@@ -5,17 +5,17 @@ observable behavior before and after this change.
 
 ## Related issue and stack
 
-- Issue: <!-- Required: #123. Use "Closes #123" only when this PR completes it. -->
-- Stack: <!-- Link the gh stack or list its PRs in dependency order. -->
-- Depends on: <!-- Previous PR, or None for the base of the stack. -->
-- Scope: <!-- Explain the single reviewable step this PR implements. -->
+- Issue:
+- Stack:
+- Depends on:
+- Scope:
 
 ## Compatibility and changes
 
-- Client tracks: <!-- v5.36.0, v6.12.20, v9.27.0, v12.06.0, or Not applicable. -->
-- Tested setup: <!-- Exact client build, patch numbers, device/OS, server commit. -->
-- Components and contracts: <!-- Handlers, payloads, resources, services, config. -->
-- Game rules: <!-- Costs, rewards, timers, progression, events, or unchanged. -->
+- Client tracks:
+- Tested setup:
+- Components and contracts:
+- Game rules:
 
 Describe any effect on other client tracks and label untested combinations
 explicitly. For client resources, list the numbered patches and the updated
@@ -29,7 +29,7 @@ is affected. For documentation or tooling, describe the relevant verification.
 
 | Scenario or command | Client/server setup | Result and evidence |
 | --- | --- | --- |
-| <!-- Check --> | <!-- Versions or N/A --> | <!-- Pass/fail/not run; evidence --> |
+|  |  |  |
 
 List checks not run, why, and any known limitations. Attach sanitized logs,
 screenshots, or a recording where they help verify the behavior.

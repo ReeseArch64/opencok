@@ -1,26 +1,11 @@
-# Code owners for OpenCok
-#
-# Owners are auto-requested for review on PRs that touch matching paths.
-# When the master ruleset enables "require code owner review", these paths
-# also require an owner's approval to merge.
-#
-# Swap @ReeseArch64 for a team handle (e.g. @opencok/maintainers) once a
-# maintainers team exists.
-
-# Default owner for everything in the repo.
 *                           @ReeseArch64
 
-# CI, automation, and repo configuration.
 /.github/                   @ReeseArch64
 
-# Planning and codebase knowledge — the source of truth.
 /.specs/                    @ReeseArch64
 
-# Architecture Decision Records are immutable once accepted.
 /docs/adr/                  @ReeseArch64
 
-# The type-safe API boundary. Contract changes ripple to both ends.
 /packages/api-contracts/    @ReeseArch64
 
-# Project rules enforced by the quality gate.
 /.agents/rules/             @ReeseArch64

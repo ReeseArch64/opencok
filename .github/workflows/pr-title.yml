@@ -1,9 +1,5 @@
 name: PR title
 
-# Validates the PR title as a Conventional Commit. We squash-merge, so the PR
-# title becomes the commit subject on `main` — keep it changelog-clean.
-# Types and scopes follow .github/CONTRIBUTING.md.
-
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
@@ -22,7 +18,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # Allowed commit types from CONTRIBUTING.md.
           types: |
             feat
             fix
@@ -35,7 +30,6 @@ jobs:
             ci
             chore
             revert
-          # Required commit scopes from CONTRIBUTING.md.
           scopes: |
             api
             app

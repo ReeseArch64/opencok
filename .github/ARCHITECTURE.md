@@ -321,33 +321,33 @@ propostas de organização; este documento não cria os serviços.
 ```text
 opencok/
 ├── apps/
-│   ├── server/         # composição do servidor autoritativo
-│   ├── chat/           # chat WS em hospedagem externa
-│   ├── files/          # planejado: serviço de arquivos
-│   ├── api/            # planejado: descoberta, consultas e backend do painel
-│   ├── admin/          # admin.opencok.com -> Cloudflare Pages
-│   ├── www/            # opencok.com -> Cloudflare Pages
-│   ├── docs/           # planejado: docs.opencok.com -> Cloudflare Pages
-│   ├── web/            # game.opencok.com -> Vercel SSR
-│   ├── bot/            # simulador Python em hospedagem externa
-│   ├── workers/        # planejado: execução de tarefas auxiliares
-│   └── combat/         # cálculo TypeScript isolado; Rust/Go futuros
-├── packages/           # domínios, contratos e adaptadores compartilhados
-├── infra/              # definições de execução e infraestrutura
-│   ├── compose/        # proposto: desenvolvimento e testes locais
-│   ├── kubernetes/     # proposto: workloads da VPS e políticas
-│   ├── cloudflare/     # proposto: Pages, DNS e configuração de borda
-│   ├── vercel/         # proposto: deploy SSR e ambientes de preview
-│   ├── providers/      # proposto: configuração dos SaaS e segredos referenciados
-│   ├── observability/  # proposto: painéis, métricas, logs e alertas
-│   └── migrations/     # proposto: migrações e procedimentos de dados
-├── mobile/             # clientes autorizados, patches e artefatos privados
-├── legacy/             # referência de compatibilidade, isolada da aplicação
-├── assets/             # assets próprios e manifestos autorizados
-├── tests/              # proposto: E2E, contratos e fixtures sintéticas comuns
-├── docs/               # contratos, decisões, operação e compatibilidade
-├── .specs/             # especificações e critérios verificáveis
-└── .github/            # contribuição, automações e arquitetura
+│   ├── server/
+│   ├── chat/
+│   ├── files/
+│   ├── api/
+│   ├── admin/
+│   ├── www/
+│   ├── docs/
+│   ├── web/
+│   ├── bot/
+│   ├── workers/
+│   └── combat/
+├── packages/
+├── infra/
+│   ├── compose/
+│   ├── kubernetes/
+│   ├── cloudflare/
+│   ├── vercel/
+│   ├── providers/
+│   ├── observability/
+│   └── migrations/
+├── mobile/
+├── legacy/
+├── assets/
+├── tests/
+├── docs/
+├── .specs/
+└── .github/
 ```
 
 ### Grupos de pacotes
