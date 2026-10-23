@@ -7,6 +7,20 @@
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/node-zookeeper-client": "0.2.13"
+  },
+  "type": "module",
+  "exports": {
+    "./coordination": "./src/coordination.ts",
+    "./discovery-redis": "./src/discovery-redis.ts",
+    "./server-directory": "./src/server-directory.ts",
+    "./session": "./src/session.ts",
+    "./timeout": "./src/timeout.ts"
+  },
+  "dependencies": {
+    "@opencok/constants": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "node-zookeeper-client": "1.1.3"
   }
 }

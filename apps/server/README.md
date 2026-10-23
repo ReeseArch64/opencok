@@ -11,6 +11,14 @@ session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
 
+## Code organization
+
+`src/index.ts` owns process startup and shutdown, and `src/config.ts` maps the
+validated environment. The composition root wires the shared packages described
+in the [architecture package map](../../.github/ARCHITECTURE.md#implemented-api-and-realm-package-boundaries).
+`src/server.ts` loads the rule catalog and connects `@opencok/connection/server`
+to repositories, Redis/ZooKeeper adapters and command controllers.
+
 ## Start locally
 
 From the repository root:
@@ -116,6 +124,6 @@ URLs or use private resources. A synthetic SFS client verifies wire responses;
 APK/device validation and production dependency versions are separate gates.
 
 A focused mutation check runs the login tests against seven disabled auth guards in
-a temporary source copy: signature, device binding, account activation, realm,
+a temporary test bundle: signature, device binding, account activation, realm,
 account device and both ban checks. Every mutant must fail its tests. This is a
 bounded auth check, not the architecture's future repository-wide Stryker suite.

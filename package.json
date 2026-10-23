@@ -18,7 +18,8 @@
     "format": "vp fmt --config .oxfmtrc.json . --write",
     "format:check": "vp fmt --config .oxfmtrc.json . --check",
     "check-types": "vp check-types",
-    "test:stack": "bun --no-env-file test tests/stack"
+    "test:stack": "bun --no-env-file test tests/stack",
+    "test:packages": "bun --no-env-file test tests/packages packages/resources/tests"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
@@ -26,7 +27,8 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:",
-    "vite-plus": "^1.3.0"
+    "vite-plus": "^1.3.0",
+    "@opencok/messages": "workspace:*"
   },
   "packageManager": "bun@1.4.2"
 }

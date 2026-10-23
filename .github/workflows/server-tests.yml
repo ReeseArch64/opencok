@@ -4,9 +4,7 @@ on:
   pull_request:
     paths:
       - "apps/server/**"
-      - "packages/drizzle/**"
-      - "packages/env/**"
-      - "packages/config/**"
+      - "packages/**"
       - "package.json"
       - "bun.lock"
       - "bunfig.toml"
@@ -16,9 +14,7 @@ on:
     branches: [develop]
     paths:
       - "apps/server/**"
-      - "packages/drizzle/**"
-      - "packages/env/**"
-      - "packages/config/**"
+      - "packages/**"
       - "package.json"
       - "bun.lock"
       - "bunfig.toml"

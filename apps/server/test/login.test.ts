@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test";
 import { createHash } from "node:crypto";
-import { authenticate } from "../src/game/auth.ts";
+import { authenticate } from "@opencok/identity/mobile";
 import type { Config } from "../src/config.ts";
-import type { AuthenticationStore } from "../src/persistence.ts";
-import { fields, sfs } from "../src/protocol/sfs.ts";
+import type { AuthenticationStore } from "@opencok/contracts/game";
+import { fields, sfs } from "@opencok/messages/sfs";
 
 const cfg = { loginSecret: "synthetic-secret", kingdomId: 2 } as Config;
 const profile = {

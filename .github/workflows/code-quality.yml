@@ -17,3 +17,4 @@ jobs:
       - uses: ./.github/actions/setup
       - run: bun run lint
       - run: bun run format:check
+      - run: bun run test:packages

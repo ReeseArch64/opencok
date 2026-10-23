@@ -1,7 +1,8 @@
-import type { GameStore } from "../persistence.ts";
-import { long, num, text, type Row } from "./rows.ts";
-import { int, sfs, str, type Fields } from "../protocol/sfs.ts";
-import { GameError, errors } from "./rules.ts";
+import type { GameStore } from "@opencok/contracts/game";
+import { long, num, text, type Row } from "@opencok/contracts/rows";
+import { int, sfs, str, type Fields } from "@opencok/messages/sfs";
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 
 export function viewport(x: number, y: number, size: number): number[] {
   const ids = new Set<number>();

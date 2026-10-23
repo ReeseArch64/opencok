@@ -1,24 +1,6 @@
-export enum Type {
-  Null,
-  Bool,
-  Byte,
-  Short,
-  Int,
-  Long,
-  Float,
-  Double,
-  String,
-  BoolArray,
-  Bytes,
-  ShortArray,
-  IntArray,
-  LongArray,
-  FloatArray,
-  DoubleArray,
-  StringArray,
-  Array,
-  Object,
-}
+import { SfsType as Type } from "@opencok/enums/sfs";
+export { SfsType as Type } from "@opencok/enums/sfs";
+
 export type Fields = Record<string, Value>;
 export type Value = { type: Type; value: unknown };
 export const sfs = {

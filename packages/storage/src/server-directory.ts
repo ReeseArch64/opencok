@@ -1,14 +1,20 @@
-import type { Config } from "./config.ts";
+import { readFile, stat } from "node:fs/promises";
+export interface ServerDirectoryConfig {
+  kingdomId: number;
+  serversFile?: string;
+  gameHost?: string;
+  gamePort?: number;
+}
 export type ServerInfo = Record<string, string>;
 const publicFields = ["id", "name", "ip", "port", "zone"];
 export class ServerDirectory {
-  constructor(private readonly config: Config) {}
+  constructor(private readonly config: ServerDirectoryConfig) {}
   async read(): Promise<Map<string, ServerInfo>> {
     let items: unknown;
     if (this.config.serversFile) {
-      const file = Bun.file(this.config.serversFile);
-      if (file.size > 1024 * 1024) throw new Error("Oversized server directory");
-      items = await file.json();
+      const file = this.config.serversFile;
+      if ((await stat(file)).size > 1024 * 1024) throw new Error("Oversized server directory");
+      items = JSON.parse(await readFile(file, "utf8"));
     } else {
       const id = String(this.config.kingdomId);
       items = [

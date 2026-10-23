@@ -11,36 +11,19 @@ import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { and, asc, eq, getTableColumns, gt, inArray, or, sql } from "drizzle-orm";
-import type { Config } from "./config.ts";
-import type { Row } from "./game/rows.ts";
+import type { ServerConfig } from "@opencok/contracts/server";
+import type { GameStore, CityState } from "@opencok/contracts/game";
+import type { Row } from "@opencok/contracts/rows";
 
-export interface AuthenticationStore {
-  profile(uid: string): Promise<Row | undefined>;
-  accounts(uid: string): Promise<Row[]>;
-}
-export interface CityState {
-  profile: Row | undefined;
-  resource: Row | undefined;
-  buildings: Row[];
-  queues: Row[];
-  world: Row | undefined;
-  hasMarches: boolean;
-  armies: Row[];
-  items: Row[];
-  lord: Row | undefined;
-}
-export interface GameStore extends AuthenticationStore {
-  city(uid: string, now: number): Promise<CityState>;
-  world(
-    uid: string,
-    ids: number[],
-  ): Promise<{ world: Row | undefined; points: Row[]; hasMarches: boolean }>;
-}
+type GameRepositoryConfig = Pick<
+  ServerConfig,
+  "databaseUrl" | "timeoutMs" | "globalDatabase" | "kingdomId" | "kingdomDatabase"
+>;
 
 export class Database implements GameStore {
   readonly databases;
   readonly kingdom;
-  constructor(readonly config: Config) {
+  constructor(readonly config: GameRepositoryConfig) {
     this.databases = createDatabases(
       {
         connectionString: config.databaseUrl,

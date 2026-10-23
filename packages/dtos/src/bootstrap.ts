@@ -1,6 +1,8 @@
-import { sfs, Type, type Fields } from "../protocol/sfs.ts";
-import { GameError, errors, type Rules } from "./rules.ts";
-import { long, num, text, type Row } from "./rows.ts";
+import { sfs, Type, type Fields } from "@opencok/messages/sfs";
+import type { Rules } from "@opencok/rules/game";
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
+import { long, num, text, type Row } from "@opencok/contracts/rows";
 
 export function dataConfig(rules: Rules): Fields {
   if (!rules.items.size) throw new GameError(errors.unsupported);

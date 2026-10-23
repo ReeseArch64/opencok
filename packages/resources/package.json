@@ -2,11 +2,20 @@
   "name": "@opencok/resources",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./rules": "./src/rules.ts"
+  },
+  "dependencies": {
+    "@opencok/rules": "workspace:*",
+    "fast-xml-parser": "^5.0.0"
   }
 }

@@ -11,16 +11,23 @@
     "test:mutations": "bun --no-env-file scripts/mutate-auth.ts"
   },
   "dependencies": {
-    "@opencok/drizzle": "workspace:*",
+    "@opencok/connection": "workspace:*",
+    "@opencok/contracts": "workspace:*",
+    "@opencok/controllers": "workspace:*",
     "@opencok/env": "workspace:*",
-    "drizzle-orm": "0.45.4",
-    "fast-xml-parser": "^5.0.0",
-    "node-zookeeper-client": "1.1.3"
+    "@opencok/repositories": "workspace:*",
+    "@opencok/resources": "workspace:*",
+    "@opencok/storage": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
-    "@types/node-zookeeper-client": "0.2.13",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@opencok/drizzle": "workspace:*",
+    "@opencok/dtos": "workspace:*",
+    "@opencok/identity": "workspace:*",
+    "@opencok/messages": "workspace:*",
+    "@opencok/rules": "workspace:*",
+    "drizzle-orm": "0.45.4"
   }
 }

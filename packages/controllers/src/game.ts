@@ -1,16 +1,20 @@
-import type { Config } from "../config.ts";
-import type { CityState, GameStore } from "../persistence.ts";
-import { long, num, text, type Row } from "./rows.ts";
-import { sfs, type Fields } from "../protocol/sfs.ts";
-import { building, gold, queue, resource, user } from "./dto.ts";
-import { GameError, errors, type Rules } from "./rules.ts";
+import type { ServerConfig } from "@opencok/contracts/server";
+import type { CityState, GameStore } from "@opencok/contracts/game";
+import { long, num, text, type Row } from "@opencok/contracts/rows";
+import { sfs, type Fields } from "@opencok/messages/sfs";
+import { building, gold, queue, resource, user } from "@opencok/dtos/city";
+import type { Rules } from "@opencok/rules/game";
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 import {
   armySnapshot,
   dataConfig,
   featureConfig,
   inventoryItem,
   serverClock,
-} from "./bootstrap.ts";
+} from "@opencok/dtos/bootstrap";
+
+type GameConfig = Pick<ServerConfig, "kingdomId">;
 
 type ReadyCity = CityState & { profile: Row; resource: Row };
 export interface Result {
@@ -22,7 +26,7 @@ export class Game {
   constructor(
     readonly db: GameStore,
     readonly rules: Rules,
-    readonly config: Config,
+    readonly config: GameConfig,
     readonly now = Date.now,
   ) {}
   private async state(uid: string): Promise<ReadyCity> {

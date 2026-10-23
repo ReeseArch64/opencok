@@ -1,6 +1,10 @@
 import { phpEmpty, type Parameters } from "./compat.ts";
-import { listedServers, publicServer, type ServerDirectory } from "./servers.ts";
-import type { Account, AccountReader } from "./storage.ts";
+import {
+  listedServers,
+  publicServer,
+  type ServerDirectory,
+} from "@opencok/storage/server-directory";
+import type { Account, AccountReader } from "@opencok/contracts/account";
 
 export class Discovery {
   constructor(

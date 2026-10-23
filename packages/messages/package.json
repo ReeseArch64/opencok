@@ -8,5 +8,13 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./frame": "./src/frame.ts",
+    "./sfs": "./src/sfs.ts"
+  },
+  "dependencies": {
+    "@opencok/enums": "workspace:*"
   }
 }

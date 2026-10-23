@@ -8,5 +8,14 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./mobile": "./src/mobile.ts"
+  },
+  "dependencies": {
+    "@opencok/constants": "workspace:*",
+    "@opencok/contracts": "workspace:*",
+    "@opencok/messages": "workspace:*"
   }
 }

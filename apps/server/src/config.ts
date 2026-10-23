@@ -1,23 +1,9 @@
 import { dirname, resolve } from "node:path";
 import { requireEnv, rootEnvPath } from "@opencok/env/database";
 import { loadServerEnvironment, type ServerEnvironment } from "@opencok/env/server";
+import type { ServerConfig } from "@opencok/contracts/server";
 
-export interface Config {
-  host: string;
-  port: number;
-  healthPort: number;
-  kingdomId: number;
-  kingdomDatabase: string;
-  globalDatabase: string;
-  databaseUrl: string;
-  redisUrl: string;
-  zookeeper: string;
-  zkPath: string;
-  loginSecret: string;
-  resources: string;
-  mapSize: number;
-  timeoutMs: number;
-}
+export type Config = ServerConfig;
 
 export function config(settings: ServerEnvironment = loadServerEnvironment()): Config {
   return {

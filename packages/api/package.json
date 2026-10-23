@@ -8,5 +8,16 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./compat": "./src/compat.ts",
+    "./discovery": "./src/discovery.ts",
+    "./handler": "./src/handler.ts"
+  },
+  "dependencies": {
+    "@opencok/contracts": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/storage": "workspace:*"
   }
 }

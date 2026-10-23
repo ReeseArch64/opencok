@@ -8,5 +8,12 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./account": "./src/account.ts",
+    "./game": "./src/game.ts",
+    "./rows": "./src/rows.ts",
+    "./server": "./src/server.ts"
   }
 }
