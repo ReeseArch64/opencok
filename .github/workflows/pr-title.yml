@@ -1,0 +1,55 @@
+name: PR title
+
+# Validates the PR title as a Conventional Commit. We squash-merge, so the PR
+# title becomes the commit subject on `main` — keep it changelog-clean.
+# Types and scopes follow .github/CONTRIBUTING.md.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [develop, main]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  lint:
+    name: Lint PR title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Allowed commit types from CONTRIBUTING.md.
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          # Required commit scopes from CONTRIBUTING.md.
+          scopes: |
+            api
+            app
+            ci
+            docs
+            config
+            infra
+            deps
+            release
+          requireScope: true
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" must start with a lowercase letter.
+            Examples:
+              feat(api): add session refresh endpoint
+              fix(app): correct redirect after login
+              docs(docs): update API documentation

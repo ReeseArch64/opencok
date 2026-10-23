@@ -6,7 +6,7 @@ body:
   -
     type: "markdown"
     attributes:
-      value: "Explore an idea before turning it into a scoped feature issue. Explain the benefit for players or kingdom operators and invite alternatives."
+      value: "Write the title, body, and replies in English (en-US). Keep the discussion label and add relevant topic, component, or client-release labels after publishing. Explore an idea before turning it into a scoped feature issue. Explain the benefit for players or kingdom operators and invite alternatives."
   -
     type: "textarea"
     id: "proposal"

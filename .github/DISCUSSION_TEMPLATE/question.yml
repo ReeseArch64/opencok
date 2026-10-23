@@ -1,11 +1,12 @@
 title: "[Question] "
 labels:
+  - "discussion"
   - "question"
 body:
   -
     type: "markdown"
     attributes:
-      value: "Ask for help with gameplay, client preparation, hosting, or development. For a confirmed reproducible bug, open a Bug report issue and link this discussion."
+      value: "Write the title, body, and replies in English (en-US). Keep the discussion label and add relevant topic, component, or client-release labels after publishing. Ask for help with gameplay, client preparation, hosting, or development. For a confirmed reproducible bug, open a Bug report issue and link this discussion."
   -
     type: "textarea"
     id: "question"
