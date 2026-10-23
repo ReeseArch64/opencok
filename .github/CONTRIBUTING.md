@@ -25,6 +25,12 @@ verification evidence are tracked separately.
 
 ## Code quality
 
+Comments are prohibited in tracked project files, including code, configuration,
+scripts, SQL migrations, templates and embedded code examples. Do not add inline,
+block, documentation or suppression comments. Keep explanations in prose
+documentation and express constraints through names, types and tests. Interpreter
+directives required to execute scripts are executable syntax and must be preserved.
+
 Install the workspace dependencies with `bun install --frozen-lockfile`. Use the
 Oxlint and Oxfmt versions bundled with the existing `vite-plus` dependency;
 separate global installations are not required. Configure lint rules in the root

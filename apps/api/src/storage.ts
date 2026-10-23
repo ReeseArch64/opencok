@@ -23,7 +23,6 @@ export interface AccountReader {
   valid(type: string, value: string, bound: boolean): Promise<Account[]>;
 }
 
-/** Discovery only reads identity mappings; it never reactivates or provisions accounts. */
 export class AccountStore implements AccountReader {
   private readonly database;
   constructor(config: Config) {
@@ -77,7 +76,7 @@ export class AccountStore implements AccountReader {
           ),
         )
         .orderBy(asc(account_new.gameUid));
-      // Preserve legacy lastTime tie handling with a deterministic UID order and exact bigint sort.
+
       const byTime = new Map(rows.map((row) => [row.lastTime.toString(), row]));
       return [...byTime.values()]
         .sort((a, b) => (a.lastTime > b.lastTime ? -1 : a.lastTime < b.lastTime ? 1 : 0))

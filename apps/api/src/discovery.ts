@@ -35,7 +35,7 @@ export class Discovery {
         country: 1,
       };
     }
-    // Directory metadata only. Registration and migration of account state are separate operations.
+
     return { serverList: listedServers(servers, true), country: 1 };
   }
 }

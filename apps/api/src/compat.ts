@@ -11,7 +11,6 @@ export function phpEmpty(value: unknown): boolean {
   );
 }
 
-// PHP json_encode's default representation, including escaped non-ASCII and slashes.
 export function phpJson(value: unknown): string {
   return JSON.stringify(value)
     .replace(/\//g, "\\/")
@@ -30,7 +29,7 @@ function addParameter(result: Parameters, name: string, value: string): void {
 export async function requestParameters(request: Request): Promise<Parameters> {
   const result: Parameters = Object.create(null);
   for (const [name, value] of new URL(request.url).searchParams) addParameter(result, name, value);
-  // PHP's default request_order is GP; cookies and raw JSON are not $_REQUEST.
+
   if (request.method === "POST") {
     const contentType = request.headers.get("content-type") ?? "";
     if (contentType.startsWith("application/x-www-form-urlencoded")) {
@@ -45,7 +44,6 @@ export async function requestParameters(request: Request): Promise<Parameters> {
   return result;
 }
 
-// urldecode runs a second time in query_userinfo_by_name.php.
 export function phpUrlDecode(value: string): string {
   const bytes: number[] = [];
   for (let i = 0; i < value.length;) {

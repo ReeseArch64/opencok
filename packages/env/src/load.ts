@@ -3,7 +3,6 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseEnv } from "node:util";
 
-// __dirname also supports tools that register TypeScript through a CJS loader.
 const moduleDirectory =
   typeof __dirname === "string" ? __dirname : dirname(fileURLToPath(import.meta.url));
 

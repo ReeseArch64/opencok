@@ -31,7 +31,7 @@ async function eventually(check: () => Promise<boolean>, timeout = 15000) {
 async function createStack() {
   const root = new URL("../../", import.meta.url).pathname;
   const folder = await mkdtemp(join(tmpdir(), "opencok-stack-"));
-  await chmod(folder, 0o755); // Synthetic XML must be readable by the image UID in CI.
+  await chmod(folder, 0o755);
   const project = "opencok-stack-test-" + randomBytes(5).toString("hex");
   const httpPort = await freePort(),
     gamePort = await freePort(),
@@ -77,7 +77,7 @@ async function createStack() {
   const pgadminPort = publishedPort("pgadmin");
   const insightPort = publishedPort("redisinsight");
   const portainerPort = publishedPort("portainer");
-  // Keep Portainer fully functional as a UI without access to the host daemon.
+
   isolated.services.portainer.volumes = isolated.services.portainer.volumes.filter(
     (volume: any) => volume.target !== "/var/run/docker.sock",
   );
@@ -88,7 +88,7 @@ async function createStack() {
   isolated.services.database.environment.POSTGRES_PASSWORD = "synthetic-test-password";
   isolated.services["database-setup"].environment.POSTGRES_USER = "synthetic";
   isolated.services["database-setup"].environment.POSTGRES_PASSWORD = "synthetic-test-password";
-  // The base healthcheck is intentionally hardcoded for local development.
+
   isolated.services.database.healthcheck.test = [
     "CMD",
     "pg_isready",

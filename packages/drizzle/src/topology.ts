@@ -50,7 +50,6 @@ export function validateTopology(topology: DatabaseTopology): DatabaseTopology {
   });
 }
 
-/** Keep credentials/TLS settings while routing a pool to its configured physical database. */
 export function databasePoolConfig(config: PoolConfig, database: string): PoolConfig {
   validateName(database);
   if (!config.connectionString) return { ...config, database };

@@ -10,6 +10,7 @@ description: Create and maintain Architecture Decision Records (ADRs) optimized 
 ADRs created with this skill are **executable specifications for coding agents**. A human approves the decision; an agent implements it. The ADR must contain everything the agent needs to write correct code without asking follow-up questions.
 
 This means:
+
 - Constraints must be explicit and measurable, not vibes
 - Decisions must be specific enough to act on ("use PostgreSQL 16 with pgvector" not "use a database")
 - Consequences must map to concrete follow-up tasks
@@ -20,18 +21,20 @@ This means:
 ## When to Write an ADR
 
 Write an ADR when a decision:
+
 - **Changes how the system is built or operated** (new dependency, architecture pattern, infrastructure choice, API design)
 - **Is hard to reverse** once code is written against it
 - **Affects other people or agents** who will work in this codebase later
 - **Has real alternatives** that were considered and rejected
 
 Do NOT write an ADR for:
+
 - Routine implementation choices within an established pattern
 - Bug fixes or typo corrections
 - Decisions already captured in an existing ADR (update it instead)
 - Style preferences already covered by linters or formatters
 
-When in doubt: if a future agent working in this codebase would benefit from knowing *why* this choice was made, write the ADR.
+When in doubt: if a future agent working in this codebase would benefit from knowing _why_ this choice was made, write the ADR.
 
 ### Proactive ADR Triggers (For Agents)
 
@@ -43,7 +46,7 @@ If you are an agent coding in a repo and you encounter any of these situations, 
 - You are about to change something that contradicts an existing accepted ADR
 - You realize you're writing a long code comment explaining "why" — that reasoning belongs in an ADR
 
-**How to propose**: Tell the human what decision you've hit, why it matters, and ask if they want to capture it as an ADR. If yes, run the full four-phase workflow. If no, note the decision in a code comment and move on.
+**How to propose**: Tell the human what decision you've hit, why it matters, and ask if they want to capture it as an ADR. If yes, run the full four-phase workflow. If no, record the decision in the relevant prose documentation and move on.
 
 ## Creating an ADR: Four-Phase Workflow
 
@@ -62,7 +65,7 @@ Before asking any questions, gather context from the repo:
 
 3. **Find related code patterns.** If the decision involves a specific area (e.g., "how we handle auth"), scan for existing implementations. Identify the specific files, directories, and patterns that will be affected by the decision.
 
-4. **Check for ADR references in code.** Look for `ADR-NNNN` references in comments and docs (see "Code ↔ ADR Linking" below). This reveals which existing decisions govern which parts of the codebase.
+4. **Check for ADR references in code.** Look for `ADR-NNNN` references in documentation and pull request descriptions (see "Code ↔ ADR Linking" below). This reveals which existing decisions govern which parts of the codebase.
 
 5. **Note what you found.** Carry this context into Phase 1 — it will sharpen your questions and prevent the ADR from contradicting existing decisions.
 
@@ -82,6 +85,7 @@ Interview the human to understand the decision space. Ask questions **one at a t
 8. **What would an agent need to implement this?** — Which files/directories are affected? What existing patterns should it follow? What should it avoid? What tests would prove it's working? This directly feeds the Implementation Plan.
 
 **Adaptive follow-ups**: Based on answers, probe deeper where the decision is fuzzy. Common follow-ups:
+
 - "What's the worst-case outcome if this decision is wrong?"
 - "What would make you revisit this in 6 months?"
 - "Is there anything you're explicitly choosing NOT to do?"
@@ -144,6 +148,7 @@ After drafting, review the ADR against the agent-readiness checklist in `referen
 > ✅ **Passes**: {list what's solid — e.g., "context is self-contained, implementation plan covers affected files, verification criteria are checkable"}
 >
 > ⚠️ **Gaps found**:
+>
 > - {specific gap 1 — e.g., "Implementation Plan doesn't mention test files — which test suite should cover this?"}
 > - {specific gap 2}
 >
@@ -165,7 +170,7 @@ Agents should read existing ADRs **before implementing changes** in a codebase t
 - When you encounter a pattern in the code and wonder "why is it done this way?"
 - Before proposing a change that might contradict an existing decision
 - When a human says "check the ADRs" or "there's a decision about this"
-- When you find an `ADR-NNNN` reference in a code comment
+- When you find an `ADR-NNNN` reference in documentation or a pull request
 
 ### How to Consult ADRs
 
@@ -179,11 +184,11 @@ Agents should read existing ADRs **before implementing changes** in a codebase t
 
 5. **Follow the Implementation Plan.** When implementing code in an area governed by an ADR, follow the patterns specified in its Implementation Plan. If the plan says "all new queries go through the data-access layer in `src/db/`," do that.
 
-6. **Reference ADRs in your work.** Add `ADR-NNNN` references in code comments and PR descriptions (see "Code ↔ ADR Linking" below).
+6. **Reference ADRs in your work.** Add `ADR-NNNN` references in the relevant documentation and PR descriptions (see "Code ↔ ADR Linking" below).
 
 ## Code ↔ ADR Linking
 
-ADRs should be bidirectionally linked to the code they govern.
+ADRs name the code they govern. Relevant component documentation and pull requests link back to those ADRs.
 
 ### ADR → Code (in the Implementation Plan)
 
@@ -191,21 +196,19 @@ The Implementation Plan section names specific files, directories, and patterns:
 
 ```markdown
 ## Implementation Plan
+
 - **Affected paths**: `src/db/`, `src/config/database.ts`, `tests/integration/`
 - **Pattern**: all database queries go through `src/db/client.ts`
 ```
 
-### Code → ADR (in comments)
+### Component documentation → ADR
 
-When implementing code guided by an ADR, add a comment referencing it:
+When implementing code guided by an ADR, reference the record in the component's
+prose documentation and in the pull request description. For example, document
+that `src/db/client.ts` implements ADR-0004 and link to the record there.
 
-```typescript
-// ADR-0004: Using better-sqlite3 for test database
-// See: docs/decisions/0004-use-sqlite-for-test-database.md
-import Database from 'better-sqlite3';
-```
-
-Keep these lightweight — one comment at the entry point, not on every line. The goal is discoverability: when a future agent reads this code, they can find the reasoning.
+Do not add comments to source files. Keep rationale and traceability in the ADR,
+component documentation and pull request metadata, following the contribution rules.
 
 ### Why This Matters
 
@@ -231,7 +234,7 @@ After an ADR is accepted:
 
 1. **Create implementation tasks.** Each item in the Implementation Plan and each follow-up in Consequences should become a trackable task (issue, ticket, or TODO).
 2. **Reference the ADR in PRs.** Link to the ADR in PR descriptions: "Implements ADR-0004."
-3. **Add code references.** Add `ADR-NNNN` comments at key implementation points.
+3. **Add documentation references.** Link the relevant ADR from component prose documentation.
 4. **Check verification criteria.** Once implementation is complete, walk through the Verification checkboxes. Update the ADR with results in `## More Information`.
 5. **Revisit when triggers fire.** If the ADR specified revisit conditions ("if X happens, reconsider"), monitor for those conditions.
 
@@ -240,6 +243,7 @@ After an ADR is accepted:
 If the repo has an ADR index/log file (often `README.md` or `index.md` in the ADR dir), keep it updated.
 
 Preferred: let `scripts/new_adr.js --update-index` do it. Otherwise:
+
 - Add a bullet entry for the new ADR.
 - Keep ordering consistent (numeric if numbered; date or alpha if slugs).
 
@@ -272,17 +276,20 @@ Numbers are local to each category. Choose a categorization scheme early (by lay
 ## Resources
 
 ### scripts/
+
 - `scripts/new_adr.js` — create a new ADR file from a template, using repo conventions.
 - `scripts/set_adr_status.js` — update an ADR status in-place (YAML front matter or inline). Use `--json` for machine output.
 - `scripts/bootstrap_adr.js` — create ADR dir, `README.md`, and initial "Adopt ADRs" decision.
 
 ### references/
+
 - `references/review-checklist.md` — agent-readiness checklist for Phase 3 review.
 - `references/adr-conventions.md` — directory, filename, status, and lifecycle conventions.
 - `references/template-variants.md` — when to use simple vs MADR-style templates.
 - `references/examples.md` — filled-out short and long ADR examples with implementation plans.
 
 ### assets/
+
 - `assets/templates/adr-simple.md` — lean template for straightforward decisions.
 - `assets/templates/adr-madr.md` — MADR 4.0 template for decisions with multiple options and structured tradeoffs.
 - `assets/templates/adr-readme.md` — default ADR index scaffold used by `scripts/bootstrap_adr.js`.
@@ -292,20 +299,17 @@ Numbers are local to each category. Choose a categorization scheme early (by lay
 From the target repo root:
 
 ```bash
-# Simple ADR
 node /path/to/adr-skill/scripts/new_adr.js --title "Choose database" --status proposed
 
-# MADR-style with options
 node /path/to/adr-skill/scripts/new_adr.js --title "Choose database" --template madr --status proposed
 
-# With index update
 node /path/to/adr-skill/scripts/new_adr.js --title "Choose database" --status proposed --update-index
 
-# Bootstrap a new repo
 node /path/to/adr-skill/scripts/bootstrap_adr.js --dir docs/decisions
 ```
 
 Notes:
+
 - Scripts auto-detect ADR directory and filename strategy.
 - Use `--dir` and `--strategy` to override.
 - Use `--json` to emit machine-readable output.

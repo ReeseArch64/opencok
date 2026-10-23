@@ -5,7 +5,6 @@ import { Pool } from "pg";
 import { EnvironmentError, requireEnv } from "@opencok/env/database";
 import { databaseSchemas, type DatabaseRole } from "../src/roles";
 
-/** Apply pending Drizzle migrations; one physical database has one role. */
 export async function migrateDatabase(pool: Pool, role: DatabaseRole) {
   if (role !== "global" && role !== "kingdom") throw new Error("Unknown database role");
   const client = await pool.connect();
@@ -15,7 +14,7 @@ export async function migrateDatabase(pool: Pool, role: DatabaseRole) {
       ...Object.entries(databaseSchemas)
         .filter(([key]) => key !== role)
         .flatMap(([, schemas]) => [...schemas]),
-      // Names in the existing PostgreSQL migration history also identify the other role.
+
       ...(role === "global" ? ["cokdb1"] : ["cokdb_global", "cokdb_pay"]),
     ];
     const existing = await client.query(
@@ -44,7 +43,6 @@ if (import.meta.main) {
     await migrateDatabase(pool, role);
     console.log(`Applied PostgreSQL migrations for ${role}`);
   } catch (error) {
-    // Connection strings and raw query parameters never enter CLI diagnostics.
     console.error(
       error instanceof EnvironmentError
         ? error.message

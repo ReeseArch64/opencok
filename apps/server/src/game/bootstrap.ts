@@ -2,7 +2,6 @@ import { sfs, Type, type Fields } from "../protocol/sfs.ts";
 import { GameError, errors, type Rules } from "./rules.ts";
 import { long, num, text, type Row } from "./rows.ts";
 
-// Core city/world configuration only. XML data remains external to the implementation.
 export function dataConfig(rules: Rules): Fields {
   if (!rules.items.size) throw new GameError(errors.unsupported);
   const result: Fields = {};
@@ -83,7 +82,6 @@ export function serverClock(now: number, offsetHours: number): Fields {
   const offset = offsetHours * 3600;
   const seconds = Math.floor(now / 1000);
   return {
-    // The legacy names are inverted. Preserve their wire values for the APK.
     db_utc_timestamp: sfs.int(offsetHours),
     db_timezone_offset: sfs.int(seconds),
     tomorrow: sfs.int((Math.floor((seconds + offset) / 86400) + 1) * 86400 - offset),
@@ -91,7 +89,6 @@ export function serverClock(now: number, offsetHours: number): Fields {
 }
 
 export function featureConfig(rules: Rules): Fields {
-  // Advertise the experiment's unavailable optional modules as closed.
   return {
     funcOn: sfs.array(
       [...rules.features.values()].map((rule) =>

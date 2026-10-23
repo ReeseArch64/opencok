@@ -1,10 +1,4 @@
 #!/usr/bin/env node
-/**
- * Bootstrap ADRs in a repo:
- * - create ADR directory
- * - create adr/README.md (index) using a template
- * - create first ADR: "Adopt architecture decision records"
- */
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -60,7 +54,7 @@ function parseArgs(argv) {
           "  --strategy number|slug|auto  Filename strategy for initial ADR (default: number)",
           "  --json                 Output machine-readable JSON (default: off)",
           "",
-        ].join("\n")
+        ].join("\n"),
       );
       process.exit(0);
     } else {
@@ -68,7 +62,8 @@ function parseArgs(argv) {
     }
   }
 
-  if (!["auto", "number", "slug"].includes(out.strategy)) die(`Invalid --strategy: ${out.strategy}`);
+  if (!["auto", "number", "slug"].includes(out.strategy))
+    die(`Invalid --strategy: ${out.strategy}`);
   return out;
 }
 
@@ -87,7 +82,9 @@ function writeIndex(indexFile, adrDirName, { force }) {
 }
 
 function slugify(text) {
-  const t = String(text || "").trim().toLowerCase();
+  const t = String(text || "")
+    .trim()
+    .toLowerCase();
   const noQuotes = t.replace(/['"`]/g, "");
   const dashed = noQuotes.replace(/[^a-z0-9]+/g, "-").replace(/-{2,}/g, "-");
   const trimmed = dashed.replace(/^-+/, "").replace(/-+$/, "");
@@ -100,7 +97,11 @@ function toPosix(p) {
 
 function generateFirstAdr({ title, status, date, deciders, adrDir }) {
   const deciderLine = deciders
-    ? String(deciders).split(",").map((s) => s.trim()).filter(Boolean).join(", ")
+    ? String(deciders)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .join(", ")
     : "";
 
   return `---
@@ -141,7 +142,7 @@ Conventions:
 
 ## Alternatives Considered
 
-* No formal records: Continue making decisions in conversations and code comments. Rejected because context is lost and decisions get relitigated.
+* No formal records: Continue making decisions in conversations without durable records. Rejected because context is lost and decisions get relitigated.
 * Wiki or Notion pages: Capture decisions outside the repo. Rejected because they drift out of sync with the code and are not version-controlled.
 * Lightweight RFCs: More heavyweight process with formal review cycles. Rejected as overkill for most decisions — ADRs can scale up to RFC-level detail when needed.
 
@@ -158,13 +159,11 @@ function updateIndexFile(indexFile, { relLink, title, status, date }) {
 
   const entryLine = `- [${title}](${relLink}) (${status}, ${date})`;
 
-  // Append after "## ADRs" heading if found, otherwise append at end
   const normalized = content.replace(/\r\n/g, "\n");
   const lines = normalized.split("\n");
   const headingIdx = lines.findIndex((l) => /^##\s+ADRs\s*$/i.test(l));
 
   if (headingIdx !== -1) {
-    // Insert after the heading (and any blank line after it)
     let insertAt = headingIdx + 1;
     while (insertAt < lines.length && lines[insertAt].trim() === "") insertAt++;
     lines.splice(insertAt, 0, entryLine);
@@ -185,14 +184,15 @@ function main() {
   fs.mkdirSync(adrDir, { recursive: true });
 
   const indexFile = args.indexFile
-    ? (path.isAbsolute(args.indexFile) ? args.indexFile : path.resolve(repoRoot, args.indexFile))
+    ? path.isAbsolute(args.indexFile)
+      ? args.indexFile
+      : path.resolve(repoRoot, args.indexFile)
     : path.join(adrDir, "README.md");
 
   const indexExistedBefore = fs.existsSync(indexFile);
   writeIndex(indexFile, args.dir, { force: args.forceIndex });
   const indexWritten = fs.existsSync(indexFile) && (!indexExistedBefore || args.forceIndex);
 
-  // Create the first ADR as a filled-out decision (not a blank template).
   const relIndex = path.isAbsolute(indexFile) ? path.relative(repoRoot, indexFile) : indexFile;
   const today = new Date().toISOString().slice(0, 10);
 
@@ -204,7 +204,6 @@ function main() {
     adrDir: args.dir,
   });
 
-  // Determine filename using same logic as new_adr.js
   const strategy = args.strategy === "auto" ? "number" : args.strategy;
   let firstAdrFilename;
   if (strategy === "number") {
@@ -215,7 +214,6 @@ function main() {
   const firstAdrPath = path.join(adrDir, firstAdrFilename);
   fs.writeFileSync(firstAdrPath, `${firstAdrContent.trimEnd()}\n`, "utf8");
 
-  // Update index
   const relLink = toPosix(path.relative(path.dirname(indexFile), firstAdrPath));
   updateIndexFile(indexFile, {
     relLink,

@@ -18,7 +18,6 @@ export interface Result {
   pushes: { command: string; body: Fields }[];
 }
 
-/** First migration slice: authenticated snapshots only; mutations fail explicitly. */
 export class Game {
   constructor(
     readonly db: GameStore,

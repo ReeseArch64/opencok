@@ -1096,7 +1096,10 @@ separate domain change.
 
 Standard Drizzle Kit generation maintains independent PostgreSQL migrations and
 snapshots per role. The migration command applies only pending SQL using Drizzle's
-journal and serializes deployments with a PostgreSQL advisory lock. It refuses a
+journal and serializes deployments with a PostgreSQL advisory lock. Generated SQL statement breakpoints are disabled to
+keep migrations comment-free. Removing historical breakpoint comments changes file
+hashes but not SQL statements or journal timestamps; existing applied migration
+records are retained, and no migration history or player data is reset. It refuses a
 database containing the other role's application schemas. New kingdoms apply the same
 kingdom migrations to separate databases. Default setup creates missing configured
 databases and applies pending migrations. Typed connection routing selects a kingdom

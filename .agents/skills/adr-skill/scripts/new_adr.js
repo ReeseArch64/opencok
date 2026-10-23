@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-/**
- * Create a new ADR markdown file using repo conventions and a template.
- *
- * Design goals:
- * - Safe defaults (auto-detect adr directory + numbering)
- * - No external deps
- * - Works even if the repo has no ADRs yet
- */
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -17,7 +9,9 @@ function die(msg) {
 }
 
 function slugify(text) {
-  const t = String(text || "").trim().toLowerCase();
+  const t = String(text || "")
+    .trim()
+    .toLowerCase();
   const noQuotes = t.replace(/['"`]/g, "");
   const dashed = noQuotes.replace(/[^a-z0-9]+/g, "-").replace(/-{2,}/g, "-");
   const trimmed = dashed.replace(/^-+/, "").replace(/-+$/, "");
@@ -35,8 +29,8 @@ function parseArgs(argv) {
     noCreateDir: false,
     title: null,
     status: "proposed",
-    template: "simple", // simple | madr
-    strategy: "auto", // auto | number | slug
+    template: "simple",
+    strategy: "auto",
     deciders: "",
     consulted: "",
     informed: "",
@@ -72,7 +66,7 @@ function parseArgs(argv) {
     else if (a === "--help" || a === "-h") {
       process.stdout.write(
         [
-          "Usage: node new_adr.js --title \"Choose database\" [options]",
+          'Usage: node new_adr.js --title "Choose database" [options]',
           "",
           "Options:",
           "  --repo-root <path>     Repo root (default: .)",
@@ -81,16 +75,16 @@ function parseArgs(argv) {
           "  --status <value>       ADR status (default: proposed)",
           "  --template simple|madr Template (default: simple)",
           "  --strategy auto|number|slug  Filename strategy (default: auto)",
-          "  --deciders \"a,b\"      Deciders list",
-          "  --consulted \"a,b\"     Consulted experts (RACI)",
-          "  --informed \"a,b\"      Informed stakeholders (RACI)",
+          '  --deciders "a,b"      Deciders list',
+          '  --consulted "a,b"     Consulted experts (RACI)',
+          '  --informed "a,b"      Informed stakeholders (RACI)',
           "  --technical-story <x>  Issue/ticket/PR link or short ref",
           "  --chosen-option <x>    MADR template: chosen option label",
           "  --update-index         Update adr/README.md (or existing index)",
           "  --index-file <path>    Override index file (relative to repo root unless absolute)",
           "  --json                 Output machine-readable JSON (default: off)",
           "",
-        ].join("\n")
+        ].join("\n"),
       );
       process.exit(0);
     } else {
@@ -101,7 +95,8 @@ function parseArgs(argv) {
   if (!out.title) die("Missing required --title");
 
   if (!["simple", "madr"].includes(out.template)) die(`Invalid --template: ${out.template}`);
-  if (!["auto", "number", "slug"].includes(out.strategy)) die(`Invalid --strategy: ${out.strategy}`);
+  if (!["auto", "number", "slug"].includes(out.strategy))
+    die(`Invalid --strategy: ${out.strategy}`);
 
   return out;
 }
@@ -117,9 +112,7 @@ function detectAdrDir(repoRoot) {
   for (const p of candidates) {
     try {
       if (fs.statSync(p).isDirectory()) return p;
-    } catch {
-      // ignore
-    }
+    } catch {}
   }
   return null;
 }
@@ -137,10 +130,6 @@ function listMdFiles(dir) {
 }
 
 function detectStrategy(adrDir) {
-  // Heuristic:
-  // - If any ADR looks numbered -> use numbering.
-  // - Else if there are any markdown files at all -> use slug (assume existing convention).
-  // - Else (empty/new) -> default to numbering.
   const md = listMdFiles(adrDir);
   for (const name of md) {
     if (/^\d+-/.test(name)) return "number";
@@ -178,26 +167,12 @@ function loadTemplate(templateName) {
 }
 
 function renderTemplate(raw, vars) {
-  // Handle YAML front matter placeholders (quoted and unquoted)
   let out = raw;
 
-  // YAML front matter fields — replace the whole placeholder pattern
-  // e.g. status: "{proposed | accepted | ...}" → status: proposed
-  out = out.replace(
-    /^(status:\s*)["']?\{[^}]*\}["']?\s*$/m,
-    `$1${vars.status}`
-  );
-  out = out.replace(
-    /^(date:\s*)\{[^}]*\}\s*$/m,
-    `$1${vars.date}`
-  );
-  out = out.replace(
-    /^(decision-makers:\s*)["']?\{[^}]*\}["']?\s*$/m,
-    `$1${vars.deciders || ""}`
-  );
+  out = out.replace(/^(status:\s*)["']?\{[^}]*\}["']?\s*$/m, `$1${vars.status}`);
+  out = out.replace(/^(date:\s*)\{[^}]*\}\s*$/m, `$1${vars.date}`);
+  out = out.replace(/^(decision-makers:\s*)["']?\{[^}]*\}["']?\s*$/m, `$1${vars.deciders || ""}`);
 
-  // consulted / informed: replace if a value was provided, otherwise remove the
-  // entire line so we don't leak placeholder text like "{list everyone...}"
   if (vars.consulted) {
     out = out.replace(/^(consulted:\s*)["']?\{[^}]*\}["']?\s*$/m, `$1${vars.consulted}`);
   } else {
@@ -209,13 +184,8 @@ function renderTemplate(raw, vars) {
     out = out.replace(/^informed:\s*["']?\{[^}]*\}["']?\s*\n/m, "");
   }
 
-  // Replace MADR-style heading placeholder
-  out = out.replace(
-    /^(#\s+)\{short title[^}]*\}\s*$/m,
-    `$1${vars.title}`
-  );
+  out = out.replace(/^(#\s+)\{short title[^}]*\}\s*$/m, `$1${vars.title}`);
 
-  // Inline placeholders (title in heading, etc.)
   out = out
     .replaceAll("{TITLE}", vars.title)
     .replaceAll("{STATUS}", vars.status)
@@ -236,7 +206,6 @@ function chooseIndexFile(adrDir) {
 }
 
 function insertIndexEntryUnderHeading(lines, headingRegex, entryLine) {
-  // Returns { lines, inserted }
   const headingIndex = lines.findIndex((l) => headingRegex.test(l));
   if (headingIndex === -1) return { lines, inserted: false };
 
@@ -248,7 +217,6 @@ function insertIndexEntryUnderHeading(lines, headingRegex, entryLine) {
     }
   }
 
-  // Prefer inserting at end of list in this section if there is a list.
   let lastListItem = -1;
   for (let i = sectionEnd - 1; i > headingIndex; i--) {
     if (/^[-*]\s+/.test(lines[i])) {
@@ -261,7 +229,6 @@ function insertIndexEntryUnderHeading(lines, headingRegex, entryLine) {
 
   const out = [...lines];
 
-  // Ensure there's a blank line after the heading if we're inserting immediately after it.
   if (insertAt === headingIndex + 1 && out[insertAt] !== "") {
     out.splice(insertAt, 0, "");
   }
@@ -280,13 +247,12 @@ function updateIndex(indexFile, { relLink, title, status, date }) {
   const normalized = content.replace(/\r\n/g, "\n");
   const hadTrailingNewline = normalized.endsWith("\n");
   let lines = normalized.split("\n");
-  // Normalize away the trailing empty split element so insertion math is sane.
+
   if (hadTrailingNewline && lines.length > 0 && lines[lines.length - 1] === "") {
     lines = lines.slice(0, -1);
   }
   const entryLine = `- [${title}](${relLink}) (${status}, ${date})`;
 
-  // Prefer inserting under "## ADRs" if it exists, otherwise append at EOF.
   const r = insertIndexEntryUnderHeading(lines, /^##\s+ADRs\s*$/i, entryLine);
   const nextLines = r.inserted ? r.lines : [...lines, entryLine];
 

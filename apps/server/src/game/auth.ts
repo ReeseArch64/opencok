@@ -49,7 +49,7 @@ export async function authenticate(
   )
     throw new LoginError("identity");
   if (str(data, "appVersion") !== "12.06.0") throw new LoginError("version");
-  // Mobile signs this opaque client value; Java's clock check applies only to web login.
+
   if (!timestamp || timestamp.length > 64) throw new LoginError("timestamp");
   if (!/^[a-f0-9]{32}$/.test(signature)) throw new LoginError("signature_format");
   const expected = createHash("md5")
@@ -61,9 +61,7 @@ export async function authenticate(
   if (!equal(deviceUuid, text(profile, "deviceUuid"))) throw new LoginError("device");
   if (long(profile, "banTime") > BigInt(now) || num(profile, "banFlag") !== 0)
     throw new LoginError("banned");
-  // Platform token providers and account creation are outside this experiment.
-  // These mobile channels use the same device/account path in the Java server.
-  // Registration channel is not required to equal the current distribution channel.
+
   const platform = str(data, "pf", "").trim() || text(profile, "pf");
   const devicePlatforms = ["csmod_games", "Google", "market_global"];
   if (!devicePlatforms.includes(platform) || !devicePlatforms.includes(text(profile, "pf")))

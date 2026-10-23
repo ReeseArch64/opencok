@@ -12,7 +12,6 @@ import {
 
 const schemas = { global: globalSchema, kingdom: kingdomSchema };
 
-/** Create one owned PostgreSQL pool for the global database or a single kingdom. */
 export function createDatabase<T extends DatabaseRole>(role: T, config: PoolConfig) {
   if (role !== "global" && role !== "kingdom") throw new Error("Unknown database role");
   const pool = new Pool({ ...config, options: `${config.options ?? ""} -c timezone=UTC` });
@@ -20,13 +19,12 @@ export function createDatabase<T extends DatabaseRole>(role: T, config: PoolConf
   return { role, db, pool, close: () => pool.end() };
 }
 
-/** Reuse one kingdom schema across the configured physical databases (two by default). */
 export function createDatabases(
   config: PoolConfig,
   topology: DatabaseTopology = defaultDatabaseTopology,
 ) {
   const resolved = validateTopology(topology);
-  // Resolve every connection first so invalid configuration cannot leak partially created pools.
+
   const globalConfig = databasePoolConfig(config, resolved.globalDatabase);
   const kingdomConfigs = resolved.kingdoms.map((kingdom) => ({
     ...kingdom,

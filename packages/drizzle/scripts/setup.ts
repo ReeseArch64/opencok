@@ -8,7 +8,6 @@ import {
 } from "../src/topology";
 import { migrateDatabase } from "./migrate";
 
-/** Create missing application databases and migrate the shared global + every configured kingdom. */
 export async function setupDatabases(
   admin: Pool,
   config: PoolConfig,

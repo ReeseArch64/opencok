@@ -28,7 +28,7 @@ test("namespace migrations preserve existing PostgreSQL rows, object identity an
         ["kingdom", topology.kingdoms[0]!.database],
       ] as const) {
         await admin.query(`CREATE DATABASE "${database}"`);
-        // Reproduce an existing deployment at the checked-in initial migration.
+
         const folder = join(directory, role);
         await mkdir(join(folder, "meta"), { recursive: true });
         const current = new URL(`../migrations/${role}/`, import.meta.url);

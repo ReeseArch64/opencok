@@ -102,7 +102,7 @@ export class Coordination {
       this.expired = true;
       this.registered = false;
     });
-    // Never log the library error object: it can contain the connection string.
+
     this.client.on("error", () => {});
   }
   get ready() {

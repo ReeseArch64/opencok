@@ -86,14 +86,11 @@ test("operation-specific requirements report missing keys and retain narrow type
     "DATABASE_ROLE",
   );
   expect(role).toBe("kingdom");
-  // This block checks rejected properties at compile time without evaluating them.
-  // oxlint-disable-next-line no-constant-condition
-  if (false) {
-    // @ts-expect-error Database settings are absent from the general environment.
-    void parseEnvironment({}).DATABASE_URL;
-    // @ts-expect-error General settings are absent from the database environment.
-    void parseDatabaseEnvironment({}).NODE_ENV;
-  }
+  const separatedDomains: [
+    "DATABASE_URL" extends keyof ReturnType<typeof parseEnvironment> ? false : true,
+    "NODE_ENV" extends keyof ReturnType<typeof parseDatabaseEnvironment> ? false : true,
+  ] = [true, true];
+  expect(separatedDomains).toEqual([true, true]);
 });
 
 test("Compose credentials preserve special characters and require a password per operation", () => {

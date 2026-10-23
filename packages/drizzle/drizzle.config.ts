@@ -7,6 +7,7 @@ export default defineConfig({
   dialect: "postgresql",
   schema: `./src/schema/${role}.ts`,
   out: `./migrations/${role}`,
+  breakpoints: false,
   ...(env.DATABASE_URL ? { dbCredentials: { url: env.DATABASE_URL } } : {}),
   strict: true,
 });

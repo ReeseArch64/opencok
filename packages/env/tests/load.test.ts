@@ -85,7 +85,7 @@ test("one root file is used from root, a package and an unrelated working direct
         hasDatabase: true,
       });
     }
-    // Normal root execution uses bunfig.toml to disable Bun's additional dotenv files.
+
     for (const cwd of [item.root, join(item.root, "packages/env")]) {
       const result = await run(item.script, cwd, {}, false);
       expect(result.code).toBe(0);

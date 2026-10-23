@@ -43,7 +43,6 @@ docker compose --profile dev config --quiet
 docker compose --profile dev up --build -d --wait
 docker compose --profile dev ps -a
 
-# Equivalent complete stack using the other profile.
 docker compose --profile all up --build -d --wait
 ```
 
@@ -90,9 +89,7 @@ authority for player progress. Back up databases and local inputs before changes
 an image rollback does not reverse SQL migrations.
 
 ```sh
-# Apply only pending database migrations.
 docker compose --profile dev run --rm database-setup
-# Stop services while retaining volumes.
 docker compose --profile dev down
 ```
 

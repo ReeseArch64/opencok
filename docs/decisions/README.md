@@ -15,8 +15,8 @@ that an implementation or deployment is complete.
   decision with a new record and reciprocal supersession links.
 - Keep one technology decision per record and one commit per ADR. Implementation
   TODOs are local tracking until linked through the repository's contribution workflow.
-- Read relevant accepted ADRs before implementing a change. Add a lightweight ADR
-  reference at an affected code entry point when implementing it.
+- Read relevant accepted ADRs before implementing a change. Link ADRs from component
+  prose documentation and name the governed code paths; source comments are prohibited.
 
 The [architecture](../../.github/ARCHITECTURE.md) remains the system overview,
 [PRODUCT.md](../../PRODUCT.md) defines product goals, and

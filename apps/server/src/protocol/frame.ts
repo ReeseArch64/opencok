@@ -25,7 +25,7 @@ export class FrameReader {
     while (offset < chunk.length) {
       if (this.headerUsed === 0) {
         const flags = chunk[offset++]!;
-        // Binary, optionally zlib and 32-bit length. No negotiated encryption.
+
         if (![0x80, 0x88, 0xa0, 0xa8].includes(flags)) throw new ProtocolError();
         this.header[0] = flags;
         this.headerUsed = 1;
@@ -42,7 +42,7 @@ export class FrameReader {
         const size =
           this.headerSize === 5 ? this.header.readUInt32BE(1) : this.header.readUInt16BE(1);
         if (size < 3 || size > MAX_FRAME) throw new ProtocolError();
-        // Allocate once after validating the length: byte-by-byte TCP input stays linear.
+
         this.body = Buffer.alloc(size);
         this.bodyUsed = 0;
       }

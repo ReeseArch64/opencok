@@ -3,8 +3,6 @@ import { Pool } from "pg";
 import { writeFile } from "node:fs/promises";
 import { setupDatabases } from "./setup";
 
-// Compose provides individual local development credentials. URL setters encode
-// special characters; host-side DATABASE_URL values are not reused in the network.
 const url = new URL("postgresql://database:5432/postgres");
 url.username = env.POSTGRES_USER;
 url.password = requireEnv("POSTGRES_PASSWORD");

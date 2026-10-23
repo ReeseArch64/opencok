@@ -3,7 +3,6 @@ import { long, num, text, type Row } from "./rows.ts";
 import { int, sfs, str, type Fields } from "../protocol/sfs.ts";
 import { GameError, errors } from "./rules.ts";
 
-// The legacy viewport is an isometric 10-by-16 footprint, not a square radius.
 export function viewport(x: number, y: number, size: number): number[] {
   const ids = new Set<number>();
   for (let column = x - 13; column < x + 13; column++) {
@@ -18,7 +17,6 @@ export function viewport(x: number, y: number, size: number): number[] {
   return [...ids];
 }
 export function compactPoint(row: Row): string {
-  // Only basic terrain, cities and resources; monster/event details need their own DTOs.
   if (
     ![0, 1, 3].includes(num(row, "pointType")) ||
     text(row, "allianceId") ||
@@ -59,7 +57,7 @@ export function pointSections(points: string[]): Fields {
     }
     section.push(point);
   }
-  // An explicit empty section is consumable by the native JSON parser.
+
   if (section.length || !sections.length) sections.push(JSON.stringify(section));
   return { section: sfs.int(sections.length), points: sfs.array(sections.map(sfs.string)) };
 }

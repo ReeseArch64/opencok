@@ -37,7 +37,6 @@ export interface GameStore extends AuthenticationStore {
   ): Promise<{ world: Row | undefined; points: Row[]; hasMarches: boolean }>;
 }
 
-/** PostgreSQL adapter. All game reads use the selected realm's write pool. */
 export class Database implements GameStore {
   readonly databases;
   readonly kingdom;
@@ -56,12 +55,11 @@ export class Database implements GameStore {
       },
     );
     this.kingdom = this.databases.getKingdom(config.kingdomId);
-    // Never allow an unhandled pool error to print driver context or player data.
+
     this.kingdom.pool.on("error", () => {});
     this.databases.global.pool.on("error", () => {});
   }
   async start() {
-    // Compile and execute projections against the actual namespaces before accepting clients.
     await this.kingdom.db.select().from(userprofile).limit(0);
     for (const table of [
       user_resource,

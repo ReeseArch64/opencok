@@ -50,7 +50,6 @@ import { requireEnv } from "@opencok/env/database";
 import { createDatabases } from "@opencok/drizzle";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 
-// The base URL selects the PostgreSQL cluster; routing selects each configured DB.
 const databases = createDatabases({
   connectionString: requireEnv("DATABASE_URL"),
   max: 10,
@@ -61,7 +60,6 @@ const kingdom2 = databases.getKingdom(2);
 const profiles = await kingdom1.db.select().from(userprofile).limit(10);
 const otherProfiles = await kingdom2.db.query.userprofile.findMany({ limit: 10 });
 
-// At service shutdown:
 await databases.close();
 ```
 
@@ -97,7 +95,6 @@ DATABASE_ROLE=kingdom bun run db:generate --name add_kingdom_state
 DATABASE_ROLE=global bun run db:check
 DATABASE_ROLE=kingdom bun run db:check
 
-# Set DATABASE_URL privately to the selected physical database.
 DATABASE_ROLE=global bun run db:migrate
 DATABASE_ROLE=kingdom bun run db:migrate
 ```

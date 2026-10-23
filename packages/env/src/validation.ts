@@ -15,7 +15,6 @@ export class EnvironmentError extends Error {
 export const blankToUndefined = (value: unknown) =>
   typeof value === "string" ? value.trim() || undefined : value;
 
-/** Keep Zod errors and rejected secret values out of public diagnostics. */
 export function validateEnvironment<T extends z.ZodType>(
   schema: T,
   source: Readonly<Record<string, string | undefined>>,

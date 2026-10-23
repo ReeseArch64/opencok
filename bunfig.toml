@@ -1,2 +1,1 @@
-# @opencok/env explicitly loads the single workspace-root .env.
 env = false

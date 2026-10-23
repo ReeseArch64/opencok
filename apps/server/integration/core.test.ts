@@ -275,7 +275,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         Type.Int,
       );
       await replacement.next();
-      // The old connection's close callback cannot delete the replacement lease.
+
       expect((await replacement.command("cmd.ping")).serverNowTime?.type).toBe(Type.Long);
     }
     const otherCache = new Cache({ ...base, kingdomId: 2 });
@@ -284,7 +284,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     await cache.release("synthetic-shared-uid", "synthetic-token-1");
     expect(await otherCache.refresh("synthetic-shared-uid", "synthetic-token-2")).toBe(true);
     await otherCache.release("synthetic-shared-uid", "synthetic-token-2");
-    // A process restart retains PostgreSQL state and releases its session lease.
+
     clients[0]!.close();
     await servers[0]!.close();
     servers.shift();

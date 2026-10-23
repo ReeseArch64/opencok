@@ -70,3 +70,9 @@ or a historical evaluation was performed.
 - **Review again when**: the stated boundaries cannot be maintained, a required
   dependency becomes unsupported, or measured compatibility/operational results
   invalidate the choice. A replacement requires a linked superseding ADR.
+
+### 2026-10-23: Prohibit source comments and lint suppressions
+
+The maintainer subsequently prohibited comments in tracked project files. This
+replaces the earlier allowance for narrow inline rule suppressions. Express the
+constraint through code, types and tests; document its rationale in prose.

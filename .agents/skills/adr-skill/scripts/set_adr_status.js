@@ -1,11 +1,4 @@
 #!/usr/bin/env node
-/**
- * Update an ADR's status in-place.
- *
- * Supported patterns:
- * - Bullet status: "- Status: proposed" or "* Status: proposed"
- * - Nygard-style section: "## Status" followed by a single-line status value
- */
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -28,9 +21,7 @@ function parseArgs(argv) {
         "Example:",
         "  node set_adr_status.js adr/0001-foo.md --status accepted",
         "",
-      ].join(
-        "\n"
-      )
+      ].join("\n"),
     );
     process.exit(0);
   }
@@ -56,7 +47,6 @@ function parseArgs(argv) {
 }
 
 function setYamlFrontMatterStatus(lines, newStatus) {
-  // YAML front matter: starts with '---', ends with next '---'
   if (lines.length < 2 || lines[0].trim() !== "---") return { lines, changed: false };
 
   let changed = false;
@@ -111,7 +101,6 @@ function setSectionStatus(lines, newStatus) {
 
     if (!/^##\s+Status\s*$/.test(lines[i])) continue;
 
-    // Replace next non-empty, non-heading line. If not found, insert.
     let j = i + 1;
     while (j < lines.length && lines[j].trim() === "") {
       out.push(lines[j]);
@@ -121,7 +110,7 @@ function setSectionStatus(lines, newStatus) {
     if (j < lines.length && !/^##\s+/.test(lines[j])) {
       out.push(newStatus);
       changed = true;
-      i = j; // skip original status line
+      i = j;
       continue;
     }
 
@@ -147,7 +136,7 @@ function main() {
   if (!r.changed) r = setSectionStatus(lines, args.status);
   if (!r.changed) {
     die(
-      "Could not find a status to update. Expected YAML front matter 'status:', '- Status:'/'* Status:', or a '## Status' section."
+      "Could not find a status to update. Expected YAML front matter 'status:', '- Status:'/'* Status:', or a '## Status' section.",
     );
   }
 
@@ -161,7 +150,7 @@ function main() {
         fileRelPath: toPosix(path.relative(process.cwd(), filePath)),
         status: args.status,
         changed: true,
-      })}\n`
+      })}\n`,
     );
   } else {
     process.stdout.write(`${filePath}\n`);
