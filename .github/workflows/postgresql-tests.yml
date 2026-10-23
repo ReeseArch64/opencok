@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "packages/drizzle/**"
+      - "packages/env/**"
+      - ".env.example"
+      - "bunfig.toml"
       - "packages/config/**"
       - "package.json"
       - "bun.lock"
@@ -12,6 +15,9 @@ on:
     branches: [develop]
     paths:
       - "packages/drizzle/**"
+      - "packages/env/**"
+      - ".env.example"
+      - "bunfig.toml"
       - "packages/config/**"
       - "package.json"
       - "bun.lock"
@@ -30,6 +36,8 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
+      - run: bun run --cwd packages/env check-types
+      - run: bun run --cwd packages/env test
       - run: bun run --cwd packages/drizzle check-types
       - run: DATABASE_ROLE=global bun run --cwd packages/drizzle db:check
       - run: DATABASE_ROLE=kingdom bun run --cwd packages/drizzle db:check

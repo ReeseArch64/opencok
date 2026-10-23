@@ -1,4 +1,5 @@
 import { Pool, type PoolConfig } from "pg";
+import { EnvironmentError, requireEnv } from "@opencok/env";
 import { databasePoolConfig, defaultDatabaseTopology, validateTopology, type DatabaseTopology } from "../src/topology";
 import { migrateDatabase } from "./migrate";
 
@@ -33,13 +34,12 @@ export async function setupDatabases(admin: Pool, config: PoolConfig, topology: 
 if (import.meta.main) {
   let admin: Pool | undefined;
   try {
-    if (!process.env.POSTGRES_ADMIN_URL) throw new Error("Set POSTGRES_ADMIN_URL");
-    const config = { connectionString: process.env.POSTGRES_ADMIN_URL, options: "-c timezone=UTC" };
+    const config = { connectionString: requireEnv("POSTGRES_ADMIN_URL"), options: "-c timezone=UTC" };
     admin = new Pool(config);
     const topology = await setupDatabases(admin, config);
     console.log(`Initialized shared global database and ${topology.kingdoms.length} kingdoms`);
   } catch (error) {
-    console.error(error && typeof error === "object" && "code" in error ? `PostgreSQL setup failed (${error.code})` : "PostgreSQL setup failed; verify administrative connection, topology and pending migrations");
+    console.error(error instanceof EnvironmentError ? error.message : error && typeof error === "object" && "code" in error ? `PostgreSQL setup failed (${error.code})` : "PostgreSQL setup failed; verify administrative connection, topology and pending migrations");
     process.exitCode = 1;
   } finally { await admin?.end(); }
 }

@@ -2,6 +2,7 @@ import { join } from "node:path";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
+import { EnvironmentError, requireEnv } from "@opencok/env";
 import { databaseSchemas, type DatabaseRole } from "../src/roles";
 
 /** Apply pending Drizzle migrations; one physical database has one role. */
@@ -27,14 +28,13 @@ export async function migrateDatabase(pool: Pool, role: DatabaseRole) {
 if (import.meta.main) {
   let pool: Pool | undefined;
   try {
-    const role = process.env.DATABASE_ROLE;
-    if ((role !== "global" && role !== "kingdom") || !process.env.DATABASE_URL) throw new Error("Set DATABASE_URL and DATABASE_ROLE=global|realm");
-    pool = new Pool({ connectionString: process.env.DATABASE_URL, options: "-c timezone=UTC" });
+    const role = requireEnv("DATABASE_ROLE");
+    pool = new Pool({ connectionString: requireEnv("DATABASE_URL"), options: "-c timezone=UTC" });
     await migrateDatabase(pool, role);
     console.log(`Applied PostgreSQL migrations for ${role}`);
   } catch (error) {
     // Connection strings and raw query parameters never enter CLI diagnostics.
-    console.error(error && typeof error === "object" && "code" in error ? `PostgreSQL migration failed (${error.code})` : "PostgreSQL migration failed; verify DATABASE_URL, DATABASE_ROLE and pending SQL");
+    console.error(error instanceof EnvironmentError ? error.message : error && typeof error === "object" && "code" in error ? `PostgreSQL migration failed (${error.code})` : "PostgreSQL migration failed; verify DATABASE_URL, DATABASE_ROLE and pending SQL");
     process.exitCode = 1;
   } finally { await pool?.end(); }
 }
