@@ -1095,6 +1095,36 @@ tables absent from the supplied files. ORM domains still sit behind repository a
 this baseline does not give domain packages direct persistence responsibilities.
 Commands, validation and limitations are in the [package guide](../packages/drizzle/README.md).
 
+### 15.2. PostgreSQL compatibility port
+
+`packages/drizzle/src/postgresql` provides a separate PostgreSQL representation of
+all 772 legacy tables and 6,316 fields. The MariaDB baseline remains the source
+reference. The global physical database contains the `cokdb_global`, `cokdb_pay`
+and transitional `opencok_chat` schemas (113 tables); each physical realm database
+contains `cokdb1` (659 tables). Realm database names are deployment configuration,
+not SQL identifier rewrites. There is no transaction spanning those databases.
+
+The compatibility port preserves names, raw values and one module per table.
+Temporal columns intentionally remain validated strings, including zero dates;
+this is not the final domain timestamp model. Full unsigned bigint values use
+bounded numeric storage with exact TypeScript bigint adapters. Opaque binary
+columns remain bytes. PostgreSQL-native storage makes the five former MyISAM
+tables transactional, a recorded behavior change.
+
+ICU collations are explicit candidates for legacy case/accent comparisons, not
+proof of equivalence for arbitrary Unicode. PAD SPACE indexes and explicit lookup
+helpers preserve trailing-space comparison intent without trimming stored values.
+Transfer must validate source/target equality groups and refuse incompatible data.
+The public manifest records every field, source namespace/type, target mapping,
+index adaptation and legacy stored-program dependency. Business triggers/routines
+are not automatically installed; their TypeScript replacements remain prerequisites
+for releasing the corresponding application flows. Chat's final NoSQL direction
+remains separate from this complete relational compatibility baseline.
+
+PostgreSQL migrations initialize empty databases and do not authorize a production
+cutover. Commands, mapping limits and validation are maintained in the
+[PostgreSQL package guide](../packages/drizzle/postgresql/README.md).
+
 ## 16. Simulation execution and offline progress
 
 The Server executes a logical queue of commands per aggregate/partition, with
