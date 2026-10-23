@@ -4,6 +4,7 @@ import { databaseNames, sha256 } from "../legacy-sql";
 import type { ColumnMapping, DatabaseRole, TableMapping } from "../../src/postgresql/model";
 import { buildManifest, collationSql, ident, literal } from "./model";
 import { foundationSql } from "./foundation";
+import { transferMigrationSql } from "./transfer-migration";
 
 const js = JSON.stringify;
 const exportName = (name: string) => name === "package" ? "packageTable" : name;
@@ -127,7 +128,11 @@ export async function generatePostgres(check = false) {
       ...tables.flatMap((table) => table.foreignKeys.map((key) => `ALTER TABLE ${ident(table.namespace)}.${ident(table.name)} ADD CONSTRAINT ${ident(key.targetName)} FOREIGN KEY (${key.columns.map(ident).join(", ")}) REFERENCES ${ident(table.namespace)}.${ident(key.targetTable)} (${key.targetColumns.map(ident).join(", ")}) ON DELETE ${key.onDelete.toUpperCase()} ON UPDATE ${key.onUpdate.toUpperCase()};`)),
     ];
     files.set(`postgresql/migrations/${role}/0000_compatibility.sql`, ddl.join("\n--> statement-breakpoint\n") + "\n");
-    files.set(`postgresql/migrations/${role}/meta/_journal.json`, js({ version: "7", dialect: "postgresql", entries: [{ idx: 0, version: "7", when: 1792771200000, tag: "0000_compatibility", breakpoints: true }] }, null, 2) + "\n");
+    files.set(`postgresql/migrations/${role}/0001_transfer.sql`, transferMigrationSql + "\n");
+    files.set(`postgresql/migrations/${role}/meta/_journal.json`, js({ version: "7", dialect: "postgresql", entries: [
+      { idx: 0, version: "7", when: 1792771200000, tag: "0000_compatibility", breakpoints: true },
+      { idx: 1, version: "7", when: 1792771200001, tag: "0001_transfer", breakpoints: true },
+    ] }, null, 2) + "\n");
   }
   // No private inputs, live databases or Drizzle runtime definitions are needed.
   for (const [path, content] of files) {
