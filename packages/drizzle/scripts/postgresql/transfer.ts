@@ -1,3 +1,4 @@
+import type { Connection as StreamingConnection } from "mysql2";
 import { createConnection, type Connection, type RowDataPacket } from "mysql2/promise";
 import { Pool, type PoolClient } from "pg";
 import { legacyDriverOptions } from "../../src/client";
@@ -26,18 +27,21 @@ function sourceQuery(table: TableMapping) {
   const fields = table.columns.map((column) => column.adapter === "bigint" || column.adapter === "decimal" || column.adapter === "temporal"
     ? `CAST(${mysqlIdent(column.name)} AS CHAR) AS ${mysqlIdent(column.name)}` : mysqlIdent(column.name));
   for (const [i, column] of table.columns.entries()) if (column.adapter === "text") fields.push(`HEX(WEIGHT_STRING(RTRIM(${mysqlIdent(column.name)}))) AS ${mysqlIdent(`__weight_${i}`)}`);
-  const key = table.indexes.find((index) => index.kind === "primary");
-  return `SELECT ${fields.join(",")} FROM ${mysqlQualified(table)} ORDER BY ${(key?.columns.map((column) => column.name) ?? table.columns.map((column) => column.name)).map(mysqlIdent).join(",")} LIMIT ? OFFSET ?`;
+  return `SELECT ${fields.join(",")} FROM ${mysqlQualified(table)}`;
 }
 
 async function targetDigest(client: PoolClient, table: TableMapping, batch: number) {
   const digest = new RowDigest();
   const fields = table.columns.map((column) => ident(column.name)).join(",");
-  for (let offset = 0; ; offset += batch) {
-    const rows = (await client.query(`SELECT ${fields} FROM ${qualified(table)} ORDER BY ${fields} LIMIT $1 OFFSET $2`, [batch, offset])).rows;
-    for (const row of rows) digest.add(row, table);
-    if (rows.length < batch) return digest;
-  }
+  // A cursor avoids OFFSET instability for keyless rows and equal collation keys.
+  await client.query(`DECLARE legacy_verify NO SCROLL CURSOR FOR SELECT ${fields} FROM ${qualified(table)}`);
+  try {
+    while (true) {
+      const rows = (await client.query(`FETCH FORWARD ${batch} FROM legacy_verify`)).rows;
+      for (const row of rows) digest.add(row, table);
+      if (rows.length < batch) return digest;
+    }
+  } finally { await client.query("CLOSE legacy_verify").catch(() => undefined); }
 }
 
 async function validateCollations(client: PoolClient, table: TableMapping) {
@@ -79,8 +83,7 @@ async function transferTable(source: Connection, client: PoolClient, table: Tabl
     await client.query("CREATE TEMP TABLE _legacy_weights (column_name text,raw_value text COLLATE \"C\",source_weight text) ON COMMIT DROP");
     const sourceDigest = new RowDigest();
     const query = sourceQuery(table);
-    for (let offset = 0; ; offset += batch) {
-      const [rows] = await source.query<RowDataPacket[]>(query, [batch, offset]);
+    const copyBatch = async (rows: RowDataPacket[]) => {
       if (rows.length) {
         const values: unknown[] = [];
         const weights: unknown[] = [];
@@ -100,11 +103,24 @@ async function transferTable(source: Connection, client: PoolClient, table: Tabl
           await client.query(`INSERT INTO _legacy_weights VALUES ${groups.join(",")}`, weights);
         }
       }
-      if (rows.length < batch) break;
-    }
+    };
+    // One backpressured SELECT reads every source row once, including keyless duplicates.
+    // mysql2 3.24.6 exposes its public streaming connection on the promise wrapper;
+    // its PromiseConnection declaration omits that property. Guard this pinned bridge.
+    const core = (source as unknown as { connection?: StreamingConnection }).connection;
+    if (!core || typeof core.query !== "function") throw new TransferError("streaming-source-required", table.id);
+    const stream = core.query(query).stream({ highWaterMark: batch });
+    let pending: RowDataPacket[] = [];
+    try {
+      for await (const row of stream) {
+        pending.push(row as RowDataPacket);
+        if (pending.length === batch) { await copyBatch(pending); pending = []; }
+      }
+      if (pending.length) await copyBatch(pending);
+    } finally { stream.destroy(); }
     await validateCollations(client, table);
     const target = await targetDigest(client, table, batch);
-    if (target.count !== sourceDigest.count || target.result() !== sourceDigest.result()) throw new TransferError("row-or-field-reconciliation", table.id);
+    if (target.count !== sourceDigest.count || target.result() !== sourceDigest.result()) throw new TransferError("row-or-field-reconciliation", table.id, sourceDigest.differingFields(target, table).join(",") || undefined);
     if (old && (old.row_count !== sourceDigest.count.toString() || old.digest !== sourceDigest.result())) throw new TransferError("checkpoint-source-or-target-changed", table.id);
     if (!old) {
       await synchronizeSequences(client, table, sourceNext);

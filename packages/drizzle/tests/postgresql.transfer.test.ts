@@ -59,7 +59,7 @@ test("reconciliation refuses modified data and detects schema drift without reve
 test("NUL text and a proven MariaDB/ICU equality mismatch stop reconciliation without leaking values", async () => {
   await fixture.source.query("UPDATE cokdb1.ability_page SET uid=CONCAT(uid,CHAR(0))");
   try {
-    await expect(transferLegacy(fixture.source, fixture.targets, { restoredSource: true, verifyOnly: true }))
+    await expect(transferLegacy(fixture.source, fixture.targets, { restoredSource: true, verifyOnly: true, batchSize: 1 }))
       .rejects.toThrow("unrepresentable-value, cokdb1.ability_page.uid");
   } finally { await fixture.source.query("UPDATE cokdb1.ability_page SET uid=REPLACE(uid,CHAR(0),'')"); }
   // general_ci treats these as one class; ICU primary treats them as distinct.

@@ -141,6 +141,10 @@ decimal strings, bytes, NULL and temporal strings have explicit canonical codecs
 Unsupported values and constraint failures identify a public table/column and error
 code, without logging the value or raw driver exception. A checksum mismatch blocks
 the run; investigate privately and do not clear receipts to force acceptance.
+The source is read through one backpressured streaming SELECT per table, and target
+verification uses a transaction cursor. Neither side uses OFFSET paging, which is
+unstable for keyless duplicates or equal comparison keys. Discrepancies also identify
+differing public field names through per-column multiset digests.
 
 Temporary target tables also compare source `WEIGHT_STRING(RTRIM(value))` equality
 groups with the mapped PostgreSQL collation for every imported text field. A
@@ -171,3 +175,38 @@ retain the unchanged source and rebuild only the isolated target. After PostgreS
 accepts writes, switching back to a stale MariaDB backup loses those writes; require
 an audited reverse/delta reconciliation or forward recovery. No automatic live
 cutover or destructive rollback is provided by these commands.
+
+## Automated coverage
+
+```sh
+bun run test:pg:unit       # native-source contract, models and codecs
+bun run test:pg:snapshots  # one PostgreSQL schema/CRUD snapshot per table
+bun run test:pg:e2e        # disposable bootstrap, CRUD and transfer/recovery
+```
+
+All 772 tables have a named PostgreSQL unit case, reviewed snapshot and persistence
+E2E case. Catalog assertions compare physical fields, types, nullability, collations,
+primary/FK/check constraints and index expressions. E2E covers every field with
+insert/read/update/delete, defaults, NULL handling, unique/FK violations and rollback,
+including the five formerly MyISAM tables. It checks all retained fields after
+closing pools and restarting PostgreSQL. The 34 keyless tables remain keyless.
+
+Transfer fixtures contain multiple rows in every table and exact duplicates where
+no unique key prohibits them. Recovery tests include interrupted table checkpoints,
+resume without duplication, source/target value reconciliation, native sequences,
+schema/data tampering, unsupported NUL text, a real collation incompatibility,
+restart and binary pg_dump/pg_restore of both target roles. Fixtures use only public
+DDL and synthetic values; no test accepts deployment database URLs.
+
+Run E2E sequentially: FK children share a parent fixture and final restart cases
+verify earlier table cases. Missing Docker/dependencies fail the suite. The
+PostgreSQL workflow pins Bun, MariaDB and PostgreSQL versions and executes these
+commands without private files. Ordinary offline `bun run test` also includes the
+PostgreSQL unit and snapshot suites.
+
+Refresh snapshots only for an intentional reviewed contract change:
+`bun test tests/postgresql.snapshots.test.ts --update-snapshots`. Review migrations,
+manifest and native catalog evidence together. Snapshot refresh does not update the
+independent MariaDB fixture. Tests measure complete table participation, not 100%
+branch/path coverage or game-client compatibility. The required TypeScript business
+rewrites listed above still need application E2E before gameplay release.
