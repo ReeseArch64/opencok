@@ -1,228 +1,106 @@
-# Legacy MariaDB baseline
+# PostgreSQL database package
 
-`@opencok/drizzle` reconstructs the supplied Java deployment database for migration
-planning. It targets **MariaDB 10.4.33**, using Drizzle's MySQL dialect and `mysql2`.
-It does not redesign the model or migrate an existing deployment to PostgreSQL.
-The separate [PostgreSQL compatibility port](postgresql/README.md) provides all-table
-PostgreSQL models, migrations, transfer/reconciliation and its own tests. Use
-`@opencok/drizzle/postgresql` for that target; the original imports below remain
-the MariaDB reference API.
-See [the architecture](../../.github/ARCHITECTURE.md#151-legacy-mariadb-baseline)
-for the persistence and compatibility boundary.
+`@opencok/drizzle` owns the application's PostgreSQL schemas, typed client and
+versioned Drizzle migrations. The maintained source of truth is `src/schema`,
+with **772 tables / 6,316 fields** and one module per table.
 
-| Database | Tables | Scope |
-| --- | ---: | --- |
-| `cokdb1` | 659 | Game state and audit tables, including 48 tables from the 2026/2027 patches |
-| `cokdb_global` | 90 | Accounts and global state |
-| `cokdb_pay` | 21 | Legacy payment storage |
-| `opencok_chat` | 2 | Chat sessions and messages |
-| **Total** | **772** | |
+| Database role | SQL schemas | Tables |
+| --- | --- | ---: |
+| Global | `cokdb_global`, `cokdb_pay`, `opencok_chat` | 113 |
+| One physical database per realm | `cokdb1` | 659 |
 
-The schema exports preserve SQL table/column names, case, defaults, nullability,
-primary keys, secondary/unique indexes and both foreign keys. `package` is a reserved
-JavaScript word: its TypeScript export is `cokdb_pay.packageTable`; its SQL name stays
-`package`. SQL identifiers such as `zh-Hans` remain quoted properties.
+Physical database names and credentials are deployment configuration. The two
+roles have separate migration histories; apply realm migrations to each realm's
+database. SQL table/field names are preserved. A transaction belongs to one database.
+The architecture defines [persistence ownership](../../.github/ARCHITECTURE.md#151-postgresql-database-package).
 
-Each table has its own file under `src/schema/<database>/<table>.ts`, for example
-`src/schema/cokdb1/user_resource.ts`. The four `src/schema/<database>.ts` files
-re-export their tables, preserving the existing database imports. Foreign keys import
-their referenced table directly. A single table can also be imported through
-`@opencok/drizzle/schema/cokdb1/user_resource`.
+## Use from the server
 
-`inventory.json` records all seven input hashes, table counts, 49 `LIKE` expansions,
-four triggers, three procedures, one function and one event. It contains no rows,
-credentials, definers or stored-program bodies. Source inputs remain read-only and
-outside Git. Use the same authorized local inputs to reproduce their private behavior.
-
-## Use the typed schema
-
-Run `bun install --frozen-lockfile` at the repository root. Consumers declare
-`"@opencok/drizzle": "workspace:*"` in their own dependencies.
+Declare `"@opencok/drizzle": "workspace:*"` in the consuming package.
 
 ```ts
-import { createLegacyDatabase } from "@opencok/drizzle";
-import { chat_message } from "@opencok/drizzle/schema/opencok_chat";
+import { createDatabase } from "@opencok/drizzle";
+import { userprofile } from "@opencok/drizzle/schema/cokdb1/userprofile";
 
-const chat = createLegacyDatabase("opencok_chat", {
-  host: process.env.MARIADB_HOST,
-  user: process.env.MARIADB_USER,
-  password: process.env.MARIADB_PASSWORD,
-  connectionLimit: 4,
+const realm = createDatabase("realm", {
+  connectionString: process.env.REALM_DATABASE_URL,
+  max: 10,
 });
 
-try {
-  const messages = await chat.db.select().from(chat_message).limit(10);
-  // Serialize bigint values explicitly at application/transport boundaries.
-} finally {
-  await chat.close();
-}
+const profiles = await realm.db.select().from(userprofile).limit(10);
+const profile = await realm.db.query.userprofile.findFirst();
+
+// At service shutdown:
+await realm.close();
 ```
 
-Each client selects one of the original databases; do not pass a table from another
-database to that client. Importing the package opens no connections. Configure TLS
-through the mysql2 `ssl` option when required by the deployment.
+Create and reuse pools at service startup. Configure TLS using pg's `ssl` option
+when required. Each client uses UTC and exposes `db`, `pool`, `role` and `close()`;
+importing the package creates no connections. Global relational-query names include
+the SQL namespace, for example `global.db.query.cokdb_global_usermapping`, so equal
+table names in different global schemas do not collide. Realm query names match
+its table exports. Role-wide schemas are available from `schema/global` and
+`schema/realm`; individual namespaces and tables are available under `schema/*`.
 
-- `BIGINT` maps to JavaScript `bigint`, including unsigned chat sequence IDs.
-- `DECIMAL` maps to string. `FLOAT`/`DOUBLE` retain their original dimensions and map
-  to number; this baseline does not change their legacy floating-point behavior.
-- `DATE`, `DATETIME` and `TIMESTAMP` map to strings, preserving zero dates and fractional
-  seconds. The pool uses UTC conversion settings; configure MariaDB sessions/server
-  timezone explicitly for a deployment. This is not a timestamp semantics migration.
-- `BINARY`, `VARBINARY` and all blob sizes map to `Buffer`, preserving arbitrary bytes.
-- SQL defaults use SQL literals, so 64-bit sentinels never pass through JS `Number`.
+## Schema changes and migrations
 
-## Reproduce and check the baseline
-
-From this package directory:
+Run `bun install --frozen-lockfile` at the repository root, then from this package:
 
 ```sh
-export LEGACY_SQL_DIR=/path/to/authorized/legacy/deploy/database
-bun run db:generate
-bun run db:check
+DATABASE_ROLE=global bun run db:generate --name add_account_preferences
+DATABASE_ROLE=realm bun run db:generate --name add_realm_state
+DATABASE_ROLE=global bun run db:check
+DATABASE_ROLE=realm bun run db:check
+
+# Set DATABASE_URL privately to the selected PostgreSQL database.
+DATABASE_ROLE=global bun run db:migrate
+DATABASE_ROLE=realm bun run db:migrate
+```
+
+Edit the relevant table modules first. Review the generated SQL and commit the
+migration plus its Drizzle snapshot/journal. `db:migrate` applies pending migrations
+incrementally and can run again without duplicating them. It serializes migration
+processes with an advisory lock and rejects a database containing the other role's
+application schemas. New databases start from the checked-in `0000_initial.sql`.
+Never edit a migration already applied to a deployment; add the next migration.
+`DATABASE_ROLE=global|realm bun run db:studio` opens the configured database in Studio.
+
+## Data contracts
+
+- Bigints, including the bounded full-width sequence ID, use TypeScript `bigint`.
+  Serialize bigint explicitly at JSON/transport boundaries. Native sequences retain
+  allocation across transaction rollback; the full-width numeric ID uses an exact
+  offset over a signed PostgreSQL sequence.
+- Decimals use strings. Declared fixed-scale numeric fields with a number contract
+  use Drizzle's numeric number mode. Floating fields use real/double precision.
+- Binary values use PostgreSQL bytea and `Buffer`; the only custom column adapter
+  preserves arbitrary bytes, including NUL.
+- Calendar-string fields retain text values and inline format/calendar constraints,
+  including existing zero/sentinel strings. This keeps the current persisted values
+  intact; changing these field contracts requires a separate domain migration.
+- The two automatic update-time fields use Drizzle `$onUpdateFn`. Direct SQL writers
+  must supply update-time fields themselves. Required columns reject NULL normally.
+- Text uses ordinary PostgreSQL operators, database collation and declared lengths.
+  Keys and indexes are defined directly in the table modules.
+
+## Verification
+
+```sh
 bun run check-types
-bun test tests/legacy-sql.test.ts
-bun run test:integration
+bun run test:unit
+bun run test:snapshots
+bun run test:e2e
 ```
 
-The directory must contain exactly the seven SQL files in `inventory.json`. Generation
-reads DDL and writes one `src/schema/<database>/<table>.ts` module per table, database
-re-exports, schema-only migrations and the inventory. It
-fails on unsupported syntax instead of silently omitting a table or column attribute.
-Review generated diffs before accepting changed inputs. `db:check` only reads and
-compares files. The importer is intentionally limited to these dump forms, not a
-general MySQL/MariaDB SQL parser.
+Every table has a named unit case, schema/CRUD snapshot and persistence E2E case.
+`tests/fixtures/schema.json` is the reviewed PostgreSQL test contract, used only by
+tests. Intentional schema changes must update the corresponding contract and reviewed
+snapshots. Update snapshots with `bun test tests/schema.snapshots.test.ts --update-snapshots`.
 
-Integration requires Docker and `mariadb:10.4.33`. It creates two unique disposable
-containers with random credentials and ephemeral loopback ports, imports originals
-using MariaDB's own CLI, reconstructs the other instance through Drizzle, and compares
-metadata, full table definitions and seed checksums. Program bodies are compared by
-hash and never printed. Synthetic checks exercise bigint, decimal, bytes, dates,
-constraints, rollback and persistence across a database restart. Only containers made
-by the run are removed. It does not use `MARIADB_URL` or an existing database.
-
-## Tests for every table
-
-From this package directory, with Bun 1.4.2:
-
-```sh
-bun run test              # offline: parser, 772 table contracts, 772 table snapshots
-bun run test:unit         # parser + per-table unit tests
-bun run test:snapshots    # per-table schema and compiled CRUD SQL snapshots
-bun run test:e2e          # Docker: empty server -> bootstrap -> CRUD -> restart -> read
-bun run check-types
-```
-
-Every table gets a named unit, snapshot and persistence E2E case. The catalog gate
-checks the 772 source modules, exports and native table names, and all 6,316 fields;
-missing or extra tables fail. This measures **table coverage**, not 100% code-path or
-gameplay coverage. There are no table skips, including the 34 tables without a primary
-key and five MyISAM tables.
-
-The offline oracle, `tests/fixtures/mariadb-contract.json`, was captured from MariaDB
-10.4.33 `information_schema` after applying only the public baseline migrations. It
-does not use the TypeScript schema or generator to infer expected fields. It records
-all columns, defaults, indexes (including prefixes), foreign keys, engines, row formats,
-charsets, collations and column comments, plus migration hashes. Unit tests compare the
-Drizzle-representable attributes and driver mappings; E2E compares the full oracle
-against a freshly bootstrapped server. The private-input parity suite remains a
-separate check against the original dumps.
-
-E2E inserts and updates every field, reads exact values back, deletes rows, verifies
-omitted defaults and nullable fields, and rejects invalid required fields, duplicate
-keys and missing FK parents. It verifies rollback on InnoDB and the absence of rollback
-on MyISAM. Fixed session clocks test automatic timestamp updates and MariaDB 10.4's
-[NULL-to-current-timestamp behavior](https://mariadb.com/docs/server/reference/data-types/date-and-time-data-types/timestamp).
-Finally, it closes pools, restarts MariaDB, reconnects and verifies every field in all
-772 retained synthetic rows. Tests run sequentially because FK children share a parent
-and the final restart checks all earlier cases; do not use `--concurrent` or randomize
-this E2E file.
-
-Each E2E run owns one disposable `mariadb:10.4.33` container, random credentials and an
-ephemeral loopback port. It accepts neither `MARIADB_URL` nor private SQL inputs and
-removes only its own container/volumes. Docker must be available; missing Docker or
-failed bootstrap fails the suite rather than skipping it. `.github/workflows/drizzle-tests.yml`
-runs type checks, offline tests and E2E without private artifacts.
-
-For an intentional baseline change, capture a new native oracle with
-`bun tests/capture-contract.ts`, review its diff against the migration, and then run
-`bun test tests/tables.snapshots.test.ts --update-snapshots`. Never refresh either
-artifact merely to clear a failure. Snapshot updates do not refresh the native oracle.
-No snapshots contain player rows, credentials, private routines or clock-dependent data.
-
-This E2E scope is the persistence package's public bootstrap/client path. It does not
-exercise a game client, gateway, TypeScript gameplay handlers, private stored programs,
-or PostgreSQL/NoSQL behavior. Those journeys remain separate work under
-[the testing architecture](../../.github/ARCHITECTURE.md#22-mandatory-testing-strategy).
-Tracked in [issue #15](https://github.com/ReeseArch64/opencok/issues/15).
-
-## Initialize a fresh local instance
-
-Set `MARIADB_URL` privately to a fresh MariaDB instance. From this package directory:
-
-```sh
-bun run db:bootstrap
-```
-
-This creates the four databases, 772 tables and a `__drizzle_migrations` journal per
-database. **All four databases must be absent** before it starts. It refuses an existing
-database, even an empty one, and performs no drops or automatic reset. Do not point it
-at a live deployment. There is no production migration/cutover in this package.
-
-To include the original initialization statements, triggers, routines and event:
-
-```sh
-export LEGACY_SQL_DIR=/path/to/authorized/legacy/deploy/database
-bun run db:bootstrap --with-local-inputs
-```
-
-All source hashes must match the reviewed inventory before any DDL runs. This optional
-step executes original private SQL locally, including seed inserts and the
-single-kingdom deletion in `99-single-kingdom.sql`. Explicit stored-program definers
-remain as supplied; objects without a definer use the importing account, as in MariaDB's
-native importer. The disposable comparison uses matching root-compatible TCP accounts.
-Establish appropriate owners/privileges separately before any real deployment. The
-bootstrap does not enable the MariaDB event scheduler. Program creation is not proof
-that the legacy event or payment routines are appropriate for a new deployment.
-
-MariaDB DDL commits implicitly. Failure can leave partial databases; bootstrap refuses
-to resume over them. For a disposable experiment, remove only its own instance/volume
-and start a new one. Existing player databases require separately designed migrations,
-backups, reconciliation and restore procedures; never reimport this baseline over them.
-
-## Drizzle and MariaDB fidelity
-
-The checked-in `migrations/<database>/0000_legacy.sql` files are custom Drizzle
-migrations containing only table DDL. They preserve integer display widths, table and
-column collations/charsets, comments, engines (including MyISAM), auto-increment starting
-values, prefix indexes, foreign-key names/actions and other source table options.
-`CREATE TABLE ... LIKE` is expanded to a complete table definition so all tables are
-visible in TypeScript. Original `ROW_FORMAT=COMPACT` becomes `DYNAMIC`, exactly as in
-the legacy deployment importer; the widest tables cannot be initialized as COMPACT.
-
-The TypeScript DSL cannot represent all those MariaDB options. Both representations
-are generated from the same DDL and checked against MariaDB; the custom migration is
-the executable reconstruction baseline. The database journal records table migrations,
-not execution of optional private initialization statements.
-
-An offline Drizzle Kit preview is available:
-
-```sh
-DRIZZLE_DATABASE=opencok_chat bun run db:preview
-```
-
-That preview is **not an equivalent replacement** for the custom MariaDB baseline.
-Do not apply it or use `drizzle-kit push` to reconcile a legacy database: options omitted
-by the DSL could change storage or comparison semantics. There are no Kit snapshots
-for an incremental schema diff yet. Before authoring future migrations, establish and
-review that snapshot strategy, keep MariaDB-specific DDL explicit, and rehearse on a
-restored copy. Do not overwrite an already-applied `0000_legacy.sql`.
-
-The parity suite proves reconstruction of these supplied SQL inputs, not coverage of
-tables created dynamically by Java outside them, current live data, gameplay, stored
-routine business logic, or another MariaDB version.
-
-References: [Drizzle mysql2 adapter](https://orm.drizzle.team/docs/get-started/mysql-new),
-[custom types](https://orm.drizzle.team/docs/custom-types),
-[discussion #8](https://github.com/ReeseArch64/opencok/discussions/8),
-[baseline issue #9](https://github.com/ReeseArch64/opencok/issues/9),
-[validation issue #10](https://github.com/ReeseArch64/opencok/issues/10).
+E2E requires Docker and `postgres:17.11-bookworm`. Tests own a uniquely named instance,
+generated credentials and an ephemeral loopback port; no deployment URLs are accepted.
+They cover every field, defaults, NULL/unique/FK/check constraints, CRUD, transaction
+rollback, migration repeatability, a second isolated realm and persistence after restart.
+Run this suite sequentially because its FK fixtures and final restart are shared.
+Missing dependencies fail the suite. CI runs the same PostgreSQL-only commands with
+Bun 1.4.2. This verifies persistence; application/gameplay flows have their own E2E.

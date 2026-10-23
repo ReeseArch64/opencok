@@ -1,4 +1,3 @@
-// Generated database exports; each table is defined in its own module.
 export { account_device_mapping } from "./cokdb_global/account_device_mapping";
 export { account_new } from "./cokdb_global/account_new";
 export { account_new_oldbigone } from "./cokdb_global/account_new_oldbigone";

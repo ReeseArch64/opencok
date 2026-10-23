@@ -1,4 +1,3 @@
-// Generated database exports; each table is defined in its own module.
 export { download } from "./cokdb_pay/download";
 export { exchange } from "./cokdb_pay/exchange";
 export { goods } from "./cokdb_pay/goods";

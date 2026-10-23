@@ -1,4 +1,4 @@
-name: PostgreSQL compatibility
+name: PostgreSQL database
 
 on:
   pull_request:
@@ -31,9 +31,9 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run --cwd packages/drizzle check-types
-      - run: bun run --cwd packages/drizzle pg:check
-      - run: bun run --cwd packages/drizzle test:pg:unit
-      - run: bun run --cwd packages/drizzle test:pg:snapshots
-      - run: docker pull mariadb:10.4.33
+      - run: DATABASE_ROLE=global bun run --cwd packages/drizzle db:check
+      - run: DATABASE_ROLE=realm bun run --cwd packages/drizzle db:check
+      - run: bun run --cwd packages/drizzle test:unit
+      - run: bun run --cwd packages/drizzle test:snapshots
       - run: docker pull postgres:17.11-bookworm
-      - run: bun run --cwd packages/drizzle test:pg:e2e
+      - run: bun run --cwd packages/drizzle test:e2e

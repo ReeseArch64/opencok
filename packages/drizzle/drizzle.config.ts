@@ -1,14 +1,12 @@
 import { defineConfig } from "drizzle-kit";
 
-const database = process.env.DRIZZLE_DATABASE;
-if (!database || !["cokdb1", "cokdb_global", "cokdb_pay", "opencok_chat"].includes(database)) {
-  throw new Error("Set DRIZZLE_DATABASE to one of the four legacy database names");
-}
+const role = process.env.DATABASE_ROLE;
+if (role !== "global" && role !== "realm") throw new Error("Set DATABASE_ROLE=global|realm");
 
-// Offline DSL preview only. It omits MariaDB-only DDL attributes; the reviewed
-// migrations are the reconstruction baseline. No push/migrate credentials here.
 export default defineConfig({
-  dialect: "mysql",
-  schema: `./src/schema/${database}.ts`,
-  out: "./.local/drizzle-preview",
+  dialect: "postgresql",
+  schema: `./src/schema/${role}.ts`,
+  out: `./migrations/${role}`,
+  ...(process.env.DATABASE_URL ? { dbCredentials: { url: process.env.DATABASE_URL } } : {}),
+  strict: true,
 });
