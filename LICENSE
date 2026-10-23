@@ -1,0 +1,64 @@
+PROPRIETARY RIGHTS NOTICE
+
+Copyright (c) 2026 OpenCoK contributors
+
+1. Scope
+
+This notice applies only to original material created by the OpenCoK
+contributors and for which those contributors own the copyright or have
+received sufficient written permission to license it (the "Original
+Contributions").
+
+No license is granted under this notice to copy, modify, distribute, host,
+perform, display, or otherwise use the Original Contributions. All rights in
+the Original Contributions are reserved by their respective copyright owners.
+
+2. Third-party material
+
+This repository may reference or contain names, trademarks, software, source
+code, binaries, artwork, audio, text, data, protocols, or other material owned
+by third parties (the "Third-Party Material"). The Third-Party Material is not
+licensed by this notice. Its inclusion in, or availability through, this
+repository does not imply authorization, endorsement, affiliation, or a grant
+of rights by its owners.
+
+You must obtain permission directly from the applicable rights holder before
+copying, modifying, distributing, hosting, or otherwise using Third-Party
+Material, except where such use is independently permitted by applicable law.
+
+3. No rights to the original game
+
+The OpenCoK contributors do not claim ownership of the original game or of
+any proprietary material derived from it. This notice does not authorize the
+distribution or operation of leaked, confidential, or otherwise unauthorized
+copies of the original game, its server, or its assets.
+
+This project is an independent reconstruction created without access to, or
+disclosure of, Elex's private source code or other confidential material. No
+copyright is claimed in Elex's original work, and this project does not grant
+or seek any rights in that work.
+
+4. Trademarks and affiliation
+
+All third-party product names, game names, logos, and trademarks belong to
+their respective owners. This project is not affiliated with, sponsored by,
+or endorsed by the original game's developer, publisher, or other rights
+holders.
+
+5. Removal requests
+
+Rights holders may request review or removal of material by opening an issue
+or contacting the repository maintainers through the contact method published
+in the repository. A removal request should identify the material and the
+basis of the claimed rights.
+
+6. No warranty
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE ORIGINAL CONTRIBUTIONS ARE
+PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. THE CONTRIBUTORS SHALL NOT BE
+LIABLE FOR ANY CLAIM, DAMAGE, OR OTHER LIABILITY ARISING FROM THEIR USE.
+
+This notice is not permission to redistribute any material. A person who
+wants to distribute this repository must first remove all unauthorized
+Third-Party Material and obtain an appropriate license for every remaining
+component.
