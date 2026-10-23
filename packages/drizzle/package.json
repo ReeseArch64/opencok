@@ -23,9 +23,9 @@
     "db:check": "bun --no-env-file scripts/kit.ts check",
     "db:studio": "bun --no-env-file scripts/kit.ts studio",
     "test": "bun run test:unit && bun run test:snapshots",
-    "test:unit": "bun --no-env-file test tests/schema.unit.test.ts tests/topology.unit.test.ts tests/environment.unit.test.ts",
+    "test:unit": "bun --no-env-file test tests/schema.unit.test.ts tests/topology.unit.test.ts tests/environment.unit.test.ts tests/utf8-bytea.unit.test.ts",
     "test:snapshots": "bun --no-env-file test tests/schema.snapshots.test.ts",
-    "test:e2e": "bun --no-env-file test tests/database.e2e.test.ts tests/namespaces.e2e.test.ts",
+    "test:e2e": "bun --no-env-file test tests/database.e2e.test.ts tests/namespaces.e2e.test.ts tests/mail-reward.e2e.test.ts",
     "db:setup": "bun --no-env-file scripts/setup.ts"
   },
   "devDependencies": {

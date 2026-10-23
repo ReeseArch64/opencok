@@ -107,7 +107,7 @@ test("default setup is repeatable, preserves records and keeps both kingdom data
     const before = (await pool.query('SELECT count(*)::integer AS n FROM drizzle.__drizzle_migrations')).rows[0].n;
     await migrateDatabase(pool, role);
     expect((await pool.query('SELECT count(*)::integer AS n FROM drizzle.__drizzle_migrations')).rows[0].n).toBe(before);
-    expect(before).toBe(2);
+    expect(before).toBe(role === "kingdom" ? 3 : 2);
     await expect(migrateDatabase(pool, role === "global" ? "kingdom" : "global")).rejects.toThrow("different role");
   }
   const first = databases.getKingdom(1), second = databases.getKingdom(2);

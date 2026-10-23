@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
-import { bigint, check, index, integer, primaryKey, text, varchar } from "drizzle-orm/pg-core";
-import { bytea } from "../../types";
+import { bigint, check, index, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { bytea, utf8Bytea } from "../../types";
 import { opencok_kingdom } from "../namespaces";
 
 export const mail = opencok_kingdom.table("mail", {
@@ -10,7 +10,7 @@ export const mail = opencok_kingdom.table("mail", {
   "fromName": varchar("fromName", { length: 100 }).default(sql.raw("''")),
   "title": varchar("title", { length: 255 }).notNull().default(sql.raw("''")),
   "contents": bytea("contents").notNull(),
-  "rewardId": text("rewardId"),
+  "rewardId": utf8Bytea("rewardId"),
   "itemIdFlag": integer("itemIdFlag").default(sql.raw("0")),
   "status": integer("status").default(sql.raw("0")),
   "type": integer("type").notNull().default(sql.raw("1")),

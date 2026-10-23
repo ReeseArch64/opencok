@@ -59,7 +59,7 @@ test("namespace migrations preserve existing PostgreSQL rows, object identity an
       expect(await target.db.select().from(ability_page)).toHaveLength(1);
       for (const pool of [target.pool, databases.global.pool]) {
         expect((await pool.query("SELECT count(*)::integer AS n FROM pg_namespace WHERE nspname IN ('cokdb1','cokdb_global','cokdb_pay')")).rows[0].n).toBe(0);
-        expect((await pool.query("SELECT count(*)::integer AS n FROM drizzle.__drizzle_migrations")).rows[0].n).toBe(2);
+        expect((await pool.query("SELECT count(*)::integer AS n FROM drizzle.__drizzle_migrations")).rows[0].n).toBe(pool === target.pool ? 3 : 2);
       }
     } finally { await admin.end(); }
   } finally {
