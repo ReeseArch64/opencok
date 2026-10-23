@@ -29,3 +29,4 @@ This index bootstraps the ADR practice without introducing an extra technology d
 - [ADR-0002: Adopt PostgreSQL for authoritative transactional state](0002-adopt-postgresql-for-authoritative-state.md) — accepted
 - [ADR-0003: Adopt Mongo Express for development inspection](0003-adopt-mongo-express-for-development.md) — accepted
 - [ADR-0004: Adopt pgAdmin 4 for development inspection](0004-adopt-pgadmin4-for-development.md) — accepted
+- [ADR-0005: Adopt Redis for cache and ephemeral coordination](0005-adopt-redis-for-cache.md) — accepted
