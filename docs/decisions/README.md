@@ -36,3 +36,4 @@ This index bootstraps the ADR practice without introducing an extra technology d
 - [ADR-0009: Adopt Bun for development tooling and execution](0009-adopt-bun-for-development.md) — accepted
 - [ADR-0010: Adopt Node.js for production service execution](0010-adopt-nodejs-for-production.md) — accepted
 - [ADR-0011: Adopt TypeScript for application and shared package code](0011-adopt-typescript-for-application-code.md) — accepted
+- [ADR-0012: Adopt Effect for API and realm service composition](0012-adopt-effect-for-service-composition.md) — proposed

@@ -10,7 +10,8 @@
     "./server": "./src/server.ts",
     "./server/schema": "./src/server.schema.ts",
     "./api": "./src/api.ts",
-    "./api/schema": "./src/api.schema.ts"
+    "./api/schema": "./src/api.schema.ts",
+    "./effect": "./src/effect.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
@@ -22,6 +23,7 @@
     "typescript": "catalog:"
   },
   "dependencies": {
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "effect": "catalog:"
   }
 }
