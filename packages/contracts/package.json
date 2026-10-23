@@ -14,6 +14,7 @@
     "./account": "./src/account.ts",
     "./game": "./src/game.ts",
     "./rows": "./src/rows.ts",
-    "./server": "./src/server.ts"
+    "./server": "./src/server.ts",
+    "./chat": "./src/chat.ts"
   }
 }

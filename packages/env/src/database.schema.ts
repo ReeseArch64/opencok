@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { blankToUndefined, validateEnvironment } from "./validation";
 
-const postgresUrl = z.url({ protocol: /^postgres(ql)?$/ }).refine((value) => {
+export const postgresUrl = z.url({ protocol: /^postgres(ql)?$/ }).refine((value) => {
   try {
     const parsed = new URL(value);
     return !!parsed.hostname && parsed.pathname.length > 1;

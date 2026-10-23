@@ -31,6 +31,26 @@
         "typescript": "catalog:",
       },
     },
+    "apps/chat": {
+      "name": "@opencok/chat",
+      "dependencies": {
+        "@opencok/connection": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/controllers": "workspace:*",
+        "@opencok/env": "workspace:*",
+        "@opencok/identity": "workspace:*",
+        "@opencok/repositories": "workspace:*",
+      },
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@types/bun": "catalog:",
+        "@types/ws": "^8.18.1",
+        "drizzle-orm": "0.45.4",
+        "typescript": "catalog:",
+        "ws": "8.22.0",
+      },
+    },
     "apps/server": {
       "name": "@opencok/server",
       "dependencies": {
@@ -175,10 +195,12 @@
         "@opencok/identity": "workspace:*",
         "@opencok/messages": "workspace:*",
         "effect": "catalog:",
+        "ws": "8.22.0",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
+        "@types/ws": "^8.18.1",
         "typescript": "catalog:",
       },
     },
@@ -768,6 +790,8 @@
     "@opencok/building": ["@opencok/building@workspace:packages/building"],
 
     "@opencok/campaigns": ["@opencok/campaigns@workspace:packages/campaigns"],
+
+    "@opencok/chat": ["@opencok/chat@workspace:apps/chat"],
 
     "@opencok/city": ["@opencok/city@workspace:packages/city"],
 

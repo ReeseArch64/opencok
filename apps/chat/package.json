@@ -1,0 +1,29 @@
+{
+  "name": "@opencok/chat",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun --no-env-file src/index.ts",
+    "dev": "bun --no-env-file --watch src/index.ts",
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests",
+    "test:integration": "bun --no-env-file test integration"
+  },
+  "dependencies": {
+    "@opencok/contracts": "workspace:*",
+    "@opencok/identity": "workspace:*",
+    "@opencok/controllers": "workspace:*",
+    "@opencok/connection": "workspace:*",
+    "@opencok/repositories": "workspace:*",
+    "@opencok/env": "workspace:*"
+  },
+  "devDependencies": {
+    "@opencok/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:",
+    "@opencok/drizzle": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "ws": "8.22.0",
+    "@types/ws": "^8.18.1"
+  }
+}
