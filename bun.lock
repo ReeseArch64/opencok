@@ -7,6 +7,7 @@
         "@commitlint/cli": "^21.2.4",
         "@commitlint/config-conventional": "^21.2.4",
         "@opencok/config": "workspace:*",
+        "@opencok/messages": "workspace:*",
         "@types/bun": "catalog:",
         "typescript": "catalog:",
         "vite-plus": "^1.3.0",
@@ -15,12 +16,15 @@
     "apps/api": {
       "name": "@opencok/api-service",
       "dependencies": {
-        "@opencok/drizzle": "workspace:*",
+        "@opencok/api": "workspace:*",
         "@opencok/env": "workspace:*",
-        "drizzle-orm": "0.45.4",
+        "@opencok/repositories": "workspace:*",
+        "@opencok/storage": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/errors": "workspace:*",
         "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
@@ -28,16 +32,23 @@
     "apps/server": {
       "name": "@opencok/server",
       "dependencies": {
-        "@opencok/drizzle": "workspace:*",
+        "@opencok/connection": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/controllers": "workspace:*",
         "@opencok/env": "workspace:*",
-        "drizzle-orm": "0.45.4",
-        "fast-xml-parser": "^5.0.0",
-        "node-zookeeper-client": "1.1.3",
+        "@opencok/repositories": "workspace:*",
+        "@opencok/resources": "workspace:*",
+        "@opencok/storage": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/dtos": "workspace:*",
+        "@opencok/identity": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/rules": "workspace:*",
         "@types/bun": "catalog:",
-        "@types/node-zookeeper-client": "0.2.13",
+        "drizzle-orm": "0.45.4",
         "typescript": "catalog:",
       },
     },
@@ -59,6 +70,11 @@
     },
     "packages/api": {
       "name": "@opencok/api",
+      "dependencies": {
+        "@opencok/contracts": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/storage": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -146,6 +162,14 @@
     },
     "packages/connection": {
       "name": "@opencok/connection",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/controllers": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/identity": "workspace:*",
+        "@opencok/messages": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -178,6 +202,14 @@
     },
     "packages/controllers": {
       "name": "@opencok/controllers",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/dtos": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/rules": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -225,6 +257,13 @@
     },
     "packages/dtos": {
       "name": "@opencok/dtos",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/rules": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -316,6 +355,11 @@
     },
     "packages/identity": {
       "name": "@opencok/identity",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/messages": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -348,6 +392,9 @@
     },
     "packages/messages": {
       "name": "@opencok/messages",
+      "dependencies": {
+        "@opencok/enums": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -436,6 +483,12 @@
     },
     "packages/repositories": {
       "name": "@opencok/repositories",
+      "dependencies": {
+        "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "drizzle-orm": "0.45.4",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -444,6 +497,10 @@
     },
     "packages/resources": {
       "name": "@opencok/resources",
+      "dependencies": {
+        "@opencok/rules": "workspace:*",
+        "fast-xml-parser": "^5.0.0",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -460,6 +517,10 @@
     },
     "packages/rules": {
       "name": "@opencok/rules",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/errors": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -492,9 +553,15 @@
     },
     "packages/storage": {
       "name": "@opencok/storage",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "node-zookeeper-client": "1.1.3",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
+        "@types/node-zookeeper-client": "0.2.13",
         "typescript": "catalog:",
       },
     },

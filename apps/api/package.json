@@ -10,13 +10,16 @@
     "test:integration": "bun --no-env-file test ../../tests/stack"
   },
   "dependencies": {
-    "@opencok/drizzle": "workspace:*",
+    "@opencok/api": "workspace:*",
     "@opencok/env": "workspace:*",
-    "drizzle-orm": "0.45.4"
+    "@opencok/repositories": "workspace:*",
+    "@opencok/storage": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@opencok/contracts": "workspace:*",
+    "@opencok/errors": "workspace:*"
   }
 }

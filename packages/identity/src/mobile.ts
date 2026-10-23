@@ -1,8 +1,11 @@
+import { MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { createHash, timingSafeEqual } from "node:crypto";
-import type { Config } from "../config.ts";
-import { long, num, text, type Row } from "./rows.ts";
-import type { AuthenticationStore } from "../persistence.ts";
-import { fields, str, type Fields } from "../protocol/sfs.ts";
+import type { ServerConfig } from "@opencok/contracts/server";
+import { long, num, text, type Row } from "@opencok/contracts/rows";
+import type { AuthenticationStore } from "@opencok/contracts/game";
+import { fields, str, type Fields } from "@opencok/messages/sfs";
+
+type MobileAuthConfig = Pick<ServerConfig, "kingdomId" | "loginSecret">;
 
 export class LoginError extends Error {
   constructor(
@@ -31,7 +34,7 @@ function equal(left: string, right: string): boolean {
 export async function authenticate(
   packet: Fields,
   db: AuthenticationStore,
-  config: Config,
+  config: MobileAuthConfig,
   now = Date.now(),
 ): Promise<Row> {
   if (str(packet, "zn") !== `COK${config.kingdomId}`) throw new LoginError("zone");
@@ -48,7 +51,7 @@ export async function authenticate(
     !deviceUuid
   )
     throw new LoginError("identity");
-  if (str(data, "appVersion") !== "12.06.0") throw new LoginError("version");
+  if (str(data, "appVersion") !== MOBILE_CLIENT_VERSION) throw new LoginError("version");
 
   if (!timestamp || timestamp.length > 64) throw new LoginError("timestamp");
   if (!/^[a-f0-9]{32}$/.test(signature)) throw new LoginError("signature_format");

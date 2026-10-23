@@ -5,7 +5,7 @@ import { chmod, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "../../apps/server/integration/client";
-import { fields, sfs, Type } from "../../apps/server/src/protocol/sfs";
+import { fields, sfs, Type } from "@opencok/messages/sfs";
 
 async function freePort() {
   const listener = createServer();

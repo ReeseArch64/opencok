@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { deflateSync } from "node:zlib";
-import { decode, encode, envelope, fields, ProtocolError, sfs, Type } from "../src/protocol/sfs.ts";
-import { frame, FrameReader, MAX_FRAME, MAX_INFLATED } from "../src/protocol/frame.ts";
+import { decode, encode, envelope, fields, ProtocolError, sfs, Type } from "@opencok/messages/sfs";
+import { frame, FrameReader, MAX_FRAME, MAX_INFLATED } from "@opencok/messages/frame";
 
 describe("SFS compatibility boundary", () => {
   test("fixed big-endian object fixture", () => {

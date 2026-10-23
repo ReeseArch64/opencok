@@ -1,10 +1,10 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 
 const app = new URL("../", import.meta.url);
 const directory = await mkdtemp(join(tmpdir(), "opencok-auth-mutations-"));
-const authFile = "src/game/auth.ts";
+const authFile = new URL("../../../packages/identity/src/mobile.ts", import.meta.url).pathname;
 const mutations = [
   ["signature", "if (!equal(signature, expected))", "if (false)"],
   ["device binding", 'if (!equal(deviceUuid, text(profile, "deviceUuid")))', "if (false)"],
@@ -14,8 +14,26 @@ const mutations = [
   ["profile ban", 'num(profile, "banFlag") !== 0', "false"],
   ["profile ban deadline", 'long(profile, "banTime") > BigInt(now)', "false"],
 ] as const;
-async function run() {
-  const child = Bun.spawn([process.execPath, "--no-env-file", "test", "test/login.test.ts"], {
+async function run(source: string) {
+  const result = await Bun.build({
+    entrypoints: [new URL("test/login.test.ts", app).pathname],
+    outdir: directory,
+    target: "bun",
+    external: ["bun:test"],
+    plugins: [
+      {
+        name: "auth-mutation",
+        setup(build) {
+          build.onLoad({ filter: /identity\/src\/mobile\.ts$/ }, () => ({
+            contents: source,
+            loader: "ts",
+          }));
+        },
+      },
+    ],
+  });
+  if (!result.success) throw new Error("Auth mutation bundle failed");
+  const child = Bun.spawn([process.execPath, "--no-env-file", "test", "login.test.js"], {
     cwd: directory,
     stdin: "ignore",
     stdout: "pipe",
@@ -29,16 +47,12 @@ async function run() {
   return code;
 }
 try {
-  for (const name of [authFile, "src/game/rows.ts", "src/protocol/sfs.ts", "test/login.test.ts"]) {
-    await mkdir(dirname(join(directory, name)), { recursive: true });
-    await writeFile(join(directory, name), await readFile(new URL(name, app)));
-  }
-  if (await run()) throw new Error("Auth mutation baseline failed");
-  const original = await readFile(join(directory, authFile), "utf8");
+  const original = await readFile(authFile, "utf8");
+  if (await run(original)) throw new Error("Auth mutation baseline failed");
   for (const [name, from, to] of mutations) {
     if (original.split(from).length !== 2) throw new Error(`Auth mutation target changed: ${name}`);
-    await writeFile(join(directory, authFile), original.replace(from, to));
-    if ((await run()) === 0) throw new Error(`Critical auth mutation survived: ${name}`);
+    if ((await run(original.replace(from, to))) === 0)
+      throw new Error(`Critical auth mutation survived: ${name}`);
     console.log(`Killed: ${name}`);
   }
   console.log(`${mutations.length} critical auth mutations killed`);

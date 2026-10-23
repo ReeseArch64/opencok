@@ -1,6 +1,6 @@
-import { sfs, type Fields } from "../protocol/sfs.ts";
-import { long, num, text, type Row } from "./rows.ts";
-import { Rules } from "./rules.ts";
+import { sfs, type Fields } from "@opencok/messages/sfs";
+import { long, num, text, type Row } from "@opencok/contracts/rows";
+import { Rules } from "@opencok/rules/game";
 import { createHash } from "node:crypto";
 
 export const FOREVER = 9223372036854775807n;

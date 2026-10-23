@@ -1,29 +1,6 @@
-import { XMLParser, XMLValidator } from "fast-xml-parser";
-import { join } from "node:path";
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 
-export class GameError extends Error {
-  constructor(
-    readonly code: string,
-    readonly reason?:
-      | "building_shape"
-      | "building_rule"
-      | "role_rule"
-      | "cost_rule"
-      | "queue_kind"
-      | "world_state",
-  ) {
-    super(code);
-  }
-}
-export const errors = {
-  invalid: "E000000",
-  unsupported: "102192",
-  missing: "E100169",
-  full: "102152",
-  occupied: "E100157",
-  resource: "102196",
-  queue: "E100159",
-};
 export type Rule = Record<string, string>;
 export class Rules {
   constructor(
@@ -37,52 +14,6 @@ export class Rules {
     readonly features: Map<string, Rule> = new Map(),
     readonly kingdomId = 1,
   ) {}
-  static async load(directory: string, kingdomId = 1) {
-    const load = async (name: string, replaceDuplicates = false): Promise<Map<string, Rule>> => {
-      const file = Bun.file(join(directory, `${name}.xml`));
-      if (file.size > 16 * 1024 * 1024) throw new Error("Oversized gameplay resource");
-      const xml = await file.text();
-      if (xml.includes("<!DOCTYPE") || XMLValidator.validate(xml) !== true)
-        throw new Error("Invalid gameplay resource XML");
-      const parsed = new XMLParser({
-        ignoreAttributes: false,
-        attributeNamePrefix: "",
-        parseAttributeValue: false,
-        removeNSPrefix: true,
-      }).parse(xml);
-      const items = parsed.database?.ItemSpec ?? parsed.database?.Group?.ItemSpec;
-      if (!Array.isArray(items)) throw new Error("Missing gameplay resource records");
-      const map = new Map<string, Rule>();
-      for (const item of items as Rule[]) {
-        if (name === "goods" && !item.id) continue;
-        if (!item.id || (!replaceDuplicates && map.has(item.id)))
-          throw new Error("Invalid gameplay resource ID");
-        map.set(item.id, item);
-      }
-      return map;
-    };
-    const [buildings, roles, positions] = await Promise.all([
-      load("building"),
-      load("role"),
-      load("position"),
-    ]);
-    const stars = (await Bun.file(join(directory, "function_star.xml")).exists())
-      ? await load("function_star")
-      : new Map<string, Rule>();
-    const items = (await Bun.file(join(directory, "item.xml")).exists())
-      ? await load("item")
-      : new Map<string, Rule>();
-    const optional = async (name: string) =>
-      (await Bun.file(join(directory, `${name}.xml`)).exists())
-        ? load(name, name === "goods" || name === "function_on")
-        : new Map<string, Rule>();
-    const [arms, goods, features] = await Promise.all([
-      optional("arms"),
-      optional("goods"),
-      optional("function_on"),
-    ]);
-    return new Rules(buildings, roles, positions, stars, items, arms, goods, features, kingdomId);
-  }
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (
       !/^\d{6}$/.test(itemId) ||

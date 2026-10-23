@@ -8,5 +8,13 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./game": "./src/game.ts"
+  },
+  "dependencies": {
+    "@opencok/constants": "workspace:*",
+    "@opencok/errors": "workspace:*"
   }
 }

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { dataConfig, serverClock } from "../src/game/bootstrap.ts";
-import { Rules, type Rule } from "../src/game/rules.ts";
-import { fields, Type } from "../src/protocol/sfs.ts";
+import { dataConfig, serverClock } from "@opencok/dtos/bootstrap";
+import { Rules, type Rule } from "@opencok/rules/game";
+import { fields, Type } from "@opencok/messages/sfs";
 
 test("core data config preserves XML strings and legacy numeric field types", () => {
   const rules = new Rules(

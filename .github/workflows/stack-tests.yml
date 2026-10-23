@@ -5,9 +5,7 @@ on:
     paths:
       - "apps/api/**"
       - "apps/server/**"
-      - "packages/drizzle/**"
-      - "packages/env/**"
-      - "packages/config/**"
+      - "packages/**"
       - "infra/**"
       - "tests/stack/**"
       - "docker-compose.yml"
@@ -21,9 +19,7 @@ on:
     paths:
       - "apps/api/**"
       - "apps/server/**"
-      - "packages/drizzle/**"
-      - "packages/env/**"
-      - "packages/config/**"
+      - "packages/**"
       - "infra/**"
       - "tests/stack/**"
       - "docker-compose.yml"

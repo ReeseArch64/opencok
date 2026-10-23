@@ -8,5 +8,16 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./account": "./src/account.ts",
+    "./game": "./src/game.ts"
+  },
+  "dependencies": {
+    "@opencok/contracts": "workspace:*",
+    "@opencok/drizzle": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "drizzle-orm": "0.45.4"
   }
 }

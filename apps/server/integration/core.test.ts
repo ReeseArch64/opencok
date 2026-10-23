@@ -17,11 +17,12 @@ import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";
 import { startServer } from "../src/server.ts";
-import { Cache, Coordination } from "../src/infra.ts";
-import { Database } from "../src/persistence.ts";
+import { Cache } from "@opencok/storage/session";
+import { Coordination } from "@opencok/storage/coordination";
+import { Database } from "@opencok/repositories/game";
 import type { Config } from "../src/config.ts";
-import { fields, sfs, str, Type } from "../src/protocol/sfs.ts";
-import { FOREVER } from "../src/game/dto.ts";
+import { fields, sfs, str, Type } from "@opencok/messages/sfs";
+import { FOREVER } from "@opencok/dtos/city";
 import { Client } from "./client.ts";
 
 async function eventually(check: () => Promise<boolean>, timeout = 15000) {

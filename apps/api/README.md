@@ -5,6 +5,14 @@ It provides the existing mobile discovery aliases while the authoritative
 TypeScript server is migrated. It does not provision players or change accounts.
 See the [architecture](../../.github/ARCHITECTURE.md#154-local-typescript-stack).
 
+## Code organization
+
+`src/index.ts` owns process startup and shutdown, and `src/config.ts` maps the
+validated environment. The composition root wires the shared packages described
+in the [architecture package map](../../.github/ARCHITECTURE.md#implemented-api-and-realm-package-boundaries).
+`src/app.ts` connects `@opencok/api/handler` to the account repository, server
+directory and Redis health adapter.
+
 ## Run
 
 The root `.env` is limited to the shared host settings and private login-secret

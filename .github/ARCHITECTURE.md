@@ -389,6 +389,40 @@ flowchart LR
   usecases --> contracts
 ```
 
+### Implemented API and realm package boundaries
+
+`apps/api/src` and `apps/server/src` contain environment mapping, dependency
+composition and process entrypoints. Packages never import applications. Their
+source exports and direct workspace dependencies are explicit in each manifest.
+
+| Package               | Implemented responsibility                                                                                              |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `api`                 | Discovery use case, PHP request/response compatibility and injected HTTP handler.                                       |
+| `connection`          | Realm listener lifecycle, readiness, socket sessions and backpressure; receives repositories and adapters from the app. |
+| `controllers`         | Read-only city/bootstrap and world command orchestration against persistence ports.                                     |
+| `identity`            | Mobile signature, device, account, ban and realm authentication.                                                        |
+| `messages`, `enums`   | SFS codec, frames and wire type tags.                                                                                   |
+| `dtos`                | City, inventory, army, feature and clock serialization for the mobile client.                                           |
+| `contracts`           | Account readers, game snapshots, row values and realm configuration types.                                              |
+| `rules`               | In-memory gameplay rule evaluation, without files, transport or ORM imports.                                            |
+| `resources`           | Validated XML loading and construction of the rule catalog.                                                             |
+| `repositories`        | Drizzle account lookup and read-only repeatable-read city/world snapshots.                                              |
+| `storage`             | Redis leases/readiness, ZooKeeper registration, dependency timeouts and validated server-directory files.               |
+| `constants`, `errors` | Named connection limits, session TTL, mobile compatibility values and error types/codes.                                |
+
+Unit and integration suites consume public package exports. `bun run test:packages`
+checks declared imports, package exports, dependency cycles and the rule/resource
+boundary; CI runs it and triggers service integration checks on package changes.
+Existing app test commands remain available. The auth mutation runner bundles each
+mutant into a temporary directory without editing workspace source files.
+
+No dependency library or technology decision changes here. The persistence and
+cache implementations retain [ADR-0002](../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md)
+and [ADR-0005](../docs/decisions/0005-adopt-redis-for-cache.md) semantics under their
+new package paths. XML and directory file adapters use Node file APIs. Bun HTTP
+serving and Redis remain isolated in runtime/adapters; the production migration in
+[ADR-0010](../docs/decisions/0010-adopt-nodejs-for-production.md) remains pending.
+
 Python, an eventual Flutter/Dart client and a future Rust/Go engine receive contracts
 generated from JSON or Protobuf schemas; they do not import TypeScript files nor share
 free access to the database. Rule resources are versioned and hashed regardless of

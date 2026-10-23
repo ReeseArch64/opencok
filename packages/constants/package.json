@@ -8,5 +8,10 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./connection": "./src/connection.ts",
+    "./game": "./src/game.ts"
   }
 }

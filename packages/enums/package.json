@@ -8,5 +8,9 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./sfs": "./src/sfs.ts"
   }
 }

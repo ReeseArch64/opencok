@@ -1,7 +1,7 @@
 import { connect, type Socket } from "node:net";
 import { createHash } from "node:crypto";
-import { FrameReader, frame } from "../src/protocol/frame.ts";
-import { envelope, extension, fields, sfs, str, type Fields } from "../src/protocol/sfs.ts";
+import { FrameReader, frame } from "@opencok/messages/frame";
+import { envelope, extension, fields, sfs, str, type Fields } from "@opencok/messages/sfs";
 
 export class Client {
   readonly socket: Socket;

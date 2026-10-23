@@ -3,29 +3,16 @@ import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new"
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
 import { userbindmapping } from "@opencok/drizzle/schema/opencok_global/userbindmapping";
 import { and, asc, eq, inArray, isNull, or, sql } from "drizzle-orm";
-import { RedisClient } from "bun";
-import type { Config } from "./config.ts";
+import { DependencyError } from "@opencok/errors/dependency";
+import type { Account, AccountReader } from "@opencok/contracts/account";
 
-export class DependencyError extends Error {
-  constructor(readonly dependency: "database" | "redis") {
-    super(`${dependency} unavailable`);
-  }
+export interface AccountStoreConfig {
+  databaseUrl: string;
+  timeoutMs: number;
 }
-export interface Account {
-  gameUid: string;
-  server: string;
-  uuid: string;
-  gameUserLevel: string;
-  active: string | null;
-  lastTime: string;
-}
-export interface AccountReader {
-  valid(type: string, value: string, bound: boolean): Promise<Account[]>;
-}
-
 export class AccountStore implements AccountReader {
   private readonly database;
-  constructor(config: Config) {
+  constructor(config: AccountStoreConfig) {
     this.database = createDatabase("global", {
       connectionString: config.databaseUrl,
       max: 5,
@@ -90,34 +77,5 @@ export class AccountStore implements AccountReader {
   }
   close() {
     return this.database.close();
-  }
-}
-
-export class DiscoveryRedis {
-  constructor(private readonly config: Config) {}
-  async health(): Promise<void> {
-    const client = new RedisClient(this.config.redisUrl, {
-      connectionTimeout: this.config.timeoutMs,
-      idleTimeout: this.config.timeoutMs,
-      autoReconnect: false,
-      enableOfflineQueue: false,
-    });
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    try {
-      await Promise.race([
-        (async () => {
-          await client.connect();
-          if ((await client.send("PING", [])) !== "PONG") throw new DependencyError("redis");
-        })(),
-        new Promise<never>((_, reject) => {
-          timer = setTimeout(() => reject(new DependencyError("redis")), this.config.timeoutMs);
-        }),
-      ]);
-    } catch {
-      throw new DependencyError("redis");
-    } finally {
-      clearTimeout(timer);
-      client.close();
-    }
   }
 }

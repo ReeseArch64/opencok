@@ -8,5 +8,17 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./server": "./src/server.ts"
+  },
+  "dependencies": {
+    "@opencok/constants": "workspace:*",
+    "@opencok/contracts": "workspace:*",
+    "@opencok/controllers": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/identity": "workspace:*",
+    "@opencok/messages": "workspace:*"
   }
 }
