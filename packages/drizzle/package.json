@@ -12,7 +12,17 @@
     "./schema/cokdb1/*": "./src/schema/cokdb1/*.ts",
     "./schema/cokdb_global/*": "./src/schema/cokdb_global/*.ts",
     "./schema/cokdb_pay/*": "./src/schema/cokdb_pay/*.ts",
-    "./schema/opencok_chat/*": "./src/schema/opencok_chat/*.ts"
+    "./schema/opencok_chat/*": "./src/schema/opencok_chat/*.ts",
+    "./postgresql": "./src/postgresql/index.ts",
+    "./postgresql/schema": "./src/postgresql/schema/index.ts",
+    "./postgresql/schema/cokdb1": "./src/postgresql/schema/cokdb1.ts",
+    "./postgresql/schema/cokdb1/*": "./src/postgresql/schema/cokdb1/*.ts",
+    "./postgresql/schema/cokdb_global": "./src/postgresql/schema/cokdb_global.ts",
+    "./postgresql/schema/cokdb_global/*": "./src/postgresql/schema/cokdb_global/*.ts",
+    "./postgresql/schema/cokdb_pay": "./src/postgresql/schema/cokdb_pay.ts",
+    "./postgresql/schema/cokdb_pay/*": "./src/postgresql/schema/cokdb_pay/*.ts",
+    "./postgresql/schema/opencok_chat": "./src/postgresql/schema/opencok_chat.ts",
+    "./postgresql/schema/opencok_chat/*": "./src/postgresql/schema/opencok_chat/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
@@ -24,16 +34,21 @@
     "test:unit": "bun test tests/legacy-sql.test.ts tests/tables.unit.test.ts",
     "test:snapshots": "bun test tests/tables.snapshots.test.ts",
     "test:e2e": "bun test tests/tables.e2e.test.ts",
-    "test:integration": "bun tests/mariadb.integration.ts"
+    "test:integration": "bun tests/mariadb.integration.ts",
+    "pg:generate": "bun scripts/postgresql/generate.ts",
+    "pg:check": "bun scripts/postgresql/generate.ts --check",
+    "pg:bootstrap": "bun scripts/postgresql/bootstrap.ts"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
+    "@types/pg": "8.23.1",
     "drizzle-kit": "0.31.11",
     "typescript": "catalog:"
   },
   "dependencies": {
     "drizzle-orm": "0.45.4",
-    "mysql2": "3.24.6"
+    "mysql2": "3.24.6",
+    "pg": "8.23.1"
   }
 }
