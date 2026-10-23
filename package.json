@@ -21,6 +21,8 @@
     "test:stack": "bun --no-env-file test tests/stack"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:",
