@@ -8,6 +8,13 @@
       "when": 1792780440167,
       "tag": "0000_initial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792781235402,
+      "tag": "0001_opencok_namespaces",
+      "breakpoints": true
     }
   ]
 }

@@ -3,25 +3,28 @@ import assert from "node:assert/strict";
 import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
-import { createDatabase, type DatabaseRole } from "../src";
+import { createDatabases, defaultDatabaseTopology } from "../src";
 import { migrateDatabase } from "../scripts/migrate";
-import { exchange } from "../src/schema/cokdb_pay";
+import { setupDatabases } from "../scripts/setup";
+import { userprofile } from "../src/schema/opencok_kingdom/userprofile";
+import { exchange } from "../src/schema/opencok_pay";
 import { chat_message } from "../src/schema/opencok_chat";
-import { logging_event, logging_event_property, user_tasks } from "../src/schema/cokdb_global";
+import { logging_event, logging_event_property, user_tasks } from "../src/schema/opencok_global";
 import { catalog, normalizeType } from "./support/schema";
 import { sampleRow, literalDefault, type Row } from "./support/rows";
 import { DisposablePostgres } from "./support/postgres";
 
 const server = new DisposablePostgres();
-const clients = new Map<DatabaseRole, { db: NodePgDatabase; pool: Pool; close: () => Promise<void> }>();
+let databases: ReturnType<typeof createDatabases>;
 const completed = new Set<string>();
-function openClients() {
-  for (const role of ["global", "realm"] as const) {
-    const client = createDatabase(role, { ...server.options, database: role });
-    clients.set(role, { ...client, db: client.db as unknown as NodePgDatabase });
-  }
+function client(kingdomId?: number): { db: NodePgDatabase; pool: Pool } {
+  const selected = kingdomId === undefined ? databases.global : databases.getKingdom(kingdomId);
+  return { db: selected.db as unknown as NodePgDatabase, pool: selected.pool };
 }
-async function closeClients() { await Promise.all([...clients.values()].map((client) => client.close())); clients.clear(); }
+function scopes(role: "global" | "kingdom"): (number | undefined)[] {
+  return role === "global" ? [undefined] : defaultDatabaseTopology.kingdoms.map((kingdom) => kingdom.id);
+}
+function caseId(id: string, kingdomId?: number) { return `${id} [${kingdomId === undefined ? "global" : `kingdom ${kingdomId}`}]`; }
 async function rejectsCode(action: PromiseLike<unknown>, expected: string) {
   try { await action; } catch (error) {
     const cause = error instanceof Error && error.cause ? error.cause : error;
@@ -34,16 +37,14 @@ const now = async (pool: Pool) => (await pool.query("SELECT to_char(statement_ti
 
 beforeAll(async () => {
   const admin = await server.start();
-  try { for (const name of ["global", "realm"]) await admin.query(`CREATE DATABASE "${name}"`); }
-  finally { await admin.end(); }
-  openClients();
-  for (const [role, client] of clients) await migrateDatabase(client.pool, role);
+  try { await setupDatabases(admin, server.options); } finally { await admin.end(); }
+  databases = createDatabases(server.options);
 }, 120_000);
-afterAll(async () => { try { await closeClients(); } finally { await server.stop(); } }, 30_000);
+afterAll(async () => { try { await databases?.close(); } finally { await server.stop(); } }, 30_000);
 
 for (const { id, namespace, table, config, spec } of catalog) {
-  test(`${id}: catalog, CRUD, defaults, constraints and rollback`, async () => {
-    const { db, pool } = clients.get(spec.role)!;
+  for (const kingdomId of scopes(spec.role)) test(`${caseId(id, kingdomId)}: catalog, CRUD, defaults, constraints and rollback`, async () => {
+    const { db, pool } = client(kingdomId);
     const columns = (await pool.query(`SELECT a.attname,format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull
       FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace
       WHERE n.nspname=$1 AND c.relname=$2 AND a.attnum>0 AND NOT a.attisdropped ORDER BY a.attnum`, [namespace, config.name])).rows;
@@ -94,31 +95,39 @@ for (const { id, namespace, table, config, spec } of catalog) {
       const [updated] = await read(); assert.ok(String((updated as Row)[column.name]) >= before && String((updated as Row)[column.name]) <= await now(pool));
       await db.update(table).set(original);
     }
-    expect(await read()).toEqual([original]); completed.add(id);
+    expect(await read()).toEqual([original]); completed.add(caseId(id, kingdomId));
   }, 15_000);
 }
 
-test("standard migrations are incremental/idempotent and enforce physical role isolation", async () => {
-  for (const [role, { pool }] of clients) {
+test("default setup is repeatable, preserves records and keeps both kingdom databases isolated", async () => {
+  const admin = await server.connect();
+  try { expect(await setupDatabases(admin, server.options)).toEqual(defaultDatabaseTopology); }
+  finally { await admin.end(); }
+  for (const [role, pool] of [["global", databases.global.pool], ["kingdom", databases.getKingdom(1).pool], ["kingdom", databases.getKingdom(2).pool]] as const) {
     const before = (await pool.query('SELECT count(*)::integer AS n FROM drizzle.__drizzle_migrations')).rows[0].n;
     await migrateDatabase(pool, role);
     expect((await pool.query('SELECT count(*)::integer AS n FROM drizzle.__drizzle_migrations')).rows[0].n).toBe(before);
-    await expect(migrateDatabase(pool, role === "global" ? "realm" : "global")).rejects.toThrow("different role");
+    expect(before).toBe(2);
+    await expect(migrateDatabase(pool, role === "global" ? "kingdom" : "global")).rejects.toThrow("different role");
   }
-  const admin = await server.connect();
-  try { await admin.query('CREATE DATABASE "realm2"'); } finally { await admin.end(); }
-  const realm2 = await server.connect("realm2");
-  try {
-    await migrateDatabase(realm2, "realm");
-    expect((await realm2.query("SELECT count(*)::integer AS n FROM information_schema.tables WHERE table_schema='cokdb1'")).rows[0].n).toBe(659);
-    expect((await realm2.query("SELECT count(*)::integer AS n FROM cokdb1.userprofile")).rows[0].n).toBe(0);
-  } finally { await realm2.end(); }
+  const first = databases.getKingdom(1), second = databases.getKingdom(2);
+  expect((await first.pool.query("SELECT current_database() AS name")).rows[0].name).toBe("opencok_kingdom_1");
+  expect((await second.pool.query("SELECT current_database() AS name")).rows[0].name).toBe("opencok_kingdom_2");
+  const original = (await first.db.select().from(userprofile))[0]!;
+  await first.db.update(userprofile).set({ name: "kingdom-one-only" });
+  expect((await first.db.select().from(userprofile))[0]!.name).toBe("kingdom-one-only");
+  expect((await second.db.select().from(userprofile))[0]!.name).toBe(original.name);
+  await first.db.update(userprofile).set({ name: original.name });
+  for (const kingdom of [first, second]) {
+    expect((await kingdom.pool.query("SELECT count(*)::integer AS n FROM information_schema.tables WHERE table_schema='opencok_kingdom'")).rows[0].n).toBe(659);
+    expect((await kingdom.pool.query("SELECT count(*)::integer AS n FROM pg_namespace WHERE nspname IN ('cokdb1','cokdb2','opencok_kingdom_1','opencok_kingdom_2')")).rows[0].n).toBe(0);
+  }
 });
 
 test("PostgreSQL numeric limits, bytes, Unicode and native uint64 sequence allocation", async () => {
-  const { db, pool } = clients.get("global")!;
+  const { db, pool } = client();
   const messageSpec = catalog.find((entry) => entry.id === "opencok_chat.chat_message")!.spec;
-  const paySpec = catalog.find((entry) => entry.id === "cokdb_pay.exchange")!.spec;
+  const paySpec = catalog.find((entry) => entry.id === "opencok_pay.exchange")!.spec;
   try {
     await db.update(chat_message).set({ sequence_id: 18446744073709551615n, body: "synthetic 🐉", idempotency_key: Buffer.from([0, 255, 128, 0]) });
     expect((await db.select().from(chat_message))[0]!.sequence_id).toBe(18446744073709551615n);
@@ -141,11 +150,11 @@ test("PostgreSQL numeric limits, bytes, Unicode and native uint64 sequence alloc
 });
 
 test("foreign key actions and ordinary PostgreSQL text comparisons", async () => {
-  const { db } = clients.get("global")!;
+  const { db } = client();
   await rejectsCode(db.delete(logging_event), "23503");
   await rejectsCode(db.update(logging_event).set({ event_id: 777n }), "23503");
-  const parent = catalog.find((entry) => entry.id === "cokdb_global.logging_event")!;
-  const child = catalog.find((entry) => entry.id === "cokdb_global.user_tasks")!;
+  const parent = catalog.find((entry) => entry.id === "opencok_global.logging_event")!;
+  const child = catalog.find((entry) => entry.id === "opencok_global.user_tasks")!;
   await db.insert(parent.table).values({ ...sampleRow(parent.spec), event_id: 777n });
   await db.insert(child.table).values({ ...sampleRow(child.spec, 2), event_id: 777n });
   await db.update(logging_event).set({ event_id: 778n }).where(eq(logging_event.event_id, 777n));
@@ -158,8 +167,10 @@ test("foreign key actions and ordinary PostgreSQL text comparisons", async () =>
   expect(await db.select().from(exchange).where(eq(exchange.name, `${row!.name} `))).toHaveLength(0);
 });
 
-test("every table and all 6,316 saved fields survive a PostgreSQL restart", async () => {
-  expect([...completed].sort()).toEqual(catalog.map((entry) => entry.id));
-  await closeClients(); await server.restart(); openClients();
-  for (const { id, table, spec } of catalog) assert.deepEqual(await clients.get(spec.role)!.db.select().from(table), [sampleRow(spec)], `${id} persistence`);
+test("the global database and both kingdoms preserve every field across restart", async () => {
+  expect([...completed].sort()).toEqual(catalog.flatMap(({ id, spec }) => scopes(spec.role).map((kingdomId) => caseId(id, kingdomId))).sort());
+  await databases.close(); await server.restart(); databases = createDatabases(server.options);
+  for (const { id, table, spec } of catalog) for (const kingdomId of scopes(spec.role)) {
+    assert.deepEqual(await client(kingdomId).db.select().from(table), [sampleRow(spec)], `${caseId(id, kingdomId)} persistence`);
+  }
 }, 120_000);

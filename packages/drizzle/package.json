@@ -6,13 +6,13 @@
     ".": "./src/index.ts",
     "./schema": "./src/schema/index.ts",
     "./schema/global": "./src/schema/global.ts",
-    "./schema/realm": "./src/schema/realm.ts",
-    "./schema/cokdb1": "./src/schema/cokdb1.ts",
-    "./schema/cokdb1/*": "./src/schema/cokdb1/*.ts",
-    "./schema/cokdb_global": "./src/schema/cokdb_global.ts",
-    "./schema/cokdb_global/*": "./src/schema/cokdb_global/*.ts",
-    "./schema/cokdb_pay": "./src/schema/cokdb_pay.ts",
-    "./schema/cokdb_pay/*": "./src/schema/cokdb_pay/*.ts",
+    "./schema/kingdom": "./src/schema/kingdom.ts",
+    "./schema/opencok_kingdom": "./src/schema/opencok_kingdom.ts",
+    "./schema/opencok_kingdom/*": "./src/schema/opencok_kingdom/*.ts",
+    "./schema/opencok_global": "./src/schema/opencok_global.ts",
+    "./schema/opencok_global/*": "./src/schema/opencok_global/*.ts",
+    "./schema/opencok_pay": "./src/schema/opencok_pay.ts",
+    "./schema/opencok_pay/*": "./src/schema/opencok_pay/*.ts",
     "./schema/opencok_chat": "./src/schema/opencok_chat.ts",
     "./schema/opencok_chat/*": "./src/schema/opencok_chat/*.ts"
   },
@@ -23,9 +23,10 @@
     "db:check": "drizzle-kit check --config drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config drizzle.config.ts",
     "test": "bun run test:unit && bun run test:snapshots",
-    "test:unit": "bun test tests/schema.unit.test.ts",
+    "test:unit": "bun test tests/schema.unit.test.ts tests/topology.unit.test.ts",
     "test:snapshots": "bun test tests/schema.snapshots.test.ts",
-    "test:e2e": "bun test tests/database.e2e.test.ts"
+    "test:e2e": "bun test tests/database.e2e.test.ts tests/namespaces.e2e.test.ts",
+    "db:setup": "bun scripts/setup.ts"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",

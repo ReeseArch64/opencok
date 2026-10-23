@@ -19,16 +19,16 @@ test("application inventory contains all 772 tables and 6,316 fields", async () 
       .toEqual(catalog.filter((entry) => entry.namespace === namespace).map((entry) => `${entry.config.name}.ts`).sort());
   }
   expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(113);
-  expect(catalog.filter((entry) => entry.spec.role === "realm")).toHaveLength(659);
+  expect(catalog.filter((entry) => entry.spec.role === "kingdom")).toHaveLength(659);
 });
 
 test("package entrypoint exposes role-specific typed PostgreSQL queries without connecting on import", async () => {
   const global = createDatabase("global", { max: 1 });
-  const realm = createDatabase("realm", { max: 1 });
+  const realm = createDatabase("kingdom", { max: 1 });
   try {
     expect(global.pool.totalCount).toBe(0); expect(realm.pool.totalCount).toBe(0);
-    expect(global.db.query.cokdb_global_usermapping.findMany().toSQL().sql).toContain('"cokdb_global"."usermapping"');
-    expect(realm.db.query.userprofile.findMany().toSQL().sql).toContain('"cokdb1"."userprofile"');
+    expect(global.db.query.opencok_global_usermapping.findMany().toSQL().sql).toContain('"opencok_global"."usermapping"');
+    expect(realm.db.query.userprofile.findMany().toSQL().sql).toContain('"opencok_kingdom"."userprofile"');
     expect(() => createDatabase("invalid" as never, {})).toThrow("Unknown database role");
   } finally { await global.close(); await realm.close(); }
 });
