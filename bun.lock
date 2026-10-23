@@ -14,11 +14,493 @@
       "name": "@opencok/account",
       "devDependencies": {
         "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/alliance": {
+      "name": "@opencok/alliance",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/api": {
+      "name": "@opencok/api",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/api-client": {
+      "name": "@opencok/api-client",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/api-contracts": {
+      "name": "@opencok/api-contracts",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/base": {
+      "name": "@opencok/base",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/billing": {
+      "name": "@opencok/billing",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/building": {
+      "name": "@opencok/building",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/campaigns": {
+      "name": "@opencok/campaigns",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/city": {
+      "name": "@opencok/city",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/combat": {
+      "name": "@opencok/combat",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/command": {
+      "name": "@opencok/command",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
       },
     },
     "packages/config": {
       "name": "@opencok/config",
       "devDependencies": {
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/connection": {
+      "name": "@opencok/connection",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/constants": {
+      "name": "@opencok/constants",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/contexts": {
+      "name": "@opencok/contexts",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/contracts": {
+      "name": "@opencok/contracts",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/controllers": {
+      "name": "@opencok/controllers",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/core": {
+      "name": "@opencok/core",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/custom": {
+      "name": "@opencok/custom",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/decorators": {
+      "name": "@opencok/decorators",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/drizzle": {
+      "name": "@opencok/drizzle",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/dtos": {
+      "name": "@opencok/dtos",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/email": {
+      "name": "@opencok/email",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/enums": {
+      "name": "@opencok/enums",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/env": {
+      "name": "@opencok/env",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/errors": {
+      "name": "@opencok/errors",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/events": {
+      "name": "@opencok/events",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/generators": {
+      "name": "@opencok/generators",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/guard": {
+      "name": "@opencok/guard",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/helpers": {
+      "name": "@opencok/helpers",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/hero": {
+      "name": "@opencok/hero",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/i18n": {
+      "name": "@opencok/i18n",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/identity": {
+      "name": "@opencok/identity",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/kvk": {
+      "name": "@opencok/kvk",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/ledger": {
+      "name": "@opencok/ledger",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/mappings": {
+      "name": "@opencok/mappings",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/messages": {
+      "name": "@opencok/messages",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/middlewares": {
+      "name": "@opencok/middlewares",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/mongoose": {
+      "name": "@opencok/mongoose",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/notifications": {
+      "name": "@opencok/notifications",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/npc": {
+      "name": "@opencok/npc",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/payments": {
+      "name": "@opencok/payments",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/player": {
+      "name": "@opencok/player",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/policy": {
+      "name": "@opencok/policy",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/prompts": {
+      "name": "@opencok/prompts",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/queues": {
+      "name": "@opencok/queues",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/ranking": {
+      "name": "@opencok/ranking",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/repositories": {
+      "name": "@opencok/repositories",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/resources": {
+      "name": "@opencok/resources",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/robot": {
+      "name": "@opencok/robot",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/rules": {
+      "name": "@opencok/rules",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/scripts": {
+      "name": "@opencok/scripts",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/share": {
+      "name": "@opencok/share",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/skins": {
+      "name": "@opencok/skins",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/storage": {
+      "name": "@opencok/storage",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/store": {
+      "name": "@opencok/store",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/tasks": {
+      "name": "@opencok/tasks",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/troops": {
+      "name": "@opencok/troops",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/utils": {
+      "name": "@opencok/utils",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/validations": {
+      "name": "@opencok/validations",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/webhooks": {
+      "name": "@opencok/webhooks",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
@@ -45,7 +527,127 @@
 
     "@opencok/account": ["@opencok/account@workspace:packages/account"],
 
+    "@opencok/alliance": ["@opencok/alliance@workspace:packages/alliance"],
+
+    "@opencok/api": ["@opencok/api@workspace:packages/api"],
+
+    "@opencok/api-client": ["@opencok/api-client@workspace:packages/api-client"],
+
+    "@opencok/api-contracts": ["@opencok/api-contracts@workspace:packages/api-contracts"],
+
+    "@opencok/base": ["@opencok/base@workspace:packages/base"],
+
+    "@opencok/billing": ["@opencok/billing@workspace:packages/billing"],
+
+    "@opencok/building": ["@opencok/building@workspace:packages/building"],
+
+    "@opencok/campaigns": ["@opencok/campaigns@workspace:packages/campaigns"],
+
+    "@opencok/city": ["@opencok/city@workspace:packages/city"],
+
+    "@opencok/combat": ["@opencok/combat@workspace:packages/combat"],
+
+    "@opencok/command": ["@opencok/command@workspace:packages/command"],
+
     "@opencok/config": ["@opencok/config@workspace:packages/config"],
+
+    "@opencok/connection": ["@opencok/connection@workspace:packages/connection"],
+
+    "@opencok/constants": ["@opencok/constants@workspace:packages/constants"],
+
+    "@opencok/contexts": ["@opencok/contexts@workspace:packages/contexts"],
+
+    "@opencok/contracts": ["@opencok/contracts@workspace:packages/contracts"],
+
+    "@opencok/controllers": ["@opencok/controllers@workspace:packages/controllers"],
+
+    "@opencok/core": ["@opencok/core@workspace:packages/core"],
+
+    "@opencok/custom": ["@opencok/custom@workspace:packages/custom"],
+
+    "@opencok/decorators": ["@opencok/decorators@workspace:packages/decorators"],
+
+    "@opencok/drizzle": ["@opencok/drizzle@workspace:packages/drizzle"],
+
+    "@opencok/dtos": ["@opencok/dtos@workspace:packages/dtos"],
+
+    "@opencok/email": ["@opencok/email@workspace:packages/email"],
+
+    "@opencok/enums": ["@opencok/enums@workspace:packages/enums"],
+
+    "@opencok/env": ["@opencok/env@workspace:packages/env"],
+
+    "@opencok/errors": ["@opencok/errors@workspace:packages/errors"],
+
+    "@opencok/events": ["@opencok/events@workspace:packages/events"],
+
+    "@opencok/generators": ["@opencok/generators@workspace:packages/generators"],
+
+    "@opencok/guard": ["@opencok/guard@workspace:packages/guard"],
+
+    "@opencok/helpers": ["@opencok/helpers@workspace:packages/helpers"],
+
+    "@opencok/hero": ["@opencok/hero@workspace:packages/hero"],
+
+    "@opencok/i18n": ["@opencok/i18n@workspace:packages/i18n"],
+
+    "@opencok/identity": ["@opencok/identity@workspace:packages/identity"],
+
+    "@opencok/kvk": ["@opencok/kvk@workspace:packages/kvk"],
+
+    "@opencok/ledger": ["@opencok/ledger@workspace:packages/ledger"],
+
+    "@opencok/mappings": ["@opencok/mappings@workspace:packages/mappings"],
+
+    "@opencok/messages": ["@opencok/messages@workspace:packages/messages"],
+
+    "@opencok/middlewares": ["@opencok/middlewares@workspace:packages/middlewares"],
+
+    "@opencok/mongoose": ["@opencok/mongoose@workspace:packages/mongoose"],
+
+    "@opencok/notifications": ["@opencok/notifications@workspace:packages/notifications"],
+
+    "@opencok/npc": ["@opencok/npc@workspace:packages/npc"],
+
+    "@opencok/payments": ["@opencok/payments@workspace:packages/payments"],
+
+    "@opencok/player": ["@opencok/player@workspace:packages/player"],
+
+    "@opencok/policy": ["@opencok/policy@workspace:packages/policy"],
+
+    "@opencok/prompts": ["@opencok/prompts@workspace:packages/prompts"],
+
+    "@opencok/queues": ["@opencok/queues@workspace:packages/queues"],
+
+    "@opencok/ranking": ["@opencok/ranking@workspace:packages/ranking"],
+
+    "@opencok/repositories": ["@opencok/repositories@workspace:packages/repositories"],
+
+    "@opencok/resources": ["@opencok/resources@workspace:packages/resources"],
+
+    "@opencok/robot": ["@opencok/robot@workspace:packages/robot"],
+
+    "@opencok/rules": ["@opencok/rules@workspace:packages/rules"],
+
+    "@opencok/scripts": ["@opencok/scripts@workspace:packages/scripts"],
+
+    "@opencok/share": ["@opencok/share@workspace:packages/share"],
+
+    "@opencok/skins": ["@opencok/skins@workspace:packages/skins"],
+
+    "@opencok/storage": ["@opencok/storage@workspace:packages/storage"],
+
+    "@opencok/store": ["@opencok/store@workspace:packages/store"],
+
+    "@opencok/tasks": ["@opencok/tasks@workspace:packages/tasks"],
+
+    "@opencok/troops": ["@opencok/troops@workspace:packages/troops"],
+
+    "@opencok/utils": ["@opencok/utils@workspace:packages/utils"],
+
+    "@opencok/validations": ["@opencok/validations@workspace:packages/validations"],
+
+    "@opencok/webhooks": ["@opencok/webhooks@workspace:packages/webhooks"],
 
     "@oxc-project/runtime": ["@oxc-project/runtime@0.155.0", "", {}, "sha512-VbW9raczGS5ZZ1FMunUBYHe4uV/R684qlQCoMdE3n5JT1PcqQsvmFpMYkF8AD+W04fBLGAq6Tr7YsTk0jjvDBA=="],
 
