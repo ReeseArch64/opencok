@@ -57,7 +57,11 @@ async function synchronizeSequences(client: PoolClient, table: TableMapping, sou
   for (const column of table.columns.filter((column) => column.autoIncrement)) {
     const maximum = (await client.query(`SELECT max(${ident(column.name)})::text AS value FROM ${qualified(table)}`)).rows[0].value;
     const next = [1n, BigInt(table.initialSequence), BigInt(sourceNext ?? "1"), maximum === null ? 1n : BigInt(maximum) + 1n].reduce((a, b) => a > b ? a : b);
-    if (column.sourceType === "bigint unsigned") await client.query("UPDATE legacy_meta.unsigned_sequences SET next_value=$1 WHERE name=$2", [next.toString(), table.id]);
+    if (column.sourceType === "bigint unsigned") {
+      await client.query("UPDATE legacy_meta.unsigned_sequences SET next_value=$1 WHERE name=$2", [next.toString(), table.id]);
+      const limit = 18446744073709551615n;
+      await client.query("SELECT setval('legacy_meta.uint64_chat',$1::bigint,$2)", [((next > limit ? limit : next) - 9223372036854775808n).toString(), next > limit]);
+    }
     else {
       const limit = column.sourceType === "bigint" ? 9223372036854775807n : column.sourceType === "int unsigned" ? 4294967295n : 2147483647n;
       const sequence = (await client.query("SELECT pg_get_serial_sequence($1,$2) AS name", [qualified(table), column.name])).rows[0].name;

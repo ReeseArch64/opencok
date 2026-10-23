@@ -5,6 +5,7 @@ import type { ColumnMapping, DatabaseRole, TableMapping } from "../../src/postgr
 import { buildManifest, collationSql, ident, literal } from "./model";
 import { foundationSql } from "./foundation";
 import { transferMigrationSql } from "./transfer-migration";
+import { unsignedSequenceMigrationSql } from "./unsigned-sequence-migration";
 
 const js = JSON.stringify;
 const exportName = (name: string) => name === "package" ? "packageTable" : name;
@@ -129,9 +130,11 @@ export async function generatePostgres(check = false) {
     ];
     files.set(`postgresql/migrations/${role}/0000_compatibility.sql`, ddl.join("\n--> statement-breakpoint\n") + "\n");
     files.set(`postgresql/migrations/${role}/0001_transfer.sql`, transferMigrationSql + "\n");
+    files.set(`postgresql/migrations/${role}/0002_unsigned_sequence.sql`, unsignedSequenceMigrationSql + "\n");
     files.set(`postgresql/migrations/${role}/meta/_journal.json`, js({ version: "7", dialect: "postgresql", entries: [
       { idx: 0, version: "7", when: 1792771200000, tag: "0000_compatibility", breakpoints: true },
       { idx: 1, version: "7", when: 1792771200001, tag: "0001_transfer", breakpoints: true },
+      { idx: 2, version: "7", when: 1792771200002, tag: "0002_unsigned_sequence", breakpoints: true },
     ] }, null, 2) + "\n");
   }
   // No private inputs, live databases or Drizzle runtime definitions are needed.

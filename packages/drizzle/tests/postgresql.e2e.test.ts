@@ -158,6 +158,21 @@ test("PostgreSQL exact numeric limits, binary and Unicode round trips", async ()
     await chat.update(exchange).set({ paidGold: -9223372036854775808n });
     expect((await chat.select().from(exchange))[0]!.paidGold).toBe(-9223372036854775808n);
     await expect((async () => { await chat.update(chat_message).set({ sequence_id: 18446744073709551616n }); })()).rejects.toThrow("Unsigned bigint outside source range");
+    const pool = clients.get("global")!.pool;
+    const connection = await pool.connect();
+    try {
+      await connection.query("BEGIN");
+      const allocated = BigInt((await connection.query("SELECT legacy_meta.next_unsigned('opencok_chat.chat_message')::text AS id")).rows[0].id);
+      await connection.query("ROLLBACK");
+      const next = BigInt((await connection.query("SELECT legacy_meta.next_unsigned('opencok_chat.chat_message')::text AS id")).rows[0].id);
+      expect(next).toBeGreaterThan(allocated);
+      const state = (await connection.query("SELECT last_value::text,is_called FROM legacy_meta.uint64_chat")).rows[0];
+      try {
+        await connection.query("SELECT setval('legacy_meta.uint64_chat',9223372036854775807,false)");
+        expect((await connection.query("SELECT legacy_meta.next_unsigned('opencok_chat.chat_message')::text AS id")).rows[0].id).toBe("18446744073709551615");
+        await rejectsCode(connection.query("SELECT legacy_meta.next_unsigned('opencok_chat.chat_message')"), "2200H");
+      } finally { await connection.query("SELECT setval('legacy_meta.uint64_chat',$1::bigint,$2)", [state.last_value, state.is_called]); }
+    } finally { connection.release(); }
   } finally { await chat.update(chat_message).set(original); await chat.update(exchange).set(pay); }
 });
 

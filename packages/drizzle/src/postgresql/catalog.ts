@@ -10,7 +10,7 @@ export async function catalogHash(client: PoolClient) {
   const predicate = "n.nspname NOT IN ('pg_catalog','information_schema','drizzle','legacy_meta') AND n.nspname NOT LIKE 'pg_toast%'";
   const queries = [
     `SELECT n.nspname,c.relname,c.relkind FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE ${predicate} AND c.relkind IN ('r','p','v','m','S') ORDER BY 1,2`,
-    `SELECT n.nspname,c.relname,s.seqstart::text,s.seqincrement::text,s.seqmax::text,s.seqmin::text,s.seqcache::text,s.seqcycle FROM pg_sequence s JOIN pg_class c ON c.oid=s.seqrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE ${predicate} ORDER BY 1,2`,
+    `SELECT n.nspname,c.relname,s.seqstart::text,s.seqincrement::text,s.seqmax::text,s.seqmin::text,s.seqcache::text,s.seqcycle FROM pg_sequence s JOIN pg_class c ON c.oid=s.seqrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE (${predicate}) OR n.nspname='legacy_meta' ORDER BY 1,2`,
     `SELECT n.nspname,c.relname,a.attname,format_type(a.atttypid,a.atttypmod) AS type,a.attnotnull,a.attidentity,pg_get_expr(d.adbin,d.adrelid) AS default_sql,co.collname,col_description(c.oid,a.attnum) AS comment
       FROM pg_attribute a JOIN pg_class c ON c.oid=a.attrelid JOIN pg_namespace n ON n.oid=c.relnamespace LEFT JOIN pg_attrdef d ON d.adrelid=a.attrelid AND d.adnum=a.attnum LEFT JOIN pg_collation co ON co.oid=a.attcollation
       WHERE ${predicate} AND c.relkind IN ('r','p') AND a.attnum>0 AND NOT a.attisdropped ORDER BY n.nspname,c.relname,a.attnum`,
