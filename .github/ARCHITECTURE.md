@@ -5,6 +5,10 @@ the intended project architecture, not infrastructure already deployed. This che
 contains the initial structure of the monorepo; directories and packages do not prove
 implementation.
 
+Accepted technology decisions and their implementation status are indexed in
+[the Architecture Decision Records](../docs/decisions/README.md). Read the relevant
+record before changing its governed components.
+
 The goal is a Modular monorepo with an authoritative server, independent WebSocket chat,
 file and supporting services, an administrative dashboard, a landing page, an
 experimental web client, and Python bots. TypeScript/Bun is the proposed foundation for

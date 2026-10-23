@@ -19,6 +19,10 @@
 - Every pull request must be linked to a GitHub issue that describes the work
   and its acceptance criteria.
 
+Consult the [Architecture Decision Records](../docs/decisions/README.md) before
+changing an accepted technology boundary. ADR status, implementation TODOs and
+verification evidence are tracked separately.
+
 ## Code quality
 
 Install the workspace dependencies with `bun install --frozen-lockfile`. Use the
