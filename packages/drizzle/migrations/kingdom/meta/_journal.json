@@ -15,6 +15,13 @@
       "when": 1792781238803,
       "tag": "0001_opencok_namespaces",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792788619137,
+      "tag": "0002_preserve_mail_reward_utf8",
+      "breakpoints": true
     }
   ]
 }
