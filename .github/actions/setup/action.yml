@@ -4,9 +4,6 @@ description: Install Node 22, Bun, restore install cache, and install dependenci
 runs:
   using: composite
   steps:
-    # Node 22 is required by Vite to load TypeScript config files
-    # (`vite.config.ts`). Bun is the primary runtime, but the lint
-    # pipeline shells into vite-plus which depends on Node's loader.
     - uses: actions/setup-node@v6
       with:
         node-version: '22'
@@ -15,8 +12,6 @@ runs:
       with:
         bun-version-file: package.json
 
-    # Cache Bun's global install cache. Invalidated when bun.lock changes;
-    # restore-keys cover branch/main fallbacks.
     - name: Restore Bun install cache
       uses: actions/cache@v5
       with:
@@ -25,9 +20,6 @@ runs:
         restore-keys: |
           bun-install-${{ runner.os }}-
 
-    # --ignore-scripts: the simple-git-hooks postinstall script assumes
-    # the classic npm node_modules layout and fails on Bun's isolated
-    # layout (.bun/<pkg>@<ver>/...). CI does not need git hooks.
     - name: Install dependencies
       shell: bash
       run: bun install --frozen-lockfile --ignore-scripts

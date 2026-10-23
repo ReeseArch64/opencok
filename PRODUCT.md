@@ -135,7 +135,7 @@ option, without making it a prerequisite for current gameplay or committing to
 a replacement date. The existing APK and a future client must share the same
 authoritative backend and persistent player identity. The experimental SSR web
 client remains a separate evaluation. Technical boundaries, delivery, and
-validation belong in [the architecture](.github/ARCHITECTURE.md#27-cliente-de-transição-atualização-r2-e-possível-reescrita-flutter).
+validation belong in [the architecture](.github/ARCHITECTURE.md#27-transition-client-r2-update-and-possible-flutter-rewrite).
 
 ## Current product priorities
 

@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "@types/bun": "^1.4.3",
+      "typescript": "^7.0.2"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "check-types": "vp check-types"
+  },
+  "devDependencies": {
+    "@opencok/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "^1.3.0"
+  },
+  "packageManager": "bun@1.4.2"
+}
