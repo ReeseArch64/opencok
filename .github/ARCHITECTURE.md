@@ -1125,6 +1125,29 @@ variants; the Drizzle package links that configuration for package-local invocat
 and pins Drizzle Kit's own dotenv loader to the same root file. See the
 [environment guide](../packages/env/README.md) for commands and deployment assumptions.
 
+### 15.3. First PostgreSQL server migration slice
+
+`apps/server` now contains the first port of the working Bun `apps/new-server`
+experiment: SFS/TCP transport for mobile 12.06.0, existing-account authentication,
+city bootstrap, deferred login data and base-world viewport reads. Transport,
+compatibility DTOs and the persistence adapter remain colocated for this initial
+slice; shared package extraction can follow once contracts stabilize.
+
+The adapter implements explicit read interfaces using existing `@opencok/drizzle`
+tables, with separate global/selected-kingdom connections. Snapshot transactions
+are read-only, repeatable read and UTC. Redis session keys and ZooKeeper ephemeral
+registrations include the kingdom ID; map rows come from the selected PostgreSQL
+database rather than the experiment's shared `world1` hash. Runtime setup does not
+apply migrations or provision player state.
+
+Construction, queue settlement and combat remain unavailable. Porting them next
+requires PostgreSQL receipts/activity models, atomic resource changes, epoch
+fencing and recovery tests before enabling writes. Account/discovery migration,
+MySQL-to-PostgreSQL player transfer and native APK validation remain separate work.
+Synthetic TCP tests validate the two PostgreSQL realms, dependencies and unchanged
+player state; they do not prove APK rendering. See the [server guide](../apps/server/README.md)
+for configuration, supported commands, limitations and verification.
+
 ## 16. Simulation execution and offline progress
 
 The Server executes a logical queue of commands per aggregate/partition, with

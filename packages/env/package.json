@@ -6,7 +6,9 @@
     ".": "./src/index.ts",
     "./schema": "./src/schema.ts",
     "./database": "./src/database.ts",
-    "./database/schema": "./src/database.schema.ts"
+    "./database/schema": "./src/database.schema.ts",
+    "./server": "./src/server.ts",
+    "./server/schema": "./src/server.schema.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
