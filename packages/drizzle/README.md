@@ -4,43 +4,79 @@
 versioned Drizzle migrations. The maintained source of truth is `src/schema`,
 with **772 tables / 6,316 fields** and one module per table.
 
-| Database role | SQL schemas | Tables |
-| --- | --- | ---: |
-| Global | `cokdb_global`, `cokdb_pay`, `opencok_chat` | 113 |
-| One physical database per realm | `cokdb1` | 659 |
+| Default physical database | SQL namespaces | Migration role | Tables |
+| --- | --- | --- | ---: |
+| `opencok_global` | `opencok_global`, `opencok_pay`, `opencok_chat` | `global` | 113 |
+| `opencok_kingdom_1` | `opencok_kingdom` | `kingdom` | 659 |
+| `opencok_kingdom_2` | `opencok_kingdom` | `kingdom` | 659 |
 
-Physical database names and credentials are deployment configuration. The two
-roles have separate migration histories; apply realm migrations to each realm's
-database. SQL table/field names are preserved. A transaction belongs to one database.
-The architecture defines [persistence ownership](../../.github/ARCHITECTURE.md#151-postgresql-database-package).
+Kingdom IDs **1 and 2** are configured by default. There is one maintained kingdom
+schema, one set of table modules and one kingdom migration history. Both physical
+databases use those same definitions. Additional kingdoms use configuration, not
+copied schemas or folders. Table/field names and data contracts are preserved.
+A transaction belongs to one physical database. The architecture defines
+[persistence ownership](../../.github/ARCHITECTURE.md#151-postgresql-database-package).
+
+## Initialize the default topology
+
+From this package, set `POSTGRES_ADMIN_URL` privately to a PostgreSQL administrative
+connection (for example, to the maintenance database), then run:
+
+```sh
+bun run db:setup
+```
+
+Setup creates missing global/kingdom databases and applies their pending migrations.
+The setup account needs database-creation and migration privileges. The command can
+run again: existing databases and saved rows are retained, with no reseeding or reset.
+A failure can leave earlier databases initialized; rerun after correcting the failure.
+No database is dropped. Use application credentials with the necessary runtime grants
+for server connections, rather than keeping the setup account in the server.
 
 ## Use from the server
 
 Declare `"@opencok/drizzle": "workspace:*"` in the consuming package.
 
 ```ts
-import { createDatabase } from "@opencok/drizzle";
-import { userprofile } from "@opencok/drizzle/schema/cokdb1/userprofile";
+import { createDatabases } from "@opencok/drizzle";
+import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 
-const realm = createDatabase("realm", {
-  connectionString: process.env.REALM_DATABASE_URL,
+// The base URL selects the PostgreSQL cluster; routing selects each configured DB.
+const databases = createDatabases({
+  connectionString: process.env.DATABASE_URL,
   max: 10,
 });
 
-const profiles = await realm.db.select().from(userprofile).limit(10);
-const profile = await realm.db.query.userprofile.findFirst();
+const kingdom1 = databases.getKingdom(1);
+const kingdom2 = databases.getKingdom(2);
+const profiles = await kingdom1.db.select().from(userprofile).limit(10);
+const otherProfiles = await kingdom2.db.query.userprofile.findMany({ limit: 10 });
 
 // At service shutdown:
-await realm.close();
+await databases.close();
 ```
 
-Create and reuse pools at service startup. Configure TLS using pg's `ssl` option
-when required. Each client uses UTC and exposes `db`, `pool`, `role` and `close()`;
-importing the package creates no connections. Global relational-query names include
-the SQL namespace, for example `global.db.query.cokdb_global_usermapping`, so equal
-table names in different global schemas do not collide. Realm query names match
-its table exports. Role-wide schemas are available from `schema/global` and
-`schema/realm`; individual namespaces and tables are available under `schema/*`.
+The global client is `databases.global`; `databases.kingdoms` is a read-only map.
+Unknown kingdom IDs fail explicitly. Pool creation is lazy and the same model objects
+are used for both kingdoms. URL routing preserves credentials/TLS options and changes
+only the physical database name. Duplicate IDs, shared database names, empty kingdom
+lists and invalid database names are rejected before opening connections.
+
+The exported `defaultDatabaseTopology` contains the default names/IDs. Pass a
+`DatabaseTopology` as the second argument to `createDatabases` to select other names
+or kingdoms; the setup API `setupDatabases` accepts the same topology. Names use
+lowercase letters, digits and underscores, up to 63 bytes, excluding maintenance and
+system databases. Existing physical database names can be configured without moving
+their records to new databases.
+
+For a service scoped to a single kingdom or the global database, use the lower-level
+`createDatabase("kingdom" | "global", poolConfig)` with that database's explicit URL
+and credentials. Reuse pools across requests and close them at service shutdown.
+Each client exposes `db`, `pool`, `role` and `close()`; imports create no connections.
+Connections use UTC and accept pg TLS options. Global relational-query names include
+the SQL namespace, for example `databases.global.db.query.opencok_global_usermapping`.
+Role-wide schemas are exported through `schema/global` and `schema/kingdom`; the four
+SQL namespaces and individual table modules are available under `schema/opencok_*`.
 
 ## Schema changes and migrations
 
@@ -48,22 +84,28 @@ Run `bun install --frozen-lockfile` at the repository root, then from this packa
 
 ```sh
 DATABASE_ROLE=global bun run db:generate --name add_account_preferences
-DATABASE_ROLE=realm bun run db:generate --name add_realm_state
+DATABASE_ROLE=kingdom bun run db:generate --name add_kingdom_state
 DATABASE_ROLE=global bun run db:check
-DATABASE_ROLE=realm bun run db:check
+DATABASE_ROLE=kingdom bun run db:check
 
-# Set DATABASE_URL privately to the selected PostgreSQL database.
+# Set DATABASE_URL privately to the selected physical database.
 DATABASE_ROLE=global bun run db:migrate
-DATABASE_ROLE=realm bun run db:migrate
+DATABASE_ROLE=kingdom bun run db:migrate
 ```
 
-Edit the relevant table modules first. Review the generated SQL and commit the
-migration plus its Drizzle snapshot/journal. `db:migrate` applies pending migrations
-incrementally and can run again without duplicating them. It serializes migration
-processes with an advisory lock and rejects a database containing the other role's
-application schemas. New databases start from the checked-in `0000_initial.sql`.
-Never edit a migration already applied to a deployment; add the next migration.
-`DATABASE_ROLE=global|realm bun run db:studio` opens the configured database in Studio.
+Edit the relevant table modules first. Review generated SQL and commit the migration
+plus its Drizzle snapshot/journal. Apply the same kingdom migrations to **both**
+kingdom databases; the shared global database has its own history. `db:setup` applies
+pending migrations to all default databases in one command. Migrations serialize
+per database with an advisory lock and reject the other role's application schemas.
+`DATABASE_ROLE=global|kingdom bun run db:studio` opens the selected database in Studio.
+
+The original `0000_initial.sql` migrations remain immutable. The next migration
+renames PostgreSQL namespaces with `ALTER SCHEMA`, preserving tables, rows, keys,
+indexes, native identities and sequence state. Old namespace names occur only in
+that migration history and its upgrade guard/test. Existing deployments apply the
+new migration to their existing physical databases; no database-name change or
+copy is required. Never edit a migration already applied to a deployment.
 
 ## Data contracts
 
@@ -100,7 +142,7 @@ snapshots. Update snapshots with `bun test tests/schema.snapshots.test.ts --upda
 E2E requires Docker and `postgres:17.11-bookworm`. Tests own a uniquely named instance,
 generated credentials and an ephemeral loopback port; no deployment URLs are accepted.
 They cover every field, defaults, NULL/unique/FK/check constraints, CRUD, transaction
-rollback, migration repeatability, a second isolated realm and persistence after restart.
+rollback, migration repeatability, both default kingdoms, preserved namespace upgrades and persistence after restart.
 Run this suite sequentially because its FK fixtures and final restart are shared.
 Missing dependencies fail the suite. CI runs the same PostgreSQL-only commands with
 Bun 1.4.2. This verifies persistence; application/gameplay flows have their own E2E.

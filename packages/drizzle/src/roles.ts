@@ -1,6 +1,6 @@
 export const databaseSchemas = {
-  global: ["cokdb_global", "cokdb_pay", "opencok_chat"],
-  realm: ["cokdb1"],
+  global: ["opencok_global", "opencok_pay", "opencok_chat"],
+  kingdom: ["opencok_kingdom"],
 } as const;
 
 export type DatabaseRole = keyof typeof databaseSchemas;

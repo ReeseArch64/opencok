@@ -47,8 +47,9 @@ instance. The initial limit is **two realms**.
 
 A single Kubernetes node does not provide high availability for the VPS. Failure of this
 machine affects API and realms hosted on it; remote data does not make processes
-available. Start with one realm and admit the second only after measuring memory, CPU,
-provider latency and combat spikes.
+available. The default topology configures two kingdoms from the same persistence
+model. Validate memory, CPU, provider latency and combat spikes for both kingdoms
+before production admission.
 
 ```mermaid
 flowchart TB
@@ -72,7 +73,7 @@ flowchart TB
     api[Single shared API]
     router[WS Adapter and Realm Routing]
     game1[Realm 1 Server]
-    game2[Realm 2 Server - capacity dependent]
+    game2[Realm 2 Server - default topology]
     combat[Combat TypeScript - calculation pool]
     files[Files]
     workers[Outbox workers and relay]
@@ -1054,7 +1055,7 @@ with tested procedures.
 Decisions still open: numerical validation and Combat TypeScript benchmark; SSR
 framework/adapter at Vercel; Neon, Redis.io, MongoDB Cluster, and CloudAMQP plans and
 regions; Chat/bot hosting; storage of other objects; observability backend; validation
-of the 16 GB VPS and admission to the second realm; eventual migration from Combat
+of the 16 GB VPS and admission capacity for both default kingdoms; eventual migration from Combat
 TypeScript to Rust/Go; complementary use of BullMQ and version/fork of Konga;
 feasibility of the Lua/native bridge, APK signing identity and scope/rendering of the
 eventual Flutter client. The Auth, payment, R2 releases, and core hosting providers
@@ -1071,20 +1072,26 @@ migration execution or deployment.
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
 Drizzle schemas in `src/schema` are the source of truth: 772 tables and 6,316 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
-`schema/global` / `schema/realm` provide the corresponding role-specific models.
+`schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
-One physical global database contains `cokdb_global`, `cokdb_pay` and `opencok_chat`
-(113 tables); each realm has its own physical database containing `cokdb1` (659 tables).
-The namespace/table/field names remain stable. Database names and credentials are
-configuration. Pools and local transactions belong to one physical database; there
+The default physical databases are `opencok_global`, `opencok_kingdom_1` and
+`opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
+`opencok_global`, `opencok_pay` and `opencok_chat` (113 tables). Both kingdom databases
+contain the same `opencok_kingdom` namespace (659 tables each). One set of kingdom
+table modules and migrations serves every configured kingdom; there are no per-ID
+schema copies. Table/field names and values remain stable. Database names and
+credentials are configuration. Pools and local transactions belong to one physical database; there
 is no cross-database atomic commit. The future chat service/storage transition is a
 separate domain change.
 
 Standard Drizzle Kit generation maintains independent PostgreSQL migrations and
 snapshots per role. The migration command applies only pending SQL using Drizzle's
 journal and serializes deployments with a PostgreSQL advisory lock. It refuses a
-database containing the other role's application schemas. New realms apply the same
-realm migrations to separate databases. No schema generation reads another engine's
+database containing the other role's application schemas. New kingdoms apply the same
+kingdom migrations to separate databases. Default setup creates missing configured
+databases and applies pending migrations. Typed connection routing selects a kingdom
+by validated ID. Namespace-renaming migrations preserve existing PostgreSQL records;
+physical database names can be overridden for existing deployments. No schema generation reads another engine's
 SQL, and no transfer/checkpoint/comparison infrastructure is part of the runtime.
 
 Schemas use PostgreSQL builders, declared keys/checks, native identities/sequences,
@@ -1583,7 +1590,7 @@ domain; do not infer regional recovery from the failover of a Neon read replica 
 on the same host. Key rotation, restoration and revocation of access are part of the
 versioned operational procedures.
 
-### 24.1. Initial VPS budget and admission of the second realm
+### 24.1. Initial VPS budget for the two default kingdoms
 
 16GB is a deployment hypothesis, not a proven capacity. Check actual memory in GiB, node
 `allocatable`, number/type of vCPUs, and sustained CPU performance. The budget below is
@@ -1600,7 +1607,7 @@ not a ready-made configuration of requests/limits.
 | Workers and relay | 0.5 |
 | Shared Combat TypeScript pool | 1.5 |
 | Realm Server 1 | 1.5 |
-| Realm Server 2, Conditional | 1.5 |
+| Realm Server 2, default topology | 1.5 |
 | **Planning subtotal** | **10.0** |
 
 The remaining usable memory is reserved for spikes, system cache, network, and operating
@@ -1621,8 +1628,8 @@ optimization.
 Validate normal load, dozens of continuous combats, throne and KVK, including
 simultaneous peaks of both realms, workers, files and reconnections. Record
 command/calculation p99, CPU, maximum memory, runtime pauses, queue delay, RTT and
-provider quotas. Accept the second realm only with measurable margin and section 24
-goals met, without harming API and node control. If it fails, increase CPU/RAM or move a
+provider quotas. Validate both default kingdoms with measurable margin and section 24
+goals met, without harming API and node control. If capacity is insufficient, increase CPU/RAM or move a
 Server to another VPS; the API remains shared. More RAM does not alone solve CPU
 bottleneck or remote latency.
 

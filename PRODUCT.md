@@ -12,6 +12,10 @@ on infrastructure controlled by its operator. It should replace undocumented,
 fragile setup procedures with explicit configuration, persistent storage,
 observable services, and version-aware compatibility work.
 
+The default installation configures two kingdoms with isolated persistent state and
+a shared global service. Both kingdoms use the same maintained server/database model;
+adding a kingdom changes configuration rather than duplicating its implementation.
+
 ## The problem
 
 The available game components were designed around an external production

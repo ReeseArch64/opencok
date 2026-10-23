@@ -1,7 +1,7 @@
 import { defineConfig } from "drizzle-kit";
 
 const role = process.env.DATABASE_ROLE;
-if (role !== "global" && role !== "realm") throw new Error("Set DATABASE_ROLE=global|realm");
+if (role !== "global" && role !== "kingdom") throw new Error("Set DATABASE_ROLE=global|kingdom");
 
 export default defineConfig({
   dialect: "postgresql",
