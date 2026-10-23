@@ -1066,6 +1066,35 @@ read-only; builds use separate area. Private materials, player data and credenti
 not go into the code or diagrams. No step in this document authorizes progress reset,
 migration execution or deployment.
 
+### 15.1. Legacy MariaDB baseline
+
+Before designing the PostgreSQL data migration, `packages/drizzle` reconstructs the
+supplied Java deployment SQL using Drizzle's MySQL dialect, mysql2 and MariaDB 10.4.33.
+This compatibility baseline keeps the original four database boundaries and 772 tables:
+659 in `cokdb1`, 90 in `cokdb_global`, 21 in `cokdb_pay` and two in `opencok_chat`.
+It does not implement the target Neon model or authorize a production cutover.
+
+Typed schemas and schema-only custom Drizzle migrations are generated together. The
+SQL baseline preserves MariaDB attributes outside the DSL, including collations,
+storage engines and index prefixes. Like the existing deployment importer, COMPACT
+rows become DYNAMIC. Integers of 64 bits use `bigint`, decimals use strings, temporal
+values remain strings and binary values remain bytes. Keep these semantics explicit
+when defining future application and transport contracts.
+
+All seven original SQL inputs remain local and read-only. An inventory records their
+hashes and non-table objects; optional fresh initialization loads the original private
+seeds, four triggers, four routines and one event locally. Bodies, data and credentials
+are not repository fixtures. Fresh initialization refuses pre-existing databases and
+does not enable the event scheduler. DDL failure can leave partial state because MariaDB
+DDL is not transactional.
+
+An independent disposable MariaDB comparison uses the native client for the source and
+Drizzle migrations for reconstruction. This establishes a reproducible reference for
+future mapping and reconciliation, not gameplay equivalence or coverage of live/dynamic
+tables absent from the supplied files. ORM domains still sit behind repository adapters;
+this baseline does not give domain packages direct persistence responsibilities.
+Commands, validation and limitations are in the [package guide](../packages/drizzle/README.md).
+
 ## 16. Simulation execution and offline progress
 
 The Server executes a logical queue of commands per aggregate/partition, with
