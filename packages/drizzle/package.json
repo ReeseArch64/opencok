@@ -2,11 +2,29 @@
   "name": "@opencok/drizzle",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "db:generate": "bun scripts/generate.ts",
+    "db:check": "bun scripts/generate.ts --check",
+    "db:bootstrap": "bun scripts/bootstrap.ts",
+    "db:preview": "drizzle-kit export --config drizzle.config.ts"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
+    "drizzle-kit": "0.31.11",
     "typescript": "catalog:"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4",
+    "mysql2": "3.24.6"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts",
+    "./schema/cokdb1": "./src/schema/cokdb1.ts",
+    "./schema/cokdb_global": "./src/schema/cokdb_global.ts",
+    "./schema/cokdb_pay": "./src/schema/cokdb_pay.ts",
+    "./schema/opencok_chat": "./src/schema/opencok_chat.ts"
   }
 }
