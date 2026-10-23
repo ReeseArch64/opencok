@@ -96,6 +96,61 @@ hash and never printed. Synthetic checks exercise bigint, decimal, bytes, dates,
 constraints, rollback and persistence across a database restart. Only containers made
 by the run are removed. It does not use `MARIADB_URL` or an existing database.
 
+## Tests for every table
+
+From this package directory, with Bun 1.4.2:
+
+```sh
+bun run test              # offline: parser, 772 table contracts, 772 table snapshots
+bun run test:unit         # parser + per-table unit tests
+bun run test:snapshots    # per-table schema and compiled CRUD SQL snapshots
+bun run test:e2e          # Docker: empty server -> bootstrap -> CRUD -> restart -> read
+bun run check-types
+```
+
+Every table gets a named unit, snapshot and persistence E2E case. The catalog gate
+checks the 772 source modules, exports and native table names, and all 6,316 fields;
+missing or extra tables fail. This measures **table coverage**, not 100% code-path or
+gameplay coverage. There are no table skips, including the 34 tables without a primary
+key and five MyISAM tables.
+
+The offline oracle, `tests/fixtures/mariadb-contract.json`, was captured from MariaDB
+10.4.33 `information_schema` after applying only the public baseline migrations. It
+does not use the TypeScript schema or generator to infer expected fields. It records
+all columns, defaults, indexes (including prefixes), foreign keys, engines, row formats,
+charsets, collations and column comments, plus migration hashes. Unit tests compare the
+Drizzle-representable attributes and driver mappings; E2E compares the full oracle
+against a freshly bootstrapped server. The private-input parity suite remains a
+separate check against the original dumps.
+
+E2E inserts and updates every field, reads exact values back, deletes rows, verifies
+omitted defaults and nullable fields, and rejects invalid required fields, duplicate
+keys and missing FK parents. It verifies rollback on InnoDB and the absence of rollback
+on MyISAM. Fixed session clocks test automatic timestamp updates and MariaDB 10.4's
+[NULL-to-current-timestamp behavior](https://mariadb.com/docs/server/reference/data-types/date-and-time-data-types/timestamp).
+Finally, it closes pools, restarts MariaDB, reconnects and verifies every field in all
+772 retained synthetic rows. Tests run sequentially because FK children share a parent
+and the final restart checks all earlier cases; do not use `--concurrent` or randomize
+this E2E file.
+
+Each E2E run owns one disposable `mariadb:10.4.33` container, random credentials and an
+ephemeral loopback port. It accepts neither `MARIADB_URL` nor private SQL inputs and
+removes only its own container/volumes. Docker must be available; missing Docker or
+failed bootstrap fails the suite rather than skipping it. `.github/workflows/drizzle-tests.yml`
+runs type checks, offline tests and E2E without private artifacts.
+
+For an intentional baseline change, capture a new native oracle with
+`bun tests/capture-contract.ts`, review its diff against the migration, and then run
+`bun test tests/tables.snapshots.test.ts --update-snapshots`. Never refresh either
+artifact merely to clear a failure. Snapshot updates do not refresh the native oracle.
+No snapshots contain player rows, credentials, private routines or clock-dependent data.
+
+This E2E scope is the persistence package's public bootstrap/client path. It does not
+exercise a game client, gateway, TypeScript gameplay handlers, private stored programs,
+or PostgreSQL/NoSQL behavior. Those journeys remain separate work under
+[the testing architecture](../../.github/ARCHITECTURE.md#22-mandatory-testing-strategy).
+Tracked in [issue #15](https://github.com/ReeseArch64/opencok/issues/15).
+
 ## Initialize a fresh local instance
 
 Set `MARIADB_URL` privately to a fresh MariaDB instance. From this package directory:

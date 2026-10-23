@@ -1,25 +1,6 @@
 {
   "name": "@opencok/drizzle",
   "private": true,
-  "scripts": {
-    "check-types": "tsc --noEmit",
-    "db:generate": "bun scripts/generate.ts",
-    "db:check": "bun scripts/generate.ts --check",
-    "db:bootstrap": "bun scripts/bootstrap.ts",
-    "db:preview": "drizzle-kit export --config drizzle.config.ts",
-    "test": "bun test tests/legacy-sql.test.ts",
-    "test:integration": "bun tests/mariadb.integration.ts"
-  },
-  "devDependencies": {
-    "@opencok/config": "workspace:*",
-    "@types/bun": "catalog:",
-    "drizzle-kit": "0.31.11",
-    "typescript": "catalog:"
-  },
-  "dependencies": {
-    "drizzle-orm": "0.45.4",
-    "mysql2": "3.24.6"
-  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -32,5 +13,27 @@
     "./schema/cokdb_global/*": "./src/schema/cokdb_global/*.ts",
     "./schema/cokdb_pay/*": "./src/schema/cokdb_pay/*.ts",
     "./schema/opencok_chat/*": "./src/schema/opencok_chat/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "db:generate": "bun scripts/generate.ts",
+    "db:check": "bun scripts/generate.ts --check",
+    "db:bootstrap": "bun scripts/bootstrap.ts",
+    "db:preview": "drizzle-kit export --config drizzle.config.ts",
+    "test": "bun run test:unit && bun run test:snapshots",
+    "test:unit": "bun test tests/legacy-sql.test.ts tests/tables.unit.test.ts",
+    "test:snapshots": "bun test tests/tables.snapshots.test.ts",
+    "test:e2e": "bun test tests/tables.e2e.test.ts",
+    "test:integration": "bun tests/mariadb.integration.ts"
+  },
+  "devDependencies": {
+    "@opencok/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "drizzle-kit": "0.31.11",
+    "typescript": "catalog:"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.4",
+    "mysql2": "3.24.6"
   }
 }
