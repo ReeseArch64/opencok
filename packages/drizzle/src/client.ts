@@ -1,24 +1,15 @@
-import { drizzle } from "drizzle-orm/mysql2";
-import { createPool, type PoolOptions } from "mysql2/promise";
-import * as schemas from "./schema";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool, type PoolConfig } from "pg";
+import type { DatabaseRole } from "./roles";
+import * as globalSchema from "./schema/global";
+import * as realmSchema from "./schema/realm";
 
-export type LegacyDatabaseName = keyof typeof schemas;
+const schemas = { global: globalSchema, realm: realmSchema };
 
-export const legacyDriverOptions = {
-  supportBigNumbers: true,
-  bigNumberStrings: true,
-  decimalNumbers: false,
-  dateStrings: true,
-  timezone: "Z",
-  multipleStatements: false,
-} as const;
-
-/** One pool per original database; identifiers are never silently remapped. */
-export function createLegacyDatabase<T extends LegacyDatabaseName>(
-  database: T,
-  options: Omit<PoolOptions, "database" | "uri" | "typeCast" | keyof typeof legacyDriverOptions>,
-) {
-  const pool = createPool({ ...options, ...legacyDriverOptions, database });
-  const db = drizzle(pool, { schema: schemas[database], mode: "default" });
-  return { db, pool, close: () => pool.end() };
+/** Create one owned PostgreSQL pool for the global database or a single realm. */
+export function createDatabase<T extends DatabaseRole>(role: T, config: PoolConfig) {
+  if (role !== "global" && role !== "realm") throw new Error("Unknown database role");
+  const pool = new Pool({ ...config, options: `${config.options ?? ""} -c timezone=UTC` });
+  const db = drizzle(pool, { schema: schemas[role] });
+  return { role, db, pool, close: () => pool.end() };
 }
