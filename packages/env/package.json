@@ -11,7 +11,8 @@
     "./server/schema": "./src/server.schema.ts",
     "./api": "./src/api.ts",
     "./api/schema": "./src/api.schema.ts",
-    "./effect": "./src/effect.ts"
+    "./effect": "./src/effect.ts",
+    "./chat": "./src/chat.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",

@@ -7,12 +7,15 @@
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/ws": "^8.18.1"
   },
   "type": "module",
   "exports": {
     "./server": "./src/server.ts",
-    "./dependencies": "./src/dependencies.ts"
+    "./dependencies": "./src/dependencies.ts",
+    "./chat-server": "./src/chat-server.ts",
+    "./chat-websocket": "./src/chat-websocket.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
@@ -22,6 +25,7 @@
     "@opencok/identity": "workspace:*",
     "@opencok/messages": "workspace:*",
     "@opencok/core": "workspace:*",
-    "effect": "catalog:"
+    "effect": "catalog:",
+    "ws": "8.22.0"
   }
 }

@@ -361,6 +361,15 @@ opencok/
 └── .github/
 ```
 
+### Migrated chat implementation
+
+`apps/chat` composes the imported HTTP/WebSocket contracts through `contracts`,
+`identity`, `controllers` and `connection` exports. `repositories/chat` uses existing
+Drizzle PostgreSQL schemas and routes player reads through the global account realm.
+`env/chat` owns configuration. The [chat runbook](../apps/chat/README.md) documents
+24-hour retention, process-local broadcasts, startup, recovery and unvalidated client
+integration. Seven-day archival and production Node execution remain pending.
+
 ### Package groups
 
 | Group                       | Existing packages that can fulfill this role                                                                                  | Dependency rule                                                                           |
