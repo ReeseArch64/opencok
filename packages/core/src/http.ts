@@ -17,7 +17,9 @@ export function serveHttp(
       Effect.gen(function* () {
         const incoming = yield* HttpServerRequest.HttpServerRequest;
         const request = yield* HttpServerRequest.toWeb(incoming);
-        const response = yield* Effect.tryPromise(() => Promise.resolve(fetch(request)));
+        const response = yield* Effect.tryPromise(() => Promise.resolve(fetch(request))).pipe(
+          Effect.uninterruptible,
+        );
         return HttpServerResponse.fromWeb(response);
       }).pipe(Effect.catchCause(() => Effect.succeed(HttpServerResponse.empty({ status: 500 })))),
     );

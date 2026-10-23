@@ -391,9 +391,11 @@ flowchart LR
 
 ### Implemented API and realm package boundaries
 
-`apps/api/src` and `apps/server/src` contain environment mapping, dependency
-composition and process entrypoints. Packages never import applications. Their
-source exports and direct workspace dependencies are explicit in each manifest.
+`apps/api/src` and `apps/server/src` contain Effect configuration services, Layer
+composition and process entrypoints. `packages/env` supplies one lazy injectable
+environment snapshot per process and shared Zod validators; `packages/core` owns
+the common Effect runtime, Promise resource bridge and HTTP adapter. Packages never
+import applications. Their source exports and direct workspace dependencies are explicit in each manifest.
 
 | Package               | Implemented responsibility                                                                                              |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -416,11 +418,16 @@ boundary; CI runs it and triggers service integration checks on package changes.
 Existing app test commands remain available. The auth mutation runner bundles each
 mutant into a temporary directory without editing workspace source files.
 
-No dependency library or technology decision changes here. The persistence and
-cache implementations retain [ADR-0002](../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md)
+Service composition follows proposed
+[ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md): Effect
+owns startup, scoped resources, signal shutdown and realm readiness monitoring.
+The TCP/SFS session queue and synchronous rule evaluation retain their existing
+execution models. The persistence and cache implementations retain
+[ADR-0002](../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md)
 and [ADR-0005](../docs/decisions/0005-adopt-redis-for-cache.md) semantics under their
-new package paths. XML and directory file adapters use Node file APIs. Bun HTTP
-serving and Redis remain isolated in runtime/adapters; the production migration in
+package paths. XML and directory file adapters use Node file APIs. Both service
+HTTP listeners use the scoped Effect Bun adapter; Redis remains Bun-specific.
+The production migration in
 [ADR-0010](../docs/decisions/0010-adopt-nodejs-for-production.md) remains pending.
 
 Python, an eventual Flutter/Dart client and a future Rust/Go engine receive contracts
@@ -1168,7 +1175,10 @@ for CI and offline tooling; each operation requires the settings it actually nee
 The root `.env.example` documents the supported keys; private env files are ignored.
 Validation reports variable names without exposing supplied values.
 
-Server consumers import `env` / `requireEnv` from `@opencok/env` for general settings
+Effect applications consume `EnvironmentLive` and `readEnvironment` through
+`@opencok/env/effect`; configuration failures occur inside their startup Effect.
+Database/offline consumers can still import `env` / `requireEnv` from
+`@opencok/env` for general settings
 and `@opencok/env/database` for database-only settings, instead of reading configuration
 directly from `process.env`. Each subpath validates and exposes only its domain.
 The package does not mutate `process.env` and must not be imported into browser/mobile bundles. Runtime composition passes

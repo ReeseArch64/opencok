@@ -35,6 +35,7 @@ jobs:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run --cwd apps/server check-types
+      - run: bun run --cwd packages/connection check-types
       - run: bun run --cwd packages/core check-types
       - run: bun run --cwd packages/core test
       - run: bun run --cwd packages/env test

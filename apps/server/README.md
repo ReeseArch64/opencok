@@ -13,11 +13,21 @@ preserved. Construction, queue completion, combat and other mutations return
 
 ## Code organization
 
-`src/index.ts` owns process startup and shutdown, and `src/config.ts` maps the
-validated environment. The composition root wires the shared packages described
+`src/index.ts` composes Effect Layers and runs the shared process runtime;
+`src/config.ts` provides the RealmConfig service from the shared environment Layer. The composition root wires the shared packages described
 in the [architecture package map](../../.github/ARCHITECTURE.md#implemented-api-and-realm-package-boundaries).
 `src/server.ts` loads the rule catalog and connects `@opencok/connection/server`
-to repositories, Redis/ZooKeeper adapters and command controllers.
+to repositories, Redis/ZooKeeper adapters and command controllers. The dependency
+Layer owns pools and coordination; the connection Layer owns TCP/health listeners
+and a scoped readiness fiber. Shutdown waits for health checks, stops accepting
+connections and drains session work before releasing dependencies. API and realm
+share `@opencok/core/http` and `@opencok/core/runtime`.
+
+`startServer(config)` remains a Promise boundary for embedded/integration callers,
+backed by a ManagedRuntime whose `close()` disposes the service scopes. It cleans
+up on failed startup and tolerates repeated close calls. TCP packet ordering,
+backpressure, controllers and synchronous rules remain independent of Effect. See
+[ADR-0012](../../docs/decisions/0012-adopt-effect-for-service-composition.md).
 
 ## Start locally
 
@@ -29,8 +39,7 @@ docker compose --profile dev up --build -d --wait
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the
 private `GAME_LOGIN_SECRET` exception. Other development values are direct
-Compose settings, still validated by `@opencok/env/server` and
-`@opencok/env/database`. Authorized XML comes from the complete local reference
+Compose settings, still validated by the shared Zod schemas through `@opencok/env/effect`. Authorized XML comes from the complete local reference
 copy at `data/reference/server/runtime/base/resource`; the runtime does not
 reference another checkout. Direct Bun execution requires providing the remaining
 service/resource settings through its process environment.
