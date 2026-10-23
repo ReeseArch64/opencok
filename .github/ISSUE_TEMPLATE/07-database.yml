@@ -1,0 +1,66 @@
+name: "Database and player state"
+description: "Investigate saved-state problems or propose targeted migrations."
+title: "[Database] "
+labels:
+  - "database"
+  - "needs triage"
+assignees:
+  - "ReeseArch64"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
+  -
+    type: "dropdown"
+    id: "client-track"
+    attributes:
+      label: "Client compatibility track"
+      description: "Select the client used for this scenario. A listed track is not a guarantee of support."
+      options:
+        - "v5.36.0"
+        - "v6.12.20"
+        - "v9.27.0"
+        - "v12.06.0"
+        - "Other / unknown"
+        - "Not applicable"
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "environment"
+    attributes:
+      label: "Server and database context"
+      description: "Include server commit, database engine/version, schema or migration version, and affected tables or collections. Use synthetic records only."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "change"
+    attributes:
+      label: "Affected state and reproduction"
+      description: "Describe the account, kingdom, inventory, building, troop, alliance, event, or progression state involved. Include the triggering game action and expected/actual saved result; show minimal reproducible SQL if useful."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "migration"
+    attributes:
+      label: "Migration and data preservation"
+      description: "Explain how existing players are affected, relevant invariants such as nonnegative resources or unique rewards, and the smallest targeted correction. For a bug report, describe known data impact; a finished migration is not required."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "validation"
+    attributes:
+      label: "Validation, backup, and rollback"
+      description: "Describe checks on fresh and existing accounts, reconnect/restart persistence, migration repeatability, backups, and recovery limitations. Avoid proposing a global reset as the default fix."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "evidence"
+    attributes:
+      label: "Evidence"
+      description: "Attach sanitized logs, timestamps with timezone, screenshots, or a short recording. Use synthetic player data; omit account identifiers, tokens, keys, private code, and client binaries."

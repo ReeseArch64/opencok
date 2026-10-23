@@ -1,0 +1,73 @@
+name: "Regression report"
+description: "Report a game or operation flow that worked before and now fails."
+title: "[Regression] "
+labels:
+  - "bug"
+  - "regression"
+  - "needs triage"
+assignees:
+  - "ReeseArch64"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
+  -
+    type: "dropdown"
+    id: "client-track"
+    attributes:
+      label: "Client compatibility track"
+      description: "Select the client used for this scenario. A listed track is not a guarantee of support."
+      options:
+        - "v5.36.0"
+        - "v6.12.20"
+        - "v9.27.0"
+        - "v12.06.0"
+        - "Other / unknown"
+        - "Not applicable"
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "environment"
+    attributes:
+      label: "Client, server, and environment"
+      description: "Include the exact client build, Android/iOS version and device or emulator, applied patch numbers, server branch and commit, and local or remote deployment. Use Not applicable for unrelated components."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "last-working"
+    attributes:
+      label: "Last known working setup"
+      description: "Provide the client build and patches, server commit, and configuration where this game flow worked. State unknown if no exact commit is available."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "first-broken"
+    attributes:
+      label: "First known failing setup"
+      description: "Provide the failing client build, server commit, and relevant changes to patches, configuration, or migrations."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "reproduction"
+    attributes:
+      label: "Reproduction and before/after behavior"
+      description: "List initial player state and exact game actions. Compare results using equivalent data and configuration; include frequency and reconnect/restart behavior."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "impact"
+    attributes:
+      label: "Progression impact and workaround"
+      description: "Describe blocked gameplay, affected players, persistent data changes, and any temporary workaround."
+  -
+    type: "textarea"
+    id: "evidence"
+    attributes:
+      label: "Evidence"
+      description: "Attach sanitized logs, timestamps with timezone, screenshots, or a short recording. Use synthetic player data; omit account identifiers, tokens, keys, private code, and client binaries."

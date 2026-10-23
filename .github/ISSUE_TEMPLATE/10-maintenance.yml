@@ -1,0 +1,44 @@
+name: "Maintenance and refactoring"
+description: "Restructure game-stack code or tooling while preserving behavior."
+title: "[Maintenance] "
+labels:
+  - "maintenance"
+  - "refactoring"
+  - "needs triage"
+assignees:
+  - "ReeseArch64"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
+  -
+    type: "textarea"
+    id: "scope"
+    attributes:
+      label: "Components and motivation"
+      description: "Identify affected gateway/server handlers, supporting services, shared packages, client tools, or configuration and the concrete maintenance problem."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "plan"
+    attributes:
+      label: "Proposed scope and boundaries"
+      description: "Describe the restructuring and explicit behavior to preserve, including protocol responses, gameplay rules, configuration, and saved-state formats. List dependent tasks suitable for small stacked PRs."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "verification"
+    attributes:
+      label: "Behavior preservation checks"
+      description: "Identify client tracks and representative game flows to compare before/after. Include regression checks and performance or persistence checks where relevant."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "recovery"
+    attributes:
+      label: "Deployment and recovery impact"
+      description: "State whether rollout, migrations, service restarts, or client repackaging are needed, or explain why these do not apply."

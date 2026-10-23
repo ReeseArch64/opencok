@@ -1,0 +1,60 @@
+name: "Testing and coverage"
+description: "Add reproducible tests for game rules, protocols, or operation."
+title: "[Testing] "
+labels:
+  - "testing"
+  - "needs triage"
+assignees:
+  - "ReeseArch64"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
+  -
+    type: "dropdown"
+    id: "client-track"
+    attributes:
+      label: "Client compatibility track"
+      description: "Select the client used for this scenario. A listed track is not a guarantee of support."
+      options:
+        - "v5.36.0"
+        - "v6.12.20"
+        - "v9.27.0"
+        - "v12.06.0"
+        - "Other / unknown"
+        - "Not applicable"
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "gap"
+    attributes:
+      label: "Missing coverage or unreliable test"
+      description: "Identify the game rule, command handler, client flow, migration, or deployment behavior and the failure this test should detect."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "plan"
+    attributes:
+      label: "Test cases and expected results"
+      description: "Include initial synthetic player/kingdom state, actions, expected costs/rewards/timers, and relevant boundary or failure cases. For flaky tests, include frequency and failure output."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "execution"
+    attributes:
+      label: "Environment, fixtures, and commands"
+      description: "Specify server/client versions, services, controlled clock/randomness where needed, and reproducible execution steps. Use synthetic fixtures and respect read-only extracted clients and keys."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "isolation"
+    attributes:
+      label: "Isolation and cleanup"
+      description: "Explain how tests avoid affecting real players, leaking state between runs, or requiring unavailable external services."
+    validations:
+      required: true

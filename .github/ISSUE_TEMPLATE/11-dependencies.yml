@@ -1,0 +1,46 @@
+name: "Dependency update"
+description: "Update a game-stack library, container image, or build tool."
+title: "[Dependencies] "
+labels:
+  - "dependencies"
+  - "maintenance"
+  - "needs triage"
+assignees:
+  - "ReeseArch64"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
+  -
+    type: "textarea"
+    id: "dependency"
+    attributes:
+      label: "Dependency and versions"
+      description: "Name the library, image, SDK, or tool; provide current/target versions, consuming components, and upstream release notes."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "reason"
+    attributes:
+      label: "Reason and compatibility impact"
+      description: "Explain the benefit and relevant runtime, protocol, data format, device/OS, or build changes. Use private reporting for non-public vulnerabilities."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "verification"
+    attributes:
+      label: "Validation matrix"
+      description: "List affected client tracks, server start/login/gameplay smoke checks, container builds, migrations, or client packaging checks. Include commands and expected outcomes appropriate to this dependency."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "rollback"
+    attributes:
+      label: "Upgrade and rollback plan"
+      description: "Describe required configuration changes, downtime, persistent-format compatibility, and the recovery path if the update fails."
+    validations:
+      required: true

@@ -1,0 +1,49 @@
+title: "[Question] "
+labels:
+  - "question"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Ask for help with gameplay, client preparation, hosting, or development. For a confirmed reproducible bug, open a Bug report issue and link this discussion."
+  -
+    type: "textarea"
+    id: "question"
+    attributes:
+      label: "What are you trying to do?"
+      description: "Describe the game action or operator task, the expected outcome, and the specific question."
+    validations:
+      required: true
+  -
+    type: "dropdown"
+    id: "client-track"
+    attributes:
+      label: "Client compatibility track"
+      description: "Select the client used for this scenario. A listed track is not a guarantee of support."
+      options:
+        - "v5.36.0"
+        - "v6.12.20"
+        - "v9.27.0"
+        - "v12.06.0"
+        - "Other / unknown"
+        - "Not applicable"
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "context"
+    attributes:
+      label: "Setup and current behavior"
+      description: "If relevant, include client build/patches, device or emulator and OS, server commit, deployment mode, and the affected game screen. State Not applicable for general questions."
+  -
+    type: "textarea"
+    id: "attempts"
+    attributes:
+      label: "What have you tried?"
+      description: "Link guides or related discussions and describe steps attempted and their results."
+  -
+    type: "textarea"
+    id: "evidence"
+    attributes:
+      label: "Evidence"
+      description: "Attach sanitized logs, timestamps with timezone, screenshots, or a short recording. Use synthetic player data; omit account identifiers, tokens, keys, private code, and client binaries."

@@ -1,0 +1,51 @@
+title: "[Show and tell] "
+labels:
+  - "discussion"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Share a kingdom setup, client patch experiment, tool, or development result. Distinguish verified behavior from planned work and share only material you are authorized to publish."
+  -
+    type: "textarea"
+    id: "summary"
+    attributes:
+      label: "What did you build or learn?"
+      description: "Describe the result, the game system or operator workflow it affects, and the benefit."
+    validations:
+      required: true
+  -
+    type: "dropdown"
+    id: "client-track"
+    attributes:
+      label: "Client compatibility track"
+      description: "Select the client used for this scenario. A listed track is not a guarantee of support."
+      options:
+        - "v5.36.0"
+        - "v6.12.20"
+        - "v9.27.0"
+        - "v12.06.0"
+        - "Other / unknown"
+        - "Not applicable"
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "setup"
+    attributes:
+      label: "Setup and reproducibility"
+      description: "Include applicable client build/patches, server commit, environment, and steps to reproduce the result."
+  -
+    type: "textarea"
+    id: "validation"
+    attributes:
+      label: "What works and what remains untested?"
+      description: "Describe game flows tested, observed results, known limitations, and compatibility gaps."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "links"
+    attributes:
+      label: "Demo, documentation, and feedback"
+      description: "Link a short recording, screenshots, authorized code, issues, or guides. State the feedback you would find useful; omit keys, private data, private Elex code, and client binaries."

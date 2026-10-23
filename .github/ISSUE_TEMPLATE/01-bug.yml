@@ -1,0 +1,72 @@
+name: "Bug report"
+description: "Report a reproducible gameplay, client, or server failure."
+title: "[Bug] "
+labels:
+  - "bug"
+  - "needs triage"
+assignees:
+  - "ReeseArch64"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
+  -
+    type: "dropdown"
+    id: "client-track"
+    attributes:
+      label: "Client compatibility track"
+      description: "Select the client used for this scenario. A listed track is not a guarantee of support."
+      options:
+        - "v5.36.0"
+        - "v6.12.20"
+        - "v9.27.0"
+        - "v12.06.0"
+        - "Other / unknown"
+        - "Not applicable"
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "environment"
+    attributes:
+      label: "Client, server, and environment"
+      description: "Include the exact client build, Android/iOS version and device or emulator, applied patch numbers, server branch and commit, and local or remote deployment. Use Not applicable for unrelated components."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "system"
+    attributes:
+      label: "Affected game system"
+      description: "Identify the screen, command, or system: login, kingdom, construction, research, troops, combat, heroes, inventory, alliance, events, chat, or media."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "reproduction"
+    attributes:
+      label: "Starting state and steps to reproduce"
+      description: "Describe a test account's castle/building level, resources, troop state, active queues or events, and relevant configuration. List exact actions and indicate whether the issue affects fresh or existing accounts."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "behavior"
+    attributes:
+      label: "Expected and actual results"
+      description: "Describe what should happen, what happens instead, how often it occurs, and any workaround. Include resource costs, timers, rewards, or error messages when relevant."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "impact"
+    attributes:
+      label: "Player and persistence impact"
+      description: "Does this block login or progression, lose or duplicate items/resources, affect battle results, or change saved state after reconnect? State whether one or multiple test players are affected."
+  -
+    type: "textarea"
+    id: "evidence"
+    attributes:
+      label: "Evidence"
+      description: "Attach sanitized logs, timestamps with timezone, screenshots, or a short recording. Use synthetic player data; omit account identifiers, tokens, keys, private code, and client binaries."

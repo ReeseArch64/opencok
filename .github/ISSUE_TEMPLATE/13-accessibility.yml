@@ -1,0 +1,67 @@
+name: "Accessibility"
+description: "Report barriers in game screens, controls, or operator tools."
+title: "[Accessibility] "
+labels:
+  - "accessibility"
+  - "enhancement"
+  - "needs triage"
+assignees:
+  - "ReeseArch64"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
+  -
+    type: "dropdown"
+    id: "client-track"
+    attributes:
+      label: "Client compatibility track"
+      description: "Select the client used for this scenario. A listed track is not a guarantee of support."
+      options:
+        - "v5.36.0"
+        - "v6.12.20"
+        - "v9.27.0"
+        - "v12.06.0"
+        - "Other / unknown"
+        - "Not applicable"
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "environment"
+    attributes:
+      label: "Device and affected interface"
+      description: "Include client build/patches or tool version, Android/iOS and device, screen size, language, and relevant accessibility settings or assistive technology."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "barrier"
+    attributes:
+      label: "Barrier and steps to encounter it"
+      description: "Name the screen or flow, such as login, map navigation, building upgrades, inventory, or chat. Explain the interaction that becomes difficult or impossible."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "proposal"
+    attributes:
+      label: "Expected accessible behavior"
+      description: "Describe a usable outcome, such as readable timers, scalable text, distinguishable resource icons, reachable controls, or screen-reader labels. Include suggested improvements if available."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "validation"
+    attributes:
+      label: "Validation scenario"
+      description: "Describe how to verify the improvement on the affected device/settings, including whether it requires client resources or server-provided text."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "evidence"
+    attributes:
+      label: "Evidence"
+      description: "Attach sanitized logs, timestamps with timezone, screenshots, or a short recording. Use synthetic player data; omit account identifiers, tokens, keys, private code, and client binaries."

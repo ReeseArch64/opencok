@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Game setup and operator guides
+    url: https://github.com/ReeseArch64/opencok/wiki
+    about: Consult client preparation, kingdom operation, and troubleshooting guides before opening an issue.
+
+  - name: Gameplay questions, hosting help, and ideas
+    url: https://github.com/ReeseArch64/opencok/discussions
+    about: Ask how a game system works, get setup help, or discuss a proposal before creating a scoped issue.
+
+  - name: Security reporting
+    url: https://github.com/ReeseArch64/opencok/security
+    about: Consult the repository security reporting options for vulnerabilities, credential exposure, or exploitable game behavior. Do not disclose vulnerabilities in public issues.

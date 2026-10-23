@@ -1,0 +1,50 @@
+name: "Infrastructure and CI/CD"
+description: "Improve game-stack deployment, persistence, networking, or automation."
+title: "[Infrastructure] "
+labels:
+  - "infrastructure"
+  - "ci/cd"
+  - "needs triage"
+assignees:
+  - "ReeseArch64"
+body:
+  -
+    type: "markdown"
+    attributes:
+      value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
+  -
+    type: "textarea"
+    id: "scope"
+    attributes:
+      label: "Environment and affected services"
+      description: "Identify local/remote deployment, host OS/architecture, container/runtime versions, server commit, and affected gateway, server, database, cache, storage, or CI workflow."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "change"
+    attributes:
+      label: "Problem and proposed change"
+      description: "Include reproducible setup commands or workflow links, expected/actual behavior, and the effect on kingdom availability, client connectivity, or release preparation."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "storage"
+    attributes:
+      label: "Networking, storage, and dependencies"
+      description: "Describe affected ports/routes, volumes, health checks, startup dependencies, and configuration names. Identify optional services and their failure behavior; do not include secret values."
+  -
+    type: "textarea"
+    id: "validation"
+    attributes:
+      label: "Validation and recovery plan"
+      description: "Explain how to verify startup, client connection, persistent state across recreation, and recovery from failure. Include backup, downtime, and rollback requirements where applicable."
+    validations:
+      required: true
+  -
+    type: "textarea"
+    id: "evidence"
+    attributes:
+      label: "Evidence"
+      description: "Attach sanitized logs, timestamps with timezone, screenshots, or a short recording. Use synthetic player data; omit account identifiers, tokens, keys, private code, and client binaries."
