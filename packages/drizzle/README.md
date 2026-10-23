@@ -19,8 +19,14 @@ A transaction belongs to one physical database. The architecture defines
 
 ## Initialize the default topology
 
-From this package, set `POSTGRES_ADMIN_URL` privately to a PostgreSQL administrative
-connection (for example, to the maintenance database), then run:
+The root [Docker Compose environment](../../infra/compose/README.md) starts a local
+PostgreSQL instance and runs this setup automatically for the default topology.
+
+Copy the root `.env.example` to the root `.env` once and fill in
+`POSTGRES_ADMIN_URL` privately with a PostgreSQL administrative connection
+(for example, to the maintenance database). All commands use
+[`@opencok/env`](../env/README.md) and that single root file. Process/CI values
+override it; do not create package-local env files. From this package, run:
 
 ```sh
 bun run db:setup
@@ -35,15 +41,17 @@ for server connections, rather than keeping the setup account in the server.
 
 ## Use from the server
 
-Declare `"@opencok/drizzle": "workspace:*"` in the consuming package.
+Declare `"@opencok/drizzle": "workspace:*"` and `"@opencok/env": "workspace:*"`
+in the consuming server package.
 
 ```ts
+import { requireEnv } from "@opencok/env/database";
 import { createDatabases } from "@opencok/drizzle";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 
 // The base URL selects the PostgreSQL cluster; routing selects each configured DB.
 const databases = createDatabases({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: requireEnv("DATABASE_URL"),
   max: 10,
 });
 

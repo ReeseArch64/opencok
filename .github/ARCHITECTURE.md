@@ -1107,6 +1107,24 @@ schema, defaults/constraints, transactions, migration repeatability, realm isola
 and restart. The [package guide](../packages/drizzle/README.md) documents imports,
 generation/migration commands, data representations and verification.
 
+### 15.2. Shared server environment
+
+`packages/env` owns server environment configuration validated with Zod and inferred
+TypeScript types. It locates the workspace root from its own module and loads only the root `.env`, independently of the working
+directory. Explicit process/CI variables override file values. The file is optional
+for CI and offline tooling; each operation requires the settings it actually needs.
+The root `.env.example` documents the supported keys; private env files are ignored.
+Validation reports variable names without exposing supplied values.
+
+Server consumers import `env` / `requireEnv` from `@opencok/env` for general settings
+and `@opencok/env/database` for database-only settings, instead of reading configuration
+directly from `process.env`. Each subpath validates and exposes only its domain.
+The package does not mutate `process.env` and must not be imported into browser/mobile bundles. Runtime composition passes
+validated settings to adapters. Bun's root configuration disables automatic dotenv
+variants; the Drizzle package links that configuration for package-local invocation
+and pins Drizzle Kit's own dotenv loader to the same root file. See the
+[environment guide](../packages/env/README.md) for commands and deployment assumptions.
+
 ## 16. Simulation execution and offline progress
 
 The Server executes a logical queue of commands per aggregate/partition, with
@@ -1511,6 +1529,18 @@ cache, MongoDB unavailability, restoration and replay of expired jobs. Use a con
 clock, without waiting one or seven real days.
 
 ## 23. Development environment and administrative tools
+
+The implemented root `docker-compose.yml` starts PostgreSQL, a one-shot Drizzle
+setup job and pgAdmin 4 under the `dev` / `all` profiles. Setup waits for database
+health, creates/migrates the global database and both default kingdoms, and generates
+a password-free pgAdmin server registration. Named volumes persist the cluster and
+pgAdmin settings. The database/setup use the internal network; pgAdmin also uses the
+external network. Compose explicitly configures local credentials and host ports;
+application tools use the single root `.env`. The build context excludes private
+files and mobile artifacts. The
+[local environment guide](../infra/compose/README.md) documents startup, verification,
+credential changes and recovery. This single-instance local environment does not
+implement the production replica/managed-service topology.
 
 Development uses Compose with proposed profiles `core`, `dev-tools` and
 `tests`. Administrative interfaces are developer tools and not game startup

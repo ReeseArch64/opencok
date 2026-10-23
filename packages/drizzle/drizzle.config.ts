@@ -1,12 +1,12 @@
 import { defineConfig } from "drizzle-kit";
+import { env, requireEnv } from "@opencok/env/database";
 
-const role = process.env.DATABASE_ROLE;
-if (role !== "global" && role !== "kingdom") throw new Error("Set DATABASE_ROLE=global|kingdom");
+const role = requireEnv("DATABASE_ROLE");
 
 export default defineConfig({
   dialect: "postgresql",
   schema: `./src/schema/${role}.ts`,
   out: `./migrations/${role}`,
-  ...(process.env.DATABASE_URL ? { dbCredentials: { url: process.env.DATABASE_URL } } : {}),
+  ...(env.DATABASE_URL ? { dbCredentials: { url: env.DATABASE_URL } } : {}),
   strict: true,
 });
