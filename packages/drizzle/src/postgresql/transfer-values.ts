@@ -36,14 +36,22 @@ export function canonicalValue(value: unknown, column: ColumnMapping, tableId: s
 /** Order-independent cryptographic multiset digest retains duplicate counts for keyless tables. */
 export class RowDigest {
   private sum = 0n;
+  private fields: bigint[] = [];
   count = 0n;
   add(row: Record<string, unknown>, table: TableMapping) {
     const values = table.columns.map((column) => canonicalValue(row[column.name], column, table.id));
     const digest = createHash("sha256").update(JSON.stringify(values)).digest("hex");
     this.sum = (this.sum + BigInt(`0x${digest}`)) % (1n << 256n);
+    for (const [i, value] of values.entries()) {
+      const field = createHash("sha256").update(JSON.stringify(value)).digest("hex");
+      this.fields[i] = ((this.fields[i] ?? 0n) + BigInt(`0x${field}`)) % (1n << 256n);
+    }
     this.count++;
   }
   result() { return createHash("sha256").update(`${this.count}:${this.sum.toString(16).padStart(64, "0")}`).digest("hex"); }
+  differingFields(other: RowDigest, table: TableMapping) {
+    return table.columns.filter((_, i) => this.fields[i] !== other.fields[i]).map((column) => column.name);
+  }
 }
 
 export function driverValue(value: unknown, column: ColumnMapping, tableId: string): unknown {

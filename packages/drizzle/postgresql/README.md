@@ -47,13 +47,13 @@ close it after use. Connections use UTC. Models always qualify schema names.
 | --- | --- |
 | Signed integers | Native integer/smallint/bigint, preserving source ranges; tinyint has a range check. Bigints use TypeScript bigint. |
 | Unsigned int | Bounded bigint storage, exact TypeScript number within the uint32 range. |
-| Unsigned bigint | Bounded `numeric(20,0)`, exact TypeScript bigint; a locked numeric counter supports the full unsigned identity range. |
+| Unsigned bigint | Bounded `numeric(20,0)`, exact TypeScript bigint; a signed native sequence plus an exact numeric offset supports the full unsigned identity range. |
 | Decimal | Numeric with original precision/scale, TypeScript string. |
 | FLOAT/DOUBLE(M,D) | Numeric with declared precision/scale, TypeScript number matching the rounded driver value. This intentionally does not reproduce every binary32/64 intermediate in future gameplay calculations. Unbounded float/double use real/double precision. |
 | Varchar/char/text | UTF-8 text/varchar preserving stored spelling and trailing spaces. Fixed char becomes varchar to avoid PostgreSQL blank padding. Source encoding is decoded during transfer. |
 | Binary/varbinary/blob | Bytea/Buffer, including zero bytes and high bytes; fixed/declared byte limits are checked. |
 | Date/datetime/timestamp | Validated canonical text strings, preserving zero/partial-zero dates, fractional precision, NULL and sentinel meanings. No unproven instant/local-time conversion. |
-| AUTO_INCREMENT | Generated-by-default identity for signed/int ranges, numeric counter for uint64; imported explicit IDs require sequence synchronization. |
+| AUTO_INCREMENT | Generated-by-default identity for signed/int ranges, offset native sequence for uint64; imported explicit IDs require sequence synchronization. |
 | TIMESTAMP NULL / ON UPDATE | Independently authored database triggers preserve NULL-to-current UTC time and distinguish explicitly supplied timestamps from omitted timestamps on UPDATE. |
 | MyISAM / ROW_FORMAT | PostgreSQL storage; every table now supports transactions. Original engine/options remain in the source reference and manifest provenance. |
 
@@ -141,6 +141,10 @@ decimal strings, bytes, NULL and temporal strings have explicit canonical codecs
 Unsupported values and constraint failures identify a public table/column and error
 code, without logging the value or raw driver exception. A checksum mismatch blocks
 the run; investigate privately and do not clear receipts to force acceptance.
+The source is read through one backpressured streaming SELECT per table, and target
+verification uses a transaction cursor. Neither side uses OFFSET paging, which is
+unstable for keyless duplicates or equal comparison keys. Discrepancies also identify
+differing public field names through per-column multiset digests.
 
 Temporary target tables also compare source `WEIGHT_STRING(RTRIM(value))` equality
 groups with the mapped PostgreSQL collation for every imported text field. A
@@ -155,7 +159,9 @@ Imported AUTO_INCREMENT fields synchronize generators with the highest imported
 value, the source's current next value (including deleted-ID gaps), and the baseline
 start. Exhausted ranges remain exhausted. Native sequence changes are not rolled
 back by PostgreSQL; an interrupted table must be resumed/reconciled before enabling
-writers. The unsigned numeric counter and receipts are transactionally updated.
+writers. Unsigned identities also use a native nontransactional sequence, so aborted
+allocations are not reused. The numeric metadata row records the imported next-ID
+floor; actual allocation comes from the sequence. Table data and receipts remain atomic.
 
 Before any proposed cutover, take and restore backups of the source and both target
 roles in isolated environments; rerun `--verify-only` on restored targets. The
@@ -171,3 +177,38 @@ retain the unchanged source and rebuild only the isolated target. After PostgreS
 accepts writes, switching back to a stale MariaDB backup loses those writes; require
 an audited reverse/delta reconciliation or forward recovery. No automatic live
 cutover or destructive rollback is provided by these commands.
+
+## Automated coverage
+
+```sh
+bun run test:pg:unit       # native-source contract, models and codecs
+bun run test:pg:snapshots  # one PostgreSQL schema/CRUD snapshot per table
+bun run test:pg:e2e        # disposable bootstrap, CRUD and transfer/recovery
+```
+
+All 772 tables have a named PostgreSQL unit case, reviewed snapshot and persistence
+E2E case. Catalog assertions compare physical fields, types, nullability, collations,
+primary/FK/check constraints and index expressions. E2E covers every field with
+insert/read/update/delete, defaults, NULL handling, unique/FK violations and rollback,
+including the five formerly MyISAM tables. It checks all retained fields after
+closing pools and restarting PostgreSQL. The 34 keyless tables remain keyless.
+
+Transfer fixtures contain multiple rows in every table and exact duplicates where
+no unique key prohibits them. Recovery tests include interrupted table checkpoints,
+resume without duplication, source/target value reconciliation, native sequences,
+schema/data tampering, unsupported NUL text, a real collation incompatibility,
+restart and binary pg_dump/pg_restore of both target roles. Fixtures use only public
+DDL and synthetic values; no test accepts deployment database URLs.
+
+Run E2E sequentially: FK children share a parent fixture and final restart cases
+verify earlier table cases. Missing Docker/dependencies fail the suite. The
+PostgreSQL workflow pins Bun, MariaDB and PostgreSQL versions and executes these
+commands without private files. Ordinary offline `bun run test` also includes the
+PostgreSQL unit and snapshot suites.
+
+Refresh snapshots only for an intentional reviewed contract change:
+`bun test tests/postgresql.snapshots.test.ts --update-snapshots`. Review migrations,
+manifest and native catalog evidence together. Snapshot refresh does not update the
+independent MariaDB fixture. Tests measure complete table participation, not 100%
+branch/path coverage or game-client compatibility. The required TypeScript business
+rewrites listed above still need application E2E before gameplay release.

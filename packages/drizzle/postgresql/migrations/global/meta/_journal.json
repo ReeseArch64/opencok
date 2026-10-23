@@ -15,6 +15,13 @@
       "when": 1792771200001,
       "tag": "0001_transfer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792771200002,
+      "tag": "0002_unsigned_sequence",
+      "breakpoints": true
     }
   ]
 }

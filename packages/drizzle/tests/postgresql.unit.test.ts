@@ -11,11 +11,7 @@ import { normalizeDefault, type Contract } from "./support/contract";
 import { sampleRow } from "./support/rows";
 
 const native = fixture as unknown as Contract;
-export const pgCatalog = manifest.tables.map((mapping) => {
-  const table = Object.values(schemas[mapping.namespace]).find((table) => getTableConfig(table).name === mapping.name)!;
-  if (!table) throw new Error(`Missing PostgreSQL table ${mapping.id}`);
-  return { mapping, table, config: getTableConfig(table) };
-});
+import { pgCatalog } from "./support/pg-catalog";
 const dialect = new PgDialect();
 const type = (value: string) => value.replaceAll(", ", ",");
 
@@ -55,7 +51,17 @@ for (const { mapping, config, table } of pgCatalog) {
     expect(config.primaryKeys.flatMap((key) => key.columns.map((column) => column.name))).toEqual(expected.indexes.find((index) => index[0] === "PRIMARY")?.[2].map((column) => column[0]) ?? []);
     expect(mapping.indexes.filter((index) => index.kind !== "pad-unique").map((index) => [index.sourceName, index.kind !== "index", index.columns.map((column) => [column.name, column.prefix]), "BTREE"]).sort((a, b) => String(a[0]).localeCompare(String(b[0])))).toEqual(expected.indexes);
     expect(config.indexes).toHaveLength(mapping.indexes.filter((index) => index.kind !== "primary").length);
+    expect(config.indexes.map(({ config: index }) => [index.name, !!index.unique, index.columns.map((column) => "name" in column ? column.name : dialect.sqlToQuery(column as SQL).sql)]))
+      .toEqual(mapping.indexes.filter((index) => index.kind !== "primary").map((index) => [index.targetName, index.kind !== "index", index.expressions]));
+    expect(config.checks.map((check) => [check.name, dialect.sqlToQuery(check.value).sql]))
+      .toEqual(mapping.columns.flatMap((column) => column.checks.map((check) => [check.name, check.expression])));
     expect(config.foreignKeys).toHaveLength(expected.foreignKeys.length);
+    expect(config.foreignKeys.map((key) => {
+      const ref = key.reference();
+      return [mapping.foreignKeys.find((candidate) => candidate.targetName === key.getName())!.sourceName,
+        ref.columns.map((column) => column.name), getTableConfig(ref.foreignTable).name, ref.foreignColumns.map((column) => column.name),
+        key.onUpdate?.toUpperCase(), key.onDelete?.toUpperCase()];
+    })).toEqual(expected.foreignKeys);
     const row = sampleRow(expected);
     for (const [i, column] of config.columns.entries()) {
       const spec = mapping.columns[i]!;

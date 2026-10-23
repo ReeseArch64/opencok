@@ -3,6 +3,10 @@
 `@opencok/drizzle` reconstructs the supplied Java deployment database for migration
 planning. It targets **MariaDB 10.4.33**, using Drizzle's MySQL dialect and `mysql2`.
 It does not redesign the model or migrate an existing deployment to PostgreSQL.
+The separate [PostgreSQL compatibility port](postgresql/README.md) provides all-table
+PostgreSQL models, migrations, transfer/reconciliation and its own tests. Use
+`@opencok/drizzle/postgresql` for that target; the original imports below remain
+the MariaDB reference API.
 See [the architecture](../../.github/ARCHITECTURE.md#151-legacy-mariadb-baseline)
 for the persistence and compatibility boundary.
 

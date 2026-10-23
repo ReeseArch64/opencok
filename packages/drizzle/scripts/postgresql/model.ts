@@ -43,6 +43,11 @@ function columnMapping(definition: string, table: TableMapping, primary: string[
   const [, name, rawType, size, scale, unsigned, suffix = ""] = match;
   ident(name!);
   const type = rawType!.toLowerCase();
+  if (unsigned && !["tinyint", "smallint", "int", "bigint"].includes(type)) throw new Error(`Unreviewed unsigned type in ${table.id}.${name}`);
+  const remainder = suffix.replace(defaultPattern, "")
+    .replace(/\b(?:NOT NULL|NULL|AUTO_INCREMENT|CHARACTER SET \w+|COLLATE \w+|ON UPDATE current_timestamp\(\))/gi, "")
+    .replace(/COMMENT\s+'(?:[^'\\]|\\.|'')*'/i, "").trim();
+  if (remainder) throw new Error(`Unmapped column attributes in ${table.id}.${name}`);
   const sourceType = `${type}${size && !["bigint", "int", "smallint", "tinyint"].includes(type) ? `(${size}${scale ? `,${scale}` : ""})` : ""}${unsigned ? " unsigned" : ""}`;
   const collation = /COLLATE\s+(\w+)/i.exec(suffix)?.[1] ?? (/char|text/.test(type) ? table.sourceCollation : null);
   const charset = /CHARACTER SET\s+(\w+)/i.exec(suffix)?.[1] ?? (collation ? collation.split("_")[0]! : null);
@@ -59,7 +64,7 @@ function columnMapping(definition: string, table: TableMapping, primary: string[
   if (["int", "tinyint", "smallint", "bigint"].includes(type)) {
     result.adapter = type === "bigint" ? "bigint" : "number";
     result.targetType = type === "bigint" ? unsigned ? "numeric(20,0)" : "bigint"
-      : type === "int" ? unsigned ? "bigint" : "integer" : "smallint";
+      : type === "int" ? unsigned ? "bigint" : "integer" : type === "smallint" && unsigned ? "integer" : "smallint";
     if (unsigned) check("range", `${ref} >= 0 AND ${ref} <= ${type === "bigint" ? "18446744073709551615" : type === "int" ? "4294967295" : type === "smallint" ? "65535" : "255"}`);
     else if (type === "tinyint") check("range", `${ref} BETWEEN -128 AND 127`);
   } else if (["float", "double", "decimal"].includes(type)) {
@@ -142,7 +147,6 @@ export async function buildManifest(): Promise<MigrationManifest> {
   const dispositions: Record<string, string> = {
     DAILY: "TypeScript daily progression/reward use case; legacy business trigger not installed",
     kill_moster_event: "TypeScript event/progression use case; legacy business trigger not installed",
-    DAilYEVENT: "TypeScript durable scheduler; legacy event not installed",
     DAILYEVENT: "TypeScript durable scheduler; legacy event not installed",
     before_insert_user: "TypeScript identity/provisioning workflow across global and realm; legacy trigger not installed",
     generatepassword: "Identity provider/TypeScript auth rewrite; legacy password generation not installed",
