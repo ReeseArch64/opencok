@@ -9,7 +9,7 @@ import { sql } from "drizzle-orm";
 
 import { bigint, datetime, decimal, mysqlTable, primaryKey, uniqueIndex } from "drizzle-orm/mysql-core";
 
-import { binaryData } from "../binary";
+import { binaryData } from "../../binary";
 
 export const synthetic = mysqlTable("synthetic", {
   "id": bigint("id", {"mode":"bigint","unsigned":true}).notNull(),
