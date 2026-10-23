@@ -31,3 +31,4 @@ This index bootstraps the ADR practice without introducing an extra technology d
 - [ADR-0004: Adopt pgAdmin 4 for development inspection](0004-adopt-pgadmin4-for-development.md) — accepted
 - [ADR-0005: Adopt Redis for cache and ephemeral coordination](0005-adopt-redis-for-cache.md) — accepted
 - [ADR-0006: Adopt Redis Insight for development inspection](0006-adopt-redis-insight-for-development.md) — accepted
+- [ADR-0007: Adopt Oxlint for JavaScript and TypeScript linting](0007-adopt-oxlint-for-linting.md) — accepted
