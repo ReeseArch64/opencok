@@ -1,38 +1,29 @@
-import { config } from "./config.ts";
-import { startServer } from "./server.ts";
+import { Effect, Layer } from "effect";
+import { runService } from "@opencok/core/runtime";
+import { EnvironmentLive } from "@opencok/env/effect";
+import { RealmConfig, RealmConfigLive } from "./config.ts";
+import { RealmLive, RealmServer } from "./server.ts";
 
-try {
-  const settings = config();
-  const server = await startServer(settings);
-  console.log(
-    JSON.stringify({
-      event: "started",
-      runtime: "bun",
-      kingdom: settings.kingdomId,
-      port: server.port,
-      healthPort: server.healthPort,
-      experimental: true,
-    }),
-  );
-  let stopping = false;
-  const stop = async () => {
-    if (stopping) return;
-    stopping = true;
-    await server.close();
-    console.log(JSON.stringify({ event: "stopped" }));
-  };
-  process.once("SIGTERM", () => {
-    void stop();
-  });
-  process.once("SIGINT", () => {
-    void stop();
-  });
-} catch {
-  console.error(
-    JSON.stringify({
-      event: "startup_failed",
-      hint: "Check configuration, resources, schemas and dependency availability",
-    }),
-  );
-  process.exitCode = 1;
-}
+const services = RealmLive.pipe(
+  Layer.provideMerge(RealmConfigLive),
+  Layer.provide(EnvironmentLive),
+);
+
+runService(
+  "server",
+  Effect.gen(function* () {
+    const server = yield* RealmServer;
+    const settings = yield* RealmConfig;
+    console.info(
+      JSON.stringify({
+        event: "started",
+        runtime: "bun",
+        kingdom: settings.kingdomId,
+        port: server.port,
+        healthPort: server.healthPort,
+        experimental: true,
+      }),
+    );
+    yield* Effect.never;
+  }).pipe(Effect.provide(services)),
+);

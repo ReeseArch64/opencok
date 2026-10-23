@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Effect } from "effect";
+import { Effect, Fiber } from "effect";
 import { serveHttp } from "../src/http";
 
 test("Effect HTTP listener preserves fetch bodies and closes its port with the scope", async () => {
@@ -27,4 +27,50 @@ test("Effect HTTP listener preserves fetch bodies and closes its port with the s
     ),
   );
   await expect(fetch(`http://127.0.0.1:${port}/`)).rejects.toThrow();
+});
+
+test("shutdown waits for an active Promise handler before releasing its dependencies", async () => {
+  let completeRequest!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    completeRequest = resolve;
+  });
+  let markStarted!: () => void;
+  const started = new Promise<void>((resolve) => {
+    markStarted = resolve;
+  });
+  let markListening!: (port: number) => void;
+  const listening = new Promise<number>((resolve) => {
+    markListening = resolve;
+  });
+  let handled = false;
+  let released = false;
+  const fiber = Effect.runFork(
+    Effect.scoped(
+      Effect.gen(function* () {
+        yield* Effect.addFinalizer(() =>
+          Effect.sync(() => {
+            expect(handled).toBe(true);
+            released = true;
+          }),
+        );
+        const server = yield* serveHttp({ host: "127.0.0.1", port: 0 }, async () => {
+          markStarted();
+          await gate;
+          handled = true;
+          return new Response("finished");
+        });
+        markListening(server.port);
+        yield* Effect.never;
+      }),
+    ),
+  );
+  const port = await listening;
+  const response = fetch(`http://127.0.0.1:${port}/`);
+  await started;
+  const stopped = Effect.runPromise(Fiber.interrupt(fiber));
+  expect(released).toBe(false);
+  completeRequest();
+  expect(await (await response).text()).toBe("finished");
+  await stopped;
+  expect(released).toBe(true);
 });

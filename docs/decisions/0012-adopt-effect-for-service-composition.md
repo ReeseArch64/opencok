@@ -53,7 +53,8 @@ moving simulation hot paths into Effect.
 ## Implementation Plan
 
 - **Affected paths**: `packages/env/src/{effect,service.schema}.ts`,
-  `packages/core/src/`, `apps/api/src/`, `apps/server/src/`, root/workspace manifests,
+  `packages/core/src/`, `packages/connection/src/server.ts`, `apps/api/src/`,
+  `apps/server/src/`, root/workspace manifests,
   `bun.lock`, affected tests, CI workflows and component guides.
 - **Dependencies**: catalog `effect@4.0.6`, `@effect/platform-bun@4.0.6`;
   retain existing Zod, database and TCP adapters.
@@ -69,12 +70,12 @@ moving simulation hot paths into Effect.
 
 ### Verification
 
-- [ ] Environment tests cover injection, shared realm defaults and redacted failures.
-- [ ] Core tests cover reverse-order cleanup and interruption during acquisition.
-- [ ] HTTP tests exercise real sockets, request bodies and listener release.
-- [ ] API/server unit and synthetic integration suites preserve discovery and SFS contracts.
-- [ ] Process tests verify SIGINT/SIGTERM cleanup and nonzero sanitized failures.
-- [ ] Lint, format, package boundaries and affected workspace type checks pass.
+- [x] Environment tests cover injection, shared realm defaults and redacted failures.
+- [x] Core tests cover reverse-order cleanup and interruption during acquisition.
+- [x] HTTP tests exercise real sockets, request bodies and listener release.
+- [x] API/server unit and synthetic integration suites preserve discovery and SFS contracts.
+- [x] Process tests verify SIGINT/SIGTERM cleanup and nonzero sanitized failures.
+- [x] Lint, format, package boundaries and affected workspace type checks pass.
 
 ## Alternatives Considered
 
@@ -95,3 +96,19 @@ The [Effect runtime documentation](https://effect.website/docs/v4/runtime) and
 [platform overview](https://effect.website/docs/v4/platform/introduction) describe
 these integration boundaries. Revisit when measured throughput/latency regresses,
 when Node production adapters land, or when an Effect upgrade changes ownership.
+
+### Implementation evidence — 2026-10-23
+
+Both applications now consume the shared environment/runtime. The realm transport
+owns scoped TCP and HTTP listeners and a readiness fiber; its dependency Layer
+owns pools and coordination. Promise HTTP handlers finish before dependency
+release. Unit tests include partial bind failure and repeated runtime disposal.
+
+Validation passed: 52 focused core/env/API/server/package tests, seven rejected
+authentication mutations, real PostgreSQL/Redis/ZooKeeper integration with 63
+assertions, and all 14 isolated Compose scenarios with 122 assertions. Lint,
+format, affected workspace type checks, stack type checking and frozen install
+passed. Native APK rendering, representative load measurements and Node production
+remain unverified by this work. Implementation is tracked in
+[issue #42](https://github.com/ReeseArch64/opencok/issues/42); formal ADR acceptance
+remains pending maintainer review.

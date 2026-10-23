@@ -17,7 +17,9 @@
     "@opencok/env": "workspace:*",
     "@opencok/repositories": "workspace:*",
     "@opencok/resources": "workspace:*",
-    "@opencok/storage": "workspace:*"
+    "@opencok/storage": "workspace:*",
+    "effect": "catalog:",
+    "@opencok/core": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
