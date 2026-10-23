@@ -56,6 +56,15 @@ boundaries described in [the architecture](ARCHITECTURE.md).
 
 ## Commits
 
+Before completing any task that changes tracked project content, review and
+validate the changes, then commit all changes belonging to that task. This applies
+to code, tests, documentation and configuration. Do not wait for a separate request
+to commit unless the user explicitly asks to leave the changes uncommitted.
+
+Keep commits focused. Preserve unrelated working-tree and staged changes; stage
+only the task's changes and inspect the staged diff before committing. Do not
+create an empty commit when a task produces no changes.
+
 Write commit messages using [Conventional Commits](https://www.conventionalcommits.org/)
 with the following format and rules:
 
