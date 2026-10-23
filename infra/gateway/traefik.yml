@@ -1,0 +1,37 @@
+entryPoints:
+  web:
+    address: ":80"
+    forwardedHeaders:
+      insecure: false
+    http:
+      aliasHeadersStrategy: delete
+  game:
+    address: ":9933"
+  health:
+    address: ":8082"
+providers:
+  file:
+    filename: /etc/traefik/dynamic.yml
+    watch: true
+ping:
+  entryPoint: health
+api:
+  dashboard: false
+  insecure: false
+log:
+  level: WARN
+accessLog:
+  format: json
+  fields:
+    defaultMode: drop
+    names:
+      StartUTC: keep
+      RequestMethod: keep
+      RouterName: keep
+      OriginStatus: keep
+      DownstreamStatus: keep
+      Duration: keep
+    headers:
+      defaultMode: drop
+    queryParameters:
+      defaultMode: drop

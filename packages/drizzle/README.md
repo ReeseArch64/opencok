@@ -22,9 +22,10 @@ A transaction belongs to one physical database. The architecture defines
 The root [Docker Compose environment](../../infra/compose/README.md) starts a local
 PostgreSQL instance and runs this setup automatically for the default topology.
 
-Copy the root `.env.example` to the root `.env` once and fill in
-`POSTGRES_ADMIN_URL` privately with a PostgreSQL administrative connection
-(for example, to the maintenance database). All commands use
+Copy the root `.env.example` to the root `.env` once and set `DATABASE_URL`
+privately. The host setup command uses its cluster credentials and the `postgres`
+maintenance database; an explicit process-level `POSTGRES_ADMIN_URL` remains an
+optional override. All commands use
 [`@opencok/env`](../env/README.md) and that single root file. Process/CI values
 override it; do not create package-local env files. From this package, run:
 
@@ -125,6 +126,15 @@ copy is required. Never edit a migration already applied to a deployment.
   use Drizzle's numeric number mode. Floating fields use real/double precision.
 - Binary values use PostgreSQL bytea and `Buffer`; the only custom column adapter
   preserves arbitrary bytes, including NUL.
+- `mail.rewardId` retains a TypeScript string contract but stores UTF-8 bytes in
+  PostgreSQL `bytea` through `utf8Bytea`. This preserves embedded NUL characters,
+  which PostgreSQL `text` cannot store. The adapter preserves BOM characters and
+  rejects invalid Unicode instead of replacing bytes. Raw SQL writers must send
+  UTF-8 buffers; do not cast bytea to text to read this field. The next kingdom
+  migration converts existing text using `convert_to(..., 'UTF8')`, preserving
+  literal backslashes and normal strings. Apply it to every kingdom. After
+  importing NUL-containing values, a text downgrade cannot represent those values;
+  restore an appropriate backup or retain a lossless representation before rollback.
 - Calendar-string fields retain text values and inline format/calendar constraints,
   including existing zero/sentinel strings. This keeps the current persisted values
   intact; changing these field contracts requires a separate domain migration.

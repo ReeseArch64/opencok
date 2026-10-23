@@ -1,0 +1,22 @@
+{
+  "name": "@opencok/api-service",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun --no-env-file src/index.ts",
+    "dev": "bun --no-env-file --watch src/index.ts",
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests",
+    "test:integration": "bun --no-env-file test ../../tests/stack"
+  },
+  "dependencies": {
+    "@opencok/drizzle": "workspace:*",
+    "@opencok/env": "workspace:*",
+    "drizzle-orm": "0.45.4"
+  },
+  "devDependencies": {
+    "@opencok/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  }
+}

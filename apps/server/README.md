@@ -16,14 +16,16 @@ preserved. Construction, queue completion, combat and other mutations return
 From the repository root:
 
 ```sh
-bun install --frozen-lockfile
-# Initialize PostgreSQL following packages/drizzle/README.md.
-bun run --cwd packages/drizzle db:setup
-bun run --cwd apps/server start
+docker compose --profile dev up --build -d --wait
 ```
 
-Configure the **root** `.env` using `.env.example`; preserve existing private
-values. The server uses `@opencok/env/server` and `@opencok/env/database`.
+The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the
+private `GAME_LOGIN_SECRET` exception. Other development values are direct
+Compose settings, still validated by `@opencok/env/server` and
+`@opencok/env/database`. Authorized XML comes from the complete local reference
+copy at `data/reference/server/runtime/base/resource`; the runtime does not
+reference another checkout. Direct Bun execution requires providing the remaining
+service/resource settings through its process environment.
 
 | Setting                          | Purpose/default                                                                                                                      |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -40,12 +42,13 @@ values. The server uses `@opencok/env/server` and `@opencok/env/database`.
 | `GAME_MAP_SIZE`                  | Defaults to `1200`.                                                                                                                  |
 | `DEPENDENCY_TIMEOUT_MS`          | Defaults to `5000`.                                                                                                                  |
 
-Provide reachable Redis and ZooKeeper services. The current root Compose environment
-starts PostgreSQL and its administration tools; it does not start this server,
-Redis or ZooKeeper. Each running realm needs its own TCP/health ports and
+The root [Compose stack](../../infra/compose/README.md) starts this server, the
+shared discovery API, gateway, PostgreSQL, Redis, ZooKeeper and MinIO CDN. It mounts the XML
+directory read-only and uses a container-specific database URL. For direct Bun
+execution, provide reachable PostgreSQL/Redis/ZooKeeper endpoints separately. Each running realm needs its own TCP/health ports and
 `KINGDOM_ID`. The PostgreSQL topology setup initializes realms 1 and 2 with the
 same schema. Advertise the corresponding `COK<id>` zone and TCP endpoint through
-the existing discovery issuer; discovery/registration are not migrated here.
+the existing discovery issuer; the shared API implements discovery; registration remains unavailable.
 
 Relative XML paths are resolved from the workspace root, independently of the
 command working directory. The XML loader requires `building.xml`, `role.xml` and `position.xml`.

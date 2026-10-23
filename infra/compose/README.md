@@ -1,101 +1,114 @@
-# Local database and pgAdmin environment
+# Local development stack
 
-The root `docker-compose.yml` runs PostgreSQL 17.11, a Bun 1.4.2 initialization job
-and pgAdmin 4. The setup job prepares `opencok_global` and both default kingdom
-databases with the maintained Drizzle migrations, then writes the pgAdmin server
-registration without storing the database password. See the
-[architecture](../../.github/ARCHITECTURE.md#151-postgresql-database-package) for
-database ownership and namespace boundaries.
+Compose is the local development environment. Production uses a separate deployment
+and does not depend on this Compose configuration. Development settings are written
+directly in `docker-compose.yml`; only the game login secret is substituted from the
+root `.env`.
 
-## Start
+All services use profiles `all` and `dev`, except pgAdmin, which uses only `all`.
+Chat and media/files remain outside this stage. MinIO and `minio-setup` provide the
+client CDN alongside the TypeScript API/server, gateway, PostgreSQL, Redis and
+ZooKeeper.
 
-From the repository root:
+## Local inputs and start
+
+The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the private
+`GAME_LOGIN_SECRET` exception. Use `.env.example` as the reference and preserve
+existing values. No app-local env files are needed. The example database URL uses
+Compose service DNS; host-side tools need the published PostgreSQL port 55432.
+
+After changing `GAME_LOGIN_SECRET`, recreate the server to apply it:
+
+```sh
+docker compose --profile dev up -d --no-deps --wait server
+```
+
+A container restart retains its previous environment. A stale login secret causes
+signature rejection (`LoginErr`) even when the root `.env` is correct.
+
+The full authorized server reference is copied into `data/reference/server`.
+The runtime mounts only `data/reference/server/runtime/base/resource` read-only at
+`/resources`. It has no dependency on another checkout or a user home directory.
+The reference contains private legacy inputs and stays ignored by Git, outside
+runtime images; maintained TypeScript code remains under `apps/server`.
+
+The CDN source is `data/cdn/data`; see the [CDN guide](../storage/README.md) for
+its two extracted host trees. These local inputs are not supplied by the public
+repository. Missing input directories fail the mount instead of being silently
+created. Obtain the authorized inputs before starting a new checkout.
 
 ```sh
 docker compose --profile dev config --quiet
-docker compose --profile dev up --build -d
-docker compose --profile dev logs database-setup
+docker compose --profile dev up --build -d --wait
 docker compose --profile dev ps -a
+
+# Include pgAdmin.
+docker compose --profile all up --build -d --wait
 ```
 
-The services belong to profiles `dev` and `all`; starting without a profile does
-not select them. The current Compose file explicitly defines local development
-credentials, container names, platform and published ports. PostgreSQL is available
-on port 5432 and pgAdmin at <http://localhost:5050>. Sign in using the pgAdmin
-credentials configured in that file. The pgAdmin login and PostgreSQL login are
-separate accounts. Port mappings currently bind all host interfaces as configured
-in Compose; access follows the host's network/firewall settings.
+PostgreSQL setup applies pending Drizzle migrations to the global database and both
+kingdom databases. API/server wait for setup and their dependencies. MinIO setup
+imports the CDN; the gateway waits for API/server health and successful CDN setup.
+The one-shot jobs exit with code zero after completion.
 
-PostgreSQL must become healthy before `database-setup` starts. That job should
-finish with exit code 0; its stopped container is expected. pgAdmin waits for the
-job to succeed. Its own healthcheck checks the HTTP endpoint. Check both service
-health and initialization completion before using the database.
+## Direct development values
 
-The server `OpenCok local PostgreSQL` is automatically registered in pgAdmin under
-`OpenCok`, using the internal address `database:5432`. Enter the PostgreSQL password
-when connecting. The global database and both kingdom databases appear on that
-server. The generated registration contains the username and connection metadata,
-without a password. Registration is imported when pgAdmin initializes its own
-configuration database; edit an existing saved server in pgAdmin if you later
-change its connection settings.
+| Endpoint | Published port |
+| --- | --- |
+| Gateway HTTP discovery and CDN | 80 |
+| Gateway game TCP | 9933 |
+| PostgreSQL | 55432 |
+| MinIO object endpoint | 9000 |
+| MinIO console | 9001 |
+| pgAdmin, profile `all` only | 5050 |
 
-## Configuration and boundaries
+Port mappings have no host-IP prefix. Internal connections use service DNS:
+`database:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933` and
+`storage:9000`. The API and game server have no directly published host ports.
+The local API advertises `192.168.1.104:9933`; edit that direct value if the host
+address changes. The MinIO console redirect uses the same local host address.
 
-The PostgreSQL container and setup job share the username/password explicitly
-configured in Compose. Setup validates these through `@opencok/env/database` and
-uses URL setters to encode special characters. Host-side tools continue using the
-single root `.env`: set `DATABASE_URL` for the target application database and
-`POSTGRES_ADMIN_URL` for the maintenance database. No package-local env file is
-required. See the [environment guide](../../packages/env/README.md).
+The realm is explicitly configured as ID 1 / `opencok_kingdom_1`, with shared global
+state in `opencok_global`. The second kingdom database keeps the same schema.
+Changing the active realm requires matching server database/ID and API directory
+configuration; the disposable test exercises COK2 through explicit overrides.
 
-The database and setup job use the internal network. pgAdmin also uses the external
-network for its interface. The fixed network/container names represent one local
-installation; use overrides with unique names/ports for another copy. The image
-build context includes only workspace manifests and database runtime code/migrations;
-private env files, mobile artifacts, Git metadata, data and tests are excluded.
-No root env file is copied into the image.
+Application settings are still validated by `@opencok/env`. Compose provides the
+container values directly; host-side tools use the root database URL. Database and
+MinIO credentials in Compose are local development values. The prepared client's
+existing login secret remains in the ignored root env file rather than source.
 
-## Persistence and maintenance
+## Persistence and recovery
 
-The `postgres-data` volume mounts `/var/lib/postgresql/data`; PostgreSQL stores its
-cluster in the configured `pgdata` subdirectory. The PostgreSQL-specific volume name
-avoids reusing the legacy MariaDB `opencok_database-data` volume. That legacy volume
-is preserved; this setup does not import or convert its data.
-`pgadmin-data` stores the pgAdmin account and saved settings; `pgadmin-servers` shares
-the generated registration from setup to pgAdmin with a read-only consumer mount.
-Routine stop/recreation and `docker compose --profile dev down` retain these volumes.
-Adding `--volumes` deletes the local state; use it only for an intentional reset of
-disposable data.
+The existing PostgreSQL, Redis, ZooKeeper and MinIO named volumes are preserved.
+The MariaDB volume is never mounted by this stack. Startup does not reseed players,
+reactivate accounts, flush Redis or remove objects/volumes. PostgreSQL remains the
+authority for player progress. Back up databases and local inputs before changes;
+an image rollback does not reverse SQL migrations.
 
 ```sh
-# Apply pending migrations after changing source/migrations.
-docker compose --profile dev up --build -d
+# Apply only pending database migrations.
 docker compose --profile dev run --rm database-setup
-
-# Stop the environment while preserving volumes.
+# Stop services while retaining volumes.
 docker compose --profile dev down
 ```
 
-Initialization creates missing databases and applies pending migrations; reruns
-preserve existing records. A partial failure can be retried after correcting the
-cause. Back up existing databases before applying new migrations. Reverting an image
-does not reverse already-applied SQL; preserve immutable migration history and use
-forward corrections or a verified backup when recovery is needed.
-
-PostgreSQL initialization credentials apply only to a new cluster. Changing Compose
-values does not change credentials already stored in a volume. Rotate credentials
-in PostgreSQL and update configuration together; do not delete the volume to resolve
-authentication errors. pgAdmin's initial login settings likewise initialize a new
-configuration store; manage an existing account through pgAdmin.
-
-This is the implemented local persistence environment. Application services and other
-infrastructure adapters will be added when their runtime entry points exist. It is a
-single PostgreSQL instance, without replicas or a production HA claim.
+PostgreSQL initialization passwords do not rotate existing accounts. Keep direct
+Compose credentials aligned with the existing cluster; do not delete a volume to
+repair authentication. pgAdmin registration uses `database:5432` and omits the
+database password.
 
 ## Verification
 
-Verification uses an isolated Compose project and overrides for unique container/network
-names, loopback ports, synthetic credentials and disposable volumes. It checks image
-build, healthchecks, initialization, expected database/table counts, repeated setup,
-persistence after recreation, pgAdmin login/server import and private build exclusions.
-Only the verification project's resources are removed afterward.
+```sh
+bun run --cwd apps/api check-types
+bun run --cwd apps/server check-types
+bun run --cwd packages/env test
+bun run test:stack
+```
+
+The integration test creates an isolated Compose configuration with synthetic
+accounts, XML and CDN files, unique ports/networks and disposable volumes. It
+verifies discovery, SFS login, CDN reads/Range/ETag, private paths, unchanged player
+state and Redis failure/recovery. Cleanup removes only its own test project.
+Native APK rendering and unimplemented gameplay still require separate evidence.

@@ -1,0 +1,54 @@
+name: Local TypeScript stack
+
+on:
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - "apps/server/**"
+      - "packages/drizzle/**"
+      - "packages/env/**"
+      - "packages/config/**"
+      - "infra/**"
+      - "tests/stack/**"
+      - "docker-compose.yml"
+      - ".dockerignore"
+      - ".env.example"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/stack-tests.yml"
+  push:
+    branches: [develop]
+    paths:
+      - "apps/api/**"
+      - "apps/server/**"
+      - "packages/drizzle/**"
+      - "packages/env/**"
+      - "packages/config/**"
+      - "infra/**"
+      - "tests/stack/**"
+      - "docker-compose.yml"
+      - ".dockerignore"
+      - ".env.example"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/stack-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run --cwd apps/api check-types
+      - run: bun run --cwd packages/env check-types
+      - run: bunx --no-install tsc --noEmit -p tests/stack/tsconfig.json
+      - run: bun run --cwd apps/api test
+      - run: bun run --cwd packages/env test
+      - run: bun run test:stack
