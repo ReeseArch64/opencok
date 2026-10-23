@@ -12,7 +12,8 @@
   "type": "module",
   "exports": {
     "./account": "./src/account.ts",
-    "./game": "./src/game.ts"
+    "./game": "./src/game.ts",
+    "./chat": "./src/chat.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",

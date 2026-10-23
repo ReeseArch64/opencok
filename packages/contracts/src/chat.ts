@@ -1,0 +1,115 @@
+import type { IncomingMessage, Server, ServerResponse } from "node:http";
+
+export interface Session {
+  tokenHash: Buffer;
+  uid: string;
+  createdAt: Date;
+  expiresAt: Date;
+}
+
+export interface SessionStore {
+  save(session: Session): Promise<void>;
+  findByTokenHash(tokenHash: Buffer): Promise<{ uid: string } | null>;
+}
+
+export interface PlayerState {
+  serverId: number;
+  originalServerId: number;
+  allianceId: string | null;
+  membershipAllianceId: string | null;
+  language: string;
+}
+
+export type RoomGroup = "original" | "country" | "alliance" | "global" | "local";
+export interface Room {
+  group: RoomGroup;
+  roomId: string;
+}
+
+export type PlayerStateLoader = (uid: string) => Promise<PlayerState | null>;
+export type RoomAuthorizer = (uid: string, roomId: string) => Promise<Room | null>;
+
+export interface MessageInput {
+  roomId: string;
+  senderUid: string;
+  idempotencyKey: string;
+  body: string;
+  now: Date;
+}
+
+export interface ChatMessage {
+  sequenceId: number;
+  roomId: string;
+  senderUid: string;
+  idempotencyKey: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface MessageStore {
+  send(input: MessageInput): Promise<ChatMessage & { inserted: boolean }>;
+  listRecent(roomId: string, afterMs?: number): Promise<ChatMessage[]>;
+  listRange(roomId: string, startMs: number, endMs: number): Promise<ChatMessage[]>;
+}
+
+export interface Connection {
+  joinedRooms: Set<string>;
+}
+
+export type Frame = Record<string, unknown>;
+export interface Peer {
+  uid: string;
+  connection: Connection;
+  sendFrame(frame: Frame): void;
+}
+
+export interface CommandContext extends Peer {
+  params: Record<string, unknown>;
+  sendTime?: unknown;
+  peers: Set<Peer>;
+}
+
+export type CommandHandler = (context: CommandContext) => Promise<unknown>;
+export type CommandHandlers = Record<string, CommandHandler>;
+export type Log = (event: { correlationId?: string; operation: string; category: string }) => void;
+export type HttpHandler = (request: IncomingMessage, response: ServerResponse) => void;
+export type AsyncHttpHandler = (
+  request: IncomingMessage,
+  response: ServerResponse,
+) => Promise<void>;
+export type TokenVerifier = (
+  token: unknown,
+  claimedUid?: unknown,
+) => Promise<{ uid: string } | null>;
+
+export interface WebSocketGateway {
+  attach(server: Server): void;
+  close(): Promise<void>;
+}
+
+export interface RoomHandlerOptions {
+  authorizeRoom: RoomAuthorizer;
+  messages: MessageStore;
+}
+
+export interface IncomingFrame {
+  cmd: string;
+  params: Record<string, unknown>;
+  sendTime?: unknown;
+}
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+export function isSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value);
+}
+
+export interface ChatRepository {
+  sessions: SessionStore;
+  messages: MessageStore;
+  loadPlayerState: PlayerStateLoader;
+  cleanup(): Promise<{ messages: number; sessions: number }>;
+  health(): Promise<void>;
+}

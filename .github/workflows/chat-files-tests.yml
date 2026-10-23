@@ -1,0 +1,42 @@
+name: Chat and files services
+
+on:
+  pull_request:
+    paths:
+      [
+        "apps/chat/**",
+        "apps/files/**",
+        "packages/**",
+        "package.json",
+        "bun.lock",
+        ".github/workflows/chat-files-tests.yml",
+      ]
+  push:
+    branches: [develop]
+    paths:
+      [
+        "apps/chat/**",
+        "apps/files/**",
+        "packages/**",
+        "package.json",
+        "bun.lock",
+        ".github/workflows/chat-files-tests.yml",
+      ]
+
+permissions:
+  contents: read
+
+jobs:
+  chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run --cwd apps/chat check-types
+      - run: bun run --cwd apps/chat test
+      - run: bun run --cwd apps/chat test:integration
+      - run: bun run test:packages
