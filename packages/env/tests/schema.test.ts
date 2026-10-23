@@ -8,14 +8,14 @@ test("general and database Zod schemas expose only their own domain", () => {
   expect(databaseSchema.safeParse({ DATABASE_ROLE: "kingdom" }).success).toBe(true);
   expect(parseEnvironment({ NODE_ENV: "testing", DATABASE_URL: "invalid" })).toEqual({ NODE_ENV: "testing" });
   const database = parseDatabaseEnvironment({ NODE_ENV: "invalid", DATABASE_ROLE: "global" });
-  expect(database).toEqual({ DATABASE_ROLE: "global" });
+  expect(database).toEqual({ DATABASE_ROLE: "global", POSTGRES_USER: "postgres" });
   expect(Object.isFrozen(database)).toBe(true);
   expect(Object.isFrozen(parseEnvironment({}))).toBe(true);
 });
 
 test("defaults and blank optional settings permit offline tools", () => {
   expect(parseEnvironment({ NODE_ENV: " " })).toEqual({ NODE_ENV: "development" });
-  expect(parseDatabaseEnvironment({ DATABASE_URL: " ", POSTGRES_ADMIN_URL: "", DATABASE_ROLE: "" })).toEqual({ DATABASE_ROLE: undefined, DATABASE_URL: undefined, POSTGRES_ADMIN_URL: undefined });
+  expect(parseDatabaseEnvironment({ DATABASE_URL: " ", POSTGRES_ADMIN_URL: "", DATABASE_ROLE: "" })).toEqual({ DATABASE_ROLE: undefined, DATABASE_URL: undefined, POSTGRES_ADMIN_URL: undefined, POSTGRES_USER: "postgres" });
 });
 
 test("accepts supported modes, database roles and PostgreSQL URL formats", () => {
@@ -56,4 +56,12 @@ test("operation-specific requirements report missing keys and retain narrow type
     // @ts-expect-error General settings are absent from the database environment.
     parseDatabaseEnvironment({}).NODE_ENV;
   }
+});
+
+
+test("Compose credentials preserve special characters and require a password per operation", () => {
+  const password = " synthetic@value:/?#$ ";
+  const env = parseDatabaseEnvironment({ POSTGRES_USER: "compose_check", POSTGRES_PASSWORD: password });
+  expect(env.POSTGRES_PASSWORD).toBe(password); expect(env.POSTGRES_USER).toBe("compose_check");
+  expect(() => requireEnvironment(parseDatabaseEnvironment({ POSTGRES_PASSWORD: "" }), "POSTGRES_PASSWORD")).toThrow("POSTGRES_PASSWORD");
 });

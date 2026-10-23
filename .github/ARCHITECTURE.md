@@ -1530,6 +1530,18 @@ clock, without waiting one or seven real days.
 
 ## 23. Development environment and administrative tools
 
+The implemented root `docker-compose.yml` starts PostgreSQL, a one-shot Drizzle
+setup job and pgAdmin 4 under the `dev` / `all` profiles. Setup waits for database
+health, creates/migrates the global database and both default kingdoms, and generates
+a password-free pgAdmin server registration. Named volumes persist the cluster and
+pgAdmin settings. The database/setup use the internal network; pgAdmin also uses the
+external network. Compose explicitly configures local credentials and host ports;
+application tools use the single root `.env`. The build context excludes private
+files and mobile artifacts. The
+[local environment guide](../infra/compose/README.md) documents startup, verification,
+credential changes and recovery. This single-instance local environment does not
+implement the production replica/managed-service topology.
+
 Development uses Compose with proposed profiles `core`, `dev-tools` and
 `tests`. Administrative interfaces are developer tools and not game startup
 dependencies. Application CI does not need to start these interfaces to test the core.

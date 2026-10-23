@@ -6,7 +6,7 @@ import { env, rootEnvPath } from "@opencok/env/database";
 // and pass validated settings so it cannot replace explicit process overrides.
 const childEnvironment: Record<string, string | undefined> = {
   ...process.env,
-  ...Object.fromEntries(Object.entries(env).map(([key, value]) => [key, value ?? ""])),
+  ...Object.fromEntries(Object.entries(env).map(([key, value]) => [key, String(value ?? "")])),
   DOTENV_CONFIG_PATH: rootEnvPath,
   DOTENV_KEY: "",
 };

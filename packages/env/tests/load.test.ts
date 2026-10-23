@@ -77,6 +77,6 @@ test("public imports validate and expose only their selected domain", async () =
     await writeFile(join(item.root, ".env"), "NODE_ENV=invalid\nDATABASE_ROLE=kingdom\n");
     await writeFile(item.script, `import {env,requireEnv} from '@opencok/env/database'; console.log(JSON.stringify({keys:Object.keys(env),role:requireEnv('DATABASE_ROLE')}));`);
     const database = await run(item.script, tmpdir());
-    expect(database.code).toBe(0); expect(JSON.parse(database.stdout)).toEqual({ keys: ["DATABASE_ROLE"], role: "kingdom" });
+    expect(database.code).toBe(0); expect(JSON.parse(database.stdout)).toEqual({ keys: ["POSTGRES_USER", "DATABASE_ROLE"], role: "kingdom" });
   } finally { await rm(item.root, { recursive: true, force: true }); }
 });

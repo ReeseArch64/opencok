@@ -1,0 +1,108 @@
+name: opencok
+
+networks:
+  opencok-internal-network:
+    name: opencok-internal-network
+    internal: true
+    driver: bridge
+
+  opencok-external-network:
+    name: opencok-external-network
+    internal: false
+    driver: bridge
+
+volumes:
+  postgres-data: ~
+  pgadmin-data: ~
+  pgadmin-servers: ~
+
+services:
+  database:
+    image: postgres:17.11-bookworm
+    container_name: opencok-database
+    platform: linux/amd64
+    restart: unless-stopped
+
+    profiles: ["all", "dev"]
+    stop_grace_period: 60s
+    security_opt: [no-new-privileges:true]
+    networks: [opencok-internal-network]
+
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    ports:
+      - 5432:5432
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$${POSTGRES_USER}" -d postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  database-setup:
+    build:
+      context: .
+      dockerfile: infra/compose/database.Dockerfile
+    container_name: opencok-database-setup
+    platform: linux/amd64
+    restart: no
+
+    profiles: ["all", "dev"]
+    stop_grace_period: 60s
+    security_opt: [no-new-privileges:true]
+    networks: [opencok-internal-network]
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    depends_on:
+      database:
+        condition: service_healthy
+    
+    volumes:
+      - pgadmin-servers:/configuration
+
+  pgadmin:
+    image: dpage/pgadmin4:9.18
+    container_name: opencok-pgadmin
+    platform: linux/amd64
+    restart: unless-stopped
+
+    profiles: ["all", "dev"]
+    stop_grace_period: 60s
+    security_opt: [no-new-privileges:true]
+    networks: [opencok-internal-network, opencok-external-network]
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@opencok.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_LISTEN_PORT: 8080
+      PGADMIN_SERVER_JSON_FILE: /configuration/servers.json
+
+    ports:
+      - 5050:8080
+
+    depends_on:
+      database-setup:
+        condition: service_completed_successfully
+    
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - pgadmin-servers:/configuration:ro
+    
+    healthcheck:
+      test: [CMD, /venv/bin/python3, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/misc/ping', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s

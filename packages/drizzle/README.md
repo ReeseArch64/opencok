@@ -19,6 +19,9 @@ A transaction belongs to one physical database. The architecture defines
 
 ## Initialize the default topology
 
+The root [Docker Compose environment](../../infra/compose/README.md) starts a local
+PostgreSQL instance and runs this setup automatically for the default topology.
+
 Copy the root `.env.example` to the root `.env` once and fill in
 `POSTGRES_ADMIN_URL` privately with a PostgreSQL administrative connection
 (for example, to the maintenance database). All commands use

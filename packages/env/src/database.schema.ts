@@ -9,6 +9,8 @@ const postgresUrl = z.url({ protocol: /^postgres(ql)?$/ }).refine(value => {
 });
 
 export const databaseSchema = z.object({
+  POSTGRES_USER: z.preprocess(blankToUndefined, z.string().min(1).default("postgres")),
+  POSTGRES_PASSWORD: z.preprocess(value => value === "" ? undefined : value, z.string().min(1).optional()),
   DATABASE_ROLE: z.preprocess(blankToUndefined, z.enum(["global", "kingdom"]).optional()),
   DATABASE_URL: z.preprocess(blankToUndefined, postgresUrl.optional()),
   POSTGRES_ADMIN_URL: z.preprocess(blankToUndefined, postgresUrl.optional()),

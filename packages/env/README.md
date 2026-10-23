@@ -24,6 +24,8 @@ const connectionString = requireEnv("DATABASE_URL");
 | `@opencok/env/database` | `DATABASE_ROLE` | `global`, `kingdom` | Required by Drizzle Kit and single-database migration |
 | `@opencok/env/database` | `DATABASE_URL` | `postgres://` or `postgresql://` URL with host and database | Required by server composition and single-database migration |
 | `@opencok/env/database` | `POSTGRES_ADMIN_URL` | PostgreSQL URL with host and database | Required by topology setup |
+| `@opencok/env/database` | `POSTGRES_USER` | Nonblank string | Local Compose user; defaults to `postgres` |
+| `@opencok/env/database` | `POSTGRES_PASSWORD` | Nonempty string, preserved verbatim | Required by local Compose setup |
 
 Each entry validates and exposes only its own domain. Types are inferred from Zod;
 the general entry never re-exports database variables. Pure schemas are available
@@ -35,6 +37,9 @@ clear optional settings. A missing file is allowed. Invalid nonblank values in t
 selected domain fail at import; `requireEnv` fails when a specific setting is absent. Diagnostics contain
 variable names, never supplied values or raw Zod issues. Do not log environment
 objects or URLs.
+
+The Compose setup password preserves spaces and special characters. An empty
+password is absent; the initialization job requires it. See the [local environment guide](../../infra/compose/README.md).
 
 The read-only object is a snapshot at import and does not mutate `process.env`.
 Only the listed keys are exposed. Parsing uses native `node:util.parseEnv`: quoted
