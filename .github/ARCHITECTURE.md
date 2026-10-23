@@ -370,6 +370,15 @@ Drizzle PostgreSQL schemas and routes player reads through the global account re
 24-hour retention, process-local broadcasts, startup, recovery and unvalidated client
 integration. Seven-day archival and production Node execution remain pending.
 
+### Migrated files implementation
+
+`apps/files` composes `api/files`, `identity/avatar`, `validations/image` and
+`storage/images` through the shared scoped HTTP runtime. `contracts/files` defines
+storage ports and compatibility limits, while `env/files` validates configuration.
+The [files runbook](../apps/files/README.md) covers private S3/MinIO provisioning,
+signing keys, backup and the JPEG/PNG-only avatar contract. Full media lifecycle,
+animated formats, realm grant issuance and production Node execution remain pending.
+
 ### Package groups
 
 | Group                       | Existing packages that can fulfill this role                                                                                  | Dependency rule                                                                           |
