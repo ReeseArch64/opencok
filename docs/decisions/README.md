@@ -27,3 +27,4 @@ This index bootstraps the ADR practice without introducing an extra technology d
 
 - [ADR-0001: Adopt MongoDB for document storage](0001-adopt-mongodb-for-documents.md) — accepted
 - [ADR-0002: Adopt PostgreSQL for authoritative transactional state](0002-adopt-postgresql-for-authoritative-state.md) — accepted
+- [ADR-0003: Adopt Mongo Express for development inspection](0003-adopt-mongo-express-for-development.md) — accepted
