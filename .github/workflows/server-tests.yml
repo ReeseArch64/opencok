@@ -29,12 +29,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
       - run: bun run --cwd apps/server check-types
+      - run: bun run --cwd packages/connection check-types
+      - run: bun run --cwd packages/core check-types
+      - run: bun run --cwd packages/core test
       - run: bun run --cwd packages/env test
       - run: bun run --cwd apps/server test
       - run: bun run --cwd apps/server test:mutations

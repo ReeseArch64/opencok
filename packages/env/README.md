@@ -87,3 +87,18 @@ For the current local Compose workflow, the root file is limited to `NODE_ENV`,
 service values are hardcoded in Compose and are still validated by the relevant
 runtime schema. Production deployment is separate. Authorized resources come
 from the ignored local `data/reference/server` copy, not another checkout.
+
+## Effect application configuration
+
+API and realm composition use `@opencok/env/effect` as defined in
+[ADR-0012](../../docs/decisions/0012-adopt-effect-for-service-composition.md).
+`EnvironmentLive` reads the same root file and process overrides once when its
+Layer is built, rather than at module import. `EnvironmentSource` can be replaced
+with a synthetic Layer in tests; `readEnvironment(schema)` and `databaseUrl`
+validate that snapshot inside Effect and report only invalid/missing key names.
+
+App-specific configuration services map these validated settings to adapter
+contracts. API and realm schemas share realm identity, database naming, Redis URL,
+port and timeout validators, retaining their different defaults and required keys.
+Zod remains the single validation definition; no parallel Effect Config schema is
+maintained. Existing synchronous subpaths remain for database/offline tools.

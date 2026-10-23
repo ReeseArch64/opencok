@@ -7,11 +7,15 @@ See the [architecture](../../.github/ARCHITECTURE.md#154-local-typescript-stack)
 
 ## Code organization
 
-`src/index.ts` owns process startup and shutdown, and `src/config.ts` maps the
-validated environment. The composition root wires the shared packages described
+`src/index.ts` composes Effect Layers and runs the shared process runtime;
+`src/config.ts` provides the ApiConfig service from the shared environment Layer. The composition root wires the shared packages described
 in the [architecture package map](../../.github/ARCHITECTURE.md#implemented-api-and-realm-package-boundaries).
 `src/app.ts` connects `@opencok/api/handler` to the account repository, server
-directory and Redis health adapter.
+directory and Redis health adapter. Account pools are registered in a scope before
+startup checks, and the HTTP scope closes before dependency scopes. Both apps use
+`@opencok/core/http` and `@opencok/core/runtime`; no per-app signal handlers or
+ambient configuration imports remain. See
+[ADR-0012](../../docs/decisions/0012-adopt-effect-for-service-composition.md).
 
 ## Run
 

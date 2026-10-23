@@ -2,11 +2,22 @@
   "name": "@opencok/core",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test tests"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "dependencies": {
+    "effect": "catalog:",
+    "@effect/platform-bun": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./runtime": "./src/runtime.ts",
+    "./resource": "./src/resource.ts",
+    "./http": "./src/http.ts"
   }
 }
