@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1",
+    "name": "OpenCoK Kingdom 1",
+    "ip": "127.0.0.1",
+    "port": "9933",
+    "zone": "COK1",
+    "recommend": "true",
+    "test": "false"
+  }
+]

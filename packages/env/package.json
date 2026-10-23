@@ -8,7 +8,9 @@
     "./database": "./src/database.ts",
     "./database/schema": "./src/database.schema.ts",
     "./server": "./src/server.ts",
-    "./server/schema": "./src/server.schema.ts"
+    "./server/schema": "./src/server.schema.ts",
+    "./api": "./src/api.ts",
+    "./api/schema": "./src/api.schema.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",

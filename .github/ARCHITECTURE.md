@@ -1100,7 +1100,12 @@ columns retain their existing text/value contracts, including sentinel values, w
 inline format/calendar checks. Changing those data contracts requires its own domain
 migration. Automatic application update timestamps use Drizzle's onUpdate callback;
 explicit SQL writers must supply the required update fields. Text comparisons use
-the database's PostgreSQL collation and ordinary SQL operators.
+the database's PostgreSQL collation and ordinary SQL operators. `mail.rewardId` is
+an explicit exception: the application still reads/writes a string, while its
+Drizzle adapter stores UTF-8 `bytea` to preserve embedded NUL characters. The
+incremental kingdom migration converts existing text without interpreting escapes;
+raw SQL writers use UTF-8 bytes. This enables lossless legacy data import without
+removing characters or adding player-specific exceptions to application code.
 
 Unit tests, one snapshot per table, and PostgreSQL persistence E2E cover the complete
 schema, defaults/constraints, transactions, migration repeatability, realm isolation
@@ -1142,11 +1147,44 @@ apply migrations or provision player state.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
-fencing and recovery tests before enabling writes. Account/discovery migration,
-MySQL-to-PostgreSQL player transfer and native APK validation remain separate work.
+fencing and recovery tests before enabling writes. Account provisioning,
+controlled player-data cutover and native APK validation remain separate work.
 Synthetic TCP tests validate the two PostgreSQL realms, dependencies and unchanged
 player state; they do not prove APK rendering. See the [server guide](../apps/server/README.md)
 for configuration, supported commands, limitations and verification.
+
+### 15.4. Local TypeScript stack
+
+The root Compose environment now composes Traefik, the shared Bun discovery API,
+one read-only Bun realm server, PostgreSQL, Redis and ZooKeeper. MinIO and its one-shot setup job supply the client CDN. Chat and media/files
+have no services or gateway routes in this stage. All services use `all`/`dev`
+profiles except pgAdmin, which uses `all` only. The broader production architecture remains the target;
+this local stack does not establish TLS, Firebase or production readiness.
+
+The API reads global account/mapping tables through existing Drizzle models. It
+preserves the three mobile discovery aliases and wire encodings while removing
+account reactivation, legacy Redis counters, hardcoded country/server selection,
+GeoIP/upload-key setup and unrelated external update metadata. Only existing active
+accounts resolve to an existing realm; discovery never provisions or mutates state.
+Server-directory metadata is configured separately from bind addresses. The API
+exposes liveness and bounded PostgreSQL/Redis readiness with sanitized logs.
+
+Compose is local development only, with direct service values and no host-IP
+prefixes on published ports. The root env contains `NODE_ENV`, `DATABASE_ROLE`,
+`DATABASE_URL` and the private game-login-secret exception. Application values
+still pass the dedicated API/server Zod schemas. Container database URLs are
+direct Compose values, separate from the host-side root URL. The authorized
+server reference is copied under ignored `data/reference/server`; runtime XML
+is mounted from that local copy, without another checkout dependency. Persistent PostgreSQL/Redis/ZooKeeper volumes are
+retained; initialization applies pending migrations before app readiness. The
+initial active TCP route is `server:9933` for COK1, and discovery advertises the
+configured host-facing port. Both kingdom databases retain the shared schema;
+activating another server/endpoint requires its own prepared account state.
+
+See the [local stack guide](../infra/compose/README.md) for profiles, configuration,
+private resource mounts and recovery. A disposable Compose test builds images and
+exercises PostgreSQL discovery and real SFS login through Traefik, preserving
+synthetic state and testing dependency failure without using player databases.
 
 ## 16. Simulation execution and offline progress
 

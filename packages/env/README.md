@@ -74,3 +74,16 @@ This validates `GAME_*`, `KINGDOM_ID`, the database routing names and
 `DEPENDENCY_TIMEOUT_MS` only when requested, so offline/database tools do not
 require a game secret or XML directory. The [server guide](../../apps/server/README.md)
 documents all keys.
+
+The shared discovery service uses `loadApiEnvironment()` from `@opencok/env/api`,
+with its pure validator at `@opencok/env/api/schema`. Database URLs stay in the
+database subpath; API settings select listener, dependency timeout, directory and
+advertised client endpoint. See the [API guide](../../apps/api/README.md).
+Compose declares each application's internal `DATABASE_URL` directly, while
+host tools retain the host-facing root value; container builds exclude `.env`.
+
+For the current local Compose workflow, the root file is limited to `NODE_ENV`,
+`DATABASE_ROLE`, `DATABASE_URL` and the `GAME_LOGIN_SECRET` exception. Other local
+service values are hardcoded in Compose and are still validated by the relevant
+runtime schema. Production deployment is separate. Authorized resources come
+from the ignored local `data/reference/server` copy, not another checkout.

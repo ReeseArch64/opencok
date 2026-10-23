@@ -1,0 +1,68 @@
+http:
+  routers:
+    health:
+      entryPoints: [web]
+      rule: (Path(`/healthz`) || Path(`/readyz`) || Path(`/_health.php`)) && (Method(`GET`) || Method(`HEAD`))
+      service: api
+    discovery:
+      entryPoints: [web]
+      rule: (Path(`/gameservice/getserverlist.php`) || Path(`/gameservice/getline.php`) || Path(`/gameservice/getserverlist_memoryold.php`)) && (Method(`GET`) || Method(`HEAD`) || Method(`POST`))
+      middlewares: [discovery-body]
+      service: api
+    cdn-cok:
+      entryPoints: [web]
+      rule: PathPrefix(`/cok/`) && !PathPrefix(`/cok/img/`) && !PathRegexp(`(^|/)\.`) && !PathRegexp(`(?i)\.part(/|$)`) && !PathRegexp(`(?i)\.(php[0-9]*|phtml|phar|cgi|pl|py|sh|bash|asp|aspx|jsp)([./]|$)`) && (Method(`GET`) || Method(`HEAD`))
+      middlewares: [cdn-cok-path]
+      service: cdn-storage
+    cdn-assets:
+      entryPoints: [web]
+      rule: PathPrefix(`/100001/`) && !PathRegexp(`(^|/)\.`) && !PathRegexp(`(?i)\.part(/|$)`) && !PathRegexp(`(?i)\.(php[0-9]*|phtml|phar|cgi|pl|py|sh|bash|asp|aspx|jsp)([./]|$)`) && (Method(`GET`) || Method(`HEAD`))
+      middlewares: [cdn-assets-path]
+      service: cdn-storage
+  middlewares:
+    cdn-cok-path:
+      addPrefix:
+        prefix: /opencok-cdn/cok.eleximg.com
+    cdn-assets-path:
+      addPrefix:
+        prefix: /opencok-cdn/asset.cok.chat
+    discovery-body:
+      buffering:
+        maxRequestBodyBytes: 65536
+  services:
+    cdn-storage:
+      loadBalancer:
+        passHostHeader: false
+        serversTransport: cdn-transport
+        servers:
+          - url: http://storage:9000
+    api:
+      loadBalancer:
+        serversTransport: api-transport
+        servers:
+          - url: http://api:8080
+  serversTransports:
+    cdn-transport:
+      forwardingTimeouts:
+        dialTimeout: 3s
+        responseHeaderTimeout: 65s
+    api-transport:
+      forwardingTimeouts:
+        dialTimeout: 3s
+        responseHeaderTimeout: 10s
+
+tcp:
+  routers:
+    game:
+      entryPoints: [game]
+      rule: HostSNI(`*`)
+      service: game
+  services:
+    game:
+      loadBalancer:
+        serversTransport: game-transport
+        servers:
+          - address: server:9933
+  serversTransports:
+    game-transport:
+      dialTimeout: 3s

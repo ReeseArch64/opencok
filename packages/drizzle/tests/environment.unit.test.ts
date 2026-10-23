@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { fileURLToPath } from "node:url";
 
-for (const [script, key] of [["migrate", "DATABASE_URL"], ["setup", "POSTGRES_ADMIN_URL"]] as const) {
+for (const [script, key] of [["migrate", "DATABASE_URL"], ["setup", "DATABASE_URL"]] as const) {
   test(`${script} reports its missing connection setting before database access`, async () => {
     const child = Bun.spawn([process.execPath, "--no-env-file", `scripts/${script}.ts`], {
       cwd: fileURLToPath(new URL("..", import.meta.url)),
