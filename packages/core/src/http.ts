@@ -3,15 +3,15 @@ import { Effect } from "effect";
 import { HttpServerRequest, HttpServerResponse } from "effect/http";
 
 export function serveHttp(
-  config: { host: string; port: number },
+  config: { host: string; port: number; maxRequestBodySize?: number; idleTimeout?: number },
   fetch: (request: Request) => Promise<Response> | Response,
 ) {
   return Effect.gen(function* () {
     const server = yield* BunHttpServer.make({
       hostname: config.host,
       port: config.port,
-      maxRequestBodySize: 65536,
-      idleTimeout: 20,
+      maxRequestBodySize: config.maxRequestBodySize ?? 65536,
+      idleTimeout: config.idleTimeout ?? 20,
     });
     yield* server.serve(
       Effect.gen(function* () {

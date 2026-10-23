@@ -12,6 +12,8 @@
   "type": "module",
   "exports": {
     "./dependency": "./src/dependency.ts",
-    "./game": "./src/game.ts"
-  }
+    "./game": "./src/game.ts",
+    "./http": "./src/http.ts"
+  },
+  "dependencies": {}
 }

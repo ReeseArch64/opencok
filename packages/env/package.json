@@ -12,7 +12,8 @@
     "./api": "./src/api.ts",
     "./api/schema": "./src/api.schema.ts",
     "./effect": "./src/effect.ts",
-    "./chat": "./src/chat.ts"
+    "./chat": "./src/chat.ts",
+    "./files": "./src/files.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
