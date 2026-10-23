@@ -28,7 +28,6 @@ try {
     void stop();
   });
 } catch {
-  // Driver errors can include SQL, credentials and player values. Never print raw errors.
   console.error(
     JSON.stringify({
       event: "startup_failed",

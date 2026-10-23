@@ -54,7 +54,6 @@ export class Rules {
       if (!Array.isArray(items)) throw new Error("Missing gameplay resource records");
       const map = new Map<string, Rule>();
       for (const item of items as Rule[]) {
-        // Legacy goods contains blank-ID placeholders and later overrides.
         if (name === "goods" && !item.id) continue;
         if (!item.id || (!replaceDuplicates && map.has(item.id)))
           throw new Error("Invalid gameplay resource ID");
@@ -149,7 +148,7 @@ export class Rules {
   maxStar(itemId: string): number {
     const prefix = String(Math.floor(Number(itemId) / 100) * 100);
     let max = 0;
-    // This adapter serves mobile 12.06.0. Scheduled gates remain closed.
+
     for (const rule of this.stars.values()) {
       const server = (rule.online ?? "").split(";").some((v) => {
         if (v === "all") return true;

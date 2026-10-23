@@ -30,12 +30,10 @@ body:
       description: "Summarize the findings and explain why a concrete issue is now needed."
     validations:
       required: true
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
-  -
-    type: "dropdown"
+  - type: "dropdown"
     id: "client-track"
     attributes:
       label: "Client compatibility track"
@@ -49,46 +47,40 @@ body:
         - "Not applicable"
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "environment"
     attributes:
       label: "Client, server, and environment"
       description: "Include the exact client build, Android/iOS version and device or emulator, applied patch numbers, server branch and commit, and local or remote deployment. Use Not applicable for unrelated components."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "last-working"
     attributes:
       label: "Last known working setup"
       description: "Provide the client build and patches, server commit, and configuration where this game flow worked. State unknown if no exact commit is available."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "first-broken"
     attributes:
       label: "First known failing setup"
       description: "Provide the failing client build, server commit, and relevant changes to patches, configuration, or migrations."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "reproduction"
     attributes:
       label: "Reproduction and before/after behavior"
       description: "List initial player state and exact game actions. Compare results using equivalent data and configuration; include frequency and reconnect/restart behavior."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "impact"
     attributes:
       label: "Progression impact and workaround"
       description: "Describe blocked gameplay, affected players, persistent data changes, and any temporary workaround."
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "evidence"
     attributes:
       label: "Evidence"

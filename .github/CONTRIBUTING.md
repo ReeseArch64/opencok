@@ -19,7 +19,57 @@
 - Every pull request must be linked to a GitHub issue that describes the work
   and its acceptance criteria.
 
+Consult the [Architecture Decision Records](../docs/decisions/README.md) before
+changing an accepted technology boundary. ADR status, implementation TODOs and
+verification evidence are tracked separately.
+
+## Code quality
+
+Comments are prohibited in tracked project files, including code, configuration,
+scripts, SQL migrations, templates and embedded code examples. Do not add inline,
+block, documentation or suppression comments. Keep explanations in prose
+documentation and express constraints through names, types and tests. Interpreter
+directives required to execute scripts are executable syntax and must be preserved.
+
+Install the workspace dependencies with `bun install --frozen-lockfile`. Use the
+Oxlint and Oxfmt versions bundled with the existing `vite-plus` dependency;
+separate global installations are not required. Configure lint rules in the root
+`.oxlintrc.json` and formatting in `.oxfmtrc.json`. These files follow the
+[Oxlint configuration](https://oxc.rs/docs/guide/usage/linter/config) and
+[Oxfmt configuration](https://oxc.rs/docs/guide/usage/formatter/config).
+
+Run these commands from the repository root before submitting changes:
+
+```sh
+bun run lint
+bun run format:check
+```
+
+Use `bun run lint:fix` for safe automatic lint fixes and `bun run format` to
+apply formatting. Review the resulting diff. CI checks lint and formatting on
+pull requests and pushes to `develop`; lint warnings fail the check.
+
+Formatting uses two spaces, double quotes, semicolons, LF line endings and a
+100-column print width. Import and package-key sorting are disabled. Markdown
+keeps its existing prose wrapping. Lint enables correctness rules for the
+default TypeScript, Unicorn and Oxc plugins. Type checking remains separate;
+use `bun run --cwd <workspace> check-types` for each implemented workspace.
+
+Both tools exclude mobile/legacy inputs, local data, build output, coverage,
+Drizzle migrations, snapshot output and database fixture data. Maintained
+Drizzle TypeScript schemas remain included. These exclusions preserve the
+boundaries described in [the architecture](ARCHITECTURE.md).
+
 ## Commits
+
+Before completing any task that changes tracked project content, review and
+validate the changes, then commit all changes belonging to that task. This applies
+to code, tests, documentation and configuration. Do not wait for a separate request
+to commit unless the user explicitly asks to leave the changes uncommitted.
+
+Keep commits focused. Preserve unrelated working-tree and staged changes; stage
+only the task's changes and inspect the staged diff before committing. Do not
+create an empty commit when a task produces no changes.
 
 Write commit messages using [Conventional Commits](https://www.conventionalcommits.org/)
 with the following format and rules:
@@ -149,7 +199,7 @@ Use the repository's GitHub features as the primary collaboration channels:
   the linked repository project to plan, prioritize, assign, and track issues and
   pull requests through their lifecycle. Keep the status of each item current
   as work progresses.
-  
+
 - **[GitHub Wiki](https://github.com/ReeseArch64/opencok/wiki):** use the
   repository wiki for long-lived project knowledge, operational guides,
   architecture notes, and documentation that does not belong next to the

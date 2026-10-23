@@ -29,12 +29,10 @@ body:
       description: "Summarize the findings and explain why a concrete issue is now needed."
     validations:
       required: true
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
-  -
-    type: "dropdown"
+  - type: "dropdown"
     id: "client-track"
     attributes:
       label: "Client compatibility track"
@@ -48,32 +46,28 @@ body:
         - "Not applicable"
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "problem"
     attributes:
       label: "Player or operator need"
       description: "Describe the game flow or operational problem and who benefits. Reference the required prior discussion and its findings."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "proposal"
     attributes:
       label: "Proposed behavior and alternatives"
       description: "Describe the proposed game rules or operator workflow. For gameplay changes, include costs, rewards, timers, limits, and interactions with existing systems; distinguish compatibility restoration from custom rules."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "impact"
     attributes:
       label: "Compatibility and saved-state impact"
       description: "Identify affected clients, server components, configuration, and existing player progression. Explain whether this should be opt-in per kingdom."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "acceptance"
     attributes:
       label: "Acceptance criteria"

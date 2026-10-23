@@ -2,20 +2,17 @@ title: "[Show and tell] "
 labels:
   - "discussion"
 body:
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "Write the title, body, and replies in English (en-US). Keep the discussion label and add relevant topic, component, or client-release labels after publishing. Share a kingdom setup, client patch experiment, tool, or development result. Distinguish verified behavior from planned work and share only material you are authorized to publish."
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "summary"
     attributes:
       label: "What did you build or learn?"
       description: "Describe the result, the game system or operator workflow it affects, and the benefit."
     validations:
       required: true
-  -
-    type: "dropdown"
+  - type: "dropdown"
     id: "client-track"
     attributes:
       label: "Client compatibility track"
@@ -29,22 +26,19 @@ body:
         - "Not applicable"
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "setup"
     attributes:
       label: "Setup and reproducibility"
       description: "Include applicable client build/patches, server commit, environment, and steps to reproduce the result."
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "validation"
     attributes:
       label: "What works and what remains untested?"
       description: "Describe game flows tested, observed results, known limitations, and compatibility gaps."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "links"
     attributes:
       label: "Demo, documentation, and feedback"

@@ -4,12 +4,12 @@ Traefik routes HTTP discovery to `api:8080` and SFS/TCP to `server:9933`.
 Configuration lives in [traefik.yml](traefik.yml) and [dynamic.yml](dynamic.yml).
 No Docker socket or administration dashboard is exposed.
 
-| Public route | Methods | Destination |
-| --- | --- | --- |
-| `/gameservice/getserverlist.php`, `/gameservice/getline.php`, `/gameservice/getserverlist_memoryold.php` | GET, POST, HEAD | Shared TypeScript API |
-| `/healthz`, `/_health.php` | GET, HEAD | API process liveness |
-| `/readyz` | GET, HEAD | API database/Redis readiness |
-| Game port (default 9933) | TCP | TypeScript realm server |
+| Public route                                                                                             | Methods         | Destination                  |
+| -------------------------------------------------------------------------------------------------------- | --------------- | ---------------------------- |
+| `/gameservice/getserverlist.php`, `/gameservice/getline.php`, `/gameservice/getserverlist_memoryold.php` | GET, POST, HEAD | Shared TypeScript API        |
+| `/healthz`, `/_health.php`                                                                               | GET, HEAD       | API process liveness         |
+| `/readyz`                                                                                                | GET, HEAD       | API database/Redis readiness |
+| Game port (default 9933)                                                                                 | TCP             | TypeScript realm server      |
 
 The CDN routes `/cok/*` (excluding `/cok/img/*`) and `/100001/*` map to fixed
 MinIO bucket/host prefixes. Other paths, including chat, uploads, avatars and the

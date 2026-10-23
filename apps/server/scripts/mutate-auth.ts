@@ -2,7 +2,6 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
-// Run critical auth mutations in a disposable copy; never modify workspace sources.
 const app = new URL("../", import.meta.url);
 const directory = await mkdtemp(join(tmpdir(), "opencok-auth-mutations-"));
 const authFile = "src/game/auth.ts";

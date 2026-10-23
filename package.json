@@ -13,10 +13,16 @@
   },
   "type": "module",
   "scripts": {
+    "lint": "vp lint --config .oxlintrc.json . --deny-warnings",
+    "lint:fix": "vp lint --config .oxlintrc.json . --fix --deny-warnings",
+    "format": "vp fmt --config .oxfmtrc.json . --write",
+    "format:check": "vp fmt --config .oxfmtrc.json . --check",
     "check-types": "vp check-types",
     "test:stack": "bun --no-env-file test tests/stack"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:",

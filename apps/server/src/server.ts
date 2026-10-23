@@ -209,7 +209,7 @@ export async function startServer(config: Config) {
         }
       } catch (error) {
         rejected++;
-        // Fingerprint only the operation name, never its arguments or account/session data.
+
         const commandHash = createHash("sha256").update(command).digest("hex").slice(0, 16);
         if (reportedCommands.size < 128 && !reportedCommands.has(commandHash)) {
           reportedCommands.add(commandHash);
@@ -325,8 +325,8 @@ export async function startServer(config: Config) {
       const closed = new Promise<void>((resolve) => listener.close(() => resolve()));
       for (const socket of sockets) socket.destroy();
       await closed;
-      // Close callbacks can enqueue Redis cleanup after the socket was destroyed.
-      while (inFlight.size) await Promise.allSettled([...inFlight]);
+
+      while (inFlight.size) await Promise.allSettled(inFlight);
       coordination.close();
       await db.close();
     },

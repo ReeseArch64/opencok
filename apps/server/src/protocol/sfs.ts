@@ -1,4 +1,3 @@
-// Independently authored SFS wire codec. Numeric tags are retained end to end.
 export enum Type {
   Null,
   Bool,

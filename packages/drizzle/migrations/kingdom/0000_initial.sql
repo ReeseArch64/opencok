@@ -1,5 +1,5 @@
 CREATE SCHEMA "cokdb1";
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."ability_page" (
 	"uid" varchar(40) NOT NULL,
 	"page" integer DEFAULT 0 NOT NULL,
@@ -7,14 +7,14 @@ CREATE TABLE "cokdb1"."ability_page" (
 	CONSTRAINT "ability_page_PRIMARY" PRIMARY KEY("uid","page"),
 	CONSTRAINT "ability_page_ability_length" CHECK (octet_length("ability") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."accept_fb_record" (
 	"uid" varchar(255) NOT NULL,
 	"uuid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
 	CONSTRAINT "accept_fb_record_PRIMARY" PRIMARY KEY("uid","uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."account_lock" (
 	"uid" varchar(255) NOT NULL,
 	"lastLoginIp" varchar(50),
@@ -32,7 +32,7 @@ CREATE TABLE "cokdb1"."account_lock" (
 	CONSTRAINT "account_lock_lockSwitch_range" CHECK ("lockSwitch" BETWEEN -128 AND 127),
 	CONSTRAINT "account_lock_locked_range" CHECK ("locked" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_0" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_0" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_0_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_1" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_1" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_1_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_2" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_2" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_2_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_3" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -88,7 +88,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_3" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_3_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_4" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_4" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_4_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_5" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_5" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_5_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_6" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_6" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_6_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_7" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -144,7 +144,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_7" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_7_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_8" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -158,7 +158,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_8" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_8_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2024_9" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -172,7 +172,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2024_9" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2024_9_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_0" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -186,7 +186,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_0" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_0_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_1" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -200,7 +200,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_1" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_1_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_10" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -214,7 +214,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_10" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_10_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_11" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -228,7 +228,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_11" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_11_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_2" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -242,7 +242,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_2" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_2_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_3" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -256,7 +256,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_3" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_3_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_4" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -270,7 +270,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_4" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_4_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_5" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -284,7 +284,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_5" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_5_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_6" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -298,7 +298,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_6" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_6_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_7" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -312,7 +312,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_7" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_7_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_8" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -326,7 +326,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_8" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_8_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2026_9" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -340,7 +340,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2026_9" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2026_9_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_0" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -354,7 +354,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_0" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_0_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_1" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -368,7 +368,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_1" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_1_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_10" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -382,7 +382,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_10" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_10_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_11" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -396,7 +396,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_11" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_11_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_2" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -410,7 +410,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_2" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_2_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_3" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -424,7 +424,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_3" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_3_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_4" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -438,7 +438,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_4" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_4_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_5" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -452,7 +452,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_5" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_5_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_6" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -466,7 +466,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_6" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_6_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_7" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -480,7 +480,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_7" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_7_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_8" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -494,7 +494,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_8" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_8_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_cost_record_2027_9" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -508,7 +508,7 @@ CREATE TABLE "cokdb1"."action_cost_record_2027_9" (
 	"update_time" bigint NOT NULL,
 	CONSTRAINT "action_cost_record_2027_9_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."action_record_pack" (
 	"uid" varchar(255) NOT NULL,
 	"type" integer NOT NULL,
@@ -521,7 +521,7 @@ CREATE TABLE "cokdb1"."action_record_pack" (
 	"param" varchar(1024),
 	"gold" integer
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."activation" (
 	"code" varchar(40) NOT NULL,
 	"series" integer,
@@ -529,7 +529,7 @@ CREATE TABLE "cokdb1"."activation" (
 	"state" integer DEFAULT 0,
 	CONSTRAINT "activation_PRIMARY" PRIMARY KEY("code")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."activity" (
 	"id" bigint NOT NULL,
 	"name" varchar(40),
@@ -541,7 +541,7 @@ CREATE TABLE "cokdb1"."activity" (
 	CONSTRAINT "activity_PRIMARY" PRIMARY KEY("id"),
 	CONSTRAINT "activity_id_range" CHECK ("id" >= 0 AND "id" <= 4294967295)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."activity_cost" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer NOT NULL,
@@ -553,7 +553,7 @@ CREATE TABLE "cokdb1"."activity_cost" (
 	"getLv" varchar(40),
 	CONSTRAINT "activity_cost_PRIMARY" PRIMARY KEY("uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."activity_cost_log" (
 	"uid" varchar(40) NOT NULL,
 	"userId" varchar(40),
@@ -563,7 +563,7 @@ CREATE TABLE "cokdb1"."activity_cost_log" (
 	"time" bigint,
 	CONSTRAINT "activity_cost_log_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."activity_group_buys" (
 	"id" varchar(40) NOT NULL,
 	"curRound" integer NOT NULL,
@@ -572,7 +572,7 @@ CREATE TABLE "cokdb1"."activity_group_buys" (
 	"roundInfo" text,
 	CONSTRAINT "activity_group_buys_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."activity_minstrel" (
 	"uid" varchar(32) NOT NULL,
 	"type" integer DEFAULT 0 NOT NULL,
@@ -585,20 +585,20 @@ CREATE TABLE "cokdb1"."activity_minstrel" (
 	"resettime" bigint,
 	CONSTRAINT "activity_minstrel_PRIMARY" PRIMARY KEY("uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."activity_monster" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"id" integer NOT NULL,
 	"flushTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "activity_monster_PRIMARY" PRIMARY KEY("uid","id","flushTime")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."activity_new" (
 	"type" varchar(11) NOT NULL,
 	"activityInfo" varchar(2000) DEFAULT '',
 	CONSTRAINT "activity_new_PRIMARY" PRIMARY KEY("type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."ad_building_attachment" (
 	"uuid" varchar(36) NOT NULL,
 	"serverid" integer,
@@ -607,13 +607,13 @@ CREATE TABLE "cokdb1"."ad_building_attachment" (
 	"skillstate" integer,
 	"donateresource" varchar(300)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."ad_mat" (
 	"uid" varchar(40) NOT NULL,
 	"matId" varchar(200) NOT NULL,
 	CONSTRAINT "ad_mat_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."ad_reward" (
 	"uid" varchar(40) NOT NULL,
 	"type" varchar(40) NOT NULL,
@@ -624,7 +624,7 @@ CREATE TABLE "cokdb1"."ad_reward" (
 	"dplink_type" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "ad_reward_PRIMARY" PRIMARY KEY("uid","type","dplink_type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."admin" (
 	"uid" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."admin_uid_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"username" varchar(20) NOT NULL,
@@ -638,7 +638,7 @@ CREATE TABLE "cokdb1"."admin" (
 	"default_module_id" integer DEFAULT -1,
 	CONSTRAINT "admin_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."affairs" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer NOT NULL,
@@ -650,7 +650,7 @@ CREATE TABLE "cokdb1"."affairs" (
 	"opt" integer NOT NULL,
 	CONSTRAINT "affairs_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."affairs_value" (
 	"uid" varchar(40) NOT NULL,
 	"people" integer DEFAULT 0 NOT NULL,
@@ -658,7 +658,7 @@ CREATE TABLE "cokdb1"."affairs_value" (
 	"leagueTime" bigint NOT NULL,
 	CONSTRAINT "affairs_value_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance" (
 	"uid" varchar(40) NOT NULL,
 	"alliancename" varchar(40),
@@ -712,7 +712,7 @@ CREATE TABLE "cokdb1"."alliance" (
 	"taskFlushTime" bigint DEFAULT 0,
 	CONSTRAINT "alliance_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_apply" (
 	"uid" varchar(40) NOT NULL,
 	"userId" varchar(40),
@@ -723,7 +723,7 @@ CREATE TABLE "cokdb1"."alliance_apply" (
 	CONSTRAINT "alliance_apply_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "alliance_apply_message_length" CHECK (octet_length("message") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_battle_record" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"attAllianceId" varchar(40) DEFAULT '' NOT NULL,
@@ -734,7 +734,7 @@ CREATE TABLE "cokdb1"."alliance_battle_record" (
 	CONSTRAINT "alliance_battle_record_PRIMARY" PRIMARY KEY("uuid"),
 	CONSTRAINT "alliance_battle_record_report_length" CHECK (octet_length("report") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_battle_team" (
 	"id" varchar(40) NOT NULL,
 	"type" integer NOT NULL,
@@ -761,14 +761,14 @@ CREATE TABLE "cokdb1"."alliance_battle_team" (
 	"superTeam" integer DEFAULT 0,
 	CONSTRAINT "alliance_battle_team_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_blacklist" (
 	"allianceId" varchar(40) NOT NULL,
 	"black" varchar(500),
 	"white" varchar(500),
 	CONSTRAINT "alliance_blacklist_PRIMARY" PRIMARY KEY("allianceId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_boss" (
 	"uid" varchar(40) NOT NULL,
 	"itemNum" integer DEFAULT 0,
@@ -790,7 +790,7 @@ CREATE TABLE "cokdb1"."alliance_boss" (
 	"userAttackInfo" text,
 	CONSTRAINT "alliance_boss_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_boss_rank" (
 	"uid" varchar(40) NOT NULL,
 	"allianceId" varchar(40),
@@ -798,7 +798,7 @@ CREATE TABLE "cokdb1"."alliance_boss_rank" (
 	"useTime" bigint DEFAULT 0,
 	CONSTRAINT "alliance_boss_rank_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_boss_record" (
 	"uid" varchar(40) NOT NULL,
 	"allianceId" varchar(40),
@@ -815,7 +815,7 @@ CREATE TABLE "cokdb1"."alliance_boss_record" (
 	"userAttackInfo" text,
 	CONSTRAINT "alliance_boss_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_build_cost_record" (
 	"uid" varchar(255) NOT NULL,
 	"userId" varchar(255) NOT NULL,
@@ -828,7 +828,7 @@ CREATE TABLE "cokdb1"."alliance_build_cost_record" (
 	"time" bigint NOT NULL,
 	CONSTRAINT "alliance_build_cost_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_comment" (
 	"uid" varchar(40) NOT NULL,
 	"allianceId" varchar(40),
@@ -846,7 +846,7 @@ CREATE TABLE "cokdb1"."alliance_comment" (
 	CONSTRAINT "alliance_comment_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "alliance_comment_message_length" CHECK (octet_length("message") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_comment_shield" (
 	"uuid" varchar(40) NOT NULL,
 	"allianceId" varchar(40),
@@ -856,7 +856,7 @@ CREATE TABLE "cokdb1"."alliance_comment_shield" (
 	"name" varchar(40),
 	CONSTRAINT "alliance_comment_shield_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_diplomacy" (
 	"uid" varchar(255) NOT NULL,
 	"ally" "bytea",
@@ -867,7 +867,7 @@ CREATE TABLE "cokdb1"."alliance_diplomacy" (
 	CONSTRAINT "alliance_diplomacy_enemy_length" CHECK (octet_length("enemy") <= 65535),
 	CONSTRAINT "alliance_diplomacy_other_length" CHECK (octet_length("other") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_donate" (
 	"uerid" varchar(45) NOT NULL,
 	"scienceid" integer NOT NULL,
@@ -890,14 +890,14 @@ CREATE TABLE "cokdb1"."alliance_donate" (
 	"highAvailable" integer DEFAULT 0,
 	CONSTRAINT "alliance_donate_PRIMARY" PRIMARY KEY("uerid","scienceid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_dragon_battle" (
 	"allianceId" varchar(40) NOT NULL,
 	"joinMemberCnt" integer DEFAULT 0,
 	"leftTeleportTimes" integer,
 	CONSTRAINT "alliance_dragon_battle_PRIMARY" PRIMARY KEY("allianceId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_dragonplayoff_award" (
 	"version" integer NOT NULL,
 	"allianceId" varchar(50) NOT NULL,
@@ -907,7 +907,7 @@ CREATE TABLE "cokdb1"."alliance_dragonplayoff_award" (
 	"addr" varchar(2000),
 	CONSTRAINT "alliance_dragonplayoff_award_PRIMARY" PRIMARY KEY("version","allianceId","uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_fight_of_king" (
 	"type" integer NOT NULL,
 	"id" varchar(40) NOT NULL,
@@ -916,7 +916,7 @@ CREATE TABLE "cokdb1"."alliance_fight_of_king" (
 	"occupyTime" bigint NOT NULL,
 	CONSTRAINT "alliance_fight_of_king_PRIMARY" PRIMARY KEY("type","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_gift" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"allianceid" varchar(40) NOT NULL,
@@ -926,7 +926,7 @@ CREATE TABLE "cokdb1"."alliance_gift" (
 	"expiretime" integer,
 	CONSTRAINT "alliance_gift_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_group_buys" (
 	"id" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -939,7 +939,7 @@ CREATE TABLE "cokdb1"."alliance_group_buys" (
 	"reward" integer,
 	CONSTRAINT "alliance_group_buys_PRIMARY" PRIMARY KEY("id","uid","round")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_help" (
 	"helpId" varchar(255) DEFAULT '' NOT NULL,
 	"allianceId" varchar(255) NOT NULL,
@@ -959,7 +959,7 @@ CREATE TABLE "cokdb1"."alliance_help" (
 	CONSTRAINT "alliance_help_PRIMARY" PRIMARY KEY("helpId"),
 	CONSTRAINT "alliance_help_helpers_length" CHECK (octet_length("helpers") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_helper" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"helpId" varchar(255),
@@ -968,14 +968,14 @@ CREATE TABLE "cokdb1"."alliance_helper" (
 	"stats" integer DEFAULT 0,
 	CONSTRAINT "alliance_helper_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_invite_move" (
 	"inviter" varchar(255) NOT NULL,
 	"invitee" varchar(255) NOT NULL,
 	"createTime" bigint,
 	CONSTRAINT "alliance_invite_move_PRIMARY" PRIMARY KEY("inviter","invitee")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_member" (
 	"uid" varchar(40) NOT NULL,
 	"allianceId" varchar(40) NOT NULL,
@@ -1000,7 +1000,7 @@ CREATE TABLE "cokdb1"."alliance_member" (
 	"playoffFight" integer DEFAULT 0,
 	CONSTRAINT "alliance_member_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_member_bak" (
 	"uid" varchar(40) NOT NULL,
 	"allianceId" varchar(40) NOT NULL,
@@ -1024,7 +1024,7 @@ CREATE TABLE "cokdb1"."alliance_member_bak" (
 	"fight" integer DEFAULT 0,
 	CONSTRAINT "alliance_member_bak_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_member_dragon_right" (
 	"uid" varchar(50) NOT NULL,
 	"allianceId" varchar(50) NOT NULL,
@@ -1033,7 +1033,7 @@ CREATE TABLE "cokdb1"."alliance_member_dragon_right" (
 	CONSTRAINT "alliance_member_dragon_right_PRIMARY" PRIMARY KEY("uid","allianceId"),
 	CONSTRAINT "alliance_member_dragon_right_canFight_range" CHECK ("canFight" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_mission" (
 	"uuid" varchar(255) NOT NULL,
 	"missionId" varchar(50) NOT NULL,
@@ -1048,7 +1048,7 @@ CREATE TABLE "cokdb1"."alliance_mission" (
 	"refreshTime" bigint,
 	CONSTRAINT "alliance_mission_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_mission_record" (
 	"uid" varchar(255) NOT NULL,
 	"missionUUID" varchar(255) NOT NULL,
@@ -1057,7 +1057,7 @@ CREATE TABLE "cokdb1"."alliance_mission_record" (
 	"rewardFlag" varchar(100),
 	CONSTRAINT "alliance_mission_record_PRIMARY" PRIMARY KEY("uid","missionUUID")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_new_resource_log" (
 	"uuid" bigint GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."alliance_new_resource_log_uuid_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1887 CACHE 1),
 	"uid" varchar(40) NOT NULL,
@@ -1069,7 +1069,7 @@ CREATE TABLE "cokdb1"."alliance_new_resource_log" (
 	"updateTime" bigint,
 	CONSTRAINT "alliance_new_resource_log_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_offical" (
 	"allianceId" varchar(40) NOT NULL,
 	"officalOneUid" varchar(40) DEFAULT '' NOT NULL,
@@ -1078,7 +1078,7 @@ CREATE TABLE "cokdb1"."alliance_offical" (
 	"officalFourUid" varchar(40) DEFAULT '' NOT NULL,
 	CONSTRAINT "alliance_offical_PRIMARY" PRIMARY KEY("allianceId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_offical_apply" (
 	"uuid" varchar(40) NOT NULL,
 	"userId" varchar(40) DEFAULT '' NOT NULL,
@@ -1089,7 +1089,7 @@ CREATE TABLE "cokdb1"."alliance_offical_apply" (
 	"operateTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "alliance_offical_apply_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_science" (
 	"allianceId" varchar(40) NOT NULL,
 	"scienceId" integer NOT NULL,
@@ -1107,7 +1107,7 @@ CREATE TABLE "cokdb1"."alliance_science" (
 	"power" integer DEFAULT 0,
 	CONSTRAINT "alliance_science_PRIMARY" PRIMARY KEY("allianceId","scienceId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_science_upgrade" (
 	"allianceId" varchar(40) NOT NULL,
 	"scienceId" integer,
@@ -1117,14 +1117,14 @@ CREATE TABLE "cokdb1"."alliance_science_upgrade" (
 	CONSTRAINT "alliance_science_upgrade_PRIMARY" PRIMARY KEY("allianceId"),
 	CONSTRAINT "alliance_science_upgrade_accelerate_length" CHECK (octet_length("accelerate") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_shop" (
 	"allianceId" varchar(40) NOT NULL,
 	"goodsId" varchar(40) NOT NULL,
 	"count" integer,
 	CONSTRAINT "alliance_shop_PRIMARY" PRIMARY KEY("allianceId","goodsId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_shop_buyrecord" (
 	"allianceId" varchar(40) NOT NULL,
 	"goodsId" varchar(40) NOT NULL,
@@ -1133,7 +1133,7 @@ CREATE TABLE "cokdb1"."alliance_shop_buyrecord" (
 	"buytime" bigint NOT NULL,
 	CONSTRAINT "alliance_shop_buyrecord_PRIMARY" PRIMARY KEY("allianceId","buytime")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_shop_buytoallianceshoprecord" (
 	"allianceId" varchar(40) NOT NULL,
 	"goodsId" varchar(40) NOT NULL,
@@ -1142,7 +1142,7 @@ CREATE TABLE "cokdb1"."alliance_shop_buytoallianceshoprecord" (
 	"buytime" bigint NOT NULL,
 	CONSTRAINT "alliance_shop_buytoallianceshoprecord_PRIMARY" PRIMARY KEY("allianceId","buytime")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_shop_make" (
 	"uid" varchar(40) NOT NULL,
 	"allianceId" varchar(40) NOT NULL,
@@ -1152,7 +1152,7 @@ CREATE TABLE "cokdb1"."alliance_shop_make" (
 	"needTime" bigint,
 	CONSTRAINT "alliance_shop_make_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_shophis" (
 	"uid" varchar(40) NOT NULL,
 	"allianceId" varchar(40),
@@ -1161,7 +1161,7 @@ CREATE TABLE "cokdb1"."alliance_shophis" (
 	"time" bigint,
 	CONSTRAINT "alliance_shophis_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_skill" (
 	"uuid" varchar(128) NOT NULL,
 	"skillId" varchar(128),
@@ -1175,7 +1175,7 @@ CREATE TABLE "cokdb1"."alliance_skill" (
 	"endTime" bigint,
 	CONSTRAINT "alliance_skill_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_stats" (
 	"uid" varchar(255) NOT NULL,
 	"event_type" integer,
@@ -1186,7 +1186,7 @@ CREATE TABLE "cokdb1"."alliance_stats" (
 	CONSTRAINT "alliance_stats_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "alliance_stats_extraParam_length" CHECK (octet_length("extraParam") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_task" (
 	"uid" varchar(255) NOT NULL,
 	"taskId" varchar(255) NOT NULL,
@@ -1205,7 +1205,7 @@ CREATE TABLE "cokdb1"."alliance_task" (
 	"freequeue" integer DEFAULT 0,
 	CONSTRAINT "alliance_task_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_task_log" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255),
@@ -1217,7 +1217,7 @@ CREATE TABLE "cokdb1"."alliance_task_log" (
 	"behavior" integer DEFAULT 0,
 	CONSTRAINT "alliance_task_log_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_task_record" (
 	"uid" varchar(255) NOT NULL,
 	"publishCount" integer DEFAULT 0,
@@ -1237,7 +1237,7 @@ CREATE TABLE "cokdb1"."alliance_task_record" (
 	"colorSysRate5" integer DEFAULT 0,
 	CONSTRAINT "alliance_task_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_task_unpublish" (
 	"uid" varchar(255) NOT NULL,
 	"taskId" varchar(255) NOT NULL,
@@ -1250,7 +1250,7 @@ CREATE TABLE "cokdb1"."alliance_task_unpublish" (
 	"extraReward" varchar(255),
 	CONSTRAINT "alliance_task_unpublish_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_territory" (
 	"uid" varchar(255) NOT NULL,
 	"pointId" integer,
@@ -1289,7 +1289,7 @@ CREATE TABLE "cokdb1"."alliance_territory" (
 	"activeSkin" varchar(10) DEFAULT '',
 	CONSTRAINT "alliance_territory_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_territory_fix_log" (
 	"uuid" varchar(255) NOT NULL,
 	"pointId" integer NOT NULL,
@@ -1299,7 +1299,7 @@ CREATE TABLE "cokdb1"."alliance_territory_fix_log" (
 	"runTime" bigint NOT NULL,
 	CONSTRAINT "alliance_territory_fix_log_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_title" (
 	"allianceId" varchar(40) NOT NULL,
 	"title" integer NOT NULL,
@@ -1308,7 +1308,7 @@ CREATE TABLE "cokdb1"."alliance_title" (
 	"applicant" varchar(500),
 	CONSTRAINT "alliance_title_PRIMARY" PRIMARY KEY("allianceId","title")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."alliance_vedio" (
 	"allianceId" varchar(40) NOT NULL,
 	"vedioURL" varchar(200),
@@ -1321,12 +1321,12 @@ CREATE TABLE "cokdb1"."alliance_vedio" (
 	CONSTRAINT "alliance_vedio_PRIMARY" PRIMARY KEY("allianceId"),
 	CONSTRAINT "alliance_vedio_checkSign_range" CHECK ("checkSign" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."anniversary_allianceinfo" (
 	"num" integer NOT NULL,
 	"allnum" integer NOT NULL
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."anniversary_userinfo" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"regtop" bigint DEFAULT 0,
@@ -1344,7 +1344,7 @@ CREATE TABLE "cokdb1"."anniversary_userinfo" (
 	"killpercent" numeric(10, 2),
 	CONSTRAINT "anniversary_userinfo_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."arena_battle_team" (
 	"id" varchar(255) NOT NULL,
 	"type" integer,
@@ -1370,7 +1370,7 @@ CREATE TABLE "cokdb1"."arena_battle_team" (
 	"superTeam" integer,
 	"failBackItem" integer
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."army_skill_info" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1380,7 +1380,7 @@ CREATE TABLE "cokdb1"."army_skill_info" (
 	"exp" integer NOT NULL,
 	CONSTRAINT "army_skill_info_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."army_strengthen" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"type" integer DEFAULT 0 NOT NULL,
@@ -1392,25 +1392,25 @@ CREATE TABLE "cokdb1"."army_strengthen" (
 	"crit" integer,
 	"updateTime" bigint
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."army_total" (
 	"uid" varchar(255) NOT NULL,
 	"total" integer DEFAULT 0,
 	CONSTRAINT "army_total_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."atk_name" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"name" varchar(255),
 	CONSTRAINT "atk_name_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."atk_time" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "atk_time_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."avatar_storage" (
 	"uid" varchar(255) NOT NULL,
 	"avatarId" varchar(255) NOT NULL,
@@ -1421,13 +1421,13 @@ CREATE TABLE "cokdb1"."avatar_storage" (
 	"type" integer DEFAULT 0,
 	CONSTRAINT "avatar_storage_PRIMARY" PRIMARY KEY("uid","avatarId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."badwords" (
 	"id" bigint GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."badwords_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1),
 	"words" varchar(255),
 	CONSTRAINT "badwords_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."barbarion_statistics" (
 	"playerUid" varchar(255) NOT NULL,
 	"playerName" varchar(255) NOT NULL,
@@ -1436,7 +1436,7 @@ CREATE TABLE "cokdb1"."barbarion_statistics" (
 	"strongHoldLevel" integer DEFAULT 0,
 	"actType" integer DEFAULT 0
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."black_land_barbarion_dead" (
 	"id" varchar(40) NOT NULL,
 	"areaId" integer NOT NULL,
@@ -1444,7 +1444,7 @@ CREATE TABLE "cokdb1"."black_land_barbarion_dead" (
 	"deadFinishTime" bigint NOT NULL,
 	CONSTRAINT "black_land_barbarion_dead_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."black_land_basttile_dead" (
 	"id" varchar(40) NOT NULL,
 	"areaId" integer NOT NULL,
@@ -1452,7 +1452,7 @@ CREATE TABLE "cokdb1"."black_land_basttile_dead" (
 	"deadFinishTime" bigint NOT NULL,
 	CONSTRAINT "black_land_basttile_dead_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."black_land_res_dead" (
 	"id" varchar(40) NOT NULL,
 	"areaId" integer NOT NULL,
@@ -1460,7 +1460,7 @@ CREATE TABLE "cokdb1"."black_land_res_dead" (
 	"deadFinishTime" bigint NOT NULL,
 	CONSTRAINT "black_land_res_dead_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."bottles" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255) DEFAULT '' NOT NULL,
@@ -1475,7 +1475,7 @@ CREATE TABLE "cokdb1"."bottles" (
 	CONSTRAINT "bottles_content_length" CHECK (octet_length("content") <= 65535),
 	CONSTRAINT "bottles_locked_range" CHECK ("locked" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."branch_link" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"serverId" integer DEFAULT 0 NOT NULL,
@@ -1487,7 +1487,7 @@ CREATE TABLE "cokdb1"."branch_link" (
 	"modifyTime" bigint DEFAULT 0,
 	CONSTRAINT "branch_link_PRIMARY" PRIMARY KEY("uid","serverId","data")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."branch_url" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"serverId" integer DEFAULT 0 NOT NULL,
@@ -1498,11 +1498,11 @@ CREATE TABLE "cokdb1"."branch_url" (
 	"modifyTime" bigint DEFAULT 0,
 	CONSTRAINT "branch_url_PRIMARY" PRIMARY KEY("uid","serverId","url")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."c3p0testtable" (
 	"a" varchar(1)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."castle_exchange" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(40) NOT NULL,
@@ -1510,7 +1510,7 @@ CREATE TABLE "cokdb1"."castle_exchange" (
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "castle_exchange_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."castle_leveling_0" (
 	"uid" varchar(50) NOT NULL,
 	"level" integer NOT NULL,
@@ -1530,7 +1530,7 @@ CREATE TABLE "cokdb1"."castle_leveling_0" (
 	"pay_times_5" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "castle_leveling_0_PRIMARY" PRIMARY KEY("uid","level")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."castle_leveling_1" (
 	"uid" varchar(50) NOT NULL,
 	"level" integer NOT NULL,
@@ -1550,20 +1550,20 @@ CREATE TABLE "cokdb1"."castle_leveling_1" (
 	"pay_times_5" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "castle_leveling_1_PRIMARY" PRIMARY KEY("uid","level")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."celebrity" (
 	"uid" varchar(255) NOT NULL,
 	"description" "bytea",
 	CONSTRAINT "celebrity_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "celebrity_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."chat_report_record" (
 	"uid" varchar(255) NOT NULL,
 	"lastUpdateTime" bigint DEFAULT 0,
 	CONSTRAINT "chat_report_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."chat_shield" (
 	"uuid" varchar(40) NOT NULL,
 	"owner" varchar(40) NOT NULL,
@@ -1571,7 +1571,7 @@ CREATE TABLE "cokdb1"."chat_shield" (
 	"time" bigint,
 	CONSTRAINT "chat_shield_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."city_monster" (
 	"uid" varchar(255) NOT NULL,
 	"nextUpdateTime" bigint,
@@ -1581,7 +1581,7 @@ CREATE TABLE "cokdb1"."city_monster" (
 	"bigMonsterInOneDay" integer,
 	CONSTRAINT "city_monster_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."civilization_castle" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"level" integer DEFAULT 0,
@@ -1597,7 +1597,7 @@ CREATE TABLE "cokdb1"."civilization_castle" (
 	"lastSettleTime" bigint DEFAULT 0,
 	CONSTRAINT "civilization_castle_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."civilization_castle_record" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"level" integer DEFAULT 0,
@@ -1613,7 +1613,7 @@ CREATE TABLE "cokdb1"."civilization_castle_record" (
 	"lastSettleTime" bigint DEFAULT 0,
 	CONSTRAINT "civilization_castle_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."client_log" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer NOT NULL,
@@ -1621,7 +1621,7 @@ CREATE TABLE "cokdb1"."client_log" (
 	"time" bigint NOT NULL,
 	CONSTRAINT "client_log_PRIMARY" PRIMARY KEY("uid","type","keyword","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."cok_monitor_log" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."cok_monitor_log_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"url" varchar(500),
@@ -1633,7 +1633,7 @@ CREATE TABLE "cokdb1"."cok_monitor_log" (
 	CONSTRAINT "cok_monitor_log_PRIMARY" PRIMARY KEY("id"),
 	CONSTRAINT "cok_monitor_log_access_time_temporal" CHECK (("access_time" IS NULL OR (CASE WHEN "access_time" ~ '^[0-9]{4}-(0[0-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$' THEN CASE WHEN left("access_time",4) <> '0000' AND substring("access_time",6,2) <> '00' AND substring("access_time",9,2) <> '00' THEN to_char(to_date(left("access_time",10),'YYYY-MM-DD'),'YYYY-MM-DD') = left("access_time",10) ELSE true END ELSE false END)))
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."compensate_record" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255),
@@ -1645,13 +1645,13 @@ CREATE TABLE "cokdb1"."compensate_record" (
 	"num" integer,
 	CONSTRAINT "compensate_record_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."compensate_shield_record" (
 	"uid" varchar(255) NOT NULL,
 	"createTime" bigint DEFAULT 0,
 	CONSTRAINT "compensate_shield_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."compensation_record" (
 	"uid" varchar(255) NOT NULL,
 	"count" integer DEFAULT 0,
@@ -1659,13 +1659,13 @@ CREATE TABLE "cokdb1"."compensation_record" (
 	"isFirstOnFire" integer DEFAULT 1,
 	CONSTRAINT "compensation_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."compensation_record_shield" (
 	"uid" varchar(255) NOT NULL,
 	"createTime" bigint DEFAULT 0,
 	CONSTRAINT "compensation_record_shield_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_0" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1674,7 +1674,7 @@ CREATE TABLE "cokdb1"."contact_0" (
 	CONSTRAINT "contact_0_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_0_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_1" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1683,7 +1683,7 @@ CREATE TABLE "cokdb1"."contact_1" (
 	CONSTRAINT "contact_1_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_1_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_2" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1692,7 +1692,7 @@ CREATE TABLE "cokdb1"."contact_2" (
 	CONSTRAINT "contact_2_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_2_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_3" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1701,7 +1701,7 @@ CREATE TABLE "cokdb1"."contact_3" (
 	CONSTRAINT "contact_3_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_3_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_4" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1710,7 +1710,7 @@ CREATE TABLE "cokdb1"."contact_4" (
 	CONSTRAINT "contact_4_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_4_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_5" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1719,7 +1719,7 @@ CREATE TABLE "cokdb1"."contact_5" (
 	CONSTRAINT "contact_5_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_5_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_6" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1728,7 +1728,7 @@ CREATE TABLE "cokdb1"."contact_6" (
 	CONSTRAINT "contact_6_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_6_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_7" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1737,7 +1737,7 @@ CREATE TABLE "cokdb1"."contact_7" (
 	CONSTRAINT "contact_7_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_7_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_8" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1746,7 +1746,7 @@ CREATE TABLE "cokdb1"."contact_8" (
 	CONSTRAINT "contact_8_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_8_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_9" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1755,7 +1755,7 @@ CREATE TABLE "cokdb1"."contact_9" (
 	CONSTRAINT "contact_9_PRIMARY" PRIMARY KEY("uid","friendUid"),
 	CONSTRAINT "contact_9_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."contact_fb" (
 	"uid" varchar(255) NOT NULL,
 	"friendUid" varchar(255) NOT NULL,
@@ -1767,7 +1767,7 @@ CREATE TABLE "cokdb1"."contact_fb" (
 	CONSTRAINT "contact_fb_description_length" CHECK (octet_length("description") <= 65535),
 	CONSTRAINT "contact_fb_fbName_length" CHECK (octet_length("fbName") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."cross_info" (
 	"uid" varchar(128) DEFAULT '' NOT NULL,
 	"changeServerType" varchar(128),
@@ -1775,7 +1775,7 @@ CREATE TABLE "cokdb1"."cross_info" (
 	"targetServerId" integer DEFAULT 0,
 	CONSTRAINT "cross_info_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."cross_promotion_status" (
 	"srcGameId" varchar(255) NOT NULL,
 	"targetGameId" varchar(255) NOT NULL,
@@ -1789,7 +1789,7 @@ CREATE TABLE "cokdb1"."cross_promotion_status" (
 	"maxValue" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "cross_promotion_status_PRIMARY" PRIMARY KEY("srcGameId","targetUid","taskid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."cross_promotion_update_task" (
 	"uid" varchar(255) NOT NULL,
 	"taskid" varchar(255) NOT NULL,
@@ -1800,7 +1800,7 @@ CREATE TABLE "cokdb1"."cross_promotion_update_task" (
 	"finishTime" bigint,
 	CONSTRAINT "cross_promotion_update_task_PRIMARY" PRIMARY KEY("uid","taskid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."cross_throne_king_info" (
 	"uuid" varchar(50) NOT NULL,
 	"version" integer NOT NULL,
@@ -1823,7 +1823,7 @@ CREATE TABLE "cokdb1"."cross_throne_king_info" (
 	"last_update_time" bigint,
 	CONSTRAINT "cross_throne_king_info_PRIMARY" PRIMARY KEY("version","king_type","config_type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."cross_throne_occupy_record" (
 	"uuid" varchar(50) NOT NULL,
 	"king_info_id" varchar(50) NOT NULL,
@@ -1835,7 +1835,7 @@ CREATE TABLE "cokdb1"."cross_throne_occupy_record" (
 	"start_millis" bigint,
 	CONSTRAINT "cross_throne_occupy_record_PRIMARY" PRIMARY KEY("uuid","king_info_id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."cross_throne_reward_record" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."cross_throne_reward_record_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 10 CACHE 1),
 	"version" integer NOT NULL,
@@ -1855,7 +1855,7 @@ CREATE TABLE "cokdb1"."cross_throne_reward_record" (
 	CONSTRAINT "cross_throne_reward_record_PRIMARY" PRIMARY KEY("id"),
 	CONSTRAINT "cross_throne_reward_record_reward_type_range" CHECK ("reward_type" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."crystal_cost_record" (
 	"uid" varchar(255) NOT NULL,
 	"userId" varchar(255) NOT NULL,
@@ -1869,13 +1869,13 @@ CREATE TABLE "cokdb1"."crystal_cost_record" (
 	"time" bigint NOT NULL,
 	CONSTRAINT "crystal_cost_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."def_time" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "def_time_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_0" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1886,7 +1886,7 @@ CREATE TABLE "cokdb1"."deposit_record_0" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_0_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_1" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1897,7 +1897,7 @@ CREATE TABLE "cokdb1"."deposit_record_1" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_1_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_2" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1908,7 +1908,7 @@ CREATE TABLE "cokdb1"."deposit_record_2" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_2_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_3" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1919,7 +1919,7 @@ CREATE TABLE "cokdb1"."deposit_record_3" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_3_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_4" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1930,7 +1930,7 @@ CREATE TABLE "cokdb1"."deposit_record_4" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_4_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_5" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1941,7 +1941,7 @@ CREATE TABLE "cokdb1"."deposit_record_5" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_5_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_6" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1952,7 +1952,7 @@ CREATE TABLE "cokdb1"."deposit_record_6" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_6_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_7" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1963,7 +1963,7 @@ CREATE TABLE "cokdb1"."deposit_record_7" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_7_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_8" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1974,7 +1974,7 @@ CREATE TABLE "cokdb1"."deposit_record_8" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_8_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."deposit_record_9" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -1985,7 +1985,7 @@ CREATE TABLE "cokdb1"."deposit_record_9" (
 	"withDrawTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "deposit_record_9_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."device_info" (
 	"uid" varchar(40) NOT NULL,
 	"signCode" varchar(100),
@@ -2002,13 +2002,13 @@ CREATE TABLE "cokdb1"."device_info" (
 	"reserve5" varchar(1000),
 	CONSTRAINT "device_info_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."device_mail_record" (
 	"deviceId" varchar(40) NOT NULL,
 	"record" varchar(40) NOT NULL,
 	CONSTRAINT "device_mail_record_PRIMARY" PRIMARY KEY("deviceId","record")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."donate_history" (
 	"uid" varchar(255) NOT NULL,
 	"allianceId" varchar(255),
@@ -2017,7 +2017,7 @@ CREATE TABLE "cokdb1"."donate_history" (
 	"donateTime" bigint,
 	CONSTRAINT "donate_history_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."donate_history_record" (
 	"uid" varchar(255) NOT NULL,
 	"allianceId" varchar(255),
@@ -2026,7 +2026,7 @@ CREATE TABLE "cokdb1"."donate_history_record" (
 	"donateTime" bigint,
 	CONSTRAINT "donate_history_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_battle_fight_history" (
 	"uid" varchar(50) NOT NULL,
 	"teamId" varchar(50),
@@ -2041,7 +2041,7 @@ CREATE TABLE "cokdb1"."dragon_battle_fight_history" (
 	"seasonVersion" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "dragon_battle_fight_history_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_battle_mail_record" (
 	"season_version" integer NOT NULL,
 	"version" integer NOT NULL,
@@ -2060,7 +2060,7 @@ CREATE TABLE "cokdb1"."dragon_battle_mail_record" (
 	CONSTRAINT "dragon_battle_mail_record_recived_range" CHECK ("recived" BETWEEN -128 AND 127),
 	CONSTRAINT "dragon_battle_mail_record_win_range" CHECK ("win" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_building_record" (
 	"uuid" varchar(255) NOT NULL,
 	"worldId" integer NOT NULL,
@@ -2071,7 +2071,7 @@ CREATE TABLE "cokdb1"."dragon_building_record" (
 	"lastHandKnightTime" integer DEFAULT 0,
 	CONSTRAINT "dragon_building_record_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_playoff_properties" (
 	"key" varchar(100) NOT NULL,
 	"value" varchar(1000),
@@ -2079,7 +2079,7 @@ CREATE TABLE "cokdb1"."dragon_playoff_properties" (
 	CONSTRAINT "dragon_playoff_properties_PRIMARY" PRIMARY KEY("key"),
 	CONSTRAINT "dragon_playoff_properties_updateTime_temporal" CHECK (("updateTime" IS NULL OR (CASE WHEN "updateTime" ~ '^[0-9]{4}-(0[0-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$' THEN CASE WHEN left("updateTime",4) <> '0000' AND substring("updateTime",6,2) <> '00' AND substring("updateTime",9,2) <> '00' THEN to_char(to_date(left("updateTime",10),'YYYY-MM-DD'),'YYYY-MM-DD') = left("updateTime",10) ELSE true END ELSE false END)))
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_playoff_teaminfo" (
 	"teamId" varchar(40) NOT NULL,
 	"teamName" varchar(255),
@@ -2112,7 +2112,7 @@ CREATE TABLE "cokdb1"."dragon_playoff_teaminfo" (
 	"finalRankNum" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "dragon_playoff_teaminfo_PRIMARY" PRIMARY KEY("teamId","version")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_skill" (
 	"uid" varchar(96),
 	"dragonId" integer,
@@ -2122,7 +2122,7 @@ CREATE TABLE "cokdb1"."dragon_skill" (
 	"endTime" bigint,
 	"stat" integer
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_talent_skill" (
 	"uid" varchar(96) DEFAULT '' NOT NULL,
 	"dragonId" integer DEFAULT 0 NOT NULL,
@@ -2136,7 +2136,7 @@ CREATE TABLE "cokdb1"."dragon_talent_skill" (
 	"totalExp" integer,
 	CONSTRAINT "dragon_talent_skill_PRIMARY" PRIMARY KEY("uid","dragonId","skillId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_tower_buff" (
 	"uid" varchar(32) NOT NULL,
 	"buffid" integer NOT NULL,
@@ -2144,7 +2144,7 @@ CREATE TABLE "cokdb1"."dragon_tower_buff" (
 	"buytime" bigint,
 	CONSTRAINT "dragon_tower_buff_PRIMARY" PRIMARY KEY("uid","buffid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_tower_fightreport" (
 	"citylevel" smallint NOT NULL,
 	"layer" integer NOT NULL,
@@ -2159,7 +2159,7 @@ CREATE TABLE "cokdb1"."dragon_tower_fightreport" (
 	"playerdead" integer,
 	CONSTRAINT "dragon_tower_fightreport_PRIMARY" PRIMARY KEY("citylevel","layer")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_tower_layer" (
 	"uid" varchar(32) NOT NULL,
 	"layer" integer NOT NULL,
@@ -2177,7 +2177,7 @@ CREATE TABLE "cokdb1"."dragon_tower_layer" (
 	CONSTRAINT "dragon_tower_layer_awardstate_range" CHECK ("awardstate" BETWEEN -128 AND 127),
 	CONSTRAINT "dragon_tower_layer_layerstate_range" CHECK ("layerstate" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_tower_user" (
 	"uid" varchar(32) NOT NULL,
 	"currentlayer" integer,
@@ -2198,7 +2198,7 @@ CREATE TABLE "cokdb1"."dragon_tower_user" (
 	"generalid" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "dragon_tower_user_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."dragon_words_record" (
 	"uid" varchar(255) NOT NULL,
 	"castleLevel" integer NOT NULL,
@@ -2208,7 +2208,7 @@ CREATE TABLE "cokdb1"."dragon_words_record" (
 	"talismanDetail" varchar(1024),
 	CONSTRAINT "dragon_words_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."egg_activity" (
 	"uid" varchar(40) NOT NULL,
 	"curEgg" varchar(10) NOT NULL,
@@ -2217,7 +2217,7 @@ CREATE TABLE "cokdb1"."egg_activity" (
 	"curExpStage" integer DEFAULT 0,
 	CONSTRAINT "egg_activity_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exception_user" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer NOT NULL,
@@ -2226,7 +2226,7 @@ CREATE TABLE "cokdb1"."exception_user" (
 	"updateTime" bigint,
 	CONSTRAINT "exception_user_PRIMARY" PRIMARY KEY("uid","type","day")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(40) NOT NULL,
@@ -2235,7 +2235,7 @@ CREATE TABLE "cokdb1"."exchange" (
 	"flush" bigint DEFAULT 0,
 	CONSTRAINT "exchange_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange_activity" (
 	"uid" varchar(40) NOT NULL,
 	"actId" varchar(10) NOT NULL,
@@ -2245,7 +2245,7 @@ CREATE TABLE "cokdb1"."exchange_activity" (
 	CONSTRAINT "exchange_activity_PRIMARY" PRIMARY KEY("uid","actId"),
 	CONSTRAINT "exchange_activity_reward_length" CHECK (octet_length("reward") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange_alliance_log" (
 	"uid" varchar(40) NOT NULL,
 	"orderId" varchar(200) NOT NULL,
@@ -2255,7 +2255,7 @@ CREATE TABLE "cokdb1"."exchange_alliance_log" (
 	CONSTRAINT "exchange_alliance_log_PRIMARY" PRIMARY KEY("uid","orderId","createTime"),
 	CONSTRAINT "exchange_alliance_log_status_range" CHECK ("status" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange_condition" (
 	"uid" varchar(40) NOT NULL,
 	"soldierDead" bigint DEFAULT 0,
@@ -2264,7 +2264,7 @@ CREATE TABLE "cokdb1"."exchange_condition" (
 	"goldFlushTime" bigint DEFAULT 0,
 	CONSTRAINT "exchange_condition_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange_gift" (
 	"uid" varchar(40) NOT NULL,
 	"receiverId" varchar(40) NOT NULL,
@@ -2272,7 +2272,7 @@ CREATE TABLE "cokdb1"."exchange_gift" (
 	"sendTime" bigint,
 	CONSTRAINT "exchange_gift_PRIMARY" PRIMARY KEY("uid","receiverId","exchangeId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange_gift_log" (
 	"mailId" varchar(40) NOT NULL,
 	"senderId" varchar(40),
@@ -2284,7 +2284,7 @@ CREATE TABLE "cokdb1"."exchange_gift_log" (
 	CONSTRAINT "exchange_gift_log_PRIMARY" PRIMARY KEY("mailId","sendTime"),
 	CONSTRAINT "exchange_gift_log_status_range" CHECK ("status" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange_group_type" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"group_type" integer DEFAULT 0 NOT NULL,
@@ -2292,13 +2292,13 @@ CREATE TABLE "cokdb1"."exchange_group_type" (
 	"refreshtime" bigint,
 	CONSTRAINT "exchange_group_type_PRIMARY" PRIMARY KEY("uid","group_type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange_order" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"itemId" varchar(40) NOT NULL,
 	CONSTRAINT "exchange_order_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange_time" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(40) NOT NULL,
@@ -2306,14 +2306,14 @@ CREATE TABLE "cokdb1"."exchange_time" (
 	"buyTime" bigint,
 	CONSTRAINT "exchange_time_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."exchange_visible" (
 	"uid" varchar(40) NOT NULL,
 	"exchangeId" varchar(20) NOT NULL,
 	"createTime" bigint,
 	CONSTRAINT "exchange_visible_PRIMARY" PRIMARY KEY("uid","exchangeId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."expedition_fail_award" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"score" double precision DEFAULT 0,
@@ -2321,7 +2321,7 @@ CREATE TABLE "cokdb1"."expedition_fail_award" (
 	"rank" integer NOT NULL,
 	CONSTRAINT "expedition_fail_award_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."expedition_mark" (
 	"serverId" integer NOT NULL,
 	"isKickFinished" smallint DEFAULT 0 NOT NULL,
@@ -2332,7 +2332,7 @@ CREATE TABLE "cokdb1"."expedition_mark" (
 	CONSTRAINT "expedition_mark_isKickFinished_range" CHECK ("isKickFinished" BETWEEN -128 AND 127),
 	CONSTRAINT "expedition_mark_isSendedAward_range" CHECK ("isSendedAward" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."expedition_record" (
 	"uuid" varchar(255) NOT NULL,
 	"time" bigint DEFAULT 0,
@@ -2343,7 +2343,7 @@ CREATE TABLE "cokdb1"."expedition_record" (
 	"kingUserName" varchar(255),
 	CONSTRAINT "expedition_record_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."fast_carry_activity" (
 	"uid" varchar(40) NOT NULL,
 	"type" varchar(40) DEFAULT '17' NOT NULL,
@@ -2359,7 +2359,7 @@ CREATE TABLE "cokdb1"."fast_carry_activity" (
 	"goalReward4" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "fast_carry_activity_PRIMARY" PRIMARY KEY("uid","lastEndTime")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."fastcarryhelp" (
 	"allianceId" varchar(40) NOT NULL,
 	"uid" varchar(255) NOT NULL,
@@ -2370,7 +2370,7 @@ CREATE TABLE "cokdb1"."fastcarryhelp" (
 	"progress" integer DEFAULT 0,
 	CONSTRAINT "fastcarryhelp_PRIMARY" PRIMARY KEY("allianceId","uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."feed_reward" (
 	"uid" varchar(255) NOT NULL,
 	"feed_count" integer,
@@ -2380,7 +2380,7 @@ CREATE TABLE "cokdb1"."feed_reward" (
 	"feed_uuid" varchar(255),
 	CONSTRAINT "feed_reward_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."fight_arena_info" (
 	"worldId" integer NOT NULL,
 	"state" integer,
@@ -2388,7 +2388,7 @@ CREATE TABLE "cokdb1"."fight_arena_info" (
 	"version" integer,
 	CONSTRAINT "fight_arena_info_PRIMARY" PRIMARY KEY("worldId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."fight_arena_player_info" (
 	"uid" varchar(255),
 	"worldId" integer,
@@ -2397,13 +2397,13 @@ CREATE TABLE "cokdb1"."fight_arena_player_info" (
 	"side" integer,
 	"rankScore" integer
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."fight_king_status" (
 	"index" integer NOT NULL,
 	"info" varchar(8192),
 	CONSTRAINT "fight_king_status_PRIMARY" PRIMARY KEY("index")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."firstpaylog" (
 	"uid" varchar(40) NOT NULL,
 	"orderId" varchar(200) NOT NULL,
@@ -2418,13 +2418,13 @@ CREATE TABLE "cokdb1"."firstpaylog" (
 	"payLevel" integer NOT NULL,
 	CONSTRAINT "firstpaylog_PRIMARY" PRIMARY KEY("uid","orderId","pf")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."fiveonlinedata" (
 	"timeStamp" integer DEFAULT 0 NOT NULL,
 	"count" integer,
 	CONSTRAINT "fiveonlinedata_PRIMARY" PRIMARY KEY("timeStamp")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."flower_history" (
 	"uid" varchar(255) NOT NULL,
 	"sourceID" varchar(255) NOT NULL,
@@ -2434,7 +2434,7 @@ CREATE TABLE "cokdb1"."flower_history" (
 	"count" integer,
 	CONSTRAINT "flower_history_PRIMARY" PRIMARY KEY("uid","sourceID","targetID")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."flower_info" (
 	"uid" varchar(38) NOT NULL,
 	"lastflowerRanking" integer,
@@ -2444,7 +2444,7 @@ CREATE TABLE "cokdb1"."flower_info" (
 	"lastBeCanvassTime" bigint DEFAULT 0,
 	CONSTRAINT "flower_info_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."flower_notice" (
 	"uid" varchar(255) NOT NULL,
 	"addTime" bigint,
@@ -2455,7 +2455,7 @@ CREATE TABLE "cokdb1"."flower_notice" (
 	"itemCount" integer,
 	CONSTRAINT "flower_notice_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."flower_ranking" (
 	"uid" varchar(255) NOT NULL,
 	"scoreVal" integer,
@@ -2464,7 +2464,7 @@ CREATE TABLE "cokdb1"."flower_ranking" (
 	"hideKing" integer DEFAULT 0,
 	CONSTRAINT "flower_ranking_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."foreigen_sciences" (
 	"uid" varchar(32) NOT NULL,
 	"itemid" integer NOT NULL,
@@ -2473,7 +2473,7 @@ CREATE TABLE "cokdb1"."foreigen_sciences" (
 	"reserve" integer,
 	CONSTRAINT "foreigen_sciences_PRIMARY" PRIMARY KEY("uid","itemid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."formation_info" (
 	"uid" varchar(255) NOT NULL,
 	"formation" varchar(1024),
@@ -2484,20 +2484,20 @@ CREATE TABLE "cokdb1"."formation_info" (
 	"angelArmy" varchar(50),
 	CONSTRAINT "formation_info_PRIMARY" PRIMARY KEY("uid","index1")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."fresh_recharge_reward" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"id" varchar(255) NOT NULL,
 	CONSTRAINT "fresh_recharge_reward_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."friend_help" (
 	"fromId" varchar(40) NOT NULL,
 	"toId" varchar(20) NOT NULL,
 	"time" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "friend_help_PRIMARY" PRIMARY KEY("fromId","toId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."friend_mine" (
 	"uid" varchar(40) NOT NULL,
 	"itemId" integer,
@@ -2505,19 +2505,19 @@ CREATE TABLE "cokdb1"."friend_mine" (
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "friend_mine_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."fserver_data" (
 	"uid" varchar(255) NOT NULL,
 	"value" text,
 	CONSTRAINT "fserver_data_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."function_notice" (
 	"uid" varchar(255) NOT NULL,
 	"noticeMapStr" text,
 	CONSTRAINT "function_notice_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."general_challenge_layer" (
 	"id" integer DEFAULT 0 NOT NULL,
 	"uid" varchar(96) DEFAULT '' NOT NULL,
@@ -2529,14 +2529,14 @@ CREATE TABLE "cokdb1"."general_challenge_layer" (
 	"resettime" bigint,
 	CONSTRAINT "general_challenge_layer_PRIMARY" PRIMARY KEY("id","uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."gm_expedition_match" (
 	"serverId" integer NOT NULL,
 	"targetServerId" integer NOT NULL,
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "gm_expedition_match_PRIMARY" PRIMARY KEY("serverId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."gold_cost_record" (
 	"uid" varchar(255) NOT NULL,
 	"userId" varchar(255) NOT NULL,
@@ -2550,7 +2550,7 @@ CREATE TABLE "cokdb1"."gold_cost_record" (
 	"time" bigint NOT NULL,
 	CONSTRAINT "gold_cost_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."gold_eggs" (
 	"uid" varchar(96) NOT NULL,
 	"flushfreetimes" integer DEFAULT 0 NOT NULL,
@@ -2567,7 +2567,7 @@ CREATE TABLE "cokdb1"."gold_eggs" (
 	"onlogintime" bigint DEFAULT 0,
 	CONSTRAINT "gold_eggs_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."gold_group_buy" (
 	"id" varchar(40) NOT NULL,
 	"flushtime" bigint DEFAULT 0 NOT NULL,
@@ -2575,7 +2575,7 @@ CREATE TABLE "cokdb1"."gold_group_buy" (
 	"create_time" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "gold_group_buy_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."gold_wish_pool" (
 	"uid" varchar(255) NOT NULL,
 	"times" integer NOT NULL,
@@ -2585,7 +2585,7 @@ CREATE TABLE "cokdb1"."gold_wish_pool" (
 	"time" bigint,
 	CONSTRAINT "gold_wish_pool_PRIMARY" PRIMARY KEY("uid","times")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2599,7 +2599,7 @@ CREATE TABLE "cokdb1"."goods_cost_record" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_0" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2613,7 +2613,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_0" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_0_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_1" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2627,7 +2627,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_1" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_1_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_10" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2641,7 +2641,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_10" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_10_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_11" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2655,7 +2655,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_11" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_11_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_2" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2669,7 +2669,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_2" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_2_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_3" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2683,7 +2683,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_3" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_3_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_4" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2697,7 +2697,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_4" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_4_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_5" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2711,7 +2711,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_5" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_5_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_6" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2725,7 +2725,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_6" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_6_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_7" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2739,7 +2739,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_7" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_7_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_8" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2753,7 +2753,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_8" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_8_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2024_9" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2767,7 +2767,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2024_9" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2024_9_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_0" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2781,7 +2781,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_0" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_0_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_1" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2795,7 +2795,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_1" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_1_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_10" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2809,7 +2809,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_10" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_10_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_11" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2823,7 +2823,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_11" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_11_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_2" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2837,7 +2837,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_2" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_2_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_3" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2851,7 +2851,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_3" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_3_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_4" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2865,7 +2865,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_4" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_4_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_5" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2879,7 +2879,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_5" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_5_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_6" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2893,7 +2893,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_6" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_6_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_7" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2907,7 +2907,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_7" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_7_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_8" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2921,7 +2921,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_8" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_8_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2026_9" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2935,7 +2935,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2026_9" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2026_9_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_0" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2949,7 +2949,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_0" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_0_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_1" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2963,7 +2963,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_1" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_1_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_10" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2977,7 +2977,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_10" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_10_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_11" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -2991,7 +2991,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_11" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_11_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_2" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -3005,7 +3005,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_2" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_2_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_3" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -3019,7 +3019,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_3" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_3_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_4" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -3033,7 +3033,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_4" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_4_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_5" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -3047,7 +3047,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_5" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_5_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_6" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -3061,7 +3061,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_6" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_6_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_7" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -3075,7 +3075,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_7" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_7_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_8" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -3089,7 +3089,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_8" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_8_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_cost_record_2027_9" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -3103,7 +3103,7 @@ CREATE TABLE "cokdb1"."goods_cost_record_2027_9" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "goods_cost_record_2027_9_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."goods_exchange_goods" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."goods_exchange_goods_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 3073 CACHE 1),
 	"uid" varchar(40) NOT NULL,
@@ -3116,7 +3116,7 @@ CREATE TABLE "cokdb1"."goods_exchange_goods" (
 	CONSTRAINT "goods_exchange_goods_stage_range" CHECK ("stage" BETWEEN -128 AND 127),
 	CONSTRAINT "goods_exchange_goods_getAward_range" CHECK ("getAward" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."hero_activity" (
 	"uuid" varchar(255) NOT NULL,
 	"activityId" varchar(100) NOT NULL,
@@ -3130,7 +3130,7 @@ CREATE TABLE "cokdb1"."hero_activity" (
 	"kingdomRank" varchar(255),
 	CONSTRAINT "hero_activity_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."hero_event" (
 	"uuid" varchar(255) NOT NULL,
 	"eventId" varchar(200) NOT NULL,
@@ -3146,7 +3146,7 @@ CREATE TABLE "cokdb1"."hero_event" (
 	"kingdomRank" varchar(255),
 	CONSTRAINT "hero_event_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."hero_event_reward_record" (
 	"uid" varchar(255) NOT NULL,
 	"allianceId" varchar(255) DEFAULT '' NOT NULL,
@@ -3157,7 +3157,7 @@ CREATE TABLE "cokdb1"."hero_event_reward_record" (
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "hero_event_reward_record_PRIMARY" PRIMARY KEY("uid","allianceId","eventId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."hero_office" (
 	"id" integer NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -3167,14 +3167,14 @@ CREATE TABLE "cokdb1"."hero_office" (
 	"lastRefreshExpTime" bigint DEFAULT 0,
 	CONSTRAINT "hero_office_PRIMARY" PRIMARY KEY("id","uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."hot_buy_record" (
 	"uid" varchar(255) NOT NULL,
 	"goodsId" varchar(50) NOT NULL,
 	"buyCount" integer DEFAULT 0,
 	CONSTRAINT "hot_buy_record_PRIMARY" PRIMARY KEY("uid","goodsId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."hot_goods_cost_record" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255) NOT NULL,
@@ -3184,7 +3184,7 @@ CREATE TABLE "cokdb1"."hot_goods_cost_record" (
 	"buyTime" bigint,
 	CONSTRAINT "hot_goods_cost_record_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."hot_info_before_refresh" (
 	"uid" varchar(255) NOT NULL,
 	"goodsId" varchar(20) NOT NULL,
@@ -3196,14 +3196,14 @@ CREATE TABLE "cokdb1"."hot_info_before_refresh" (
 	"gold" integer DEFAULT 0,
 	CONSTRAINT "hot_info_before_refresh_PRIMARY" PRIMARY KEY("uid","goodsId","price","refreshTime")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."hot_refresh_record" (
 	"uid" varchar(255) NOT NULL,
 	"count" integer DEFAULT 0,
 	"todayTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "hot_refresh_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."innercityskin" (
 	"uid" varchar(255) NOT NULL,
 	"style" varchar(255) DEFAULT '-1',
@@ -3212,7 +3212,7 @@ CREATE TABLE "cokdb1"."innercityskin" (
 	"time" varchar(255),
 	CONSTRAINT "innercityskin_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."invest_everyday" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"tableid" integer NOT NULL,
@@ -3224,13 +3224,13 @@ CREATE TABLE "cokdb1"."invest_everyday" (
 	"promptTime" bigint DEFAULT 0,
 	CONSTRAINT "invest_everyday_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."invite_count" (
 	"uid" varchar(40) NOT NULL,
 	"count" integer DEFAULT 0,
 	CONSTRAINT "invite_count_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."invitee" (
 	"uid" varchar(40) NOT NULL,
 	"inviterUid" varchar(40) NOT NULL,
@@ -3238,7 +3238,7 @@ CREATE TABLE "cokdb1"."invitee" (
 	"time" bigint,
 	CONSTRAINT "invitee_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."inviter" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -3248,7 +3248,7 @@ CREATE TABLE "cokdb1"."inviter" (
 	"time" bigint,
 	CONSTRAINT "inviter_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."item_count_control" (
 	"itemId" varchar(50) NOT NULL,
 	"count" integer,
@@ -3257,7 +3257,7 @@ CREATE TABLE "cokdb1"."item_count_control" (
 	"lastRefreshTime" bigint,
 	CONSTRAINT "item_count_control_PRIMARY" PRIMARY KEY("itemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."king_allot_tax_record" (
 	"uuid" varchar(255) NOT NULL,
 	"kingUid" varchar(255),
@@ -3271,7 +3271,7 @@ CREATE TABLE "cokdb1"."king_allot_tax_record" (
 	"sendTime" bigint DEFAULT 0,
 	CONSTRAINT "king_allot_tax_record_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."king_fight_log" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."king_fight_log_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 46500 CACHE 1),
 	"index" integer NOT NULL,
@@ -3281,7 +3281,7 @@ CREATE TABLE "cokdb1"."king_fight_log" (
 	"log" varchar(2048) DEFAULT '',
 	CONSTRAINT "king_fight_log_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."king_present_record" (
 	"toUserId" varchar(40) NOT NULL,
 	"presentId" integer NOT NULL,
@@ -3290,7 +3290,7 @@ CREATE TABLE "cokdb1"."king_present_record" (
 	"abbr" varchar(10),
 	CONSTRAINT "king_present_record_PRIMARY" PRIMARY KEY("toUserId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."king_skill_event" (
 	"uid" varchar(256),
 	"skillId" varchar(128),
@@ -3299,7 +3299,7 @@ CREATE TABLE "cokdb1"."king_skill_event" (
 	"params" varchar(1024),
 	"dialogId" varchar(128)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."king_skill_status" (
 	"id" integer DEFAULT 0 NOT NULL,
 	"kingMsg" varchar(2048) NOT NULL,
@@ -3307,7 +3307,7 @@ CREATE TABLE "cokdb1"."king_skill_status" (
 	"skillMaterial" bigint,
 	CONSTRAINT "king_skill_status_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."king_tax_record" (
 	"uuid" varchar(255) NOT NULL,
 	"taxTime" bigint DEFAULT 0,
@@ -3320,7 +3320,7 @@ CREATE TABLE "cokdb1"."king_tax_record" (
 	"stone" bigint DEFAULT 0,
 	CONSTRAINT "king_tax_record_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."king_time_fight_log" (
 	"uid" varchar(50) NOT NULL,
 	"logtime" bigint,
@@ -3333,7 +3333,7 @@ CREATE TABLE "cokdb1"."king_time_fight_log" (
 	"data4" varchar(255),
 	CONSTRAINT "king_time_fight_log_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."kingdom_battle_team" (
 	"id" varchar(40) NOT NULL,
 	"type" integer NOT NULL,
@@ -3360,7 +3360,7 @@ CREATE TABLE "cokdb1"."kingdom_battle_team" (
 	"superTeam" integer DEFAULT 0,
 	CONSTRAINT "kingdom_battle_team_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."kingdom_building" (
 	"uuid" varchar(36) NOT NULL,
 	"itemid" integer,
@@ -3387,7 +3387,7 @@ CREATE TABLE "cokdb1"."kingdom_building" (
 	CONSTRAINT "kingdom_building_progress_range" CHECK ("progress" BETWEEN -128 AND 127),
 	CONSTRAINT "kingdom_building_type_range" CHECK ("type" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."kingdom_building_buff" (
 	"uuid" varchar(36) NOT NULL,
 	"effect" integer NOT NULL,
@@ -3396,7 +3396,7 @@ CREATE TABLE "cokdb1"."kingdom_building_buff" (
 	"reserve" bigint,
 	CONSTRAINT "kingdom_building_buff_PRIMARY" PRIMARY KEY("uuid","effect")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."kingdom_cemetery" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."kingdom_cemetery_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 9 CACHE 1),
 	"cemeteryStat" integer DEFAULT 0,
@@ -3409,7 +3409,7 @@ CREATE TABLE "cokdb1"."kingdom_cemetery" (
 	"needContributionSum" integer DEFAULT 0,
 	CONSTRAINT "kingdom_cemetery_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."kingdom_cross_fight_history" (
 	"serverId" varchar(10) NOT NULL,
 	"startTime" bigint NOT NULL,
@@ -3418,7 +3418,7 @@ CREATE TABLE "cokdb1"."kingdom_cross_fight_history" (
 	"rank" integer DEFAULT 0,
 	CONSTRAINT "kingdom_cross_fight_history_PRIMARY" PRIMARY KEY("serverId","startTime","round")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."kingdom_info" (
 	"serverId" integer NOT NULL,
 	"wood" bigint DEFAULT 0,
@@ -3444,7 +3444,7 @@ CREATE TABLE "cokdb1"."kingdom_info" (
 	CONSTRAINT "kingdom_info_isMyThroneOccupy_range" CHECK ("isMyThroneOccupy" BETWEEN -128 AND 127),
 	CONSTRAINT "kingdom_info_isOccupyOtherThrone_range" CHECK ("isOccupyOtherThrone" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."kingdom_position" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"positionId" varchar(40) DEFAULT '' NOT NULL,
@@ -3462,20 +3462,20 @@ CREATE TABLE "cokdb1"."kingdom_position" (
 	"isSmall" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "kingdom_position_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."kingdom_position_appoint" (
 	"positionId" integer DEFAULT 0 NOT NULL,
 	"appointTime" bigint DEFAULT 0,
 	CONSTRAINT "kingdom_position_appoint_PRIMARY" PRIMARY KEY("positionId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."kingdom_skill_log" (
 	"uid" varchar(255) NOT NULL,
 	"skillId" integer NOT NULL,
 	"logTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "kingdom_skill_log_PRIMARY" PRIMARY KEY("uid","skillId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."logaction" (
 	"uid" varchar(50) NOT NULL,
 	"user" varchar(200) NOT NULL,
@@ -3487,7 +3487,7 @@ CREATE TABLE "cokdb1"."logaction" (
 	CONSTRAINT "logaction_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "logaction_param_length" CHECK (octet_length("param") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."logrecord" (
 	"uid" varchar(50) NOT NULL,
 	"user" varchar(200) NOT NULL,
@@ -3504,7 +3504,7 @@ CREATE TABLE "cokdb1"."logrecord" (
 	"data4" varchar(255),
 	CONSTRAINT "logrecord_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."logrecord_fight" (
 	"uid" varchar(50) NOT NULL,
 	"user" varchar(200) NOT NULL,
@@ -3522,7 +3522,7 @@ CREATE TABLE "cokdb1"."logrecord_fight" (
 	"data5" varchar(4086),
 	CONSTRAINT "logrecord_fight_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."logstat" (
 	"uid" varchar(50) NOT NULL,
 	"user" varchar(200) NOT NULL,
@@ -3543,7 +3543,7 @@ CREATE TABLE "cokdb1"."logstat" (
 	"data8" integer,
 	CONSTRAINT "logstat_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."logtemp" (
 	"uid" varchar(50) NOT NULL,
 	"user" varchar(200) NOT NULL,
@@ -3564,7 +3564,7 @@ CREATE TABLE "cokdb1"."logtemp" (
 	"data8" integer,
 	CONSTRAINT "logtemp_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."logtmp" (
 	"uid" varchar(50) NOT NULL,
 	"user" varchar(200) NOT NULL,
@@ -3585,7 +3585,7 @@ CREATE TABLE "cokdb1"."logtmp" (
 	"data8" integer,
 	CONSTRAINT "logtmp_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."lottery_log" (
 	"uid" varchar(40) NOT NULL,
 	"name" varchar(200),
@@ -3601,7 +3601,7 @@ CREATE TABLE "cokdb1"."lottery_log" (
 	CONSTRAINT "lottery_log_type_range" CHECK ("type" BETWEEN -128 AND 127),
 	CONSTRAINT "lottery_log_superMode_range" CHECK ("superMode" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."lottery_record" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer NOT NULL,
@@ -3620,7 +3620,7 @@ CREATE TABLE "cokdb1"."lottery_record" (
 	"boxTimes" integer DEFAULT 0,
 	CONSTRAINT "lottery_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."luck_draw_history" (
 	"gameUid" varchar(255),
 	"roleName" varchar(40),
@@ -3630,7 +3630,7 @@ CREATE TABLE "cokdb1"."luck_draw_history" (
 	"itemId" varchar(255),
 	"time" bigint
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."lucky_bag" (
 	"uid" varchar(255) NOT NULL,
 	"openFreetimes" integer DEFAULT 0,
@@ -3641,7 +3641,7 @@ CREATE TABLE "cokdb1"."lucky_bag" (
 	"scoreReward" varchar(255),
 	CONSTRAINT "lucky_bag_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."lucky_day" (
 	"uid" varchar(255) NOT NULL,
 	"unluckyCount" integer DEFAULT 0,
@@ -3652,7 +3652,7 @@ CREATE TABLE "cokdb1"."lucky_day" (
 	"lucky_id" integer,
 	CONSTRAINT "lucky_day_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mail" (
 	"uid" varchar(40) NOT NULL,
 	"toUser" varchar(40) NOT NULL,
@@ -3672,7 +3672,7 @@ CREATE TABLE "cokdb1"."mail" (
 	CONSTRAINT "mail_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "mail_contents_length" CHECK (octet_length("contents") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mail_20150212" (
 	"uid" varchar(40) NOT NULL,
 	"toUser" varchar(40) NOT NULL,
@@ -3692,7 +3692,7 @@ CREATE TABLE "cokdb1"."mail_20150212" (
 	CONSTRAINT "mail_20150212_contents_length" CHECK (octet_length("contents") <= 65535),
 	CONSTRAINT "mail_20150212_rewardId_length" CHECK (octet_length("rewardId") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mail_contents" (
 	"uid" varchar(40) NOT NULL,
 	"contents" "bytea" NOT NULL,
@@ -3700,7 +3700,7 @@ CREATE TABLE "cokdb1"."mail_contents" (
 	CONSTRAINT "mail_contents_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "mail_contents_contents_length" CHECK (octet_length("contents") <= 16777215)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mail_contents_1016" (
 	"id" varchar(40) NOT NULL,
 	"title" varchar(40) NOT NULL,
@@ -3712,7 +3712,7 @@ CREATE TABLE "cokdb1"."mail_contents_1016" (
 	CONSTRAINT "mail_contents_1016_contents_length" CHECK (octet_length("contents") <= 65535),
 	CONSTRAINT "mail_contents_1016_rewardId_length" CHECK (octet_length("rewardId") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mail_contents_20141030" (
 	"id" varchar(40) NOT NULL,
 	"title" varchar(40) NOT NULL,
@@ -3724,7 +3724,7 @@ CREATE TABLE "cokdb1"."mail_contents_20141030" (
 	CONSTRAINT "mail_contents_20141030_contents_length" CHECK (octet_length("contents") <= 65535),
 	CONSTRAINT "mail_contents_20141030_rewardId_length" CHECK (octet_length("rewardId") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mail_group" (
 	"uid" varchar(40) NOT NULL,
 	"groupType" integer DEFAULT 1 NOT NULL,
@@ -3732,7 +3732,7 @@ CREATE TABLE "cokdb1"."mail_group" (
 	"updateTime" bigint NOT NULL,
 	CONSTRAINT "mail_group_PRIMARY" PRIMARY KEY("uid","groupType","groupIndex")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mail_group_20150212" (
 	"uid" varchar(40) NOT NULL,
 	"groupType" integer DEFAULT 1 NOT NULL,
@@ -3740,7 +3740,7 @@ CREATE TABLE "cokdb1"."mail_group_20150212" (
 	"updateTime" bigint NOT NULL,
 	CONSTRAINT "mail_group_20150212_PRIMARY" PRIMARY KEY("uid","groupType","groupIndex")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mail_reward_log" (
 	"uid" varchar(40) NOT NULL,
 	"mailId" varchar(40) NOT NULL,
@@ -3750,7 +3750,7 @@ CREATE TABLE "cokdb1"."mail_reward_log" (
 	CONSTRAINT "mail_reward_log_PRIMARY" PRIMARY KEY("uid","mailId","createTime"),
 	CONSTRAINT "mail_reward_log_status_range" CHECK ("status" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."marketing_log" (
 	"uid" varchar(255) NOT NULL,
 	"id" varchar(255) NOT NULL,
@@ -3759,20 +3759,20 @@ CREATE TABLE "cokdb1"."marketing_log" (
 	"deviceId" varchar(255),
 	CONSTRAINT "marketing_log_PRIMARY" PRIMARY KEY("uid","id","network")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."material_control" (
 	"uid" varchar(40) NOT NULL,
 	"num" integer DEFAULT 0 NOT NULL,
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "material_control_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."material_cost_ranking" (
 	"uid" varchar(40) NOT NULL,
 	"contributeSum" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "material_cost_ranking_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."material_cost_record" (
 	"uid" varchar(255) NOT NULL,
 	"userId" varchar(255) NOT NULL,
@@ -3785,7 +3785,7 @@ CREATE TABLE "cokdb1"."material_cost_record" (
 	"time" bigint NOT NULL,
 	CONSTRAINT "material_cost_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."menu" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."menu_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"module_id" integer,
@@ -3802,7 +3802,7 @@ CREATE TABLE "cokdb1"."menu" (
 	CONSTRAINT "menu_is_prod_range" CHECK ("is_prod" BETWEEN -128 AND 127),
 	CONSTRAINT "menu_is_log_range" CHECK ("is_log" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."methods" (
 	"method_id" integer NOT NULL,
 	"route_id" integer,
@@ -3810,7 +3810,7 @@ CREATE TABLE "cokdb1"."methods" (
 	"method_path" varchar(50),
 	CONSTRAINT "methods_PRIMARY" PRIMARY KEY("method_id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."military_cost_record" (
 	"uid" varchar(255) NOT NULL,
 	"userId" varchar(255) NOT NULL,
@@ -3823,13 +3823,13 @@ CREATE TABLE "cokdb1"."military_cost_record" (
 	"time" bigint NOT NULL,
 	CONSTRAINT "military_cost_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mod_authorize" (
 	"uid" varchar(255) NOT NULL,
 	"authorize" integer DEFAULT 1,
 	CONSTRAINT "mod_authorize_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."mod_record" (
 	"id" bigint GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."mod_record_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1),
 	"fromUser" varchar(255),
@@ -3838,7 +3838,7 @@ CREATE TABLE "cokdb1"."mod_record" (
 	"createTime" bigint,
 	CONSTRAINT "mod_record_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."modules" (
 	"module_id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."modules_module_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"module_name" varchar(50),
@@ -3847,20 +3847,20 @@ CREATE TABLE "cokdb1"."modules" (
 	"group_name" varchar(255) DEFAULT '' NOT NULL,
 	CONSTRAINT "modules_PRIMARY" PRIMARY KEY("module_id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."monitor_test" (
 	"id" bigint GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."monitor_test_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1),
 	"value" varchar(255),
 	CONSTRAINT "monitor_test_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."monster_everyday_refresh" (
 	"monster_id" varchar(255) DEFAULT '' NOT NULL,
 	"monster_num" integer,
 	"refreshtime" bigint,
 	CONSTRAINT "monster_everyday_refresh_PRIMARY" PRIMARY KEY("monster_id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."monster_siege" (
 	"allianceId" varchar(40) NOT NULL,
 	"monsterCastleId" integer DEFAULT 0,
@@ -3878,7 +3878,7 @@ CREATE TABLE "cokdb1"."monster_siege" (
 	"monsterPerRoundNum" varchar(500),
 	CONSTRAINT "monster_siege_PRIMARY" PRIMARY KEY("allianceId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."monster_siege_top_history" (
 	"allianceId" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -3896,7 +3896,7 @@ CREATE TABLE "cokdb1"."monster_siege_top_history" (
 	"monsterPerRoundNum" varchar(500),
 	CONSTRAINT "monster_siege_top_history_PRIMARY" PRIMARY KEY("allianceId","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."monthly_card" (
 	"uid" varchar(40) NOT NULL,
 	"itemId" varchar(40) NOT NULL,
@@ -3907,7 +3907,7 @@ CREATE TABLE "cokdb1"."monthly_card" (
 	"optionId" integer,
 	CONSTRAINT "monthly_card_PRIMARY" PRIMARY KEY("uid","itemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_city_log" (
 	"pointId" integer NOT NULL,
 	"time" bigint NOT NULL,
@@ -3917,13 +3917,13 @@ CREATE TABLE "cokdb1"."move_city_log" (
 	"uids" varchar(1000),
 	CONSTRAINT "move_city_log_PRIMARY" PRIMARY KEY("pointId","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_city_time" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "move_city_time_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -3933,7 +3933,7 @@ CREATE TABLE "cokdb1"."move_server_record" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_0" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -3943,7 +3943,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_0" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_0_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_1" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -3953,7 +3953,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_1" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_1_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_10" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -3963,7 +3963,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_10" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_10_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_11" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -3973,7 +3973,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_11" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_11_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_2" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -3983,7 +3983,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_2" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_2_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_3" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -3993,7 +3993,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_3" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_3_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_4" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -4003,7 +4003,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_4" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_4_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_5" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -4013,7 +4013,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_5" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_5_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_6" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -4023,7 +4023,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_6" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_6_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_7" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -4033,7 +4033,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_7" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_7_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_8" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -4043,7 +4043,7 @@ CREATE TABLE "cokdb1"."move_server_record_2024_8" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_8_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_server_record_2024_9" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"uid" varchar(40) DEFAULT '' NOT NULL,
@@ -4053,13 +4053,13 @@ CREATE TABLE "cokdb1"."move_server_record_2024_9" (
 	"time" bigint,
 	CONSTRAINT "move_server_record_2024_9_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."move_total" (
 	"uid" varchar(255) NOT NULL,
 	"total" integer DEFAULT 0,
 	CONSTRAINT "move_total_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."neutral_server_info" (
 	"serverId" integer NOT NULL,
 	"groupId" integer NOT NULL,
@@ -4072,7 +4072,7 @@ CREATE TABLE "cokdb1"."neutral_server_info" (
 	CONSTRAINT "neutral_server_info_PRIMARY" PRIMARY KEY("serverId"),
 	CONSTRAINT "neutral_server_info_open_range" CHECK ("open" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."new_exped_history" (
 	"stageId" integer DEFAULT 0,
 	"winServerId" integer DEFAULT 0,
@@ -4080,7 +4080,7 @@ CREATE TABLE "cokdb1"."new_exped_history" (
 	"users" varchar(1500) DEFAULT '',
 	"createTime" bigint DEFAULT 0
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."new_general" (
 	"id" integer DEFAULT 0 NOT NULL,
 	"uid" varchar(96) DEFAULT '' NOT NULL,
@@ -4112,7 +4112,7 @@ CREATE TABLE "cokdb1"."new_general" (
 	"baseSkill" varchar(256),
 	CONSTRAINT "new_general_PRIMARY" PRIMARY KEY("id","uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."new_general_buy" (
 	"uid" varchar(255) NOT NULL,
 	"generalId" integer NOT NULL,
@@ -4122,7 +4122,7 @@ CREATE TABLE "cokdb1"."new_general_buy" (
 	"countType4" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "new_general_buy_PRIMARY" PRIMARY KEY("uid","generalId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."new_general_skill" (
 	"uid" varchar(96) DEFAULT '' NOT NULL,
 	"newGeneralId" integer DEFAULT 0 NOT NULL,
@@ -4133,7 +4133,7 @@ CREATE TABLE "cokdb1"."new_general_skill" (
 	"stat" integer,
 	CONSTRAINT "new_general_skill_PRIMARY" PRIMARY KEY("uid","newGeneralId","skillId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."new_general_status" (
 	"uid" varchar(96) DEFAULT '' NOT NULL,
 	"newGeneralId" integer DEFAULT 0 NOT NULL,
@@ -4142,13 +4142,13 @@ CREATE TABLE "cokdb1"."new_general_status" (
 	"endTime" bigint,
 	CONSTRAINT "new_general_status_PRIMARY" PRIMARY KEY("uid","newGeneralId","stateId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."new_sercum_recharge" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"id" varchar(255) NOT NULL,
 	CONSTRAINT "new_sercum_recharge_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."new_user_score" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255),
@@ -4159,7 +4159,7 @@ CREATE TABLE "cokdb1"."new_user_score" (
 	"stage" integer DEFAULT 0,
 	CONSTRAINT "new_user_score_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."notice_cost_log" (
 	"uid" varchar(40) NOT NULL,
 	"type" smallint,
@@ -4169,7 +4169,7 @@ CREATE TABLE "cokdb1"."notice_cost_log" (
 	CONSTRAINT "notice_cost_log_PRIMARY" PRIMARY KEY("uid","itemId","createTime"),
 	CONSTRAINT "notice_cost_log_type_range" CHECK ("type" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."npc_trade" (
 	"uid" varchar(40) NOT NULL,
 	"trade" varchar(100) NOT NULL,
@@ -4178,7 +4178,7 @@ CREATE TABLE "cokdb1"."npc_trade" (
 	"superValue" integer DEFAULT 0,
 	CONSTRAINT "npc_trade_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."ob_record" (
 	"uid" varchar(50) NOT NULL,
 	"allianceIds" varchar(200) NOT NULL,
@@ -4187,7 +4187,7 @@ CREATE TABLE "cokdb1"."ob_record" (
 	"areaId" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "ob_record_PRIMARY" PRIMARY KEY("uid","allianceIds")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."ob_report" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."ob_report_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"worldId" integer NOT NULL,
@@ -4196,7 +4196,7 @@ CREATE TABLE "cokdb1"."ob_report" (
 	CONSTRAINT "ob_report_PRIMARY" PRIMARY KEY("id","worldId"),
 	CONSTRAINT "ob_report_content_length" CHECK (octet_length("content") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."ob_user" (
 	"uid" varchar(50) NOT NULL,
 	"worldId" integer,
@@ -4204,13 +4204,13 @@ CREATE TABLE "cokdb1"."ob_user" (
 	"createTime" bigint,
 	CONSTRAINT "ob_user_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."oldmailinsert" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "oldmailinsert_PRIMARY" PRIMARY KEY("uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."parse_info" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer NOT NULL,
@@ -4218,7 +4218,7 @@ CREATE TABLE "cokdb1"."parse_info" (
 	"audio" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "parse_info_PRIMARY" PRIMARY KEY("uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."pay_action" (
 	"uid" varchar(40) NOT NULL,
 	"exchangeId" varchar(20) NOT NULL,
@@ -4226,7 +4226,7 @@ CREATE TABLE "cokdb1"."pay_action" (
 	"createTime" bigint NOT NULL,
 	CONSTRAINT "pay_action_PRIMARY" PRIMARY KEY("uid","exchangeId","createTime")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."pay_order_count" (
 	"uid" varchar(40) NOT NULL,
 	"className" varchar(40) NOT NULL,
@@ -4234,14 +4234,14 @@ CREATE TABLE "cokdb1"."pay_order_count" (
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "pay_order_count_PRIMARY" PRIMARY KEY("uid","className")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."pay_order_count_log" (
 	"uid" varchar(40) NOT NULL,
 	"className" varchar(40) NOT NULL,
 	"action" integer DEFAULT 0,
 	"time" bigint DEFAULT 0
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."pay_request" (
 	"uid" varchar(40) NOT NULL,
 	"pf" varchar(20) NOT NULL,
@@ -4253,7 +4253,7 @@ CREATE TABLE "cokdb1"."pay_request" (
 	"finishTime" bigint DEFAULT 0,
 	CONSTRAINT "pay_request_PRIMARY" PRIMARY KEY("uid","pf","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."pay_total" (
 	"uid" varchar(40) NOT NULL,
 	"gold" bigint,
@@ -4262,7 +4262,7 @@ CREATE TABLE "cokdb1"."pay_total" (
 	"getLv" integer DEFAULT 0,
 	CONSTRAINT "pay_total_PRIMARY" PRIMARY KEY("uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."pay_total_log" (
 	"uid" varchar(40) NOT NULL,
 	"level" integer NOT NULL,
@@ -4271,7 +4271,7 @@ CREATE TABLE "cokdb1"."pay_total_log" (
 	"type" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "pay_total_log_PRIMARY" PRIMARY KEY("uid","level","createTime","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."paycheck" (
 	"uid" varchar(40) NOT NULL,
 	"orderId" varchar(200) NOT NULL,
@@ -4282,7 +4282,7 @@ CREATE TABLE "cokdb1"."paycheck" (
 	CONSTRAINT "paycheck_PRIMARY" PRIMARY KEY("uid","orderId","pf"),
 	CONSTRAINT "paycheck_apidata_length" CHECK (octet_length("apidata") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."paylog" (
 	"uid" varchar(40) NOT NULL,
 	"orderId" varchar(200) NOT NULL,
@@ -4307,7 +4307,7 @@ CREATE TABLE "cokdb1"."paylog" (
 	CONSTRAINT "paylog_PRIMARY" PRIMARY KEY("uid","orderId","pf"),
 	CONSTRAINT "paylog_orderParam_length" CHECK (octet_length("orderParam") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."paylog_back" (
 	"uid" varchar(40) NOT NULL,
 	"orderId" varchar(40) NOT NULL,
@@ -4319,13 +4319,13 @@ CREATE TABLE "cokdb1"."paylog_back" (
 	"payLevel" integer NOT NULL,
 	CONSTRAINT "paylog_back_PRIMARY" PRIMARY KEY("uid","orderId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."personal_data" (
 	"uid" varchar(255) NOT NULL,
 	"value" text,
 	CONSTRAINT "personal_data_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."pic_upload_record" (
 	"uid" varchar(255) NOT NULL,
 	"picVer" integer DEFAULT 0,
@@ -4336,7 +4336,7 @@ CREATE TABLE "cokdb1"."pic_upload_record" (
 	"stat" integer DEFAULT 0,
 	CONSTRAINT "pic_upload_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."platform_first_login_reward" (
 	"uid" varchar(50) NOT NULL,
 	"hasReward" integer DEFAULT 0 NOT NULL,
@@ -4344,7 +4344,7 @@ CREATE TABLE "cokdb1"."platform_first_login_reward" (
 	"rewardTime" bigint,
 	CONSTRAINT "platform_first_login_reward_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."play_evolutions" (
 	"id" integer NOT NULL,
 	"hash" varchar(255) NOT NULL,
@@ -4356,13 +4356,13 @@ CREATE TABLE "cokdb1"."play_evolutions" (
 	CONSTRAINT "play_evolutions_PRIMARY" PRIMARY KEY("id"),
 	CONSTRAINT "play_evolutions_applied_at_temporal" CHECK (("applied_at" IS NULL OR (CASE WHEN "applied_at" ~ '^[0-9]{4}-(0[0-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$' THEN CASE WHEN left("applied_at",4) <> '0000' AND substring("applied_at",6,2) <> '00' AND substring("applied_at",9,2) <> '00' THEN to_char(to_date(left("applied_at",10),'YYYY-MM-DD'),'YYYY-MM-DD') = left("applied_at",10) ELSE true END ELSE false END)))
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."player" (
 	"id" varchar(8) NOT NULL,
 	"name" varchar(255) NOT NULL,
 	CONSTRAINT "player_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."player_percents_save" (
 	"uid" varchar(255) NOT NULL,
 	"footEffect" real DEFAULT 0 NOT NULL,
@@ -4371,7 +4371,7 @@ CREATE TABLE "cokdb1"."player_percents_save" (
 	"carEffect" real DEFAULT 0 NOT NULL,
 	CONSTRAINT "player_percents_save_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."playerinfo" (
 	"uid" varchar(40) NOT NULL,
 	"battlesWin" integer DEFAULT 0,
@@ -4390,13 +4390,13 @@ CREATE TABLE "cokdb1"."playerinfo" (
 	"is_reward" varchar(255) DEFAULT 'N' NOT NULL,
 	CONSTRAINT "playerinfo_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."point_minifort" (
 	"pointId" integer NOT NULL,
 	"fortPointId" integer NOT NULL,
 	CONSTRAINT "point_minifort_PRIMARY" PRIMARY KEY("pointId","fortPointId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."post_box" (
 	"uid" varchar(40) NOT NULL,
 	"from" varchar(255) DEFAULT '',
@@ -4408,7 +4408,7 @@ CREATE TABLE "cokdb1"."post_box" (
 	CONSTRAINT "post_box_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "post_box_contents_length" CHECK (octet_length("contents") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."post_mail" (
 	"uid" varchar(40) NOT NULL,
 	"boxId" varchar(40) NOT NULL,
@@ -4421,7 +4421,7 @@ CREATE TABLE "cokdb1"."post_mail" (
 	CONSTRAINT "post_mail_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "post_mail_contents_length" CHECK (octet_length("contents") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."post_relation" (
 	"uid" varchar(40) NOT NULL,
 	"publicValue" varchar(600),
@@ -4429,7 +4429,7 @@ CREATE TABLE "cokdb1"."post_relation" (
 	"players" varchar(600),
 	CONSTRAINT "post_relation_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."pray_record" (
 	"id" bigint GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."pray_record_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 44571 CACHE 1),
 	"uid" varchar(255) NOT NULL,
@@ -4440,7 +4440,7 @@ CREATE TABLE "cokdb1"."pray_record" (
 	"prayTime" bigint,
 	CONSTRAINT "pray_record_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."princess_task" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(255) NOT NULL,
@@ -4453,7 +4453,7 @@ CREATE TABLE "cokdb1"."princess_task" (
 	"pop" integer DEFAULT 0,
 	CONSTRAINT "princess_task_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."princess_task_record" (
 	"uid" varchar(40) NOT NULL,
 	"refreshNum" integer DEFAULT 0,
@@ -4462,7 +4462,7 @@ CREATE TABLE "cokdb1"."princess_task_record" (
 	"completeTime" bigint DEFAULT 0,
 	CONSTRAINT "princess_task_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."princess_task_stat" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint NOT NULL,
@@ -4474,7 +4474,7 @@ CREATE TABLE "cokdb1"."princess_task_stat" (
 	"param1" bigint NOT NULL,
 	CONSTRAINT "princess_task_stat_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."promotion_log" (
 	"channel" varchar(100) NOT NULL,
 	"statId" varchar(100) NOT NULL,
@@ -4493,13 +4493,13 @@ CREATE TABLE "cokdb1"."promotion_log" (
 	"location" varchar(50),
 	CONSTRAINT "promotion_log_PRIMARY" PRIMARY KEY("channel","statId","exchangeId","uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."protect_total" (
 	"uid" varchar(255) NOT NULL,
 	"total" integer DEFAULT 0,
 	CONSTRAINT "protect_total_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."push_log" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint DEFAULT 0 NOT NULL,
@@ -4507,7 +4507,7 @@ CREATE TABLE "cokdb1"."push_log" (
 	"status" integer,
 	CONSTRAINT "push_log_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."push_record" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -4517,7 +4517,7 @@ CREATE TABLE "cokdb1"."push_record" (
 	CONSTRAINT "push_record_PRIMARY" PRIMARY KEY("uid","time"),
 	CONSTRAINT "push_record_msg_length" CHECK (octet_length("msg") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."question_match" (
 	"id" varchar(40) NOT NULL,
 	"result" varchar(40),
@@ -4527,7 +4527,7 @@ CREATE TABLE "cokdb1"."question_match" (
 	"betNum" bigint,
 	CONSTRAINT "question_match_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."queue" (
 	"uuid" varchar(40) NOT NULL,
 	"ownerId" varchar(40) NOT NULL,
@@ -4544,14 +4544,14 @@ CREATE TABLE "cokdb1"."queue" (
 	CONSTRAINT "queue_PRIMARY" PRIMARY KEY("uuid"),
 	CONSTRAINT "queue_exchgType_range" CHECK ("exchgType" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."receive_heart" (
 	"uid" varchar(40) NOT NULL,
 	"duration" integer NOT NULL,
 	"effecttype" varchar(2) NOT NULL,
 	"senduid" varchar(40) NOT NULL
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."receive_item" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."receive_item_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"uid" varchar(50) NOT NULL,
@@ -4561,7 +4561,7 @@ CREATE TABLE "cokdb1"."receive_item" (
 	"createTime" bigint,
 	CONSTRAINT "receive_item_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."red_packets" (
 	"uid" varchar(255) NOT NULL,
 	"range" integer DEFAULT 0,
@@ -4580,7 +4580,7 @@ CREATE TABLE "cokdb1"."red_packets" (
 	"state" integer DEFAULT 0,
 	CONSTRAINT "red_packets_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."red_packets_records" (
 	"uid" varchar(255) NOT NULL,
 	"player" varchar(255) DEFAULT '' NOT NULL,
@@ -4591,13 +4591,13 @@ CREATE TABLE "cokdb1"."red_packets_records" (
 	"getTime" bigint DEFAULT 0,
 	CONSTRAINT "red_packets_records_PRIMARY" PRIMARY KEY("uid","player")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."redis_cfg_backup" (
 	"keyFlag" varchar(128) NOT NULL,
 	"info" varchar(2048) DEFAULT '0',
 	CONSTRAINT "redis_cfg_backup_PRIMARY" PRIMARY KEY("keyFlag")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."refund_log" (
 	"refundId" varchar(255) NOT NULL,
 	"order" integer NOT NULL,
@@ -4610,7 +4610,7 @@ CREATE TABLE "cokdb1"."refund_log" (
 	"remain" bigint NOT NULL,
 	CONSTRAINT "refund_log_PRIMARY" PRIMARY KEY("refundId","order")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."report" (
 	"uid" varchar(40) NOT NULL,
 	"createTime" bigint NOT NULL,
@@ -4618,13 +4618,13 @@ CREATE TABLE "cokdb1"."report" (
 	CONSTRAINT "report_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "report_report_length" CHECK (octet_length("report") <= 16777215)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."res_area_count" (
 	"areaId" integer NOT NULL,
 	"count" integer NOT NULL,
 	CONSTRAINT "res_area_count_PRIMARY" PRIMARY KEY("areaId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."rescue_skill_record" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255),
@@ -4639,7 +4639,7 @@ CREATE TABLE "cokdb1"."rescue_skill_record" (
 	"attack" integer DEFAULT 0,
 	CONSTRAINT "rescue_skill_record_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_107" (
 	"uid" varchar(255) NOT NULL,
 	"version" varchar(255) NOT NULL,
@@ -4651,7 +4651,7 @@ CREATE TABLE "cokdb1"."reward_107" (
 	"endTime" bigint DEFAULT 0,
 	CONSTRAINT "reward_107_PRIMARY" PRIMARY KEY("uid","version")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_item_control" (
 	"uid" varchar(255) NOT NULL,
 	"itemId" varchar(255) NOT NULL,
@@ -4659,7 +4659,7 @@ CREATE TABLE "cokdb1"."reward_item_control" (
 	"flushTime" bigint DEFAULT 0,
 	CONSTRAINT "reward_item_control_PRIMARY" PRIMARY KEY("uid","itemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4667,7 +4667,7 @@ CREATE TABLE "cokdb1"."reward_log" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_0" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4675,7 +4675,7 @@ CREATE TABLE "cokdb1"."reward_log_0" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_0_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_1" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4683,7 +4683,7 @@ CREATE TABLE "cokdb1"."reward_log_1" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_1_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_2" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4691,7 +4691,7 @@ CREATE TABLE "cokdb1"."reward_log_2" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_2_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_3" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4699,7 +4699,7 @@ CREATE TABLE "cokdb1"."reward_log_3" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_3_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_4" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4707,7 +4707,7 @@ CREATE TABLE "cokdb1"."reward_log_4" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_4_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_5" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4715,7 +4715,7 @@ CREATE TABLE "cokdb1"."reward_log_5" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_5_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_6" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4723,7 +4723,7 @@ CREATE TABLE "cokdb1"."reward_log_6" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_6_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_7" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4731,7 +4731,7 @@ CREATE TABLE "cokdb1"."reward_log_7" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_7_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_8" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4739,7 +4739,7 @@ CREATE TABLE "cokdb1"."reward_log_8" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_8_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."reward_log_9" (
 	"uid" varchar(255) NOT NULL,
 	"rewardid" varchar(255) NOT NULL,
@@ -4747,7 +4747,7 @@ CREATE TABLE "cokdb1"."reward_log_9" (
 	"totalnum" bigint DEFAULT 0,
 	CONSTRAINT "reward_log_9_PRIMARY" PRIMARY KEY("uid","rewardid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."rob_general" (
 	"uid" varchar(96),
 	"serverid" integer,
@@ -4761,7 +4761,7 @@ CREATE TABLE "cokdb1"."rob_general" (
 	"optime" varchar(200),
 	CONSTRAINT "rob_general_PRIMARY" PRIMARY KEY("owneruid","generalid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."role_permission" (
 	"role_id" integer NOT NULL,
 	"module_permission" varchar(255) NOT NULL,
@@ -4769,14 +4769,14 @@ CREATE TABLE "cokdb1"."role_permission" (
 	"method_permission" varchar(1000),
 	CONSTRAINT "role_permission_PRIMARY" PRIMARY KEY("role_id","module_permission")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."roles" (
 	"role_id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."roles_role_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"role_name" varchar(50),
 	"role_flag" varchar(50),
 	CONSTRAINT "roles_PRIMARY" PRIMARY KEY("role_id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."routes" (
 	"route_id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."routes_route_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"module_id" integer,
@@ -4792,7 +4792,7 @@ CREATE TABLE "cokdb1"."routes" (
 	CONSTRAINT "routes_log_tag_range" CHECK ("log_tag" BETWEEN -128 AND 127),
 	CONSTRAINT "routes_isProd_range" CHECK ("isProd" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."saga_tower_science" (
 	"uid" varchar(32) NOT NULL,
 	"itemid" integer NOT NULL,
@@ -4801,14 +4801,14 @@ CREATE TABLE "cokdb1"."saga_tower_science" (
 	"reserve" integer,
 	CONSTRAINT "saga_tower_science_PRIMARY" PRIMARY KEY("uid","itemid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."sampleuser" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"regTime" bigint NOT NULL,
 	"tag" integer NOT NULL,
 	CONSTRAINT "sampleuser_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."score_act" (
 	"uid" varchar(255) NOT NULL,
 	"actId" varchar(40) NOT NULL,
@@ -4818,7 +4818,7 @@ CREATE TABLE "cokdb1"."score_act" (
 	"rewardFlag" varchar(255),
 	CONSTRAINT "score_act_PRIMARY" PRIMARY KEY("uid","actId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."score_act_in" (
 	"uid" varchar(255) NOT NULL,
 	"allianceId" varchar(255) NOT NULL,
@@ -4826,7 +4826,7 @@ CREATE TABLE "cokdb1"."score_act_in" (
 	"score" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "score_act_in_PRIMARY" PRIMARY KEY("uid","allianceId","actId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."score_act_record" (
 	"uid" varchar(255) NOT NULL,
 	"actId" varchar(40) NOT NULL,
@@ -4836,7 +4836,7 @@ CREATE TABLE "cokdb1"."score_act_record" (
 	"rewardFlag" varchar(255),
 	CONSTRAINT "score_act_record_PRIMARY" PRIMARY KEY("uid","actId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_activity" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"id" integer NOT NULL,
@@ -4846,7 +4846,7 @@ CREATE TABLE "cokdb1"."server_activity" (
 	"events" varchar(500),
 	CONSTRAINT "server_activity_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_announce" (
 	"serverId" varchar(255) NOT NULL,
 	"randomGeneral" "bytea",
@@ -4854,13 +4854,13 @@ CREATE TABLE "cokdb1"."server_announce" (
 	CONSTRAINT "server_announce_PRIMARY" PRIMARY KEY("serverId"),
 	CONSTRAINT "server_announce_randomGeneral_length" CHECK (octet_length("randomGeneral") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_config" (
 	"uid" varchar(255) NOT NULL,
 	"stat" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "server_config_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_history_top_score" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint DEFAULT 0 NOT NULL,
@@ -4871,7 +4871,7 @@ CREATE TABLE "cokdb1"."server_history_top_score" (
 	"allianceIcon" varchar(40),
 	CONSTRAINT "server_history_top_score_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_info" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"activityTime" bigint,
@@ -4891,7 +4891,7 @@ CREATE TABLE "cokdb1"."server_info" (
 	"lastClearMilitaryMailSendTime" bigint DEFAULT 0,
 	CONSTRAINT "server_info_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_info_copy" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"activityTime" bigint,
@@ -4911,13 +4911,13 @@ CREATE TABLE "cokdb1"."server_info_copy" (
 	"lastClearMilitaryMailSendTime" bigint DEFAULT 0,
 	CONSTRAINT "server_info_copy_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_mail_record" (
 	"uid" varchar(40) NOT NULL,
 	"record" varchar(40) NOT NULL,
 	"state" integer DEFAULT 0
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_merge_task" (
 	"id" varchar(40) NOT NULL,
 	"src_server" varchar(255) DEFAULT '' NOT NULL,
@@ -4928,7 +4928,7 @@ CREATE TABLE "cokdb1"."server_merge_task" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "server_merge_task_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_push" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer DEFAULT 0,
@@ -4970,7 +4970,7 @@ CREATE TABLE "cokdb1"."server_push" (
 	CONSTRAINT "server_push_reward_length" CHECK (octet_length("reward") <= 65535),
 	CONSTRAINT "server_push_notification_length" CHECK (octet_length("notification") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_push_20141106" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer DEFAULT 0,
@@ -4995,7 +4995,7 @@ CREATE TABLE "cokdb1"."server_push_20141106" (
 	CONSTRAINT "server_push_20141106_contents_length" CHECK (octet_length("contents") <= 65535),
 	CONSTRAINT "server_push_20141106_reward_length" CHECK (octet_length("reward") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_push_config" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer DEFAULT 0,
@@ -5005,7 +5005,7 @@ CREATE TABLE "cokdb1"."server_push_config" (
 	CONSTRAINT "server_push_config_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "server_push_config_contents_length" CHECK (octet_length("contents") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_score" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"id" integer NOT NULL,
@@ -5017,7 +5017,7 @@ CREATE TABLE "cokdb1"."server_score" (
 	"round" integer DEFAULT 1,
 	CONSTRAINT "server_score_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_top_score" (
 	"uid" varchar(40) NOT NULL,
 	"actId" varchar(40) NOT NULL,
@@ -5029,7 +5029,7 @@ CREATE TABLE "cokdb1"."server_top_score" (
 	"allianceIcon" varchar(40),
 	CONSTRAINT "server_top_score_PRIMARY" PRIMARY KEY("uid","actId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_transfer" (
 	"uid" varchar(255) NOT NULL,
 	"cdTime" bigint,
@@ -5038,7 +5038,7 @@ CREATE TABLE "cokdb1"."server_transfer" (
 	"beforeServers" varchar(255) DEFAULT '',
 	CONSTRAINT "server_transfer_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_update" (
 	"uid" varchar(255) NOT NULL,
 	"idx" integer NOT NULL,
@@ -5049,7 +5049,7 @@ CREATE TABLE "cokdb1"."server_update" (
 	CONSTRAINT "server_update_content_length" CHECK (octet_length("content") <= 65535),
 	CONSTRAINT "server_update_chineseContent_length" CHECK (octet_length("chineseContent") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_update_suggestion" (
 	"uid" varchar(255) NOT NULL,
 	"updateId" varchar(255) NOT NULL,
@@ -5063,7 +5063,7 @@ CREATE TABLE "cokdb1"."server_update_suggestion" (
 	CONSTRAINT "server_update_suggestion_PRIMARY" PRIMARY KEY("uid","updateId","idx"),
 	CONSTRAINT "server_update_suggestion_suggestion_length" CHECK (octet_length("suggestion") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."server_usermail" (
 	"uid" varchar(40) NOT NULL,
 	"toUser" varchar(40) NOT NULL,
@@ -5077,7 +5077,7 @@ CREATE TABLE "cokdb1"."server_usermail" (
 	CONSTRAINT "server_usermail_contents_length" CHECK (octet_length("contents") <= 65535),
 	CONSTRAINT "server_usermail_reward_length" CHECK (octet_length("reward") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."shopping_mall" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"id" varchar(40) NOT NULL,
@@ -5087,14 +5087,14 @@ CREATE TABLE "cokdb1"."shopping_mall" (
 	"flushTotalTime" bigint DEFAULT 0,
 	CONSTRAINT "shopping_mall_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."sign_in" (
 	"uid" varchar(255) NOT NULL,
 	"day" integer DEFAULT 0,
 	"signInTime" bigint DEFAULT 0,
 	CONSTRAINT "sign_in_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."sign_in_feed" (
 	"uid" varchar(255) NOT NULL,
 	"type" integer DEFAULT 0 NOT NULL,
@@ -5102,7 +5102,7 @@ CREATE TABLE "cokdb1"."sign_in_feed" (
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "sign_in_feed_PRIMARY" PRIMARY KEY("uid","type","feed")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."soccer_match" (
 	"id" varchar(255) NOT NULL,
 	"vs" varchar(100),
@@ -5117,13 +5117,13 @@ CREATE TABLE "cokdb1"."soccer_match" (
 	"oddsB" numeric(20, 2),
 	CONSTRAINT "soccer_match_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."staff" (
 	"id" integer NOT NULL,
 	"name" varchar(255) NOT NULL,
 	CONSTRAINT "staff_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_adjust" (
 	"uid" varchar(40) NOT NULL,
 	"device" varchar(10),
@@ -5134,7 +5134,7 @@ CREATE TABLE "cokdb1"."stat_adjust" (
 	CONSTRAINT "stat_adjust_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "stat_adjust_fulldata_length" CHECK (octet_length("fulldata") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_af" (
 	"uid" varchar(40) NOT NULL,
 	"afuid" varchar(200),
@@ -5146,7 +5146,7 @@ CREATE TABLE "cokdb1"."stat_af" (
 	CONSTRAINT "stat_af_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "stat_af_fulldata_length" CHECK (octet_length("fulldata") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_date" (
 	"date" text NOT NULL,
 	"dau" integer DEFAULT 0 NOT NULL,
@@ -5155,7 +5155,7 @@ CREATE TABLE "cokdb1"."stat_date" (
 	CONSTRAINT "stat_date_PRIMARY" PRIMARY KEY("date"),
 	CONSTRAINT "stat_date_date_temporal" CHECK (("date" IS NULL OR (CASE WHEN "date" ~ '^[0-9]{4}-(0[0-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01])$' THEN CASE WHEN left("date",4) <> '0000' AND substring("date",6,2) <> '00' AND substring("date",9,2) <> '00' THEN to_char(to_date(left("date",10),'YYYY-MM-DD'),'YYYY-MM-DD') = left("date",10) ELSE true END ELSE false END)))
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5178,12 +5178,12 @@ CREATE TABLE "cokdb1"."stat_login" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login2" (
 	"uid" varchar(40) NOT NULL,
 	CONSTRAINT "stat_login2_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_0" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5206,7 +5206,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_0" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_0_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_1" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5229,7 +5229,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_1" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_1_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_10" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5252,7 +5252,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_10" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_10_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_11" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5275,7 +5275,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_11" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_11_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_2" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5298,7 +5298,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_2" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_2_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_3" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5321,7 +5321,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_3" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_3_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_4" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5344,7 +5344,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_4" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_4_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_5" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5367,7 +5367,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_5" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_5_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_6" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5390,7 +5390,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_6" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_6_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_7" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5413,7 +5413,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_7" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_7_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_8" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5436,7 +5436,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_8" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_8_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2024_9" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5459,7 +5459,7 @@ CREATE TABLE "cokdb1"."stat_login_2024_9" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2024_9_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_login_2026_9" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -5482,7 +5482,7 @@ CREATE TABLE "cokdb1"."stat_login_2026_9" (
 	"curip" varchar(20),
 	CONSTRAINT "stat_login_2026_9_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_phone" (
 	"uid" varchar(255) NOT NULL,
 	"model" varchar(255),
@@ -5491,7 +5491,7 @@ CREATE TABLE "cokdb1"."stat_phone" (
 	"height" integer,
 	CONSTRAINT "stat_phone_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_phone_log" (
 	"uid" varchar(40) NOT NULL,
 	"phoneDevice" varchar(255) NOT NULL,
@@ -5503,7 +5503,7 @@ CREATE TABLE "cokdb1"."stat_phone_log" (
 	"time" bigint,
 	CONSTRAINT "stat_phone_log_PRIMARY" PRIMARY KEY("uid","phoneDevice","model","version","width","height")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_reg" (
 	"uid" varchar(40) NOT NULL,
 	"type" integer DEFAULT 0 NOT NULL,
@@ -5519,21 +5519,21 @@ CREATE TABLE "cokdb1"."stat_reg" (
 	CONSTRAINT "stat_reg_PRIMARY" PRIMARY KEY("uid","type"),
 	CONSTRAINT "stat_reg_referrer_length" CHECK (octet_length("referrer") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_tutorial" (
 	"uid" varchar(40) NOT NULL,
 	"tutorial" bigint NOT NULL,
 	"time" bigint,
 	CONSTRAINT "stat_tutorial_PRIMARY" PRIMARY KEY("uid","tutorial")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_tutorial_analyze" (
 	"uid" varchar(40) NOT NULL,
 	"tutorial" bigint NOT NULL,
 	"time" bigint,
 	CONSTRAINT "stat_tutorial_analyze_PRIMARY" PRIMARY KEY("uid","tutorial")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."stat_tutorial_v2" (
 	"uid" varchar(40) NOT NULL,
 	"tutorial" bigint NOT NULL,
@@ -5541,7 +5541,7 @@ CREATE TABLE "cokdb1"."stat_tutorial_v2" (
 	"appVersion" varchar(40),
 	CONSTRAINT "stat_tutorial_v2_PRIMARY" PRIMARY KEY("uid","tutorial")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."subscription_log" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"orderId" varchar(200) DEFAULT '' NOT NULL,
@@ -5552,7 +5552,7 @@ CREATE TABLE "cokdb1"."subscription_log" (
 	"nextCheckTime" bigint,
 	CONSTRAINT "subscription_log_PRIMARY" PRIMARY KEY("uid","orderId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."suggest_log" (
 	"uuid" varchar(50) NOT NULL,
 	"user" varchar(200) NOT NULL,
@@ -5563,7 +5563,7 @@ CREATE TABLE "cokdb1"."suggest_log" (
 	CONSTRAINT "suggest_log_PRIMARY" PRIMARY KEY("uuid"),
 	CONSTRAINT "suggest_log_description_length" CHECK (octet_length("description") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."suggestion" (
 	"uid" varchar(40) NOT NULL,
 	"ownerId" varchar(40) NOT NULL,
@@ -5576,14 +5576,14 @@ CREATE TABLE "cokdb1"."suggestion" (
 	CONSTRAINT "suggestion_contents_length" CHECK (octet_length("contents") <= 65535),
 	CONSTRAINT "suggestion_replyContent_length" CHECK (octet_length("replyContent") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."suit_create_rate" (
 	"uid" varchar(40) NOT NULL,
 	"itemId" varchar(40) NOT NULL,
 	"rate" integer NOT NULL,
 	CONSTRAINT "suit_create_rate_PRIMARY" PRIMARY KEY("uid","itemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."suit_decompose_effect" (
 	"item1" varchar(100),
 	"item2" varchar(100) DEFAULT '0',
@@ -5595,14 +5595,14 @@ CREATE TABLE "cokdb1"."suit_decompose_effect" (
 	"suitid" varchar(100) DEFAULT '0' NOT NULL,
 	CONSTRAINT "suit_decompose_effect_PRIMARY" PRIMARY KEY("owner","suitid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."sumsungactivity" (
 	"uid" varchar(70) NOT NULL,
 	"deviceID" varchar(100) NOT NULL,
 	"time" bigint,
 	CONSTRAINT "sumsungactivity_PRIMARY" PRIMARY KEY("uid","deviceID")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."super_army_log" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255),
@@ -5611,20 +5611,20 @@ CREATE TABLE "cokdb1"."super_army_log" (
 	"createTime" bigint,
 	CONSTRAINT "super_army_log_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."switches" (
 	"name" varchar(255) NOT NULL,
 	"stat" integer DEFAULT 0,
 	"appVersion" varchar(255),
 	CONSTRAINT "switches_PRIMARY" PRIMARY KEY("name")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."system_data" (
 	"uid" varchar(255) NOT NULL,
 	"value" text,
 	CONSTRAINT "system_data_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."t_hero" (
 	"id" varchar(36) NOT NULL,
 	"uid" varchar(32),
@@ -5638,7 +5638,7 @@ CREATE TABLE "cokdb1"."t_hero" (
 	CONSTRAINT "t_hero_PRIMARY" PRIMARY KEY("id"),
 	CONSTRAINT "t_hero_state_range" CHECK ("state" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."t_worldboss" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."t_worldboss_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 8456 CACHE 1),
 	"bossid" integer,
@@ -5664,7 +5664,7 @@ CREATE TABLE "cokdb1"."t_worldboss" (
 	CONSTRAINT "t_worldboss_reward_range" CHECK ("reward" BETWEEN -128 AND 127),
 	CONSTRAINT "t_worldboss_status_range" CHECK ("status" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."t_worldbossinfo" (
 	"id" varchar(36) NOT NULL,
 	"bossid" integer,
@@ -5677,7 +5677,7 @@ CREATE TABLE "cokdb1"."t_worldbossinfo" (
 	CONSTRAINT "t_worldbossinfo_PRIMARY" PRIMARY KEY("id"),
 	CONSTRAINT "t_worldbossinfo_type_range" CHECK ("type" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."t_worldbossrank" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."t_worldbossrank_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1131 CACHE 1),
 	"bossid" integer,
@@ -5690,7 +5690,7 @@ CREATE TABLE "cokdb1"."t_worldbossrank" (
 	CONSTRAINT "t_worldbossrank_PRIMARY" PRIMARY KEY("id"),
 	CONSTRAINT "t_worldbossrank_reward_range" CHECK ("reward" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."tavern" (
 	"uid" varchar(40) NOT NULL,
 	"free" integer NOT NULL,
@@ -5715,13 +5715,13 @@ CREATE TABLE "cokdb1"."tavern" (
 	"resetResult" integer NOT NULL,
 	CONSTRAINT "tavern_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."team_atk_time" (
 	"uid" varchar(255) NOT NULL,
 	"time" bigint DEFAULT 0,
 	CONSTRAINT "team_atk_time_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."territory_trap_log" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"allianceid" varchar(40) NOT NULL,
@@ -5731,7 +5731,7 @@ CREATE TABLE "cokdb1"."territory_trap_log" (
 	"paramname" varchar(60) DEFAULT '',
 	CONSTRAINT "territory_trap_log_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."territory_user_effect" (
 	"uid" varchar(255) NOT NULL,
 	"pointId" integer NOT NULL,
@@ -5740,13 +5740,13 @@ CREATE TABLE "cokdb1"."territory_user_effect" (
 	"active" integer,
 	CONSTRAINT "territory_user_effect_PRIMARY" PRIMARY KEY("uid","pointId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."time_notice" (
 	"timeType" integer NOT NULL,
 	"timeVal" bigint,
 	CONSTRAINT "time_notice_PRIMARY" PRIMARY KEY("timeType")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."time_reward" (
 	"uid" varchar(255) NOT NULL,
 	"itemId" varchar(255),
@@ -5756,7 +5756,7 @@ CREATE TABLE "cokdb1"."time_reward" (
 	"count" integer,
 	CONSTRAINT "time_reward_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."train" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(20) NOT NULL,
@@ -5765,7 +5765,7 @@ CREATE TABLE "cokdb1"."train" (
 	"endTime" bigint NOT NULL,
 	CONSTRAINT "train_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."translation" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."translation_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"content" "bytea",
@@ -5775,7 +5775,7 @@ CREATE TABLE "cokdb1"."translation" (
 	CONSTRAINT "translation_content_length" CHECK (octet_length("content") <= 65535),
 	CONSTRAINT "translation_en_length" CHECK (octet_length("en") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."translation_record" (
 	"date" varchar(255) NOT NULL,
 	"month" integer,
@@ -5801,7 +5801,7 @@ CREATE TABLE "cokdb1"."translation_record" (
 	"fromMS" integer DEFAULT 0,
 	CONSTRAINT "translation_record_PRIMARY" PRIMARY KEY("date")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."translationv2" (
 	"id" varchar(255) NOT NULL,
 	"en" "bytea",
@@ -5831,7 +5831,7 @@ CREATE TABLE "cokdb1"."translationv2" (
 	CONSTRAINT "translationv2_it_length" CHECK (octet_length("it") <= 65535),
 	CONSTRAINT "translationv2_pt_length" CHECK (octet_length("pt") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."treasure_map" (
 	"uuid" varchar(40) NOT NULL,
 	"treasureId" varchar(40),
@@ -5846,7 +5846,7 @@ CREATE TABLE "cokdb1"."treasure_map" (
 	"state" integer,
 	CONSTRAINT "treasure_map_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."tree_award" (
 	"uid" varchar(255) NOT NULL,
 	"freeCount" integer NOT NULL,
@@ -5856,7 +5856,7 @@ CREATE TABLE "cokdb1"."tree_award" (
 	"awardMaxCount" integer DEFAULT 0,
 	CONSTRAINT "tree_award_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."trial_field" (
 	"uid" varchar(50) NOT NULL,
 	"freeTrial" integer DEFAULT 0,
@@ -5871,14 +5871,14 @@ CREATE TABLE "cokdb1"."trial_field" (
 	"rewardMonster" varchar(50) DEFAULT '',
 	CONSTRAINT "trial_field_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."trigger_timmer" (
 	"timmer_name" varchar(200) NOT NULL,
 	"count" integer DEFAULT 0 NOT NULL,
 	"last_exec_millis" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "trigger_timmer_PRIMARY" PRIMARY KEY("timmer_name")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."trigger_var" (
 	"type" integer NOT NULL,
 	"uid" varchar(50) DEFAULT '''''' NOT NULL,
@@ -5891,14 +5891,14 @@ CREATE TABLE "cokdb1"."trigger_var" (
 	CONSTRAINT "trigger_var_createTime_temporal" CHECK (("createTime" IS NULL OR (CASE WHEN "createTime" ~ '^[0-9]{4}-(0[0-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$' THEN CASE WHEN left("createTime",4) <> '0000' AND substring("createTime",6,2) <> '00' AND substring("createTime",9,2) <> '00' THEN to_char(to_date(left("createTime",10),'YYYY-MM-DD'),'YYYY-MM-DD') = left("createTime",10) ELSE true END ELSE false END))),
 	CONSTRAINT "trigger_var_lastUpdateTime_temporal" CHECK (("lastUpdateTime" IS NULL OR (CASE WHEN "lastUpdateTime" ~ '^[0-9]{4}-(0[0-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$' THEN CASE WHEN left("lastUpdateTime",4) <> '0000' AND substring("lastUpdateTime",6,2) <> '00' AND substring("lastUpdateTime",9,2) <> '00' THEN to_char(to_date(left("lastUpdateTime",10),'YYYY-MM-DD'),'YYYY-MM-DD') = left("lastUpdateTime",10) ELSE true END ELSE false END)))
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."trouble_log" (
 	"uid" bigint,
 	"username" varchar(255),
 	"usetime" bigint,
 	"statusid" varchar(255)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."turret_shooting_task" (
 	"uid" varchar(255) NOT NULL,
 	"turretUid" varchar(255),
@@ -5907,7 +5907,7 @@ CREATE TABLE "cokdb1"."turret_shooting_task" (
 	"endTime" bigint,
 	CONSTRAINT "turret_shooting_task_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user" (
 	"id" bigint DEFAULT 0 NOT NULL,
 	"age" bigint,
@@ -5915,7 +5915,7 @@ CREATE TABLE "cokdb1"."user" (
 	"name" varchar(255),
 	CONSTRAINT "user_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_14day_login" (
 	"uid" varchar(255) NOT NULL,
 	"type" integer DEFAULT 0 NOT NULL,
@@ -5925,7 +5925,7 @@ CREATE TABLE "cokdb1"."user_14day_login" (
 	"reward" varchar(255),
 	CONSTRAINT "user_14day_login_PRIMARY" PRIMARY KEY("uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_achievement" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(255) NOT NULL,
@@ -5935,14 +5935,14 @@ CREATE TABLE "cokdb1"."user_achievement" (
 	"rewardTime" bigint,
 	CONSTRAINT "user_achievement_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_activation" (
 	"uid" varchar(40) NOT NULL,
 	"data" "bytea",
 	CONSTRAINT "user_activation_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "user_activation_data_length" CHECK (octet_length("data") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_activity" (
 	"uid" varchar(255) NOT NULL,
 	"type" integer DEFAULT 0 NOT NULL,
@@ -5951,7 +5951,7 @@ CREATE TABLE "cokdb1"."user_activity" (
 	"time" bigint,
 	CONSTRAINT "user_activity_PRIMARY" PRIMARY KEY("uid","actId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_activity_new" (
 	"uid" varchar(40) NOT NULL,
 	"actId" integer NOT NULL,
@@ -5965,7 +5965,7 @@ CREATE TABLE "cokdb1"."user_activity_new" (
 	"receiveLevels" varchar(40) DEFAULT '',
 	CONSTRAINT "user_activity_new_PRIMARY" PRIMARY KEY("uid","actId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_alliance_task" (
 	"uid" varchar(255) NOT NULL,
 	"id" varchar(255) NOT NULL,
@@ -5974,7 +5974,7 @@ CREATE TABLE "cokdb1"."user_alliance_task" (
 	"state" integer DEFAULT 0,
 	CONSTRAINT "user_alliance_task_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_arena" (
 	"uid" varchar(255),
 	"rankScore" integer,
@@ -5987,7 +5987,7 @@ CREATE TABLE "cokdb1"."user_arena" (
 	"totalLoseCount" integer,
 	"serialWinCount" integer
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_army" (
 	"uid" varchar(40) NOT NULL,
 	"armyId" varchar(20) NOT NULL,
@@ -6001,7 +6001,7 @@ CREATE TABLE "cokdb1"."user_army" (
 	"finishTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_army_PRIMARY" PRIMARY KEY("uid","armyId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_army_back" (
 	"uid" varchar(40) NOT NULL,
 	"armyId" varchar(20) NOT NULL,
@@ -6015,7 +6015,7 @@ CREATE TABLE "cokdb1"."user_army_back" (
 	"finishTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_army_back_PRIMARY" PRIMARY KEY("uid","armyId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_army_bak" (
 	"uid" varchar(40) NOT NULL,
 	"armyId" varchar(20) NOT NULL,
@@ -6029,7 +6029,7 @@ CREATE TABLE "cokdb1"."user_army_bak" (
 	"finishTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_army_bak_PRIMARY" PRIMARY KEY("uid","armyId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_army_change" (
 	"uid" varchar(40) NOT NULL,
 	"armyId" varchar(20) NOT NULL,
@@ -6043,7 +6043,7 @@ CREATE TABLE "cokdb1"."user_army_change" (
 	"finishTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_army_change_PRIMARY" PRIMARY KEY("uid","armyId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_army_cross" (
 	"uid" varchar(40) NOT NULL,
 	"armyId" varchar(20) NOT NULL,
@@ -6057,7 +6057,7 @@ CREATE TABLE "cokdb1"."user_army_cross" (
 	"finishTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_army_cross_PRIMARY" PRIMARY KEY("uid","armyId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_assets" (
 	"uid" varchar(255) NOT NULL,
 	"winPoint" bigint DEFAULT 0 NOT NULL,
@@ -6065,20 +6065,20 @@ CREATE TABLE "cokdb1"."user_assets" (
 	"lastprottectTime" bigint DEFAULT 0,
 	CONSTRAINT "user_assets_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_auction" (
 	"uid" varchar(255) NOT NULL,
 	"gold" bigint,
 	CONSTRAINT "user_auction_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_auction_goods" (
 	"uid" varchar(255) NOT NULL,
 	"uuid" varchar(255) NOT NULL,
 	"gold" integer,
 	CONSTRAINT "user_auction_goods_PRIMARY" PRIMARY KEY("uid","uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_auction_history" (
 	"uid" varchar(255) NOT NULL,
 	"uuid" varchar(255) NOT NULL,
@@ -6088,7 +6088,7 @@ CREATE TABLE "cokdb1"."user_auction_history" (
 	"time" bigint NOT NULL,
 	CONSTRAINT "user_auction_history_PRIMARY" PRIMARY KEY("uid","uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_auth" (
 	"uid" varchar(40) NOT NULL,
 	"female" integer,
@@ -6096,7 +6096,7 @@ CREATE TABLE "cokdb1"."user_auth" (
 	"seal" bigint DEFAULT 0,
 	CONSTRAINT "user_auth_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance" (
 	"uid" varchar(50) NOT NULL,
 	"type" integer DEFAULT 0 NOT NULL,
@@ -6107,7 +6107,7 @@ CREATE TABLE "cokdb1"."user_balance" (
 	"last_effect_time" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_PRIMARY" PRIMARY KEY("uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_0" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6122,7 +6122,7 @@ CREATE TABLE "cokdb1"."user_balance_history_0" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_0_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_1" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6137,7 +6137,7 @@ CREATE TABLE "cokdb1"."user_balance_history_1" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_1_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_2" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6152,7 +6152,7 @@ CREATE TABLE "cokdb1"."user_balance_history_2" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_2_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_3" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6167,7 +6167,7 @@ CREATE TABLE "cokdb1"."user_balance_history_3" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_3_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_4" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6182,7 +6182,7 @@ CREATE TABLE "cokdb1"."user_balance_history_4" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_4_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_5" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6197,7 +6197,7 @@ CREATE TABLE "cokdb1"."user_balance_history_5" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_5_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_6" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6212,7 +6212,7 @@ CREATE TABLE "cokdb1"."user_balance_history_6" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_6_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_7" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6227,7 +6227,7 @@ CREATE TABLE "cokdb1"."user_balance_history_7" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_7_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_8" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6242,7 +6242,7 @@ CREATE TABLE "cokdb1"."user_balance_history_8" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_8_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_balance_history_9" (
 	"uuid" varchar(50) NOT NULL,
 	"uid" varchar(50) NOT NULL,
@@ -6257,14 +6257,14 @@ CREATE TABLE "cokdb1"."user_balance_history_9" (
 	"state" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_balance_history_9_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_bank" (
 	"uid" varchar(40) NOT NULL,
 	"level" integer DEFAULT 0 NOT NULL,
 	"deposit" text,
 	CONSTRAINT "user_bank_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_bet" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255),
@@ -6279,7 +6279,7 @@ CREATE TABLE "cokdb1"."user_bet" (
 	"odds" numeric(10, 2),
 	CONSTRAINT "user_bet_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_bottle_info" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"throwRemainCount" integer DEFAULT 0 NOT NULL,
@@ -6290,7 +6290,7 @@ CREATE TABLE "cokdb1"."user_bottle_info" (
 	CONSTRAINT "user_bottle_info_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "user_bottle_info_pickBottlesUidsByteArray_length" CHECK (octet_length("pickBottlesUidsByteArray") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_branch_city_info" (
 	"uid" varchar(32) NOT NULL,
 	"openstate" smallint NOT NULL,
@@ -6298,7 +6298,7 @@ CREATE TABLE "cokdb1"."user_branch_city_info" (
 	"takerewardtime" bigint,
 	CONSTRAINT "user_branch_city_info_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_branch_city_reward" (
 	"id" integer DEFAULT 0 NOT NULL,
 	"uid" varchar(32) DEFAULT '' NOT NULL,
@@ -6306,7 +6306,7 @@ CREATE TABLE "cokdb1"."user_branch_city_reward" (
 	"dieawaytime" bigint,
 	"rewardrefreashtime" bigint
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_building" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -6325,7 +6325,7 @@ CREATE TABLE "cokdb1"."user_building" (
 	"costUnlockTimes" integer DEFAULT 0,
 	CONSTRAINT "user_building_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_building_bak" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -6342,14 +6342,14 @@ CREATE TABLE "cokdb1"."user_building_bak" (
 	"progress" integer DEFAULT 0,
 	CONSTRAINT "user_building_bak_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_building_exp" (
 	"uid" varchar(255) NOT NULL,
 	"historyMax" bigint DEFAULT 0,
 	"currentMax" bigint DEFAULT 0,
 	CONSTRAINT "user_building_exp_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_cemetery" (
 	"uid" varchar(255) NOT NULL,
 	"deadSum" bigint DEFAULT 0,
@@ -6368,7 +6368,7 @@ CREATE TABLE "cokdb1"."user_cemetery" (
 	"revived" text,
 	CONSTRAINT "user_cemetery_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_cemetery_history" (
 	"uid" varchar(255) NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -6379,7 +6379,7 @@ CREATE TABLE "cokdb1"."user_cemetery_history" (
 	"rechargeSum" integer NOT NULL,
 	CONSTRAINT "user_cemetery_history_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_civilization_prestige" (
 	"uid" varchar(40) NOT NULL,
 	"civilizationType" integer NOT NULL,
@@ -6390,14 +6390,14 @@ CREATE TABLE "cokdb1"."user_civilization_prestige" (
 	"actionLimits" varchar(3000),
 	CONSTRAINT "user_civilization_prestige_PRIMARY" PRIMARY KEY("uid","civilizationType")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_civilization_science" (
 	"baseItemID" integer NOT NULL,
 	"userID" varchar(64) NOT NULL,
 	"level" integer,
 	CONSTRAINT "user_civilization_science_PRIMARY" PRIMARY KEY("baseItemID","userID")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_collect_record" (
 	"uid" varchar(255) NOT NULL,
 	"resource" integer DEFAULT 0,
@@ -6409,7 +6409,7 @@ CREATE TABLE "cokdb1"."user_collect_record" (
 	"sockByTrain" integer,
 	CONSTRAINT "user_collect_record_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_comeback_record" (
 	"uid" varchar(50) NOT NULL,
 	"deviceId" varchar(255),
@@ -6423,7 +6423,7 @@ CREATE TABLE "cokdb1"."user_comeback_record" (
 	CONSTRAINT "user_comeback_record_PRIMARY" PRIMARY KEY("uid","configId"),
 	CONSTRAINT "user_comeback_record_backReward_range" CHECK ("backReward" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_continue_pay" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"productId" varchar(40) NOT NULL,
@@ -6432,7 +6432,7 @@ CREATE TABLE "cokdb1"."user_continue_pay" (
 	"updateTime" bigint,
 	CONSTRAINT "user_continue_pay_PRIMARY" PRIMARY KEY("uid","productId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_cross_fight_history" (
 	"uid" varchar(255) NOT NULL,
 	"startTime" bigint NOT NULL,
@@ -6443,14 +6443,14 @@ CREATE TABLE "cokdb1"."user_cross_fight_history" (
 	"worldId" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_cross_fight_history_PRIMARY" PRIMARY KEY("uid","startTime","round","worldId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_cross_server" (
 	"uid" varchar(255) NOT NULL,
 	"fromServerId" integer,
 	"time" bigint,
 	CONSTRAINT "user_cross_server_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_cross_throne" (
 	"id" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."user_cross_throne_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 2347 CACHE 1),
 	"uid" varchar(128),
@@ -6468,7 +6468,7 @@ CREATE TABLE "cokdb1"."user_cross_throne" (
 	"hasCemeteryCollected" bigint DEFAULT 0,
 	CONSTRAINT "user_cross_throne_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_daily_task" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(255) NOT NULL,
@@ -6476,14 +6476,14 @@ CREATE TABLE "cokdb1"."user_daily_task" (
 	"times" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_daily_task_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_device_bind_hide" (
 	"uid" varchar(40) NOT NULL,
 	"hideUid" varchar(40) NOT NULL,
 	"time" bigint,
 	CONSTRAINT "user_device_bind_hide_PRIMARY" PRIMARY KEY("uid","hideUid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_dragon" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -6493,14 +6493,14 @@ CREATE TABLE "cokdb1"."user_dragon" (
 	"place" varchar(100),
 	CONSTRAINT "user_dragon_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_dragon_battle" (
 	"uid" varchar(40) NOT NULL,
 	"freeTeleport" integer DEFAULT 0,
 	"leaveTime" bigint DEFAULT 0,
 	CONSTRAINT "user_dragon_battle_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_egg" (
 	"uid" varchar(40) NOT NULL,
 	"eggId" varchar(10) NOT NULL,
@@ -6508,7 +6508,7 @@ CREATE TABLE "cokdb1"."user_egg" (
 	"reward" integer DEFAULT 0,
 	CONSTRAINT "user_egg_PRIMARY" PRIMARY KEY("uid","eggId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_equip" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255) NOT NULL,
@@ -6527,7 +6527,7 @@ CREATE TABLE "cokdb1"."user_equip" (
 	"chargeType" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_equip_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_equip_bak" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255) NOT NULL,
@@ -6538,7 +6538,7 @@ CREATE TABLE "cokdb1"."user_equip_bak" (
 	"refineProperty" varchar(255) DEFAULT '',
 	CONSTRAINT "user_equip_bak_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_exchange_cycle" (
 	"uid" varchar(255) NOT NULL,
 	"stage" integer DEFAULT 0,
@@ -6559,7 +6559,7 @@ CREATE TABLE "cokdb1"."user_exchange_cycle" (
 	"receive_reward2" varchar(255),
 	CONSTRAINT "user_exchange_cycle_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_expedition_info" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"recieveResource" bigint DEFAULT 0 NOT NULL,
@@ -6575,13 +6575,13 @@ CREATE TABLE "cokdb1"."user_expedition_info" (
 	CONSTRAINT "user_expedition_info_isTakeAward2_range" CHECK ("isTakeAward2" BETWEEN -128 AND 127),
 	CONSTRAINT "user_expedition_info_isTakeAward3_range" CHECK ("isTakeAward3" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_expedition_score" (
 	"uid" varchar(255) NOT NULL,
 	"score" double precision DEFAULT 0,
 	CONSTRAINT "user_expedition_score_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_general" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -6597,7 +6597,7 @@ CREATE TABLE "cokdb1"."user_general" (
 	CONSTRAINT "user_general_PRIMARY" PRIMARY KEY("uuid"),
 	CONSTRAINT "user_general_ability_length" CHECK (octet_length("ability") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_gift" (
 	"uuid" varchar(40) NOT NULL,
 	"giftId" varchar(40) NOT NULL,
@@ -6615,7 +6615,7 @@ CREATE TABLE "cokdb1"."user_gift" (
 	"description" varchar(255),
 	CONSTRAINT "user_gift_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_gift_vote" (
 	"uid" varchar(50) NOT NULL,
 	"version" integer NOT NULL,
@@ -6624,7 +6624,7 @@ CREATE TABLE "cokdb1"."user_gift_vote" (
 	"time" bigint,
 	CONSTRAINT "user_gift_vote_PRIMARY" PRIMARY KEY("uid","version","type","giftId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_glory_info" (
 	"uid" varchar(40) NOT NULL,
 	"strengthenCount" integer NOT NULL,
@@ -6633,7 +6633,7 @@ CREATE TABLE "cokdb1"."user_glory_info" (
 	"weaknessTime" bigint,
 	CONSTRAINT "user_glory_info_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_gold_group_buy" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(40) NOT NULL,
@@ -6644,7 +6644,7 @@ CREATE TABLE "cokdb1"."user_gold_group_buy" (
 	"isMail" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_gold_group_buy_PRIMARY" PRIMARY KEY("uid","id","buy_time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_gold_wheel" (
 	"uid" varchar(50) NOT NULL,
 	"hide_king" integer DEFAULT 0 NOT NULL,
@@ -6665,7 +6665,7 @@ CREATE TABLE "cokdb1"."user_gold_wheel" (
 	"rewardFlags" varchar(200),
 	CONSTRAINT "user_gold_wheel_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_gold_wheel_histo" (
 	"uid" varchar(50) NOT NULL,
 	"normal_free" integer DEFAULT 0 NOT NULL,
@@ -6683,14 +6683,14 @@ CREATE TABLE "cokdb1"."user_gold_wheel_histo" (
 	"create_time" text NOT NULL,
 	CONSTRAINT "user_gold_wheel_histo_create_time_temporal" CHECK (("create_time" IS NULL OR (CASE WHEN "create_time" ~ '^[0-9]{4}-(0[0-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$' THEN CASE WHEN left("create_time",4) <> '0000' AND substring("create_time",6,2) <> '00' AND substring("create_time",9,2) <> '00' THEN to_char(to_date(left("create_time",10),'YYYY-MM-DD'),'YYYY-MM-DD') = left("create_time",10) ELSE true END ELSE false END)))
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_grant_title" (
 	"uid" varchar(40) NOT NULL,
 	"endtime" bigint DEFAULT 0 NOT NULL,
 	"targetuid" varchar(40) NOT NULL,
 	CONSTRAINT "user_grant_title_PRIMARY" PRIMARY KEY("uid","endtime","targetuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_growth_fund" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"type" integer DEFAULT 0 NOT NULL,
@@ -6700,7 +6700,7 @@ CREATE TABLE "cokdb1"."user_growth_fund" (
 	"status" integer,
 	CONSTRAINT "user_growth_fund_PRIMARY" PRIMARY KEY("uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_hero" (
 	"ownerUid" varchar(40) DEFAULT '' NOT NULL,
 	"heroUid" varchar(40) NOT NULL,
@@ -6718,14 +6718,14 @@ CREATE TABLE "cokdb1"."user_hero" (
 	"lastKillerUid" varchar(40) DEFAULT '',
 	CONSTRAINT "user_hero_PRIMARY" PRIMARY KEY("heroUid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_honor" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(50) DEFAULT '' NOT NULL,
 	"level" integer,
 	CONSTRAINT "user_honor_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_hospital" (
 	"uid" varchar(40) NOT NULL,
 	"armyId" varchar(20) NOT NULL,
@@ -6734,7 +6734,7 @@ CREATE TABLE "cokdb1"."user_hospital" (
 	"finishTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_hospital_PRIMARY" PRIMARY KEY("uid","armyId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_hot_item" (
 	"uid" varchar(255) NOT NULL,
 	"itemId" varchar(20) NOT NULL,
@@ -6743,7 +6743,7 @@ CREATE TABLE "cokdb1"."user_hot_item" (
 	"refreshTime" bigint,
 	CONSTRAINT "user_hot_item_PRIMARY" PRIMARY KEY("uid","itemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_hot_item_best" (
 	"uid" varchar(255) NOT NULL,
 	"goodsId" varchar(20) NOT NULL,
@@ -6753,7 +6753,7 @@ CREATE TABLE "cokdb1"."user_hot_item_best" (
 	"price_hot" integer DEFAULT 0,
 	CONSTRAINT "user_hot_item_best_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_hot_item_best_v3" (
 	"uid" varchar(255) NOT NULL,
 	"goodsId" varchar(20) NOT NULL,
@@ -6764,7 +6764,7 @@ CREATE TABLE "cokdb1"."user_hot_item_best_v3" (
 	CONSTRAINT "user_hot_item_best_v3_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "user_hot_item_best_v3_color_range" CHECK ("color" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_hot_item_v2" (
 	"uid" varchar(255) NOT NULL,
 	"goodsId" varchar(20) NOT NULL,
@@ -6777,7 +6777,7 @@ CREATE TABLE "cokdb1"."user_hot_item_v2" (
 	"para1" integer DEFAULT 0,
 	CONSTRAINT "user_hot_item_v2_PRIMARY" PRIMARY KEY("uid","goodsId","price")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_hot_item_v3" (
 	"uid" varchar(255) NOT NULL,
 	"goodsId" varchar(20) NOT NULL,
@@ -6792,7 +6792,7 @@ CREATE TABLE "cokdb1"."user_hot_item_v3" (
 	CONSTRAINT "user_hot_item_v3_PRIMARY" PRIMARY KEY("uid","goodsId","price"),
 	CONSTRAINT "user_hot_item_v3_type_range" CHECK ("type" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_item" (
 	"uuid" varchar(40) NOT NULL,
 	"ownerId" varchar(255) NOT NULL,
@@ -6802,7 +6802,7 @@ CREATE TABLE "cokdb1"."user_item" (
 	"vanishTime" bigint DEFAULT 0,
 	CONSTRAINT "user_item_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_item_bak" (
 	"uuid" varchar(40) NOT NULL,
 	"ownerId" varchar(255) NOT NULL,
@@ -6812,14 +6812,14 @@ CREATE TABLE "cokdb1"."user_item_bak" (
 	"vanishTime" bigint DEFAULT 0,
 	CONSTRAINT "user_item_bak_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_item_cd" (
 	"uid" varchar(40) NOT NULL,
 	"itemId" varchar(255) NOT NULL,
 	"useTime" bigint NOT NULL,
 	CONSTRAINT "user_item_cd_PRIMARY" PRIMARY KEY("uid","itemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_king_skill" (
 	"uuid" varchar(128) NOT NULL,
 	"uid" varchar(128) NOT NULL,
@@ -6833,7 +6833,7 @@ CREATE TABLE "cokdb1"."user_king_skill" (
 	"isSuccessLast" integer DEFAULT 1,
 	CONSTRAINT "user_king_skill_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_knight_title" (
 	"uid" varchar(255) NOT NULL,
 	"activity_title" integer NOT NULL,
@@ -6847,14 +6847,14 @@ CREATE TABLE "cokdb1"."user_knight_title" (
 	CONSTRAINT "user_knight_title_contract_unlock_title_length" CHECK (octet_length("contract_unlock_title") <= 65535),
 	CONSTRAINT "user_knight_title_normal_unlock_title_length" CHECK (octet_length("normal_unlock_title") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_login_ip" (
 	"uid" varchar(40) NOT NULL,
 	"ip" varchar(40) NOT NULL,
 	"count" integer,
 	CONSTRAINT "user_login_ip_PRIMARY" PRIMARY KEY("uid","ip")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_lord" (
 	"uid" varchar(40) NOT NULL,
 	"userSign" varchar(50),
@@ -6882,7 +6882,7 @@ CREATE TABLE "cokdb1"."user_lord" (
 	"refreshAtkLeaderBossTime" bigint DEFAULT 0,
 	CONSTRAINT "user_lord_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_lottery" (
 	"uid" varchar(40) NOT NULL,
 	"lotteryId" varchar(40) NOT NULL,
@@ -6890,7 +6890,7 @@ CREATE TABLE "cokdb1"."user_lottery" (
 	"updateTime" bigint,
 	CONSTRAINT "user_lottery_PRIMARY" PRIMARY KEY("uid","lotteryId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_luck_draw" (
 	"uid" varchar(255) NOT NULL,
 	"type" integer NOT NULL,
@@ -6900,7 +6900,7 @@ CREATE TABLE "cokdb1"."user_luck_draw" (
 	"reward" varchar(1000),
 	CONSTRAINT "user_luck_draw_PRIMARY" PRIMARY KEY("uid","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_military" (
 	"uid" varchar(255) NOT NULL,
 	"score" numeric(11, 2) DEFAULT 0.00,
@@ -6915,7 +6915,7 @@ CREATE TABLE "cokdb1"."user_military" (
 	"honorThisWeek" numeric(11, 2) DEFAULT 0.00,
 	CONSTRAINT "user_military_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_military_rank" (
 	"uid" varchar(255) NOT NULL,
 	"militaryScore" numeric(11, 2) DEFAULT 0.00,
@@ -6934,7 +6934,7 @@ CREATE TABLE "cokdb1"."user_military_rank" (
 	"lastRewardTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_military_rank_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_mine" (
 	"uid" varchar(40) NOT NULL,
 	"fId" varchar(40) NOT NULL,
@@ -6948,13 +6948,13 @@ CREATE TABLE "cokdb1"."user_mine" (
 	CONSTRAINT "user_mine_PRIMARY" PRIMARY KEY("uid","fId"),
 	CONSTRAINT "user_mine_helpInfo_length" CHECK (octet_length("helpInfo") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_miracle_buff_active" (
 	"uid" varchar(255) NOT NULL,
 	"level" smallint,
 	CONSTRAINT "user_miracle_buff_active_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_mixed_info" (
 	"uid" varchar(40) NOT NULL,
 	"scoreSwitch" integer DEFAULT 0,
@@ -7036,7 +7036,7 @@ CREATE TABLE "cokdb1"."user_mixed_info" (
 	"ancientSuperArmyUseTimes" integer DEFAULT 0,
 	CONSTRAINT "user_mixed_info_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_monster_siege" (
 	"uid" varchar(40) NOT NULL,
 	"failTimes" integer DEFAULT 0,
@@ -7047,7 +7047,7 @@ CREATE TABLE "cokdb1"."user_monster_siege" (
 	"isfinish" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_monster_siege_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_monster_siege_data" (
 	"uid" varchar(40) NOT NULL,
 	"failTimes" integer DEFAULT 0,
@@ -7058,7 +7058,7 @@ CREATE TABLE "cokdb1"."user_monster_siege_data" (
 	"recordTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_monster_siege_data_PRIMARY" PRIMARY KEY("uid","recordTime")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_monster_siege_history" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -7070,7 +7070,7 @@ CREATE TABLE "cokdb1"."user_monster_siege_history" (
 	"failRounds" varchar(100),
 	CONSTRAINT "user_monster_siege_history_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_monster_siege_top_history" (
 	"uid" varchar(40) NOT NULL,
 	"time" bigint NOT NULL,
@@ -7082,7 +7082,7 @@ CREATE TABLE "cokdb1"."user_monster_siege_top_history" (
 	"failRounds" varchar(100),
 	CONSTRAINT "user_monster_siege_top_history_PRIMARY" PRIMARY KEY("uid","time")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_neutral" (
 	"uid" varchar(40) NOT NULL,
 	"serverid" integer DEFAULT 0,
@@ -7092,7 +7092,7 @@ CREATE TABLE "cokdb1"."user_neutral" (
 	"leaveTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_neutral_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_new_daily_task" (
 	"uid" varchar(40) NOT NULL,
 	"id" integer NOT NULL,
@@ -7101,7 +7101,7 @@ CREATE TABLE "cokdb1"."user_new_daily_task" (
 	"state" integer,
 	CONSTRAINT "user_new_daily_task_PRIMARY" PRIMARY KEY("uid","id","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_new_recall_info" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"type" integer,
@@ -7113,7 +7113,7 @@ CREATE TABLE "cokdb1"."user_new_recall_info" (
 	"extra" text,
 	CONSTRAINT "user_new_recall_info_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_new_recall_task" (
 	"uid" varchar(255) NOT NULL,
 	"taskId" varchar(255) DEFAULT '' NOT NULL,
@@ -7125,7 +7125,7 @@ CREATE TABLE "cokdb1"."user_new_recall_task" (
 	"refreshTime" bigint,
 	CONSTRAINT "user_new_recall_task_PRIMARY" PRIMARY KEY("uid","taskId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_new_resource_log" (
 	"uuid" bigint GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."user_new_resource_log_uuid_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 2311 CACHE 1),
 	"uid" varchar(40) NOT NULL,
@@ -7138,7 +7138,7 @@ CREATE TABLE "cokdb1"."user_new_resource_log" (
 	"updateTime" bigint,
 	CONSTRAINT "user_new_resource_log_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_olympic_bet" (
 	"uuid" varchar(40) NOT NULL,
 	"uid" varchar(40) NOT NULL,
@@ -7152,7 +7152,7 @@ CREATE TABLE "cokdb1"."user_olympic_bet" (
 	"reward" integer,
 	CONSTRAINT "user_olympic_bet_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_onekey_reload" (
 	"uid" varchar(40) NOT NULL,
 	"generalId" varchar(40) NOT NULL,
@@ -7163,7 +7163,7 @@ CREATE TABLE "cokdb1"."user_onekey_reload" (
 	"dragon_stone_rhyme" varchar(40) DEFAULT '' NOT NULL,
 	CONSTRAINT "user_onekey_reload_PRIMARY" PRIMARY KEY("uid","generalId","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_onlinereward" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"online" bigint DEFAULT 0,
@@ -7171,7 +7171,7 @@ CREATE TABLE "cokdb1"."user_onlinereward" (
 	"use" bigint DEFAULT 0,
 	CONSTRAINT "user_onlinereward_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_pay_lottery" (
 	"uid" varchar(40) NOT NULL,
 	"totalGold" integer,
@@ -7184,7 +7184,7 @@ CREATE TABLE "cokdb1"."user_pay_lottery" (
 	"luckyNum" integer,
 	CONSTRAINT "user_pay_lottery_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_pay_lottery_log" (
 	"uid" varchar(40) NOT NULL,
 	"userId" varchar(40),
@@ -7196,7 +7196,7 @@ CREATE TABLE "cokdb1"."user_pay_lottery_log" (
 	"time" bigint,
 	CONSTRAINT "user_pay_lottery_log_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_pay_reward" (
 	"uid" varchar(40) NOT NULL,
 	"itemId" varchar(40),
@@ -7206,7 +7206,7 @@ CREATE TABLE "cokdb1"."user_pay_reward" (
 	"extra" varchar(2000),
 	CONSTRAINT "user_pay_reward_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_permission" (
 	"user_id" integer NOT NULL,
 	"module_permission" varchar(255) NOT NULL,
@@ -7215,7 +7215,7 @@ CREATE TABLE "cokdb1"."user_permission" (
 	"type" smallint NOT NULL,
 	CONSTRAINT "user_permission_PRIMARY" PRIMARY KEY("user_id","module_permission","type")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_pet_dragon" (
 	"uuid" varchar(255) NOT NULL,
 	"uid" varchar(255) NOT NULL,
@@ -7241,7 +7241,7 @@ CREATE TABLE "cokdb1"."user_pet_dragon" (
 	CONSTRAINT "user_pet_dragon_useFlag_range" CHECK ("useFlag" BETWEEN -128 AND 127),
 	CONSTRAINT "user_pet_dragon_initFriendShipFlag_range" CHECK ("initFriendShipFlag" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_pet_dragon_skill" (
 	"uuid" varchar(32) NOT NULL,
 	"uid" varchar(32) NOT NULL,
@@ -7254,7 +7254,7 @@ CREATE TABLE "cokdb1"."user_pet_dragon_skill" (
 	"strengthenLevel" integer DEFAULT 0,
 	CONSTRAINT "user_pet_dragon_skill_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_picture" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"uploadTime" bigint DEFAULT 0,
@@ -7264,7 +7264,7 @@ CREATE TABLE "cokdb1"."user_picture" (
 	"picVer" integer DEFAULT 0,
 	CONSTRAINT "user_picture_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_pray" (
 	"uid" varchar(255) NOT NULL,
 	"freeFromItem" integer DEFAULT 0,
@@ -7285,7 +7285,7 @@ CREATE TABLE "cokdb1"."user_pray" (
 	"isFirstPay" integer DEFAULT 0,
 	CONSTRAINT "user_pray_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_push" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"platform" varchar(20),
@@ -7294,7 +7294,7 @@ CREATE TABLE "cokdb1"."user_push" (
 	"active" integer DEFAULT 1,
 	CONSTRAINT "user_push_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_recall_task" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(255) NOT NULL,
@@ -7305,7 +7305,7 @@ CREATE TABLE "cokdb1"."user_recall_task" (
 	"receive" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_recall_task_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_recall_task_notes" (
 	"uid" varchar(40) NOT NULL,
 	"version" varchar(255) NOT NULL,
@@ -7317,21 +7317,21 @@ CREATE TABLE "cokdb1"."user_recall_task_notes" (
 	"endTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_recall_task_notes_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_reg" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"appVersion" varchar(40),
 	"deviceId" varchar(255),
 	CONSTRAINT "user_reg_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_reg_copy" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"appVersion" varchar(40),
 	"deviceId" varchar(255),
 	CONSTRAINT "user_reg_copy_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_region_recall" (
 	"uid" varchar(32) DEFAULT '' NOT NULL,
 	"level" integer,
@@ -7344,14 +7344,14 @@ CREATE TABLE "cokdb1"."user_region_recall" (
 	"reward" varchar(255) DEFAULT '' NOT NULL,
 	CONSTRAINT "user_region_recall_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_report" (
 	"uid" varchar(40) NOT NULL,
 	"target_uid" varchar(40) NOT NULL,
 	"type" integer DEFAULT 0 NOT NULL,
 	"time" bigint DEFAULT 0 NOT NULL
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_resource" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"stone" bigint NOT NULL,
@@ -7375,7 +7375,7 @@ CREATE TABLE "cokdb1"."user_resource" (
 	"limestone" integer DEFAULT 0,
 	CONSTRAINT "user_resource_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_resource_bak" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"stone" integer NOT NULL,
@@ -7394,7 +7394,7 @@ CREATE TABLE "cokdb1"."user_resource_bak" (
 	"foodbind" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_resource_bak_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_resource_bind" (
 	"uid" varchar(40) NOT NULL,
 	"wood" integer,
@@ -7404,7 +7404,7 @@ CREATE TABLE "cokdb1"."user_resource_bind" (
 	"count" integer,
 	CONSTRAINT "user_resource_bind_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_resource_copy" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"stone" integer NOT NULL,
@@ -7419,7 +7419,7 @@ CREATE TABLE "cokdb1"."user_resource_copy" (
 	"lastUpdateTime" bigint NOT NULL,
 	CONSTRAINT "user_resource_copy_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_resource_log" (
 	"uid" varchar(40) NOT NULL,
 	"day" varchar(10) NOT NULL,
@@ -7431,7 +7431,7 @@ CREATE TABLE "cokdb1"."user_resource_log" (
 	"updateTime" bigint,
 	CONSTRAINT "user_resource_log_PRIMARY" PRIMARY KEY("uid","day","resourceType","actionType","rewardType")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_resource_record" (
 	"uid" varchar(255) NOT NULL,
 	"itemId" varchar(255) NOT NULL,
@@ -7446,7 +7446,7 @@ CREATE TABLE "cokdb1"."user_resource_record" (
 	"costItem" varchar(255),
 	CONSTRAINT "user_resource_record_PRIMARY" PRIMARY KEY("uid","itemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_science" (
 	"uid" varchar(40) NOT NULL,
 	"itemId" varchar(20) NOT NULL,
@@ -7454,7 +7454,7 @@ CREATE TABLE "cokdb1"."user_science" (
 	"cd" bigint DEFAULT 9223372036854775807 NOT NULL,
 	CONSTRAINT "user_science_PRIMARY" PRIMARY KEY("uid","itemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_score" (
 	"uid" varchar(40) NOT NULL,
 	"actId" varchar(40) NOT NULL,
@@ -7464,7 +7464,7 @@ CREATE TABLE "cokdb1"."user_score" (
 	"reward" integer DEFAULT 0,
 	CONSTRAINT "user_score_PRIMARY" PRIMARY KEY("uid","actId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_score_bak" (
 	"uid" varchar(40) NOT NULL,
 	"actId" varchar(40) NOT NULL,
@@ -7474,7 +7474,7 @@ CREATE TABLE "cokdb1"."user_score_bak" (
 	"reward" integer DEFAULT 0,
 	CONSTRAINT "user_score_bak_PRIMARY" PRIMARY KEY("uid","actId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_single_pay" (
 	"uid" varchar(40) NOT NULL,
 	"productId" varchar(255) NOT NULL,
@@ -7482,7 +7482,7 @@ CREATE TABLE "cokdb1"."user_single_pay" (
 	"hasRecNum" integer,
 	CONSTRAINT "user_single_pay_PRIMARY" PRIMARY KEY("uid","productId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_skill" (
 	"uuid" varchar(40) NOT NULL,
 	"ownerId" varchar(40) NOT NULL,
@@ -7495,7 +7495,7 @@ CREATE TABLE "cokdb1"."user_skill" (
 	"param2" integer DEFAULT 0,
 	CONSTRAINT "user_skill_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_snowball" (
 	"uid" varchar(255) NOT NULL,
 	"curLevel" integer,
@@ -7504,7 +7504,7 @@ CREATE TABLE "cokdb1"."user_snowball" (
 	"lastBuyTime" bigint DEFAULT 0,
 	CONSTRAINT "user_snowball_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_sock" (
 	"uid" varchar(255) NOT NULL,
 	"socks" bigint DEFAULT 0,
@@ -7514,7 +7514,7 @@ CREATE TABLE "cokdb1"."user_sock" (
 	CONSTRAINT "user_sock_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "user_sock_reward_length" CHECK (octet_length("reward") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_state" (
 	"uid" varchar(255) NOT NULL,
 	"stateId" integer NOT NULL,
@@ -7530,7 +7530,7 @@ CREATE TABLE "cokdb1"."user_state" (
 	"count" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "user_state_PRIMARY" PRIMARY KEY("uid","stateId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_story_task" (
 	"uid" varchar(40) NOT NULL,
 	"id" integer NOT NULL,
@@ -7539,14 +7539,14 @@ CREATE TABLE "cokdb1"."user_story_task" (
 	"state" integer,
 	CONSTRAINT "user_story_task_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_talent" (
 	"uid" varchar(40) NOT NULL,
 	"talent" "bytea",
 	CONSTRAINT "user_talent_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "user_talent_talent_length" CHECK (octet_length("talent") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_target_task" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(255) NOT NULL,
@@ -7557,7 +7557,7 @@ CREATE TABLE "cokdb1"."user_target_task" (
 	"rewardDouble" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_target_task_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_target_task_notes" (
 	"uid" varchar(40) NOT NULL,
 	"version" varchar(255) NOT NULL,
@@ -7569,7 +7569,7 @@ CREATE TABLE "cokdb1"."user_target_task_notes" (
 	"endTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_target_task_notes_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_task" (
 	"uid" varchar(40) NOT NULL,
 	"id" varchar(255) NOT NULL,
@@ -7578,7 +7578,7 @@ CREATE TABLE "cokdb1"."user_task" (
 	"type" integer DEFAULT 1 NOT NULL,
 	CONSTRAINT "user_task_PRIMARY" PRIMARY KEY("uid","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_tax" (
 	"uid" varchar(40) DEFAULT '' NOT NULL,
 	"wood" bigint NOT NULL,
@@ -7588,7 +7588,7 @@ CREATE TABLE "cokdb1"."user_tax" (
 	"silver" bigint NOT NULL,
 	CONSTRAINT "user_tax_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_territory_donate_resource" (
 	"uid" varchar(255) NOT NULL,
 	"allianceId" varchar(255) NOT NULL,
@@ -7604,7 +7604,7 @@ CREATE TABLE "cokdb1"."user_territory_donate_resource" (
 	"lastUpdateTime" bigint NOT NULL,
 	CONSTRAINT "user_territory_donate_resource_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_territory_resource" (
 	"uid" varchar(255) NOT NULL,
 	"allianceId" varchar(255),
@@ -7616,7 +7616,7 @@ CREATE TABLE "cokdb1"."user_territory_resource" (
 	"lastUpdateTime" bigint DEFAULT 0,
 	CONSTRAINT "user_territory_resource_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_thumbup" (
 	"uid" varchar(50) NOT NULL,
 	"type" integer NOT NULL,
@@ -7624,7 +7624,7 @@ CREATE TABLE "cokdb1"."user_thumbup" (
 	"time" bigint,
 	CONSTRAINT "user_thumbup_PRIMARY" PRIMARY KEY("uid","type","para1")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_timereward" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"level" integer DEFAULT 0,
@@ -7635,14 +7635,14 @@ CREATE TABLE "cokdb1"."user_timereward" (
 	CONSTRAINT "user_timereward_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "user_timereward_rewardInfo_length" CHECK (octet_length("rewardInfo") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_totem" (
 	"uid" varchar(40) NOT NULL,
 	"totemId" integer NOT NULL,
 	"putTime" bigint,
 	CONSTRAINT "user_totem_PRIMARY" PRIMARY KEY("uid","totemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_true_info_bind" (
 	"uid" varchar(40) NOT NULL,
 	"phoneNumber" varchar(11),
@@ -7651,13 +7651,13 @@ CREATE TABLE "cokdb1"."user_true_info_bind" (
 	"emailReward" integer,
 	"trueInfo" integer NOT NULL
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_used_item" (
 	"uid" varchar(40) NOT NULL,
 	"itemId" varchar(40) NOT NULL,
 	CONSTRAINT "user_used_item_PRIMARY" PRIMARY KEY("uid","itemId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_vip" (
 	"uid" varchar(255) NOT NULL,
 	"score" integer NOT NULL,
@@ -7674,7 +7674,7 @@ CREATE TABLE "cokdb1"."user_vip" (
 	CONSTRAINT "user_vip_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "user_vip_svip_level_range" CHECK ("svip_level" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_wall" (
 	"uid" varchar(40) NOT NULL,
 	"armyId" varchar(20) NOT NULL,
@@ -7684,7 +7684,7 @@ CREATE TABLE "cokdb1"."user_wall" (
 	"level" integer NOT NULL,
 	CONSTRAINT "user_wall_PRIMARY" PRIMARY KEY("uid","armyId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_weakness_building" (
 	"uid" varchar(40) NOT NULL,
 	"armyId" varchar(20) NOT NULL,
@@ -7694,7 +7694,7 @@ CREATE TABLE "cokdb1"."user_weakness_building" (
 	"finishTime" bigint DEFAULT 0 NOT NULL,
 	CONSTRAINT "user_weakness_building_PRIMARY" PRIMARY KEY("uid","armyId")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_world" (
 	"uid" varchar(40) NOT NULL,
 	"pointId" integer NOT NULL,
@@ -7720,7 +7720,7 @@ CREATE TABLE "cokdb1"."user_world" (
 	CONSTRAINT "user_world_PRIMARY" PRIMARY KEY("uid"),
 	CONSTRAINT "user_world_monsterLock_length" CHECK (octet_length("monsterLock") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."user_world_pve" (
 	"uid" varchar(40) NOT NULL,
 	"pointId" integer NOT NULL,
@@ -7730,7 +7730,7 @@ CREATE TABLE "cokdb1"."user_world_pve" (
 	CONSTRAINT "user_world_pve_PRIMARY" PRIMARY KEY("uid","pointId"),
 	CONSTRAINT "user_world_pve_monsterInfo_length" CHECK (octet_length("monsterInfo") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."username" (
 	"uid" varchar(40) NOT NULL,
 	"people" integer DEFAULT 0 NOT NULL,
@@ -7738,7 +7738,7 @@ CREATE TABLE "cokdb1"."username" (
 	"leagueTime" bigint NOT NULL,
 	CONSTRAINT "username_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."userprofile" (
 	"USN" varchar(11),
 	"uid" varchar(255) DEFAULT '' NOT NULL,
@@ -7817,7 +7817,7 @@ CREATE TABLE "cokdb1"."userprofile" (
 	"picfraId" integer DEFAULT 0,
 	CONSTRAINT "userprofile_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."userprofile_active" (
 	"uuid" integer GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."userprofile_active_uuid_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"uid" varchar(30) NOT NULL,
@@ -7858,7 +7858,7 @@ CREATE TABLE "cokdb1"."userprofile_active" (
 	CONSTRAINT "userprofile_active_svip_level_range" CHECK ("svip_level" BETWEEN -128 AND 127),
 	CONSTRAINT "userprofile_active_status_range" CHECK ("status" BETWEEN -128 AND 127)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."userprofile_bak" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -7907,7 +7907,7 @@ CREATE TABLE "cokdb1"."userprofile_bak" (
 	"crystal" bigint DEFAULT 0,
 	CONSTRAINT "userprofile_bak_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."userprofile_del" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -7957,7 +7957,7 @@ CREATE TABLE "cokdb1"."userprofile_del" (
 	"skillMaterial" bigint DEFAULT 0,
 	CONSTRAINT "userprofile_del_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."vip_box_turntable" (
 	"uid" varchar(255) DEFAULT '' NOT NULL,
 	"vip" integer NOT NULL,
@@ -7970,7 +7970,7 @@ CREATE TABLE "cokdb1"."vip_box_turntable" (
 	"refreshTime" bigint DEFAULT 0,
 	CONSTRAINT "vip_box_turntable_PRIMARY" PRIMARY KEY("uid","vip")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."wishing_tree" (
 	"uid" varchar(32) DEFAULT '' NOT NULL,
 	"totalNum" bigint,
@@ -7999,7 +7999,7 @@ CREATE TABLE "cokdb1"."wishing_tree" (
 	"type_20" integer DEFAULT 0,
 	CONSTRAINT "wishing_tree_PRIMARY" PRIMARY KEY("uid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_barbarion" (
 	"pointId" integer NOT NULL,
 	"configId" varchar(255) NOT NULL,
@@ -8011,7 +8011,7 @@ CREATE TABLE "cokdb1"."world_barbarion" (
 	CONSTRAINT "world_barbarion_lastArmyMapByteArray_length" CHECK (octet_length("lastArmyMapByteArray") <= 65535),
 	CONSTRAINT "world_barbarion_lastAwardArmyMapByteArray_length" CHECK (octet_length("lastAwardArmyMapByteArray") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_barbarion_dead" (
 	"id" varchar(40) NOT NULL,
 	"areaId" integer NOT NULL,
@@ -8020,7 +8020,7 @@ CREATE TABLE "cokdb1"."world_barbarion_dead" (
 	"deadFinishTime" bigint NOT NULL,
 	CONSTRAINT "world_barbarion_dead_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_basttile_dead" (
 	"id" varchar(40) NOT NULL,
 	"areaId" integer NOT NULL,
@@ -8029,7 +8029,7 @@ CREATE TABLE "cokdb1"."world_basttile_dead" (
 	"deadFinishTime" bigint NOT NULL,
 	CONSTRAINT "world_basttile_dead_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_favorite" (
 	"uid" varchar(255) NOT NULL,
 	"point" integer NOT NULL,
@@ -8041,7 +8041,7 @@ CREATE TABLE "cokdb1"."world_favorite" (
 	"createTime" bigint DEFAULT 0,
 	CONSTRAINT "world_favorite_PRIMARY" PRIMARY KEY("uid","point","server")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_field_monster_dead" (
 	"uuid" varchar(40) NOT NULL,
 	"id" integer NOT NULL,
@@ -8049,7 +8049,7 @@ CREATE TABLE "cokdb1"."world_field_monster_dead" (
 	"deadFinishTime" bigint NOT NULL,
 	CONSTRAINT "world_field_monster_dead_PRIMARY" PRIMARY KEY("uuid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_flush_barbarion_tmp" (
 	"id" integer NOT NULL,
 	"pointType" integer NOT NULL,
@@ -8058,7 +8058,7 @@ CREATE TABLE "cokdb1"."world_flush_barbarion_tmp" (
 	"flushTime" bigint DEFAULT 0,
 	CONSTRAINT "world_flush_barbarion_tmp_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_flush_basttile_tmp" (
 	"id" integer NOT NULL,
 	"pointType" integer NOT NULL,
@@ -8067,7 +8067,7 @@ CREATE TABLE "cokdb1"."world_flush_basttile_tmp" (
 	"flushTime" bigint DEFAULT 0,
 	CONSTRAINT "world_flush_basttile_tmp_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_flush_field_monster_tmp" (
 	"id" integer NOT NULL,
 	"pointType" integer NOT NULL,
@@ -8076,14 +8076,14 @@ CREATE TABLE "cokdb1"."world_flush_field_monster_tmp" (
 	"flushTime" bigint DEFAULT 0,
 	CONSTRAINT "world_flush_field_monster_tmp_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_flush_monster_tmp" (
 	"id" integer NOT NULL,
 	"pointType" integer NOT NULL,
 	"flushTime" bigint DEFAULT 0,
 	CONSTRAINT "world_flush_monster_tmp_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_flush_resource_new_tmp" (
 	"id" integer NOT NULL,
 	"pointType" integer NOT NULL,
@@ -8094,7 +8094,7 @@ CREATE TABLE "cokdb1"."world_flush_resource_new_tmp" (
 	"flushTime" bigint DEFAULT 0,
 	CONSTRAINT "world_flush_resource_new_tmp_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_flush_resource_tmp" (
 	"id" integer NOT NULL,
 	"pointType" integer NOT NULL,
@@ -8105,13 +8105,13 @@ CREATE TABLE "cokdb1"."world_flush_resource_tmp" (
 	"flushTime" bigint DEFAULT 0,
 	CONSTRAINT "world_flush_resource_tmp_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_hero_record" (
 	"heroUid" varchar(40) NOT NULL,
 	"heroFreeTime" bigint DEFAULT 0,
 	CONSTRAINT "world_hero_record_PRIMARY" PRIMARY KEY("heroUid")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_march" (
 	"uuid" varchar(40) DEFAULT '' NOT NULL,
 	"ownerUid" varchar(40),
@@ -8164,7 +8164,7 @@ CREATE TABLE "cokdb1"."world_march" (
 	CONSTRAINT "world_march_exploreReport_length" CHECK (octet_length("exploreReport") <= 65535),
 	CONSTRAINT "world_march_buildingKillArmy_length" CHECK (octet_length("buildingKillArmy") <= 65535)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_res_dead" (
 	"id" varchar(40) NOT NULL,
 	"areaId" integer NOT NULL,
@@ -8173,7 +8173,7 @@ CREATE TABLE "cokdb1"."world_res_dead" (
 	"deadFinishTime" bigint NOT NULL,
 	CONSTRAINT "world_res_dead_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_res_new_dead" (
 	"id" varchar(40) NOT NULL,
 	"areaId" integer NOT NULL,
@@ -8182,7 +8182,7 @@ CREATE TABLE "cokdb1"."world_res_new_dead" (
 	"deadFinishTime" bigint NOT NULL,
 	CONSTRAINT "world_res_new_dead_PRIMARY" PRIMARY KEY("id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_res_record" (
 	"time" bigint NOT NULL,
 	"id" integer NOT NULL,
@@ -8193,7 +8193,7 @@ CREATE TABLE "cokdb1"."world_res_record" (
 	"pointItem" varchar(255),
 	CONSTRAINT "world_res_record_PRIMARY" PRIMARY KEY("time","id")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."world_update_gridtype_tmp" (
 	"id" bigint GENERATED BY DEFAULT AS IDENTITY (sequence name "cokdb1"."world_update_gridtype_tmp_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 4294967295 START WITH 1442402 CACHE 1),
 	"gridType" integer NOT NULL,
@@ -8201,7 +8201,7 @@ CREATE TABLE "cokdb1"."world_update_gridtype_tmp" (
 	CONSTRAINT "world_update_gridtype_tmp_PRIMARY" PRIMARY KEY("id"),
 	CONSTRAINT "world_update_gridtype_tmp_id_range" CHECK ("id" >= 0 AND "id" <= 4294967295)
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."worldcup_apply" (
 	"allianceId" varchar(50) NOT NULL,
 	"version" integer NOT NULL,
@@ -8210,7 +8210,7 @@ CREATE TABLE "cokdb1"."worldcup_apply" (
 	"time" bigint,
 	CONSTRAINT "worldcup_apply_PRIMARY" PRIMARY KEY("allianceId","version")
 );
---> statement-breakpoint
+
 CREATE TABLE "cokdb1"."worldpoint" (
 	"id" integer NOT NULL,
 	"worldId" integer DEFAULT 0 NOT NULL,
@@ -8253,533 +8253,533 @@ CREATE TABLE "cokdb1"."worldpoint" (
 	CONSTRAINT "worldpoint_PRIMARY" PRIMARY KEY("id","worldId"),
 	CONSTRAINT "worldpoint_monsterInfo_length" CHECK (octet_length("monsterInfo") <= 65535)
 );
---> statement-breakpoint
-CREATE INDEX "action_record_pack_uid" ON "cokdb1"."action_record_pack" USING btree ("uid","type","type1");--> statement-breakpoint
-CREATE INDEX "action_record_pack_time" ON "cokdb1"."action_record_pack" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "activation_index_user" ON "cokdb1"."activation" USING btree ("user");--> statement-breakpoint
-CREATE UNIQUE INDEX "ad_building_attachment_uss_index" ON "cokdb1"."ad_building_attachment" USING btree ("uuid","serverid","skillid");--> statement-breakpoint
-CREATE INDEX "ad_mat_index_query" ON "cokdb1"."ad_mat" USING btree ("matId");--> statement-breakpoint
-CREATE INDEX "ad_reward_index_time" ON "cokdb1"."ad_reward" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "affairs_index_type" ON "cokdb1"."affairs" USING btree ("type","rewardTime");--> statement-breakpoint
-CREATE INDEX "alliance_name_idx" ON "cokdb1"."alliance" USING btree ("alliancename");--> statement-breakpoint
-CREATE INDEX "alliance_apply_index_user" ON "cokdb1"."alliance_apply" USING btree ("userId");--> statement-breakpoint
-CREATE INDEX "alliance_apply_index_alliance" ON "cokdb1"."alliance_apply" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_apply_index_time" ON "cokdb1"."alliance_apply" USING btree ("applyTime");--> statement-breakpoint
-CREATE INDEX "alliance_build_cost_record_index_user" ON "cokdb1"."alliance_build_cost_record" USING btree ("time","userId","type");--> statement-breakpoint
-CREATE INDEX "alliance_build_cost_record_index_type" ON "cokdb1"."alliance_build_cost_record" USING btree ("userId","time","type");--> statement-breakpoint
-CREATE INDEX "alliance_comment_index_allianceId" ON "cokdb1"."alliance_comment" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_comment_shield_index_allianceId" ON "cokdb1"."alliance_comment_shield" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_group_buys_index_allianceId" ON "cokdb1"."alliance_group_buys" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_group_buys_index_time" ON "cokdb1"."alliance_group_buys" USING btree ("buyTime");--> statement-breakpoint
-CREATE INDEX "alliance_help_allianceId_index" ON "cokdb1"."alliance_help" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_help_index_alliance_help" ON "cokdb1"."alliance_help" USING btree ("content");--> statement-breakpoint
-CREATE INDEX "alliance_helper_index_alliance_helper" ON "cokdb1"."alliance_helper" USING btree ("helpId","recvId");--> statement-breakpoint
-CREATE INDEX "alliance_member_index_allianceId" ON "cokdb1"."alliance_member" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_member_bak_index_allianceId" ON "cokdb1"."alliance_member_bak" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_mission_aid_idx" ON "cokdb1"."alliance_mission" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_mission_record_uid_idx" ON "cokdb1"."alliance_mission_record" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "alliance_mission_record_mid_idx" ON "cokdb1"."alliance_mission_record" USING btree ("missionUUID");--> statement-breakpoint
-CREATE INDEX "alliance_mission_record_allianceId" ON "cokdb1"."alliance_mission_record" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_new_resource_log_uid_index" ON "cokdb1"."alliance_new_resource_log" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "alliance_offical_apply_index_user" ON "cokdb1"."alliance_offical_apply" USING btree ("userId");--> statement-breakpoint
-CREATE INDEX "alliance_offical_apply_index_alliance" ON "cokdb1"."alliance_offical_apply" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_science_index_alliance" ON "cokdb1"."alliance_science" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_shop_index_alliance" ON "cokdb1"."alliance_shop" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_shop_buyrecord_buytime" ON "cokdb1"."alliance_shop_buyrecord" USING btree ("buytime");--> statement-breakpoint
-CREATE INDEX "alliance_shop_buytoallianceshoprecord_buytime" ON "cokdb1"."alliance_shop_buytoallianceshoprecord" USING btree ("buytime");--> statement-breakpoint
-CREATE INDEX "alliance_shop_make_index_alliance" ON "cokdb1"."alliance_shop_make" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_shophis_index_alliance" ON "cokdb1"."alliance_shophis" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_shophis_index_user" ON "cokdb1"."alliance_shophis" USING btree ("userId");--> statement-breakpoint
-CREATE INDEX "alliance_task_al_idx" ON "cokdb1"."alliance_task" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_task_publish_idx" ON "cokdb1"."alliance_task" USING btree ("publishUid");--> statement-breakpoint
-CREATE INDEX "alliance_task_accept_idx" ON "cokdb1"."alliance_task" USING btree ("acceptUid");--> statement-breakpoint
-CREATE INDEX "alliance_task_log_castle_color" ON "cokdb1"."alliance_task_log" USING btree ("castleLevel","color");--> statement-breakpoint
-CREATE INDEX "alliance_task_log_level_index" ON "cokdb1"."alliance_task_log" USING btree ("level");--> statement-breakpoint
-CREATE INDEX "alliance_task_log_color_index" ON "cokdb1"."alliance_task_log" USING btree ("color");--> statement-breakpoint
-CREATE INDEX "alliance_task_log_castle_index" ON "cokdb1"."alliance_task_log" USING btree ("castleLevel");--> statement-breakpoint
-CREATE INDEX "alliance_task_unpublish_pub_idx" ON "cokdb1"."alliance_task_unpublish" USING btree ("publishUid");--> statement-breakpoint
-CREATE UNIQUE INDEX "alliance_territory_pointId_worldId_idx" ON "cokdb1"."alliance_territory" USING btree ("pointId","atWorldId");--> statement-breakpoint
-CREATE INDEX "alliance_territory_alliance_idx" ON "cokdb1"."alliance_territory" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "alliance_territory_update_idx" ON "cokdb1"."alliance_territory" USING btree ("updateTime");--> statement-breakpoint
-CREATE INDEX "alliance_territory_start_idx" ON "cokdb1"."alliance_territory" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "alliance_territory_lastup_idx" ON "cokdb1"."alliance_territory" USING btree ("lastUpdateTime");--> statement-breakpoint
-CREATE INDEX "alliance_territory_tower_idx" ON "cokdb1"."alliance_territory" USING btree ("towerPoint");--> statement-breakpoint
-CREATE INDEX "alliance_territory_pointId_idx" ON "cokdb1"."alliance_territory" USING btree ("pointId");--> statement-breakpoint
-CREATE INDEX "army_skill_info_uid" ON "cokdb1"."army_skill_info" USING btree ("uid");--> statement-breakpoint
-CREATE UNIQUE INDEX "barbarion_statistics_uid_name_time_index" ON "cokdb1"."barbarion_statistics" USING btree ("playerUid","playerName","time");--> statement-breakpoint
-CREATE INDEX "barbarion_statistics_playerUid_Index" ON "cokdb1"."barbarion_statistics" USING btree ("playerUid");--> statement-breakpoint
-CREATE INDEX "barbarion_statistics_isSuccess_actType_index" ON "cokdb1"."barbarion_statistics" USING btree ("isSuccess","actType");--> statement-breakpoint
-CREATE INDEX "barbarion_statistics_strongHoldLevel_index" ON "cokdb1"."barbarion_statistics" USING btree ("strongHoldLevel");--> statement-breakpoint
-CREATE INDEX "barbarion_statistics_actType_index" ON "cokdb1"."barbarion_statistics" USING btree ("actType");--> statement-breakpoint
-CREATE INDEX "black_land_barbarion_dead_dead_res_time" ON "cokdb1"."black_land_barbarion_dead" USING btree ("deadFinishTime");--> statement-breakpoint
-CREATE INDEX "black_land_barbarion_dead_areaId_index" ON "cokdb1"."black_land_barbarion_dead" USING btree ("areaId");--> statement-breakpoint
-CREATE INDEX "black_land_basttile_dead_dead_res_time" ON "cokdb1"."black_land_basttile_dead" USING btree ("deadFinishTime");--> statement-breakpoint
-CREATE INDEX "black_land_basttile_dead_areaId_index" ON "cokdb1"."black_land_basttile_dead" USING btree ("areaId");--> statement-breakpoint
-CREATE INDEX "black_land_res_dead_dead_res_time" ON "cokdb1"."black_land_res_dead" USING btree ("deadFinishTime");--> statement-breakpoint
-CREATE INDEX "black_land_res_dead_areaId_index" ON "cokdb1"."black_land_res_dead" USING btree ("areaId");--> statement-breakpoint
-CREATE INDEX "bottles_uid_index" ON "cokdb1"."bottles" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "branch_link_branch_link_from_index" ON "cokdb1"."branch_link" USING btree ("fromUid");--> statement-breakpoint
-CREATE INDEX "branch_link_branch_link_type_index" ON "cokdb1"."branch_link" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "branch_url_branch_url_link_index" ON "cokdb1"."branch_url" USING btree ("url");--> statement-breakpoint
-CREATE INDEX "branch_url_branch_url_type_index" ON "cokdb1"."branch_url" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "chat_report_record_time_idx" ON "cokdb1"."chat_report_record" USING btree ("lastUpdateTime");--> statement-breakpoint
-CREATE INDEX "chat_shield_owner_other_index" ON "cokdb1"."chat_shield" USING btree ("owner","other");--> statement-breakpoint
-CREATE INDEX "compensate_record_time_idx" ON "cokdb1"."compensate_record" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "compensate_record_uid_idx" ON "cokdb1"."compensate_record" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "compensation_record_time_index" ON "cokdb1"."compensation_record" USING btree ("lastCompensateTime");--> statement-breakpoint
-CREATE UNIQUE INDEX "cross_throne_king_info_uuid" ON "cokdb1"."cross_throne_king_info" USING btree ("uuid");--> statement-breakpoint
-CREATE INDEX "crystal_cost_record_index_user" ON "cokdb1"."crystal_cost_record" USING btree ("time","userId","type");--> statement-breakpoint
-CREATE INDEX "crystal_cost_record_index_type" ON "cokdb1"."crystal_cost_record" USING btree ("userId","time","type");--> statement-breakpoint
-CREATE INDEX "crystal_cost_record_index_goldType" ON "cokdb1"."crystal_cost_record" USING btree ("goldType");--> statement-breakpoint
-CREATE INDEX "donate_history_aid_idx" ON "cokdb1"."donate_history" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "donate_history_time_idx" ON "cokdb1"."donate_history" USING btree ("donateTime");--> statement-breakpoint
-CREATE INDEX "donate_history_progress_idx" ON "cokdb1"."donate_history" USING btree ("progress");--> statement-breakpoint
-CREATE INDEX "donate_history_donate_idx" ON "cokdb1"."donate_history" USING btree ("donate");--> statement-breakpoint
-CREATE INDEX "donate_history_record_aid_idx" ON "cokdb1"."donate_history_record" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "donate_history_record_time_idx" ON "cokdb1"."donate_history_record" USING btree ("donateTime");--> statement-breakpoint
-CREATE INDEX "donate_history_record_progress_idx" ON "cokdb1"."donate_history_record" USING btree ("progress");--> statement-breakpoint
-CREATE INDEX "donate_history_record_donate_idx" ON "cokdb1"."donate_history_record" USING btree ("donate");--> statement-breakpoint
-CREATE INDEX "dragon_battle_fight_history_utvindex" ON "cokdb1"."dragon_battle_fight_history" USING btree ("uid","type","VERSION");--> statement-breakpoint
-CREATE INDEX "dragon_battle_fight_history_teamIdindex" ON "cokdb1"."dragon_battle_fight_history" USING btree ("teamId");--> statement-breakpoint
-CREATE INDEX "dragon_battle_mail_record_state" ON "cokdb1"."dragon_battle_mail_record" USING btree ("state");--> statement-breakpoint
-CREATE INDEX "dragon_tower_buff_Index_uid" ON "cokdb1"."dragon_tower_buff" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "dragon_tower_layer_Index_uid" ON "cokdb1"."dragon_tower_layer" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "dragon_words_record_dragon_words_record_index" ON "cokdb1"."dragon_words_record" USING btree ("castleLevel","buildingLevel");--> statement-breakpoint
-CREATE INDEX "exchange_visible_uid_index" ON "cokdb1"."exchange_visible" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "expedition_record_time_index" ON "cokdb1"."expedition_record" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "fast_carry_activity_goalReward" ON "cokdb1"."fast_carry_activity" USING btree ("goalReward1","goalReward2","goalReward3","goalReward4");--> statement-breakpoint
-CREATE INDEX "firstpaylog_index_time_pf" ON "cokdb1"."firstpaylog" USING btree ("time","pf");--> statement-breakpoint
-CREATE INDEX "gold_cost_record_index_user" ON "cokdb1"."gold_cost_record" USING btree ("time","userId","type");--> statement-breakpoint
-CREATE INDEX "gold_cost_record_index_type" ON "cokdb1"."gold_cost_record" USING btree ("userId","time","type");--> statement-breakpoint
-CREATE INDEX "gold_cost_record_index_goldType" ON "cokdb1"."gold_cost_record" USING btree ("goldType");--> statement-breakpoint
-CREATE INDEX "gold_wish_pool_byUid" ON "cokdb1"."gold_wish_pool" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_index_time" ON "cokdb1"."goods_cost_record" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_index_user" ON "cokdb1"."goods_cost_record" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_0_index_type" ON "cokdb1"."goods_cost_record_2024_0" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_0_index_time" ON "cokdb1"."goods_cost_record_2024_0" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_0_index_time_user" ON "cokdb1"."goods_cost_record_2024_0" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_0_index_user_time" ON "cokdb1"."goods_cost_record_2024_0" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_1_index_type" ON "cokdb1"."goods_cost_record_2024_1" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_1_index_time" ON "cokdb1"."goods_cost_record_2024_1" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_1_index_time_user" ON "cokdb1"."goods_cost_record_2024_1" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_1_index_user_time" ON "cokdb1"."goods_cost_record_2024_1" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_10_index_type" ON "cokdb1"."goods_cost_record_2024_10" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_10_index_time" ON "cokdb1"."goods_cost_record_2024_10" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_10_index_time_user" ON "cokdb1"."goods_cost_record_2024_10" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_10_index_user_time" ON "cokdb1"."goods_cost_record_2024_10" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_11_index_type" ON "cokdb1"."goods_cost_record_2024_11" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_11_index_time" ON "cokdb1"."goods_cost_record_2024_11" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_11_index_time_user" ON "cokdb1"."goods_cost_record_2024_11" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_11_index_user_time" ON "cokdb1"."goods_cost_record_2024_11" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_2_index_type" ON "cokdb1"."goods_cost_record_2024_2" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_2_index_time" ON "cokdb1"."goods_cost_record_2024_2" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_2_index_time_user" ON "cokdb1"."goods_cost_record_2024_2" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_2_index_user_time" ON "cokdb1"."goods_cost_record_2024_2" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_3_index_type" ON "cokdb1"."goods_cost_record_2024_3" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_3_index_time" ON "cokdb1"."goods_cost_record_2024_3" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_3_index_time_user" ON "cokdb1"."goods_cost_record_2024_3" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_3_index_user_time" ON "cokdb1"."goods_cost_record_2024_3" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_4_index_type" ON "cokdb1"."goods_cost_record_2024_4" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_4_index_time" ON "cokdb1"."goods_cost_record_2024_4" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_4_index_time_user" ON "cokdb1"."goods_cost_record_2024_4" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_4_index_user_time" ON "cokdb1"."goods_cost_record_2024_4" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_5_index_type" ON "cokdb1"."goods_cost_record_2024_5" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_5_index_time" ON "cokdb1"."goods_cost_record_2024_5" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_5_index_time_user" ON "cokdb1"."goods_cost_record_2024_5" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_5_index_user_time" ON "cokdb1"."goods_cost_record_2024_5" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_6_index_type" ON "cokdb1"."goods_cost_record_2024_6" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_6_index_time" ON "cokdb1"."goods_cost_record_2024_6" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_6_index_time_user" ON "cokdb1"."goods_cost_record_2024_6" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_6_index_user_time" ON "cokdb1"."goods_cost_record_2024_6" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_7_index_type" ON "cokdb1"."goods_cost_record_2024_7" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_7_index_time" ON "cokdb1"."goods_cost_record_2024_7" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_7_index_time_user" ON "cokdb1"."goods_cost_record_2024_7" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_7_index_user_time" ON "cokdb1"."goods_cost_record_2024_7" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_8_index_type" ON "cokdb1"."goods_cost_record_2024_8" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_8_index_time" ON "cokdb1"."goods_cost_record_2024_8" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_8_index_time_user" ON "cokdb1"."goods_cost_record_2024_8" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_8_index_user_time" ON "cokdb1"."goods_cost_record_2024_8" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_9_index_type" ON "cokdb1"."goods_cost_record_2024_9" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_9_index_time" ON "cokdb1"."goods_cost_record_2024_9" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_9_index_time_user" ON "cokdb1"."goods_cost_record_2024_9" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2024_9_index_user_time" ON "cokdb1"."goods_cost_record_2024_9" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_0_index_type" ON "cokdb1"."goods_cost_record_2026_0" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_0_index_time" ON "cokdb1"."goods_cost_record_2026_0" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_0_index_time_user" ON "cokdb1"."goods_cost_record_2026_0" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_0_index_user_time" ON "cokdb1"."goods_cost_record_2026_0" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_1_index_type" ON "cokdb1"."goods_cost_record_2026_1" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_1_index_time" ON "cokdb1"."goods_cost_record_2026_1" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_1_index_time_user" ON "cokdb1"."goods_cost_record_2026_1" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_1_index_user_time" ON "cokdb1"."goods_cost_record_2026_1" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_10_index_type" ON "cokdb1"."goods_cost_record_2026_10" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_10_index_time" ON "cokdb1"."goods_cost_record_2026_10" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_10_index_time_user" ON "cokdb1"."goods_cost_record_2026_10" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_10_index_user_time" ON "cokdb1"."goods_cost_record_2026_10" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_11_index_type" ON "cokdb1"."goods_cost_record_2026_11" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_11_index_time" ON "cokdb1"."goods_cost_record_2026_11" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_11_index_time_user" ON "cokdb1"."goods_cost_record_2026_11" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_11_index_user_time" ON "cokdb1"."goods_cost_record_2026_11" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_2_index_type" ON "cokdb1"."goods_cost_record_2026_2" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_2_index_time" ON "cokdb1"."goods_cost_record_2026_2" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_2_index_time_user" ON "cokdb1"."goods_cost_record_2026_2" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_2_index_user_time" ON "cokdb1"."goods_cost_record_2026_2" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_3_index_type" ON "cokdb1"."goods_cost_record_2026_3" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_3_index_time" ON "cokdb1"."goods_cost_record_2026_3" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_3_index_time_user" ON "cokdb1"."goods_cost_record_2026_3" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_3_index_user_time" ON "cokdb1"."goods_cost_record_2026_3" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_4_index_type" ON "cokdb1"."goods_cost_record_2026_4" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_4_index_time" ON "cokdb1"."goods_cost_record_2026_4" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_4_index_time_user" ON "cokdb1"."goods_cost_record_2026_4" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_4_index_user_time" ON "cokdb1"."goods_cost_record_2026_4" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_5_index_type" ON "cokdb1"."goods_cost_record_2026_5" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_5_index_time" ON "cokdb1"."goods_cost_record_2026_5" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_5_index_time_user" ON "cokdb1"."goods_cost_record_2026_5" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_5_index_user_time" ON "cokdb1"."goods_cost_record_2026_5" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_6_index_type" ON "cokdb1"."goods_cost_record_2026_6" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_6_index_time" ON "cokdb1"."goods_cost_record_2026_6" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_6_index_time_user" ON "cokdb1"."goods_cost_record_2026_6" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_6_index_user_time" ON "cokdb1"."goods_cost_record_2026_6" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_7_index_type" ON "cokdb1"."goods_cost_record_2026_7" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_7_index_time" ON "cokdb1"."goods_cost_record_2026_7" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_7_index_time_user" ON "cokdb1"."goods_cost_record_2026_7" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_7_index_user_time" ON "cokdb1"."goods_cost_record_2026_7" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_8_index_type" ON "cokdb1"."goods_cost_record_2026_8" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_8_index_time" ON "cokdb1"."goods_cost_record_2026_8" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_8_index_time_user" ON "cokdb1"."goods_cost_record_2026_8" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_8_index_user_time" ON "cokdb1"."goods_cost_record_2026_8" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_9_index_type" ON "cokdb1"."goods_cost_record_2026_9" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_9_index_time" ON "cokdb1"."goods_cost_record_2026_9" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_9_index_time_user" ON "cokdb1"."goods_cost_record_2026_9" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2026_9_index_user_time" ON "cokdb1"."goods_cost_record_2026_9" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_0_index_type" ON "cokdb1"."goods_cost_record_2027_0" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_0_index_time" ON "cokdb1"."goods_cost_record_2027_0" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_0_index_time_user" ON "cokdb1"."goods_cost_record_2027_0" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_0_index_user_time" ON "cokdb1"."goods_cost_record_2027_0" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_1_index_type" ON "cokdb1"."goods_cost_record_2027_1" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_1_index_time" ON "cokdb1"."goods_cost_record_2027_1" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_1_index_time_user" ON "cokdb1"."goods_cost_record_2027_1" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_1_index_user_time" ON "cokdb1"."goods_cost_record_2027_1" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_10_index_type" ON "cokdb1"."goods_cost_record_2027_10" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_10_index_time" ON "cokdb1"."goods_cost_record_2027_10" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_10_index_time_user" ON "cokdb1"."goods_cost_record_2027_10" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_10_index_user_time" ON "cokdb1"."goods_cost_record_2027_10" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_11_index_type" ON "cokdb1"."goods_cost_record_2027_11" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_11_index_time" ON "cokdb1"."goods_cost_record_2027_11" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_11_index_time_user" ON "cokdb1"."goods_cost_record_2027_11" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_11_index_user_time" ON "cokdb1"."goods_cost_record_2027_11" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_2_index_type" ON "cokdb1"."goods_cost_record_2027_2" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_2_index_time" ON "cokdb1"."goods_cost_record_2027_2" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_2_index_time_user" ON "cokdb1"."goods_cost_record_2027_2" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_2_index_user_time" ON "cokdb1"."goods_cost_record_2027_2" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_3_index_type" ON "cokdb1"."goods_cost_record_2027_3" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_3_index_time" ON "cokdb1"."goods_cost_record_2027_3" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_3_index_time_user" ON "cokdb1"."goods_cost_record_2027_3" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_3_index_user_time" ON "cokdb1"."goods_cost_record_2027_3" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_4_index_type" ON "cokdb1"."goods_cost_record_2027_4" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_4_index_time" ON "cokdb1"."goods_cost_record_2027_4" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_4_index_time_user" ON "cokdb1"."goods_cost_record_2027_4" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_4_index_user_time" ON "cokdb1"."goods_cost_record_2027_4" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_5_index_type" ON "cokdb1"."goods_cost_record_2027_5" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_5_index_time" ON "cokdb1"."goods_cost_record_2027_5" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_5_index_time_user" ON "cokdb1"."goods_cost_record_2027_5" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_5_index_user_time" ON "cokdb1"."goods_cost_record_2027_5" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_6_index_type" ON "cokdb1"."goods_cost_record_2027_6" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_6_index_time" ON "cokdb1"."goods_cost_record_2027_6" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_6_index_time_user" ON "cokdb1"."goods_cost_record_2027_6" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_6_index_user_time" ON "cokdb1"."goods_cost_record_2027_6" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_7_index_type" ON "cokdb1"."goods_cost_record_2027_7" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_7_index_time" ON "cokdb1"."goods_cost_record_2027_7" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_7_index_time_user" ON "cokdb1"."goods_cost_record_2027_7" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_7_index_user_time" ON "cokdb1"."goods_cost_record_2027_7" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_8_index_type" ON "cokdb1"."goods_cost_record_2027_8" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_8_index_time" ON "cokdb1"."goods_cost_record_2027_8" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_8_index_time_user" ON "cokdb1"."goods_cost_record_2027_8" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_8_index_user_time" ON "cokdb1"."goods_cost_record_2027_8" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_9_index_type" ON "cokdb1"."goods_cost_record_2027_9" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_9_index_time" ON "cokdb1"."goods_cost_record_2027_9" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_9_index_time_user" ON "cokdb1"."goods_cost_record_2027_9" USING btree ("time","userId","itemId");--> statement-breakpoint
-CREATE INDEX "goods_cost_record_2027_9_index_user_time" ON "cokdb1"."goods_cost_record_2027_9" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "hero_activity_st_idx" ON "cokdb1"."hero_activity" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "hero_activity_et_idx" ON "cokdb1"."hero_activity" USING btree ("endTime");--> statement-breakpoint
-CREATE INDEX "hero_activity_act_idx" ON "cokdb1"."hero_activity" USING btree ("activityId");--> statement-breakpoint
-CREATE INDEX "hero_event_act_idx" ON "cokdb1"."hero_event" USING btree ("activityId");--> statement-breakpoint
-CREATE INDEX "hero_event_st_idx" ON "cokdb1"."hero_event" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "hero_event_et_idx" ON "cokdb1"."hero_event" USING btree ("endTime");--> statement-breakpoint
-CREATE INDEX "hero_event_eid_idx" ON "cokdb1"."hero_event" USING btree ("eventId");--> statement-breakpoint
-CREATE INDEX "hero_event_r_idx" ON "cokdb1"."hero_event" USING btree ("rewardStatus");--> statement-breakpoint
-CREATE INDEX "hero_event_reward_record_eid_idx" ON "cokdb1"."hero_event_reward_record" USING btree ("eventId");--> statement-breakpoint
-CREATE INDEX "hero_event_reward_record_time_idx" ON "cokdb1"."hero_event_reward_record" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "hero_event_reward_record_level_idx" ON "cokdb1"."hero_event_reward_record" USING btree ("level");--> statement-breakpoint
-CREATE INDEX "hero_event_reward_record_al_idx" ON "cokdb1"."hero_event_reward_record" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "hero_office_uid_index" ON "cokdb1"."hero_office" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "hot_goods_cost_record_uid_idx" ON "cokdb1"."hot_goods_cost_record" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "hot_goods_cost_record_goods_idx" ON "cokdb1"."hot_goods_cost_record" USING btree ("goodsId");--> statement-breakpoint
-CREATE INDEX "hot_goods_cost_record_time_idx" ON "cokdb1"."hot_goods_cost_record" USING btree ("buyTime");--> statement-breakpoint
-CREATE INDEX "hot_info_before_refresh_time_idx" ON "cokdb1"."hot_info_before_refresh" USING btree ("refreshTime");--> statement-breakpoint
-CREATE INDEX "inviter_inviter_index_001" ON "cokdb1"."inviter" USING btree ("uid","type","time");--> statement-breakpoint
-CREATE INDEX "inviter_uid_type_inviteeUid" ON "cokdb1"."inviter" USING btree ("uid","inviteeUid","type");--> statement-breakpoint
-CREATE INDEX "king_allot_tax_record_time_index" ON "cokdb1"."king_allot_tax_record" USING btree ("sendTime");--> statement-breakpoint
-CREATE INDEX "king_fight_log_uid_index" ON "cokdb1"."king_fight_log" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "king_skill_event_uid_index" ON "cokdb1"."king_skill_event" USING btree (left("uid", 255));--> statement-breakpoint
-CREATE INDEX "king_tax_record_time_index" ON "cokdb1"."king_tax_record" USING btree ("taxTime");--> statement-breakpoint
-CREATE INDEX "king_time_fight_log_Index_logtime" ON "cokdb1"."king_time_fight_log" USING btree ("logtime");--> statement-breakpoint
-CREATE INDEX "kingdom_building_Index_itemid" ON "cokdb1"."kingdom_building" USING btree ("itemid");--> statement-breakpoint
-CREATE INDEX "kingdom_building_buff_Index_itemid" ON "cokdb1"."kingdom_building_buff" USING btree ("uuid");--> statement-breakpoint
-CREATE INDEX "kingdom_cross_fight_history_kingdom_startTime" ON "cokdb1"."kingdom_cross_fight_history" USING btree ("serverId","startTime");--> statement-breakpoint
-CREATE INDEX "kingdom_cross_fight_history_startTime" ON "cokdb1"."kingdom_cross_fight_history" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "logaction_index" ON "cokdb1"."logaction" USING btree ("timeStamp","user","action","code");--> statement-breakpoint
-CREATE INDEX "logaction_index2" ON "cokdb1"."logaction" USING btree ("user","timeStamp","action");--> statement-breakpoint
-CREATE INDEX "logrecord_index" ON "cokdb1"."logrecord" USING btree ("timeStamp","user","category","type");--> statement-breakpoint
-CREATE INDEX "logrecord_index_2" ON "cokdb1"."logrecord" USING btree ("user","category","type","timeStamp");--> statement-breakpoint
-CREATE INDEX "logrecord_fight_index" ON "cokdb1"."logrecord_fight" USING btree ("timeStamp","user","category","type");--> statement-breakpoint
-CREATE INDEX "logrecord_fight_index_2" ON "cokdb1"."logrecord_fight" USING btree ("user","category","type","timeStamp");--> statement-breakpoint
-CREATE INDEX "logstat_index" ON "cokdb1"."logstat" USING btree ("timeStamp","user","type","param1","param2","param3");--> statement-breakpoint
-CREATE INDEX "logstat_index2" ON "cokdb1"."logstat" USING btree ("type","timeStamp","user");--> statement-breakpoint
-CREATE INDEX "logtemp_index" ON "cokdb1"."logtemp" USING btree ("timeStamp","user","type","param1","param2","param3");--> statement-breakpoint
-CREATE INDEX "logtemp_index2" ON "cokdb1"."logtemp" USING btree ("type","timeStamp","user");--> statement-breakpoint
-CREATE INDEX "logtmp_index" ON "cokdb1"."logtmp" USING btree ("timeStamp","user","type","param1","param2","param3");--> statement-breakpoint
-CREATE INDEX "logtmp_index2" ON "cokdb1"."logtmp" USING btree ("type","timeStamp","user");--> statement-breakpoint
-CREATE INDEX "mail_index_toFrom" ON "cokdb1"."mail" USING btree ("toUser","type","fromUser");--> statement-breakpoint
-CREATE INDEX "mail_index_toUserTime" ON "cokdb1"."mail" USING btree ("toUser","createTime");--> statement-breakpoint
-CREATE INDEX "mail_20150212_index_toFrom" ON "cokdb1"."mail_20150212" USING btree ("toUser","type","fromUser");--> statement-breakpoint
-CREATE INDEX "mail_20150212_index_toUserTime" ON "cokdb1"."mail_20150212" USING btree ("toUser","createTime");--> statement-breakpoint
-CREATE INDEX "mail_contents_user_idx" ON "cokdb1"."mail_contents" USING btree ("toUser");--> statement-breakpoint
-CREATE INDEX "material_cost_record_index_user" ON "cokdb1"."material_cost_record" USING btree ("time","userId","type");--> statement-breakpoint
-CREATE INDEX "material_cost_record_index_type" ON "cokdb1"."material_cost_record" USING btree ("userId","time","type");--> statement-breakpoint
-CREATE INDEX "military_cost_record_index_user" ON "cokdb1"."military_cost_record" USING btree ("time","userId","type");--> statement-breakpoint
-CREATE INDEX "military_cost_record_index_type" ON "cokdb1"."military_cost_record" USING btree ("userId","time","type");--> statement-breakpoint
-CREATE INDEX "mod_record_from_idx" ON "cokdb1"."mod_record" USING btree ("fromUser");--> statement-breakpoint
-CREATE INDEX "mod_record_to_idx" ON "cokdb1"."mod_record" USING btree ("toUser");--> statement-breakpoint
-CREATE INDEX "mod_record_time_Idx" ON "cokdb1"."mod_record" USING btree ("createTime");--> statement-breakpoint
-CREATE INDEX "new_exped_history_winServerId_index" ON "cokdb1"."new_exped_history" USING btree ("winServerId");--> statement-breakpoint
-CREATE INDEX "new_exped_history_loseServerId_index" ON "cokdb1"."new_exped_history" USING btree ("loseServerId");--> statement-breakpoint
-CREATE INDEX "new_general_predatoruid_index" ON "cokdb1"."new_general" USING btree ("predatoruid");--> statement-breakpoint
-CREATE INDEX "new_general_uid" ON "cokdb1"."new_general" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "new_user_score_uid_idx" ON "cokdb1"."new_user_score" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "new_user_score_uid_stage_index" ON "cokdb1"."new_user_score" USING btree ("uid","stage");--> statement-breakpoint
-CREATE INDEX "ob_record_uid" ON "cokdb1"."ob_record" USING btree ("uid","serverId","areaId");--> statement-breakpoint
-CREATE INDEX "ob_report_createTime" ON "cokdb1"."ob_report" USING btree ("createTime");--> statement-breakpoint
-CREATE INDEX "pay_order_count_log_index_time" ON "cokdb1"."pay_order_count_log" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "pay_order_count_log_index_uid_class" ON "cokdb1"."pay_order_count_log" USING btree ("uid","className");--> statement-breakpoint
-CREATE INDEX "pay_request_index_uid_pf_purchaseId" ON "cokdb1"."pay_request" USING btree ("uid","pf","purchaseId");--> statement-breakpoint
-CREATE INDEX "pay_request_index_uid_pf_productId" ON "cokdb1"."pay_request" USING btree ("uid","pf","productId");--> statement-breakpoint
-CREATE INDEX "paycheck_index_time_status" ON "cokdb1"."paycheck" USING btree ("time","status");--> statement-breakpoint
-CREATE INDEX "paylog_index_time_pf" ON "cokdb1"."paylog" USING btree ("time","pf");--> statement-breakpoint
-CREATE INDEX "pic_upload_record_time_idx" ON "cokdb1"."pic_upload_record" USING btree ("updateTime");--> statement-breakpoint
-CREATE INDEX "pic_upload_record_report_idx" ON "cokdb1"."pic_upload_record" USING btree ("report");--> statement-breakpoint
-CREATE INDEX "pic_upload_record_stat_idx" ON "cokdb1"."pic_upload_record" USING btree ("stat");--> statement-breakpoint
-CREATE INDEX "playerinfo_power_index" ON "cokdb1"."playerinfo" USING btree ("power");--> statement-breakpoint
-CREATE INDEX "post_box_index_from" ON "cokdb1"."post_box" USING btree ("from");--> statement-breakpoint
-CREATE INDEX "post_box_index_time" ON "cokdb1"."post_box" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "post_mail_index_toUserTime" ON "cokdb1"."post_mail" USING btree ("toUser","createTime");--> statement-breakpoint
-CREATE INDEX "post_relation_index_time" ON "cokdb1"."post_relation" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "pray_record_uid_idx" ON "cokdb1"."pray_record" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "pray_record_resource_idx" ON "cokdb1"."pray_record" USING btree ("resource");--> statement-breakpoint
-CREATE INDEX "pray_record_time_idx" ON "cokdb1"."pray_record" USING btree ("prayTime");--> statement-breakpoint
-CREATE INDEX "princess_task_stat_index_type" ON "cokdb1"."princess_task_stat" USING btree ("state","taskType");--> statement-breakpoint
-CREATE INDEX "princess_task_stat_index_param" ON "cokdb1"."princess_task_stat" USING btree ("state","param1");--> statement-breakpoint
-CREATE INDEX "push_record_index_type" ON "cokdb1"."push_record" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "queue_ownerId_index_001" ON "cokdb1"."queue" USING btree ("ownerId");--> statement-breakpoint
-CREATE INDEX "queue_updateTime_index" ON "cokdb1"."queue" USING btree ("updateTime");--> statement-breakpoint
-CREATE INDEX "red_packets_state_index" ON "cokdb1"."red_packets" USING btree ("state");--> statement-breakpoint
-CREATE INDEX "red_packets_records_index_player" ON "cokdb1"."red_packets_records" USING btree ("player");--> statement-breakpoint
-CREATE INDEX "refund_log_index_time" ON "cokdb1"."refund_log" USING btree ("time","userId","type","itemId");--> statement-breakpoint
-CREATE INDEX "refund_log_index_user" ON "cokdb1"."refund_log" USING btree ("userId","time");--> statement-breakpoint
-CREATE INDEX "report_index_time" ON "cokdb1"."report" USING btree ("createTime");--> statement-breakpoint
-CREATE INDEX "rescue_skill_record_uid_idx" ON "cokdb1"."rescue_skill_record" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "rescue_skill_record_tuid_idx" ON "cokdb1"."rescue_skill_record" USING btree ("targetUid");--> statement-breakpoint
-CREATE INDEX "rescue_skill_record_att_time_idx" ON "cokdb1"."rescue_skill_record" USING btree ("attackTime");--> statement-breakpoint
-CREATE INDEX "rescue_skill_record_return_time_idx" ON "cokdb1"."rescue_skill_record" USING btree ("returnTime");--> statement-breakpoint
-CREATE INDEX "rescue_skill_record_muid_idx" ON "cokdb1"."rescue_skill_record" USING btree ("marchUuid");--> statement-breakpoint
-CREATE INDEX "reward_107_time_idx" ON "cokdb1"."reward_107" USING btree ("endTime");--> statement-breakpoint
-CREATE INDEX "reward_107_stat_idx" ON "cokdb1"."reward_107" USING btree ("rewardStatus");--> statement-breakpoint
-CREATE INDEX "sampleuser_tag_index" ON "cokdb1"."sampleuser" USING btree ("tag");--> statement-breakpoint
-CREATE INDEX "score_act_actId_idx" ON "cokdb1"."score_act" USING btree ("actId");--> statement-breakpoint
-CREATE INDEX "score_act_in_actId" ON "cokdb1"."score_act_in" USING btree ("actId");--> statement-breakpoint
-CREATE INDEX "score_act_in_al_idx" ON "cokdb1"."score_act_in" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "score_act_record_actid_idx" ON "cokdb1"."score_act_record" USING btree ("actId");--> statement-breakpoint
-CREATE INDEX "score_act_record_rw_idx" ON "cokdb1"."score_act_record" USING btree ("rewardFlag");--> statement-breakpoint
-CREATE INDEX "score_act_record_lv_idx" ON "cokdb1"."score_act_record" USING btree ("level");--> statement-breakpoint
-CREATE INDEX "server_mail_record_index_uid" ON "cokdb1"."server_mail_record" USING btree ("uid","record","state");--> statement-breakpoint
-CREATE INDEX "server_mail_record_index_record" ON "cokdb1"."server_mail_record" USING btree ("record","state");--> statement-breakpoint
-CREATE INDEX "server_push_index_startTime" ON "cokdb1"."server_push" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "server_push_index_stateType" ON "cokdb1"."server_push" USING btree ("state","type");--> statement-breakpoint
-CREATE INDEX "server_push_20141106_index_startTime" ON "cokdb1"."server_push_20141106" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "server_push_config_index_startTime" ON "cokdb1"."server_push_config" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "server_usermail_index_sendTime" ON "cokdb1"."server_usermail" USING btree ("sendTime");--> statement-breakpoint
-CREATE INDEX "soccer_match_idx_sbt" ON "cokdb1"."soccer_match" USING btree ("startBetTime");--> statement-breakpoint
-CREATE INDEX "soccer_match_idx_st" ON "cokdb1"."soccer_match" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "stat_adjust_index_query" ON "cokdb1"."stat_adjust" USING btree ("device","country","channel","campain");--> statement-breakpoint
-CREATE INDEX "stat_af_index_af" ON "cokdb1"."stat_af" USING btree ("afuid");--> statement-breakpoint
-CREATE INDEX "stat_af_index_query" ON "cokdb1"."stat_af" USING btree ("device","country","channel","campain");--> statement-breakpoint
-CREATE INDEX "stat_login_index_timeStamp" ON "cokdb1"."stat_login" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_0_index_timeStamp" ON "cokdb1"."stat_login_2024_0" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_1_index_timeStamp" ON "cokdb1"."stat_login_2024_1" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_10_index_timeStamp" ON "cokdb1"."stat_login_2024_10" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_11_index_timeStamp" ON "cokdb1"."stat_login_2024_11" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_2_index_timeStamp" ON "cokdb1"."stat_login_2024_2" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_3_index_timeStamp" ON "cokdb1"."stat_login_2024_3" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_4_index_timeStamp" ON "cokdb1"."stat_login_2024_4" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_5_index_timeStamp" ON "cokdb1"."stat_login_2024_5" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_6_index_timeStamp" ON "cokdb1"."stat_login_2024_6" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_7_index_timeStamp" ON "cokdb1"."stat_login_2024_7" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_8_index_timeStamp" ON "cokdb1"."stat_login_2024_8" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2024_9_index_timeStamp" ON "cokdb1"."stat_login_2024_9" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_login_2026_9_index_timeStamp" ON "cokdb1"."stat_login_2026_9" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_phone_log_idx" ON "cokdb1"."stat_phone_log" USING btree ("uid","time");--> statement-breakpoint
-CREATE INDEX "stat_reg_index_time_pf_country" ON "cokdb1"."stat_reg" USING btree ("time","pf","country");--> statement-breakpoint
-CREATE INDEX "stat_reg_country_index" ON "cokdb1"."stat_reg" USING btree ("country");--> statement-breakpoint
-CREATE INDEX "stat_tutorial_index_time" ON "cokdb1"."stat_tutorial" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_tutorial_index_tutorial" ON "cokdb1"."stat_tutorial" USING btree ("tutorial");--> statement-breakpoint
-CREATE INDEX "stat_tutorial_analyze_index_time" ON "cokdb1"."stat_tutorial_analyze" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "stat_tutorial_analyze_index_tutorial" ON "cokdb1"."stat_tutorial_analyze" USING btree ("tutorial");--> statement-breakpoint
-CREATE INDEX "stat_tutorial_v2_index_time" ON "cokdb1"."stat_tutorial_v2" USING btree ("time","appVersion");--> statement-breakpoint
-CREATE INDEX "subscription_log_index_uid_itemId" ON "cokdb1"."subscription_log" USING btree ("uid","itemId");--> statement-breakpoint
-CREATE INDEX "suggest_log_index" ON "cokdb1"."suggest_log" USING btree ("user","timeStamp");--> statement-breakpoint
-CREATE INDEX "suggest_log_index_2" ON "cokdb1"."suggest_log" USING btree ("user");--> statement-breakpoint
-CREATE INDEX "suggest_log_index_3" ON "cokdb1"."suggest_log" USING btree ("param1","param2");--> statement-breakpoint
-CREATE INDEX "suggestion_ownerId" ON "cokdb1"."suggestion" USING btree ("ownerId");--> statement-breakpoint
-CREATE INDEX "suit_decompose_effect_owner_suit" ON "cokdb1"."suit_decompose_effect" USING btree ("owner","suitid");--> statement-breakpoint
-CREATE INDEX "super_army_log_createTime_index" ON "cokdb1"."super_army_log" USING btree ("createTime");--> statement-breakpoint
-CREATE INDEX "super_army_log_uid_index" ON "cokdb1"."super_army_log" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "t_hero_Index_uid" ON "cokdb1"."t_hero" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "t_worldbossrank_Index_bossid" ON "cokdb1"."t_worldbossrank" USING btree ("bossid");--> statement-breakpoint
-CREATE INDEX "territory_trap_log_allianceid_index" ON "cokdb1"."territory_trap_log" USING btree ("allianceid");--> statement-breakpoint
-CREATE INDEX "territory_user_effect_alliance_idx" ON "cokdb1"."territory_user_effect" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "translation_index_content" ON "cokdb1"."translation" USING btree (substring("content" from 1 for 50));--> statement-breakpoint
-CREATE INDEX "translationv2_index_en" ON "cokdb1"."translationv2" USING btree (substring("en" from 1 for 50));--> statement-breakpoint
-CREATE INDEX "translationv2_index_zh-Hans" ON "cokdb1"."translationv2" USING btree (substring("zh-Hans" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_zh-Hant" ON "cokdb1"."translationv2" USING btree (substring("zh-Hant" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_ja" ON "cokdb1"."translationv2" USING btree (substring("ja" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_ko" ON "cokdb1"."translationv2" USING btree (substring("ko" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_ru" ON "cokdb1"."translationv2" USING btree (substring("ru" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_es" ON "cokdb1"."translationv2" USING btree (substring("es" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_ms" ON "cokdb1"."translationv2" USING btree (substring("ms" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_fr" ON "cokdb1"."translationv2" USING btree (substring("fr" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_de" ON "cokdb1"."translationv2" USING btree (substring("de" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_it" ON "cokdb1"."translationv2" USING btree (substring("it" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_pt" ON "cokdb1"."translationv2" USING btree (substring("pt" from 1 for 20));--> statement-breakpoint
-CREATE INDEX "translationv2_index_count" ON "cokdb1"."translationv2" USING btree ("count");--> statement-breakpoint
-CREATE INDEX "treasure_map_index_o_m" ON "cokdb1"."treasure_map" USING btree ("currentOwner","marchId");--> statement-breakpoint
-CREATE INDEX "treasure_map_index_o_t" ON "cokdb1"."treasure_map" USING btree ("currentOwner","targetId");--> statement-breakpoint
-CREATE INDEX "treasure_map_index_o_s_c" ON "cokdb1"."treasure_map" USING btree ("currentOwner","state","colour");--> statement-breakpoint
-CREATE INDEX "trigger_var_type_key" ON "cokdb1"."trigger_var" USING btree ("type","key");--> statement-breakpoint
-CREATE INDEX "trigger_var_uid" ON "cokdb1"."trigger_var" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "trigger_var_createTime" ON "cokdb1"."trigger_var" USING btree ("createTime");--> statement-breakpoint
-CREATE INDEX "trigger_var_lastUpdateTime" ON "cokdb1"."trigger_var" USING btree ("lastUpdateTime");--> statement-breakpoint
-CREATE INDEX "trouble_log_trouble_log_uid_index" ON "cokdb1"."trouble_log" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "turret_shooting_task_uuid_idx" ON "cokdb1"."turret_shooting_task" USING btree ("marchUuid");--> statement-breakpoint
-CREATE INDEX "turret_shooting_task_startTime_idx" ON "cokdb1"."turret_shooting_task" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "turret_shooting_task_endTime_idx" ON "cokdb1"."turret_shooting_task" USING btree ("endTime");--> statement-breakpoint
-CREATE INDEX "turret_shooting_task_uid_idx" ON "cokdb1"."turret_shooting_task" USING btree ("turretUid");--> statement-breakpoint
-CREATE INDEX "user_14day_login_day_index" ON "cokdb1"."user_14day_login" USING btree ("day");--> statement-breakpoint
-CREATE INDEX "user_alliance_task_id_idx" ON "cokdb1"."user_alliance_task" USING btree ("id");--> statement-breakpoint
-CREATE INDEX "user_auction_goods_key_user_auction_goods_uid" ON "cokdb1"."user_auction_goods" USING btree ("uid");--> statement-breakpoint
-CREATE UNIQUE INDEX "user_auction_history_unique_user_auction_history_uuid" ON "cokdb1"."user_auction_history" USING btree ("uuid");--> statement-breakpoint
-CREATE INDEX "user_auction_history_key_user_auction_history_uid" ON "cokdb1"."user_auction_history" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_balance_history_0_uid_bank_type" ON "cokdb1"."user_balance_history_0" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_0_time" ON "cokdb1"."user_balance_history_0" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_balance_history_1_uid_bank_type" ON "cokdb1"."user_balance_history_1" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_1_time" ON "cokdb1"."user_balance_history_1" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_balance_history_2_uid_bank_type" ON "cokdb1"."user_balance_history_2" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_2_time" ON "cokdb1"."user_balance_history_2" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_balance_history_3_uid_bank_type" ON "cokdb1"."user_balance_history_3" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_3_time" ON "cokdb1"."user_balance_history_3" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_balance_history_4_uid_bank_type" ON "cokdb1"."user_balance_history_4" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_4_time" ON "cokdb1"."user_balance_history_4" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_balance_history_5_uid_bank_type" ON "cokdb1"."user_balance_history_5" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_5_time" ON "cokdb1"."user_balance_history_5" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_balance_history_6_uid_bank_type" ON "cokdb1"."user_balance_history_6" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_6_time" ON "cokdb1"."user_balance_history_6" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_balance_history_7_uid_bank_type" ON "cokdb1"."user_balance_history_7" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_7_time" ON "cokdb1"."user_balance_history_7" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_balance_history_8_uid_bank_type" ON "cokdb1"."user_balance_history_8" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_8_time" ON "cokdb1"."user_balance_history_8" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_balance_history_9_uid_bank_type" ON "cokdb1"."user_balance_history_9" USING btree ("uid","bank_type");--> statement-breakpoint
-CREATE INDEX "user_balance_history_9_time" ON "cokdb1"."user_balance_history_9" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_bet_idx_uid" ON "cokdb1"."user_bet" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_bet_idx_mid" ON "cokdb1"."user_bet" USING btree ("matchId");--> statement-breakpoint
-CREATE INDEX "user_bet_idx_e" ON "cokdb1"."user_bet" USING btree ("ended");--> statement-breakpoint
-CREATE INDEX "user_bet_idx_r" ON "cokdb1"."user_bet" USING btree ("rewarded");--> statement-breakpoint
-CREATE INDEX "user_branch_city_reward_uid_id_index" ON "cokdb1"."user_branch_city_reward" USING btree ("uid","id");--> statement-breakpoint
-CREATE INDEX "user_building_ub_uid_index" ON "cokdb1"."user_building" USING btree ("uid","itemId");--> statement-breakpoint
-CREATE INDEX "user_building_item_index" ON "cokdb1"."user_building" USING btree ("itemId");--> statement-breakpoint
-CREATE INDEX "user_building_itemId_level_index" ON "cokdb1"."user_building" USING btree ("itemId","level");--> statement-breakpoint
-CREATE INDEX "user_building_itemId_star_index" ON "cokdb1"."user_building" USING btree ("itemId","star");--> statement-breakpoint
-CREATE INDEX "user_building_bak_ub_uid_index" ON "cokdb1"."user_building_bak" USING btree ("uid","itemId");--> statement-breakpoint
-CREATE INDEX "user_building_bak_item_index" ON "cokdb1"."user_building_bak" USING btree ("itemId");--> statement-breakpoint
-CREATE INDEX "user_cross_fight_history_user_startTime" ON "cokdb1"."user_cross_fight_history" USING btree ("uid","startTime");--> statement-breakpoint
-CREATE INDEX "user_cross_fight_history_startTime" ON "cokdb1"."user_cross_fight_history" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "user_dragon_uid_index" ON "cokdb1"."user_dragon" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_equip_index_uid_on" ON "cokdb1"."user_equip" USING btree ("uid","on");--> statement-breakpoint
-CREATE INDEX "user_equip_bak_index_uid_on" ON "cokdb1"."user_equip_bak" USING btree ("uid","on");--> statement-breakpoint
-CREATE INDEX "user_general_uid_index_001" ON "cokdb1"."user_general" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_gold_wheel_histo_uid" ON "cokdb1"."user_gold_wheel_histo" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_hero_ownerUid_index" ON "cokdb1"."user_hero" USING btree ("ownerUid");--> statement-breakpoint
-CREATE INDEX "user_item_uitem_ownerId_index" ON "cokdb1"."user_item" USING btree ("ownerId","itemId","value");--> statement-breakpoint
-CREATE INDEX "user_item_bak_uitem_ownerId_index" ON "cokdb1"."user_item_bak" USING btree ("ownerId","itemId","value");--> statement-breakpoint
-CREATE INDEX "user_login_ip_index_uid_count" ON "cokdb1"."user_login_ip" USING btree ("uid","count");--> statement-breakpoint
-CREATE INDEX "user_military_military_score_index" ON "cokdb1"."user_military" USING btree ("score");--> statement-breakpoint
-CREATE INDEX "user_military_military_exp_index" ON "cokdb1"."user_military" USING btree ("exp");--> statement-breakpoint
-CREATE INDEX "user_military_rank_index_militaryScore" ON "cokdb1"."user_military_rank" USING btree ("militaryScore");--> statement-breakpoint
-CREATE INDEX "user_military_rank_index_rankingExp" ON "cokdb1"."user_military_rank" USING btree ("rankingExp");--> statement-breakpoint
-CREATE INDEX "user_mine_index_fId" ON "cokdb1"."user_mine" USING btree ("fId");--> statement-breakpoint
-CREATE INDEX "user_mixed_info_protectEndTime" ON "cokdb1"."user_mixed_info" USING btree ("protectEndTime");--> statement-breakpoint
-CREATE INDEX "user_mixed_info_protectEndSendTimes" ON "cokdb1"."user_mixed_info" USING btree ("protectEndSendTimes");--> statement-breakpoint
-CREATE INDEX "user_monster_siege_state_index" ON "cokdb1"."user_monster_siege" USING btree ("state");--> statement-breakpoint
-CREATE INDEX "user_monster_siege_data_state_index" ON "cokdb1"."user_monster_siege_data" USING btree ("state");--> statement-breakpoint
-CREATE INDEX "user_new_resource_log_uid_index" ON "cokdb1"."user_new_resource_log" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_pet_dragon_index_uid" ON "cokdb1"."user_pet_dragon" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_pet_dragon_skill_uid" ON "cokdb1"."user_pet_dragon_skill" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_pray_count_idx" ON "cokdb1"."user_pray" USING btree ("prayCount");--> statement-breakpoint
-CREATE INDEX "user_pray_date_idx" ON "cokdb1"."user_pray" USING btree ("lastPrayTime");--> statement-breakpoint
-CREATE INDEX "user_push_userId" ON "cokdb1"."user_push" USING btree (left("userId", 255));--> statement-breakpoint
-CREATE INDEX "user_report_uid" ON "cokdb1"."user_report" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_report_target_uid" ON "cokdb1"."user_report" USING btree ("target_uid");--> statement-breakpoint
-CREATE INDEX "user_report_time" ON "cokdb1"."user_report" USING btree ("time");--> statement-breakpoint
-CREATE INDEX "user_resource_record_uid_idx" ON "cokdb1"."user_resource_record" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "user_resource_record_item_idx" ON "cokdb1"."user_resource_record" USING btree ("itemId");--> statement-breakpoint
-CREATE INDEX "user_science_Index_ownerId" ON "cokdb1"."user_science" USING btree ("uid","itemId");--> statement-breakpoint
-CREATE INDEX "user_score_index_actId" ON "cokdb1"."user_score" USING btree ("actId");--> statement-breakpoint
-CREATE INDEX "user_score_bak_index_actId" ON "cokdb1"."user_score_bak" USING btree ("actId");--> statement-breakpoint
-CREATE INDEX "user_skill_ownerId_index" ON "cokdb1"."user_skill" USING btree ("ownerId");--> statement-breakpoint
-CREATE INDEX "user_skill_starttime_index" ON "cokdb1"."user_skill" USING btree ("startTime");--> statement-breakpoint
-CREATE INDEX "user_skill_endtime_index" ON "cokdb1"."user_skill" USING btree ("endTime");--> statement-breakpoint
-CREATE INDEX "user_state_index_uid_type2" ON "cokdb1"."user_state" USING btree ("uid","type2");--> statement-breakpoint
-CREATE INDEX "user_state_index_uid_stateId" ON "cokdb1"."user_state" USING btree ("uid","stateId");--> statement-breakpoint
-CREATE INDEX "user_state_index_stateId" ON "cokdb1"."user_state" USING btree ("stateId");--> statement-breakpoint
-CREATE INDEX "user_territory_resource_al_idx" ON "cokdb1"."user_territory_resource" USING btree ("allianceId");--> statement-breakpoint
-CREATE INDEX "user_thumbup_type" ON "cokdb1"."user_thumbup" USING btree ("type");--> statement-breakpoint
-CREATE INDEX "user_true_info_bind_uid, trueInfo" ON "cokdb1"."user_true_info_bind" USING btree ("uid","trueInfo");--> statement-breakpoint
-CREATE INDEX "userprofile_name_index" ON "cokdb1"."userprofile" USING btree ("name");--> statement-breakpoint
-CREATE INDEX "userprofile_time_level_index" ON "cokdb1"."userprofile" USING btree ("regTime","level","lastOnlineTime","pf");--> statement-breakpoint
-CREATE INDEX "userprofile_allianceid_lasttime_index" ON "cokdb1"."userprofile" USING btree ("allianceId","lastOnlineTime");--> statement-breakpoint
-CREATE INDEX "userprofile_lang_index" ON "cokdb1"."userprofile" USING btree ("lang");--> statement-breakpoint
-CREATE INDEX "userprofile_deviceId" ON "cokdb1"."userprofile" USING btree ("deviceId");--> statement-breakpoint
-CREATE INDEX "userprofile_index_crossServerId" ON "cokdb1"."userprofile" USING btree ("crossFightSrcServerId");--> statement-breakpoint
-CREATE INDEX "userprofile_active_uid" ON "cokdb1"."userprofile_active" USING btree ("uid");--> statement-breakpoint
-CREATE INDEX "userprofile_bak_name_index" ON "cokdb1"."userprofile_bak" USING btree ("name");--> statement-breakpoint
-CREATE INDEX "userprofile_bak_time_level_index" ON "cokdb1"."userprofile_bak" USING btree ("regTime","level","lastOnlineTime","pf");--> statement-breakpoint
-CREATE INDEX "userprofile_bak_allianceid_lasttime_index" ON "cokdb1"."userprofile_bak" USING btree ("allianceId","lastOnlineTime");--> statement-breakpoint
-CREATE INDEX "userprofile_bak_lang_index" ON "cokdb1"."userprofile_bak" USING btree ("lang");--> statement-breakpoint
-CREATE INDEX "userprofile_del_name_index" ON "cokdb1"."userprofile_del" USING btree ("name");--> statement-breakpoint
-CREATE INDEX "userprofile_del_time_level_index" ON "cokdb1"."userprofile_del" USING btree ("regTime","level","lastOnlineTime","pf");--> statement-breakpoint
-CREATE INDEX "userprofile_del_allianceid_lasttime_index" ON "cokdb1"."userprofile_del" USING btree ("allianceId","lastOnlineTime");--> statement-breakpoint
-CREATE INDEX "userprofile_del_lang_index" ON "cokdb1"."userprofile_del" USING btree ("lang");--> statement-breakpoint
-CREATE INDEX "world_barbarion_dead_dead_res_time" ON "cokdb1"."world_barbarion_dead" USING btree ("deadFinishTime");--> statement-breakpoint
-CREATE INDEX "world_barbarion_dead_areaId_index" ON "cokdb1"."world_barbarion_dead" USING btree ("areaId");--> statement-breakpoint
-CREATE INDEX "world_basttile_dead_dead_res_time" ON "cokdb1"."world_basttile_dead" USING btree ("deadFinishTime");--> statement-breakpoint
-CREATE INDEX "world_basttile_dead_areaId_index" ON "cokdb1"."world_basttile_dead" USING btree ("areaId");--> statement-breakpoint
-CREATE INDEX "world_favorite_time_idx" ON "cokdb1"."world_favorite" USING btree ("createTime");--> statement-breakpoint
-CREATE INDEX "world_field_monster_dead_dead_monster_time" ON "cokdb1"."world_field_monster_dead" USING btree ("deadFinishTime");--> statement-breakpoint
-CREATE INDEX "world_march_ownerId_index_001" ON "cokdb1"."world_march" USING btree ("ownerUid");--> statement-breakpoint
-CREATE INDEX "world_march_targetUid_index" ON "cokdb1"."world_march" USING btree ("targetUid");--> statement-breakpoint
-CREATE INDEX "world_res_dead_dead_res_time" ON "cokdb1"."world_res_dead" USING btree ("deadFinishTime");--> statement-breakpoint
-CREATE INDEX "world_res_dead_areaId_index" ON "cokdb1"."world_res_dead" USING btree ("areaId");--> statement-breakpoint
-CREATE INDEX "world_res_new_dead_dead_res_time" ON "cokdb1"."world_res_new_dead" USING btree ("deadFinishTime");--> statement-breakpoint
-CREATE INDEX "world_res_new_dead_areaId_index" ON "cokdb1"."world_res_new_dead" USING btree ("areaId");--> statement-breakpoint
-CREATE INDEX "worldpoint_world_res_area_id" ON "cokdb1"."worldpoint" USING btree ("areaId","gridType");--> statement-breakpoint
-CREATE INDEX "worldpoint_world_monster_area_id" ON "cokdb1"."worldpoint" USING btree ("monsterAreaId","pointType","gridType","ownerId","grid2Type");--> statement-breakpoint
-CREATE INDEX "worldpoint_world_pointType_flushTime_index" ON "cokdb1"."worldpoint" USING btree ("pointType","pointItem","flushTime","gridType","grid2Type");--> statement-breakpoint
-CREATE INDEX "worldpoint_world_xy_type_country_index" ON "cokdb1"."worldpoint" USING btree ("x","y","pointType");--> statement-breakpoint
+
+CREATE INDEX "action_record_pack_uid" ON "cokdb1"."action_record_pack" USING btree ("uid","type","type1");
+CREATE INDEX "action_record_pack_time" ON "cokdb1"."action_record_pack" USING btree ("time");
+CREATE INDEX "activation_index_user" ON "cokdb1"."activation" USING btree ("user");
+CREATE UNIQUE INDEX "ad_building_attachment_uss_index" ON "cokdb1"."ad_building_attachment" USING btree ("uuid","serverid","skillid");
+CREATE INDEX "ad_mat_index_query" ON "cokdb1"."ad_mat" USING btree ("matId");
+CREATE INDEX "ad_reward_index_time" ON "cokdb1"."ad_reward" USING btree ("time");
+CREATE INDEX "affairs_index_type" ON "cokdb1"."affairs" USING btree ("type","rewardTime");
+CREATE INDEX "alliance_name_idx" ON "cokdb1"."alliance" USING btree ("alliancename");
+CREATE INDEX "alliance_apply_index_user" ON "cokdb1"."alliance_apply" USING btree ("userId");
+CREATE INDEX "alliance_apply_index_alliance" ON "cokdb1"."alliance_apply" USING btree ("allianceId");
+CREATE INDEX "alliance_apply_index_time" ON "cokdb1"."alliance_apply" USING btree ("applyTime");
+CREATE INDEX "alliance_build_cost_record_index_user" ON "cokdb1"."alliance_build_cost_record" USING btree ("time","userId","type");
+CREATE INDEX "alliance_build_cost_record_index_type" ON "cokdb1"."alliance_build_cost_record" USING btree ("userId","time","type");
+CREATE INDEX "alliance_comment_index_allianceId" ON "cokdb1"."alliance_comment" USING btree ("allianceId");
+CREATE INDEX "alliance_comment_shield_index_allianceId" ON "cokdb1"."alliance_comment_shield" USING btree ("allianceId");
+CREATE INDEX "alliance_group_buys_index_allianceId" ON "cokdb1"."alliance_group_buys" USING btree ("allianceId");
+CREATE INDEX "alliance_group_buys_index_time" ON "cokdb1"."alliance_group_buys" USING btree ("buyTime");
+CREATE INDEX "alliance_help_allianceId_index" ON "cokdb1"."alliance_help" USING btree ("allianceId");
+CREATE INDEX "alliance_help_index_alliance_help" ON "cokdb1"."alliance_help" USING btree ("content");
+CREATE INDEX "alliance_helper_index_alliance_helper" ON "cokdb1"."alliance_helper" USING btree ("helpId","recvId");
+CREATE INDEX "alliance_member_index_allianceId" ON "cokdb1"."alliance_member" USING btree ("allianceId");
+CREATE INDEX "alliance_member_bak_index_allianceId" ON "cokdb1"."alliance_member_bak" USING btree ("allianceId");
+CREATE INDEX "alliance_mission_aid_idx" ON "cokdb1"."alliance_mission" USING btree ("allianceId");
+CREATE INDEX "alliance_mission_record_uid_idx" ON "cokdb1"."alliance_mission_record" USING btree ("uid");
+CREATE INDEX "alliance_mission_record_mid_idx" ON "cokdb1"."alliance_mission_record" USING btree ("missionUUID");
+CREATE INDEX "alliance_mission_record_allianceId" ON "cokdb1"."alliance_mission_record" USING btree ("allianceId");
+CREATE INDEX "alliance_new_resource_log_uid_index" ON "cokdb1"."alliance_new_resource_log" USING btree ("uid");
+CREATE INDEX "alliance_offical_apply_index_user" ON "cokdb1"."alliance_offical_apply" USING btree ("userId");
+CREATE INDEX "alliance_offical_apply_index_alliance" ON "cokdb1"."alliance_offical_apply" USING btree ("allianceId");
+CREATE INDEX "alliance_science_index_alliance" ON "cokdb1"."alliance_science" USING btree ("allianceId");
+CREATE INDEX "alliance_shop_index_alliance" ON "cokdb1"."alliance_shop" USING btree ("allianceId");
+CREATE INDEX "alliance_shop_buyrecord_buytime" ON "cokdb1"."alliance_shop_buyrecord" USING btree ("buytime");
+CREATE INDEX "alliance_shop_buytoallianceshoprecord_buytime" ON "cokdb1"."alliance_shop_buytoallianceshoprecord" USING btree ("buytime");
+CREATE INDEX "alliance_shop_make_index_alliance" ON "cokdb1"."alliance_shop_make" USING btree ("allianceId");
+CREATE INDEX "alliance_shophis_index_alliance" ON "cokdb1"."alliance_shophis" USING btree ("allianceId");
+CREATE INDEX "alliance_shophis_index_user" ON "cokdb1"."alliance_shophis" USING btree ("userId");
+CREATE INDEX "alliance_task_al_idx" ON "cokdb1"."alliance_task" USING btree ("allianceId");
+CREATE INDEX "alliance_task_publish_idx" ON "cokdb1"."alliance_task" USING btree ("publishUid");
+CREATE INDEX "alliance_task_accept_idx" ON "cokdb1"."alliance_task" USING btree ("acceptUid");
+CREATE INDEX "alliance_task_log_castle_color" ON "cokdb1"."alliance_task_log" USING btree ("castleLevel","color");
+CREATE INDEX "alliance_task_log_level_index" ON "cokdb1"."alliance_task_log" USING btree ("level");
+CREATE INDEX "alliance_task_log_color_index" ON "cokdb1"."alliance_task_log" USING btree ("color");
+CREATE INDEX "alliance_task_log_castle_index" ON "cokdb1"."alliance_task_log" USING btree ("castleLevel");
+CREATE INDEX "alliance_task_unpublish_pub_idx" ON "cokdb1"."alliance_task_unpublish" USING btree ("publishUid");
+CREATE UNIQUE INDEX "alliance_territory_pointId_worldId_idx" ON "cokdb1"."alliance_territory" USING btree ("pointId","atWorldId");
+CREATE INDEX "alliance_territory_alliance_idx" ON "cokdb1"."alliance_territory" USING btree ("allianceId");
+CREATE INDEX "alliance_territory_update_idx" ON "cokdb1"."alliance_territory" USING btree ("updateTime");
+CREATE INDEX "alliance_territory_start_idx" ON "cokdb1"."alliance_territory" USING btree ("startTime");
+CREATE INDEX "alliance_territory_lastup_idx" ON "cokdb1"."alliance_territory" USING btree ("lastUpdateTime");
+CREATE INDEX "alliance_territory_tower_idx" ON "cokdb1"."alliance_territory" USING btree ("towerPoint");
+CREATE INDEX "alliance_territory_pointId_idx" ON "cokdb1"."alliance_territory" USING btree ("pointId");
+CREATE INDEX "army_skill_info_uid" ON "cokdb1"."army_skill_info" USING btree ("uid");
+CREATE UNIQUE INDEX "barbarion_statistics_uid_name_time_index" ON "cokdb1"."barbarion_statistics" USING btree ("playerUid","playerName","time");
+CREATE INDEX "barbarion_statistics_playerUid_Index" ON "cokdb1"."barbarion_statistics" USING btree ("playerUid");
+CREATE INDEX "barbarion_statistics_isSuccess_actType_index" ON "cokdb1"."barbarion_statistics" USING btree ("isSuccess","actType");
+CREATE INDEX "barbarion_statistics_strongHoldLevel_index" ON "cokdb1"."barbarion_statistics" USING btree ("strongHoldLevel");
+CREATE INDEX "barbarion_statistics_actType_index" ON "cokdb1"."barbarion_statistics" USING btree ("actType");
+CREATE INDEX "black_land_barbarion_dead_dead_res_time" ON "cokdb1"."black_land_barbarion_dead" USING btree ("deadFinishTime");
+CREATE INDEX "black_land_barbarion_dead_areaId_index" ON "cokdb1"."black_land_barbarion_dead" USING btree ("areaId");
+CREATE INDEX "black_land_basttile_dead_dead_res_time" ON "cokdb1"."black_land_basttile_dead" USING btree ("deadFinishTime");
+CREATE INDEX "black_land_basttile_dead_areaId_index" ON "cokdb1"."black_land_basttile_dead" USING btree ("areaId");
+CREATE INDEX "black_land_res_dead_dead_res_time" ON "cokdb1"."black_land_res_dead" USING btree ("deadFinishTime");
+CREATE INDEX "black_land_res_dead_areaId_index" ON "cokdb1"."black_land_res_dead" USING btree ("areaId");
+CREATE INDEX "bottles_uid_index" ON "cokdb1"."bottles" USING btree ("uid");
+CREATE INDEX "branch_link_branch_link_from_index" ON "cokdb1"."branch_link" USING btree ("fromUid");
+CREATE INDEX "branch_link_branch_link_type_index" ON "cokdb1"."branch_link" USING btree ("type");
+CREATE INDEX "branch_url_branch_url_link_index" ON "cokdb1"."branch_url" USING btree ("url");
+CREATE INDEX "branch_url_branch_url_type_index" ON "cokdb1"."branch_url" USING btree ("type");
+CREATE INDEX "chat_report_record_time_idx" ON "cokdb1"."chat_report_record" USING btree ("lastUpdateTime");
+CREATE INDEX "chat_shield_owner_other_index" ON "cokdb1"."chat_shield" USING btree ("owner","other");
+CREATE INDEX "compensate_record_time_idx" ON "cokdb1"."compensate_record" USING btree ("time");
+CREATE INDEX "compensate_record_uid_idx" ON "cokdb1"."compensate_record" USING btree ("uid");
+CREATE INDEX "compensation_record_time_index" ON "cokdb1"."compensation_record" USING btree ("lastCompensateTime");
+CREATE UNIQUE INDEX "cross_throne_king_info_uuid" ON "cokdb1"."cross_throne_king_info" USING btree ("uuid");
+CREATE INDEX "crystal_cost_record_index_user" ON "cokdb1"."crystal_cost_record" USING btree ("time","userId","type");
+CREATE INDEX "crystal_cost_record_index_type" ON "cokdb1"."crystal_cost_record" USING btree ("userId","time","type");
+CREATE INDEX "crystal_cost_record_index_goldType" ON "cokdb1"."crystal_cost_record" USING btree ("goldType");
+CREATE INDEX "donate_history_aid_idx" ON "cokdb1"."donate_history" USING btree ("allianceId");
+CREATE INDEX "donate_history_time_idx" ON "cokdb1"."donate_history" USING btree ("donateTime");
+CREATE INDEX "donate_history_progress_idx" ON "cokdb1"."donate_history" USING btree ("progress");
+CREATE INDEX "donate_history_donate_idx" ON "cokdb1"."donate_history" USING btree ("donate");
+CREATE INDEX "donate_history_record_aid_idx" ON "cokdb1"."donate_history_record" USING btree ("allianceId");
+CREATE INDEX "donate_history_record_time_idx" ON "cokdb1"."donate_history_record" USING btree ("donateTime");
+CREATE INDEX "donate_history_record_progress_idx" ON "cokdb1"."donate_history_record" USING btree ("progress");
+CREATE INDEX "donate_history_record_donate_idx" ON "cokdb1"."donate_history_record" USING btree ("donate");
+CREATE INDEX "dragon_battle_fight_history_utvindex" ON "cokdb1"."dragon_battle_fight_history" USING btree ("uid","type","VERSION");
+CREATE INDEX "dragon_battle_fight_history_teamIdindex" ON "cokdb1"."dragon_battle_fight_history" USING btree ("teamId");
+CREATE INDEX "dragon_battle_mail_record_state" ON "cokdb1"."dragon_battle_mail_record" USING btree ("state");
+CREATE INDEX "dragon_tower_buff_Index_uid" ON "cokdb1"."dragon_tower_buff" USING btree ("uid");
+CREATE INDEX "dragon_tower_layer_Index_uid" ON "cokdb1"."dragon_tower_layer" USING btree ("uid");
+CREATE INDEX "dragon_words_record_dragon_words_record_index" ON "cokdb1"."dragon_words_record" USING btree ("castleLevel","buildingLevel");
+CREATE INDEX "exchange_visible_uid_index" ON "cokdb1"."exchange_visible" USING btree ("uid");
+CREATE INDEX "expedition_record_time_index" ON "cokdb1"."expedition_record" USING btree ("time");
+CREATE INDEX "fast_carry_activity_goalReward" ON "cokdb1"."fast_carry_activity" USING btree ("goalReward1","goalReward2","goalReward3","goalReward4");
+CREATE INDEX "firstpaylog_index_time_pf" ON "cokdb1"."firstpaylog" USING btree ("time","pf");
+CREATE INDEX "gold_cost_record_index_user" ON "cokdb1"."gold_cost_record" USING btree ("time","userId","type");
+CREATE INDEX "gold_cost_record_index_type" ON "cokdb1"."gold_cost_record" USING btree ("userId","time","type");
+CREATE INDEX "gold_cost_record_index_goldType" ON "cokdb1"."gold_cost_record" USING btree ("goldType");
+CREATE INDEX "gold_wish_pool_byUid" ON "cokdb1"."gold_wish_pool" USING btree ("uid");
+CREATE INDEX "goods_cost_record_index_time" ON "cokdb1"."goods_cost_record" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_index_user" ON "cokdb1"."goods_cost_record" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_0_index_type" ON "cokdb1"."goods_cost_record_2024_0" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_0_index_time" ON "cokdb1"."goods_cost_record_2024_0" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_0_index_time_user" ON "cokdb1"."goods_cost_record_2024_0" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_0_index_user_time" ON "cokdb1"."goods_cost_record_2024_0" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_1_index_type" ON "cokdb1"."goods_cost_record_2024_1" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_1_index_time" ON "cokdb1"."goods_cost_record_2024_1" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_1_index_time_user" ON "cokdb1"."goods_cost_record_2024_1" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_1_index_user_time" ON "cokdb1"."goods_cost_record_2024_1" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_10_index_type" ON "cokdb1"."goods_cost_record_2024_10" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_10_index_time" ON "cokdb1"."goods_cost_record_2024_10" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_10_index_time_user" ON "cokdb1"."goods_cost_record_2024_10" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_10_index_user_time" ON "cokdb1"."goods_cost_record_2024_10" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_11_index_type" ON "cokdb1"."goods_cost_record_2024_11" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_11_index_time" ON "cokdb1"."goods_cost_record_2024_11" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_11_index_time_user" ON "cokdb1"."goods_cost_record_2024_11" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_11_index_user_time" ON "cokdb1"."goods_cost_record_2024_11" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_2_index_type" ON "cokdb1"."goods_cost_record_2024_2" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_2_index_time" ON "cokdb1"."goods_cost_record_2024_2" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_2_index_time_user" ON "cokdb1"."goods_cost_record_2024_2" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_2_index_user_time" ON "cokdb1"."goods_cost_record_2024_2" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_3_index_type" ON "cokdb1"."goods_cost_record_2024_3" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_3_index_time" ON "cokdb1"."goods_cost_record_2024_3" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_3_index_time_user" ON "cokdb1"."goods_cost_record_2024_3" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_3_index_user_time" ON "cokdb1"."goods_cost_record_2024_3" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_4_index_type" ON "cokdb1"."goods_cost_record_2024_4" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_4_index_time" ON "cokdb1"."goods_cost_record_2024_4" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_4_index_time_user" ON "cokdb1"."goods_cost_record_2024_4" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_4_index_user_time" ON "cokdb1"."goods_cost_record_2024_4" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_5_index_type" ON "cokdb1"."goods_cost_record_2024_5" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_5_index_time" ON "cokdb1"."goods_cost_record_2024_5" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_5_index_time_user" ON "cokdb1"."goods_cost_record_2024_5" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_5_index_user_time" ON "cokdb1"."goods_cost_record_2024_5" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_6_index_type" ON "cokdb1"."goods_cost_record_2024_6" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_6_index_time" ON "cokdb1"."goods_cost_record_2024_6" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_6_index_time_user" ON "cokdb1"."goods_cost_record_2024_6" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_6_index_user_time" ON "cokdb1"."goods_cost_record_2024_6" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_7_index_type" ON "cokdb1"."goods_cost_record_2024_7" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_7_index_time" ON "cokdb1"."goods_cost_record_2024_7" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_7_index_time_user" ON "cokdb1"."goods_cost_record_2024_7" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_7_index_user_time" ON "cokdb1"."goods_cost_record_2024_7" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_8_index_type" ON "cokdb1"."goods_cost_record_2024_8" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_8_index_time" ON "cokdb1"."goods_cost_record_2024_8" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_8_index_time_user" ON "cokdb1"."goods_cost_record_2024_8" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_8_index_user_time" ON "cokdb1"."goods_cost_record_2024_8" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2024_9_index_type" ON "cokdb1"."goods_cost_record_2024_9" USING btree ("type");
+CREATE INDEX "goods_cost_record_2024_9_index_time" ON "cokdb1"."goods_cost_record_2024_9" USING btree ("time");
+CREATE INDEX "goods_cost_record_2024_9_index_time_user" ON "cokdb1"."goods_cost_record_2024_9" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2024_9_index_user_time" ON "cokdb1"."goods_cost_record_2024_9" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_0_index_type" ON "cokdb1"."goods_cost_record_2026_0" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_0_index_time" ON "cokdb1"."goods_cost_record_2026_0" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_0_index_time_user" ON "cokdb1"."goods_cost_record_2026_0" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_0_index_user_time" ON "cokdb1"."goods_cost_record_2026_0" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_1_index_type" ON "cokdb1"."goods_cost_record_2026_1" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_1_index_time" ON "cokdb1"."goods_cost_record_2026_1" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_1_index_time_user" ON "cokdb1"."goods_cost_record_2026_1" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_1_index_user_time" ON "cokdb1"."goods_cost_record_2026_1" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_10_index_type" ON "cokdb1"."goods_cost_record_2026_10" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_10_index_time" ON "cokdb1"."goods_cost_record_2026_10" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_10_index_time_user" ON "cokdb1"."goods_cost_record_2026_10" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_10_index_user_time" ON "cokdb1"."goods_cost_record_2026_10" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_11_index_type" ON "cokdb1"."goods_cost_record_2026_11" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_11_index_time" ON "cokdb1"."goods_cost_record_2026_11" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_11_index_time_user" ON "cokdb1"."goods_cost_record_2026_11" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_11_index_user_time" ON "cokdb1"."goods_cost_record_2026_11" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_2_index_type" ON "cokdb1"."goods_cost_record_2026_2" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_2_index_time" ON "cokdb1"."goods_cost_record_2026_2" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_2_index_time_user" ON "cokdb1"."goods_cost_record_2026_2" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_2_index_user_time" ON "cokdb1"."goods_cost_record_2026_2" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_3_index_type" ON "cokdb1"."goods_cost_record_2026_3" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_3_index_time" ON "cokdb1"."goods_cost_record_2026_3" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_3_index_time_user" ON "cokdb1"."goods_cost_record_2026_3" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_3_index_user_time" ON "cokdb1"."goods_cost_record_2026_3" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_4_index_type" ON "cokdb1"."goods_cost_record_2026_4" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_4_index_time" ON "cokdb1"."goods_cost_record_2026_4" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_4_index_time_user" ON "cokdb1"."goods_cost_record_2026_4" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_4_index_user_time" ON "cokdb1"."goods_cost_record_2026_4" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_5_index_type" ON "cokdb1"."goods_cost_record_2026_5" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_5_index_time" ON "cokdb1"."goods_cost_record_2026_5" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_5_index_time_user" ON "cokdb1"."goods_cost_record_2026_5" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_5_index_user_time" ON "cokdb1"."goods_cost_record_2026_5" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_6_index_type" ON "cokdb1"."goods_cost_record_2026_6" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_6_index_time" ON "cokdb1"."goods_cost_record_2026_6" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_6_index_time_user" ON "cokdb1"."goods_cost_record_2026_6" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_6_index_user_time" ON "cokdb1"."goods_cost_record_2026_6" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_7_index_type" ON "cokdb1"."goods_cost_record_2026_7" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_7_index_time" ON "cokdb1"."goods_cost_record_2026_7" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_7_index_time_user" ON "cokdb1"."goods_cost_record_2026_7" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_7_index_user_time" ON "cokdb1"."goods_cost_record_2026_7" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_8_index_type" ON "cokdb1"."goods_cost_record_2026_8" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_8_index_time" ON "cokdb1"."goods_cost_record_2026_8" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_8_index_time_user" ON "cokdb1"."goods_cost_record_2026_8" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_8_index_user_time" ON "cokdb1"."goods_cost_record_2026_8" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2026_9_index_type" ON "cokdb1"."goods_cost_record_2026_9" USING btree ("type");
+CREATE INDEX "goods_cost_record_2026_9_index_time" ON "cokdb1"."goods_cost_record_2026_9" USING btree ("time");
+CREATE INDEX "goods_cost_record_2026_9_index_time_user" ON "cokdb1"."goods_cost_record_2026_9" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2026_9_index_user_time" ON "cokdb1"."goods_cost_record_2026_9" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_0_index_type" ON "cokdb1"."goods_cost_record_2027_0" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_0_index_time" ON "cokdb1"."goods_cost_record_2027_0" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_0_index_time_user" ON "cokdb1"."goods_cost_record_2027_0" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_0_index_user_time" ON "cokdb1"."goods_cost_record_2027_0" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_1_index_type" ON "cokdb1"."goods_cost_record_2027_1" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_1_index_time" ON "cokdb1"."goods_cost_record_2027_1" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_1_index_time_user" ON "cokdb1"."goods_cost_record_2027_1" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_1_index_user_time" ON "cokdb1"."goods_cost_record_2027_1" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_10_index_type" ON "cokdb1"."goods_cost_record_2027_10" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_10_index_time" ON "cokdb1"."goods_cost_record_2027_10" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_10_index_time_user" ON "cokdb1"."goods_cost_record_2027_10" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_10_index_user_time" ON "cokdb1"."goods_cost_record_2027_10" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_11_index_type" ON "cokdb1"."goods_cost_record_2027_11" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_11_index_time" ON "cokdb1"."goods_cost_record_2027_11" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_11_index_time_user" ON "cokdb1"."goods_cost_record_2027_11" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_11_index_user_time" ON "cokdb1"."goods_cost_record_2027_11" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_2_index_type" ON "cokdb1"."goods_cost_record_2027_2" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_2_index_time" ON "cokdb1"."goods_cost_record_2027_2" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_2_index_time_user" ON "cokdb1"."goods_cost_record_2027_2" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_2_index_user_time" ON "cokdb1"."goods_cost_record_2027_2" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_3_index_type" ON "cokdb1"."goods_cost_record_2027_3" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_3_index_time" ON "cokdb1"."goods_cost_record_2027_3" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_3_index_time_user" ON "cokdb1"."goods_cost_record_2027_3" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_3_index_user_time" ON "cokdb1"."goods_cost_record_2027_3" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_4_index_type" ON "cokdb1"."goods_cost_record_2027_4" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_4_index_time" ON "cokdb1"."goods_cost_record_2027_4" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_4_index_time_user" ON "cokdb1"."goods_cost_record_2027_4" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_4_index_user_time" ON "cokdb1"."goods_cost_record_2027_4" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_5_index_type" ON "cokdb1"."goods_cost_record_2027_5" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_5_index_time" ON "cokdb1"."goods_cost_record_2027_5" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_5_index_time_user" ON "cokdb1"."goods_cost_record_2027_5" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_5_index_user_time" ON "cokdb1"."goods_cost_record_2027_5" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_6_index_type" ON "cokdb1"."goods_cost_record_2027_6" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_6_index_time" ON "cokdb1"."goods_cost_record_2027_6" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_6_index_time_user" ON "cokdb1"."goods_cost_record_2027_6" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_6_index_user_time" ON "cokdb1"."goods_cost_record_2027_6" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_7_index_type" ON "cokdb1"."goods_cost_record_2027_7" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_7_index_time" ON "cokdb1"."goods_cost_record_2027_7" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_7_index_time_user" ON "cokdb1"."goods_cost_record_2027_7" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_7_index_user_time" ON "cokdb1"."goods_cost_record_2027_7" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_8_index_type" ON "cokdb1"."goods_cost_record_2027_8" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_8_index_time" ON "cokdb1"."goods_cost_record_2027_8" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_8_index_time_user" ON "cokdb1"."goods_cost_record_2027_8" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_8_index_user_time" ON "cokdb1"."goods_cost_record_2027_8" USING btree ("userId","time");
+CREATE INDEX "goods_cost_record_2027_9_index_type" ON "cokdb1"."goods_cost_record_2027_9" USING btree ("type");
+CREATE INDEX "goods_cost_record_2027_9_index_time" ON "cokdb1"."goods_cost_record_2027_9" USING btree ("time");
+CREATE INDEX "goods_cost_record_2027_9_index_time_user" ON "cokdb1"."goods_cost_record_2027_9" USING btree ("time","userId","itemId");
+CREATE INDEX "goods_cost_record_2027_9_index_user_time" ON "cokdb1"."goods_cost_record_2027_9" USING btree ("userId","time");
+CREATE INDEX "hero_activity_st_idx" ON "cokdb1"."hero_activity" USING btree ("startTime");
+CREATE INDEX "hero_activity_et_idx" ON "cokdb1"."hero_activity" USING btree ("endTime");
+CREATE INDEX "hero_activity_act_idx" ON "cokdb1"."hero_activity" USING btree ("activityId");
+CREATE INDEX "hero_event_act_idx" ON "cokdb1"."hero_event" USING btree ("activityId");
+CREATE INDEX "hero_event_st_idx" ON "cokdb1"."hero_event" USING btree ("startTime");
+CREATE INDEX "hero_event_et_idx" ON "cokdb1"."hero_event" USING btree ("endTime");
+CREATE INDEX "hero_event_eid_idx" ON "cokdb1"."hero_event" USING btree ("eventId");
+CREATE INDEX "hero_event_r_idx" ON "cokdb1"."hero_event" USING btree ("rewardStatus");
+CREATE INDEX "hero_event_reward_record_eid_idx" ON "cokdb1"."hero_event_reward_record" USING btree ("eventId");
+CREATE INDEX "hero_event_reward_record_time_idx" ON "cokdb1"."hero_event_reward_record" USING btree ("time");
+CREATE INDEX "hero_event_reward_record_level_idx" ON "cokdb1"."hero_event_reward_record" USING btree ("level");
+CREATE INDEX "hero_event_reward_record_al_idx" ON "cokdb1"."hero_event_reward_record" USING btree ("allianceId");
+CREATE INDEX "hero_office_uid_index" ON "cokdb1"."hero_office" USING btree ("uid");
+CREATE INDEX "hot_goods_cost_record_uid_idx" ON "cokdb1"."hot_goods_cost_record" USING btree ("uid");
+CREATE INDEX "hot_goods_cost_record_goods_idx" ON "cokdb1"."hot_goods_cost_record" USING btree ("goodsId");
+CREATE INDEX "hot_goods_cost_record_time_idx" ON "cokdb1"."hot_goods_cost_record" USING btree ("buyTime");
+CREATE INDEX "hot_info_before_refresh_time_idx" ON "cokdb1"."hot_info_before_refresh" USING btree ("refreshTime");
+CREATE INDEX "inviter_inviter_index_001" ON "cokdb1"."inviter" USING btree ("uid","type","time");
+CREATE INDEX "inviter_uid_type_inviteeUid" ON "cokdb1"."inviter" USING btree ("uid","inviteeUid","type");
+CREATE INDEX "king_allot_tax_record_time_index" ON "cokdb1"."king_allot_tax_record" USING btree ("sendTime");
+CREATE INDEX "king_fight_log_uid_index" ON "cokdb1"."king_fight_log" USING btree ("uid");
+CREATE INDEX "king_skill_event_uid_index" ON "cokdb1"."king_skill_event" USING btree (left("uid", 255));
+CREATE INDEX "king_tax_record_time_index" ON "cokdb1"."king_tax_record" USING btree ("taxTime");
+CREATE INDEX "king_time_fight_log_Index_logtime" ON "cokdb1"."king_time_fight_log" USING btree ("logtime");
+CREATE INDEX "kingdom_building_Index_itemid" ON "cokdb1"."kingdom_building" USING btree ("itemid");
+CREATE INDEX "kingdom_building_buff_Index_itemid" ON "cokdb1"."kingdom_building_buff" USING btree ("uuid");
+CREATE INDEX "kingdom_cross_fight_history_kingdom_startTime" ON "cokdb1"."kingdom_cross_fight_history" USING btree ("serverId","startTime");
+CREATE INDEX "kingdom_cross_fight_history_startTime" ON "cokdb1"."kingdom_cross_fight_history" USING btree ("startTime");
+CREATE INDEX "logaction_index" ON "cokdb1"."logaction" USING btree ("timeStamp","user","action","code");
+CREATE INDEX "logaction_index2" ON "cokdb1"."logaction" USING btree ("user","timeStamp","action");
+CREATE INDEX "logrecord_index" ON "cokdb1"."logrecord" USING btree ("timeStamp","user","category","type");
+CREATE INDEX "logrecord_index_2" ON "cokdb1"."logrecord" USING btree ("user","category","type","timeStamp");
+CREATE INDEX "logrecord_fight_index" ON "cokdb1"."logrecord_fight" USING btree ("timeStamp","user","category","type");
+CREATE INDEX "logrecord_fight_index_2" ON "cokdb1"."logrecord_fight" USING btree ("user","category","type","timeStamp");
+CREATE INDEX "logstat_index" ON "cokdb1"."logstat" USING btree ("timeStamp","user","type","param1","param2","param3");
+CREATE INDEX "logstat_index2" ON "cokdb1"."logstat" USING btree ("type","timeStamp","user");
+CREATE INDEX "logtemp_index" ON "cokdb1"."logtemp" USING btree ("timeStamp","user","type","param1","param2","param3");
+CREATE INDEX "logtemp_index2" ON "cokdb1"."logtemp" USING btree ("type","timeStamp","user");
+CREATE INDEX "logtmp_index" ON "cokdb1"."logtmp" USING btree ("timeStamp","user","type","param1","param2","param3");
+CREATE INDEX "logtmp_index2" ON "cokdb1"."logtmp" USING btree ("type","timeStamp","user");
+CREATE INDEX "mail_index_toFrom" ON "cokdb1"."mail" USING btree ("toUser","type","fromUser");
+CREATE INDEX "mail_index_toUserTime" ON "cokdb1"."mail" USING btree ("toUser","createTime");
+CREATE INDEX "mail_20150212_index_toFrom" ON "cokdb1"."mail_20150212" USING btree ("toUser","type","fromUser");
+CREATE INDEX "mail_20150212_index_toUserTime" ON "cokdb1"."mail_20150212" USING btree ("toUser","createTime");
+CREATE INDEX "mail_contents_user_idx" ON "cokdb1"."mail_contents" USING btree ("toUser");
+CREATE INDEX "material_cost_record_index_user" ON "cokdb1"."material_cost_record" USING btree ("time","userId","type");
+CREATE INDEX "material_cost_record_index_type" ON "cokdb1"."material_cost_record" USING btree ("userId","time","type");
+CREATE INDEX "military_cost_record_index_user" ON "cokdb1"."military_cost_record" USING btree ("time","userId","type");
+CREATE INDEX "military_cost_record_index_type" ON "cokdb1"."military_cost_record" USING btree ("userId","time","type");
+CREATE INDEX "mod_record_from_idx" ON "cokdb1"."mod_record" USING btree ("fromUser");
+CREATE INDEX "mod_record_to_idx" ON "cokdb1"."mod_record" USING btree ("toUser");
+CREATE INDEX "mod_record_time_Idx" ON "cokdb1"."mod_record" USING btree ("createTime");
+CREATE INDEX "new_exped_history_winServerId_index" ON "cokdb1"."new_exped_history" USING btree ("winServerId");
+CREATE INDEX "new_exped_history_loseServerId_index" ON "cokdb1"."new_exped_history" USING btree ("loseServerId");
+CREATE INDEX "new_general_predatoruid_index" ON "cokdb1"."new_general" USING btree ("predatoruid");
+CREATE INDEX "new_general_uid" ON "cokdb1"."new_general" USING btree ("uid");
+CREATE INDEX "new_user_score_uid_idx" ON "cokdb1"."new_user_score" USING btree ("uid");
+CREATE INDEX "new_user_score_uid_stage_index" ON "cokdb1"."new_user_score" USING btree ("uid","stage");
+CREATE INDEX "ob_record_uid" ON "cokdb1"."ob_record" USING btree ("uid","serverId","areaId");
+CREATE INDEX "ob_report_createTime" ON "cokdb1"."ob_report" USING btree ("createTime");
+CREATE INDEX "pay_order_count_log_index_time" ON "cokdb1"."pay_order_count_log" USING btree ("time");
+CREATE INDEX "pay_order_count_log_index_uid_class" ON "cokdb1"."pay_order_count_log" USING btree ("uid","className");
+CREATE INDEX "pay_request_index_uid_pf_purchaseId" ON "cokdb1"."pay_request" USING btree ("uid","pf","purchaseId");
+CREATE INDEX "pay_request_index_uid_pf_productId" ON "cokdb1"."pay_request" USING btree ("uid","pf","productId");
+CREATE INDEX "paycheck_index_time_status" ON "cokdb1"."paycheck" USING btree ("time","status");
+CREATE INDEX "paylog_index_time_pf" ON "cokdb1"."paylog" USING btree ("time","pf");
+CREATE INDEX "pic_upload_record_time_idx" ON "cokdb1"."pic_upload_record" USING btree ("updateTime");
+CREATE INDEX "pic_upload_record_report_idx" ON "cokdb1"."pic_upload_record" USING btree ("report");
+CREATE INDEX "pic_upload_record_stat_idx" ON "cokdb1"."pic_upload_record" USING btree ("stat");
+CREATE INDEX "playerinfo_power_index" ON "cokdb1"."playerinfo" USING btree ("power");
+CREATE INDEX "post_box_index_from" ON "cokdb1"."post_box" USING btree ("from");
+CREATE INDEX "post_box_index_time" ON "cokdb1"."post_box" USING btree ("time");
+CREATE INDEX "post_mail_index_toUserTime" ON "cokdb1"."post_mail" USING btree ("toUser","createTime");
+CREATE INDEX "post_relation_index_time" ON "cokdb1"."post_relation" USING btree ("time");
+CREATE INDEX "pray_record_uid_idx" ON "cokdb1"."pray_record" USING btree ("uid");
+CREATE INDEX "pray_record_resource_idx" ON "cokdb1"."pray_record" USING btree ("resource");
+CREATE INDEX "pray_record_time_idx" ON "cokdb1"."pray_record" USING btree ("prayTime");
+CREATE INDEX "princess_task_stat_index_type" ON "cokdb1"."princess_task_stat" USING btree ("state","taskType");
+CREATE INDEX "princess_task_stat_index_param" ON "cokdb1"."princess_task_stat" USING btree ("state","param1");
+CREATE INDEX "push_record_index_type" ON "cokdb1"."push_record" USING btree ("type");
+CREATE INDEX "queue_ownerId_index_001" ON "cokdb1"."queue" USING btree ("ownerId");
+CREATE INDEX "queue_updateTime_index" ON "cokdb1"."queue" USING btree ("updateTime");
+CREATE INDEX "red_packets_state_index" ON "cokdb1"."red_packets" USING btree ("state");
+CREATE INDEX "red_packets_records_index_player" ON "cokdb1"."red_packets_records" USING btree ("player");
+CREATE INDEX "refund_log_index_time" ON "cokdb1"."refund_log" USING btree ("time","userId","type","itemId");
+CREATE INDEX "refund_log_index_user" ON "cokdb1"."refund_log" USING btree ("userId","time");
+CREATE INDEX "report_index_time" ON "cokdb1"."report" USING btree ("createTime");
+CREATE INDEX "rescue_skill_record_uid_idx" ON "cokdb1"."rescue_skill_record" USING btree ("uid");
+CREATE INDEX "rescue_skill_record_tuid_idx" ON "cokdb1"."rescue_skill_record" USING btree ("targetUid");
+CREATE INDEX "rescue_skill_record_att_time_idx" ON "cokdb1"."rescue_skill_record" USING btree ("attackTime");
+CREATE INDEX "rescue_skill_record_return_time_idx" ON "cokdb1"."rescue_skill_record" USING btree ("returnTime");
+CREATE INDEX "rescue_skill_record_muid_idx" ON "cokdb1"."rescue_skill_record" USING btree ("marchUuid");
+CREATE INDEX "reward_107_time_idx" ON "cokdb1"."reward_107" USING btree ("endTime");
+CREATE INDEX "reward_107_stat_idx" ON "cokdb1"."reward_107" USING btree ("rewardStatus");
+CREATE INDEX "sampleuser_tag_index" ON "cokdb1"."sampleuser" USING btree ("tag");
+CREATE INDEX "score_act_actId_idx" ON "cokdb1"."score_act" USING btree ("actId");
+CREATE INDEX "score_act_in_actId" ON "cokdb1"."score_act_in" USING btree ("actId");
+CREATE INDEX "score_act_in_al_idx" ON "cokdb1"."score_act_in" USING btree ("allianceId");
+CREATE INDEX "score_act_record_actid_idx" ON "cokdb1"."score_act_record" USING btree ("actId");
+CREATE INDEX "score_act_record_rw_idx" ON "cokdb1"."score_act_record" USING btree ("rewardFlag");
+CREATE INDEX "score_act_record_lv_idx" ON "cokdb1"."score_act_record" USING btree ("level");
+CREATE INDEX "server_mail_record_index_uid" ON "cokdb1"."server_mail_record" USING btree ("uid","record","state");
+CREATE INDEX "server_mail_record_index_record" ON "cokdb1"."server_mail_record" USING btree ("record","state");
+CREATE INDEX "server_push_index_startTime" ON "cokdb1"."server_push" USING btree ("startTime");
+CREATE INDEX "server_push_index_stateType" ON "cokdb1"."server_push" USING btree ("state","type");
+CREATE INDEX "server_push_20141106_index_startTime" ON "cokdb1"."server_push_20141106" USING btree ("startTime");
+CREATE INDEX "server_push_config_index_startTime" ON "cokdb1"."server_push_config" USING btree ("startTime");
+CREATE INDEX "server_usermail_index_sendTime" ON "cokdb1"."server_usermail" USING btree ("sendTime");
+CREATE INDEX "soccer_match_idx_sbt" ON "cokdb1"."soccer_match" USING btree ("startBetTime");
+CREATE INDEX "soccer_match_idx_st" ON "cokdb1"."soccer_match" USING btree ("startTime");
+CREATE INDEX "stat_adjust_index_query" ON "cokdb1"."stat_adjust" USING btree ("device","country","channel","campain");
+CREATE INDEX "stat_af_index_af" ON "cokdb1"."stat_af" USING btree ("afuid");
+CREATE INDEX "stat_af_index_query" ON "cokdb1"."stat_af" USING btree ("device","country","channel","campain");
+CREATE INDEX "stat_login_index_timeStamp" ON "cokdb1"."stat_login" USING btree ("time");
+CREATE INDEX "stat_login_2024_0_index_timeStamp" ON "cokdb1"."stat_login_2024_0" USING btree ("time");
+CREATE INDEX "stat_login_2024_1_index_timeStamp" ON "cokdb1"."stat_login_2024_1" USING btree ("time");
+CREATE INDEX "stat_login_2024_10_index_timeStamp" ON "cokdb1"."stat_login_2024_10" USING btree ("time");
+CREATE INDEX "stat_login_2024_11_index_timeStamp" ON "cokdb1"."stat_login_2024_11" USING btree ("time");
+CREATE INDEX "stat_login_2024_2_index_timeStamp" ON "cokdb1"."stat_login_2024_2" USING btree ("time");
+CREATE INDEX "stat_login_2024_3_index_timeStamp" ON "cokdb1"."stat_login_2024_3" USING btree ("time");
+CREATE INDEX "stat_login_2024_4_index_timeStamp" ON "cokdb1"."stat_login_2024_4" USING btree ("time");
+CREATE INDEX "stat_login_2024_5_index_timeStamp" ON "cokdb1"."stat_login_2024_5" USING btree ("time");
+CREATE INDEX "stat_login_2024_6_index_timeStamp" ON "cokdb1"."stat_login_2024_6" USING btree ("time");
+CREATE INDEX "stat_login_2024_7_index_timeStamp" ON "cokdb1"."stat_login_2024_7" USING btree ("time");
+CREATE INDEX "stat_login_2024_8_index_timeStamp" ON "cokdb1"."stat_login_2024_8" USING btree ("time");
+CREATE INDEX "stat_login_2024_9_index_timeStamp" ON "cokdb1"."stat_login_2024_9" USING btree ("time");
+CREATE INDEX "stat_login_2026_9_index_timeStamp" ON "cokdb1"."stat_login_2026_9" USING btree ("time");
+CREATE INDEX "stat_phone_log_idx" ON "cokdb1"."stat_phone_log" USING btree ("uid","time");
+CREATE INDEX "stat_reg_index_time_pf_country" ON "cokdb1"."stat_reg" USING btree ("time","pf","country");
+CREATE INDEX "stat_reg_country_index" ON "cokdb1"."stat_reg" USING btree ("country");
+CREATE INDEX "stat_tutorial_index_time" ON "cokdb1"."stat_tutorial" USING btree ("time");
+CREATE INDEX "stat_tutorial_index_tutorial" ON "cokdb1"."stat_tutorial" USING btree ("tutorial");
+CREATE INDEX "stat_tutorial_analyze_index_time" ON "cokdb1"."stat_tutorial_analyze" USING btree ("time");
+CREATE INDEX "stat_tutorial_analyze_index_tutorial" ON "cokdb1"."stat_tutorial_analyze" USING btree ("tutorial");
+CREATE INDEX "stat_tutorial_v2_index_time" ON "cokdb1"."stat_tutorial_v2" USING btree ("time","appVersion");
+CREATE INDEX "subscription_log_index_uid_itemId" ON "cokdb1"."subscription_log" USING btree ("uid","itemId");
+CREATE INDEX "suggest_log_index" ON "cokdb1"."suggest_log" USING btree ("user","timeStamp");
+CREATE INDEX "suggest_log_index_2" ON "cokdb1"."suggest_log" USING btree ("user");
+CREATE INDEX "suggest_log_index_3" ON "cokdb1"."suggest_log" USING btree ("param1","param2");
+CREATE INDEX "suggestion_ownerId" ON "cokdb1"."suggestion" USING btree ("ownerId");
+CREATE INDEX "suit_decompose_effect_owner_suit" ON "cokdb1"."suit_decompose_effect" USING btree ("owner","suitid");
+CREATE INDEX "super_army_log_createTime_index" ON "cokdb1"."super_army_log" USING btree ("createTime");
+CREATE INDEX "super_army_log_uid_index" ON "cokdb1"."super_army_log" USING btree ("uid");
+CREATE INDEX "t_hero_Index_uid" ON "cokdb1"."t_hero" USING btree ("uid");
+CREATE INDEX "t_worldbossrank_Index_bossid" ON "cokdb1"."t_worldbossrank" USING btree ("bossid");
+CREATE INDEX "territory_trap_log_allianceid_index" ON "cokdb1"."territory_trap_log" USING btree ("allianceid");
+CREATE INDEX "territory_user_effect_alliance_idx" ON "cokdb1"."territory_user_effect" USING btree ("allianceId");
+CREATE INDEX "translation_index_content" ON "cokdb1"."translation" USING btree (substring("content" from 1 for 50));
+CREATE INDEX "translationv2_index_en" ON "cokdb1"."translationv2" USING btree (substring("en" from 1 for 50));
+CREATE INDEX "translationv2_index_zh-Hans" ON "cokdb1"."translationv2" USING btree (substring("zh-Hans" from 1 for 20));
+CREATE INDEX "translationv2_index_zh-Hant" ON "cokdb1"."translationv2" USING btree (substring("zh-Hant" from 1 for 20));
+CREATE INDEX "translationv2_index_ja" ON "cokdb1"."translationv2" USING btree (substring("ja" from 1 for 20));
+CREATE INDEX "translationv2_index_ko" ON "cokdb1"."translationv2" USING btree (substring("ko" from 1 for 20));
+CREATE INDEX "translationv2_index_ru" ON "cokdb1"."translationv2" USING btree (substring("ru" from 1 for 20));
+CREATE INDEX "translationv2_index_es" ON "cokdb1"."translationv2" USING btree (substring("es" from 1 for 20));
+CREATE INDEX "translationv2_index_ms" ON "cokdb1"."translationv2" USING btree (substring("ms" from 1 for 20));
+CREATE INDEX "translationv2_index_fr" ON "cokdb1"."translationv2" USING btree (substring("fr" from 1 for 20));
+CREATE INDEX "translationv2_index_de" ON "cokdb1"."translationv2" USING btree (substring("de" from 1 for 20));
+CREATE INDEX "translationv2_index_it" ON "cokdb1"."translationv2" USING btree (substring("it" from 1 for 20));
+CREATE INDEX "translationv2_index_pt" ON "cokdb1"."translationv2" USING btree (substring("pt" from 1 for 20));
+CREATE INDEX "translationv2_index_count" ON "cokdb1"."translationv2" USING btree ("count");
+CREATE INDEX "treasure_map_index_o_m" ON "cokdb1"."treasure_map" USING btree ("currentOwner","marchId");
+CREATE INDEX "treasure_map_index_o_t" ON "cokdb1"."treasure_map" USING btree ("currentOwner","targetId");
+CREATE INDEX "treasure_map_index_o_s_c" ON "cokdb1"."treasure_map" USING btree ("currentOwner","state","colour");
+CREATE INDEX "trigger_var_type_key" ON "cokdb1"."trigger_var" USING btree ("type","key");
+CREATE INDEX "trigger_var_uid" ON "cokdb1"."trigger_var" USING btree ("uid");
+CREATE INDEX "trigger_var_createTime" ON "cokdb1"."trigger_var" USING btree ("createTime");
+CREATE INDEX "trigger_var_lastUpdateTime" ON "cokdb1"."trigger_var" USING btree ("lastUpdateTime");
+CREATE INDEX "trouble_log_trouble_log_uid_index" ON "cokdb1"."trouble_log" USING btree ("uid");
+CREATE INDEX "turret_shooting_task_uuid_idx" ON "cokdb1"."turret_shooting_task" USING btree ("marchUuid");
+CREATE INDEX "turret_shooting_task_startTime_idx" ON "cokdb1"."turret_shooting_task" USING btree ("startTime");
+CREATE INDEX "turret_shooting_task_endTime_idx" ON "cokdb1"."turret_shooting_task" USING btree ("endTime");
+CREATE INDEX "turret_shooting_task_uid_idx" ON "cokdb1"."turret_shooting_task" USING btree ("turretUid");
+CREATE INDEX "user_14day_login_day_index" ON "cokdb1"."user_14day_login" USING btree ("day");
+CREATE INDEX "user_alliance_task_id_idx" ON "cokdb1"."user_alliance_task" USING btree ("id");
+CREATE INDEX "user_auction_goods_key_user_auction_goods_uid" ON "cokdb1"."user_auction_goods" USING btree ("uid");
+CREATE UNIQUE INDEX "user_auction_history_unique_user_auction_history_uuid" ON "cokdb1"."user_auction_history" USING btree ("uuid");
+CREATE INDEX "user_auction_history_key_user_auction_history_uid" ON "cokdb1"."user_auction_history" USING btree ("uid");
+CREATE INDEX "user_balance_history_0_uid_bank_type" ON "cokdb1"."user_balance_history_0" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_0_time" ON "cokdb1"."user_balance_history_0" USING btree ("time");
+CREATE INDEX "user_balance_history_1_uid_bank_type" ON "cokdb1"."user_balance_history_1" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_1_time" ON "cokdb1"."user_balance_history_1" USING btree ("time");
+CREATE INDEX "user_balance_history_2_uid_bank_type" ON "cokdb1"."user_balance_history_2" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_2_time" ON "cokdb1"."user_balance_history_2" USING btree ("time");
+CREATE INDEX "user_balance_history_3_uid_bank_type" ON "cokdb1"."user_balance_history_3" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_3_time" ON "cokdb1"."user_balance_history_3" USING btree ("time");
+CREATE INDEX "user_balance_history_4_uid_bank_type" ON "cokdb1"."user_balance_history_4" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_4_time" ON "cokdb1"."user_balance_history_4" USING btree ("time");
+CREATE INDEX "user_balance_history_5_uid_bank_type" ON "cokdb1"."user_balance_history_5" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_5_time" ON "cokdb1"."user_balance_history_5" USING btree ("time");
+CREATE INDEX "user_balance_history_6_uid_bank_type" ON "cokdb1"."user_balance_history_6" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_6_time" ON "cokdb1"."user_balance_history_6" USING btree ("time");
+CREATE INDEX "user_balance_history_7_uid_bank_type" ON "cokdb1"."user_balance_history_7" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_7_time" ON "cokdb1"."user_balance_history_7" USING btree ("time");
+CREATE INDEX "user_balance_history_8_uid_bank_type" ON "cokdb1"."user_balance_history_8" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_8_time" ON "cokdb1"."user_balance_history_8" USING btree ("time");
+CREATE INDEX "user_balance_history_9_uid_bank_type" ON "cokdb1"."user_balance_history_9" USING btree ("uid","bank_type");
+CREATE INDEX "user_balance_history_9_time" ON "cokdb1"."user_balance_history_9" USING btree ("time");
+CREATE INDEX "user_bet_idx_uid" ON "cokdb1"."user_bet" USING btree ("uid");
+CREATE INDEX "user_bet_idx_mid" ON "cokdb1"."user_bet" USING btree ("matchId");
+CREATE INDEX "user_bet_idx_e" ON "cokdb1"."user_bet" USING btree ("ended");
+CREATE INDEX "user_bet_idx_r" ON "cokdb1"."user_bet" USING btree ("rewarded");
+CREATE INDEX "user_branch_city_reward_uid_id_index" ON "cokdb1"."user_branch_city_reward" USING btree ("uid","id");
+CREATE INDEX "user_building_ub_uid_index" ON "cokdb1"."user_building" USING btree ("uid","itemId");
+CREATE INDEX "user_building_item_index" ON "cokdb1"."user_building" USING btree ("itemId");
+CREATE INDEX "user_building_itemId_level_index" ON "cokdb1"."user_building" USING btree ("itemId","level");
+CREATE INDEX "user_building_itemId_star_index" ON "cokdb1"."user_building" USING btree ("itemId","star");
+CREATE INDEX "user_building_bak_ub_uid_index" ON "cokdb1"."user_building_bak" USING btree ("uid","itemId");
+CREATE INDEX "user_building_bak_item_index" ON "cokdb1"."user_building_bak" USING btree ("itemId");
+CREATE INDEX "user_cross_fight_history_user_startTime" ON "cokdb1"."user_cross_fight_history" USING btree ("uid","startTime");
+CREATE INDEX "user_cross_fight_history_startTime" ON "cokdb1"."user_cross_fight_history" USING btree ("startTime");
+CREATE INDEX "user_dragon_uid_index" ON "cokdb1"."user_dragon" USING btree ("uid");
+CREATE INDEX "user_equip_index_uid_on" ON "cokdb1"."user_equip" USING btree ("uid","on");
+CREATE INDEX "user_equip_bak_index_uid_on" ON "cokdb1"."user_equip_bak" USING btree ("uid","on");
+CREATE INDEX "user_general_uid_index_001" ON "cokdb1"."user_general" USING btree ("uid");
+CREATE INDEX "user_gold_wheel_histo_uid" ON "cokdb1"."user_gold_wheel_histo" USING btree ("uid");
+CREATE INDEX "user_hero_ownerUid_index" ON "cokdb1"."user_hero" USING btree ("ownerUid");
+CREATE INDEX "user_item_uitem_ownerId_index" ON "cokdb1"."user_item" USING btree ("ownerId","itemId","value");
+CREATE INDEX "user_item_bak_uitem_ownerId_index" ON "cokdb1"."user_item_bak" USING btree ("ownerId","itemId","value");
+CREATE INDEX "user_login_ip_index_uid_count" ON "cokdb1"."user_login_ip" USING btree ("uid","count");
+CREATE INDEX "user_military_military_score_index" ON "cokdb1"."user_military" USING btree ("score");
+CREATE INDEX "user_military_military_exp_index" ON "cokdb1"."user_military" USING btree ("exp");
+CREATE INDEX "user_military_rank_index_militaryScore" ON "cokdb1"."user_military_rank" USING btree ("militaryScore");
+CREATE INDEX "user_military_rank_index_rankingExp" ON "cokdb1"."user_military_rank" USING btree ("rankingExp");
+CREATE INDEX "user_mine_index_fId" ON "cokdb1"."user_mine" USING btree ("fId");
+CREATE INDEX "user_mixed_info_protectEndTime" ON "cokdb1"."user_mixed_info" USING btree ("protectEndTime");
+CREATE INDEX "user_mixed_info_protectEndSendTimes" ON "cokdb1"."user_mixed_info" USING btree ("protectEndSendTimes");
+CREATE INDEX "user_monster_siege_state_index" ON "cokdb1"."user_monster_siege" USING btree ("state");
+CREATE INDEX "user_monster_siege_data_state_index" ON "cokdb1"."user_monster_siege_data" USING btree ("state");
+CREATE INDEX "user_new_resource_log_uid_index" ON "cokdb1"."user_new_resource_log" USING btree ("uid");
+CREATE INDEX "user_pet_dragon_index_uid" ON "cokdb1"."user_pet_dragon" USING btree ("uid");
+CREATE INDEX "user_pet_dragon_skill_uid" ON "cokdb1"."user_pet_dragon_skill" USING btree ("uid");
+CREATE INDEX "user_pray_count_idx" ON "cokdb1"."user_pray" USING btree ("prayCount");
+CREATE INDEX "user_pray_date_idx" ON "cokdb1"."user_pray" USING btree ("lastPrayTime");
+CREATE INDEX "user_push_userId" ON "cokdb1"."user_push" USING btree (left("userId", 255));
+CREATE INDEX "user_report_uid" ON "cokdb1"."user_report" USING btree ("uid");
+CREATE INDEX "user_report_target_uid" ON "cokdb1"."user_report" USING btree ("target_uid");
+CREATE INDEX "user_report_time" ON "cokdb1"."user_report" USING btree ("time");
+CREATE INDEX "user_resource_record_uid_idx" ON "cokdb1"."user_resource_record" USING btree ("uid");
+CREATE INDEX "user_resource_record_item_idx" ON "cokdb1"."user_resource_record" USING btree ("itemId");
+CREATE INDEX "user_science_Index_ownerId" ON "cokdb1"."user_science" USING btree ("uid","itemId");
+CREATE INDEX "user_score_index_actId" ON "cokdb1"."user_score" USING btree ("actId");
+CREATE INDEX "user_score_bak_index_actId" ON "cokdb1"."user_score_bak" USING btree ("actId");
+CREATE INDEX "user_skill_ownerId_index" ON "cokdb1"."user_skill" USING btree ("ownerId");
+CREATE INDEX "user_skill_starttime_index" ON "cokdb1"."user_skill" USING btree ("startTime");
+CREATE INDEX "user_skill_endtime_index" ON "cokdb1"."user_skill" USING btree ("endTime");
+CREATE INDEX "user_state_index_uid_type2" ON "cokdb1"."user_state" USING btree ("uid","type2");
+CREATE INDEX "user_state_index_uid_stateId" ON "cokdb1"."user_state" USING btree ("uid","stateId");
+CREATE INDEX "user_state_index_stateId" ON "cokdb1"."user_state" USING btree ("stateId");
+CREATE INDEX "user_territory_resource_al_idx" ON "cokdb1"."user_territory_resource" USING btree ("allianceId");
+CREATE INDEX "user_thumbup_type" ON "cokdb1"."user_thumbup" USING btree ("type");
+CREATE INDEX "user_true_info_bind_uid, trueInfo" ON "cokdb1"."user_true_info_bind" USING btree ("uid","trueInfo");
+CREATE INDEX "userprofile_name_index" ON "cokdb1"."userprofile" USING btree ("name");
+CREATE INDEX "userprofile_time_level_index" ON "cokdb1"."userprofile" USING btree ("regTime","level","lastOnlineTime","pf");
+CREATE INDEX "userprofile_allianceid_lasttime_index" ON "cokdb1"."userprofile" USING btree ("allianceId","lastOnlineTime");
+CREATE INDEX "userprofile_lang_index" ON "cokdb1"."userprofile" USING btree ("lang");
+CREATE INDEX "userprofile_deviceId" ON "cokdb1"."userprofile" USING btree ("deviceId");
+CREATE INDEX "userprofile_index_crossServerId" ON "cokdb1"."userprofile" USING btree ("crossFightSrcServerId");
+CREATE INDEX "userprofile_active_uid" ON "cokdb1"."userprofile_active" USING btree ("uid");
+CREATE INDEX "userprofile_bak_name_index" ON "cokdb1"."userprofile_bak" USING btree ("name");
+CREATE INDEX "userprofile_bak_time_level_index" ON "cokdb1"."userprofile_bak" USING btree ("regTime","level","lastOnlineTime","pf");
+CREATE INDEX "userprofile_bak_allianceid_lasttime_index" ON "cokdb1"."userprofile_bak" USING btree ("allianceId","lastOnlineTime");
+CREATE INDEX "userprofile_bak_lang_index" ON "cokdb1"."userprofile_bak" USING btree ("lang");
+CREATE INDEX "userprofile_del_name_index" ON "cokdb1"."userprofile_del" USING btree ("name");
+CREATE INDEX "userprofile_del_time_level_index" ON "cokdb1"."userprofile_del" USING btree ("regTime","level","lastOnlineTime","pf");
+CREATE INDEX "userprofile_del_allianceid_lasttime_index" ON "cokdb1"."userprofile_del" USING btree ("allianceId","lastOnlineTime");
+CREATE INDEX "userprofile_del_lang_index" ON "cokdb1"."userprofile_del" USING btree ("lang");
+CREATE INDEX "world_barbarion_dead_dead_res_time" ON "cokdb1"."world_barbarion_dead" USING btree ("deadFinishTime");
+CREATE INDEX "world_barbarion_dead_areaId_index" ON "cokdb1"."world_barbarion_dead" USING btree ("areaId");
+CREATE INDEX "world_basttile_dead_dead_res_time" ON "cokdb1"."world_basttile_dead" USING btree ("deadFinishTime");
+CREATE INDEX "world_basttile_dead_areaId_index" ON "cokdb1"."world_basttile_dead" USING btree ("areaId");
+CREATE INDEX "world_favorite_time_idx" ON "cokdb1"."world_favorite" USING btree ("createTime");
+CREATE INDEX "world_field_monster_dead_dead_monster_time" ON "cokdb1"."world_field_monster_dead" USING btree ("deadFinishTime");
+CREATE INDEX "world_march_ownerId_index_001" ON "cokdb1"."world_march" USING btree ("ownerUid");
+CREATE INDEX "world_march_targetUid_index" ON "cokdb1"."world_march" USING btree ("targetUid");
+CREATE INDEX "world_res_dead_dead_res_time" ON "cokdb1"."world_res_dead" USING btree ("deadFinishTime");
+CREATE INDEX "world_res_dead_areaId_index" ON "cokdb1"."world_res_dead" USING btree ("areaId");
+CREATE INDEX "world_res_new_dead_dead_res_time" ON "cokdb1"."world_res_new_dead" USING btree ("deadFinishTime");
+CREATE INDEX "world_res_new_dead_areaId_index" ON "cokdb1"."world_res_new_dead" USING btree ("areaId");
+CREATE INDEX "worldpoint_world_res_area_id" ON "cokdb1"."worldpoint" USING btree ("areaId","gridType");
+CREATE INDEX "worldpoint_world_monster_area_id" ON "cokdb1"."worldpoint" USING btree ("monsterAreaId","pointType","gridType","ownerId","grid2Type");
+CREATE INDEX "worldpoint_world_pointType_flushTime_index" ON "cokdb1"."worldpoint" USING btree ("pointType","pointItem","flushTime","gridType","grid2Type");
+CREATE INDEX "worldpoint_world_xy_type_country_index" ON "cokdb1"."worldpoint" USING btree ("x","y","pointType");
 CREATE INDEX "worldpoint_worldId_pointType_gridType_grid2Type" ON "cokdb1"."worldpoint" USING btree ("worldId","pointType","gridType","grid2Type");

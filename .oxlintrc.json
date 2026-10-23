@@ -1,0 +1,18 @@
+{
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/*.tsbuildinfo",
+    "mobile/**",
+    "legacy/**",
+    "data/**",
+    "packages/drizzle/migrations/**",
+    "**/__snapshots__/**",
+    "packages/drizzle/tests/fixtures/**"
+  ],
+  "plugins": ["typescript", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error"
+  }
+}

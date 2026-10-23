@@ -1,5 +1,3 @@
-// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
-
 exports[`opencok_kingdom.ability_page: schema and CRUD SQL 1`] = `
 "schema opencok_kingdom
 column ["uid","varchar(40)",true,null,null,null]

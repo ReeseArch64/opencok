@@ -25,17 +25,17 @@ point; the API has no directly published container port.
 Container/process settings are validated through `@opencok/env/api` and
 `@opencok/env/database`; local Compose values are direct declarations:
 
-| Setting | Purpose |
-| --- | --- |
-| `DATABASE_URL` | PostgreSQL cluster connection; the configured global database replaces the URL pathname. |
-| `KINGDOM_ID` | Default single-realm directory ID/zone; defaults to `1`, matching the Compose server. |
-| `GLOBAL_DATABASE_NAME` | Global physical database, default `opencok_global`. |
-| `API_HOST` / `API_PORT` | Direct Bun listener, defaults `127.0.0.1:8082`; Compose uses `0.0.0.0:8080` internally. |
-| `API_REDIS_URL` | Dependency health endpoint; Compose uses `redis://redis:6379/0`. |
-| `API_DEPENDENCY_TIMEOUT_MS` | Database/Redis timeout, default 3000 ms. |
-| `API_SERVERS_FILE` | Optional JSON directory, relative to the workspace root; defaults to an in-memory directory derived from `KINGDOM_ID`. |
-| `API_GAME_HOST` | Optional advertised client-reachable TCP host. A bind wildcard is rejected. |
-| `API_GAME_PORT` | Optional advertised port override for a single-realm directory. Compose uses `GATEWAY_GAME_PORT`. |
+| Setting                     | Purpose                                                                                                                |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`              | PostgreSQL cluster connection; the configured global database replaces the URL pathname.                               |
+| `KINGDOM_ID`                | Default single-realm directory ID/zone; defaults to `1`, matching the Compose server.                                  |
+| `GLOBAL_DATABASE_NAME`      | Global physical database, default `opencok_global`.                                                                    |
+| `API_HOST` / `API_PORT`     | Direct Bun listener, defaults `127.0.0.1:8082`; Compose uses `0.0.0.0:8080` internally.                                |
+| `API_REDIS_URL`             | Dependency health endpoint; Compose uses `redis://redis:6379/0`.                                                       |
+| `API_DEPENDENCY_TIMEOUT_MS` | Database/Redis timeout, default 3000 ms.                                                                               |
+| `API_SERVERS_FILE`          | Optional JSON directory, relative to the workspace root; defaults to an in-memory directory derived from `KINGDOM_ID`. |
+| `API_GAME_HOST`             | Optional advertised client-reachable TCP host. A bind wildcard is rejected.                                            |
+| `API_GAME_PORT`             | Optional advertised port override for a single-realm directory. Compose uses `GATEWAY_GAME_PORT`.                      |
 
 Direct Bun execution requires separately reachable dependencies; the default
 Compose network does not publish Redis. If the server runs directly in Bun, set
@@ -48,12 +48,12 @@ request bodies, tokens, paths and query strings do not enter operational logs.
 
 ## Routes and compatibility
 
-| Path | Methods | Behavior |
-| --- | --- | --- |
-| `/gameservice/getserverlist.php`, `/gameservice/getline.php`, `/gameservice/getserverlist_memoryold.php` | GET, POST, HEAD | PHP-compatible form/query parsing and JSON string escaping. |
-| `/healthz`, `/_health.php` | GET, HEAD | Process liveness, `ok` plus newline. |
-| `/readyz` | GET, HEAD | PostgreSQL and Redis readiness; failures return non-200. |
-| `/gameservice/api/query_userinfo_by_name.php` | GET, POST, HEAD | Internal API compatibility query; not exposed by the gateway in this stage. |
+| Path                                                                                                     | Methods         | Behavior                                                                    |
+| -------------------------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------- |
+| `/gameservice/getserverlist.php`, `/gameservice/getline.php`, `/gameservice/getserverlist_memoryold.php` | GET, POST, HEAD | PHP-compatible form/query parsing and JSON string escaping.                 |
+| `/healthz`, `/_health.php`                                                                               | GET, HEAD       | Process liveness, `ok` plus newline.                                        |
+| `/readyz`                                                                                                | GET, HEAD       | PostgreSQL and Redis readiness; failures return non-200.                    |
+| `/gameservice/api/query_userinfo_by_name.php`                                                            | GET, POST, HEAD | Internal API compatibility query; not exposed by the gateway in this stage. |
 
 Discovery requires the legacy `loginFlag=1` marker. This marker is not independent
 proof of identity; SFS login still checks its own signature/device binding. Existing

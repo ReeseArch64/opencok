@@ -1,13 +1,11 @@
 import { customType } from "drizzle-orm/pg-core";
 
-/** PostgreSQL binary values retain arbitrary bytes, including NUL. */
 export const bytea = customType<{ data: Buffer; driverData: Buffer }>({
   dataType: () => "bytea",
   fromDriver: (value) => Buffer.from(value),
   toDriver: (value) => value,
 });
 
-/** UTF-8 strings including NUL; PostgreSQL text cannot represent that character. */
 export const utf8Bytea = customType<{ data: string; driverData: Buffer }>({
   dataType: () => "bytea",
   fromDriver: (value) => new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(value),

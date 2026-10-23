@@ -20,6 +20,8 @@ volumes:
   zookeeper-datalog: ~
   zookeeper-logs: ~
   minio-data: ~
+  redisinsight-data: ~
+  portainer-data: ~
 
 services:
   database:
@@ -73,7 +75,7 @@ services:
     container_name: opencok-pgadmin
     platform: linux/amd64
     restart: unless-stopped
-    profiles: [all]
+    profiles: [all, dev]
     stop_grace_period: 60s
     security_opt: [no-new-privileges:true]
     networks: [opencok-internal-network, opencok-external-network]
@@ -192,7 +194,7 @@ services:
       GAME_HEALTH_PORT: 18090
       GAME_REDIS_URL: redis://redis:6379/0
       GAME_ZOOKEEPER: zookeeper:2181
-      GAME_LOGIN_SECRET: ${GAME_LOGIN_SECRET:-}
+      GAME_LOGIN_SECRET: ${GAME_LOGIN_SECRET}
       GAME_RESOURCES: /resources
       GAME_MAP_SIZE: 1200
       DEPENDENCY_TIMEOUT_MS: 5000
@@ -378,3 +380,66 @@ services:
     depends_on:
       storage:
         condition: service_healthy
+
+  redisinsight:
+    container_name: opencok-redisinsight
+    image: redis/redisinsight:latest
+    platform: linux/amd64
+    restart: no
+
+    profiles: [all, dev]
+    stop_grace_period: 30s
+    security_opt: [no-new-privileges:true]
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.50"
+
+    mem_limit: 512m
+    memswap_limit: 1g
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+    networks: [opencok-internal-network, opencok-external-network]
+
+    volumes:
+      - redisinsight-data:/data
+
+    ports:
+      - 5540:5540
+
+  portainer:
+    container_name: opencok-portainer
+    image: portainer/portainer-ce:lts
+    platform: linux/amd64
+    restart: no
+
+    profiles: [all, dev]
+    stop_grace_period: 30s
+    security_opt: [no-new-privileges:true]
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.50"
+
+    mem_limit: 512m
+    memswap_limit: 1g
+
+    networks: [opencok-external-network]
+
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        bind: { create_host_path: false }
+
+      - portainer-data:/data
+
+    ports:
+      - 9443:9443

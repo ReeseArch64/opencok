@@ -29,12 +29,10 @@ body:
       description: "Summarize the findings and explain why a concrete issue is now needed."
     validations:
       required: true
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
-  -
-    type: "dropdown"
+  - type: "dropdown"
     id: "client-track"
     attributes:
       label: "Client compatibility track"
@@ -48,46 +46,40 @@ body:
         - "Not applicable"
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "environment"
     attributes:
       label: "Client, server, and environment"
       description: "Include the exact client build, Android/iOS version and device or emulator, applied patch numbers, server branch and commit, and local or remote deployment. Use Not applicable for unrelated components."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "system"
     attributes:
       label: "Affected game system"
       description: "Identify the screen, command, or system: login, kingdom, construction, research, troops, combat, heroes, inventory, alliance, events, chat, or media."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "reproduction"
     attributes:
       label: "Starting state and steps to reproduce"
       description: "Describe a test account's castle/building level, resources, troop state, active queues or events, and relevant configuration. List exact actions and indicate whether the issue affects fresh or existing accounts."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "behavior"
     attributes:
       label: "Expected and actual results"
       description: "Describe what should happen, what happens instead, how often it occurs, and any workaround. Include resource costs, timers, rewards, or error messages when relevant."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "impact"
     attributes:
       label: "Player and persistence impact"
       description: "Does this block login or progression, lose or duplicate items/resources, affect battle results, or change saved state after reconnect? State whether one or multiple test players are affected."
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "evidence"
     attributes:
       label: "Evidence"

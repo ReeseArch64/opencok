@@ -3,20 +3,17 @@ labels:
   - "discussion"
   - "question"
 body:
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "Write the title, body, and replies in English (en-US). Keep the discussion label and add relevant topic, component, or client-release labels after publishing. Ask for help with gameplay, client preparation, hosting, or development. For a confirmed reproducible bug, open a Bug report issue and link this discussion."
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "question"
     attributes:
       label: "What are you trying to do?"
       description: "Describe the game action or operator task, the expected outcome, and the specific question."
     validations:
       required: true
-  -
-    type: "dropdown"
+  - type: "dropdown"
     id: "client-track"
     attributes:
       label: "Client compatibility track"
@@ -30,20 +27,17 @@ body:
         - "Not applicable"
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "context"
     attributes:
       label: "Setup and current behavior"
       description: "If relevant, include client build/patches, device or emulator and OS, server commit, deployment mode, and the affected game screen. State Not applicable for general questions."
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "attempts"
     attributes:
       label: "What have you tried?"
       description: "Link guides or related discussions and describe steps attempted and their results."
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "evidence"
     attributes:
       label: "Evidence"

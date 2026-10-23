@@ -5,7 +5,8 @@ and does not depend on this Compose configuration. Development settings are writ
 directly in `docker-compose.yml`; only the game login secret is substituted from the
 root `.env`.
 
-All services use profiles `all` and `dev`, except pgAdmin, which uses only `all`.
+Every service uses both profiles `all` and `dev`; either profile starts the same
+complete set of containers, including pgAdmin, Redis Insight and Portainer.
 Chat and media/files remain outside this stage. MinIO and `minio-setup` provide the
 client CDN alongside the TypeScript API/server, gateway, PostgreSQL, Redis and
 ZooKeeper.
@@ -15,7 +16,7 @@ ZooKeeper.
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the private
 `GAME_LOGIN_SECRET` exception. Use `.env.example` as the reference and preserve
 existing values. No app-local env files are needed. The example database URL uses
-Compose service DNS; host-side tools need the published PostgreSQL port 55432.
+Compose service DNS; host-side tools need the published PostgreSQL port 5432.
 
 After changing `GAME_LOGIN_SECRET`, recreate the server to apply it:
 
@@ -42,7 +43,6 @@ docker compose --profile dev config --quiet
 docker compose --profile dev up --build -d --wait
 docker compose --profile dev ps -a
 
-# Include pgAdmin.
 docker compose --profile all up --build -d --wait
 ```
 
@@ -53,14 +53,16 @@ The one-shot jobs exit with code zero after completion.
 
 ## Direct development values
 
-| Endpoint | Published port |
-| --- | --- |
-| Gateway HTTP discovery and CDN | 80 |
-| Gateway game TCP | 9933 |
-| PostgreSQL | 55432 |
-| MinIO object endpoint | 9000 |
-| MinIO console | 9001 |
-| pgAdmin, profile `all` only | 5050 |
+| Endpoint                       | Published port |
+| ------------------------------ | -------------- |
+| Gateway HTTP discovery and CDN | 80             |
+| Gateway game TCP               | 9933           |
+| PostgreSQL                     | 5432           |
+| MinIO object endpoint          | 9000           |
+| MinIO console                  | 9001           |
+| pgAdmin                        | 5050           |
+| Redis Insight                  | 5540           |
+| Portainer HTTPS                | 9443           |
 
 Port mappings have no host-IP prefix. Internal connections use service DNS:
 `database:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933` and
@@ -87,16 +89,16 @@ authority for player progress. Back up databases and local inputs before changes
 an image rollback does not reverse SQL migrations.
 
 ```sh
-# Apply only pending database migrations.
 docker compose --profile dev run --rm database-setup
-# Stop services while retaining volumes.
 docker compose --profile dev down
 ```
 
 PostgreSQL initialization passwords do not rotate existing accounts. Keep direct
 Compose credentials aligned with the existing cluster; do not delete a volume to
 repair authentication. pgAdmin registration uses `database:5432` and omits the
-database password.
+database password. Redis Insight and Portainer each have their own named data
+volume. Portainer uses HTTPS on port 9443 and its development service mounts
+the host Docker socket for local container administration.
 
 ## Verification
 
@@ -109,6 +111,16 @@ bun run test:stack
 
 The integration test creates an isolated Compose configuration with synthetic
 accounts, XML and CDN files, unique ports/networks and disposable volumes. It
-verifies discovery, SFS login, CDN reads/Range/ETag, private paths, unchanged player
-state and Redis failure/recovery. Cleanup removes only its own test project.
+checks that `dev` and `all` select the same complete service set and runs a named
+lifecycle/functional test for each of the 12 services. Long-running containers must
+be running; `database-setup` and `minio-setup` must exit successfully. Checks cover
+PostgreSQL databases, setup registrations, pgAdmin ping/login page, Redis TTLs,
+ZooKeeper status, API/server readiness, gateway routing, MinIO health/CDN policy,
+Redis Insight health/API and Portainer HTTPS/authentication boundaries.
+
+The existing discovery, SFS login, CDN reads/Range/ETag, private-path, player-state
+and Redis failure/recovery checks remain. Every published test port binds to
+loopback with a unique port. Portainer receives a disposable data volume and no
+host Docker socket: these tests validate its UI/API startup and authentication
+boundary, not management of the host daemon. Cleanup removes only the test project.
 Native APK rendering and unimplemented gameplay still require separate evidence.

@@ -5,11 +5,21 @@ the intended project architecture, not infrastructure already deployed. This che
 contains the initial structure of the monorepo; directories and packages do not prove
 implementation.
 
+Accepted technology decisions and their implementation status are indexed in
+[the Architecture Decision Records](../docs/decisions/README.md). Read the relevant
+record before changing its governed components.
+
+[ADR-0009](../docs/decisions/0009-adopt-bun-for-development.md) retains Bun for
+development; [ADR-0010](../docs/decisions/0010-adopt-nodejs-for-production.md) selects
+Node.js for production services and supersedes earlier Bun-production assumptions.
+The checked-in API/server images and adapters still use Bun and remain development
+implementations until the Node migration and its release verification are complete.
+
 The goal is a Modular monorepo with an authoritative server, independent WebSocket chat,
 file and supporting services, an administrative dashboard, a landing page, an
-experimental web client, and Python bots. TypeScript/Bun is the proposed foundation for
-application services, while allowing processes in other languages when measurements
-justify them.
+experimental web client, and Python bots. TypeScript is the foundation for application
+services, with Bun in development and Node.js in production. Processes in other languages
+remain possible when measurements justify them.
 
 The previous proof of concept with APK v12.06.0 opened the city and map screens using
 Bun, MariaDB, Redis and ZooKeeper. This evidence does not validate PostgreSQL,
@@ -30,20 +40,20 @@ below. The API is **single and shared**, initially with one replica; do not crea
 API per realm. Each realm has a separate authoritative Server, with an active logical
 instance. The initial limit is **two realms**.
 
-| Location | Defined components |
-| --- | --- |
-| VPS Europe / Kubernetes | Shared API, API Gateway, Traefik, ZooKeeper, one Server per realm, Combat TypeScript, workers/relay and Files. |
-| Cloudflare Pages | Landing page, public documentation and WebAdmin. |
-| Vercel | Experimental Web Game in SSR; runtime/adapter compatible with the chosen framework. |
-| Redis.io / Redis Cloud | Redis for caching, sessions, presence and, only if adopted, separate Redis for BullMQ queues. |
-| Neon | PostgreSQL: write compute and read compute/replica of the same production branch. |
-| Managed MongoDB Cluster | Large documents and temporary chat archive; exact provider/plan yet to be selected. |
-| CloudAMQP | Managed RabbitMQ. |
-| Firebase | Auth (Guest, Facebook, Google, Email/Password, Apple, Microsoft and GitHub), product telemetry and push notifications via FCM. |
-| Stripe | Checkout/payments in USD, packages from $1 to $5. |
-| External hosting to be defined | WS chat and Python bot; outside the main VPS in the initial topology. |
-| Cloudflare R2 | Distribution of APK releases and Lua bundles/validated resources; direct downloads, without going through VPS. |
-| Destinations to be defined | Storage of other private objects and observability backend. MinIO remains the choice for development. |
+| Location                       | Defined components                                                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| VPS Europe / Kubernetes        | Shared API, API Gateway, Traefik, ZooKeeper, one Server per realm, Combat TypeScript, workers/relay and Files.                 |
+| Cloudflare Pages               | Landing page, public documentation and WebAdmin.                                                                               |
+| Vercel                         | Experimental Web Game in SSR; runtime/adapter compatible with the chosen framework.                                            |
+| Redis.io / Redis Cloud         | Redis for caching, sessions, presence and, only if adopted, separate Redis for BullMQ queues.                                  |
+| Neon                           | PostgreSQL: write compute and read compute/replica of the same production branch.                                              |
+| Managed MongoDB Cluster        | Large documents and temporary chat archive; exact provider/plan yet to be selected.                                            |
+| CloudAMQP                      | Managed RabbitMQ.                                                                                                              |
+| Firebase                       | Auth (Guest, Facebook, Google, Email/Password, Apple, Microsoft and GitHub), product telemetry and push notifications via FCM. |
+| Stripe                         | Checkout/payments in USD, packages from $1 to $5.                                                                              |
+| External hosting to be defined | WS chat and Python bot; outside the main VPS in the initial topology.                                                          |
+| Cloudflare R2                  | Distribution of APK releases and Lua bundles/validated resources; direct downloads, without going through VPS.                 |
+| Destinations to be defined     | Storage of other private objects and observability backend. MinIO remains the choice for development.                          |
 
 A single Kubernetes node does not provide high availability for the VPS. Failure of this
 machine affects API and realms hosted on it; remote data does not make processes
@@ -286,24 +296,24 @@ mindmap
 
 ## 3. Applications and responsibility boundaries
 
-| Application/component | Location and execution defined | Responsibility |
-| --- | --- | --- |
-| `apps/api` | A shared API across VPS/Kubernetes, TypeScript/Bun | Discovery, Firebase validation, identity binding, push preferences/devices, queries, Admin backend, Stripe orders, and webhooks. It is not replicated per realm. |
-| `apps/server` | One active logical process/pod per realm on VPS, TypeScript/Bun | Authority over city, economy, troops, skills, marches and combat. A maximum of two realms at this stage. |
-| API Gateway + Traefik | VPS/Kubernetes | Ingress, routing, HTTP/WSS policies and TCP passthrough; configuration in `infra/`, without gameplay rules. |
-| `apps/combat` | VPS/Kubernetes, TypeScript initially | Limited calculation pool, separated from the network handling and economic state updates. Rust or Go are future alternatives after benchmarking and equivalence. |
-| `apps/workers` | VPS/Kubernetes, TypeScript/Bun | Outbox, CloudAMQP queues, projections, retention, push via FCM and auxiliary tasks; quotas per workload. |
-| `apps/files` | VPS/Kubernetes, TypeScript/Bun | Uploads, validation, metadata and access to external storage. Transformation CPU has its own limits. |
-| `apps/chat` | Service external to VPS, hosting to be defined | WS chat, channels, authorization, history, moderation and 1/7 day retention. |
-| `apps/bot` | Service external to VPS, Python | Authenticated simulators with quotas without direct access to the realm state. |
-| `apps/admin` | Cloudflare Pages, `admin.opencok.com` | Administrative panel; uses shared API and authorized identity. |
-| `apps/www` | Cloudflare Pages, `opencok.com` | Public landing page. |
-| `apps/docs` — planned | Cloudflare Pages, `docs.opencok.com` | Documentation website; versioned content and publication. |
-| `apps/web` | Vercel, `game.opencok.com` | Experimental SSR Web Game, with continuous rendering and in-browser game connection. |
+| Application/component | Location and execution defined                                      | Responsibility                                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api`            | A shared API across VPS/Kubernetes, TypeScript/Node.js              | Discovery, Firebase validation, identity binding, push preferences/devices, queries, Admin backend, Stripe orders, and webhooks. It is not replicated per realm. |
+| `apps/server`         | One active logical process/pod per realm on VPS, TypeScript/Node.js | Authority over city, economy, troops, skills, marches and combat. A maximum of two realms at this stage.                                                         |
+| API Gateway + Traefik | VPS/Kubernetes                                                      | Ingress, routing, HTTP/WSS policies and TCP passthrough; configuration in `infra/`, without gameplay rules.                                                      |
+| `apps/combat`         | VPS/Kubernetes, TypeScript initially                                | Limited calculation pool, separated from the network handling and economic state updates. Rust or Go are future alternatives after benchmarking and equivalence. |
+| `apps/workers`        | VPS/Kubernetes, TypeScript/Node.js                                  | Outbox, CloudAMQP queues, projections, retention, push via FCM and auxiliary tasks; quotas per workload.                                                         |
+| `apps/files`          | VPS/Kubernetes, TypeScript/Node.js                                  | Uploads, validation, metadata and access to external storage. Transformation CPU has its own limits.                                                             |
+| `apps/chat`           | Service external to VPS, hosting to be defined                      | WS chat, channels, authorization, history, moderation and 1/7 day retention.                                                                                     |
+| `apps/bot`            | Service external to VPS, Python                                     | Authenticated simulators with quotas without direct access to the realm state.                                                                                   |
+| `apps/admin`          | Cloudflare Pages, `admin.opencok.com`                               | Administrative panel; uses shared API and authorized identity.                                                                                                   |
+| `apps/www`            | Cloudflare Pages, `opencok.com`                                     | Public landing page.                                                                                                                                             |
+| `apps/docs` — planned | Cloudflare Pages, `docs.opencok.com`                                | Documentation website; versioned content and publication.                                                                                                        |
+| `apps/web`            | Vercel, `game.opencok.com`                                          | Experimental SSR Web Game, with continuous rendering and in-browser game connection.                                                                             |
 
 Vercel is responsible for the SSR frontend, not the authoritative state of the realms.
 Validate the framework, adapter, and deployment runtime; sharing TypeScript does not
-mean that all environments run the same backend Bun composition. The chosen strategy
+mean that all environments run the same backend composition or runtime. The chosen strategy
 connects the browser directly to the backend WSS, without using the SSR as a permanent
 relay of match messages. [Reference: Vercel Functions](https://vercel.com/docs/functions/limitations).
 
@@ -353,13 +363,13 @@ opencok/
 
 ### Package groups
 
-| Group | Existing packages that can fulfill this role | Dependency rule |
-| --- | --- | --- |
-| Domains | `account`, `player`, `building`, `city`, `hero`, `troops`, `combat`, `alliance`, `kvk`, `campaigns`, `npc`, `rules`, `ledger` | Pure rules and use cases; they must not import sockets, controllers, an ORM, or a broker. |
-| Contracts | `contracts`, `api-contracts`, `dtos`, `messages`, `events`, `enums`, `validations` | Versioned schemas and envelopes, with compatibility tests. |
-| Entry and application | `api`, `api-client`, `command`, `connection`, `controllers`, `middlewares`, `guard`, `identity`, `policy` | Validate and authorize; call the use cases. They do not duplicate economic rules. |
-| Persistence and integration | `repositories`, `drizzle`, `mongoose`, `storage`, `queues`, `webhooks`, `notifications`, `email` | Implement use case interfaces. Writes respect domain ownership. |
-| Setup and support | `config`, `env`, `errors`, `resources`, `i18n`, `constants`, `scripts`, `generators` | Small and explicit dependencies, with environment and resource validation. |
+| Group                       | Existing packages that can fulfill this role                                                                                  | Dependency rule                                                                           |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Domains                     | `account`, `player`, `building`, `city`, `hero`, `troops`, `combat`, `alliance`, `kvk`, `campaigns`, `npc`, `rules`, `ledger` | Pure rules and use cases; they must not import sockets, controllers, an ORM, or a broker. |
+| Contracts                   | `contracts`, `api-contracts`, `dtos`, `messages`, `events`, `enums`, `validations`                                            | Versioned schemas and envelopes, with compatibility tests.                                |
+| Entry and application       | `api`, `api-client`, `command`, `connection`, `controllers`, `middlewares`, `guard`, `identity`, `policy`                     | Validate and authorize; call the use cases. They do not duplicate economic rules.         |
+| Persistence and integration | `repositories`, `drizzle`, `mongoose`, `storage`, `queues`, `webhooks`, `notifications`, `email`                              | Implement use case interfaces. Writes respect domain ownership.                           |
+| Setup and support           | `config`, `env`, `errors`, `resources`, `i18n`, `constants`, `scripts`, `generators`                                          | Small and explicit dependencies, with environment and resource validation.                |
 
 Names such as `core`, `base`, `share`, `helpers`, and `utils`
 should not accumulate rules from all domains. Define a public API for each package and
@@ -386,13 +396,13 @@ language.
 
 ## 5. Domains, network and gateways
 
-| Defined domain | Destination | Usage |
-| --- | --- | --- |
-| `opencok.com` | Cloudflare Pages / `apps/www` | Landing page. |
-| `docs.opencok.com` | Cloudflare Pages / `apps/docs` | Public documentation. |
-| `admin.opencok.com` | Cloudflare Pages / `apps/admin` | Administrative panel. |
-| `game.opencok.com` | Vercel / `apps/web` | Web Game SSR. |
-| `api.opencok.com` | VPS HTTPS/WSS Input → Traefik → Kong | Shared API, discovery, game WS, files and Stripe webhooks. |
+| Defined domain      | Destination                          | Usage                                                      |
+| ------------------- | ------------------------------------ | ---------------------------------------------------------- |
+| `opencok.com`       | Cloudflare Pages / `apps/www`        | Landing page.                                              |
+| `docs.opencok.com`  | Cloudflare Pages / `apps/docs`       | Public documentation.                                      |
+| `admin.opencok.com` | Cloudflare Pages / `apps/admin`      | Administrative panel.                                      |
+| `game.opencok.com`  | Vercel / `apps/web`                  | Web Game SSR.                                              |
+| `api.opencok.com`   | VPS HTTPS/WSS Input → Traefik → Kong | Shared API, discovery, game WS, files and Stripe webhooks. |
 
 Frontend SSR, API calls and game session connection have different destinations. The
 browser in `game.opencok.com` uses HTTPS/WSS from `api.opencok.com`, with authorized origin. Admin
@@ -464,14 +474,14 @@ repeating the mutation.
 
 ## 7. MongoDB, Redis and file storage
 
-| Technology | Planned data | Authority and recovery |
-| --- | --- | --- |
-| PostgreSQL on Neon | Progress, economy, accounts, metadata, active chat and outbox | Transactional authority. Global/alliance chat leaves the active history after 24 hours and expires after 7 days; details in section 20. Backup with point-in-time recovery and restore testing. |
-| Managed MongoDB Cluster | Detailed battle reports, simulation documents, projections and temporary chat archive | Documents versioned by ID and schema. Archived global/alliance chat expires 7 days after submission, not archiving. Unique documents require their own backup. |
-| Redis.io / Redis Cloud | Cache of queries, sessions, presence, ephemeral fan-out and traffic limits | TTL, invalidation and recovery set. It is not the only record of balance, completion or combat. |
-| Separate Redis.io for queues — if BullMQ | Jobs, retries and auxiliary schedules | An instance separate from the cache, with persistence and a `noeviction` policy. |
-| Cloudflare R2 — releases | APKs, Lua bundles and update manifests | Versioned artifacts, integrity/authenticity check and release channel; see section 27. |
-| S3 compatible — other objects | Avatars, assets, attachments, large replays, exports and backups | Provider per operation yet to be defined; MinIO in development, with access/retention policies. |
+| Technology                               | Planned data                                                                          | Authority and recovery                                                                                                                                                                          |
+| ---------------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PostgreSQL on Neon                       | Progress, economy, accounts, metadata, active chat and outbox                         | Transactional authority. Global/alliance chat leaves the active history after 24 hours and expires after 7 days; details in section 20. Backup with point-in-time recovery and restore testing. |
+| Managed MongoDB Cluster                  | Detailed battle reports, simulation documents, projections and temporary chat archive | Documents versioned by ID and schema. Archived global/alliance chat expires 7 days after submission, not archiving. Unique documents require their own backup.                                  |
+| Redis.io / Redis Cloud                   | Cache of queries, sessions, presence, ephemeral fan-out and traffic limits            | TTL, invalidation and recovery set. It is not the only record of balance, completion or combat.                                                                                                 |
+| Separate Redis.io for queues — if BullMQ | Jobs, retries and auxiliary schedules                                                 | An instance separate from the cache, with persistence and a `noeviction` policy.                                                                                                                |
+| Cloudflare R2 — releases                 | APKs, Lua bundles and update manifests                                                | Versioned artifacts, integrity/authenticity check and release channel; see section 27.                                                                                                          |
+| S3 compatible — other objects            | Avatars, assets, attachments, large replays, exports and backups                      | Provider per operation yet to be defined; MinIO in development, with access/retention policies.                                                                                                 |
 
 MongoDB alleviates queries and documents that do not need to participate in the economic
 transaction. The primary stores the ID, version and summary necessary for consistency; a
@@ -595,7 +605,7 @@ is not enough: it is necessary to control all sources of randomness, as shown be
 ### 10.1. Current language choice and exactness criteria
 
 **The engine starts in TypeScript**, maintaining the monorepo contracts and the backend
-Bun runtime. The previous recommendation to go directly to Rust is replaced by this
+Node.js production runtime, with Bun for development. The previous recommendation to go directly to Rust is replaced by this
 decision. Rust and Go are future candidates if measurements show that the compute, not
 database/network/queue, is the relevant bottleneck.
 
@@ -610,14 +620,14 @@ any later port to Rust/Go: migrating based on performance does not authorize cha
 casualties, random draws, or rewards. There is no language that automatically eliminates
 rule or formula errors.
 
-| Option | Defined role |
-| --- | --- |
-| **TypeScript/Bun** | Initial implementation. Explicit layer for Java numeric semantics; calculation isolated from networking, with CPU/memory budget. |
-| **Java** | Migration oracle and reference executor in the laboratory. The game does not rely on reintroducing the entire production Java server to use TypeScript. |
-| **Rust** | Future candidate to reduce CPU cost/latency/allocations if a benchmark warrants it. Requires new validation of mathematics and contract. |
-| **Go** | Future candidate, also subject to CPU measurement, allocations, GC pauses and numerical equivalence. Don't assume that switching to Go makes the formula accurate or faster. |
-| **C++** | No adoption planned at this stage. |
-| **Python** | Bots and analysis tools, no authoritative battle calculation loop. |
+| Option                 | Defined role                                                                                                                                                                 |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TypeScript/Node.js** | Initial implementation. Explicit layer for Java numeric semantics; calculation isolated from networking, with CPU/memory budget.                                             |
+| **Java**               | Migration oracle and reference executor in the laboratory. The game does not rely on reintroducing the entire production Java server to use TypeScript.                      |
+| **Rust**               | Future candidate to reduce CPU cost/latency/allocations if a benchmark warrants it. Requires new validation of mathematics and contract.                                     |
+| **Go**                 | Future candidate, also subject to CPU measurement, allocations, GC pauses and numerical equivalence. Don't assume that switching to Go makes the formula accurate or faster. |
+| **C++**                | No adoption planned at this stage.                                                                                                                                           |
+| **Python**             | Bots and analysis tools, no authoritative battle calculation loop.                                                                                                           |
 
 ### 10.2. Java review scope and evidence
 
@@ -632,15 +642,15 @@ The scan also inventoried 34 world handler/battle factory files, four effects su
 files, and the boss flows. Dependencies such as profiles, marches, hospitals, and events
 make the domain larger than a single damage function.
 
-| Reference area | What was observed and needs to be included in the specification |
-| --- | --- |
-| `battle/manager/AbstractFightManager` | Preparation of participants; turns/subturns; movement; target selection; attacks by troops, generals and dragons; damage; defender protection; victory and report. PVP, PVE, tower and challenge managers use this core. |
-| `battle/info/*`, `battle/role/*` | Attributes from XML and profiles, weighted abilities, temporary effects, positions, troop strengths, deaths, and fractional damage remainder. |
-| `battle/manager/FightCalCache` | Contextual cache by role/effect/skill, invalidation by dependencies and comparison mode with recalculation. Changing the cache can change results if the invalidation is incorrect. |
-| `gameengine/battle/*`, `UserProfile.getGameEffect` | Effects aggregate several sources: VIP, equipment, heroes, alliance, territory, world, dragons and event conditions. Part depends on global state and execution context. |
-| `world/normal/AbstractWorldFightHandler` and subclasses | PVP context, city, resources, territory, reinforcements and other modalities; march assembly; calculation; loss distribution; after effects. |
-| `WorldMarchGeneralArmy`, `FightResultObject`, bosses and relics | Losses per participant, conversion of dead to injured, healing, protection and modifiers per mode, as well as periodic effects outside the central loop. |
-| `battle/report/*` | The contract includes the sequence of events/turns used by the client, not just the winning side. |
+| Reference area                                                  | What was observed and needs to be included in the specification                                                                                                                                                          |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `battle/manager/AbstractFightManager`                           | Preparation of participants; turns/subturns; movement; target selection; attacks by troops, generals and dragons; damage; defender protection; victory and report. PVP, PVE, tower and challenge managers use this core. |
+| `battle/info/*`, `battle/role/*`                                | Attributes from XML and profiles, weighted abilities, temporary effects, positions, troop strengths, deaths, and fractional damage remainder.                                                                            |
+| `battle/manager/FightCalCache`                                  | Contextual cache by role/effect/skill, invalidation by dependencies and comparison mode with recalculation. Changing the cache can change results if the invalidation is incorrect.                                      |
+| `gameengine/battle/*`, `UserProfile.getGameEffect`              | Effects aggregate several sources: VIP, equipment, heroes, alliance, territory, world, dragons and event conditions. Part depends on global state and execution context.                                                 |
+| `world/normal/AbstractWorldFightHandler` and subclasses         | PVP context, city, resources, territory, reinforcements and other modalities; march assembly; calculation; loss distribution; after effects.                                                                             |
+| `WorldMarchGeneralArmy`, `FightResultObject`, bosses and relics | Losses per participant, conversion of dead to injured, healing, protection and modifiers per mode, as well as periodic effects outside the central loop.                                                                 |
+| `battle/report/*`                                               | The contract includes the sequence of events/turns used by the client, not just the winning side.                                                                                                                        |
 
 To reduce the risk of relying on a decompiler rebuild, six critical methods were checked
 against the **original JAR bytecode**, using `javap` in JDK 8: damage converted to
@@ -651,20 +661,20 @@ original artifacts.
 
 ### 10.3. Numerical and behavioral risks found
 
-| Observed evidence | Consequence for the new engine |
-| --- | --- |
-| Mixture of `float`, `double`, `int`, decimal parsing and intermediate promotions | `f32` and `f64` must appear at the corresponding points in the evaluation. A result saved in `double` may have already lost precision in a previous `float` multiplication. |
-| Using `Math.pow` with Configuration Derived Exponents | Copying the formula to `powf` does not prove equivalence of last bits or integer thresholds. Pin and validate the mathematical implementation. |
-| Casts for integer, `floor`, `ceil` and `round` in different places | Do not replace them with a generic rounding function. Preserve the moment of each conversion, saturation and treatment of exceptional values. |
-| `hurtAcc` preserves the fractional part of the damage | Rounding each attack without carrying the remainder changes the casualty total over the course of the battle. |
-| Turns, sub-turns, order by side/position, towers, traps and early termination | Parallelizing a battle's attacks or rearranging the loop can change live targets, abilities, and the winner. |
-| `HashMap`, lists and multimap in formations, skills, and sums | Ordering everything differently is not a neutral optimization. Capture the effective order of entry and explain the tiebreakers. |
-| `ThreadLocalRandom`, `Math.random`, `RandomUtil` with `SecureRandom`, `RandomUtils` and `Random` in helpers | A single seed does not control the legacy. Comparison requires intercepting/replaying all random calls, their types, thresholds and order. |
-| Probabilistic tests with different limits and comparators | Open/closed ranges, `<` and `<=` need boundary testing; do not normalize all chances to a generic Bernoulli. |
-| Effects can query profile, role flags, realm and context during calculation | Snapshot needs to capture these dependencies and preserve turn/target-conditional effects. Just serializing troop counts is insufficient. |
-| Result calculation also contains recovery rules and draws | The replay must cover the generation of the final result, not end when the last attack ends. Getters with side effects must not become unrestricted, repeatable reads. |
-| Conversion to injured and mode modifiers happens outside of the central manager | Comparing only damage or victory leaves out real losses, hospital and persisted state. |
-| Some skill initializers catch exceptions and continue | Reference Java may also produce degraded result. Configuration errors should block validation and require investigation, rather than being treated as a successful oracle result. |
+| Observed evidence                                                                                           | Consequence for the new engine                                                                                                                                                    |
+| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mixture of `float`, `double`, `int`, decimal parsing and intermediate promotions                            | `f32` and `f64` must appear at the corresponding points in the evaluation. A result saved in `double` may have already lost precision in a previous `float` multiplication.       |
+| Using `Math.pow` with Configuration Derived Exponents                                                       | Copying the formula to `powf` does not prove equivalence of last bits or integer thresholds. Pin and validate the mathematical implementation.                                    |
+| Casts for integer, `floor`, `ceil` and `round` in different places                                          | Do not replace them with a generic rounding function. Preserve the moment of each conversion, saturation and treatment of exceptional values.                                     |
+| `hurtAcc` preserves the fractional part of the damage                                                       | Rounding each attack without carrying the remainder changes the casualty total over the course of the battle.                                                                     |
+| Turns, sub-turns, order by side/position, towers, traps and early termination                               | Parallelizing a battle's attacks or rearranging the loop can change live targets, abilities, and the winner.                                                                      |
+| `HashMap`, lists and multimap in formations, skills, and sums                                               | Ordering everything differently is not a neutral optimization. Capture the effective order of entry and explain the tiebreakers.                                                  |
+| `ThreadLocalRandom`, `Math.random`, `RandomUtil` with `SecureRandom`, `RandomUtils` and `Random` in helpers | A single seed does not control the legacy. Comparison requires intercepting/replaying all random calls, their types, thresholds and order.                                        |
+| Probabilistic tests with different limits and comparators                                                   | Open/closed ranges, `<` and `<=` need boundary testing; do not normalize all chances to a generic Bernoulli.                                                                      |
+| Effects can query profile, role flags, realm and context during calculation                                 | Snapshot needs to capture these dependencies and preserve turn/target-conditional effects. Just serializing troop counts is insufficient.                                         |
+| Result calculation also contains recovery rules and draws                                                   | The replay must cover the generation of the final result, not end when the last attack ends. Getters with side effects must not become unrestricted, repeatable reads.            |
+| Conversion to injured and mode modifiers happens outside of the central manager                             | Comparing only damage or victory leaves out real losses, hospital and persisted state.                                                                                            |
+| Some skill initializers catch exceptions and continue                                                       | Reference Java may also produce degraded result. Configuration errors should block validation and require investigation, rather than being treated as a successful oracle result. |
 
 The JDK is also part of the contract. Initially pin the reference runtime, artifacts,
 architecture and resources; do not update JDK or swap `Math` for `StrictMath` and
@@ -708,7 +718,7 @@ Do not enable fast-math, reassociation, approximations or explicit FMA without p
 equivalence of the affected operation. [Reference: powf accuracy](https://doc.rust-lang.org/std/primitive.f64.html#method.powf).
 
 In the initial engine, `Math.pow` and other mathematical functions of the JavaScript
-runtime also need to pass through Java vectors. Pin the Bun/engine version, architecture
+runtime also need to pass through Java vectors. Pin the Node.js production engine and Bun development versions, architecture
 and dependencies; TypeScript does not promise numerical equivalence to legacy per se.
 The Rust examples above are risks of a future port, not a change from the current choice
 of TypeScript.
@@ -797,12 +807,12 @@ In addition to static inspection and bytecode reading, independent numeric probe
 run on **Temurin 8.0.504** and **Rust 1.99.0 with optimization**. They are synthetic
 examples of semantics, not a port of private code nor full battles. Observed examples:
 
-| Synthetic probe | Observed result | Implication |
-| --- | --- | --- |
-| Quantity `16,777,217` passes through `float` before returning to integer | `16,777,216`; the path only in `double` keeps `16,777,217` | Promoting everything to 64-bit can change a unit. |
+| Synthetic probe                                                                               | Observed result                                                                                                  | Implication                                             |
+| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Quantity `16,777,217` passes through `float` before returning to integer                      | `16,777,216`; the path only in `double` keeps `16,777,217`                                                       | Promoting everything to 64-bit can change a unit.       |
 | Ten increments with fractional remainder, using `0.1f` promoted to `double` or `0.1` directly | First path accounts for `1`; the second accounts for `0` in this sequence of flooring and carrying the remainder | Parsing and intermediate precision affect accumulators. |
-| Rounding of `-1.5` | Java `-1`; default Rust `-2` | The direct translation of rounding already diverges. |
-| Floor and cast by `-1.2` | Floor `-2`; cast to integer `-1` | Truncate and round down are different operations. |
+| Rounding of `-1.5`                                                                            | Java `-1`; default Rust `-2`                                                                                     | The direct translation of rounding already diverges.    |
+| Floor and cast by `-1.2`                                                                      | Floor `-2`; cast to integer `-1`                                                                                 | Truncate and round down are different operations.       |
 
 Differential tests of complete battles, throughput/p99 benchmark, Rust validation for
 combat or proof of correctness of all effects were not performed in this review. No
@@ -914,7 +924,7 @@ Server/Chat confirms the event and its outbox; the worker consumes the notificat
 intent and sends it through FCM from a trusted environment. It runs on `apps/workers` on
 the VPS, using the defined messaging, without a new server per realm. The external call
 does not enter the gameplay transaction. Use SDK/Admin or HTTP v1 with an adapter
-validated for Bun and credentials restricted to the backend. [Reference: FCM architecture](https://firebase.google.com/docs/cloud-messaging/fcm-architecture).
+validated for the Node.js production runtime and credentials restricted to the backend. [Reference: FCM architecture](https://firebase.google.com/docs/cloud-messaging/fcm-architecture).
 
 The API associates each FCM installation/token with the authenticated account, platform,
 environment and preferences; recipient per character/realm is validated by the backend.
@@ -966,17 +976,17 @@ The VPS's executable infrastructure lives on Kubernetes. SaaS services and front
 not pods in this cluster. Initial deployment is **a single node**; a lightweight
 distribution like K3s is a candidate, after measuring its actual cost. [Reference: K3s requirements](https://docs.k3s.io/installation/requirements).
 
-| Layer | Initial deployment |
-| --- | --- |
-| Entrance | Traefik and Kong/API Gateway on VPS Kubernetes, with declarative configuration. |
-| API | A shared Deployment, initially one replica; not duplicated per realm. |
-| Realms | `server-realm-1` and, if supported, `server-realm-2`; one active owner per realm and separate settings/pools. |
-| Calculation and auxiliaries | Combat TypeScript, workers/relay and Files with independent limits. |
-| Coordination | A ZooKeeper instance with persistent volume on the initial node; it is not an HA installation. Distributed ensemble is evolution for multiple hosts. |
-| Data and queues | External Neon, Redis.io, MongoDB Cluster and CloudAMQP; do not install your production copies on the VPS. |
-| Frontends | Pages for WWW/Docs/Admin; Vercel for Web Game SSR. |
-| Chat and bots | Services external to the VPS; hosting and quotas still to be selected. |
-| Observability | Light collectors/exporters in the cluster; target of Prometheus/Loki/Grafana outside of core budget or dedicated capacity yet to be defined. |
+| Layer                       | Initial deployment                                                                                                                                   |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Entrance                    | Traefik and Kong/API Gateway on VPS Kubernetes, with declarative configuration.                                                                      |
+| API                         | A shared Deployment, initially one replica; not duplicated per realm.                                                                                |
+| Realms                      | `server-realm-1` and, if supported, `server-realm-2`; one active owner per realm and separate settings/pools.                                        |
+| Calculation and auxiliaries | Combat TypeScript, workers/relay and Files with independent limits.                                                                                  |
+| Coordination                | A ZooKeeper instance with persistent volume on the initial node; it is not an HA installation. Distributed ensemble is evolution for multiple hosts. |
+| Data and queues             | External Neon, Redis.io, MongoDB Cluster and CloudAMQP; do not install your production copies on the VPS.                                            |
+| Frontends                   | Pages for WWW/Docs/Admin; Vercel for Web Game SSR.                                                                                                   |
+| Chat and bots               | Services external to the VPS; hosting and quotas still to be selected.                                                                               |
+| Observability               | Light collectors/exporters in the cluster; target of Prometheus/Loki/Grafana outside of core budget or dedicated capacity yet to be defined.         |
 
 Three ZooKeeper pods on the same VPS cannot survive machine loss. Kubernetes does not
 create RAM, vCPU, or physical availability. It also does not automatically duplicate a
@@ -1013,23 +1023,23 @@ with tested procedures.
 
 ## 14. Failures and expected degradation
 
-| Failure | Required behavior |
-| --- | --- |
-| Neon / writing compute | Suspend new mutations; reconnect with timeout; resolve uncertain result by receipt/idempotency. Do not confirm economic changes only in memory. |
-| Neon / compute ro delayed or unavailable | Query compute rw for consistent data; reduce reporting or indicate lag, without burdening the primary with unlimited fallback. |
-| Cache Redis | Reduce dependent functionalities and apply limit fallback; Authentication and quotas explicitly fail when there is no safe alternative. |
-| Broker or worker | Preserve the outbox and show pending status; reprocess without duplicating effects. Impose backlog and backpressure limits. |
-| ZooKeeper/session | Stop mutations of the affected partition until reasserting ownership; refuse stale epochs. |
-| Chat | Game continues; chat reports unavailability and retrieves history via the persisted source. |
-| Files/MongoDB/search | Uploading, documents and searches degrade; Central commands do not wait indefinitely for these services. |
-| External Battle Engine | Maintain recoverable reserve and pending result; timeout, idempotent retry and reconciliation. Do not create fictitious victory. |
-| Observability | Maintain game behavior; limited buffers and controlled disposal of operational logs, without losing the transactional audit record. |
-| Bots | Stop simulators without interrupting players; allow quick shutdown by scope. |
-| Firebase Auth | Login/renewal may be unavailable; Existing sessions comply with validity and revocation policy. Do not accept invalid token to work around the flaw. |
-| Firebase telemetry | Discard/buffer events in a limited way; do not block game commands. |
+| Failure                                           | Required behavior                                                                                                                                       |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Neon / writing compute                            | Suspend new mutations; reconnect with timeout; resolve uncertain result by receipt/idempotency. Do not confirm economic changes only in memory.         |
+| Neon / compute ro delayed or unavailable          | Query compute rw for consistent data; reduce reporting or indicate lag, without burdening the primary with unlimited fallback.                          |
+| Cache Redis                                       | Reduce dependent functionalities and apply limit fallback; Authentication and quotas explicitly fail when there is no safe alternative.                 |
+| Broker or worker                                  | Preserve the outbox and show pending status; reprocess without duplicating effects. Impose backlog and backpressure limits.                             |
+| ZooKeeper/session                                 | Stop mutations of the affected partition until reasserting ownership; refuse stale epochs.                                                              |
+| Chat                                              | Game continues; chat reports unavailability and retrieves history via the persisted source.                                                             |
+| Files/MongoDB/search                              | Uploading, documents and searches degrade; Central commands do not wait indefinitely for these services.                                                |
+| External Battle Engine                            | Maintain recoverable reserve and pending result; timeout, idempotent retry and reconciliation. Do not create fictitious victory.                        |
+| Observability                                     | Maintain game behavior; limited buffers and controlled disposal of operational logs, without losing the transactional audit record.                     |
+| Bots                                              | Stop simulators without interrupting players; allow quick shutdown by scope.                                                                            |
+| Firebase Auth                                     | Login/renewal may be unavailable; Existing sessions comply with validity and revocation policy. Do not accept invalid token to work around the flaw.    |
+| Firebase telemetry                                | Discard/buffer events in a limited way; do not block game commands.                                                                                     |
 | Firebase Cloud Messaging / push permission denied | Game continues; retry limited to warnings still valid, with discard after expiration. Recover state on open/reconnect, without relying on notification. |
-| Stripe | Suspend new purchases or show pending status; receive/reconcile events later without granting credit based on the success page. |
-| VPS/Single Node Kubernetes | API and local realms stop until host recovers; External data services preserve what has been confirmed according to their guarantees. |
+| Stripe                                            | Suspend new purchases or show pending status; receive/reconcile events later without granting credit based on the success page.                         |
+| VPS/Single Node Kubernetes                        | API and local realms stop until host recovers; External data services preserve what has been confirmed according to their guarantees.                   |
 
 ## 15. Sequence of evolution and pending decisions
 
@@ -1086,7 +1096,10 @@ separate domain change.
 
 Standard Drizzle Kit generation maintains independent PostgreSQL migrations and
 snapshots per role. The migration command applies only pending SQL using Drizzle's
-journal and serializes deployments with a PostgreSQL advisory lock. It refuses a
+journal and serializes deployments with a PostgreSQL advisory lock. Generated SQL statement breakpoints are disabled to
+keep migrations comment-free. Removing historical breakpoint comments changes file
+hashes but not SQL statements or journal timestamps; existing applied migration
+records are retained, and no migration history or player data is reset. It refuses a
 database containing the other role's application schemas. New kingdoms apply the same
 kingdom migrations to separate databases. Default setup creates missing configured
 databases and applies pending migrations. Typed connection routing selects a kingdom
@@ -1158,7 +1171,7 @@ for configuration, supported commands, limitations and verification.
 The root Compose environment now composes Traefik, the shared Bun discovery API,
 one read-only Bun realm server, PostgreSQL, Redis and ZooKeeper. MinIO and its one-shot setup job supply the client CDN. Chat and media/files
 have no services or gateway routes in this stage. All services use `all`/`dev`
-profiles except pgAdmin, which uses `all` only. The broader production architecture remains the target;
+profiles, including pgAdmin, Redis Insight and Portainer. The broader production architecture remains the target;
 this local stack does not establish TLS, Firebase or production readiness.
 
 The API reads global account/mapping tables through existing Drizzle models. It
@@ -1194,14 +1207,14 @@ monotonic clock measures duration and timeout within the process. The client clo
 not determine completion, production or reward. Tests are given an injectable clock to
 advance days without waiting for real days.
 
-| System | State and authoritative transitions |
-| --- | --- |
-| Construction, research and training | `queued → running → completed`; permitted cancellation uses an exclusive transition with a versioned refund policy. |
-| Resources and production | Record `lastSettledAt`, production rates, caps, and rate changes; settle the unprocessed range once. |
-| Marches | `scheduled → marching → arrived → returning → returned`, with deadline, destination and troop reserves. Combat/occupation are explicit transitions upon arrival. |
-| Temporary effects and abilities | Versioned start, end, overlap, and source; expiration changes state and invalidates dependent caches. |
-| Realm Events | Pinned schedule and rule version; opening, closing and reward have their own receipts. |
-| Rewards, inventory and quests | Transitions by command/event with idempotency; consulting a screen does not create a new reward. |
+| System                              | State and authoritative transitions                                                                                                                              |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Construction, research and training | `queued → running → completed`; permitted cancellation uses an exclusive transition with a versioned refund policy.                                              |
+| Resources and production            | Record `lastSettledAt`, production rates, caps, and rate changes; settle the unprocessed range once.                                                             |
+| Marches                             | `scheduled → marching → arrived → returning → returned`, with deadline, destination and troop reserves. Combat/occupation are explicit transitions upon arrival. |
+| Temporary effects and abilities     | Versioned start, end, overlap, and source; expiration changes state and invalidates dependent caches.                                                            |
+| Realm Events                        | Pinned schedule and rule version; opening, closing and reward have their own receipts.                                                                           |
+| Rewards, inventory and quests       | Transitions by command/event with idempotency; consulting a screen does not create a new reward.                                                                 |
 
 A scheduler looks for past deadlines and wakes the responsible executor. Each activity
 has an ID, version, due date and expected state. Multiple workers can discover the same
@@ -1229,19 +1242,19 @@ represents the Firebase link and internal permissions; login credentials are man
 Firebase Auth. A realm's account/character belongs to the game. This separation resolves
 the overlap between API and Server.
 
-| Proposed domain/schema | Central entities | Authorized Writer |
-| --- | --- | --- |
-| `identity` | Unique Firebase UID binding for internal account, Guest/linked state, game session/ticket, internal revocation, and administrative roles | Shared API; provider credentials and bindings in Firebase Auth. |
-| `notifications` | FCM installations and tokens, preferences, account/character/realm scope, send intent, expiration, and attempts | API registers devices/preferences; worker sends notifications of authorized events. |
-| `game` | Player by realm, city, building, activity, research, troops, march, inventory and aggregate version | Partition owner server. |
-| `economy` | Wallet, ledger entry, reservation, consumption, refund, and operation receipt | Economic Server use cases; administrative API requests commands. |
-| `combat` | Battle, snapshot, reservations, engine version, result and application receipt | Server authoritative orchestrator. The Combat TypeScript process only calculates. |
-| `social` | Alliance, Membership, Roles, Permissions, and Membership Ranges | Server alliance domain. Chat queries derived authorization. |
-| `chat` | Channel, message, sequence, receipt, archive metadata, and retention state | Chat and its retention worker, with specific permissions. |
-| `files` | Upload, owner, object, hash, transformation and reference | Files and media workers. |
-| `billing` | USD Catalog, order, Checkout Session, payment, received events and delivery status | API/payments worker; granting items/currency only by the Realm Server and Ledger. |
-| `operations` | Rules version, publication and administrative audit | Authorized administrative use cases; publication passes through the Server when it affects gameplay. |
-| Integration | Outbox and inbox/receipts per service | The producer writes its outbox in the transaction; the consumer writes its inbox when applying the event. |
+| Proposed domain/schema | Central entities                                                                                                                         | Authorized Writer                                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `identity`             | Unique Firebase UID binding for internal account, Guest/linked state, game session/ticket, internal revocation, and administrative roles | Shared API; provider credentials and bindings in Firebase Auth.                                           |
+| `notifications`        | FCM installations and tokens, preferences, account/character/realm scope, send intent, expiration, and attempts                          | API registers devices/preferences; worker sends notifications of authorized events.                       |
+| `game`                 | Player by realm, city, building, activity, research, troops, march, inventory and aggregate version                                      | Partition owner server.                                                                                   |
+| `economy`              | Wallet, ledger entry, reservation, consumption, refund, and operation receipt                                                            | Economic Server use cases; administrative API requests commands.                                          |
+| `combat`               | Battle, snapshot, reservations, engine version, result and application receipt                                                           | Server authoritative orchestrator. The Combat TypeScript process only calculates.                         |
+| `social`               | Alliance, Membership, Roles, Permissions, and Membership Ranges                                                                          | Server alliance domain. Chat queries derived authorization.                                               |
+| `chat`                 | Channel, message, sequence, receipt, archive metadata, and retention state                                                               | Chat and its retention worker, with specific permissions.                                                 |
+| `files`                | Upload, owner, object, hash, transformation and reference                                                                                | Files and media workers.                                                                                  |
+| `billing`              | USD Catalog, order, Checkout Session, payment, received events and delivery status                                                       | API/payments worker; granting items/currency only by the Realm Server and Ledger.                         |
+| `operations`           | Rules version, publication and administrative audit                                                                                      | Authorized administrative use cases; publication passes through the Server when it affects gameplay.      |
+| Integration            | Outbox and inbox/receipts per service                                                                                                    | The producer writes its outbox in the transaction; the consumer writes its inbox when applying the event. |
 
 Minimum invariants: non-negative available balance; reservation not consumed twice;
 inventory and troops with valid quantities; activity with a single completion or
@@ -1302,15 +1315,15 @@ receives the same authorized identity regardless of the provider. This is the ta
 matrix; enabling the method requires provider configuration and validation in the Web
 Game and in each supported mobile version.
 
-| Method | Target Integration | Preparation and behavior |
-| --- | --- | --- |
-| **Guest** | Firebase Anonymous Auth | Create real anonymous identity, with validated session; maintain progress associated with the internal account. Do not use local UUID as authentication. |
-| **Facebook** | `facebook.com` | Meta application, credentials and callbacks configured; request only the necessary scopes. |
-| **Google** | `google.com` | OAuth configuration and validated mobile platform identifiers/signatures. |
-| **Email/Password** | `password` | Registration, email verification, recovery and password policy through Firebase; do not save password in PostgreSQL. |
-| **Apple** | `apple.com` | Apple identifiers, keys and callbacks; handle private email/relay and link consent as per flow. |
-| **Microsoft** | `microsoft.com` | Microsoft OAuth Registration; define accepted personal/organizational accounts and tenant policy. |
-| **GitHub** | `github.com` | OAuth GitHub app, authorized callback and minimal scopes; do not ask for access to repositories to play. |
+| Method             | Target Integration      | Preparation and behavior                                                                                                                                 |
+| ------------------ | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Guest**          | Firebase Anonymous Auth | Create real anonymous identity, with validated session; maintain progress associated with the internal account. Do not use local UUID as authentication. |
+| **Facebook**       | `facebook.com`          | Meta application, credentials and callbacks configured; request only the necessary scopes.                                                               |
+| **Google**         | `google.com`            | OAuth configuration and validated mobile platform identifiers/signatures.                                                                                |
+| **Email/Password** | `password`              | Registration, email verification, recovery and password policy through Firebase; do not save password in PostgreSQL.                                     |
+| **Apple**          | `apple.com`             | Apple identifiers, keys and callbacks; handle private email/relay and link consent as per flow.                                                          |
+| **Microsoft**      | `microsoft.com`         | Microsoft OAuth Registration; define accepted personal/organizational accounts and tenant policy.                                                        |
+| **GitHub**         | `github.com`            | OAuth GitHub app, authorized callback and minimal scopes; do not ask for access to repositories to play.                                                 |
 
 Configuration references: [Guest](https://firebase.google.com/docs/auth/web/anonymous-auth), [Facebook](https://firebase.google.com/docs/auth/web/facebook-login), [Google](https://firebase.google.com/docs/auth/web/google-signin), [Email/Password](https://firebase.google.com/docs/auth/web/password-auth),
 [Apple](https://firebase.google.com/docs/auth/web/apple), [Microsoft](https://firebase.google.com/docs/auth/web/microsoft-oauth) and [GitHub](https://firebase.google.com/docs/auth/web/github-auth).
@@ -1346,14 +1359,14 @@ The internal contract is independent of SFS or WebSocket. Transport adapters map
 client's existing fields to this envelope, without requiring an old APK to start sending
 unknown fields.
 
-| Field | Rule |
-| --- | --- |
-| `protocolVersion`, `schemaVersion` | Validate before interpreting commands or events. |
-| `requestId`, command type and content hash | Correlate response and allow retry without duplicating a mutation. |
-| Identity, realm and scope | Derived from the validated session; client-supplied IDs do not prove ownership. |
-| `aggregateId`, `expectedVersion` | Apply concurrency control when necessary. |
-| `eventId`, `sequence`, `occurredAt` | Identify durable events, order them per stream, and recover them. There is no implicit global order between channels/realms. |
-| Error and operation status | Distinguish rejection, pending, confirmation and uncertain result. Timeout is not proof that a command did not occur. |
+| Field                                      | Rule                                                                                                                         |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `protocolVersion`, `schemaVersion`         | Validate before interpreting commands or events.                                                                             |
+| `requestId`, command type and content hash | Correlate response and allow retry without duplicating a mutation.                                                           |
+| Identity, realm and scope                  | Derived from the validated session; client-supplied IDs do not prove ownership.                                              |
+| `aggregateId`, `expectedVersion`           | Apply concurrency control when necessary.                                                                                    |
+| `eventId`, `sequence`, `occurredAt`        | Identify durable events, order them per stream, and recover them. There is no implicit global order between channels/realms. |
+| Error and operation status                 | Distinguish rejection, pending, confirmation and uncertain result. Timeout is not proof that a command did not occur.        |
 
 When reconnecting, the client identifies the session and the last confirmed cursor. The
 service validates the scope and delivers still retained events; if the cursor has
@@ -1409,11 +1422,11 @@ The deadlines are elapsed durations, counted from `createdAt` **of the server-co
 send time in UTC**. `archiveAt = createdAt + 24h` and `expiresAt = createdAt + 168h`. Editing, retry, import and archiving
 do not renew these deadlines. Early deletion due to moderation remains permitted.
 
-| Message age | Status and storage | Access |
-| --- | --- | --- |
-| Less than 1 day | Active; body in recent PostgreSQL history, with limited cache. | Recent history and WS delivery to authorized members. |
+| Message age                 | Status and storage                                                                 | Access                                                                                               |
+| --------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Less than 1 day             | Active; body in recent PostgreSQL history, with limited cache.                     | Recent history and WS delivery to authorized members.                                                |
 | From 1 day to before 7 days | Archived; body in MongoDB, with minimal metadata/cursor when needed in PostgreSQL. | Paginated archive endpoint, with the same authorization as the channel. Removed from recent history. |
-| 7 full days or more | Expired; deletion of the body and operational copies. | Do not return to history, archive, search or replay, even if physical cleaning is delayed. |
+| 7 full days or more         | Expired; deletion of the body and operational copies.                              | Do not return to history, archive, search or replay, even if physical cleaning is delayed.           |
 
 This rule applies to **global chat and alliance chat**. Private messages and other
 channels need their own explicit policy, without inheriting retention by accident. Do
@@ -1500,13 +1513,13 @@ All layers below are part of the quality architecture. This is an implementation
 suites still need to be built at this checkout. A manual smoke test on the APK does not
 replace automated E2E.
 
-| Layer | Scope | Mandatory examples |
-| --- | --- | --- |
-| **Unit Tests** | Isolated functions and use cases, injectable clock/RNG, and controlled dependencies. | Costs, limits, bonuses, rounding, permissions, transitions, offline production, retention and economic invariants. |
-| **Integration Tests** | Adapters with real, disposable databases, broker, ZooKeeper and storage. | Transaction/rollback, concurrency, primary/replica, outbox/inbox, redelivery, change of owner, migrations, chat archive and S3. |
-| **Snapshot Tests** | Contracts, serialization, deterministic results and visual interfaces. | SFS frames, API JSON, WS events, combat state/trace, HTML SSR and web/dashboard screens. |
-| **E2E Tests** | Flow from client to persistence and return, through the gateway and real applications. | Login, city, build/complete/reconnect, map, chat between two clients, moderation, files and panel commands. |
-| **Mutation Tests** | Evaluate whether the suite detects behavioral changes in the code. | Swap comparators, remove owner/epoch checks, change cost/rounding, and remove idempotency or retention limits. |
+| Layer                 | Scope                                                                                  | Mandatory examples                                                                                                              |
+| --------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Unit Tests**        | Isolated functions and use cases, injectable clock/RNG, and controlled dependencies.   | Costs, limits, bonuses, rounding, permissions, transitions, offline production, retention and economic invariants.              |
+| **Integration Tests** | Adapters with real, disposable databases, broker, ZooKeeper and storage.               | Transaction/rollback, concurrency, primary/replica, outbox/inbox, redelivery, change of owner, migrations, chat archive and S3. |
+| **Snapshot Tests**    | Contracts, serialization, deterministic results and visual interfaces.                 | SFS frames, API JSON, WS events, combat state/trace, HTML SSR and web/dashboard screens.                                        |
+| **E2E Tests**         | Flow from client to persistence and return, through the gateway and real applications. | Login, city, build/complete/reconnect, map, chat between two clients, moderation, files and panel commands.                     |
+| **Mutation Tests**    | Evaluate whether the suite detects behavioral changes in the code.                     | Swap comparators, remove owner/epoch checks, change cost/rounding, and remove idempotency or retention limits.                  |
 
 ### Organization, tools and environments
 
@@ -1603,19 +1616,22 @@ files and mobile artifacts. The
 credential changes and recovery. This single-instance local environment does not
 implement the production replica/managed-service topology.
 
-Development uses Compose with proposed profiles `core`, `dev-tools` and
-`tests`. Administrative interfaces are developer tools and not game startup
-dependencies. Application CI does not need to start these interfaces to test the core.
+The current development Compose uses `dev` and `all` on every service; both
+profiles select the same complete stack. Redis Insight and Portainer have their
+own persistent volumes. The isolated stack suite covers every declared service,
+including the two one-shot setup jobs; its Portainer instance omits the host
+Docker socket. Additional profile subdivisions remain a future proposal.
+Administrative interfaces are developer tools and not game startup dependencies. Application CI does not need to start these interfaces to test the core.
 Declarative configuration of the gateway remains versioned.
 
-| Requested tool | Development use | Boundary |
-| --- | --- | --- |
-| **Konga** | Lab Kong inspection/administration interface. | Validate a version/fork compatible with the chosen Kong; it is not the game's administrative panel. |
-| **Mongo Express** | Inspection of collections and the temporary message archive. | Access only to local/synthetic MongoDB, with authentication. |
-| **pgAdmin 4** | Inspection of schemas, transactions and PostgreSQL `rw`/`ro` endpoints. | Credentials by environment; read permissions do not allow changes to the replica. |
-| **Redis Insight** | Inspection of caches, sessions, presence and Redis queues when applicable. | Identify instances to avoid confusing disposable cache and durable queues. |
-| **MinIO** | Local S3 storage and console for uploads, assets, replays and testing. | Buckets and local credentials; tests isolate your prefix/bucket and do not delete objects from another environment. |
-| **Portainer** | Inspection and operation of laboratory containers/stacks. | Runtime administration access; do not give application access to the Docker socket. |
+| Requested tool    | Development use                                                            | Boundary                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Konga**         | Lab Kong inspection/administration interface.                              | Validate a version/fork compatible with the chosen Kong; it is not the game's administrative panel.                 |
+| **Mongo Express** | Inspection of collections and the temporary message archive.               | Access only to local/synthetic MongoDB, with authentication.                                                        |
+| **pgAdmin 4**     | Inspection of schemas, transactions and PostgreSQL `rw`/`ro` endpoints.    | Credentials by environment; read permissions do not allow changes to the replica.                                   |
+| **Redis Insight** | Inspection of caches, sessions, presence and Redis queues when applicable. | Identify instances to avoid confusing disposable cache and durable queues.                                          |
+| **MinIO**         | Local S3 storage and console for uploads, assets, replays and testing.     | Buckets and local credentials; tests isolate your prefix/bucket and do not delete objects from another environment. |
+| **Portainer**     | Inspection and operation of laboratory containers/stacks.                  | Runtime administration access; do not give application access to the Docker socket.                                 |
 
 **Konga Compatibility:** Upstream states that as of 0.14.0, Kong 1.x is only supported.
 Therefore presence on the dev plan does not prove compatibility with a modern version of
@@ -1652,14 +1668,14 @@ The values below are **initial targets proposed for validation**, not measured r
 or guarantees of the current checkout. Load and failure tests must validate the values
 on the chosen hardware and topology before release.
 
-| Indicator | Proposed target and scope |
-| --- | --- |
-| Core/API availability | 99.9% monthly, with definition of success/error by operation and maintenance accounted for in the published policy. |
-| Common synchronous command | p95 up to 150 ms and p99 up to 500 ms in the application path, without internet RTT or explicitly asynchronous tasks. |
-| Confirmed economic durability | RPO/RTO linked to the guarantees and recovery of the contracted Neon plan; validate uncertain commits and restore. Do not declare RPO 0 just for using two computes. |
-| VPS Recovery | Initial goal of resuming API and realm within 15 minutes after the host becomes available; measure rebuild, secrets, reconciliation and reconnection. This does not guarantee physical replacement by the provider. |
-| Chat retention | Messages become invisible to queries at the 7-day boundary; reconciliation every minute and physical cleaning in up to 5 minutes in healthy operation. |
-| Capacity by realm | Publish the baseline of simultaneous connections, commands/s and battles/s sustainable, with p99, CPU/memory and database budget, before admitting the corresponding population. |
+| Indicator                     | Proposed target and scope                                                                                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core/API availability         | 99.9% monthly, with definition of success/error by operation and maintenance accounted for in the published policy.                                                                                                 |
+| Common synchronous command    | p95 up to 150 ms and p99 up to 500 ms in the application path, without internet RTT or explicitly asynchronous tasks.                                                                                               |
+| Confirmed economic durability | RPO/RTO linked to the guarantees and recovery of the contracted Neon plan; validate uncertain commits and restore. Do not declare RPO 0 just for using two computes.                                                |
+| VPS Recovery                  | Initial goal of resuming API and realm within 15 minutes after the host becomes available; measure rebuild, secrets, reconciliation and reconnection. This does not guarantee physical replacement by the provider. |
+| Chat retention                | Messages become invisible to queries at the 7-day boundary; reconciliation every minute and physical cleaning in up to 5 minutes in healthy operation.                                                              |
+| Capacity by realm             | Publish the baseline of simultaneous connections, commands/s and battles/s sustainable, with p99, CPU/memory and database budget, before admitting the corresponding population.                                    |
 
 Capacity testing includes normal load, peak and backlog recovery; separately measures
 players and bots, external chat, SSR on Vercel, combat and workers. The VPS does not
@@ -1688,18 +1704,18 @@ versioned operational procedures.
 **provisional, without measurements**, and includes both realms to guide testing; it is
 not a ready-made configuration of requests/limits.
 
-| Local component | Planning reserve in GiB |
-| --- | ---: |
-| Operating System and Kubernetes/K3s | 2.5 |
-| Traefik and Kong | 1.0 |
-| Shared API | 0.5 |
-| Files | 0.5 |
-| ZooKeeper | 0.5 |
-| Workers and relay | 0.5 |
-| Shared Combat TypeScript pool | 1.5 |
-| Realm Server 1 | 1.5 |
-| Realm Server 2, default topology | 1.5 |
-| **Planning subtotal** | **10.0** |
+| Local component                     | Planning reserve in GiB |
+| ----------------------------------- | ----------------------: |
+| Operating System and Kubernetes/K3s |                     2.5 |
+| Traefik and Kong                    |                     1.0 |
+| Shared API                          |                     0.5 |
+| Files                               |                     0.5 |
+| ZooKeeper                           |                     0.5 |
+| Workers and relay                   |                     0.5 |
+| Shared Combat TypeScript pool       |                     1.5 |
+| Realm Server 1                      |                     1.5 |
+| Realm Server 2, default topology    |                     1.5 |
+| **Planning subtotal**               |                **10.0** |
 
 The remaining usable memory is reserved for spikes, system cache, network, and operating
 margin. Adjust requests, limits and concurrency to measured data; a low limit can kill a
@@ -1873,7 +1889,7 @@ Don't promise silent installation on legacy APK. The flow must support player
 confirmation; exceptions without interaction depend on specific conditions of version,
 target, permissions and owner of the installation, which have not yet been validated.
 Lua does not bypass these conditions. Installation started or download complete does not
-mean update is complete. [Reference: User action in PackageInstaller](https://developer.android.com/reference/android/content/pm/PackageInstaller.SessionParams#setRequireUserAction(int)).
+mean update is complete. [Reference: User action in PackageInstaller](<https://developer.android.com/reference/android/content/pm/PackageInstaller.SessionParams#setRequireUserAction(int)>).
 
 Updating the existing installation requires the same application ID, compatible
 signature (or recognized rotation) and version supported by Android; the project release
