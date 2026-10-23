@@ -7,17 +7,23 @@
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/busboy": "^1.5.5"
   },
   "type": "module",
   "exports": {
     "./compat": "./src/compat.ts",
     "./discovery": "./src/discovery.ts",
-    "./handler": "./src/handler.ts"
+    "./handler": "./src/handler.ts",
+    "./files": "./src/files.ts",
+    "./files-multipart": "./src/files-multipart.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",
     "@opencok/errors": "workspace:*",
-    "@opencok/storage": "workspace:*"
+    "@opencok/storage": "workspace:*",
+    "@opencok/identity": "workspace:*",
+    "@opencok/validations": "workspace:*",
+    "busboy": "^1.6.0"
   }
 }
