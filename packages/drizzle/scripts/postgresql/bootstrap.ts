@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool, type PoolClient } from "pg";
 import { manifest } from "../../src/postgresql/manifest";
+import { catalogHash } from "../../src/postgresql/catalog";
 import type { DatabaseRole } from "../../src/postgresql/model";
 
 /** Initialize an already-created, empty database. Does not create/drop physical databases. */
@@ -17,6 +18,7 @@ export async function bootstrapPostgres(connection: PoolClient, role: DatabaseRo
   await migrate(drizzle(connection), { migrationsFolder: join(import.meta.dir, "../../postgresql/migrations", role) });
   const counts = await connection.query(`SELECT count(*)::integer AS tables FROM information_schema.tables WHERE table_schema IN ('cokdb1','cokdb_global','cokdb_pay','opencok_chat') AND table_type='BASE TABLE'`);
   if (counts.rows[0].tables !== manifest.tables.filter((table) => table.role === role).length) throw new Error("PostgreSQL baseline inventory mismatch");
+  await connection.query("UPDATE legacy_meta.manifest SET catalog_hash=$1", [await catalogHash(connection)]);
 }
 
 if (import.meta.main) {

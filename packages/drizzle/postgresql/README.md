@@ -90,3 +90,84 @@ project-authored SQL, independent of those private business programs.
 This is a faithful schema baseline and migration foundation. It neither removes
 unused legacy tables nor chooses their final domain/NoSQL design. Planning and
 acceptance criteria: [issue #17](https://github.com/ReeseArch64/opencok/issues/17).
+
+## Transfer, reconciliation and recovery
+
+The transfer tool operates on an **authorized restored MariaDB copy** and newly
+initialized, offline PostgreSQL targets. It never initializes/drops a target or
+overwrites an untracked nonempty table. Keep every application writer stopped and
+target credentials restricted to the migrator until the complete run is accepted.
+The physical target names remain configuration, not fixed names in the command.
+
+```sh
+# Set these URLs privately; do not put them in shell history, issues or logs:
+# MIGRATION_SOURCE_URL: authorized restored MariaDB instance
+# PG_GLOBAL_URL: initialized global PostgreSQL database
+# PG_REALM_URL: initialized PostgreSQL database for this realm
+bun run pg:transfer --restored-source
+bun run pg:transfer --restored-source --resume
+bun run pg:transfer --restored-source --verify-only
+
+# Copy another realm without copying global tables again:
+bun run pg:transfer --restored-source --scope realm
+```
+
+`--restored-source` explicitly acknowledges the supported source environment. The
+source event scheduler must be OFF. The dedicated source account needs SELECT on
+the four source databases and metadata access, plus the privilege needed for
+`FLUSH TABLES WITH READ LOCK` (RELOAD for the pinned MariaDB). That connection holds
+the global read lock throughout the run, covering MyISAM and InnoDB alike; the
+finally path unlocks it and a disconnected session releases it. Run only on the
+restored copy: this deliberately blocks all source writes. No source rows are
+modified. PostgreSQL credentials require reads/writes on the target application
+tables, sequence synchronization, temporary tables and `legacy_meta`; do not give
+the transfer process unrelated deployment privileges.
+
+Preflight checks the complete source field/default/index/FK contract and target
+manifest, role and catalog fingerprint. Target advisory locks prevent two transfer
+processes from sharing a target. Each table is copied in bounded parameterized
+batches (128 rows by default, reduced for PostgreSQL's parameter limit) inside one
+target transaction. This is a **table checkpoint**, not a row checkpoint: an
+interruption rolls back the current table and a retry starts that table again.
+Earlier committed tables remain. Global and realm commits are independent.
+Do not release either database to applications during a partial run.
+
+The same transaction records a manifest hash, count and order-independent SHA-256
+multiset digest of every canonicalized field, retaining duplicate multiplicity in
+tables without unique keys. Resume checks completed tables against both source and
+target before continuing. Verification rereads every field and requires all
+checkpoints; it never treats count equality alone as reconciliation. Numeric values,
+decimal strings, bytes, NULL and temporal strings have explicit canonical codecs.
+Unsupported values and constraint failures identify a public table/column and error
+code, without logging the value or raw driver exception. A checksum mismatch blocks
+the run; investigate privately and do not clear receipts to force acceptance.
+
+Temporary target tables also compare source `WEIGHT_STRING(RTRIM(value))` equality
+groups with the mapped PostgreSQL collation for every imported text field. A
+coarser or finer equality partition is refused. For example, MariaDB general_ci's
+`s`/`ß` behavior differs from the chosen ICU candidate. This validates the imported
+population, not every future Unicode input or sort ordering. Report such mismatches
+for an explicit per-domain collation decision; never merge/drop colliding rows.
+Large indexed values can also hit different PostgreSQL index/value limits and must
+be investigated rather than truncated.
+
+Imported AUTO_INCREMENT fields synchronize generators with the highest imported
+value, the source's current next value (including deleted-ID gaps), and the baseline
+start. Exhausted ranges remain exhausted. Native sequence changes are not rolled
+back by PostgreSQL; an interrupted table must be resumed/reconciled before enabling
+writers. The unsigned numeric counter and receipts are transactionally updated.
+
+Before any proposed cutover, take and restore backups of the source and both target
+roles in isolated environments; rerun `--verify-only` on restored targets. The
+automated transfer suite rehearses interruption/resume, all-table reconciliation,
+schema/data drift refusal, sequence advancement, restart and pg_dump/pg_restore.
+CI uses only public DDL and synthetic fixtures. Repeat on the authorized restored
+dataset to discover actual invalid dates, collations, limits, duplicates and orphans.
+
+Keep source authoritative until the rehearsal and application validation are
+accepted. A later deployment plan must define a write freeze, final copy/reconcile,
+operator acceptance and write enablement. Before target writes begin, recovery can
+retain the unchanged source and rebuild only the isolated target. After PostgreSQL
+accepts writes, switching back to a stale MariaDB backup loses those writes; require
+an audited reverse/delta reconciliation or forward recovery. No automatic live
+cutover or destructive rollback is provided by these commands.
