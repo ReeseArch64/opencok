@@ -1,0 +1,26 @@
+{
+  "name": "@opencok/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun --no-env-file src/index.ts",
+    "dev": "bun --no-env-file --watch src/index.ts",
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test ./test",
+    "test:integration": "bun --no-env-file test integration",
+    "test:mutations": "bun --no-env-file scripts/mutate-auth.ts"
+  },
+  "dependencies": {
+    "@opencok/drizzle": "workspace:*",
+    "@opencok/env": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "fast-xml-parser": "^5.0.0",
+    "node-zookeeper-client": "1.1.3"
+  },
+  "devDependencies": {
+    "@opencok/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "@types/node-zookeeper-client": "0.2.13",
+    "typescript": "catalog:"
+  }
+}

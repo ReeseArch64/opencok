@@ -1,0 +1,45 @@
+name: PostgreSQL realm server
+
+on:
+  pull_request:
+    paths:
+      - "apps/server/**"
+      - "packages/drizzle/**"
+      - "packages/env/**"
+      - "packages/config/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+      - ".env.example"
+      - ".github/workflows/server-tests.yml"
+  push:
+    branches: [develop]
+    paths:
+      - "apps/server/**"
+      - "packages/drizzle/**"
+      - "packages/env/**"
+      - "packages/config/**"
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+      - ".env.example"
+      - ".github/workflows/server-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+      - run: bun run --cwd apps/server check-types
+      - run: bun run --cwd packages/env test
+      - run: bun run --cwd apps/server test
+      - run: bun run --cwd apps/server test:mutations
+      - run: bun run --cwd apps/server test:integration

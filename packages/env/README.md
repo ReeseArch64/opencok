@@ -67,3 +67,10 @@ local files before this package runs. External loaders must follow the same rule
 
 Tests use temporary synthetic workspaces and subprocesses to verify cwd independence,
 process precedence, missing files, required keys, validation and secret redaction.
+
+The realm server loads its dedicated settings with `loadServerEnvironment()` from
+`@opencok/env/server`; the pure validator is `@opencok/env/server/schema`.
+This validates `GAME_*`, `KINGDOM_ID`, the database routing names and
+`DEPENDENCY_TIMEOUT_MS` only when requested, so offline/database tools do not
+require a game secret or XML directory. The [server guide](../../apps/server/README.md)
+documents all keys.
