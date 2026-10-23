@@ -98,6 +98,25 @@ classifying issues, pull requests, and discussions. Available labels are:
 
 ### Community and project management
 
+#### Discuss before opening an issue
+
+- Before opening any issue, search existing discussions and either open a
+  discussion about the topic or participate meaningfully in an existing one.
+  Reading a discussion alone does not satisfy this requirement.
+- Discuss the report, proposal, or task in English and use the required
+  discussion labels. Search existing issues as well to avoid duplicates.
+- Once there is concrete work to track, use the appropriate issue form.
+  Include the discussion or comment URL, confirm your participation, and
+  summarize the findings and why an issue is needed. Link the resulting issue
+  back from the discussion so participants can follow the work.
+- This requirement applies to all issue types, including bug reports,
+  regressions, feature requests, documentation, and maintenance tasks.
+  Security vulnerabilities must continue through private security reporting;
+  never open a public discussion containing sensitive vulnerability details.
+- Issue forms require a discussion reference and participation confirmation.
+  Maintainers verify that the link is relevant and participation occurred;
+  form validation does not independently verify GitHub discussion activity.
+
 #### Discussion language and labels
 
 - Write every discussion title, body, and reply in English (en-US), including
@@ -121,8 +140,9 @@ Use the repository's GitHub features as the primary collaboration channels:
   conversations that do not yet describe actionable work.
 
 - **[GitHub Issues](https://github.com/ReeseArch64/opencok/issues):** use
-  issues for confirmed bugs, feature requests, and concrete tasks. Search for
-  an existing issue before creating a new one and link related discussions,
+  issues for confirmed bugs, feature requests, and concrete tasks after
+  opening or participating in a related discussion. Search for an existing
+  issue before creating a new one and link the required prior discussion,
   pull requests, and project items.
 
 - **[OpenCok project](https://github.com/users/ReeseArch64/projects/6):** use

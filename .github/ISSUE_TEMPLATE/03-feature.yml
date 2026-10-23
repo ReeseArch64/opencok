@@ -7,6 +7,28 @@ labels:
 assignees:
   - "ReeseArch64"
 body:
+  - type: input
+    id: prior-discussion
+    attributes:
+      label: "Prior discussion"
+      description: "Before opening this issue, start a discussion or participate in an existing one about this topic. Link the discussion or your relevant comment."
+      placeholder: "https://github.com/ReeseArch64/opencok/discussions/123"
+    validations:
+      required: true
+  - type: checkboxes
+    id: discussion-participation
+    attributes:
+      label: "Discussion participation"
+      options:
+        - label: "I opened or participated in the linked discussion before creating this issue and summarized its outcome below."
+          required: true
+  - type: textarea
+    id: discussion-outcome
+    attributes:
+      label: "Discussion outcome"
+      description: "Summarize the findings and explain why a concrete issue is now needed."
+    validations:
+      required: true
   -
     type: "markdown"
     attributes:
@@ -31,7 +53,7 @@ body:
     id: "problem"
     attributes:
       label: "Player or operator need"
-      description: "Describe the game flow or operational problem and who benefits. Link the relevant Discussion if the idea was explored there."
+      description: "Describe the game flow or operational problem and who benefits. Reference the required prior discussion and its findings."
     validations:
       required: true
   -

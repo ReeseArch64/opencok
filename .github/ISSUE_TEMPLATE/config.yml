@@ -1,6 +1,10 @@
 blank_issues_enabled: false
 
 contact_links:
+  - name: "Required first step: start or join a discussion"
+    url: https://github.com/ReeseArch64/opencok/discussions
+    about: "Before opening any issue, start a discussion or participate in an existing one, then link it and summarize the outcome in the issue form."
+
   - name: Game setup and operator guides
     url: https://github.com/ReeseArch64/opencok/wiki
     about: Consult client preparation, kingdom operation, and troubleshooting guides before opening an issue.
