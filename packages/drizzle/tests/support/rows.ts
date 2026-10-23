@@ -9,7 +9,10 @@ export function sampleValue(column: ColumnContract, variant: number): unknown {
     return `2020-01-0${variant} 12:34:56${precision ? `.${"1".repeat(precision)}` : ""}`;
   }
   if (column.value === "bigint") return 9007199254740992n + BigInt(variant);
-  if (column.value === "number") return /^(?:numeric|real|double)/.test(column.type) && !/,0\)/.test(column.type) ? variant + 0.25 : variant;
+  if (column.value === "number")
+    return /^(?:numeric|real|double)/.test(column.type) && !/,0\)/.test(column.type)
+      ? variant + 0.25
+      : variant;
   if (column.value === "buffer") {
     const buffer = Buffer.alloc(column.bytes ?? 6, variant);
     if (buffer.length > 1) buffer[1] = 255;
@@ -25,14 +28,18 @@ export function sampleValue(column: ColumnContract, variant: number): unknown {
 }
 
 export function sampleRow(spec: TableContract, variant = 1): Row {
-  const row = Object.fromEntries(spec.columns.map((column) => [column.name, sampleValue(column, variant)]));
+  const row = Object.fromEntries(
+    spec.columns.map((column) => [column.name, sampleValue(column, variant)]),
+  );
   for (const key of spec.foreignKeys) for (const name of key.columns) row[name] = 9007199254740993n;
   return row;
 }
 
 export function literalDefault(column: ColumnContract): unknown {
   if (column.default === null) return null;
-  const value = column.default.startsWith("'") ? column.default.slice(1, -1).replaceAll("''", "'") : column.default;
+  const value = column.default.startsWith("'")
+    ? column.default.slice(1, -1).replaceAll("''", "'")
+    : column.default;
   if (column.value === "bigint") return BigInt(value);
   if (column.value === "number") return Number(value);
   if (column.value === "buffer") return Buffer.from(value);

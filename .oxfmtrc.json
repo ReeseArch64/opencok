@@ -1,0 +1,25 @@
+{
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/*.tsbuildinfo",
+    "mobile/**",
+    "legacy/**",
+    "data/**",
+    "packages/drizzle/migrations/**",
+    "**/__snapshots__/**",
+    "packages/drizzle/tests/fixtures/**"
+  ],
+  "useTabs": false,
+  "tabWidth": 2,
+  "printWidth": 100,
+  "endOfLine": "lf",
+  "semi": true,
+  "singleQuote": false,
+  "quoteProps": "preserve",
+  "trailingComma": "all",
+  "proseWrap": "preserve",
+  "sortImports": false,
+  "sortPackageJson": false
+}

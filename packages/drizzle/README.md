@@ -4,11 +4,11 @@
 versioned Drizzle migrations. The maintained source of truth is `src/schema`,
 with **772 tables / 6,316 fields** and one module per table.
 
-| Default physical database | SQL namespaces | Migration role | Tables |
-| --- | --- | --- | ---: |
-| `opencok_global` | `opencok_global`, `opencok_pay`, `opencok_chat` | `global` | 113 |
-| `opencok_kingdom_1` | `opencok_kingdom` | `kingdom` | 659 |
-| `opencok_kingdom_2` | `opencok_kingdom` | `kingdom` | 659 |
+| Default physical database | SQL namespaces                                  | Migration role | Tables |
+| ------------------------- | ----------------------------------------------- | -------------- | -----: |
+| `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    113 |
+| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    659 |
+| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    659 |
 
 Kingdom IDs **1 and 2** are configured by default. There is one maintained kingdom
 schema, one set of table modules and one kingdom migration history. Both physical

@@ -2,11 +2,15 @@ import { sql } from "drizzle-orm";
 import { bigint, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
 
-export const reward_log_3 = opencok_kingdom.table("reward_log_3", {
-  "uid": varchar("uid", { length: 255 }).notNull(),
-  "rewardid": varchar("rewardid", { length: 255 }).notNull(),
-  "nownum": integer("nownum").default(sql.raw("0")),
-  "totalnum": bigint("totalnum", { mode: "bigint" }).default(sql.raw("0")),
-}, (table) => [
-  primaryKey({ name: "reward_log_3_PRIMARY", columns: [table["uid"], table["rewardid"]] }),
-]);
+export const reward_log_3 = opencok_kingdom.table(
+  "reward_log_3",
+  {
+    "uid": varchar("uid", { length: 255 }).notNull(),
+    "rewardid": varchar("rewardid", { length: 255 }).notNull(),
+    "nownum": integer("nownum").default(sql.raw("0")),
+    "totalnum": bigint("totalnum", { mode: "bigint" }).default(sql.raw("0")),
+  },
+  (table) => [
+    primaryKey({ name: "reward_log_3_PRIMARY", columns: [table["uid"], table["rewardid"]] }),
+  ],
+);

@@ -326,7 +326,7 @@ export async function startServer(config: Config) {
       for (const socket of sockets) socket.destroy();
       await closed;
       // Close callbacks can enqueue Redis cleanup after the socket was destroyed.
-      while (inFlight.size) await Promise.allSettled([...inFlight]);
+      while (inFlight.size) await Promise.allSettled(inFlight);
       coordination.close();
       await db.close();
     },

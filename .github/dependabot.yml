@@ -6,11 +6,11 @@ updates:
     schedule:
       interval: weekly
       day: monday
-      time: '09:00'
+      time: "09:00"
       timezone: America/Sao_Paulo
     open-pull-requests-limit: 5
     commit-message:
-      prefix: 'ci(deps)'
+      prefix: "ci(deps)"
     labels:
       - dependencies
       - ci/cd

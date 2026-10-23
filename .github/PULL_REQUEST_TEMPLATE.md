@@ -28,8 +28,8 @@ expected/observed results. Include reconnect or restart checks when saved state
 is affected. For documentation or tooling, describe the relevant verification.
 
 | Scenario or command | Client/server setup | Result and evidence |
-| --- | --- | --- |
-|  |  |  |
+| ------------------- | ------------------- | ------------------- |
+|                     |                     |                     |
 
 List checks not run, why, and any known limitations. Attach sanitized logs,
 screenshots, or a recording where they help verify the behavior.

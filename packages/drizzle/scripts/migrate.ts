@@ -12,16 +12,27 @@ export async function migrateDatabase(pool: Pool, role: DatabaseRole) {
   try {
     await client.query("SELECT pg_advisory_lock(1936028531,1)");
     const otherSchemas = [
-      ...Object.entries(databaseSchemas).filter(([key]) => key !== role).flatMap(([, schemas]) => [...schemas]),
+      ...Object.entries(databaseSchemas)
+        .filter(([key]) => key !== role)
+        .flatMap(([, schemas]) => [...schemas]),
       // Names in the existing PostgreSQL migration history also identify the other role.
       ...(role === "global" ? ["cokdb1"] : ["cokdb_global", "cokdb_pay"]),
     ];
-    const existing = await client.query("SELECT nspname FROM pg_namespace WHERE nspname=ANY($1::text[])", [otherSchemas]);
-    if (existing.rowCount) throw new Error("Database contains schemas belonging to a different role");
-    await migrate(drizzle(client), { migrationsFolder: join(import.meta.dir, "../migrations", role) });
+    const existing = await client.query(
+      "SELECT nspname FROM pg_namespace WHERE nspname=ANY($1::text[])",
+      [otherSchemas],
+    );
+    if (existing.rowCount)
+      throw new Error("Database contains schemas belonging to a different role");
+    await migrate(drizzle(client), {
+      migrationsFolder: join(import.meta.dir, "../migrations", role),
+    });
   } finally {
-    try { await client.query("SELECT pg_advisory_unlock(1936028531,1)"); }
-    finally { client.release(); }
+    try {
+      await client.query("SELECT pg_advisory_unlock(1936028531,1)");
+    } finally {
+      client.release();
+    }
   }
 }
 
@@ -34,7 +45,15 @@ if (import.meta.main) {
     console.log(`Applied PostgreSQL migrations for ${role}`);
   } catch (error) {
     // Connection strings and raw query parameters never enter CLI diagnostics.
-    console.error(error instanceof EnvironmentError ? error.message : error && typeof error === "object" && "code" in error ? `PostgreSQL migration failed (${error.code})` : "PostgreSQL migration failed; verify DATABASE_URL, DATABASE_ROLE and pending SQL");
+    console.error(
+      error instanceof EnvironmentError
+        ? error.message
+        : error && typeof error === "object" && "code" in error
+          ? `PostgreSQL migration failed (${error.code})`
+          : "PostgreSQL migration failed; verify DATABASE_URL, DATABASE_ROLE and pending SQL",
+    );
     process.exitCode = 1;
-  } finally { await pool?.end(); }
+  } finally {
+    await pool?.end();
+  }
 }

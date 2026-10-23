@@ -30,12 +30,10 @@ body:
       description: "Summarize the findings and explain why a concrete issue is now needed."
     validations:
       required: true
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
-  -
-    type: "dropdown"
+  - type: "dropdown"
     id: "client-track"
     attributes:
       label: "Client compatibility track"
@@ -49,40 +47,35 @@ body:
         - "Not applicable"
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "environment"
     attributes:
       label: "Device and affected interface"
       description: "Include client build/patches or tool version, Android/iOS and device, screen size, language, and relevant accessibility settings or assistive technology."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "barrier"
     attributes:
       label: "Barrier and steps to encounter it"
       description: "Name the screen or flow, such as login, map navigation, building upgrades, inventory, or chat. Explain the interaction that becomes difficult or impossible."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "proposal"
     attributes:
       label: "Expected accessible behavior"
       description: "Describe a usable outcome, such as readable timers, scalable text, distinguishable resource icons, reachable controls, or screen-reader labels. Include suggested improvements if available."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "validation"
     attributes:
       label: "Validation scenario"
       description: "Describe how to verify the improvement on the affected device/settings, including whether it requires client resources or server-provided text."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "evidence"
     attributes:
       label: "Evidence"

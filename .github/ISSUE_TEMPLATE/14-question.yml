@@ -30,16 +30,13 @@ body:
       description: "Summarize the findings and explain why a concrete issue is now needed."
     validations:
       required: true
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "For general help, gameplay questions, or early ideas, use [Discussions](https://github.com/ReeseArch64/opencok/discussions). Use this form for a scoped investigation with a verifiable answer."
-  -
-    type: "dropdown"
+  - type: "dropdown"
     id: "client-track"
     attributes:
       label: "Client compatibility track"
@@ -53,24 +50,21 @@ body:
         - "Not applicable"
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "question"
     attributes:
       label: "Technical question and impact"
       description: "State one answerable question about game behavior, a protocol, configuration, or kingdom operation. Explain which implementation or operator decision depends on the answer."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "context"
     attributes:
       label: "Context and work already done"
       description: "Include server commit, relevant game flow, reproduction steps, guides consulted, and observations. Reference the required prior discussion and its findings."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "completion"
     attributes:
       label: "Completion criteria"

@@ -3,7 +3,12 @@ import { Pool, type PoolConfig } from "pg";
 import type { DatabaseRole } from "./roles";
 import * as globalSchema from "./schema/global";
 import * as kingdomSchema from "./schema/kingdom";
-import { databasePoolConfig, defaultDatabaseTopology, validateTopology, type DatabaseTopology } from "./topology";
+import {
+  databasePoolConfig,
+  defaultDatabaseTopology,
+  validateTopology,
+  type DatabaseTopology,
+} from "./topology";
 
 const schemas = { global: globalSchema, kingdom: kingdomSchema };
 
@@ -16,13 +21,21 @@ export function createDatabase<T extends DatabaseRole>(role: T, config: PoolConf
 }
 
 /** Reuse one kingdom schema across the configured physical databases (two by default). */
-export function createDatabases(config: PoolConfig, topology: DatabaseTopology = defaultDatabaseTopology) {
+export function createDatabases(
+  config: PoolConfig,
+  topology: DatabaseTopology = defaultDatabaseTopology,
+) {
   const resolved = validateTopology(topology);
   // Resolve every connection first so invalid configuration cannot leak partially created pools.
   const globalConfig = databasePoolConfig(config, resolved.globalDatabase);
-  const kingdomConfigs = resolved.kingdoms.map((kingdom) => ({ ...kingdom, config: databasePoolConfig(config, kingdom.database) }));
+  const kingdomConfigs = resolved.kingdoms.map((kingdom) => ({
+    ...kingdom,
+    config: databasePoolConfig(config, kingdom.database),
+  }));
   const global = createDatabase("global", globalConfig);
-  const kingdoms = new Map(kingdomConfigs.map((kingdom) => [kingdom.id, createDatabase("kingdom", kingdom.config)]));
+  const kingdoms = new Map(
+    kingdomConfigs.map((kingdom) => [kingdom.id, createDatabase("kingdom", kingdom.config)]),
+  );
   return {
     topology: resolved,
     global,
@@ -32,6 +45,10 @@ export function createDatabases(config: PoolConfig, topology: DatabaseTopology =
       if (!kingdom) throw new Error("Kingdom is not configured");
       return kingdom;
     },
-    close: () => Promise.all([global.close(), ...[...kingdoms.values()].map((kingdom) => kingdom.close())]).then(() => undefined),
+    close: () =>
+      Promise.all([
+        global.close(),
+        ...[...kingdoms.values()].map((kingdom) => kingdom.close()),
+      ]).then(() => undefined),
   };
 }

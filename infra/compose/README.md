@@ -53,14 +53,14 @@ The one-shot jobs exit with code zero after completion.
 
 ## Direct development values
 
-| Endpoint | Published port |
-| --- | --- |
-| Gateway HTTP discovery and CDN | 80 |
-| Gateway game TCP | 9933 |
-| PostgreSQL | 55432 |
-| MinIO object endpoint | 9000 |
-| MinIO console | 9001 |
-| pgAdmin, profile `all` only | 5050 |
+| Endpoint                       | Published port |
+| ------------------------------ | -------------- |
+| Gateway HTTP discovery and CDN | 80             |
+| Gateway game TCP               | 9933           |
+| PostgreSQL                     | 55432          |
+| MinIO object endpoint          | 9000           |
+| MinIO console                  | 9001           |
+| pgAdmin, profile `all` only    | 5050           |
 
 Port mappings have no host-IP prefix. Internal connections use service DNS:
 `database:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933` and

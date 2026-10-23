@@ -32,12 +32,10 @@ body:
       description: "Summarize the findings and explain why a concrete issue is now needed."
     validations:
       required: true
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "Use one issue per reproducible problem or scoped task. Search existing issues first. Do not publish credentials, player data, private Elex code, or client binaries. Report security vulnerabilities privately through the repository's Security tab."
-  -
-    type: "dropdown"
+  - type: "dropdown"
     id: "client-track"
     attributes:
       label: "Client compatibility track"
@@ -51,48 +49,42 @@ body:
         - "Not applicable"
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "environment"
     attributes:
       label: "Client, server, and environment"
       description: "Include the exact client build, Android/iOS version and device or emulator, applied patch numbers, server branch and commit, and local or remote deployment. Use Not applicable for unrelated components."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "matrix"
     attributes:
       label: "Working and failing combinations"
       description: "List client build + patch numbers + server commit for each tested combination, including the observed result. State explicitly which combinations are untested."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "reproduction"
     attributes:
       label: "Connection or game flow"
       description: "Describe discovery, authentication, loading, or the affected gameplay action with exact reproduction steps and initial player state."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "contract"
     attributes:
       label: "Expected and observed compatibility"
       description: "Identify missing resources, commands, fields, error codes, or fallback behavior. Explain the basis for the expected behavior; share only authorized, sanitized protocol excerpts."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "acceptance"
     attributes:
       label: "Compatibility acceptance criteria"
       description: "Describe the affected flow that must work and which other client tracks should be checked for regressions."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "evidence"
     attributes:
       label: "Evidence"

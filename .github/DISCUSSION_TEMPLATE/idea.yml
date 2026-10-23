@@ -3,20 +3,17 @@ labels:
   - "discussion"
   - "enhancement"
 body:
-  -
-    type: "markdown"
+  - type: "markdown"
     attributes:
       value: "Write the title, body, and replies in English (en-US). Keep the discussion label and add relevant topic, component, or client-release labels after publishing. Explore an idea before turning it into a scoped feature issue. Explain the benefit for players or kingdom operators and invite alternatives."
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "proposal"
     attributes:
       label: "Idea and player/operator benefit"
       description: "Describe the game system or hosting workflow, who benefits, and the problem or opportunity."
     validations:
       required: true
-  -
-    type: "dropdown"
+  - type: "dropdown"
     id: "client-track"
     attributes:
       label: "Client compatibility track"
@@ -30,22 +27,19 @@ body:
         - "Not applicable"
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "rules"
     attributes:
       label: "Proposed experience and rules"
       description: "Describe an example interaction. Consider costs, rewards, timers, progression, economy, fairness, and server configuration where relevant."
     validations:
       required: true
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "alternatives"
     attributes:
       label: "Alternatives and compatibility"
       description: "Discuss trade-offs, existing ways to achieve the outcome, affected clients, patching needs, and existing player data."
-  -
-    type: "textarea"
+  - type: "textarea"
     id: "feedback"
     attributes:
       label: "Feedback and next steps"

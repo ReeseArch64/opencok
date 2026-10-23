@@ -3,14 +3,16 @@ import { bigint, integer, primaryKey } from "drizzle-orm/pg-core";
 import { bytea } from "../../types";
 import { opencok_global } from "../namespaces";
 
-export const server_info = opencok_global.table("server_info", {
-  "id": integer("id").notNull(),
-  "type": integer("type").notNull().default(sql.raw("0")),
-  "cross_fight_server_id": integer("cross_fight_server_id"),
-  "fightRoomSize": integer("fightRoomSize"),
-  "beginTime": bigint("beginTime", { mode: "bigint" }),
-  "endTime": bigint("endTime", { mode: "bigint" }),
-  "open_time_info": bytea("open_time_info"),
-}, (table) => [
-  primaryKey({ name: "server_info_PRIMARY", columns: [table["id"]] }),
-]);
+export const server_info = opencok_global.table(
+  "server_info",
+  {
+    "id": integer("id").notNull(),
+    "type": integer("type").notNull().default(sql.raw("0")),
+    "cross_fight_server_id": integer("cross_fight_server_id"),
+    "fightRoomSize": integer("fightRoomSize"),
+    "beginTime": bigint("beginTime", { mode: "bigint" }),
+    "endTime": bigint("endTime", { mode: "bigint" }),
+    "open_time_info": bytea("open_time_info"),
+  },
+  (table) => [primaryKey({ name: "server_info_PRIMARY", columns: [table["id"]] })],
+);
