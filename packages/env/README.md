@@ -1,7 +1,8 @@
 # Shared server environment
 
-`@opencok/env` loads the single workspace-root `.env` and validates the supported
-server settings. Add `"@opencok/env": "workspace:*"` to each consuming server package.
+`@opencok/env` loads the single workspace-root `.env` and validates server settings
+with Zod schemas, separated by domain. Add `"@opencok/env": "workspace:*"` to each
+consuming server package.
 
 From the repository root, copy `.env.example` to `.env` if it does not exist, then
 fill in the settings privately. Keep existing configuration when the file exists.
@@ -9,23 +10,31 @@ The local file and dotenv variants are ignored; only the root example is tracked
 Do not create `.env` files inside apps or packages.
 
 ```ts
-import { env, requireEnv } from "@opencok/env";
+import { env } from "@opencok/env";
+import { env as database, requireEnv } from "@opencok/env/database";
 
 const mode = env.NODE_ENV;
+const role = database.DATABASE_ROLE;
 const connectionString = requireEnv("DATABASE_URL");
 ```
 
-| Key | Accepted values | Requirement |
-| --- | --- | --- |
-| `NODE_ENV` | `development`, `test`, `production` | Defaults to `development` |
-| `DATABASE_ROLE` | `global`, `kingdom` | Required by Drizzle Kit and single-database migration |
-| `DATABASE_URL` | `postgres://` or `postgresql://` URL with host and database | Required by server composition and single-database migration |
-| `POSTGRES_ADMIN_URL` | PostgreSQL URL with host and database | Required by topology setup |
+| Import | Key | Accepted values | Requirement |
+| --- | --- | --- | --- |
+| `@opencok/env` | `NODE_ENV` | `development`, `testing`, `production` | Defaults to `development` |
+| `@opencok/env/database` | `DATABASE_ROLE` | `global`, `kingdom` | Required by Drizzle Kit and single-database migration |
+| `@opencok/env/database` | `DATABASE_URL` | `postgres://` or `postgresql://` URL with host and database | Required by server composition and single-database migration |
+| `@opencok/env/database` | `POSTGRES_ADMIN_URL` | PostgreSQL URL with host and database | Required by topology setup |
+
+Each entry validates and exposes only its own domain. Types are inferred from Zod;
+the general entry never re-exports database variables. Pure schemas are available
+through `@opencok/env/schema` and `@opencok/env/database/schema`. Add future service
+settings through dedicated subpaths rather than exposing every secret to every consumer.
 
 Explicit process/CI variables override the root file, including blank values, which
-clear optional settings. A missing file is allowed. Invalid nonblank values fail
-at import; `requireEnv` fails when a specific setting is absent. Diagnostics contain
-variable names, never supplied values. Do not log environment objects or URLs.
+clear optional settings. A missing file is allowed. Invalid nonblank values in the
+selected domain fail at import; `requireEnv` fails when a specific setting is absent. Diagnostics contain
+variable names, never supplied values or raw Zod issues. Do not log environment
+objects or URLs.
 
 The read-only object is a snapshot at import and does not mutate `process.env`.
 Only the listed keys are exposed. Parsing uses native `node:util.parseEnv`: quoted

@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseEnv } from "node:util";
-import { parseEnvironment } from "./schema";
 
 // __dirname also supports tools that register TypeScript through a CJS loader.
 const moduleDirectory = typeof __dirname === "string" ? __dirname : dirname(fileURLToPath(import.meta.url));
@@ -31,5 +30,5 @@ export function loadEnvironment(source: Readonly<Record<string, string | undefin
   catch (error) {
     if (!(error && typeof error === "object" && "code" in error && error.code === "ENOENT")) throw new Error("Cannot read root .env configuration");
   }
-  return parseEnvironment({ ...values, ...source });
+  return { ...values, ...source };
 }

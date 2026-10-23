@@ -1,5 +1,5 @@
 import { defineConfig } from "drizzle-kit";
-import { env, requireEnv } from "@opencok/env";
+import { env, requireEnv } from "@opencok/env/database";
 
 const role = requireEnv("DATABASE_ROLE");
 

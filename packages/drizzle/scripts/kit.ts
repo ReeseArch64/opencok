@@ -1,6 +1,6 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { env, rootEnvPath } from "@opencok/env";
+import { env, rootEnvPath } from "@opencok/env/database";
 
 // Drizzle Kit also loads dotenv internally. Pin that loader to the same file
 // and pass validated settings so it cannot replace explicit process overrides.

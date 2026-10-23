@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
-import { EnvironmentError, requireEnv } from "@opencok/env";
+import { EnvironmentError, requireEnv } from "@opencok/env/database";
 import { databaseSchemas, type DatabaseRole } from "../src/roles";
 
 /** Apply pending Drizzle migrations; one physical database has one role. */

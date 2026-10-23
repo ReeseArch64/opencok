@@ -1,10 +1,11 @@
 import { loadEnvironment } from "./load";
-export { rootEnvPath } from "./load";
-import { requireEnvironment, type Environment } from "./schema";
+import { parseEnvironment, type Environment } from "./schema";
+import { requireEnvironment } from "./validation";
 
-/** Server configuration: one root file plus explicitly injected process/CI overrides. */
-export const env = loadEnvironment(process.env);
+/** General server settings; database settings have their own subpath. */
+export const env = parseEnvironment(loadEnvironment(process.env));
 export function requireEnv<K extends keyof Environment>(key: K): NonNullable<Environment[K]> {
   return requireEnvironment(env, key);
 }
-export { EnvironmentError, type Environment } from "./schema";
+export { EnvironmentError } from "./validation";
+export { environmentSchema, type Environment } from "./schema";

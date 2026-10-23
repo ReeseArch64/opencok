@@ -42,7 +42,7 @@ Declare `"@opencok/drizzle": "workspace:*"` and `"@opencok/env": "workspace:*"`
 in the consuming server package.
 
 ```ts
-import { requireEnv } from "@opencok/env";
+import { requireEnv } from "@opencok/env/database";
 import { createDatabases } from "@opencok/drizzle";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 

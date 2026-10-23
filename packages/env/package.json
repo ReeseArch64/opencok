@@ -4,7 +4,9 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./database": "./src/database.ts",
+    "./database/schema": "./src/database.schema.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",
@@ -14,5 +16,8 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "dependencies": {
+    "zod": "catalog:"
   }
 }

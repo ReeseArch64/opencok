@@ -1109,16 +1109,17 @@ generation/migration commands, data representations and verification.
 
 ### 15.2. Shared server environment
 
-`packages/env` owns typed server environment configuration. It locates the workspace
-root from its own module and loads only the root `.env`, independently of the working
+`packages/env` owns server environment configuration validated with Zod and inferred
+TypeScript types. It locates the workspace root from its own module and loads only the root `.env`, independently of the working
 directory. Explicit process/CI variables override file values. The file is optional
 for CI and offline tooling; each operation requires the settings it actually needs.
 The root `.env.example` documents the supported keys; private env files are ignored.
 Validation reports variable names without exposing supplied values.
 
-Server consumers import `env` / `requireEnv` from `@opencok/env` instead of reading
-configuration directly from `process.env`. The package does not mutate `process.env`
-and must not be imported into browser/mobile bundles. Runtime composition passes
+Server consumers import `env` / `requireEnv` from `@opencok/env` for general settings
+and `@opencok/env/database` for database-only settings, instead of reading configuration
+directly from `process.env`. Each subpath validates and exposes only its domain.
+The package does not mutate `process.env` and must not be imported into browser/mobile bundles. Runtime composition passes
 validated settings to adapters. Bun's root configuration disables automatic dotenv
 variants; the Drizzle package links that configuration for package-local invocation
 and pins Drizzle Kit's own dotenv loader to the same root file. See the

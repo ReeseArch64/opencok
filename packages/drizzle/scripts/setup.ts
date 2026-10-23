@@ -1,5 +1,5 @@
 import { Pool, type PoolConfig } from "pg";
-import { EnvironmentError, requireEnv } from "@opencok/env";
+import { EnvironmentError, requireEnv } from "@opencok/env/database";
 import { databasePoolConfig, defaultDatabaseTopology, validateTopology, type DatabaseTopology } from "../src/topology";
 import { migrateDatabase } from "./migrate";
 
