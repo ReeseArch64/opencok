@@ -9,11 +9,17 @@ Accepted technology decisions and their implementation status are indexed in
 [the Architecture Decision Records](../docs/decisions/README.md). Read the relevant
 record before changing its governed components.
 
+[ADR-0009](../docs/decisions/0009-adopt-bun-for-development.md) retains Bun for
+development; [ADR-0010](../docs/decisions/0010-adopt-nodejs-for-production.md) selects
+Node.js for production services and supersedes earlier Bun-production assumptions.
+The checked-in API/server images and adapters still use Bun and remain development
+implementations until the Node migration and its release verification are complete.
+
 The goal is a Modular monorepo with an authoritative server, independent WebSocket chat,
 file and supporting services, an administrative dashboard, a landing page, an
-experimental web client, and Python bots. TypeScript/Bun is the proposed foundation for
-application services, while allowing processes in other languages when measurements
-justify them.
+experimental web client, and Python bots. TypeScript is the foundation for application
+services, with Bun in development and Node.js in production. Processes in other languages
+remain possible when measurements justify them.
 
 The previous proof of concept with APK v12.06.0 opened the city and map screens using
 Bun, MariaDB, Redis and ZooKeeper. This evidence does not validate PostgreSQL,
@@ -290,24 +296,24 @@ mindmap
 
 ## 3. Applications and responsibility boundaries
 
-| Application/component | Location and execution defined                                  | Responsibility                                                                                                                                                   |
-| --------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/api`            | A shared API across VPS/Kubernetes, TypeScript/Bun              | Discovery, Firebase validation, identity binding, push preferences/devices, queries, Admin backend, Stripe orders, and webhooks. It is not replicated per realm. |
-| `apps/server`         | One active logical process/pod per realm on VPS, TypeScript/Bun | Authority over city, economy, troops, skills, marches and combat. A maximum of two realms at this stage.                                                         |
-| API Gateway + Traefik | VPS/Kubernetes                                                  | Ingress, routing, HTTP/WSS policies and TCP passthrough; configuration in `infra/`, without gameplay rules.                                                      |
-| `apps/combat`         | VPS/Kubernetes, TypeScript initially                            | Limited calculation pool, separated from the network handling and economic state updates. Rust or Go are future alternatives after benchmarking and equivalence. |
-| `apps/workers`        | VPS/Kubernetes, TypeScript/Bun                                  | Outbox, CloudAMQP queues, projections, retention, push via FCM and auxiliary tasks; quotas per workload.                                                         |
-| `apps/files`          | VPS/Kubernetes, TypeScript/Bun                                  | Uploads, validation, metadata and access to external storage. Transformation CPU has its own limits.                                                             |
-| `apps/chat`           | Service external to VPS, hosting to be defined                  | WS chat, channels, authorization, history, moderation and 1/7 day retention.                                                                                     |
-| `apps/bot`            | Service external to VPS, Python                                 | Authenticated simulators with quotas without direct access to the realm state.                                                                                   |
-| `apps/admin`          | Cloudflare Pages, `admin.opencok.com`                           | Administrative panel; uses shared API and authorized identity.                                                                                                   |
-| `apps/www`            | Cloudflare Pages, `opencok.com`                                 | Public landing page.                                                                                                                                             |
-| `apps/docs` — planned | Cloudflare Pages, `docs.opencok.com`                            | Documentation website; versioned content and publication.                                                                                                        |
-| `apps/web`            | Vercel, `game.opencok.com`                                      | Experimental SSR Web Game, with continuous rendering and in-browser game connection.                                                                             |
+| Application/component | Location and execution defined                                      | Responsibility                                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api`            | A shared API across VPS/Kubernetes, TypeScript/Node.js              | Discovery, Firebase validation, identity binding, push preferences/devices, queries, Admin backend, Stripe orders, and webhooks. It is not replicated per realm. |
+| `apps/server`         | One active logical process/pod per realm on VPS, TypeScript/Node.js | Authority over city, economy, troops, skills, marches and combat. A maximum of two realms at this stage.                                                         |
+| API Gateway + Traefik | VPS/Kubernetes                                                      | Ingress, routing, HTTP/WSS policies and TCP passthrough; configuration in `infra/`, without gameplay rules.                                                      |
+| `apps/combat`         | VPS/Kubernetes, TypeScript initially                                | Limited calculation pool, separated from the network handling and economic state updates. Rust or Go are future alternatives after benchmarking and equivalence. |
+| `apps/workers`        | VPS/Kubernetes, TypeScript/Node.js                                  | Outbox, CloudAMQP queues, projections, retention, push via FCM and auxiliary tasks; quotas per workload.                                                         |
+| `apps/files`          | VPS/Kubernetes, TypeScript/Node.js                                  | Uploads, validation, metadata and access to external storage. Transformation CPU has its own limits.                                                             |
+| `apps/chat`           | Service external to VPS, hosting to be defined                      | WS chat, channels, authorization, history, moderation and 1/7 day retention.                                                                                     |
+| `apps/bot`            | Service external to VPS, Python                                     | Authenticated simulators with quotas without direct access to the realm state.                                                                                   |
+| `apps/admin`          | Cloudflare Pages, `admin.opencok.com`                               | Administrative panel; uses shared API and authorized identity.                                                                                                   |
+| `apps/www`            | Cloudflare Pages, `opencok.com`                                     | Public landing page.                                                                                                                                             |
+| `apps/docs` — planned | Cloudflare Pages, `docs.opencok.com`                                | Documentation website; versioned content and publication.                                                                                                        |
+| `apps/web`            | Vercel, `game.opencok.com`                                          | Experimental SSR Web Game, with continuous rendering and in-browser game connection.                                                                             |
 
 Vercel is responsible for the SSR frontend, not the authoritative state of the realms.
 Validate the framework, adapter, and deployment runtime; sharing TypeScript does not
-mean that all environments run the same backend Bun composition. The chosen strategy
+mean that all environments run the same backend composition or runtime. The chosen strategy
 connects the browser directly to the backend WSS, without using the SSR as a permanent
 relay of match messages. [Reference: Vercel Functions](https://vercel.com/docs/functions/limitations).
 
@@ -599,7 +605,7 @@ is not enough: it is necessary to control all sources of randomness, as shown be
 ### 10.1. Current language choice and exactness criteria
 
 **The engine starts in TypeScript**, maintaining the monorepo contracts and the backend
-Bun runtime. The previous recommendation to go directly to Rust is replaced by this
+Node.js production runtime, with Bun for development. The previous recommendation to go directly to Rust is replaced by this
 decision. Rust and Go are future candidates if measurements show that the compute, not
 database/network/queue, is the relevant bottleneck.
 
@@ -614,14 +620,14 @@ any later port to Rust/Go: migrating based on performance does not authorize cha
 casualties, random draws, or rewards. There is no language that automatically eliminates
 rule or formula errors.
 
-| Option             | Defined role                                                                                                                                                                 |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TypeScript/Bun** | Initial implementation. Explicit layer for Java numeric semantics; calculation isolated from networking, with CPU/memory budget.                                             |
-| **Java**           | Migration oracle and reference executor in the laboratory. The game does not rely on reintroducing the entire production Java server to use TypeScript.                      |
-| **Rust**           | Future candidate to reduce CPU cost/latency/allocations if a benchmark warrants it. Requires new validation of mathematics and contract.                                     |
-| **Go**             | Future candidate, also subject to CPU measurement, allocations, GC pauses and numerical equivalence. Don't assume that switching to Go makes the formula accurate or faster. |
-| **C++**            | No adoption planned at this stage.                                                                                                                                           |
-| **Python**         | Bots and analysis tools, no authoritative battle calculation loop.                                                                                                           |
+| Option                 | Defined role                                                                                                                                                                 |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TypeScript/Node.js** | Initial implementation. Explicit layer for Java numeric semantics; calculation isolated from networking, with CPU/memory budget.                                             |
+| **Java**               | Migration oracle and reference executor in the laboratory. The game does not rely on reintroducing the entire production Java server to use TypeScript.                      |
+| **Rust**               | Future candidate to reduce CPU cost/latency/allocations if a benchmark warrants it. Requires new validation of mathematics and contract.                                     |
+| **Go**                 | Future candidate, also subject to CPU measurement, allocations, GC pauses and numerical equivalence. Don't assume that switching to Go makes the formula accurate or faster. |
+| **C++**                | No adoption planned at this stage.                                                                                                                                           |
+| **Python**             | Bots and analysis tools, no authoritative battle calculation loop.                                                                                                           |
 
 ### 10.2. Java review scope and evidence
 
@@ -712,7 +718,7 @@ Do not enable fast-math, reassociation, approximations or explicit FMA without p
 equivalence of the affected operation. [Reference: powf accuracy](https://doc.rust-lang.org/std/primitive.f64.html#method.powf).
 
 In the initial engine, `Math.pow` and other mathematical functions of the JavaScript
-runtime also need to pass through Java vectors. Pin the Bun/engine version, architecture
+runtime also need to pass through Java vectors. Pin the Node.js production engine and Bun development versions, architecture
 and dependencies; TypeScript does not promise numerical equivalence to legacy per se.
 The Rust examples above are risks of a future port, not a change from the current choice
 of TypeScript.
@@ -918,7 +924,7 @@ Server/Chat confirms the event and its outbox; the worker consumes the notificat
 intent and sends it through FCM from a trusted environment. It runs on `apps/workers` on
 the VPS, using the defined messaging, without a new server per realm. The external call
 does not enter the gameplay transaction. Use SDK/Admin or HTTP v1 with an adapter
-validated for Bun and credentials restricted to the backend. [Reference: FCM architecture](https://firebase.google.com/docs/cloud-messaging/fcm-architecture).
+validated for the Node.js production runtime and credentials restricted to the backend. [Reference: FCM architecture](https://firebase.google.com/docs/cloud-messaging/fcm-architecture).
 
 The API associates each FCM installation/token with the authenticated account, platform,
 environment and preferences; recipient per character/realm is validated by the backend.

@@ -34,3 +34,4 @@ This index bootstraps the ADR practice without introducing an extra technology d
 - [ADR-0007: Adopt Oxlint for JavaScript and TypeScript linting](0007-adopt-oxlint-for-linting.md) — accepted
 - [ADR-0008: Adopt Oxfmt for repository formatting](0008-adopt-oxfmt-for-formatting.md) — accepted
 - [ADR-0009: Adopt Bun for development tooling and execution](0009-adopt-bun-for-development.md) — accepted
+- [ADR-0010: Adopt Node.js for production service execution](0010-adopt-nodejs-for-production.md) — accepted
