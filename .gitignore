@@ -1,0 +1,10 @@
+# TypeScript
+dist/
+*.tsbuildinfo
+
+# Node Modules
+node_modules/
+
+# Local data (Docker volumes, CDN assets, etc.).
+data/*
+!data/.gitkeep

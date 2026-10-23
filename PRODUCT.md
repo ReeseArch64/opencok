@@ -121,6 +121,22 @@ OpenCoK includes or coordinates the following product areas:
 - documentation for installation, operation, troubleshooting, and
   contribution.
 
+## Mobile client transition
+
+Keep the validated Elex APK as the transitional mobile client while the backend
+is rebuilt. Plan a maintained Lua adaptation to check releases and coordinate
+updates distributed through Cloudflare R2, subject to a validated native Android
+bridge and platform installation requirements. Preserve account access and
+player progress throughout updates; downloading an APK is not proof that an
+update was installed.
+
+Evaluate a gradual rewrite of the game client in Flutter/Dart as a longer-term
+option, without making it a prerequisite for current gameplay or committing to
+a replacement date. The existing APK and a future client must share the same
+authoritative backend and persistent player identity. The experimental SSR web
+client remains a separate evaluation. Technical boundaries, delivery, and
+validation belong in [the architecture](.github/ARCHITECTURE.md#27-cliente-de-transição-atualização-r2-e-possível-reescrita-flutter).
+
 ## Current product priorities
 
 1. **Stabilize the active client experience.** Resolve broken screens,
