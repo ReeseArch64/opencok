@@ -6,7 +6,9 @@
     "db:generate": "bun scripts/generate.ts",
     "db:check": "bun scripts/generate.ts --check",
     "db:bootstrap": "bun scripts/bootstrap.ts",
-    "db:preview": "drizzle-kit export --config drizzle.config.ts"
+    "db:preview": "drizzle-kit export --config drizzle.config.ts",
+    "test": "bun test tests/legacy-sql.test.ts",
+    "test:integration": "bun tests/mariadb.integration.ts"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
