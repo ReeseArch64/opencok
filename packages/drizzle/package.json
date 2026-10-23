@@ -27,6 +27,10 @@
     "./schema/cokdb1": "./src/schema/cokdb1.ts",
     "./schema/cokdb_global": "./src/schema/cokdb_global.ts",
     "./schema/cokdb_pay": "./src/schema/cokdb_pay.ts",
-    "./schema/opencok_chat": "./src/schema/opencok_chat.ts"
+    "./schema/opencok_chat": "./src/schema/opencok_chat.ts",
+    "./schema/cokdb1/*": "./src/schema/cokdb1/*.ts",
+    "./schema/cokdb_global/*": "./src/schema/cokdb_global/*.ts",
+    "./schema/cokdb_pay/*": "./src/schema/cokdb_pay/*.ts",
+    "./schema/opencok_chat/*": "./src/schema/opencok_chat/*.ts"
   }
 }

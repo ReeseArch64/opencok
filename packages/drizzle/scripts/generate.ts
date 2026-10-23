@@ -13,6 +13,7 @@ function identifiers(input: string): string[] {
 
 export function renderSchema(tables: LegacyTable[]): string {
   const imports = new Set(["mysqlTable"]);
+  const referencedTables = new Set<string>();
   let usesSql = false;
   let usesBinary = false;
   const declarations = tables.map((table) => {
@@ -97,6 +98,7 @@ export function renderSchema(tables: LegacyTable[]): string {
         const match = definition.match(/^CONSTRAINT `([^`]+)` FOREIGN KEY \(([^)]+)\) REFERENCES `([^`]+)` \(([^)]+)\)(.*)$/i);
         if (!match) throw new Error(`Unsupported foreign key in ${table.name}`);
         imports.add("foreignKey");
+        if (!tables.some((candidate) => candidate.name === match[3])) referencedTables.add(match[3]!);
         let expression = `foreignKey({ name: ${js(match[1])}, columns: [${identifiers(match[2]!).map(columnRef).join(", ")}], foreignColumns: [${identifiers(match[4]!).map((name) => `${exportName(match[3]!)}[${js(name)}]`).join(", ")}] })`;
         for (const action of ["DELETE", "UPDATE"]) {
           const value = match[5]!.match(new RegExp(`ON ${action} (CASCADE|RESTRICT|NO ACTION|SET NULL|SET DEFAULT)`, "i"))?.[1];
@@ -113,7 +115,8 @@ export function renderSchema(tables: LegacyTable[]): string {
     "// MariaDB-only attributes are preserved in migrations/<database>/0000_legacy.sql.",
     usesSql ? 'import { sql } from "drizzle-orm";' : "",
     `import { ${[...imports].sort().join(", ")} } from "drizzle-orm/mysql-core";`,
-    usesBinary ? 'import { binaryData } from "../binary";' : "",
+    usesBinary ? 'import { binaryData } from "../../binary";' : "",
+    ...[...referencedTables].sort().map((name) => `import { ${exportName(name)} } from "./${name}";`),
     "", ...declarations,
   ].filter((line) => line !== "").join("\n\n") + "\n";
 }
@@ -123,7 +126,13 @@ export async function generate(directory: string, output: string, check = false)
   const files = new Map<string, string>();
   for (const database of databaseNames) {
     const tables = legacy.tables.filter((table) => table.database === database);
-    files.set(`src/schema/${database}.ts`, renderSchema(tables));
+    files.set(`src/schema/${database}.ts`, [
+      "// Generated database exports; each table is defined in its own module.",
+      ...tables.map((table) => `export { ${exportName(table.name)} } from "./${database}/${table.name}";`),
+    ].join("\n") + "\n");
+    for (const table of tables) {
+      files.set(`src/schema/${database}/${table.name}.ts`, renderSchema([table]));
+    }
     files.set(`migrations/${database}/0000_legacy.sql`, [
       "-- Generated schema-only baseline. Original ROW_FORMAT=COMPACT becomes DYNAMIC, as in the legacy importer.\nSET NAMES utf8mb4;",
       ...tables.map(tableSql),

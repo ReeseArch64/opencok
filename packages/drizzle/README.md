@@ -19,6 +19,12 @@ primary keys, secondary/unique indexes and both foreign keys. `package` is a res
 JavaScript word: its TypeScript export is `cokdb_pay.packageTable`; its SQL name stays
 `package`. SQL identifiers such as `zh-Hans` remain quoted properties.
 
+Each table has its own file under `src/schema/<database>/<table>.ts`, for example
+`src/schema/cokdb1/user_resource.ts`. The four `src/schema/<database>.ts` files
+re-export their tables, preserving the existing database imports. Foreign keys import
+their referenced table directly. A single table can also be imported through
+`@opencok/drizzle/schema/cokdb1/user_resource`.
+
 `inventory.json` records all seven input hashes, table counts, 49 `LIKE` expansions,
 four triggers, three procedures, one function and one event. It contains no rows,
 credentials, definers or stored-program bodies. Source inputs remain read-only and
@@ -75,7 +81,8 @@ bun run test:integration
 ```
 
 The directory must contain exactly the seven SQL files in `inventory.json`. Generation
-reads DDL and writes `src/schema/*.ts`, schema-only migrations and the inventory. It
+reads DDL and writes one `src/schema/<database>/<table>.ts` module per table, database
+re-exports, schema-only migrations and the inventory. It
 fails on unsupported syntax instead of silently omitting a table or column attribute.
 Review generated diffs before accepting changed inputs. `db:check` only reads and
 compares files. The importer is intentionally limited to these dump forms, not a
