@@ -1168,7 +1168,7 @@ for configuration, supported commands, limitations and verification.
 The root Compose environment now composes Traefik, the shared Bun discovery API,
 one read-only Bun realm server, PostgreSQL, Redis and ZooKeeper. MinIO and its one-shot setup job supply the client CDN. Chat and media/files
 have no services or gateway routes in this stage. All services use `all`/`dev`
-profiles except pgAdmin, which uses `all` only. The broader production architecture remains the target;
+profiles, including pgAdmin, Redis Insight and Portainer. The broader production architecture remains the target;
 this local stack does not establish TLS, Firebase or production readiness.
 
 The API reads global account/mapping tables through existing Drizzle models. It
@@ -1613,9 +1613,12 @@ files and mobile artifacts. The
 credential changes and recovery. This single-instance local environment does not
 implement the production replica/managed-service topology.
 
-Development uses Compose with proposed profiles `core`, `dev-tools` and
-`tests`. Administrative interfaces are developer tools and not game startup
-dependencies. Application CI does not need to start these interfaces to test the core.
+The current development Compose uses `dev` and `all` on every service; both
+profiles select the same complete stack. Redis Insight and Portainer have their
+own persistent volumes. The isolated stack suite covers every declared service,
+including the two one-shot setup jobs; its Portainer instance omits the host
+Docker socket. Additional profile subdivisions remain a future proposal.
+Administrative interfaces are developer tools and not game startup dependencies. Application CI does not need to start these interfaces to test the core.
 Declarative configuration of the gateway remains versioned.
 
 | Requested tool    | Development use                                                            | Boundary                                                                                                            |

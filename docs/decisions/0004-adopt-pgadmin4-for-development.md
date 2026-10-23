@@ -69,3 +69,17 @@ or a historical evaluation was performed.
 - **Review again when**: the stated boundaries cannot be maintained, a required
   dependency becomes unsupported, or measured compatibility/operational results
   invalidate the choice. A replacement requires a linked superseding ADR.
+
+### 2026-10-23: Include pgAdmin in both development profiles
+
+The maintainer subsequently requested `dev` and `all` on every Compose service.
+This operational amendment supersedes the initial `all`-only profile choice and
+the verification criterion that `dev` omits pgAdmin. Both profiles now include
+pgAdmin and the same complete service set. pgAdmin remains outside the public
+game ingress and is not a direct dependency of API/server startup.
+
+- [ ] Verify both profiles include pgAdmin, its ping/login page responds, and the
+      setup-generated registration contains the synthetic database user without a password.
+
+These checks are implemented in `tests/stack/compose.test.ts`; a passing run is
+evidence for the tested disposable stack, not a production deployment.

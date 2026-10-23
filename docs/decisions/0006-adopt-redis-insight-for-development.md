@@ -69,3 +69,17 @@ or a historical evaluation was performed.
 - **Review again when**: the stated boundaries cannot be maintained, a required
   dependency becomes unsupported, or measured compatibility/operational results
   invalidate the choice. A replacement requires a linked superseding ADR.
+
+### 2026-10-23: Include Redis Insight in both development profiles
+
+The maintainer added a Redis Insight Compose service and subsequently requested
+`dev` and `all` on every service. This replaces the planned separate tooling
+profile for this local stack. A named `redisinsight-data` volume supplies its
+persistent UI state. API/server do not depend directly on the visualizer.
+
+- [ ] Verify both profiles include Redis Insight and its health endpoint, UI and
+      database-list API respond in the isolated stack.
+
+The smoke checks in `tests/stack/compose.test.ts` do not establish the original
+UI-authentication or pinned-image criteria; those implementation tasks remain
+open for the maintainer-supplied `latest` image configuration.
