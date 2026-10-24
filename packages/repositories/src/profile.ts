@@ -13,9 +13,53 @@ import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_honor } from "@opencok/drizzle/schema/opencok_kingdom/user_honor";
 import { user_achievement } from "@opencok/drizzle/schema/opencok_kingdom/user_achievement";
 import { and, asc, count, eq, inArray } from "drizzle-orm";
-import type { PublicProfileState } from "@opencok/contracts/profile";
+import type { PublicProfileState, RoutedPublicProfile } from "@opencok/contracts/profile";
+import type { createDatabases } from "@opencok/drizzle";
+import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
+import { alliance_vedio } from "@opencok/drizzle/schema/opencok_kingdom/alliance_vedio";
+import { DependencyError } from "@opencok/errors/dependency";
 import type { Database } from "./game.ts";
 import { readProfileAlliance } from "./profile-alliance.ts";
+
+export async function checkPublicProfileStore(db: Database["kingdom"]["db"]) {
+  for (const table of [user_skill, user_honor, user_achievement, flower_ranking, alliance_vedio])
+    await db.select().from(table).limit(0);
+}
+
+export async function loadPublicProfile(
+  databases: ReturnType<typeof createDatabases>,
+  localKingdomId: number,
+  uid: string,
+  observerAllianceId: string,
+): Promise<RoutedPublicProfile | undefined> {
+  if (!/^[0-9]{1,40}$/.test(uid)) return undefined;
+  const account = (
+    await databases.global.db
+      .select({ server: account_new.server })
+      .from(account_new)
+      .where(eq(account_new.gameUid, uid))
+      .limit(1)
+  )[0];
+  const server = account?.server ?? String(localKingdomId);
+  if (!/^[+-]?\d+$/.test(server)) throw new DependencyError("player realm");
+  const kingdomId = Number(server);
+  if (
+    !Number.isInteger(kingdomId) ||
+    kingdomId <= 0 ||
+    kingdomId > 2147483647 ||
+    !databases.kingdoms.has(kingdomId)
+  )
+    throw new DependencyError("player realm");
+  const state = await readPublicProfile(
+    databases.getKingdom(kingdomId).db,
+    uid,
+    observerAllianceId,
+  );
+  if (!state.profile) return undefined;
+  if (state.profile.uid !== uid || Number(state.profile.serverId) !== kingdomId)
+    throw new DependencyError("player realm");
+  return { state, kingdomId };
+}
 
 export function readPublicProfile(
   db: Database["kingdom"]["db"],
