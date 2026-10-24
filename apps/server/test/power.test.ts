@@ -80,6 +80,7 @@ function fixture() {
     miracle: undefined,
     office: undefined,
     kingdomFights: [],
+    territoryTrees: [],
   };
   return { state, rules };
 }
@@ -108,6 +109,7 @@ function empty(): PowerSnapshot {
     miracle: undefined,
     office: undefined,
     kingdomFights: [],
+    territoryTrees: [],
   };
 }
 

@@ -14,6 +14,7 @@ function database(
     allianceFailure?: boolean;
     office?: boolean;
     fightFailure?: boolean;
+    treeFailure?: boolean;
   } = {},
 ) {
   const queries: { text: string; params: unknown[] }[] = [];
@@ -52,6 +53,10 @@ function database(
       if (table === "activity") {
         if (options.fightFailure) throw new Error("Synthetic fight read failure");
         return { rows: [[0, "1792756790000", "1792756800000", "9007199254740993"]] };
+      }
+      if (table === "alliance_territory") {
+        if (options.treeFailure) throw new Error("Synthetic tree read failure");
+        return { rows: [[options.allianceId, 10, 42, 3, 2, "synthetic-skin"]] };
       }
       if (table === "alliance_science") {
         if (options.allianceFailure) throw new Error("Synthetic alliance read failure");
@@ -114,7 +119,9 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(selects).toHaveLength(22);
   expect(snapshot.office).toBeUndefined();
   expect(snapshot.kingdomFights).toEqual([]);
+  expect(snapshot.territoryTrees).toEqual([]);
   expect(selects.some((query) => query.text.includes('"activity"'))).toBe(false);
+  expect(selects.some((query) => query.text.includes('"alliance_territory"'))).toBe(false);
   expect(snapshot.profile?.civilizationType).toBe(2);
   expect(snapshot.prestige).toEqual([{ civilizationType: 2, prestigeValue: 9007199254740993n }]);
   expect(snapshot.military).toEqual({ skill: "1001|1002" });
@@ -181,6 +188,34 @@ test("alliance power reads follow the persisted membership and roll back on a la
   expect(failure.queries.some((query) => query.text === "commit")).toBe(false);
 });
 
+test("tree power reads follow alliance membership, bound duplicate detection and roll back failures", async () => {
+  const fixture = database({ allianceId: "synthetic-alliance" });
+  const result = await readPowerState(fixture.db, "synthetic", now);
+  expect(result.territoryTrees).toEqual([
+    {
+      allianceId: "synthetic-alliance",
+      pointId: 10,
+      type: 42,
+      stat: 3,
+      level: 2,
+      activeSkin: "synthetic-skin",
+    },
+  ]);
+  const query = fixture.queries.find((entry) => entry.text.includes('"alliance_territory"'))!;
+  expect(query.params).toEqual(["synthetic-alliance", 42, 0, 2]);
+  expect(query.text).toContain('"alliance_territory"."allianceId" = $1');
+  expect(query.text).toContain('"alliance_territory"."type" = $2');
+  expect(query.text).toContain('"alliance_territory"."pointId" > $3');
+  expect(query.text).not.toMatch(/buildingSpd|activateTime|updateTime|createId/);
+  expect(fixture.queries.at(-1)?.text).toBe("commit");
+  const blank = database({ allianceId: " " });
+  expect((await readPowerState(blank.db, "synthetic", now)).territoryTrees).toEqual([]);
+  expect(blank.queries.some((entry) => entry.text.includes('"alliance_territory"'))).toBe(false);
+  const failure = database({ allianceId: "synthetic-alliance", treeFailure: true });
+  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  expect(failure.queries.at(-1)?.text).toBe("rollback");
+});
+
 test("office snapshots use owner membership and bounded realm fight reads in the same transaction", async () => {
   const fixture = database({ office: true });
   const result = await readPowerState(fixture.db, "synthetic", now);
@@ -216,7 +251,7 @@ test("power readiness checks each required table without reading records or writ
   };
   await checkPowerStore(drizzle(client as unknown as NodePgClient, { schema }));
   const tables = queries.map((query) => query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1]);
-  expect(new Set(tables).size).toBe(24);
+  expect(new Set(tables).size).toBe(25);
   for (const table of [
     "userprofile",
     "playerinfo",
@@ -242,6 +277,7 @@ test("power readiness checks each required table without reading records or writ
     "user_miracle_buff_active",
     "kingdom_position",
     "activity",
+    "alliance_territory",
   ])
     expect(tables).toContain(table);
   for (const query of queries) {
