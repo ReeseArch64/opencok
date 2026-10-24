@@ -134,7 +134,9 @@ test("celebrity reads require an authenticated local unbanned caller before para
   ] as (Row | undefined)[]) {
     const instance = fixture();
     instance.owner(owner);
-    await expect(instance.run({})).rejects.toThrow();
+    await expect(instance.run({})).rejects.toMatchObject({
+      code: owner ? "E000000" : "E100169",
+    });
     expect(instance.queries).toEqual([]);
   }
 });
