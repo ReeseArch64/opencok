@@ -1,0 +1,261 @@
+import type { createDatabases } from "@opencok/drizzle";
+import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
+import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
+import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
+import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
+import { stat_reg } from "@opencok/drizzle/schema/opencok_kingdom/stat_reg";
+import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
+import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
+import type {
+  WorldPointDetailStore,
+  WorldPointOwnerSnapshot,
+} from "@opencok/contracts/world-point-detail";
+import type { Row } from "@opencok/contracts/rows";
+import { DependencyError } from "@opencok/errors/dependency";
+import { and, asc, desc, eq } from "drizzle-orm";
+
+type Databases = Pick<ReturnType<typeof createDatabases>, "getKingdom" | "kingdoms">;
+type Db = ReturnType<Databases["getKingdom"]>["db"];
+type Reader = Pick<Db, "select">;
+const options = { isolationLevel: "repeatable read", accessMode: "read only" } as const;
+const profileColumns = {
+  uid: userprofile.uid,
+  serverId: userprofile.serverId,
+  banTime: userprofile.banTime,
+  banFlag: userprofile.banFlag,
+  allianceId: userprofile.allianceId,
+  appVersion: userprofile.appVersion,
+};
+const pointColumns = {
+  id: worldpoint.id,
+  worldId: worldpoint.worldId,
+  pointType: worldpoint.pointType,
+  pointItem: worldpoint.pointItem,
+  ownerId: worldpoint.ownerId,
+  ownerName: worldpoint.ownerName,
+  allianceId: worldpoint.allianceId,
+  ownerMarchUUid: worldpoint.ownerMarchUUid,
+  resInitValue: worldpoint.resInitValue,
+  resCostValue: worldpoint.resCostValue,
+  monsterCurrHP: worldpoint.monsterCurrHP,
+  territoryAlliance: worldpoint.territoryAlliance,
+  active: worldpoint.active,
+  reserve: worldpoint.reserve,
+};
+function integer(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= -2147483648 &&
+    value <= 2147483647
+  );
+}
+function validText(value: unknown, limit: number): value is string {
+  return (
+    typeof value === "string" &&
+    value.length <= limit &&
+    value.isWellFormed() &&
+    !value.includes("\0")
+  );
+}
+function blank(value: string | null | undefined): boolean {
+  if (value == null) return true;
+  return Array.from(value).every((character) => {
+    const code = character.charCodeAt(0);
+    return (
+      (code >= 9 && code <= 13) ||
+      (code >= 28 && code <= 32) ||
+      code === 0x1680 ||
+      code === 0x180e ||
+      (code >= 0x2000 && code <= 0x2006) ||
+      (code >= 0x2008 && code <= 0x200a) ||
+      [0x2028, 0x2029, 0x205f, 0x3000].includes(code)
+    );
+  });
+}
+function authorized(
+  profile: Row | undefined,
+  observer: string,
+  kingdomId: number,
+  now: number,
+): boolean {
+  if (profile?.uid !== observer || profile.serverId !== kingdomId) return false;
+  const flag = profile.banFlag ?? 0;
+  const until = profile.banTime ?? 0n;
+  return (
+    flag === 0 &&
+    typeof until === "bigint" &&
+    BigInt.asIntN(64, until) === until &&
+    until <= BigInt(now)
+  );
+}
+function single<T>(rows: T[]): T | undefined {
+  if (rows.length > 1) throw new Error("Ambiguous world detail row");
+  return rows[0];
+}
+async function ownerRows(
+  db: Reader,
+  point: Row,
+  remote: boolean,
+): Promise<WorldPointOwnerSnapshot> {
+  if (!remote && (point.pointType === 6 || point.pointType === 15)) return {};
+  const uid = point.ownerId;
+  if (uid == null || (typeof uid === "string" && blank(uid))) return {};
+  if (!validText(uid, 255)) throw new Error("Invalid point owner");
+  const result: WorldPointOwnerSnapshot = {};
+  result.profile = single(
+    await db
+      .select({ uid: userprofile.uid, pic: userprofile.pic, regTime: userprofile.regTime })
+      .from(userprofile)
+      .where(eq(userprofile.uid, uid))
+      .limit(2),
+  );
+  if (result.profile && result.profile.uid !== uid) throw new Error("Foreign point owner");
+  const city = point.pointType === 1 || point.pointType === 2;
+  if (result.profile) {
+    result.registration = single(
+      await db
+        .select({ uid: stat_reg.uid, type: stat_reg.type, time: stat_reg.time })
+        .from(stat_reg)
+        .where(eq(stat_reg.uid, uid))
+        .orderBy(desc(eq(stat_reg.type, 2)), desc(stat_reg.time), asc(stat_reg.type))
+        .limit(1),
+    );
+    if (result.registration && result.registration.uid !== uid)
+      throw new Error("Foreign owner registration");
+    if (city) {
+      result.statistics = single(
+        await db
+          .select({ uid: playerinfo.uid, power: playerinfo.power, armyKill: playerinfo.armyKill })
+          .from(playerinfo)
+          .where(eq(playerinfo.uid, uid))
+          .limit(2),
+      );
+      if (result.statistics && result.statistics.uid !== uid)
+        throw new Error("Foreign owner statistics");
+    }
+  }
+  if (city || point.pointType === 3) {
+    const allianceId = point.allianceId;
+    if (allianceId != null && !(typeof allianceId === "string" && blank(allianceId))) {
+      if (!validText(allianceId, 40)) throw new Error("Invalid point alliance");
+      result.alliance = single(
+        await db
+          .select({ uid: alliance.uid, abbr: alliance.abbr })
+          .from(alliance)
+          .where(eq(alliance.uid, allianceId))
+          .limit(2),
+      );
+      if (result.alliance && result.alliance.uid !== allianceId)
+        throw new Error("Foreign point alliance");
+      result.member = single(
+        await db
+          .select({ uid: alliance_member.uid, rank: alliance_member.rank })
+          .from(alliance_member)
+          .where(eq(alliance_member.uid, uid))
+          .limit(2),
+      );
+      if (result.member && result.member.uid !== uid) throw new Error("Foreign owner membership");
+    }
+  }
+  return result;
+}
+async function readPoint(db: Reader, id: number, worldId: number, remote: boolean) {
+  const point = single(
+    await db
+      .select(pointColumns)
+      .from(worldpoint)
+      .where(and(eq(worldpoint.id, id), eq(worldpoint.worldId, worldId)))
+      .limit(2),
+  );
+  if (!point) return {};
+  if (point.id !== id || point.worldId !== worldId || !integer(point.pointType))
+    throw new Error("Invalid world point");
+  const owner = await ownerRows(db, point, remote);
+  return { point, owner };
+}
+export function createWorldPointDetailStore(
+  databases: Databases,
+  kingdomId: number,
+): WorldPointDetailStore {
+  if (!integer(kingdomId) || kingdomId < 1 || !databases.kingdoms.has(kingdomId))
+    throw new Error("Invalid world detail realm");
+  return {
+    async read(observer, input) {
+      const query = Object.freeze({ ...input });
+      if (
+        !validText(observer, 255) ||
+        !observer ||
+        !integer(query.point) ||
+        !integer(query.kingdomId) ||
+        query.kingdomId < 1 ||
+        !Number.isSafeInteger(query.now) ||
+        query.now < 0
+      )
+        throw new Error("Invalid world detail query");
+      const remote = query.kingdomId !== kingdomId;
+      try {
+        const local = await databases.getKingdom(kingdomId).db.transaction(async (tx) => {
+          const profile = single(
+            await tx
+              .select(profileColumns)
+              .from(userprofile)
+              .where(eq(userprofile.uid, observer))
+              .limit(2),
+          );
+          const snapshot = { profile, kingdomId: query.kingdomId, remote };
+          if (!authorized(profile, observer, kingdomId, query.now) || query.point <= 0)
+            return snapshot;
+          const world = single(
+            await tx
+              .select({ uid: user_world.uid, worldId: user_world.worldId })
+              .from(user_world)
+              .where(eq(user_world.uid, observer))
+              .limit(2),
+          );
+          if (!world || world.uid !== observer || !integer(world.worldId))
+            throw new Error("Missing observer world");
+          const result = { ...snapshot, world };
+          return remote
+            ? result
+            : { ...result, ...(await readPoint(tx, query.point, world.worldId, false)) };
+        }, options);
+        if (
+          !authorized(local.profile, observer, kingdomId, query.now) ||
+          query.point <= 0 ||
+          !remote
+        )
+          return local;
+        if (!databases.kingdoms.has(query.kingdomId))
+          throw new Error("Unconfigured world detail realm");
+        const detail = await databases
+          .getKingdom(query.kingdomId)
+          .db.transaction((tx) => readPoint(tx, query.point, 0, true), options);
+        return { ...local, ...detail };
+      } catch {
+        throw new DependencyError("world point detail");
+      }
+    },
+  };
+}
+export async function checkWorldPointDetailStore(db: Db): Promise<void> {
+  await db
+    .select({ ...profileColumns, pic: userprofile.pic, regTime: userprofile.regTime })
+    .from(userprofile)
+    .limit(0);
+  await db.select({ uid: user_world.uid, worldId: user_world.worldId }).from(user_world).limit(0);
+  await db.select(pointColumns).from(worldpoint).limit(0);
+  await db
+    .select({ uid: playerinfo.uid, power: playerinfo.power, armyKill: playerinfo.armyKill })
+    .from(playerinfo)
+    .limit(0);
+  await db
+    .select({ uid: stat_reg.uid, type: stat_reg.type, time: stat_reg.time })
+    .from(stat_reg)
+    .limit(0);
+  await db.select({ uid: alliance.uid, abbr: alliance.abbr }).from(alliance).limit(0);
+  await db
+    .select({ uid: alliance_member.uid, rank: alliance_member.rank })
+    .from(alliance_member)
+    .limit(0);
+}

@@ -443,6 +443,19 @@ Java primitive oracle covers arithmetic boundaries without executing private gam
 classes. The [realm runbook](../apps/server/README.md#world-resource-detail-foundation)
 records the implemented fields and outstanding command dependencies.
 
+The dependent `repositories/world-point-detail` reader authenticates the local
+observer and selects a point in the observer's world within a read-only repeatable-read
+transaction. Configured remote realms use a separate transaction and world zero after
+local authorization. Public owner profile, registration, statistics and point-alliance
+metadata share the point's snapshot; registration selection prefers type 2 before
+the latest timestamp. Owner reads omit private account and registration fields. The corresponding rules and
+DTO provide the base owner fields and preserve local monster early exits, without
+claiming the specialized monster/territory fields. Current database reads replace
+legacy process-local profile/alliance caches for this path. This reader and its
+readiness helper are not connected to the runtime yet; complete command composition,
+specialized state and remote JSON/wire conversion remain pending. Details are in the
+[realm runbook](../apps/server/README.md#world-point-and-owner-read-foundation).
+
 ### Migrated files implementation
 
 `apps/files` composes `api/files`, `identity/avatar`, `validations/image` and

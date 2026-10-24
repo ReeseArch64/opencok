@@ -1170,12 +1170,65 @@ The fixtures include cases where converting a long through a JavaScript double
 before float rounding would produce the wrong result. Normal tests require no Java
 runtime, ignored source inputs, database, listener or client.
 
-Point lookup, observer authorization, local/remote routing, owner and specialized
-point projections, existing-march restoration and command composition remain pending.
+The point/owner read foundation below now supplies lookup, observer authorization,
+local/remote routing and base owner fields. Specialized point projections,
+existing-march restoration and command composition remain pending.
 Raw troop load and runtime-only `maxCollectTime` must be resolved explicitly; the
 persisted march row alone does not provide both values. The read path must not
 silently schedule marches, start combat or repair ownership. This foundation does
 not establish full point-detail compatibility or complete topic 5.
+
+## World point and owner read foundation
+
+`repositories/world-point-detail` supplies a read-only snapshot for the pending
+`world.get.detail` command. Its port and readiness helper are not yet composed into
+the runtime. The current ordinary-realm implementation uses existing tables and adds
+no schema or configuration. It does not start a march, repair ownership, create
+missing player/statistics rows or mutate caches.
+
+`rules/world-point-detail` normalizes omitted/`-1` server IDs to the local kingdom.
+The reader validates the observer UID, local realm and ban state before any world
+or target reads. Nonpositive signed point IDs require no world lookup. Positive IDs
+require the observer's existing `user_world` row. A local point is selected by both
+ID and that world's ID; a configured remote realm is read at world zero, after the
+local authorization transaction commits. Remote access uses the supplied public-read
+database topology without a global account-directory lookup. Unknown realms fail
+explicitly. Missing points remain absent in the snapshot rather than becoming a
+fabricated resource or empty owner; final command error mapping remains pending.
+
+Each realm read uses a read-only repeatable-read transaction. Point and owner data
+share that transaction; local authorization and remote reads are not atomic together.
+Readiness probes select only required columns with limit zero. Invalid dependencies,
+ambiguous rows and failed transactions produce a sanitized dependency error. The
+ordinary-realm registration rule is not an implementation of cross-fight-server
+registration behavior.
+
+| Base owner field    | Selection and presentation                                                                                                                                                                                                                                                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `uid`               | Nonblank point owner ID; Java whitespace rules also determine occupancy from either owner ID or owner name. Local monster-boss type 15 returns before this field.                                                                                                                                        |
+| `registerTime`      | Long, initially the existing owner's profile time or zero if no profile exists. With a profile, the chosen registration record can raise this value: type 2 takes priority, otherwise the latest timestamp is used. Equal-time records use type order as a deterministic tie-breaker.                    |
+| `pic`               | String for cities (1/2), resources (3/37), relics (4) and towers (5). Missing profiles supply an empty string; a null picture on an existing profile rejects, matching the reference SFS non-null string requirement.                                                                                    |
+| `power`, `killArmy` | Exact Long fields for cities with an existing owner profile; missing statistics reject. Nullable stored primitive counters use zero. No statistics are invented when the owner profile is absent.                                                                                                        |
+| `afn`               | Optional abbreviation from the alliance recorded on the point, for cities and ordinary resources. Empty abbreviations are retained; missing/null abbreviations are omitted.                                                                                                                              |
+| `rank`, `vl`        | Int membership rank defaults to zero. Membership lookup uses owner UID, including the reference database fallback when point/profile alliance membership differs. Cities emit rank only with a nonblank point alliance; ordinary resources always emit rank. Both emit `vl: 0`; new resources omit both. |
+
+Local monster type 6 stops base-owner projection after UID, and local monster-boss
+type 15 has no base owner fields. Their specialized exploration/HP fields are still
+pending. Remote reads do not take these observer-specific early exits. Territory
+and other specialized additions are also pending; the base fields alone are not a
+complete response. The DTO preserves direct/local SFS field types; it does not yet
+emulate the remote legacy JSON round trip or claim remote wire-type equivalence.
+
+Current database snapshots replace the legacy process-local profile, statistics
+and alliance caches. This can expose persisted updates sooner and does not reproduce
+unpersisted in-memory changes, stale cache contents or invalidation timing. Cache
+equivalence and live database snapshot behavior are not claimed.
+
+Sixteen unit tests compose the actual Drizzle reader with synthetic query clients
+and the pure owner projection. They cover all point-kind base-field omissions,
+local/remote world selection, authorization, migration-record priority, missing
+and inconsistent rows, exact numeric wire types, failure rollback, captured query
+inputs and read-only readiness. No database, service, listener or client is started.
 
 ## Realm avatar grants
 
@@ -1935,7 +1988,7 @@ use these descriptions before the reconnect task component is complete.
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; resource-detail arithmetic/projection foundation with synthetic unit coverage                                                  | Point details; documented search cache/collation/exceptional-state differences; live behavior remains deferred.                                           |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; resource arithmetic plus point/owner read foundations with synthetic unit coverage                                             | Point details; documented search cache/collation/exceptional-state differences; live behavior remains deferred.                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                              | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
