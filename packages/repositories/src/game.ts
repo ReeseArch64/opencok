@@ -1,5 +1,6 @@
 import { readMailBatch } from "./mail-batch.ts";
 import { markMailConversationRead } from "./mail-conversation-read.ts";
+import { deleteMailCategories, deleteMailType } from "./mail-batch-delete.ts";
 import { readMailGroups } from "./mail-groups.ts";
 import { readMailCategory } from "./mail-category.ts";
 import { translationv2 } from "@opencok/drizzle/schema/opencok_kingdom/translationv2";
@@ -15,6 +16,9 @@ import type {
   MailContentsInspector,
   MailConversationSaveQuery,
   MailConversationReadQuery,
+  MailCategoryDeleteQuery,
+  MailCategoryDeleteInspector,
+  MailTypeDeleteQuery,
   MailDeleteQuery,
   MailDeletePlanner,
   MailReadQuery,
@@ -317,6 +321,16 @@ export class Database implements GameStore, FriendshipMineStore {
     if (query.effects.some((effect) => effect.kind === "chat"))
       throw new DependencyError("chat read delivery unavailable");
     return markMailConversationRead(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
+  mailCategoryDelete(
+    uid: string,
+    query: MailCategoryDeleteQuery,
+    inspect: MailCategoryDeleteInspector,
+  ) {
+    return deleteMailCategories(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
+  }
+  mailTypeDelete(uid: string, query: MailTypeDeleteQuery) {
+    return deleteMailType(this.kingdom.db, this.config.kingdomId, uid, query);
   }
   mailDelete(uid: string, query: MailDeleteQuery, plan: MailDeletePlanner) {
     return deleteMail(this.kingdom.db, this.config.kingdomId, uid, query, plan);

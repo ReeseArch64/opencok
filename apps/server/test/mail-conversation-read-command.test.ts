@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
+import type { Row } from "@opencok/contracts/rows";
 import type {
   MailConversationReadQuery,
   MailConversationReadSnapshot,
@@ -127,7 +128,7 @@ test("malformed consumed request fields or acknowledgment encoding reject before
     { types: sfs.int(0) },
     { types: sfs.string("4,bad") },
     { type: sfs.int(4), _cok_: sfs.string("x".repeat(65536)) },
-  ]) {
+  ] as Fields[]) {
     const app = fixture();
     await expect(app.game.execute("self", "chatMail.read", params)).rejects.toThrow();
     expect(app.calls).toEqual([]);
@@ -141,7 +142,7 @@ test("mail read type commands reject missing foreign or banned owner snapshots",
     { uid: "self", serverId: 2 },
     { uid: "self", serverId: 1, banFlag: 1 },
     { uid: "self", serverId: 1, banTime: BigInt(now + 1) },
-  ]) {
+  ] as (Row | undefined)[]) {
     const app = fixture();
     app.state.profile = profile;
     await expect(app.game.execute("self", "chatMail.read", { type: sfs.int(4) })).rejects.toThrow();

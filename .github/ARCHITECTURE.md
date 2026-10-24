@@ -1721,6 +1721,16 @@ does not emit synchronization markers or contact chat, matching its legacy behav
 It loads no message contents and imposes no conversation-size truncation. Wire rules,
 transaction failures and ownership are covered by synthetic units only.
 
+Category-only batch deletion and scalar-type conversation deletion now have separate
+owned transaction adapters. Category reads aggregate pending-reward counters before
+mutation, retain raw numeric label keys and validate the complete reply before deletion.
+Auxiliary cleanup follows the selected owned primary rows, while primary deletion keeps
+its separate saved/reward predicates. Type deletion ignores saved flags and removes only
+the matching type-group pointer. Neither branch invents chat, synchronization or reward
+effects absent from its reference path. Nonempty ID batches and sender-selected deletion
+remain unavailable until their distinct group/invitation/chat effects are implemented.
+The command boundaries reject these scopes before writes; the existing schemas suffice.
+
 Conversation read marking has a pure request/effect contract that preserves ordered
 mailbox assignments and chat-service intents. It performs complete prevalidation,
 retains conditional versus unconditional status assignments, and does not drop chat
