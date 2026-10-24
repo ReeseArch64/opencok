@@ -1528,8 +1528,8 @@ Readiness now probes sixteen point-detail table projections, including six owner
 projections, without reading data. No database, listener, client or migration is run.
 SQL failures and invalid requested snapshot rows become the existing dependency
 failure; these tests do not establish real database isolation or the legacy lazy
-cache's availability behavior. Owner building/context restoration, residency and
-final endpoint composition still remain pending.
+cache's availability behavior. Owner building/context restoration is described below;
+residency and final endpoint composition still remain pending.
 
 `controllers/world-resource-generals` now converts the general portion of this raw
 snapshot into ordered general/equipment state. Saved talent, operation-time and base
@@ -1560,9 +1560,48 @@ executed to produce those fixtures; no private game classes were run.
 
 This projection defines fresh-map traversal from the repository's stable SQL ordering.
 It does not reconstruct historical resident caches or the legacy database's unspecified
-row order. Building selection, prestige/official owner context, residency, expedition
-state and maximum collection time still need composition before occupied-resource
-responses can be enabled. All current evidence is server-side unit coverage.
+row order. Residency, authoritative owner/world modifiers, expedition state and maximum
+collection time still need composition before occupied-resource responses can be
+enabled. All current evidence is server-side unit coverage.
+
+`controllers/world-resource-owner-context` now selects the requested building by item
+ID after fresh String ConcurrentHashMap restoration of UUIDs. The default target is
+the stronghold. Multiple buildings of that type select the first map entry, not the
+highest level or first SQL row. Duplicate UUIDs retain the final loaded record. The
+main-building level adds level and star with signed Int wrapping; nullable primitive
+stars default to zero. An absent requested building returns before general content,
+equipment modifiers or status clocks are consumed.
+
+The controller connects the restored generals and building state to the concrete
+equipment/building effect composition. Player level, prestige and office getters defer
+restoration until the eligibility branch requests them. Direct assignments therefore
+do not fail because of unused official catalog or prestige data. Reached restoration
+errors retain the whole-general-module zero fallback, including sums accumulated by
+earlier generals. No office repairs, building initialization or data writes occur.
+
+Official prestige selects the owner's current civilization, including type zero,
+without applying the ordinary civilization-effect feature gate. Missing saved records
+or unmatched ranges yield level zero. The first matching range uses exact signed Long
+comparisons: one positive threshold is inclusive above, one nonpositive threshold is
+exclusive below, and two thresholds form a half-open interval. Whole-separator parsing
+retains malformed trailing values and rejects them when consumed. Level parsing occurs
+only after a match. `reputation_level` now retains all ordered XML records alongside
+its final-definition ID index; both official and ordinary prestige lookup use the
+ordered records, preserving overlapping ranges and duplicate IDs.
+
+Official and refinement features use the saved owner's app version, not an observer's
+version. Null and Java-blank owner versions skip version comparison while retaining
+the configured feature, execution-realm and time gates. The execution realm remains
+separate from saved home/cross-fight origin. Nonblank general feature versions parse
+all supplied dot-separated Java Integer components, ignoring empty segments, before
+short-circuit comparison of the first three components. Missing components fail only
+when comparison reaches them; malformed extra components still fail parsing.
+Seventeen added unit tests cover these projections, deferred failures, overflow,
+exact Long thresholds, duplicate catalog
+records, resource loading and ordinary prestige regression. This supplies the general
+owner projection; authoritative ordinary modifier resolution and complete occupied
+resource responses remain pending. The shared realm/date gates still need a separate
+compatibility audit for exceptional legacy selectors and lenient date strings.
 
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries

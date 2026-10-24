@@ -489,8 +489,14 @@ general content and status/equipment associations, selects the last loaded piece
 exact slot, and supplies fresh Integer/String ConcurrentHashMap traversal. Duplicate
 key updates retain their collision-treeification behavior. Restoration preserves the
 transferred-owner skip and rejects missing binding catalogs before eligibility, while
-orphan associations are ignored without database repair. Building selection, official
-owner context and endpoint integration remain required; callback-based units do not
+orphan associations are ignored without database repair. The owner-context controller
+now selects buildings through the same fresh String-map traversal and connects saved
+generals to building composition. Stronghold level/star addition wraps as Int; player
+level, prestige and office projections are consumed only when eligibility needs them.
+Prestige scans ordered catalog records, including duplicate IDs, independently of the
+civilization-effect feature gate. Feature checks use the saved owner version and the
+execution realm; blank owner versions skip version comparison. The ordinary modifier
+provider and endpoint integration remain required; callback-based units do not
 establish runtime parity.
 
 The point repository now accepts an internal `resourceEffects` request to read the
@@ -502,8 +508,10 @@ realm fields and nullable state. The transferred-owner Long-max ban marker skips
 general status/equipment loading while retaining general and office rows. SQL
 sorting provides stable insertion inputs for fresh general/equipment maps, not a
 reconstruction of historical process-cache traversal or unordered legacy SQL reads.
-Building traversal, eligibility context and endpoint composition remain separate work. Invalid
-or unavailable requested state fails the point snapshot rather than fabricating effects.
+The owner-context projection supplies building traversal and official eligibility.
+Runtime residency, authoritative world/expedition effects and endpoint composition
+remain separate work. Invalid or unavailable requested state fails the point snapshot
+rather than fabricating effects.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read

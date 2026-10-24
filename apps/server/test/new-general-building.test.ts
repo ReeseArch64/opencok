@@ -79,6 +79,19 @@ test("official eligibility uses owner version, realm and inclusive time gates", 
   expect(f.resolve()).toBeUndefined();
 });
 
+test("official versions preserve Java integer parsing and short-circuit comparison after parsing every supplied part", () => {
+  const f = fixture();
+  for (const version of ["13", "13.0", ".12..6.0.", "+12.06.００", "12.6.0.99", "12.6.0.-1"])
+    expect(f.resolve({ version })).toBe(1.5);
+  for (const version of ["11", "12.5", "12.6.-1"]) expect(f.resolve({ version })).toBeUndefined();
+  for (const version of ["12", "12.6", "13.bad", "13.0.0.bad", "2147483648.0.0", " 12.6.0"])
+    expect(() => f.resolve({ version })).toThrow();
+  f.rules.features.get("general_official")!.version = "11";
+  expect(f.resolve()).toBe(1.5);
+  f.rules.features.get("general_official")!.version = "12";
+  expect(() => f.resolve()).toThrow();
+});
+
 test("official feature opening checks the main-building level before general state and preserves malformed-config failures", () => {
   const f = fixture();
   f.state.mainBuildingLevel = 29;
