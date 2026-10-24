@@ -36,7 +36,8 @@
     "./mail-delete": "./src/mail-delete.ts",
     "./mail-conversation-save": "./src/mail-conversation-save.ts",
     "./avatar-grant": "./src/avatar-grant.ts",
-    "./mail-conversation-read": "./src/mail-conversation-read.ts"
+    "./mail-conversation-read": "./src/mail-conversation-read.ts",
+    "./chat-avatar-profile": "./src/chat-avatar-profile.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",

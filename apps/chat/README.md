@@ -12,19 +12,22 @@ Install with `bun install --frozen-lockfile`. Run the root Compose `dev` profile
 provision PostgreSQL and the existing global/kingdom migrations. Configure the root
 `.env` or process environment, then run `bun run --cwd apps/chat start`.
 
-| Setting                  | Meaning                                                                    |
-| ------------------------ | -------------------------------------------------------------------------- |
-| `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases    |
-| `CHAT_SIGNING_SECRET`    | Required shared secret for trusted backend session issuance                |
-| `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment |
-| `CHAT_HOST`, `CHAT_PORT` | Listen address, default `127.0.0.1:8083`                                   |
-| `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                   |
-| `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                          |
+| Setting                  | Meaning                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases         |
+| `CHAT_SIGNING_SECRET`    | Required shared secret for trusted backend session and avatar metadata requests |
+| `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment      |
+| `CHAT_HOST`, `CHAT_PORT` | Listen address, default `127.0.0.1:8083`                                        |
+| `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                        |
+| `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                               |
 
 Configuration uses the shared root environment loader. Legacy MariaDB variables and
 secret-file settings are replaced by these validated settings. Credentials are never
 reported by startup errors. The database identity needs chat writes and read access
 to the global account directory and configured kingdoms' profiles/alliance membership.
+Avatar metadata publication also locks the account routing row; a restricted database
+role needs the PostgreSQL UPDATE privilege on at least one `account_new` column for
+`SELECT FOR UPDATE`, although this path never changes account fields.
 The existing Drizzle migrations own the schema; startup never creates or resets it.
 
 `/_health` reports maintenance readiness. `/api/v1global_config`, `/chat/server/links`
@@ -72,6 +75,45 @@ not satisfy the full target architecture. Production Node execution remains pend
 for Bun development, matching the existing API/server images.
 
 Back up the global database and kingdom databases consistently. Roll back the service
-image/code and configuration together; no schema changes or data migration occur here.
+image/code and configuration together. The additive global migration described below
+must be applied through the normal deployment workflow before this version becomes ready;
+startup only checks it and never applies it.
 Existing MariaDB data is not imported. Keep session issuance secrets stable across
 restarts; rotate only with coordinated backend configuration.
+
+## Internal avatar metadata
+
+[Issue #80](https://github.com/ReeseArch64/opencok/issues/80) adds exact
+`POST /_internal/avatar-profile`, private to trusted backends and excluded from the
+public discovery gateway. This maintained service protocol is not the legacy external
+chat API. `CHAT_SIGNING_SECRET` authenticates it with HMAC-SHA256 over the protocol domain,
+method, path, timestamp and complete UTF-8 JSON body. `x-opencok-timestamp` carries canonical
+milliseconds and must be within 30 seconds of the receiver clock; `x-opencok-signature`
+carries lowercase hexadecimal HMAC. Session MD5 compatibility remains separate. Use a
+trusted private network or TLS; the shared secret authenticates trusted backend callers,
+not individual realms independently. Rotate both service configurations together.
+
+Requests contain owner, realm, avatar sequence/version, captured millisecond time, exact
+second marker, user name and platform. Bodies are limited to 4 KiB, names/platforms to
+255 UTF-16 units and the whole handler to three seconds, including body consumption.
+Responses expose only the acknowledged owner/realm/sequence and disposition; errors
+contain no supplied metadata or dependency details. A timed-out database write may still
+commit, so callers retry the same captured intent rather than generate a new one.
+
+`repositories/chat-avatar-profile` owns `opencok_chat.chat_avatar_profile` in the global
+database. Generated migration `0002_chat_avatar_profiles` adds seven non-null fields with
+a compound owner/realm primary key and range checks. Publication locks the global account
+row before the projection, requires the canonical current realm string and serializes
+first inserts for that owner. No cross-database atomicity is assumed. A larger avatar
+sequence replaces the snapshot even if its clock time decreased; an equal sequence must
+match all captured fields; a smaller sequence is acknowledged as superseded without writes.
+`find` reads the projection only while the global routing row still points to its realm.
+
+This is an avatar-event projection, not a general current-profile authority: name edits,
+other profile mutations, transfer reconciliation and restoring databases independently
+need their own protocols. Old realm snapshots are not exposed after routing changes and
+are retained without automatic deletion. Public room frames and session userinfo handling
+do not consume or expose this projection yet. The receiver and readiness check are
+composed by `apps/chat`; realm command/relay composition is still pending. Unit evidence
+uses the real adapters with synthetic SQL clients and in-memory HTTP handlers. Migration
+application, real transaction concurrency and client integration remain unvalidated.

@@ -1003,8 +1003,8 @@ and isolation behavior have not been exercised; SQL and failure paths use synthe
 clients only.
 
 The authorized mail catalog and internal system-mail consumer are now implemented as
-described below. The internal profile-marker consumer is also implemented below; chat
-metadata delivery and notification/runtime composition remain pending. Persisted intents
+described below. The internal profile-marker and chat metadata consumers are implemented
+below; notification/runtime composition remains pending. Persisted intents
 alone are not evidence of delivered mail or updated caches. Completion cannot be exposed until those behaviors are implemented.
 
 ## Avatar system-mail delivery
@@ -1098,8 +1098,40 @@ to the maintained implementation; ordinary tests need neither Lua nor Redis. Tes
 compose publication with the existing marker reader and simulate SQL failures, uncertain
 commits, deadlines, out-of-order updates, realm isolation and malformed projections.
 No listener, Redis/PostgreSQL service, migration or client is exercised. The consumer is
-not started by runtime composition yet. Chat bit 4 remains pending until its receiver and
-publication path exist; final command/relay and notification composition are still required.
+not started by runtime composition yet. The chat receiver and publication path are described
+below; final command/relay and notification composition are still required.
+
+## Avatar chat metadata publication
+
+[Issue #80](https://github.com/ReeseArch64/opencok/issues/80) implements the internal
+`publishAvatarChat` consumer for pending bit 4. It shares owner/completion locking and
+bounded publication with the profile-marker consumer, while each entry point clears only
+its own bit. `avatarChatUpdate` validates captured metadata even after bit 2 was delivered.
+Mail bits and immutable completion history survive either publication.
+
+`connection/chat-avatar-profile` signs the captured snapshot and sends it to the chat
+service's exact private `/_internal/avatar-profile` endpoint. The adapter requires a
+configured HTTP(S) URL without credentials/query/fragment, the existing shared signing
+secret and a 100–30,000 ms timeout. It bounds requests to 4 KiB and JSON responses to
+16 KiB, rejects redirects, honors the consumer abort signal through body consumption and
+accepts only a matching owner/realm/sequence acknowledgment. It does not automatically
+retry. Invalid responses and dependency errors are sanitized. No new environment setting
+or running realm worker is introduced in this slice.
+
+The [chat receiver contract](../chat/README.md#internal-avatar-metadata) describes durable
+sequence ordering and account routing checks. If chat commits but the response or realm
+commit fails, bit 4 remains retryable. A repeated identical snapshot is accepted without
+another write; a snapshot already overtaken by a newer avatar sequence can also clear its
+old bit. A same-sequence conflicting snapshot fails and remains pending. A response after
+the consumer deadline cannot acknowledge rolled-back work. An uncertain chat transaction
+may finish after cancellation, but its write is idempotent.
+
+Unit tests compose the actual realm consumer, HTTP adapter, receiver and chat repository
+with synthetic database clients, including SQL lock order, commit loss, ownership checks,
+clock rollback, input bounds, signatures and deadlines. No listener, service, database,
+ADB or client is started. Global migration `0002_chat_avatar_profiles` is generated only.
+`user.avatar.finish` remains unsupported until final command, relay and notification
+composition; this consumer is not scheduled automatically.
 
 ## Realm chat sessions
 
