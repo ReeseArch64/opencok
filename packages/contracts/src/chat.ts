@@ -113,3 +113,33 @@ export interface ChatRepository {
   cleanup(): Promise<{ messages: number; sessions: number }>;
   health(): Promise<void>;
 }
+
+export interface RealmChatSessionRequest {
+  uid: string;
+  userinfo: Record<string, string>;
+}
+
+export interface ChatSessionTicket {
+  session: string;
+  expire: number;
+}
+
+export type ChatSessionIssuer = (request: RealmChatSessionRequest) => Promise<ChatSessionTicket>;
+
+export function isChatSessionTicket(value: unknown, now: number): value is ChatSessionTicket {
+  if (
+    !isRecord(value) ||
+    typeof value.session !== "string" ||
+    !/^[A-Za-z0-9_-]{43}$/.test(value.session)
+  )
+    return false;
+  const token = Buffer.from(value.session, "base64url");
+  return (
+    token.length === 32 &&
+    token.toString("base64url") === value.session &&
+    Number.isSafeInteger(now) &&
+    now >= 0 &&
+    isSafeInteger(value.expire) &&
+    value.expire > Math.floor(now / 1000)
+  );
+}

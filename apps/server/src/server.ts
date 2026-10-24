@@ -9,6 +9,7 @@ import { Coordination } from "@opencok/storage/coordination";
 import { loadRules } from "@opencok/resources/rules";
 import { Game } from "@opencok/controllers/game";
 import { World } from "@opencok/controllers/world";
+import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
 import { startMailGiftRelay } from "./mail-gift-relay.ts";
 
 export class RealmDependencies extends Context.Service<RealmDependencies, ServerDependencies>()(
@@ -56,6 +57,12 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        chatSession: config.chatSession
+          ? createRealmChatSessionIssuer({
+              ...config.chatSession,
+              timeoutMs: config.timeoutMs,
+            })
+          : undefined,
         expeditionRanking: (limit) => cache.expeditionRanking(limit),
         worldPowerEffects: () => cache.worldEffects(),
         emperorVersion: () => cache.emperorVersion(),
