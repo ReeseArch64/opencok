@@ -1,3 +1,4 @@
+import type { ExpeditionRankingEntry } from "./expedition-ranking.ts";
 import type { AllianceRankingQuery, AllianceRankingSnapshot } from "./alliance-ranking.ts";
 import type { Row } from "./rows.ts";
 import type { PowerState } from "./power.ts";
@@ -46,6 +47,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  expeditionRanking?(limit: number): Promise<readonly ExpeditionRankingEntry[] | undefined>;
   worldPowerEffects?(): Promise<ReadonlyMap<string, string>>;
   emperorVersion?(): Promise<number | null | undefined>;
   playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;

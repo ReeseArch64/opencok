@@ -1271,6 +1271,13 @@ construction queues and persisted power are never recalculated by the query.
 Material-contribution rankings read the existing contribution table with their own
 window and empty-list response contract; score writers and activity resets remain
 outside the query boundary.
+Expedition ranking reads use the shared Redis instance with a global realm-pairing
+record and lower-realm score/metadata keys. A read-only Lua evaluation revalidates
+pairing and returns a consistent bounded board; one retry handles a rematch. The
+controller authenticates the local owner, decodes integer-preserving metadata and
+projects only public fields. Importing authoritative event state and maintaining
+pairings/scores remain separate from the reader; namespace and verification details
+are in the server guide.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch

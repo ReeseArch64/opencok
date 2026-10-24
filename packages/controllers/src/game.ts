@@ -1,3 +1,6 @@
+import { expeditionRanking } from "@opencok/dtos/expedition-ranking";
+import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
+import { decodeExpeditionRanking } from "./expedition-ranking.ts";
 import { allianceRanking } from "@opencok/dtos/alliance-ranking";
 import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
 import type { AllianceRankingKind } from "@opencok/contracts/alliance-ranking";
@@ -146,6 +149,9 @@ export class Game {
       case "get.power.info":
         body = await this.power(uid);
         break;
+      case "expedition.rank":
+        body = await this.expeditionRanking(uid);
+        break;
       case "alliance.rank":
       case "kill.al.rank":
         body = await this.allianceRanking(uid, command === "alliance.rank" ? "power" : "kills");
@@ -166,6 +172,17 @@ export class Game {
   }
   private async profile(uid: string): Promise<Row> {
     return this.checkProfile(await this.db.profile(uid));
+  }
+  private async expeditionRanking(uid: string): Promise<Fields> {
+    if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)
+      throw new GameError(errors.unsupported, "ranking");
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.profile(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const limit = expeditionRankingLimit(this.rules);
+    const entries = await this.services.expeditionRanking(limit);
+    return expeditionRanking(selectExpeditionRanking(uid, limit, decodeExpeditionRanking(entries)));
   }
   private async allianceRanking(uid: string, kind: AllianceRankingKind): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId)
