@@ -173,6 +173,8 @@ truncating it. The reader does not mutate scores or rebuild/expire the board; th
 publisher remains responsible for its derived-cache lifecycle. No event lifecycle or
 `hero.self.rank` in-memory activity/rank-map provider is implied. This extends the accepted
 Redis query-cache boundary without adding a schema, service or authoritative ledger.
+Focused command/cache units and disposable Redis tests verify realm isolation, exact
+opaque strings, bounds, outage fallback and unchanged board contents/expiry.
 Global celebrity ranking queries first read the selected realm's global `server_info`
 type, accepting the reference normal/test/inner-test/green types before decoding the
 selector. A fresh metadata read replaces the reference process-local type cache. The
