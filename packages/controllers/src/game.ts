@@ -1,3 +1,5 @@
+import { flowerRanking, flowerRankingEntries } from "@opencok/mappings/flower-ranking";
+import { flowerRankingRefresh } from "@opencok/rules/flower-ranking";
 import type { DonationRankingKind } from "@opencok/contracts/community-ranking";
 import {
   donationRanking,
@@ -390,6 +392,9 @@ export class Game {
       case "cemetery.get.ranking":
         body = await this.cemeteryRanking(uid, params);
         break;
+      case "flower.ranking":
+        body = await this.flowerRanking(uid);
+        break;
       case "ctf.get.rank":
         body = await this.throneRanking(uid, params);
         break;
@@ -440,6 +445,7 @@ export class Game {
         "al.donate.res.rank.week",
         "al.donate.res.rank.history",
         "cemetery.get.ranking",
+        "flower.ranking",
         "ctf.get.rank",
         "hero.self.rank",
         "act.score.rank",
@@ -1056,6 +1062,52 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async flowerRanking(uid: string): Promise<Fields> {
+    const now = this.now();
+    const current = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (
+      !this.db.crossRankingRealm ||
+      !this.db.flowerRanking ||
+      !this.services.flowerRankingPublication
+    )
+      throw new GameError(errors.unsupported, "ranking");
+    const cross = await this.db.crossRankingRealm();
+    const realm = cross ? Number(current.crossFightSrcServerId) : this.config.kingdomId;
+    if (!Number.isInteger(realm) || realm < 1) throw new GameError(errors.invalid);
+    const limit = Number(this.rules.items.get("ranking")?.k2);
+    if (!Number.isInteger(limit) || limit < 1 || limit > 32767)
+      throw new GameError(errors.unsupported, "ranking");
+    const feature = this.rules.features.get("flowers_all_sev");
+    const global =
+      serverFeature(this.rules, "flowers_all_sev", {
+        kingdomId: this.config.kingdomId,
+        now,
+        version: MOBILE_CLIENT_VERSION,
+      }) && versionAtLeast(MOBILE_CLIENT_VERSION, feature!.version!);
+    const publication = await this.services.flowerRankingPublication(realm, uid, limit, global);
+    const state = await this.db.flowerRanking(
+      uid,
+      realm,
+      flowerRankingEntries(publication.local).map((row) => row.uid),
+    );
+    const profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || num(profile, "serverId") !== realm)
+      throw new GameError(errors.invalid);
+    if (global && cross) {
+      const own = await this.db.flowerRanking(uid, this.config.kingdomId, []);
+      if (this.checkProfile(own.profile, now).uid !== uid) throw new GameError(errors.invalid);
+      state.hide = own.hide;
+    }
+    return flowerRanking(
+      publication,
+      state,
+      uid,
+      flowerRankingRefresh(now, state.time, Number(this.rules.items.get("flowers")?.k5)),
+      global,
+    );
   }
   private async donationRanking(uid: string, command: string): Promise<Fields> {
     const now = this.now();

@@ -1,3 +1,4 @@
+import { loadFlowerRanking } from "./flower-ranking.ts";
 import { loadDonationRanking } from "./donation-ranking.ts";
 import { loadThroneRankingPeriod } from "./throne-ranking.ts";
 import { loadHeroRankingPosition } from "./hero-ranking.ts";
@@ -74,6 +75,15 @@ export class Cache {
       allianceId,
       kind,
       date,
+    );
+  }
+  flowerRankingPublication(realm: number, uid: string, limit: number, global: boolean) {
+    return loadFlowerRanking(
+      (name, ...args) => this.command(name, ...args),
+      realm,
+      uid,
+      limit,
+      global,
     );
   }
   attributeRanking(type: number) {

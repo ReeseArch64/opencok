@@ -39,7 +39,8 @@
     "./published-ranking": "./src/published-ranking.ts",
     "./hero-ranking": "./src/hero-ranking.ts",
     "./throne-ranking": "./src/throne-ranking.ts",
-    "./community-ranking": "./src/community-ranking.ts"
+    "./community-ranking": "./src/community-ranking.ts",
+    "./flower-ranking": "./src/flower-ranking.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

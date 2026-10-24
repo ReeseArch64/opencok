@@ -71,7 +71,8 @@
     "./java-integer": "./src/java-integer.ts",
     "./dragon-ranking": "./src/dragon-ranking.ts",
     "./hero-ranking": "./src/hero-ranking.ts",
-    "./community-ranking": "./src/community-ranking.ts"
+    "./community-ranking": "./src/community-ranking.ts",
+    "./flower-ranking": "./src/flower-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

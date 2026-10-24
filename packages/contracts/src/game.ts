@@ -1,3 +1,4 @@
+import type { FlowerRankingPublication, FlowerRankingState } from "./flower-ranking.ts";
 import type { CommunityRankingSnapshot, DonationScore } from "./community-ranking.ts";
 import type { ThroneRankingPeriod, ThroneRankingSnapshot } from "./throne-ranking.ts";
 import type { HeroRankingSnapshot, HeroRankingLookup } from "./hero-ranking.ts";
@@ -78,6 +79,7 @@ export interface GameStore extends AuthenticationStore {
   donationRanking?(uid: string, now: number): Promise<CommunityRankingSnapshot>;
   cemeteryRanking?(uid: string, type: "0" | "1", now: number): Promise<CommunityRankingSnapshot>;
   crossRankingRealm?(): Promise<boolean>;
+  flowerRanking?(uid: string, realm: number, uids: readonly string[]): Promise<FlowerRankingState>;
   normalRankingRealm?(): Promise<boolean>;
   mailUpdates?(
     uid: string,
@@ -196,6 +198,12 @@ export interface GameServices {
     kind: "resource-day" | "resource-week" | "resource-history",
     date: string,
   ): Promise<readonly DonationScore[]>;
+  flowerRankingPublication?(
+    realm: number,
+    uid: string,
+    limit: number,
+    global: boolean,
+  ): Promise<FlowerRankingPublication>;
   attributeRanking?(type: number): Promise<readonly string[]>;
   publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
   globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
