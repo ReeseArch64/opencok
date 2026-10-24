@@ -1820,6 +1820,8 @@ Sequential list/self reads retain the reference non-atomic snapshot and missing/
 failure fallback. Maintained size bounds reject oversized results; no match, team, score
 or reward mutation is introduced. Producer/import lifecycle and lenient noncanonical
 JSON parity remain outside this query slice, as detailed in the server guide.
+Command/rule/cache units and disposable Redis tests cover range arithmetic, duplicate
+rows, own-alliance lookup, public wire types, maintained bounds and read-only state.
 Expedition ranking reads use the shared Redis instance with a global realm-pairing
 record and lower-realm score/metadata keys. A read-only Lua evaluation revalidates
 pairing and returns a consistent bounded board; one retry handles a rematch. The
