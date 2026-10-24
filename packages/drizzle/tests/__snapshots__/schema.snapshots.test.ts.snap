@@ -14134,6 +14134,43 @@ update "opencok_kingdom"."avatar_version_update" set "operationId" = $1, "ownerU
 delete from "opencok_kingdom"."avatar_version_update" where "opencok_kingdom"."avatar_version_update"."operationId" = $1"
 `;
 
+exports[`opencok_kingdom.realm_authority: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["kingdomId","integer",true,null,null,null]
+column ["ownerEpoch","bigint",true,null,null,null]
+column ["instanceId","varchar(40)",true,null,null,null]
+column ["acquiredAt","bigint",true,null,null,null]
+primary ["realm_authority_PRIMARY",["kingdomId"]]
+check ["realm_authority_kingdom_positive","\\"opencok_kingdom\\".\\"realm_authority\\".\\"kingdomId\\" > 0"]
+check ["realm_authority_epoch_positive","\\"opencok_kingdom\\".\\"realm_authority\\".\\"ownerEpoch\\" > 0"]
+insert into "opencok_kingdom"."realm_authority" ("kingdomId", "ownerEpoch", "instanceId", "acquiredAt") values ($1, $2, $3, $4)
+select "kingdomId", "ownerEpoch", "instanceId", "acquiredAt" from "opencok_kingdom"."realm_authority" where "opencok_kingdom"."realm_authority"."kingdomId" = $1
+update "opencok_kingdom"."realm_authority" set "kingdomId" = $1, "ownerEpoch" = $2, "instanceId" = $3, "acquiredAt" = $4 where "opencok_kingdom"."realm_authority"."kingdomId" = $5
+delete from "opencok_kingdom"."realm_authority" where "opencok_kingdom"."realm_authority"."kingdomId" = $1"
+`;
+
+exports[`opencok_kingdom.resource_settlement: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["uid","varchar(40)",true,null,null,null]
+column ["fromTime","bigint",true,null,null,null]
+column ["toTime","bigint",true,null,null,null]
+column ["ownerEpoch","bigint",true,null,null,null]
+column ["foodBefore","bigint",true,null,null,null]
+column ["foodAfter","bigint",true,null,null,null]
+column ["boundBefore","bigint",true,null,null,null]
+column ["boundAfter","bigint",true,null,null,null]
+column ["starvingMillis","bigint",true,null,null,null]
+column ["troopChanges","jsonb",true,null,null,null]
+primary ["resource_settlement_uid_fromTime_toTime_pk",["uid","fromTime","toTime"]]
+check ["resource_settlement_interval","\\"opencok_kingdom\\".\\"resource_settlement\\".\\"toTime\\" > \\"opencok_kingdom\\".\\"resource_settlement\\".\\"fromTime\\""]
+check ["resource_settlement_epoch","\\"opencok_kingdom\\".\\"resource_settlement\\".\\"ownerEpoch\\" > 0"]
+check ["resource_settlement_starvation","\\"opencok_kingdom\\".\\"resource_settlement\\".\\"starvingMillis\\" >= 0"]
+insert into "opencok_kingdom"."resource_settlement" ("uid", "fromTime", "toTime", "ownerEpoch", "foodBefore", "foodAfter", "boundBefore", "boundAfter", "starvingMillis", "troopChanges") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "uid", "fromTime", "toTime", "ownerEpoch", "foodBefore", "foodAfter", "boundBefore", "boundAfter", "starvingMillis", "troopChanges" from "opencok_kingdom"."resource_settlement" where "opencok_kingdom"."resource_settlement"."uid" = $1
+update "opencok_kingdom"."resource_settlement" set "uid" = $1, "fromTime" = $2, "toTime" = $3, "ownerEpoch" = $4, "foodBefore" = $5, "foodAfter" = $6, "boundBefore" = $7, "boundAfter" = $8, "starvingMillis" = $9, "troopChanges" = $10 where "opencok_kingdom"."resource_settlement"."uid" = $11
+delete from "opencok_kingdom"."resource_settlement" where "opencok_kingdom"."resource_settlement"."uid" = $1"
+`;
+
 exports[`opencok_global.nickname_change_receipt: schema and CRUD SQL 1`] = `
 "schema opencok_global
 column ["operationId","uuid",true,null,null,null]

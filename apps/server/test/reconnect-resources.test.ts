@@ -7,6 +7,22 @@ import { decode, encode, fields, sfs } from "@opencok/messages/sfs";
 
 const options = { separateBound: true, protect: false, protectedFood: 0, consumptionRatio: 1 };
 
+test("wrapped protection capacity cannot turn upkeep into a resource credit", () => {
+  const state = { food: 3000000000n, foodbind: 0n, lastUpdateTime: 0n };
+  const result = settleReconnectFood(
+    state,
+    100n,
+    { ordinary: 1, bound: 0 },
+    {
+      ...options,
+      separateBound: false,
+      protect: true,
+    },
+  );
+  expect(result.food).toBe(state.food);
+  expect(result.foodDelta).toBe(0n);
+});
+
 test("reconnect upkeep charges each settled interval once and never rewinds its checkpoint", () => {
   const initial = { food: 1000n, foodbind: 100n, lastUpdateTime: 1000n };
   const first = settleReconnectFood(initial, 1100n, { ordinary: 2, bound: 1 }, options);

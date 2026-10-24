@@ -146,6 +146,20 @@ export async function readWorldResourceOwner(
       integer(row.level) &&
       nullableInteger(row.star),
   );
+  const newGenerals = await readResourceNewGenerals(
+    db,
+    uid,
+    profile.banTime === 9223372036854775807n,
+  );
+  return { effects, buildings, newGenerals };
+}
+
+export async function readResourceNewGenerals(
+  db: Reader,
+  uid: string,
+  moved: boolean,
+): Promise<WorldResourceOwnerSnapshot["newGenerals"]> {
+  if (!text(uid, 255) || !uid) throw new Error("Invalid general owner");
   const generals = await db
     .select(generalColumns)
     .from(new_general)
@@ -167,7 +181,6 @@ export async function readWorldResourceOwner(
       nullableText(row.opTime, 200) &&
       nullableText(row.refinement, 300),
   );
-  const moved = profile.banTime === 9223372036854775807n;
   const statuses = moved
     ? []
     : await db
@@ -222,7 +235,7 @@ export async function readWorldResourceOwner(
       nullableInteger(row.position) &&
       (row.startTime === null || long(row.startTime)),
   );
-  return { effects, buildings, newGenerals: { moved, generals, statuses, equipment, offices } };
+  return { moved, generals, statuses, equipment, offices };
 }
 
 export async function checkWorldResourceOwnerStore(db: Reader): Promise<void> {

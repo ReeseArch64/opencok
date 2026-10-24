@@ -71,6 +71,13 @@
       "when": 1792877948096,
       "tag": "0009_nickname_notification_delivery",
       "breakpoints": false
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792877948097,
+      "tag": "0010_reconnect_authority",
+      "breakpoints": false
     }
   ]
 }

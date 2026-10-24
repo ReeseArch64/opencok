@@ -3,7 +3,7 @@ import type { ReconnectBaseState } from "@opencok/contracts/reconnect";
 import { reconnectOwnGenerals } from "@opencok/controllers/reconnect";
 import { decodeGeneralAbilities } from "@opencok/controllers/profile";
 import { Rules } from "@opencok/rules/game";
-import { publicGeneralPreviews } from "@opencok/rules/profile-generals";
+import { publicGeneralPreviews, reconnectGeneralRepairs } from "@opencok/rules/profile-generals";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 
 const now = 1792756800000;
@@ -166,4 +166,34 @@ test("empty own generals remain an empty collection and required profile or cata
   expect(project).toThrow();
   state.profile = undefined;
   expect(project).toThrow();
+});
+
+test("reconnect persists only invalid ability trees, disabled supported skills and elapsed cooldowns", () => {
+  const { general, skill, rules } = fixture();
+  const abilities = new Map<string, readonly import("@opencok/contracts/profile").GeneralAbility[]>(
+    [[general.uuid, [{ id: "50000", "602700": 1, "601300": 19 }]]],
+  );
+  const skills = [
+    skill,
+    { ...skill, uuid: "unknown", skillId: "unknown", endTime: BigInt(now) },
+    { ...skill, uuid: "ready", endTime: 9223372036854775807n, stat: 3 },
+  ];
+  const plan = () => reconnectGeneralRepairs([general], skills, abilities, "synthetic", rules, now);
+  expect(plan()).toEqual({
+    generalResets: ["a"],
+    skillResets: ["skill-a"],
+    skillCooldownResets: ["unknown"],
+  });
+  skill.endTime = BigInt(now + 5000);
+  expect(plan().skillCooldownResets).toEqual(["skill-a", "unknown"]);
+  abilities.set("a", [{ id: "50000", "602700": 1, "601300": 20, "601100": 20 }]);
+  expect(plan().generalResets).toEqual([]);
+  expect(reconnectGeneralRepairs([], skills, abilities, "synthetic", rules, now)).toEqual({
+    generalResets: [],
+    skillResets: [],
+    skillCooldownResets: [],
+  });
+  expect(skill.stat).toBe(2);
+  skills.push({ ...skill });
+  expect(plan).toThrow();
 });

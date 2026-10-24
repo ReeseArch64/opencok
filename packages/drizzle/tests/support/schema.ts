@@ -6,7 +6,7 @@ import artifact from "../fixtures/schema.json";
 export interface ColumnContract {
   name: string;
   type: string;
-  value: "number" | "bigint" | "string" | "buffer";
+  value: "number" | "bigint" | "string" | "buffer" | "json";
   notNull: boolean;
   default: string | null;
   identity: { name: string; startWith: number; maxValue?: number } | null;
