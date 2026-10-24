@@ -488,6 +488,17 @@ all-equipment modifiers 207–218. Runtime owner snapshot composition and author
 general/equipment traversal remain required before connecting this calculation to
 occupied-resource queries; callback-based units do not establish runtime parity.
 
+The point repository now accepts an internal `resourceEffects` request to read the
+saved march owner's ordinary effects, buildings and new-general records in the same
+point transaction. It is opt-in and only applies to resource types 3/37 with a present
+march and owner profile. Remote reads use the destination transaction after local
+authorization. The bounded reader preserves exact owner version, home/cross-fight
+realm fields and nullable state. The transferred-owner Long-max ban marker skips
+general status/equipment loading while retaining general and office rows. SQL
+sorting provides stable raw snapshots, not legacy map traversal; restoration, slot
+selection, eligibility context and endpoint composition remain separate work. Invalid
+or unavailable requested state fails the point snapshot rather than fabricating effects.
+
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read
 transaction. Configured remote realms use a separate transaction and world zero after
