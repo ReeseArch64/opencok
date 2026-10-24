@@ -586,6 +586,17 @@ values skip writes except the speed flag; banner bigint storage retains Int prot
 limits. Public-profile reads already consume the visibility columns. No cache delivery
 or notification is introduced. The server guide records command-specific no-op and
 failure behavior, with synthetic unit validation only.
+Celebrity-description reads now expose `celebrity.desc.get` through the authenticated
+realm controller. Blank target UIDs return before server-ID decoding; other requests
+select only the explicitly requested configured realm, with no account-directory reroute.
+The repository reads the target celebrity flag before the description blob and never
+writes. Both UID comparisons use the reference UCA 4 equality key and bound candidate
+patterns, rejecting ambiguous canonical aliases in restored PostgreSQL state. Missing
+realms, profiles, celebrity flag 11 or description rows produce an empty string; reached
+query failures reject. Strict UTF-8 decoding preserves BOM and applies Java trim/blank
+rules; malformed bytes produce empty text as in the source. The maintained protocol
+limits still apply to the resulting string. This completes the read command's local
+implementation; description saving/filtering remains separate and unsupported.
 Nickname text rules remain pure: Java trim/blank behavior, weighted GBK length and
 character eligibility feed an ordered filter/availability evaluation. The GBK width
 table is derived from an independently authored Java 8 standard-library probe and has
