@@ -14050,10 +14050,10 @@ exports[`opencok_kingdom.mail_chat_read_intent: schema and CRUD SQL 1`] = `
 column ["commandId","uuid",true,null,null,null]
 column ["effectIndex","integer",true,null,null,null]
 column ["ownerUid","varchar(40)",true,null,null,null]
-column ["action","varchar(6)",true,"'read'",null,null]
 column ["others","varchar(40)",true,null,null,null]
 column ["chatTypes","varchar(8)",true,null,null,null]
 column ["requestedAt","bigint",true,null,null,null]
+column ["action","varchar(6)",true,"'read'",null,null]
 primary ["mail_chat_read_intent_PRIMARY",["commandId","effectIndex"]]
 index ["mail_chat_read_intent_pending",false,["requestedAt","commandId","effectIndex"]]
 index ["mail_chat_read_intent_owner",false,["ownerUid"]]
@@ -14062,9 +14062,9 @@ check ["mail_chat_read_intent_owner_nonempty","length(\\"ownerUid\\") > 0"]
 check ["mail_chat_read_intent_types","\\"chatTypes\\" IN ('1,20', '2', '3', '1,2,20')"]
 check ["mail_chat_read_intent_action","\\"action\\" IN ('read', 'delete')"]
 check ["mail_chat_read_intent_time_nonnegative","\\"requestedAt\\" >= 0"]
-insert into "opencok_kingdom"."mail_chat_read_intent" ("commandId", "effectIndex", "ownerUid", "action", "others", "chatTypes", "requestedAt") values ($1, $2, $3, $4, $5, $6, $7)
-select "commandId", "effectIndex", "ownerUid", "action", "others", "chatTypes", "requestedAt" from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $1
-update "opencok_kingdom"."mail_chat_read_intent" set "commandId" = $1, "effectIndex" = $2, "ownerUid" = $3, "action" = $4, "others" = $5, "chatTypes" = $6, "requestedAt" = $7 where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $8
+insert into "opencok_kingdom"."mail_chat_read_intent" ("commandId", "effectIndex", "ownerUid", "others", "chatTypes", "requestedAt", "action") values ($1, $2, $3, $4, $5, $6, $7)
+select "commandId", "effectIndex", "ownerUid", "others", "chatTypes", "requestedAt", "action" from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $1
+update "opencok_kingdom"."mail_chat_read_intent" set "commandId" = $1, "effectIndex" = $2, "ownerUid" = $3, "others" = $4, "chatTypes" = $5, "requestedAt" = $6, "action" = $7 where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $8
 delete from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $1"
 `;
 

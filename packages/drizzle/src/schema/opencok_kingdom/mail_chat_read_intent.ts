@@ -8,10 +8,10 @@ export const mail_chat_read_intent = opencok_kingdom.table(
     commandId: uuid("commandId").notNull(),
     effectIndex: integer("effectIndex").notNull(),
     ownerUid: varchar("ownerUid", { length: 40 }).notNull(),
-    action: varchar("action", { length: 6 }).notNull().default(sql.raw("'read'")),
     others: varchar("others", { length: 40 }).notNull(),
     chatTypes: varchar("chatTypes", { length: 8 }).notNull(),
     requestedAt: bigint("requestedAt", { mode: "bigint" }).notNull(),
+    action: varchar("action", { length: 6 }).notNull().default(sql.raw("'read'")),
   },
   (table) => [
     primaryKey({

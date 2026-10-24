@@ -27500,13 +27500,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "action": {
-          "name": "action",
-          "type": "varchar(6)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'read'"
-        },
         "others": {
           "name": "others",
           "type": "varchar(40)",
@@ -27524,6 +27517,13 @@
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
+        },
+        "action": {
+          "name": "action",
+          "type": "varchar(6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'read'"
         }
       },
       "indexes": {

@@ -101,7 +101,7 @@ function database(
       if (text.startsWith('insert into "opencok_kingdom"."mail_chat_read_intent"')) {
         expect(text).not.toMatch(/on conflict|returning/);
         expect(text).toContain(
-          '("commandId", "effectIndex", "ownerUid", "action", "others", "chatTypes", "requestedAt")',
+          '("commandId", "effectIndex", "ownerUid", "others", "chatTypes", "requestedAt", "action")',
         );
         for (let index = 0; index < params.length; index += 6) {
           const [commandId, effectIndex, ownerUid, others, chatTypes, requestedAt] = params.slice(
