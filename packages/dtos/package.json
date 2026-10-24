@@ -16,7 +16,8 @@
     "./players": "./src/players.ts",
     "./power": "./src/power.ts",
     "./profile": "./src/profile.ts",
-    "./profile-alliance": "./src/profile-alliance.ts"
+    "./profile-alliance": "./src/profile-alliance.ts",
+    "./reconnect": "./src/reconnect.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

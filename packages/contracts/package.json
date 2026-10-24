@@ -15,6 +15,7 @@
     "./game": "./src/game.ts",
     "./power": "./src/power.ts",
     "./profile": "./src/profile.ts",
+    "./reconnect": "./src/reconnect.ts",
     "./rows": "./src/rows.ts",
     "./server": "./src/server.ts",
     "./chat": "./src/chat.ts",
