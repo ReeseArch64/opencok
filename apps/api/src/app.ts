@@ -1,4 +1,5 @@
 import { Context, Effect, Layer } from "effect";
+import { logEvent } from "@opencok/core/logging";
 import { ApiConfig } from "./config.ts";
 import { acquireResource, fromPromise } from "@opencok/core/resource";
 import { serveHttp } from "@opencok/core/http";
@@ -43,6 +44,6 @@ export const serveApi = Effect.gen(function* () {
   const config = yield* ApiConfig;
   const app = yield* createApp;
   const server = yield* serveHttp(config, app.fetch);
-  console.info(JSON.stringify({ event: "listening", host: config.host, port: server.port }));
+  logEvent("listening", { host: config.host, port: server.port, outcome: "success" });
   return server;
 });

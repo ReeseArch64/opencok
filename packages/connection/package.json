@@ -15,7 +15,8 @@
     "./server": "./src/server.ts",
     "./dependencies": "./src/dependencies.ts",
     "./chat-server": "./src/chat-server.ts",
-    "./chat-websocket": "./src/chat-websocket.ts"
+    "./chat-websocket": "./src/chat-websocket.ts",
+    "./session": "./src/session.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
