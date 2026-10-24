@@ -40,6 +40,8 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  worldPowerEffects?(): Promise<ReadonlyMap<string, string>>;
+  emperorVersion?(): Promise<number | null | undefined>;
   playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;
   changeAccountCount?(deviceId: string): Promise<bigint | null>;
   featureAvailability?(profile: Row, now: number): Readonly<Record<string, boolean>>;
