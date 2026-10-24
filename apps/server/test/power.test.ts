@@ -72,6 +72,8 @@ function fixture() {
     knight: { activity_title: 8001, contract_activity_title: -1 },
     items: [],
     states: [],
+    vip: undefined,
+    allianceSciences: [],
   };
   return { state, rules };
 }
@@ -92,6 +94,8 @@ function empty(): PowerSnapshot {
     knight: undefined,
     items: [],
     states: [],
+    vip: undefined,
+    allianceSciences: [],
   };
 }
 
