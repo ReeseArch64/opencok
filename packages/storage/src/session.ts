@@ -1,3 +1,4 @@
+import { loadBattleFightRanking, loadPlayoffRanking } from "./battle-ranking.ts";
 import { loadMilitaryRanking } from "./military-ranking.ts";
 import { loadFlowerRanking } from "./flower-ranking.ts";
 import { loadDonationRanking } from "./donation-ranking.ts";
@@ -58,6 +59,15 @@ export class Cache {
       (command, ...args) => this.command(command, ...args),
       this.config.kingdomId,
     );
+  }
+  battleFightPublication() {
+    return loadBattleFightRanking(
+      (name, ...args) => this.command(name, ...args),
+      this.config.kingdomId,
+    );
+  }
+  playoffPublication() {
+    return loadPlayoffRanking((name, ...args) => this.command(name, ...args));
   }
   heroHistoryPublication(keys: readonly string[], alliance: boolean) {
     return loadHeroHistoryPublication(

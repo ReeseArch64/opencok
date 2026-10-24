@@ -1,3 +1,4 @@
+import { readBattleRankingState } from "./battle-ranking.ts";
 import { readFlowerRanking } from "./flower-ranking.ts";
 import { readDonationRanking, readCemeteryRanking } from "./community-ranking.ts";
 import { readThroneRanking } from "./throne-ranking.ts";
@@ -132,6 +133,15 @@ export class Database implements GameStore, FriendshipMineStore {
       .where(eq(user_mixed_info.uid, uid))
       .limit(1);
     return rows[0]?.hide ?? 0;
+  }
+  battleRankingState(uid: string, now: number) {
+    return readBattleRankingState(
+      this.kingdom.db,
+      this.databases.global.db,
+      uid,
+      this.config.kingdomId,
+      now,
+    );
   }
   heroHistory(uid: string, kingdomId: number, type: number, now: number) {
     if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))

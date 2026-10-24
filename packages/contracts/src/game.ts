@@ -1,3 +1,4 @@
+import type { BattleRankingState, PlayoffPublication } from "./battle-ranking.ts";
 import type { FlowerRankingPublication, FlowerRankingState } from "./flower-ranking.ts";
 import type { CommunityRankingSnapshot, DonationScore } from "./community-ranking.ts";
 import type { ThroneRankingPeriod, ThroneRankingSnapshot } from "./throne-ranking.ts";
@@ -72,6 +73,7 @@ export interface CityState {
 }
 export interface GameStore extends AuthenticationStore {
   rankingPrivacy?(uid: string, kind: "payment" | "consumption"): Promise<number>;
+  battleRankingState?(uid: string, now: number): Promise<BattleRankingState>;
   heroHistory?(
     uid: string,
     kingdomId: number,
@@ -213,6 +215,8 @@ export interface GameServices {
     ranges: readonly DragonRankingRange[],
     allianceId: string,
   ): Promise<readonly DragonRankingEntry[]>;
+  battleFightPublication?(): Promise<string | undefined>;
+  playoffPublication?(): Promise<PlayoffPublication>;
   heroHistoryPublication?(
     keys: readonly string[],
     alliance: boolean,
