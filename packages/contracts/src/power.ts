@@ -5,6 +5,12 @@ export interface GeneralSkill {
   points: number;
 }
 
+export interface WorldPowerEffect {
+  id: number;
+  value: string;
+  endTime: bigint | undefined;
+}
+
 export interface PowerSnapshot {
   profile: Row;
   statistics: Row | undefined;
