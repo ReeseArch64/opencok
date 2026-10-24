@@ -7,6 +7,7 @@ import type {
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import {
   encode,
+  extension,
   fields,
   ProtocolError,
   sfs,
@@ -100,7 +101,11 @@ export function mailCategoryProjection(
     new Set(window.map((entry) => entry.uid)).size !== window.length ||
     window.some((entry) => entry.toUser !== owner) ||
     window.reduce(
-      (size, entry) => size + (entry.contents?.length ?? 0) + (entry.extra?.length ?? 0),
+      (size, entry) =>
+        size +
+        (entry.contents?.length ?? 0) +
+        (entry.extra?.length ?? 0) +
+        Buffer.byteLength(entry.rewardId ?? ""),
       0,
     ) >
       4 * 1024 * 1024
@@ -151,6 +156,11 @@ export function mailCategoryProjection(
     result.push(sfs.object(message));
   }
   const body: Fields = mailCategoryWindow(query) === undefined ? {} : { result: sfs.array(result) };
-  encode({ ...(Object.keys(body).length ? body : { success: sfs.bool(true) }), ...envelope });
+  encode(
+    extension("mread.batch.category", {
+      ...(Object.keys(body).length ? body : { success: sfs.bool(true) }),
+      ...envelope,
+    }),
+  );
   return { body, invalidIds };
 }

@@ -1,8 +1,15 @@
 import { mailDeleted, mailSave, mailStatus } from "@opencok/dtos/mail";
+import { mailCategoryProjection } from "./mail-category.ts";
+import { storedMailText } from "./mail-contents.ts";
 import { mailContentsProjection } from "./mail-contents.ts";
 import { planMailDeletion } from "./mail-delete.ts";
 import {
   mailContentsQuery,
+  mailCategoryQuery,
+  mailCategorySenders,
+  selectMailCategory,
+  mailBlank,
+  mailTranslationRequest,
   mailConversationSaveQuery,
   mailDeleteQuery,
   mailReadQuery,
@@ -10,7 +17,7 @@ import {
   mailStatusQuery,
   calculateMailStatus,
 } from "@opencok/rules/mail";
-import type { MailSaveMode } from "@opencok/contracts/mail";
+import type { MailSaveMode, MailTranslation, MailTranslationLookup } from "@opencok/contracts/mail";
 import { expeditionRanking } from "@opencok/dtos/expedition-ranking";
 import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
 import { decodeExpeditionRanking } from "./expedition-ranking.ts";
@@ -66,7 +73,7 @@ const playerRankingKinds = {
   "silver.contribute.rank": "contribution",
 } as const;
 
-type GameConfig = Pick<ServerConfig, "kingdomId">;
+type GameConfig = Pick<ServerConfig, "kingdomId" | "mailTranslationEnabled">;
 
 type ReadyCity = CityState & { profile: Row; resource: Row };
 export interface Result {
@@ -175,6 +182,9 @@ export class Game {
       case "mail.read.status":
       case "mail.read.status.betch":
         body = await this.mailRead(uid, command === "mail.read.status.betch", params);
+        break;
+      case "mread.batch.category":
+        body = await this.mailCategory(uid, params);
         break;
       case "mail.read":
         body = await this.mailContents(uid, params);
@@ -297,6 +307,75 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return mailDeleted(state.deleted);
+  }
+  private async mailCategory(uid: string, params: Fields): Promise<Fields> {
+    const query = mailCategoryQuery(
+      wireInt(params, "category"),
+      wireInt(params, "num"),
+      wireInt(params, "offset"),
+      this.now(),
+    );
+    if (params.fromUser !== undefined && typeof wireString(params, "fromUser") !== "string")
+      throw new GameError(errors.invalid);
+    const envelope: Fields = {};
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) envelope[key] = params[key]!;
+    let body: Fields | undefined;
+    const state = await this.db.mailCategory(uid, query, async (window, readers) => {
+      const entries = selectMailCategory(query, window);
+      const senders = await readers.senders(mailCategorySenders(entries));
+      const chat = query.category === 4 || query.category === 7;
+      const enabled = this.config.mailTranslationEnabled ?? true;
+      const requests = new Map<string, { id: string; fromLang: string; toLang: string }>();
+      if (chat && enabled)
+        for (const entry of entries) {
+          if (entry.type !== 22 && entry.type !== 24) continue;
+          const sender = entry.fromUser === null ? undefined : senders.get(entry.fromUser);
+          const request = mailTranslationRequest(entry.translationId, sender ? sender.lang : "");
+          if (request) requests.set(entry.uid, request);
+        }
+      const lookups = new Map<string, MailTranslationLookup>();
+      for (const request of requests.values())
+        lookups.set(JSON.stringify([request.id, request.toLang]), {
+          id: request.id,
+          language: request.toLang,
+        });
+      const translated = lookups.size ? await readers.translations([...lookups.values()]) : [];
+      const stored = new Map<string, string>();
+      for (const row of translated) {
+        const key = JSON.stringify([row.id, row.language]);
+        if (!lookups.has(key) || stored.has(key)) throw new GameError(errors.invalid);
+        stored.set(key, storedMailText(row.contents, false));
+      }
+      const translations = new Map<string, MailTranslation>();
+      for (const [id, request] of requests) {
+        const translatedText = stored.get(JSON.stringify([request.id, request.toLang]));
+        if (!mailBlank(translatedText))
+          translations.set(id, { originalLang: request.fromLang, translationMsg: translatedText! });
+      }
+      const updates =
+        chat && entries.length
+          ? await this.services.playerUpdateTimes?.(this.config.kingdomId, [uid])
+          : undefined;
+      const projection = mailCategoryProjection(
+        uid,
+        query,
+        window,
+        {
+          senders,
+          translations,
+          translationEnabled: enabled,
+          recipientUpdateTime: updates?.get(uid) ?? "",
+        },
+        envelope,
+      );
+      body = projection.body;
+      return projection.invalidIds;
+    });
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
+      throw new GameError(errors.invalid);
+    return body;
   }
   private async mailContents(uid: string, params: Fields): Promise<Fields> {
     const ids = wireString(params, "uid");

@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import type { MailListEntry, MailCategoryPresentation } from "@opencok/contracts/mail";
 import { mailCategoryProjection } from "@opencok/controllers/mail-category";
 import {
@@ -455,4 +456,19 @@ test("list content reuses persisted extra bodies, scout repairs and plain-scout 
     sfs.object({ contents: sfs.string("hello\nworld") }),
   );
   expect(fields(result.detail).contentsArr).toBeUndefined();
+});
+
+test("category projection checks the transport envelope before returning malformed-row removals", () => {
+  const raw = "{a:".repeat(29) + "{}" + "}".repeat(29);
+  expect(() =>
+    encode({
+      result: sfs.array([sfs.object({ detail: sfs.object(decodeLegacyJsonObject(raw)) })]),
+    }),
+  ).not.toThrow();
+  expect(() =>
+    project(3, [
+      entry(32, { uid: "bad", contents: Buffer.from("broken") }),
+      entry(32, { uid: "deep", contents: Buffer.from(raw) }),
+    ]),
+  ).toThrow(ProtocolError);
 });

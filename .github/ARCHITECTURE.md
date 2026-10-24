@@ -1330,6 +1330,19 @@ unresolved decoder forms reject without removal. This path changes no read statu
 reward, auxiliary, group or synchronization state. The server guide records the bounded
 permissive decoder, remaining syntax/order differences and synthetic unit evidence.
 
+Category mailbox lists use the same owner-locked write boundary because malformed
+structured entries can be removed. Metadata bounds the newest-first mailbox window before
+loading bodies and reward descriptors; category filtering follows that window. An async
+controller projection can request only bounded public sender and translation data. Local
+profiles, alliance abbreviations and persisted translations share the mailbox snapshot;
+global account routing and configured remote public profiles are separate reads. Only
+public identity fields cross this boundary, with no remote writes or cross-database atomicity
+claim. Recipient update metadata reuses the realm-scoped player-update service. Missing
+optional translations preserve original content; external machine translation remains
+unavailable. The server guide records configuration, limits and degraded behavior. Both
+category and detail readers validate the wrapped extension response before authorizing
+owned primary-row cleanup. SQL, routing, projection and cleanup remain unit-verified only.
+
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
 fencing and recovery tests before enabling writes. Account provisioning,
