@@ -1492,6 +1492,59 @@ database, concurrent writers, client or ADB. `mail.delete.batch`, category/label
 deletion, chat-conversation deletion, content edge cases and synchronization readers
 remain separate unfinished portions of topic 4.
 
+## Category and type mailbox deletion
+
+`mail.delete.batch` now accepts category-only requests: `uids` must be absent, null,
+Java-blank or contain only commas. Optional String `types` uses comma-separated Java
+Int labels, preserving raw spellings as response keys. Labels 0–5 select respectively
+personal/system (stored type below 13 or above 16), saved-category types 14–16, studio
+13, fight types 6/7/8/9/30, moderator types 23/24 and boss reward 32. Other signed labels
+select types 13–16. These are the reference deletion selectors, not the listing/status
+category mappings. Repeated labels and numeric aliases retain their separate raw keys.
+
+The reply contains `RetObj`, with Int fields `<raw label>` for unread messages whose
+`rewardStatus` is exactly zero, and `total<raw label>` for all messages whose
+`rewardStatus` is exactly zero. Counts are read before category deletion and retain
+signed Java Int wrapping. SQL-null status restores to the Java model's primitive zero
+and therefore counts as unread. These counters ignore saved flags and are not a count
+of deleted mail.
+Unclaimed saved messages count; already-claimed saved messages do not. The bounded raw
+request permits at most 1,000 labels; at most seven distinct SQL selectors are read.
+No mailbox contents are loaded and matching mailbox size is not truncated.
+
+The owner profile is locked and its realm/ban state revalidated. The complete correlated
+response must encode before any deletion. Matching owned auxiliary content is deleted
+for every selected primary mail, including primary messages retained because their
+saved flag or reward status prevents deletion; this unusual distinction follows the
+reference category path. Explicitly foreign auxiliary ownership is preserved. Primary
+mail is deleted only when `saveFlag = 0` and `rewardStatus != 0`. Both statements commit
+atomically. Category deletion does not change groups, synchronization markers, invitation
+records, rewards or chat state, matching the reference branch. Missing/empty categories
+still authorize the owner and return an empty `RetObj`.
+
+`chatMail.delete` now accepts scalar `type` or an empty selection. `mod` is validated
+when present. The ordinary inverse client-type mapping applies. It deletes only owned
+mail of that type with `rewardStatus != 0`, regardless of the saved flag. Resource type
+5, trade type 10 and monster type 18 additionally remove the empty-index group 200, 400
+or 300 respectively, even if unclaimed messages remain. This path leaves auxiliary
+content, markers and invitation state unchanged, and returns the correlated success
+acknowledgment without pushes. The transaction and reply are validated before commit.
+
+Nonempty explicit IDs in `mail.delete.batch`, sender-selected `chatMail.delete` and
+`chatMail.delete.batch` remain unsupported before writes. Explicit-ID batches have
+different whole-group, invitation and chat effects; they must not be routed through
+ordinary deletion as an approximation. Sender deletion requires the still-missing
+private-chat deletion consumer. These implementations advance the original mailbox
+scope but do not complete the deletion family or topic 4.
+
+Nine synthetic units cover parser/selector boundaries, exact response keys, owner
+scoping, SQL predicates, no-op and error behavior, statement order, type groups and
+pre-write rejection of unsupported scopes. The focused deletion/conversation-read
+selection passed 14 units and 169 assertions before the final SQL-null status predicate
+correction. That final predicate/assertion edit was reviewed but not rerun; affected
+types, lint and formatting passed before it. Broad regression remains deferred under
+the maintainer's request to prioritize implementation. No new schema, dependency, configuration, live service or client test.
+
 ## Conversation and type mailbox saving
 
 `chatMail.save`, tracked in [issue #68](https://github.com/ReeseArch64/opencok/issues/68),
@@ -2948,9 +3001,10 @@ rechecks the returned owner/realm/ban snapshot. Runtime repository dispatch inde
 rejects plans containing chat effects, so it cannot quietly drop an intent. Missing
 adapters, malformed consumed fields and storage failures do not return success. Empty
 plans still authorize the owner. No new schema, worker, dependency or configuration is
-introduced. Five new command units are written for mapping/order, deferred chat cases,
-authorization, encoding and failures; their execution and type/lint checks are deferred
-under the maintainer's current request to prioritize implementation.
+introduced. Five command units cover mapping/order, deferred chat cases, authorization,
+encoding and failures. They pass in the focused 14-unit deletion/conversation-read
+selection, with affected types, lint and formatting also passing. Broad regression
+remains deferred under the maintainer's request to prioritize implementation.
 
 ## Mailbox content reads
 
