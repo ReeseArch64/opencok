@@ -46,6 +46,7 @@
     "./world-resource-owner": "./src/world-resource-owner.ts"
   },
   "dependencies": {
+    "@opencok/constants": "workspace:*",
     "@opencok/contracts": "workspace:*",
     "@opencok/drizzle": "workspace:*",
     "@opencok/errors": "workspace:*",

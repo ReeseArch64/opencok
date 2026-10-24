@@ -175,16 +175,28 @@ enabled in the runtime composition.
 
 `login.other` with `config` now returns `fbShare`, `pushSetting`, `switches`,
 `isVerifyChangeAccount` and `funcOn`. Optional `fb_share.xml` records preserve all
-string values and IDs. Profile, switches and saved notification preferences are
-read in one repeatable-read PostgreSQL transaction. Missing notification settings
-are synthesized using the legacy 20-type defaults, with world news off. Unlike
-the Java read path, this query never inserts a preference row; explicit preference
-updates belong to topic 6. Required profile/preference failures reject the query.
-The optional switches query runs after those reads inside a savepoint. A query failure
-must roll back to that savepoint and release it before the snapshot can commit;
-transaction-control failures still reject. Recognized PostgreSQL SQLSTATE errors become
+string values and IDs. Profile and saved notification preferences are read in one
+read-only repeatable-read PostgreSQL transaction. Missing notification settings
+are synthesized using the legacy 20-type defaults, with world news off. When the
+original saved list has fewer than 20 rows and no type 15, the controller persists
+that world-news default before querying switches. A separate read-write transaction
+locks and revalidates the owner in the configured realm, then inserts type 15,
+status 0 and audio 1 into the existing `parse_info` table. Other synthesized defaults
+are not persisted. The first response retains the synthesized type/status shape;
+later reads include the stored audio field. Existing preferences are not updated.
+
+Required profile/preference failures reject the query. Initialization failures also
+reject before switches or announcements. A duplicate insert from a stale snapshot
+fails without overwriting the saved choice; a retry reads the current preference.
+A lost commit acknowledgment may leave the row saved despite a failed request.
+Later switch or announcement failures cannot undo an already committed default.
+Explicit preference-update commands remain topic 6 work. No schema migration or
+external dependency is added; repositories reuse the existing constants workspace.
+
+The optional switches query runs independently after the required snapshot and any
+default initialization. Recognized PostgreSQL SQLSTATE errors become
 empty switch arrays, matching the legacy SQL adapter's SQLException fallback, and
-verification continues. Other recovered query exceptions omit both `switches` and
+verification continues. Other query exceptions omit both `switches` and
 `isVerifyChangeAccount`. An empty successful query also retains its empty array.
 Verification failures retain already projected switches and omit only the verification
 field. Feature announcements run afterward, outside that failure boundary.

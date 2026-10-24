@@ -88,6 +88,8 @@ export interface GameStore extends AuthenticationStore {
   power(uid: string, now: number): Promise<PowerState>;
   playerSummaries(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
   configuration(uid: string): Promise<LoginConfigurationState>;
+  configurationSwitches?(): Promise<Row[] | undefined>;
+  initializeWorldNewsPreference?(uid: string, now: number): Promise<void>;
   city(uid: string, now: number): Promise<CityState>;
   world(
     uid: string,

@@ -554,12 +554,19 @@ has no boss lifecycle provider; absent running state remains closed. Account/sub
 metadata does not implement their mutation handlers. Missing announcement platform/version
 fields fail after availability evaluation, while missing IDs fail before service reads.
 Deferred-login configuration distinguishes unavailable switch rows from a successful
-empty result. The repository reads required profile/preferences first, then isolates
-the optional switch query with a savepoint in the same read-only snapshot. Only a
-successfully recovered statement failure can continue: recognized PostgreSQL SQLSTATE
+empty result. The repository first reads required profile/preferences in a read-only
+repeatable-read snapshot. If the original list has fewer than 20 rows and lacks type 15,
+the controller invokes a separate read-write transaction to lock/revalidate the owner
+and insert the world-news default with status 0 and audio 1. The first response keeps
+the synthesized type/status shape; subsequent reads include the stored audio. The
+insert never updates an existing preference, and duplicate/write failures reject.
+Initialization precedes switches and announcements, so later failures cannot undo
+the committed row. Lost commit acknowledgments can leave it persisted despite a
+failed request. Explicit preference-update commands remain separately scoped.
+The optional switch query then runs independently: recognized PostgreSQL SQLSTATE
 errors produce empty switches, matching the legacy SQL adapter's SQLException fallback,
-while other exceptions produce unavailable switches. Savepoint, rollback, release and
-commit failures still reject. The controller omits both switch fields after an
+while other exceptions produce unavailable switches. Required snapshot and preference
+transaction failures still reject. The controller omits both switch fields after an
 unavailable query, or only verification after a later account-gate/
 counter failure. Announcements remain outside this boundary. Empty device IDs retain
 empty Redis suffixes; null/missing IDs use literal `null`, with no blank-device bypass.
