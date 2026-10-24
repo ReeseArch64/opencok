@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { createZodDto, wire } from "./dto.ts";
+
 import type { PlayerRankingKind, PlayerRankingResult } from "@opencok/contracts/ranking";
 import { text, type Row } from "@opencok/contracts/rows";
 import { GameError } from "@opencok/errors/game";
@@ -52,11 +55,49 @@ function player(row: Row, kind: PlayerRankingKind): Fields {
   return result;
 }
 
-export function playerRanking(kind: PlayerRankingKind, ranking: PlayerRankingResult): Fields {
+function serializePlayerRanking(kind: PlayerRankingKind, ranking: PlayerRankingResult): Fields {
   return {
     [kind === "contribution" ? "myRanking" : "selfRanking"]: sfs.int(
       kind === "contribution" && ranking.rows.length === 0 ? -1 : ranking.selfRanking,
     ),
     serverRanking: sfs.array(ranking.rows.map((row) => sfs.object(player(row, kind)))),
   };
+}
+
+export class PlayerRankingDto extends createZodDto(
+  z.strictObject({
+    selfRanking: wire.int.optional(),
+    myRanking: wire.int.optional(),
+    serverRanking: wire.array(
+      wire.object(
+        z
+          .strictObject({
+            uid: wire.string.optional(),
+            name: wire.string.optional(),
+            pic: wire.string.optional(),
+            allianceId: wire.string.optional(),
+            alliancename: wire.string.optional(),
+            abbr: wire.string.optional(),
+            icon: wire.string.optional(),
+          })
+          .extend({
+            picVer: z.union([wire.int, wire.long]).optional(),
+            picfraId: z.union([wire.int, wire.long]).optional(),
+            power: z.union([wire.int, wire.long]).optional(),
+            armyKill: z.union([wire.int, wire.long]).optional(),
+            contributeSum: z.union([wire.int, wire.long]).optional(),
+            level: z.union([wire.int, wire.long]).optional(),
+            exp: z.union([wire.int, wire.long]).optional(),
+            banTime: z.union([wire.int, wire.long]).optional(),
+            updateTime: z.union([wire.int, wire.long]).optional(),
+            star: z.union([wire.int, wire.long]).optional(),
+            buildingPower: z.union([wire.int, wire.long]).optional(),
+          }),
+      ),
+    ),
+  }),
+) {}
+
+export function playerRanking(...args: Parameters<typeof serializePlayerRanking>): Fields {
+  return new PlayerRankingDto(serializePlayerRanking(...args));
 }

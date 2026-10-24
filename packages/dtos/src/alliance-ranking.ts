@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { createZodDto, wire } from "./dto.ts";
+import { AllianceVideoDto } from "./profile-alliance.ts";
 import type {
   AllianceRankingKind,
   AllianceRankingResult,
@@ -39,7 +42,10 @@ function aggregate(value: unknown): Value {
   return Math.abs(number) < 10000000 ? sfs.int(number) : sfs.double(number);
 }
 
-export function allianceRanking(kind: AllianceRankingKind, ranking: AllianceRankingResult): Fields {
+function serializeAllianceRanking(
+  kind: AllianceRankingKind,
+  ranking: AllianceRankingResult,
+): Fields {
   const fields: Fields = {
     allianceRanking: sfs.array(
       ranking.rows.map(({ alliance, maxMember, video }) => {
@@ -67,4 +73,34 @@ export function allianceRanking(kind: AllianceRankingKind, ranking: AllianceRank
   };
   if (ranking.selfRanking !== 0) fields.selfRanking = int(ranking.selfRanking);
   return fields;
+}
+
+export class AllianceRankingDto extends createZodDto(
+  z.strictObject({
+    selfRanking: wire.int.optional(),
+    allianceRanking: wire.array(
+      wire.object(
+        z
+          .strictObject({
+            uid: wire.string,
+            alliancename: wire.string,
+            abbr: wire.string,
+            leader: wire.string.optional(),
+            icon: wire.string.optional(),
+            curMember: wire.int,
+            maxMember: wire.int,
+          })
+          .extend({
+            nums: z.union([wire.int, wire.long]),
+            fightpower: z.union([wire.int, wire.double]).optional(),
+            armyKill: z.union([wire.int, wire.double]).optional(),
+            allianceVideo: wire.object(AllianceVideoDto.schema).optional(),
+          }),
+      ),
+    ),
+  }),
+) {}
+
+export function allianceRanking(...args: Parameters<typeof serializeAllianceRanking>): Fields {
+  return new AllianceRankingDto(serializeAllianceRanking(...args));
 }

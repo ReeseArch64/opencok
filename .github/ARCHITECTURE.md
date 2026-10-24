@@ -912,6 +912,15 @@ import applications. Their source exports and direct workspace dependencies are 
 | `storage`             | Redis leases/readiness, ZooKeeper registration, dependency timeouts and validated server-directory files.               |
 | `constants`, `errors` | Named connection limits, session TTL, mobile compatibility values and error types/codes.                                |
 
+`dtos` exposes concrete classes with Zod field schemas in the NestJS class-based
+DTO convention, without adding a NestJS runtime dependency. Existing serializer
+functions project snapshots and construct validated class instances while retaining
+their public `Fields`/`Value` signatures. Strict schemas preserve public field
+allowlists and SFS widths; dynamic maps validate each entry. Construction preserves
+source field order recursively for byte compatibility. The
+[DTO package guide](../packages/dtos/README.md) records validation boundaries,
+mutable response composition and compatibility checks.
+
 Repository data operations follow the [repository method conventions](../packages/repositories/README.md):
 entity stores use CRUD verbs, while aggregate reads name their resource and lookup key.
 These names do not expand write authority or change snapshot/transaction boundaries.

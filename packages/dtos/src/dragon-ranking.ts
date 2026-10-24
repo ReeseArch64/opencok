@@ -1,7 +1,10 @@
+import { z } from "zod";
+import { createZodDto, wire } from "./dto.ts";
+
 import type { DragonRankingTeam } from "@opencok/contracts/dragon-ranking";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
-export function dragonRanking(teams: readonly DragonRankingTeam[]): Fields {
+function serializeDragonRanking(teams: readonly DragonRankingTeam[]): Fields {
   return {
     rank: sfs.array(
       teams.map((team) => {
@@ -29,4 +32,38 @@ export function dragonRanking(teams: readonly DragonRankingTeam[]): Fields {
       }),
     ),
   };
+}
+
+export class DragonRankingDto extends createZodDto(
+  z.strictObject({
+    rank: wire.array(
+      wire.object(
+        z
+          .strictObject({
+            teamId: wire.string,
+            allianceId: wire.string,
+            name: wire.string,
+            leader: wire.string,
+            kingName: wire.string,
+            icon: wire.string,
+            abbr: wire.string,
+            teamState: wire.int,
+            score: wire.int,
+            kingId: wire.int,
+            wins2: wire.int,
+            curmember: wire.int,
+            maxmember: wire.int,
+            fighting: wire.int,
+            rankNum: wire.int,
+            type: wire.int,
+            fightPower: wire.long,
+          })
+          .extend({ wins: z.union([wire.int, wire.double]) }),
+      ),
+    ),
+  }),
+) {}
+
+export function dragonRanking(...args: Parameters<typeof serializeDragonRanking>): Fields {
+  return new DragonRankingDto(serializeDragonRanking(...args));
 }

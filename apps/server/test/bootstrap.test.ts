@@ -33,7 +33,7 @@ test("legacy clock names retain inverted values and midnight follows database of
 
 test("UTC clock response has a stable wire snapshot", () => {
   expect(serverClock(Date.UTC(2024, 0, 1, 12), 0)).toMatchInlineSnapshot(`
-    {
+    ServerClockDto {
       "db_timezone_offset": {
         "type": 4,
         "value": 1704110400,

@@ -1,10 +1,13 @@
+import { z } from "zod";
+import { createZodDto, wire } from "./dto.ts";
+
 import type { WorldFavoriteList } from "@opencok/contracts/world-favorites";
 import { favoriteInteger, favoriteServerType } from "@opencok/rules/world-favorites";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
-export function worldFavorites(state: WorldFavoriteList, owner: string): Fields {
+function serializeWorldFavorites(state: WorldFavoriteList, owner: string): Fields {
   if (state.rows.length > 32767) throw new GameError(errors.unsupported, "world_favorite_size");
   const favorites = state.rows.map((row) => {
     if (row.uid !== owner) throw new GameError(errors.invalid);
@@ -40,4 +43,27 @@ export function worldFavorites(state: WorldFavoriteList, owner: string): Fields 
   });
   const body = { favo: sfs.array(favorites) };
   return body;
+}
+
+export class WorldFavoritesDto extends createZodDto(
+  z.strictObject({
+    favo: wire.array(
+      wire.object(
+        z.strictObject({
+          name: wire.string.optional(),
+          point: wire.int.optional(),
+          type: wire.int.optional(),
+          server: wire.int.optional(),
+          resType: wire.int.optional(),
+          cityType: wire.int.optional(),
+          serverType: wire.int.optional(),
+          createTime: wire.long.optional(),
+        }),
+      ),
+    ),
+  }),
+) {}
+
+export function worldFavorites(...args: Parameters<typeof serializeWorldFavorites>): Fields {
+  return new WorldFavoritesDto(serializeWorldFavorites(...args));
 }

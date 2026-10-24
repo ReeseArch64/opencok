@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { createZodDto, wire, wireRecord } from "./dto.ts";
+import { PlayerStatisticsDto } from "./power.ts";
 import { text, type Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
@@ -23,7 +26,7 @@ function integer(row: Row, key: string) {
   return Number(signed(row[key], 32));
 }
 
-export function publicStatistics(statistics: Row | undefined): Fields {
+function serializePublicStatistics(statistics: Row | undefined): Fields {
   if (!statistics) return {};
   return {
     ...playerStatistics(statistics),
@@ -31,11 +34,11 @@ export function publicStatistics(statistics: Row | undefined): Fields {
   };
 }
 
-export function publicMedal(row: Row): Fields {
+function serializePublicMedal(row: Row): Fields {
   return { id: sfs.string(text(row, "id")), level: sfs.int(integer(row, "level")) };
 }
 
-export function publicGenerals(generals: readonly GeneralPreview[]): Fields {
+function serializePublicGenerals(generals: readonly GeneralPreview[]): Fields {
   if (!generals.length) throw new GameError(errors.unsupported, "public_profile");
   return {
     skillPoint: sfs.int(generals[0]!.plusSkillPoint),
@@ -43,7 +46,7 @@ export function publicGenerals(generals: readonly GeneralPreview[]): Fields {
   };
 }
 
-export function generalInfo(general: Omit<GeneralPreview, "plusSkillPoint">): Fields {
+function serializeGeneralInfo(general: Omit<GeneralPreview, "plusSkillPoint">): Fields {
   return {
     uuid: sfs.string(general.uuid),
     generalId: sfs.string(general.generalId),
@@ -85,7 +88,7 @@ export function generalInfo(general: Omit<GeneralPreview, "plusSkillPoint">): Fi
   };
 }
 
-export function publicProfileBase(
+function serializePublicProfileBase(
   state: PublicProfileState,
   rules: Rules,
   context: RuleContext,
@@ -121,7 +124,7 @@ export function publicProfileBase(
   return fields;
 }
 
-export function publicEquipment(row: Row, strengthen: boolean): Fields {
+function serializePublicEquipment(row: Row, strengthen: boolean): Fields {
   const fields: Fields = {
     uuid: sfs.string(text(row, "uuid")),
     itemId: sfs.string(String(integer(row, "itemId"))),
@@ -153,4 +156,131 @@ export function publicEquipment(row: Row, strengthen: boolean): Fields {
     fields.lockProperty = sfs.string(locks);
   }
   return fields;
+}
+
+export class PublicStatisticsDto extends createZodDto(
+  z.union([z.strictObject({}), PlayerStatisticsDto.schema.extend({ power: wire.long })]),
+) {}
+
+export class PublicMedalDto extends createZodDto(
+  z.strictObject({ id: wire.string, level: wire.int }),
+) {}
+
+export class GeneralInfoDto extends createZodDto(
+  z.strictObject({
+    uuid: wire.string,
+    generalId: wire.string,
+    level: wire.int,
+    status: wire.int,
+    att: wire.int,
+    defence: wire.int,
+    ability: wire.array(
+      wire.object(wireRecord(z.string(), z.union([wire.null, wire.string, wire.int]))),
+    ),
+    skill: wire.array(
+      wire.object(
+        z.strictObject({
+          uuid: wire.string,
+          ownerId: wire.string,
+          skillId: wire.string,
+          startTime: wire.long,
+          endTime: wire.long,
+          actTime: wire.long,
+          stat: wire.int,
+          param1: wire.int,
+          param2: wire.int,
+        }),
+      ),
+    ),
+  }),
+) {}
+
+export class PublicGeneralsDto extends createZodDto(
+  z.strictObject({
+    skillPoint: wire.int,
+    userGenerals: wire.array(wire.object(GeneralInfoDto.schema)),
+  }),
+) {}
+
+export class PublicEquipmentDto extends createZodDto(
+  z.strictObject({
+    uuid: wire.string,
+    itemId: wire.string,
+    extraProperty: wire.string,
+    refineProperty: wire.string,
+    lockProperty: wire.string.optional(),
+    suit_effect: wire.string.optional(),
+    suit_value: wire.string.optional(),
+    suit_value_type: wire.string.optional(),
+    suit_value_sign: wire.string.optional(),
+    Buff: wire.string.optional(),
+    buff: wire.string.optional(),
+    buff_str: wire.string.optional(),
+    buff_Str: wire.string.optional(),
+    buffStr: wire.string.optional(),
+    BuffStr: wire.string.optional(),
+    on: wire.int,
+    reforgeCount: wire.int,
+    strength_level: wire.int.optional(),
+  }),
+) {}
+
+export class PublicProfileBaseDto extends createZodDto(
+  z
+    .strictObject({
+      uid: wire.string,
+      name: wire.string,
+      pic: wire.string,
+      medal: wire.string,
+      serverName: wire.string,
+      lastUpdateTime: wire.string,
+      officer: wire.string.optional(),
+      level: wire.int,
+      exp: wire.int,
+      picVer: wire.int,
+      picfraId: wire.int,
+      gmFlag: wire.int,
+      maxExp: wire.int,
+      vip: wire.int,
+      vipEndTime: wire.int,
+      armedLevel: wire.int,
+      market: wire.int,
+      score: wire.int,
+      serverId: wire.int,
+      flowerVal: wire.int,
+      showEquip: wire.bool,
+      showMedal: wire.bool,
+      showMarchSoldier: wire.bool,
+      achieveNum: wire.float,
+    })
+    .extend({
+      ...PlayerStatisticsDto.schema.partial().shape,
+      power: wire.long.optional(),
+      medalList: wire.array(wire.object(PublicMedalDto.schema)),
+      equip: wire.array(wire.object(PublicEquipmentDto.schema)),
+    }),
+) {}
+
+export function publicStatistics(...args: Parameters<typeof serializePublicStatistics>): Fields {
+  return new PublicStatisticsDto(serializePublicStatistics(...args));
+}
+
+export function publicMedal(...args: Parameters<typeof serializePublicMedal>): Fields {
+  return new PublicMedalDto(serializePublicMedal(...args));
+}
+
+export function publicGenerals(...args: Parameters<typeof serializePublicGenerals>): Fields {
+  return new PublicGeneralsDto(serializePublicGenerals(...args));
+}
+
+export function generalInfo(...args: Parameters<typeof serializeGeneralInfo>): Fields {
+  return new GeneralInfoDto(serializeGeneralInfo(...args));
+}
+
+export function publicProfileBase(...args: Parameters<typeof serializePublicProfileBase>): Fields {
+  return new PublicProfileBaseDto(serializePublicProfileBase(...args));
+}
+
+export function publicEquipment(...args: Parameters<typeof serializePublicEquipment>): Fields {
+  return new PublicEquipmentDto(serializePublicEquipment(...args));
 }

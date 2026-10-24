@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { createZodDto, wire, wireRecord } from "./dto.ts";
+
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
@@ -228,7 +231,7 @@ function strings(rule: Rule | undefined, projection?: Record<string, string>): F
   return result;
 }
 
-export function dataConfig(rules: Rules, context: DataConfigContext = {}): Fields {
+function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fields {
   const items = rules.configuration.dataConfig ?? rules.items;
   if (!items.size) throw new GameError(errors.unsupported);
   const result: Fields = {};
@@ -429,4 +432,95 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
     feed_maxCount: sfs.int(integer(String(context.feedMaxCount ?? 3))),
   });
   return { dataConfig: sfs.object(result) };
+}
+
+const configStrings = wire.object(wireRecord(z.string(), wire.string));
+
+export class DataConfigDto extends createZodDto(
+  z.strictObject({
+    dataConfig: wire.object(
+      z.strictObject({
+        ...Object.fromEntries(objectKeys.map((key) => [key, configStrings])),
+        hero: configStrings,
+        hero_yutao: configStrings,
+        w_thedoor: configStrings,
+        "69008": configStrings,
+        worldmap_pve: configStrings,
+        facebook_gift: configStrings,
+        wa_army: configStrings,
+        wa_switch: configStrings,
+        graveyard: configStrings,
+        activityconfig2: configStrings,
+        icon: configStrings,
+        general_buy: configStrings,
+        kingdomskill: configStrings,
+        followFB: configStrings.optional(),
+        lordtips_time: configStrings.optional(),
+        ranking: configStrings.optional(),
+        freeSpdT: wire.int,
+        resources_basics: wire.int,
+        cityDefInterval: wire.int,
+        monster_count: wire.int,
+        monster_decr: wire.int,
+        beginner_move: wire.int,
+        resKey: wire.int,
+        shield_base_2: wire.int,
+        activityOn: wire.int,
+        territory_switch: wire.int,
+        territory_resource_switch: wire.int,
+        ckf_world_row: wire.int,
+        neutral_row: wire.int,
+        neutral_CD_time: wire.int,
+        alliance_quest_tab: wire.int,
+        alliance_quest_push: wire.int,
+        on_trumpet_k2: wire.int,
+        dragon_world_row: wire.int,
+        alliance_quest_init_level: wire.int.optional(),
+        quickEndBattle: wire.string,
+        chatShieldMax: wire.string,
+        monster_interval: wire.string,
+        monster_power_limit: wire.string,
+        boss_decr: wire.string,
+        overlord_open_type: wire.string,
+        boss_max_member: wire.string,
+        alliance_quest: wire.string,
+        alliance_quest_chat: wire.string,
+        alliance_mission: wire.string,
+        loading_show_type: wire.string.optional(),
+        scoutmark_on: wire.string.optional(),
+        serviceTerms_on: wire.string.optional(),
+        cross_open: wire.bool,
+        dbf_maxScoreView: wire.long,
+        serverConfig: wire.object(
+          z.strictObject({ chat_interval: wire.int, feed_maxCount: wire.int }),
+        ),
+        worldboss: configStrings,
+        worldboss_10_19: configStrings,
+        worldboss_10_19_other: configStrings,
+        worldboss_20_29: configStrings,
+        worldboss_20_29_other: configStrings,
+        worldboss_30_40: configStrings,
+        worldboss_30_40_other: configStrings,
+        worldboss_elite: configStrings,
+        worldboss_elite_10_19: configStrings,
+        worldboss_elite_10_19_other: configStrings,
+        worldboss_elite_20_29: configStrings,
+        worldboss_elite_20_29_other: configStrings,
+        worldboss_elite_30_40: configStrings,
+        worldboss_elite_30_40_other: configStrings,
+        worldboss_special: configStrings,
+        worldboss_special_10_19: configStrings,
+        worldboss_special_10_19_other: configStrings,
+        worldboss_special_20_29: configStrings,
+        worldboss_special_20_29_other: configStrings,
+        worldboss_special_30_40: configStrings,
+        worldboss_special_30_40_other: configStrings,
+        worldboss_npc: configStrings,
+      }),
+    ),
+  }),
+) {}
+
+export function dataConfig(...args: Parameters<typeof serializeDataConfig>): Fields {
+  return new DataConfigDto(serializeDataConfig(...args));
 }

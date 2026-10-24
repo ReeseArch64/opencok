@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { createZodDto, wire, wireRecord } from "./dto.ts";
+
 import type { PublicAllianceState } from "@opencok/contracts/profile";
 import { text, type Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
@@ -73,7 +76,7 @@ function signed(value: unknown, bits: 8 | 32 | 64): bigint {
   return parsed;
 }
 
-export function allianceVideo(row: Row): Fields {
+function serializeAllianceVideo(row: Row): Fields {
   const fields: Fields = {};
   for (const [wire, column] of [
     ["allianceid", "allianceId"],
@@ -94,7 +97,7 @@ export function allianceVideo(row: Row): Fields {
   return fields;
 }
 
-export function publicAllianceInfo(
+function serializePublicAllianceInfo(
   state: PublicAllianceState,
   rules: Rules,
   remote: boolean,
@@ -133,4 +136,48 @@ export function publicAllianceInfo(
     fields.allianceVideo = sfs.object(allianceVideo(state.video));
   }
   return { alliance: sfs.object(fields) };
+}
+
+export class AllianceVideoDto extends createZodDto(
+  z.strictObject({
+    allianceid: wire.string,
+    videoURL: wire.string,
+    thumbnailURL: wire.string,
+    videoH: wire.int,
+    videoW: wire.int,
+    videoSize: wire.int,
+    videoLength: wire.int,
+    checksign: wire.byte,
+  }),
+) {}
+
+export class PublicAllianceInfoDto extends createZodDto(
+  z.strictObject({
+    alliance: wire.object(
+      z.strictObject({
+        ...Object.fromEntries(strings.map((key) => [key, wire.string.optional()])),
+        ...Object.fromEntries(integers.map((key) => [key, wire.int.optional()])),
+        ...Object.fromEntries(longs.map((key) => [key, wire.long.optional()])),
+        currentlevel: z.union([wire.long, wire.double]).optional(),
+        nextlevel: z.union([wire.long, wire.double]).optional(),
+        fightpower: z.union([wire.long, wire.double]).optional(),
+        member: wire.long,
+        maxMember: wire.int.optional(),
+        learderUid: wire.string,
+        learderName: wire.string.optional(),
+        permission: wire.object(wireRecord(z.string(), wire.int)).optional(),
+        allianceVideo: wire.object(AllianceVideoDto.schema).optional(),
+      }),
+    ),
+  }),
+) {}
+
+export function allianceVideo(...args: Parameters<typeof serializeAllianceVideo>): Fields {
+  return new AllianceVideoDto(serializeAllianceVideo(...args));
+}
+
+export function publicAllianceInfo(
+  ...args: Parameters<typeof serializePublicAllianceInfo>
+): Fields {
+  return new PublicAllianceInfoDto(serializePublicAllianceInfo(...args));
 }

@@ -1,7 +1,10 @@
+import { z } from "zod";
+import { createZodDto, wire } from "./dto.ts";
+
 import type { ExpeditionRankingResult } from "@opencok/contracts/expedition-ranking";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
-export function expeditionRanking(result: ExpeditionRankingResult | undefined): Fields {
+function serializeExpeditionRanking(result: ExpeditionRankingResult | undefined): Fields {
   if (result === undefined) return {};
   return {
     selfRanking: sfs.int(result.selfRanking),
@@ -24,4 +27,33 @@ export function expeditionRanking(result: ExpeditionRankingResult | undefined): 
       ),
     ),
   };
+}
+
+export class ExpeditionRankingDto extends createZodDto(
+  z.union([
+    z.strictObject({}),
+    z.strictObject({
+      selfRanking: wire.int,
+      serverRanking: wire.array(
+        wire.object(
+          z
+            .strictObject({
+              uid: wire.string,
+              name: wire.string,
+              pic: wire.string,
+              abbr: wire.string,
+              score: wire.int,
+              rank: wire.int,
+              picVer: wire.int,
+              serverId: wire.int,
+            })
+            .extend({ power: z.union([wire.int, wire.long]) }),
+        ),
+      ),
+    }),
+  ]),
+) {}
+
+export function expeditionRanking(...args: Parameters<typeof serializeExpeditionRanking>): Fields {
+  return new ExpeditionRankingDto(serializeExpeditionRanking(...args));
 }

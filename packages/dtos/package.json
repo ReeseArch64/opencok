@@ -2,7 +2,8 @@
   "name": "@opencok/dtos",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test ./tests"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
@@ -30,13 +31,15 @@
     "./world-resource-detail": "./src/world-resource-detail.ts",
     "./world-point-detail": "./src/world-point-detail.ts",
     "./world-monster-detail": "./src/world-monster-detail.ts",
-    "./dragon-ranking": "./src/dragon-ranking.ts"
+    "./dragon-ranking": "./src/dragon-ranking.ts",
+    "./dto": "./src/dto.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
     "@opencok/contracts": "workspace:*",
     "@opencok/errors": "workspace:*",
     "@opencok/messages": "workspace:*",
-    "@opencok/rules": "workspace:*"
+    "@opencok/rules": "workspace:*",
+    "zod": "catalog:"
   }
 }

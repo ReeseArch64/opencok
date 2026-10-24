@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { createZodDto, wire } from "./dto.ts";
+import { GeneralInfoDto } from "./profile.ts";
 import type { Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
@@ -18,7 +21,7 @@ function signed(value: unknown, bits: 32 | 64): bigint {
   return parsed;
 }
 
-export function reconnectBalances(profile: Row): Fields {
+function serializeReconnectBalances(profile: Row): Fields {
   const free = signed(profile.gold, 64);
   const paid = signed(profile.paidGold, 64);
   const special = signed(profile.paidSpecialGold, 64);
@@ -33,7 +36,7 @@ export function reconnectBalances(profile: Row): Fields {
   };
 }
 
-export function reconnectArmy(row: Row): Fields {
+function serializeReconnectArmy(row: Row): Fields {
   if (typeof row.armyId !== "string" || !row.armyId || row.armyId.length > 20) return invalid();
   const result: Fields = {
     id: sfs.string(row.armyId),
@@ -49,7 +52,7 @@ export function reconnectArmy(row: Row): Fields {
   return result;
 }
 
-export function reconnectArmies(rows: readonly Row[]): Fields {
+function serializeReconnectArmies(rows: readonly Row[]): Fields {
   if (rows.length > 32767) return invalid();
   const seen = new Set<string>();
   return {
@@ -65,7 +68,7 @@ export function reconnectArmies(rows: readonly Row[]): Fields {
   };
 }
 
-export function reconnectGenerals(generals: readonly OwnGeneralSnapshot[]): Fields {
+function serializeReconnectGenerals(generals: readonly OwnGeneralSnapshot[]): Fields {
   if (generals.length > 32767) return invalid();
   return {
     userGenerals: sfs.array(
@@ -79,7 +82,7 @@ export function reconnectGenerals(generals: readonly OwnGeneralSnapshot[]): Fiel
   };
 }
 
-export function reconnectMine(mine: FriendshipMineView): Fields {
+function serializeReconnectMine(mine: FriendshipMineView): Fields {
   return {
     mine: sfs.object({
       itemId: sfs.int(mine.itemId),
@@ -92,4 +95,74 @@ export function reconnectMine(mine: FriendshipMineView): Fields {
       xml_miner: sfs.int(mine.maxMiners),
     }),
   };
+}
+
+export class ReconnectBalancesDto extends createZodDto(
+  z.strictObject({
+    gold: wire.long,
+    dmmGold: wire.long,
+    dmmPaidGold: wire.long,
+    dmmPaidSpecialGold: wire.long,
+    freeGold: wire.long,
+    paidGold: wire.long,
+    paidSpecialGold: wire.long,
+  }),
+) {}
+
+export class ReconnectArmyDto extends createZodDto(
+  z.strictObject({
+    id: wire.string.refine(({ value }) => value.length > 0 && value.length <= 20),
+    free: wire.int,
+    march: wire.int,
+    level: wire.int,
+    train: wire.int.optional(),
+    finish: wire.long.optional(),
+  }),
+) {}
+
+export class ReconnectArmiesDto extends createZodDto(
+  z.strictObject({ army: wire.array(wire.object(ReconnectArmyDto.schema)) }),
+) {}
+
+export class ReconnectGeneralsDto extends createZodDto(
+  z.strictObject({
+    userGenerals: wire.array(wire.object(GeneralInfoDto.schema.extend({ abilityIndex: wire.int }))),
+  }),
+) {}
+
+export class ReconnectMineDto extends createZodDto(
+  z.strictObject({
+    mine: wire.object(
+      z.strictObject({
+        itemId: wire.int,
+        level: wire.int,
+        exp: wire.int,
+        miner: wire.int,
+        call: wire.int,
+        xml_exp: wire.int,
+        xml_miner: wire.int,
+        mineTime: wire.long,
+      }),
+    ),
+  }),
+) {}
+
+export function reconnectBalances(...args: Parameters<typeof serializeReconnectBalances>): Fields {
+  return new ReconnectBalancesDto(serializeReconnectBalances(...args));
+}
+
+export function reconnectArmy(...args: Parameters<typeof serializeReconnectArmy>): Fields {
+  return new ReconnectArmyDto(serializeReconnectArmy(...args));
+}
+
+export function reconnectArmies(...args: Parameters<typeof serializeReconnectArmies>): Fields {
+  return new ReconnectArmiesDto(serializeReconnectArmies(...args));
+}
+
+export function reconnectGenerals(...args: Parameters<typeof serializeReconnectGenerals>): Fields {
+  return new ReconnectGeneralsDto(serializeReconnectGenerals(...args));
+}
+
+export function reconnectMine(...args: Parameters<typeof serializeReconnectMine>): Fields {
+  return new ReconnectMineDto(serializeReconnectMine(...args));
 }

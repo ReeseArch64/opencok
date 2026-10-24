@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { createZodDto, wire } from "./dto.ts";
+
 import type { PlayerPower } from "@opencok/contracts/power";
 import type { Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
@@ -15,7 +18,7 @@ function signed(value: unknown, bits: 32 | 64): bigint {
   return parsed;
 }
 
-export function playerStatistics(statistics: Row | undefined): Fields {
+function serializePlayerStatistics(statistics: Row | undefined): Fields {
   const fields: Fields = {};
   for (const [wire, column] of Object.entries({
     battleWin: "battlesWin",
@@ -33,7 +36,7 @@ export function playerStatistics(statistics: Row | undefined): Fields {
   return fields;
 }
 
-export function powerInfo(
+function serializePowerInfo(
   statistics: Row | undefined,
   power: PlayerPower,
   upload: Row | undefined,
@@ -64,4 +67,48 @@ export function powerInfo(
   fields.banTime = sfs.long(signed(upload?.banTime, 64));
   fields.banCount = sfs.int(Number(signed(upload?.banCount, 32)));
   return fields;
+}
+
+export class PlayerStatisticsDto extends createZodDto(
+  z.strictObject({
+    battleWin: wire.int,
+    battleLose: wire.int,
+    attackWin: wire.int,
+    attackLose: wire.int,
+    defenseWin: wire.int,
+    detectNum: wire.int,
+    armyDead: wire.int,
+    armyCure: wire.int,
+    cityDes: wire.int,
+    armyKill: wire.long,
+  }),
+) {}
+
+export class PowerInfoDto extends createZodDto(
+  PlayerStatisticsDto.schema.extend({
+    playerPower: wire.int,
+    heroPower: wire.int,
+    buildingPower: wire.int,
+    sciencePower: wire.int,
+    civilizationSciencePower: wire.int,
+    questpower: wire.int,
+    equipPower: wire.int,
+    knight_title: wire.int,
+    sagatower_science: wire.int,
+    banCount: wire.int,
+    armyPower: wire.long,
+    fortPower: wire.long,
+    petDragonPower: wire.long,
+    prinessPower: wire.long,
+    nextUpdateTime: wire.long,
+    banTime: wire.long,
+  }),
+) {}
+
+export function playerStatistics(...args: Parameters<typeof serializePlayerStatistics>): Fields {
+  return new PlayerStatisticsDto(serializePlayerStatistics(...args));
+}
+
+export function powerInfo(...args: Parameters<typeof serializePowerInfo>): Fields {
+  return new PowerInfoDto(serializePowerInfo(...args));
 }

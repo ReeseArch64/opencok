@@ -1,9 +1,12 @@
+import { z } from "zod";
+import { createZodDto, wire } from "./dto.ts";
+
 import type { Row } from "@opencok/contracts/rows";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
-export function worldSearch(rows: readonly Row[]): Fields {
+function serializeWorldSearch(rows: readonly Row[]): Fields {
   if (rows.length > 8) throw new GameError(errors.invalid);
   const ids = new Set<string>();
   return {
@@ -49,4 +52,37 @@ export function worldSearch(rows: readonly Row[]): Fields {
       }),
     ),
   };
+}
+
+const searchText = (maximum: number) =>
+  wire.string.refine(
+    ({ value }) => value.length <= maximum && value.isWellFormed() && !value.includes("\0"),
+  );
+
+export class WorldSearchDto extends createZodDto(
+  z.strictObject({
+    list: wire
+      .array(
+        wire.object(
+          z.strictObject({
+            uid: searchText(255).refine(({ value }) => value.length > 0),
+            name: searchText(255),
+            pic: searchText(40).optional(),
+            abbr: searchText(10),
+            pointId: wire.int.refine(({ value }) => value === 1203),
+            picVer: wire.int.optional(),
+            power: wire.long.optional(),
+          }),
+        ),
+      )
+      .refine(
+        ({ value }) =>
+          value.length <= 8 &&
+          new Set(value.map((entry) => entry.value.uid.value)).size === value.length,
+      ),
+  }),
+) {}
+
+export function worldSearch(...args: Parameters<typeof serializeWorldSearch>): Fields {
+  return new WorldSearchDto(serializeWorldSearch(...args));
 }

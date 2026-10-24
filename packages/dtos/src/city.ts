@@ -1,10 +1,13 @@
+import { z } from "zod";
+import { createZodDto, wire, wireFields } from "./dto.ts";
+
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import { Rules } from "@opencok/rules/game";
 import { createHash } from "node:crypto";
 
 export const FOREVER = 9223372036854775807n;
-export function building(row: Row, rules: Rules, next = false, now = Date.now()): Fields {
+function serializeBuilding(row: Row, rules: Rules, next = false, now = Date.now()): Fields {
   const itemId = text(row, "itemId");
   const rule = next
     ? rules.nextBuilding(itemId, num(row, "level"), num(row, "star"), num(row, "progress"), now)
@@ -56,7 +59,7 @@ export function building(row: Row, rules: Rules, next = false, now = Date.now())
   }
   return out;
 }
-export function queue(row: Row, item: Fields = {}, helped = true): Fields {
+function serializeQueue(row: Row, item: Fields = {}, helped = true): Fields {
   const timestamp = (key: string) => sfs.long(long(row, key) === FOREVER ? 0n : long(row, key));
   const result: Fields = {
     uuid: sfs.string(text(row, "uuid")),
@@ -71,7 +74,7 @@ export function queue(row: Row, item: Fields = {}, helped = true): Fields {
   if (helped) result.isHelped = sfs.int(num(row, "isHelped"));
   return result;
 }
-export function resource(row: Row): Fields {
+function serializeResource(row: Row): Fields {
   const result: Fields = {};
   for (const key of ["wood", "stone", "iron", "food"]) {
     result[key] = sfs.long(long(row, key) < 0n ? 0n : long(row, key));
@@ -95,7 +98,7 @@ export function resource(row: Row): Fields {
 export function gold(profile: Row) {
   return long(profile, "gold") + long(profile, "paidGold") + long(profile, "paidSpecialGold");
 }
-export function user(
+function serializeUser(
   profile: Row,
   rules: Rules,
   kingdomId: number,
@@ -146,4 +149,148 @@ export function user(
   ])
     result[key] = sfs.long(long(profile, key));
   return result;
+}
+
+export class BuildingDto extends createZodDto(
+  z.strictObject({
+    uuid: wire.string,
+    itemId: wire.string,
+    putId: wire.string,
+    building: wire.string,
+    star_building: wire.string,
+    star_building_new: wire.string,
+    unlock_type: wire.string,
+    unlock_value: wire.string,
+    item: wire.string.optional(),
+    para1: wire.string.optional(),
+    para2: wire.string.optional(),
+    para3: wire.string.optional(),
+    para4: wire.string.optional(),
+    para5: wire.string.optional(),
+    nextLevelParas: wire.string.optional(),
+    pos: wire.int,
+    level: wire.int,
+    opType: wire.int,
+    starNum: wire.int,
+    starRate: wire.int,
+    starMax: wire.int,
+    unlockFlag: wire.int,
+    unlock_costNum: wire.int,
+    time: wire.int,
+    exp: wire.int,
+    civilization_level: wire.int,
+    resource: wire.int,
+    ban_luckyday: wire.int,
+    destroy_time: wire.int,
+    power: wire.int.optional(),
+    unlock_costType: wire.int.optional(),
+    unlock_costValue: wire.int.optional(),
+    wood: wire.long,
+    stone: wire.long,
+    iron: wire.long,
+    food: wire.long,
+    silver: wire.long,
+    refreshTime: wire.long.optional(),
+    cdTime: wire.long.optional(),
+    effectTime: wire.long.optional(),
+  }),
+) {}
+
+export class QueueDto extends createZodDto(
+  z
+    .strictObject({
+      uuid: wire.string,
+      qid: wire.int,
+      type: wire.int,
+      isHelped: wire.int.optional(),
+      startTime: wire.long,
+      endTime: wire.long,
+      updateTime: wire.long,
+      totalTime: wire.long,
+    })
+    .extend({ itemObj: wire.object(wireFields) }),
+) {}
+
+export class ResourceDto extends createZodDto(
+  z.strictObject({
+    wood: wire.long,
+    wood_bind: wire.long,
+    stone: wire.long,
+    stone_bind: wire.long,
+    iron: wire.long,
+    iron_bind: wire.long,
+    food: wire.long,
+    food_bind: wire.long,
+    silver: wire.int,
+    chip: wire.int,
+    diamond: wire.int,
+    sandstone: wire.int,
+    diamondstone: wire.int,
+    marble: wire.int,
+    granite: wire.int,
+    limestone: wire.int,
+    dragonFood: wire.int,
+    dragonGold: wire.int,
+  }),
+) {}
+
+export class UserDto extends createZodDto(
+  z.strictObject({
+    buildcode: wire.string,
+    uuid: wire.string,
+    newCountry: wire.string,
+    uid: wire.string,
+    name: wire.string,
+    allianceId: wire.string,
+    openedPos: wire.string,
+    pic: wire.string,
+    guideStep: wire.string,
+    serverType: wire.int,
+    civilization_type: wire.int,
+    serverId: wire.int,
+    serverMax: wire.int,
+    country: wire.int,
+    maxExp: wire.int,
+    level: wire.int,
+    exp: wire.int,
+    chNameCount: wire.int,
+    picVer: wire.int,
+    picfraId: wire.int,
+    gmFlag: wire.int,
+    crossFightSrcServerId: wire.int,
+    civilization_score: wire.long,
+    civilization_prestige: wire.long,
+    gold: wire.long,
+    freeGold: wire.long,
+    material: wire.long,
+    allBuildScore: wire.long,
+    paidGold: wire.long,
+    paidSpecialGold: wire.long,
+    crystal: wire.long,
+    crystalGold: wire.long,
+    dmmGold: wire.long,
+    dmmPaidGold: wire.long,
+    dmmPaidSpecialGold: wire.long,
+    payTotal: wire.long,
+    regTime: wire.long,
+    neutralScore: wire.long,
+    csmodBalance: wire.long,
+    payTotalDollar: wire.double,
+  }),
+) {}
+
+export function building(...args: Parameters<typeof serializeBuilding>): Fields {
+  return new BuildingDto(serializeBuilding(...args));
+}
+
+export function queue(...args: Parameters<typeof serializeQueue>): Fields {
+  return new QueueDto(serializeQueue(...args));
+}
+
+export function resource(...args: Parameters<typeof serializeResource>): Fields {
+  return new ResourceDto(serializeResource(...args));
+}
+
+export function user(...args: Parameters<typeof serializeUser>): Fields {
+  return new UserDto(serializeUser(...args));
 }
