@@ -1,3 +1,4 @@
+import { loadExpeditionRanking } from "./expedition-ranking.ts";
 import { SESSION_TTL_SECONDS } from "@opencok/constants/connection";
 import { RedisClient } from "bun";
 import { DependencyError } from "@opencok/errors/dependency";
@@ -31,6 +32,13 @@ export class Cache {
     } finally {
       client.close();
     }
+  }
+  expeditionRanking(limit: number) {
+    return loadExpeditionRanking(
+      (command, ...args) => this.command(command, ...args),
+      this.config.kingdomId,
+      limit,
+    );
   }
   async claim(uid: string, token: string): Promise<boolean> {
     return (
@@ -82,6 +90,44 @@ export class Cache {
       updates.set(uids[index]!, value);
     }
     return updates;
+  }
+  async emperorVersion(): Promise<number | null | undefined> {
+    const kingdomId = this.config.kingdomId;
+    if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
+    const value = await this.command("GET", `opencok:kingdom:${kingdomId}:emperor-version`);
+    if (value === null) return undefined;
+    if (value === "none") return null;
+    if (typeof value !== "string" || !/^(?:0|-?[1-9]\d{0,9})$/.test(value))
+      throw new DependencyError("redis");
+    const version = Number(value);
+    if (version < -2147483648 || version > 2147483647) throw new DependencyError("redis");
+    return version;
+  }
+  async worldEffects(): Promise<ReadonlyMap<string, string>> {
+    const kingdomId = this.config.kingdomId;
+    if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
+    const values = await this.command("HGETALL", `opencok:kingdom:${kingdomId}:world-effects`);
+    if (!Array.isArray(values) || values.length > 8192 || values.length % 2 !== 0)
+      throw new DependencyError("redis");
+    const effects = new Map<string, string>();
+    let bytes = 0;
+    for (let index = 0; index < values.length; index += 2) {
+      const key = values[index];
+      const value = values[index + 1];
+      if (
+        typeof key !== "string" ||
+        !/^(?:0|[1-9]\d{0,9})$/.test(key) ||
+        Number(key) > 2147483647 ||
+        typeof value !== "string" ||
+        effects.has(key)
+      )
+        throw new DependencyError("redis");
+      const size = Buffer.byteLength(value);
+      bytes += size;
+      if (size > 65535 || bytes > 1048576) throw new DependencyError("redis");
+      effects.set(key, value);
+    }
+    return effects;
   }
   async refresh(uid: string, token: string): Promise<boolean> {
     return (

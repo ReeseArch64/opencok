@@ -17,8 +17,18 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
     accounts: unused,
     city: unused,
     world: unused,
+    mailContents: unused,
+    mailConversationSave: unused,
+    mailDelete: unused,
+    mailRead: unused,
+    mailSave: unused,
+    mailStatus: unused,
+    allianceRanking: unused,
+    playerRanking: unused,
+    publicProfile: unused,
     playerSummaries: unused,
     configuration: unused,
+    power: unused,
   };
   const game = new Game(store, rules, { kingdomId: 1 });
   const result = await game.execute("synthetic-player", "setting.xml", {
@@ -78,8 +88,18 @@ test("build.info uses the injected clock for buildings and queue previews withou
   };
   const store: GameStore = {
     profile: unused,
+    mailContents: unused,
+    mailConversationSave: unused,
+    mailDelete: unused,
+    mailRead: unused,
+    mailSave: unused,
+    mailStatus: unused,
+    allianceRanking: unused,
+    playerRanking: unused,
+    publicProfile: unused,
     playerSummaries: unused,
     configuration: unused,
+    power: unused,
     accounts: unused,
     city: async () => state,
     world: unused,

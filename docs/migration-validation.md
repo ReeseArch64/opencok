@@ -89,3 +89,669 @@ parity. Required follow-ups and limitations remain in the linked source report.
 The nonempty evidence commit retains `[skip ci]`; workflows and required checks
 are unchanged, integration/client execution is deferred and merge readiness is
 not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 5: migrate-player-power
+
+Source implementation: `4dc95a5`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157017).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 6: migrate-power-context
+
+Source implementation: `43bd2fe`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157112).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 7: migrate-power-attributes
+
+Source implementation: `1f37865`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157227).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 8: migrate-power-memberships
+
+Source implementation: `46e124f`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157291).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 9: migrate-power-command
+
+Source implementation: `264b430`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157291).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 10: migrate-power-progression
+
+Source implementation: `b0c8cae`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157354).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 11: migrate-world-power-effects
+
+Source implementation: `361087e`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157354).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 12: migrate-hero-dragon-effects
+
+Source implementation: `43dce7f`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157432).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 13: migrate-office-power-effects
+
+Source implementation: `06944ba`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157432).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 14: migrate-territory-power-effects
+
+Source implementation: `c9ef7cd`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157472).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 15: migrate-research-power-effects
+
+Source implementation: `2b5fd08`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157503).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 16: migrate-lucky-day-effects
+
+Source implementation: `fa16476`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157503).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 17: migrate-throne-power-effects
+
+Source implementation: `897b3f8`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157578).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 18: compose-player-power-effects
+
+Source implementation: `ac2d33e`. Tracking: #56.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157578).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 19: migrate-public-profile-data
+
+Source implementation: `4b1d3fd`. Tracking: #57.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157650).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 20: migrate-public-profile-fields
+
+Source implementation: `a9e3f05`. Tracking: #57.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157678).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 21: migrate-public-profile-generals
+
+Source implementation: `8b2bbd6`. Tracking: #57.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157708).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 22: migrate-public-profile-social-fields
+
+Source implementation: `1dab177`. Tracking: #57.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157725).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 23: migrate-public-profile-alliance
+
+Source implementation: `e254b3f`. Tracking: #57.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157838).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 24: migrate-public-profile-command
+
+Source implementation: `2213a9a`. Tracking: #57.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157838).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 25: migrate-reconnect-state
+
+Source implementation: `8612123`. Tracking: #58.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157922).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 26: migrate-reconnect-generals
+
+Source implementation: `52d5842`. Tracking: #58.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157948).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 27: migrate-reconnect-mine
+
+Source implementation: `665a09a`. Tracking: #58.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19157993).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 28: migrate-reward-previews
+
+Source implementation: `597614f`. Tracking: #58.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158039).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 29: migrate-player-rankings
+
+Source implementation: `f45e6d2`. Tracking: #59.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158141).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 30: migrate-alliance-rankings
+
+Source implementation: `70f0118`. Tracking: #60.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158325).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 31: migrate-castle-ranking
+
+Source implementation: `bd34031`. Tracking: #61.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158385).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 32: migrate-contribution-ranking
+
+Source implementation: `699e9b9`. Tracking: #62.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158420).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 33: migrate-expedition-ranking
+
+Source implementation: `02cdd1b`. Tracking: #63.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158506).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 34: restore-empty-command-ack
+
+Source implementation: `60f35bc`. Tracking: #64.
+
+[Tracking issue; no individual source-stage report located](https://github.com/ReeseArch64/opencok/issues/64).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 35: migrate-mail-status
+
+Source implementation: `89a88f4`. Tracking: #64.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158587).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 36: migrate-mail-saving
+
+Source implementation: `323a355`. Tracking: #65.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158707).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 37: migrate-mail-read-status
+
+Source implementation: `c6af863`. Tracking: #66.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158795).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 38: migrate-mail-deletion
+
+Source implementation: `28091e1`. Tracking: #67.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158884).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 39: migrate-conversation-mail-saving
+
+Source implementation: `2328642`. Tracking: #68.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19158943).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 40: migrate-mail-contents
+
+Source implementation: `3dd14fe`. Tracking: #69.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19159042).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 41: complete-mail-content-numbers
+
+Source implementation: `149dec7`. Tracking: #69.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19159132).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.

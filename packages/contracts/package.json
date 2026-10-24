@@ -13,10 +13,18 @@
   "exports": {
     "./account": "./src/account.ts",
     "./game": "./src/game.ts",
+    "./power": "./src/power.ts",
+    "./profile": "./src/profile.ts",
+    "./reconnect": "./src/reconnect.ts",
+    "./rewards": "./src/rewards.ts",
+    "./ranking": "./src/ranking.ts",
     "./rows": "./src/rows.ts",
     "./server": "./src/server.ts",
     "./chat": "./src/chat.ts",
-    "./files": "./src/files.ts"
+    "./files": "./src/files.ts",
+    "./alliance-ranking": "./src/alliance-ranking.ts",
+    "./expedition-ranking": "./src/expedition-ranking.ts",
+    "./mail": "./src/mail.ts"
   },
   "dependencies": {}
 }

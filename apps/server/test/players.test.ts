@@ -24,12 +24,22 @@ function game(
       expect(uid).toBe("observer");
       return profile;
     },
+    mailContents: unused,
+    mailConversationSave: unused,
+    mailDelete: unused,
+    mailRead: unused,
+    mailSave: unused,
+    mailStatus: unused,
+    allianceRanking: unused,
+    playerRanking: unused,
+    publicProfile: unused,
     playerSummaries: async (uids, allServers) => {
       calls.push({ uids, allServers });
       return summaries;
     },
     accounts: unused,
     configuration: unused,
+    power: unused,
     city: unused,
     world: unused,
   };

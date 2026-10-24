@@ -3,7 +3,7 @@ import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { join } from "node:path";
 import { Rules, type Rule } from "@opencok/rules/game";
 
-export function parseRules(xml: string, name: string): Map<string, Rule> {
+function parseRecords(xml: string, name: string): Rule[] {
   if (
     Buffer.byteLength(xml) > 16 * 1024 * 1024 ||
     /<!DOCTYPE|<!ENTITY/i.test(xml) ||
@@ -19,18 +19,16 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     removeNSPrefix: true,
     isArray: (tag) => tag === "Group" || tag === "ItemSpec",
   }).parse(xml);
+  if (!Object.hasOwn(parsed, "database")) throw new Error("Invalid gameplay resource root");
   const records: unknown[] = [];
   const collect = (node: unknown) => {
     if (!node || typeof node !== "object") return;
-    const group = node as { ItemSpec?: unknown[]; Group?: unknown[] };
-    if (group.ItemSpec) records.push(...group.ItemSpec);
+    const group = node as { id?: string; ItemSpec?: unknown[]; Group?: unknown[] };
+    if (group.ItemSpec && (name !== "vip" || group.id === "vip")) records.push(...group.ItemSpec);
     for (const child of group.Group ?? []) collect(child);
   };
   collect(parsed.database);
-  if (!records.length) throw new Error("Missing gameplay resource records");
-  const map = new Map<string, Rule>();
-  const replaceDuplicates = name === "goods" || name === "function_on";
-  for (const record of records) {
+  for (const record of records)
     if (
       !record ||
       typeof record !== "object" ||
@@ -38,7 +36,25 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
       Object.values(record).some((value) => typeof value !== "string")
     )
       throw new Error("Invalid gameplay resource record");
-    const item = record as Rule;
+  return records as Rule[];
+}
+
+export function parseRules(xml: string, name: string): Map<string, Rule> {
+  const records = parseRecords(xml, name);
+  if (!records.length) throw new Error("Missing gameplay resource records");
+  const map = new Map<string, Rule>();
+  const replaceDuplicates = [
+    "goods",
+    "function_on",
+    "science",
+    "equipment",
+    "status",
+    "dragon_skill",
+    "activity_panel",
+    "reward",
+  ].includes(name);
+  for (const record of records) {
+    const item = record;
     if (name === "goods" && !item.id) continue;
     if (!item.id?.trim() || (!replaceDuplicates && map.has(item.id)))
       throw new Error("Invalid gameplay resource ID");
@@ -48,12 +64,13 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
 }
 
 export async function loadRules(directory: string, kingdomId = 1) {
-  const load = async (name: string): Promise<Map<string, Rule>> => {
+  const read = async (name: string): Promise<string> => {
     const file = join(directory, `${name}.xml`);
     if ((await stat(file)).size > 16 * 1024 * 1024) throw new Error("Oversized gameplay resource");
-    const xml = await readFile(file, "utf8");
-    return parseRules(xml, name);
+    return readFile(file, "utf8");
   };
+  const load = async (name: string): Promise<Map<string, Rule>> =>
+    parseRules(await read(name), name);
   const [buildings, roles, positions] = await Promise.all([
     load("building"),
     load("role"),
@@ -67,17 +84,97 @@ export async function loadRules(directory: string, kingdomId = 1) {
     : new Map<string, Rule>();
   const optional = async (name: string) =>
     (await exists(join(directory, `${name}.xml`))) ? load(name) : new Map<string, Rule>();
-  const [arms, goods, features, settings, generalSales, payControl, kingdomSkills, facebookShare] =
-    await Promise.all([
-      optional("arms"),
-      optional("goods"),
-      optional("function_on"),
-      optional("setting"),
-      optional("general_sale"),
-      optional("pay_servercontrol"),
-      optional("kingdomskill"),
-      optional("fb_share"),
-    ]);
+  const [
+    arms,
+    goods,
+    features,
+    settings,
+    generalSales,
+    payControl,
+    kingdomSkills,
+    facebookShare,
+    serverConfig,
+  ] = await Promise.all([
+    optional("arms"),
+    optional("goods"),
+    optional("function_on"),
+    optional("setting"),
+    optional("general_sale"),
+    optional("pay_servercontrol"),
+    optional("kingdomskill"),
+    optional("fb_share"),
+    optional("servers_config"),
+  ]);
+  const [
+    generals,
+    sciences,
+    civilizationSciences,
+    sagaSciences,
+    heroes,
+    equipment,
+    titles,
+    dragonBases,
+    dragonLevels,
+    statuses,
+    generalSkills,
+    equipmentSets,
+    vip,
+    superVip,
+    allianceSciences,
+    prestigeLevels,
+    civilizationFeatures,
+    militarySkills,
+    miracleBuffs,
+    dragonSkills,
+    activityEvents,
+    offices,
+    treeSkins,
+    sagaScienceBases,
+    foreignSciences,
+    foreignScienceBases,
+    activityPanels,
+    mergeActivities,
+    luckyEffects,
+    monarchTitles,
+  ] = await Promise.all(
+    [
+      "general",
+      "science",
+      "scienceRace",
+      "saga_tower_science_up",
+      "hero",
+      "equipment",
+      "dragon_words",
+      "dragon_base",
+      "dragon_new",
+      "status",
+      "sk",
+      "suit",
+      "vip",
+      "svip",
+      "alliancescience",
+      "reputation_level",
+      "civilization_feature",
+      "wr_skill",
+      "miracle_buff",
+      "dragon_skill",
+      "activity_event",
+      "office",
+      "life_treeS",
+      "saga_tower_science_base",
+      "foreign_civilization_up",
+      "foreign_civilization_base",
+      "activity_panel",
+      "merge_activity",
+      "lucky_effect",
+      "monarch_title_lord",
+    ].map(optional),
+  );
+  const [militaryRanks, servers] = await Promise.all([optional("wr_rank"), optional("servers")]);
+  const [treasures, rewards] = await Promise.all([optional("treasure"), optional("reward")]);
+  const achievementCount = (await exists(join(directory, "achievement.xml")))
+    ? parseRecords(await read("achievement"), "achievement").length
+    : 0;
   return new Rules(
     buildings,
     roles,
@@ -89,7 +186,41 @@ export async function loadRules(directory: string, kingdomId = 1) {
     features,
     kingdomId,
     settings,
-    { generalSales, payControl, kingdomSkills, facebookShare },
+    { generalSales, payControl, kingdomSkills, facebookShare, serverConfig },
+    {
+      generals,
+      sciences,
+      civilizationSciences,
+      sagaSciences,
+      heroes,
+      equipment,
+      titles,
+      dragonBases,
+      dragonLevels,
+      statuses,
+      generalSkills,
+      equipmentSets,
+      vip,
+      superVip,
+      allianceSciences,
+      prestigeLevels,
+      civilizationFeatures,
+      militarySkills,
+      miracleBuffs,
+      dragonSkills,
+      activityEvents,
+      offices,
+      treeSkins,
+      sagaScienceBases,
+      foreignSciences,
+      foreignScienceBases,
+      activityPanels,
+      mergeActivities,
+      luckyEffects,
+      monarchTitles,
+    },
+    { achievementCount, militaryRanks, servers },
+    { treasures, rewards },
   );
 }
 

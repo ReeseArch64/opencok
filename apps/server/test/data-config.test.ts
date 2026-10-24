@@ -267,8 +267,18 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
       calls++;
       return { uid, level: 5 };
     },
+    mailContents: unused,
+    mailConversationSave: unused,
+    mailDelete: unused,
+    mailRead: unused,
+    mailSave: unused,
+    mailStatus: unused,
+    allianceRanking: unused,
+    playerRanking: unused,
+    publicProfile: unused,
     playerSummaries: unused,
     configuration: unused,
+    power: unused,
     accounts: unused,
     city: unused,
     world: unused,
