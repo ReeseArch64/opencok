@@ -525,8 +525,13 @@ global ID index; duplicate groups replace their own view without clearing global
 entries. Data-config projections consume that group, while the overlord scalar keeps
 its reference global lookup. Loaded empty groups never fall back to other item groups.
 PVE aliases number only present selected fields, and the projection omits the extra
-world_fire/cityDefMax fields absent from the reference. Mandatory-record failures,
-remaining scalar parsing differences and general-sale restoration still require work.
+world_fire/cityDefMax fields absent from the reference. Required records and scalar
+attributes now reject incomplete configurations, while optional and conditionally
+consumed records retain their distinct boundaries. Empty external feature/pay-control
+items remain empty objects. Scalar Int/Long fields use bounded Java decimal parsing;
+only the selected world-mode records are required. Synthetic catalogs are test inputs,
+not runtime defaults. General-sale restoration and the full configuration completion
+audit remain outstanding.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
