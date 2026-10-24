@@ -577,6 +577,7 @@
       "name": "@opencok/rules",
       "dependencies": {
         "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
         "@opencok/errors": "workspace:*",
       },
       "devDependencies": {

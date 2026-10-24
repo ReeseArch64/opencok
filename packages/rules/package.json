@@ -13,10 +13,12 @@
   "exports": {
     "./game": "./src/game.ts",
     "./availability": "./src/availability.ts",
-    "./features": "./src/features.ts"
+    "./features": "./src/features.ts",
+    "./power": "./src/power.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
+    "@opencok/contracts": "workspace:*",
     "@opencok/errors": "workspace:*"
   }
 }

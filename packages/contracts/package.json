@@ -13,6 +13,7 @@
   "exports": {
     "./account": "./src/account.ts",
     "./game": "./src/game.ts",
+    "./power": "./src/power.ts",
     "./rows": "./src/rows.ts",
     "./server": "./src/server.ts",
     "./chat": "./src/chat.ts",
