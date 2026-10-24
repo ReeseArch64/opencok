@@ -21,7 +21,8 @@
     "./power-memberships": "./src/power-memberships.ts",
     "./power-progression": "./src/power-progression.ts",
     "./power-world": "./src/power-world.ts",
-    "./power-companions": "./src/power-companions.ts"
+    "./power-companions": "./src/power-companions.ts",
+    "./power-office": "./src/power-office.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

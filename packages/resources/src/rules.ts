@@ -107,6 +107,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     miracleBuffs,
     dragonSkills,
     activityEvents,
+    offices,
   ] = await Promise.all(
     [
       "general",
@@ -130,6 +131,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "miracle_buff",
       "dragon_skill",
       "activity_event",
+      "office",
     ].map(optional),
   );
   return new Rules(
@@ -166,6 +168,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
       miracleBuffs,
       dragonSkills,
       activityEvents,
+      offices,
     },
   );
 }

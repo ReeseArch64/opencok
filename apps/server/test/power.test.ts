@@ -78,6 +78,8 @@ function fixture() {
     prestige: [],
     military: undefined,
     miracle: undefined,
+    office: undefined,
+    kingdomFights: [],
   };
   return { state, rules };
 }
@@ -104,6 +106,8 @@ function empty(): PowerSnapshot {
     prestige: [],
     military: undefined,
     miracle: undefined,
+    office: undefined,
+    kingdomFights: [],
   };
 }
 

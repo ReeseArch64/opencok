@@ -197,7 +197,7 @@ Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `dragon_base.xml`, `dragon_new.xml`, `status.xml`, `sk.xml`, `suit.xml`,
 `vip.xml`, `svip.xml`, `alliancescience.xml`, `reputation_level.xml`,
 `civilization_feature.xml`, `wr_skill.xml`, `miracle_buff.xml`,
-`dragon_skill.xml` and `activity_event.xml`.
+`dragon_skill.xml`, `activity_event.xml` and `office.xml`.
 They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
@@ -277,6 +277,21 @@ and reached strengthening thresholds retain double precision, with signed level
 subtraction and per-dragon accumulation. Battle-only skills, inactive dragons and
 other owners do not contribute. The calculator neither equips skills nor creates
 missing defaults. Catalog duplicate replacement now includes dragon skills.
+
+Office effects use the owner's persisted kingdom position and the `office` catalog,
+including signed penalties and first-occurrence precedence for duplicate effects.
+Position IDs normalize through the legacy ordinal; the local ready-king placeholder
+is excluded. The world prohibition effect suppresses office bonuses when positive.
+The `officials` server gate suspends them during an opened, started throne fight,
+ending that suspension exactly five seconds before the persisted end time.
+
+The power snapshot reads the office and its realm's fight schedule in the same
+read-only transaction. A second matching schedule makes the input ambiguous and
+is rejected when battle suppression must be resolved, rather than choosing Java's
+unspecified map iteration order. Queries are bounded to two matching records and
+skip schedules for players without an office. These projections do not appoint
+officials, start battles, reschedule events or change persisted state. They remain
+dependencies for the pending complete effect resolver.
 
 World effects can be read with one `HGETALL` from
 `opencok:kingdom:<kingdomId>:world-effects`. The hash retains numeric effect IDs
