@@ -1104,6 +1104,64 @@ coverage remains in place after extracting the shared boundary. No ADB, native c
 real database/service/socket, integration/E2E or remote CI was run. Full `mread.batch`
 coverage still requires the two group selectors, and topic 4 remains incomplete.
 
+## Group mailbox projection foundation
+
+[Issue #72](https://github.com/ReeseArch64/opencok/issues/72) tracks the remaining
+group selectors of `mread.batch`. The pure rules, snapshot contracts, response projection
+and cleanup planning are implemented with synthetic units. The production command still
+rejects selectors `10` and `1000` with `mail_groups`: the owner-locked repository and
+command connection are the next dependent slice. This foundation performs no storage
+reads or writes and does not enable group listing by itself.
+
+The group query preserves nonnegative integer start/size values without the message
+reader's negative-start clamp. Ordinary windows contain group types below 500;
+moderator windows contain type 500 only. The supplied page must already be ordered by
+update time descending and paginated. Its complete bounded window determines sender
+lookup IDs, while only the first seven groups receive previews, output or cleanup.
+Unknown/empty groups consume a slot; later groups do not refill those holes.
+
+| Group type                                | Matching stored mail types                                | Response content | Preview ordering                     |
+| ----------------------------------------- | --------------------------------------------------------- | ---------------- | ------------------------------------ |
+| 100                                       | 20, 21, 22, with exact sender                             | `chats`          | Newest seven, displayed oldest first |
+| 500                                       | 23, 24, with exact sender                                 | `chats`          | Newest seven, displayed oldest first |
+| 200                                       | 5                                                         | `collect`        | Newest seven, newest first           |
+| 300                                       | 18                                                        | `monster`        | Newest seven, newest first           |
+| 400                                       | 10                                                        | `collect`        | Newest seven, newest first           |
+| 2, 11, 12, 17, 25, 26, 27, 28, 29, 33, 34 | Any of these single-message types, with exact message UID | `detail`         | One message                          |
+
+Single-message membership permits a different stored type from its group key if both
+belong to that family. Type-group indexes do not filter messages. Moderator media types
+39/40 remain excluded by the effective source query. All supplied messages must belong
+to the authenticated owner, including single-message lookups. Sender resolution uses
+group indexes, not the generic mail-list sender classifier, so a sender group beyond
+the first seven can enrich an earlier trade or single-message root.
+
+Each root uses the newest matching message's ordinary envelope, including its actual
+create time rather than the group's update time. Conversation/type roots add integer
+`totalNum` and `unread` counts for the whole group. The snapshot contract carries those
+counts separately from the bounded newest-seven bodies; the storage adapter must
+compute them without loading historical bodies. Preview messages reuse the existing
+conversation serializer, update marker and persisted optional translation behavior.
+Single-message roots always report both group counters as zero, even for unread mail.
+
+Unknown or empty processed groups produce group-key removal plans. Invalid structured
+single-message detail keeps its root envelope without `detail` and plans only primary
+mail removal, even when saved or reward-pending; it does not remove that group in the
+same response. Malformed structured conversation previews reject the request instead.
+If no sender profiles resolve and a processed sender group exists, the projection
+preserves the reference failure without returning cleanup. If another sender resolved,
+a missing sender's empty group can be removed. Missing extra bodies and unrepresentable
+content remain failures, not invalid-content cleanup.
+
+Bounds are 1,000 actual groups in a requested window, seven processed groups, seven
+preview messages per conversation/type group, and 4 MiB aggregate raw preview bodies,
+extra content and reward descriptors. Counts must be nonnegative signed 32-bit values;
+larger totals reject rather than emulate integer-overflow-dependent preview iteration.
+The projection validates count/preview consistency, membership, ordering, ownership,
+duplicate keys and the complete correlated extension packet before returning any plan.
+The pending adapter must validate plans and apply owned cleanup atomically; projection
+tests alone do not prove persistence, transaction rollback or command availability.
+
 ## Gameplay migration: topics 1–8
 
 The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)
@@ -1152,16 +1210,16 @@ uses the existing bounded Java hash traversal helper, with its documented except
 limits. Task visibility, discovery, completion writes and their pushes still need to
 use these descriptions before the reconnect task component is complete.
 
-| Topic                                     | Implemented evidence                                                                                                                                                                                           | Remaining work                                                                                                                                                        |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests                     | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable.                      |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                   | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                                |
-| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                            |
-| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; synthetic units | Group list queries, content edge cases, batch/category/conversation deletion, chat-mail reading and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport                                                                                                                                                                                                  | Point details, player search and favorites, including authorization for writes.                                                                                       |
-| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                          | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                             |
-| 7. Avatar integration                     | Standalone files service                                                                                                                                                                                       | Realm grants, confirmation and profile updates.                                                                                                                       |
-| 8. Basic chat integration                 | Standalone chat service                                                                                                                                                                                        | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                                           |
+| Topic                                     | Implemented evidence                                                                                                                                                                                                                  | Remaining work                                                                                                                                                                         |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests                                            | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable.                                       |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                          | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                                                 |
+| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                       | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                             |
+| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; pure group projection; synthetic units | Group repository/command connection, content edge cases, batch/category/conversation deletion, chat-mail reading and synchronization readers/cleanup; redemption is outside this wave. |
+| 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                         | Point details, player search and favorites, including authorization for writes.                                                                                                        |
+| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                 | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                                              |
+| 7. Avatar integration                     | Standalone files service                                                                                                                                                                                                              | Realm grants, confirmation and profile updates.                                                                                                                                        |
+| 8. Basic chat integration                 | Standalone chat service                                                                                                                                                                                                               | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                                                            |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog
