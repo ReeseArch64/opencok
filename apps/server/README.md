@@ -910,6 +910,12 @@ Plain message types retain text with literal backslash-n sequences converted to 
 Structured types use the independently authored permissive stored-JSON decoder: signed
 32/64-bit integer widths, doubles, single quotes, unquoted keys, comments, alternate
 separators, octal/hexadecimal integers and repeated-property accumulation are retained.
+Numeric parsing follows Java 8 BMP digit classification, including Unicode decimal
+digits after an ASCII numeric prefix and fullwidth hexadecimal digits. Hexadecimal
+floating-point literals round to binary64 with ties to even, including subnormal
+boundaries, overflow rejection and signed zero. Integer overflow falls through to the
+legacy long/double/string alternatives rather than wrapping. Frozen synthetic oracle
+vectors cover 459 numeric inputs without loading Java libraries during maintained tests.
 The decoder also preserves default excluded properties and the legacy distinction
 between immediately quoted JSON strings and strings following whitespace. Combat
 reports convert old helper maps to arrays and remove general skill/ability fields;
@@ -934,9 +940,8 @@ auxiliary contents, group pointers, synchronization markers and reward state are
 changed. Projection and complete correlated SFS encoding run before any removal, so
 storage, byte/depth/item limits or serialization failures roll back all changes.
 
-Some decoder edge cases remain unfinished: hexadecimal floating-point literals,
-signed hexadecimal integer strings, non-ASCII numeric digits, complex/numeric-double
-object keys, function values, array holes and escaped unpaired surrogates reject the
+Some decoder edge cases remain unfinished: complex/numeric-double object keys,
+function values, array holes and escaped unpaired surrogates reject the
 whole request without deleting mail. Helper-map output follows parsed key order rather
 than the reference's concurrent hash-map traversal. These differences remain explicit
 work under #69; this implementation is not proof of complete content parity. No new

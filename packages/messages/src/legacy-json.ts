@@ -1,3 +1,4 @@
+import { legacyJsonNumber } from "./legacy-number.ts";
 import { ProtocolError, sfs, Type, type Fields, type Value } from "./sfs.ts";
 
 export class LegacyJsonError extends Error {
@@ -86,29 +87,9 @@ class Parser {
     if (/^true$/i.test(token)) return sfs.bool(true);
     if (/^false$/i.test(token)) return sfs.bool(false);
     if (token === "null") return sfs.null();
-    if (/^[\d.+-]/.test(token)) return this.number(token);
+    if (/^[\d.+-]/.test(token)) return legacyJsonNumber(token) ?? this.fail();
     if (/^function\s*\(/.test(token)) throw new ProtocolError();
     if (",[]{}".includes(this.source[this.position] ?? "\0")) return this.fail();
-    return sfs.string(token);
-  }
-  number(token: string): Value {
-    if (/[^\x20-\x7e]/.test(token) || /^0[xX][+-]/.test(token)) throw new ProtocolError();
-    if (/^[+-]?(?:Infinity|NaN)$/.test(token)) return this.fail();
-    if (/^0[xX][\da-f]+$/i.test(token) || /^0[0-7]+$/.test(token)) {
-      const value = /^0[xX]/.test(token) ? BigInt(token) : BigInt(`0o${token}`);
-      if (value <= 2147483647n) return sfs.int(Number(value));
-    }
-    if (/^[+-]?\d+$/.test(token)) {
-      const value = BigInt(token);
-      if (value >= -2147483648n && value <= 2147483647n) return sfs.int(Number(value));
-      if (value >= -9223372036854775808n && value <= 9223372036854775807n) return sfs.long(value);
-    }
-    if (/^[+-]?0[xX].*[pP]/.test(token)) throw new ProtocolError();
-    if (/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?[dDfF]?$/.test(token)) {
-      const value = Number(token.replace(/[dDfF]$/, ""));
-      if (!Number.isFinite(value)) return this.fail();
-      return sfs.double(value);
-    }
     return sfs.string(token);
   }
   array(depth: number): Value[] {
