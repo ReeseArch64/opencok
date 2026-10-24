@@ -25,3 +25,7 @@ export function worldResourceGroup(detail: WorldResourceGroupDetail | undefined)
         sdt: sfs.double(detail.sampledAt),
       };
 }
+
+export function worldNeutralResource(startTime: bigint | undefined): Fields {
+  return startTime === undefined ? {} : { occupybegintime: sfs.long(startTime) };
+}

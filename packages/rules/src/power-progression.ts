@@ -28,11 +28,12 @@ export function prestigeEffects(
   if (civilization === 0) return effects;
   const prestige = prestiges.find((row) => integer(row.civilizationType) === civilization);
   if (!prestige) return effects;
-  if (!rules.power.prestigeLevels?.size) return invalid();
+  const levels = rules.power.prestigeLevelRecords ?? [
+    ...(rules.power.prestigeLevels?.values() ?? []),
+  ];
+  if (!levels.length) return invalid();
   const value = long(prestige.prestigeValue ?? 0);
-  const level = [...rules.power.prestigeLevels.values()].find((rule) =>
-    prestigeRange(value, rule.reputation_point),
-  );
+  const level = levels.find((rule) => prestigeRange(value, rule.reputation_point));
   if (!level) return effects;
   if (!rules.power.civilizationFeatures?.size) return invalid();
   const feature = [...rules.power.civilizationFeatures.values()].find(
