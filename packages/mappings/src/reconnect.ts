@@ -1,3 +1,10 @@
+import {
+  reconnectQueuesSchema,
+  reconnectResourcesSchema,
+  reconnectTasksSchema,
+  reconnectTaskSchema,
+} from "@opencok/validations/reconnect";
+import { validateValue } from "./validation.ts";
 import { building, queue } from "./city.ts";
 import type { Rules } from "@opencok/rules/game";
 import { mailBlank } from "@opencok/rules/mail";
@@ -132,7 +139,7 @@ export function reconnectMine(...args: Parameters<typeof serializeReconnectMine>
   return validateFields(reconnectMineSchema, serializeReconnectMine(...args));
 }
 
-export function reconnectQueues(
+function serializeReconnectQueues(
   rows: readonly Row[],
   buildings: readonly Row[],
   equipment: readonly Row[],
@@ -183,18 +190,17 @@ export function reconnectQueues(
         }
         for (const key of ["qid", "type", "isHelped"]) signed(row[key], 32);
         for (const key of ["startTime", "endTime", "updateTime", "totalTime"]) signed(row[key], 64);
-        const result = queue(row, item);
-        result.totalTime = sfs.long(
+        const totalTime =
           signed(row.totalTime, 64) ||
-            BigInt.asIntN(64, signed(row.updateTime, 64) - signed(row.startTime, 64)),
-        );
+          BigInt.asIntN(64, signed(row.updateTime, 64) - signed(row.startTime, 64));
+        const result = queue({ ...row, totalTime }, item);
         return sfs.object(result);
       }),
     ),
   };
 }
 
-export function reconnectResources(row: Row, showBound: boolean): Fields {
+function serializeReconnectResources(row: Row, showBound: boolean): Fields {
   const result: Fields = {};
   if (showBound)
     for (const key of ["wood", "iron", "stone", "food"])
@@ -219,7 +225,7 @@ export function reconnectResources(row: Row, showBound: boolean): Fields {
   return { resource: sfs.object(result) };
 }
 
-export function reconnectTasks(
+function serializeReconnectTasks(
   plan: ReconnectTaskPlan,
   rules: Rules,
   context: RuleContext,
@@ -240,7 +246,7 @@ export function reconnectTasks(
     }
     if (reward)
       fields.reward = rewardPreviewArray(previewRewards(task.reward, rules, context, random));
-    return sfs.object(fields);
+    return validateValue(reconnectTaskSchema, sfs.object(fields));
   };
   const group = (tasks: readonly ReconnectTask[], reward: boolean): Fields => {
     if (tasks.length > 32767) return invalid();
@@ -275,4 +281,20 @@ export function reconnectTasks(
     },
     pushes,
   };
+}
+
+export function reconnectQueues(...args: Parameters<typeof serializeReconnectQueues>): Fields {
+  return validateFields(reconnectQueuesSchema, serializeReconnectQueues(...args));
+}
+export function reconnectResources(
+  ...args: Parameters<typeof serializeReconnectResources>
+): Fields {
+  return validateFields(reconnectResourcesSchema, serializeReconnectResources(...args));
+}
+export function reconnectTasks(
+  ...args: Parameters<typeof serializeReconnectTasks>
+): ReturnType<typeof serializeReconnectTasks> {
+  const result = serializeReconnectTasks(...args);
+  validateFields(reconnectTasksSchema, result.fields);
+  return result;
 }
