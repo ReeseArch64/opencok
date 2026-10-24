@@ -26,6 +26,7 @@ export class GameError extends Error {
       | "queue_kind"
       | "world_state"
       | "world_favorite_catalog"
+      | "world_search_size"
       | "world_favorite_size",
   ) {
     super(code);

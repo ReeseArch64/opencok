@@ -1,5 +1,7 @@
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
 import { worldFavorites } from "@opencok/dtos/world-favorites";
+import { worldSearch } from "@opencok/dtos/world-search";
+import { worldSearchName, worldSearchOffset } from "@opencok/rules/world-search";
 import { MAX_FRAME } from "@opencok/messages/frame";
 import { encode, extension } from "@opencok/messages/sfs";
 import {
@@ -172,6 +174,9 @@ export class Game {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "world.search.user":
+        body = await this.worldSearch(uid, params);
+        break;
       case "world.favo.get":
       case "world.favo.add":
       case "world.favo.delme":
@@ -268,7 +273,36 @@ export class Game {
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
     if (command.startsWith("world.favo.") && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_favorite_size");
+    if (command === "world.search.user" && encode(extension(command, body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "world_search_size");
     return { body, pushes };
+  }
+  private async worldSearch(uid: string, params: Fields): Promise<Fields> {
+    const store = this.services.worldSearch;
+    if (!store) throw new GameError(errors.unsupported);
+    const integer = (key: string, fallback: number) => {
+      const field = params[key];
+      if (field === undefined) return fallback;
+      if (field.type !== Type.Int || !favoriteInteger(field.value))
+        throw new GameError(errors.invalid);
+      return field.value;
+    };
+    const name = params.name === undefined ? "" : params.name.value;
+    if ((params.name !== undefined && params.name.type !== Type.String) || !worldSearchName(name))
+      throw new GameError(errors.invalid);
+    const kingdomId = integer("serverId", this.config.kingdomId);
+    const offset = worldSearchOffset(integer("page", 1));
+    const now = this.now();
+    if (kingdomId < 1 || !Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid);
+    const state = await store.search(uid, { name, offset, kingdomId, now });
+    const profile = this.checkProfile(state.profile, now);
+    if (
+      profile.uid !== uid ||
+      profile.serverId !== this.config.kingdomId ||
+      state.kingdomId !== kingdomId
+    )
+      throw new GameError(errors.invalid);
+    return worldSearch(state.rows);
   }
   private async worldFavorites(uid: string, command: string, params: Fields): Promise<Fields> {
     const store = this.services.worldFavorites;

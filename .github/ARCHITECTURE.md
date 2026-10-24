@@ -402,6 +402,21 @@ last and a documented deterministic tie-breaker. Storage-only name exclusions an
 response bounds are documented in the [realm runbook](../apps/server/README.md#world-favorites).
 Unit composition uses synthetic clients; no migration or live validation was performed.
 
+### Migrated map player search
+
+`GameServices.worldSearch` routes public name searches to the local realm or an
+explicitly configured public-read realm. The repository authenticates the local
+observer and reads only the profile/statistics/alliance projection. Local queries
+share the observer's read-only repeatable-read snapshot; remote queries use a separate
+snapshot after authorization, with no cross-database atomicity or write authority.
+Startup checks local columns only. Pure rules preserve page normalization and signed
+offset arithmetic, while the DTO allowlists public fields and exact SFS types.
+Bound patterns replace interpolated SQL; errors remain visible instead of returning
+fabricated empty results. Stable UID ordering resolves an unspecified legacy order.
+Collation, pattern escapes, nulls and the reference fixed point identifier are documented
+in the [realm runbook](../apps/server/README.md#map-player-search). Unit composition uses
+synthetic database clients; live database and client behavior remain unvalidated.
+
 ### Migrated files implementation
 
 `apps/files` composes `api/files`, `identity/avatar`, `validations/image` and
