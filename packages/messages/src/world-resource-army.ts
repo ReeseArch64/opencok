@@ -28,11 +28,7 @@ function checked(value: JavaValue, name: string, uid: bigint, flags: number): Ja
     return invalid();
   return result;
 }
-function field(
-  value: JavaObject,
-  name: string,
-  type: "I" | "Ljava/lang/String;" | "Ljava/util/List;",
-): JavaValue {
+function field(value: JavaObject, name: string, type: string): JavaValue {
   const declaration = value.descriptor.fields.find((entry) => entry.name === name);
   if (!declaration) return type === "I" ? 0 : null;
   if ((declaration.signature ?? declaration.type) !== type) return invalid();
@@ -63,6 +59,10 @@ export function decodeWorldResourceArmy(data: Buffer): SavedResourceArmy | null 
   const decoded = decodeJavaObjectStream(data);
   if (decoded === null) return null;
   const root = checked(decoded, armyName, 1740992047662150684n, 2);
+  return resourceArmy(root);
+}
+
+function resourceArmy(root: JavaObject): SavedResourceArmy {
   const soldiers = list(field(root, "soldierList", "Ljava/util/List;"));
   return {
     owner: text(field(root, "userId", "Ljava/lang/String;")),
@@ -78,5 +78,72 @@ export function decodeWorldResourceArmy(data: Buffer): SavedResourceArmy | null 
           loadEffect: field(soldier, "loadEffectVal", "I") as number,
         };
       }) ?? null,
+  };
+}
+
+export interface SavedMarchArmy extends Omit<SavedResourceArmy, "soldiers"> {
+  soldiers: (SavedResourceSoldier & { basicArm: number | null })[] | null;
+  dragons: { owner: string | null; uuid: string | null; itemId: number; level: number }[] | null;
+  general: { owner: string | null; id: number; level: number } | null;
+}
+
+export function decodeWorldMarchArmy(data: Buffer): SavedMarchArmy | null {
+  const decoded = decodeJavaObjectStream(data);
+  if (decoded === null) return null;
+  const root = checked(decoded, armyName, 1740992047662150684n, 2);
+  const army = resourceArmy(root);
+  const soldiers = list(field(root, "soldierList", "Ljava/util/List;"));
+  const dragons = list(field(root, "dragonList", "Ljava/util/List;"));
+  const savedGeneral = field(
+    root,
+    "fightNewGeneral",
+    `L${armyName.replaceAll(".", "/")}$FightNewGeneral;`,
+  );
+  const general =
+    savedGeneral === null
+      ? null
+      : checked(savedGeneral, `${armyName}$FightNewGeneral`, -7546450651339456017n, 2);
+  return {
+    owner: army.owner,
+    cachedLoad: army.cachedLoad,
+    soldiers:
+      soldiers?.map((value, index) => {
+        const soldier = object(value);
+        const type = field(
+          soldier,
+          "basicArmType",
+          `L${armyName.replaceAll(".", "/")}$BasicArmType;`,
+        );
+        let basicArm: number | null = null;
+        if (type !== null) {
+          if (
+            typeof type !== "object" ||
+            type.kind !== "enum" ||
+            type.descriptor.name !== `${armyName}$BasicArmType`
+          )
+            return invalid();
+          basicArm = ["INFANTRY", "CAVALRY", "BOW", "CAR"].indexOf(type.name);
+          if (basicArm < 0) return invalid();
+        }
+        return { ...army.soldiers![index]!, basicArm };
+      }) ?? null,
+    dragons:
+      dragons?.map((value) => {
+        const dragon = checked(value, `${armyName}$FightDragon`, -7126474412733967892n, 2);
+        return {
+          owner: text(field(dragon, "userId", "Ljava/lang/String;")),
+          uuid: text(field(dragon, "drgUUID", "Ljava/lang/String;")),
+          itemId: field(dragon, "itemId", "I") as number,
+          level: field(dragon, "level", "I") as number,
+        };
+      }) ?? null,
+    general:
+      general === null
+        ? null
+        : {
+            owner: text(field(general, "userId", "Ljava/lang/String;")),
+            id: field(general, "id", "I") as number,
+            level: field(general, "level", "I") as number,
+          },
   };
 }

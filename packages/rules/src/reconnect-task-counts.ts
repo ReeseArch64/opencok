@@ -8,7 +8,9 @@ const narrow = (value: unknown) => Number(BigInt.asIntN(32, javaDecimal(String(v
 
 function matches(building: Row, requirement: string): boolean {
   const id = integer(requirement);
-  return building.itemId === `${Math.trunc(id / 100)}00` && integer(building.level) >= id % 100;
+  return (
+    String(building.itemId) === `${Math.trunc(id / 100)}00` && integer(building.level) >= id % 100
+  );
 }
 
 export function reconnectContainsBuildings(
@@ -32,6 +34,34 @@ export interface ReconnectTaskCountState {
   civilizationCastle: Row | undefined;
 }
 
+export function reconnectResourceOutput(
+  buildings: readonly Row[],
+  rules: Rules,
+): ReadonlyMap<number, number> {
+  const types = new Map([
+    ["413000", 0],
+    ["412000", 1],
+    ["414000", 2],
+    ["415000", 3],
+    ["437000", 17],
+    ["455000", 211508],
+  ]);
+  const result = new Map<number, number>();
+  for (const row of buildings) {
+    const type = types.get(String(row.itemId));
+    if (type === undefined) continue;
+    const rule = rules.building(
+      String(row.itemId),
+      integer(row.level),
+      integer(row.star),
+      integer(row.progress),
+    );
+    if (rule.para1 !== undefined)
+      result.set(type, ((result.get(type) ?? 0) + integer(rule.para1)) | 0);
+  }
+  return result;
+}
+
 export function reconnectTaskInitialCount(
   rule: Rule,
   state: ReconnectTaskCountState,
@@ -42,7 +72,7 @@ export function reconnectTaskInitialCount(
     case 0:
       return state.buildings.reduce(
         (maximum, row) =>
-          row.itemId === rule.para1 ? Math.max(maximum, integer(row.level)) : maximum,
+          String(row.itemId) === rule.para1 ? Math.max(maximum, integer(row.level)) : maximum,
         0,
       );
     case 1:

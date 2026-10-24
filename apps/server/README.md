@@ -3648,9 +3648,9 @@ still prevent declaring topic 4 complete.
 The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)
 defines the full requested scope. Implementation and verification remain incremental;
 the table records gaps rather than treating package scaffolding as completed behavior.
-The current work is restricted to server implementation. New test generation and
-execution, CI repairs, ADB, native-client validation, integration and end-to-end tests
-are deferred by the user's current instruction. Existing test evidence remains recorded.
+The current work is restricted to server implementation. Topic 2 changes use synthetic
+unit tests and static checks. Native-client, integration and end-to-end validation
+remain separate from this evidence.
 
 The reconnect foundation tracked in [issue #58](https://github.com/ReeseArch64/opencok/issues/58)
 reads an owner's balances, armies, generals and initiative skills in one read-only
@@ -3677,9 +3677,29 @@ rebind selects another composite key. The provider rejects realm mismatches and 
 local owners. Unit tests simulate conflicts and lost commit responses; real database
 concurrency remains untested in this phase.
 
-This foundation is not yet exposed as `user.lv`: actual marches, settled resources,
-queues and task transitions still need implementation, and the available components
-must be composed with required authoritative mutations before enabling the handler.
+Reconnect queue projection handles all 42 declared queue types, including building,
+training, equipment and item payloads. It preserves sentinel deadlines, signed-long
+duration arithmetic and empty item objects without completing overdue queues.
+Resource projection preserves bound-resource field selection and per-resource widths.
+The food settlement planner implements troop upkeep, protected food, bound-food policy,
+float conversion and starvation intervals. Its checkpoint never moves backward when
+the clock regresses, so a later retry cannot charge an already settled interval again.
+The planner does not itself persist changes or apply starvation losses.
+
+The task planner restores accepted, completed and rewarded collections, applies mobile
+and completion-count triggers, discovers eligible normal and cross-kingdom tasks, and
+returns inserts, updates and push snapshots. Initial counts use saved buildings,
+troops, research, power, payments, positions, equipment and civilization state.
+The task serializer preserves reward previews, predecessor visibility, phase fields
+and reward-free completion pushes. Quest declarations retain their source ordering.
+Saved march decoding also reads basic troop families, dragons and new generals.
+March projection covers army aggregation, direction, deadlines, miracle state and
+conditional loot and siege fields. Synthetic Java serialization fixtures exercise
+companion decoding and malformed saved data without using private player records.
+
+This foundation is not yet exposed as `user.lv`: full march composition, authoritative
+resource settlement, starvation effects and task persistence remain to be integrated
+with the consistent owner snapshot before enabling the handler.
 
 Task reward descriptions have a pure rules implementation and typed SFS serializer.
 It preserves resource ordering, weighted item draws, repeated-item aggregation and
@@ -3689,8 +3709,8 @@ and performs no grants. Reward resources retain the final definition of duplicat
 matching the legacy cache. Quantity calculations preserve signed 32-bit wrapping and
 the legacy float conversion in guaranteed groups. Grouped item and prestige ordering
 uses the existing bounded Java hash traversal helper, with its documented exceptional
-limits. Task visibility, discovery, completion writes and their pushes still need to
-use these descriptions before the reconnect task component is complete.
+limits. Reconnect task projection uses these descriptions; completion writes and
+post-commit push delivery remain pending.
 
 | Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                                                                       |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
