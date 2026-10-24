@@ -481,9 +481,12 @@ and gated refinement contributions. `rules/new-general-effects` composes these w
 skills/talents and an obligatory equipment resolver, preserving Float ordering,
 per-general status clocks, late official scaling, whole-module failure fallback and
 the narrower refinement failure boundary. Its snapshot callback must supply the
-authoritative general traversal and owner state. Equipment/suit calculation and
-runtime owner snapshot composition remain required before connecting this composition
-to occupied-resource queries; callback-based units do not establish runtime parity.
+authoritative general traversal and owner state. `rules/new-general-equipment` now
+calculates bound general equipment and exclusive suits and supplies a concrete
+adapter into the composition. The shared player-effect resolver exposes color/site/
+all-equipment modifiers 207–218. Runtime owner snapshot composition and authoritative
+general/equipment traversal remain required before connecting this calculation to
+occupied-resource queries; callback-based units do not establish runtime parity.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read

@@ -1445,9 +1445,9 @@ context. Neither clock nor equipment is read for an ineligible general.
 The composition requires a snapshot callback containing authoritative general
 traversal, buildings, level/prestige and office state, plus an equipment callback.
 It does not infer ConcurrentHashMap iteration or historical cache state from SQL
-order. The equipment callback must implement the general's equipment, modifier 218
-and exclusive suit contributions; ordinary player equipment accumulation is not a
-substitute. Owner relocation/loading policy, those readers and equipment calculation
+order. The concrete `equippedGeneralBuildingEffect` adapter now supplies the general's
+equipment calculation from explicit ordered equipment bindings and current owner
+modifiers. Owner relocation/loading policy, authoritative traversal and those readers
 remain pending. No current endpoint substitutes an empty provider to enable this path.
 
 Twenty-four added units cover these rules and their catalog loading, reusing the
@@ -1456,6 +1456,40 @@ and official-rate vectors. They cover skipped reads, clock order, restoration be
 filtering, failure boundaries, signed/nonfinite arithmetic and immutable snapshots.
 They use no live database, service or client. The occupied-resource command remains
 gated until all required runtime dependencies are supplied.
+
+`rules/new-general-equipment` calculates each bound item's base and extra effects,
+rereading the owner's color/site modifiers for the extra stage as in the reference.
+Color effects 214–217 and site effects 207–213 combine before division by 100;
+modifier 218 applies separately to each item-effect entry. Every operation rounds
+as Float. Negative values remain negative, and nonfinite values retain Float
+arithmetic. An already bound general item does not require the player's worn `on`
+flag. The input is the selected equipment map's traversal, not an unfiltered SQL
+inventory. Duplicate site selection and cache history remain reader responsibilities.
+
+Ordinary equipment parameters stop at the first blank group or after group 99.
+Only canonical site string `6` selects parallel dragon values. Extra properties
+preserve the distinct pipe, comma and at-sign split rules, duplicate sums
+and ignored trailing comma fields. Saved extras are bounded to 255 UTF-16 units;
+piece/effect collections are bounded to 4,096 entries. Missing consumed definitions,
+invalid enums, malformed values and unavailable modifiers propagate to the enclosing
+general module failure boundary. A missing item definition behaves as an empty map
+inside this already-bound calculation, including any saved extras; validating initial
+bindings before eligibility remains a separate restoration requirement.
+
+Suit counts retain present empty suit IDs and traverse a fresh String HashMap. The
+two/four/six-piece thresholds each honor exact comma-separated general exclusivity.
+Suit values use strict Float parsing and whole-separator effect lists, including
+duplicate effects. Suit bonuses apply after item effects without modifier 218,
+the ordinary player's suit feature gate, strengthening or decomposition selections.
+This is why the ordinary player's equipment accumulator is not reused here.
+
+The shared player-effect resolver now exposes 207–218, preserving the special case
+that modifier 218 does not multiply itself. Twenty-two additional units include
+1,000 independent Java 8 equipment arithmetic vectors, the complete ordinary-source
+matrix for all twelve modifiers, concrete building-composition wiring and a bridge
+from current owner modifiers through general equipment to raw troop load. The
+existing 600 building-composition vectors also remain passing. Runtime owner reads,
+ordered bindings and occupied-resource endpoint integration are still pending.
 
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries

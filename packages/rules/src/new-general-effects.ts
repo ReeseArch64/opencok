@@ -21,15 +21,15 @@ export interface NewGeneralEffectState extends NewGeneralSkillState {
   opTime: string | null;
 }
 
-export function newGeneralBuildingEffect(
+export function newGeneralBuildingEffect<T extends NewGeneralEffectState>(
   read: () => {
-    orderedGenerals: readonly NewGeneralEffectState[];
+    orderedGenerals: readonly T[];
     building: NewGeneralBuildingState;
   },
   rules: Rules,
   context: RuleContext,
   effect: number,
-  equipment: (general: NewGeneralEffectState, effect: number) => number,
+  equipment: (general: T, effect: number) => number,
   clock: () => bigint,
 ): number {
   try {
