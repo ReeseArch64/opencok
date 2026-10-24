@@ -209,3 +209,81 @@ rankings, distribute rewards, initialize member state or trigger settlement.
 Alliance power is summed with exact integers instead of a floating-point SQL
 conversion. Battle/event domains remain responsible for publishing current
 scores and persisting their member projections.
+
+## Battle participants and playoffs
+
+`dragon.battle.fight.rank` reads the persisted `dragon_battle_tops_info_<realm>`
+JSON publication for dragon battle, playoff and World Cup realms. The owner's
+alliance or persisted observer record selects the encounter. Only active members
+are returned; the caller cannot select another encounter. Published rank numbers
+are retained, with rank then UID ordering replacing concurrent-map traversal.
+The query does not join a battle, activate a participant or initialize a fight.
+A missing encounter publication returns an empty participant list. Ordinary
+realms retain the acknowledgment without a `rank` field.
+
+`dragon.playoff.rank.info` atomically reads the published version, phase, round,
+phase timing and that version's team hash. It selects one champion per group,
+orders champions by score with group order resolving ties, reconstructs enemy
+pairs and places the owner's pair first. Public team fields, one-based published
+rank numbers, phase byte, fight power longs, scheduled battle times and valid
+observer tickets retain the legacy wire contract. Missing or inconsistent
+brackets reject the request rather than fabricate champions. The publication's
+phase can include the final address-collection phase.
+
+Both queries enforce the applicable server-age and feature gates. Observer and
+ticket lookups use a read-only owner-scoped transaction. UTC is the maintained
+server calendar; test-only accelerated Java schedules are not activated.
+Participant reads observe the authoritative domain's last persisted publication,
+not mutable Java process memory. Event writers must publish their current state
+at the required gameplay cadence. Queries never settle battles, award scores or
+rebuild missing matches. No Java actor or private binary is required at runtime.
+
+## Topic 3 command inventory
+
+This inventory covers the 43 registered command names containing `rank` in the
+reference handler registry. It distinguishes scoreboards from membership roles,
+reward previews and military progression metadata whose names also contain the
+word. Ranking writes remain with their owning domains.
+
+| Commands                                                                          | Read contract                                                             |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `server.rank`, `kill.rank`, `level.rank`, `building.rank`                         | Ordinary player lists, own positions, existing range and tie rules        |
+| `alliance.rank`, `kill.al.rank`                                                   | Alliance power and kill lists and own alliance positions                  |
+| `silver.contribute.rank`                                                          | Persisted material contribution totals                                    |
+| `expedition.rank`                                                                 | Published paired-realm expedition list                                    |
+| `act.score.rank`                                                                  | Published score-event board                                               |
+| `global.celebrities.rank`                                                         | Published global celebrity category boards                                |
+| `dragon.battle.rank`                                                              | Published team ranges with legacy `index_limit` pagination                |
+| `attributeRank.info`                                                              | Published attribute boards by category                                    |
+| `paytotal.ranking`, `continuedcost.ranking`                                       | Published global payment/consumption boards and owner visibility/position |
+| `hero.self.rank`                                                                  | Owner and alliance positions across active events                         |
+| `hero.event.ranking.his.get`                                                      | Ten rewarded event boards for the owner's current band                    |
+| `hero.al.inside.ranking`                                                          | Own alliance's persisted event participants and positions                 |
+| `ctf.get.rank`                                                                    | Current cross-throne standings and own position                           |
+| `al.donate.rank.all`, `al.donate.rank.today`, `al.donate.rank.week`               | Own alliance's contribution boards and refresh times                      |
+| `al.donate.res.rank.day`, `al.donate.res.rank.week`, `al.donate.res.rank.history` | Published resource donation lists plus current zero-score members         |
+| `cemetery.get.ranking`                                                            | Item/death lists and legacy own-position behavior                         |
+| `flower.ranking`                                                                  | Local/global published flower standings and owner visibility              |
+| `military.ranking`                                                                | Published military score/experience lists and own position                |
+| `dragon.battle.fight.rank`                                                        | Active participants in the owner's or observer's encounter                |
+| `dragon.playoff.rank.info`                                                        | Published champion pairings, positions, times and tickets                 |
+
+The following registry entries are not leaderboard queries and are not silently
+credited as implemented by this migration:
+
+| Commands                                                                                                                | Owning behavior outside topic 3                                  |
+| ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `al.rank`                                                                                                               | Alliance membership role list                                    |
+| `al.setrank`, `al.rankname.set`                                                                                         | Alliance role/name mutations                                     |
+| `hero.event.ranking.get`                                                                                                | Event rank-reward preview metadata, without a ranked player list |
+| `military.rank.info`, `military.rank.effect`                                                                            | Military progression and effects                                 |
+| `military.rank.shop.skill`, `military.rank.shop.item`                                                                   | Military shop metadata                                           |
+| `military.rank.award`, `military.rank.award.config`                                                                     | Award metadata                                                   |
+| `military.rank.award.receive`, `military.rank.skill.levelup`, `military.rank.item.buy`, `military.rank.ranking.refresh` | Award, progression, purchase and publication mutations           |
+
+Pagination is preserved only where defined by each command. Fixed published
+boards keep their reference limits and sentinels; no invented universal cursor
+or score mutation parameter is accepted. Synthetic unit tests exercise owner
+routing, SQL read boundaries, cache commands, wire widths, ordering, pagination,
+calendar boundaries, absent publications and malformed inputs. Real PostgreSQL,
+Redis and native-client execution remain unverified.

@@ -85,3 +85,108 @@ test("inside event adapter isolates the owner's alliance, scores and public meta
   expect((await readHeroInsideRanking(absent.db, "self", "event", 1000)).rows).toEqual([]);
   expect(absent.queries).toHaveLength(3);
 });
+
+test("hero history requires an active event and rejects invalid types without lifecycle writes", async () => {
+  const { readHeroHistory } = await import("@opencok/repositories/hero-ranking");
+  const { db, queries } = database({
+    userprofile: [["self", "alliance", 1, 0, "0"]],
+    hero_event: [],
+    user_building: [[4]],
+    alliance_member: [["9007199254740993"]],
+  });
+  expect((await readHeroHistory(db, "self", 3, 1000)).events).toEqual([]);
+  expect(queries.map((query) => query.text).join(" ")).toContain('"hero_activity"."finish"');
+  expect(queries.some((query) => /insert|update|delete/i.test(query.text))).toBe(false);
+  await expect(readHeroHistory(db, "self", 5, 1000)).rejects.toThrow();
+});
+
+test("donation and flower adapters keep owner scoping and never initialize missing records", async () => {
+  const { readDonationRanking } = await import("@opencok/repositories/community-ranking");
+  const { readFlowerRanking } = await import("@opencok/repositories/flower-ranking");
+  const donation = database({
+    userprofile: [["self", 1, "alliance", 0, "0"]],
+    alliance: [["alliance"]],
+  });
+  expect((await readDonationRanking(donation.db, "self", 1000)).rows).toEqual([]);
+  const members = donation.queries.find((query) =>
+    query.text.includes('from "opencok_kingdom"."alliance_member"'),
+  )!;
+  expect(members.params).toContain("alliance");
+  expect(members.text).toContain('"alliance_member"."uid" asc');
+  expect(members.text).not.toMatch(/password|email|deadDetail/);
+  const flowers = database({ userprofile: [["self", 1, 0, "0"]] });
+  const state = await readFlowerRanking(flowers.db, "self", []);
+  expect(state.hide).toBe(0);
+  expect(state.time).toBeUndefined();
+  expect(
+    flowers.queries.find((query) => query.text.includes('from "opencok_kingdom"."flower_ranking"'))!
+      .params,
+  ).toContain("self");
+  expect(
+    [...donation.queries, ...flowers.queries].some((query) =>
+      /insert|update|delete/i.test(query.text),
+    ),
+  ).toBe(false);
+});
+
+test("battle adapter reads only the authenticated observer and unexpired ticket pairs", async () => {
+  const { readBattleRankingState } = await import("@opencok/repositories/battle-ranking");
+  const local = database({
+    userprofile: [["self", "own", 1, 0, "0"]],
+    server_info: [["123"]],
+    ob_user: [["a,b"]],
+    ob_record: [["a,b"], ["b,c"]],
+  });
+  const global = database({ server_info: [[7]] });
+  const state = await readBattleRankingState(
+    local.db,
+    global.db as unknown as Parameters<typeof readBattleRankingState>[1],
+    "self",
+    1,
+    8000000,
+  );
+  expect(state.observerTeam).toBe("a");
+  expect(state.tickets).toEqual(["a", "b", "c"]);
+  expect(state.openedAt).toBe(123n);
+  expect(state.realmType).toBe(7);
+  const tickets = local.queries.find((query) =>
+    query.text.includes('from "opencok_kingdom"."ob_record"'),
+  )!;
+  expect(tickets.params).toContain("self");
+  expect(tickets.params).toContain(800000n);
+  expect(local.queries.some((query) => /insert|update|delete/i.test(query.text))).toBe(false);
+});
+
+test("completed hero history queries retain exact power and select only rewarded events in descending time", async () => {
+  const { readHeroHistory } = await import("@opencok/repositories/hero-ranking");
+  const queries: { text: string; params: unknown[] }[] = [];
+  const client = {
+    query: async (query: { text: string }, params: unknown[] = []) => {
+      queries.push({ text: query.text, params });
+      const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
+      if (table === "userprofile") return { rows: [["self", "alliance", 1, 0, "0"]] };
+      if (table === "user_building") return { rows: [[4]] };
+      if (table === "alliance_member") return { rows: [["9007199254740993"]] };
+      if (table === "hero_event")
+        return {
+          rows: query.text.includes('"rewardStatus"')
+            ? [["old", "rule", 4, "9007199254740993", "1_2", "2|1"]]
+            : [["rule", 4]],
+        };
+      return { rows: [] };
+    },
+  };
+  const state = await readHeroHistory(
+    drizzle(client as unknown as NodePgClient, { schema }),
+    "self",
+    4,
+    1000,
+  );
+  expect(state.alliancePower).toBe(9007199254740993n);
+  expect(state.castleLevel).toBe(4);
+  expect(state.events[0]?.endTime).toBe(9007199254740993n);
+  const historical = queries.find((query) => query.text.includes('"rewardStatus"'))!;
+  expect(historical.params).toEqual([4, 1, 10]);
+  expect(historical.text).toContain('"endTime" desc');
+  expect(queries.some((query) => /insert|update|delete/i.test(query.text))).toBe(false);
+});

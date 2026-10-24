@@ -1,4 +1,5 @@
 export const errors = {
+  battleClosed: "140223",
   nicknameOccupied: "105251",
   nicknameInvalid: "113995",
   nicknameCharacters: "105229",

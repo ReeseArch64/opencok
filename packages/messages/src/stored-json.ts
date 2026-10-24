@@ -1,7 +1,15 @@
 import { ProtocolError } from "./sfs.ts";
 
 export function decodeStoredJson(data: Buffer): unknown {
-  if (!Buffer.isBuffer(data) || data.length > 65535) throw new ProtocolError();
+  return decodeJson(data, 65535);
+}
+
+export function decodePublishedJson(data: Buffer): unknown {
+  return decodeJson(data, 4194304);
+}
+
+function decodeJson(data: Buffer, limit: number): unknown {
+  if (!Buffer.isBuffer(data) || data.length > limit) throw new ProtocolError();
   try {
     const decoded = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(data);
     let start = 0;
