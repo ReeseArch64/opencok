@@ -1,3 +1,5 @@
+import { decodeJavaIntMap } from "@opencok/messages/java-int-map";
+import { barbarianArmyPlan, barbarianPower } from "@opencok/rules/world-barbarian-detail";
 import type { GameServices } from "@opencok/contracts/game";
 import { MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
@@ -57,6 +59,7 @@ export async function localWorldPointDetail(
   kingdomId: number,
   now: number,
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion"> = {},
+  clock: () => number = () => now,
 ): Promise<Fields> {
   if (
     params.point?.type !== Type.Int ||
@@ -104,8 +107,7 @@ export async function localWorldPointDetail(
   )
     return unsupported();
   const type = point.pointType;
-  if (type < 0 || type > 69 || [14, 18, 20, 21, 23, 44, 46, 47].includes(type))
-    return unsupported();
+  if (type < 0 || type > 69 || [14, 18, 20, 21, 23, 46, 47].includes(type)) return unsupported();
   const owner = worldPointOwner(worldPointOwnerBase(point, state.owner, false));
   const occupied = worldPointOccupied(point);
   if (!occupied && (type === 3 || type === 37)) {
@@ -175,6 +177,21 @@ export async function localWorldPointDetail(
         ),
       ),
     );
+  }
+  if (type === 44) {
+    if (!state.barbarian) return unsupported();
+    const row = state.barbarian.row;
+    if (row && row.pointId !== query.point) return unsupported();
+    const plan = barbarianArmyPlan(row, rules, clock());
+    let remaining: ReadonlyMap<string | null, number | null> | null = null;
+    if (plan?.army.size && row?.lastArmyMapByteArray != null) {
+      try {
+        remaining = decodeJavaIntMap(row.lastArmyMapByteArray as Buffer);
+      } catch {
+        return unsupported();
+      }
+    }
+    result.barbarionPower = sfs.long(barbarianPower(plan, remaining, rules));
   }
   if (type === 6) {
     if (!state.exploration) return unsupported();

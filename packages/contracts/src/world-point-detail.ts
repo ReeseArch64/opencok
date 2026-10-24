@@ -29,6 +29,7 @@ export interface WorldPointDetailSnapshot {
     mixed: Row | undefined;
     effects: PlayerEffectSnapshot;
   };
+  barbarian?: { row: Row | undefined };
   neutralResource?: { march: Row | undefined };
 }
 
