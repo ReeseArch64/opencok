@@ -32,7 +32,9 @@
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./configuration": "./src/configuration.ts",
-    "./published-ranking": "./src/published-ranking.ts"
+    "./published-ranking": "./src/published-ranking.ts",
+    "./hero-ranking": "./src/hero-ranking.ts",
+    "./throne-ranking": "./src/throne-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

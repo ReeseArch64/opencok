@@ -1,3 +1,6 @@
+import { loadThroneRankingPeriod } from "./throne-ranking.ts";
+import { loadHeroRankingPosition } from "./hero-ranking.ts";
+import type { HeroRankingLookup } from "@opencok/contracts/hero-ranking";
 import { loadAttributeRanking, loadPublishedGlobalRanking } from "./published-ranking.ts";
 import { loadDragonRanking } from "./dragon-ranking.ts";
 import type { DragonRankingRange } from "@opencok/contracts/dragon-ranking";
@@ -52,6 +55,12 @@ export class Cache {
       (command, ...args) => this.command(command, ...args),
       this.config.kingdomId,
     );
+  }
+  heroRankingPosition(query: HeroRankingLookup) {
+    return loadHeroRankingPosition((name, ...args) => this.command(name, ...args), query);
+  }
+  throneRankingPeriod(realm: number) {
+    return loadThroneRankingPeriod((name, ...args) => this.command(name, ...args), realm);
   }
   attributeRanking(type: number) {
     return loadAttributeRanking(

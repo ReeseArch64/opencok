@@ -36,7 +36,9 @@
     "./configuration": "./src/configuration.ts",
     "./dto": "./src/dto.ts",
     "./sfs": "./src/sfs.ts",
-    "./published-ranking": "./src/published-ranking.ts"
+    "./published-ranking": "./src/published-ranking.ts",
+    "./hero-ranking": "./src/hero-ranking.ts",
+    "./throne-ranking": "./src/throne-ranking.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

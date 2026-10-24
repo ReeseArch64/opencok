@@ -33,6 +33,8 @@
     "./dragon-ranking": "./src/dragon-ranking.ts",
     "./value": "./src/value.ts",
     "./configuration": "./src/configuration.ts",
-    "./published-ranking": "./src/published-ranking.ts"
+    "./published-ranking": "./src/published-ranking.ts",
+    "./hero-ranking": "./src/hero-ranking.ts",
+    "./throne-ranking": "./src/throne-ranking.ts"
   }
 }

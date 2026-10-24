@@ -19,7 +19,9 @@
     "./session": "./src/session.ts",
     "./timeout": "./src/timeout.ts",
     "./images": "./src/images.ts",
-    "./published-ranking": "./src/published-ranking.ts"
+    "./published-ranking": "./src/published-ranking.ts",
+    "./hero-ranking": "./src/hero-ranking.ts",
+    "./throne-ranking": "./src/throne-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

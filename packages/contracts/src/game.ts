@@ -1,3 +1,5 @@
+import type { ThroneRankingPeriod, ThroneRankingSnapshot } from "./throne-ranking.ts";
+import type { HeroRankingSnapshot, HeroRankingLookup } from "./hero-ranking.ts";
 import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
 import type { WorldPointDetailStore } from "./world-point-detail.ts";
 import type { WorldFavoriteStore } from "./world-favorites.ts";
@@ -62,6 +64,16 @@ export interface CityState {
 }
 export interface GameStore extends AuthenticationStore {
   rankingPrivacy?(uid: string, kind: "payment" | "consumption"): Promise<number>;
+  heroRanking?(
+    uid: string,
+    kingdomId: number,
+    activityId: string,
+    now: number,
+  ): Promise<HeroRankingSnapshot>;
+  throneRanking?(
+    kingdomId: number,
+    publication?: ThroneRankingPeriod,
+  ): Promise<ThroneRankingSnapshot>;
   normalRankingRealm?(): Promise<boolean>;
   mailUpdates?(
     uid: string,
@@ -173,6 +185,8 @@ export interface GameServices {
     ranges: readonly DragonRankingRange[],
     allianceId: string,
   ): Promise<readonly DragonRankingEntry[]>;
+  heroRankingPosition?(query: HeroRankingLookup): Promise<number>;
+  throneRankingPeriod?(realm: number): Promise<ThroneRankingPeriod | undefined>;
   attributeRanking?(type: number): Promise<readonly string[]>;
   publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
   globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;

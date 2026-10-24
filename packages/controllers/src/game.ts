@@ -1,3 +1,10 @@
+import {
+  throneRanking,
+  throneRankingBoard,
+  throneRankingOpen,
+} from "@opencok/mappings/throne-ranking";
+import { heroRankingLookup, heroSelfRanking } from "@opencok/rules/hero-ranking";
+import { heroSelfRanking as mapHeroSelfRanking } from "@opencok/mappings/hero-ranking";
 import { versionAtLeast } from "@opencok/rules/availability";
 import { attributeRanking, publishedRanking } from "@opencok/mappings/published-ranking";
 import { serverFeature } from "@opencok/rules/power-context";
@@ -365,6 +372,12 @@ export class Game {
       case "dragon.battle.rank":
         body = await this.dragonRanking(uid, params);
         break;
+      case "ctf.get.rank":
+        body = await this.throneRanking(uid, params);
+        break;
+      case "hero.self.rank":
+        body = await this.heroSelfRanking(uid, params);
+        break;
       case "attributeRank.info":
         body = await this.attributeRanking(uid, params);
         break;
@@ -402,6 +415,8 @@ export class Game {
       throw new GameError(errors.unsupported, "world_point_detail");
     if (
       [
+        "ctf.get.rank",
+        "hero.self.rank",
         "act.score.rank",
         "global.celebrities.rank",
         "dragon.battle.rank",
@@ -1016,6 +1031,68 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async throneRanking(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const own = this.config.kingdomId;
+    const peer = own % 2 === 0 ? own - 1 : own + 1;
+    const enabled = (realm: number) =>
+      serverFeature(this.rules, "wk_switch", {
+        kingdomId: realm,
+        version: MOBILE_CLIENT_VERSION,
+        now,
+      });
+    const target = enabled(own) && enabled(peer) ? peer : -1;
+    const selected = params.serverId === undefined ? undefined : wireInt(params, "serverId");
+    if (selected !== undefined && selected <= 0) throw new GameError(errors.invalid);
+    if (selected !== undefined && selected !== own && selected !== target) return throneRanking([]);
+    if (!this.services.throneRankingPeriod || !this.db.throneRanking)
+      throw new GameError(errors.unsupported, "ranking");
+    const boards: Fields[] = [];
+    for (const realm of [own, ...(target > 0 ? [target] : [])]) {
+      if (selected !== undefined && selected !== realm) continue;
+      const period = await this.services.throneRankingPeriod(realm);
+      if (realm !== own && !period) continue;
+      if (period && !throneRankingOpen(period)) continue;
+      const snapshot = await this.db.throneRanking(realm, period);
+      const board = throneRankingBoard(snapshot, realm, realm === own ? uid : "");
+      if (board) boards.push(board);
+    }
+    return throneRanking(boards);
+  }
+  private async heroSelfRanking(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const current = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const source = current.crossFightSrcServerId;
+    const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
+    const activityId = wireString(params, "activityId");
+    if (!this.db.heroRanking) throw new GameError(errors.unsupported, "ranking");
+    const state = await this.db.heroRanking(uid, realm, activityId, now);
+    const profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || num(profile, "serverId") !== realm)
+      throw new GameError(errors.invalid);
+    const positions: number[] = [];
+    for (const event of state.events) {
+      const query = heroRankingLookup(
+        event,
+        uid,
+        text(profile, "allianceId"),
+        this.rules,
+        realm,
+        MOBILE_CLIENT_VERSION,
+      );
+      if (typeof query === "number") positions.push(query);
+      else {
+        if (!this.services.heroRankingPosition) throw new GameError(errors.unsupported, "ranking");
+        positions.push(await this.services.heroRankingPosition(query));
+      }
+    }
+    return mapHeroSelfRanking(heroSelfRanking(state.events, positions));
   }
   private async publishedRanking(uid: string, kind: "payment" | "consumption"): Promise<Fields> {
     const now = this.now();
