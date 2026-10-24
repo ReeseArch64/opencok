@@ -1691,3 +1691,346 @@ parity. Required follow-ups and limitations remain in the linked source report.
 The nonempty evidence commit retains `[skip ci]`; workflows and required checks
 are unchanged, integration/client execution is deferred and merge readiness is
 not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 94: restore-login-catalog-declarations
+
+Source implementation: `36c1850`. Tracking: #52.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19164812).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 95: restore-account-verification-integers
+
+Source implementation: `ff971d4`. Tracking: #54.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19164812).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 96: restore-feature-announcement-overrides
+
+Source implementation: `c5ac0a0`. Tracking: #54.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19164899).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 97: restore-login-switch-failure-boundaries
+
+Source implementation: `cfc81f9`. Tracking: #54.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19164989).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 98: initialize-world-news-preference
+
+Source implementation: `c2197e0`. Tracking: #54.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19165147).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 99: migrate-push-preferences
+
+Source implementation: `305d5f9`. Tracking: #86.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19165234).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 100: migrate-profile-flags
+
+Source implementation: `9ef5204`. Tracking: #87.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19165328).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 101: restore-nickname-validation-rules
+
+Source implementation: `651760e`. Tracking: #88.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19165449).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 102: restore-nickname-word-filter
+
+Source implementation: `090f95e`. Tracking: #88.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19165603).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 103: restore-nickname-collation
+
+Source implementation: `67425d6`. Tracking: #88.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19165754).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Parallel merge readiness for PR #197
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: none.
+
+The integration target remains the original feature branch
+`feat/review-restore-nickname-word-filter`. The enclosing stack will be integrated into develop
+through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+At the nickname-collation stage, Compose does not yet declare the later nickname-word
+file mount. This fixture retains the complete synthetic data-config catalog without
+requiring that future mount. Later stack wiring supplies its own generated nickname
+input, while production resource validation and mounts remain unchanged.
+
+The shared PostgreSQL duplicate-avatar fixture retains the picture version paired with
+its original composite key, preserving the exact unique-violation assertion and production
+checks. The identical later-schema fixture suite passed 1446 tests and 34488 assertions
+in the upper validation worktree. This worktree also passed server integration, all 14
+Compose checks, affected types, lint and formatting; its fresh full CI must pass before merge.
+
+## Parallel merge readiness for PR #196
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #197.
+
+The integration target remains the original feature branch
+`feat/review-restore-nickname-validation-rules`. The enclosing stack will be integrated into
+develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+## Parallel merge readiness for PR #195
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #196, #197.
+
+The integration target remains the original feature branch `feat/review-migrate-profile-flags`.
+The enclosing stack will be integrated into develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+## Parallel merge readiness for PR #194
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #195, #196, #197.
+
+The integration target remains the original feature branch
+`feat/review-migrate-push-preferences`. The enclosing stack will be integrated into develop
+through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+## Parallel merge readiness for PR #193
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #194, #195, #196, #197.
+
+The integration target remains the original feature branch
+`feat/review-initialize-world-news-preference`. The enclosing stack will be integrated into
+develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+## Parallel merge readiness for PR #192
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #193, #194, #195, #196, #197.
+
+The integration target remains the original feature branch
+`feat/review-restore-login-switch-failure-boundaries`. The enclosing stack will be integrated
+into develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+## Parallel merge readiness for PR #191
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #192, #193, #194, #195, #196, #197.
+
+The integration target remains the original feature branch
+`feat/review-restore-feature-announcement-overrides`. The enclosing stack will be integrated
+into develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+## Parallel merge readiness for PR #190
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #191, #192, #193, #194, #195, #196, #197.
+
+The integration target remains the original feature branch
+`feat/review-restore-account-verification-integers`. The enclosing stack will be integrated
+into develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+## Parallel merge readiness for PR #189
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #190, #191, #192, #193, #194, #195, #196, #197.
+
+The integration target remains the original feature branch
+`feat/review-restore-login-catalog-declarations`. The enclosing stack will be integrated into
+develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
