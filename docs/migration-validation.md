@@ -938,8 +938,8 @@ not claimed. No migration or gameplay write is executed by publication.
 
 ## Parallel lower block merge readiness
 
-The current snapshot integrates PR #139 and the already merged descendant PRs in this parallel
-block: #139, #140, #141, #142, #143.
+The current snapshot integrates PR #138 and the already merged descendant PRs in this parallel
+block: #138, #139, #140, #141, #142, #143.
 
 The maintainer authorized readiness and merge after all applicable CI checks pass on the final head.
 Original source-stage validation above remains historical; this record does not claim native-client,
