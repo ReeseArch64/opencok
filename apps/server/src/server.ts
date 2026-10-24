@@ -43,9 +43,6 @@ export const RealmDependenciesLive = Layer.effect(
     const rules = yield* fromPromise("realm.resources", () =>
       loadRules(config.resources, config.kingdomId),
     );
-    const nicknameServices = yield* fromPromise("realm.nickname-words", () =>
-      loadNicknameServices(config.resources),
-    );
     const db = yield* acquireResource(
       "realm.database",
       async () => new Database(config),
@@ -74,6 +71,9 @@ export const RealmDependenciesLive = Layer.effect(
         })
       : undefined;
     const cache = new Cache(config);
+    const nicknameServices = yield* fromPromise("realm.nickname-words", () =>
+      loadNicknameServices(config.resources, (key) => cache.nicknameForbiddenWords(key)),
+    );
     const coordination = yield* acquireResource(
       "realm.coordination",
       async () => new Coordination(config),
@@ -159,6 +159,9 @@ export const RealmDependenciesLive = Layer.effect(
             })
           : undefined,
         expeditionRanking: (limit) => cache.expeditionRanking(limit),
+        scoreActivityRanking: () => cache.scoreActivityRanking(),
+        globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
+        dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
         expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
         worldPowerEffects: (kingdomId) => cache.worldEffects(kingdomId),
         emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),

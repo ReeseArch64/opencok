@@ -29,7 +29,8 @@
     "./player-search": "./src/player-search.ts",
     "./world-resource-detail": "./src/world-resource-detail.ts",
     "./world-point-detail": "./src/world-point-detail.ts",
-    "./world-monster-detail": "./src/world-monster-detail.ts"
+    "./world-monster-detail": "./src/world-monster-detail.ts",
+    "./dragon-ranking": "./src/dragon-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
