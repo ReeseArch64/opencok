@@ -2,9 +2,11 @@
 
 The local ZooKeeper service is private at `zookeeper:2181`, without a published
 host port. [zoo.cfg](zoo.cfg) explicitly configures sessions, client limits,
-snapshot retention and the `ruok`/`srvr` health commands. The small entrypoint
-copies the read-only input into `/conf` before the pinned image performs its
-normal ownership setup, preserving compatibility with existing data volumes. The container heap is
+snapshot retention and the `ruok`/`srvr` health commands. The
+[Dockerfile](../compose/zookeeper.Dockerfile) bakes it into `/conf` on the pinned
+image, together with the health check and heap settings, so the image's normal
+ownership setup stays compatible with existing data volumes. Changing the
+configuration requires `docker compose build zookeeper`. The container heap is
 256 MiB within a 512 MiB limit.
 
 The TypeScript server registers an ephemeral owner under its configured realm

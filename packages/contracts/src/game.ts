@@ -23,6 +23,7 @@ import type {
   MailConversationReadSnapshot,
   MailCategoryDeleteQuery,
   MailCategoryDeleteInspector,
+  MailBatchInvitationPlanner,
   MailCategoryDeleteSnapshot,
   MailTypeDeleteQuery,
   MailDeleteQuery,
@@ -104,6 +105,7 @@ export interface GameStore extends AuthenticationStore {
     uid: string,
     query: MailCategoryDeleteQuery,
     inspect: MailCategoryDeleteInspector,
+    invitations?: MailBatchInvitationPlanner,
   ): Promise<MailCategoryDeleteSnapshot>;
   mailTypeDelete?(uid: string, query: MailTypeDeleteQuery): Promise<MailCategoryDeleteSnapshot>;
   mailSave(uid: string, query: MailSaveQuery): Promise<MailSaveSnapshot>;

@@ -31,13 +31,13 @@ async function fixture(rootFile?: string) {
     "index.ts",
   ])
     await copyFile(new URL(`../src/${name}`, import.meta.url), join(source, name));
-  await symlink(
-    fileURLToPath(new URL("../node_modules", import.meta.url)),
-    join(root, "packages/env/node_modules"),
-    "dir",
-  );
   if (rootFile !== undefined) await writeFile(join(root, ".env"), rootFile);
   await mkdir(join(root, "node_modules/@opencok"), { recursive: true });
+  await symlink(
+    fileURLToPath(new URL(".", import.meta.resolve("zod/package.json"))),
+    join(root, "node_modules/zod"),
+    "dir",
+  );
   await symlink(join(root, "packages/env"), join(root, "node_modules/@opencok/env"), "dir");
   const script = join(root, "read.ts");
   await writeFile(

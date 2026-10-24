@@ -178,8 +178,13 @@ test("chatMail.save rejects unauthorized snapshots and transaction failures", as
   ).rejects.toThrow("Synthetic conversation failure");
 });
 
-test("conversation read rejects unsupported chat effects before mailbox mutation", async () => {
+test("conversation reads requiring chat effects reject before persistence", async () => {
   const f = fixture();
+  let reads = 0;
+  f.db.mailConversationRead = async () => {
+    reads++;
+    throw new Error("Chat effects must not reach mailbox persistence");
+  };
   await expect(
     f.game.execute("self", "chatMail.read", {
       fromUser: sfs.string("sender"),
@@ -189,4 +194,5 @@ test("conversation read rejects unsupported chat effects before mailbox mutation
   ).rejects.toMatchObject({ code: "102192" });
   expect(f.calls).toEqual([]);
   expect(f.clocks()).toBe(1);
+  expect(reads).toBe(0);
 });

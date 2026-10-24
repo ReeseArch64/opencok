@@ -100,6 +100,14 @@
         "typescript": "catalog:",
       },
     },
+    "apps/web": {
+      "name": "@opencok/web",
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/account": {
       "name": "@opencok/account",
       "devDependencies": {
@@ -1030,6 +1038,8 @@
     "@opencok/utils": ["@opencok/utils@workspace:packages/utils"],
 
     "@opencok/validations": ["@opencok/validations@workspace:packages/validations"],
+
+    "@opencok/web": ["@opencok/web@workspace:apps/web"],
 
     "@opencok/webhooks": ["@opencok/webhooks@workspace:packages/webhooks"],
 

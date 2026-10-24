@@ -16,6 +16,7 @@ function storage() {
   let profile: unknown[][] = [["self", 1, 0n, 0]];
   let counts: unknown[][] = [["7", "3"]];
   let failOn = "";
+  let selected: unknown[][] = [];
   class Pool {
     async connect() {
       return { query: this.query.bind(this), release() {} };
@@ -26,6 +27,7 @@ function storage() {
       if (failOn && text.startsWith(failOn)) throw new Error("Synthetic mailbox SQL failure");
       if (text.includes('from "opencok_kingdom"."userprofile"')) return { rows: profile };
       if (text.startsWith("select count(*) filter")) return { rows: counts };
+      if (text.includes("octet_length(")) return { rows: selected };
       return { rows: [] };
     }
   }
@@ -37,6 +39,9 @@ function storage() {
     },
     counts(rows: unknown[][]) {
       counts = rows;
+    },
+    selected(rows: unknown[][]) {
+      selected = rows;
     },
     fail(prefix: string) {
       failOn = prefix;
@@ -60,7 +65,13 @@ test("batch deletion parses Java category labels while retaining raw result keys
     expect(mailCategoryDeleteQuery(raw, raw, now)).toEqual({ now, labels: [] });
   for (const raw of [" 0", "1 ", "2147483648", "0x1", "1,bad", Array(1001).fill("0").join(",")])
     expect(() => mailCategoryDeleteQuery(null, raw, now)).toThrow();
-  expect(() => mailCategoryDeleteQuery("ordinary-id", "0", now)).toThrow();
+  expect(mailCategoryDeleteQuery("ordinary-id,,other,ordinary-id", "0", now)).toEqual({
+    now,
+    labels: [{ raw: "0", category: 0 }],
+    ids: ["ordinary-id", "other"],
+  });
+  for (const ids of ["x".repeat(41), "\0", "\ud800", Array(1001).fill("id").join(",")])
+    expect(() => mailCategoryDeleteQuery(ids, "0", now)).toThrow();
 });
 
 test("category deletes count pending rewards before mutation and preserve the distinct primary and extra predicates", async () => {
@@ -235,8 +246,8 @@ function command() {
     mailCategory: unused,
     mailContents: unused,
     mailConversationSave: unused,
-    mailCategoryDelete: (owner, query, inspect) =>
-      deleteMailCategories(app.db, 1, owner, query, inspect),
+    mailCategoryDelete: (owner, query, inspect, invitations) =>
+      deleteMailCategories(app.db, 1, owner, query, inspect, invitations),
     mailTypeDelete: (owner, query) => deleteMailType(app.db, 1, owner, query),
   };
   return {
@@ -270,9 +281,8 @@ test("mail.delete.batch emits exact nested RetObj keys and correlation through t
   expect(empty.body).toEqual({ RetObj: sfs.object({}) });
 });
 
-test("unsupported ID and sender deletion scopes reject before all persistence and malformed acknowledgments cannot delete", async () => {
+test("unsupported sender deletion scopes reject before all persistence and malformed acknowledgments cannot delete", async () => {
   for (const [name, params] of [
-    ["mail.delete.batch", { uids: sfs.string("selected"), types: sfs.string("0") }],
     ["chatMail.delete", { fromUser: sfs.string("peer"), type: sfs.int(5) }],
     ["chatMail.delete", { fromUser: sfs.null() }],
     ["chatMail.delete.batch", { users: sfs.string("peer") }],
@@ -309,4 +319,50 @@ test("chatMail.delete type-only replies acknowledge mapped deletions without unr
     app.queries.find((query) => query.text.startsWith('delete from "opencok_kingdom"."mail"'))!
       .params,
   ).toEqual(["self", 10, 0]);
+});
+
+test("explicit ID deletion reaches the owned adapter selection and records deduplicated invalidations", async () => {
+  const { app, game } = command();
+  app.selected([["selected", 1, 1, "system", 0, 0]]);
+  const result = await game.execute("self", "mail.delete.batch", {
+    uids: sfs.string("selected,missing,selected"),
+    uid: sfs.string("forged"),
+    _cok_: sfs.string("request"),
+  });
+  expect(decode(encode(result.body))).toEqual({
+    RetObj: sfs.object({}),
+    _cok_: sfs.string("request"),
+  });
+  expect(result.pushes).toEqual([]);
+  const selection = app.queries.find((query) => query.text.includes("octet_length("))!;
+  expect(selection.params).toEqual(["self", "", "self", "selected", "missing"]);
+  expect(selection.text).toContain('"opencok_kingdom"."mail"."toUser" =');
+  const deletes = app.queries.filter((query) => query.text.startsWith("delete "));
+  expect(deletes).toHaveLength(2);
+  expect(deletes[0]!.params).toEqual(["self", "selected", "missing", 0, 0]);
+  expect(deletes[0]!.text).toContain('"saveFlag" =');
+  expect(deletes[0]!.text).toContain('"rewardStatus" <>');
+  expect(deletes[1]!.params).toEqual(["selected", "self", ""]);
+  const invalidation = app.queries.find((query) => query.text.startsWith("insert into"))!;
+  expect(invalidation.text).toContain('"mail_update"');
+  expect(invalidation.params).toEqual([
+    "self",
+    "selected",
+    BigInt(now),
+    "self",
+    "missing",
+    BigInt(now),
+  ]);
+  expect(app.queries.every((query) => !query.params.includes("forged"))).toBe(true);
+  expect(app.queries.at(-1)!.text).toBe("commit");
+});
+
+test("explicit chat IDs reject and roll back before deletion or invalidation", async () => {
+  const { app, game } = command();
+  app.selected([["selected", 20, 1, "peer", 0, 0]]);
+  await expect(
+    game.execute("self", "mail.delete.batch", { uids: sfs.string("selected") }),
+  ).rejects.toMatchObject({ code: "102192" });
+  expect(app.queries.some((query) => /^(delete|insert|update) /.test(query.text))).toBe(false);
+  expect(app.queries.at(-1)!.text).toBe("rollback");
 });

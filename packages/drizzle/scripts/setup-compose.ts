@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import { writeFile } from "node:fs/promises";
 import { setupDatabases } from "./setup";
 
-const url = new URL("postgresql://database:5432/postgres");
+const url = new URL("postgresql://postgres:5432/postgres");
 url.username = env.POSTGRES_USER;
 url.password = requireEnv("POSTGRES_PASSWORD");
 const config = { connectionString: url.toString(), options: "-c timezone=UTC" };
@@ -17,7 +17,7 @@ try {
         "1": {
           Name: "OpenCok local PostgreSQL",
           Group: "OpenCok",
-          Host: "database",
+          Host: "postgres",
           Port: 5432,
           MaintenanceDB: "postgres",
           Username: env.POSTGRES_USER,
