@@ -1,3 +1,4 @@
+import { roundTripLegacyIntegerObject } from "@opencok/messages/legacy-json";
 import { decodeJavaIntMap } from "@opencok/messages/java-int-map";
 import { barbarianArmyPlan, barbarianPower } from "@opencok/rules/world-barbarian-detail";
 import type { GameServices } from "@opencok/contracts/game";
@@ -51,7 +52,7 @@ export function restoredExplorationMarch(
   const ordered = legacyObjectOrder(keys).map((key) => byId.get(key)!);
   return selectWorldExplorationMarch(observer, point, ordered, false)?.uuid as string | undefined;
 }
-export async function localWorldPointDetail(
+export async function worldPointDetail(
   store: WorldPointDetailStore,
   observer: string,
   params: Fields,
@@ -74,7 +75,6 @@ export async function localWorldPointDetail(
     kingdomId,
     now,
   );
-  if (query.kingdomId !== kingdomId && query.point > 0) return unsupported();
   const cityFeature = rules.items.get("lost_battle");
   const state = await store.read(
     observer,
@@ -101,15 +101,32 @@ export async function localWorldPointDetail(
     state.world.uid !== observer ||
     !favoriteInteger(state.world.worldId) ||
     point.id !== query.point ||
-    point.worldId !== state.world.worldId ||
+    point.worldId !== (state.remote ? 0 : state.world.worldId) ||
     !favoriteInteger(point.pointType) ||
     !state.owner
   )
     return unsupported();
   const type = point.pointType;
   if (type < 0 || type > 69 || [14, 18, 20, 21, 23, 46, 47].includes(type)) return unsupported();
-  const owner = worldPointOwner(worldPointOwnerBase(point, state.owner, false));
   const occupied = worldPointOccupied(point);
+  if (state.remote) {
+    if (type === 3 && !occupied)
+      return roundTripLegacyIntegerObject({
+        point: sfs.int(query.point),
+        tq: sfs.int(resourceRemaining(point.resInitValue as number, point.resCostValue as number)),
+      });
+    if (
+      (type === 3 || type === 37) &&
+      !mailBlank(point.ownerId as string | null) &&
+      !mailBlank(point.ownerMarchUUid as string | null)
+    )
+      return unsupported();
+    return roundTripLegacyIntegerObject({
+      ...worldPointOwner(worldPointOwnerBase(point, state.owner, true)),
+      point: sfs.int(query.point),
+    });
+  }
+  const owner = worldPointOwner(worldPointOwnerBase(point, state.owner, false));
   if (!occupied && (type === 3 || type === 37)) {
     const result: Fields = {
       ...owner,

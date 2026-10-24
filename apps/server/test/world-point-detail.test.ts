@@ -1,3 +1,8 @@
+import { Game } from "@opencok/controllers/game";
+import type { GameStore } from "@opencok/contracts/game";
+import { Rules } from "@opencok/rules/game";
+import { Type } from "@opencok/messages/sfs";
+import { MAX_FRAME } from "@opencok/messages/frame";
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as kingdom from "@opencok/drizzle/schema/kingdom";
@@ -582,4 +587,240 @@ test("captured query fields cannot be changed during authorization and readiness
   await expect(f.store.read("\0", { point: 701, kingdomId: 1, now })).rejects.toThrow(
     "Invalid world detail query",
   );
+});
+
+function remoteCommandFixture() {
+  const f = fixture();
+  const rules = new Rules(new Map(), new Map(), new Map());
+  rules.items.set("lost_battle", { k3: "1", k4: "2" });
+  let clocks = 0;
+  const game = new Game(
+    {} as GameStore,
+    rules,
+    { kingdomId: 1 },
+    () => {
+      clocks++;
+      return now;
+    },
+    {
+      worldPointDetail: f.store,
+      worldPowerEffects: async () => {
+        throw new Error("Unexpected remote effect cache");
+      },
+      emperorVersion: async () => {
+        throw new Error("Unexpected remote emperor read");
+      },
+    },
+  );
+  const execute = () =>
+    game.execute("observer", "world.get.detail", {
+      point: sfs.int(701),
+      serverId: sfs.int(2),
+      _cok_: sfs.long(1n),
+      cmdBaseTime: sfs.long(2n),
+    });
+  return { ...f, rules, game, execute, clocks: () => clocks };
+}
+
+test("remote point command authenticates locally then reads world zero with legacy JSON numeric widths", async () => {
+  const f = remoteCommandFixture();
+  const result = await f.execute();
+  expect(result).toEqual({
+    body: {
+      uid: sfs.string("remote"),
+      registerTime: sfs.int(300),
+      pic: sfs.string("g102"),
+      power: sfs.int(8),
+      killArmy: sfs.int(5),
+      afn: sfs.string("RMT"),
+      rank: sfs.int(3),
+      vl: sfs.int(0),
+      point: sfs.int(701),
+      _cok_: sfs.long(1n),
+      cmdBaseTime: sfs.long(2n),
+    },
+    pushes: [],
+  });
+  expect(decode(encode(result.body))).toEqual(result.body);
+  expect(f.clocks()).toBe(1);
+  expect(f.queries.map((q) => q.realm)).toEqual([
+    ...Array(4).fill(1),
+    ...Array(f.queries.length - 4).fill(2),
+  ]);
+  expect(f.queries[3]!.text).toBe("commit");
+  expect(f.queries[4]!.text).toBe("begin isolation level repeatable read read only");
+  expect(f.queries.at(-1)!.text).toBe("commit");
+  expect(reads(f, "worldpoint")[0]!.params).toEqual([701, 0, 2]);
+  expect(
+    f.queries.some((q) => /world_march|user_mixed_info|world_barbarion|user_state/.test(q.text)),
+  ).toBe(false);
+});
+
+test("remote public longs retain exact boundary values and narrow only inside the signed Int range", async () => {
+  for (const power of [
+    -9223372036854775808n,
+    -9007199254740993n,
+    -2147483649n,
+    -2147483648n,
+    0n,
+    2147483647n,
+    2147483648n,
+    9007199254740993n,
+    9223372036854775807n,
+  ]) {
+    const f = remoteCommandFixture();
+    f.state.owners.get(2)!.statistics!.power = power;
+    f.state.owners.get(2)!.profile!.regTime = power;
+    const body = (await f.execute()).body;
+    const expected =
+      power >= -2147483648n && power <= 2147483647n ? sfs.int(Number(power)) : sfs.long(power);
+    expect(body.power).toEqual(expected);
+    expect(body.registerTime).toEqual(expected);
+    expect(body._cok_!.type).toBe(Type.Long);
+    expect(decode(encode(body))).toEqual(body);
+  }
+});
+
+test("remote monster, city, barbarian, neutral and world-boss details omit local-only additions", async () => {
+  for (const type of [1, 2, 6, 15, 44, 49, 50, 60]) {
+    const f = remoteCommandFixture();
+    f.state.points.get(2)![0]!.pointType = type;
+    const result = await f.execute();
+    expect(result.body.uid).toEqual(sfs.string("remote"));
+    expect(result.body.registerTime).toEqual(sfs.int(300));
+    expect(result.body.point).toEqual(sfs.int(701));
+    for (const key of [
+      "erp",
+      "st",
+      "et",
+      "mchp",
+      "mmhp",
+      "slowDown",
+      "targetTooStrong",
+      "targetPower",
+      "lastBeDuelTime",
+      "barbarionPower",
+      "occupybegintime",
+      "data",
+      "reward",
+    ])
+      expect(result.body[key]).toBeUndefined();
+    expect(f.clocks()).toBe(1);
+    expect(f.queries.some((q) => /world_march|world_barbarion|user_mixed_info/.test(q.text))).toBe(
+      false,
+    );
+  }
+});
+
+test("remote resource service preserves its separate early return and new-resource base behavior", async () => {
+  const f = remoteCommandFixture();
+  const point = f.state.points.get(2)![0]!;
+  Object.assign(point, {
+    pointType: 3,
+    ownerId: null,
+    ownerName: null,
+    resInitValue: -2147483648,
+    resCostValue: 1,
+  });
+  expect((await f.execute()).body).toEqual({
+    point: sfs.int(701),
+    tq: sfs.int(2147483647),
+    _cok_: sfs.long(1n),
+    cmdBaseTime: sfs.long(2n),
+  });
+  point.pointType = 37;
+  expect((await f.execute()).body).toEqual({
+    point: sfs.int(701),
+    _cok_: sfs.long(1n),
+    cmdBaseTime: sfs.long(2n),
+  });
+  point.ownerId = "remote";
+  point.ownerName = "Owner";
+  expect((await f.execute()).body).toEqual({
+    uid: sfs.string("remote"),
+    registerTime: sfs.int(300),
+    pic: sfs.string("g102"),
+    point: sfs.int(701),
+    _cok_: sfs.long(1n),
+    cmdBaseTime: sfs.long(2n),
+  });
+  point.pointType = 3;
+  point.active = 1;
+  point.territoryAlliance = "observer-alliance";
+  expect((await f.execute()).body.territory_positive_effect).toBeUndefined();
+  point.ownerMarchUUid = "existing";
+  await expect(f.execute()).rejects.toThrow("102192");
+  point.pointType = 37;
+  await expect(f.execute()).rejects.toThrow("102192");
+});
+
+test("remote point commands reject missing routes, points and unfinished territory state without local fallback", async () => {
+  for (const type of [14, 18, 20, 21, 23, 46, 47, -1, 70]) {
+    const f = remoteCommandFixture();
+    f.state.points.get(2)![0]!.pointType = type;
+    await expect(f.execute()).rejects.toThrow("102192");
+  }
+  const f = remoteCommandFixture();
+  f.state.points.set(2, []);
+  await expect(f.execute()).rejects.toThrow("E100169");
+  await expect(
+    f.game.execute("observer", "world.get.detail", {
+      point: sfs.int(701),
+      serverId: sfs.int(3),
+    }),
+  ).rejects.toThrow("world point detail unavailable");
+  expect(f.queries.every((q) => q.realm !== 3)).toBe(true);
+});
+
+test("remote failures preserve local authorization and do not fabricate success after committed local reads", async () => {
+  for (const key of ["2:worldpoint", "2:playerinfo", "2:commit"]) {
+    const f = remoteCommandFixture();
+    f.state.fail = key;
+    await expect(f.execute()).rejects.toThrow("world point detail unavailable");
+    expect(f.queries.at(-1)).toEqual({ realm: 2, text: "rollback", params: [] });
+    expect(f.queries.some((q) => q.realm === 1 && q.text === "commit")).toBe(true);
+  }
+  for (const patch of [{ banFlag: 1 }, { banTime: BigInt(now + 1) }, { serverId: 2 }]) {
+    const f = remoteCommandFixture();
+    Object.assign(f.state.observer!, patch);
+    await expect(f.execute()).rejects.toThrow("E000000");
+    expect(f.queries.every((q) => q.realm === 1)).toBe(true);
+  }
+  const f = remoteCommandFixture();
+  f.state.world = undefined;
+  await expect(f.execute()).rejects.toThrow("world point detail unavailable");
+  expect(f.queries.every((q) => q.realm === 1)).toBe(true);
+});
+
+test("remote public strings retain quoted JSON-like values while unsupported function values fail without execution", async () => {
+  const f = remoteCommandFixture();
+  for (const value of ["null", "123", "true", "{a:1}", "[1,2]", 'a"b', "a\nb", '"null"']) {
+    f.state.owners.get(2)!.profile!.pic = value;
+    expect((await f.execute()).body.pic).toEqual(sfs.string(value));
+  }
+  f.state.owners.get(2)!.profile!.pic = "function(){}";
+  await expect(f.execute()).rejects.toThrow("Invalid stored JSON object");
+  f.state.owners.get(2)!.profile!.pic = "function(){}\n";
+  expect((await f.execute()).body.pic).toEqual(sfs.string("function(){}\n"));
+});
+
+test("remote nonpositive points preserve empty replies and complete response bounds include correlation", async () => {
+  const f = remoteCommandFixture();
+  expect(
+    (
+      await f.game.execute("observer", "world.get.detail", {
+        point: sfs.int(0),
+        serverId: sfs.int(999),
+      })
+    ).body,
+  ).toEqual({});
+  expect(f.queries.every((q) => q.realm === 1)).toBe(true);
+  expect(f.queries.some((q) => /worldpoint|user_world/.test(q.text))).toBe(false);
+  await expect(
+    f.game.execute("observer", "world.get.detail", {
+      point: sfs.int(701),
+      serverId: sfs.int(2),
+      _cok_: { type: Type.Bytes, value: Buffer.alloc(MAX_FRAME) },
+    }),
+  ).rejects.toThrow("102192");
 });

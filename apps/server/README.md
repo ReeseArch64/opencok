@@ -1146,8 +1146,8 @@ this command's global/remote search reads and global search readiness probes.
 branches listed below. It requires Int `point`, accepts optional Int `serverId`
 with omitted/`-1` meaning the local realm, and retains normal correlation fields.
 Authenticated nonpositive points return an empty object without an added success
-flag. Missing positive local points return `E100169`. Positive remote queries and
-unfinished specialized branches return `102192`; they are still required work in
+flag. Missing positive points return `E100169`. Supported remote queries are described
+below. Unfinished specialized branches return `102192`; they are still required work in
 [issue #85](https://github.com/ReeseArch64/opencok/issues/85), not removed scope.
 
 | Local point branch                                            | Current command behavior                                                                                                                                                          |
@@ -1173,6 +1173,47 @@ Twenty-seven command/adapter unit tests cover these branches, error behavior, ow
 isolation, bounded report selection, transaction failures and response limits.
 Fresh-map selection also reuses frozen Java 8 collision-order fixtures. Validation
 uses synthetic Drizzle clients; no live database, listener, service or client is run.
+
+## Remote world point details
+
+Positive `world.get.detail` requests for a configured remote realm authorize the
+observer locally, commit that read-only snapshot, then read the destination point
+at world zero in a separate snapshot. Missing routes fail without local fallback.
+The ordinary-realm remote service returns these branches before the local handler's
+exploration, health, city effects, barbarian power, neutral timing, territory-effect
+and world-boss reward additions. No global cache or emperor service is consulted.
+
+| Remote branch                                                                  | Response before correlation                                                                                      |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Unoccupied ordinary resource 3                                                 | Point and wrapped remaining quantity only.                                                                       |
+| Ordinary resource 3 or new resource 37 with a nonblank owner and march pointer | Pending occupied-resource restoration; rejects.                                                                  |
+| New resource 37 without that pointer                                           | Base owner fields and point; no remaining quantity or member count.                                              |
+| Territories 14/18/20/21/23/46/47                                               | Pending specialized state; rejects.                                                                              |
+| Other known types 0–69                                                         | Base owner fields and point, including remote monster, city, barbarian, neutral-resource and world-boss queries. |
+
+The remote Java service serializes its SFS object to JSON and the caller parses it
+again. `messages/legacy-json` now reproduces this conversion for the String, Int
+and Long fields emitted by the supported branches. Long values inside signed Int
+range become Int; larger signed Long values retain all bits without passing through
+a JavaScript Number. Correlation fields are appended afterward and keep their
+original types. JSON-looking strings, numeric strings and the literal string
+`null` remain strings. Default excluded properties are omitted. Function-shaped
+strings follow Java's full-string regular expression matching and reject as
+unrepresentable values without execution; trailing line breaks remain significant.
+The shared stored-mail matcher also uses these Java line-terminator semantics.
+
+Conversion is bounded to 32,767 properties and 4 MiB of JSON, followed by the normal
+complete SFS response limit. Other scalar/container types reject explicitly; their
+conversion must be implemented with the pending specialized branches. This is not
+a general replacement for the entire legacy serializer or a claim of cache parity.
+
+Eight added command/adapter units cover routing order, world zero, omitted local
+reads, integer widths, missing state, authorization, rollback and response bounds.
+Four converter units use 616 signed-decimal cases and 48 function-pattern cases
+from independently authored Java 8 primitive/regular-expression probes. Existing
+mail structure fixtures protect the shared decoder. Tests use synthetic clients
+and frozen public-value fixtures; they require no Java runtime, private classes,
+real database, service, listener or client.
 
 ## Local barbarian point details
 
@@ -1335,7 +1376,7 @@ boundaries and failure rollback; a loader unit covers optional files and duplica
 
 `repositories/world-point-detail` supplies a read-only snapshot for
 `world.get.detail`. Its port and readiness helper are composed into
-the runtime through `GameServices.worldPointDetail` for the local branches listed above.
+the runtime through `GameServices.worldPointDetail` for the local and remote branches listed above.
 The current ordinary-realm implementation uses existing tables and adds
 no schema or configuration. It does not start a march, repair ownership, create
 missing player/statistics rows or mutate caches.
@@ -1348,9 +1389,9 @@ ID and that world's ID; a configured remote realm is read at world zero, after t
 local authorization transaction commits. Remote access uses the supplied public-read
 database topology without a global account-directory lookup. Unknown realms fail
 explicitly. Missing points remain absent in the snapshot rather than becoming a
-fabricated resource or empty owner; the connected local command maps their absence to
-`E100169`. The reader supports remote snapshots, but the command rejects positive
-remote requests until the complete remote projection/wire conversion is implemented.
+fabricated resource or empty owner; the connected command maps their absence to
+`E100169`. Supported remote branches use the separate projection and JSON conversion
+described above; pending occupied-resource and territory state still rejects.
 
 Each realm read uses a read-only repeatable-read transaction. Point and owner data
 share that transaction; local authorization and remote reads are not atomic together.
@@ -1373,8 +1414,8 @@ type 15 has no base owner fields. The specialized exploration/HP projection foun
 is documented below and is connected for local queries.
 Remote reads do not take these observer-specific early exits. Territory
 and other specialized additions are also pending; the base fields alone are not a
-complete response. The DTO preserves direct/local SFS field types; it does not yet
-emulate the remote legacy JSON round trip or claim remote wire-type equivalence.
+complete response. The DTO preserves direct/local SFS field types; the remote
+command subsequently applies the bounded legacy JSON conversion described above.
 
 Current database snapshots replace the legacy process-local profile, statistics
 and alliance caches. This can expose persisted updates sooner and does not reproduce
@@ -1434,8 +1475,8 @@ map restoration order, so historical traversal equivalence is not claimed. Reads
 use current persisted marches and do not run the reference login's expired-return
 cleanup. No world, march-type or OCCUPY-only SQL filter replaces the reference
 destination-first selection. The reader does not create, restore, schedule or advance
-marches. Remote queries omit these observer-specific monster additions; their JSON
-wire conversion remains separate unfinished work.
+marches. Remote queries omit these observer-specific monster additions and use the
+base-field JSON conversion described above.
 
 Eleven unit tests cover the rules and projections, including a manually specified
 binary report fixture, exact boundary arithmetic, missing catalogs, owner identity,
@@ -2199,16 +2240,16 @@ uses the existing bounded Java hash traversal helper, with its documented except
 limits. Task visibility, discovery, completion writes and their pushes still need to
 use these descriptions before the reconnect task component is complete.
 
-| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                | Remaining work                                                                                                                                            |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests                                                                                          | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable.          |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
-| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
-| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage   | Remaining specialized and remote point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                     |
-| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
-| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                              | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
-| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
+| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                            |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests                                                                                                   | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable.          |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                                 | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
+| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
+| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.          |
+| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                                        | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
+| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
+| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog

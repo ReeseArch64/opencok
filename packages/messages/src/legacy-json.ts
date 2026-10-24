@@ -19,8 +19,9 @@ const parsedKeys = new WeakMap<Fields, string[]>();
 const convertedKeys = new WeakMap<Fields, string[]>();
 const excluded = new Set(["class", "declaringClass", "metaClass"]);
 const unrepresentable: Value = { type: Type.Null, value: Symbol("unrepresentable JSON value") };
-const functionHeader = /^function ?\(.*?\)$/;
-const functionValue = /^function ?\(.*?\)[ \n\t]*\{.*?\}$/;
+const functionHeader = /^function ?\([^\n\r\u0085\u2028\u2029]*?\)(?![\s\S])/;
+const functionValue =
+  /^function ?\([^\n\r\u0085\u2028\u2029]*?\)[ \n\t]*\{[^\n\r\u0085\u2028\u2029]*?\}(?![\s\S])/;
 const mayBeJson = (value: string) =>
   value === "null" ||
   (value.startsWith("{") && value.endsWith("}")) ||
@@ -270,4 +271,38 @@ export function decodeLegacyJsonObject(source: string): Fields {
   const parser = new Parser(text);
   if (parser.clean() !== "{") throw new LegacyJsonError();
   return convert(sfs.object(parser.object(0))).value as Fields;
+}
+
+export function roundTripLegacyIntegerObject(fields: Fields): Fields {
+  const entries = Object.entries(fields);
+  if (entries.length > 32767) throw new ProtocolError();
+  const parts: string[] = [];
+  let bytes = 2;
+  for (const [key, field] of entries) {
+    if (key === "null") throw new LegacyJsonError();
+    if (excluded.has(key)) continue;
+    let value: string;
+    if (field.type === Type.String && typeof field.value === "string") {
+      value = functionValue.test(field.value) ? field.value : JSON.stringify(field.value);
+    } else if (
+      field.type === Type.Int &&
+      typeof field.value === "number" &&
+      Number.isInteger(field.value) &&
+      field.value >= -2147483648 &&
+      field.value <= 2147483647
+    ) {
+      value = String(field.value);
+    } else if (
+      field.type === Type.Long &&
+      typeof field.value === "bigint" &&
+      BigInt.asIntN(64, field.value) === field.value
+    ) {
+      value = String(field.value);
+    } else throw new ProtocolError();
+    const part = `${JSON.stringify(key)}:${value}`;
+    bytes += Buffer.byteLength(part) + (parts.length ? 1 : 0);
+    if (bytes > 4 * 1024 * 1024) throw new ProtocolError();
+    parts.push(part);
+  }
+  return decodeLegacyJsonObject(`{${parts.join(",")}}`);
 }
