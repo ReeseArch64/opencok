@@ -417,6 +417,14 @@ Collation, pattern escapes, nulls and the reference fixed point identifier are d
 in the [realm runbook](../apps/server/README.md#map-player-search). Unit composition uses
 synthetic database clients; live database and client behavior remain unvalidated.
 
+General player search has separate pure contracts, selection rules and wire DTOs.
+Its two-stage cross-realm pagination and shared-profile shape must be retained when
+the global name directory and configured-realm readers are connected. The current
+policy layer performs no I/O and exposes no command. Bounded Java hash traversal is
+reused for remote selection, with the same explicit exceptional-state limits. The
+[realm runbook](../apps/server/README.md#general-player-search-policy) records exact
+semantics, synthetic primitive-oracle evidence and the pending adapter/runtime work.
+
 ### Migrated files implementation
 
 `apps/files` composes `api/files`, `identity/avatar`, `validations/image` and
