@@ -29,3 +29,24 @@ workflows start integration suites, which the maintainer has not authorized duri
 this phase. Workflows and required checks are unchanged. Skipped required checks can
 remain pending; these drafts are not merge-ready. A later authorized validation
 commit without the marker must run the required checks before merge.
+
+## Data-config foundation: issue 53
+
+Source commit: `4de54e5`, dependent on the issue 52 foundation. This step expands
+explicit catalog/scalar projections, player-level stamina selection and typed SFS
+output. It is not the final restoration of catalog groups, Java numeric/date
+failure semantics, general-sale declaration ordering or kingdom-skill tab sorting;
+those changes are implemented later in the original migration stack and still
+require publication as dependent refinements.
+
+Validation on this isolated publication branch, 2026-10-24:
+
+- `bun --no-env-file test apps/server/test/availability.test.ts apps/server/test/settings.test.ts apps/server/test/data-config.test.ts packages/resources/tests tests/packages/boundaries.test.ts`:
+  21 tests across five files, 1,404 assertions, all passing.
+- Type checks: rules, resources, DTOs, controllers and realm server passed.
+- Repository lint, formatting and diff checks passed.
+
+Synthetic authenticated/banned/missing profiles exercise explicit field mappings,
+wire integer/long/string types, realm switches and stamina gates. The projection
+performs no player-state mutation. No live services, clients or integration tests
+were used. The draft CI deferral described above still applies.
