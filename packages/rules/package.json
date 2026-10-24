@@ -29,7 +29,8 @@
     "./power-resolver": "./src/power-resolver.ts",
     "./profile": "./src/profile.ts",
     "./profile-generals": "./src/profile-generals.ts",
-    "./reconnect-mine": "./src/reconnect-mine.ts"
+    "./reconnect-mine": "./src/reconnect-mine.ts",
+    "./rewards": "./src/rewards.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
