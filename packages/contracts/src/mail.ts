@@ -1,5 +1,37 @@
 import type { Row } from "./rows.ts";
 
+export interface MailDeleteQuery {
+  ids: readonly string[];
+  now: number;
+}
+
+export interface MailDeleteEntry {
+  uid: string;
+  type: number;
+  fromUser: string | null;
+  contents: Buffer | null;
+  extra: Buffer | null;
+}
+
+export interface MailDeleteGroup {
+  groupType: number;
+  groupIndex: string;
+  types: readonly number[];
+  fromUser?: string;
+}
+
+export interface MailDeletePlan {
+  groups: readonly MailDeleteGroup[];
+  inviters: readonly string[];
+}
+
+export type MailDeletePlanner = (entries: readonly MailDeleteEntry[]) => MailDeletePlan;
+
+export interface MailDeleteSnapshot {
+  profile: Row | undefined;
+  deleted: number;
+}
+
 export interface MailReadQuery {
   batch: boolean;
   ids: readonly string[];

@@ -1,5 +1,7 @@
-import { mailSave, mailStatus } from "@opencok/dtos/mail";
+import { mailDeleted, mailSave, mailStatus } from "@opencok/dtos/mail";
+import { planMailDeletion } from "./mail-delete.ts";
 import {
+  mailDeleteQuery,
   mailReadQuery,
   mailSaveQuery,
   mailStatusQuery,
@@ -164,6 +166,9 @@ export class Game {
       case "mail.read.status.betch":
         body = await this.mailRead(uid, command === "mail.read.status.betch", params);
         break;
+      case "mail.delete":
+        body = await this.mailDelete(uid, params);
+        break;
       case "mail.save":
       case "mail.cancel.save":
       case "mail.save.batch":
@@ -254,6 +259,28 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return {};
+  }
+  private async mailDelete(uid: string, params: Fields): Promise<Fields> {
+    const ids = params.uids;
+    const legacyNum = params.num;
+    if (
+      !ids ||
+      ids.type !== Type.String ||
+      typeof ids.value !== "string" ||
+      (legacyNum !== undefined &&
+        (legacyNum.type !== Type.Int ||
+          typeof legacyNum.value !== "number" ||
+          !Number.isInteger(legacyNum.value) ||
+          legacyNum.value < -2147483648 ||
+          legacyNum.value > 2147483647))
+    )
+      throw new GameError(errors.invalid);
+    const query = mailDeleteQuery(ids.value, this.now());
+    const state = await this.db.mailDelete(uid, query, (entries) => planMailDeletion(uid, entries));
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return mailDeleted(state.deleted);
   }
   private async expeditionRanking(uid: string): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)

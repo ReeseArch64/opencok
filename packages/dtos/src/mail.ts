@@ -1,6 +1,10 @@
 import type { MailSaveResult, MailStatusResult } from "@opencok/contracts/mail";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
+export function mailDeleted(count: number): Fields {
+  return { delete: sfs.int(count) };
+}
+
 export function mailSave(result: MailSaveResult): Fields {
   return result === "unchanged" ? {} : { [result]: sfs.string("success") };
 }

@@ -1,4 +1,7 @@
 import type {
+  MailDeleteEntry,
+  MailDeleteGroup,
+  MailDeleteQuery,
   MailReadQuery,
   MailSaveMode,
   MailSaveQuery,
@@ -55,6 +58,48 @@ function mailIds(value: string, batch: boolean): string[] {
 export function mailReadQuery(batch: boolean, value: string, now: number): MailReadQuery {
   if (typeof batch !== "boolean" || !Number.isSafeInteger(now) || now < 0) return invalid();
   return { batch, ids: mailIds(value, batch), now };
+}
+
+export function mailDeleteQuery(value: string, now: number): MailDeleteQuery {
+  if (!Number.isSafeInteger(now) || now < 0) return invalid();
+  if (typeof value !== "string" || new TextEncoder().encode(value).length > 65535) return invalid();
+  const ids = value.split(",").filter(Boolean);
+  if (
+    ids.length > 1000 ||
+    ids.some((id) => id.length > 40 || id.includes("\0") || !id.isWellFormed())
+  )
+    return invalid();
+  return { ids: [...new Set(ids)], now };
+}
+
+export function mailDeleteGroups(
+  entries: readonly Pick<MailDeleteEntry, "uid" | "type" | "fromUser">[],
+): MailDeleteGroup[] {
+  const groups = new Map<string, MailDeleteGroup>();
+  for (const entry of entries) {
+    let group: MailDeleteGroup | undefined;
+    if ([2, 11, 12, 17, 25, 26, 27, 28, 29, 33, 34].includes(entry.type))
+      group = { groupType: entry.type, groupIndex: entry.uid, types: [] };
+    else if ([20, 21, 22].includes(entry.type) && entry.fromUser !== null)
+      group = {
+        groupType: 100,
+        groupIndex: entry.fromUser,
+        fromUser: entry.fromUser,
+        types: [20, 21, 22],
+      };
+    else if ([23, 24, 39, 40].includes(entry.type) && entry.fromUser !== null)
+      group = {
+        groupType: 500,
+        groupIndex: entry.fromUser,
+        fromUser: entry.fromUser,
+        types: [23, 24],
+      };
+    else if (entry.type === 5) group = { groupType: 200, groupIndex: "", types: [5] };
+    else if (entry.type === 10) group = { groupType: 400, groupIndex: "", types: [10] };
+    else if (entry.type === 18) group = { groupType: 300, groupIndex: "", types: [18] };
+    if (group) groups.set(JSON.stringify([group.groupType, group.groupIndex]), group);
+  }
+  return [...groups.values()];
 }
 
 export function mailSaveQuery(
