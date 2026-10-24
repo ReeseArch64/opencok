@@ -419,14 +419,14 @@ import applications. Their source exports and direct workspace dependencies are 
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `api`                 | Discovery use case, PHP request/response compatibility and injected HTTP handler.                                       |
 | `connection`          | Realm listener lifecycle, readiness, socket sessions and backpressure; receives repositories and adapters from the app. |
-| `controllers`         | Read-only city/bootstrap and world command orchestration against persistence ports.                                     |
+| `controllers`         | Read-only city/bootstrap, public player summary and world command orchestration against persistence ports.              |
 | `identity`            | Mobile signature, device, account, ban and realm authentication.                                                        |
 | `messages`, `enums`   | SFS codec, frames and wire type tags.                                                                                   |
-| `dtos`                | City, inventory, army, feature and clock serialization for the mobile client.                                           |
+| `dtos`                | City, inventory, army, public player summaries, feature and clock serialization for the mobile client.                  |
 | `contracts`           | Account readers, game snapshots, row values and realm configuration types.                                              |
 | `rules`               | In-memory gameplay rule evaluation, without files, transport or ORM imports.                                            |
 | `resources`           | Validated XML loading and construction of the rule catalog.                                                             |
-| `repositories`        | Drizzle account lookup and read-only repeatable-read city/world snapshots.                                              |
+| `repositories`        | Drizzle account lookup and read-only repeatable-read city/world/player snapshots, with configured public realm reads.   |
 | `storage`             | Redis leases/readiness, ZooKeeper registration, dependency timeouts and validated server-directory files.               |
 | `constants`, `errors` | Named connection limits, session TTL, mobile compatibility values and error types/codes.                                |
 
@@ -1219,6 +1219,17 @@ are read-only, repeatable read and UTC. Redis session keys and ZooKeeper ephemer
 registrations include the kingdom ID; map rows come from the selected PostgreSQL
 database rather than the experiment's shared `world1` hash. Runtime setup does not
 apply migrations or provision player state.
+
+Public player summary queries can read a second explicitly configured realm through
+`GAME_PLAYER_KINGDOMS`. The global account directory routes missing numeric player
+IDs to the authoritative database; each realm uses its own read-only snapshot.
+This grants no cross-realm write authority and does not enable cross-realm gameplay.
+Only public fields and required presentation metadata are selected, with a separate
+allowlisted wire DTO. Missing routes and dependency failures reject the response;
+remote availability does not gate local login readiness. Update markers use the
+realm-scoped Redis `player-update` namespace. See the server guide for exact key
+format, configuration and legacy compatibility details. This incremental query
+work is currently validated with unit tests and synthetic adapters only.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
