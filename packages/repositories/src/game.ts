@@ -54,6 +54,7 @@ import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
+import { user_civilization_prestige } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_prestige";
 import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
@@ -85,7 +86,7 @@ import type {
   PushPreference,
   ProfilePreferenceField,
 } from "@opencok/contracts/game";
-import type { Row } from "@opencok/contracts/rows";
+import { num, type Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, loadPlayerSummaries } from "./players.ts";
 import { checkPowerStore, readPowerState } from "./power.ts";
 import { checkPublicProfileStore, loadPublicProfile } from "./profile.ts";
@@ -147,6 +148,7 @@ export class Database implements GameStore, FriendshipMineStore {
       user_army,
       user_item,
       user_lord,
+      user_civilization_prestige,
       user_mine,
       material_cost_ranking,
       mail,
@@ -219,6 +221,22 @@ export class Database implements GameStore, FriendshipMineStore {
         const profile = (
           await tx.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
         )[0];
+        const civilizationType = profile ? num(profile, "civilizationType") : 0;
+        const prestige =
+          civilizationType > 0
+            ? (
+                await tx
+                  .select({ value: user_civilization_prestige.prestigeValue })
+                  .from(user_civilization_prestige)
+                  .where(
+                    and(
+                      eq(user_civilization_prestige.uid, uid),
+                      eq(user_civilization_prestige.civilizationType, civilizationType),
+                    ),
+                  )
+                  .limit(1)
+              )[0]
+            : undefined;
         const resource = (
           await tx.select().from(user_resource).where(eq(user_resource.uid, uid)).limit(1)
         )[0];
@@ -270,7 +288,18 @@ export class Database implements GameStore, FriendshipMineStore {
           )
           .orderBy(asc(user_item.itemId));
         const lord = (await tx.select().from(user_lord).where(eq(user_lord.uid, uid)).limit(1))[0];
-        return { profile, resource, buildings, queues, world, hasMarches, armies, items, lord };
+        return {
+          profile,
+          resource,
+          buildings,
+          queues,
+          world,
+          hasMarches,
+          armies,
+          items,
+          lord,
+          civilizationPrestige: prestige?.value ?? 0n,
+        };
       },
       { isolationLevel: "repeatable read", accessMode: "read only" },
     );
