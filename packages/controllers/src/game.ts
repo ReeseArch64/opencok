@@ -35,6 +35,7 @@ import { resolveMailPresentation } from "./mail-presentation.ts";
 import { mailListProjection } from "./mail-list.ts";
 import { mailContentsProjection } from "./mail-contents.ts";
 import { mailConversationReadRequest } from "./mail-conversation-read.ts";
+import { mailCategoryDeleteQuery, mailTypeDeleteQuery } from "@opencok/rules/mail-batch-delete";
 import { planMailDeletion } from "./mail-delete.ts";
 import { mailUpdateCursor, mailUpdatesProjection } from "./mail-updates.ts";
 import {
@@ -304,6 +305,12 @@ export class Game {
         break;
       case "chatMail.read":
         body = await this.mailConversationRead(uid, params);
+        break;
+      case "mail.delete.batch":
+        body = await this.mailCategoryDelete(uid, params);
+        break;
+      case "chatMail.delete":
+        body = await this.mailTypeDelete(uid, params);
         break;
       case "mail.save":
       case "mail.cancel.save":
@@ -863,6 +870,51 @@ export class Game {
     if (encode(extension("chatMail.read", body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "mail");
     const state = await this.db.mailConversationRead(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return body;
+  }
+  private async mailCategoryDelete(uid: string, params: Fields): Promise<Fields> {
+    const read = (key: string) =>
+      params[key] === undefined || params[key]!.type === Type.Null ? null : wireString(params, key);
+    const query = mailCategoryDeleteQuery(read("uids"), read("types"), this.now());
+    if (!this.db.mailCategoryDelete) throw new GameError(errors.unsupported, "mail");
+    let body: Fields | undefined;
+    const state = await this.db.mailCategoryDelete(uid, query, (counts) => {
+      const result: Fields = Object.create(null);
+      for (const entry of counts) {
+        result[entry.raw] = sfs.int(entry.unread);
+        result[`total${entry.raw}`] = sfs.int(entry.total);
+      }
+      body = { RetObj: sfs.object(result) };
+      for (const key of ["_cok_", "cmdBaseTime"])
+        if (params[key] !== undefined) body[key] = params[key]!;
+      if (encode(extension("mail.delete.batch", body)).length > MAX_FRAME)
+        throw new GameError(errors.unsupported, "mail");
+    });
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
+      throw new GameError(errors.invalid);
+    return body;
+  }
+  private async mailTypeDelete(uid: string, params: Fields): Promise<Fields> {
+    wireInt(params, "mod", 0);
+    if (params.fromUser !== undefined) {
+      if (params.fromUser.type !== Type.Null) wireString(params, "fromUser");
+      throw new GameError(errors.unsupported, "mail");
+    }
+    const query = mailTypeDeleteQuery(
+      params.type === undefined ? undefined : wireInt(params, "type"),
+      this.now(),
+    );
+    if (!this.db.mailTypeDelete) throw new GameError(errors.unsupported, "mail");
+    const body: Fields = { success: sfs.bool(true) };
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) body[key] = params[key]!;
+    if (encode(extension("chatMail.delete", body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "mail");
+    const state = await this.db.mailTypeDelete(uid, query);
     const profile = this.checkProfile(state.profile, query.now);
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);

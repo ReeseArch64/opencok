@@ -44,6 +44,7 @@
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./mail": "./src/mail.ts",
+    "./mail-batch-delete": "./src/mail-batch-delete.ts",
     "./mail-groups": "./src/mail-groups.ts",
     "./avatar": "./src/avatar.ts",
     "./mail-conversation-read": "./src/mail-conversation-read.ts",
