@@ -1,3 +1,4 @@
+import type { ChatSessionIssuer } from "./chat.ts";
 import type {
   MailGroupQuery,
   MailGroupInspector,
@@ -101,6 +102,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  chatSession?: ChatSessionIssuer;
   expeditionRanking?(limit: number): Promise<readonly ExpeditionRankingEntry[] | undefined>;
   worldPowerEffects?(): Promise<ReadonlyMap<string, string>>;
   emperorVersion?(): Promise<number | null | undefined>;

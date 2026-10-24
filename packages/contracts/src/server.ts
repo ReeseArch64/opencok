@@ -1,4 +1,5 @@
 export interface ServerConfig {
+  chatSession?: { url: string; signingSecret: string };
   mailTranslationEnabled?: boolean;
   host: string;
   port: number;

@@ -9,6 +9,12 @@ export type Config = ServerConfig;
 export const config = Effect.gen(function* () {
   const settings = yield* readEnvironment(serverSchema);
   return {
+    chatSession: settings.GAME_CHAT_SESSION_URL
+      ? {
+          url: settings.GAME_CHAT_SESSION_URL,
+          signingSecret: settings.CHAT_SIGNING_SECRET!,
+        }
+      : undefined,
     host: settings.GAME_HOST,
     mailTranslationEnabled: settings.GAME_MAIL_TRANSLATION,
     port: settings.GAME_PORT,
