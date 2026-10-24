@@ -1,3 +1,4 @@
+import type { CommunityRankingSnapshot, DonationScore } from "./community-ranking.ts";
 import type { ThroneRankingPeriod, ThroneRankingSnapshot } from "./throne-ranking.ts";
 import type { HeroRankingSnapshot, HeroRankingLookup } from "./hero-ranking.ts";
 import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
@@ -74,6 +75,9 @@ export interface GameStore extends AuthenticationStore {
     kingdomId: number,
     publication?: ThroneRankingPeriod,
   ): Promise<ThroneRankingSnapshot>;
+  donationRanking?(uid: string, now: number): Promise<CommunityRankingSnapshot>;
+  cemeteryRanking?(uid: string, type: "0" | "1", now: number): Promise<CommunityRankingSnapshot>;
+  crossRankingRealm?(): Promise<boolean>;
   normalRankingRealm?(): Promise<boolean>;
   mailUpdates?(
     uid: string,
@@ -187,6 +191,11 @@ export interface GameServices {
   ): Promise<readonly DragonRankingEntry[]>;
   heroRankingPosition?(query: HeroRankingLookup): Promise<number>;
   throneRankingPeriod?(realm: number): Promise<ThroneRankingPeriod | undefined>;
+  donationScores?(
+    allianceId: string,
+    kind: "resource-day" | "resource-week" | "resource-history",
+    date: string,
+  ): Promise<readonly DonationScore[]>;
   attributeRanking?(type: number): Promise<readonly string[]>;
   publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
   globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;

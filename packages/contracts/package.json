@@ -36,7 +36,8 @@
     "./world-monster-detail": "./src/world-monster-detail.ts",
     "./dragon-ranking": "./src/dragon-ranking.ts",
     "./hero-ranking": "./src/hero-ranking.ts",
-    "./throne-ranking": "./src/throne-ranking.ts"
+    "./throne-ranking": "./src/throne-ranking.ts",
+    "./community-ranking": "./src/community-ranking.ts"
   },
   "dependencies": {}
 }

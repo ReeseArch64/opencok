@@ -1,3 +1,4 @@
+import { loadDonationRanking } from "./donation-ranking.ts";
 import { loadThroneRankingPeriod } from "./throne-ranking.ts";
 import { loadHeroRankingPosition } from "./hero-ranking.ts";
 import type { HeroRankingLookup } from "@opencok/contracts/hero-ranking";
@@ -61,6 +62,19 @@ export class Cache {
   }
   throneRankingPeriod(realm: number) {
     return loadThroneRankingPeriod((name, ...args) => this.command(name, ...args), realm);
+  }
+  donationScores(
+    allianceId: string,
+    kind: "resource-day" | "resource-week" | "resource-history",
+    date: string,
+  ) {
+    return loadDonationRanking(
+      (name, ...args) => this.command(name, ...args),
+      this.config.kingdomId,
+      allianceId,
+      kind,
+      date,
+    );
   }
   attributeRanking(type: number) {
     return loadAttributeRanking(

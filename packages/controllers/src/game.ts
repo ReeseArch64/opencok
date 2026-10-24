@@ -1,3 +1,10 @@
+import type { DonationRankingKind } from "@opencok/contracts/community-ranking";
+import {
+  donationRanking,
+  resourceDonationRanking,
+  cemeteryRanking,
+} from "@opencok/mappings/community-ranking";
+import { rankingCalendar } from "@opencok/rules/community-ranking";
 import {
   throneRanking,
   throneRankingBoard,
@@ -372,6 +379,17 @@ export class Game {
       case "dragon.battle.rank":
         body = await this.dragonRanking(uid, params);
         break;
+      case "al.donate.rank.all":
+      case "al.donate.rank.today":
+      case "al.donate.rank.week":
+      case "al.donate.res.rank.day":
+      case "al.donate.res.rank.week":
+      case "al.donate.res.rank.history":
+        body = await this.donationRanking(uid, command);
+        break;
+      case "cemetery.get.ranking":
+        body = await this.cemeteryRanking(uid, params);
+        break;
       case "ctf.get.rank":
         body = await this.throneRanking(uid, params);
         break;
@@ -415,6 +433,13 @@ export class Game {
       throw new GameError(errors.unsupported, "world_point_detail");
     if (
       [
+        "al.donate.rank.all",
+        "al.donate.rank.today",
+        "al.donate.rank.week",
+        "al.donate.res.rank.day",
+        "al.donate.res.rank.week",
+        "al.donate.res.rank.history",
+        "cemetery.get.ranking",
         "ctf.get.rank",
         "hero.self.rank",
         "act.score.rank",
@@ -1031,6 +1056,51 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async donationRanking(uid: string, command: string): Promise<Fields> {
+    const now = this.now();
+    const resource = command.startsWith("al.donate.res.");
+    const current = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (resource) {
+      if (!this.db.crossRankingRealm) throw new GameError(errors.unsupported, "ranking");
+      if (await this.db.crossRankingRealm()) return {};
+    }
+    if (!this.db.donationRanking) throw new GameError(errors.unsupported, "ranking");
+    const snapshot = await this.db.donationRanking(uid, now);
+    const profile = this.checkProfile(snapshot.profile, now);
+    if (
+      profile.uid !== uid ||
+      num(profile, "serverId") !== this.config.kingdomId ||
+      !text(profile, "allianceId").trim()
+    )
+      throw new GameError(errors.invalid);
+    const suffix = command.split(".").at(-1)!;
+    const kind = (resource ? `resource-${suffix}` : suffix) as DonationRankingKind;
+    if (!resource) return donationRanking(snapshot, kind, now);
+    if (!this.services.donationScores) throw new GameError(errors.unsupported, "ranking");
+    const date = rankingCalendar(now);
+    const scores = await this.services.donationScores(
+      text(profile, "allianceId"),
+      kind as "resource-day" | "resource-week" | "resource-history",
+      kind === "resource-day" ? date.dayKey : date.weekKey,
+    );
+    return resourceDonationRanking(snapshot, scores, kind === "resource-week", now);
+  }
+  private async cemeteryRanking(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const type = wireString(params, "type");
+    if (type !== "0" && type !== "1") throw new GameError(errors.invalid);
+    if (!this.db.cemeteryRanking) throw new GameError(errors.unsupported, "ranking");
+    const snapshot = await this.db.cemeteryRanking(uid, type, now);
+    const owner = this.checkProfile(snapshot.profile, now);
+    if (owner.uid !== uid || num(owner, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return cemeteryRanking(snapshot, uid);
   }
   private async throneRanking(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();

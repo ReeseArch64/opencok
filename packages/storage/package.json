@@ -21,7 +21,8 @@
     "./images": "./src/images.ts",
     "./published-ranking": "./src/published-ranking.ts",
     "./hero-ranking": "./src/hero-ranking.ts",
-    "./throne-ranking": "./src/throne-ranking.ts"
+    "./throne-ranking": "./src/throne-ranking.ts",
+    "./donation-ranking": "./src/donation-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
