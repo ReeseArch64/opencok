@@ -17,6 +17,8 @@ import type {
   MailContentsInspector,
   MailConversationSaveQuery,
   MailConversationSaveSnapshot,
+  MailConversationReadQuery,
+  MailConversationReadSnapshot,
   MailDeleteQuery,
   MailDeletePlanner,
   MailDeleteSnapshot,
@@ -86,6 +88,10 @@ export interface GameStore extends AuthenticationStore {
     plan: MailDeletePlanner,
   ): Promise<MailDeleteSnapshot>;
   mailRead(uid: string, query: MailReadQuery): Promise<MailReadSnapshot>;
+  mailConversationRead?(
+    uid: string,
+    query: MailConversationReadQuery,
+  ): Promise<MailConversationReadSnapshot>;
   mailSave(uid: string, query: MailSaveQuery): Promise<MailSaveSnapshot>;
   mailStatus(uid: string, query: MailStatusQuery): Promise<MailStatusSnapshot>;
   allianceRanking(uid: string, query: AllianceRankingQuery): Promise<AllianceRankingSnapshot>;

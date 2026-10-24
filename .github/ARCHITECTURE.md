@@ -1761,18 +1761,22 @@ transaction failures and ownership are covered by synthetic units only.
 Conversation read marking has a pure request/effect contract that preserves ordered
 mailbox assignments and chat-service intents. It performs complete prevalidation,
 retains conditional versus unconditional status assignments, and does not drop chat
-effects when mailbox updates would match no rows. The command remains unsupported
-until a recoverable private-chat read-state consumer and delivery are wired. Public room
-history is not that consumer. An independent repository adapter locks the owner, checks
+effects when mailbox updates would match no rows. Command dispatch supports only plans
+without chat effects, validating the complete correlated success envelope before the
+owned transaction. Sender selections and the exact all-peer trigger remain unsupported
+before any write until a recoverable private-chat read-state consumer and delivery are
+wired. Runtime repository dispatch enforces the same boundary. Public room history is
+not that consumer. An independent repository adapter locks the owner, checks
 realm/ban state, updates the union of mailbox predicates without fetching bodies and
 inserts immutable realm `mail_chat_read_intent` rows in the same transaction. Null
 mailbox status is unchanged except for bottle assignments; null sender equality matches
 no mail but still emits its raw chat intent. UUID/effect-position keys identify delivery
 retries; separate command invocations get fresh identities. Owner-serialized admission
 bounds pending events to 1,000 before any write. The additive kingdom migration is
-generated only; no runtime worker or command dispatch consumes this adapter yet. Future
-delivery must preserve peer semantics, effect ordering and idempotent acknowledgment
-without assuming a cross-database transaction. Synthetic driver units cover SQL and
+generated only; no runtime worker consumes its chat intents yet. Mailbox-only dispatch
+reuses the adapter without creating intents. Future delivery must preserve peer semantics,
+effect ordering and idempotent acknowledgment without assuming a cross-database
+transaction. Synthetic driver units cover SQL and
 rollback; actual database execution, locking and acknowledgment ambiguity are unverified.
 
 Read-status commands share the owner-lock and atomic marker boundary. Individual
