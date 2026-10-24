@@ -116,6 +116,7 @@ export interface GameServices {
   avatarFinish?: AvatarFinishService;
   chatSession?: ChatSessionIssuer;
   expeditionRanking?(limit: number): Promise<readonly ExpeditionRankingEntry[] | undefined>;
+  expeditionStage?(kingdomId: number): Promise<number | undefined>;
   worldPowerEffects?(kingdomId?: number): Promise<ReadonlyMap<string, string>>;
   emperorVersion?(kingdomId?: number): Promise<number | null | undefined>;
   playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;
