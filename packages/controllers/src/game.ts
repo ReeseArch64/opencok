@@ -145,9 +145,16 @@ export class Game {
       case "server.rank":
       case "kill.rank":
       case "level.rank":
+      case "building.rank":
         body = await this.ranking(
           uid,
-          command === "server.rank" ? "power" : command === "kill.rank" ? "kills" : "level",
+          command === "server.rank"
+            ? "power"
+            : command === "kill.rank"
+              ? "kills"
+              : command === "level.rank"
+                ? "level"
+                : "building",
         );
         break;
       default:
