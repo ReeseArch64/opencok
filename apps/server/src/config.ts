@@ -10,6 +10,7 @@ export const config = Effect.gen(function* () {
   const settings = yield* readEnvironment(serverSchema);
   return {
     host: settings.GAME_HOST,
+    mailTranslationEnabled: settings.GAME_MAIL_TRANSLATION,
     port: settings.GAME_PORT,
     healthPort: settings.GAME_HEALTH_PORT,
     kingdomId: settings.KINGDOM_ID,

@@ -1,4 +1,5 @@
 export interface ServerConfig {
+  mailTranslationEnabled?: boolean;
   host: string;
   port: number;
   healthPort: number;
