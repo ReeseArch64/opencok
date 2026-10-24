@@ -45,6 +45,34 @@ test("sessions correlate successful commands and every repeated failure without 
   const dependencies: ServerDependencies = {
     db: {
       playerSummaries: async () => [],
+      mailContents: async () => {
+        throw new Error("Unexpected mail contents");
+      },
+      mailConversationSave: async () => {
+        throw new Error("Unexpected conversation save");
+      },
+      mailDelete: async () => {
+        throw new Error("Unexpected mailbox deletion");
+      },
+      mailRead: async () => {
+        throw new Error("Unexpected mailbox read");
+      },
+      mailSave: async () => {
+        throw new Error("Unexpected mailbox save");
+      },
+      mailStatus: async () => {
+        throw new Error("Unexpected dependency call");
+      },
+      allianceRanking: async () => {
+        throw new Error("Unexpected dependency call");
+      },
+      playerRanking: async () => {
+        throw new Error("Unexpected ranking query");
+      },
+      publicProfile: async () => undefined,
+      power: async () => {
+        throw new Error("unused");
+      },
       configuration: async () => {
         throw new Error("unused");
       },
