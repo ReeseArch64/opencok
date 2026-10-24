@@ -16,3 +16,25 @@ test("server settings validate realm routing and require private inputs", () => 
   );
   expect(() => parseServerEnvironment({ ...base, GAME_PORT: "65536" })).toThrow("GAME_PORT");
 });
+
+test("public player realm routes are explicit, bounded and validated", () => {
+  expect(parseServerEnvironment(base).GAME_PLAYER_KINGDOMS).toBeUndefined();
+  expect(
+    parseServerEnvironment({ ...base, GAME_PLAYER_KINGDOMS: "1:kingdom_one,2:kingdom_two" })
+      .GAME_PLAYER_KINGDOMS,
+  ).toEqual([
+    { id: 1, database: "kingdom_one" },
+    { id: 2, database: "kingdom_two" },
+  ]);
+  for (const value of [
+    "0:kingdom",
+    "2:kingdom:extra",
+    "2:db;drop",
+    "2:kingdom,2:other",
+    "1:same,2:same",
+    "1:one,2:two,3:three",
+  ])
+    expect(() => parseServerEnvironment({ ...base, GAME_PLAYER_KINGDOMS: value })).toThrow(
+      "GAME_PLAYER_KINGDOMS",
+    );
+});

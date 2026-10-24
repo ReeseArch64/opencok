@@ -13,6 +13,7 @@ export class GameError extends Error {
       | "icon_date_rule"
       | "general_sale_rule"
       | "account_rule"
+      | "player_summary"
       | "queue_kind"
       | "world_state",
   ) {
