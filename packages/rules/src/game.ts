@@ -3,6 +3,12 @@ import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { ruleAvailable } from "./availability.ts";
 
 export type Rule = Record<string, string>;
+export interface WorldCatalogs {
+  fieldMonsters?: Map<string, Rule>;
+  armies?: Map<string, Rule>;
+  neutralResources?: Map<string, Rule>;
+  barbarians?: Map<string, Rule>;
+}
 export interface ReconnectCatalogs {
   treasures?: Map<string, Rule>;
   rewards?: Map<string, Rule>;
@@ -34,11 +40,16 @@ export interface PowerCatalogs {
   dragonLevels?: Map<string, Rule>;
   statuses?: Map<string, Rule>;
   generalSkills?: Map<string, Rule>;
+  newGeneralBases?: Map<string, Rule>;
+  newGeneralSkills?: Map<string, Rule>;
+  newGeneralOffices?: Map<string, Rule>;
+  newGeneralRefinement?: Map<string, Rule>;
   equipmentSets?: Map<string, Rule>;
   vip?: Map<string, Rule>;
   superVip?: Map<string, Rule>;
   allianceSciences?: Map<string, Rule>;
   prestigeLevels?: Map<string, Rule>;
+  prestigeLevelRecords?: readonly Rule[];
   civilizationFeatures?: Map<string, Rule>;
   militarySkills?: Map<string, Rule>;
   miracleBuffs?: Map<string, Rule>;
@@ -68,6 +79,7 @@ export class Rules {
     readonly profile: ProfileCatalogs = {},
     readonly reconnect: ReconnectCatalogs = {},
     readonly mail: Map<string, Rule> = new Map(),
+    readonly world: WorldCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (

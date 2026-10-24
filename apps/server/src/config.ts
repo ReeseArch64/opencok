@@ -23,6 +23,7 @@ export const config = Effect.gen(function* () {
       : undefined,
     host: settings.GAME_HOST,
     mailTranslationEnabled: settings.GAME_MAIL_TRANSLATION,
+    crossSearchEnabled: settings.GAME_CROSS_SEARCH,
     port: settings.GAME_PORT,
     healthPort: settings.GAME_HEALTH_PORT,
     kingdomId: settings.KINGDOM_ID,
