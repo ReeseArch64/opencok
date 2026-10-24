@@ -114,6 +114,33 @@ provide sale limits, the `69008` control record and ordered skill-tab metadata.
 Unrelated item records are not exposed. Missing optional records remain omitted;
 missing sale catalogs produce an empty `general_buy` object.
 
+The item loader now retains the final `data_config` group independently of the global
+item ID index. Duplicate IDs are replaced within each view; a later group with the
+same name replaces that group without removing earlier global entries. A declaration
+in another group can replace the global ID while the data-config group keeps its own
+value. When top-level groups exist, root item declarations are ignored. Group records
+use direct child element attributes, matching the reference loader; nested elements
+are not recursively added to the item index. Missing IDs use the literal `null` global
+cache suffix, while group maps retain a distinct null key. Blank IDs remain intact.
+Other catalog parsing keeps its existing behavior.
+
+Resource loading always supplies the group view, including an empty map for absent,
+empty or ungrouped configuration. An empty view rejects `login.dataconfig` and never
+falls back to unrelated global records. Directly constructed Rules without a supplied
+group view retain their explicitly provided item map as the configuration catalog.
+The overlord scalar deliberately keeps its global item lookup; feature, pay-control,
+sale and kingdom-skill catalogs remain separate. PVE attributes are assigned contiguous
+`k1`/`k2` aliases from the selected present fields; `k6` alone becomes `k1`. The extra
+`world_fire` object and `cityDefMax` scalar were removed from this response because the
+reference does not emit them. `world_fire1` and `cityDefInterval` remain present.
+
+Seven added unit tests cover group/global collisions, repeated groups, missing groups,
+root-versus-group precedence, null/blank IDs, direct element attributes, DTO source
+selection and projection aliases. Required-record failure parity, numeric scalar edge
+cases and general-sale restoration remain incomplete; sparse catalogs can still omit
+fields that the reference requires. These are outstanding topic 1 work, not a claim
+that the configuration contract is complete.
+
 The command reads the authenticated realm profile to select the level-dependent
 stamina cap when `stamina_limit` is available. Realm switches control quest metadata,
 service terms and scout settings; the mission switch also checks version and time.

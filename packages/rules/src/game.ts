@@ -19,6 +19,7 @@ export interface ProfileCatalogs {
   servers?: Map<string, Rule>;
 }
 export interface ConfigurationCatalogs {
+  dataConfig?: Map<string | null, Rule>;
   serverConfig?: Map<string, Rule>;
   generalSales?: Map<string, Rule>;
   payControl?: Map<string, Rule>;
