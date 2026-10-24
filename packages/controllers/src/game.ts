@@ -1,3 +1,4 @@
+import { reportAvatar } from "./avatar-report.ts";
 import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
 import { dragonRanking } from "@opencok/dtos/dragon-ranking";
 import { decodeDragonRanking } from "./dragon-ranking.ts";
@@ -255,6 +256,9 @@ export class Game {
       case "world.favo.add":
       case "world.favo.delme":
         body = await this.worldFavorites(uid, command, params);
+        break;
+      case "report.picVer":
+        body = await reportAvatar(this.db, uid, this.config.kingdomId, params, this.now());
         break;
       case "user.update.picVer":
         body = await this.avatarVersion(uid);
