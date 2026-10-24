@@ -1,3 +1,4 @@
+import { readFlowerRanking } from "./flower-ranking.ts";
 import { readDonationRanking, readCemeteryRanking } from "./community-ranking.ts";
 import { readThroneRanking } from "./throne-ranking.ts";
 import type { ThroneRankingPeriod } from "@opencok/contracts/throne-ranking";
@@ -149,6 +150,11 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   crossRankingRealm(): Promise<boolean> {
     return readCrossRankingRealm(this.databases.global.db, this.config.kingdomId);
+  }
+  flowerRanking(uid: string, realm: number, uids: readonly string[]) {
+    if (!Number.isInteger(realm) || realm < 1 || !this.databases.kingdoms.has(realm))
+      throw new Error("Unconfigured flower ranking realm");
+    return readFlowerRanking(this.databases.getKingdom(realm).db, uid, uids);
   }
   normalRankingRealm(): Promise<boolean> {
     return readNormalRankingRealm(this.databases.global.db, this.config.kingdomId);

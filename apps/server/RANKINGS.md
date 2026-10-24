@@ -124,3 +124,36 @@ history, calendar boundaries, resource-score hydration, membership filtering,
 wire omission, command authorization and malformed inputs. These queries add
 no schema or dependencies. Their publishers retain score, TTL and invalidation
 ownership. Database/cache failures reject, and rollback requires no data edits.
+
+## Flower rankings
+
+`flower.ranking` reads `flower_ranking_<realm>` and the requesting UID in
+`flower_ranking_self_<realm>` together. Missing self positions retain 5001.
+The configured `ranking.k2` bounds both local and optional numbered global
+`flower_global_rank_<position>` publications. A read-only Redis script observes
+these publications together. Public identity fields are hydrated from current
+profiles; absent profiles are omitted without changing cached self rank.
+Global duplicates and ties retain publication order, with last-UID overwrite
+for `myGRank` and -1 when absent. `myHide` reads existing `flower_ranking.hideKing`
+without creating the default row that the legacy getter sometimes inserted.
+
+Cross-fight realms resolve the local board/profile presentation against the
+configured origin realm. Global visibility remains scoped to the executing
+realm. `flowers_all_sev` uses the current realm/version/date gate. The maintained
+shared resource catalog and Redis topology must contain the source realm's
+publications; unavailable realm configuration rejects rather than inventing a
+local board.
+
+Refresh uses existing `time_notice` type 0 and `flowers.k5`. It retains weekly,
+monthly and fortnightly calculations, including the source Calendar's Sunday
+behavior and millisecond remainder. Missing notice/unknown refresh modes retain
+the signed-Long wrapped `now + Long.MAX_VALUE` sentinel. No reset, score refresh,
+publication, visibility toggle or notice insertion occurs on read. Cache and
+public-profile state are separate observations. Unlike the source per-row catch,
+malformed reached publications reject instead of silently hiding damaged rows.
+The UTC calendar and 4 MiB JSON/frame bounds are explicit maintained contracts.
+
+Flower unit tests cover publication keys and snapshot composition, missing self
+positions, profile omissions, global visibility, origin routing, refresh
+boundaries, Long sentinel arithmetic, correlation and failures. Native-client
+and real-service validation remain deferred. Rollback needs no player-data edits.
