@@ -25,7 +25,7 @@ function fixture(initial = new Map<string, Buffer | null>()) {
   let queue = Promise.resolve();
   let failure = "";
   let beforeWrite: (() => Promise<void>) | undefined;
-  const filter = new NicknameWordFilter(async () => "blocked,中文");
+  const filter = new NicknameWordFilter(async () => ["blocked", "中文"]);
   class Pool {
     async connect() {
       let release!: () => void;

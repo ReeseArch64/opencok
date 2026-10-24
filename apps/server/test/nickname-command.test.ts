@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { GameServices, GameStore } from "@opencok/contracts/game";
@@ -194,14 +194,12 @@ test("nickname checks propagate reached provider failures without returning avai
   ).toEqual(sfs.int(0));
 });
 
-test("realm nickname services compose the real UTF-8 file filter with the authenticated command", async () => {
+test("realm nickname services compose the real JSON file filter with the authenticated command", async () => {
   const root = await mkdtemp(join(tmpdir(), "opencok-nickname-runtime-"));
   try {
-    const resources = join(root, "resource");
-    await mkdir(resources);
-    await mkdir(join(root, "gameconfig"));
-    await writeFile(join(root, "gameconfig", "badwords.txt"), "blocked,中文");
-    const services = await loadNicknameServices(resources);
+    const wordsFile = join(root, "badwords.json");
+    await writeFile(wordsFile, JSON.stringify(["blocked", "中文"]));
+    const services = await loadNicknameServices(undefined, wordsFile);
     for (const name of ["BLOCKED", "中 文"]) {
       const instance = fixture(services);
       const result = await instance.run({ nickName: sfs.string(name) });
@@ -213,8 +211,8 @@ test("realm nickname services compose the real UTF-8 file filter with the authen
     const instance = fixture(services);
     expect((await instance.run({ nickName: sfs.string("clear") })).body.exist).toEqual(sfs.int(0));
     expect(instance.calls).toEqual(["profile", "occupied:clear"]);
-    await rm(join(root, "gameconfig", "badwords.txt"));
-    const absent = fixture(await loadNicknameServices(resources));
+    await rm(wordsFile);
+    const absent = fixture(await loadNicknameServices(undefined, wordsFile));
     expect((await absent.run({ nickName: sfs.string("blocked") })).body.exist).toEqual(sfs.int(0));
     expect(absent.calls).toEqual(["profile", "occupied:blocked"]);
   } finally {

@@ -79,7 +79,7 @@ export const RealmDependenciesLive = Layer.effect(
       : undefined;
     const cache = new Cache(config);
     const nicknameServices = yield* fromPromise("realm.nickname-words", () =>
-      loadNicknameServices(config.resources, (key) => cache.nicknameForbiddenWords(key)),
+      loadNicknameServices((key) => cache.nicknameForbiddenWords(key)),
     );
     const coordination = yield* acquireResource(
       "realm.coordination",

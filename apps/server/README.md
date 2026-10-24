@@ -354,15 +354,17 @@ literal. Supplementary/surrogate matching and final line-terminator anchors foll
 Java primitive vectors. A matching exception stops the remaining list and returns false;
 the loading lock returns true before inspecting entries or text.
 
-`resources/nickname-words` reads UTF-8 `../gameconfig/badwords.txt` relative to the supplied
-resource directory, with the existing resource-size policy of 16 MiB. It splits CR/LF
-lines and commas, drops empty tokens without trimming, stably orders new entries by
-descending UTF-16 length, appends them to retained entries and removes only the first
-exact space and `v` from the combined list. Reloads keep duplicates. Read failures unlock
-and retain previous entries, including an empty list after an unsuccessful first load;
-this is the reference loader's failure behavior. Overlapping reloads retain its shared
-lock-flag behavior rather than introducing a reference counter. The original launch
-configuration specifies UTF-8, and BOM/entry whitespace is preserved.
+`resources/nickname-words` reads the bundled UTF-8 JSON array in
+[`packages/resources/data/badwords.json`](../../packages/resources/data/badwords.json),
+independently of `GAME_RESOURCES` and the current working directory. The 16 MiB
+resource-size limit remains. JSON must contain an array of strings; invalid input
+is rejected before changing the loaded entries. Empty entries are dropped without
+trimming; new entries are stably sorted by descending UTF-16 length and appended
+to retained entries. Only the first exact space and `v` are removed from the combined
+list. Reloads keep duplicates, and JSON strings retain their Unicode and whitespace.
+Read or validation failures unlock and retain previous entries, including an empty
+list after an unsuccessful first load. Overlapping reloads retain the shared lock.
+See the [catalog provenance and editing guide](../../packages/resources/data/README.md).
 
 Fourteen new units cover the matcher and resource lifecycle with synthetic input only.
 An independently authored Java 8 probe supplies 4,071 generated-pattern outcomes and a
@@ -394,11 +396,10 @@ and optional signed Int `type` (default 0), and returns Int `occupied`, `exist`,
 and `remainLength` with request correlation. It emits no pushes and accepts no requested
 UID/realm override. Invalid text skips providers, bad words skip occupancy and nonzero
 types skip only occupancy. Reached missing providers or non-SQL failures reject the
-request. Realm startup loads the real filter; Compose mounts the ignored source file at
-`/gameconfig/badwords.txt` read-only without creating missing host paths. Local execution
-uses the existing `GAME_RESOURCES` directory and its adjacent `gameconfig` directory.
-The loader's previously documented empty-list behavior after a failed first read is
-retained.
+request. Realm startup loads the versioned JSON filter from the application artifact;
+Compose no longer mounts `gameconfig/badwords.txt`. Local execution uses the same
+bundled list. Rebuild the server image after editing the JSON. The loader's
+previously documented empty-list behavior after a failed first read is retained.
 
 The global repository first selects name mappings, then selects their non-deleted
 accounts. It applies legacy collation to mapping type/value and account UID, Java-trims

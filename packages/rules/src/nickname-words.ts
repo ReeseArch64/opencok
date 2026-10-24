@@ -203,10 +203,11 @@ export function containsNicknameBadWords(
   return false;
 }
 
-export function nicknameBadWordEntries(text: string, previous: readonly string[] = []): string[] {
-  const added = text
-    .split(/\r\n|\r|\n/)
-    .flatMap((line) => line.split(",").filter((entry) => entry.length > 0));
+export function nicknameBadWordEntries(
+  entries: readonly string[],
+  previous: readonly string[] = [],
+): string[] {
+  const added = entries.filter((entry) => entry.length > 0);
   added.sort((left, right) => right.length - left.length);
   const result = [...previous, ...added];
   for (const omitted of [" ", "v"]) {

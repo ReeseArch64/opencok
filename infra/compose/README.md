@@ -35,6 +35,8 @@ signature rejection (`LoginErr`) even when the root `.env` is correct.
 The full authorized server reference is copied into `data/reference/server`.
 The runtime mounts only `data/reference/server/runtime/base/resource` read-only at
 `/resources`. It has no dependency on another checkout or a user home directory.
+The nickname filter is bundled as `packages/resources/data/badwords.json` and needs
+no additional volume. Rebuild the server image to apply list edits.
 The reference contains private legacy inputs and stays ignored by Git, outside
 runtime images; maintained TypeScript code remains under `apps/server`.
 
