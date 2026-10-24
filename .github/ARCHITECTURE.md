@@ -617,6 +617,16 @@ perform no writes, locks or name reservation. This adapter adds a direct workspa
 rules dependency to reuse compatibility logic. Regex candidate scans are not an indexed
 collation-key lookup; performance and actual PostgreSQL execution remain unverified in
 the unit-only phase. Existing query/statement timeouts remain in force.
+Rename mutation rules remain a separate pure foundation. They preserve replacement
+and filter ordering, distinct validation errors and one-item debit semantics. Gold
+plans retain Java parsing and signed arithmetic, ordinary/DMM bucket selection and
+source return-value differences. Refunds re-read price and credit free gold through
+Java float conversion; the CN1 ratio is an explicit lazily reached provider. Independent
+standard-library vectors cover the numeric conversion. These rules neither select
+inventory nor mutate state. `user.modify.nickName` remains disabled pending real reserved
+patterns, global name serialization, owned economic persistence and cross-database
+recovery, then world/alliance/chat/throne/shared-user effects. No atomic transaction
+across the global and kingdom databases is assumed.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
