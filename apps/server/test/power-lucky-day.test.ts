@@ -235,3 +235,18 @@ test("lucky-day player versions retain direct Java comparison before realm and e
   rules.features.get("luckyday_server")!.online = "close";
   expect(luckyDayEffects(profile, lucky, server, rules, context).size).toBe(0);
 });
+
+test("lucky-day panel dates normalize fields and retain independent minus-one parse fallbacks", () => {
+  const rules = fixture();
+  const panel = rules.power.activityPanels!.get("57091")!;
+  panel.start = "2026-9-53-12-00suffix";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).get(487)).toBe(15);
+  panel.start = "bad";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).get(487)).toBe(15);
+  panel.end = "bad";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).size).toBe(0);
+  expect(luckyDayEffects(profile, lucky, server, rules, { ...context, now: -1 }).get(487)).toBe(15);
+  expect(luckyDayEffects(profile, lucky, server, rules, { ...context, now: 0 }).size).toBe(0);
+  delete panel.start;
+  expect(luckyDayEffects(profile, lucky, server, rules, { ...context, now: -1 }).size).toBe(0);
+});

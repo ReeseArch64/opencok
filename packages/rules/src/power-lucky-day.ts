@@ -1,6 +1,7 @@
 import type { Row } from "@opencok/contracts/rows";
 import { text } from "@opencok/contracts/rows";
-import { eventRealmEnabled, ruleTime, versionAtLeast, type RuleContext } from "./availability.ts";
+import { eventRealmEnabled, versionAtLeast, type RuleContext } from "./availability.ts";
+import { javaCalendarDate } from "./java-calendar-date.ts";
 import type { Rules } from "./game.ts";
 import { serverFeature } from "./power-context.ts";
 import {
@@ -21,11 +22,16 @@ function activityOpen(server: Row, rules: Rules, context: RuleContext): boolean 
       if (start <= elapsed && elapsed < end) return true;
     }
   }
-  const panel = rules.power.activityPanels?.get("57091");
-  if (panel?.function_on !== "1") return false;
-  const start = ruleTime(panel.start ?? "", context.utcOffsetMinutes);
-  const end = ruleTime(panel.end ?? "", context.utcOffsetMinutes);
-  return start !== undefined && end !== undefined && start <= context.now && context.now <= end;
+  try {
+    const panel = rules.power.activityPanels?.get("57091");
+    if (panel?.function_on !== "1") return false;
+    const start = javaCalendarDate(panel.start!, 5, context.utcOffsetMinutes) ?? -1n;
+    const end = javaCalendarDate(panel.end!, 5, context.utcOffsetMinutes) ?? -1n;
+    const now = long(context.now);
+    return start <= now && now <= end;
+  } catch {
+    return false;
+  }
 }
 
 export function luckyDayEffects(
