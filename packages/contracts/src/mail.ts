@@ -15,6 +15,28 @@ export interface MailConversationReadSnapshot {
   profile: Row | undefined;
 }
 
+export interface MailCategoryDeleteQuery {
+  labels: readonly { raw: string; category: number }[];
+  now: number;
+}
+
+export interface MailCategoryDeleteCount {
+  raw: string;
+  total: number;
+  unread: number;
+}
+
+export type MailCategoryDeleteInspector = (counts: readonly MailCategoryDeleteCount[]) => void;
+
+export interface MailCategoryDeleteSnapshot {
+  profile: Row | undefined;
+}
+
+export interface MailTypeDeleteQuery {
+  type?: number;
+  now: number;
+}
+
 export interface MailGroupQuery {
   moderation: boolean;
   begin: number;

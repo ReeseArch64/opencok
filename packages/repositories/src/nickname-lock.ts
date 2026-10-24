@@ -11,7 +11,7 @@ import type { Database } from "./game.ts";
 import { readNicknameOccupation } from "./nickname.ts";
 
 type GlobalDatabase = Database["databases"]["global"]["db"];
-type GlobalTransaction = Pick<
+export type NicknameGlobalTransaction = Pick<
   NodePgDatabase<typeof globalSchema>,
   "select" | "insert" | "update" | "delete" | "execute"
 >;
@@ -19,7 +19,7 @@ type GlobalTransaction = Pick<
 export async function withAvailableNickname<T>(
   db: GlobalDatabase,
   name: string,
-  operation: (tx: GlobalTransaction) => Promise<T>,
+  operation: (tx: NicknameGlobalTransaction) => Promise<T>,
 ): Promise<T> {
   let key: string;
   try {
