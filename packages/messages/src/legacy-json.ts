@@ -314,3 +314,55 @@ export function roundTripLegacyIntegerObject(fields: Fields): Fields {
   }
   return decodeLegacyJsonObject(`{${parts.join(",")}}`);
 }
+
+export function roundTripLegacyObject(input: Fields): Fields {
+  let count = 0;
+  const serialize = (value: Value, depth: number): string => {
+    if (depth > 32 || ++count > 100000) throw new ProtocolError();
+    if (value.type === Type.Null) return "null";
+    if (value.type === Type.Bool && typeof value.value === "boolean") return String(value.value);
+    if (value.type === Type.String && typeof value.value === "string")
+      return functionValue.test(value.value) ? value.value : JSON.stringify(value.value);
+    if (
+      value.type === Type.Long &&
+      typeof value.value === "bigint" &&
+      BigInt.asIntN(64, value.value) === value.value
+    )
+      return String(value.value);
+    if (
+      [Type.Byte, Type.Short, Type.Int, Type.Float, Type.Double].includes(value.type) &&
+      typeof value.value === "number" &&
+      Number.isFinite(value.value)
+    ) {
+      const number = value.type === Type.Float ? Math.fround(value.value) : value.value;
+      if (!Number.isFinite(number)) throw new ProtocolError();
+      if ([Type.Byte, Type.Short, Type.Int].includes(value.type)) {
+        const bits = value.type === Type.Byte ? 8 : value.type === Type.Short ? 16 : 32;
+        if (!Number.isInteger(number) || number < -(2 ** (bits - 1)) || number >= 2 ** (bits - 1))
+          throw new ProtocolError();
+      } else if (Math.abs(number) >= 1e7 || (number !== 0 && Math.abs(number) < 1e-3)) {
+        return number.toExponential().replace("e+", "E").replace("e", "E");
+      }
+      return String(number);
+    }
+    if (value.type === Type.Array && Array.isArray(value.value))
+      return `[${(value.value as Value[]).map((entry) => serialize(entry, depth + 1)).join(",")}]`;
+    if (
+      value.type === Type.Object &&
+      value.value &&
+      typeof value.value === "object" &&
+      !Array.isArray(value.value)
+    )
+      return `{${Object.entries(value.value as Fields)
+        .filter(([key]) => !excluded.has(key))
+        .map(([key, entry]) => {
+          if (key === "null") throw new LegacyJsonError();
+          return `${JSON.stringify(key)}:${serialize(entry, depth + 1)}`;
+        })
+        .join(",")}}`;
+    throw new ProtocolError();
+  };
+  const json = serialize(sfs.object(input), 0);
+  if (Buffer.byteLength(json) > 4 * 1024 * 1024) throw new ProtocolError();
+  return decodeLegacyJsonObject(json);
+}

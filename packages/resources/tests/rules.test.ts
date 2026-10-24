@@ -710,3 +710,21 @@ test("nickname alliance catalog is optional and retains the last duplicate with 
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("territory building catalog preserves declaration order and duplicate levels", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-territory-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).world.allianceBuildings).toBeUndefined();
+    await writeFile(
+      join(directory, "alliance_building.xml"),
+      '<database><ItemSpec id="a" type="0" level="2" building_value="40"/><ItemSpec id="b" type="0" level="2" building_value="100"/></database>',
+    );
+    expect(
+      (await loadRules(directory)).world.allianceBuildings?.map((row) => row.building_value),
+    ).toEqual(["40", "100"]);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

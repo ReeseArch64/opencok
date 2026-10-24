@@ -44,6 +44,8 @@ export interface WorldPointDetailSnapshot {
   };
   barbarian?: { row: Row | undefined };
   neutralResource?: { march: Row | undefined };
+  special?: WorldSpecialDetailSnapshot;
+  resourceGroup?: readonly Row[];
   resource?: { march: Row | undefined; owner?: WorldResourceOwnerSnapshot };
 }
 
@@ -54,6 +56,7 @@ export interface WorldPointDetailStore {
     observer: string,
     query: WorldPointDetailQuery,
     selectExploration?: WorldExplorationSelector,
+    turret?: WorldTurretReader,
   ): Promise<WorldPointDetailSnapshot>;
 }
 
@@ -74,3 +77,23 @@ export interface WorldCityDetail {
   targetPower: bigint;
   lastBeDuelTime: bigint;
 }
+
+export interface WorldSpecialDetailSnapshot {
+  territory?: Row;
+  marches: readonly Row[];
+  leader?: Row;
+  team?: Row;
+  ownerProfile?: Row;
+  ownerAlliance?: Row;
+  ownerEffects?: WorldResourceOwnerSnapshot;
+  banner?: string;
+  observerBanner?: string;
+  resources: readonly { row: Row; profile: Row }[];
+  kills: readonly { uid: string; content: string; profile?: Row }[];
+  boss?: Row;
+  ranks: readonly Row[];
+}
+export type WorldTurretReader = (
+  kingdomId: number,
+  territory: string,
+) => Promise<ReadonlyMap<string, string>>;

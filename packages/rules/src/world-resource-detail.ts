@@ -250,3 +250,38 @@ export function neutralResourceStart(
   }
   return BigInt.asIntN(64, end - seconds * 1000n);
 }
+
+export function restoredSharedCollectionTime(
+  remaining: number,
+  owner: WorldResourceCollection,
+  arrivalTime: bigint | null,
+  marches: readonly WorldResourceCollection[],
+  now: bigint,
+  included: boolean,
+): bigint {
+  if (!included) return 0n;
+  const group = resourceGroupDetail(remaining, marches, () => now);
+  if (!group) return 0n;
+  const castLong = (value: number): bigint => {
+    if (Number.isNaN(value)) return 0n;
+    if (value >= Number(9223372036854775807n)) return 9223372036854775807n;
+    if (value <= Number(-9223372036854775808n)) return -9223372036854775808n;
+    return BigInt(Math.trunc(value));
+  };
+  const shared = BigInt.asIntN(
+    64,
+    castLong(Math.fround(Math.fround(group.remaining) / group.speed)) * 1000n,
+  );
+  const maximum = BigInt.asIntN(64, shared + long(now) - long(arrivalTime ?? 0n));
+  const own = castLong(
+    Math.ceil(
+      Math.fround(
+        Math.fround(
+          Math.fround(Math.min(integer(remaining), integer(owner.armyLoad))) /
+            speed(owner.collectSpd),
+        ) * 1000,
+      ),
+    ),
+  );
+  return maximum < own ? maximum : own;
+}

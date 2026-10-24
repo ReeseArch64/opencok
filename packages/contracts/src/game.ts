@@ -274,6 +274,7 @@ export interface GameServices {
   expeditionStage?(kingdomId: number): Promise<number | undefined>;
   worldPowerEffects?(kingdomId?: number): Promise<ReadonlyMap<string, string>>;
   emperorVersion?(kingdomId?: number): Promise<number | null | undefined>;
+  worldTurretKills?(kingdomId: number, territory: string): Promise<ReadonlyMap<string, string>>;
   lastSystemMail?(uid: string): Promise<string | null>;
   systemMailPage?(
     uid: string,

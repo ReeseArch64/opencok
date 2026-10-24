@@ -300,6 +300,9 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     optional(GameplayCatalog.SpResources),
     optional(GameplayCatalog.Barbarion),
   ]);
+  const allianceBuildings = (await available(GameplayCatalog.AllianceBuilding))
+    ? parseDeclaredCatalog(await read(GameplayCatalog.AllianceBuilding)).records
+    : undefined;
   const achievementCount = (await available(GameplayCatalog.Achievement))
     ? parseRecords(await read(GameplayCatalog.Achievement), GameplayCatalog.Achievement).length
     : 0;
@@ -369,7 +372,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     { achievementCount, militaryRanks, servers },
     { treasures, rewards, quests, positionUnlock },
     mail,
-    { fieldMonsters, armies, neutralResources, barbarians },
+    { fieldMonsters, armies, neutralResources, barbarians, allianceBuildings },
     { militaryGroups, heroEvents },
   );
 }
