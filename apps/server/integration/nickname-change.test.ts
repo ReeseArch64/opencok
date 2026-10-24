@@ -161,6 +161,10 @@ beforeAll(async () => {
   databases = createDatabases(pg.options, topology);
   await migrateDatabase(databases.global.pool, "global");
   for (const entry of topology.kingdoms) await migrateDatabase(realm(entry.id).pool, "kingdom");
+  for (const pool of [databases.global.pool, realm().pool])
+    await pool.query(
+      "CREATE FUNCTION public.reject_nickname() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic write failure'; END $$",
+    );
 }, 120_000);
 
 afterAll(async () => {
@@ -475,9 +479,6 @@ test("lost global, payment and final realm commit replies converge without doubl
 test("SQL failures roll back realm preparation and global receipt writes independently", async () => {
   const uid = await seed({ items: 1 }),
     operationId = randomUUID();
-  const fail =
-    "CREATE FUNCTION public.reject_nickname() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic write failure'; END $$";
-  await realm().pool.query(fail);
   await realm().pool.query(
     "CREATE TRIGGER reject_nickname BEFORE INSERT ON opencok_kingdom.nickname_change FOR EACH ROW EXECUTE FUNCTION public.reject_nickname()",
   );
@@ -490,7 +491,6 @@ test("SQL failures roll back realm preparation and global receipt writes indepen
   } finally {
     await realm().pool.query("DROP TRIGGER reject_nickname ON opencok_kingdom.nickname_change");
   }
-  await databases.global.pool.query(fail);
   await databases.global.pool.query(
     "CREATE TRIGGER reject_nickname BEFORE INSERT ON opencok_global.nickname_change_receipt FOR EACH ROW EXECUTE FUNCTION public.reject_nickname()",
   );
@@ -510,6 +510,45 @@ test("SQL failures roll back realm preparation and global receipt writes indepen
       "DROP TRIGGER reject_nickname ON opencok_global.nickname_change_receipt",
     );
   }
+});
+
+test("unreadable or mismatched global evidence leaves the charged operation pending", async () => {
+  const uid = await seed({ items: 1 }),
+    operationId = randomUUID();
+  await realm().pool.query(
+    "CREATE TRIGGER reject_nickname BEFORE UPDATE ON opencok_kingdom.nickname_change FOR EACH ROW EXECUTE FUNCTION public.reject_nickname()",
+  );
+  try {
+    await expect(store().change(uid, operationId, "Evidence Name", now)).rejects.toThrow();
+  } finally {
+    await realm().pool.query("DROP TRIGGER reject_nickname ON opencok_kingdom.nickname_change");
+  }
+  await databases.global.pool.query(
+    "ALTER TABLE opencok_global.nickname_change_receipt RENAME TO unavailable_receipt",
+  );
+  try {
+    await expect(store().recover(uid, operationId, now + 1)).rejects.toThrow();
+    expect(await item(uid)).toMatchObject({ count: 0 });
+    expect((await store().find(uid, operationId))?.state).toBe("prepared");
+  } finally {
+    await databases.global.pool.query(
+      "ALTER TABLE opencok_global.unavailable_receipt RENAME TO nickname_change_receipt",
+    );
+  }
+  await databases.global.db
+    .update(nickname_change_receipt)
+    .set({ kingdomId: 2 })
+    .where(eq(nickname_change_receipt.operationId, operationId));
+  await expect(store().recover(uid, operationId, now + 2)).rejects.toThrow();
+  expect(await item(uid)).toMatchObject({ count: 0 });
+  expect((await store().find(uid, operationId))?.state).toBe("prepared");
+  await databases.global.db
+    .update(nickname_change_receipt)
+    .set({ kingdomId: 1 })
+    .where(eq(nickname_change_receipt.operationId, operationId));
+  expect(await store().recover(uid, operationId, now + 3)).toMatchObject({ state: "committed" });
+  expect(await profile(uid)).toMatchObject({ name: "Evidence Name", chNameCount: "1" });
+  expect(await item(uid)).toMatchObject({ count: 0 });
 });
 
 test("global receipt survives PostgreSQL restart and completes a failed realm finalization", async () => {
