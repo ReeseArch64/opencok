@@ -29,3 +29,23 @@ export interface PlayerSearchResult {
   maximum: bigint;
   entries: PlayerSearchEntry[];
 }
+
+export interface PlayerSearchBudget {
+  limit: number;
+  minimumLevel: number;
+}
+
+export interface PlayerSearchSnapshot {
+  profile: Row | undefined;
+  local: Row[];
+  remote: PlayerSearchRemote[];
+}
+
+export interface PlayerSearchStore {
+  search(
+    owner: string,
+    query: PlayerSearchQuery,
+    now: number,
+    budget: (rows: readonly Row[]) => PlayerSearchBudget,
+  ): Promise<PlayerSearchSnapshot>;
+}
