@@ -5,7 +5,7 @@ import {
   playerSearchRemoteBudget,
   selectPlayerSearch,
 } from "@opencok/rules/player-search";
-import { playerSearch, playerSearchEntry } from "@opencok/dtos/player-search";
+import { playerSearch, playerSearchEntry } from "@opencok/mappings/player-search";
 import type {
   PlayerSearchQuery,
   PlayerSearchRemote,

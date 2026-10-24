@@ -4,7 +4,7 @@ import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import type { Rules } from "@opencok/rules/game";
 import { ownGeneralSnapshots } from "@opencok/rules/profile-generals";
-import { reconnectGenerals, reconnectMine } from "@opencok/dtos/reconnect";
+import { reconnectGenerals, reconnectMine } from "@opencok/mappings/reconnect";
 import { initialFriendshipMine, friendshipMineView } from "@opencok/rules/reconnect-mine";
 import { decodeGeneralAbilities } from "./profile.ts";
 

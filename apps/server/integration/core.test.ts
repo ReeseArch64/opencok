@@ -22,7 +22,7 @@ import { Coordination } from "@opencok/storage/coordination";
 import { Database } from "@opencok/repositories/game";
 import type { Config } from "../src/config.ts";
 import { fields, sfs, str, Type } from "@opencok/messages/sfs";
-import { FOREVER } from "@opencok/dtos/city";
+import { FOREVER } from "@opencok/mappings/city";
 import { Client } from "./client.ts";
 import { dataConfigItems } from "../test/fixtures/data-config.ts";
 

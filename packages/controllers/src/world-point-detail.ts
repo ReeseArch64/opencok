@@ -6,16 +6,16 @@ import { MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { generalSkillPoints, decodeWorldPowerEffects } from "./power.ts";
-import { worldNeutralResource } from "@opencok/dtos/world-resource-detail";
+import { worldNeutralResource } from "@opencok/mappings/world-resource-detail";
 import type { WorldPointDetailStore } from "@opencok/contracts/world-point-detail";
 import type { Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
-import { worldPointOwner, worldCityFields } from "@opencok/dtos/world-point-detail";
+import { worldPointOwner, worldCityFields } from "@opencok/mappings/world-point-detail";
 import {
   worldMonsterHealth as healthFields,
   worldMonsterExploration,
-} from "@opencok/dtos/world-monster-detail";
+} from "@opencok/mappings/world-monster-detail";
 import {
   worldPointDetailQuery,
   worldCityDetail,

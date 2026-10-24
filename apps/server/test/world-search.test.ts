@@ -3,7 +3,7 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as kingdom from "@opencok/drizzle/schema/kingdom";
 import { createWorldSearchStore, checkWorldSearchStore } from "@opencok/repositories/world-search";
 import { worldSearchOffset, worldSearchName } from "@opencok/rules/world-search";
-import { worldSearch } from "@opencok/dtos/world-search";
+import { worldSearch } from "@opencok/mappings/world-search";
 import { Game } from "@opencok/controllers/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore, GameServices } from "@opencok/contracts/game";

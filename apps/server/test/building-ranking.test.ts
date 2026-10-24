@@ -3,7 +3,7 @@ import type { Row } from "@opencok/contracts/rows";
 import type { PlayerRankingSnapshot } from "@opencok/contracts/ranking";
 import { Rules } from "@opencok/rules/game";
 import { playerRankingQuery, selectPlayerRanking } from "@opencok/rules/ranking";
-import { playerRanking } from "@opencok/dtos/ranking";
+import { playerRanking } from "@opencok/mappings/ranking";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 
 const now = 1792756800000;

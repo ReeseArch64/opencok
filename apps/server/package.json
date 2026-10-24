@@ -28,9 +28,9 @@
     "@types/bun": "catalog:",
     "typescript": "catalog:",
     "@opencok/drizzle": "workspace:*",
-    "@opencok/dtos": "workspace:*",
     "@opencok/identity": "workspace:*",
     "@opencok/messages": "workspace:*",
-    "drizzle-orm": "0.45.4"
+    "drizzle-orm": "0.45.4",
+    "@opencok/mappings": "workspace:*"
   }
 }

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { CityState, GameStore } from "@opencok/contracts/game";
 import { Game } from "@opencok/controllers/game";
-import { settingConfig } from "@opencok/dtos/bootstrap";
+import { settingConfig } from "@opencok/mappings/bootstrap";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 

@@ -1,20 +1,12 @@
-import type {
-  WorldMonsterHealth,
-  WorldExplorationDetail,
-} from "@opencok/contracts/world-monster-detail";
-import { sfs, decodeArray, type Fields } from "@opencok/messages/sfs";
+import type { DtoValue } from "./value.ts";
 
-export function worldMonsterHealth(detail: WorldMonsterHealth | undefined): Fields {
-  return detail === undefined
-    ? {}
-    : { mchp: sfs.int(detail.current), mmhp: sfs.int(detail.maximum) };
+export class WorldMonsterHealthDto {
+  readonly mchp?: number;
+  readonly mmhp?: number;
 }
-export function worldMonsterExploration(detail: WorldExplorationDetail | undefined): Fields {
-  return detail === undefined
-    ? {}
-    : {
-        erp: sfs.array(detail.report === null ? [] : decodeArray(detail.report)),
-        st: sfs.long(detail.startTime),
-        et: sfs.long(detail.endTime),
-      };
+
+export class WorldMonsterExplorationDto {
+  readonly erp?: DtoValue[];
+  readonly st?: bigint;
+  readonly et?: bigint;
 }

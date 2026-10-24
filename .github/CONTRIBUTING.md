@@ -60,6 +60,13 @@ Drizzle migrations, snapshot output and database fixture data. Maintained
 Drizzle TypeScript schemas remain included. These exclusions preserve the
 boundaries described in [the architecture](ARCHITECTURE.md).
 
+DTOs must be standalone classes with explicitly declared `readonly` data
+properties, following the NestJS DTO style without decorators. Keep Zod schemas
+in `packages/validations` and serialization in `packages/mappings`. DTO classes
+must not inherit from schema factories or contain constructors, methods or static
+schemas. See the [DTO package](../packages/dtos/README.md). Validate at the mapping
+or application boundary and preserve mobile wire types and field order.
+
 ## Commits
 
 Before completing any task that changes tracked project content, review and

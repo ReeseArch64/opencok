@@ -1,16 +1,16 @@
 import { reportAvatar } from "./avatar-report.ts";
 import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
-import { dragonRanking } from "@opencok/dtos/dragon-ranking";
+import { dragonRanking } from "@opencok/mappings/dragon-ranking";
 import { decodeDragonRanking } from "./dragon-ranking.ts";
 import { worldPointDetail } from "./world-point-detail.ts";
 import { profilePreference } from "./profile-preferences.ts";
 import { celebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
 import { checkNickname } from "@opencok/rules/nickname";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
-import { worldFavorites } from "@opencok/dtos/world-favorites";
-import { worldSearch } from "@opencok/dtos/world-search";
+import { worldFavorites } from "@opencok/mappings/world-favorites";
+import { worldSearch } from "@opencok/mappings/world-search";
 import { worldSearchName, worldSearchOffset } from "@opencok/rules/world-search";
-import { playerSearch } from "@opencok/dtos/player-search";
+import { playerSearch } from "@opencok/mappings/player-search";
 import {
   playerSearchQuery,
   playerSearchRemoteBudget,
@@ -26,7 +26,7 @@ import {
   checkAvatarRecord,
 } from "@opencok/rules/avatar";
 import { realmChatSessionRequest, realmChatSessionResponse } from "./realm-chat-session.ts";
-import { mailDeleted, mailSave, mailStatus } from "@opencok/dtos/mail";
+import { mailDeleted, mailSave, mailStatus } from "@opencok/mappings/mail";
 import { mailCategoryProjection } from "./mail-category.ts";
 import { mailGroupProjection } from "./mail-groups.ts";
 import {
@@ -62,10 +62,10 @@ import type {
   MailGroupPreview,
   MailListCommand,
 } from "@opencok/contracts/mail";
-import { expeditionRanking } from "@opencok/dtos/expedition-ranking";
+import { expeditionRanking } from "@opencok/mappings/expedition-ranking";
 import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
 import { decodeExpeditionRanking } from "./expedition-ranking.ts";
-import { allianceRanking } from "@opencok/dtos/alliance-ranking";
+import { allianceRanking } from "@opencok/mappings/alliance-ranking";
 import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
 import type { AllianceRankingKind } from "@opencok/contracts/alliance-ranking";
 import type { ServerConfig } from "@opencok/contracts/server";
@@ -79,12 +79,12 @@ import {
   type Fields,
   type Value,
 } from "@opencok/messages/sfs";
-import { guidePlayerSummary, playerSummary } from "@opencok/dtos/players";
-import { building, gold, queue, resource, user } from "@opencok/dtos/city";
-import { powerInfo } from "@opencok/dtos/power";
-import { publicProfileBase } from "@opencok/dtos/profile";
+import { guidePlayerSummary, playerSummary } from "@opencok/mappings/players";
+import { building, gold, queue, resource, user } from "@opencok/mappings/city";
+import { powerInfo } from "@opencok/mappings/power";
+import { publicProfileBase } from "@opencok/mappings/profile";
 import { publicProfileAlliance, publicProfileGenerals } from "./profile.ts";
-import { playerRanking } from "@opencok/dtos/ranking";
+import { playerRanking } from "@opencok/mappings/ranking";
 import { playerRankingQuery, selectPlayerRanking } from "@opencok/rules/ranking";
 import type { PlayerRankingKind } from "@opencok/contracts/ranking";
 import { calculatePlayerPower } from "@opencok/rules/power";
@@ -114,7 +114,7 @@ import {
   loginConfigurationPreferences,
   loginSwitches,
   pushPreferences,
-} from "@opencok/dtos/bootstrap";
+} from "@opencok/mappings/bootstrap";
 
 const playerRankingKinds = {
   "server.rank": "power",

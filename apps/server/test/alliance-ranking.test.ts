@@ -3,7 +3,7 @@ import type { AllianceRankingSnapshot } from "@opencok/contracts/alliance-rankin
 import type { Row } from "@opencok/contracts/rows";
 import { Rules } from "@opencok/rules/game";
 import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
-import { allianceRanking } from "@opencok/dtos/alliance-ranking";
+import { allianceRanking } from "@opencok/mappings/alliance-ranking";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 
 const now = 1792756800000;

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { dataConfig, serverClock } from "@opencok/dtos/bootstrap";
+import { dataConfig, serverClock } from "@opencok/mappings/bootstrap";
 import { Rules } from "@opencok/rules/game";
 import { dataConfigItems } from "./fixtures/data-config.ts";
 import { fields, Type } from "@opencok/messages/sfs";

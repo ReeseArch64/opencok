@@ -7,9 +7,9 @@ import {
 import {
   worldMonsterHealth as healthFields,
   worldMonsterExploration,
-} from "@opencok/dtos/world-monster-detail";
+} from "@opencok/mappings/world-monster-detail";
 import { worldPointOwnerBase } from "@opencok/rules/world-point-detail";
-import { worldPointOwner } from "@opencok/dtos/world-point-detail";
+import { worldPointOwner } from "@opencok/mappings/world-point-detail";
 import { Rules, type Rule } from "@opencok/rules/game";
 import type { Row } from "@opencok/contracts/rows";
 import {

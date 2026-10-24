@@ -17,7 +17,7 @@ import {
   worldPointOccupied,
   worldPointOwnerBase,
 } from "@opencok/rules/world-point-detail";
-import { worldPointOwner } from "@opencok/dtos/world-point-detail";
+import { worldPointOwner } from "@opencok/mappings/world-point-detail";
 import type { WorldPointOwnerSnapshot } from "@opencok/contracts/world-point-detail";
 import type { Row } from "@opencok/contracts/rows";
 import { decode, encode, sfs } from "@opencok/messages/sfs";

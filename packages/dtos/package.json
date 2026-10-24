@@ -30,13 +30,8 @@
     "./world-resource-detail": "./src/world-resource-detail.ts",
     "./world-point-detail": "./src/world-point-detail.ts",
     "./world-monster-detail": "./src/world-monster-detail.ts",
-    "./dragon-ranking": "./src/dragon-ranking.ts"
-  },
-  "dependencies": {
-    "@opencok/constants": "workspace:*",
-    "@opencok/contracts": "workspace:*",
-    "@opencok/errors": "workspace:*",
-    "@opencok/messages": "workspace:*",
-    "@opencok/rules": "workspace:*"
+    "./dragon-ranking": "./src/dragon-ranking.ts",
+    "./value": "./src/value.ts",
+    "./configuration": "./src/configuration.ts"
   }
 }

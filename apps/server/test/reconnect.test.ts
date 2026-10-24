@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { reconnectArmies, reconnectArmy, reconnectBalances } from "@opencok/dtos/reconnect";
+import { reconnectArmies, reconnectArmy, reconnectBalances } from "@opencok/mappings/reconnect";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 import type { Row } from "@opencok/contracts/rows";
 

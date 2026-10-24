@@ -8,7 +8,7 @@ import type {
 import type { Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 import { avatarSystemMail } from "@opencok/rules/avatar-mail";
-import { avatarMailPush } from "@opencok/dtos/avatar-mail";
+import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import { finishAvatar } from "./avatar-finish.ts";
 
 export function createAvatarCompletion(options: {
