@@ -61,6 +61,7 @@ export interface CityState {
   civilizationPrestige?: bigint;
 }
 export interface GameStore extends AuthenticationStore {
+  rankingPrivacy?(uid: string, kind: "payment" | "consumption"): Promise<number>;
   normalRankingRealm?(): Promise<boolean>;
   mailUpdates?(
     uid: string,
@@ -172,6 +173,8 @@ export interface GameServices {
     ranges: readonly DragonRankingRange[],
     allianceId: string,
   ): Promise<readonly DragonRankingEntry[]>;
+  attributeRanking?(type: number): Promise<readonly string[]>;
+  publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
   globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
   scoreActivityRanking?(): Promise<readonly string[]>;
   nicknameBadWords?(name: string): boolean | Promise<boolean>;

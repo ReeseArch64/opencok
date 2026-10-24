@@ -1,3 +1,4 @@
+import { loadAttributeRanking, loadPublishedGlobalRanking } from "./published-ranking.ts";
 import { loadDragonRanking } from "./dragon-ranking.ts";
 import type { DragonRankingRange } from "@opencok/contracts/dragon-ranking";
 import { publishPlayerUpdate } from "./player-update.ts";
@@ -51,6 +52,16 @@ export class Cache {
       (command, ...args) => this.command(command, ...args),
       this.config.kingdomId,
     );
+  }
+  attributeRanking(type: number) {
+    return loadAttributeRanking(
+      (name, ...args) => this.command(name, ...args),
+      this.config.kingdomId,
+      type,
+    );
+  }
+  publishedGlobalRanking(kind: "payment" | "consumption") {
+    return loadPublishedGlobalRanking((name, ...args) => this.command(name, ...args), kind);
   }
   globalCelebrityRanking(rankType: number): Promise<readonly string[]> {
     return loadGlobalCelebrityRanking(
