@@ -22,6 +22,7 @@ import { user_military_rank } from "@opencok/drizzle/schema/opencok_kingdom/user
 import { user_miracle_buff_active } from "@opencok/drizzle/schema/opencok_kingdom/user_miracle_buff_active";
 import { kingdom_position } from "@opencok/drizzle/schema/opencok_kingdom/kingdom_position";
 import { activity } from "@opencok/drizzle/schema/opencok_kingdom/activity";
+import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Database } from "./game.ts";
@@ -52,6 +53,7 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     user_miracle_buff_active,
     kingdom_position,
     activity,
+    alliance_territory,
   ])
     await db.select().from(table).limit(0);
 }
@@ -105,6 +107,7 @@ export function readPowerState(
         miracle: undefined,
         office: undefined,
         kingdomFights: [],
+        territoryTrees: [],
       };
       if (!profile) return empty;
       const statistics = (
@@ -306,6 +309,27 @@ export function readPowerState(
             .orderBy(asc(activity.id))
             .limit(2)
         : [];
+      const territoryTrees = profile.allianceId?.trim()
+        ? await tx
+            .select({
+              allianceId: alliance_territory.allianceId,
+              pointId: alliance_territory.pointId,
+              type: alliance_territory.type,
+              stat: alliance_territory.stat,
+              level: alliance_territory.level,
+              activeSkin: alliance_territory.activeSkin,
+            })
+            .from(alliance_territory)
+            .where(
+              and(
+                eq(alliance_territory.allianceId, profile.allianceId),
+                eq(alliance_territory.type, 42),
+                gt(alliance_territory.pointId, 0),
+              ),
+            )
+            .orderBy(asc(alliance_territory.uid))
+            .limit(2)
+        : [];
       return {
         profile,
         statistics,
@@ -331,6 +355,7 @@ export function readPowerState(
         miracle,
         office,
         kingdomFights,
+        territoryTrees,
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

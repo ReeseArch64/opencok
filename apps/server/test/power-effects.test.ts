@@ -29,6 +29,7 @@ function fixture() {
     miracle: undefined,
     office: undefined,
     kingdomFights: [],
+    territoryTrees: [],
   };
   const rules = new Rules(
     new Map(),
