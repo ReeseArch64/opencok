@@ -586,6 +586,13 @@ values skip writes except the speed flag; banner bigint storage retains Int prot
 limits. Public-profile reads already consume the visibility columns. No cache delivery
 or notification is introduced. The server guide records command-specific no-op and
 failure behavior, with synthetic unit validation only.
+Nickname text rules remain pure: Java trim/blank behavior, weighted GBK length and
+character eligibility feed an ordered filter/availability evaluation. The GBK width
+table is derived from an independently authored Java 8 standard-library probe and has
+exhaustive code-unit checksum coverage; runtime and unit tests require no Java process.
+Providers are explicit, and the nickname-check command remains disabled until the
+bad-word source/matcher and global name-mapping/account adapter are connected. This
+foundation neither reserves names nor changes profiles, balances or items.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab

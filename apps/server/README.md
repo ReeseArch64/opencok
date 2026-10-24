@@ -262,6 +262,37 @@ unchanged-value or speed-write rule. Unit coverage uses fake SQL and a simulated
 schedule, including different-field updates preserving both values. Live concurrency,
 client behavior, nickname changes and their costs remain outside this completed slice.
 
+Nickname checking now has a pure text/evaluation foundation in `rules/nickname`.
+It uses Java trim (boundary code units at most U+0020), Java 8 blank classification,
+balanced braces and the original JSON/emoji/supplementary-character exclusions.
+Weighted length counts U+007E–U+05FF units as one each, removes them, then measures
+the remaining UTF-16 text using Java GBK byte widths and replacement behavior.
+Removing those units can join surrogate halves; supplementary or unmappable characters
+use the encoder's replacement width. Pure inputs are bounded to 65,535 UTF-16 units;
+this does not expand the existing SFS transport bounds or admit malformed wire text.
+
+The 3–16 gate uses the trimmed weighted length. Response `length` adds every ASCII
+space in the original input, including internal spaces already counted by the weighted
+length; `remainLength` can therefore be negative while this gate still passes. A leading
+parenthesis sets `exist` to -1 but does not skip otherwise eligible filter or availability
+calls. Invalid length/characters skip both providers; a filter match skips availability.
+Only type 0 checks occupation, while other signed Int types still filter. Providers
+receive the trimmed name, are required explicitly and preserve reached failures.
+
+The GBK width table contains 139 intervals covering 23,940 two-byte BMP characters.
+An independently authored Temurin 8.0.504+1 standard-library probe supplied an exhaustive
+65,536-unit width checksum and 2,264 synthetic text vectors. The checked-in vectors store
+UTF-16 as hex to retain surrogate and control cases. Normal unit tests execute only
+TypeScript; no private game classes were executed to generate evidence. Character
+validation follows the collected original's balanced-brace return rather than an
+inconsistent reconstructed source variant.
+
+`user.check.nickName` remains unsupported until the bad-word loader/matcher and global
+name-mapping/account query are composed with these rules. The global mapping lookup is
+distinct from a local profile-name search. No default empty filter or available-name
+answer is supplied. Name reservation, rename item/gold costs and downstream effects
+remain separate required work. This foundation performs no persistence or notifications.
+
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
 separately checks version and start/end dates for stamina, star unlocks and
@@ -2951,7 +2982,7 @@ use these descriptions before the reconnect task component is complete.
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                              |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                               |
 | 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                        |
-| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags                                                                                              | Nicknames, validation, applicable costs and remaining profile preference commands.                                                                                                      |
+| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags; nickname text/evaluation rules                                                              | Nickname filter/global availability and handler composition; rename costs/effects and remaining profile commands.                                                                       |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                            |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                       |
 
