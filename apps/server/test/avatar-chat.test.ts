@@ -582,6 +582,7 @@ test("the internal route is exact and remains distinct from public discovery rou
       { method, url: path } as IncomingMessage,
       {
         setHeader() {},
+        once() {},
         writeHead(code: number) {
           status = code;
         },

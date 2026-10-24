@@ -1,9 +1,9 @@
+import { logContext, logEvent, logHttpRequest } from "@opencok/core/logging";
 import {
   chatDiscoveryPaths,
   type ChatDiscovery,
   type ChatDiscoveryPath,
 } from "@opencok/contracts/chat";
-import { randomUUID } from "node:crypto";
 import { phpEmpty, phpJson, phpUrlDecode, requestParameters } from "./compat.ts";
 import { Discovery } from "./discovery.ts";
 import type { AccountReader } from "@opencok/contracts/account";
@@ -66,31 +66,20 @@ export function createHandler(
     }
     return text("Not Found", 404);
   }
-  return {
-    async fetch(request: Request): Promise<Response> {
-      const started = performance.now(),
-        requestId = randomUUID();
-      let response: Response, failure: string | undefined;
-      try {
-        response = await route(request);
-      } catch (error) {
-        failure = error instanceof DependencyError ? error.dependency : "request_failed";
-        response = text("", error instanceof DependencyError ? 503 : 500);
-      }
-      response.headers.set("X-Request-ID", requestId);
-      console.info(
-        JSON.stringify({
-          event: "http",
-          requestId,
-          method: request.method,
-          status: response.status,
-          durationMs: Math.round(performance.now() - started),
-          failure,
-        }),
-      );
-      return request.method === "HEAD"
-        ? new Response(null, { status: response.status, headers: response.headers })
-        : response;
-    },
-  };
+  async function fetchRequest(request: Request): Promise<Response> {
+    const requestId = logContext().requestId;
+    let response: Response, failure: string | undefined;
+    try {
+      response = await route(request);
+    } catch (error) {
+      failure = error instanceof DependencyError ? error.dependency : "request_failed";
+      response = text("", error instanceof DependencyError ? 503 : 500);
+    }
+    if (requestId) response.headers.set("X-Request-ID", String(requestId));
+    if (failure) logEvent("request_failed", { reason: failure, status: response.status }, "error");
+    return request.method === "HEAD"
+      ? new Response(null, { status: response.status, headers: response.headers })
+      : response;
+  }
+  return { fetch: (request: Request) => logHttpRequest(request, fetchRequest) };
 }

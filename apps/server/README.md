@@ -34,6 +34,35 @@ up on failed startup and tolerates repeated close calls. TCP packet ordering,
 backpressure, controllers and synchronous rules remain independent of Effect. See
 [ADR-0012](../../docs/decisions/0012-adopt-effect-for-service-composition.md).
 
+## Observe local tests
+
+The server emits Evlog JSON events for startup, dependency acquisition/release,
+readiness transitions, TCP connections, handshake, login, initialization,
+commands, protocol rejection, backpressure, timeout, session cleanup and shutdown.
+API and Files use the shared HTTP request logger; Chat also logs HTTP and
+WebSocket operations. See the [shared logging contract](../../packages/core/README.md#operational-logging).
+
+After rebuilding the development stack, follow the realm and discovery logs:
+
+```sh
+docker compose --profile dev up --build -d --wait
+docker compose logs --follow --tail=200 server api
+```
+
+For a JSON stream suitable for local filtering:
+
+```sh
+docker compose logs --follow --no-log-prefix server api | jq -R 'fromjson?'
+```
+
+Filter by `level`, `event`, `connectionId`, `operationId` or `requestId`.
+`command_completed` includes `command`, `durationMs` and `outcome` for every
+command, including repeated failures. `command_rejected` explains rejection;
+`resource_failed` identifies the failed startup/shutdown dependency operation.
+`readiness_changed` reports database, cache and coordination availability.
+An unexpected application failure intentionally omits the original error text;
+use its operation, controlled reason and correlation fields to reproduce it.
+
 ## Start locally
 
 From the repository root:

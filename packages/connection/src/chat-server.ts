@@ -1,6 +1,8 @@
 import { chatAvatarProfilePath } from "@opencok/contracts/chat-avatar-profile";
 import type { AsyncHttpHandler, HttpHandler, WebSocketGateway } from "@opencok/contracts/chat";
-import { createServer } from "node:http";
+import { createServer, type RequestListener } from "node:http";
+import { randomUUID } from "node:crypto";
+import { httpOperation, logEvent, withLogContext } from "@opencok/core/logging";
 
 export function createChatHttpHandler({
   isReady = () => true,
@@ -16,7 +18,7 @@ export function createChatHttpHandler({
   serverListHandler?: HttpHandler;
   websocketGateway?: WebSocketGateway;
 } = {}): HttpHandler {
-  return (request, response) => {
+  const route: RequestListener = (request, response) => {
     if (request.method === "GET" && request.url?.split("?", 1)[0] === "/api/v1global_config") {
       if (configHandler) {
         configHandler(request, response);
@@ -74,6 +76,28 @@ export function createChatHttpHandler({
 
     response.writeHead(404);
     response.end("not found\n");
+  };
+  return (request, response) => {
+    const requestId = randomUUID();
+    const started = performance.now();
+    withLogContext({ requestId, component: "chat.http" }, () => {
+      response.setHeader("X-Request-ID", requestId);
+      response.once("finish", () =>
+        logEvent(
+          "http",
+          {
+            requestId,
+            component: "chat.http",
+            operation: httpOperation(request.url?.split("?", 1)[0] ?? ""),
+            status: response.statusCode,
+            durationMs: Math.round(performance.now() - started),
+            outcome: response.statusCode >= 400 ? "failure" : "success",
+          },
+          response.statusCode >= 500 ? "error" : response.statusCode >= 400 ? "warn" : "info",
+        ),
+      );
+      route(request, response);
+    });
   };
 }
 
