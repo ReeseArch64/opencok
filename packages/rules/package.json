@@ -34,7 +34,9 @@
     "./ranking": "./src/ranking.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
-    "./mail": "./src/mail.ts"
+    "./mail": "./src/mail.ts",
+    "./mail-groups": "./src/mail-groups.ts",
+    "./mail-conversation-read": "./src/mail-conversation-read.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
