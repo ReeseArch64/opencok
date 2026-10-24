@@ -11,7 +11,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`, `report.picVer`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `act.score.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -1370,12 +1370,15 @@ board. `hero.self.rank` still requires actual activity/event state and rank maps
 cross-origin routing; it is not enabled by treating missing state as an empty activity.
 Other event and cross-realm ranking families remain incomplete.
 
-Code review and storage/controllers/server type checks pass for this slice. No new tests
-or fixtures were generated and no tests were executed, following the user's latest
-instruction to prioritize migration. Unit and runtime validation are deferred. No real
-cache/database/services, integration tests or client/ADB were used; no schema, dependency
-or CI workflow changed. The incomplete event-ranking family receives no completed-group
-credit from this unverified command alone.
+Four focused unit tests cover exact SFS StringArray output, correlation, ignored
+selectors, authenticated owner checks, missing-provider versus reached-failure behavior
+and complete string/collection/frame bounds. A disposable Redis 6.2.24 test executes
+real list reads for two realms and checks duplicates, empty/NUL/Unicode strings, repeated
+reads, unchanged contents/expiry, wrong-type fallback and service loss. Affected types,
+lint and formatting pass. Native clients and production Redis remain unverified. No
+schema, dependency or CI workflow changes are required. This evidence completes the
+query acceptance in issue #177; event publishing and other ranking families remain
+separate work.
 
 `global.celebrities.rank` reads the existing published global boards for the local
 realm. Before decoding `rankType`, it checks the global `server_info` row: realm IDs
