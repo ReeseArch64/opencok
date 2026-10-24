@@ -42,7 +42,7 @@ async function boundedBody(request: Request) {
   }
   return Buffer.concat(chunks);
 }
-export function createHandler(store: ImageStore, signingKey: Buffer) {
+export function createHandler(store: ImageStore, signingKey: Buffer, now = Date.now) {
   return async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
     try {
@@ -58,6 +58,7 @@ export function createHandler(store: ImageStore, signingKey: Buffer) {
           owner,
           sequence,
           signingKey,
+          Math.floor(now() / 1000),
         );
         const receipt = await store.find(owner, sequence);
         if (!receipt) return new Response(null, { status: 404 });
@@ -81,7 +82,11 @@ export function createHandler(store: ImageStore, signingKey: Buffer) {
       if (url.pathname !== UPLOAD_PATH || url.search) throw new HttpError(404, "Unknown endpoint");
       if (request.method !== "POST")
         return new Response(null, { status: 405, headers: { Allow: "POST" } });
-      const grant = verifyGrant(request.headers.get("x-upload-grant") ?? "", signingKey);
+      const grant = verifyGrant(
+        request.headers.get("x-upload-grant") ?? "",
+        signingKey,
+        Math.floor(now() / 1000),
+      );
       const body = await boundedBody(request);
       let form: FormData;
       try {

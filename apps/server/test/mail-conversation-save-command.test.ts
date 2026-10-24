@@ -35,6 +35,9 @@ function fixture() {
     mailSave: unused,
     mailRead: unused,
     mailDelete: unused,
+    mailGroups: unused,
+    mailBatch: unused,
+    mailCategory: unused,
     mailContents: unused,
     mailConversationSave: async (uid, query) => {
       calls.push({ uid, query });
@@ -173,4 +176,17 @@ test("chatMail.save rejects unauthorized snapshots and transaction failures", as
   await expect(
     game.execute("self", "chatMail.save", { type: sfs.int(1), flag: sfs.int(1) }),
   ).rejects.toThrow("Synthetic conversation failure");
+});
+
+test("conversation read rejects unsupported chat effects before mailbox mutation", async () => {
+  const f = fixture();
+  await expect(
+    f.game.execute("self", "chatMail.read", {
+      fromUser: sfs.string("sender"),
+      mod: sfs.int(1),
+      types: sfs.string("0,1,20"),
+    }),
+  ).rejects.toMatchObject({ code: "102192" });
+  expect(f.calls).toEqual([]);
+  expect(f.clocks()).toBe(1);
 });

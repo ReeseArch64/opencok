@@ -5,6 +5,79 @@ import { port, timeout, databaseName, redisUrl, realmSettings } from "./service.
 
 export const serverSchema = z
   .object({
+    GAME_FILES_URL: z.preprocess(
+      blankToUndefined,
+      z
+        .url({ protocol: /^https?$/ })
+        .refine((value) => {
+          try {
+            const url = new URL(value);
+            return (
+              url.pathname === "/" && !url.username && !url.password && !url.search && !url.hash
+            );
+          } catch {
+            return false;
+          }
+        })
+        .optional(),
+    ),
+    FILES_SIGNING_KEY_FILE: z.preprocess(blankToUndefined, z.string().min(1).optional()),
+    GAME_AVATAR_CHAT_URL: z.preprocess(
+      blankToUndefined,
+      z
+        .url({ protocol: /^https?$/ })
+        .refine((value) => {
+          try {
+            const url = new URL(value);
+            return (
+              url.pathname === "/_internal/avatar-profile" &&
+              !url.username &&
+              !url.password &&
+              !url.search &&
+              !url.hash &&
+              url.hostname !== "cok.chat" &&
+              !url.hostname.endsWith(".cok.chat")
+            );
+          } catch {
+            return false;
+          }
+        })
+        .optional(),
+    ),
+    GAME_CHAT_SESSION_URL: z.preprocess(
+      blankToUndefined,
+      z
+        .url({ protocol: /^https?$/ })
+        .refine((value) => {
+          try {
+            const url = new URL(value);
+            return (
+              url.pathname === "/external/session" &&
+              !url.username &&
+              !url.password &&
+              !url.search &&
+              !url.hash &&
+              url.hostname !== "cok.chat" &&
+              !url.hostname.endsWith(".cok.chat")
+            );
+          } catch {
+            return false;
+          }
+        })
+        .optional(),
+    ),
+    CHAT_SIGNING_SECRET: z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().min(1).optional(),
+    ),
+    GAME_MAIL_TRANSLATION: z
+      .enum(["true", "false"])
+      .default("true")
+      .transform((value) => value === "true"),
+    GAME_CROSS_SEARCH: z
+      .enum(["true", "false"])
+      .default("true")
+      .transform((value) => value === "true"),
     GAME_HOST: z.string().min(1).default("127.0.0.1"),
     GAME_PORT: port(19933),
     GAME_HEALTH_PORT: port(18090),
@@ -44,6 +117,18 @@ export const serverSchema = z
     GAME_RESOURCES: z.string().trim().min(1),
     GAME_MAP_SIZE: z.coerce.number().int().min(100).max(4000).default(1200),
     DEPENDENCY_TIMEOUT_MS: timeout(5000),
+  })
+  .refine((settings) => !settings.GAME_CHAT_SESSION_URL || !!settings.CHAT_SIGNING_SECRET, {
+    path: ["CHAT_SIGNING_SECRET"],
+  })
+  .refine((settings) => !settings.GAME_FILES_URL || !!settings.FILES_SIGNING_KEY_FILE, {
+    path: ["FILES_SIGNING_KEY_FILE"],
+  })
+  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.GAME_FILES_URL, {
+    path: ["GAME_FILES_URL"],
+  })
+  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.CHAT_SIGNING_SECRET, {
+    path: ["CHAT_SIGNING_SECRET"],
   })
   .readonly();
 

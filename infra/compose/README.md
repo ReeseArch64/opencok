@@ -2,19 +2,23 @@
 
 Compose is the local development environment. Production uses a separate deployment
 and does not depend on this Compose configuration. Development settings are written
-directly in `docker-compose.yml`; only the game login secret is substituted from the
-root `.env`.
+directly in `docker-compose.yml`; the game login secret and optional chat integration
+settings are substituted from the root `.env`.
 
 Every service uses both profiles `all` and `dev`; either profile starts the same
 complete set of containers, including pgAdmin, Redis Insight and Portainer.
-Chat and media/files remain outside this stage. MinIO and `minio-setup` provide the
+Chat and media/files containers remain outside this stage. MinIO and `minio-setup` provide the
 client CDN alongside the TypeScript API/server, gateway, PostgreSQL, Redis and
 ZooKeeper.
 
 ## Local inputs and start
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the private
-`GAME_LOGIN_SECRET` exception. Use `.env.example` as the reference and preserve
+`GAME_LOGIN_SECRET` exception. Optional `GAME_CHAT_SESSION_URL`, `CHAT_SIGNING_SECRET`
+and `API_CHAT_URL` connect separately hosted chat without provisioning it. The realm
+uses the private session URL; the API uses the HTTP origin for public metadata only.
+Both processes must be able to reach the configured service on their network, and its
+advertised WebSocket must be reachable by clients. Use `.env.example` as the reference and preserve
 existing values. No app-local env files are needed. The example database URL uses
 Compose service DNS; host-side tools need the published PostgreSQL port 5432.
 
@@ -53,16 +57,16 @@ The one-shot jobs exit with code zero after completion.
 
 ## Direct development values
 
-| Endpoint                       | Published port |
-| ------------------------------ | -------------- |
-| Gateway HTTP discovery and CDN | 80             |
-| Gateway game TCP               | 9933           |
-| PostgreSQL                     | 5432           |
-| MinIO object endpoint          | 9000           |
-| MinIO console                  | 9001           |
-| pgAdmin                        | 5050           |
-| Redis Insight                  | 5540           |
-| Portainer HTTPS                | 9443           |
+| Endpoint                                 | Published port |
+| ---------------------------------------- | -------------- |
+| Gateway HTTP game/chat discovery and CDN | 80             |
+| Gateway game TCP                         | 9933           |
+| PostgreSQL                               | 5432           |
+| MinIO object endpoint                    | 9000           |
+| MinIO console                            | 9001           |
+| pgAdmin                                  | 5050           |
+| Redis Insight                            | 5540           |
+| Portainer HTTPS                          | 9443           |
 
 Port mappings have no host-IP prefix. Internal connections use service DNS:
 `database:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933` and

@@ -68,6 +68,7 @@ export function createSessionHandler(
     socket.setNoDelay(true);
     const reader = new FrameReader();
     const token = randomBytes(24).toString("hex");
+    let unsubscribe: (() => void) | undefined;
     let uid: string | undefined;
     let handshake = false;
     let initialized = false;
@@ -149,6 +150,20 @@ export function createSessionHandler(
           const details = fields(body.p);
           if (details._cok_) initial._cok_ = details._cok_;
           send(extension("init", initial));
+          if (!socket.destroyed)
+            unsubscribe = dependencies.notifications?.subscribe(uid, async (command, body) => {
+              if (
+                socket.destroyed ||
+                !ready() ||
+                sessions.get(claimed!)?.socket !== socket ||
+                !(await cache.refresh(claimed!, token))
+              )
+                return false;
+              if (socket.destroyed || !ready() || sessions.get(claimed!)?.socket !== socket)
+                return false;
+              send(extension(command, body));
+              return !socket.destroyed;
+            });
           report("login_accepted", {
             initialization: "partial",
             outcome: "success",
@@ -329,6 +344,8 @@ export function createSessionHandler(
       socket.destroy();
     });
     socket.on("close", () => {
+      unsubscribe?.();
+      unsubscribe = undefined;
       sockets.delete(socket);
       report("connection_closed", {
         reason: closeReason,

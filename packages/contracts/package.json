@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./avatar-version": "./src/avatar-version.ts",
     "./account": "./src/account.ts",
     "./game": "./src/game.ts",
     "./power": "./src/power.ts",
@@ -24,7 +25,16 @@
     "./files": "./src/files.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
-    "./mail": "./src/mail.ts"
+    "./mail": "./src/mail.ts",
+    "./mail-updates": "./src/mail-updates.ts",
+    "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
+    "./world-favorites": "./src/world-favorites.ts",
+    "./world-search": "./src/world-search.ts",
+    "./player-search": "./src/player-search.ts",
+    "./world-resource-detail": "./src/world-resource-detail.ts",
+    "./world-point-detail": "./src/world-point-detail.ts",
+    "./world-monster-detail": "./src/world-monster-detail.ts",
+    "./dragon-ranking": "./src/dragon-ranking.ts"
   },
   "dependencies": {}
 }

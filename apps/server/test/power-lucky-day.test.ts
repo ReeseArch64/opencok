@@ -65,6 +65,26 @@ test("lucky-day projections retain persisted effects and last duplicate values w
   expect(lucky).toEqual(before);
 });
 
+test("lucky-day event selectors preserve Unicode ranges and repeated hyphens separately from function-on gates", () => {
+  const rules = fixture();
+  const control = rules.configuration.payControl!.get("69028")!;
+  for (const selector of ["--١--٢--", "1;bad", "3-2147483648;1"]) {
+    control.k2 = selector;
+    expect(luckyDayEffects(profile, lucky, server, rules, context).get(487)).toBe(15);
+  }
+  control.k2 = "3-2147483648";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).size).toBe(0);
+  for (const selector of ["bad;1", "1-2-3"]) {
+    control.k2 = selector;
+    expect(() => luckyDayEffects(profile, lucky, server, rules, context)).toThrow();
+  }
+  expect(
+    luckyDayEffects(profile, lucky, server, rules, { ...context, testServer: true }).get(487),
+  ).toBe(15);
+  rules.features.get("luckyday_server")!.online = "close";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).size).toBe(0);
+});
+
 test("lucky-day eligibility combines server availability, player version, realm, platform and both test switches", () => {
   const rules = fixture();
   const control = rules.configuration.payControl!.get("69028")!;
@@ -195,4 +215,38 @@ test("active dependency gaps and malformed effect vectors fail rather than inven
       [218, -2],
     ]),
   );
+});
+
+test("lucky-day player versions retain direct Java comparison before realm and event state", () => {
+  const rules = fixture();
+  const control = rules.configuration.payControl!.get("69028")!;
+  for (const version of ["13", ".12..6.0.1", "１２.６.０"])
+    expect(luckyDayEffects(profile, lucky, server, rules, { ...context, version }).get(487)).toBe(
+      15,
+    );
+  for (const version of ["", "\u2000", "12.6", "13.bad"])
+    expect(() => luckyDayEffects(profile, lucky, server, rules, { ...context, version })).toThrow();
+  control.k2 = "bad";
+  expect(luckyDayEffects(profile, lucky, server, rules, { ...context, version: "11" }).size).toBe(
+    0,
+  );
+  delete control.k1;
+  expect(() => luckyDayEffects(profile, lucky, server, rules, context)).toThrow();
+  rules.features.get("luckyday_server")!.online = "close";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).size).toBe(0);
+});
+
+test("lucky-day panel dates normalize fields and retain independent minus-one parse fallbacks", () => {
+  const rules = fixture();
+  const panel = rules.power.activityPanels!.get("57091")!;
+  panel.start = "2026-9-53-12-00suffix";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).get(487)).toBe(15);
+  panel.start = "bad";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).get(487)).toBe(15);
+  panel.end = "bad";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).size).toBe(0);
+  expect(luckyDayEffects(profile, lucky, server, rules, { ...context, now: -1 }).get(487)).toBe(15);
+  expect(luckyDayEffects(profile, lucky, server, rules, { ...context, now: 0 }).size).toBe(0);
+  delete panel.start;
+  expect(luckyDayEffects(profile, lucky, server, rules, { ...context, now: -1 }).size).toBe(0);
 });

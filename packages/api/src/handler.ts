@@ -1,4 +1,9 @@
 import { logContext, logEvent, logHttpRequest } from "@opencok/core/logging";
+import {
+  chatDiscoveryPaths,
+  type ChatDiscovery,
+  type ChatDiscoveryPath,
+} from "@opencok/contracts/chat";
 import { phpEmpty, phpJson, phpUrlDecode, requestParameters } from "./compat.ts";
 import { Discovery } from "./discovery.ts";
 import type { AccountReader } from "@opencok/contracts/account";
@@ -20,10 +25,27 @@ export function createHandler(
   accounts: AccountReader & { health(): Promise<unknown> },
   directory: Pick<ServerDirectory, "read">,
   redis: { health(): Promise<unknown> },
+  chatDiscovery?: ChatDiscovery,
 ) {
   const discovery = new Discovery(accounts, directory);
   async function route(request: Request): Promise<Response> {
     const path = new URL(request.url).pathname.replace(/\/{2,}/g, "/");
+    if (
+      chatDiscovery &&
+      request.method === "GET" &&
+      (chatDiscoveryPaths as readonly string[]).includes(path)
+    ) {
+      try {
+        return Response.json(await chatDiscovery(path as ChatDiscoveryPath), {
+          headers: { "Cache-Control": "no-store" },
+        });
+      } catch {
+        return Response.json(
+          { code: 0, data: path === "/api/v1global_config" ? {} : [] },
+          { status: 503, headers: { "Cache-Control": "no-store" } },
+        );
+      }
+    }
     if (["/healthz", "/_health.php"].includes(path) && ["GET", "HEAD"].includes(request.method))
       return text("ok\n");
     if (path === "/readyz" && ["GET", "HEAD"].includes(request.method)) {

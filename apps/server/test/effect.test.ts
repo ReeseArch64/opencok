@@ -23,6 +23,15 @@ const dependencies: ServerDependencies = {
     profile: async () => undefined,
     accounts: async () => [],
     playerSummaries: async () => [],
+    mailGroups: async () => {
+      throw new Error("Unexpected mail groups");
+    },
+    mailBatch: async () => {
+      throw new Error("Unexpected batch mail lookup");
+    },
+    mailCategory: async () => {
+      throw new Error("Unexpected category lookup");
+    },
     mailContents: async () => {
       throw new Error("Unexpected mail contents");
     },

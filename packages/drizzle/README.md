@@ -2,13 +2,13 @@
 
 `@opencok/drizzle` owns the application's PostgreSQL schemas, typed client and
 versioned Drizzle migrations. The maintained source of truth is `src/schema`,
-with **774 tables / 6,323 fields** and one module per table.
+with **778 tables / 6,350 fields** and one module per table.
 
 | Default physical database | SQL namespaces                                  | Migration role | Tables |
 | ------------------------- | ----------------------------------------------- | -------------- | -----: |
-| `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    113 |
-| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    661 |
-| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    661 |
+| `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    114 |
+| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    664 |
+| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    664 |
 
 Kingdom IDs **1 and 2** are configured by default. There is one maintained kingdom
 schema, one set of table modules and one kingdom migration history. Both physical
@@ -123,7 +123,7 @@ before using the corresponding server version. Generation, synthetic schema cont
 and SQL snapshots are verified; real migration execution and persistence/concurrency
 checks remain deferred under the current unit-only validation restriction.
 
-The next additive kingdom migration, `0004_mail_gift_openings`, adds a durable outbox
+The additive kingdom migration, `0004_mail_gift_openings`, adds a durable outbox
 for individual gift-opening records. It stores recipient and opening time by mail ID
 and original creation time. The server commits it with the read flag and update marker,
 then relays immutable values to the existing global gift log before deleting delivered
@@ -131,6 +131,16 @@ entries. No cross-database atomicity is assumed; replay is idempotent. No foreig
 ties pending entries to mail lifetime. Rollback of the application can leave both
 additive mailbox tables in place; preserve pending entries for later relay recovery.
 This migration has also been generated and checked without being applied to a database.
+
+The additive kingdom migration `0005_mail_chat_read_intents` creates an immutable
+outbox for conversation read notifications. UUID command identity and original effect
+position form its primary key; recipient, raw peer string, canonical chat types and
+request time describe each event. Pending-time and owner indexes support future relay
+scans and bounded per-player admission. Empty peers and the literal `null` remain distinct.
+No foreign key ties events to mailbox lifetime. Repository writes commit events and mail
+status together, but command dispatch and delivery remain disabled until a maintained
+private-conversation consumer exists. The migration is generated and checked only; it
+has not been applied. Preserve this table and pending events across application rollback.
 
 - Bigints, including the bounded full-width sequence ID, use TypeScript `bigint`.
   Serialize bigint explicitly at JSON/transport boundaries. Native sequences retain
@@ -178,3 +188,43 @@ rollback, migration repeatability, both default kingdoms, preserved namespace up
 Run this suite sequentially because its FK fixtures and final restart are shared.
 Missing dependencies fail the suite. CI runs the same PostgreSQL-only commands with
 Bun 1.4.2. This verifies persistence; application/gameplay flows have their own E2E.
+
+## Avatar completion receipts
+
+The generated kingdom migration `0006_avatar_completions` adds `avatar_completion`
+without rewriting existing data. Its `(ownerUid, sequence)` primary key permanently
+records the committed owner-bound image hash and encoded picture version. Constraints
+bound numeric identities, sequences, hashes, timestamps, pending-effect bits and the
+65,535-byte JSON intent snapshot. The pending index supports bounded delivery scans;
+this slice supplies no worker and applies no migration.
+
+`repositories/avatar-finish` writes the receipt together with the profile and moderation
+record. The versioned snapshot captures the optional mail template and profile/chat
+metadata. Pending bits 1/2/4 mean mail/profile timestamp/chat metadata respectively.
+Verified current-version replays without history create an observed receipt with zero
+pending effects; its timestamp records observation, not the original profile mutation.
+Consumers must acknowledge only completed effects and retain the completion row after
+all bits clear. Deleting receipt history can permit reuse after a profile reset. Back up
+receipts, profiles, moderation and object storage consistently; independent restores are
+not proven safe. The internal `repositories/avatar-mail` consumer now clears only the mail
+bit in the same transaction as message/extra/group insertion, without altering receipt
+history. The internal profile-marker consumer now acknowledges bit 2 only after bounded
+external publication; a failed or uncertain database commit can repeat that idempotent write. Chat
+bit 4 now has a corresponding authenticated receiver and consumer. Opt-in realm completion
+and recovery composition wires all three consumers; startup inspects the required tables
+without applying migrations. A recovery-only completion read requires an existing matching
+receipt and cannot advance progression or manufacture an observed receipt.
+
+## Chat avatar projection
+
+Global migration `0002_chat_avatar_profiles` adds `opencok_chat.chat_avatar_profile`
+with an owner/realm primary key, seven non-null fields and owner, realm, sequence,
+picture-version and timestamp checks. Chat owns writes and validates global account
+routing while holding that row lock before the projection lock. Larger avatar sequences
+win regardless of clock rollback; exact duplicates are idempotent and conflicting equal
+sequences fail. Reads join the current account route. This is a captured avatar-event
+projection, not authoritative progression or a complete current-profile directory.
+The realm acknowledges its separate pending bit only after the bounded HTTP receiver
+confirms the write. There is no cross-database transaction or automatic transfer/restore
+reconciliation. The migration has been generated and metadata/snapshots checked only;
+application and real PostgreSQL concurrency remain unvalidated.

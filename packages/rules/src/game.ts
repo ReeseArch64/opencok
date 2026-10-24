@@ -1,8 +1,15 @@
 import { GameError } from "@opencok/errors/game";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { ruleAvailable } from "./availability.ts";
+import { javaDecimal } from "./java-integer.ts";
 
 export type Rule = Record<string, string>;
+export interface WorldCatalogs {
+  fieldMonsters?: Map<string, Rule>;
+  armies?: Map<string, Rule>;
+  neutralResources?: Map<string, Rule>;
+  barbarians?: Map<string, Rule>;
+}
 export interface ReconnectCatalogs {
   treasures?: Map<string, Rule>;
   rewards?: Map<string, Rule>;
@@ -13,11 +20,18 @@ export interface ProfileCatalogs {
   servers?: Map<string, Rule>;
 }
 export interface ConfigurationCatalogs {
+  settingRecords?: readonly Rule[];
+  starRecords?: readonly Rule[];
+  featureRecords?: readonly Rule[];
+  dataConfig?: Map<string | null, Rule>;
   serverConfig?: Map<string, Rule>;
   generalSales?: Map<string, Rule>;
+  generalSaleRecords?: readonly Rule[];
   payControl?: Map<string, Rule>;
   kingdomSkills?: Map<string, Rule>;
+  kingdomSkillRecords?: readonly Rule[];
   facebookShare?: Map<string, Rule>;
+  facebookShareRecords?: readonly Rule[];
 }
 export interface PowerCatalogs {
   generals?: Map<string, Rule>;
@@ -34,11 +48,16 @@ export interface PowerCatalogs {
   dragonLevels?: Map<string, Rule>;
   statuses?: Map<string, Rule>;
   generalSkills?: Map<string, Rule>;
+  newGeneralBases?: Map<string, Rule>;
+  newGeneralSkills?: Map<string, Rule>;
+  newGeneralOffices?: Map<string, Rule>;
+  newGeneralRefinement?: Map<string, Rule>;
   equipmentSets?: Map<string, Rule>;
   vip?: Map<string, Rule>;
   superVip?: Map<string, Rule>;
   allianceSciences?: Map<string, Rule>;
   prestigeLevels?: Map<string, Rule>;
+  prestigeLevelRecords?: readonly Rule[];
   civilizationFeatures?: Map<string, Rule>;
   militarySkills?: Map<string, Rule>;
   miracleBuffs?: Map<string, Rule>;
@@ -67,6 +86,8 @@ export class Rules {
     readonly power: PowerCatalogs = {},
     readonly profile: ProfileCatalogs = {},
     readonly reconnect: ReconnectCatalogs = {},
+    readonly mail: Map<string, Rule> = new Map(),
+    readonly world: WorldCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (
@@ -131,18 +152,15 @@ export class Rules {
     return out;
   }
   maxStar(itemId: string, now: number): number {
-    const prefix = String(Math.floor(Number(itemId) / 100) * 100);
+    const prefix = `${javaDecimal(itemId, 32) / 100n}00`;
     let max = 0;
 
-    for (const rule of this.stars.values()) {
+    for (const rule of this.configuration.starRecords ?? this.stars.values()) {
       if (
         rule.build_id === prefix &&
-        ruleAvailable(rule, { kingdomId: this.kingdomId, version: MOBILE_CLIENT_VERSION, now }) &&
-        /^\d+$/.test(rule.star ?? "") &&
-        Number.isSafeInteger(Number(rule.star)) &&
-        Number(rule.star) <= 2147483647
+        ruleAvailable(rule, { kingdomId: this.kingdomId, version: MOBILE_CLIENT_VERSION, now })
       )
-        max = Math.max(max, Number(rule.star));
+        max = Math.max(max, Number(javaDecimal(rule.star ?? "", 32)));
     }
     return max;
   }

@@ -1,21 +1,23 @@
+import { chatAvatarProfilePath } from "@opencok/contracts/chat-avatar-profile";
 import type { AsyncHttpHandler, HttpHandler, WebSocketGateway } from "@opencok/contracts/chat";
 import { createServer, type RequestListener } from "node:http";
 import { randomUUID } from "node:crypto";
 import { httpOperation, logEvent, withLogContext } from "@opencok/core/logging";
 
-export function createChatServer({
+export function createChatHttpHandler({
   isReady = () => true,
   sessionHandler,
+  profileHandler,
   configHandler,
   serverListHandler,
-  websocketGateway,
 }: {
   isReady?: () => boolean;
   sessionHandler?: AsyncHttpHandler;
+  profileHandler?: AsyncHttpHandler;
   configHandler?: HttpHandler;
   serverListHandler?: HttpHandler;
   websocketGateway?: WebSocketGateway;
-} = {}) {
+} = {}): HttpHandler {
   const route: RequestListener = (request, response) => {
     if (request.method === "GET" && request.url?.split("?", 1)[0] === "/api/v1global_config") {
       if (configHandler) {
@@ -49,6 +51,15 @@ export function createChatServer({
       return;
     }
 
+    if (request.method === "POST" && request.url === chatAvatarProfilePath) {
+      if (profileHandler) void profileHandler(request, response);
+      else {
+        response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
+        response.end('{"code":0,"data":{}}');
+      }
+      return;
+    }
+
     response.setHeader("Content-Type", "text/plain; charset=utf-8");
 
     if (request.method === "GET" && request.url === "/_health") {
@@ -66,7 +77,7 @@ export function createChatServer({
     response.writeHead(404);
     response.end("not found\n");
   };
-  const server = createServer((request, response) => {
+  return (request, response) => {
     const requestId = randomUUID();
     const started = performance.now();
     withLogContext({ requestId, component: "chat.http" }, () => {
@@ -87,10 +98,13 @@ export function createChatServer({
       );
       route(request, response);
     });
-  });
+  };
+}
 
+export function createChatServer(options: Parameters<typeof createChatHttpHandler>[0] = {}) {
+  const server = createServer(createChatHttpHandler(options));
   server.requestTimeout = 4_000;
   server.headersTimeout = 5_000;
-  websocketGateway?.attach(server);
+  options.websocketGateway?.attach(server);
   return server;
 }

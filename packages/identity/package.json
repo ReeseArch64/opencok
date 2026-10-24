@@ -14,7 +14,8 @@
     "./mobile": "./src/mobile.ts",
     "./chat-token": "./src/chat-token.ts",
     "./chat-rooms": "./src/chat-rooms.ts",
-    "./avatar": "./src/avatar.ts"
+    "./avatar": "./src/avatar.ts",
+    "./chat-avatar-profile": "./src/chat-avatar-profile.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

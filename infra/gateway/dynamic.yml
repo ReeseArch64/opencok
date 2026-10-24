@@ -9,6 +9,10 @@ http:
       rule: (Path(`/gameservice/getserverlist.php`) || Path(`/gameservice/getline.php`) || Path(`/gameservice/getserverlist_memoryold.php`)) && (Method(`GET`) || Method(`HEAD`) || Method(`POST`))
       middlewares: [discovery-body]
       service: api
+    chat-discovery:
+      entryPoints: [web]
+      rule: (Path(`/api/v1global_config`) || Path(`/chat/server/links`) || Path(`/chat/server/all`)) && Method(`GET`)
+      service: api
     cdn-cok:
       entryPoints: [web]
       rule: PathPrefix(`/cok/`) && !PathPrefix(`/cok/img/`) && !PathRegexp(`(^|/)\.`) && !PathRegexp(`(?i)\.part(/|$)`) && !PathRegexp(`(?i)\.(php[0-9]*|phtml|phar|cgi|pl|py|sh|bash|asp|aspx|jsp)([./]|$)`) && (Method(`GET`) || Method(`HEAD`))

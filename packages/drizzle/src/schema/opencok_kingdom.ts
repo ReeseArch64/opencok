@@ -659,3 +659,6 @@ export { worldcup_apply } from "./opencok_kingdom/worldcup_apply";
 export { worldpoint } from "./opencok_kingdom/worldpoint";
 export { mail_update } from "./opencok_kingdom/mail_update";
 export { mail_gift_opening } from "./opencok_kingdom/mail_gift_opening";
+export { mail_chat_read_intent } from "./opencok_kingdom/mail_chat_read_intent";
+export { avatar_completion } from "./opencok_kingdom/avatar_completion";
+export { avatar_version_update } from "./opencok_kingdom/avatar_version_update";
