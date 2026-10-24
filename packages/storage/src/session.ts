@@ -2,7 +2,7 @@ import { loadMilitaryRanking } from "./military-ranking.ts";
 import { loadFlowerRanking } from "./flower-ranking.ts";
 import { loadDonationRanking } from "./donation-ranking.ts";
 import { loadThroneRankingPeriod } from "./throne-ranking.ts";
-import { loadHeroRankingPosition } from "./hero-ranking.ts";
+import { loadHeroRankingPosition, loadHeroHistoryPublication } from "./hero-ranking.ts";
 import type { HeroRankingLookup } from "@opencok/contracts/hero-ranking";
 import { loadAttributeRanking, loadPublishedGlobalRanking } from "./published-ranking.ts";
 import { loadDragonRanking } from "./dragon-ranking.ts";
@@ -57,6 +57,13 @@ export class Cache {
     return loadScoreActivityRanking(
       (command, ...args) => this.command(command, ...args),
       this.config.kingdomId,
+    );
+  }
+  heroHistoryPublication(keys: readonly string[], alliance: boolean) {
+    return loadHeroHistoryPublication(
+      (name, ...args) => this.command(name, ...args),
+      keys,
+      alliance,
     );
   }
   heroRankingPosition(query: HeroRankingLookup) {

@@ -13,3 +13,20 @@ export interface HeroSelfRanking {
   rankingAlliance: number;
   type: number;
 }
+
+export interface HeroInsideRankingSnapshot {
+  profile: Row | undefined;
+  rows: readonly Row[];
+}
+
+export interface HeroHistorySnapshot {
+  profile: Row | undefined;
+  active: Row | undefined;
+  events: readonly Row[];
+  castleLevel: number;
+  alliancePower: bigint;
+}
+export interface HeroHistoryPublication {
+  members: readonly string[];
+  alliances: readonly (string | null)[];
+}
