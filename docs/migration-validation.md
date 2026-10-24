@@ -2394,3 +2394,10 @@ the authoritative outcomes.
 
 No new tests, dependencies, private inputs or player-data mutations are introduced by this
 readiness record.
+
+The complete later-schema PostgreSQL suite found a coupled avatar-receipt fixture: copying
+its original composite key also requires the original picture version. The duplicate-row
+fixture now retains that version while still requiring the exact unique-violation code;
+production checks and all CRUD, rollback and restart assertions remain unchanged.
+The full local E2E suite passes 1446 tests and 34488 assertions, with Drizzle types, lint
+and formatting also passing. Full final-head CI remains required before merge.
