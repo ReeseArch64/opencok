@@ -52,7 +52,8 @@
     "./world-search": "./src/world-search.ts",
     "./player-search": "./src/player-search.ts",
     "./world-point-detail": "./src/world-point-detail.ts",
-    "./world-resource-owner": "./src/world-resource-owner.ts"
+    "./world-resource-owner": "./src/world-resource-owner.ts",
+    "./mail-system": "./src/mail-system.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

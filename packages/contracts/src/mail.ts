@@ -1,5 +1,16 @@
 import type { Row } from "./rows.ts";
 
+export interface MailSystemQuery {
+  anchor: string | null;
+  time: bigint;
+  now: number;
+}
+
+export type MailSystemInspector = (
+  entries: readonly MailListEntry[],
+  readers: MailCategoryReaders,
+) => Promise<void>;
+
 export type MailListCommand = "mread.batch" | "mread.chat";
 
 export type MailConversationReadEffect =

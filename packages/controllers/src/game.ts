@@ -1,3 +1,5 @@
+import { systemMailProjection } from "./mail-system.ts";
+import { javaDecimal } from "@opencok/rules/java-integer";
 import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
 import { dragonRanking } from "@opencok/dtos/dragon-ranking";
 import { decodeDragonRanking } from "./dragon-ranking.ts";
@@ -43,6 +45,7 @@ import { planMailDeletion } from "./mail-delete.ts";
 import { mailUpdateCursor, mailUpdatesProjection } from "./mail-updates.ts";
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import {
+  mailBlank,
   mailContentsQuery,
   mailCategoryQuery,
   mailBatchQuery,
@@ -313,6 +316,9 @@ export class Game {
         break;
       case "mail.delete":
         body = await this.mailDelete(uid, params);
+        break;
+      case "chat.get.system.mails.v2":
+        body = await this.mailSystem(uid, params);
         break;
       case "chat.get.update.mails":
         body = await this.mailUpdates(uid, params);
@@ -721,6 +727,49 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return mailDeleted(state.deleted);
+  }
+  private async mailSystem(uid: string, params: Fields): Promise<Fields> {
+    const clientseq = params.clientseq;
+    if (
+      !clientseq ||
+      (clientseq.type !== Type.Null &&
+        (clientseq.type !== Type.String || typeof clientseq.value !== "string"))
+    )
+      throw new GameError(errors.invalid);
+    const count = wireInt(params, "count");
+    let time = 0n;
+    if (params.time !== undefined) {
+      try {
+        time = javaDecimal(wireString(params, "time"), 64);
+      } catch {
+        throw new GameError(errors.invalid);
+      }
+    }
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.profile(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (!this.db.mailSystem) throw new GameError(errors.unsupported);
+    let anchor = clientseq.type === Type.Null ? null : (clientseq.value as string);
+    if (mailBlank(anchor) || anchor === "0") {
+      if (!this.services.lastSystemMail) throw new GameError(errors.unsupported);
+      anchor = await this.services.lastSystemMail(uid);
+    }
+    if (mailBlank(anchor) || anchor === "0") anchor = null;
+    if (anchor !== null && (anchor.length > 40 || anchor.includes("\0") || !anchor.isWellFormed()))
+      throw new GameError(errors.invalid);
+    const envelope: Fields = {};
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) envelope[key] = params[key]!;
+    let body: Fields | undefined;
+    const state = await this.db.mailSystem(uid, { anchor, time, now }, async (entries, readers) => {
+      body = await systemMailProjection(uid, entries, readers, count, time, envelope);
+    });
+    const current = this.checkProfile(state.profile, now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (!body) throw new GameError(errors.unsupported);
+    return body;
   }
   private async mailUpdates(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
