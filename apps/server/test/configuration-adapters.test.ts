@@ -3,56 +3,43 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { getTableColumns } from "drizzle-orm";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
-import { readLoginConfiguration } from "@opencok/repositories/game";
+import { readLoginConfiguration, readLoginSwitches } from "@opencok/repositories/game";
 import { Cache } from "@opencok/storage/session";
 
 function database(
   options: {
-    failure?:
-      | "profile"
-      | "preferences"
-      | "switches"
-      | "savepoint"
-      | "recover"
-      | "release"
-      | "commit";
+    failure?: "profile" | "preferences" | "switches" | "commit";
     emptySwitches?: boolean;
     sqlState?: string;
   } = {},
 ) {
   const queries: { text: string; params: unknown[] }[] = [];
   let aborted = false;
+  let transaction = false;
   const client = {
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
+      if (query.text.startsWith("begin")) transaction = true;
       const stage =
-        query.text === "rollback to savepoint login_configuration_switches"
-          ? "recover"
-          : query.text === "savepoint login_configuration_switches"
-            ? "savepoint"
-            : query.text === "release savepoint login_configuration_switches"
-              ? "release"
-              : query.text === "commit"
-                ? "commit"
-                : query.text.includes('from "opencok_kingdom"."userprofile"')
-                  ? "profile"
-                  : query.text.includes('from "opencok_kingdom"."parse_info"')
-                    ? "preferences"
-                    : query.text.includes('from "opencok_kingdom"."switches"')
-                      ? "switches"
-                      : undefined;
-      if (
-        stage &&
-        (stage === options.failure || (stage === "switches" && options.failure === "recover"))
-      ) {
-        aborted = true;
+        query.text === "commit"
+          ? "commit"
+          : query.text.includes('from "opencok_kingdom"."userprofile"')
+            ? "profile"
+            : query.text.includes('from "opencok_kingdom"."parse_info"')
+              ? "preferences"
+              : query.text.includes('from "opencok_kingdom"."switches"')
+                ? "switches"
+                : undefined;
+      if (stage && stage === options.failure) {
+        aborted = transaction;
         throw Object.assign(
           new Error("Synthetic query failure"),
           options.sqlState ? { code: options.sqlState } : {},
         );
       }
-      if (stage === "recover" || query.text === "rollback") aborted = false;
+      if (query.text === "rollback") aborted = false;
       if (aborted) throw new Error("Transaction still aborted");
+      if (query.text === "commit" || query.text === "rollback") transaction = false;
       if (query.text.includes('from "opencok_kingdom"."userprofile"')) {
         const values: Record<string, unknown> = {
           uid: "synthetic-player",
@@ -78,7 +65,10 @@ test("configuration persistence uses one read-only snapshot and filters both pla
   const { db, queries } = database();
   const result = await readLoginConfiguration(db, "synthetic-player");
   expect(result.profile?.uid).toBe("synthetic-player");
-  expect(result.switches).toEqual([{ name: "synthetic-switch", stat: 1, appVersion: "12.6.0" }]);
+  expect(result.switches).toBeUndefined();
+  expect(queries.some(({ text }) => text.includes('from "opencok_kingdom"."switches"'))).toBe(
+    false,
+  );
   expect(result.pushSettings).toEqual([{ type: 3, status: 0, audio: 1 }]);
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
@@ -144,43 +134,29 @@ test("invalid Redis transport responses and bounded keys fail before configurati
   expect(cache.calls).toEqual([]);
 });
 
-test("optional switches failures recover the read-only transaction and retain required configuration", async () => {
+test("optional switches run independently after required configuration and recover non-SQL failures by omission", async () => {
   const { db, queries } = database({ failure: "switches" });
   const result = await readLoginConfiguration(db, "synthetic-player");
   expect(result.profile?.uid).toBe("synthetic-player");
   expect(result.pushSettings).toEqual([{ type: 3, status: 0, audio: 1 }]);
-  expect(result.switches).toBeUndefined();
-  const savepoint = queries.findIndex(
-    ({ text }) => text === "savepoint login_configuration_switches",
-  );
-  expect(queries[savepoint - 1]?.text).toContain('from "opencok_kingdom"."parse_info"');
-  expect(queries.slice(savepoint + 2).map(({ text }) => text)).toEqual([
-    "rollback to savepoint login_configuration_switches",
-    "release savepoint login_configuration_switches",
-    "commit",
-  ]);
+  expect(queries.at(-1)?.text).toBe("commit");
+  expect(await readLoginSwitches(db)).toBeUndefined();
+  expect(queries.at(-1)?.text).toContain('from "opencok_kingdom"."switches"');
+  expect(queries.filter(({ text }) => text.startsWith("begin"))).toHaveLength(1);
   expect(queries.every(({ text }) => !/\b(insert|update|delete)\b/i.test(text))).toBe(true);
 });
 
-test("empty switches remain a successful query while transaction control and required reads cannot be swallowed", async () => {
+test("empty switches remain successful while required snapshot failures cannot be swallowed", async () => {
   const { db } = database({ emptySwitches: true });
-  expect((await readLoginConfiguration(db, "synthetic-player")).switches).toEqual([]);
-  for (const failure of [
-    "profile",
-    "preferences",
-    "savepoint",
-    "recover",
-    "release",
-    "commit",
-  ] as const) {
+  expect(await readLoginSwitches(db)).toEqual([]);
+  for (const failure of ["profile", "preferences", "commit"] as const) {
     const { db, queries } = database({ failure });
     await expect(readLoginConfiguration(db, "synthetic-player")).rejects.toThrow();
     expect(queries.at(-1)?.text).toBe("rollback");
     if (failure !== "commit") expect(queries.some(({ text }) => text === "commit")).toBe(false);
-    if (failure === "profile" || failure === "preferences")
-      expect(queries.some(({ text }) => text.includes('from "opencok_kingdom"."switches"'))).toBe(
-        false,
-      );
+    expect(queries.some(({ text }) => text.includes('from "opencok_kingdom"."switches"'))).toBe(
+      false,
+    );
   }
 });
 
@@ -194,21 +170,14 @@ test("counter keys preserve empty, literal null and whitespace device suffixes",
   ]);
 });
 
-test("recognized SQL failures recover to empty switches while non-SQL query exceptions remain unavailable", async () => {
+test("recognized SQL failures return empty switches while non-SQL query exceptions remain unavailable", async () => {
   for (const sqlState of ["42P01", "42501", "57014", "XX000"]) {
     const { db, queries } = database({ failure: "switches", sqlState });
-    const result = await readLoginConfiguration(db, "synthetic-player");
-    expect(result.switches).toEqual([]);
-    expect(result.profile?.uid).toBe("synthetic-player");
-    expect(queries.at(-1)?.text).toBe("commit");
-    expect(
-      queries.some(({ text }) => text === "rollback to savepoint login_configuration_switches"),
-    ).toBe(true);
+    expect(await readLoginSwitches(db)).toEqual([]);
+    expect(queries).toHaveLength(1);
   }
   for (const sqlState of ["ETIMEDOUT", "bad", "42p01"]) {
     const { db } = database({ failure: "switches", sqlState });
-    expect((await readLoginConfiguration(db, "synthetic-player")).switches).toBeUndefined();
+    expect(await readLoginSwitches(db)).toBeUndefined();
   }
-  const { db } = database({ failure: "recover", sqlState: "42P01" });
-  await expect(readLoginConfiguration(db, "synthetic-player")).rejects.toThrow();
 });
