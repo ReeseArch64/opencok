@@ -9,3 +9,5 @@ export const errors = {
 };
 
 export const MOBILE_CLIENT_VERSION = "12.06.0";
+export const PUSH_SETTING_COUNT = 20;
+export const WORLD_NEWS_PUSH_TYPE = 15;
