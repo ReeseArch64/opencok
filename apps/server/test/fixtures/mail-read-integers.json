@@ -1,0 +1,1645 @@
+{
+  "source": "Synthetic Java 8 Integer.parseInt vectors",
+  "vectors": [
+    {
+      "input": "",
+      "value": null
+    },
+    {
+      "input": " ",
+      "value": null
+    },
+    {
+      "input": " 1",
+      "value": null
+    },
+    {
+      "input": "1 ",
+      "value": null
+    },
+    {
+      "input": "1\n",
+      "value": null
+    },
+    {
+      "input": "\t1",
+      "value": null
+    },
+    {
+      "input": "+",
+      "value": null
+    },
+    {
+      "input": "-",
+      "value": null
+    },
+    {
+      "input": "++1",
+      "value": null
+    },
+    {
+      "input": "--1",
+      "value": null
+    },
+    {
+      "input": "+-1",
+      "value": null
+    },
+    {
+      "input": "-+1",
+      "value": null
+    },
+    {
+      "input": "0x1",
+      "value": null
+    },
+    {
+      "input": "010",
+      "value": 10
+    },
+    {
+      "input": "1.0",
+      "value": null
+    },
+    {
+      "input": "1e2",
+      "value": null
+    },
+    {
+      "input": "2147483647",
+      "value": 2147483647
+    },
+    {
+      "input": "2147483648",
+      "value": null
+    },
+    {
+      "input": "-2147483648",
+      "value": -2147483648
+    },
+    {
+      "input": "-2147483649",
+      "value": null
+    },
+    {
+      "input": "0002147483647",
+      "value": 2147483647
+    },
+    {
+      "input": "-0000000000",
+      "value": 0
+    },
+    {
+      "input": "\u00b2",
+      "value": null
+    },
+    {
+      "input": "\u2460",
+      "value": null
+    },
+    {
+      "input": "\ud835\udfce",
+      "value": null
+    },
+    {
+      "input": "\ua9f0",
+      "value": null
+    },
+    {
+      "input": "\u22121",
+      "value": null
+    },
+    {
+      "input": "\uff0b1",
+      "value": null
+    },
+    {
+      "input": "1\u0000",
+      "value": null
+    },
+    {
+      "input": "0",
+      "value": 0
+    },
+    {
+      "input": "1",
+      "value": 1
+    },
+    {
+      "input": "2",
+      "value": 2
+    },
+    {
+      "input": "3",
+      "value": 3
+    },
+    {
+      "input": "4",
+      "value": 4
+    },
+    {
+      "input": "5",
+      "value": 5
+    },
+    {
+      "input": "6",
+      "value": 6
+    },
+    {
+      "input": "7",
+      "value": 7
+    },
+    {
+      "input": "8",
+      "value": 8
+    },
+    {
+      "input": "9",
+      "value": 9
+    },
+    {
+      "input": "\u0660",
+      "value": 0
+    },
+    {
+      "input": "\u0661",
+      "value": 1
+    },
+    {
+      "input": "\u0662",
+      "value": 2
+    },
+    {
+      "input": "\u0663",
+      "value": 3
+    },
+    {
+      "input": "\u0664",
+      "value": 4
+    },
+    {
+      "input": "\u0665",
+      "value": 5
+    },
+    {
+      "input": "\u0666",
+      "value": 6
+    },
+    {
+      "input": "\u0667",
+      "value": 7
+    },
+    {
+      "input": "\u0668",
+      "value": 8
+    },
+    {
+      "input": "\u0669",
+      "value": 9
+    },
+    {
+      "input": "\u06f0",
+      "value": 0
+    },
+    {
+      "input": "\u06f1",
+      "value": 1
+    },
+    {
+      "input": "\u06f2",
+      "value": 2
+    },
+    {
+      "input": "\u06f3",
+      "value": 3
+    },
+    {
+      "input": "\u06f4",
+      "value": 4
+    },
+    {
+      "input": "\u06f5",
+      "value": 5
+    },
+    {
+      "input": "\u06f6",
+      "value": 6
+    },
+    {
+      "input": "\u06f7",
+      "value": 7
+    },
+    {
+      "input": "\u06f8",
+      "value": 8
+    },
+    {
+      "input": "\u06f9",
+      "value": 9
+    },
+    {
+      "input": "\u07c0",
+      "value": 0
+    },
+    {
+      "input": "\u07c1",
+      "value": 1
+    },
+    {
+      "input": "\u07c2",
+      "value": 2
+    },
+    {
+      "input": "\u07c3",
+      "value": 3
+    },
+    {
+      "input": "\u07c4",
+      "value": 4
+    },
+    {
+      "input": "\u07c5",
+      "value": 5
+    },
+    {
+      "input": "\u07c6",
+      "value": 6
+    },
+    {
+      "input": "\u07c7",
+      "value": 7
+    },
+    {
+      "input": "\u07c8",
+      "value": 8
+    },
+    {
+      "input": "\u07c9",
+      "value": 9
+    },
+    {
+      "input": "\u0966",
+      "value": 0
+    },
+    {
+      "input": "\u0967",
+      "value": 1
+    },
+    {
+      "input": "\u0968",
+      "value": 2
+    },
+    {
+      "input": "\u0969",
+      "value": 3
+    },
+    {
+      "input": "\u096a",
+      "value": 4
+    },
+    {
+      "input": "\u096b",
+      "value": 5
+    },
+    {
+      "input": "\u096c",
+      "value": 6
+    },
+    {
+      "input": "\u096d",
+      "value": 7
+    },
+    {
+      "input": "\u096e",
+      "value": 8
+    },
+    {
+      "input": "\u096f",
+      "value": 9
+    },
+    {
+      "input": "\u09e6",
+      "value": 0
+    },
+    {
+      "input": "\u09e7",
+      "value": 1
+    },
+    {
+      "input": "\u09e8",
+      "value": 2
+    },
+    {
+      "input": "\u09e9",
+      "value": 3
+    },
+    {
+      "input": "\u09ea",
+      "value": 4
+    },
+    {
+      "input": "\u09eb",
+      "value": 5
+    },
+    {
+      "input": "\u09ec",
+      "value": 6
+    },
+    {
+      "input": "\u09ed",
+      "value": 7
+    },
+    {
+      "input": "\u09ee",
+      "value": 8
+    },
+    {
+      "input": "\u09ef",
+      "value": 9
+    },
+    {
+      "input": "\u0a66",
+      "value": 0
+    },
+    {
+      "input": "\u0a67",
+      "value": 1
+    },
+    {
+      "input": "\u0a68",
+      "value": 2
+    },
+    {
+      "input": "\u0a69",
+      "value": 3
+    },
+    {
+      "input": "\u0a6a",
+      "value": 4
+    },
+    {
+      "input": "\u0a6b",
+      "value": 5
+    },
+    {
+      "input": "\u0a6c",
+      "value": 6
+    },
+    {
+      "input": "\u0a6d",
+      "value": 7
+    },
+    {
+      "input": "\u0a6e",
+      "value": 8
+    },
+    {
+      "input": "\u0a6f",
+      "value": 9
+    },
+    {
+      "input": "\u0ae6",
+      "value": 0
+    },
+    {
+      "input": "\u0ae7",
+      "value": 1
+    },
+    {
+      "input": "\u0ae8",
+      "value": 2
+    },
+    {
+      "input": "\u0ae9",
+      "value": 3
+    },
+    {
+      "input": "\u0aea",
+      "value": 4
+    },
+    {
+      "input": "\u0aeb",
+      "value": 5
+    },
+    {
+      "input": "\u0aec",
+      "value": 6
+    },
+    {
+      "input": "\u0aed",
+      "value": 7
+    },
+    {
+      "input": "\u0aee",
+      "value": 8
+    },
+    {
+      "input": "\u0aef",
+      "value": 9
+    },
+    {
+      "input": "\u0b66",
+      "value": 0
+    },
+    {
+      "input": "\u0b67",
+      "value": 1
+    },
+    {
+      "input": "\u0b68",
+      "value": 2
+    },
+    {
+      "input": "\u0b69",
+      "value": 3
+    },
+    {
+      "input": "\u0b6a",
+      "value": 4
+    },
+    {
+      "input": "\u0b6b",
+      "value": 5
+    },
+    {
+      "input": "\u0b6c",
+      "value": 6
+    },
+    {
+      "input": "\u0b6d",
+      "value": 7
+    },
+    {
+      "input": "\u0b6e",
+      "value": 8
+    },
+    {
+      "input": "\u0b6f",
+      "value": 9
+    },
+    {
+      "input": "\u0be6",
+      "value": 0
+    },
+    {
+      "input": "\u0be7",
+      "value": 1
+    },
+    {
+      "input": "\u0be8",
+      "value": 2
+    },
+    {
+      "input": "\u0be9",
+      "value": 3
+    },
+    {
+      "input": "\u0bea",
+      "value": 4
+    },
+    {
+      "input": "\u0beb",
+      "value": 5
+    },
+    {
+      "input": "\u0bec",
+      "value": 6
+    },
+    {
+      "input": "\u0bed",
+      "value": 7
+    },
+    {
+      "input": "\u0bee",
+      "value": 8
+    },
+    {
+      "input": "\u0bef",
+      "value": 9
+    },
+    {
+      "input": "\u0c66",
+      "value": 0
+    },
+    {
+      "input": "\u0c67",
+      "value": 1
+    },
+    {
+      "input": "\u0c68",
+      "value": 2
+    },
+    {
+      "input": "\u0c69",
+      "value": 3
+    },
+    {
+      "input": "\u0c6a",
+      "value": 4
+    },
+    {
+      "input": "\u0c6b",
+      "value": 5
+    },
+    {
+      "input": "\u0c6c",
+      "value": 6
+    },
+    {
+      "input": "\u0c6d",
+      "value": 7
+    },
+    {
+      "input": "\u0c6e",
+      "value": 8
+    },
+    {
+      "input": "\u0c6f",
+      "value": 9
+    },
+    {
+      "input": "\u0ce6",
+      "value": 0
+    },
+    {
+      "input": "\u0ce7",
+      "value": 1
+    },
+    {
+      "input": "\u0ce8",
+      "value": 2
+    },
+    {
+      "input": "\u0ce9",
+      "value": 3
+    },
+    {
+      "input": "\u0cea",
+      "value": 4
+    },
+    {
+      "input": "\u0ceb",
+      "value": 5
+    },
+    {
+      "input": "\u0cec",
+      "value": 6
+    },
+    {
+      "input": "\u0ced",
+      "value": 7
+    },
+    {
+      "input": "\u0cee",
+      "value": 8
+    },
+    {
+      "input": "\u0cef",
+      "value": 9
+    },
+    {
+      "input": "\u0d66",
+      "value": 0
+    },
+    {
+      "input": "\u0d67",
+      "value": 1
+    },
+    {
+      "input": "\u0d68",
+      "value": 2
+    },
+    {
+      "input": "\u0d69",
+      "value": 3
+    },
+    {
+      "input": "\u0d6a",
+      "value": 4
+    },
+    {
+      "input": "\u0d6b",
+      "value": 5
+    },
+    {
+      "input": "\u0d6c",
+      "value": 6
+    },
+    {
+      "input": "\u0d6d",
+      "value": 7
+    },
+    {
+      "input": "\u0d6e",
+      "value": 8
+    },
+    {
+      "input": "\u0d6f",
+      "value": 9
+    },
+    {
+      "input": "\u0e50",
+      "value": 0
+    },
+    {
+      "input": "\u0e51",
+      "value": 1
+    },
+    {
+      "input": "\u0e52",
+      "value": 2
+    },
+    {
+      "input": "\u0e53",
+      "value": 3
+    },
+    {
+      "input": "\u0e54",
+      "value": 4
+    },
+    {
+      "input": "\u0e55",
+      "value": 5
+    },
+    {
+      "input": "\u0e56",
+      "value": 6
+    },
+    {
+      "input": "\u0e57",
+      "value": 7
+    },
+    {
+      "input": "\u0e58",
+      "value": 8
+    },
+    {
+      "input": "\u0e59",
+      "value": 9
+    },
+    {
+      "input": "\u0ed0",
+      "value": 0
+    },
+    {
+      "input": "\u0ed1",
+      "value": 1
+    },
+    {
+      "input": "\u0ed2",
+      "value": 2
+    },
+    {
+      "input": "\u0ed3",
+      "value": 3
+    },
+    {
+      "input": "\u0ed4",
+      "value": 4
+    },
+    {
+      "input": "\u0ed5",
+      "value": 5
+    },
+    {
+      "input": "\u0ed6",
+      "value": 6
+    },
+    {
+      "input": "\u0ed7",
+      "value": 7
+    },
+    {
+      "input": "\u0ed8",
+      "value": 8
+    },
+    {
+      "input": "\u0ed9",
+      "value": 9
+    },
+    {
+      "input": "\u0f20",
+      "value": 0
+    },
+    {
+      "input": "\u0f21",
+      "value": 1
+    },
+    {
+      "input": "\u0f22",
+      "value": 2
+    },
+    {
+      "input": "\u0f23",
+      "value": 3
+    },
+    {
+      "input": "\u0f24",
+      "value": 4
+    },
+    {
+      "input": "\u0f25",
+      "value": 5
+    },
+    {
+      "input": "\u0f26",
+      "value": 6
+    },
+    {
+      "input": "\u0f27",
+      "value": 7
+    },
+    {
+      "input": "\u0f28",
+      "value": 8
+    },
+    {
+      "input": "\u0f29",
+      "value": 9
+    },
+    {
+      "input": "\u1040",
+      "value": 0
+    },
+    {
+      "input": "\u1041",
+      "value": 1
+    },
+    {
+      "input": "\u1042",
+      "value": 2
+    },
+    {
+      "input": "\u1043",
+      "value": 3
+    },
+    {
+      "input": "\u1044",
+      "value": 4
+    },
+    {
+      "input": "\u1045",
+      "value": 5
+    },
+    {
+      "input": "\u1046",
+      "value": 6
+    },
+    {
+      "input": "\u1047",
+      "value": 7
+    },
+    {
+      "input": "\u1048",
+      "value": 8
+    },
+    {
+      "input": "\u1049",
+      "value": 9
+    },
+    {
+      "input": "\u1090",
+      "value": 0
+    },
+    {
+      "input": "\u1091",
+      "value": 1
+    },
+    {
+      "input": "\u1092",
+      "value": 2
+    },
+    {
+      "input": "\u1093",
+      "value": 3
+    },
+    {
+      "input": "\u1094",
+      "value": 4
+    },
+    {
+      "input": "\u1095",
+      "value": 5
+    },
+    {
+      "input": "\u1096",
+      "value": 6
+    },
+    {
+      "input": "\u1097",
+      "value": 7
+    },
+    {
+      "input": "\u1098",
+      "value": 8
+    },
+    {
+      "input": "\u1099",
+      "value": 9
+    },
+    {
+      "input": "\u17e0",
+      "value": 0
+    },
+    {
+      "input": "\u17e1",
+      "value": 1
+    },
+    {
+      "input": "\u17e2",
+      "value": 2
+    },
+    {
+      "input": "\u17e3",
+      "value": 3
+    },
+    {
+      "input": "\u17e4",
+      "value": 4
+    },
+    {
+      "input": "\u17e5",
+      "value": 5
+    },
+    {
+      "input": "\u17e6",
+      "value": 6
+    },
+    {
+      "input": "\u17e7",
+      "value": 7
+    },
+    {
+      "input": "\u17e8",
+      "value": 8
+    },
+    {
+      "input": "\u17e9",
+      "value": 9
+    },
+    {
+      "input": "\u1810",
+      "value": 0
+    },
+    {
+      "input": "\u1811",
+      "value": 1
+    },
+    {
+      "input": "\u1812",
+      "value": 2
+    },
+    {
+      "input": "\u1813",
+      "value": 3
+    },
+    {
+      "input": "\u1814",
+      "value": 4
+    },
+    {
+      "input": "\u1815",
+      "value": 5
+    },
+    {
+      "input": "\u1816",
+      "value": 6
+    },
+    {
+      "input": "\u1817",
+      "value": 7
+    },
+    {
+      "input": "\u1818",
+      "value": 8
+    },
+    {
+      "input": "\u1819",
+      "value": 9
+    },
+    {
+      "input": "\u1946",
+      "value": 0
+    },
+    {
+      "input": "\u1947",
+      "value": 1
+    },
+    {
+      "input": "\u1948",
+      "value": 2
+    },
+    {
+      "input": "\u1949",
+      "value": 3
+    },
+    {
+      "input": "\u194a",
+      "value": 4
+    },
+    {
+      "input": "\u194b",
+      "value": 5
+    },
+    {
+      "input": "\u194c",
+      "value": 6
+    },
+    {
+      "input": "\u194d",
+      "value": 7
+    },
+    {
+      "input": "\u194e",
+      "value": 8
+    },
+    {
+      "input": "\u194f",
+      "value": 9
+    },
+    {
+      "input": "\u19d0",
+      "value": 0
+    },
+    {
+      "input": "\u19d1",
+      "value": 1
+    },
+    {
+      "input": "\u19d2",
+      "value": 2
+    },
+    {
+      "input": "\u19d3",
+      "value": 3
+    },
+    {
+      "input": "\u19d4",
+      "value": 4
+    },
+    {
+      "input": "\u19d5",
+      "value": 5
+    },
+    {
+      "input": "\u19d6",
+      "value": 6
+    },
+    {
+      "input": "\u19d7",
+      "value": 7
+    },
+    {
+      "input": "\u19d8",
+      "value": 8
+    },
+    {
+      "input": "\u19d9",
+      "value": 9
+    },
+    {
+      "input": "\u1a80",
+      "value": 0
+    },
+    {
+      "input": "\u1a81",
+      "value": 1
+    },
+    {
+      "input": "\u1a82",
+      "value": 2
+    },
+    {
+      "input": "\u1a83",
+      "value": 3
+    },
+    {
+      "input": "\u1a84",
+      "value": 4
+    },
+    {
+      "input": "\u1a85",
+      "value": 5
+    },
+    {
+      "input": "\u1a86",
+      "value": 6
+    },
+    {
+      "input": "\u1a87",
+      "value": 7
+    },
+    {
+      "input": "\u1a88",
+      "value": 8
+    },
+    {
+      "input": "\u1a89",
+      "value": 9
+    },
+    {
+      "input": "\u1a90",
+      "value": 0
+    },
+    {
+      "input": "\u1a91",
+      "value": 1
+    },
+    {
+      "input": "\u1a92",
+      "value": 2
+    },
+    {
+      "input": "\u1a93",
+      "value": 3
+    },
+    {
+      "input": "\u1a94",
+      "value": 4
+    },
+    {
+      "input": "\u1a95",
+      "value": 5
+    },
+    {
+      "input": "\u1a96",
+      "value": 6
+    },
+    {
+      "input": "\u1a97",
+      "value": 7
+    },
+    {
+      "input": "\u1a98",
+      "value": 8
+    },
+    {
+      "input": "\u1a99",
+      "value": 9
+    },
+    {
+      "input": "\u1b50",
+      "value": 0
+    },
+    {
+      "input": "\u1b51",
+      "value": 1
+    },
+    {
+      "input": "\u1b52",
+      "value": 2
+    },
+    {
+      "input": "\u1b53",
+      "value": 3
+    },
+    {
+      "input": "\u1b54",
+      "value": 4
+    },
+    {
+      "input": "\u1b55",
+      "value": 5
+    },
+    {
+      "input": "\u1b56",
+      "value": 6
+    },
+    {
+      "input": "\u1b57",
+      "value": 7
+    },
+    {
+      "input": "\u1b58",
+      "value": 8
+    },
+    {
+      "input": "\u1b59",
+      "value": 9
+    },
+    {
+      "input": "\u1bb0",
+      "value": 0
+    },
+    {
+      "input": "\u1bb1",
+      "value": 1
+    },
+    {
+      "input": "\u1bb2",
+      "value": 2
+    },
+    {
+      "input": "\u1bb3",
+      "value": 3
+    },
+    {
+      "input": "\u1bb4",
+      "value": 4
+    },
+    {
+      "input": "\u1bb5",
+      "value": 5
+    },
+    {
+      "input": "\u1bb6",
+      "value": 6
+    },
+    {
+      "input": "\u1bb7",
+      "value": 7
+    },
+    {
+      "input": "\u1bb8",
+      "value": 8
+    },
+    {
+      "input": "\u1bb9",
+      "value": 9
+    },
+    {
+      "input": "\u1c40",
+      "value": 0
+    },
+    {
+      "input": "\u1c41",
+      "value": 1
+    },
+    {
+      "input": "\u1c42",
+      "value": 2
+    },
+    {
+      "input": "\u1c43",
+      "value": 3
+    },
+    {
+      "input": "\u1c44",
+      "value": 4
+    },
+    {
+      "input": "\u1c45",
+      "value": 5
+    },
+    {
+      "input": "\u1c46",
+      "value": 6
+    },
+    {
+      "input": "\u1c47",
+      "value": 7
+    },
+    {
+      "input": "\u1c48",
+      "value": 8
+    },
+    {
+      "input": "\u1c49",
+      "value": 9
+    },
+    {
+      "input": "\u1c50",
+      "value": 0
+    },
+    {
+      "input": "\u1c51",
+      "value": 1
+    },
+    {
+      "input": "\u1c52",
+      "value": 2
+    },
+    {
+      "input": "\u1c53",
+      "value": 3
+    },
+    {
+      "input": "\u1c54",
+      "value": 4
+    },
+    {
+      "input": "\u1c55",
+      "value": 5
+    },
+    {
+      "input": "\u1c56",
+      "value": 6
+    },
+    {
+      "input": "\u1c57",
+      "value": 7
+    },
+    {
+      "input": "\u1c58",
+      "value": 8
+    },
+    {
+      "input": "\u1c59",
+      "value": 9
+    },
+    {
+      "input": "\ua620",
+      "value": 0
+    },
+    {
+      "input": "\ua621",
+      "value": 1
+    },
+    {
+      "input": "\ua622",
+      "value": 2
+    },
+    {
+      "input": "\ua623",
+      "value": 3
+    },
+    {
+      "input": "\ua624",
+      "value": 4
+    },
+    {
+      "input": "\ua625",
+      "value": 5
+    },
+    {
+      "input": "\ua626",
+      "value": 6
+    },
+    {
+      "input": "\ua627",
+      "value": 7
+    },
+    {
+      "input": "\ua628",
+      "value": 8
+    },
+    {
+      "input": "\ua629",
+      "value": 9
+    },
+    {
+      "input": "\ua8d0",
+      "value": 0
+    },
+    {
+      "input": "\ua8d1",
+      "value": 1
+    },
+    {
+      "input": "\ua8d2",
+      "value": 2
+    },
+    {
+      "input": "\ua8d3",
+      "value": 3
+    },
+    {
+      "input": "\ua8d4",
+      "value": 4
+    },
+    {
+      "input": "\ua8d5",
+      "value": 5
+    },
+    {
+      "input": "\ua8d6",
+      "value": 6
+    },
+    {
+      "input": "\ua8d7",
+      "value": 7
+    },
+    {
+      "input": "\ua8d8",
+      "value": 8
+    },
+    {
+      "input": "\ua8d9",
+      "value": 9
+    },
+    {
+      "input": "\ua900",
+      "value": 0
+    },
+    {
+      "input": "\ua901",
+      "value": 1
+    },
+    {
+      "input": "\ua902",
+      "value": 2
+    },
+    {
+      "input": "\ua903",
+      "value": 3
+    },
+    {
+      "input": "\ua904",
+      "value": 4
+    },
+    {
+      "input": "\ua905",
+      "value": 5
+    },
+    {
+      "input": "\ua906",
+      "value": 6
+    },
+    {
+      "input": "\ua907",
+      "value": 7
+    },
+    {
+      "input": "\ua908",
+      "value": 8
+    },
+    {
+      "input": "\ua909",
+      "value": 9
+    },
+    {
+      "input": "\ua9d0",
+      "value": 0
+    },
+    {
+      "input": "\ua9d1",
+      "value": 1
+    },
+    {
+      "input": "\ua9d2",
+      "value": 2
+    },
+    {
+      "input": "\ua9d3",
+      "value": 3
+    },
+    {
+      "input": "\ua9d4",
+      "value": 4
+    },
+    {
+      "input": "\ua9d5",
+      "value": 5
+    },
+    {
+      "input": "\ua9d6",
+      "value": 6
+    },
+    {
+      "input": "\ua9d7",
+      "value": 7
+    },
+    {
+      "input": "\ua9d8",
+      "value": 8
+    },
+    {
+      "input": "\ua9d9",
+      "value": 9
+    },
+    {
+      "input": "\uaa50",
+      "value": 0
+    },
+    {
+      "input": "\uaa51",
+      "value": 1
+    },
+    {
+      "input": "\uaa52",
+      "value": 2
+    },
+    {
+      "input": "\uaa53",
+      "value": 3
+    },
+    {
+      "input": "\uaa54",
+      "value": 4
+    },
+    {
+      "input": "\uaa55",
+      "value": 5
+    },
+    {
+      "input": "\uaa56",
+      "value": 6
+    },
+    {
+      "input": "\uaa57",
+      "value": 7
+    },
+    {
+      "input": "\uaa58",
+      "value": 8
+    },
+    {
+      "input": "\uaa59",
+      "value": 9
+    },
+    {
+      "input": "\uabf0",
+      "value": 0
+    },
+    {
+      "input": "\uabf1",
+      "value": 1
+    },
+    {
+      "input": "\uabf2",
+      "value": 2
+    },
+    {
+      "input": "\uabf3",
+      "value": 3
+    },
+    {
+      "input": "\uabf4",
+      "value": 4
+    },
+    {
+      "input": "\uabf5",
+      "value": 5
+    },
+    {
+      "input": "\uabf6",
+      "value": 6
+    },
+    {
+      "input": "\uabf7",
+      "value": 7
+    },
+    {
+      "input": "\uabf8",
+      "value": 8
+    },
+    {
+      "input": "\uabf9",
+      "value": 9
+    },
+    {
+      "input": "\uff10",
+      "value": 0
+    },
+    {
+      "input": "\uff11",
+      "value": 1
+    },
+    {
+      "input": "\uff12",
+      "value": 2
+    },
+    {
+      "input": "\uff13",
+      "value": 3
+    },
+    {
+      "input": "\uff14",
+      "value": 4
+    },
+    {
+      "input": "\uff15",
+      "value": 5
+    },
+    {
+      "input": "\uff16",
+      "value": 6
+    },
+    {
+      "input": "\uff17",
+      "value": 7
+    },
+    {
+      "input": "\uff18",
+      "value": 8
+    },
+    {
+      "input": "\uff19",
+      "value": 9
+    },
+    {
+      "input": "14",
+      "value": 14
+    },
+    {
+      "input": "+21",
+      "value": 21
+    },
+    {
+      "input": "-1",
+      "value": -1
+    },
+    {
+      "input": "\u0661\u0664",
+      "value": 14
+    },
+    {
+      "input": "+\u0662\u0661",
+      "value": 21
+    },
+    {
+      "input": "-\u0661",
+      "value": -1
+    },
+    {
+      "input": "\u0662\u0661\u0664\u0667\u0664\u0668\u0663\u0666\u0664\u0667",
+      "value": 2147483647
+    },
+    {
+      "input": "-\u0662\u0661\u0664\u0667\u0664\u0668\u0663\u0666\u0664\u0668",
+      "value": -2147483648
+    },
+    {
+      "input": "\u0662\u0661\u0664\u0667\u0664\u0668\u0663\u0666\u0664\u0668",
+      "value": null
+    },
+    {
+      "input": "-\u0662\u0661\u0664\u0667\u0664\u0668\u0663\u0666\u0664\u0669",
+      "value": null
+    },
+    {
+      "input": "\u06f1\u06f4",
+      "value": 14
+    },
+    {
+      "input": "+\u06f2\u06f1",
+      "value": 21
+    },
+    {
+      "input": "-\u06f1",
+      "value": -1
+    },
+    {
+      "input": "\u06f2\u06f1\u06f4\u06f7\u06f4\u06f8\u06f3\u06f6\u06f4\u06f7",
+      "value": 2147483647
+    },
+    {
+      "input": "-\u06f2\u06f1\u06f4\u06f7\u06f4\u06f8\u06f3\u06f6\u06f4\u06f8",
+      "value": -2147483648
+    },
+    {
+      "input": "\u06f2\u06f1\u06f4\u06f7\u06f4\u06f8\u06f3\u06f6\u06f4\u06f8",
+      "value": null
+    },
+    {
+      "input": "-\u06f2\u06f1\u06f4\u06f7\u06f4\u06f8\u06f3\u06f6\u06f4\u06f9",
+      "value": null
+    },
+    {
+      "input": "\u0967\u096a",
+      "value": 14
+    },
+    {
+      "input": "+\u0968\u0967",
+      "value": 21
+    },
+    {
+      "input": "-\u0967",
+      "value": -1
+    },
+    {
+      "input": "\u0968\u0967\u096a\u096d\u096a\u096e\u0969\u096c\u096a\u096d",
+      "value": 2147483647
+    },
+    {
+      "input": "-\u0968\u0967\u096a\u096d\u096a\u096e\u0969\u096c\u096a\u096e",
+      "value": -2147483648
+    },
+    {
+      "input": "\u0968\u0967\u096a\u096d\u096a\u096e\u0969\u096c\u096a\u096e",
+      "value": null
+    },
+    {
+      "input": "-\u0968\u0967\u096a\u096d\u096a\u096e\u0969\u096c\u096a\u096f",
+      "value": null
+    },
+    {
+      "input": "\uff11\uff14",
+      "value": 14
+    },
+    {
+      "input": "+\uff12\uff11",
+      "value": 21
+    },
+    {
+      "input": "-\uff11",
+      "value": -1
+    },
+    {
+      "input": "\uff12\uff11\uff14\uff17\uff14\uff18\uff13\uff16\uff14\uff17",
+      "value": 2147483647
+    },
+    {
+      "input": "-\uff12\uff11\uff14\uff17\uff14\uff18\uff13\uff16\uff14\uff18",
+      "value": -2147483648
+    },
+    {
+      "input": "\uff12\uff11\uff14\uff17\uff14\uff18\uff13\uff16\uff14\uff18",
+      "value": null
+    },
+    {
+      "input": "-\uff12\uff11\uff14\uff17\uff14\uff18\uff13\uff16\uff14\uff19",
+      "value": null
+    }
+  ]
+}

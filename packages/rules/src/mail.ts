@@ -80,6 +80,11 @@ export function mailConversationSaveQuery(
     };
   }
   if (input.type === undefined || !int(input.type)) return invalid();
+  return { scope: "type", type: mailServerType(input.type), flag: input.flag, now };
+}
+
+export function mailServerType(type: number): number {
+  if (!int(type)) return invalid();
   const types = new Map([
     [0, 21],
     [1, 22],
@@ -88,7 +93,7 @@ export function mailConversationSaveQuery(
     [14, 12],
     [21, 10],
   ]);
-  return { scope: "type", type: types.get(input.type) ?? input.type, flag: input.flag, now };
+  return types.get(type) ?? type;
 }
 
 export function mailBlank(value: string | null | undefined): boolean {

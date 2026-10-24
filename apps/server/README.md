@@ -896,6 +896,60 @@ conversations and transaction failures. Real PostgreSQL execution, concurrency a
 native-client behavior remain unverified. `chatMail.read`, conversation deletion,
 content edge cases and synchronization flows remain pending.
 
+## Conversation read planning
+
+[Issue #73](https://github.com/ReeseArch64/opencok/issues/73) tracks `chatMail.read`.
+Its complete wire parser and ordered effect planner now have synthetic unit coverage.
+The command still returns unsupported: enabling it requires owned mailbox persistence,
+durable chat intent delivery and a maintained private-conversation read-state consumer.
+The current chat room history implementation does not supply that consumer. This pure
+foundation performs no I/O and changes no state.
+
+| Selection                                   | Mailbox assignment                                                   | Chat intent                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `fromUser`, `mod = 1`                       | Exact sender, types 23/24, status exactly 0 to 1                     | Same raw peer string, chat type `2`                                      |
+| `fromUser`, other mod, `driftingBottle = 1` | Exact sender, types 43/44, all statuses to 1                         | Same raw peer string, chat type `3`                                      |
+| `fromUser`, other modes                     | Exact sender, types 20/21/22, status exactly 0 to 1                  | Same raw peer string, chat types `1,20`                                  |
+| No sender, `type`                           | Exact mapped type across senders, status exactly 0 to 1              | None                                                                     |
+| Additional `types` list                     | One mapped-type assignment per nonempty token, status exactly 0 to 1 | Exact raw `0,1,20` additionally emits empty peers with chat types `1,20` |
+
+Sender presence takes precedence over scalar type; moderator mode takes precedence over
+the bottle flag. `mod` defaults to zero and is always validated. Scalar type is not
+read when sender is present, and the bottle flag is not read without sender or in
+moderator mode. The `types` string is independent and always consumed when present.
+Duplicate list entries and effect order are retained, including targeted chat intent
+before list assignments and the optional final all-peer intent. An empty request or
+empty/comma-only type list has no effects.
+
+The shared inverse type mapping is `0→21`, `1→22`, `4→7`, `10→14`, `14→12`, `21→10`;
+other signed integers remain unchanged. List parsing follows Java 8 signed decimal
+rules, including supported BMP digit families, leading zeros and ASCII signs. It does
+not trim whitespace or interpret hexadecimal, octal or exponents. Empty comma tokens
+are discarded. Equivalent numeric spellings, reordered entries or added commas do not
+activate the exact raw-string chat trigger.
+
+Empty, blank and comma-containing sender strings retain their bytes. A present null
+sender remains null in the mailbox predicate, while the chat intent preserves the
+source string-builder result `null`. The empty peer string used by an all-peer intent
+is distinct from that literal. These raw intent values are retained for the future
+consumer; this stage does not invent private-chat room IDs or silently drop events
+when mailbox assignments match no rows.
+
+Consumed sender strings are bounded to 40 UTF-16 units and reject NUL/invalid Unicode.
+The raw type list is bounded to 65,535 UTF-8 bytes and 1,000 nonempty tokens; extra commas
+do not count as operations. The whole request is validated before any plan returns,
+preventing the reference's earlier partial writes before a malformed trailing token.
+No mailbox synchronization marker, reward, saved flag, group or auxiliary cleanup
+belongs to this plan.
+The future adapter must retain SQL status-exactness: personal/moderator/type updates
+do not reinterpret null status as zero, while bottle assignments include null status.
+
+Tests cover precedence, ignored/invalid wire fields, null and empty sender behavior,
+integer boundaries, raw-list triggers and limits. Frozen synthetic vectors generated
+with an isolated Java 8 integer probe verify 410 parsing cases; maintained tests need
+no Java runtime, private source or server process. Persistence, acknowledgment,
+cross-database recovery and chat read-state integration remain pending.
+
 ## Mailbox content reads
 
 `mail.read`, tracked in [issue #69](https://github.com/ReeseArch64/opencok/issues/69),
