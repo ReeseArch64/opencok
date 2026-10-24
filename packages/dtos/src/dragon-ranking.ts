@@ -1,5 +1,5 @@
 export class DragonRankingDto {
-  readonly rank!: {
+  declare public readonly rank: {
     readonly teamId: string;
     readonly allianceId: string;
     readonly name: string;

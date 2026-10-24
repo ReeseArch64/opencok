@@ -34,7 +34,12 @@
     "./world-resource-detail": "./src/world-resource-detail.ts",
     "./world-point-detail": "./src/world-point-detail.ts",
     "./world-monster-detail": "./src/world-monster-detail.ts",
-    "./dragon-ranking": "./src/dragon-ranking.ts"
+    "./dragon-ranking": "./src/dragon-ranking.ts",
+    "./hero-ranking": "./src/hero-ranking.ts",
+    "./throne-ranking": "./src/throne-ranking.ts",
+    "./community-ranking": "./src/community-ranking.ts",
+    "./flower-ranking": "./src/flower-ranking.ts",
+    "./battle-ranking": "./src/battle-ranking.ts"
   },
   "dependencies": {}
 }

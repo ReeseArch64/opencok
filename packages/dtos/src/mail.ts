@@ -1,14 +1,14 @@
 export class MailDeletedDto {
-  readonly delete!: number;
+  declare public readonly delete: number;
 }
 
 export class MailSaveDto {
-  readonly save?: string;
-  readonly cancel?: string;
+  declare public readonly save?: string;
+  declare public readonly cancel?: string;
 }
 
 export class MailStatusDto {
-  readonly total?: bigint;
-  readonly unread?: bigint;
+  declare public readonly total?: bigint;
+  declare public readonly unread?: bigint;
   readonly [category: `${number}`]: { readonly total: number; readonly unread: number };
 }

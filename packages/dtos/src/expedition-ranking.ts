@@ -1,6 +1,6 @@
 export class ExpeditionRankingDto {
-  readonly selfRanking?: number;
-  readonly serverRanking?: {
+  declare public readonly selfRanking?: number;
+  declare public readonly serverRanking?: {
     readonly uid: string;
     readonly name: string;
     readonly pic: string;

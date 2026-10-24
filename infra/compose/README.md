@@ -7,7 +7,8 @@ settings are substituted from the root `.env`.
 
 Every service uses both profiles `all` and `dev`; either profile starts the same
 complete set of containers, including pgAdmin, Redis Insight and Portainer.
-Chat and media/files containers remain outside this stage. MinIO and `minio-setup` provide the
+Chat remains separately hosted. Media runs inside the API when explicitly enabled
+with the [media overlay](../../apps/api/MEDIA.md); there is no Files container. MinIO and `minio-setup` provide the
 client CDN alongside the TypeScript API/server, gateway, PostgreSQL, Redis and
 ZooKeeper.
 
