@@ -197,7 +197,7 @@ Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `dragon_base.xml`, `dragon_new.xml`, `status.xml`, `sk.xml`, `suit.xml`,
 `vip.xml`, `svip.xml`, `alliancescience.xml`, `reputation_level.xml`,
 `civilization_feature.xml`, `wr_skill.xml`, `miracle_buff.xml`,
-`dragon_skill.xml`, `activity_event.xml` and `office.xml`.
+`dragon_skill.xml`, `activity_event.xml`, `office.xml` and `life_treeS.xml`.
 They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
@@ -292,6 +292,23 @@ unspecified map iteration order. Queries are bounded to two matching records and
 skip schedules for players without an office. These projections do not appoint
 officials, start battles, reschedule events or change persisted state. They remain
 dependencies for the pending complete effect resolver.
+
+Territory effects for power queries use the alliance's placed life tree, without a
+map target. Only building/complete trees contribute. Default skins use the current
+persisted stage's control record; custom skins supply status IDs through `life_treeS`.
+Blank saved skins use the configured default in memory. Status IDs are deduplicated,
+and each status contributes its first Java hash-map entry. Replacement order follows
+Java 8 hash buckets, including ordinary collision chains and resizing, before double
+values are floored and saturated to signed integers. Missing individual status IDs or
+empty definitions are ignored as in the legacy lookup. Missing required catalogs and
+malformed active values fail explicitly.
+
+The realm snapshot selects at most two placed trees for the persisted alliance;
+multiple trees are rejected as ambiguous rather than selecting an arbitrary one.
+Pathological catalog collisions that would require Java tree-bin ordering are also
+rejected, and each hash traversal is bounded to 4,096 unique keys. These reads do
+not progress tree construction, change skins, settle vitality or apply map-target
+turret/range effects. Those map-target effects do not participate in power queries.
 
 World effects can be read with one `HGETALL` from
 `opencok:kingdom:<kingdomId>:world-effects`. The hash retains numeric effect IDs
