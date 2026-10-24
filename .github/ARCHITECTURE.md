@@ -1718,14 +1718,14 @@ migration execution or deployment.
 ### 15.1. PostgreSQL database package
 
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
-Drizzle schemas in `src/schema` are the source of truth: 778 tables and 6,350 fields,
+Drizzle schemas in `src/schema` are the source of truth: 780 tables and 6,366 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
 `schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
 The default physical databases are `opencok_global`, `opencok_kingdom_1` and
 `opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
-`opencok_global`, `opencok_pay` and `opencok_chat` (114 tables). Both kingdom databases
-contain the same `opencok_kingdom` namespace (664 tables each). One set of kingdom
+`opencok_global`, `opencok_pay` and `opencok_chat` (115 tables). Both kingdom databases
+contain the same `opencok_kingdom` namespace (665 tables each). One set of kingdom
 table modules and migrations serves every configured kingdom; there are no per-ID
 schema copies. Table/field names and values remain stable. Database names and
 credentials are configuration. Pools and local transactions belong to one physical database; there
