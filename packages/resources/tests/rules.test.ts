@@ -49,6 +49,9 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "saga_tower_science_base",
       "foreign_civilization_up",
       "foreign_civilization_base",
+      "activity_panel",
+      "merge_activity",
+      "lucky_effect",
     ])
       await writeFile(
         join(directory, `${name}.xml`),
@@ -59,7 +62,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       '<database><Group id="vip"><ItemSpec id="001" power="007"/></Group></database>',
     );
     const power = (await loadRules(directory)).power;
-    expect(Object.keys(power)).toHaveLength(26);
+    expect(Object.keys(power)).toHaveLength(29);
     expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
     for (const name of ["general_sale", "pay_servercontrol", "kingdomskill", "fb_share"])
       await writeFile(
@@ -114,7 +117,7 @@ test("duplicates remain explicit across groups and malformed resource records ar
   expect(() => parseRules(duplicate, "setting")).toThrow("Invalid gameplay resource ID");
   expect(parseRules(duplicate, "function_on").get("a")?.value).toBe("2");
   expect(parseRules(duplicate, "goods").get("a")?.value).toBe("2");
-  for (const name of ["science", "equipment", "status", "dragon_skill"])
+  for (const name of ["science", "equipment", "status", "dragon_skill", "activity_panel"])
     expect(parseRules(duplicate, name).get("a")?.value).toBe("2");
   expect(
     parseRules('<database><ItemSpec value="ignored"/><ItemSpec id="a"/></database>', "goods").size,

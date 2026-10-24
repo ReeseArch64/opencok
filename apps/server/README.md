@@ -199,7 +199,8 @@ Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `civilization_feature.xml`, `wr_skill.xml`, `miracle_buff.xml`,
 `dragon_skill.xml`, `activity_event.xml`, `office.xml`, `life_treeS.xml`,
 `saga_tower_science_base.xml`, `foreign_civilization_up.xml` and
-`foreign_civilization_base.xml`.
+`foreign_civilization_base.xml`, `activity_panel.xml`, `merge_activity.xml`
+and `lucky_effect.xml`.
 They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
@@ -322,6 +323,22 @@ Pathological catalog collisions that would require Java tree-bin ordering are al
 rejected, and each hash traversal is bounded to 4,096 unique keys. These reads do
 not progress tree construction, change skins, settle vitality or apply map-target
 turret/range effects. Those map-target effects do not participate in power queries.
+
+Lucky Day effects reconstruct the saved active record using its exact deadline,
+server feature, player version/platform and realm controls. Test realms require
+both event test switches. Ordinary activity dates include both endpoints; merge
+activity offsets are minutes relative to the realm's persisted merge timestamp,
+with an exclusive end, and can open the event independently of the ordinary panel.
+The snapshot reads only the local realm's `server` metadata row when a Lucky Day
+record exists. Activity-panel duplicate IDs retain the last catalog record.
+
+The projection returns the persisted Lucky Day effect, with last duplicate values
+and integer validation. It does not recreate a missing record, randomly replace
+an effect on a power read, write that replacement or push it to a player. This is
+a deliberate snapshot-query difference from the legacy getter's reroll side effect;
+Lucky Day activation and reroll commands remain outside this read-only slice.
+Expiry follows login reconstruction, so a deadline equal to the captured instant
+is inactive. Required metadata/catalog failures reject rather than fabricate a bonus.
 
 World effects can be read with one `HGETALL` from
 `opencok:kingdom:<kingdomId>:world-effects`. The hash retains numeric effect IDs

@@ -23,7 +23,8 @@
     "./power-world": "./src/power-world.ts",
     "./power-companions": "./src/power-companions.ts",
     "./power-office": "./src/power-office.ts",
-    "./power-territory": "./src/power-territory.ts"
+    "./power-territory": "./src/power-territory.ts",
+    "./power-lucky-day": "./src/power-lucky-day.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

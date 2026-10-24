@@ -31,6 +31,8 @@ function fixture() {
     office: undefined,
     kingdomFights: [],
     territoryTrees: [],
+    luckyDay: undefined,
+    powerServer: undefined,
   };
   const rules = new Rules(
     new Map(),

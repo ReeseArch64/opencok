@@ -15,6 +15,8 @@ function database(
     office?: boolean;
     fightFailure?: boolean;
     treeFailure?: boolean;
+    lucky?: boolean;
+    serverFailure?: boolean;
   } = {},
 ) {
   const queries: { text: string; params: unknown[] }[] = [];
@@ -69,6 +71,12 @@ function database(
       }
       if (table === "user_civilization_science") return { rows: [[2000, 3]] };
       if (table === "foreigen_sciences") return { rows: [[3000, 2]] };
+      if (table === "lucky_day")
+        return { rows: options.lucky ? [[1, "9007199254740993", "8001", 1]] : [] };
+      if (table === "server_info") {
+        if (options.serverFailure) throw new Error("Synthetic realm metadata failure");
+        return { rows: [["9007199254740995"]] };
+      }
       if (table === "t_hero") return { rows: [[7001, 5, 20]] };
       if (table === "user_pet_dragon") return { rows: [[6001, 3, 5, 1]] };
       if (table === "user_pet_dragon_skill") return { rows: [[6001, 1, "8001", 3, 2]] };
@@ -118,7 +126,10 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const selects = queries.filter((query) => query.text.startsWith("select"));
-  expect(selects).toHaveLength(23);
+  expect(selects).toHaveLength(24);
+  expect(snapshot.luckyDay).toBeUndefined();
+  expect(snapshot.powerServer).toBeUndefined();
+  expect(selects.some((query) => query.text.includes('"server_info"'))).toBe(false);
   expect(snapshot.office).toBeUndefined();
   expect(snapshot.kingdomFights).toEqual([]);
   expect(snapshot.territoryTrees).toEqual([]);
@@ -247,6 +258,33 @@ test("office snapshots use owner membership and bounded realm fight reads in the
   expect(failure.queries.at(-1)?.text).toBe("rollback");
 });
 
+test("lucky-day snapshots retain exact deadlines and read metadata only from the selected realm", async () => {
+  const fixture = database({ lucky: true });
+  const result = await readPowerState(fixture.db, "synthetic", now);
+  expect(result.luckyDay).toEqual({
+    status: 1,
+    time: 9007199254740993n,
+    effectId: "8001",
+    lucky_id: 1,
+  });
+  expect(result.powerServer).toEqual({ lastMergeMillis: 9007199254740995n });
+  const lucky = fixture.queries.find((query) => query.text.includes('"lucky_day"'))!;
+  expect(lucky.params).toEqual(["synthetic", 1]);
+  expect(lucky.text).toContain('"lucky_day"."uid" = $1');
+  expect(lucky.text).not.toMatch(/unluckyCount|luckyCount/);
+  const server = fixture.queries.find((query) => query.text.includes('"server_info"'))!;
+  expect(server.params).toEqual(["server", 1]);
+  expect(server.text).toContain('from "opencok_kingdom"."server_info"');
+  expect(server.text).not.toMatch(/kaifu|activationTime|crossFightServerId/);
+  expect(fixture.queries.at(-1)?.text).toBe("commit");
+  expect(fixture.queries.every((query) => !/\b(insert|update|delete)\b/i.test(query.text))).toBe(
+    true,
+  );
+  const failure = database({ lucky: true, serverFailure: true });
+  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  expect(failure.queries.at(-1)?.text).toBe("rollback");
+});
+
 test("power readiness checks each required table without reading records or writing data", async () => {
   const queries: { text: string; params: unknown[] }[] = [];
   const client = {
@@ -257,7 +295,7 @@ test("power readiness checks each required table without reading records or writ
   };
   await checkPowerStore(drizzle(client as unknown as NodePgClient, { schema }));
   const tables = queries.map((query) => query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1]);
-  expect(new Set(tables).size).toBe(26);
+  expect(new Set(tables).size).toBe(28);
   for (const table of [
     "userprofile",
     "playerinfo",
@@ -285,6 +323,8 @@ test("power readiness checks each required table without reading records or writ
     "kingdom_position",
     "activity",
     "alliance_territory",
+    "lucky_day",
+    "server_info",
   ])
     expect(tables).toContain(table);
   for (const query of queries) {

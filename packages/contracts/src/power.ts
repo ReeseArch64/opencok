@@ -37,6 +37,8 @@ export interface PowerSnapshot {
   office: Row | undefined;
   kingdomFights: readonly Row[];
   territoryTrees: readonly Row[];
+  luckyDay: Row | undefined;
+  powerServer: Row | undefined;
 }
 
 export interface PowerState extends Omit<PowerSnapshot, "profile"> {
