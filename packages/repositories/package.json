@@ -38,7 +38,12 @@
     "./avatar-grant": "./src/avatar-grant.ts",
     "./mail-conversation-read": "./src/mail-conversation-read.ts",
     "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
-    "./avatar-delivery": "./src/avatar-delivery.ts"
+    "./avatar-delivery": "./src/avatar-delivery.ts",
+    "./world-favorites": "./src/world-favorites.ts",
+    "./world-search": "./src/world-search.ts",
+    "./player-search": "./src/player-search.ts",
+    "./world-point-detail": "./src/world-point-detail.ts",
+    "./world-resource-owner": "./src/world-resource-owner.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",

@@ -2,6 +2,19 @@ import { expect, test } from "bun:test";
 import { parseServerEnvironment } from "../src/server.schema";
 
 const base = { GAME_LOGIN_SECRET: "synthetic-secret", GAME_RESOURCES: "synthetic-resources" };
+test("general player search defaults to cross mode and accepts explicit true or false only", () => {
+  expect(parseServerEnvironment(base).GAME_CROSS_SEARCH).toBe(true);
+  expect(parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: "false" }).GAME_CROSS_SEARCH).toBe(
+    false,
+  );
+  expect(parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: "true" }).GAME_CROSS_SEARCH).toBe(
+    true,
+  );
+  for (const value of ["", "0", "1", "TRUE", "yes"])
+    expect(() => parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: value })).toThrow(
+      "GAME_CROSS_SEARCH",
+    );
+});
 test("server settings validate realm routing and require private inputs", () => {
   expect(parseServerEnvironment(base).KINGDOM_ID).toBe(1);
   expect(parseServerEnvironment({ ...base, KINGDOM_ID: "2", GAME_PORT: "0" }).KINGDOM_ID).toBe(2);

@@ -1,3 +1,7 @@
+import type { WorldPointDetailStore } from "./world-point-detail.ts";
+import type { WorldFavoriteStore } from "./world-favorites.ts";
+import type { WorldSearchStore } from "./world-search.ts";
+import type { PlayerSearchStore } from "./player-search.ts";
 import type { AvatarFinishService } from "./files.ts";
 import type { AvatarGrantService } from "./files.ts";
 import type { ChatSessionIssuer } from "./chat.ts";
@@ -104,6 +108,10 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  worldPointDetail?: WorldPointDetailStore;
+  playerSearch?: PlayerSearchStore;
+  worldSearch?: WorldSearchStore;
+  worldFavorites?: WorldFavoriteStore;
   avatar?: AvatarGrantService;
   avatarFinish?: AvatarFinishService;
   chatSession?: ChatSessionIssuer;

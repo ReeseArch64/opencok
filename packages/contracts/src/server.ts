@@ -1,4 +1,5 @@
 export interface ServerConfig {
+  crossSearchEnabled?: boolean;
   avatarChat?: { url: string; signingSecret: string };
   avatarFiles?: { origin: string; keyFile: string };
   chatSession?: { url: string; signingSecret: string };
