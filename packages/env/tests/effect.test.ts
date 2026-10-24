@@ -8,7 +8,6 @@ const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://example:secret@localhost/global",
   KINGDOM_ID: "2",
   GAME_LOGIN_SECRET: "synthetic",
-  GAME_RESOURCES: "fixtures",
 });
 
 test("API and realm read the same injected snapshot with independent service defaults", async () => {

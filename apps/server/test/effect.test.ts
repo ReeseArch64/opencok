@@ -3,13 +3,13 @@ import { createConnection, createServer } from "node:net";
 import { Effect, Layer, ManagedRuntime } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
 import { RealmConfig, RealmConfigLive, config } from "../src/config.ts";
-import { RealmDependencies, RealmServer, RealmServerLive } from "../src/server.ts";
+import { RealmDependencies, RealmServer, RealmServerLive, startServer } from "../src/server.ts";
+import { Rules } from "@opencok/rules/game";
 import type { ServerDependencies } from "@opencok/connection/dependencies";
 
 const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://synthetic:secret@localhost/postgres",
   GAME_LOGIN_SECRET: "synthetic",
-  GAME_RESOURCES: "fixtures",
   GAME_PORT: "0",
   GAME_HEALTH_PORT: "0",
   KINGDOM_ID: "2",
@@ -91,7 +91,7 @@ test("realm configuration derives database and ownership from the shared snapsho
   expect(settings.kingdomId).toBe(2);
   expect(settings.kingdomDatabase).toBe("opencok_kingdom_2");
   expect(settings.zkPath).toBe("/opencok-experiment/COK2");
-  expect(settings.resources.startsWith("/")).toBe(true);
+  expect(settings).not.toHaveProperty("resources");
 });
 
 test("realm runtime disposes live sockets and health before closing dependencies, exactly once", async () => {
@@ -170,4 +170,12 @@ test("health port bind failure rolls back an already opened TCP listener", async
     await new Promise<void>((resolve) => probe.close(() => resolve()));
     await new Promise<void>((resolve) => occupied.close(() => resolve()));
   }
+});
+
+test("realm startup rejects injected rules belonging to another kingdom before acquiring dependencies", async () => {
+  const settings = await Effect.runPromise(config.pipe(Effect.provide(source)));
+  const foreignRules = new Rules(new Map(), new Map(), new Map());
+  await expect(startServer(settings, foreignRules)).rejects.toThrow(
+    "Rules do not belong to the configured realm",
+  );
 });

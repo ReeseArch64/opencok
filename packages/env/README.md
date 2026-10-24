@@ -85,8 +85,9 @@ host tools retain the host-facing root value; container builds exclude `.env`.
 For the current local Compose workflow, the root file is limited to `NODE_ENV`,
 `DATABASE_ROLE`, `DATABASE_URL` and the `GAME_LOGIN_SECRET` exception. Other local
 service values are hardcoded in Compose and are still validated by the relevant
-runtime schema. Production deployment is separate. Authorized resources come
-from the ignored local `data/reference/server` copy, not another checkout.
+runtime schema. Production deployment is separate. Gameplay catalogs ship as
+maintained TypeScript; GAME_RESOURCES and external XML inputs are no longer
+application settings.
 
 ## Effect application configuration
 

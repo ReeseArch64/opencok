@@ -1,3 +1,4 @@
+import { parseGameplayCatalog } from "@opencok/resources/rules";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { createServer } from "node:net";
 import { randomBytes } from "node:crypto";
@@ -105,7 +106,16 @@ async function createStack() {
     GAME_LOGIN_SECRET: "synthetic-secret",
     DEPENDENCY_TIMEOUT_MS: "1000",
   });
-  isolated.services.server.volumes.find((v: any) => v.target === "/resources").source = folder;
+  expect(isolated.services.server.volumes ?? []).toEqual([]);
+  isolated.services.server.volumes = [
+    {
+      type: "bind",
+      source: join(folder, "catalogs.ts"),
+      target: "/workspace/packages/resources/src/catalogs.ts",
+      read_only: true,
+      bind: { create_host_path: false },
+    },
+  ];
   Object.assign(isolated.services.api.environment, {
     DATABASE_URL: databaseUrl,
     KINGDOM_ID: "2",
@@ -173,8 +183,18 @@ async function createStack() {
     position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
     item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/><ItemSpec id="on_trumpet" k2="0"/>',
   };
-  for (const [name, records] of Object.entries(xml))
-    await Bun.write(join(folder, name + ".xml"), `<database>${records}</database>`);
+  const documents = Object.fromEntries(
+    Object.entries(xml).map(([name, records]) => [
+      name,
+      parseGameplayCatalog(`<database>${records}</database>`),
+    ]),
+  );
+  await Bun.write(
+    join(folder, "catalogs.ts"),
+    `const documents = ${JSON.stringify(documents)};
+export const gameplayCatalogs = Object.fromEntries(Object.entries(documents).map(([name, document]) => [name, async () => structuredClone(document)]));
+`,
+  );
   let started = false;
   async function cleanup(passed: boolean) {
     try {

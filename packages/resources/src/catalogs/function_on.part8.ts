@@ -1,0 +1,315 @@
+import { type GameplayCatalogElement } from "../catalog.ts";
+
+export function part8(): GameplayCatalogElement[] {
+  return [
+    { "#text": "\n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_skin_mall",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_box_show_rate",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_csmod_skin_mall",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_dress_introduction",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_dress_effect",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_csmod_fortress_avatar",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_gamble_mall_global_rank",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_skin_fetters",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_gamble_mall_local_rank",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_lord_frame_show",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_csmod_avatar_mall",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_gamble_mall_rank",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_dress_index",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_shop_combine_icon",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_diamond_show",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_avatar_shop_level_limit",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_mysterypiece_page",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\t\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_fortress_avatar",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "csmod_skin_mall_integrate",
+        "online": "close",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n    \n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "new_equip_list_v1",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "equipment_retrofit_advance",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "equipment_newforge",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "equipment_transfer_strgth",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "equipment_retrofit_advance",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "new_equip_list_v1",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "new_equip_list_v1",
+        "online": "all",
+        "test": "all",
+        "version": "9.26.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\n\t\n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "popularity_civilization_open",
+        "online": "all",
+        "test": "all",
+        "version": "12.06.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\t" },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "ancestralSpirit_civilization_open",
+        "online": "all",
+        "test": "all",
+        "version": "12.06.0",
+        "pf": "all",
+      },
+    },
+    { "#text": "\n\t" },
+  ];
+}

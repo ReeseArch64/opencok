@@ -3,7 +3,9 @@
   "private": true,
   "scripts": {
     "check-types": "tsc --noEmit",
-    "test": "bun --no-env-file test tests"
+    "test": "bun --no-env-file test tests",
+    "import:catalogs": "bun --no-env-file scripts/import-gameplay-catalogs.ts",
+    "update:catalogs": "bun --no-env-file scripts/update-catalog-hashes.ts"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
@@ -13,10 +15,12 @@
   "type": "module",
   "exports": {
     "./rules": "./src/rules.ts",
-    "./nickname-words": "./src/nickname-words.ts"
+    "./nickname-words": "./src/nickname-words.ts",
+    "./catalogs": "./src/catalogs.ts"
   },
   "dependencies": {
     "@opencok/rules": "workspace:*",
-    "fast-xml-parser": "^5.0.0"
+    "fast-xml-parser": "^5.0.0",
+    "@opencok/enums": "workspace:*"
   }
 }

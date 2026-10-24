@@ -110,13 +110,14 @@ host address. The example login-secret placeholder is not a working client secre
 
 Before starting, supply these authorized local inputs:
 
-| Input                    | Required location                                                             |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| Realm XML/rule resources | `data/reference/server/runtime/base/resource`                                 |
-| CDN host trees           | `data/cdn/data/cok.eleximg.com/cok` and `data/cdn/data/asset.cok.chat/100001` |
+| Input          | Required location                                                             |
+| -------------- | ----------------------------------------------------------------------------- |
+| CDN host trees | `data/cdn/data/cok.eleximg.com/cok` and `data/cdn/data/asset.cok.chat/100001` |
 
-The nickname filter is included as `packages/resources/data/badwords.json`; it
-requires no external TXT or bind mount. Rebuild the server after changing that list.
+Gameplay catalogs are included as typed TypeScript in `packages/resources/src/catalogs`,
+and the nickname filter is included as `packages/resources/data/badwords.json`.
+The server requires no external XML/TXT or resource bind mount. See the
+[catalog editing guide](packages/resources/README.md); rebuild the server after changes.
 
 The runtime mounts originals read-only and fails when required inputs are absent.
 Do not force-add these files, keys, player records or prepared APKs to Git.

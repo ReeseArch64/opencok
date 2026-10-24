@@ -8,6 +8,7 @@
         "@commitlint/config-conventional": "^21.2.4",
         "@opencok/config": "workspace:*",
         "@opencok/messages": "workspace:*",
+        "@opencok/resources": "workspace:*",
         "@types/bun": "catalog:",
         "husky": "9.1.7",
         "typescript": "catalog:",
@@ -557,6 +558,7 @@
     "packages/resources": {
       "name": "@opencok/resources",
       "dependencies": {
+        "@opencok/enums": "workspace:*",
         "@opencok/rules": "workspace:*",
         "fast-xml-parser": "^5.0.0",
       },

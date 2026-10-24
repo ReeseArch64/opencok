@@ -19,7 +19,6 @@ export interface ServerConfig {
   zookeeper: string;
   zkPath: string;
   loginSecret: string;
-  resources: string;
   mapSize: number;
   timeoutMs: number;
 }
