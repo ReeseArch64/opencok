@@ -1,3 +1,5 @@
+import { mailStatus } from "@opencok/dtos/mail";
+import { mailStatusQuery, calculateMailStatus } from "@opencok/rules/mail";
 import { expeditionRanking } from "@opencok/dtos/expedition-ranking";
 import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
 import { decodeExpeditionRanking } from "./expedition-ranking.ts";
@@ -149,6 +151,9 @@ export class Game {
       case "get.power.info":
         body = await this.power(uid);
         break;
+      case "mail.category.status":
+        body = await this.mailStatus(uid, params);
+        break;
       case "expedition.rank":
         body = await this.expeditionRanking(uid);
         break;
@@ -173,6 +178,21 @@ export class Game {
   }
   private async profile(uid: string): Promise<Row> {
     return this.checkProfile(await this.db.profile(uid));
+  }
+  private async mailStatus(uid: string, params: Fields): Promise<Fields> {
+    const field = params.category;
+    let category: number | undefined;
+    if (field !== undefined) {
+      if (field.type !== Type.Int || typeof field.value !== "number")
+        throw new GameError(errors.invalid);
+      category = field.value;
+    }
+    const query = mailStatusQuery(category, this.now());
+    const state = await this.db.mailStatus(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return mailStatus(calculateMailStatus(query, state.counts));
   }
   private async expeditionRanking(uid: string): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)
