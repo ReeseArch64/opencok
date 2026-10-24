@@ -454,8 +454,12 @@ DTO provide the base owner fields and preserve local monster early exits, while
 specialized additions remain separate from base owner projection. Current database reads replace
 legacy process-local profile/alliance caches for this path. The runtime now connects
 this reader and its readiness helper through
-`GameServices.worldPointDetail` for implemented local branches. Remaining specialized
-state and remote JSON/wire conversion are explicit unsupported command paths. Details are in the
+`GameServices.worldPointDetail` for implemented local and remote branches. Remote
+responses preserve the world-zero service projection and its JSON conversion: signed
+Long values within the Int range narrow to Int, while larger values remain exact.
+Local-only additions are omitted remotely. The bounded converter accepts the current
+base String/Int/Long fields; occupied-resource and specialized territory projections
+and their additional value types remain pending. Details are in the
 [realm runbook](../apps/server/README.md#world-point-and-owner-read-foundation).
 
 The monster-detail foundation adds optional `field_monster` and `army` catalogs

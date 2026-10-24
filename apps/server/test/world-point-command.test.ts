@@ -389,7 +389,6 @@ test("command validates integer parameters, local realm routing and observer sta
     { point: sfs.int(1.5) },
     { serverId: sfs.string("1") },
     { serverId: sfs.int(0) },
-    { serverId: sfs.int(2) },
   ];
   for (const params of invalidParams) {
     const f = fixture();
