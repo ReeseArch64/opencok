@@ -48,3 +48,9 @@ test("public chat discovery uses an optional HTTP origin without private URL com
   ])
     expect(() => parseApiEnvironment({ API_CHAT_URL: value })).toThrow("API_CHAT_URL");
 });
+
+test("API media is disabled by default and requires an explicit boolean flag", () => {
+  expect(parseApiEnvironment({}).API_FILES_ENABLED).toBe(false);
+  expect(parseApiEnvironment({ API_FILES_ENABLED: "true" }).API_FILES_ENABLED).toBe(true);
+  expect(() => parseApiEnvironment({ API_FILES_ENABLED: "yes" })).toThrow("API_FILES_ENABLED");
+});

@@ -1,34 +1,34 @@
 import type { GeneralInfoDto } from "./profile.ts";
 
 export class ReconnectBalancesDto {
-  readonly gold!: bigint;
-  readonly dmmGold!: bigint;
-  readonly dmmPaidGold!: bigint;
-  readonly dmmPaidSpecialGold!: bigint;
-  readonly freeGold!: bigint;
-  readonly paidGold!: bigint;
-  readonly paidSpecialGold!: bigint;
+  declare public readonly gold: bigint;
+  declare public readonly dmmGold: bigint;
+  declare public readonly dmmPaidGold: bigint;
+  declare public readonly dmmPaidSpecialGold: bigint;
+  declare public readonly freeGold: bigint;
+  declare public readonly paidGold: bigint;
+  declare public readonly paidSpecialGold: bigint;
 }
 
 export class ReconnectArmyDto {
-  readonly id!: string;
-  readonly free!: number;
-  readonly march!: number;
-  readonly level!: number;
-  readonly train?: number;
-  readonly finish?: bigint;
+  declare public readonly id: string;
+  declare public readonly free: number;
+  declare public readonly march: number;
+  declare public readonly level: number;
+  declare public readonly train?: number;
+  declare public readonly finish?: bigint;
 }
 
 export class ReconnectArmiesDto {
-  readonly army!: ReconnectArmyDto[];
+  declare public readonly army: ReconnectArmyDto[];
 }
 
 export class ReconnectGeneralsDto {
-  readonly userGenerals!: (GeneralInfoDto & { readonly abilityIndex: number })[];
+  declare public readonly userGenerals: (GeneralInfoDto & { readonly abilityIndex: number })[];
 }
 
 export class ReconnectMineDto {
-  readonly mine!: {
+  declare public readonly mine: {
     readonly itemId: number;
     readonly level: number;
     readonly exp: number;
