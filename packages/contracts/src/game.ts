@@ -134,6 +134,7 @@ export interface LoginConfigurationState {
 
 export interface GameServices {
   nicknameBadWords?(name: string): boolean | Promise<boolean>;
+  nicknameReservedPatterns?(): readonly string[];
   worldPointDetail?: WorldPointDetailStore;
   playerSearch?: PlayerSearchStore;
   worldSearch?: WorldSearchStore;

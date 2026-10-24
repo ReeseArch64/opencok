@@ -64,6 +64,30 @@ export class Cache {
     if (typeof value !== "string" || value.length > 65535) throw new DependencyError("redis");
     return value;
   }
+  async nicknameForbiddenWords(key: string): Promise<readonly string[]> {
+    if (
+      !["regular", "strict", "pattern", "weight", "name"].some(
+        (kind) => key === `forbidden_words_${kind}`,
+      )
+    )
+      throw new DependencyError("nickname forbidden list");
+    let entries: unknown;
+    try {
+      entries = await this.command("LRANGE", key, "0", "-1");
+    } catch {
+      return [];
+    }
+    if (!Array.isArray(entries) || entries.length > 65536)
+      throw new DependencyError("nickname forbidden list");
+    let bytes = 0;
+    for (const entry of entries) {
+      if (typeof entry !== "string" || Buffer.byteLength(entry) > 65535)
+        throw new DependencyError("nickname forbidden list");
+      bytes += Buffer.byteLength(entry);
+      if (bytes > 16 * 1024 * 1024) throw new DependencyError("nickname forbidden list");
+    }
+    return [...entries];
+  }
   publishPlayerUpdateTime(uid: string, updatedAt: string): Promise<void> {
     return publishPlayerUpdate(
       (command, ...args) => this.command(command, ...args),
