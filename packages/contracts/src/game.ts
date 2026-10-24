@@ -204,6 +204,7 @@ export interface GameServices {
     limit: number,
     global: boolean,
   ): Promise<FlowerRankingPublication>;
+  militaryRanking?(type: number, group: number): Promise<readonly string[]>;
   attributeRanking?(type: number): Promise<readonly string[]>;
   publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
   globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;

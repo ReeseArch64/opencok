@@ -72,7 +72,8 @@
     "./dragon-ranking": "./src/dragon-ranking.ts",
     "./hero-ranking": "./src/hero-ranking.ts",
     "./community-ranking": "./src/community-ranking.ts",
-    "./flower-ranking": "./src/flower-ranking.ts"
+    "./flower-ranking": "./src/flower-ranking.ts",
+    "./military-ranking": "./src/military-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
