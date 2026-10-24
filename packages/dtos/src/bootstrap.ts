@@ -1,8 +1,10 @@
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
-import { errors } from "@opencok/constants/game";
+import { errors, PUSH_SETTING_COUNT, WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
+import type { LoginConfigurationState } from "@opencok/contracts/game";
+import { featureAnnouncementEnabled, type FeatureContext } from "@opencok/rules/features";
 
 export { dataConfig } from "./configuration.ts";
 
@@ -16,7 +18,7 @@ export function serverClock(now: number, offsetHours: number): Fields {
   };
 }
 
-export function featureConfig(rules: Rules): Fields {
+export function featureConfig(rules: Rules, context: FeatureContext): Fields {
   return {
     funcOn: sfs.array(
       [...rules.features.values()].map((rule) =>
@@ -24,10 +26,56 @@ export function featureConfig(rules: Rules): Fields {
           funcKey: sfs.string(rule.id!),
           pf: sfs.string(rule.pf ?? "all"),
           version: sfs.string(rule.version ?? ""),
-          onOff: sfs.bool(false),
+          onOff: sfs.bool(featureAnnouncementEnabled(rule, rules, context)),
         }),
       ),
     ),
+  };
+}
+
+export function loginConfiguration(
+  rules: Rules,
+  state: LoginConfigurationState,
+  context: FeatureContext,
+  verifyChangeAccount: boolean,
+): Fields {
+  const present = new Set(state.pushSettings.map((row) => num(row, "type")));
+  const pushSettings = state.pushSettings.map((row) =>
+    sfs.object({
+      type: sfs.int(num(row, "type")),
+      status: sfs.int(num(row, "status")),
+      audio: sfs.int(num(row, "audio")),
+    }),
+  );
+  if (state.pushSettings.length < PUSH_SETTING_COUNT)
+    for (let type = 0; type < PUSH_SETTING_COUNT; type++)
+      if (!present.has(type))
+        pushSettings.push(
+          sfs.object({
+            type: sfs.int(type),
+            status: sfs.int(type === WORLD_NEWS_PUSH_TYPE ? 0 : 1),
+          }),
+        );
+  return {
+    ...featureConfig(rules, context),
+    fbShare: sfs.array(
+      [...(rules.configuration.facebookShare?.values() ?? [])].map((rule) =>
+        sfs.object(
+          Object.fromEntries(Object.entries(rule).map(([key, value]) => [key, sfs.string(value)])),
+        ),
+      ),
+    ),
+    pushSetting: sfs.array(pushSettings),
+    switches: sfs.array(
+      state.switches.map((row) =>
+        sfs.object({
+          name: sfs.string(text(row, "name")),
+          stat: row.stat === null ? sfs.null() : sfs.int(num(row, "stat")),
+          appVersion: row.appVersion === null ? sfs.null() : sfs.string(text(row, "appVersion")),
+        }),
+      ),
+    ),
+    isVerifyChangeAccount: sfs.bool(verifyChangeAccount),
   };
 }
 

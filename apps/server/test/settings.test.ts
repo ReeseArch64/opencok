@@ -12,7 +12,13 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
   const unused = async (): Promise<never> => {
     throw new Error("Settings must not access player state");
   };
-  const store: GameStore = { profile: unused, accounts: unused, city: unused, world: unused };
+  const store: GameStore = {
+    profile: unused,
+    accounts: unused,
+    city: unused,
+    world: unused,
+    configuration: unused,
+  };
   const game = new Game(store, rules, { kingdomId: 1 });
   const result = await game.execute("synthetic-player", "setting.xml", {
     _cok_: sfs.string("correlation"),
@@ -71,6 +77,7 @@ test("build.info uses the injected clock for buildings and queue previews withou
   };
   const store: GameStore = {
     profile: unused,
+    configuration: unused,
     accounts: unused,
     city: async () => state,
     world: unused,

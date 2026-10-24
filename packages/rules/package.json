@@ -12,7 +12,8 @@
   "type": "module",
   "exports": {
     "./game": "./src/game.ts",
-    "./availability": "./src/availability.ts"
+    "./availability": "./src/availability.ts",
+    "./features": "./src/features.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
