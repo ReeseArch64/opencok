@@ -1,7 +1,10 @@
+import type { Row } from "@opencok/contracts/rows";
 import type {
   WorldResourceLoad,
+  WorldResourceArmy,
   WorldResourceCollection,
   WorldResourceMarch,
+  WorldResourceSavedCollection,
   WorldResourceOwnerDetail,
   WorldResourceGroupDetail,
 } from "@opencok/contracts/world-resource-detail";
@@ -44,6 +47,66 @@ export function resourceLongFloat(value: bigint): number {
 }
 export function resourceRemaining(initial: number, cost: number): number {
   return (integer(initial) - integer(cost)) | 0;
+}
+export function resourceSavedCollection(row: Row): WorldResourceSavedCollection {
+  const rate = row.collectSpd ?? 0;
+  if (typeof rate !== "number" || (Number.isFinite(rate) && !Number.isFinite(Math.fround(rate))))
+    return invalid();
+  const collected = long((row.collectedBeforeSpd ?? 0n) as bigint);
+  if (collected < -2147483648n || collected > 2147483647n) return invalid();
+  return {
+    collectSpd: Math.fround(rate),
+    marchArrivalTime: long((row.marchArrivalTime ?? 0n) as bigint),
+    collectedBeforeSpd: Number(collected),
+    changeCollectSpdTime: long((row.changeCollectSpdTime ?? 0n) as bigint),
+    occupyResourceEndTime: long((row.occupyResourceEndTime ?? 0n) as bigint),
+  };
+}
+export function resourceRawArmyLoad(army: WorldResourceArmy, rules: Rules): number {
+  const cached = integer(army.cachedLoad);
+  if (typeof army.residentOwner !== "boolean") return invalid();
+  if (!army.residentOwner && cached > 0) return cached;
+  if (!Array.isArray(army.soldiers) || army.soldiers.length > 4096) return invalid();
+  const float = (value: number): number => {
+    if (typeof value !== "number" || !Object.is(Math.fround(value), value)) return invalid();
+    return value;
+  };
+  let result = 0;
+  for (const soldier of army.soldiers) {
+    if (
+      typeof soldier.armsId !== "string" ||
+      soldier.armsId.length > 255 ||
+      !soldier.armsId.isWellFormed() ||
+      soldier.armsId.includes("\0")
+    )
+      return invalid();
+    const arms = rules.arms.get(soldier.armsId);
+    if (!arms) return invalid();
+    if (!Object.hasOwn(arms, "load")) continue;
+    let load: number;
+    try {
+      load = Number(javaDecimal(arms.load, 32));
+    } catch {
+      return invalid();
+    }
+    const remaining = (integer(soldier.total) - integer(soldier.dead)) | 0;
+    const base = Math.imul(load, remaining);
+    let effect = Math.fround(0);
+    if (army.effects) {
+      const e = army.effects;
+      effect = Math.fround(float(e.worldLoad) + float(e.worldLoadAdd));
+      effect = Math.fround(effect + float(e.general));
+      effect = Math.fround(effect + float(e.newGeneral));
+      effect = Math.fround(effect + float(e.expedition));
+    } else if (army.residentOwner) return invalid();
+    const multiplier = Math.max(
+      Math.fround(Math.fround(100 + effect) + Math.fround(integer(soldier.loadEffect))),
+      20,
+    );
+    const contribution = narrow(Math.fround(Math.fround(Math.fround(base) * multiplier) / 100));
+    result = (result + contribution) | 0;
+  }
+  return result;
 }
 export function resourceArmyLoad(input: WorldResourceLoad, rules: Rules): number {
   let load = integer(input.rawArmyLoad);
@@ -144,4 +207,30 @@ export function resourceGroupDetail(
     remaining: (remaining - collected) | 0,
     sampledAt: Number(long(clock())),
   };
+}
+
+export function neutralResourceStart(
+  point: Row,
+  march: Row | undefined,
+  rules: Rules,
+): bigint | undefined {
+  if (point.pointType !== 60 || point.pointItem == null) return undefined;
+  if (
+    typeof point.pointItem !== "string" ||
+    point.pointItem.length > 255 ||
+    !point.pointItem.isWellFormed() ||
+    point.pointItem.includes("\0")
+  )
+    return invalid();
+  if (mailBlank(point.pointItem) || !march) return undefined;
+  integer(point.id as number);
+  if (march.targetId !== point.id || march.state !== 1) return invalid();
+  const end = long((march.occupyResourceEndTime ?? 0n) as bigint);
+  let seconds: bigint;
+  try {
+    seconds = javaDecimal(rules.world.neutralResources?.get(point.pointItem)?.gather_time, 32);
+  } catch {
+    return invalid();
+  }
+  return BigInt.asIntN(64, end - seconds * 1000n);
 }

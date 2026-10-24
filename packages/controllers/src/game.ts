@@ -1,4 +1,4 @@
-import { localWorldPointDetail } from "./world-point-detail.ts";
+import { worldPointDetail } from "./world-point-detail.ts";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
 import { worldFavorites } from "@opencok/dtos/world-favorites";
 import { worldSearch } from "@opencok/dtos/world-search";
@@ -184,13 +184,15 @@ export class Game {
     switch (command) {
       case "world.get.detail":
         if (!this.services.worldPointDetail) throw new GameError(errors.unsupported);
-        body = await localWorldPointDetail(
+        body = await worldPointDetail(
           this.services.worldPointDetail,
           uid,
           params,
           this.rules,
           this.config.kingdomId,
           this.now(),
+          this.services,
+          this.now,
         );
         break;
       case "search.player":

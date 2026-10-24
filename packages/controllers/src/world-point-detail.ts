@@ -1,14 +1,24 @@
+import { roundTripLegacyIntegerObject } from "@opencok/messages/legacy-json";
+import { decodeJavaIntMap } from "@opencok/messages/java-int-map";
+import { barbarianArmyPlan, barbarianPower } from "@opencok/rules/world-barbarian-detail";
+import type { GameServices } from "@opencok/contracts/game";
+import { MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
+import { playerGameEffect } from "@opencok/rules/power-resolver";
+import { worldPowerEffects } from "@opencok/rules/power-world";
+import { generalSkillPoints, decodeWorldPowerEffects } from "./power.ts";
+import { worldNeutralResource } from "@opencok/dtos/world-resource-detail";
 import type { WorldPointDetailStore } from "@opencok/contracts/world-point-detail";
 import type { Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
-import { worldPointOwner } from "@opencok/dtos/world-point-detail";
+import { worldPointOwner, worldCityFields } from "@opencok/dtos/world-point-detail";
 import {
   worldMonsterHealth as healthFields,
   worldMonsterExploration,
 } from "@opencok/dtos/world-monster-detail";
 import {
   worldPointDetailQuery,
+  worldCityDetail,
   worldPointOccupied,
   worldPointOwnerBase,
 } from "@opencok/rules/world-point-detail";
@@ -17,7 +27,7 @@ import {
   worldExplorationDetail,
   selectWorldExplorationMarch,
 } from "@opencok/rules/world-monster-detail";
-import { resourceRemaining } from "@opencok/rules/world-resource-detail";
+import { resourceRemaining, neutralResourceStart } from "@opencok/rules/world-resource-detail";
 import { favoriteInteger } from "@opencok/rules/world-favorites";
 import { mailBlank } from "@opencok/rules/mail";
 import type { Rules } from "@opencok/rules/game";
@@ -42,13 +52,15 @@ export function restoredExplorationMarch(
   const ordered = legacyObjectOrder(keys).map((key) => byId.get(key)!);
   return selectWorldExplorationMarch(observer, point, ordered, false)?.uuid as string | undefined;
 }
-export async function localWorldPointDetail(
+export async function worldPointDetail(
   store: WorldPointDetailStore,
   observer: string,
   params: Fields,
   rules: Rules,
   kingdomId: number,
   now: number,
+  services: Pick<GameServices, "worldPowerEffects" | "emperorVersion"> = {},
+  clock: () => number = () => now,
 ): Promise<Fields> {
   if (
     params.point?.type !== Type.Int ||
@@ -63,9 +75,11 @@ export async function localWorldPointDetail(
     kingdomId,
     now,
   );
-  if (query.kingdomId !== kingdomId && query.point > 0) return unsupported();
-  const state = await store.read(observer, query, (point, marches) =>
-    restoredExplorationMarch(observer, point, marches),
+  const cityFeature = rules.items.get("lost_battle");
+  const state = await store.read(
+    observer,
+    { ...query, cityExtras: cityFeature?.k3 === "1" },
+    (point, marches) => restoredExplorationMarch(observer, point, marches),
   );
   const profile = state.profile;
   if (!profile) throw new GameError(errors.missing);
@@ -87,16 +101,32 @@ export async function localWorldPointDetail(
     state.world.uid !== observer ||
     !favoriteInteger(state.world.worldId) ||
     point.id !== query.point ||
-    point.worldId !== state.world.worldId ||
+    point.worldId !== (state.remote ? 0 : state.world.worldId) ||
     !favoriteInteger(point.pointType) ||
     !state.owner
   )
     return unsupported();
   const type = point.pointType;
-  if (type < 0 || type > 69 || [14, 18, 20, 21, 23, 44, 46, 47].includes(type))
-    return unsupported();
-  const owner = worldPointOwner(worldPointOwnerBase(point, state.owner, false));
+  if (type < 0 || type > 69 || [14, 18, 20, 21, 23, 46, 47].includes(type)) return unsupported();
   const occupied = worldPointOccupied(point);
+  if (state.remote) {
+    if (type === 3 && !occupied)
+      return roundTripLegacyIntegerObject({
+        point: sfs.int(query.point),
+        tq: sfs.int(resourceRemaining(point.resInitValue as number, point.resCostValue as number)),
+      });
+    if (
+      (type === 3 || type === 37) &&
+      !mailBlank(point.ownerId as string | null) &&
+      !mailBlank(point.ownerMarchUUid as string | null)
+    )
+      return unsupported();
+    return roundTripLegacyIntegerObject({
+      ...worldPointOwner(worldPointOwnerBase(point, state.owner, true)),
+      point: sfs.int(query.point),
+    });
+  }
+  const owner = worldPointOwner(worldPointOwnerBase(point, state.owner, false));
   if (!occupied && (type === 3 || type === 37)) {
     const result: Fields = {
       ...owner,
@@ -116,20 +146,83 @@ export async function localWorldPointDetail(
     !mailBlank(point.ownerMarchUUid as string | null)
   )
     return unsupported();
-  if (type === 60 && !mailBlank(point.pointItem as string | null)) return unsupported();
-  if (type === 1 && rules.items.get("lost_battle")?.k3 === "1" && state.owner.profile)
-    return unsupported();
   const result: Fields = {
     ...owner,
     ...healthFields(worldMonsterHealth(point, false, rules)),
     point: sfs.int(query.point),
   };
+  if (type === 1 && cityFeature?.k3 === "1" && state.owner.profile) {
+    const city = state.city;
+    if (
+      !city ||
+      !city.observerStatistics ||
+      city.observerStatistics.uid !== observer ||
+      !city.mixed ||
+      city.mixed.uid !== point.ownerId ||
+      city.effects.profile.uid !== point.ownerId ||
+      city.effects.profile.serverId !== kingdomId ||
+      !services.worldPowerEffects
+    )
+      return unsupported();
+    const context = { now, kingdomId, version: MOBILE_CLIENT_VERSION };
+    const world = worldPowerEffects(
+      decodeWorldPowerEffects(await services.worldPowerEffects()),
+      rules,
+      context,
+    );
+    const emperor = city.effects.throneRewards.length
+      ? await services.emperorVersion?.()
+      : undefined;
+    const effect = playerGameEffect(
+      city.effects,
+      rules,
+      context,
+      generalSkillPoints(city.effects.generals),
+      world,
+      emperor,
+      37,
+    );
+    Object.assign(
+      result,
+      worldCityFields(
+        worldCityDetail(
+          city.observerStatistics.power,
+          state.owner.statistics?.power,
+          city.mixed.lastBeDuelTime,
+          effect,
+          cityFeature.k4,
+        ),
+      ),
+    );
+  }
+  if (type === 44) {
+    if (!state.barbarian) return unsupported();
+    const row = state.barbarian.row;
+    if (row && row.pointId !== query.point) return unsupported();
+    const plan = barbarianArmyPlan(row, rules, clock());
+    let remaining: ReadonlyMap<string | null, number | null> | null = null;
+    if (plan?.army.size && row?.lastArmyMapByteArray != null) {
+      try {
+        remaining = decodeJavaIntMap(row.lastArmyMapByteArray as Buffer);
+      } catch {
+        return unsupported();
+      }
+    }
+    result.barbarionPower = sfs.long(barbarianPower(plan, remaining, rules));
+  }
   if (type === 6) {
     if (!state.exploration) return unsupported();
     const marches = state.exploration.march ? [state.exploration.march] : [];
     Object.assign(
       result,
       worldMonsterExploration(worldExplorationDetail(observer, point, marches, false)),
+    );
+  }
+  if (type === 60 && !mailBlank(point.pointItem as string | null)) {
+    if (!state.neutralResource) return unsupported();
+    Object.assign(
+      result,
+      worldNeutralResource(neutralResourceStart(point, state.neutralResource.march, rules)),
     );
   }
   if (
