@@ -1,5 +1,10 @@
 import type { Row } from "./rows.ts";
 
+export interface GeneralSkill {
+  id: string;
+  points: number;
+}
+
 export interface PowerSnapshot {
   profile: Row;
   statistics: Row | undefined;

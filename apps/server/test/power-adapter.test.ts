@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { readPowerState } from "@opencok/repositories/power";
-import { titleContractExpiries } from "@opencok/controllers/power";
+import { generalSkillPoints, titleContractExpiries } from "@opencok/controllers/power";
 
 const now = 1792756800000;
 function database(options: { missing?: boolean; failure?: boolean } = {}) {
@@ -12,8 +12,14 @@ function database(options: { missing?: boolean; failure?: boolean } = {}) {
       queries.push({ text: query.text, params });
       const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
       if (table === "userprofile")
-        return { rows: options.missing ? [] : [["synthetic", 5, "0", 0, "market_global", "", 1]] };
+        return {
+          rows: options.missing
+            ? []
+            : [["synthetic", 5, "0", 0, "market_global", "", 1, "9001;0;0"]],
+        };
       if (table === "user_army") return { rows: [["107001", 1, 2, 3, 4]] };
+      if (table === "user_general") return { rows: [["1001", 5, Buffer.from('[{"600001":2}]')]] };
+      if (table === "user_equip") return { rows: [[1001, 1, "487,3", 4]] };
       if (table === "user_wall") return { rows: [["108001", 5]] };
       if (table === "user_state") return { rows: [[510001, "9007199254740993", 487, 25]] };
       if (table === "user_civilization_science") return { rows: [[2000, 3]] };
@@ -35,6 +41,11 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   const { db, queries } = database();
   const snapshot = await readPowerState(db, "synthetic", now);
   expect(snapshot.profile?.uid).toBe("synthetic");
+  expect(generalSkillPoints(snapshot.generals)).toEqual([[{ id: "600001", points: 2 }]]);
+  expect(snapshot.equipment).toEqual([
+    { itemId: 1001, on: 1, extraProperty: "487,3", strengthLevel: 4 },
+  ]);
+  expect(snapshot.profile?.decomposeSuitEffect).toBe("9001;0;0");
   expect(snapshot.armies).toEqual([{ armyId: "107001", free: 1, pve: 2, defence: 3, march: 4 }]);
   expect(snapshot.walls).toEqual([{ armyId: "108001", num: 5 }]);
   expect(snapshot.civilizationSciences).toEqual([{ baseItemID: 2000, level: 3 }]);

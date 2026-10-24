@@ -35,6 +35,7 @@ export function readPowerState(
             pf: userprofile.pf,
             allianceId: userprofile.allianceId,
             serverId: userprofile.serverId,
+            decomposeSuitEffect: userprofile.decomposesuiteffect,
           })
           .from(userprofile)
           .where(eq(userprofile.uid, uid))
@@ -63,7 +64,11 @@ export function readPowerState(
         await tx.select().from(playerinfo).where(eq(playerinfo.uid, uid)).limit(1)
       )[0];
       const generals = await tx
-        .select({ generalId: user_general.generalId, level: user_general.level })
+        .select({
+          generalId: user_general.generalId,
+          level: user_general.level,
+          ability: user_general.ability,
+        })
         .from(user_general)
         .where(eq(user_general.uid, uid))
         .orderBy(asc(user_general.uuid));
@@ -112,7 +117,12 @@ export function readPowerState(
         .where(eq(saga_tower_science.uid, uid))
         .orderBy(asc(saga_tower_science.itemid));
       const equipment = await tx
-        .select({ itemId: user_equip.itemId, on: user_equip.on })
+        .select({
+          itemId: user_equip.itemId,
+          on: user_equip.on,
+          extraProperty: user_equip.extraProperty,
+          strengthLevel: user_equip.strengthLevel,
+        })
         .from(user_equip)
         .where(and(eq(user_equip.uid, uid), eq(user_equip.on, 1)))
         .orderBy(asc(user_equip.uuid));
