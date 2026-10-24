@@ -9,7 +9,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `user.check.nickName`,
 `equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
-`mail.read.status`, `mail.read.status.betch`,
+`mail.read.status`, `mail.read.status.betch`, `report.picVer`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
@@ -3179,11 +3179,13 @@ uniqueness. Candidate scans retain the existing collation adapter's performance
 limitation. Startup checks the moderation table even when files/chat integration is
 disabled, because report submission is independently available.
 
-No schema, migration, dependency, test or fixture was added for this command. Types,
-lint, formatting and diff review were run; test execution was deferred by instruction.
-PostgreSQL locks/concurrency, client/ADB, runtime services and moderation lifecycle
-remain unverified. This command does not complete avatar topic 7 or the version-wrap
-and restoration work tracked in #217.
+No schema, migration or dependency is added. Three command tests cover exact targets,
+repeated reports, correlation and rejection before persistence. A disposable PostgreSQL
+test applies maintained migrations and covers concurrent increments from two reporters,
+defaults, counter wrap, null counters, alias ambiguity, owner/realm/ban checks, unchanged
+moderation fields and persistence after restart. The full server unit suite, affected
+types, lint, formatting and diff review pass. Native client/ADB and the separate
+moderation lifecycle remain unverified; version allocation remains tracked in #217.
 
 ## Realm chat sessions
 
