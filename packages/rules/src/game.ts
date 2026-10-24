@@ -1,5 +1,6 @@
 import { GameError } from "@opencok/errors/game";
-import { errors } from "@opencok/constants/game";
+import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
+import { ruleAvailable } from "./availability.ts";
 
 export type Rule = Record<string, string>;
 export class Rules {
@@ -13,6 +14,7 @@ export class Rules {
     readonly goods: Map<string, Rule> = new Map(),
     readonly features: Map<string, Rule> = new Map(),
     readonly kingdomId = 1,
+    readonly settings: Map<string, Rule> = new Map(),
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (
@@ -76,35 +78,26 @@ export class Rules {
     }
     return out;
   }
-  maxStar(itemId: string): number {
+  maxStar(itemId: string, now: number): number {
     const prefix = String(Math.floor(Number(itemId) / 100) * 100);
     let max = 0;
 
     for (const rule of this.stars.values()) {
-      const server = (rule.online ?? "").split(";").some((v) => {
-        if (v === "all") return true;
-        const [lo, hi = lo] = v.split("-").map(Number);
-        return lo! <= this.kingdomId && hi! >= this.kingdomId;
-      });
-      const version = (rule.version ?? "").split(".").map(Number);
-      const current = [12, 6, 0];
-      const diff = current.map((v, i) => v - (version[i] ?? 0)).find((v) => v !== 0) ?? 0;
       if (
         rule.build_id === prefix &&
-        server &&
-        rule.version &&
-        diff >= 0 &&
-        !rule.start &&
-        !rule.end
+        ruleAvailable(rule, { kingdomId: this.kingdomId, version: MOBILE_CLIENT_VERSION, now }) &&
+        /^\d+$/.test(rule.star ?? "") &&
+        Number.isSafeInteger(Number(rule.star)) &&
+        Number(rule.star) <= 2147483647
       )
         max = Math.max(max, Number(rule.star));
     }
     return max;
   }
-  nextBuilding(itemId: string, level: number, star = 0, progress = 0): Rule {
+  nextBuilding(itemId: string, level: number, star: number, progress: number, now: number): Rule {
     const current = this.building(itemId, level, star, progress);
     if (level < 30) return this.building(itemId, level + 1, star, progress);
-    if (star >= this.maxStar(itemId)) return current;
+    if (star >= this.maxStar(itemId, now)) return current;
     const steps = progression(current.star_time);
     const next = Number(steps[stepIndex(steps, progress) + 1]?.[0] ?? progress + 10);
     return this.building(itemId, level, star + (next >= 100 ? 1 : 0), next >= 100 ? 0 : next);

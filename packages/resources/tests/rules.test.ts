@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadRules } from "../src/rules.ts";
+import { loadRules, parseRules } from "../src/rules.ts";
 
 const records =
   '<database><ItemSpec id="100100" level="0"/><ItemSpec id="100101" level="1"/></database>';
@@ -17,6 +17,12 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     expect(rules.role(1).level).toBe("1");
     expect(rules.stars.size).toBe(0);
     expect(rules.goods.size).toBe(0);
+    expect(rules.settings.size).toBe(0);
+    await writeFile(
+      join(directory, "setting.xml"),
+      '<database><Group id="settings"><ItemSpec id="001" value="0007"/></Group></database>',
+    );
+    expect((await loadRules(directory)).settings.get("001")?.value).toBe("0007");
     await writeFile(
       join(directory, "goods.xml"),
       '<database><ItemSpec id="1" value="old"/><ItemSpec id="1" value="new"/></database>',
@@ -32,4 +38,40 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+test("XML records support singleton, multiple groups, and nested groups with exact strings", () => {
+  expect(
+    parseRules('<database><ItemSpec id="001" value="0007"/></database>', "setting").get("001"),
+  ).toEqual({ id: "001", value: "0007" });
+  const rules = parseRules(
+    '<database><Group id="one"><ItemSpec id="001" value="  text  "/></Group><Group id="two"><ItemSpec id="002" value="a &amp; b"/><Group id="nested"><ItemSpec id="003" value="城"/></Group></Group></database>',
+    "setting",
+  );
+  expect([...rules.values()]).toEqual([
+    { id: "001", value: "  text  " },
+    { id: "002", value: "a & b" },
+    { id: "003", value: "城" },
+  ]);
+});
+
+test("duplicates remain explicit across groups and malformed resource records are rejected", () => {
+  const duplicate =
+    '<database><Group id="one"><ItemSpec id="a" value="1"/></Group><Group id="two"><ItemSpec id="a" value="2"/></Group></database>';
+  expect(() => parseRules(duplicate, "setting")).toThrow("Invalid gameplay resource ID");
+  expect(parseRules(duplicate, "function_on").get("a")?.value).toBe("2");
+  expect(parseRules(duplicate, "goods").get("a")?.value).toBe("2");
+  expect(
+    parseRules('<database><ItemSpec value="ignored"/><ItemSpec id="a"/></database>', "goods").size,
+  ).toBe(1);
+  for (const xml of [
+    '<database><ItemSpec value="missing ID"/></database>',
+    '<database><ItemSpec id=" "/></database>',
+    '<database><ItemSpec id="a"><nested value="invalid"/></ItemSpec></database>',
+    "<database/>",
+    '<other><ItemSpec id="a"/></other>',
+    "<database>",
+    '<!DOCTYPE database [<!ENTITY secret "private">]><database><ItemSpec id="a"/></database>',
+  ])
+    expect(() => parseRules(xml, "setting")).toThrow();
 });
