@@ -1344,7 +1344,11 @@ category and detail readers validate the wrapped extension response before autho
 owned primary-row cleanup. SQL, routing, projection and cleanup remain unit-verified only.
 
 Paginated message and conversation reads share the owned mailbox-window boundary with
-category listing. Their selector predicates run before pagination; categories retain
+category listing. `mread.chat` reuses the `mread.batch` selector paths, defaulting only
+an absent type to personal conversation. Both retain their actual command name during
+complete-response validation before cleanup, including explicit group selections.
+Fetching conversation content does not mark it read or write chat-service markers.
+Selector predicates run before pagination; categories retain
 post-window filtering. Both use the same presentation readers and serializers, with
 separate ordinary, category-chat and conversation envelopes. Group selectors use a
 separate owner-locked transaction and a scoped preview reader: domain rules select group

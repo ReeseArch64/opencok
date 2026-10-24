@@ -8,7 +8,15 @@ import type {
 } from "@opencok/contracts/mail";
 import { mailGroupProjection } from "@opencok/controllers/mail-groups";
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
-import { encode, fields, ProtocolError, sfs, type Fields, type Value } from "@opencok/messages/sfs";
+import {
+  encode,
+  extension,
+  fields,
+  ProtocolError,
+  sfs,
+  type Fields,
+  type Value,
+} from "@opencok/messages/sfs";
 import {
   mailGroupContains,
   mailGroupQuery,
@@ -456,4 +464,26 @@ test("aggregate raw size and complete transport encoding must succeed before cle
   expect(() =>
     project({ groups: [group(100, "sender")], previews: [preview(recent(22, 1))] }, badPortrait),
   ).toThrow(ProtocolError);
+});
+
+test("group cleanup validates the actual chat command envelope rather than the longer batch command", () => {
+  const page = {
+    groups: [group(12)],
+    previews: [preview([mailListEntry({ type: 12, contents: Buffer.from("broken") })])],
+  };
+  const body = project(page).body;
+  const values = Array.from({ length: 127 }, () => sfs.string("x".repeat(32767)));
+  values.push(sfs.string(""));
+  const envelope = { _cok_: sfs.array(values) };
+  const baseline = encode(extension("mread.chat", { ...body, ...envelope })).length;
+  const padding = 4 * 1024 * 1024 - baseline;
+  expect(padding).toBeGreaterThan(0);
+  expect(padding).toBeLessThanOrEqual(32767);
+  values[127] = sfs.string("x".repeat(padding));
+  const result = mailGroupProjection("self", query(), page, presentation(), envelope, "mread.chat");
+  expect(result.cleanup).toEqual({ groups: [], mailIds: ["mail"] });
+  expect(encode(extension("mread.chat", { ...result.body, ...envelope }))).toHaveLength(
+    4 * 1024 * 1024,
+  );
+  expect(() => project(page, presentation(), 1000, envelope)).toThrow(ProtocolError);
 });

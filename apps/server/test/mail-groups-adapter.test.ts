@@ -786,3 +786,25 @@ test("repository query and selector validation reject invalid capabilities befor
     expect(g.calls.some((call) => call.text.includes('from "opencok_kingdom"."mail"'))).toBe(false);
   }
 });
+
+test("mread.chat explicit group selectors preserve group output, sender resolution and cleanup", async () => {
+  for (const selector of [10, 1000]) {
+    const f = fixture();
+    const batch = fixture();
+    const request = { ...params(selector), _cok_: sfs.string("chat-group") };
+    expect(await f.game.execute("self", "mread.chat", request)).toEqual(
+      await batch.game.execute("self", "mread.batch", request),
+    );
+    expect(f.calls).toEqual(batch.calls);
+    expect(f.routes).toEqual(batch.routes);
+    expect(f.groups()).toEqual(batch.groups());
+    expect(f.rows()).toEqual(batch.rows());
+    const failure = fixture({ fail: "delete-groups" });
+    const before = structuredClone([failure.rows(), failure.groups()]);
+    if (selector === 1000) {
+      await expect(failure.game.execute("self", "mread.chat", request)).rejects.toThrow();
+      expect(structuredClone([failure.rows(), failure.groups()])).toEqual(before);
+      expect(failure.calls.at(-1)!.text).toBe("rollback");
+    }
+  }
+});

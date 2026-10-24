@@ -24,7 +24,12 @@ import {
   mailStatusQuery,
   calculateMailStatus,
 } from "@opencok/rules/mail";
-import type { MailSaveMode, MailGroupQuery, MailGroupPreview } from "@opencok/contracts/mail";
+import type {
+  MailSaveMode,
+  MailGroupQuery,
+  MailGroupPreview,
+  MailListCommand,
+} from "@opencok/contracts/mail";
 import { expeditionRanking } from "@opencok/dtos/expedition-ranking";
 import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
 import { decodeExpeditionRanking } from "./expedition-ranking.ts";
@@ -191,7 +196,8 @@ export class Game {
         body = await this.mailRead(uid, command === "mail.read.status.betch", params);
         break;
       case "mread.batch":
-        body = await this.mailBatch(uid, params);
+      case "mread.chat":
+        body = await this.mailBatch(uid, params, command);
         break;
       case "mread.batch.category":
         body = await this.mailCategory(uid, params);
@@ -318,18 +324,19 @@ export class Game {
       throw new GameError(errors.invalid);
     return mailDeleted(state.deleted);
   }
-  private async mailBatch(uid: string, params: Fields): Promise<Fields> {
+  private async mailBatch(uid: string, params: Fields, command: MailListCommand): Promise<Fields> {
     const fromUser =
       params.fromUser === undefined || params.fromUser.type === Type.Null
         ? null
         : wireString(params, "fromUser");
     if (fromUser !== null && typeof fromUser !== "string") throw new GameError(errors.invalid);
-    const type = wireInt(params, "type");
+    const type =
+      command === "mread.chat" && params.type === undefined ? 4 : wireInt(params, "type");
     const begin = wireInt(params, "num");
     const limit = wireInt(params, "offset");
     const now = this.now();
     if (type === 10 || type === 1000)
-      return this.mailGroups(uid, params, mailGroupQuery(type, begin, limit, now));
+      return this.mailGroups(uid, params, mailGroupQuery(type, begin, limit, now), command);
     const query = mailBatchQuery(type, begin, limit, fromUser, now);
     const chat = mailBatchIsChat(query);
     let body: Fields | undefined;
@@ -351,7 +358,7 @@ export class Game {
         entries,
         presentation,
         chat ? "conversation" : "ordinary",
-        "mread.batch",
+        command,
         envelope,
       );
       body = projection.body;
@@ -362,7 +369,12 @@ export class Game {
       throw new GameError(errors.invalid);
     return body;
   }
-  private async mailGroups(uid: string, params: Fields, query: MailGroupQuery): Promise<Fields> {
+  private async mailGroups(
+    uid: string,
+    params: Fields,
+    query: MailGroupQuery,
+    command: MailListCommand,
+  ): Promise<Fields> {
     const envelope: Fields = {};
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) envelope[key] = params[key]!;
@@ -397,6 +409,7 @@ export class Game {
         { groups, previews },
         presentation,
         envelope,
+        command,
       );
       body = projection.body;
       return projection.cleanup;
