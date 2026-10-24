@@ -48,23 +48,7 @@ export function versionAtLeast(actual: string, required: string): boolean {
   return true;
 }
 
-export function realmEnabled(selector: string | undefined, kingdomId: number): boolean {
-  if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) return false;
-  if (selector === "all") return true;
-  if (!selector || selector === "close" || selector === "0") return false;
-  const ranges = selector.split(";").filter(Boolean);
-  if (!ranges.length) return false;
-  let enabled = false;
-  for (const range of ranges) {
-    if (!/^\d+(?:-\d+)?$/.test(range)) return false;
-    const [start, end = start] = range.split("-").map(Number);
-    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start! > end!) return false;
-    enabled ||= kingdomId >= start! && kingdomId <= end!;
-  }
-  return enabled;
-}
-
-export function featureRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
+function realmEntries(selector: string | undefined, kingdomId: number): string[] {
   if (
     typeof selector !== "string" ||
     selector.length > 65535 ||
@@ -72,11 +56,16 @@ export function featureRealmEnabled(selector: string | undefined, kingdomId: num
     kingdomId < -2147483648 ||
     kingdomId > 2147483647
   )
-    throw new Error("Invalid feature realm selector");
+    throw new Error("Invalid realm selector");
+  const entries = selector.split(";").filter(Boolean);
+  if (entries.length > 4096) throw new Error("Too many realm selectors");
+  return entries;
+}
+
+export function featureRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
+  const entries = realmEntries(selector, kingdomId);
   if (selector === "all") return true;
   if (selector === "close") return false;
-  const entries = selector.split(";").filter(Boolean);
-  if (entries.length > 4096) throw new Error("Too many feature realm selectors");
   for (const entry of entries) {
     if (/^[0-9]+-[0-9]+/.exec(entry)?.[0] === entry) {
       const [lower, upper] = entry.split("-");
@@ -86,6 +75,43 @@ export function featureRealmEnabled(selector: string | undefined, kingdomId: num
       )
         return true;
     } else if (kingdomId === Number(javaDecimal(entry, 32))) return true;
+  }
+  return false;
+}
+
+export function switchRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
+  return featureRealmEnabled(selector === "0" ? "close" : selector, kingdomId);
+}
+
+export function eventRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
+  const entries = realmEntries(selector, kingdomId);
+  if (selector === "all") return true;
+  if (selector === "close") return false;
+  for (const entry of entries) {
+    const range = entry.split("-").filter(Boolean);
+    if (range.length === 2) {
+      if (
+        kingdomId >= Number(javaDecimal(range[0], 32)) &&
+        kingdomId <= Number(javaDecimal(range[1], 32))
+      )
+        return true;
+    } else if (kingdomId === Number(javaDecimal(entry, 32))) return true;
+  }
+  return false;
+}
+
+export function worldActivityRealmEnabled(
+  selector: string | undefined,
+  kingdomId: number,
+): boolean {
+  const entries = realmEntries(selector, kingdomId);
+  if (selector === "all") return true;
+  if (selector === "0") return false;
+  for (const entry of entries) {
+    const range = entry.split("-").filter(Boolean);
+    const lower = Number(javaDecimal(range[0], 32));
+    const upper = range.length === 2 ? Number(javaDecimal(range[1], 32)) : lower;
+    if (kingdomId >= lower && kingdomId <= upper) return true;
   }
   return false;
 }

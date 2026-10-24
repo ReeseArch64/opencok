@@ -504,8 +504,11 @@ execution realm; blank owner versions skip version comparison. Function-on realm
 selection uses ordered Java Integer parsing and ASCII range matching, including
 early success and deferred upper-bound parsing. Required metadata follows Java blank
 semantics. Parse failures propagate to the consuming module's existing failure
-boundary. Item-switch/event selectors and lenient date parsing remain separate
-compatibility work. The resource-owner
+boundary. Item switches, event controls and world-activity switches now use separate
+selector functions matching their reference methods. Deferred-login configuration,
+account verification and lucky-day effects select the appropriate parser; kingdom
+skill availability uses the function-on parser. Lenient dates and remaining version
+policies still require compatibility work. The resource-owner
 effect controller now decodes current saved abilities, reads execution-realm world
 effects and conditional emperor state, and connects ordinary load, general-only 133
 and new-general equipment modifiers. It preserves separate general and expedition

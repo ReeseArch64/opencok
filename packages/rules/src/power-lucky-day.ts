@@ -1,6 +1,6 @@
 import type { Row } from "@opencok/contracts/rows";
 import { text } from "@opencok/contracts/rows";
-import { realmEnabled, ruleTime, versionAtLeast, type RuleContext } from "./availability.ts";
+import { eventRealmEnabled, ruleTime, versionAtLeast, type RuleContext } from "./availability.ts";
 import type { Rules } from "./game.ts";
 import { serverFeature } from "./power-context.ts";
 import {
@@ -42,7 +42,7 @@ export function luckyDayEffects(
   if (
     context.testServer
       ? control.k72 !== "1" || control.k107 !== "1"
-      : !realmEnabled(control.k2, context.kingdomId)
+      : !eventRealmEnabled(control.k2, context.kingdomId)
   )
     return effects;
   if (integer(control.k4) === 0) return effects;

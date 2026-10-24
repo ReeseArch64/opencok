@@ -65,6 +65,26 @@ test("lucky-day projections retain persisted effects and last duplicate values w
   expect(lucky).toEqual(before);
 });
 
+test("lucky-day event selectors preserve Unicode ranges and repeated hyphens separately from function-on gates", () => {
+  const rules = fixture();
+  const control = rules.configuration.payControl!.get("69028")!;
+  for (const selector of ["--١--٢--", "1;bad", "3-2147483648;1"]) {
+    control.k2 = selector;
+    expect(luckyDayEffects(profile, lucky, server, rules, context).get(487)).toBe(15);
+  }
+  control.k2 = "3-2147483648";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).size).toBe(0);
+  for (const selector of ["bad;1", "1-2-3"]) {
+    control.k2 = selector;
+    expect(() => luckyDayEffects(profile, lucky, server, rules, context)).toThrow();
+  }
+  expect(
+    luckyDayEffects(profile, lucky, server, rules, { ...context, testServer: true }).get(487),
+  ).toBe(15);
+  rules.features.get("luckyday_server")!.online = "close";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).size).toBe(0);
+});
+
 test("lucky-day eligibility combines server availability, player version, realm, platform and both test switches", () => {
   const rules = fixture();
   const control = rules.configuration.payControl!.get("69028")!;
