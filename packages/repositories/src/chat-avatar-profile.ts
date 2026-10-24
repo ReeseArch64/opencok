@@ -1,6 +1,7 @@
 import { and, eq, sql } from "drizzle-orm";
 import { chat_avatar_profile } from "@opencok/drizzle/schema/opencok_chat/chat_avatar_profile";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
+import { nickname_change_receipt } from "@opencok/drizzle/schema/opencok_global/nickname_change_receipt";
 import {
   validAvatarProfile,
   type ChatAvatarProfileStore,
@@ -43,6 +44,28 @@ export function createChatAvatarProfileStore(
             account.server !== String(update.kingdomId)
           )
             throw new Error("Chat avatar profile owner unavailable");
+          const [identity] = await tx
+            .select({
+              name: account_new.gameUserName,
+              renamed: sql<boolean>`exists(select 1 from ${nickname_change_receipt} where ${nickname_change_receipt.ownerUid} = ${update.owner} and ${nickname_change_receipt.kingdomId} = ${update.kingdomId})`,
+            })
+            .from(account_new)
+            .where(eq(account_new.gameUid, update.owner))
+            .limit(1);
+          if (!identity || typeof identity.renamed !== "boolean")
+            throw new Error("Chat nickname authority unavailable");
+          let userName = update.userName;
+          if (identity.renamed) {
+            if (
+              typeof identity.name !== "string" ||
+              !identity.name ||
+              identity.name.length > 200 ||
+              identity.name.includes("\0") ||
+              !identity.name.isWellFormed()
+            )
+              throw new Error("Chat nickname authority unavailable");
+            userName = identity.name;
+          }
           const key = and(
             eq(chat_avatar_profile.owner_uid, update.owner),
             eq(chat_avatar_profile.kingdom_id, update.kingdomId),
@@ -62,11 +85,11 @@ export function createChatAvatarProfileStore(
               if (
                 current.picVer !== update.picVer ||
                 current.committedAt !== update.committedAt ||
-                current.userName !== update.userName ||
+                (!identity.renamed && current.userName !== update.userName) ||
                 current.platform !== update.platform
               )
                 throw new Error("Conflicting chat avatar profile");
-              return "unchanged";
+              if (current.userName === userName) return "unchanged";
             }
           }
           const values = {
@@ -75,7 +98,7 @@ export function createChatAvatarProfileStore(
             sequence: update.sequence,
             pic_ver: update.picVer,
             committed_at: update.committedAt,
-            user_name: update.userName,
+            user_name: userName,
             platform: update.platform,
           };
           const changed = row

@@ -1,6 +1,6 @@
 import type { Fields } from "@opencok/messages/sfs";
 
-type Recipient = (command: string, body: Fields) => Promise<boolean>;
+type Recipient = (command: string, body: Fields, signal?: AbortSignal) => Promise<boolean>;
 export function createRealmNotifications() {
   const recipients = new Map<string, Recipient>();
   return {
@@ -10,11 +10,17 @@ export function createRealmNotifications() {
         if (recipients.get(owner) === recipient) recipients.delete(owner);
       };
     },
-    async publish(owner: string, command: string, body: Fields): Promise<boolean> {
+    async publish(
+      owner: string,
+      command: string,
+      body: Fields,
+      signal?: AbortSignal,
+    ): Promise<boolean> {
       const recipient = recipients.get(owner);
-      if (!recipient) return false;
+      if (!recipient || signal?.aborted) return false;
       try {
-        return await recipient(command, body);
+        const delivered = await recipient(command, body, signal);
+        return !signal?.aborted && delivered;
       } catch {
         return false;
       }

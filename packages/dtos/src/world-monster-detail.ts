@@ -1,12 +1,12 @@
 import type { DtoValue } from "./value.ts";
 
 export class WorldMonsterHealthDto {
-  readonly mchp?: number;
-  readonly mmhp?: number;
+  declare public readonly mchp?: number;
+  declare public readonly mmhp?: number;
 }
 
 export class WorldMonsterExplorationDto {
-  readonly erp?: DtoValue[];
-  readonly st?: bigint;
-  readonly et?: bigint;
+  declare public readonly erp?: DtoValue[];
+  declare public readonly st?: bigint;
+  declare public readonly et?: bigint;
 }

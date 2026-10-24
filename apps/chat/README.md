@@ -12,14 +12,14 @@ Install with `bun install --frozen-lockfile`. Run the root Compose `dev` profile
 provision PostgreSQL and the existing global/kingdom migrations. Configure the root
 `.env` or process environment, then run `bun run --cwd apps/chat start`.
 
-| Setting                  | Meaning                                                                         |
-| ------------------------ | ------------------------------------------------------------------------------- |
-| `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases         |
-| `CHAT_SIGNING_SECRET`    | Required shared secret for trusted backend session and avatar metadata requests |
-| `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment      |
-| `CHAT_HOST`, `CHAT_PORT` | Listen address, default `127.0.0.1:8083`                                        |
-| `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                        |
-| `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                               |
+| Setting                  | Meaning                                                                          |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases          |
+| `CHAT_SIGNING_SECRET`    | Required shared secret for trusted backend session, avatar and nickname requests |
+| `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment       |
+| `CHAT_HOST`, `CHAT_PORT` | Listen address, default `127.0.0.1:8083`                                         |
+| `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                         |
+| `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                                |
 
 Configuration uses the shared root environment loader. Legacy MariaDB variables and
 secret-file settings are replaced by these validated settings. Credentials are never
@@ -106,15 +106,55 @@ a compound owner/realm primary key and range checks. Publication locks the globa
 row before the projection, requires the canonical current realm string and serializes
 first inserts for that owner. No cross-database atomicity is assumed. A larger avatar
 sequence replaces the snapshot even if its clock time decreased; an equal sequence must
-match all captured fields; a smaller sequence is acknowledged as superseded without writes.
+match captured version, timestamp and platform, plus the name until a rename receipt
+exists. A smaller sequence is acknowledged as superseded without writes.
 `find` reads the projection only while the global routing row still points to its realm.
 
-This is an avatar-event projection, not a general current-profile authority: name edits,
-other profile mutations, transfer reconciliation and restoring databases independently
-need their own protocols. Old realm snapshots are not exposed after routing changes and
+This remains an avatar-event projection with the nickname protocol below. Other profile
+mutations, transfer reconciliation and restoring databases independently need their own
+protocols. Old realm snapshots are not exposed after routing changes and
 are retained without automatic deletion. Public room frames and session userinfo handling
 do not consume or expose this projection yet. The receiver and readiness check are
 composed by `apps/chat`; the realm now supplies opt-in command and recovery composition
 through `GAME_AVATAR_CHAT_URL` as described in the [realm runbook](../server/README.md#avatar-completion-runtime). Unit evidence
 uses the real adapters with synthetic SQL clients and in-memory HTTP handlers. Migration
-application, real transaction concurrency and client integration remain unvalidated.
+application and concurrency now have disposable PostgreSQL evidence; mobile client
+integration remains unvalidated.
+
+## Internal nickname updates
+
+Exact `POST /_internal/nickname` is private to trusted backends. The public gateway does
+not forward it. It uses the existing `CHAT_SIGNING_SECRET` and timestamp/signature
+headers with a distinct `opencok-chat-nickname-v1` HMAC domain, method, path and complete
+UTF-8 body. The 4 KiB body and three-second receiver deadline match the avatar endpoint.
+Keep this endpoint on a trusted private network or TLS and rotate both service secrets
+together. There is no new public client endpoint or configuration variable.
+
+The strict JSON body contains `owner`, `kingdomId` and `operationId` only. The UUID must
+identify a global `nickname_change_receipt` owned by that player and kingdom. The receiver
+locks the global account, checks its current route and reads the current account name;
+it never accepts a name supplied by the caller. It refreshes only `user_name` in an
+existing Chat avatar projection and reports `applied` or `unchanged`. An absent projection
+requires no insert: its first avatar publication will use the committed account name.
+
+After any committed rename receipt exists for that owner/kingdom, avatar publication
+reads the current account name after acquiring the account lock, in a new read-committed
+statement. Old or higher-sequence avatar events cannot replace that name with a captured
+pre-rename name. Avatar versions, timestamps and platforms retain their existing
+conflict checks. Older nickname operation retries also project the current account name,
+so delayed delivery cannot undo a later successful rename.
+
+Apply global migrations `0003_nickname_change_receipts` and
+`0004_nickname_receipt_owner_lookup` before this Chat version. Readiness verifies the
+receipt table. The owner/kingdom index bounds receipt lookup work; there is no new table
+or field beyond the rename journal/receipt migration. Keep these additive migrations
+when rolling application code back, and retain receipts for safe replay.
+
+The realm publisher checks the acknowledged owner/kingdom/UUID/disposition before the
+owned journal's Chat bit can clear. HTTP loss, SQL acknowledgment failure and timeouts
+leave retryable work. Real Chat application HTTP and disposable PostgreSQL tests cover
+these failures, concurrent account-lock/rename publication, delayed avatars, separate
+kingdoms, no-avatar owners and restart persistence. The nickname command, remaining
+effects and background relay are still pending under
+[issue #89](https://github.com/ReeseArch64/opencok/issues/89). Public room frames and
+session userinfo do not yet consume this projection.

@@ -88,9 +88,12 @@ function globalFixture() {
           };
         }
         if (text.includes('"account_new"')) {
-          expect(text).toEndWith("for update");
-          expect(params).toEqual(["1001", 1]);
-          return { rows: working.route ? [working.route] : [] };
+          if (text.endsWith("for update")) {
+            expect(params).toEqual(["1001", 1]);
+            return { rows: working.route ? [working.route] : [] };
+          }
+          expect(params).toEqual(["1001", 1, "1001", 1]);
+          return { rows: working.route ? [[null, false]] : [] };
         }
         expect(text).toEndWith("for update");
         expect(params).toEqual(["1001", 1, 1]);
