@@ -1362,10 +1362,39 @@ vectors, cached/fallback paths, Unicode integer catalog parsing, overflow, float
 special values and composition with resource weight/plunder. Fixtures contain only
 synthetic primitive inputs and outputs.
 
-Reading the saved troop object and resolving these five modifier inputs remain
-required before the occupied-resource command can call this calculation. A database
-read is not evidence that an owner was resident in the reference process. The
-runtime-only maximum collection time is assigned by destination-march rescheduling;
+`messages/world-resource-army` decodes the saved troop object into an owner ID,
+cached load and ordered troop records. It validates the army and soldier stream
+class names, serial UIDs and consumed field types. Missing compatible fields retain
+Java defaults; null roots/lists remain null. It accepts the canonical Java 8
+ArrayList and LinkedList forms, preserving duplicates and shared entries as
+independent projected records. The projection also keeps each troop's saved owner
+and nullable troop ID so a later resolver can validate ownership and required data.
+
+The internal object-stream reader interprets serialization bytes as data. It handles
+default serializable class fields, superclass slots, references/cycles, enums,
+primitive/object arrays and framed custom-write data without loading classes or
+invoking constructors, read hooks, replacement hooks or methods. Unused companion,
+general and effect graphs are traversed structurally and omitted from the result;
+their class metadata is not treated as executable code or validated as gameplay
+state. Externalizable/proxy descriptors, resets, exception tokens and unframed
+custom serialization are unsupported. This is a bounded saved-data reader, not a
+general Java deserialization runtime.
+
+Limits include the existing 65,535-byte army column bound, nesting depth 32,
+16,384 handles, 256 fields per descriptor, 4,096 entries in troop lists and object
+arrays, and a 32,768 parsing-operation budget. Primitive byte arrays may use the column bound;
+other primitive arrays are capped at 4,096 entries. Nine units use independently
+authored synthetic DTOs serialized by Java 8, with compatibility class metadata
+mapped by the fixture writer. No private game classes are compiled or executed.
+Evidence includes shared/cyclic auxiliary graphs, collection forms, modified UTF-8,
+schema defaults, malformed handles/counts, every truncated fixture prefix and
+composition with the raw-load rule. Null or unwell-formed saved values are not
+silently converted into valid gameplay inputs.
+
+The saved-data reader is not yet connected to an occupied-resource repository query.
+Resolving the five modifier inputs and validating ownership remain required before
+the command can use the calculation. A database read is not evidence that an owner
+was resident in the reference process. The runtime-only maximum collection time is assigned by destination-march rescheduling;
 it is not a persisted march column. Restoring its read value still needs an explicit
 policy backed by that lifecycle, without scheduling work from the query. This pure
 calculation does not make occupied-resource responses available yet.
