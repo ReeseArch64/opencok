@@ -129,7 +129,9 @@ export function createSessionHandler(
           if (!(await cache.claim(claimed, token))) throw new LoginError();
           sessions.set(claimed, { socket, token });
           stage = "initialization";
-          const initial = await game.initial(claimed);
+          const details = fields(body.p);
+          const initializedState = await game.initialize(claimed, details);
+          const initial = initializedState.body;
           if (socket.destroyed || !ready()) {
             if (sessions.get(claimed)?.socket === socket) sessions.delete(claimed);
             await cache.release(claimed, token);
@@ -147,9 +149,9 @@ export function createSessionHandler(
               p: sfs.object({ use: sfs.int(0) }),
             }),
           );
-          const details = fields(body.p);
           if (details._cok_) initial._cok_ = details._cok_;
           send(extension("init", initial));
+          for (const push of initializedState.pushes) send(extension(push.command, push.body));
           if (!socket.destroyed)
             unsubscribe = dependencies.notifications?.subscribe(
               uid,
@@ -242,6 +244,9 @@ export function createSessionHandler(
         "login.other",
         "build.info",
         "get.user.info.multi",
+        "get.user.info",
+        "get.power.info",
+        "user.lv",
         "world.get",
       ];
       const commandFields = {

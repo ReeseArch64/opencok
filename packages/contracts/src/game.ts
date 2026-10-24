@@ -56,6 +56,7 @@ import type { MailUpdateInspector, MailUpdateQuery, MailUpdateSnapshot } from ".
 import type { PowerState } from "./power.ts";
 import type { RoutedPublicProfile } from "./profile.ts";
 import type { PlayerRankingQuery, PlayerRankingSnapshot } from "./ranking.ts";
+import type { ReconnectProgressState, ReconnectProgressWrite } from "./reconnect.ts";
 
 export interface AuthenticationStore {
   getProfileById(uid: string): Promise<Row | undefined>;
@@ -218,6 +219,11 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  reconnect?<T>(
+    uid: string,
+    now: number,
+    plan: (state: ReconnectProgressState) => Promise<{ write: ReconnectProgressWrite; result: T }>,
+  ): Promise<T>;
   dragonRanking?(
     ranges: readonly DragonRankingRange[],
     allianceId: string,

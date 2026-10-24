@@ -63,7 +63,8 @@
     "./chat-nickname": "./src/chat-nickname.ts",
     "./realm-authority": "./src/realm-authority.ts",
     "./reconnect-progress": "./src/reconnect-progress.ts",
-    "./reconnect-write": "./src/reconnect-write.ts"
+    "./reconnect-write": "./src/reconnect-write.ts",
+    "./reconnect-marches": "./src/reconnect-marches.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

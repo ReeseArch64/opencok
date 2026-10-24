@@ -36,7 +36,15 @@ export class Cache {
       return await bounded(
         (async () => {
           await client.connect();
-          return client.send(command, args);
+          const result = await client.send(command, args);
+          if (
+            command.toUpperCase() === "HGETALL" &&
+            result !== null &&
+            typeof result === "object" &&
+            !Array.isArray(result)
+          )
+            return Object.entries(result).flat();
+          return result;
         })(),
         this.config.timeoutMs,
         "redis",

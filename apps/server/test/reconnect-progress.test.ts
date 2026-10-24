@@ -71,7 +71,8 @@ test("reconnect progress locks the authenticated owner and resource checkpoint b
   expect(reads[0]!.text).toContain("for update");
   expect(reads[1]!.text).toContain('"user_resource"');
   expect(reads[1]!.text).toContain("for update");
-  expect(reads[0]!.text).not.toMatch(/email|password|device|ip/i);
+  expect(reads[0]!.text).not.toMatch(/email|password|deviceId|loginIp|lastIp/i);
+  expect(reads[0]!.text).toContain("deviceUuid");
   for (const table of ["user_army", "user_task", "queue", "user_weakness_building", "user_skill"])
     expect(
       reads.find((query) => query.text.includes(`from "opencok_kingdom"."${table}"`))!.params,

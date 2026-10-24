@@ -44,14 +44,14 @@ migration execution or deployment.
 ### 15.1. PostgreSQL database package
 
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
-Drizzle schemas in `src/schema` are the source of truth: 780 tables and 6,367 fields,
+Drizzle schemas in `src/schema` are the source of truth: 782 tables and 6,381 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
 `schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
 The default physical databases are `opencok_global`, `opencok_kingdom_1` and
 `opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
 `opencok_global`, `opencok_pay` and `opencok_chat` (115 tables). Both kingdom databases
-contain the same `opencok_kingdom` namespace (665 tables each). One set of kingdom
+contain the same `opencok_kingdom` namespace (667 tables each). One set of kingdom
 table modules and migrations serves every configured kingdom; there are no per-ID
 schema copies. Table/field names and values remain stable. Database names and
 credentials are configuration. Pools and local transactions belong to one physical database; there
@@ -393,7 +393,8 @@ synthetic state and testing dependency failure without using player databases.
 
 ## Nickname persistence and avatar allocation verification
 
-it are not serialized. The owned rename store uses this guard for payment and recovery.
+Rename writers that bypass the global name guard are not serialized. The owned rename
+store uses this guard for payment and recovery.
 Downstream effects remain required before enabling the command. Existing PostgreSQL
 authority under ADR-0002 is unchanged; the guard introduces no service or Redis key.
 
@@ -516,7 +517,8 @@ typed frame evidence. The runtime remains an internal composition; no rename com
 or background relay is enabled. The existing mappings workspace dependency is promoted
 from development to runtime use without adding a library or changing locked versions.
 
-legacy event-ordering or expected-previous CAS design. Command/rule units and a
+Negative or restored avatar versions and modulo wrap require a legacy event-ordering
+or expected-previous CAS design. Command/rule units and a
 disposable PostgreSQL/Redis integration exercise the production allocation runtime,
 concurrent requests, atomic rollback, uncertain-commit recovery and mail/cache/chat
 retry after restart without fabricating upload receipts. Native client behavior and

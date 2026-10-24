@@ -92,6 +92,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       await db.insert(userprofile).values({
         uid,
         name: `Synthetic ${id}`,
+        serverId: id,
         level: 1,
         exp: 0,
         country: "BR",
@@ -158,6 +159,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       )
       .join("");
     const xml: Record<string, string> = {
+      treasure: '<ItemSpec id="1" lv="1" exp="100" helper="1"/>',
+      quest: "",
       building:
         '<ItemSpec id="400001" level="1" time="30"/><ItemSpec id="400002" level="2" time="40"/>',
       role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
@@ -205,6 +208,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     };
     const cache = new Cache(base);
     await eventually(async () => (await cache.command("PING")) === "PONG");
+    await cache.command("HSET", "opencok:kingdom:3:world-effects", "487", '{"value":"0.1"}');
+    expect(await cache.worldEffects(3)).toEqual(new Map([["487", '{"value":"0.1"}']]));
     await eventually(async () => {
       const coordination = new Coordination({
         ...base,
@@ -279,7 +284,14 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         JSON.parse(String(part.value)),
       );
       expect(points.map((p: string) => JSON.parse(p).o)).toContain(`Synthetic ${id}`);
-      expect(await adapter.getCityByPlayerId(`synthetic-player-${id}`, Date.now())).toEqual(before);
+      const after = await adapter.getCityByPlayerId(`synthetic-player-${id}`, Date.now());
+      const checkpoint = after.resource?.lastUpdateTime;
+      if (typeof checkpoint !== "bigint") throw new Error("Missing reconnect checkpoint");
+      expect(checkpoint).toBeGreaterThan(BigInt(String(before.resource?.lastUpdateTime ?? 0)));
+      expect(after).toEqual({
+        ...before,
+        resource: { ...before.resource, lastUpdateTime: checkpoint },
+      });
       expect((await fetch(`http://127.0.0.1:${server.healthPort}/readyz`)).status).toBe(200);
       const replacement = new Client(server.port, id);
       clients.push(replacement);

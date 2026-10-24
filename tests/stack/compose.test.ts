@@ -169,11 +169,13 @@ async function createStack() {
   await Bun.write(join(folder, "cdn/asset.cok.chat/100001/test.bin"), "cdn-assets-synthetic");
   await Bun.write(join(folder, "cdn/cok-cdn.zip"), "synthetic-private-archive");
   const xml: Record<string, string> = {
+    treasure: '<ItemSpec id="1" lv="1" exp="100" helper="1"/>',
+    quest: "",
     building:
       '<ItemSpec id="400001" level="1" time="30"/><ItemSpec id="400002" level="2" time="40"/>',
     role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
     position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
-    item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/>',
+    item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/><ItemSpec id="on_trumpet" k2="0"/>',
   };
   for (const [name, records] of Object.entries(xml))
     await Bun.write(join(folder, name + ".xml"), `<database>${records}</database>`);
@@ -498,7 +500,7 @@ describe("isolated Compose stack", () => {
         await sql(
           "opencok_kingdom_2",
           `
-      INSERT INTO opencok_kingdom.userprofile (uid,name,level,exp,country,"deviceUuid",pf,gold) VALUES ('synthetic-player','Synthetic',1,0,'BR','synthetic-device','csmod_games',9007199254740993);
+      INSERT INTO opencok_kingdom.userprofile (uid,name,level,exp,country,"deviceUuid",pf,gold,"serverId") VALUES ('synthetic-player','Synthetic',1,0,'BR','synthetic-device','csmod_games',9007199254740993,2);
       INSERT INTO opencok_kingdom.user_resource (uid,wood,stone,iron,food,silver,chip,diamond,dragon_food,dragon_gold,"lastUpdateTime") VALUES ('synthetic-player',10000,0,0,0,0,0,0,0,0,0);
       INSERT INTO opencok_kingdom.user_building (uuid,uid,"itemId",pos,level) VALUES ('synthetic-building','synthetic-player',400000,0,1);
       INSERT INTO opencok_kingdom.queue (uuid,"ownerId",qid,type,"startTime","endTime","updateTime") VALUES ('synthetic-queue','synthetic-player',1,0,9223372036854775807,9223372036854775807,9223372036854775807);

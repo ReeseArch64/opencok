@@ -43,6 +43,8 @@
     "./reconnect-tasks": "./src/reconnect-tasks.ts",
     "./reconnect-task-counts": "./src/reconnect-task-counts.ts",
     "./reconnect-resources": "./src/reconnect-resources.ts",
+    "./reconnect-timeline": "./src/reconnect-timeline.ts",
+    "./reconnect-refresh": "./src/reconnect-refresh.ts",
     "./reconnect-mail": "./src/reconnect-mail.ts",
     "./reconnect-upkeep": "./src/reconnect-upkeep.ts",
     "./reconnect-weakness": "./src/reconnect-weakness.ts",

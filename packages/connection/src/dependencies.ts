@@ -19,6 +19,6 @@ export interface ServerDependencies {
     release(uid: string, token: string): Promise<void>;
   };
   coordination: { readonly ready: boolean; start(): Promise<void>; close(): void };
-  game: Pick<Game, "initial" | "execute">;
+  game: Pick<Game, "initialize" | "execute">;
   world: Pick<World, "get">;
 }

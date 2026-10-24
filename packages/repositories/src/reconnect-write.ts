@@ -14,6 +14,8 @@ import type { Database } from "./game.ts";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority.ts";
 import { readReconnectProgress } from "./reconnect-progress.ts";
 import { insertSystemMail } from "./system-mail.ts";
+import { readFriendshipMine } from "./reconnect-mine.ts";
+import type { FriendshipMine } from "@opencok/contracts/reconnect";
 
 type Transaction = Parameters<Parameters<Database["kingdom"]["db"]["transaction"]>[0]>[0];
 const integer = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
@@ -265,12 +267,14 @@ export async function executeReconnectProgress<T>(
   uid: string,
   now: bigint,
   plan: (state: ReconnectProgressState) => Promise<{ write: ReconnectProgressWrite; result: T }>,
+  mine?: { binding: string | null; initial: () => FriendshipMine },
 ): Promise<T> {
   const execute = () =>
     db.transaction(
       async (tx) => {
         await fenceRealmTransaction(tx, authority);
         const state = await readReconnectProgress(tx, uid, authority.kingdomId, now);
+        if (mine) state.mine = await readFriendshipMine(tx, uid, mine.binding, mine.initial);
         const freeze = (value: unknown): void => {
           if (!value || typeof value !== "object" || Buffer.isBuffer(value)) return;
           for (const child of Object.values(value)) freeze(child);

@@ -109,7 +109,7 @@ test("sessions correlate successful commands and every repeated failure without 
     },
     coordination: { ready: true, start: async () => {}, close: () => {} },
     game: {
-      initial: async () => ({}),
+      initialize: async () => ({ body: {}, pushes: [] }),
       execute: async (_uid, command) => {
         if (command !== "cmd.ping") throw new Error("private-database-password");
         return { body: {}, pushes: [] };
