@@ -79,12 +79,12 @@ export function worldMonsterHealth(
     ),
   };
 }
-export function worldExplorationDetail(
+export function selectWorldExplorationMarch(
   observer: string,
   point: Row,
   orderedMarches: readonly Row[],
   remote: boolean,
-): WorldExplorationDetail | undefined {
+): Row | undefined {
   if (typeof remote !== "boolean") return invalid();
   if (remote || integer(point.pointType) !== 6) return undefined;
   if (!text(observer, 255) || orderedMarches.length > 32767) return invalid();
@@ -99,6 +99,16 @@ export function worldExplorationDetail(
     if (selected === undefined && target === pointId) selected = march;
   }
   if (!selected || integer(selected.state ?? 0) !== 1) return undefined;
+  return selected;
+}
+export function worldExplorationDetail(
+  observer: string,
+  point: Row,
+  orderedMarches: readonly Row[],
+  remote: boolean,
+): WorldExplorationDetail | undefined {
+  const selected = selectWorldExplorationMarch(observer, point, orderedMarches, remote);
+  if (!selected) return undefined;
   const report = selected.exploreReport;
   if (report != null && (!Buffer.isBuffer(report) || report.length > 65535)) return invalid();
   return {
