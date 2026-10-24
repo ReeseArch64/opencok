@@ -23,6 +23,7 @@ export interface ConfigurationCatalogs {
   generalSales?: Map<string, Rule>;
   payControl?: Map<string, Rule>;
   kingdomSkills?: Map<string, Rule>;
+  kingdomSkillRecords?: readonly Rule[];
   facebookShare?: Map<string, Rule>;
 }
 export interface PowerCatalogs {

@@ -64,6 +64,21 @@ export function restoredResourceBuilding(
   };
 }
 
+export function resourceOwnerRuleContext(
+  snapshot: WorldResourceOwnerSnapshot,
+  context: Omit<RuleContext, "version">,
+): RuleContext {
+  return {
+    kingdomId: context.kingdomId,
+    now: context.now,
+    testServer: context.testServer,
+    utcOffsetMinutes: context.utcOffsetMinutes,
+    get version() {
+      return text(snapshot.effects.profile.appVersion, 40) ?? "";
+    },
+  };
+}
+
 export function resourceGeneralBuildingEffect(
   snapshot: WorldResourceOwnerSnapshot,
   rules: Rules,
@@ -73,12 +88,7 @@ export function resourceGeneralBuildingEffect(
   clock: () => bigint,
   buildingItemId = 400000,
 ): number {
-  const ownerContext: RuleContext = {
-    ...context,
-    get version() {
-      return text(snapshot.effects.profile.appVersion, 40) ?? "";
-    },
-  };
+  const ownerContext = resourceOwnerRuleContext(snapshot, context);
   return equippedGeneralBuildingEffect(
     () => {
       const building = restoredResourceBuilding(snapshot, rules, buildingItemId);

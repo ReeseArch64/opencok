@@ -116,8 +116,9 @@ export interface GameServices {
   avatarFinish?: AvatarFinishService;
   chatSession?: ChatSessionIssuer;
   expeditionRanking?(limit: number): Promise<readonly ExpeditionRankingEntry[] | undefined>;
-  worldPowerEffects?(): Promise<ReadonlyMap<string, string>>;
-  emperorVersion?(): Promise<number | null | undefined>;
+  expeditionStage?(kingdomId: number): Promise<number | undefined>;
+  worldPowerEffects?(kingdomId?: number): Promise<ReadonlyMap<string, string>>;
+  emperorVersion?(kingdomId?: number): Promise<number | null | undefined>;
   playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;
   changeAccountCount?(deviceId: string): Promise<bigint | null>;
   featureAvailability?(profile: Row, now: number): Readonly<Record<string, boolean>>;

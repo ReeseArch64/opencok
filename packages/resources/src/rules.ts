@@ -40,6 +40,8 @@ function parseRecords(xml: string, name: string): Rule[] {
 }
 
 function indexRules(records: Rule[], name: string): Map<string, Rule> {
+  if (name === "kingdomskill")
+    return new Map(records.map((record) => [record.id ?? "null", record]));
   if (!records.length) throw new Error("Missing gameplay resource records");
   const map = new Map<string, Rule>();
   const replaceDuplicates = [
@@ -104,7 +106,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     settings,
     generalSales,
     payControl,
-    kingdomSkills,
+    kingdomSkillRecords,
     facebookShare,
     serverConfig,
   ] = await Promise.all([
@@ -114,7 +116,10 @@ export async function loadRules(directory: string, kingdomId = 1) {
     optional("setting"),
     optional("general_sale"),
     optional("pay_servercontrol"),
-    optional("kingdomskill"),
+    (async () =>
+      (await exists(join(directory, "kingdomskill.xml")))
+        ? parseRecords(await read("kingdomskill"), "kingdomskill")
+        : [])(),
     optional("fb_share"),
     optional("servers_config"),
   ]);
@@ -221,7 +226,14 @@ export async function loadRules(directory: string, kingdomId = 1) {
     features,
     kingdomId,
     settings,
-    { generalSales, payControl, kingdomSkills, facebookShare, serverConfig },
+    {
+      generalSales,
+      payControl,
+      kingdomSkills: indexRules(kingdomSkillRecords, "kingdomskill"),
+      kingdomSkillRecords,
+      facebookShare,
+      serverConfig,
+    },
     {
       generals,
       sciences,

@@ -154,8 +154,9 @@ export const RealmDependenciesLive = Layer.effect(
             })
           : undefined,
         expeditionRanking: (limit) => cache.expeditionRanking(limit),
-        worldPowerEffects: () => cache.worldEffects(),
-        emperorVersion: () => cache.emperorVersion(),
+        expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
+        worldPowerEffects: (kingdomId) => cache.worldEffects(kingdomId),
+        emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
         changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
         playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
       }),

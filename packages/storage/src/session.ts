@@ -1,5 +1,6 @@
 import { publishPlayerUpdate } from "./player-update.ts";
 import { loadExpeditionRanking } from "./expedition-ranking.ts";
+import { loadExpeditionStage } from "./expedition-stage.ts";
 import { SESSION_TTL_SECONDS } from "@opencok/constants/connection";
 import { RedisClient } from "bun";
 import { DependencyError } from "@opencok/errors/dependency";
@@ -40,6 +41,9 @@ export class Cache {
       this.config.kingdomId,
       limit,
     );
+  }
+  expeditionStage(kingdomId = this.config.kingdomId): Promise<number | undefined> {
+    return loadExpeditionStage((command, ...args) => this.command(command, ...args), kingdomId);
   }
   async claim(uid: string, token: string): Promise<boolean> {
     return (
@@ -100,8 +104,7 @@ export class Cache {
     }
     return updates;
   }
-  async emperorVersion(): Promise<number | null | undefined> {
-    const kingdomId = this.config.kingdomId;
+  async emperorVersion(kingdomId = this.config.kingdomId): Promise<number | null | undefined> {
     if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
     const value = await this.command("GET", `opencok:kingdom:${kingdomId}:emperor-version`);
     if (value === null) return undefined;
@@ -112,8 +115,7 @@ export class Cache {
     if (version < -2147483648 || version > 2147483647) throw new DependencyError("redis");
     return version;
   }
-  async worldEffects(): Promise<ReadonlyMap<string, string>> {
-    const kingdomId = this.config.kingdomId;
+  async worldEffects(kingdomId = this.config.kingdomId): Promise<ReadonlyMap<string, string>> {
     if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
     const values = await this.command("HGETALL", `opencok:kingdom:${kingdomId}:world-effects`);
     if (!Array.isArray(values) || values.length > 8192 || values.length % 2 !== 0)
