@@ -1560,7 +1560,7 @@ executed to produce those fixtures; no private game classes were run.
 
 This projection defines fresh-map traversal from the repository's stable SQL ordering.
 It does not reconstruct historical resident caches or the legacy database's unspecified
-row order. Residency, authoritative owner/world modifiers, expedition state and maximum
+row order. Residency, authoritative expedition state and maximum
 collection time still need composition before occupied-resource responses can be
 enabled. All current evidence is server-side unit coverage.
 
@@ -1599,9 +1599,38 @@ when comparison reaches them; malformed extra components still fail parsing.
 Seventeen added unit tests cover these projections, deferred failures, overflow,
 exact Long thresholds, duplicate catalog
 records, resource loading and ordinary prestige regression. This supplies the general
-owner projection; authoritative ordinary modifier resolution and complete occupied
-resource responses remain pending. The shared realm/date gates still need a separate
+owner projection; ordinary modifier composition is described below, and complete
+occupied-resource responses remain pending. The shared realm/date gates still need a separate
 compatibility audit for exceptional legacy selectors and lenient date strings.
+
+`controllers/world-resource-owner-effects` now composes the resource owner's saved
+abilities and ordinary effects with the building/general projection. It reads world
+effects for the execution realm and reads that realm's emperor version only when
+saved throne reward records require it. The cache methods and runtime service wiring
+accept an explicit destination realm; calls without one retain their local default.
+Saved home/cross-fight origin and observer version do not replace the execution realm
+or the owner's version. Persisted-owner contexts explicitly opt into legacy player
+version comparison for ordinary feature gates; other contexts retain their existing
+strict version checks.
+
+Ordinary load effects 78/2196 and general-only 133 are resolved first. Bound general
+equipment resolves its color/site/all-equipment modifiers from the same current owner
+state, without mixing general pieces into the player's worn-equipment collection.
+The concrete building contribution retains its own zero-on-failure boundary.
+Conditional 895 resolution consumes the explicit expedition provider only after its
+feature gates and retains its separate fallback. Missing world dependencies, malformed
+abilities, invalid ordinary effect state and unavailable required emperor state fail
+the composition instead of returning fabricated zero modifiers. An explicit no-emperor
+state remains different from an unavailable emperor version.
+
+Thirteen additional unit tests cover this composition through raw troop-load arithmetic,
+owner version handling, world expiration, missing dependencies, moved-owner state,
+separate failure boundaries and destination cache routing. Redis commands are replaced
+with in-memory doubles; no connections or listeners are created. The cache reads occur
+after the persisted snapshot, without cross-store atomicity. The endpoint still needs
+an authoritative expedition provider, resident-owner policy, decoded ownership checks
+and runtime maximum collection time. It must also avoid consuming owner effects on
+the cached-load or no-applicable-troop branches.
 
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries

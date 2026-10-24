@@ -57,6 +57,20 @@ test("emperor cache distinguishes absent state, explicit no-emperor state and an
   expect(other.calls).toEqual([["GET", "opencok:kingdom:1:emperor-version"]]);
 });
 
+test("explicit destination realm routes emperor reads without changing the local realm default", async () => {
+  const cache = new ThroneCache(1);
+  cache.response = "7";
+  expect(await cache.emperorVersion(2)).toBe(7);
+  expect(await cache.emperorVersion()).toBe(7);
+  expect(cache.calls).toEqual([
+    ["GET", "opencok:kingdom:2:emperor-version"],
+    ["GET", "opencok:kingdom:1:emperor-version"],
+  ]);
+  for (const kingdomId of [0, -1, NaN, 1.5])
+    await expect(cache.emperorVersion(kingdomId)).rejects.toThrow();
+  expect(cache.calls).toHaveLength(2);
+});
+
 test("malformed or cross-realm emperor inputs reject before returning a fabricated version", async () => {
   const cache = new ThroneCache();
   for (const response of [1, "", "01", "-0", " 1", "1.5", "2147483648", "-2147483649", {}, []]) {

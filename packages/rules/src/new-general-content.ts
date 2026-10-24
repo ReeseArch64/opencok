@@ -1,6 +1,6 @@
 import { javaDecimal } from "./java-integer.ts";
 import { mailBlank } from "./mail.ts";
-import type { RuleContext } from "./availability.ts";
+import { legacyPlayerVersionAtLeast, type RuleContext } from "./availability.ts";
 import type { Rules } from "./game.ts";
 import { serverFeature } from "./power-context.ts";
 
@@ -8,24 +8,7 @@ export function generalFeatureAvailable(rules: Rules, key: string, context: Rule
   const rule = rules.features.get(key);
   if (!rule || mailBlank(rule.version) || mailBlank(context.testServer ? rule.test : rule.online))
     return false;
-  if (!mailBlank(context.version)) {
-    const parse = (raw: string): number[] => {
-      if (raw.length > 65535) throw new Error("Oversized general feature version");
-      const parts = raw.split(".").filter(Boolean);
-      if (parts.length > 4096) throw new Error("Too many general feature version parts");
-      return parts.map(generalInteger);
-    };
-    const current = parse(context.version);
-    const minimum = parse(rule.version!);
-    for (let index = 0; index < 3; index++) {
-      const actual = current[index];
-      const required = minimum[index];
-      if (actual === undefined || required === undefined)
-        throw new Error("Missing general feature version part");
-      if (actual < required) return false;
-      if (actual > required) break;
-    }
-  }
+  if (!legacyPlayerVersionAtLeast(context.version, rule.version)) return false;
   return serverFeature(rules, key, context);
 }
 

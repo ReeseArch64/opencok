@@ -33,7 +33,8 @@
     "./avatar-completion": "./src/avatar-completion.ts",
     "./world-resource-detail": "./src/world-resource-detail.ts",
     "./world-resource-generals": "./src/world-resource-generals.ts",
-    "./world-resource-owner-context": "./src/world-resource-owner-context.ts"
+    "./world-resource-owner-context": "./src/world-resource-owner-context.ts",
+    "./world-resource-owner-effects": "./src/world-resource-owner-effects.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
