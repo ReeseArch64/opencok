@@ -1152,14 +1152,14 @@ migration execution or deployment.
 ### 15.1. PostgreSQL database package
 
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
-Drizzle schemas in `src/schema` are the source of truth: 773 tables and 6,319 fields,
+Drizzle schemas in `src/schema` are the source of truth: 774 tables and 6,323 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
 `schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
 The default physical databases are `opencok_global`, `opencok_kingdom_1` and
 `opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
 `opencok_global`, `opencok_pay` and `opencok_chat` (113 tables). Both kingdom databases
-contain the same `opencok_kingdom` namespace (660 tables each). One set of kingdom
+contain the same `opencok_kingdom` namespace (661 tables each). One set of kingdom
 table modules and migrations serves every configured kingdom; there are no per-ID
 schema copies. Table/field names and values remain stable. Database names and
 credentials are configuration. Pools and local transactions belong to one physical database; there
@@ -1287,11 +1287,22 @@ Mailbox save/cancel commands use a separate recipient-scoped write interface. A 
 owner profile authorizes each realm transaction; conditional saved-flag updates and
 durable `mail_update` markers commit together. Marker timestamps never decrease and
 only matched owned messages receive markers. The additive kingdom migration supplies
-the marker table; synchronization consumers, cleanup, read marking, deletion and
+the marker table; synchronization consumers, cleanup, deletion and
 redemption remain separate work. This follows ADR-0002/0005 without dual writes to
 Redis. Absolute flag assignments preserve repeat-request state absent intervening
 changes; correlation fields do not provide durable command receipts. The server guide
 records these limits, compatibility differences and unit-only validation.
+
+Read-status commands share the owner-lock and atomic marker boundary. Individual
+unread gift transitions additionally insert a realm `mail_gift_opening` outbox record;
+batch marking deliberately omits that event. A lifecycle-owned relay locks bounded
+pending batches with `SKIP LOCKED`, updates matching recipient-scoped global gift logs
+in a separate transaction, then acknowledges the realm records. Repeat assignments
+use immutable event timestamps, allowing retries after global commit or acknowledgment
+failure. Missing global log rows are acknowledged without creation. The relay retries
+after five seconds and drains before database disposal; pending events never depend
+on Redis availability. This implements recoverable logging, not cross-database atomicity
+or attachment grants. The additive migration and runtime are unit-verified only.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch

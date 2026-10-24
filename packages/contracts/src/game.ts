@@ -1,4 +1,6 @@
 import type {
+  MailReadQuery,
+  MailReadSnapshot,
   MailSaveQuery,
   MailSaveSnapshot,
   MailStatusQuery,
@@ -27,6 +29,7 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  mailRead(uid: string, query: MailReadQuery): Promise<MailReadSnapshot>;
   mailSave(uid: string, query: MailSaveQuery): Promise<MailSaveSnapshot>;
   mailStatus(uid: string, query: MailStatusQuery): Promise<MailStatusSnapshot>;
   allianceRanking(uid: string, query: AllianceRankingQuery): Promise<AllianceRankingSnapshot>;
