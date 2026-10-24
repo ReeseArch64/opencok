@@ -19,7 +19,8 @@
     "./power-effects": "./src/power-effects.ts",
     "./power-attributes": "./src/power-attributes.ts",
     "./power-memberships": "./src/power-memberships.ts",
-    "./power-progression": "./src/power-progression.ts"
+    "./power-progression": "./src/power-progression.ts",
+    "./power-world": "./src/power-world.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
