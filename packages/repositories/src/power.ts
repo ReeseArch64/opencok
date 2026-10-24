@@ -26,6 +26,7 @@ import { activity } from "@opencok/drizzle/schema/opencok_kingdom/activity";
 import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
 import { lucky_day } from "@opencok/drizzle/schema/opencok_kingdom/lucky_day";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
+import { cross_throne_reward_record } from "@opencok/drizzle/schema/opencok_kingdom/cross_throne_reward_record";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Database } from "./game.ts";
@@ -60,6 +61,7 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     alliance_territory,
     lucky_day,
     server_info,
+    cross_throne_reward_record,
   ])
     await db.select().from(table).limit(0);
 }
@@ -117,6 +119,7 @@ export function readPowerState(
         territoryTrees: [],
         luckyDay: undefined,
         powerServer: undefined,
+        throneRewards: [],
       };
       if (!profile) return empty;
       const statistics = (
@@ -365,6 +368,21 @@ export function readPowerState(
               .limit(1)
           )[0]
         : undefined;
+      const throneRewards = await tx
+        .select({
+          version: cross_throne_reward_record.version,
+          rewardId: cross_throne_reward_record.reward_id,
+        })
+        .from(cross_throne_reward_record)
+        .where(
+          and(
+            eq(cross_throne_reward_record.target_uid, uid),
+            eq(cross_throne_reward_record.reward_type, 2),
+            eq(cross_throne_reward_record.throne_type, 2),
+          ),
+        )
+        .orderBy(asc(cross_throne_reward_record.id))
+        .limit(4097);
       return {
         profile,
         statistics,
@@ -394,6 +412,7 @@ export function readPowerState(
         territoryTrees,
         luckyDay,
         powerServer,
+        throneRewards,
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

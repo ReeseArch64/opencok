@@ -116,6 +116,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     activityPanels,
     mergeActivities,
     luckyEffects,
+    monarchTitles,
   ] = await Promise.all(
     [
       "general",
@@ -147,6 +148,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "activity_panel",
       "merge_activity",
       "lucky_effect",
+      "monarch_title_lord",
     ].map(optional),
   );
   return new Rules(
@@ -191,6 +193,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
       activityPanels,
       mergeActivities,
       luckyEffects,
+      monarchTitles,
     },
   );
 }
