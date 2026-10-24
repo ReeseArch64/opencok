@@ -107,9 +107,6 @@ async function createStack() {
     DEPENDENCY_TIMEOUT_MS: "1000",
   });
   isolated.services.server.volumes.find((v: any) => v.target === "/resources").source = folder;
-  isolated.services.server.volumes.find(
-    (v: any) => v.target === "/gameconfig/badwords.txt",
-  ).source = join(folder, "badwords.txt");
   Object.assign(isolated.services.api.environment, {
     DATABASE_URL: databaseUrl,
     KINGDOM_ID: "2",
@@ -180,7 +177,6 @@ async function createStack() {
   };
   for (const [name, records] of Object.entries(xml))
     await Bun.write(join(folder, name + ".xml"), `<database>${records}</database>`);
-  await Bun.write(join(folder, "badwords.txt"), "synthetic-forbidden\n");
   let started = false;
   async function cleanup(passed: boolean) {
     try {

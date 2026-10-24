@@ -1888,3 +1888,14 @@ the authoritative outcomes.
 
 No new tests, dependencies, private inputs or player-data mutations are introduced by this
 readiness record.
+
+At the nickname-collation stage, Compose does not yet declare the later nickname-word
+file mount. This fixture retains the complete synthetic data-config catalog without
+requiring that future mount. Later stack wiring supplies its own generated nickname
+input, while production resource validation and mounts remain unchanged.
+
+The shared PostgreSQL duplicate-avatar fixture retains the picture version paired with
+its original composite key, preserving the exact unique-violation assertion and production
+checks. The identical later-schema fixture suite passed 1446 tests and 34488 assertions
+in the upper validation worktree. This worktree also passed server integration, all 14
+Compose checks, affected types, lint and formatting; its fresh full CI must pass before merge.
