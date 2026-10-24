@@ -44,6 +44,10 @@ test("sessions correlate successful commands and every repeated failure without 
   };
   const dependencies: ServerDependencies = {
     db: {
+      playerSummaries: async () => [],
+      configuration: async () => {
+        throw new Error("unused");
+      },
       start: async () => {},
       health: async () => {},
       close: async () => {},
