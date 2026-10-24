@@ -1230,8 +1230,8 @@ is the final deterministic tie breaker where the reference leaves ties unspecifi
 names and UIDs use PostgreSQL `C` collation, which can differ from the legacy database
 collation. Synthetic units verify query structure, mapping, selection, numeric types,
 authentication and rollback. Real database execution, cache timing and native-client
-rendering remain unverified. Event and cross-realm ranking families
-are still unavailable; this player slice implements the three commands tracked in
+rendering remain unverified. Additional event and cross-realm query contracts are
+documented in [the topic 3 inventory](RANKINGS.md). This player slice implements the three commands tracked in
 [issue #59](https://github.com/ReeseArch64/opencok/issues/59).
 
 `alliance.rank` and `kill.al.rank`, tracked in
@@ -1366,16 +1366,15 @@ per string and the existing encoded response/frame bounds including correlation.
 This is a read-only derived-cache query. The event publisher owns list replacement,
 invalidation and expiry; this reader adds no TTL, score writer, reward or lifecycle
 scheduler. The original realm-qualified key remains usable for an authorized restored
-board. `hero.self.rank` still requires actual activity/event state and rank maps, including
-cross-origin routing; it is not enabled by treating missing state as an empty activity.
-Other event and cross-realm ranking families remain incomplete.
+board. `hero.self.rank` now reads actual activity/event state and published rank maps,
+including owner-origin routing; see [the event contracts](RANKINGS.md).
 
 Code review and storage/controllers/server type checks pass for this slice. No new tests
 or fixtures were generated and no tests were executed, following the user's latest
 instruction to prioritize migration. Unit and runtime validation are deferred. No real
 cache/database/services, integration tests or client/ADB were used; no schema, dependency
-or CI workflow changed. The incomplete event-ranking family receives no completed-group
-credit from this unverified command alone.
+or CI workflow changed. These historical validation notes apply to this slice; current topic 3 query coverage
+and remaining runtime limitations are documented in [the ranking inventory](RANKINGS.md).
 
 `global.celebrities.rank` reads the existing published global boards for the local
 realm. Before decoding `rankType`, it checks the global `server_info` row: realm IDs
@@ -1407,8 +1406,7 @@ The query adds no score publisher, invalidation, TTL, settlement or cross-realm 
 
 Storage, repository, controller and server type checks plus source review cover this
 slice. No new tests or fixtures were generated and no tests, real services or client/ADB
-were run. Behavioral and runtime verification remain deferred; this command does not
-complete the cross-realm ranking family. See [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
+were run. Behavioral and runtime verification remain deferred; the broader query family is documented in [the ranking inventory](RANKINGS.md). See [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
 
 `dragon.battle.rank` reads published global team rankings after checking the local
 profile, realm and ban state. `index_limit` is a string of `start|limit` ranges separated
@@ -1447,8 +1445,8 @@ matchmaking and combat remain separate work.
 This slice has source review, package/server type checks and scoped lint/format checks.
 No tests or fixtures were generated and no tests, database/cache/services, client/ADB or
 CI fixes were performed. Runtime and behavioral validation remain deferred in
-[issue #215](https://github.com/ReeseArch64/opencok/issues/215); the cross-realm ranking
-family still requires `ctf.get.rank` and broader verification.
+[issue #215](https://github.com/ReeseArch64/opencok/issues/215); the completed query contracts, including `ctf.get.rank`, and runtime verification
+limits are documented in [the ranking inventory](RANKINGS.md).
 
 ## Mailbox category status
 

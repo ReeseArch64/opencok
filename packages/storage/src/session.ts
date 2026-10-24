@@ -1,3 +1,11 @@
+import { loadBattleFightRanking, loadPlayoffRanking } from "./battle-ranking.ts";
+import { loadMilitaryRanking } from "./military-ranking.ts";
+import { loadFlowerRanking } from "./flower-ranking.ts";
+import { loadDonationRanking } from "./donation-ranking.ts";
+import { loadThroneRankingPeriod } from "./throne-ranking.ts";
+import { loadHeroRankingPosition, loadHeroHistoryPublication } from "./hero-ranking.ts";
+import type { HeroRankingLookup } from "@opencok/contracts/hero-ranking";
+import { loadAttributeRanking, loadPublishedGlobalRanking } from "./published-ranking.ts";
 import { loadDragonRanking } from "./dragon-ranking.ts";
 import type { DragonRankingRange } from "@opencok/contracts/dragon-ranking";
 import { publishPlayerUpdate } from "./player-update.ts";
@@ -51,6 +59,63 @@ export class Cache {
       (command, ...args) => this.command(command, ...args),
       this.config.kingdomId,
     );
+  }
+  battleFightPublication() {
+    return loadBattleFightRanking(
+      (name, ...args) => this.command(name, ...args),
+      this.config.kingdomId,
+    );
+  }
+  playoffPublication() {
+    return loadPlayoffRanking((name, ...args) => this.command(name, ...args));
+  }
+  heroHistoryPublication(keys: readonly string[], alliance: boolean) {
+    return loadHeroHistoryPublication(
+      (name, ...args) => this.command(name, ...args),
+      keys,
+      alliance,
+    );
+  }
+  heroRankingPosition(query: HeroRankingLookup) {
+    return loadHeroRankingPosition((name, ...args) => this.command(name, ...args), query);
+  }
+  throneRankingPeriod(realm: number) {
+    return loadThroneRankingPeriod((name, ...args) => this.command(name, ...args), realm);
+  }
+  donationScores(
+    allianceId: string,
+    kind: "resource-day" | "resource-week" | "resource-history",
+    date: string,
+  ) {
+    return loadDonationRanking(
+      (name, ...args) => this.command(name, ...args),
+      this.config.kingdomId,
+      allianceId,
+      kind,
+      date,
+    );
+  }
+  flowerRankingPublication(realm: number, uid: string, limit: number, global: boolean) {
+    return loadFlowerRanking(
+      (name, ...args) => this.command(name, ...args),
+      realm,
+      uid,
+      limit,
+      global,
+    );
+  }
+  militaryRanking(type: number, group: number) {
+    return loadMilitaryRanking((name, ...args) => this.command(name, ...args), type, group);
+  }
+  attributeRanking(type: number) {
+    return loadAttributeRanking(
+      (name, ...args) => this.command(name, ...args),
+      this.config.kingdomId,
+      type,
+    );
+  }
+  publishedGlobalRanking(kind: "payment" | "consumption") {
+    return loadPublishedGlobalRanking((name, ...args) => this.command(name, ...args), kind);
   }
   globalCelebrityRanking(rankType: number): Promise<readonly string[]> {
     return loadGlobalCelebrityRanking(
