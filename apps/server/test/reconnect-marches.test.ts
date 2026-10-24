@@ -6,7 +6,7 @@ import {
   reconnectMarchGeneral,
   reconnectMarches,
   type ReconnectMarchView,
-} from "@opencok/dtos/reconnect-marches";
+} from "@opencok/mappings/reconnect-marches";
 import { decodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
 import { sfs, decode, encode, Type } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";
@@ -86,8 +86,8 @@ test("march companions use current dragon levels and saved general levels with u
 });
 
 test("team reconnect projects arrived members through their leader and aggregates armies without disclosing unrelated marches", () => {
-  const dragon = { uuid: sfs.string("dragon") };
-  const general = { generalId: sfs.string("7") };
+  const dragon = { uuid: sfs.string("dragon"), itemId: sfs.string("3001"), friendShip: sfs.int(0) };
+  const general = { generalId: sfs.string("7"), userId: sfs.string("owner"), level: sfs.int(9) };
   const team = { leader: "leader", members: ["member"], createdAt: 50n };
   const view = (id: string, owner: string, type: number, state: number): ReconnectMarchView => {
     const saved = {
