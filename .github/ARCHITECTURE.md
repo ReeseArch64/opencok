@@ -1738,6 +1738,16 @@ construction queues and persisted power are never recalculated by the query.
 Material-contribution rankings read the existing contribution table with their own
 window and empty-list response contract; score writers and activity resets remain
 outside the query boundary.
+The `act.score.rank` query reads the existing `SCORE_ACT_RANK_<kingdomId>` Redis list
+through the realm cache adapter. This is an opaque published board: strings, duplicates,
+empty values and list order remain unchanged. The local authenticated owner and realm
+are checked before reading; request parameters cannot select a different realm. Missing
+lists and reached command failures return an empty board, matching the reference list
+reader's fallback. Invalid data or maintained SFS bounds reject the response instead of
+truncating it. The reader does not mutate scores or rebuild/expire the board; the event
+publisher remains responsible for its derived-cache lifecycle. No event lifecycle or
+`hero.self.rank` in-memory activity/rank-map provider is implied. This extends the accepted
+Redis query-cache boundary without adding a schema, service or authoritative ledger.
 Expedition ranking reads use the shared Redis instance with a global realm-pairing
 record and lower-realm score/metadata keys. A read-only Lua evaluation revalidates
 pairing and returns a consistent bounded board; one retry handles a rematch. The

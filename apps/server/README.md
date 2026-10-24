@@ -1291,6 +1291,34 @@ new match. Synthetic units inject Redis command results and inspect the script c
 Lua execution against Redis, real service availability and client rendering remain
 unverified in this phase.
 
+`act.score.rank` now exposes the realm's published score-activity board. The command
+checks the authenticated local profile, ban state and realm, then reads the existing
+`SCORE_ACT_RANK_<kingdomId>` list through the runtime cache provider. It ignores request
+selectors and returns `rank` as an SFS StringArray, preserving list order, duplicates,
+blank strings and opaque contents. It neither decodes board entries nor recomputes ranks.
+Correlation fields are retained and no pushes are emitted.
+
+The list read uses `LRANGE 0 -1`. A missing list produces the ordinary empty board;
+reached cache-command failures also return an empty board, retaining the reference
+list-reader fallback. An absent runtime provider remains an unsupported command.
+Malformed non-string entries, invalid UTF-16 strings and oversized responses reject
+rather than silently truncate. Maintained limits are 32,767 entries, 32,767 UTF-8 bytes
+per string and the existing encoded response/frame bounds including correlation.
+
+This is a read-only derived-cache query. The event publisher owns list replacement,
+invalidation and expiry; this reader adds no TTL, score writer, reward or lifecycle
+scheduler. The original realm-qualified key remains usable for an authorized restored
+board. `hero.self.rank` still requires actual activity/event state and rank maps, including
+cross-origin routing; it is not enabled by treating missing state as an empty activity.
+Other event and cross-realm ranking families remain incomplete.
+
+Code review and storage/controllers/server type checks pass for this slice. No new tests
+or fixtures were generated and no tests were executed, following the user's latest
+instruction to prioritize migration. Unit and runtime validation are deferred. No real
+cache/database/services, integration tests or client/ADB were used; no schema, dependency
+or CI workflow changed. The incomplete event-ranking family receives no completed-group
+credit from this unverified command alone.
+
 ## Mailbox category status
 
 `mail.category.status`, tracked in [issue #64](https://github.com/ReeseArch64/opencok/issues/64),
