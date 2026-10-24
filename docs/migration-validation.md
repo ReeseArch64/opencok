@@ -2176,3 +2176,10 @@ the authoritative outcomes.
 
 No new tests, dependencies, private inputs or player-data mutations are introduced by this
 readiness record.
+
+The first full server run found two integration mismatches. The existing category-deletion
+assertion now matches Drizzle's unqualified single-table status predicate while retaining
+ownership, category and reward checks. Missing conversation-read adapters reject before
+clock capture; supported adapters retain request parsing and chat-effect validation.
+The 19 affected mailbox tests, server types, lint and formatting pass locally. Full CI
+must pass again on the fix commit before merge.

@@ -889,8 +889,9 @@ export class Game {
     return {};
   }
   private async mailConversationRead(uid: string, params: Fields): Promise<Fields> {
+    if (!this.db.mailConversationRead) throw new GameError(errors.unsupported, "mail");
     const query = mailConversationReadRequest(params, this.now());
-    if (!this.db.mailConversationRead || query.effects.some((effect) => effect.kind === "chat"))
+    if (query.effects.some((effect) => effect.kind === "chat"))
       throw new GameError(errors.unsupported, "mail");
     const body: Fields = { success: sfs.bool(true) };
     for (const key of ["_cok_", "cmdBaseTime"])
