@@ -46,6 +46,9 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "activity_event",
       "office",
       "life_treeS",
+      "saga_tower_science_base",
+      "foreign_civilization_up",
+      "foreign_civilization_base",
     ])
       await writeFile(
         join(directory, `${name}.xml`),
@@ -56,7 +59,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       '<database><Group id="vip"><ItemSpec id="001" power="007"/></Group></database>',
     );
     const power = (await loadRules(directory)).power;
-    expect(Object.keys(power)).toHaveLength(23);
+    expect(Object.keys(power)).toHaveLength(26);
     expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
     for (const name of ["general_sale", "pay_servercontrol", "kingdomskill", "fb_share"])
       await writeFile(

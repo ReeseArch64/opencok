@@ -5,6 +5,7 @@ import { GameError } from "@opencok/errors/game";
 import type { Rules } from "./game.ts";
 
 import { effectInteger as integer } from "./power-values.ts";
+import { civilizationResearchEffect, towerResearchEffect } from "./power-research.ts";
 
 function effectValues(source: string | undefined, requested: number): number[] {
   if (!source?.trim()) return [];
@@ -36,6 +37,26 @@ export function storedPowerEffects(state: PowerSnapshot, rules: Rules, now: numb
           initialAndScience + Math.fround(integer(rule.para2 ?? "0")),
         );
   }
+  initialAndScience = towerResearchEffect(
+    state.sagaSciences,
+    rules.power.sagaScienceBases,
+    rules.power.sagaSciences,
+    effect,
+    initialAndScience,
+  );
+  initialAndScience = towerResearchEffect(
+    state.foreignSciences,
+    rules.power.foreignScienceBases,
+    rules.power.foreignSciences,
+    effect,
+    initialAndScience,
+  );
+  initialAndScience = civilizationResearchEffect(
+    state.civilizationSciences,
+    rules.power.civilizationSciences,
+    effect,
+    initialAndScience,
+  );
   let status = 0n;
   for (const row of state.states) {
     if (long(row, "endTime") <= BigInt(now)) continue;

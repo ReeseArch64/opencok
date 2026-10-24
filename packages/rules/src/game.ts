@@ -14,6 +14,9 @@ export interface PowerCatalogs {
   sciences?: Map<string, Rule>;
   civilizationSciences?: Map<string, Rule>;
   sagaSciences?: Map<string, Rule>;
+  sagaScienceBases?: Map<string, Rule>;
+  foreignSciences?: Map<string, Rule>;
+  foreignScienceBases?: Map<string, Rule>;
   heroes?: Map<string, Rule>;
   equipment?: Map<string, Rule>;
   titles?: Map<string, Rule>;

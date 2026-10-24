@@ -21,6 +21,7 @@ function fixture() {
     sciences: [],
     civilizationSciences: [],
     sagaSciences: [],
+    foreignSciences: [],
     equipment: [],
     heroes: [],
     dragons: [],
