@@ -166,6 +166,7 @@ export class Game {
       default:
         throw new GameError(errors.unsupported);
     }
+    if (Object.keys(body).length === 0) body.success = sfs.bool(true);
     if (params._cok_) body._cok_ = params._cok_;
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
     return { body, pushes: [] };
