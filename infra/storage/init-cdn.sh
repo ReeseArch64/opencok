@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-mc alias set local http://storage:9000 opencok opencok-secret >/dev/null
+mc alias set local http://minio:9000 opencok opencok-secret >/dev/null
 mc mb --ignore-existing local/opencok-cdn >/dev/null
 mc mb --ignore-existing local/opencok-uploads >/dev/null
 mc anonymous set none local/opencok-uploads >/dev/null

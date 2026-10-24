@@ -6,6 +6,18 @@
       "sourceType": "github",
       "skillPath": "skills/adr-skill/SKILL.md",
       "computedHash": "c6a786cb3c69478135098561e60c193953fd473d08f8e4c03dbb48b90f5c73aa"
+    },
+    "code-review": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/code-review/SKILL.md",
+      "computedHash": "57cfd4ceb011f05e58a1a4f4cad3b2e03419d371f8990f4bcb32ff0d435a039f"
+    },
+    "generate-tests": {
+      "source": "mavka-ai/unit-tests-skills",
+      "sourceType": "github",
+      "skillPath": "skills/generate-tests/SKILL.md",
+      "computedHash": "be6edbdb9bb66aeb1f97fc31eb988804d61b5feb7bbedf6e2c35de81b134e807"
     }
   }
 }

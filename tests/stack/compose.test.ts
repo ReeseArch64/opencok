@@ -81,15 +81,15 @@ async function createStack() {
   isolated.services.portainer.volumes = isolated.services.portainer.volumes.filter(
     (volume: any) => volume.target !== "/var/run/docker.sock",
   );
-  isolated.services.database.ports = [
+  isolated.services.postgres.ports = [
     { target: 5432, published: String(databasePort), host_ip: "127.0.0.1", protocol: "tcp" },
   ];
-  isolated.services.database.environment.POSTGRES_USER = "synthetic";
-  isolated.services.database.environment.POSTGRES_PASSWORD = "synthetic-test-password";
-  isolated.services["database-setup"].environment.POSTGRES_USER = "synthetic";
-  isolated.services["database-setup"].environment.POSTGRES_PASSWORD = "synthetic-test-password";
+  isolated.services.postgres.environment.POSTGRES_USER = "synthetic";
+  isolated.services.postgres.environment.POSTGRES_PASSWORD = "synthetic-test-password";
+  isolated.services["postgres-setup"].environment.POSTGRES_USER = "synthetic";
+  isolated.services["postgres-setup"].environment.POSTGRES_PASSWORD = "synthetic-test-password";
 
-  isolated.services.database.healthcheck.test = [
+  isolated.services.postgres.healthcheck.test = [
     "CMD",
     "pg_isready",
     "-U",
@@ -97,7 +97,7 @@ async function createStack() {
     "-d",
     "postgres",
   ];
-  const databaseUrl = "postgres://synthetic:synthetic-test-password@database:5432/opencok_global";
+  const databaseUrl = "postgres://synthetic:synthetic-test-password@postgres:5432/opencok_global";
   Object.assign(isolated.services.server.environment, {
     DATABASE_URL: databaseUrl,
     KINGDOM_ID: "2",
@@ -106,6 +106,10 @@ async function createStack() {
     DEPENDENCY_TIMEOUT_MS: "1000",
   });
   isolated.services.server.volumes.find((v: any) => v.target === "/resources").source = folder;
+  isolated.services.server.volumes.find(
+    (v: any) => v.target === "/gameconfig/badwords.txt",
+  ).source = join(folder, "badwords.txt");
+  await Bun.write(join(folder, "badwords.txt"), "synthetic-filtered-word\n");
   Object.assign(isolated.services.api.environment, {
     DATABASE_URL: databaseUrl,
     KINGDOM_ID: "2",
@@ -118,7 +122,7 @@ async function createStack() {
     { target: 80, published: String(httpPort), host_ip: "127.0.0.1", protocol: "tcp" },
     { target: 9933, published: String(gamePort), host_ip: "127.0.0.1", protocol: "tcp" },
   ];
-  isolated.services.storage.ports = [];
+  isolated.services.minio.ports = [];
   Object.assign(isolated.services.pgadmin.environment, {
     PGADMIN_DEFAULT_EMAIL: "synthetic@example.com",
     PGADMIN_DEFAULT_PASSWORD: "synthetic-pgadmin-password",
@@ -193,7 +197,7 @@ async function createStack() {
       expect(config.services).not.toHaveProperty(excluded);
     expect(config.services.api.environment).not.toHaveProperty("API_DB_HOST");
     expect(config.services.server.environment.DATABASE_URL).toContain(
-      "@database:5432/opencok_global",
+      "@postgres:5432/opencok_global",
     );
     const allBase = [...base];
     allBase[allBase.length - 1] = "all";
@@ -243,7 +247,7 @@ async function checkService(stack: Stack, service: string) {
       return Array.isArray(parsed) ? parsed : [parsed];
     });
   expect(rows).toHaveLength(1);
-  const job = ["database-setup", "minio-setup"].includes(service);
+  const job = ["postgres-setup", "minio-setup"].includes(service);
   expect(rows[0].State).toBe(job ? "exited" : "running");
   expect(rows[0].ExitCode).toBe(0);
 
@@ -259,11 +263,11 @@ async function checkService(stack: Stack, service: string) {
     return http(url, tls);
   };
   switch (service) {
-    case "database": {
+    case "postgres": {
       const names = await compose([
         "exec",
         "-T",
-        "database",
+        "postgres",
         "psql",
         "-U",
         "synthetic",
@@ -279,8 +283,8 @@ async function checkService(stack: Stack, service: string) {
       ]);
       break;
     }
-    case "database-setup":
-      expect(await compose(["logs", "--no-color", "database-setup"])).toContain(
+    case "postgres-setup":
+      expect(await compose(["logs", "--no-color", "postgres-setup"])).toContain(
         "Initialized global database and 2 kingdoms",
       );
       break;
@@ -298,7 +302,7 @@ async function checkService(stack: Stack, service: string) {
         "pgadmin",
         "/venv/bin/python3",
         "-c",
-        "import json; s=json.load(open('/configuration/servers.json')); assert s['Servers']['1']['Host']=='database'; assert s['Servers']['1']['Username']=='synthetic'; assert all('Password' not in v for v in s['Servers'].values()); print('registration-ok')",
+        "import json; s=json.load(open('/configuration/servers.json')); assert s['Servers']['1']['Host']=='postgres'; assert s['Servers']['1']['Username']=='synthetic'; assert all('Password' not in v for v in s['Servers'].values()); print('registration-ok')",
       ]);
       expect(registration.trim()).toBe("registration-ok");
       break;
@@ -368,11 +372,11 @@ async function checkService(stack: Stack, service: string) {
       ).toContain("OK");
       expect((await http(stack.baseUrl + "/readyz")).status).toBe(200);
       break;
-    case "storage":
+    case "minio":
       expect(
         await probe(
           "api",
-          "Promise.all(['/minio/health/live','/minio/health/ready'].map(async path=>{const r=await fetch('http://storage:9000'+path);if(!r.ok)throw Error('storage unavailable')})).catch(()=>process.exit(1))",
+          "Promise.all(['/minio/health/live','/minio/health/ready'].map(async path=>{const r=await fetch('http://minio:9000'+path);if(!r.ok)throw Error('storage unavailable')})).catch(()=>process.exit(1))",
         ),
       ).toBe("");
       break;
@@ -424,15 +428,15 @@ describe("isolated Compose stack", () => {
   }, 120000);
 
   const services = [
-    "database",
-    "database-setup",
+    "postgres",
+    "postgres-setup",
     "pgadmin",
     "redis",
     "zookeeper",
     "server",
     "api",
     "gateway",
-    "storage",
+    "minio",
     "minio-setup",
     "redisinsight",
     "portainer",
@@ -466,7 +470,7 @@ describe("isolated Compose stack", () => {
             [
               "exec",
               "-T",
-              "database",
+              "postgres",
               "psql",
               "-U",
               "synthetic",
@@ -525,7 +529,7 @@ describe("isolated Compose stack", () => {
           "bun",
           "--no-env-file",
           "-e",
-          "Promise.all(['/opencok-cdn/','/opencok-cdn/cok-cdn.zip','/opencok-uploads/private'].map(async p=>{const r=await fetch('http://storage:9000'+p);if(r.status!==403)throw Error('unexpected public storage route')})).catch(()=>process.exit(1))",
+          "Promise.all(['/opencok-cdn/','/opencok-cdn/cok-cdn.zip','/opencok-uploads/private'].map(async p=>{const r=await fetch('http://minio:9000'+p);if(r.status!==403)throw Error('unexpected public storage route')})).catch(()=>process.exit(1))",
         ]);
         expect(privateChecks).toBe("");
 

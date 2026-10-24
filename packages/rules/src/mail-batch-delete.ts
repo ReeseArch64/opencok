@@ -38,8 +38,7 @@ export function mailCategoryDeleteQuery(
       throw new GameError(errors.invalid, "mail");
     }
   });
-  if (ids.length) throw new GameError(errors.unsupported, "mail");
-  return { now, labels };
+  return { now, labels, ...(ids.length ? { ids: [...new Set(ids)] } : {}) };
 }
 
 export function mailTypeDeleteQuery(type: number | undefined, now: number): MailTypeDeleteQuery {

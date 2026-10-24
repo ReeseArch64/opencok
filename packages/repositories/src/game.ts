@@ -21,6 +21,7 @@ import type {
   MailConversationReadQuery,
   MailCategoryDeleteQuery,
   MailCategoryDeleteInspector,
+  MailBatchInvitationPlanner,
   MailTypeDeleteQuery,
   MailDeleteQuery,
   MailDeletePlanner,
@@ -347,8 +348,16 @@ export class Database implements GameStore, FriendshipMineStore {
     uid: string,
     query: MailCategoryDeleteQuery,
     inspect: MailCategoryDeleteInspector,
+    invitations?: MailBatchInvitationPlanner,
   ) {
-    return deleteMailCategories(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
+    return deleteMailCategories(
+      this.kingdom.db,
+      this.config.kingdomId,
+      uid,
+      query,
+      inspect,
+      invitations,
+    );
   }
   mailTypeDelete(uid: string, query: MailTypeDeleteQuery) {
     return deleteMailType(this.kingdom.db, this.config.kingdomId, uid, query);

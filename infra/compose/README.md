@@ -69,8 +69,8 @@ The one-shot jobs exit with code zero after completion.
 | Portainer HTTPS                          | 9443           |
 
 Port mappings have no host-IP prefix. Internal connections use service DNS:
-`database:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933` and
-`storage:9000`. The API and game server have no directly published host ports.
+`postgres:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933` and
+`minio:9000`. The API and game server have no directly published host ports.
 The local API advertises `192.168.1.104:9933`; edit that direct value if the host
 address changes. The MinIO console redirect uses the same local host address.
 
@@ -87,19 +87,23 @@ existing login secret remains in the ignored root env file rather than source.
 ## Persistence and recovery
 
 The existing PostgreSQL, Redis, ZooKeeper and MinIO named volumes are preserved.
+The service names are `postgres`, `postgres-setup` and `minio`; update local
+overrides that previously targeted `database`, `database-setup` or `storage`.
+Redis and ZooKeeper configuration is copied into their development images, so
+configuration changes require rebuilding the corresponding image.
 The MariaDB volume is never mounted by this stack. Startup does not reseed players,
 reactivate accounts, flush Redis or remove objects/volumes. PostgreSQL remains the
 authority for player progress. Back up databases and local inputs before changes;
 an image rollback does not reverse SQL migrations.
 
 ```sh
-docker compose --profile dev run --rm database-setup
+docker compose --profile dev run --rm postgres-setup
 docker compose --profile dev down
 ```
 
 PostgreSQL initialization passwords do not rotate existing accounts. Keep direct
 Compose credentials aligned with the existing cluster; do not delete a volume to
-repair authentication. pgAdmin registration uses `database:5432` and omits the
+repair authentication. pgAdmin registration uses `postgres:5432` and omits the
 database password. Redis Insight and Portainer each have their own named data
 volume. Portainer uses HTTPS on port 9443 and its development service mounts
 the host Docker socket for local container administration.
@@ -117,7 +121,7 @@ The integration test creates an isolated Compose configuration with synthetic
 accounts, XML and CDN files, unique ports/networks and disposable volumes. It
 checks that `dev` and `all` select the same complete service set and runs a named
 lifecycle/functional test for each of the 12 services. Long-running containers must
-be running; `database-setup` and `minio-setup` must exit successfully. Checks cover
+be running; `postgres-setup` and `minio-setup` must exit successfully. Checks cover
 PostgreSQL databases, setup registrations, pgAdmin ping/login page, Redis TTLs,
 ZooKeeper status, API/server readiness, gateway routing, MinIO health/CDN policy,
 Redis Insight health/API and Portainer HTTPS/authentication boundaries.

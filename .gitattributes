@@ -1,0 +1,8 @@
+*.m4 linguist-detectable=false
+*.sh linguist-detectable=false
+*.bash linguist-detectable=false
+*.zsh linguist-detectable=false
+*.ksh linguist-detectable=false
+*.csh linguist-detectable=false
+*.fish linguist-detectable=false
+*.cjs linguist-detectable=false

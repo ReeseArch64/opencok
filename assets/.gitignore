@@ -1,0 +1,7 @@
+# Local Music Assets
+music/*
+!music/.gitkeep
+
+# Local Video Assets
+video/*
+!video/.gitkeep

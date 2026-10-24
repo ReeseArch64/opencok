@@ -24,14 +24,23 @@ volumes:
   portainer-data: ~
 
 services:
-  database:
+  portainer:
+    image: portainer/portainer-ce:lts
+    container_name: opencok-portainer
+    restart: no
+    profiles: [all, dev]
+    networks: [opencok-external-network]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+    ports:
+      - 9443:9443
+
+  postgres:
     image: postgres:17.11-bookworm
-    container_name: opencok-database
-    platform: linux/amd64
+    container_name: opencok-postgres
     restart: unless-stopped
     profiles: [all, dev]
-    stop_grace_period: 60s
-    security_opt: [no-new-privileges:true]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       POSTGRES_DB: postgres
@@ -50,22 +59,19 @@ services:
       retries: 12
       start_period: 10s
 
-  database-setup:
+  postgres-setup:
     build:
       context: .
-      dockerfile: infra/compose/database.Dockerfile
-    container_name: opencok-database-setup
-    platform: linux/amd64
+      dockerfile: infra/compose/postgres.Dockerfile
+    container_name: opencok-postgres-setup
     restart: no
     profiles: [all, dev]
-    stop_grace_period: 60s
-    security_opt: [no-new-privileges:true]
     networks: [opencok-internal-network]
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     depends_on:
-      database:
+      postgres:
         condition: service_healthy
     volumes:
       - pgadmin-servers:/configuration
@@ -73,11 +79,8 @@ services:
   pgadmin:
     image: dpage/pgadmin4:9.18
     container_name: opencok-pgadmin
-    platform: linux/amd64
     restart: unless-stopped
     profiles: [all, dev]
-    stop_grace_period: 60s
-    security_opt: [no-new-privileges:true]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@opencok.com
@@ -85,13 +88,14 @@ services:
       PGADMIN_LISTEN_PORT: 8080
       PGADMIN_SERVER_JSON_FILE: /configuration/servers.json
     ports:
-      - "5050:8080"
+      - 5050:8080
     depends_on:
-      database-setup:
+      postgres-setup:
         condition: service_completed_successfully
     volumes:
       - pgadmin-data:/var/lib/pgadmin
       - pgadmin-servers:/configuration:ro
+
     healthcheck:
       test:
         [
@@ -106,72 +110,102 @@ services:
       start_period: 30s
 
   redis:
-    image: redis:6.2.24-bookworm
+    build:
+      context: .
+      dockerfile: infra/compose/redis.Dockerfile
     container_name: opencok-redis
-    platform: linux/amd64
     restart: unless-stopped
     profiles: [all, dev]
-    command: [redis-server, /usr/local/etc/redis/redis.conf]
-    stop_grace_period: 30s
-    security_opt: [no-new-privileges:true]
     networks: [opencok-internal-network]
-    mem_limit: 512m
-    cpus: "0.50"
     volumes:
-      - type: bind
-        source: ./infra/redis/redis.conf
-        target: /usr/local/etc/redis/redis.conf
-        read_only: true
-        bind: { create_host_path: false }
       - redis-data:/data
-    healthcheck:
-      test: [CMD, redis-cli, ping]
-      interval: 5s
-      timeout: 3s
-      retries: 12
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: opencok-redisinsight
+    restart: no
+    profiles: [all, dev]
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks: [opencok-internal-network, opencok-external-network]
+    volumes:
+      - redisinsight-data:/data
+    ports:
+      - 5540:5540
 
   zookeeper:
-    image: zookeeper:3.4.14
+    build:
+      context: .
+      dockerfile: infra/compose/zookeeper.Dockerfile
+    image: opencok-zookeeper
     container_name: opencok-zookeeper
-    platform: linux/amd64
     restart: unless-stopped
     profiles: [all, dev]
-    stop_grace_period: 30s
-    security_opt: [no-new-privileges:true]
     networks: [opencok-internal-network]
-    mem_limit: 512m
-    cpus: "0.50"
-    entrypoint: [bash, /usr/local/bin/opencok-zookeeper-entrypoint.sh]
-    environment:
-      ZOO_HEAP_SIZE: 256
-      ZOO_LOG4J_PROP: INFO,CONSOLE
     volumes:
-      - type: bind
-        source: ./infra/zookeeper/zoo.cfg
-        target: /run/opencok-zoo.cfg
-        read_only: true
-        bind: { create_host_path: false }
-      - type: bind
-        source: ./infra/zookeeper/entrypoint.sh
-        target: /usr/local/bin/opencok-zookeeper-entrypoint.sh
-        read_only: true
-        bind: { create_host_path: false }
       - zookeeper-data:/data
       - zookeeper-datalog:/datalog
       - zookeeper-logs:/logs
+
+  minio:
+    image: ghcr.io/coollabsio/minio
+    container_name: opencok-minio
+    restart: unless-stopped
+    profiles: [all, dev]
+    command: [server, /data, --console-address, ":9001"]
+    environment:
+      MINIO_ROOT_USER: opencok
+      MINIO_ROOT_PASSWORD: opencok-secret
+      MINIO_BROWSER_REDIRECT_URL: http://192.168.1.104:9001
+      MINIO_API_CORS_ALLOW_ORIGIN: "*"
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - minio-data:/data
+    networks: [opencok-internal-network, opencok-external-network]
     healthcheck:
-      test: [CMD-SHELL, "printf srvr | nc -w 2 127.0.0.1 2181 | grep -q 'Mode: standalone'"]
-      interval: 5s
-      timeout: 3s
-      start_period: 10s
-      retries: 12
+      test:
+        [
+          CMD-SHELL,
+          "mc alias set health http://127.0.0.1:9000 opencok opencok-secret >/dev/null 2>&1 && mc ready health >/dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 6
+
+  minio-setup:
+    image: ghcr.io/coollabsio/minio
+    container_name: opencok-minio-setup
+    restart: no
+    profiles: [all, dev]
+    stop_grace_period: 60s
+    security_opt: [no-new-privileges:true]
+    entrypoint: [sh, /usr/local/bin/opencok-cdn-init.sh]
+    volumes:
+      - type: bind
+        source: ./infra/storage/init-cdn.sh
+        target: /usr/local/bin/opencok-cdn-init.sh
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ./data/cdn/data
+        target: /source
+        read_only: true
+        bind: { create_host_path: false }
+    networks: [opencok-internal-network]
+    depends_on:
+      minio:
+        condition: service_healthy
 
   server:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
     container_name: opencok-server
-    platform: linux/amd64
+
     restart: unless-stopped
     profiles: [all, dev]
     init: true
@@ -185,7 +219,7 @@ services:
     cpus: "2.00"
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgres://postgres:postgres@database:5432/opencok_global
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
       KINGDOM_ID: 1
       KINGDOM_DATABASE_NAME: opencok_kingdom_1
       GLOBAL_DATABASE_NAME: opencok_global
@@ -203,7 +237,7 @@ services:
       GAME_MAP_SIZE: 1200
       DEPENDENCY_TIMEOUT_MS: 5000
     depends_on:
-      database-setup:
+      postgres-setup:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
@@ -239,7 +273,7 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     container_name: opencok-api
-    platform: linux/amd64
+
     restart: unless-stopped
     profiles: [all, dev]
     init: true
@@ -253,7 +287,7 @@ services:
     cpus: "0.50"
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgres://postgres:postgres@database:5432/opencok_global
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
       GLOBAL_DATABASE_NAME: opencok_global
       KINGDOM_ID: 1
       API_SERVERS_FILE: ""
@@ -271,7 +305,7 @@ services:
         read_only: true
         bind: { create_host_path: false }
     depends_on:
-      database-setup:
+      postgres-setup:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
@@ -292,7 +326,7 @@ services:
   gateway:
     image: traefik:v3.7.15
     container_name: opencok-gateway
-    platform: linux/amd64
+
     restart: unless-stopped
     profiles: [all, dev]
     command: [--configFile=/etc/traefik/traefik.yml]
@@ -332,124 +366,3 @@ services:
       timeout: 3s
       start_period: 5s
       retries: 6
-
-  storage:
-    image: ghcr.io/coollabsio/minio
-    container_name: opencok-storage
-    platform: linux/amd64
-    restart: unless-stopped
-    profiles: [all, dev]
-    stop_grace_period: 60s
-    security_opt: [no-new-privileges:true]
-    command: [server, /data, --console-address, ":9001"]
-    environment:
-      MINIO_ROOT_USER: opencok
-      MINIO_ROOT_PASSWORD: opencok-secret
-      MINIO_BROWSER_REDIRECT_URL: http://192.168.1.104:9001
-      MINIO_API_CORS_ALLOW_ORIGIN: "*"
-    ports:
-      - 9000:9000
-      - 9001:9001
-    volumes:
-      - minio-data:/data
-    networks: [opencok-internal-network, opencok-external-network]
-    mem_limit: 1g
-    cpus: "0.50"
-    healthcheck:
-      test:
-        [
-          CMD-SHELL,
-          "mc alias set health http://127.0.0.1:9000 opencok opencok-secret >/dev/null 2>&1 && mc ready health >/dev/null 2>&1",
-        ]
-      interval: 10s
-      timeout: 5s
-      start_period: 15s
-      retries: 6
-
-  minio-setup:
-    image: ghcr.io/coollabsio/minio
-    container_name: opencok-minio-setup
-    platform: linux/amd64
-    restart: no
-    profiles: [all, dev]
-    stop_grace_period: 60s
-    security_opt: [no-new-privileges:true]
-    entrypoint: [sh, /usr/local/bin/opencok-cdn-init.sh]
-    volumes:
-      - type: bind
-        source: ./infra/storage/init-cdn.sh
-        target: /usr/local/bin/opencok-cdn-init.sh
-        read_only: true
-        bind: { create_host_path: false }
-      - type: bind
-        source: ./data/cdn/data
-        target: /source
-        read_only: true
-        bind: { create_host_path: false }
-    networks: [opencok-internal-network]
-    depends_on:
-      storage:
-        condition: service_healthy
-
-  redisinsight:
-    container_name: opencok-redisinsight
-    image: redis/redisinsight:latest
-    platform: linux/amd64
-    restart: no
-
-    profiles: [all, dev]
-    stop_grace_period: 30s
-    security_opt: [no-new-privileges:true]
-
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.50"
-
-    mem_limit: 512m
-    memswap_limit: 1g
-
-    depends_on:
-      redis:
-        condition: service_healthy
-
-    networks: [opencok-internal-network, opencok-external-network]
-
-    volumes:
-      - redisinsight-data:/data
-
-    ports:
-      - 5540:5540
-
-  portainer:
-    container_name: opencok-portainer
-    image: portainer/portainer-ce:lts
-    platform: linux/amd64
-    restart: no
-
-    profiles: [all, dev]
-    stop_grace_period: 30s
-    security_opt: [no-new-privileges:true]
-
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.50"
-
-    mem_limit: 512m
-    memswap_limit: 1g
-
-    networks: [opencok-external-network]
-
-    volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-        bind: { create_host_path: false }
-
-      - portainer-data:/data
-
-    ports:
-      - 9443:9443
