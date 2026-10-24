@@ -30,6 +30,8 @@
     "./power-throne": "./src/power-throne.ts",
     "./power-resolver": "./src/power-resolver.ts",
     "./profile": "./src/profile.ts",
+    "./nickname": "./src/nickname.ts",
+    "./java-gbk": "./src/java-gbk.ts",
     "./profile-generals": "./src/profile-generals.ts",
     "./reconnect-mine": "./src/reconnect-mine.ts",
     "./rewards": "./src/rewards.ts",
