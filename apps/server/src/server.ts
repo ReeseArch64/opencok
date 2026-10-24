@@ -1,3 +1,4 @@
+import { createWorldSearchStore, checkWorldSearchStore } from "@opencok/repositories/world-search";
 import {
   createWorldFavoriteStore,
   checkWorldFavoriteStore,
@@ -46,6 +47,8 @@ export const RealmDependenciesLive = Layer.effect(
       db.databases.global.db,
       config.kingdomId,
     );
+    yield* fromPromise("realm.world-search", () => checkWorldSearchStore(db.kingdom.db));
+    const worldSearch = createWorldSearchStore(db.databases, config.kingdomId);
     const avatarFiles = config.avatarFiles
       ? yield* fromPromise("realm.avatar-files", async () => {
           await checkAvatarGrantStore(db.kingdom.db);
@@ -118,6 +121,7 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        worldSearch,
         worldFavorites,
         avatarFinish: avatar?.service,
         avatar: avatarFiles

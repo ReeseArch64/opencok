@@ -24,7 +24,8 @@
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./mail": "./src/mail.ts",
-    "./world-favorites": "./src/world-favorites.ts"
+    "./world-favorites": "./src/world-favorites.ts",
+    "./world-search": "./src/world-search.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
