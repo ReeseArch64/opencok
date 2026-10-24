@@ -2190,3 +2190,20 @@ catalog into its declared group. Compose mounts a generated temporary nickname w
 without reading ignored reference inputs. Production validation and mounts are unchanged.
 The two-realm server integration passes 63 assertions; all 14 disposable Compose checks
 pass 122 assertions locally, including state recovery. Full final-head CI remains required.
+
+## Parallel merge readiness for PR #216
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #220.
+
+The integration target remains the original feature branch
+`feat/review-connect-event-score-ranking`. The enclosing stack will be integrated into develop
+through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
