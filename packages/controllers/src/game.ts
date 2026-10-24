@@ -247,6 +247,9 @@ export class Game {
       case "world.favo.delme":
         body = await this.worldFavorites(uid, command, params);
         break;
+      case "user.update.picVer":
+        body = await this.avatarVersion(uid);
+        break;
       case "user.avatar.finish":
         ({ body, pushes } = await this.avatarFinish(uid, params));
         break;
@@ -473,6 +476,36 @@ export class Game {
       pointArray: sfs.array(points.map(sfs.int)),
       serverArray: sfs.array(servers.map(sfs.int)),
     };
+  }
+  private async avatarVersion(uid: string): Promise<Fields> {
+    const service = this.services.avatarVersion;
+    if (!service) throw new GameError(errors.unsupported);
+    if (!/^[0-9]{1,20}$/.test(uid)) throw new GameError(errors.invalid);
+    const now = this.now();
+    const state = await service.update(uid, now);
+    const profile = this.checkProfile(state.profile, now);
+    const intent = state.intent;
+    if (
+      profile.uid !== uid ||
+      profile.serverId !== this.config.kingdomId ||
+      !intent ||
+      intent.ownerUid !== uid ||
+      !/^[a-f0-9]{32}$/.test(intent.operationId) ||
+      !Number.isInteger(intent.picVer) ||
+      intent.picVer < 1 ||
+      intent.picVer > 2147483647 ||
+      intent.picVer % 1000000 === 0 ||
+      (intent.nextUpdateTime !== null &&
+        (typeof intent.nextUpdateTime !== "bigint" ||
+          BigInt.asIntN(64, intent.nextUpdateTime) !== intent.nextUpdateTime))
+    )
+      throw new GameError(errors.invalid);
+    try {
+      await service.deliver(uid, intent.operationId);
+    } catch {}
+    const body: Fields = { uid: sfs.string(uid), picVer: sfs.int(intent.picVer) };
+    if (intent.nextUpdateTime !== null) body.nextUpdateTime = sfs.long(intent.nextUpdateTime);
+    return body;
   }
   private async avatarFinish(uid: string, params: Fields): Promise<Result> {
     const service = this.services.avatarFinish;

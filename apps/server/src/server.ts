@@ -12,7 +12,8 @@ import {
   checkWorldFavoriteStore,
 } from "@opencok/repositories/world-favorites";
 import { createAvatarRuntime } from "./avatar.ts";
-import { startAvatarRelay } from "./avatar-relay.ts";
+import { checkAvatarVersionStore } from "@opencok/repositories/avatar-version";
+import { startAvatarRelay, startAvatarVersionRelay } from "./avatar-relay.ts";
 import { checkAvatarCompletionStore } from "@opencok/repositories/avatar-delivery";
 import { createRealmNotifications } from "@opencok/connection/notifications";
 import { loadAvatarFiles } from "@opencok/connection/avatar-files";
@@ -119,6 +120,17 @@ export const RealmDependenciesLive = Layer.effect(
         : undefined;
     if (config.avatarChat && !avatarFiles) throw new Error("Avatar files unavailable");
     if (avatar) {
+      yield* fromPromise("realm.avatar-version", () => checkAvatarVersionStore(db.kingdom.db));
+      yield* acquireResource(
+        "realm.avatar-version-relay",
+        async () =>
+          startAvatarVersionRelay(avatar.nextVersion, avatar.versionService.deliver, () =>
+            console.warn(
+              JSON.stringify({ event: "avatar_version_relay_failed", kingdom: config.kingdomId }),
+            ),
+          ),
+        (relay) => relay.close(),
+      );
       yield* fromPromise("realm.avatar-completion", () =>
         checkAvatarCompletionStore(db.kingdom.db),
       );
@@ -145,6 +157,7 @@ export const RealmDependenciesLive = Layer.effect(
         worldSearch,
         worldFavorites,
         avatarFinish: avatar?.service,
+        avatarVersion: avatar?.versionService,
         avatar: avatarFiles
           ? {
               ...avatarFiles,

@@ -12,6 +12,7 @@
   "type": "module",
   "exports": {
     "./avatar-profile": "./src/avatar-profile.ts",
+    "./avatar-version": "./src/avatar-version.ts",
     "./avatar-mail": "./src/avatar-mail.ts",
     "./avatar-finish": "./src/avatar-finish.ts",
     "./account": "./src/account.ts",

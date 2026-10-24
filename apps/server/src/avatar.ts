@@ -1,3 +1,10 @@
+import { createAvatarVersion } from "@opencok/controllers/avatar-version";
+import {
+  commitAvatarVersion,
+  deliverAvatarVersionMail,
+  publishAvatarVersionEffect,
+  nextAvatarVersionDelivery,
+} from "@opencok/repositories/avatar-version";
 import type { AvatarFiles } from "@opencok/contracts/files";
 import type { ServerConfig } from "@opencok/contracts/server";
 import type { Rules } from "@opencok/rules/game";
@@ -99,8 +106,72 @@ export function createAvatarRuntime(options: {
       await notifications.publish(owner, command, body);
     },
   });
+  const versionService = createAvatarVersion({
+    rules,
+    kingdomId: config.kingdomId,
+    report,
+    commit: async (owner, operationId, now, inspect) => {
+      try {
+        return await commitAvatarVersion(
+          db.kingdom.db,
+          config.kingdomId,
+          owner,
+          operationId,
+          now,
+          inspect,
+        );
+      } catch (error) {
+        try {
+          const recovered = await commitAvatarVersion(
+            db.kingdom.db,
+            config.kingdomId,
+            owner,
+            operationId,
+            now,
+            inspect,
+            true,
+          );
+          if (!recovered.intent) throw error;
+          return recovered;
+        } catch {
+          throw error;
+        }
+      }
+    },
+    mail: (owner, operationId) =>
+      deliverAvatarVersionMail(db.kingdom.db, config.kingdomId, owner, operationId),
+    profile: (owner, operationId) =>
+      publishAvatarVersionEffect(
+        2,
+        db.kingdom.db,
+        config.kingdomId,
+        owner,
+        operationId,
+        async (update, signal) => {
+          signal.throwIfAborted();
+          await cache.publishPlayerUpdateTime(update.owner, update.updatedAt);
+        },
+        config.timeoutMs,
+      ),
+    chat: (owner, operationId) =>
+      publishAvatarVersionEffect(
+        4,
+        db.kingdom.db,
+        config.kingdomId,
+        owner,
+        operationId,
+        publish,
+        config.timeoutMs,
+      ),
+    notify: async (owner, command, body) => {
+      await notifications.publish(owner, command, body);
+    },
+  });
   return {
     service,
+    versionService,
+    nextVersion: (cursor?: Parameters<typeof nextAvatarVersionDelivery>[2]) =>
+      nextAvatarVersionDelivery(db.kingdom.db, config.kingdomId, cursor),
     next: (cursor?: Parameters<typeof nextAvatarDelivery>[2]) =>
       nextAvatarDelivery(db.kingdom.db, config.kingdomId, cursor),
   };

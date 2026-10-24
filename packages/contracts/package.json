@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./avatar-version": "./src/avatar-version.ts",
     "./account": "./src/account.ts",
     "./game": "./src/game.ts",
     "./power": "./src/power.ts",

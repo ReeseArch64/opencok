@@ -2502,7 +2502,8 @@ It requires an authenticated numeric owner and, when supplied, an exactly matchi
 String `gameuid`. Request version, sequence and endpoint fields cannot override stored
 state. Correlation is retained; grant issuance changes no profile, upload record or
 mail and emits no push. `user.avatar.finish` is now available under the separate completion
-configuration below. Direct `user.update.picVer` remains unsupported.
+configuration below. The separately described `user.update.picVer` allocates a legacy
+version without certifying an uploaded asset.
 
 The repository locks the owner's durable profile in a repeatable-read transaction and
 rejects missing, foreign, misplaced or banned profiles before eligibility or files reads.
@@ -2739,8 +2740,9 @@ The authenticated command accepts a String `receipt` containing `sequence:sha256
 an optional String `gameuid` must match the session. It returns String `uid`, Int `picVer`
 and Bool `superseded`, and emits an independent copy as `push.picVer.update`. Correlation
 fields appear only in the command reply. Verified repeated/current/older receipts use
-durable state without reapplying moderation or creating duplicate mail. Direct
-`user.update.picVer` remains unsupported. A failed completion attempt gets one bounded
+durable state without reapplying moderation or creating duplicate mail. The separate
+`user.update.picVer` path below does not create completion receipts. A failed completion
+attempt gets one bounded
 recovery read through the same authorization and file verification path: recovery requires
 an existing matching completion receipt and a durable version at least as advanced, and
 cannot execute the mutation inspector or create an observed receipt. It resolves a lost
@@ -2778,6 +2780,63 @@ remove only the matching subscription. No public notification route is added. Un
 use EventEmitter-based connection objects and encoded SFS frames; no real socket, listener,
 service, client or ADB is used. Full media restoration and moderation lifecycle remain
 separate migration work.
+
+## Legacy avatar version allocation
+
+[Issue #217](https://github.com/ReeseArch64/opencok/issues/217) connects authenticated
+`user.update.picVer` under the existing files/chat configuration. The request uses no
+parameters: client-supplied UID, version or upload fields cannot select the owner or
+next value. The reply contains String `uid`, Int `picVer` and, only when moderation
+checks apply, Long `nextUpdateTime`. No picture-update push is added to this legacy
+command. This operation assigns profile metadata and does not assert that an uploaded
+asset exists. `user.avatar.finish`, file grants, receipt verification and served-file
+ownership checks retain their existing contracts.
+
+The exact `function_on5.k2 = "0"` setting bypasses level/cooldown/report checks and
+encodes the next version in the Waiting band. Otherwise the command parses the castle
+minimum, checks the persisted main building, eagerly parses the signed-long interval,
+and checks cooldown before report ban. Java signed-long multiplication, subtraction and
+next-update addition wrap. It advances the supported persisted sequence and updates
+`pic_upload_record` with the new version, zero report count, current time and Waiting
+status, preserving existing ban counters/time. An absent record gets zero ban state.
+The captured nonempty system-mail 10111 template is preflighted before any write;
+missing/empty templates produce no mail, while unsupported symbolic reward resolution
+or invalid templates reject rather than committing an undeliverable mail intent.
+
+The owner-locked transaction commits profile version, applicable moderation state and
+an `avatar_version_update` outbox record together. This deliberately replaces the
+reference's sequential writes with atomic persistence under ADR-0002. The generated
+`0007_avatar_version_updates.sql` migration is additive and has not been applied. It
+contains an opaque server-generated operation ID, captured version/time/configuration
+and mail/cache/chat pending bits; it contains no image hash or asset receipt. Distinct
+requests allocate distinct versions, matching the legacy command's lack of request
+idempotency. An uncertain database response gets a recovery-only read of the same
+internal operation ID and cannot allocate another version during that recovery.
+
+Mail insertion and acknowledgment share a transaction and the operation ID supplies
+its stable mail ID. Online mail push remains best effort after durable insertion.
+Cache timestamps and authenticated chat metadata publish independently under the owner
+lock with bounded timeouts; failed delivery keeps its bit. If the current profile has
+already moved to another version, stale cache/chat effects are acknowledged without
+replacing newer metadata. A separate non-overlapping cursor relay retries one intent
+per five-second pass, wraps after the final key and drains on shutdown. Startup checks
+the new table before exposing the command. Pending work is capped at 1,000 entries per
+owner; completed intents remain retained for commit recovery, with archival/retention
+policy still pending as for existing completion history.
+
+This slice accepts nonnegative signed-Int current versions whose modulo-one-million
+sequence is below 999999. Negative or null restored versions and the sequence-wrap
+boundary reject before writes. The existing chat receiver orders by sequence; complete
+legacy reset/wrap support needs a separate ordering domain or expected-previous CAS
+without changing verified upload receipts. Historical media reconciliation, full
+moderation lifecycle, unavailable original assets and public-chat projection consumption
+remain pending. Topic 7 is not complete.
+
+No new tests or fixtures were generated and no tests were executed, following the
+latest user instruction. Static type checks, lint, formatting and diff review cover
+this change; they do not establish behavioral parity or PostgreSQL concurrency.
+No services, sockets, applied migrations, client/ADB or CI were exercised. Existing
+schema test snapshots were preserved and may need an authorized refresh later.
 
 ## Realm chat sessions
 
@@ -3254,7 +3313,7 @@ use these descriptions before the reconnect task component is complete.
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                               |
 | 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                        |
 | 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags; authenticated nickname validation with the real word filter and global availability         | Rename rule foundations exist; actual rename providers/persistence/effects and remaining profile commands are pending. Nickname query performance is unverified.                        |
-| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                            |
+| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate legacy allocation (static checks only), negative/restored/wrap states and moderation lifecycle. Native-client validation stays deferred.                                       |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                       |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
