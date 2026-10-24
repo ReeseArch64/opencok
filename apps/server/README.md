@@ -1391,9 +1391,29 @@ schema defaults, malformed handles/counts, every truncated fixture prefix and
 composition with the raw-load rule. Null or unwell-formed saved values are not
 silently converted into valid gameplay inputs.
 
-The saved-data reader is not yet connected to an occupied-resource repository query.
-Resolving the five modifier inputs and validating ownership remain required before
-the command can use the calculation. A database read is not evidence that an owner
+The point repository now reads the pointed resource march for types 3/37 when
+both owner ID and march UUID are nonblank. That read shares the point/owner snapshot,
+including the destination snapshot for remote requests. Selection uses the saved
+UUID alone, matching the reference's march index; it does not substitute a world,
+destination or occupancy-state search. The snapshot retains those metadata fields
+for subsequent resolution, even when they differ from the point. It rejects a row
+with another UUID or owner and duplicate rows, rather than expose another owner's
+saved army through an inconsistent point pointer.
+
+Only army bytes, collection speed/times, collected-before-speed-change count and
+plunder text are read alongside identity metadata. Exploration reports, combat
+payloads and unrelated march columns are omitted. Nullable columns retain null;
+Int64 values stay bigint, and PostgreSQL real values are normalized to Float32.
+Payload sizes follow existing column bounds. Missing marches remain explicitly
+absent; no ownership repair, fake zero-load army or scheduling is performed. The
+readiness probe includes these columns with limit zero. Eight additional synthetic
+adapter units cover local/remote snapshots, pointer selection, omitted reads,
+nullable/bounded payloads, Float32 normalization, precision, authorization and rollback.
+
+The saved-data decoder and raw-load calculation are not yet composed into the
+occupied-resource command. Resolving the five modifier inputs, checking decoded
+army ownership and restoring collection state remain required before it can return
+the full resource projection. A database read is not evidence that an owner
 was resident in the reference process. The runtime-only maximum collection time is assigned by destination-march rescheduling;
 it is not a persisted march column. Restoring its read value still needs an explicit
 policy backed by that lifecycle, without scheduling work from the query. This pure

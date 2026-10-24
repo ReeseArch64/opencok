@@ -452,8 +452,12 @@ calculation does not deserialize troop objects or resolve profile effects itself
 The separate messages codec projects saved army/soldier fields through a bounded
 Java object-stream data reader, without executing any classes or serialization
 hooks. Consumed class identities/field types are validated; unrelated object graphs
-are traversed structurally and discarded. Repository integration, owner validation,
-effect resolution and runtime maximum-collection-time restoration remain dependencies
+are traversed structurally and discarded. The point repository reads a nonblank
+resource owner's saved march pointer by UUID in the same point snapshot. It retains
+identity and collection metadata, bounded army/plunder payloads and exact nullable
+Long fields, normalizing real speed to Float32. Missing marches remain absent;
+inconsistent owners reject without ownership repair. Decoder composition, decoded
+owner validation, effect resolution and runtime maximum-collection-time restoration remain dependencies
 of occupied-resource command composition. No march scheduling or cache write is
 performed by this pure projection.
 

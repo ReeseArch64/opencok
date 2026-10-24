@@ -1,3 +1,5 @@
+import { decodeWorldResourceArmy } from "@opencok/messages/world-resource-army";
+import armyVectors from "./fixtures/world-resource-army-vectors.json";
 import { Game } from "@opencok/controllers/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
@@ -100,6 +102,10 @@ function fixture() {
       ],
       [2, []],
     ]),
+    marches: new Map<number, Row[]>([
+      [1, []],
+      [2, []],
+    ]),
     fail: "",
     raw: new Map<string, unknown[][]>(),
     onObserver: undefined as (() => void) | undefined,
@@ -117,11 +123,10 @@ function fixture() {
           }
           if (text === "commit" || text === "rollback") return { rows: [] };
           expect(text).toStartWith("select ");
-          expect(text).not.toMatch(
-            /for update|for share|password|email|referrer|"ip"|armyInfo|monsterInfo/,
-          );
+          expect(text).not.toMatch(/for update|for share|password|email|referrer|"ip"|monsterInfo/);
           const table = /from "opencok_kingdom"\."([^"]+)"/.exec(text)?.[1];
           expect(table).toBeDefined();
+          if (table !== "world_march") expect(text).not.toMatch(/armyInfo|plunderRes/);
           if (state.fail === `${realm}:${table}`) throw new Error("Synthetic private failure");
           if (params.length === 1 && params[0] === 0) return { rows: [] };
           const key = `${realm}:${table}${table === "userprofile" && text.includes('"serverId"') ? ":observer" : ""}`;
@@ -148,6 +153,24 @@ function fixture() {
             expect(realm).toBe(1);
             expect(params).toEqual(["observer", 2]);
             return { rows: values(state.world, ["uid", "worldId"]) };
+          }
+          if (table === "world_barbarion") return { rows: [] };
+          if (table === "world_march") {
+            expect(params).toEqual([state.points.get(realm)![0]!.ownerMarchUUid, 2]);
+            expect(text).toContain('"world_march"."uuid" = $1');
+            expect(text.slice(text.indexOf(" where "))).not.toMatch(
+              /ownerUid|worldId|targetId|state/,
+            );
+            const columns = text
+              .slice(7, text.indexOf(" from "))
+              .split(", ")
+              .map((column) => [...column.matchAll(/"([^"]+)"/g)].at(-1)![1]!);
+            return {
+              rows: state.marches
+                .get(realm)!
+                .filter((row) => row.uuid === params[0])
+                .map((row) => columns.map((key) => row[key] ?? null)),
+            };
           }
           if (table === "worldpoint") {
             expect(text).toContain('"worldpoint"."id" = $1');
@@ -823,4 +846,197 @@ test("remote nonpositive points preserve empty replies and complete response bou
       _cok_: { type: Type.Bytes, value: Buffer.alloc(MAX_FRAME) },
     }),
   ).rejects.toThrow("102192");
+});
+
+const resourceMarch = (patch: Row = {}): Row => ({
+  uuid: "resource-march",
+  ownerUid: "target",
+  targetId: 701,
+  worldId: 9,
+  state: 1,
+  armyInfo: Buffer.from(armyVectors.arrayList, "base64"),
+  collectSpd: 0.1,
+  marchArrivalTime: 9007199254740993n,
+  collectedBeforeSpd: 2147483647n,
+  changeCollectSpdTime: -9223372036854775808n,
+  occupyResourceEndTime: 9223372036854775807n,
+  plunderRes: '[{"v":7}]',
+  ...patch,
+});
+function resourceFixture(realm = 1, type = 3) {
+  const f = fixture();
+  Object.assign(f.state.points.get(realm)![0]!, {
+    pointType: type,
+    ownerMarchUUid: "resource-march",
+  });
+  f.state.marches.set(realm, [
+    resourceMarch({ ownerUid: realm === 1 ? "target" : "remote", worldId: realm === 1 ? 9 : 0 }),
+  ]);
+  return { ...f, readResource: () => f.read(701, realm) };
+}
+
+test("occupied resource reads the exact pointer in the point snapshot and preserves saved collection fields", async () => {
+  for (const type of [3, 37]) {
+    const f = resourceFixture(1, type);
+    const saved = f.state.marches.get(1)![0]!;
+    Object.assign(saved, { targetId: 702, worldId: 7, state: 2 });
+    f.state.marches.get(1)!.push(resourceMarch({ uuid: "unrelated" }));
+    const result = await f.readResource();
+    expect(result.resource!.march).toEqual({ ...saved, collectSpd: Math.fround(0.1) });
+    expect(saved.collectSpd).toBe(0.1);
+    expect(decodeWorldResourceArmy(result.resource!.march!.armyInfo as Buffer)!.cachedLoad).toBe(
+      123,
+    );
+    const queries = reads(f, "world_march");
+    expect(queries).toHaveLength(1);
+    expect(queries[0]!.params).toEqual(["resource-march", 2]);
+    expect(queries[0]!.text).not.toMatch(
+      /exploreReport|monsterInfo|buildingKillArmy|marchStartTime|maxCollectTime/,
+    );
+    expect(f.queries.filter((q) => q.text.startsWith("begin"))).toHaveLength(1);
+    expect(f.queries.at(-1)!.text).toBe("commit");
+  }
+});
+
+test("remote occupied resource reads occur only in the destination snapshot after local authorization", async () => {
+  const f = resourceFixture(2);
+  const result = await f.readResource();
+  expect(result.remote).toBe(true);
+  expect(result.point!.worldId).toBe(0);
+  expect(result.resource!.march!.ownerUid).toBe("remote");
+  expect(reads(f, "world_march").map((q) => q.realm)).toEqual([2]);
+  const localCommit = f.queries.findIndex((q) => q.realm === 1 && q.text === "commit");
+  const marchRead = f.queries.findIndex((q) =>
+    q.text.includes('from "opencok_kingdom"."world_march"'),
+  );
+  expect(localCommit).toBeGreaterThan(0);
+  expect(marchRead).toBeGreaterThan(localCommit);
+  expect(f.queries.at(-1)).toEqual({ realm: 2, text: "commit", params: [] });
+});
+
+test("resource payloads are skipped for other point types, blank owners and blank march pointers", async () => {
+  for (const patch of [
+    ...[0, 1, 2, 4, 5, 6, 15, 18, 44, 49, 50].map((pointType) => ({ pointType })),
+    ...[null, "", "\u2003", "\u001c"].map((ownerId) => ({ ownerId })),
+    ...[null, "", "\u2003", "\u001c"].map((ownerMarchUUid) => ({ ownerMarchUUid })),
+  ]) {
+    const f = resourceFixture();
+    Object.assign(f.state.points.get(1)![0]!, patch);
+    const result = await f.readResource();
+    expect(result.resource).toBeUndefined();
+    expect(reads(f, "world_march")).toHaveLength(0);
+  }
+});
+
+test("missing resource marches and nullable fields remain explicit without fabricated state or ownership repair", async () => {
+  const f = resourceFixture();
+  f.state.marches.set(1, []);
+  expect((await f.readResource()).resource).toEqual({ march: undefined });
+  const saved = resourceMarch({
+    state: null,
+    armyInfo: null,
+    collectSpd: null,
+    marchArrivalTime: null,
+    collectedBeforeSpd: null,
+    changeCollectSpdTime: null,
+    occupyResourceEndTime: null,
+    plunderRes: null,
+  });
+  f.state.marches.set(1, [saved]);
+  expect((await f.readResource()).resource!.march).toEqual(saved);
+  expect(f.state.points.get(1)![0]!.ownerId).toBe("target");
+  expect(f.state.points.get(1)![0]!.ownerMarchUUid).toBe("resource-march");
+  expect(
+    f.queries.every(
+      (q) => q.text.startsWith("select ") || q.text.startsWith("begin ") || q.text === "commit",
+    ),
+  ).toBe(true);
+});
+
+test("ambiguous or foreign resource marches reject with sanitized dependency failures", async () => {
+  for (const rows of [
+    [resourceMarch(), resourceMarch()],
+    [resourceMarch({ ownerUid: "other" })],
+    [resourceMarch({ uuid: "other" })],
+  ]) {
+    const f = resourceFixture();
+    f.state.raw.set(
+      "1:world_march",
+      rows.map((row) => Object.keys(resourceMarch()).map((key) => row[key])),
+    );
+    await expect(f.readResource()).rejects.toThrow("world point detail unavailable");
+    expect(f.queries.at(-1)!.text).toBe("rollback");
+  }
+});
+
+test("resource snapshots bound payloads and preserve signed long precision plus database float normalization", async () => {
+  for (const patch of [
+    { armyInfo: Buffer.alloc(65536) },
+    { plunderRes: "a".repeat(2049) },
+    { plunderRes: "\0" },
+    { collectSpd: Number.MAX_VALUE },
+    { targetId: 1.5 },
+    { worldId: 2147483648 },
+    { state: 2147483648 },
+    { marchArrivalTime: 9223372036854775808n },
+    { collectedBeforeSpd: -9223372036854775809n },
+  ]) {
+    const f = resourceFixture();
+    Object.assign(f.state.marches.get(1)![0]!, patch);
+    await expect(f.readResource()).rejects.toThrow("world point detail unavailable");
+    expect(f.queries.at(-1)!.text).toBe("rollback");
+  }
+  for (const collectSpd of [0, -0, 0.1, NaN, Infinity, -Infinity]) {
+    const f = resourceFixture();
+    Object.assign(f.state.marches.get(1)![0]!, {
+      collectSpd,
+      collectedBeforeSpd: 9223372036854775807n,
+    });
+    const result = (await f.readResource()).resource!.march!;
+    expect(result.collectSpd).toBe(Math.fround(collectSpd));
+    expect(result.collectedBeforeSpd).toBe(9223372036854775807n);
+    expect(result.marchArrivalTime).toBe(9007199254740993n);
+  }
+  const f = resourceFixture();
+  f.state.points.get(1)![0]!.ownerMarchUUid = "a".repeat(41);
+  await expect(f.readResource()).rejects.toThrow("world point detail unavailable");
+  expect(reads(f, "world_march")).toHaveLength(0);
+});
+
+test("resource read and commit failures roll back the active realm without retrying another realm", async () => {
+  for (const realm of [1, 2])
+    for (const failure of ["world_march", "commit"]) {
+      const f = resourceFixture(realm);
+      f.state.fail = `${realm}:${failure}`;
+      await expect(f.readResource()).rejects.toThrow("world point detail unavailable");
+      expect(f.queries.at(-1)).toEqual({ realm, text: "rollback", params: [] });
+      expect(reads(f, "world_march")).toHaveLength(1);
+      if (realm === 2)
+        expect(f.queries.some((q) => q.realm === 1 && q.text === "commit")).toBe(true);
+    }
+});
+
+test("resource authorization precedes payload reads and readiness probes the required columns without data", async () => {
+  for (const patch of [{ banFlag: 1 }, { banTime: BigInt(now + 1) }, { serverId: 2 }]) {
+    const f = resourceFixture(2);
+    Object.assign(f.state.observer!, patch);
+    expect((await f.readResource()).resource).toBeUndefined();
+    expect(reads(f, "world_march")).toHaveLength(0);
+    expect(f.queries.every((q) => q.realm === 1)).toBe(true);
+  }
+  const f = resourceFixture();
+  await checkWorldPointDetailStore(f.db);
+  expect(f.queries).toHaveLength(10);
+  const probe = reads(f, "world_march")[0]!;
+  expect(probe.params).toEqual([0]);
+  for (const column of [
+    "armyInfo",
+    "collectSpd",
+    "collectedBeforeSpd",
+    "plunderRes",
+    "marchArrivalTime",
+    "changeCollectSpdTime",
+    "occupyResourceEndTime",
+  ])
+    expect(probe.text).toContain(`"${column}"`);
 });
