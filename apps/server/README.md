@@ -6,7 +6,7 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
-`login.other`, `setting.xml`, `get.user.info.multi`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`login.other`, `setting.xml`, `get.user.info.multi`, `get.power.info`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -250,12 +250,19 @@ research query. Reads neither settle research queues nor consume donations;
 missing catalogs for active data fail explicitly. Unit tests cover exact VIP
 deadlines, membership query ownership and rollback on late shared-state failures.
 
-This foundation does not yet enable `get.power.info`. Runtime snapshot wiring and
-the remaining effective dragon attack bonus providers still require migration.
-A science-enabled dragon requires its authoritative
-attack modifier; the calculator rejects a missing modifier instead of assuming
-zero. Effective bonuses include multiple gameplay domains and need their own
-consistent read projection before this command can be advertised as complete.
+`get.power.info` now dispatches to the selected realm's power snapshot, checks the
+authenticated owner and ban status, calculates components and emits the detailed
+wire DTO with correlation fields. It captures one server instant and ignores any
+client-supplied player ID, timestamp or attack modifier. Startup checks all power
+tables with zero-row queries. Tests exercise the command and repository using
+synthetic state and fake database clients, without opening listeners.
+
+The command remains incomplete for mature dragons with the dragon-science gate
+enabled: authoritative attack-effect composition still requires the remaining
+gameplay providers. Those snapshots fail with `102192` instead of assuming a zero
+modifier. Snapshots without that dependency can return calculated power, including
+dragons with science disabled. Pure VIP, alliance, general, equipment, research
+and status projections are available for the pending complete effect resolver.
 
 Use runtime credentials with SELECT access to the required global/realm tables,
 separate from the administrative setup account. Startup checks the required
@@ -309,7 +316,7 @@ ADB, native-client validation, integration or end-to-end tests for this phase.
 | Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; power snapshot/calculation/wire foundation with synthetic unit tests                                                                           | Full own/public profiles and reconnect; power runtime wiring and effective bonus resolution.                                                     |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; authenticated detailed-power command with snapshot, calculation and wire unit tests                                                            | Full own/public profiles and reconnect; effective bonus resolution for science-enabled mature dragons.                                           |
 | 3. Ranking queries                        | Persistence schema                                                                                                                                                                         | Lists, player positions, pagination and tie-breaking.                                                                                            |
 | 4. Basic mailbox                          | Persistence schema                                                                                                                                                                         | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                              | Point details, player search and favorites, including authorization for writes.                                                                  |

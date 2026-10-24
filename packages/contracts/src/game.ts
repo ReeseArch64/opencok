@@ -1,4 +1,5 @@
 import type { Row } from "./rows.ts";
+import type { PowerState } from "./power.ts";
 
 export interface AuthenticationStore {
   profile(uid: string): Promise<Row | undefined>;
@@ -16,6 +17,7 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  power(uid: string, now: number): Promise<PowerState>;
   playerSummaries(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
   configuration(uid: string): Promise<LoginConfigurationState>;
   city(uid: string, now: number): Promise<CityState>;
