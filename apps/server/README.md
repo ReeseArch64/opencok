@@ -194,7 +194,8 @@ research component is added to the total because the legacy total omits it.
 
 Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `saga_tower_science_up.xml`, `hero.xml`, `equipment.xml`, `dragon_words.xml`,
-`dragon_base.xml`, `dragon_new.xml` and `status.xml`. They use the same validated XML loader.
+`dragon_base.xml`, `dragon_new.xml`, `status.xml`, `sk.xml` and `suit.xml`.
+They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
 types, catalog loading, query ownership and rollback.
@@ -212,6 +213,26 @@ in the same snapshot and computes initial-item, completed-research and active-st
 contributions, including random effects and the throne override. Float addition
 order and signed status overflow are preserved. Statuses ending at the snapshot
 time are excluded, matching reconstruction of the legacy active-state map.
+
+The same snapshot now retains general ability JSON, equipped extra attributes,
+strength levels and selected decomposed-set slots. `generalSkillPoints` decodes
+passive skill allocations without activating saved trees marked by `ids`.
+`generalSkillEffects` applies the skill base/increment formula with signed point
+arithmetic and float rounding. Repeated effect IDs inside one skill replace earlier
+values; skills and generals then accumulate in deterministic order.
+
+`equipmentEffects` projects worn-item attributes, paired dragon attributes and
+persisted extras. Color and position modifiers must be resolved by its caller;
+the callback receives effects from previously loaded items. Per-item aggregation
+and the nonnegative clamp match the legacy equipment accumulator. Empty dragon
+refinement that would require a random repair is rejected without changing data.
+`equipmentSetEffects` adds worn-set thresholds, six-piece strengthening and the
+three persisted decomposed-set slots. Worn sets honor client/realm/time gates;
+strengthening uses the server gate without comparing client versions. Hero-only
+set attributes are excluded and malformed strengthening tiers are skipped
+individually, matching the legacy handling. These projections do not equip items,
+consume materials or grant decomposed sets. The global equipment multiplier and
+other gameplay bonus providers still belong to the pending effect composition.
 
 This foundation does not yet enable `get.power.info`. Runtime snapshot wiring and
 the remaining effective dragon attack bonus providers still require migration.

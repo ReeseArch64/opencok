@@ -34,13 +34,15 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "dragon_base",
       "dragon_new",
       "status",
+      "sk",
+      "suit",
     ])
       await writeFile(
         join(directory, `${name}.xml`),
         '<database><ItemSpec id="001" power="007"/></database>',
       );
     const power = (await loadRules(directory)).power;
-    expect(Object.keys(power)).toHaveLength(10);
+    expect(Object.keys(power)).toHaveLength(12);
     expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
     for (const name of ["general_sale", "pay_servercontrol", "kingdomskill", "fb_share"])
       await writeFile(

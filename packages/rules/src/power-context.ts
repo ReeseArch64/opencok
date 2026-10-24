@@ -2,7 +2,7 @@ import type { RuleContext } from "./availability.ts";
 import { realmEnabled, ruleTime } from "./availability.ts";
 import type { Rules } from "./game.ts";
 
-function serverFeature(rules: Rules, key: string, context: RuleContext): boolean {
+export function serverFeature(rules: Rules, key: string, context: RuleContext): boolean {
   const rule = rules.features.get(key);
   if (
     !rule?.version?.trim() ||
