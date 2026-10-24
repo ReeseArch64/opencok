@@ -1,9 +1,11 @@
+import type { PlayerEffectSnapshot } from "./power.ts";
 import type { Row } from "./rows.ts";
 
 export interface WorldPointDetailQuery {
   point: number;
   kingdomId: number;
   now: number;
+  cityExtras?: boolean;
 }
 
 export interface WorldPointOwnerSnapshot {
@@ -22,6 +24,11 @@ export interface WorldPointDetailSnapshot {
   point?: Row;
   owner?: WorldPointOwnerSnapshot;
   exploration?: { march: Row | undefined };
+  city?: {
+    observerStatistics: Row | undefined;
+    mixed: Row | undefined;
+    effects: PlayerEffectSnapshot;
+  };
   neutralResource?: { march: Row | undefined };
 }
 
@@ -44,4 +51,11 @@ export interface WorldPointOwnerDetail {
   afn?: string;
   rank?: number;
   vl?: number;
+}
+
+export interface WorldCityDetail {
+  slowDown: boolean;
+  targetTooStrong: boolean;
+  targetPower: bigint;
+  lastBeDuelTime: bigint;
 }

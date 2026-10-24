@@ -485,6 +485,18 @@ millisecond multiplication and signed-long subtraction; no catalog is required
 when the item is blank or no occupying march exists. Only timing metadata is read,
 without march deserialization, scheduling or writes.
 
+Local player-city details conditionally restore effect 37 and read persisted power
+and duel timestamps when the lost-battle catalog flag is enabled. The shared
+`readPlayerEffects` reader accepts the point's existing transaction; it omits
+unrelated power-only troop, inventory and upload inputs and bounds effect collections
+for this public query. `playerGameEffect` shares ordinary-realm composition with
+the existing dragon modifier. Database inputs share one read-only snapshot; world
+effects and optional emperor state use existing cache ports after that snapshot,
+without a claim of cross-store atomicity or resident-profile cache equivalence.
+The projection preserves Bool flags, exact Long fields and signed multiplication
+overflow. No power recalculation, status cleanup or gameplay writes occur. Details
+and remaining specialized branches are recorded in the realm runbook.
+
 ### Migrated files implementation
 
 `apps/files` composes `api/files`, `identity/avatar`, `validations/image` and
