@@ -32,6 +32,10 @@ import { World } from "@opencok/controllers/world";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
 import { startMailGiftRelay } from "./mail-gift-relay.ts";
 import { loadNicknameServices } from "./nickname.ts";
+import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
+import { executeReconnectProgress } from "@opencok/repositories/reconnect-write";
+import { readFriendshipBinding } from "@opencok/repositories/reconnect-mine";
+import { initialFriendshipMine } from "@opencok/rules/reconnect-mine";
 
 export class RealmDependencies extends Context.Service<RealmDependencies, ServerDependencies>()(
   "@opencok/server/Dependencies",
@@ -98,6 +102,9 @@ export const RealmDependenciesLive = Layer.effect(
     yield* fromPromise("realm.coordination.start", () => coordination.start()).pipe(
       Effect.uninterruptible,
     );
+    const authority = yield* fromPromise("realm.authority", () =>
+      acquireRealmAuthority(db.kingdom.db, config.kingdomId, () => coordination.ready),
+    );
     const notifications = createRealmNotifications();
     const avatar =
       config.avatarChat && avatarFiles
@@ -151,6 +158,18 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        reconnect: async (uid, now, plan) => {
+          authority.assertReady();
+          const binding = await readFriendshipBinding(
+            db.databases.global.db,
+            config.kingdomId,
+            uid,
+          );
+          return executeReconnectProgress(db.kingdom.db, authority, uid, BigInt(now), plan, {
+            binding,
+            initial: () => initialFriendshipMine(rules),
+          });
+        },
         ...nicknameServices,
         worldPointDetail,
         playerSearch,

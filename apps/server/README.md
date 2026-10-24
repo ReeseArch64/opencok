@@ -2049,9 +2049,8 @@ below. Unfinished specialized branches return `102192`; they are still required 
 
 Every local query validates observer identity, realm and ban state before point
 access. Full response bounds include correlation fields and the SFS extension
-envelope. The command emits no pushes and performs no game-state writes. Existing
-bootstrap/reconnect restrictions on march state remain part of the unfinished
-topic-2 work; this query does not establish complete gameplay or client compatibility.
+envelope. The command emits no pushes and performs no game-state writes. Owner reconnection is implemented separately by `user.lv`; this point-detail query
+does not establish complete world gameplay or native-client compatibility.
 
 Twenty-seven command/adapter unit tests cover these branches, error behavior, owner
 isolation, bounded report selection, transaction failures and response limits.
@@ -3629,9 +3628,14 @@ The current work is restricted to server implementation. Topic 2 changes use syn
 unit tests and static checks. Native-client, integration and end-to-end validation
 remain separate from this evidence.
 
-The reconnect foundation tracked in [issue #58](https://github.com/ReeseArch64/opencok/issues/58)
-reads an owner's balances, armies, generals and initiative skills in one read-only
-repeatable-read transaction.
+The authenticated `user.lv` command tracked in [issue #58](https://github.com/ReeseArch64/opencok/issues/58)
+composes the owner's armies, actual marches, generals, settled resources, queues,
+tasks, friendship mine and currency balances in a repeatable-read realm transaction.
+The client cannot select another owner through request parameters. Correlation fields
+and the extension envelope are validated before commit. Pushes are returned only
+after a successful commit. The existing ordinary-realm login now uses this same
+path, including `init.world.m`, so existing marches and non-building queues no longer
+prevent login. Initial world gameplay beyond the owner's state remains separate.
 Its serializers preserve seven currency longs, signed 64-bit overflow in the combined
 gold balance, and conditional training fields without loading static army catalogs.
 Army rows have deterministic ID ordering and oversized collections reject instead of
@@ -3643,7 +3647,8 @@ for the current v12.06.0 process; pre-2.0 version filters are outside that proce
 supported configuration. Public reads remain projections without persistence or
 notification side effects; the reconnect write planner separately identifies ability
 repairs, elapsed cooldowns and disabled supported skills. The shared hash traversal
-retains its documented exceptional-state limits. The friendship-mine provider resolves the current global account binding,
+retains its documented exceptional-state limits. The friendship-mine provider resolves
+the current global account binding,
 returns an ephemeral level-one mine for unbound accounts, and reads or initializes
 the bound owner's persisted mine. Initialization uses the existing composite key with
 conflict handling and reads the winner after a competing insert, preserving progress
@@ -3652,7 +3657,9 @@ provides initial selection and level-dependent display values; binding and help 
 are excluded from the wire response. Global binding lookup and realm persistence are
 separate transactions, so each request uses the binding observed at its start; a later
 rebind selects another composite key. The provider rejects realm mismatches and missing
-local owners. Unit tests simulate conflicts and lost commit responses; real database
+local owners. The complete reconnect path initializes the mine inside the same realm
+transaction as resource and task changes. Unit tests simulate conflicts and lost commit
+responses; real database
 concurrency remains untested in this phase.
 
 Reconnect queue projection handles all 42 declared queue types, including building,
@@ -3670,6 +3677,13 @@ required free/defending troops. The legacy branch could remove defending troops 
 when free troops already covered the loss. A per-army ledger accounts for every debit.
 Upkeep configuration includes starred building progress, paired troop reductions,
 feature gates and the strict bound-resource display boundary above version 2.0.3.
+Settlement splits persisted status, VIP, world-effect, general-status and activity
+windows at their effective boundaries; adjacent identical upkeep configurations are
+coalesced to preserve rounding. Catalogs and permanent saved modifiers are the
+baseline for the interval. Importers and future gameplay mutations must settle before
+changing that baseline; deleted historical modifiers cannot be reconstructed from a
+current snapshot. The current authentication flow has no CN1 addiction session object,
+so its absent-session ratio follows the existing rule's value of one.
 
 The persistence adapter locks the owner and resource checkpoint, reads progress in a
 repeatable-read transaction and commits the interval receipt, resource debit, troop
@@ -3678,7 +3692,9 @@ persisted realm epoch fences stale owners; coordination readiness is checked aro
 writes. Only rolled-back serialization failures and deadlocks receive bounded retries.
 Mail and its group index use the same transaction, so failed repair notifications
 roll back the repair. The additive kingdom migration is generated but has not been
-applied. Synthetic SQL-client tests verify rollback, ownership, ledger conservation
+applied. Apply `0008_reconnect_authority.sql` to each kingdom before starting this
+version. Startup acquires the epoch only after ZooKeeper registration succeeds.
+Synthetic SQL-client tests verify rollback, ownership, ledger conservation
 and checkpoint reuse; they do not establish live PostgreSQL or ZooKeeper behavior.
 
 The task planner restores accepted, completed and rewarded collections, applies mobile
@@ -3686,15 +3702,29 @@ and completion-count triggers, discovers eligible normal and cross-kingdom tasks
 returns inserts, updates and push snapshots. Initial counts use saved buildings,
 troops, research, power, payments, positions, equipment and civilization state.
 The task serializer preserves reward previews, predecessor visibility, phase fields
-and reward-free completion pushes. Quest declarations retain their source ordering.
+and reward-free completion pushes. The tutorial completion refreshes farm and wood
+production checkpoints atomically without granting resources. Quest declarations
+retain their source ordering.
 Saved march decoding also reads basic troop families, dragons and new generals.
-March projection covers army aggregation, direction, deadlines, miracle state and
-conditional loot and siege fields. Synthetic Java serialization fixtures exercise
+March projection includes referenced alliance, kingdom and arena teams, current
+dragons, saved general levels and active skills, alliance abbreviations, destination
+alliances, offices, attack/defence/march appearances, miracle state and occupied
+resource, exploration and crystal fields. Related player reads select presentation
+fields only. Duplicate, oversized and foreign dependencies reject. Missing optional
+companions retain the reference's placeholder/omission behavior; missing required
+occupied resource state rejects. Synthetic Java serialization fixtures exercise
 companion decoding and malformed saved data without using private player records.
 
-This foundation is not yet exposed as `user.lv`: full march composition, authoritative
-resource settlement, starvation effects, task persistence and realm-epoch acquisition remain to be integrated
-with the consistent owner snapshot before enabling the handler.
+Reconnect does not finish overdue training, construction, gathering or combat. Those
+scheduled gameplay events retain their persisted deadlines and belong to their own
+domains. The reference's transient return-march deadline adjustment is projected on
+the wire without rewriting persisted events. Starvation replies use the committed
+post-settlement army counts rather than an earlier snapshot followed by a correction.
+Saved-state decoding retains the existing bounded Java serialization/hash-order
+compatibility limits. The plain skill-reset notice uses independently authored text.
+Mail reward IDs require an explicit resolver; unresolved symbolic rewards reject the
+transaction rather than silently dropping an attachment. Native-client validation,
+live database concurrency and deployment remain unperformed.
 
 Task reward descriptions have a pure rules implementation and typed SFS serializer.
 It preserves resource ordering, weighted item draws, repeated-item aggregation and
@@ -3704,13 +3734,13 @@ and performs no grants. Reward resources retain the final definition of duplicat
 matching the legacy cache. Quantity calculations preserve signed 32-bit wrapping and
 the legacy float conversion in guaranteed groups. Grouped item and prestige ordering
 uses the existing bounded Java hash traversal helper, with its documented exceptional
-limits. Reconnect task projection uses these descriptions; completion writes and
-post-commit push delivery remain pending.
+limits. Reconnect task projection uses these descriptions and persists completion
+without claiming rewards; task and notification pushes follow the committed result.
 
 | Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                                                                       |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1. Configuration and feature availability | Settings/data-config and deferred-login projections; ordered XML declarations; legacy numeric dates, versions and selectors; timed star previews; kingdom-skill tabs; account/subscription overrides and lazy boss availability; synthetic unit and adapter tests                            | Server acceptance complete for 12.06.0 normal realms in UTC; see [the checklist](CONFIGURATION.md). Native validation remains separate; gameplay backends belong to their domains.                   |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                                 | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                                                               |
+| 2. Player/progression queries             | Initial level/experience DTO; public summaries/profiles and detailed power; authenticated full owner reconnect with actual marches, epoch-fenced resource/troop settlement, task transitions, mine and post-commit notifications; synthetic unit coverage                                    | Server acceptance implemented for the supported v12.06.0 process; live concurrency and native validation remain separate. Saved-state and historical-import limits are documented above.             |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                                           |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                                            |
 | 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                                     |

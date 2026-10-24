@@ -69,6 +69,23 @@ export interface ReconnectProgressState extends ReconnectBaseState {
   knight: Row | undefined;
   items: readonly Row[];
   newGenerals: WorldResourceOwnerSnapshot["newGenerals"];
+  marches: ReconnectMarchState;
+  mine?: Row;
+  world?: Row;
+}
+
+export interface ReconnectMarchState {
+  rows: readonly Row[];
+  teams: readonly (Row & { family: number })[];
+  points: readonly Row[];
+  profiles: readonly Row[];
+  alliances: readonly Row[];
+  states: readonly Row[];
+  offices: readonly Row[];
+  dragons: readonly Row[];
+  skills: readonly Row[];
+  miracles: readonly Row[];
+  territories: readonly Row[];
 }
 
 export interface ReconnectProgressWrite {

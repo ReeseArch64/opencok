@@ -54,6 +54,7 @@
     "./world-point-detail": "./src/world-point-detail.ts",
     "./world-resource-owner": "./src/world-resource-owner.ts",
     "./realm-authority": "./src/realm-authority.ts",
+    "./reconnect-marches": "./src/reconnect-marches.ts",
     "./reconnect-progress": "./src/reconnect-progress.ts",
     "./reconnect-write": "./src/reconnect-write.ts"
   },

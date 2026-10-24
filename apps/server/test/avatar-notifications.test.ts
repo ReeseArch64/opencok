@@ -68,7 +68,10 @@ function fixture() {
         return gate ?? refresh;
       },
     },
-    game: { initial: async () => ({}), execute: async () => ({ body: {}, pushes: [] }) },
+    game: {
+      initialize: async () => ({ body: {}, pushes: [] }),
+      execute: async () => ({ body: {}, pushes: [] }),
+    },
     world: { get: async () => ({}) },
   } as unknown as ServerDependencies;
   const handle = createSessionHandler(

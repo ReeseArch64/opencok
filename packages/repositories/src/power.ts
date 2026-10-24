@@ -316,6 +316,7 @@ export async function readPlayerEffects(
     tx
       .select({
         stateId: user_state.stateId,
+        startTime: user_state.startTime,
         endTime: user_state.endTime,
         ranEffId: user_state.ranEffId,
         ranEffValue: user_state.ranEffValue,

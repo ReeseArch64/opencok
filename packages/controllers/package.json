@@ -21,6 +21,8 @@
     "./game": "./src/game.ts",
     "./power": "./src/power.ts",
     "./profile": "./src/profile.ts",
+    "./reconnect-progress": "./src/reconnect-progress.ts",
+    "./reconnect-marches": "./src/reconnect-marches.ts",
     "./reconnect": "./src/reconnect.ts",
     "./world": "./src/world.ts",
     "./chat-session": "./src/chat-session.ts",

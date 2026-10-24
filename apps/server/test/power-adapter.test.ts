@@ -46,7 +46,7 @@ function database(
       if (table === "user_general") return { rows: [["1001", 5, Buffer.from('[{"600001":2}]')]] };
       if (table === "user_equip") return { rows: [[1001, 1, "487,3", 4]] };
       if (table === "user_wall") return { rows: [["108001", 5]] };
-      if (table === "user_state") return { rows: [[510001, "9007199254740993", 487, 25]] };
+      if (table === "user_state") return { rows: [[510001, "0", "9007199254740993", 487, 25]] };
       if (table === "user_vip") return { rows: [[250, "9007199254740993", 2]] };
       if (table === "user_civilization_prestige") return { rows: [[2, "9007199254740993"]] };
       if (table === "user_military_rank") return { rows: [["1001|1002"]] };
@@ -144,7 +144,7 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(snapshot.vip).toEqual({ score: 250, vipEndTime: 9007199254740993n, sLevel: 2 });
   expect(snapshot.allianceSciences).toEqual([]);
   expect(snapshot.states).toEqual([
-    { stateId: 510001, endTime: 9007199254740993n, ranEffId: 487, ranEffValue: 25 },
+    { stateId: 510001, startTime: 0n, endTime: 9007199254740993n, ranEffId: 487, ranEffValue: 25 },
   ]);
   for (const query of selects) {
     expect(query.params[0]).toBe("synthetic");

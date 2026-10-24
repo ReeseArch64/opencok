@@ -77,7 +77,10 @@ const dependencies: ServerDependencies = {
     release: async () => {},
   },
   coordination: { ready: true, start: async () => {}, close: () => {} },
-  game: { initial: async () => ({}), execute: async () => ({ body: {}, pushes: [] }) },
+  game: {
+    initialize: async () => ({ body: {}, pushes: [] }),
+    execute: async () => ({ body: {}, pushes: [] }),
+  },
   world: { get: async () => ({}) },
 };
 

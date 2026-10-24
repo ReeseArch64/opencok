@@ -1,5 +1,7 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
+import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
+import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
@@ -22,6 +24,7 @@ import { errors } from "@opencok/constants/game";
 import type { Database } from "./game.ts";
 import { readPlayerEffects } from "./power.ts";
 import { readResourceNewGenerals } from "./world-resource-owner.ts";
+import { readReconnectMarches } from "./reconnect-marches.ts";
 
 type Transaction = Parameters<Parameters<Database["kingdom"]["db"]["transaction"]>[0]>[0];
 
@@ -54,6 +57,26 @@ export async function readReconnectProgress(
         openedPos: userprofile.openedPos,
         payTotal: userprofile.payTotal,
         appVersion: userprofile.appVersion,
+        name: userprofile.name,
+        exp: userprofile.exp,
+        deviceUuid: userprofile.deviceUuid,
+        country: userprofile.country,
+        skillMaterial: userprofile.skillMaterial,
+        allianceBuildScore: userprofile.allianceBuildScore,
+        civilizationSorce: userprofile.civilizationSorce,
+        payTotalDollar: userprofile.payTotalDollar,
+        pic: userprofile.pic,
+        guideStep: userprofile.guideStep,
+        chNameCount: userprofile.chNameCount,
+        picVer: userprofile.picVer,
+        picfraId: userprofile.picfraId,
+        gmFlag: userprofile.gmFlag,
+        crossFightSrcServerId: userprofile.crossFightSrcServerId,
+        crystal: userprofile.crystal,
+        crystalGold: userprofile.crystalGold,
+        regTime: userprofile.regTime,
+        neutralScore: userprofile.neutralScore,
+        csmodBalance: userprofile.csmodBalance,
       })
       .from(userprofile)
       .where(eq(userprofile.uid, uid))
@@ -73,8 +96,32 @@ export async function readReconnectProgress(
   )[0];
   if (!resource) throw new GameError(errors.missing);
   if (resource.uid !== uid) throw new GameError(errors.invalid);
+  const world = (
+    await tx
+      .select({
+        uid: user_world.uid,
+        worldId: user_world.worldId,
+        pointId: user_world.pointId,
+        cityDefValue: worldpoint.cityDefValue,
+        gridType: worldpoint.gridType,
+        fireTime: worldpoint.fireTime,
+        lastCityDefTime: user_world.lastCityDefTime,
+        attMonsterStamina: user_world.attMonsterStamina,
+        lastStaminaTime: user_world.lastStaminaTime,
+        resSearchCount: user_world.resSearchCount,
+      })
+      .from(user_world)
+      .innerJoin(
+        worldpoint,
+        and(eq(worldpoint.id, user_world.pointId), eq(worldpoint.worldId, user_world.worldId)),
+      )
+      .where(eq(user_world.uid, uid))
+      .limit(1)
+  )[0];
+  if (world && world.uid !== uid) throw new GameError(errors.invalid);
   const effects = await readPlayerEffects(tx, profile, true);
   const newGenerals = await readResourceNewGenerals(tx, uid, false);
+  const marches = await readReconnectMarches(tx, uid);
   const armies = await tx
     .select()
     .from(user_army)
@@ -188,7 +235,9 @@ export async function readReconnectProgress(
     throw new GameError(errors.unsupported, "reconnect");
   return {
     profile,
+    world,
     newGenerals,
+    marches,
     resource,
     effects,
     armies,

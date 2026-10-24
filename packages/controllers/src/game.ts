@@ -89,6 +89,8 @@ import { playerRankingQuery, selectPlayerRanking } from "@opencok/rules/ranking"
 import type { PlayerRankingKind } from "@opencok/contracts/ranking";
 import { calculatePlayerPower } from "@opencok/rules/power";
 import { powerContext, decodeWorldPowerEffects, generalSkillPoints } from "./power.ts";
+import { planReconnectProgress, validateReconnectResult } from "./reconnect-progress.ts";
+import { serverFeature } from "@opencok/rules/power-context";
 import { dragonAttackEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import type { Rules } from "@opencok/rules/game";
@@ -171,12 +173,30 @@ export class Game {
       gold: sfs.long(gold(state.profile)),
     };
   }
+  private initialWorld(world: Row): Fields {
+    return {
+      m: sfs.array(),
+      enemy: sfs.array(),
+      point: sfs.int(num(world, "pointId")),
+      cityDefValue: sfs.int(num(world, "cityDefValue")),
+      gridType: sfs.int(num(world, "gridType")),
+      ft: sfs.long(long(world, "fireTime")),
+      lastCityDefTime: sfs.long(long(world, "lastCityDefTime")),
+      stamina: sfs.int(num(world, "attMonsterStamina")),
+      lastStaminaTime: sfs.long(long(world, "lastStaminaTime")),
+      resSearchCount: sfs.int(num(world, "resSearchCount")),
+      maxSearchCount: sfs.int(Number(this.rules.items.get("shake")?.k10 ?? 0)),
+    };
+  }
   async initial(uid: string): Promise<Fields> {
+    return (await this.initialize(uid)).body;
+  }
+  async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
     const state = await this.state(uid);
     const world = state.world;
-    if (!world || num(world, "worldId") !== 0 || state.hasMarches)
+    if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
       throw new GameError(errors.unsupported, "world_state");
-    return {
+    const body: Fields = {
       ...serverClock(this.now(), 0),
       ...featureConfig(this.rules, this.featureContext(state.profile)),
       ...this.info(state),
@@ -184,27 +204,77 @@ export class Game {
         user(state.profile, this.rules, this.config.kingdomId, state.civilizationPrestige),
       ),
       newAccount: sfs.bool(false),
-      queue: sfs.array(state.queues.map((q) => sfs.object(this.queueDto(q, state)))),
-      world: sfs.object({
-        m: sfs.array(),
-        enemy: sfs.array(),
-        point: sfs.int(num(world, "pointId")),
-        cityDefValue: sfs.int(num(world, "cityDefValue")),
-        gridType: sfs.int(num(world, "gridType")),
-        ft: sfs.long(long(world, "fireTime")),
-        lastCityDefTime: sfs.long(long(world, "lastCityDefTime")),
-        stamina: sfs.int(num(world, "attMonsterStamina")),
-        lastStaminaTime: sfs.long(long(world, "lastStaminaTime")),
-        resSearchCount: sfs.int(num(world, "resSearchCount")),
-        maxSearchCount: sfs.int(Number(this.rules.items.get("shake")?.k10 ?? 0)),
-      }),
+      queue: sfs.array(
+        this.services.reconnect ? [] : state.queues.map((q) => sfs.object(this.queueDto(q, state))),
+      ),
+      world: sfs.object(this.initialWorld(world)),
       serverTime: sfs.long(this.now()),
     };
+    if (!this.services.reconnect) return { body, pushes: [] };
+    const now = this.now();
+    const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
+    return this.services.reconnect(uid, now, async (progress) => {
+      const planned = await planReconnectProgress(progress, this.rules, context, this.services, {
+        specialServer: serverFeature(this.rules, "araf_mode", context),
+        cn1: null,
+      });
+      if (!progress.world || num(progress.world, "worldId") !== 0)
+        throw new GameError(errors.unsupported, "world_state");
+      const buildings = progress.buildings.map((row) => {
+        const refresh = planned.write.buildingRefreshes.find((entry) => entry.uuid === row.uuid);
+        return refresh ? { ...row, refreshTime: refresh.refreshTime } : { ...row };
+      });
+      const prestige = progress.effects.prestige.find(
+        (row) => num(row, "civilizationType") === num(progress.profile, "civilizationType"),
+      );
+      planned.result.body = {
+        ...body,
+        ...this.info({
+          ...state,
+          profile: progress.profile,
+          resource: { ...progress.resource, ...planned.write.resource },
+          buildings,
+          queues: [...progress.queues],
+        }),
+        ...planned.result.body,
+        user: sfs.object(
+          user(
+            progress.profile,
+            this.rules,
+            this.config.kingdomId,
+            prestige ? long(prestige, "prestigeValue") : 0n,
+          ),
+        ),
+        world: sfs.object({
+          ...this.initialWorld(progress.world),
+          m: planned.result.body.worldMarch!,
+        }),
+      };
+      if (correlation._cok_) planned.result.body._cok_ = correlation._cok_;
+      validateReconnectResult(planned.result, "init");
+      return planned;
+    });
   }
   async execute(uid: string, command: string, params: Fields): Promise<Result> {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "user.lv": {
+        if (!this.services.reconnect) throw new GameError(errors.unsupported, "reconnect");
+        const now = this.now();
+        const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
+        ({ body, pushes } = await this.services.reconnect(uid, now, async (state) => {
+          const planned = await planReconnectProgress(state, this.rules, context, this.services, {
+            specialServer: serverFeature(this.rules, "araf_mode", context),
+            cn1: null,
+          });
+          if (params._cok_) planned.result.body._cok_ = params._cok_;
+          if (params.cmdBaseTime) planned.result.body.cmdBaseTime = params.cmdBaseTime;
+          validateReconnectResult(planned.result, command);
+          return planned;
+        }));
+        break;
+      }
       case "celebrity.desc.get":
         body = await celebrityDescription(this.db, uid, this.config.kingdomId, params, this.now());
         break;
