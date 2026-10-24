@@ -247,6 +247,18 @@ export function decode(bytes: Buffer): Fields {
   if (reader.pos !== bytes.length) throw new ProtocolError();
   return result;
 }
+export function encodeArray(data: Value[]): Buffer {
+  const writer = new Writer();
+  writer.write(sfs.array(data));
+  return Buffer.concat(writer.chunks);
+}
+export function decodeArray(bytes: Buffer): Value[] {
+  if (bytes.length > MAX_BYTES) throw new ProtocolError();
+  const reader = new Reader(bytes);
+  const result = reader.read();
+  if (result.type !== Type.Array || reader.pos !== bytes.length) throw new ProtocolError();
+  return result.value as Value[];
+}
 export function envelope(controller: number, action: number, body: Fields): Fields {
   return { c: sfs.byte(controller), a: sfs.short(action), p: sfs.object(body) };
 }

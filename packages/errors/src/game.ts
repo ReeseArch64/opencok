@@ -30,6 +30,7 @@ export class GameError extends Error {
       | "player_search"
       | "world_resource_detail"
       | "world_point_detail"
+      | "world_monster_detail"
       | "world_favorite_size",
   ) {
     super(code);

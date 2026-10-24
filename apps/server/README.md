@@ -89,7 +89,8 @@ read-only mobile originals must be extracted in a separate working directory.
 `setting.xml` is optional. Its command returns every configured setting with its ID
 and values encoded as strings, or an empty array when the catalog is absent. XML
 catalogs accept single records and multiple/nested groups. Duplicate IDs fail except
-for goods, features, research, equipment, statuses and dragon skills, where the last record wins
+for goods, features, research, equipment, statuses, dragon skills, activity panels,
+rewards, mail, field monsters and army formations, where the last record wins
 as in the legacy cache. Values retain leading
 zeroes and whitespace; malformed records and document type declarations fail loading.
 
@@ -1213,8 +1214,9 @@ registration behavior.
 | `rank`, `vl`        | Int membership rank defaults to zero. Membership lookup uses owner UID, including the reference database fallback when point/profile alliance membership differs. Cities emit rank only with a nonblank point alliance; ordinary resources always emit rank. Both emit `vl: 0`; new resources omit both. |
 
 Local monster type 6 stops base-owner projection after UID, and local monster-boss
-type 15 has no base owner fields. Their specialized exploration/HP fields are still
-pending. Remote reads do not take these observer-specific early exits. Territory
+type 15 has no base owner fields. The specialized exploration/HP projection foundation
+is documented below; its full query composition remains pending.
+Remote reads do not take these observer-specific early exits. Territory
 and other specialized additions are also pending; the base fields alone are not a
 complete response. The DTO preserves direct/local SFS field types; it does not yet
 emulate the remote legacy JSON round trip or claim remote wire-type equivalence.
@@ -1229,6 +1231,56 @@ and the pure owner projection. They cover all point-kind base-field omissions,
 local/remote world selection, authorization, migration-record priority, missing
 and inconsistent rows, exact numeric wire types, failure rollback, captured query
 inputs and read-only readiness. No database, service, listener or client is started.
+
+## World monster detail foundation
+
+`rules/world-monster-detail` and `dtos/world-monster-detail` supply local monster
+detail fields for the pending `world.get.detail` composition. `loadRules` now loads
+optional `field_monster.xml` and `army.xml` into `Rules.world.fieldMonsters` and
+`Rules.world.armies`. The `army` formation catalog is distinct from the existing
+`arms` troop-attribute catalog. Both new catalogs retain the final definition of a
+duplicate ID, matching the reference cache loader; absent files produce empty maps.
+Used missing records or malformed required counts reject rather than invent HP.
+
+For local monster-boss type 15, `mchp` is the point's current HP and `mmhp` is the
+catalog-derived maximum, both SFS Ints. Nullable current HP defaults to the Java
+primitive zero. Blank item IDs give maximum zero. An exact `NPC="1"` uses signed
+Java integer `Gift`; other records sum army formation counts. Semicolon-separated
+army IDs and pipe-separated formations ignore empty tokens, retain repeated IDs
+and count only entries with exactly two nonempty semicolon-separated components.
+Counts retain Java decimal parsing, negative values and signed 32-bit wrapping.
+Missing formation `arm` attributes contribute no count. The maximum-HP helper also
+supports field-monster type 9, but the point-detail health projection is restricted
+to local type 15, preserving the reference's early return before owner UID fields.
+
+For local monster type 6, exploration uses the first matching destination from the
+supplied ordered owner-march snapshot, then checks for OCCUPY state 1. An earlier
+march in another state suppresses later occupying matches. The rule does not add
+world or march-type filters absent from the reference accessor. No matching march
+or a nonoccupying first match adds no exploration fields. A matching occupied march
+adds `erp` as an SFS array, `st` as its exact Long start time and `et` as arrival time
+plus exploration duration with signed 64-bit wrapping. This uses `arrivalTime`,
+not the separate `marchArrivalTime`. Nullable stored arrival/duration primitives
+default to zero. A missing report becomes an empty array; present reports decode
+from bounded root SFS-array binary data and preserve nested type tags and longs.
+
+The ordered march snapshot remains an explicit required input. The Java accessor
+traverses an in-memory concurrent map; reconstructing that order and reading the
+selected persisted report have not been implemented. Sorting by UUID, selecting
+only occupying rows or filtering by world would silently change the selection and
+is not substituted here. The reader does not create, restore, schedule or advance
+marches. Remote queries omit these observer-specific monster additions; their JSON
+wire conversion remains separate unfinished work.
+
+Eleven unit tests cover the rules and projections, including a manually specified
+binary report fixture, exact boundary arithmetic, missing catalogs, owner identity,
+selection order and malformed binary payloads. A resource-loader unit test covers
+optional files, final duplicates and separation from `arms`. Root SFS array helpers
+use the existing codec's size, depth and element budgets; trailing bytes, malformed
+UTF-8, invalid tags and duplicate object keys reject rather than reproduce every
+permissive legacy decoding path. Report inputs retain the existing 65,535-byte
+storage limit and are copied before use. No private game classes, client, database
+or service are executed by these tests.
 
 ## Realm avatar grants
 
@@ -1988,7 +2040,7 @@ use these descriptions before the reconnect task component is complete.
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; resource arithmetic plus point/owner read foundations with synthetic unit coverage                                             | Point details; documented search cache/collation/exceptional-state differences; live behavior remains deferred.                                           |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; resource arithmetic, point/owner reads and monster projection foundations with synthetic unit coverage                         | Point details; documented search cache/collation/exceptional-state differences; live behavior remains deferred.                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                              | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
