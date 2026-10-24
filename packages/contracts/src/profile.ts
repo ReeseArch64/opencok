@@ -8,6 +8,7 @@ export interface PublicProfileState {
   mixed: Row | undefined;
   military: Row | undefined;
   office: Row | undefined;
+  flowers: Row | undefined;
   taverns: readonly Row[];
   generals: readonly Row[];
   skills: readonly Row[];

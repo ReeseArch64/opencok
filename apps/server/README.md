@@ -201,6 +201,16 @@ Equipment strengthening uses the server feature gate. Privacy switches remain
 separate from the equipment/medal arrays, following the legacy public contract.
 Missing required role/rank/active VIP data or lord state rejects the projection.
 
+The profile snapshot also reads the target's `flower_ranking` counters. Public
+flower score is signed 32-bit flower-minus-egg arithmetic, independent of the stored
+score and visibility flag. An absent record projects zero, matching the legacy
+default record's response, without inserting it. Existing null or malformed
+counters reject the response. Office presentation follows the ordinary kingdom's
+position enum, including canonical IDs, absent invalid ordinals and exclusion of
+the local ready-king entry. It is independent of the office effect suppression
+rules. These fields use the selected authoritative realm snapshot; routing and
+cross-realm presentation remain part of the pending command integration.
+
 `publicProfileGenerals` reconstructs the public general preview using the stored
 ability JSON and owner-scoped `user_skill` rows from the same snapshot. General
 attack/defence retain Java float operation order and signed-int saturation. The
@@ -223,7 +233,7 @@ the query does not create skills, update stored talent trees or send mail. Missi
 generals, required catalogs or malformed stored abilities reject the projection.
 
 These components have synthetic unit coverage; they are not yet connected to
-`get.user.info`. Alliance/flower/office presentation, realm routing
+`get.user.info`. Alliance presentation, realm routing
 and command dispatch remain required before enabling that full query. The base
 projection intentionally has no placeholder general/alliance response. No schema change, player write,
 client validation or live-service test is introduced by this foundation.

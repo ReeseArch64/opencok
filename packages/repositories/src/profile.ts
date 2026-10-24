@@ -5,6 +5,7 @@ import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { user_military_rank } from "@opencok/drizzle/schema/opencok_kingdom/user_military_rank";
 import { kingdom_position } from "@opencok/drizzle/schema/opencok_kingdom/kingdom_position";
+import { flower_ranking } from "@opencok/drizzle/schema/opencok_kingdom/flower_ranking";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
@@ -49,6 +50,7 @@ export function readPublicProfile(
           mixed: undefined,
           military: undefined,
           office: undefined,
+          flowers: undefined,
           taverns: [],
           generals: [],
           skills: [],
@@ -200,6 +202,13 @@ export function readPublicProfile(
       const completedAchievements = achievementCounts[0]?.count;
       if (!Number.isSafeInteger(completedAchievements) || completedAchievements! < 0)
         throw new Error("Invalid public achievement count");
+      const flowers = (
+        await tx
+          .select({ flowerVal: flower_ranking.flowerVal, eggVal: flower_ranking.eggVal })
+          .from(flower_ranking)
+          .where(eq(flower_ranking.uid, uid))
+          .limit(1)
+      )[0];
       return {
         profile,
         statistics,
@@ -208,6 +217,7 @@ export function readPublicProfile(
         mixed,
         military,
         office,
+        flowers,
         taverns,
         generals,
         skills,

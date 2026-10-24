@@ -1,4 +1,5 @@
 import type { PublicProfileState } from "@opencok/contracts/profile";
+import { text } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import type { RuleContext } from "./availability.ts";
@@ -22,6 +23,28 @@ function deadline(value: unknown): bigint {
   const number = BigInt(String(value));
   if (BigInt.asIntN(64, number) !== number) return invalid();
   return number;
+}
+
+export function publicProfileSocial(state: PublicProfileState, kingdomId: number) {
+  if (integer(kingdomId) <= 0) return invalid();
+  const flowerVal = state.flowers
+    ? Number(
+        BigInt.asIntN(
+          32,
+          BigInt(integer(state.flowers.flowerVal)) - BigInt(integer(state.flowers.eggVal)),
+        ),
+      )
+    : 0;
+  let officer: string | undefined;
+  if (state.office) {
+    const positionId = text(state.office, "positionId");
+    const ready = positionId === "216000000" && integer(state.office.serverId ?? 0) === kingdomId;
+    if (!ready) {
+      const ordinal = integer(positionId) % 100;
+      if (ordinal >= 0 && ordinal <= 16) officer = String(216000 + ordinal);
+    }
+  }
+  return { flowerVal, officer };
 }
 
 export function publicProfileProgress(
