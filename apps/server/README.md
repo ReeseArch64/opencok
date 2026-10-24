@@ -3725,3 +3725,54 @@ A focused mutation check runs the login tests against seven disabled auth guards
 a temporary test bundle: signature, device binding, account activation, realm,
 account device and both ban checks. Every mutant must fail its tests. This is a
 bounded auth check, not the architecture's future repository-wide Stryker suite.
+
+## V2 new-system-mail synchronization
+
+`chat.get.system.mails.v2`, tracked in [issue #219](https://github.com/ReeseArch64/opencok/issues/219),
+now reads the authenticated owner's new system messages. Required `clientseq` is a
+String or null and `count` is an Int; optional String `time` uses strict Java signed
+Long parsing. Blank/zero client cursors use the realm-scoped cached last ID. A valid
+owned anchor supplies the inclusive timestamp; a missing nonblank anchor uses a
+positive request timestamp or the whole mailbox. Without an anchor, request time
+does not restrict the mailbox. Foreign anchors reveal no foreign metadata.
+
+The command uses a read-only repeatable-read snapshot, first bounding the complete
+selected window to 1,000 messages and 4 MiB of stored bodies/reward descriptors.
+It rejects overflow rather than returning an incomplete page. Extra bodies come
+from existing owner-authorized `mail_contents`; unresolved cache-only legacy bodies
+require a reviewed import and fail explicitly. System messages retain the raw
+`toUser`/`fromUser`, flags, reply bitmask, translation ID and String `save` envelope.
+Contents use 5,000 UTF-16-unit chunks, replacing isolated surrogate halves as the
+existing Java-compatible serializers do. Trade and invitation senders use existing
+public profile routing; invitation sender IDs come from the stored content object.
+All selected system messages are projected and enriched before pagination.
+
+Messages sort by ascending creation time with a deterministic UID tie-breaker.
+When the full result exceeds `count`, pagination retains the request's entire
+second bucket, then admits the first message outside that bucket before enforcing
+the count. Zero and negative counts retain that behavior. `lastUid` stays `0` when
+all messages fit; `more` reflects whether pagination omitted projected system mail.
+The complete correlated response is encoded before returning. No mailbox flags,
+rewards, groups, markers, content or cursor are mutated.
+
+The fallback cache reads hash `opencok:kingdom:<id>:chat-user-info:<uid>`, field
+`chat_last_mail_id`, through the existing bounded Redis adapter. It writes no cache
+state and sets no TTL. Missing cache state safely widens the owned selection; cache
+outages fail the fallback request. The unscoped legacy hash is not consulted.
+Existing cached cursor state therefore requires a separately reviewed scoped import;
+explicit client cursors do not require Redis. Cache loss cannot erase authoritative
+mail. This follows [ADR-0005](../../docs/decisions/0005-adopt-redis-for-cache.md) and
+[ADR-0002](../../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md).
+
+The reference's shared helper also constructs private conversations discarded by
+this system-mail handler. This implementation excludes them and does not invoke their
+optional external translations, translation persistence or sender-update-cache reads.
+That side effect difference is explicit; this is not a complete private-chat migration.
+The V1 command's sent-ID bookkeeping and send counter remain unavailable. Current
+v12.06.0 behavior is implemented; obsolete pre-1.1.8 content limits and pre-7.00.0
+special text filtering are outside this process's supported version contract.
+
+No tests or fixtures were generated or executed, per the user's instruction. Static
+checks and review are separate from runtime evidence; SQL execution, cache behavior,
+concurrency, pagination and client rendering remain unverified. No new schema,
+dependency, applied migration, service or client/ADB operation is introduced.
