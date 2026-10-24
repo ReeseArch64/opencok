@@ -2666,3 +2666,18 @@ the authoritative outcomes.
 
 No new tests, dependencies, private inputs or player-data mutations are introduced by this
 readiness record.
+
+## Parallel merge readiness for PR #200
+
+This bridge combines the independently validated lower PRs #185 through #197 with the upper
+existing PRs #201 through #220. Non-PR numbers are excluded. Both readiness histories are
+retained.
+
+The original #197-to-#200 delta was applied to the completed current #184 tree. Source code and
+fixtures exactly match the validated upper tail, including later nickname mount wiring, strict
+synthetic data-config inputs, mailbox capability guards and PostgreSQL fixture invariants. Only
+readiness documentation differs.
+
+All applicable CI must pass freshly on this final bridge head before squash into #184. This
+integration does not merge directly into develop, weaken checks, introduce dependencies or add
+tests.
