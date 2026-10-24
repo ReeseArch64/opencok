@@ -1,6 +1,8 @@
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { readMailStatus } from "./mail.ts";
 import type {
+  MailContentsQuery,
+  MailContentsInspector,
   MailConversationSaveQuery,
   MailDeleteQuery,
   MailDeletePlanner,
@@ -12,6 +14,7 @@ import { mail_contents } from "@opencok/drizzle/schema/opencok_kingdom/mail_cont
 import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
 import { alliance_invite_move } from "@opencok/drizzle/schema/opencok_kingdom/alliance_invite_move";
 import { deleteMail } from "./mail-delete.ts";
+import { readMailContents } from "./mail-contents.ts";
 import { saveMailConversation } from "./mail-conversation-save.ts";
 import { mail_gift_log } from "@opencok/drizzle/schema/opencok_global/mail_gift_log";
 import { mail_gift_opening } from "@opencok/drizzle/schema/opencok_kingdom/mail_gift_opening";
@@ -222,6 +225,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   mailSave(uid: string, query: MailSaveQuery) {
     return saveMail(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
+  mailContents(uid: string, query: MailContentsQuery, inspect: MailContentsInspector) {
+    return readMailContents(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
   }
   mailConversationSave(uid: string, query: MailConversationSaveQuery) {
     return saveMailConversation(this.kingdom.db, this.config.kingdomId, uid, query);

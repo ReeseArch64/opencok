@@ -1321,6 +1321,15 @@ back together. Protected messages retain their contents and groups, correcting a
 inconsistency in the legacy helper. No new schema is needed; the server guide records
 legacy comparator quirks, extra-content import requirements and unit-only evidence.
 
+Mail detail reads use a separate read-write repeatable-read transaction because the
+reference removes malformed structured messages. The owner and selected mail rows are
+locked; recipient-scoped metadata bounds aggregate payloads before body retrieval.
+A controller projection decodes stored content and validates the correlated SFS response
+before authorizing owned malformed-row removal. Capacity, missing extra storage and
+unresolved decoder forms reject without removal. This path changes no read status,
+reward, auxiliary, group or synchronization state. The server guide records the bounded
+permissive decoder, remaining syntax/order differences and synthetic unit evidence.
+
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
 fencing and recovery tests before enabling writes. Account provisioning,

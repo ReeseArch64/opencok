@@ -23,6 +23,9 @@ const dependencies: ServerDependencies = {
     profile: async () => undefined,
     accounts: async () => [],
     playerSummaries: async () => [],
+    mailContents: async () => {
+      throw new Error("Unexpected mail contents");
+    },
     mailConversationSave: async () => {
       throw new Error("Unexpected conversation save");
     },
