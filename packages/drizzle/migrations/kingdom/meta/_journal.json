@@ -36,6 +36,27 @@
       "when": 1792813975818,
       "tag": "0004_mail_gift_openings",
       "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792822441873,
+      "tag": "0005_mail_chat_read_intents",
+      "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792825787305,
+      "tag": "0006_avatar_completions",
+      "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792860421773,
+      "tag": "0007_avatar_version_updates",
+      "breakpoints": false
     }
   ]
 }

@@ -25,6 +25,11 @@ function integer(token: string, radix: number, bits: number): bigint | undefined
   }
   return negative ? -value : value;
 }
+export function legacyHexCodeUnit(token: string): number | undefined {
+  const value = integer(token, 16, 32);
+  return value === undefined ? undefined : Number(value) & 65535;
+}
+
 function hexDouble(token: string): number | undefined {
   const match = /^([+-]?)0[xX]([\da-fA-F]*)(?:\.([\da-fA-F]*))?[pP]([+-]?\d+)[fFdD]?$/.exec(token);
   if (!match || (!match[2] && !match[3])) return undefined;

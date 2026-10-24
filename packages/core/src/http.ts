@@ -1,5 +1,6 @@
 import { BunHttpServer } from "@effect/platform-bun";
 import { Effect } from "effect";
+import { logHttpRequest } from "./logging.ts";
 import { HttpServerRequest, HttpServerResponse } from "effect/http";
 
 export function serveHttp(
@@ -17,7 +18,7 @@ export function serveHttp(
       Effect.gen(function* () {
         const incoming = yield* HttpServerRequest.HttpServerRequest;
         const request = yield* HttpServerRequest.toWeb(incoming);
-        const response = yield* Effect.tryPromise(() => Promise.resolve(fetch(request))).pipe(
+        const response = yield* Effect.tryPromise(() => logHttpRequest(request, fetch)).pipe(
           Effect.uninterruptible,
         );
         return HttpServerResponse.fromWeb(response);

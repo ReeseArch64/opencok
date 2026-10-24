@@ -71,3 +71,29 @@ export interface PlayerPower {
   prinessPower: bigint;
   total: bigint;
 }
+
+export type PlayerEffectSnapshot = Pick<
+  PowerSnapshot,
+  | "profile"
+  | "generals"
+  | "sciences"
+  | "civilizationSciences"
+  | "sagaSciences"
+  | "foreignSciences"
+  | "equipment"
+  | "heroes"
+  | "dragons"
+  | "dragonSkills"
+  | "states"
+  | "vip"
+  | "allianceSciences"
+  | "prestige"
+  | "military"
+  | "miracle"
+  | "office"
+  | "kingdomFights"
+  | "territoryTrees"
+  | "luckyDay"
+  | "powerServer"
+  | "throneRewards"
+>;

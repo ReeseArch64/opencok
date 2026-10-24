@@ -195,6 +195,10 @@ services:
       GAME_REDIS_URL: redis://redis:6379/0
       GAME_ZOOKEEPER: zookeeper:2181
       GAME_LOGIN_SECRET: ${GAME_LOGIN_SECRET}
+      GAME_CROSS_SEARCH: ${GAME_CROSS_SEARCH:-true}
+      GAME_PLAYER_KINGDOMS: ${GAME_PLAYER_KINGDOMS:-}
+      GAME_CHAT_SESSION_URL: ${GAME_CHAT_SESSION_URL:-}
+      CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-}
       GAME_RESOURCES: /resources
       GAME_MAP_SIZE: 1200
       DEPENDENCY_TIMEOUT_MS: 5000
@@ -209,6 +213,11 @@ services:
       - type: bind
         source: ./data/reference/server/runtime/base/resource
         target: /resources
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ./data/reference/server/runtime/base/gameconfig/badwords.txt
+        target: /gameconfig/badwords.txt
         read_only: true
         bind: { create_host_path: false }
     healthcheck:
@@ -248,6 +257,7 @@ services:
       GLOBAL_DATABASE_NAME: opencok_global
       KINGDOM_ID: 1
       API_SERVERS_FILE: ""
+      API_CHAT_URL: ${API_CHAT_URL:-}
       API_HOST: 0.0.0.0
       API_PORT: 8080
       API_REDIS_URL: redis://redis:6379/0

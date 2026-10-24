@@ -7,6 +7,28 @@ const optionalPath = z.preprocess(blankToUndefined, z.string().optional());
 export const apiSchema = z
   .object({
     ...realmSettings,
+    API_CHAT_URL: z.preprocess(
+      blankToUndefined,
+      z
+        .url({ protocol: /^https?$/ })
+        .refine((value) => {
+          try {
+            const url = new URL(value);
+            return (
+              url.pathname === "/" &&
+              !url.username &&
+              !url.password &&
+              !url.search &&
+              !url.hash &&
+              url.hostname !== "cok.chat" &&
+              !url.hostname.endsWith(".cok.chat")
+            );
+          } catch {
+            return false;
+          }
+        })
+        .optional(),
+    ),
     API_HOST: z.string().min(1).default("127.0.0.1"),
     API_PORT: port(8082),
     API_DEPENDENCY_TIMEOUT_MS: timeout(3000),

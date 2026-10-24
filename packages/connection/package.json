@@ -14,8 +14,14 @@
   "exports": {
     "./server": "./src/server.ts",
     "./dependencies": "./src/dependencies.ts",
+    "./avatar-files": "./src/avatar-files.ts",
+    "./chat-discovery": "./src/chat-discovery.ts",
+    "./realm-chat-session": "./src/realm-chat-session.ts",
     "./chat-server": "./src/chat-server.ts",
-    "./chat-websocket": "./src/chat-websocket.ts"
+    "./chat-websocket": "./src/chat-websocket.ts",
+    "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
+    "./notifications": "./src/notifications.ts",
+    "./session": "./src/session.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

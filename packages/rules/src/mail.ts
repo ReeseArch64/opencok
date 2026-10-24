@@ -1,4 +1,8 @@
 import type {
+  MailBatchKind,
+  MailBatchQuery,
+  MailCategoryQuery,
+  MailListEntry,
   MailContentsQuery,
   MailConversationSaveQuery,
   MailDeleteEntry,
@@ -76,6 +80,11 @@ export function mailConversationSaveQuery(
     };
   }
   if (input.type === undefined || !int(input.type)) return invalid();
+  return { scope: "type", type: mailServerType(input.type), flag: input.flag, now };
+}
+
+export function mailServerType(type: number): number {
+  if (!int(type)) return invalid();
   const types = new Map([
     [0, 21],
     [1, 22],
@@ -84,12 +93,12 @@ export function mailConversationSaveQuery(
     [14, 12],
     [21, 10],
   ]);
-  return { scope: "type", type: types.get(input.type) ?? input.type, flag: input.flag, now };
+  return types.get(type) ?? type;
 }
 
-function mailIds(value: string, batch: boolean): string[] {
-  if (typeof value !== "string" || new TextEncoder().encode(value).length > 65535) return invalid();
-  const blank = Array.from(value).every((character) => {
+export function mailBlank(value: string | null | undefined): boolean {
+  if (value == null) return true;
+  return Array.from(value).every((character) => {
     const code = character.charCodeAt(0);
     return (
       (code >= 9 && code <= 13) ||
@@ -101,6 +110,151 @@ function mailIds(value: string, batch: boolean): string[] {
       [0x2028, 0x2029, 0x205f, 0x3000].includes(code)
     );
   });
+}
+
+export function mailBatchQuery(
+  type: number,
+  begin: number,
+  limit: number,
+  fromUser: string | null,
+  now: number,
+): MailBatchQuery {
+  if (
+    ![type, begin, limit].every(int) ||
+    !Number.isSafeInteger(now) ||
+    now < 0 ||
+    (fromUser !== null && typeof fromUser !== "string")
+  )
+    throw new GameError(errors.invalid, "mail");
+  if (type === 10 || type === 1000) throw new GameError(errors.invalid, "mail");
+  const kinds = new Map<number, MailBatchKind>([
+    [2, "notices"],
+    [3, "studio"],
+    [4, "personal"],
+    [5, "resources"],
+    [6, "fight"],
+    [7, "monsters"],
+    [8, "trade"],
+    [9, "moderation"],
+    [11, "boss"],
+  ]);
+  const kind = kinds.get(type) ?? "empty";
+  if (kind === "empty") return { kind, begin: 0, limit: 0, fromUser: null, now };
+  if (limit < 0) throw new GameError(errors.invalid, "mail");
+  const sender = kind === "personal" || kind === "moderation";
+  if (
+    sender &&
+    (mailBlank(fromUser) ||
+      fromUser!.length > 40 ||
+      fromUser!.includes("\0") ||
+      !fromUser!.isWellFormed())
+  )
+    throw new GameError(errors.invalid, "mail");
+  return { kind, begin: Math.max(0, begin), limit, fromUser: sender ? fromUser : null, now };
+}
+
+export function mailBatchIsChat(query: MailBatchQuery): boolean {
+  return ["personal", "resources", "monsters", "trade", "moderation"].includes(query.kind);
+}
+
+export function mailCategoryQuery(
+  category: number,
+  begin: number,
+  offset: number,
+  now: number,
+): MailCategoryQuery {
+  if (![category, begin, offset].every(int) || !Number.isSafeInteger(now) || now < 0)
+    return invalid();
+  return { category, begin, offset, now };
+}
+
+export function mailCategoryWindow(query: MailCategoryQuery): number | undefined {
+  mailCategoryQuery(query.category, query.begin, query.offset, query.now);
+  if (!categories[query.category - 1]) return undefined;
+  return query.begin > 0 ? 0 : Math.max(0, (query.begin + query.offset) | 0);
+}
+
+export function selectMailCategory<T extends Pick<MailListEntry, "type" | "title">>(
+  query: MailCategoryQuery,
+  window: readonly T[],
+): T[] {
+  const limit = mailCategoryWindow(query);
+  if (limit === undefined) {
+    if (window.length) return invalid();
+    return [];
+  }
+  if (window.length > limit || window.length > 1000) return invalid();
+  const types = categories[query.category - 1]!;
+  return window.filter((entry) =>
+    entry.title === "115429"
+      ? query.category === 5 || (query.category !== 1 && types.includes(entry.type))
+      : types.includes(entry.type),
+  );
+}
+
+export function mailClientType(type: number): number {
+  const mapped = new Map([
+    [7, 4],
+    [10, 21],
+    [12, 14],
+    [14, 10],
+    [21, 0],
+    [22, 1],
+  ]);
+  return mapped.get(type) ?? type;
+}
+
+export function mailCategorySenders(
+  entries: readonly Pick<MailListEntry, "type" | "fromUser">[],
+): string[] {
+  const types = new Set([
+    22, 21, 20, 17, 25, 6, 10, 24, 23, 26, 27, 28, 29, 34, 33, 38, 37, 45, 46, 40, 39, 43, 44,
+  ]);
+  return [
+    ...new Set(
+      entries
+        .filter((entry) => types.has(entry.type) && !mailBlank(entry.fromUser))
+        .map((entry) => entry.fromUser!),
+    ),
+  ];
+}
+
+export function mailTranslationRequest(
+  translationId: string | null,
+  lang: string | null,
+): { id: string; fromLang: string; toLang: string } | undefined {
+  if (lang === null || mailBlank(translationId)) return undefined;
+  const [fromLang, id] = translationId!.split("|").filter(Boolean);
+  if (mailBlank(fromLang) || mailBlank(id)) return undefined;
+  const lower = lang.toLowerCase();
+  let target = lang;
+  if (["cn", "zh-chs", "zh_cn", "zh-cn"].includes(lower)) target = "zh-Hans";
+  else if (["zh-cht", "tw", "zh_tw"].includes(lower)) target = "zh-Hant";
+  else if (["id", "in"].includes(lower)) target = "ms";
+  else if (lower === "jp") target = "ja";
+  else if (lang === "en_gb") target = "en";
+  else if (lang === "fr_fr") target = "fr";
+  else if (lang === "it_it") target = "it";
+  const allowed = [
+    "en",
+    "zh-Hans",
+    "zh-Hant",
+    "ja",
+    "ko",
+    "ru",
+    "es",
+    "ms",
+    "fr",
+    "de",
+    "it",
+    "pt",
+  ];
+  return { id: id!, fromLang: fromLang!, toLang: allowed.includes(target) ? target : "en" };
+}
+
+function mailIds(value: string, batch: boolean): string[] {
+  if (typeof value !== "string" || new TextEncoder().encode(value).length > 65535) return invalid();
+  const blank = mailBlank(value);
   const parts = batch ? (blank ? [] : value.split(",").filter(Boolean)) : [value];
   if (
     parts.length > 1000 ||

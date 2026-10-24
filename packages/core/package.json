@@ -11,13 +11,15 @@
     "typescript": "catalog:"
   },
   "dependencies": {
+    "@effect/platform-bun": "catalog:",
     "effect": "catalog:",
-    "@effect/platform-bun": "catalog:"
+    "evlog": "2.33.1"
   },
   "type": "module",
   "exports": {
     "./runtime": "./src/runtime.ts",
     "./resource": "./src/resource.ts",
-    "./http": "./src/http.ts"
+    "./http": "./src/http.ts",
+    "./logging": "./src/logging.ts"
   }
 }

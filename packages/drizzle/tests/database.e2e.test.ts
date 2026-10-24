@@ -131,6 +131,7 @@ for (const { id, namespace, table, config, spec } of catalog) {
       for (const index of spec.indexes.filter((index) => index.kind !== "index")) {
         const duplicate = { ...changed };
         for (const column of index.columns) duplicate[column.name] = original[column.name];
+        if (id === "opencok_kingdom.avatar_completion") duplicate.picVer = original.picVer;
         await rejectsCode(db.insert(table).values(duplicate), "23505");
       }
       for (const key of spec.foreignKeys)
