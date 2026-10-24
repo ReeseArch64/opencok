@@ -7,9 +7,11 @@ import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_buil
 import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { saga_tower_science } from "@opencok/drizzle/schema/opencok_kingdom/saga_tower_science";
+import { foreigen_sciences } from "@opencok/drizzle/schema/opencok_kingdom/foreigen_sciences";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { t_hero } from "@opencok/drizzle/schema/opencok_kingdom/t_hero";
 import { user_pet_dragon } from "@opencok/drizzle/schema/opencok_kingdom/user_pet_dragon";
+import { user_pet_dragon_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_pet_dragon_skill";
 import { user_knight_title } from "@opencok/drizzle/schema/opencok_kingdom/user_knight_title";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
@@ -19,6 +21,12 @@ import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/allian
 import { user_civilization_prestige } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_prestige";
 import { user_military_rank } from "@opencok/drizzle/schema/opencok_kingdom/user_military_rank";
 import { user_miracle_buff_active } from "@opencok/drizzle/schema/opencok_kingdom/user_miracle_buff_active";
+import { kingdom_position } from "@opencok/drizzle/schema/opencok_kingdom/kingdom_position";
+import { activity } from "@opencok/drizzle/schema/opencok_kingdom/activity";
+import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
+import { lucky_day } from "@opencok/drizzle/schema/opencok_kingdom/lucky_day";
+import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
+import { cross_throne_reward_record } from "@opencok/drizzle/schema/opencok_kingdom/cross_throne_reward_record";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Database } from "./game.ts";
@@ -34,9 +42,11 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     user_science,
     user_civilization_science,
     saga_tower_science,
+    foreigen_sciences,
     user_equip,
     t_hero,
     user_pet_dragon,
+    user_pet_dragon_skill,
     user_knight_title,
     user_item,
     pic_upload_record,
@@ -46,6 +56,12 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     user_civilization_prestige,
     user_military_rank,
     user_miracle_buff_active,
+    kingdom_position,
+    activity,
+    alliance_territory,
+    lucky_day,
+    server_info,
+    cross_throne_reward_record,
   ])
     await db.select().from(table).limit(0);
 }
@@ -85,9 +101,11 @@ export function readPowerState(
         sciences: [],
         civilizationSciences: [],
         sagaSciences: [],
+        foreignSciences: [],
         equipment: [],
         heroes: [],
         dragons: [],
+        dragonSkills: [],
         knight: undefined,
         items: [],
         states: [],
@@ -96,6 +114,12 @@ export function readPowerState(
         prestige: [],
         military: undefined,
         miracle: undefined,
+        office: undefined,
+        kingdomFights: [],
+        territoryTrees: [],
+        luckyDay: undefined,
+        powerServer: undefined,
+        throneRewards: [],
       };
       if (!profile) return empty;
       const statistics = (
@@ -154,6 +178,11 @@ export function readPowerState(
         .from(saga_tower_science)
         .where(eq(saga_tower_science.uid, uid))
         .orderBy(asc(saga_tower_science.itemid));
+      const foreignSciences = await tx
+        .select({ itemid: foreigen_sciences.itemid, level: foreigen_sciences.level })
+        .from(foreigen_sciences)
+        .where(eq(foreigen_sciences.uid, uid))
+        .orderBy(asc(foreigen_sciences.itemid));
       const equipment = await tx
         .select({
           itemId: user_equip.itemId,
@@ -165,7 +194,7 @@ export function readPowerState(
         .where(and(eq(user_equip.uid, uid), eq(user_equip.on, 1)))
         .orderBy(asc(user_equip.uuid));
       const heroes = await tx
-        .select({ heroid: t_hero.heroid })
+        .select({ heroid: t_hero.heroid, level: t_hero.level, exp: t_hero.exp })
         .from(t_hero)
         .where(eq(t_hero.uid, uid))
         .orderBy(asc(t_hero.id));
@@ -174,10 +203,22 @@ export function readPowerState(
           itemId: user_pet_dragon.itemId,
           dragonState: user_pet_dragon.dragonState,
           lv: user_pet_dragon.lv,
+          useFlag: user_pet_dragon.useFlag,
         })
         .from(user_pet_dragon)
         .where(eq(user_pet_dragon.uid, uid))
         .orderBy(asc(user_pet_dragon.uuid));
+      const dragonSkills = await tx
+        .select({
+          ownerId: user_pet_dragon_skill.ownerId,
+          index1: user_pet_dragon_skill.index1,
+          skillId: user_pet_dragon_skill.skillId,
+          level: user_pet_dragon_skill.level,
+          strengthenLevel: user_pet_dragon_skill.strengthenLevel,
+        })
+        .from(user_pet_dragon_skill)
+        .where(eq(user_pet_dragon_skill.uid, uid))
+        .orderBy(asc(user_pet_dragon_skill.uuid));
       const knight = (
         await tx
           .select({
@@ -265,6 +306,83 @@ export function readPowerState(
           .where(eq(user_miracle_buff_active.uid, uid))
           .limit(1)
       )[0];
+      const office = (
+        await tx
+          .select({ positionId: kingdom_position.positionId, serverId: kingdom_position.serverId })
+          .from(kingdom_position)
+          .where(eq(kingdom_position.uid, uid))
+          .limit(1)
+      )[0];
+      const kingdomFights = office
+        ? await tx
+            .select({
+              type: activity.type,
+              openTime: activity.openTime,
+              startTime: activity.startTime,
+              endTime: activity.endTime,
+            })
+            .from(activity)
+            .where(and(eq(activity.type, 0), gt(activity.openTime, 0n)))
+            .orderBy(asc(activity.id))
+            .limit(2)
+        : [];
+      const territoryTrees = profile.allianceId?.trim()
+        ? await tx
+            .select({
+              allianceId: alliance_territory.allianceId,
+              pointId: alliance_territory.pointId,
+              type: alliance_territory.type,
+              stat: alliance_territory.stat,
+              level: alliance_territory.level,
+              activeSkin: alliance_territory.activeSkin,
+            })
+            .from(alliance_territory)
+            .where(
+              and(
+                eq(alliance_territory.allianceId, profile.allianceId),
+                eq(alliance_territory.type, 42),
+                gt(alliance_territory.pointId, 0),
+              ),
+            )
+            .orderBy(asc(alliance_territory.uid))
+            .limit(2)
+        : [];
+      const luckyDay = (
+        await tx
+          .select({
+            status: lucky_day.status,
+            time: lucky_day.time,
+            effectId: lucky_day.effectId,
+            lucky_id: lucky_day.lucky_id,
+          })
+          .from(lucky_day)
+          .where(eq(lucky_day.uid, uid))
+          .limit(1)
+      )[0];
+      const powerServer = luckyDay
+        ? (
+            await tx
+              .select({ lastMergeMillis: server_info.lastMergeMillis })
+              .from(server_info)
+              .where(eq(server_info.uid, "server"))
+              .limit(1)
+          )[0]
+        : undefined;
+      const throneRewards = await tx
+        .select({
+          version: cross_throne_reward_record.version,
+          rewardId: cross_throne_reward_record.reward_id,
+        })
+        .from(cross_throne_reward_record)
+        .where(
+          and(
+            eq(cross_throne_reward_record.target_uid, uid),
+            eq(cross_throne_reward_record.reward_type, 2),
+            eq(cross_throne_reward_record.throne_type, 2),
+          ),
+        )
+        .orderBy(asc(cross_throne_reward_record.id))
+        .limit(4097);
       return {
         profile,
         statistics,
@@ -275,9 +393,11 @@ export function readPowerState(
         sciences,
         civilizationSciences,
         sagaSciences,
+        foreignSciences,
         equipment,
         heroes,
         dragons,
+        dragonSkills,
         knight,
         items,
         upload,
@@ -287,6 +407,12 @@ export function readPowerState(
         prestige,
         military,
         miracle,
+        office,
+        kingdomFights,
+        territoryTrees,
+        luckyDay,
+        powerServer,
+        throneRewards,
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

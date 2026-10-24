@@ -430,6 +430,19 @@ import applications. Their source exports and direct workspace dependencies are 
 | `storage`             | Redis leases/readiness, ZooKeeper registration, dependency timeouts and validated server-directory files.               |
 | `constants`, `errors` | Named connection limits, session TTL, mobile compatibility values and error types/codes.                                |
 
+The reconnect friendship-mine use case adds a narrow realm write to the otherwise
+read-only player-query repositories. The controller supplies a validated initial mine
+from the treasure catalog. The repository reads the global account binding, verifies
+the local owner and realm under a shared row lock, and reads or creates the mine by
+its existing `(uid, fId)` key in a read-committed transaction. An insert conflict reads
+the winner instead of overwriting progress or returning an unpersisted default. An
+unbound account receives an ephemeral default without a mine-table write. This
+cost-free initialization grants no reward and changes no existing mine. Global binding
+and realm state are not one distributed transaction; each invocation uses the binding
+observed at its start, and subsequent invocations observe a rebind under another key.
+The provider has unit coverage with injected SQL clients; real database and native-client
+validation remain deferred, and the complete `user.lv` command is not yet enabled.
+
 Unit and integration suites consume public package exports. `bun run test:packages`
 checks declared imports, package exports, dependency cycles and the rule/resource
 boundary; CI runs it and triggers service integration checks on package changes.
@@ -1139,14 +1152,14 @@ migration execution or deployment.
 ### 15.1. PostgreSQL database package
 
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
-Drizzle schemas in `src/schema` are the source of truth: 772 tables and 6,316 fields,
+Drizzle schemas in `src/schema` are the source of truth: 774 tables and 6,323 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
 `schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
 The default physical databases are `opencok_global`, `opencok_kingdom_1` and
 `opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
 `opencok_global`, `opencok_pay` and `opencok_chat` (113 tables). Both kingdom databases
-contain the same `opencok_kingdom` namespace (659 tables each). One set of kingdom
+contain the same `opencok_kingdom` namespace (661 tables each). One set of kingdom
 table modules and migrations serves every configured kingdom; there are no per-ID
 schema copies. Table/field names and values remain stable. Database names and
 credentials are configuration. Pools and local transactions belong to one physical database; there
@@ -1230,6 +1243,92 @@ remote availability does not gate local login readiness. Update markers use the
 realm-scoped Redis `player-update` namespace. See the server guide for exact key
 format, configuration and legacy compatibility details. This incremental query
 work is currently validated with unit tests and synthetic adapters only.
+
+The full `get.user.info` public query also uses configured realm reads. It routes
+through the global directory first, with a local-realm fallback only when the
+directory has no entry. The selected realm supplies a repeatable-read snapshot of
+identity/progression, statistics, general previews, equipment, medals, flowers,
+offices and alliance presentation. The observer's authenticated membership controls
+alliance capacity visibility. Target identity and realm mismatches reject the query;
+no public command grants cross-realm write authority. Legacy getter repairs and
+write side effects remain documented gaps in the server guide, not migrated mutations.
+
+Ordinary-realm power, kill and level ranking queries read the requester, bounded
+candidates and fallback position in a single read-only repeatable-read transaction.
+The rules layer preserves each board's exclusions and candidate-window semantics;
+the DTO layer exposes only public ranking fields. These commands read persisted
+scores without introducing score writers or Redis ranking state. Fresh snapshots
+and deterministic final UID ordering replace the legacy cache lifecycle and
+unspecified ties; the server guide records collation and verification limitations.
+Alliance power/kill queries follow the same snapshot boundary, aggregating persisted
+member statistics and, for candidate power, alliance-science power. Batched science
+and video reads supply public presentation. The rules preserve distinct candidate
+windows and member-only fallback positions; these reads grant no alliance write
+authority and introduce no cache or schema dependency.
+The castle board reuses the player-ranking boundary with distinct candidate and
+fallback ordering. Its fallback offset uses a SQL window within the snapshot;
+construction queues and persisted power are never recalculated by the query.
+Material-contribution rankings read the existing contribution table with their own
+window and empty-list response contract; score writers and activity resets remain
+outside the query boundary.
+Expedition ranking reads use the shared Redis instance with a global realm-pairing
+record and lower-realm score/metadata keys. A read-only Lua evaluation revalidates
+pairing and returns a consistent bounded board; one retry handles a rematch. The
+controller authenticates the local owner, decodes integer-preserving metadata and
+projects only public fields. Importing authoritative event state and maintaining
+pairings/scores remain separate from the reader; namespace and verification details
+are in the server guide.
+
+Mailbox category status reads the authenticated recipient's grouped counts with the
+owner profile in a read-only repeatable-read snapshot. Contents and reward payloads
+stay outside this read interface. Pure rules retain the combined versus selected
+category distinctions and numeric widths. The status query grants no mutations.
+Mailbox save/cancel commands use a separate recipient-scoped write interface. A locked
+owner profile authorizes each realm transaction; conditional saved-flag updates and
+durable `mail_update` markers commit together. Marker timestamps never decrease and
+only matched owned messages receive markers. The additive kingdom migration supplies
+the marker table; synchronization consumers, cleanup, category/conversation deletion and
+redemption remain separate work. This follows ADR-0002/0005 without dual writes to
+Redis. Absolute flag assignments preserve repeat-request state absent intervening
+changes; correlation fields do not provide durable command receipts. The server guide
+records these limits, compatibility differences and unit-only validation.
+
+Conversation/type saving uses a separate owner-locked transaction with a recipient
+predicate and one set-based update. Rules map client message types and select personal
+text or moderation conversations; raw signed saved flags are retained. This command
+does not emit synchronization markers or contact chat, matching its legacy behavior.
+It loads no message contents and imposes no conversation-size truncation. Wire rules,
+transaction failures and ownership are covered by synthetic units only.
+
+Read-status commands share the owner-lock and atomic marker boundary. Individual
+unread gift transitions additionally insert a realm `mail_gift_opening` outbox record;
+batch marking deliberately omits that event. A lifecycle-owned relay locks bounded
+pending batches with `SKIP LOCKED`, updates matching recipient-scoped global gift logs
+in a separate transaction, then acknowledges the realm records. Repeat assignments
+use immutable event timestamps, allowing retries after global commit or acknowledgment
+failure. Missing global log rows are acknowledged without creation. The relay retries
+after five seconds and drains before database disposal; pending events never depend
+on Redis availability. This implements recoverable logging, not cross-database atomicity
+or attachment grants. The additive migration and runtime are unit-verified only.
+
+Ordinary `mail.delete` transactions enforce recipient, exact saved-flag and reward-status
+predicates before removing rows. Returned IDs authorize auxiliary-content cleanup and
+durable synchronization tombstones. A controller-supplied policy interprets invitation
+JSON and group rules while the repository owns the transaction and enforces recipient
+predicates on every associated write. Group pointers refresh from remaining messages;
+valid move-invitation invalidation stays within the selected realm. All effects roll
+back together. Protected messages retain their contents and groups, correcting an
+inconsistency in the legacy helper. No new schema is needed; the server guide records
+legacy comparator quirks, extra-content import requirements and unit-only evidence.
+
+Mail detail reads use a separate read-write repeatable-read transaction because the
+reference removes malformed structured messages. The owner and selected mail rows are
+locked; recipient-scoped metadata bounds aggregate payloads before body retrieval.
+A controller projection decodes stored content and validates the correlated SFS response
+before authorizing owned malformed-row removal. Capacity, missing extra storage and
+unresolved decoder forms reject without removal. This path changes no read status,
+reward, auxiliary, group or synchronization state. The server guide records the bounded
+permissive decoder, remaining syntax/order differences and synthetic unit evidence.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch

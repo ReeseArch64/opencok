@@ -1,4 +1,5 @@
 import type { PlayerPower, PowerContext, PowerSnapshot } from "@opencok/contracts/power";
+import { selectHeroes } from "./power-companions.ts";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
@@ -179,7 +180,7 @@ export function calculatePlayerPower(
   );
   const knight_title = titlePower(state, rules, context);
   const petDragonPower = dragonPower(state, rules, context);
-  const prinessPower = state.heroes.reduce((sum, row) => {
+  const prinessPower = selectHeroes(state.heroes).reduce((sum, row) => {
     const raw = record(rules.power.heroes, text(row, "heroid")).power ?? "0";
     if (!/^[+-]?\d+$/.test(raw)) throw new GameError(errors.unsupported, "power_rule");
     const power = BigInt(raw);

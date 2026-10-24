@@ -12,6 +12,11 @@ function database(
     failure?: boolean;
     allianceId?: string;
     allianceFailure?: boolean;
+    office?: boolean;
+    fightFailure?: boolean;
+    treeFailure?: boolean;
+    lucky?: boolean;
+    serverFailure?: boolean;
   } = {},
 ) {
   const queries: { text: string; params: unknown[] }[] = [];
@@ -46,6 +51,15 @@ function database(
       if (table === "user_civilization_prestige") return { rows: [[2, "9007199254740993"]] };
       if (table === "user_military_rank") return { rows: [["1001|1002"]] };
       if (table === "user_miracle_buff_active") return { rows: [[4]] };
+      if (table === "kingdom_position") return { rows: options.office ? [["216002", 2]] : [] };
+      if (table === "activity") {
+        if (options.fightFailure) throw new Error("Synthetic fight read failure");
+        return { rows: [[0, "1792756790000", "1792756800000", "9007199254740993"]] };
+      }
+      if (table === "alliance_territory") {
+        if (options.treeFailure) throw new Error("Synthetic tree read failure");
+        return { rows: [[options.allianceId, 10, 42, 3, 2, "synthetic-skin"]] };
+      }
       if (table === "alliance_science") {
         if (options.allianceFailure) throw new Error("Synthetic alliance read failure");
         return {
@@ -56,7 +70,17 @@ function database(
         };
       }
       if (table === "user_civilization_science") return { rows: [[2000, 3]] };
-      if (table === "t_hero") return { rows: [[7001]] };
+      if (table === "foreigen_sciences") return { rows: [[3000, 2]] };
+      if (table === "cross_throne_reward_record") return { rows: [[7, 1001]] };
+      if (table === "lucky_day")
+        return { rows: options.lucky ? [[1, "9007199254740993", "8001", 1]] : [] };
+      if (table === "server_info") {
+        if (options.serverFailure) throw new Error("Synthetic realm metadata failure");
+        return { rows: [["9007199254740995"]] };
+      }
+      if (table === "t_hero") return { rows: [[7001, 5, 20]] };
+      if (table === "user_pet_dragon") return { rows: [[6001, 3, 5, 1]] };
+      if (table === "user_pet_dragon_skill") return { rows: [[6001, 1, "8001", 3, 2]] };
       if (table === "user_knight_title")
         return { rows: [[8001, 8002, Buffer.from(`{"8002":${now + 1}}`)]] };
       if (table === "user_item") return { rows: [["talisman", 1, "9007199254740993"]] };
@@ -86,7 +110,12 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(snapshot.armies).toEqual([{ armyId: "107001", free: 1, pve: 2, defence: 3, march: 4 }]);
   expect(snapshot.walls).toEqual([{ armyId: "108001", num: 5 }]);
   expect(snapshot.civilizationSciences).toEqual([{ baseItemID: 2000, level: 3 }]);
-  expect(snapshot.heroes).toEqual([{ heroid: 7001 }]);
+  expect(snapshot.foreignSciences).toEqual([{ itemid: 3000, level: 2 }]);
+  expect(snapshot.heroes).toEqual([{ heroid: 7001, level: 5, exp: 20 }]);
+  expect(snapshot.dragons).toEqual([{ itemId: 6001, dragonState: 3, lv: 5, useFlag: 1 }]);
+  expect(snapshot.dragonSkills).toEqual([
+    { ownerId: 6001, index1: 1, skillId: "8001", level: 3, strengthenLevel: 2 },
+  ]);
   expect(snapshot.upload).toEqual({
     updateTime: 9007199254740993n,
     banTime: 9007199254740995n,
@@ -98,7 +127,16 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const selects = queries.filter((query) => query.text.startsWith("select"));
-  expect(selects).toHaveLength(20);
+  expect(selects).toHaveLength(25);
+  expect(snapshot.throneRewards).toEqual([{ version: 7, rewardId: 1001 }]);
+  expect(snapshot.luckyDay).toBeUndefined();
+  expect(snapshot.powerServer).toBeUndefined();
+  expect(selects.some((query) => query.text.includes('"server_info"'))).toBe(false);
+  expect(snapshot.office).toBeUndefined();
+  expect(snapshot.kingdomFights).toEqual([]);
+  expect(snapshot.territoryTrees).toEqual([]);
+  expect(selects.some((query) => query.text.includes('"activity"'))).toBe(false);
+  expect(selects.some((query) => query.text.includes('"alliance_territory"'))).toBe(false);
   expect(snapshot.profile?.civilizationType).toBe(2);
   expect(snapshot.prestige).toEqual([{ civilizationType: 2, prestigeValue: 9007199254740993n }]);
   expect(snapshot.military).toEqual({ skill: "1001|1002" });
@@ -121,6 +159,16 @@ test("power snapshot scopes every domain to the owner, retains long values and p
     query.text.includes('from "opencok_kingdom"."user_civilization_science"'),
   )!;
   expect(science.text).toContain('"user_civilization_science"."userID" = $1');
+  const foreign = selects.find((query) => query.text.includes('"foreigen_sciences"'))!;
+  expect(foreign.params).toEqual(["synthetic"]);
+  expect(foreign.text).toContain('"foreigen_sciences"."uid" = $1');
+  expect(foreign.text).not.toMatch(/cdtime|reserve/);
+  const throne = selects.find((query) => query.text.includes('"cross_throne_reward_record"'))!;
+  expect(throne.params).toEqual(["synthetic", 2, 2, 4097]);
+  expect(throne.text).toContain('"cross_throne_reward_record"."target_uid" = $1');
+  expect(throne.text).toContain('"cross_throne_reward_record"."reward_type" = $2');
+  expect(throne.text).toContain('"cross_throne_reward_record"."throne_type" = $3');
+  expect(throne.text).not.toMatch(/from_uid|pic_ver|alliance_abbr/);
   const equipment = selects.find((query) =>
     query.text.includes('from "opencok_kingdom"."user_equip"'),
   )!;
@@ -165,6 +213,86 @@ test("alliance power reads follow the persisted membership and roll back on a la
   expect(failure.queries.some((query) => query.text === "commit")).toBe(false);
 });
 
+test("tree power reads follow alliance membership, bound duplicate detection and roll back failures", async () => {
+  const fixture = database({ allianceId: "synthetic-alliance" });
+  const result = await readPowerState(fixture.db, "synthetic", now);
+  expect(result.territoryTrees).toEqual([
+    {
+      allianceId: "synthetic-alliance",
+      pointId: 10,
+      type: 42,
+      stat: 3,
+      level: 2,
+      activeSkin: "synthetic-skin",
+    },
+  ]);
+  const query = fixture.queries.find((entry) => entry.text.includes('"alliance_territory"'))!;
+  expect(query.params).toEqual(["synthetic-alliance", 42, 0, 2]);
+  expect(query.text).toContain('"alliance_territory"."allianceId" = $1');
+  expect(query.text).toContain('"alliance_territory"."type" = $2');
+  expect(query.text).toContain('"alliance_territory"."pointId" > $3');
+  expect(query.text).not.toMatch(/buildingSpd|activateTime|updateTime|createId/);
+  expect(fixture.queries.at(-1)?.text).toBe("commit");
+  const blank = database({ allianceId: " " });
+  expect((await readPowerState(blank.db, "synthetic", now)).territoryTrees).toEqual([]);
+  expect(blank.queries.some((entry) => entry.text.includes('"alliance_territory"'))).toBe(false);
+  const failure = database({ allianceId: "synthetic-alliance", treeFailure: true });
+  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  expect(failure.queries.at(-1)?.text).toBe("rollback");
+});
+
+test("office snapshots use owner membership and bounded realm fight reads in the same transaction", async () => {
+  const fixture = database({ office: true });
+  const result = await readPowerState(fixture.db, "synthetic", now);
+  expect(result.office).toEqual({ positionId: "216002", serverId: 2 });
+  expect(result.kingdomFights).toEqual([
+    { type: 0, openTime: 1792756790000n, startTime: 1792756800000n, endTime: 9007199254740993n },
+  ]);
+  const position = fixture.queries.find((query) => query.text.includes('"kingdom_position"'))!;
+  expect(position.params).toEqual(["synthetic", 1]);
+  expect(position.text).toContain('"kingdom_position"."uid" = $1');
+  expect(position.text).not.toMatch(/valid|appointedTime|preKingUid/);
+  const activity = fixture.queries.find((query) => query.text.includes('"activity"'))!;
+  expect(activity.params).toEqual([0, 0n, 2]);
+  expect(activity.text).toContain('"activity"."type" = $1');
+  expect(activity.text).toContain('"activity"."openTime" > $2');
+  expect(activity.text).toContain('order by "opencok_kingdom"."activity"."id" asc');
+  expect(fixture.queries.at(-1)?.text).toBe("commit");
+  expect(fixture.queries.every((query) => !/\b(insert|update|delete)\b/i.test(query.text))).toBe(
+    true,
+  );
+  const failure = database({ office: true, fightFailure: true });
+  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  expect(failure.queries.at(-1)?.text).toBe("rollback");
+});
+
+test("lucky-day snapshots retain exact deadlines and read metadata only from the selected realm", async () => {
+  const fixture = database({ lucky: true });
+  const result = await readPowerState(fixture.db, "synthetic", now);
+  expect(result.luckyDay).toEqual({
+    status: 1,
+    time: 9007199254740993n,
+    effectId: "8001",
+    lucky_id: 1,
+  });
+  expect(result.powerServer).toEqual({ lastMergeMillis: 9007199254740995n });
+  const lucky = fixture.queries.find((query) => query.text.includes('"lucky_day"'))!;
+  expect(lucky.params).toEqual(["synthetic", 1]);
+  expect(lucky.text).toContain('"lucky_day"."uid" = $1');
+  expect(lucky.text).not.toMatch(/unluckyCount|luckyCount/);
+  const server = fixture.queries.find((query) => query.text.includes('"server_info"'))!;
+  expect(server.params).toEqual(["server", 1]);
+  expect(server.text).toContain('from "opencok_kingdom"."server_info"');
+  expect(server.text).not.toMatch(/kaifu|activationTime|crossFightServerId/);
+  expect(fixture.queries.at(-1)?.text).toBe("commit");
+  expect(fixture.queries.every((query) => !/\b(insert|update|delete)\b/i.test(query.text))).toBe(
+    true,
+  );
+  const failure = database({ lucky: true, serverFailure: true });
+  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  expect(failure.queries.at(-1)?.text).toBe("rollback");
+});
+
 test("power readiness checks each required table without reading records or writing data", async () => {
   const queries: { text: string; params: unknown[] }[] = [];
   const client = {
@@ -175,7 +303,7 @@ test("power readiness checks each required table without reading records or writ
   };
   await checkPowerStore(drizzle(client as unknown as NodePgClient, { schema }));
   const tables = queries.map((query) => query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1]);
-  expect(new Set(tables).size).toBe(21);
+  expect(new Set(tables).size).toBe(29);
   for (const table of [
     "userprofile",
     "playerinfo",
@@ -186,9 +314,11 @@ test("power readiness checks each required table without reading records or writ
     "user_science",
     "user_civilization_science",
     "saga_tower_science",
+    "foreigen_sciences",
     "user_equip",
     "t_hero",
     "user_pet_dragon",
+    "user_pet_dragon_skill",
     "user_knight_title",
     "user_item",
     "pic_upload_record",
@@ -198,6 +328,12 @@ test("power readiness checks each required table without reading records or writ
     "user_civilization_prestige",
     "user_military_rank",
     "user_miracle_buff_active",
+    "kingdom_position",
+    "activity",
+    "alliance_territory",
+    "lucky_day",
+    "server_info",
+    "cross_throne_reward_record",
   ])
     expect(tables).toContain(table);
   for (const query of queries) {

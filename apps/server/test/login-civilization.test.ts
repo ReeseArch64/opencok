@@ -39,6 +39,15 @@ test("login carries the saved civilization and exact score/prestige in init.user
     throw new Error("Unexpected dependency");
   };
   const store: GameStore = {
+    mailContents: unused,
+    mailConversationSave: unused,
+    mailDelete: unused,
+    mailRead: unused,
+    mailSave: unused,
+    mailStatus: unused,
+    allianceRanking: unused,
+    playerRanking: unused,
+    publicProfile: unused,
     power: unused,
     profile: unused,
     accounts: unused,

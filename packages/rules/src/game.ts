@@ -3,7 +3,17 @@ import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { ruleAvailable } from "./availability.ts";
 
 export type Rule = Record<string, string>;
+export interface ReconnectCatalogs {
+  treasures?: Map<string, Rule>;
+  rewards?: Map<string, Rule>;
+}
+export interface ProfileCatalogs {
+  achievementCount?: number;
+  militaryRanks?: Map<string, Rule>;
+  servers?: Map<string, Rule>;
+}
 export interface ConfigurationCatalogs {
+  serverConfig?: Map<string, Rule>;
   generalSales?: Map<string, Rule>;
   payControl?: Map<string, Rule>;
   kingdomSkills?: Map<string, Rule>;
@@ -14,6 +24,9 @@ export interface PowerCatalogs {
   sciences?: Map<string, Rule>;
   civilizationSciences?: Map<string, Rule>;
   sagaSciences?: Map<string, Rule>;
+  sagaScienceBases?: Map<string, Rule>;
+  foreignSciences?: Map<string, Rule>;
+  foreignScienceBases?: Map<string, Rule>;
   heroes?: Map<string, Rule>;
   equipment?: Map<string, Rule>;
   titles?: Map<string, Rule>;
@@ -29,6 +42,14 @@ export interface PowerCatalogs {
   civilizationFeatures?: Map<string, Rule>;
   militarySkills?: Map<string, Rule>;
   miracleBuffs?: Map<string, Rule>;
+  dragonSkills?: Map<string, Rule>;
+  activityEvents?: Map<string, Rule>;
+  offices?: Map<string, Rule>;
+  treeSkins?: Map<string, Rule>;
+  activityPanels?: Map<string, Rule>;
+  mergeActivities?: Map<string, Rule>;
+  luckyEffects?: Map<string, Rule>;
+  monarchTitles?: Map<string, Rule>;
 }
 export class Rules {
   constructor(
@@ -44,6 +65,8 @@ export class Rules {
     readonly settings: Map<string, Rule> = new Map(),
     readonly configuration: ConfigurationCatalogs = {},
     readonly power: PowerCatalogs = {},
+    readonly profile: ProfileCatalogs = {},
+    readonly reconnect: ReconnectCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (

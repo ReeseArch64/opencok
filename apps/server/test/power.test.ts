@@ -20,7 +20,7 @@ function fixture() {
     sciences: catalog({ id: "1002", power: "40" }),
     civilizationSciences: catalog({ id: "2003", power: "30" }),
     sagaSciences: catalog({ id: "103004", power: "20" }),
-    heroes: catalog({ id: "7001", power: "9007199254740993" }, { id: "7002", power: "7" }),
+    heroes: catalog({ id: "7001", power: "9007199254740993" }, { id: "7101", power: "7" }),
     equipment: catalog({ id: "9001", power: "60" }),
     titles: catalog({ id: "8001", power: "70", type: "2" }),
     dragonBases: catalog({ id: "6001", initFight: "120" }),
@@ -45,6 +45,7 @@ function fixture() {
     power,
   );
   const state: PowerSnapshot = {
+    foreignSciences: [],
     profile: { level: 5 },
     statistics: { questPower: 9, power: 1n, buildingPower: 1n },
     generals: [{ generalId: "7000", level: 3 }],
@@ -63,12 +64,13 @@ function fixture() {
     ],
     heroes: [
       { heroid: 7001, level: 1 },
-      { heroid: 7002, level: 100 },
+      { heroid: 7101, level: 100 },
     ],
     dragons: [
       { itemId: 6001, dragonState: 3, lv: 2 },
       { itemId: 9999, dragonState: 0, lv: 1 },
     ],
+    dragonSkills: [],
     knight: { activity_title: 8001, contract_activity_title: -1 },
     items: [],
     states: [],
@@ -77,6 +79,12 @@ function fixture() {
     prestige: [],
     military: undefined,
     miracle: undefined,
+    office: undefined,
+    kingdomFights: [],
+    territoryTrees: [],
+    luckyDay: undefined,
+    powerServer: undefined,
+    throneRewards: [],
   };
   return { state, rules };
 }
@@ -91,9 +99,11 @@ function empty(): PowerSnapshot {
     sciences: [],
     civilizationSciences: [],
     sagaSciences: [],
+    foreignSciences: [],
     equipment: [],
     heroes: [],
     dragons: [],
+    dragonSkills: [],
     knight: undefined,
     items: [],
     states: [],
@@ -102,6 +112,12 @@ function empty(): PowerSnapshot {
     prestige: [],
     military: undefined,
     miracle: undefined,
+    office: undefined,
+    kingdomFights: [],
+    territoryTrees: [],
+    luckyDay: undefined,
+    powerServer: undefined,
+    throneRewards: [],
   };
 }
 
@@ -422,4 +438,16 @@ test("avatar deadline wraps as signed long without narrowing millisecond values 
     rules,
   );
   expect(wire.nextUpdateTime).toEqual(sfs.long(-9223372036854774809n));
+});
+
+test("hero power uses the same duplicate-family selection as hero effects without rewriting rows", () => {
+  const { state, rules } = fixture();
+  state.heroes = [
+    { heroid: 7000, level: 1, exp: 999 },
+    { heroid: 7001, level: 2, exp: 0 },
+    { heroid: 7101, level: 1, exp: 0 },
+  ];
+  const before = structuredClone(state.heroes);
+  expect(calculatePlayerPower(state, rules, context()).prinessPower).toBe(9007199254741000n);
+  expect(state.heroes).toEqual(before);
 });

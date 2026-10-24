@@ -2,13 +2,13 @@
 
 `@opencok/drizzle` owns the application's PostgreSQL schemas, typed client and
 versioned Drizzle migrations. The maintained source of truth is `src/schema`,
-with **772 tables / 6,316 fields** and one module per table.
+with **774 tables / 6,323 fields** and one module per table.
 
 | Default physical database | SQL namespaces                                  | Migration role | Tables |
 | ------------------------- | ----------------------------------------------- | -------------- | -----: |
 | `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    113 |
-| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    659 |
-| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    659 |
+| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    661 |
+| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    661 |
 
 Kingdom IDs **1 and 2** are configured by default. There is one maintained kingdom
 schema, one set of table modules and one kingdom migration history. Both physical
@@ -114,6 +114,23 @@ new migration to their existing physical databases; no database-name change or
 copy is required. Never edit a migration already applied to a deployment.
 
 ## Data contracts
+
+The additive `0003_mail_update_markers` kingdom migration creates the recipient/message
+update-marker table used by server mailbox mutations. The owner/time index supports
+future synchronization reads; no mail foreign key is present so deletion markers can
+outlive messages. Existing mail rows are unchanged. Apply the migration to all kingdoms
+before using the corresponding server version. Generation, synthetic schema contracts
+and SQL snapshots are verified; real migration execution and persistence/concurrency
+checks remain deferred under the current unit-only validation restriction.
+
+The next additive kingdom migration, `0004_mail_gift_openings`, adds a durable outbox
+for individual gift-opening records. It stores recipient and opening time by mail ID
+and original creation time. The server commits it with the read flag and update marker,
+then relays immutable values to the existing global gift log before deleting delivered
+entries. No cross-database atomicity is assumed; replay is idempotent. No foreign key
+ties pending entries to mail lifetime. Rollback of the application can leave both
+additive mailbox tables in place; preserve pending entries for later relay recovery.
+This migration has also been generated and checked without being applied to a database.
 
 - Bigints, including the bounded full-width sequence ID, use TypeScript `bigint`.
   Serialize bigint explicitly at JSON/transport boundaries. Native sequences retain

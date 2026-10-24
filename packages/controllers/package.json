@@ -11,15 +11,20 @@
   },
   "type": "module",
   "exports": {
+    "./mail-contents": "./src/mail-contents.ts",
+    "./mail-delete": "./src/mail-delete.ts",
     "./game": "./src/game.ts",
     "./power": "./src/power.ts",
+    "./profile": "./src/profile.ts",
+    "./reconnect": "./src/reconnect.ts",
     "./world": "./src/world.ts",
     "./chat-session": "./src/chat-session.ts",
     "./chat-config": "./src/chat-config.ts",
     "./chat-join": "./src/chat-join.ts",
     "./chat-send": "./src/chat-send.ts",
     "./chat-history": "./src/chat-history.ts",
-    "./chat-rooms": "./src/chat-rooms.ts"
+    "./chat-rooms": "./src/chat-rooms.ts",
+    "./expedition-ranking": "./src/expedition-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

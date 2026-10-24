@@ -1,3 +1,30 @@
+import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
+import { readMailStatus } from "./mail.ts";
+import type {
+  MailContentsQuery,
+  MailContentsInspector,
+  MailConversationSaveQuery,
+  MailDeleteQuery,
+  MailDeletePlanner,
+  MailReadQuery,
+  MailSaveQuery,
+  MailStatusQuery,
+} from "@opencok/contracts/mail";
+import { mail_contents } from "@opencok/drizzle/schema/opencok_kingdom/mail_contents";
+import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
+import { alliance_invite_move } from "@opencok/drizzle/schema/opencok_kingdom/alliance_invite_move";
+import { deleteMail } from "./mail-delete.ts";
+import { readMailContents } from "./mail-contents.ts";
+import { saveMailConversation } from "./mail-conversation-save.ts";
+import { mail_gift_log } from "@opencok/drizzle/schema/opencok_global/mail_gift_log";
+import { mail_gift_opening } from "@opencok/drizzle/schema/opencok_kingdom/mail_gift_opening";
+import { markMailRead } from "./mail-read.ts";
+import { relayMailGiftOpenings } from "./mail-gift-relay.ts";
+import { mail_update } from "@opencok/drizzle/schema/opencok_kingdom/mail_update";
+import { saveMail } from "./mail-save.ts";
+import { material_cost_ranking } from "@opencok/drizzle/schema/opencok_kingdom/material_cost_ranking";
+import { readAllianceRanking } from "./alliance-ranking.ts";
+import type { AllianceRankingQuery } from "@opencok/contracts/alliance-ranking";
 import { createDatabases } from "@opencok/drizzle";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -11,6 +38,7 @@ import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_civilization_prestige } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_prestige";
 import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
+import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
 import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
 import { and, asc, eq, getTableColumns, gt, inArray, or, sql } from "drizzle-orm";
@@ -19,6 +47,11 @@ import type { GameStore, CityState, LoginConfigurationState } from "@opencok/con
 import { num, type Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, loadPlayerSummaries } from "./players.ts";
 import { checkPowerStore, readPowerState } from "./power.ts";
+import { checkPublicProfileStore, loadPublicProfile } from "./profile.ts";
+import { loadFriendshipMine } from "./reconnect-mine.ts";
+import type { FriendshipMine, FriendshipMineStore } from "@opencok/contracts/reconnect";
+import type { PlayerRankingQuery } from "@opencok/contracts/ranking";
+import { readPlayerRanking } from "./ranking.ts";
 
 type GameRepositoryConfig = Pick<
   ServerConfig,
@@ -30,7 +63,7 @@ type GameRepositoryConfig = Pick<
   | "playerKingdoms"
 >;
 
-export class Database implements GameStore {
+export class Database implements GameStore, FriendshipMineStore {
   readonly databases;
   readonly kingdom;
   constructor(readonly config: GameRepositoryConfig) {
@@ -71,13 +104,32 @@ export class Database implements GameStore {
       user_item,
       user_lord,
       user_civilization_prestige,
+      user_mine,
+      material_cost_ranking,
+      mail,
+      mail_update,
+      mail_gift_opening,
+      mail_contents,
+      mail_group,
+      alliance_invite_move,
       switches,
       parse_info,
     ])
       await this.kingdom.db.select().from(table).limit(0);
     await this.databases.global.db.select().from(account_new).limit(0);
+    await this.databases.global.db
+      .select({
+        uid: mail_gift_log.uid,
+        sendTime: mail_gift_log.sendTime,
+        toUid: mail_gift_log.toUid,
+        isOpened: mail_gift_log.isOpened,
+        receiveTime: mail_gift_log.receiveTime,
+      })
+      .from(mail_gift_log)
+      .limit(0);
     await checkPlayerSummaryStore(this.kingdom.db);
     await checkPowerStore(this.kingdom.db);
+    await checkPublicProfileStore(this.kingdom.db);
   }
   async health() {
     await Promise.all([
@@ -193,6 +245,45 @@ export class Database implements GameStore {
   }
   playerSummaries(uids: string[], allServers: boolean) {
     return loadPlayerSummaries(this.databases, this.config.kingdomId, uids, allServers);
+  }
+  publicProfile(uid: string, observerAllianceId: string) {
+    return loadPublicProfile(this.databases, this.config.kingdomId, uid, observerAllianceId);
+  }
+  mailStatus(uid: string, query: MailStatusQuery) {
+    return readMailStatus(this.kingdom.db, uid, query);
+  }
+  mailSave(uid: string, query: MailSaveQuery) {
+    return saveMail(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
+  mailContents(uid: string, query: MailContentsQuery, inspect: MailContentsInspector) {
+    return readMailContents(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
+  }
+  mailConversationSave(uid: string, query: MailConversationSaveQuery) {
+    return saveMailConversation(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
+  mailRead(uid: string, query: MailReadQuery) {
+    return markMailRead(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
+  mailDelete(uid: string, query: MailDeleteQuery, plan: MailDeletePlanner) {
+    return deleteMail(this.kingdom.db, this.config.kingdomId, uid, query, plan);
+  }
+  relayMailGifts() {
+    return relayMailGiftOpenings(this.kingdom.db, this.databases.global.db);
+  }
+  allianceRanking(uid: string, query: AllianceRankingQuery) {
+    return readAllianceRanking(this.kingdom.db, uid, query);
+  }
+  playerRanking(uid: string, query: PlayerRankingQuery) {
+    return readPlayerRanking(this.kingdom.db, uid, query);
+  }
+  friendshipMine(uid: string, initial: () => FriendshipMine) {
+    return loadFriendshipMine(
+      this.databases.global.db,
+      this.kingdom.db,
+      this.config.kingdomId,
+      uid,
+      initial,
+    );
   }
   async world(uid: string, ids: number[]) {
     return this.kingdom.db.transaction(

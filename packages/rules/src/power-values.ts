@@ -24,13 +24,19 @@ export function effectLong(raw: unknown): bigint {
   return value;
 }
 
-export function effectFloat(raw: unknown): number {
+export function effectDouble(raw: unknown): number {
   if (
     (typeof raw !== "number" && typeof raw !== "string") ||
     !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(String(raw).trim())
   )
     return invalidEffect();
-  const value = Math.fround(Number(raw));
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return invalidEffect();
+  return value;
+}
+
+export function effectFloat(raw: unknown): number {
+  const value = Math.fround(effectDouble(raw));
   if (!Number.isFinite(value)) return invalidEffect();
   return value;
 }

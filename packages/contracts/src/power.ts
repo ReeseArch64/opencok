@@ -5,6 +5,12 @@ export interface GeneralSkill {
   points: number;
 }
 
+export interface WorldPowerEffect {
+  id: number;
+  value: string;
+  endTime: bigint | undefined;
+}
+
 export interface PowerSnapshot {
   profile: Row;
   statistics: Row | undefined;
@@ -15,9 +21,11 @@ export interface PowerSnapshot {
   sciences: readonly Row[];
   civilizationSciences: readonly Row[];
   sagaSciences: readonly Row[];
+  foreignSciences: readonly Row[];
   equipment: readonly Row[];
   heroes: readonly Row[];
   dragons: readonly Row[];
+  dragonSkills: readonly Row[];
   knight: Row | undefined;
   items: readonly Row[];
   states: readonly Row[];
@@ -26,6 +34,12 @@ export interface PowerSnapshot {
   prestige: readonly Row[];
   military: Row | undefined;
   miracle: Row | undefined;
+  office: Row | undefined;
+  kingdomFights: readonly Row[];
+  territoryTrees: readonly Row[];
+  luckyDay: Row | undefined;
+  powerServer: Row | undefined;
+  throneRewards: readonly Row[];
 }
 
 export interface PowerState extends Omit<PowerSnapshot, "profile"> {
