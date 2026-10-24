@@ -31,7 +31,8 @@
     "./mail-presentation": "./src/mail-presentation.ts",
     "./mail-contents": "./src/mail-contents.ts",
     "./mail-delete": "./src/mail-delete.ts",
-    "./mail-conversation-save": "./src/mail-conversation-save.ts"
+    "./mail-conversation-save": "./src/mail-conversation-save.ts",
+    "./mail-conversation-read": "./src/mail-conversation-read.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",
