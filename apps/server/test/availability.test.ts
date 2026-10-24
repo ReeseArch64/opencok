@@ -115,7 +115,7 @@ test("building star availability and next-level previews use the same supplied i
     id: "bad",
     build_id: "400000",
     star: "invalid",
-    online: "all",
+    online: "close",
     version: "12.6.0",
   });
   const row = { uuid: "synthetic-building", itemId: "400000", level: 30, star: 0, progress: 0 };

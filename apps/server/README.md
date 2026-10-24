@@ -6,7 +6,8 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when configured), `login.dataconfig`,
-`login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
+`login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`,
+`equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
@@ -111,8 +112,55 @@ types. XML values remain strings inside objects, while the documented integer an
 long fields are checked before serialization. Long scores retain signed 64-bit
 precision. Optional `general_sale.xml`, `pay_servercontrol.xml` and `kingdomskill.xml`
 provide sale limits, the `69008` control record and ordered skill-tab metadata.
-Unrelated item records are not exposed. Missing optional records remain omitted;
-missing sale catalogs produce an empty `general_buy` object.
+Unrelated item records are not exposed. Missing optional records follow their individual
+contracts; missing sale catalogs produce an empty `general_buy` object. Missing external
+`w_thedoor` and `69008` entries produce empty objects, as their legacy item getters do.
+
+The item loader now retains the final `data_config` group independently of the global
+item ID index. Duplicate IDs are replaced within each view; a later group with the
+same name replaces that group without removing earlier global entries. A declaration
+in another group can replace the global ID while the data-config group keeps its own
+value. When top-level groups exist, root item declarations are ignored. Group records
+use direct child element attributes, matching the reference loader; nested elements
+are not recursively added to the item index. Missing IDs use the literal `null` global
+cache suffix, while group maps retain a distinct null key. Blank IDs remain intact.
+Other catalog parsing keeps its existing behavior.
+
+Resource loading always supplies the group view, including an empty map for absent,
+empty or ungrouped configuration. An empty view rejects `login.dataconfig` and never
+falls back to unrelated global records. Directly constructed Rules without a supplied
+group view retain their explicitly provided item map as the configuration catalog.
+The overlord scalar deliberately keeps its global item lookup; feature, pay-control,
+sale and kingdom-skill catalogs remain separate. PVE attributes are assigned contiguous
+`k1`/`k2` aliases from the selected present fields; `k6` alone becomes `k1`. The extra
+`world_fire` object and `cityDefMax` scalar were removed from this response because the
+reference does not emit them. `world_fire1` and `cityDefInterval` remain present.
+
+Seven added unit tests cover group/global collisions, repeated groups, missing groups,
+root-versus-group precedence, null/blank IDs, direct element attributes, DTO source
+selection and projection aliases. General-sale record restoration and the broader
+configuration completion audit remain outstanding topic 1 work.
+
+Required data-config records and scalar fields now reject incomplete catalogs instead
+of emitting partial metadata. The normal-world synthetic contract exercises 200
+required records, including the separate global overlord lookup, and 53 required scalar
+or boss attributes. Empty plain objects remain valid when their projection requires no
+attributes. The selected normal/world-cup army, score and scene records are mandatory;
+the unselected alternative is not consumed. Quest/chat, scout and service-term text
+fields are required only after their reference gates pass. Optional follower/lord-tip
+records distinguish absent/empty maps from nonempty ID-only records, while a nonempty
+loading-show record requires its scalar. Optional quest initial level remains conditional
+on field presence. Reached errors reject the command without a partial response or
+player mutation.
+
+Configuration Int and Long scalars now share the bounded Java decimal parser, preserving
+Unicode digits, ASCII signs, leading zeroes and exact signed-width limits. Whitespace,
+fractional/exponential forms and overflows fail. Text scalars retain valid empty strings.
+Six added unit tests cover required-record deletion, required attributes, optional and
+conditional fields, selected world mode and numeric boundaries; an existing controller
+unit now also verifies rejection of incomplete catalogs after owner authentication.
+Fixtures are complete synthetic declarations, never defaults injected into runtime
+catalogs. General-sale restoration still remains separate work.
 
 The command reads the authenticated realm profile to select the level-dependent
 stamina cap when `stamina_limit` is available. Realm switches control quest metadata,
@@ -128,22 +176,185 @@ enabled in the runtime composition.
 
 `login.other` with `config` now returns `fbShare`, `pushSetting`, `switches`,
 `isVerifyChangeAccount` and `funcOn`. Optional `fb_share.xml` records preserve all
-string values and IDs. Profile, switches and saved notification preferences are
-read in one repeatable-read PostgreSQL transaction. Missing notification settings
-are synthesized using the legacy 20-type defaults, with world news off. Unlike
-the Java read path, this query never inserts a preference row; explicit preference
-updates belong to topic 6. Dependency failures reject the query instead of silently
-returning a partial configuration.
+string values and IDs. Profile and saved notification preferences are read in one
+read-only repeatable-read PostgreSQL transaction. Missing notification settings
+are synthesized using the legacy 20-type defaults, with world news off. When the
+original saved list has fewer than 20 rows and no type 15, the controller persists
+that world-news default before querying switches. A separate read-write transaction
+locks and revalidates the owner in the configured realm, then inserts type 15,
+status 0 and audio 1 into the existing `parse_info` table. Other synthesized defaults
+are not persisted. The first response retains the synthesized type/status shape;
+later reads include the stored audio field. Existing preferences are not updated.
+
+Required profile/preference failures reject the query. Initialization failures also
+reject before switches or announcements. A duplicate insert from a stale snapshot
+fails without overwriting the saved choice; a retry reads the current preference.
+A lost commit acknowledgment may leave the row saved despite a failed request.
+Later switch or announcement failures cannot undo an already committed default.
+The explicit preference commands below share this saved state. No schema migration or
+external dependency is added; repositories reuse the existing constants workspace.
+
+The optional switches query runs independently after the required snapshot and any
+default initialization. Recognized PostgreSQL SQLSTATE errors become
+empty switch arrays, matching the legacy SQL adapter's SQLException fallback, and
+verification continues. Other query exceptions omit both `switches` and
+`isVerifyChangeAccount`. An empty successful query also retains its empty array.
+Verification failures retain already projected switches and omit only the verification
+field. Feature announcements run afterward, outside that failure boundary.
+
+`pushSetting.get` returns the same `pushSetting` array and conditional world-news
+initialization independently of share metadata, switches, verification and announcements.
+Saved rows contain Int `type`, `status` and `audio`; synthesized defaults contain only
+Int `type` and `status`. A saved list of at least 20 rows suppresses defaults even when
+those rows have unknown types. Request-supplied player/realm fields do not select an owner.
+
+`parse.push.set` requires SFS Int `type` and `status`; optional SFS Int `audio` defaults
+to 1 when omitted, including when updating an existing row. All three fields retain
+the signed 32-bit domain instead of being limited to known notification types or
+boolean flags. The realm repository locks/revalidates the authenticated owner, reads
+the selected `(uid, type)` row and inserts it or updates both status and audio in one
+read-committed transaction. Other owners and types are untouched. Successful writes
+return Bool `success` with ordinary request correlation and no push payload.
+
+Owner locking serializes concurrent writes before selecting an insert/update branch.
+Repeating a committed request updates the same row to the same values. Database failures
+reject without a success response, and rollback preserves prior state; a lost commit
+acknowledgment may leave the choice saved, so a retry uses the existing-row branch.
+The initializer remains a plain insert and cannot overwrite an explicit news choice.
+No schema, configuration or dependency change is required. Device registration,
+notification delivery and other profile mutation commands remain separate work.
+Unit tests exercise protocol, controller and generated SQL behavior with synthetic
+state, including a simulated owner-lock schedule. They do not establish live database
+concurrency or native-client compatibility; neither was exercised in this phase.
+
+Seven profile preference commands persist mapped fields in the existing
+`user_mixed_info` row:
+
+| Command              | Input               | Stored field       | Response                                                          |
+| -------------------- | ------------------- | ------------------ | ----------------------------------------------------------------- |
+| `equip.show`         | Int `show`          | `showEquip`        | Int `show`                                                        |
+| `medal.show`         | Int `show`          | `showMedal`        | Int `show`                                                        |
+| `march.soldier.show` | Int `show`          | `marchSoldierShow` | Int `show`                                                        |
+| `colorblind.set`     | Int `set`           | `colorblind`       | Int `show`                                                        |
+| `equip.scroll`       | Int `setting`       | `scrollEquip`      | Bool `scrollEquip` for 0/1; ordinary success for other Int values |
+| `banner.set`         | Optional Int `set`  | `showBanner`       | Int `show` when the row exists; ordinary success otherwise        |
+| `speed.cd.open`      | Optional Int `open` | `clientSaveFlag`   | Ordinary success                                                  |
+
+All fields retain signed Int values except equipment scrolling, whose effective
+updates accept only 0/1. Other scroll integers skip the mixed-state read entirely.
+Banner/speed requests skip mixed-state reads when their parameter is absent; a missing
+profile also produces their empty-result acknowledgment. Missing mixed rows are tolerated
+only for those two commands, and their values are decoded only after locating the row.
+Required settings reject missing state. These handlers never create mixed-state rows.
+
+The repository locks/revalidates the owner and locks the selected mixed row in one
+read-committed transaction, then updates only the mapped column. Unchanged primitive
+values skip the update, except speed flags, which always write. Nullable integer fields
+compare SQL null as zero. Banner storage uses bigint but compares within the signed Int
+domain and writes an exact bigint; out-of-range restored values reject. The banner setter
+preserves its literal value; country-specific public display remains a separate read rule.
+Existing public-profile projections consume the three visibility fields and show them
+only when the value equals 1. No cache, notification or unsolicited push is emitted.
+
+Input and write failures reject without a success response; rollback preserves previous
+state. A lost commit acknowledgment can leave a value saved, and retries follow the
+unchanged-value or speed-write rule. Unit coverage uses fake SQL and a simulated owner-lock
+schedule, including different-field updates preserving both values. Live concurrency,
+client behavior, nickname changes and their costs remain outside this completed slice.
+
+Nickname checking now has a pure text/evaluation foundation in `rules/nickname`.
+It uses Java trim (boundary code units at most U+0020), Java 8 blank classification,
+balanced braces and the original JSON/emoji/supplementary-character exclusions.
+Weighted length counts U+007E–U+05FF units as one each, removes them, then measures
+the remaining UTF-16 text using Java GBK byte widths and replacement behavior.
+Removing those units can join surrogate halves; supplementary or unmappable characters
+use the encoder's replacement width. Pure inputs are bounded to 65,535 UTF-16 units;
+this does not expand the existing SFS transport bounds or admit malformed wire text.
+
+The 3–16 gate uses the trimmed weighted length. Response `length` adds every ASCII
+space in the original input, including internal spaces already counted by the weighted
+length; `remainLength` can therefore be negative while this gate still passes. A leading
+parenthesis sets `exist` to -1 but does not skip otherwise eligible filter or availability
+calls. Invalid length/characters skip both providers; a filter match skips availability.
+Only type 0 checks occupation, while other signed Int types still filter. Providers
+receive the trimmed name, are required explicitly and preserve reached failures.
+
+The GBK width table contains 139 intervals covering 23,940 two-byte BMP characters.
+An independently authored Temurin 8.0.504+1 standard-library probe supplied an exhaustive
+65,536-unit width checksum and 2,264 synthetic text vectors. The checked-in vectors store
+UTF-16 as hex to retain surrogate and control cases. Normal unit tests execute only
+TypeScript; no private game classes were executed to generate evidence. Character
+validation follows the collected original's balanced-brace return rather than an
+inconsistent reconstructed source variant.
+
+The nickname bad-word matcher now models the specific generated patterns rather than
+using JavaScript word boundaries. ASCII-word entries use ASCII case folding with Java 8
+Unicode letter/digit/underscore boundaries and its combining-mark base behavior.
+Other entries retain case, allow ASCII whitespace after each literal UTF-16 unit and
+preserve the generated unescaped `^`, `$` and `|` semantics. Escaped punctuation stays
+literal. Supplementary/surrogate matching and final line-terminator anchors follow the
+Java primitive vectors. A matching exception stops the remaining list and returns false;
+the loading lock returns true before inspecting entries or text.
+
+`resources/nickname-words` reads UTF-8 `../gameconfig/badwords.txt` relative to the supplied
+resource directory, with the existing resource-size policy of 16 MiB. It splits CR/LF
+lines and commas, drops empty tokens without trimming, stably orders new entries by
+descending UTF-16 length, appends them to retained entries and removes only the first
+exact space and `v` from the combined list. Reloads keep duplicates. Read failures unlock
+and retain previous entries, including an empty list after an unsuccessful first load;
+this is the reference loader's failure behavior. Overlapping reloads retain its shared
+lock-flag behavior rather than introducing a reference counter. The original launch
+configuration specifies UTF-8, and BOM/entry whitespace is preserved.
+
+Fourteen new units cover the matcher and resource lifecycle with synthetic input only.
+An independently authored Java 8 probe supplies 4,071 generated-pattern outcomes and a
+checksum over all 1,114,112 Unicode code points: 107,270 letter/digit points and 1,280
+nonspacing marks, represented by 735 intervals. Normal unit tests use TypeScript,
+injected reads and temporary synthetic files; they do not execute private game classes.
+
+Global name comparison now has a pure `rules/mysql-unicode` equality-key primitive.
+The reference global DDL uses `utf8_unicode_ci` for both `usermapping` and `account_new`.
+The primitive preserves UCA 4 primary weights, expansions such as sharp-s to `ss`,
+primary-ignorable characters and trailing space-weight padding. Case/accent equivalence
+is character-specific: `Æ` differs from `AE`, Cyrillic short-I differs from I, and newer
+uppercase sharp-s does not acquire modern case equivalence. Hangul syllables are not
+decomposed; contractions and normalization are not introduced. The historical U+FDFA
+implicit-weight exception is retained. Surrogates and supplementary characters are
+outside the legacy three-byte UTF-8 domain and are rejected; pure text remains bounded
+to 65,535 code units. NUL is a primary ignorable in this primitive; transport and SQL
+representability remain separate concerns for the adapter.
+
+The 12,072 explicit characters are stored in 3,963 runs derived from public Unicode
+data. Six synthetic units include an exhaustive checksum for all 63,488 valid BMP
+characters against public MySQL weight tables, plus padding, expansion and historical
+exception cases. [Data provenance and license](../../packages/rules/UNICODE-NOTICE.md)
+are checked in. No database, Java classes or client are executed by these tests.
+
+`user.check.nickName` remains unsupported until the global name-mapping/account query
+and runtime providers are composed. The global mapping lookup is distinct from a local
+profile-name search. The loader/matcher has unit composition with the check rules but
+is not yet installed in realm startup; the corresponding container resource mount also
+remains pending. No always-available name answer is supplied. Name reservation, rename
+item/gold costs and downstream effects remain separate required work. This foundation
+performs no game-state persistence or notifications.
 
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
 separately checks version and start/end dates for stamina, star unlocks and
 account-specific eligibility. Account binding and multiple-role flags also check
 exact channel and player allowlists; subscriptions check their supported channels.
-Boss, payment, subscription and multiple-role announcements additionally require
-an available backend service. They remain closed in the current composition;
-ordinary configured feature metadata is no longer forced off. This does not enable
-unsupported gameplay commands or establish client rendering.
+Account flags evaluate their announcement selector before replacing that result with
+the global `cn_bind`/`role_on` rule and allowlists. Empty tokens are ignored; Java-blank
+lists and exact `0` close the flag, while `all` also matches blank player/channel values.
+Subscriptions use the announcement's realm selector and exact supported platform,
+without a separate service flag, version comparison or time window.
+Boss announcements alone require running service state. Each declaration reads that
+state lazily before its global feature rule; elite, special and NPC bosses use the
+`world_boss_*` keys, separately from their `worldboss_*` announcement IDs. Announcement
+selectors do not gate bosses, and stopped/absent services skip feature parsing. The
+runtime has no boss lifecycle provider yet, so those flags remain closed. Configured
+account/subscription metadata does not enable commerce, account-switching handlers or
+establish client rendering.
 
 Feature-version comparison now parses every nonempty dot-separated component as a
 signed Java Integer before comparing the first three positions. Unicode decimal
@@ -232,7 +443,8 @@ typed configuration, account-counter and lucky-day composition. Original catalog
 records remain unchanged. The existing optional-catalog projection remains: absent
 item records can stay omitted/closed, while a reached required selector in a present
 record rejects when missing. Optional quest tab/push fields and absent `wa_switch.k1`
-remain optional. These projections do not claim legacy missing-catalog failures.
+remain optional. Required data-config catalog failures now follow the separate
+configuration contract described above.
 Kingdom-skill tab restoration, sorting and separators are described below. Lenient
 dates, default version policies and other exceptional catalog projections remain
 separate compatibility work.
@@ -268,9 +480,16 @@ failure. Normal tests execute no Java or private game code. This implements conf
 presentation only; skill execution, material costs, timers and rewards remain separate.
 
 Account-change verification uses the configured version/realm threshold and the
-global Redis key `opencok:global:device-account-change:<deviceId>`. Reads preserve
-integer precision and reject malformed counters. No count is fetched when the
-gate is closed or the profile has no device ID. This phase does not implement
+global Redis key `opencok:global:device-account-change:<deviceId>`. The adapter returns
+the literal string or null, rejecting non-string responses and values longer than
+65,535 characters. After the feature gate, a missing count or missing threshold returns
+false without numeric parsing. Otherwise both values use signed Java Int parsing,
+including plus signs, leading zeroes and supported Unicode digits; malformed or
+overflowing values reach the switch projection's omission boundary. Negative values
+remain signed comparisons. No count is fetched when the gate is closed or the switches
+are unavailable after a non-SQL query exception. Empty device IDs retain an empty key suffix; null/missing IDs use the
+literal `null` suffix, as in Java string concatenation. Whitespace remains literal.
+This phase does not implement
 account switching or import legacy Redis keys; a future switching writer must use
 this namespace. The shared local Redis instance supplies the global counter across
 the configured realms. Preference and counter adapters are unit-tested with fake
@@ -2801,16 +3020,16 @@ uses the existing bounded Java hash traversal helper, with its documented except
 limits. Task visibility, discovery, completion writes and their pushes still need to
 use these descriptions before the reconnect task component is complete.
 
-| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                                                                    |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; ordered feature/item/event realm parsing and kingdom-skill tabs; synthetic unit and adapter tests                                  | Lenient dates, version policies and other exceptional catalog behavior. Native-client and real-service validation remain deferred; bosses, commerce and account switching stay outside this wave. |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                                 | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                                                            |
-| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                                        |
-| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                                         |
-| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                                  |
-| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                                        | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                                                         |
-| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                                      |
-| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                                 |
+| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                                                          |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Configuration and feature availability | Settings/data-config and deferred-login projections; ordered XML declarations; legacy numeric dates, versions and selectors; timed star previews; kingdom-skill tabs; account/subscription overrides and lazy boss availability; synthetic unit and adapter tests                            | Deferred-login failure boundaries and saved-state edge cases. Native-client/service validation remains deferred; boss lifecycle, commerce and account switching stay outside this wave. |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                                 | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                                                  |
+| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                              |
+| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                               |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                        |
+| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags; nickname text/evaluation rules                                                              | Nickname filter/global availability and handler composition; rename costs/effects and remaining profile commands.                                                                       |
+| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                            |
+| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                       |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog

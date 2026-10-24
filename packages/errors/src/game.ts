@@ -6,6 +6,8 @@ export class GameError extends Error {
       | "building_rule"
       | "role_rule"
       | "cost_rule"
+      | "config_record"
+      | "config_string"
       | "config_integer"
       | "config_long"
       | "stamina_rule"
