@@ -15,10 +15,12 @@ import { user_achievement } from "@opencok/drizzle/schema/opencok_kingdom/user_a
 import { and, asc, count, eq, inArray } from "drizzle-orm";
 import type { PublicProfileState } from "@opencok/contracts/profile";
 import type { Database } from "./game.ts";
+import { readProfileAlliance } from "./profile-alliance.ts";
 
 export function readPublicProfile(
   db: Database["kingdom"]["db"],
   uid: string,
+  observerAllianceId = "",
 ): Promise<PublicProfileState> {
   if (!uid.trim() || uid.length > 40) throw new Error("Invalid public profile identity");
   return db.transaction(
@@ -51,6 +53,7 @@ export function readPublicProfile(
           military: undefined,
           office: undefined,
           flowers: undefined,
+          alliance: undefined,
           taverns: [],
           generals: [],
           skills: [],
@@ -209,6 +212,10 @@ export function readPublicProfile(
           .where(eq(flower_ranking.uid, uid))
           .limit(1)
       )[0];
+      const allianceId = profile.allianceId;
+      const alliance = allianceId?.trim()
+        ? await readProfileAlliance(tx, allianceId, allianceId !== observerAllianceId)
+        : undefined;
       return {
         profile,
         statistics,
@@ -218,6 +225,7 @@ export function readPublicProfile(
         military,
         office,
         flowers,
+        alliance,
         taverns,
         generals,
         skills,

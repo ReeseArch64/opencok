@@ -14,7 +14,7 @@ function database(
 ) {
   const queries: { text: string; params: unknown[] }[] = [];
   const rows: Record<string, unknown[][]> = {
-    userprofile: [["synthetic", "Public", 5, 123, null, 2, 3, 0, "alliance", 2]],
+    userprofile: [["synthetic", "Public", 5, 123, null, 2, 3, 0, "", 2]],
     playerinfo: [[1, 2, 3, 4, 5, 6, "9007199254740993", 7, 8, 9, "9223372036854775807"]],
     user_vip: [[180, "9007199254740995"]],
     user_lord: [["medal-a"]],
@@ -69,7 +69,7 @@ test("public profile persistence binds one owner throughout a repeatable read sn
     picVer: 2,
     picfraId: 3,
     gmFlag: 0,
-    allianceId: "alliance",
+    allianceId: "",
     serverId: 2,
   });
   expect(state.statistics).toMatchObject({
@@ -104,6 +104,7 @@ test("public profile persistence binds one owner throughout a repeatable read sn
   expect(state.honors).toEqual([{ id: "medal-a", level: 3 }]);
   expect(state.completedAchievements).toBe(3);
   expect(state.flowers).toEqual({ flowerVal: 90, eggVal: 15 });
+  expect(state.alliance).toBeUndefined();
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const reads = queries.slice(1, -1);

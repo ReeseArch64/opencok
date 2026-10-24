@@ -9,12 +9,22 @@ export interface PublicProfileState {
   military: Row | undefined;
   office: Row | undefined;
   flowers: Row | undefined;
+  alliance: PublicAllianceState | undefined;
   taverns: readonly Row[];
   generals: readonly Row[];
   skills: readonly Row[];
   equipment: readonly Row[];
   honors: readonly Row[];
   completedAchievements: number;
+}
+
+export interface PublicAllianceState {
+  alliance: Row;
+  leader: Row;
+  totals: Row;
+  sciences: readonly Row[];
+  video: Row | undefined;
+  withEffects: boolean;
 }
 
 export type GeneralAbility = Readonly<Record<string, string | number | null>>;
