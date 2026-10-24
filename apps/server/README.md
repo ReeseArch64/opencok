@@ -7,7 +7,7 @@ The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
 `login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`,
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -624,6 +624,19 @@ Null ban timestamps reject instead of simulating an aborted legacy cache refresh
 An empty fresh board stays empty, rather than retaining old cached entries. No
 construction settlement, score calculation or player-state write occurs.
 
+`silver.contribute.rank`, tracked in [issue #62](https://github.com/ReeseArch64/opencok/issues/62),
+reads positive persisted material-contribution totals using the `ranking` item's `k4`
+limit. Its candidate window equals the display limit; future bans and missing
+profile/alliance presentation are removed afterward without refilling slots. GMs and
+cross-realm visitors remain eligible. The response uses `myRanking` instead of
+`selfRanking`, returns -1 when no visible entries survive, and omits `picfraId`.
+Otherwise the position comes from the filtered candidate ordinal or one plus the
+count of strictly greater totals, without presentation exclusions. Missing own totals
+produce fallback position one when the visible board is nonempty. The existing
+`material_cost_ranking` table is checked at startup. This query uses the same fresh
+read-only snapshot and deterministic tie policy as the other boards; it does not
+accept donations, reset scores, grant rewards or advance activities.
+
 ## Gameplay migration: topics 1–8
 
 The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)
@@ -676,7 +689,7 @@ use these descriptions before the reconnect task component is complete.
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                               | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
-| 3. Ranking queries                        | Ordinary-realm player power, kills, level and castles; alliance power/kills; self positions, capacity/video presentation and synthetic unit coverage                                       | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                       |
+| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills; self positions, capacity/video presentation and synthetic unit coverage                        | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                       |
 | 4. Basic mailbox                          | Persistence schema                                                                                                                                                                         | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                              | Point details, player search and favorites, including authorization for writes.                                                                  |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                      | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |

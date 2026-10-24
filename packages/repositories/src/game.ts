@@ -1,3 +1,4 @@
+import { material_cost_ranking } from "@opencok/drizzle/schema/opencok_kingdom/material_cost_ranking";
 import { readAllianceRanking } from "./alliance-ranking.ts";
 import type { AllianceRankingQuery } from "@opencok/contracts/alliance-ranking";
 import { createDatabases } from "@opencok/drizzle";
@@ -78,6 +79,7 @@ export class Database implements GameStore, FriendshipMineStore {
       user_item,
       user_lord,
       user_mine,
+      material_cost_ranking,
       switches,
       parse_info,
     ])
