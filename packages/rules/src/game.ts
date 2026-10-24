@@ -22,6 +22,7 @@ export interface ConfigurationCatalogs {
   dataConfig?: Map<string | null, Rule>;
   serverConfig?: Map<string, Rule>;
   generalSales?: Map<string, Rule>;
+  generalSaleRecords?: readonly Rule[];
   payControl?: Map<string, Rule>;
   kingdomSkills?: Map<string, Rule>;
   kingdomSkillRecords?: readonly Rule[];

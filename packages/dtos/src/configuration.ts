@@ -387,10 +387,13 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
     }
   }
   boss("worldboss_npc");
+  const generalSales = rules.configuration.generalSaleRecords ?? [
+    ...(rules.configuration.generalSales?.values() ?? []),
+  ];
   result.general_buy = sfs.object(
     Object.fromEntries(
-      [...(rules.configuration.generalSales?.values() ?? [])].map((rule) => {
-        if (!rule.id || rule.limit === undefined)
+      generalSales.map((rule) => {
+        if (typeof rule.id !== "string" || rule.id.length > 255 || typeof rule.limit !== "string")
           throw new GameError(errors.unsupported, "general_sale_rule");
         return [rule.id, sfs.string(rule.limit)];
       }),
