@@ -14,7 +14,8 @@
     "./bootstrap": "./src/bootstrap.ts",
     "./city": "./src/city.ts",
     "./players": "./src/players.ts",
-    "./power": "./src/power.ts"
+    "./power": "./src/power.ts",
+    "./profile": "./src/profile.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
