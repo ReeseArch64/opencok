@@ -22,6 +22,8 @@ import { checkPowerStore, readPowerState } from "./power.ts";
 import { checkPublicProfileStore, loadPublicProfile } from "./profile.ts";
 import { loadFriendshipMine } from "./reconnect-mine.ts";
 import type { FriendshipMine, FriendshipMineStore } from "@opencok/contracts/reconnect";
+import type { PlayerRankingQuery } from "@opencok/contracts/ranking";
+import { readPlayerRanking } from "./ranking.ts";
 
 type GameRepositoryConfig = Pick<
   ServerConfig,
@@ -173,6 +175,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   publicProfile(uid: string, observerAllianceId: string) {
     return loadPublicProfile(this.databases, this.config.kingdomId, uid, observerAllianceId);
+  }
+  playerRanking(uid: string, query: PlayerRankingQuery) {
+    return readPlayerRanking(this.kingdom.db, uid, query);
   }
   friendshipMine(uid: string, initial: () => FriendshipMine) {
     return loadFriendshipMine(
