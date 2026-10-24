@@ -1,10 +1,13 @@
 import { readMailBatch } from "./mail-batch.ts";
+import { readMailGroups } from "./mail-groups.ts";
 import { readMailCategory } from "./mail-category.ts";
 import { translationv2 } from "@opencok/drizzle/schema/opencok_kingdom/translationv2";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { readMailStatus } from "./mail.ts";
 import type {
   MailBatchQuery,
+  MailGroupQuery,
+  MailGroupInspector,
   MailCategoryQuery,
   MailCategoryInspector,
   MailContentsQuery,
@@ -235,6 +238,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   mailBatch(uid: string, query: MailBatchQuery, inspect: MailCategoryInspector) {
     return readMailBatch(this.databases, this.config.kingdomId, uid, query, inspect);
+  }
+  mailGroups(uid: string, query: MailGroupQuery, inspect: MailGroupInspector) {
+    return readMailGroups(this.databases, this.config.kingdomId, uid, query, inspect);
   }
   mailCategory(uid: string, query: MailCategoryQuery, inspect: MailCategoryInspector) {
     return readMailCategory(this.databases, this.config.kingdomId, uid, query, inspect);

@@ -4,6 +4,7 @@ import type {
   MailCategoryPresentation,
   MailTranslationLookup,
   MailTranslation,
+  MailSender,
 } from "@opencok/contracts/mail";
 import { mailCategorySenders, mailTranslationRequest, mailBlank } from "@opencok/rules/mail";
 import { GameError } from "@opencok/errors/game";
@@ -16,8 +17,9 @@ export async function resolveMailPresentation(
   chat: boolean,
   enabled: boolean,
   updateTime: () => Promise<string>,
+  resolvedSenders?: ReadonlyMap<string, MailSender>,
 ): Promise<MailCategoryPresentation> {
-  const senders = await readers.senders(mailCategorySenders(entries));
+  const senders = resolvedSenders ?? (await readers.senders(mailCategorySenders(entries)));
   const requests = new Map<string, { id: string; fromLang: string; toLang: string }>();
   if (chat && enabled)
     for (const entry of entries) {

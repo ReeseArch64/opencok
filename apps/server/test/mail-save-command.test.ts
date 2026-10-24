@@ -29,6 +29,7 @@ function fixture() {
     playerRanking: unused,
     allianceRanking: unused,
     mailStatus: unused,
+    mailGroups: unused,
     mailBatch: unused,
     mailCategory: unused,
     mailContents: unused,

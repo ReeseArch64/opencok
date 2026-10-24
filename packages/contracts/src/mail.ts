@@ -1,5 +1,67 @@
 import type { Row } from "./rows.ts";
 
+export type MailListCommand = "mread.batch" | "mread.chat";
+
+export type MailConversationReadEffect =
+  | { kind: "mail"; types: readonly number[]; fromUser?: string | null; unreadOnly: boolean }
+  | { kind: "chat"; others: string; types: readonly ("1" | "2" | "3" | "20")[] };
+
+export interface MailConversationReadQuery {
+  now: number;
+  effects: readonly MailConversationReadEffect[];
+}
+
+export interface MailConversationReadSnapshot {
+  profile: Row | undefined;
+}
+
+export interface MailGroupQuery {
+  moderation: boolean;
+  begin: number;
+  limit: number;
+  now: number;
+}
+
+export interface MailGroupKey {
+  groupType: number;
+  groupIndex: string;
+}
+
+export interface MailGroupEntry extends MailGroupKey {
+  uid: string;
+  updateTime: bigint;
+}
+
+export interface MailGroupPreview {
+  total: bigint;
+  unread: bigint;
+  entries: readonly MailListEntry[];
+}
+
+export interface MailGroupPage {
+  groups: readonly MailGroupEntry[];
+  previews: readonly MailGroupPreview[];
+}
+
+export interface MailGroupCleanup {
+  groups: readonly MailGroupKey[];
+  mailIds: readonly string[];
+}
+
+export interface MailGroupSelection {
+  kind: "sender" | "type" | "uid";
+  types: readonly number[];
+}
+
+export interface MailGroupReaders extends MailCategoryReaders {
+  preview(group: MailGroupKey, selection: MailGroupSelection): Promise<MailGroupPreview>;
+}
+
+export type MailGroupInspector = (
+  groups: readonly MailGroupEntry[],
+  readers: MailGroupReaders,
+) => Promise<MailGroupCleanup>;
+
 export type MailBatchKind =
   | "notices"
   | "studio"

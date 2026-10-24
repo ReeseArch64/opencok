@@ -28,6 +28,7 @@ function fixture() {
     publicProfile: unused,
     playerRanking: unused,
     allianceRanking: unused,
+    mailGroups: unused,
     mailBatch: unused,
     mailCategory: unused,
     mailContents: unused,

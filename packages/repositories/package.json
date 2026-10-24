@@ -26,11 +26,13 @@
     "./mail-read": "./src/mail-read.ts",
     "./mail-gift-relay": "./src/mail-gift-relay.ts",
     "./mail-batch": "./src/mail-batch.ts",
+    "./mail-groups": "./src/mail-groups.ts",
     "./mail-category": "./src/mail-category.ts",
     "./mail-presentation": "./src/mail-presentation.ts",
     "./mail-contents": "./src/mail-contents.ts",
     "./mail-delete": "./src/mail-delete.ts",
-    "./mail-conversation-save": "./src/mail-conversation-save.ts"
+    "./mail-conversation-save": "./src/mail-conversation-save.ts",
+    "./mail-conversation-read": "./src/mail-conversation-read.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",
