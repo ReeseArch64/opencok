@@ -1,5 +1,15 @@
 import type { Row } from "./rows.ts";
 
+export type MailConversationSaveQuery = { now: number } & (
+  | { scope: "none" }
+  | { scope: "sender"; fromUser: string; moderation: boolean; flag: number }
+  | { scope: "type"; type: number; flag: number }
+);
+
+export interface MailConversationSaveSnapshot {
+  profile: Row | undefined;
+}
+
 export interface MailDeleteQuery {
   ids: readonly string[];
   now: number;
