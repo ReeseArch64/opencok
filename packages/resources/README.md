@@ -64,7 +64,10 @@ bun run --cwd packages/resources import:catalogs /path/to/authorized/xml
 Running it replaces maintained catalog edits with that source snapshot. Normal
 editing and deployment use the maintained TypeScript directly. The explicit XML
 loader remains available for isolated synthetic fixtures and compatibility checks;
-the application environment no longer selects it.
+the application environment no longer selects it. Integration tests pass their
+synthetic Rules explicitly through `startServer(config, rules)`. RealmRulesLive
+continues to load the bundled catalog by default; the injected rules must match
+the configured kingdom and retain normal dependency/resource lifecycle.
 
 No wire, database or account-state migration is introduced. Roll back the complete
 application artifact; revisions before this migration also require restoring the

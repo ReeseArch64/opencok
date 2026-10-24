@@ -25,6 +25,7 @@ import { fields, sfs, str, Type } from "@opencok/messages/sfs";
 import { FOREVER } from "@opencok/mappings/city";
 import { Client } from "./client.ts";
 import { dataConfigItems } from "../test/fixtures/data-config.ts";
+import { loadRules } from "@opencok/resources/rules";
 
 async function eventually(check: () => Promise<boolean>, timeout = 15000) {
   const end = Date.now() + timeout;
@@ -228,7 +229,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         kingdomDatabase: topology.kingdoms[id - 1]!.database,
         zkPath: `/opencok-experiment/COK${id}`,
       };
-      const server = await startServer(settings);
+      const server = await startServer(settings, await loadRules(resources, id));
       servers.push(server);
       const adapter = new Database(settings);
       adapters.push(adapter);
@@ -261,6 +262,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         fields(fields((await client.command("login.dataconfig")).dataConfig).player_max).k3?.value,
       ).toBe("30");
       const army = await client.command("login.other", { army: sfs.int(1) });
+      expect(army.army?.type).toBe(Type.Array);
       expect(fields((army.army!.value as ReturnType<typeof sfs.object>[])[0]).free?.value).toBe(17);
       expect(fields((army.items!.value as ReturnType<typeof sfs.object>[])[0]).count?.value).toBe(
         7,
@@ -314,7 +316,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     clients[0]!.close();
     await servers[0]!.close();
     servers.shift();
-    const restarted = await startServer(base);
+    const restarted = await startServer(base, await loadRules(resources, base.kingdomId));
     servers.push(restarted);
     const reconnected = new Client(restarted.port);
     clients.push(reconnected);

@@ -3,7 +3,8 @@ import { createConnection, createServer } from "node:net";
 import { Effect, Layer, ManagedRuntime } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
 import { RealmConfig, RealmConfigLive, config } from "../src/config.ts";
-import { RealmDependencies, RealmServer, RealmServerLive } from "../src/server.ts";
+import { RealmDependencies, RealmServer, RealmServerLive, startServer } from "../src/server.ts";
+import { Rules } from "@opencok/rules/game";
 import type { ServerDependencies } from "@opencok/connection/dependencies";
 
 const source = Layer.succeed(EnvironmentSource, {
@@ -169,4 +170,12 @@ test("health port bind failure rolls back an already opened TCP listener", async
     await new Promise<void>((resolve) => probe.close(() => resolve()));
     await new Promise<void>((resolve) => occupied.close(() => resolve()));
   }
+});
+
+test("realm startup rejects injected rules belonging to another kingdom before acquiring dependencies", async () => {
+  const settings = await Effect.runPromise(config.pipe(Effect.provide(source)));
+  const foreignRules = new Rules(new Map(), new Map(), new Map());
+  await expect(startServer(settings, foreignRules)).rejects.toThrow(
+    "Rules do not belong to the configured realm",
+  );
 });

@@ -30,6 +30,7 @@ import { Database } from "@opencok/repositories/game";
 import { Cache } from "@opencok/storage/session";
 import { Coordination } from "@opencok/storage/coordination";
 import { loadRules } from "@opencok/resources/rules";
+import type { Rules } from "@opencok/rules/game";
 import { GameService } from "@opencok/services/game";
 import { WorldService } from "@opencok/services/world";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
@@ -44,13 +45,21 @@ export class RealmDependencies extends Context.Service<RealmDependencies, Server
   "@opencok/server/Dependencies",
 ) {}
 
+export class RealmRules extends Context.Service<RealmRules, Rules>()("@opencok/server/Rules") {}
+
+export const RealmRulesLive = Layer.effect(
+  RealmRules,
+  Effect.gen(function* () {
+    const config = yield* RealmConfig;
+    return yield* fromPromise("realm.resources", () => loadRules(undefined, config.kingdomId));
+  }),
+);
+
 export const RealmDependenciesLive = Layer.effect(
   RealmDependencies,
   Effect.gen(function* () {
     const config = yield* RealmConfig;
-    const rules = yield* fromPromise("realm.resources", () =>
-      loadRules(undefined, config.kingdomId),
-    );
+    const rules = yield* RealmRules;
     const db = yield* acquireResource(
       "realm.database",
       async () => new Database(config),
@@ -261,11 +270,17 @@ export const RealmServerLive = Layer.effect(
   }),
 );
 
-export const RealmLive = RealmServerLive.pipe(Layer.provide(RealmDependenciesLive));
+const realm = RealmServerLive.pipe(Layer.provide(RealmDependenciesLive));
+export const RealmLive = realm.pipe(Layer.provide(RealmRulesLive));
 
-export async function startServer(config: Config) {
+export async function startServer(config: Config, rules?: Rules) {
+  if (rules && rules.kingdomId !== config.kingdomId)
+    throw new Error("Rules do not belong to the configured realm");
   const runtime = ManagedRuntime.make(
-    RealmLive.pipe(Layer.provide(Layer.succeed(RealmConfig, config))),
+    realm.pipe(
+      Layer.provide(rules ? Layer.succeed(RealmRules, rules) : RealmRulesLive),
+      Layer.provide(Layer.succeed(RealmConfig, config)),
+    ),
   );
   try {
     const server = await runtime.runPromise(RealmServer);
