@@ -16,16 +16,28 @@ import { and, asc, eq, getTableColumns, gt, inArray, or, sql } from "drizzle-orm
 import type { ServerConfig } from "@opencok/contracts/server";
 import type { GameStore, CityState, LoginConfigurationState } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
+import { checkPlayerSummaryStore, loadPlayerSummaries } from "./players.ts";
 
 type GameRepositoryConfig = Pick<
   ServerConfig,
-  "databaseUrl" | "timeoutMs" | "globalDatabase" | "kingdomId" | "kingdomDatabase"
+  | "databaseUrl"
+  | "timeoutMs"
+  | "globalDatabase"
+  | "kingdomId"
+  | "kingdomDatabase"
+  | "playerKingdoms"
 >;
 
 export class Database implements GameStore {
   readonly databases;
   readonly kingdom;
   constructor(readonly config: GameRepositoryConfig) {
+    const kingdoms = [...(config.playerKingdoms ?? [])];
+    const own = kingdoms.find((realm) => realm.id === config.kingdomId);
+    if (own && own.database !== config.kingdomDatabase)
+      throw new Error("Player realm configuration conflicts with the selected realm");
+    if (!own) kingdoms.push({ id: config.kingdomId, database: config.kingdomDatabase });
+    if (kingdoms.length > 2) throw new Error("At most two player realms may be configured");
     this.databases = createDatabases(
       {
         connectionString: config.databaseUrl,
@@ -36,12 +48,12 @@ export class Database implements GameStore {
       },
       {
         globalDatabase: config.globalDatabase,
-        kingdoms: [{ id: config.kingdomId, database: config.kingdomDatabase }],
+        kingdoms,
       },
     );
     this.kingdom = this.databases.getKingdom(config.kingdomId);
 
-    this.kingdom.pool.on("error", () => {});
+    for (const kingdom of this.databases.kingdoms.values()) kingdom.pool.on("error", () => {});
     this.databases.global.pool.on("error", () => {});
   }
   async start() {
@@ -61,6 +73,7 @@ export class Database implements GameStore {
     ])
       await this.kingdom.db.select().from(table).limit(0);
     await this.databases.global.db.select().from(account_new).limit(0);
+    await checkPlayerSummaryStore(this.kingdom.db);
   }
   async health() {
     await Promise.all([
@@ -143,6 +156,9 @@ export class Database implements GameStore {
   }
   configuration(uid: string): Promise<LoginConfigurationState> {
     return readLoginConfiguration(this.kingdom.db, uid);
+  }
+  playerSummaries(uids: string[], allServers: boolean) {
+    return loadPlayerSummaries(this.databases, this.config.kingdomId, uids, allServers);
   }
   async world(uid: string, ids: number[]) {
     return this.kingdom.db.transaction(

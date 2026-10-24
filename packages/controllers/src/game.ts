@@ -1,7 +1,8 @@
 import type { ServerConfig } from "@opencok/contracts/server";
 import type { CityState, GameServices, GameStore } from "@opencok/contracts/game";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
-import { sfs, type Fields } from "@opencok/messages/sfs";
+import { sfs, Type, type Fields, type Value } from "@opencok/messages/sfs";
+import { guidePlayerSummary, playerSummary } from "@opencok/dtos/players";
 import { building, gold, queue, resource, user } from "@opencok/dtos/city";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
@@ -114,6 +115,10 @@ export class Game {
       case "build.info":
         body = this.info(await this.state(uid));
         break;
+      case "get.user.info.multi":
+        await this.profile(uid);
+        body = await this.playerSummaries(params);
+        break;
       default:
         throw new GameError(errors.unsupported);
     }
@@ -123,6 +128,48 @@ export class Game {
   }
   private async profile(uid: string): Promise<Row> {
     return this.checkProfile(await this.db.profile(uid));
+  }
+  private async playerSummaries(params: Fields): Promise<Fields> {
+    const value = params.uids;
+    if (!value || value.type === Type.Null) return { uids: sfs.array() };
+    if (value.type !== Type.Array || !Array.isArray(value.value))
+      throw new GameError(errors.invalid);
+    const uids: string[] = [];
+    for (const entry of value.value as Value[]) {
+      if (entry?.type !== Type.String || typeof entry.value !== "string")
+        throw new GameError(errors.invalid);
+      if (!entry.value.trim()) continue;
+      if (entry.value.length > 255) throw new GameError(errors.invalid);
+      uids.push(entry.value);
+    }
+    if (!uids.length || uids.length > 50) return { uids: sfs.array() };
+    const summaries = await this.db.playerSummaries(
+      uids.filter((id) => id !== "3000002"),
+      "allservers" in params,
+    );
+    const groups = new Map<number, string[]>();
+    for (const summary of summaries) {
+      const ids = groups.get(summary.kingdomId) ?? [];
+      ids.push(text(summary.data, "uid"));
+      groups.set(summary.kingdomId, ids);
+    }
+    const updates = new Map<number, ReadonlyMap<string, string>>();
+    for (const [id, ids] of groups)
+      updates.set(
+        id,
+        (await this.services.playerUpdateTimes?.(id, [...new Set(ids)])) ?? new Map(),
+      );
+    const fallback = String(Math.trunc(this.now() / 1000));
+    const out = summaries.map((summary) =>
+      sfs.object(
+        playerSummary(
+          summary,
+          updates.get(summary.kingdomId)?.get(text(summary.data, "uid")) ?? fallback,
+        ),
+      ),
+    );
+    if (uids.includes("3000002")) out.push(sfs.object(guidePlayerSummary()));
+    return { uids: sfs.array(out) };
   }
   private checkProfile(profile: Row | undefined): Row {
     if (!profile) throw new GameError(errors.missing);

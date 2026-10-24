@@ -4,6 +4,7 @@ export interface ServerConfig {
   healthPort: number;
   kingdomId: number;
   kingdomDatabase: string;
+  playerKingdoms?: readonly { id: number; database: string }[];
   globalDatabase: string;
   databaseUrl: string;
   redisUrl: string;

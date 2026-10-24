@@ -17,6 +17,7 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
     accounts: unused,
     city: unused,
     world: unused,
+    playerSummaries: unused,
     configuration: unused,
   };
   const game = new Game(store, rules, { kingdomId: 1 });
@@ -77,6 +78,7 @@ test("build.info uses the injected clock for buildings and queue previews withou
   };
   const store: GameStore = {
     profile: unused,
+    playerSummaries: unused,
     configuration: unused,
     accounts: unused,
     city: async () => state,
