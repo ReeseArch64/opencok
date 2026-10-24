@@ -773,9 +773,13 @@ export class Game {
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) envelope[key] = params[key]!;
     let body: Fields | undefined;
-    const state = await this.db.getSystemMailByPlayerId(uid, { anchor, time, now }, async (entries, readers) => {
-      body = await systemMailProjection(uid, entries, readers, count, time, envelope);
-    });
+    const state = await this.db.getSystemMailByPlayerId(
+      uid,
+      { anchor, time, now },
+      async (entries, readers) => {
+        body = await systemMailProjection(uid, entries, readers, count, time, envelope);
+      },
+    );
     const current = this.checkProfile(state.profile, now);
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);

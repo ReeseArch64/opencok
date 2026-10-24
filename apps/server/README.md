@@ -9,7 +9,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `user.check.nickName`,
 `equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
-`mail.read.status`, `mail.read.status.betch`, `report.picVer`,
+`mail.read.status`, `mail.read.status.betch`, `report.picVer`, `chat.get.system.mails.v2`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
@@ -3772,7 +3772,13 @@ The V1 command's sent-ID bookkeeping and send counter remain unavailable. Curren
 v12.06.0 behavior is implemented; obsolete pre-1.1.8 content limits and pre-7.00.0
 special text filtering are outside this process's supported version contract.
 
-No tests or fixtures were generated or executed, per the user's instruction. Static
-checks and review are separate from runtime evidence; SQL execution, cache behavior,
-concurrency, pagination and client rendering remain unverified. No new schema,
-dependency, applied migration, service or client/ADB operation is introduced.
+Seven focused unit tests cover the raw envelope/correlation, exact Long values, bucket
+pagination including nonpositive counts, cursor fallback/outage rejection, input and
+owner rejection, chunk boundaries, trade/invitation identity and realm-scoped read-only
+cache commands. A disposable PostgreSQL test covers inclusive/foreign anchors, realm
+and ban checks, deterministic ties, repeatable sender snapshots during concurrent
+updates, extra-body ownership, inspector failures and both capacity bounds. Existing
+mailbox state remains unchanged by reads. The full server unit suite and affected
+static checks pass. Native client rendering and production Redis remain unverified.
+No schema, dependency or new service is introduced; maintained migrations run only
+in disposable test databases. No operator/player database or client/ADB is accessed.

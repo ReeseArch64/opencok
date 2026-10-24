@@ -24,7 +24,7 @@ export async function systemMailProjection(
     BigInt.asIntN(64, time) !== time
   )
     throw new Error("Invalid system mail pagination");
-  const messages: { uid: string; time: bigint; body: Fields }[] = [];
+  const messages: { uid: string; time: bigint; body: Fields; sender: string | null }[] = [];
   const senderIds = new Set<string>();
   for (const entry of entries) {
     if (privateTypes.has(entry.type)) continue;
@@ -74,11 +74,16 @@ export async function systemMailProjection(
       translationId: sfs.string(entry.translationId ?? ""),
       save: sfs.string(String(entry.saveFlag ?? 0)),
     };
-    messages.push({ uid: entry.uid, time: entry.createTime, body });
+    messages.push({
+      uid: entry.uid,
+      time: entry.createTime,
+      body,
+      sender: entry.type === 10 || entry.type === 26 ? fromUser : null,
+    });
   }
   const senders = await readers.senders([...senderIds]);
   for (const message of messages) {
-    const sender = senders.get(str(message.body, "fromUser"));
+    const sender = message.sender === null ? undefined : senders.get(message.sender);
     if (!sender) continue;
     if (mailBlank(str(message.body, "fromName")) && sender.name !== null)
       message.body.fromName = sfs.string(sender.name);

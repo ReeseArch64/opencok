@@ -1952,8 +1952,9 @@ is authorized by this path. The optional last-ID cache follows the existing real
 Redis adapter and fails closed on dependency errors; missing state widens only owned
 selection. Cache-only legacy contents require explicit import into existing authoritative
 extra storage. Discarded private-chat projection translation effects and V1 sent-ID
-bookkeeping remain separate limitations. See the server guide and issue #219. Static
-checks do not establish execution or behavioral parity; tests are deferred by instruction.
+bookkeeping remain separate limitations. Command/cache units and a disposable PostgreSQL
+selection/capacity/snapshot test cover the maintained boundary. Native client behavior
+and production cache operation remain unverified. See the server guide and issue #219.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
