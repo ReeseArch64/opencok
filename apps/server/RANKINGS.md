@@ -86,3 +86,41 @@ missing publications, read-only transactions and invalid state. Real Redis,
 PostgreSQL, cross-process events and native clients have not been exercised.
 These readers need no schema migration and can be rolled back without changing
 stored scores or event state.
+
+## Alliance donations and cemetery
+
+`al.donate.rank.all`, `.today` and `.week` read the authenticated player's
+alliance membership and public member metadata in a read-only snapshot. Total
+and weekly rankings preserve wrapped `donation * 10 + role` keys. Total ties
+compare exact Long power; daily ordering compares donation, role and power;
+weekly equal keys retain the stable UID order of the snapshot. Missing weekly
+history omits honor and donation fields. Daily values expire without resetting
+stored counters. The shared UTC calendar is explicit; importing a realm whose
+Java clock used another zone requires reconciling its day/week publications.
+
+`al.donate.res.rank.day`, `.week` and `.history` read the existing
+`bsDonateRankDay<realm><yyyyMMdd><alliance>`,
+`bsDonateRankWeek<realm><yyyyMMdd><alliance>` and
+`bsDonateRank<realm><alliance>` sorted sets. The inclusive source range contains
+up to 101 entries. Redis determines score ties. Former members are omitted, and
+remaining current members are appended with zero Double score. Weekly cache
+keys use Sunday while `weekendTime` uses the next Monday. Cross-fight realm
+classification comes from current global server metadata; such realms receive
+an acknowledgment without consuming donation publications. Neither member
+progress nor Redis scores are updated.
+
+`cemetery.get.ranking` accepts string type `0` for item contributions and `1`
+for deaths. Positive candidates are limited to 100, ordered by their metric
+and UID for stable ties. Own position refers to that candidate list and remains
+zero unless the owner's existing cemetery row has nonzero item contributions,
+including the death board. Presentation skips unavailable public profiles or
+alliances and retains the source's 49-successful-entry boundary. Reading does
+not create cemetery rows or trigger collection/revival. Only public counters
+and identity fields are selected; stored troop detail and revival data are not
+read or exposed.
+
+Synthetic tests cover ordering, overflow, exact Long power/deaths, absent weekly
+history, calendar boundaries, resource-score hydration, membership filtering,
+wire omission, command authorization and malformed inputs. These queries add
+no schema or dependencies. Their publishers retain score, TTL and invalidation
+ownership. Database/cache failures reject, and rollback requires no data edits.

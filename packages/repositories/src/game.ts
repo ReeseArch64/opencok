@@ -1,3 +1,4 @@
+import { readDonationRanking, readCemeteryRanking } from "./community-ranking.ts";
 import { readThroneRanking } from "./throne-ranking.ts";
 import type { ThroneRankingPeriod } from "@opencok/contracts/throne-ranking";
 import { readHeroRanking } from "./hero-ranking.ts";
@@ -5,7 +6,7 @@ import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mi
 import { reportAvatar } from "./avatar-report.ts";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
 import { readMailBatch } from "./mail-batch.ts";
-import { readNormalRankingRealm } from "./ranking-realm.ts";
+import { readNormalRankingRealm, readCrossRankingRealm } from "./ranking-realm.ts";
 import { readMailUpdates } from "./mail-updates.ts";
 import type { MailUpdateInspector, MailUpdateQuery } from "@opencok/contracts/mail-updates";
 import { markMailConversationRead } from "./mail-conversation-read.ts";
@@ -139,6 +140,15 @@ export class Database implements GameStore, FriendshipMineStore {
       this.databases.global.db,
       publication,
     );
+  }
+  donationRanking(uid: string, now: number) {
+    return readDonationRanking(this.kingdom.db, uid, now);
+  }
+  cemeteryRanking(uid: string, type: "0" | "1", now: number) {
+    return readCemeteryRanking(this.kingdom.db, uid, type, now);
+  }
+  crossRankingRealm(): Promise<boolean> {
+    return readCrossRankingRealm(this.databases.global.db, this.config.kingdomId);
   }
   normalRankingRealm(): Promise<boolean> {
     return readNormalRankingRealm(this.databases.global.db, this.config.kingdomId);

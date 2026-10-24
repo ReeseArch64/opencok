@@ -70,7 +70,8 @@
     "./java-calendar-date": "./src/java-calendar-date.ts",
     "./java-integer": "./src/java-integer.ts",
     "./dragon-ranking": "./src/dragon-ranking.ts",
-    "./hero-ranking": "./src/hero-ranking.ts"
+    "./hero-ranking": "./src/hero-ranking.ts",
+    "./community-ranking": "./src/community-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

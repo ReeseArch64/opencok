@@ -175,6 +175,7 @@ export const RealmDependenciesLive = Layer.effect(
         scoreActivityRanking: () => cache.scoreActivityRanking(),
         heroRankingPosition: (query) => cache.heroRankingPosition(query),
         throneRankingPeriod: (realm) => cache.throneRankingPeriod(realm),
+        donationScores: (allianceId, kind, date) => cache.donationScores(allianceId, kind, date),
         attributeRanking: (type) => cache.attributeRanking(type),
         publishedGlobalRanking: (kind) => cache.publishedGlobalRanking(kind),
         globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),

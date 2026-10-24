@@ -38,7 +38,8 @@
     "./sfs": "./src/sfs.ts",
     "./published-ranking": "./src/published-ranking.ts",
     "./hero-ranking": "./src/hero-ranking.ts",
-    "./throne-ranking": "./src/throne-ranking.ts"
+    "./throne-ranking": "./src/throne-ranking.ts",
+    "./community-ranking": "./src/community-ranking.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",
