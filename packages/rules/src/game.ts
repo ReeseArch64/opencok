@@ -29,6 +29,8 @@ export interface PowerCatalogs {
   civilizationFeatures?: Map<string, Rule>;
   militarySkills?: Map<string, Rule>;
   miracleBuffs?: Map<string, Rule>;
+  dragonSkills?: Map<string, Rule>;
+  activityEvents?: Map<string, Rule>;
 }
 export class Rules {
   constructor(
