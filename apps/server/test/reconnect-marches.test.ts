@@ -4,6 +4,8 @@ import {
   reconnectMarchBase,
   reconnectMarchDragon,
   reconnectMarchGeneral,
+  reconnectMarches,
+  type ReconnectMarchView,
 } from "@opencok/dtos/reconnect-marches";
 import { decodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
 import { sfs, decode, encode, Type } from "@opencok/messages/sfs";
@@ -81,6 +83,66 @@ test("march companions use current dragon levels and saved general levels with u
     skillList: { type: Type.StringArray, value: ["active"] },
   });
   expect(reconnectMarchGeneral(general, [], 100n)).not.toHaveProperty("skillList");
+});
+
+test("team reconnect projects arrived members through their leader and aggregates armies without disclosing unrelated marches", () => {
+  const dragon = { uuid: sfs.string("dragon") };
+  const general = { generalId: sfs.string("7") };
+  const team = { leader: "leader", members: ["member"], createdAt: 50n };
+  const view = (id: string, owner: string, type: number, state: number): ReconnectMarchView => {
+    const saved = {
+      ...row,
+      uuid: id,
+      ownerUid: owner,
+      type,
+      state,
+      teamId: "team",
+      worldId: 0,
+      marchStartTime: 400n,
+    };
+    return {
+      row: saved,
+      base: reconnectMarchBase(saved, army, rules, context),
+      team,
+      petDragon: dragon,
+      dragon,
+      hasDragon: true,
+      general,
+      late: {},
+      extras: {},
+    };
+  };
+  const leader = view("leader", "leader-owner", 4, 0);
+  const member = view("member", "owner", 5, 1);
+  const snapshots = [leader, member];
+  const result = reconnectMarches(snapshots, "owner", 300n);
+  const own = (result.worldMarch!.value as { value: Record<string, unknown> }[])[0]!.value;
+  expect(own.uuid).toEqual(sfs.string("member"));
+  expect(own.ouid).toEqual(sfs.string("leader-owner"));
+  expect(own.oType).toEqual(sfs.int(0));
+  expect(own.sType).toEqual(sfs.int(1));
+  expect(own.army).toEqual(
+    sfs.array([sfs.object({ armId: sfs.int(1), total: sfs.int(40), dead: sfs.int(8) })]),
+  );
+  expect(own.dragonList).toEqual(sfs.array([sfs.object(dragon)]));
+  expect(own.generalList).toEqual(sfs.array([sfs.object(general)]));
+  const leaderResult = reconnectMarches(snapshots, "leader-owner", 300n);
+  const leaderWire = (leaderResult.worldMarch!.value as { value: Record<string, unknown> }[])[0]!
+    .value;
+  expect(leaderWire.generalList).toEqual(
+    sfs.array([sfs.object(general), sfs.object(general), sfs.object(general)]),
+  );
+  expect(leaderWire.dragonList).toEqual(sfs.array([sfs.object(dragon)]));
+  leader.row = { ...leader.row, state: 2 };
+  leader.base = reconnectMarchBase(leader.row, army, rules, context);
+  const returning = reconnectMarches(snapshots, "leader-owner", 500n);
+  expect(
+    (returning.worldMarch!.value as { value: Record<string, unknown> }[])[0]!.value.leaderArmy,
+  ).toEqual(leader.base.army);
+  expect(() => reconnectMarches([member], "owner", 300n)).toThrow();
+  expect(() => reconnectMarches([leader, member, member], "owner", 300n)).toThrow();
+  member.row = { ...member.row, worldId: 1 };
+  expect(() => reconnectMarches(snapshots, "owner", 300n)).toThrow();
 });
 
 test("march armies aggregate saved families and knight counts without replacing saved troop totals", () => {

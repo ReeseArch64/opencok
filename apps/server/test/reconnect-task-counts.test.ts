@@ -3,6 +3,7 @@ import { Rules } from "@opencok/rules/game";
 import {
   reconnectContainsBuildings,
   reconnectTaskInitialCount,
+  reconnectResourceOutput,
   type ReconnectTaskCountState,
 } from "@opencok/rules/reconnect-task-counts";
 
@@ -11,7 +12,7 @@ rules.reconnect.positionUnlock = [{ unlock: "1" }, { unlock: "0" }, { unlock: "1
 const state: ReconnectTaskCountState = {
   profile: { level: 20, pf: "market_global", payTotal: 2147483648n, openedPos: "a,b,a" },
   buildings: [
-    { itemId: "400000", level: 8 },
+    { itemId: 400000, level: 8 },
     { itemId: "400000", level: 4 },
   ],
   armies: [{ free: 5, pve: 3, defence: 2, march: 1, train: 500 }],
@@ -52,6 +53,34 @@ test("new task counts restore each progress source with legacy integer widths", 
   for (const kind of [2, 4, 6, 7, 9, 14, 29, 64]) expect(count(kind)).toBe(0);
   expect(() => count(66)).toThrow();
   expect(() => count(8, "400000|400001", "1")).toThrow();
+});
+
+test("resource output task progress sums configured building output without granting or collecting resources", () => {
+  const catalog = new Rules(
+    new Map([
+      ["413001", { level: "1", para1: "2147483647" }],
+      ["415002", { level: "2", para1: "150" }],
+      ["455001", { level: "1", para1: "7" }],
+    ]),
+    new Map(),
+    new Map(),
+  );
+  expect([
+    ...reconnectResourceOutput(
+      [
+        { itemId: 413000, level: 1 },
+        { itemId: 413000, level: 1 },
+        { itemId: 415000, level: 2 },
+        { itemId: 455000, level: 1 },
+        { itemId: 400000, level: 3 },
+      ],
+      catalog,
+    ),
+  ]).toEqual([
+    [0, -2],
+    [3, 150],
+    [211508, 7],
+  ]);
 });
 
 test("building acceptance uses base IDs and required levels, including empty requirements", () => {

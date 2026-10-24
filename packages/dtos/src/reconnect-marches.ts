@@ -1,11 +1,11 @@
 import type { Row } from "@opencok/contracts/rows";
 import type { SavedMarchArmy } from "@opencok/messages/world-resource-army";
 import { decodeLegacyJsonArray } from "@opencok/messages/legacy-json";
-import { sfs, Type, type Fields, type Value } from "@opencok/messages/sfs";
+import { sfs, Type, fields as objectFields, type Fields, type Value } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 import { javaDecimal } from "@opencok/rules/java-integer";
 import { mailBlank } from "@opencok/rules/mail";
-import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
+import { javaHashMapOrder, javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
 
 const integer = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
 const long = (value: unknown) => {
@@ -170,4 +170,118 @@ export function reconnectMarchBase(
   }
   if (context.resourceBattle) fields.occupyEndTime = sfs.long(long(row.occupyResourceEndTime));
   return fields;
+}
+
+export interface ReconnectMarchView {
+  row: Row;
+  base: Fields;
+  petDragon: Fields | undefined;
+  dragon: Fields | undefined;
+  hasDragon: boolean;
+  general: Fields | undefined;
+  late: Fields;
+  extras: Fields;
+  team: { leader: string; members: readonly string[]; createdAt: bigint } | undefined;
+}
+
+export function reconnectMarches(
+  views: readonly ReconnectMarchView[],
+  owner: string,
+  now: bigint,
+): Fields {
+  const index = new Map<string, ReconnectMarchView>();
+  for (const view of views) {
+    const id = string(view.row.uuid);
+    if (index.has(id)) throw new Error("Duplicate reconnect march");
+    index.set(id, view);
+  }
+  const project = (view: ReconnectMarchView, visiting: Set<string>): Fields => {
+    const id = string(view.row.uuid);
+    if (visiting.has(id) || visiting.size > 1) throw new Error("Cyclic reconnect team");
+    visiting.add(id);
+    let result = { ...view.base };
+    const dragons: Fields[] = view.hasDragon && view.petDragon ? [view.petDragon] : [];
+    const generals: Fields[] = view.general ? [view.general] : [];
+    if (view.petDragon) result.petDragon = sfs.object(view.petDragon);
+    const team = view.team;
+    if (team) {
+      if (new Set(team.members).size !== team.members.length || team.members.includes(team.leader))
+        throw new Error("Duplicate reconnect team members");
+      const leader = index.get(team.leader);
+      if (!leader) throw new Error("Missing reconnect team leader");
+      const members = team.members.map((id) => {
+        const member = index.get(id);
+        if (
+          !member ||
+          member.row.teamId !== view.row.teamId ||
+          member.row.worldId !== view.row.worldId
+        )
+          throw new Error("Inconsistent reconnect team member");
+        return member;
+      });
+      if (leader.row.teamId !== view.row.teamId || leader.row.worldId !== view.row.worldId)
+        throw new Error("Inconsistent reconnect team leader");
+      result.team = sfs.string(team.leader);
+      const type = integer(view.row.type);
+      const state = integer(view.row.state);
+      if ([5, 16, 19].includes(type) && state !== 2 && now >= long(view.row.marchArrivalTime)) {
+        if (id !== team.leader) result = { ...project(leader, visiting), uuid: sfs.string(id) };
+      } else if ([4, 15, 18].includes(type)) {
+        const totals = new Map<number, { total: number; dead: number }>();
+        for (const march of [leader, ...members]) {
+          if (march.base.army?.type !== Type.Array) throw new Error("Invalid reconnect team army");
+          for (const entry of march.base.army.value as Value[]) {
+            const army = objectFields(entry);
+            const arm = integer(army.armId?.value);
+            const total = totals.get(arm) ?? { total: 0, dead: 0 };
+            total.total = (total.total + integer(army.total?.value)) | 0;
+            total.dead = (total.dead + integer(army.dead?.value)) | 0;
+            totals.set(arm, total);
+          }
+        }
+        result.army = sfs.array(
+          javaIntHashMapOrder(totals.keys()).map((arm) =>
+            sfs.object({
+              armId: sfs.int(arm),
+              total: sfs.int(totals.get(arm)!.total),
+              dead: sfs.int(totals.get(arm)!.dead),
+            }),
+          ),
+        );
+        if (state === 2) result.leaderArmy = view.base.army!;
+        if (now < long(view.row.marchStartTime)) result.sType = sfs.int(1);
+      }
+      result.tct = sfs.long(long(team.createdAt));
+      if ([4, 15, 18].includes(type)) {
+        for (const member of [
+          leader,
+          ...members.filter((member) => integer(member.row.state) === 1),
+        ]) {
+          if (member.hasDragon && member.dragon) {
+            const uuid = member.dragon.uuid?.value;
+            if (typeof uuid !== "string") throw new Error("Invalid march dragon identity");
+            if (!dragons.some((dragon) => dragon.uuid?.value === uuid)) dragons.push(member.dragon);
+          }
+          if (member.general) generals.push(member.general);
+        }
+      }
+    }
+    result.dragonList = sfs.array(dragons.map((dragon) => sfs.object(dragon)));
+    result.generalList = sfs.array(generals.map((general) => sfs.object(general)));
+    visiting.delete(id);
+    return { ...result, ...view.late };
+  };
+  const own = views.filter((view) => view.row.ownerUid === owner);
+  if (own.length > 32767) throw new Error("Oversized reconnect marches");
+  return {
+    worldMarch: sfs.array(
+      own.map((view) =>
+        sfs.object({
+          ...project(view, new Set()),
+          ...view.extras,
+          oType: sfs.int(0),
+        }),
+      ),
+    ),
+  };
 }
