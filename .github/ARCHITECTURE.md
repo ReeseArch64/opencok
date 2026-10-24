@@ -1300,6 +1300,15 @@ does not emit synchronization markers or contact chat, matching its legacy behav
 It loads no message contents and imposes no conversation-size truncation. Wire rules,
 transaction failures and ownership are covered by synthetic units only.
 
+Conversation read marking has a pure request/effect contract that preserves ordered
+mailbox assignments and chat-service intents. It performs complete prevalidation,
+retains conditional versus unconditional status assignments, and does not drop chat
+effects when mailbox updates would match no rows. The command remains unsupported
+until owned persistence and a recoverable private-chat read-state consumer are wired.
+Public room history is not that consumer. This foundation introduces no database or
+service changes; the pending connection must follow the existing PostgreSQL/outbox
+boundary without assuming a cross-database transaction.
+
 Read-status commands share the owner-lock and atomic marker boundary. Individual
 unread gift transitions additionally insert a realm `mail_gift_opening` outbox record;
 batch marking deliberately omits that event. A lifecycle-owned relay locks bounded

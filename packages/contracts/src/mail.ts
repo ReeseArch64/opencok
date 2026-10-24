@@ -2,6 +2,15 @@ import type { Row } from "./rows.ts";
 
 export type MailListCommand = "mread.batch" | "mread.chat";
 
+export type MailConversationReadEffect =
+  | { kind: "mail"; types: readonly number[]; fromUser?: string | null; unreadOnly: boolean }
+  | { kind: "chat"; others: string; types: readonly ("1" | "2" | "3" | "20")[] };
+
+export interface MailConversationReadQuery {
+  now: number;
+  effects: readonly MailConversationReadEffect[];
+}
+
 export interface MailGroupQuery {
   moderation: boolean;
   begin: number;
