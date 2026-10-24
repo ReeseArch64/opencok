@@ -30,6 +30,7 @@ import { Game } from "@opencok/controllers/game";
 import { World } from "@opencok/controllers/world";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
 import { startMailGiftRelay } from "./mail-gift-relay.ts";
+import { loadNicknameServices } from "./nickname.ts";
 
 export class RealmDependencies extends Context.Service<RealmDependencies, ServerDependencies>()(
   "@opencok/server/Dependencies",
@@ -41,6 +42,9 @@ export const RealmDependenciesLive = Layer.effect(
     const config = yield* RealmConfig;
     const rules = yield* fromPromise("realm.resources", () =>
       loadRules(config.resources, config.kingdomId),
+    );
+    const nicknameServices = yield* fromPromise("realm.nickname-words", () =>
+      loadNicknameServices(config.resources),
     );
     const db = yield* acquireResource(
       "realm.database",
@@ -135,6 +139,7 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        ...nicknameServices,
         worldPointDetail,
         playerSearch,
         worldSearch,

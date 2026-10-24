@@ -31,3 +31,26 @@ export function mysqlUtf8UnicodeKey(text: string): string {
   while (result.at(-1) === 0x0209) result.pop();
   return result.map((weight) => weight.toString(16).padStart(4, "0")).join("");
 }
+
+export function mysqlUtf8UnicodeCandidates(texts: readonly string[]): string {
+  const allowed = new Set<number>([0x0209]);
+  for (const text of texts) {
+    const key = mysqlUtf8UnicodeKey(text);
+    for (let index = 0; index < key.length; index += 4)
+      allowed.add(Number.parseInt(key.slice(index, index + 4), 16));
+  }
+  const ranges: number[][] = [];
+  for (let code = 1; code <= 0xffff; code++) {
+    if (code >= 0xd800 && code <= 0xdfff) continue;
+    if (!weights(code).every((weight) => allowed.has(weight))) continue;
+    const last = ranges.at(-1);
+    if (last && last[1] === code - 1) last[1] = code;
+    else ranges.push([code, code]);
+  }
+  const escape = (code: number) => `\\u${code.toString(16).padStart(4, "0")}`;
+  return `^[${ranges
+    .map(([first, last]) =>
+      first === last ? escape(first!) : `${escape(first!)}-${escape(last!)}`,
+    )
+    .join("")}]*$`;
+}
