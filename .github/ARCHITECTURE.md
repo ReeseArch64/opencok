@@ -16,8 +16,8 @@ The checked-in API/server images and adapters still use Bun and remain developme
 implementations; production runtime selection and release verification remain open.
 
 The goal is a Modular monorepo with an authoritative server, independent WebSocket chat,
-file and supporting services, an administrative dashboard, a landing page, an
-experimental web client, and Python bots. TypeScript is the foundation for application
+media within the shared API and supporting services, an administrative dashboard, a landing page, an
+experimental web client, and TypeScript bots. TypeScript is the foundation for application
 services, with Bun in development and a production runtime still to be decided. Processes in other languages
 remain possible when measurements justify them.
 
@@ -40,20 +40,20 @@ below. The API is **single and shared**, initially with one replica; do not crea
 API per realm. Each realm has a separate authoritative Server, with an active logical
 instance. The initial limit is **two realms**.
 
-| Location                       | Defined components                                                                                                             |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| VPS Europe / Kubernetes        | Shared API, API Gateway, Traefik, ZooKeeper, one Server per realm, Combat TypeScript, workers/relay and media within the API.  |
-| Cloudflare Pages               | Landing page, public documentation and WebAdmin.                                                                               |
-| Vercel                         | Experimental Web Game in SSR; runtime/adapter compatible with the chosen framework.                                            |
-| Redis.io / Redis Cloud         | Redis for caching, sessions, presence and, only if adopted, separate Redis for BullMQ queues.                                  |
-| Neon                           | PostgreSQL: write compute and read compute/replica of the same production branch.                                              |
-| Managed MongoDB Cluster        | Large documents and temporary chat archive; exact provider/plan yet to be selected.                                            |
-| CloudAMQP                      | Managed RabbitMQ.                                                                                                              |
-| Firebase                       | Auth (Guest, Facebook, Google, Email/Password, Apple, Microsoft and GitHub), product telemetry and push notifications via FCM. |
-| Stripe                         | Checkout/payments in USD, packages from $1 to $5.                                                                              |
-| External hosting to be defined | WS chat and Python bot; outside the main VPS in the initial topology.                                                          |
-| Cloudflare R2                  | Distribution of APK releases and Lua bundles/validated resources; direct downloads, without going through VPS.                 |
-| Destinations to be defined     | Storage of other private objects and observability backend. MinIO remains the choice for development.                          |
+| Location                       | Defined components                                                                                                                         |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| VPS Europe / Kubernetes        | Shared API, API Gateway, Traefik, ZooKeeper, one Server per realm, realm-owned combat calculation, workers/relay and media within the API. |
+| Cloudflare Pages               | Landing page, public documentation and WebAdmin.                                                                                           |
+| Vercel                         | Experimental Web Game in SSR; runtime/adapter compatible with the chosen framework.                                                        |
+| Redis.io / Redis Cloud         | Redis for caching, sessions, presence and, only if adopted, separate Redis for BullMQ queues.                                              |
+| Neon                           | PostgreSQL: write compute and read compute/replica of the same production branch.                                                          |
+| Managed MongoDB Cluster        | Large documents and temporary chat archive; exact provider/plan yet to be selected.                                                        |
+| CloudAMQP                      | Managed RabbitMQ.                                                                                                                          |
+| Firebase                       | Auth (Guest, Facebook, Google, Email/Password, Apple, Microsoft and GitHub), product telemetry and push notifications via FCM.             |
+| Stripe                         | Checkout/payments in USD, packages from $1 to $5.                                                                                          |
+| External hosting to be defined | WS chat and TypeScript bot; outside the main VPS in the initial topology.                                                                  |
+| Cloudflare R2                  | Distribution of APK releases and Lua bundles/validated resources; direct downloads, without going through VPS.                             |
+| Destinations to be defined     | Storage of other private objects and observability backend. MinIO remains the choice for development.                                      |
 
 A single Kubernetes node does not provide high availability for the VPS. Failure of this
 machine affects API and realms hosted on it; remote data does not make processes
@@ -84,7 +84,6 @@ flowchart TB
     router[WS Adapter and Realm Routing]
     game1[Realm 1 Server]
     game2[Realm 2 Server - default topology]
-    combat[Combat TypeScript - calculation pool]
     workers[Outbox workers and relay]
     zk[ZooKeeper - realm coordination]
   end
@@ -104,7 +103,7 @@ flowchart TB
   end
   subgraph external[Processes external to the main VPS]
     chat[WS Chat - hosting to be defined]
-    bot[Python bot - hosting to be defined]
+    bot[TypeScript bot - hosting to be defined]
     obs[Observability - destination to be defined]
   end
   visitor --> www
@@ -138,8 +137,6 @@ flowchart TB
   api --> pgr
   game1 --> pgw
   game2 --> pgw
-  game1 --> combat
-  game2 --> combat
   game1 --> zk
   game2 --> zk
   game1 --> redis
@@ -214,7 +211,7 @@ mindmap
       Media within the shared API
       API and administration
       Auxiliary workers
-      Python Bots
+      TypeScript Bots
     Quality
       Unit tests
       Integration Tests
@@ -298,10 +295,9 @@ mindmap
 | `apps/api`            | A shared API across VPS/Kubernetes, TypeScript              | Discovery, Firebase validation, identity binding, push preferences/devices, queries, media uploads/delivery, Admin backend, Stripe orders, and webhooks. It is not replicated per realm. |
 | `apps/server`         | One active logical process/pod per realm on VPS, TypeScript | Authority over city, economy, troops, skills, marches and combat. A maximum of two realms at this stage.                                                                                 |
 | API Gateway + Traefik | VPS/Kubernetes                                              | Ingress, routing, HTTP/WSS policies and TCP passthrough; configuration in `infra/`, without gameplay rules.                                                                              |
-| `apps/combat`         | VPS/Kubernetes, TypeScript initially                        | Limited calculation pool, separated from the network handling and economic state updates. Rust or Go are future alternatives after benchmarking and equivalence.                         |
 | `apps/workers`        | VPS/Kubernetes, TypeScript                                  | Outbox, CloudAMQP queues, projections, retention, push via FCM and auxiliary tasks; quotas per workload.                                                                                 |
 | `apps/chat`           | Service external to VPS, hosting to be defined              | WS chat, channels, authorization, history, moderation and 1/7 day retention.                                                                                                             |
-| `apps/bot`            | Service external to VPS, Python                             | Authenticated simulators with quotas without direct access to the realm state.                                                                                                           |
+| `apps/bot` — planned  | Service external to VPS, TypeScript                         | Authenticated simulators with quotas without direct access to the realm state.                                                                                                           |
 | `apps/admin`          | Cloudflare Pages, `admin.opencok.com`                       | Administrative panel; uses shared API and authorized identity.                                                                                                                           |
 | `apps/www`            | Cloudflare Pages, `opencok.com`                             | Public landing page.                                                                                                                                                                     |
 | `apps/docs` — planned | Cloudflare Pages, `docs.opencok.com`                        | Documentation website; versioned content and publication.                                                                                                                                |
@@ -320,10 +316,11 @@ credentials. [Reference: Pages Functions](https://developers.cloudflare.com/page
 
 ## 4. Organization of the monorepo
 
-The directories `apps/admin`, `apps/bot`, `apps/chat`, `apps/server`, `apps/web` and
-`apps/www` already exist as the initial structure. `apps/api`,
-`apps/workers`, `apps/combat`, `apps/docs` and the subdivisions below are organizational
-proposals; this document does not create the services.
+The implemented applications are `apps/api`, `apps/server`, `apps/chat` and
+`apps/web`. Admin, Bot, landing, workers and documentation apps remain planned;
+the diagram below is a target directory map, not an implementation inventory.
+There is no standalone Combat application. `packages/combat` remains a domain
+package; bounded calculation is owned by each realm server.
 
 ```text
 opencok/
@@ -336,8 +333,7 @@ opencok/
 │   ├── docs/
 │   ├── web/
 │   ├── bot/
-│   ├── workers/
-│   └── combat/
+│   └── workers/
 ├── packages/
 ├── infra/
 │   ├── compose/
@@ -964,7 +960,7 @@ HTTP listeners use the scoped Effect Bun adapter; Redis remains Bun-specific.
 The production Node.js mandate in
 [ADR-0010](../docs/decisions/0010-adopt-nodejs-for-production.md) is suspended.
 
-Python, an eventual Flutter/Dart client and a future Rust/Go engine receive contracts
+An eventual Flutter/Dart client and a future Rust/Go engine receive contracts
 generated from JSON or Protobuf schemas; they do not import TypeScript files nor share
 free access to the database. Rule resources are versioned and hashed regardless of
 language.
@@ -1085,7 +1081,7 @@ party.
 ## 8. Messaging: RabbitMQ and BullMQ
 
 **Defined choice:** RabbitMQ hosted on CloudAMQP for communication between languages and
-services. The presence of the Python bot and a possible calculation engine favors a
+services. A possible future calculation engine favors a
 contract independent of the TypeScript runtime.
 
 BullMQ is an alternative for jobs controlled by TypeScript workers, especially retries
@@ -1132,8 +1128,8 @@ structures.
 ## 9. Authoritative server, ZooKeeper, and scaling
 
 The game starts with a modular Server per realm, separate from the shared API. There is
-one initial realm and a maximum of two after capacity validation. Combat, Files and
-Workers have their own limits on the VPS; Chat, bots and SSR are outside of it. Realms
+one initial realm and a maximum of two after capacity validation. Realm-owned calculation, API media and
+Workers have explicit limits on the VPS; Chat, bots and SSR are outside of it. Realms
 can share the VPS if the peaks fit with margin. Increasing RAM/vCPU or moving a realm to
 another VPS does not create another global API. Partitioning a realm into regions
 remains an evolution, not the starting point.
@@ -1163,7 +1159,7 @@ flowchart LR
   player[Authenticated player or bot] --> command[combat command]
   command --> reserve[Server validates and reserves resources and troops]
   reserve --> snapshot[Persisted and versioned snapshot]
-  snapshot --> compute[Local calculation or specialized service]
+  snapshot --> compute[Realm-owned bounded calculation]
   compute --> result[Deterministic result and hash]
   result --> check[Server checks versions, epoch and idempotency]
   check --> commit[Transaction applies losses, rewards and event]
@@ -1184,10 +1180,11 @@ contracts, with Bun for development. The previous recommendation to go directly 
 decision. Rust and Go are future candidates if measurements show that the compute, not
 database/network/queue, is the relevant bottleneck.
 
-Combat runs in CPU processes/workers separate from the Servers network loop and the API.
-There is a limited pool shareable by both realms, with quotas and fairness per realm. Do
-not create a process per attack or accept unlimited concurrency. The Server validates
-and applies the result, regardless of the calculation language.
+Combat is a module of the authoritative realm server, not a separately deployed
+application. Each server owns a bounded CPU worker pool outside its network loop,
+with explicit concurrency, queue and memory limits. Do not create a process per
+attack. Pure rules remain in `packages/combat`; workers receive immutable snapshots
+and return results to the same realm owner for validation and application.
 
 **Java remains as a compatibility reference.** A TypeScript combat mode is only released
 after equivalence and invariants defined in this section. The validation also applies to
@@ -1202,7 +1199,7 @@ rule or formula errors.
 | **Rust**       | Future candidate to reduce CPU cost/latency/allocations if a benchmark warrants it. Requires new validation of mathematics and contract.                                     |
 | **Go**         | Future candidate, also subject to CPU measurement, allocations, GC pauses and numerical equivalence. Don't assume that switching to Go makes the formula accurate or faster. |
 | **C++**        | No adoption planned at this stage.                                                                                                                                           |
-| **Python**     | Bots and analysis tools, no authoritative battle calculation loop.                                                                                                           |
+| **Python**     | Authorized legacy/analysis tools only; maintained bots use TypeScript.                                                                                                       |
 
 ### 10.2. Java review scope and evidence
 
@@ -1404,14 +1401,14 @@ design.
 Optimize compact data first, compiled/versioned configuration, reduced parsing and
 allocations, validated cache, and parallelism across independent battles. The internal
 sequence of a battle remains serial until a transformation is proven equivalent. Isolate
-Combat TypeScript to CPU processes and measure the cost of this boundary. If necessary,
+TypeScript calculation in realm-owned CPU workers and measure that boundary. If necessary,
 compare Rust and Go under the same contract, hardware, and load before selecting a
 migration. The Rust probes above are historical semantic evidence, not TypeScript engine
 benchmarking.
 
 ### 10.8. Bots and NPCs
 
-Python bots consume the same commands, costs, limits and authorizations as a player.
+TypeScript bots consume the same commands, costs, limits and authorizations as a player.
 Simulated accounts have explicit tagging, quotas, concurrency limit, and kill switch on
 the dashboard. They don't write directly to the database. Bots that behave like players
 are different from internal NPCs in the world: the latter belong to the `npc`
@@ -1441,7 +1438,7 @@ private pages do not enter the public cache.
 
 ```mermaid
 flowchart LR
-  apps[Server, Chat, API, Files, bots and workers] -->|Metrics| prom[Prometheus]
+  apps[Server, Chat, API with media, bots and workers] -->|Metrics| prom[Prometheus]
   apps -->|Structured and filtered logs| collector[Log Collector]
   collector --> loki[Loki]
   infra[Managed databases, broker, gateways and Kubernetes] -->|Available metrics| prom
@@ -1478,7 +1475,7 @@ structured fields when authorized. [Reference: cardinality in Loki](https://graf
 
 The current TypeScript development services use the external Evlog library through
 `packages/core/src/logging.ts` for operational JSON output. Shared runtime,
-resource and HTTP adapters instrument API, realm and Files; realm TCP sessions
+resource and HTTP adapters instrument API with media and realm; realm TCP sessions
 and Chat HTTP/WebSocket adapters attach generated correlation IDs and controlled
 outcomes. This is a console logging implementation; collectors, Loki hosting and
 persistent audit remain separate work. The
@@ -1565,7 +1562,7 @@ distribution like K3s is a candidate, after measuring its actual cost. [Referenc
 | Entrance                    | Traefik and Kong/API Gateway on VPS Kubernetes, with declarative configuration.                                                                      |
 | API                         | A shared Deployment, initially one replica; not duplicated per realm.                                                                                |
 | Realms                      | `server-realm-1` and, if supported, `server-realm-2`; one active owner per realm and separate settings/pools.                                        |
-| Calculation and auxiliaries | Combat TypeScript, workers/relay and Files with independent limits.                                                                                  |
+| Calculation and auxiliaries | Realm-owned combat workers, API media and auxiliary workers/relay with independent limits.                                                           |
 | Coordination                | A ZooKeeper instance with persistent volume on the initial node; it is not an HA installation. Distributed ensemble is evolution for multiple hosts. |
 | Data and queues             | External Neon, Redis.io, MongoDB Cluster and CloudAMQP; do not install your production copies on the VPS.                                            |
 | Frontends                   | Pages for WWW/Docs/Admin; Vercel for Web Game SSR.                                                                                                   |
@@ -1615,8 +1612,8 @@ with tested procedures.
 | Broker or worker                                  | Preserve the outbox and show pending status; reprocess without duplicating effects. Impose backlog and backpressure limits.                             |
 | ZooKeeper/session                                 | Stop mutations of the affected partition until reasserting ownership; refuse stale epochs.                                                              |
 | Chat                                              | Game continues; chat reports unavailability and retrieves history via the persisted source.                                                             |
-| Files/MongoDB/search                              | Uploading, documents and searches degrade; Central commands do not wait indefinitely for these services.                                                |
-| External Battle Engine                            | Maintain recoverable reserve and pending result; timeout, idempotent retry and reconciliation. Do not create fictitious victory.                        |
+| API media/MongoDB/search                          | Uploading, documents and searches degrade; Central commands do not wait indefinitely for these services.                                                |
+| Realm calculation workers                         | Maintain recoverable reserve and pending result; timeout, idempotent retry and reconciliation. Do not create fictitious victory.                        |
 | Observability                                     | Maintain game behavior; limited buffers and controlled disposal of operational logs, without losing the transactional audit record.                     |
 | Bots                                              | Stop simulators without interrupting players; allow quick shutdown by scope.                                                                            |
 | Firebase Auth                                     | Login/renewal may be unavailable; Existing sessions comply with validity and revocation policy. Do not accept invalid token to work around the flaw.    |
@@ -1629,8 +1626,8 @@ with tested procedures.
 
 1. **Contracts and core:** stabilize login, city, persistent construction, and the map;
    create differential tests and synthetic scenarios per client version.
-2. **Modular server:** consolidate domains and adapters; separate Chat, Files, the
-   shared API, and workers, with connection and resource limits.
+2. **Modular server:** consolidate domains and adapters; separate Chat, the
+   shared API with media, and workers, with connection and resource limits.
 3. **PostgreSQL migration:** map types and 64-bit integers, IDs, timestamps, balances,
    queue sentinels, and transactions; rehearse copying and reconciliation. Do not merely
    replace the driver or maintain informal dual writes with MariaDB.
@@ -1642,7 +1639,7 @@ with tested procedures.
 6. **Controlled production:** validate Kubernetes, replication, backups, failover,
    observability, and load before expanding realms and bot populations.
 7. **Independent experiments:** evolve the web port and measure the need for MongoDB,
-   Elasticsearch, complementary BullMQ, and a separate computation engine. Evaluate the
+   Elasticsearch, complementary BullMQ, and a future computation engine only through a new reviewed decision. Evaluate the
    Flutter client alongside the current APK; validate the Lua/native updater and R2
    distribution before enabling updates.
 
@@ -2042,10 +2039,10 @@ the overlap between API and Server.
 | `notifications`        | FCM installations and tokens, preferences, account/character/realm scope, send intent, expiration, and attempts                          | API registers devices/preferences; worker sends notifications of authorized events.                       |
 | `game`                 | Player by realm, city, building, activity, research, troops, march, inventory and aggregate version                                      | Partition owner server.                                                                                   |
 | `economy`              | Wallet, ledger entry, reservation, consumption, refund, and operation receipt                                                            | Economic Server use cases; administrative API requests commands.                                          |
-| `combat`               | Battle, snapshot, reservations, engine version, result and application receipt                                                           | Server authoritative orchestrator. The Combat TypeScript process only calculates.                         |
+| `combat`               | Battle, snapshot, reservations, engine version, result and application receipt                                                           | Server authoritative orchestrator. Realm-owned calculation workers only calculate.                        |
 | `social`               | Alliance, Membership, Roles, Permissions, and Membership Ranges                                                                          | Server alliance domain. Chat queries derived authorization.                                               |
 | `chat`                 | Channel, message, sequence, receipt, archive metadata, and retention state                                                               | Chat and its retention worker, with specific permissions.                                                 |
-| `files`                | Upload, owner, object, hash, transformation and reference                                                                                | Files and media workers.                                                                                  |
+| `files`                | Upload, owner, object, hash, transformation and reference                                                                                | Shared API media and its bounded background jobs.                                                         |
 | `billing`              | USD Catalog, order, Checkout Session, payment, received events and delivery status                                                       | API/payments worker; granting items/currency only by the Realm Server and Ledger.                         |
 | `operations`           | Rules version, publication and administrative audit                                                                                      | Authorized administrative use cases; publication passes through the Server when it affects gameplay.      |
 | Integration            | Outbox and inbox/receipts per service                                                                                                    | The producer writes its outbox in the transaction; the consumer writes its inbox when applying the event. |
@@ -2282,10 +2279,10 @@ claim this guarantee as a consequence of a `DELETE` or TTL.
 
 ## 21. File and media lifecycle
 
-Files authenticates the owner and creates an `uploadId` with size, allowed MIME,
+The shared API media module authenticates the owner and creates an `uploadId` with size, allowed MIME,
 duration limit, and temporary object. The upload goes through the service or a
 restricted signed URL; completing the upload does not prove that the file is valid.
-Files checks bytes, actual file type, dimensions, hash and processing limits, and
+The API checks bytes, actual file type, dimensions, hash and processing limits, and
 registers `pending → uploaded → validated → ready`, or `rejected` with controlled reason.
 
 Transformations, thumbnails and checks run on workers with CPU/memory/time limits.
@@ -2319,8 +2316,7 @@ replace automated E2E.
 
 Unit tests live close to their modules; integration tests live alongside the adapter/app
 under test. `tests/` focuses on common synthetic contracts and fixtures and E2E
-journeys. TypeScript is the initial engine and uses a runner validated for Bun; Python
-uses its own suite for the bot. Rust/Go will have their own suites if they are adopted,
+journeys. TypeScript is the initial engine and uses a runner validated for Bun, including the planned TypeScript Bot application. Rust/Go will have their own suites if they are adopted,
 maintaining the same contract and replay tests. No suites use production credentials or
 create players in the real realm.
 
@@ -2348,8 +2344,7 @@ equality of authoritative values. [Reference: Playwright visual comparisons](htt
 
 Mutation testing uses StrykerJS with compatible runner for TypeScript and `cargo-mutants`
 if Rust is adopted; Go tooling will be selected if there is a port to that language.
-Integration with runner Bun must be proven; do not assume direct support. Python
-tool/runner will be validated for modules that have their own relevant rules.
+Integration with runner Bun must be proven; do not assume direct support.
 [References: StrykerJS](https://stryker-mutator.io/docs/stryker-js/introduction/), [cargo-mutants](https://mutants.rs/).
 
 The catalog of critical mutations cannot have non-equivalent survivors in combat,
@@ -2502,13 +2497,11 @@ not a ready-made configuration of requests/limits.
 | ----------------------------------- | ----------------------: |
 | Operating System and Kubernetes/K3s |                     2.5 |
 | Traefik and Kong                    |                     1.0 |
-| Shared API                          |                     0.5 |
-| Files                               |                     0.5 |
+| Shared API including media          |                     1.0 |
 | ZooKeeper                           |                     0.5 |
 | Workers and relay                   |                     0.5 |
-| Shared Combat TypeScript pool       |                     1.5 |
-| Realm Server 1                      |                     1.5 |
-| Realm Server 2, default topology    |                     1.5 |
+| Realm Server 1 including combat     |                    2.25 |
+| Realm Server 2 including combat     |                    2.25 |
 | **Planning subtotal**               |                **10.0** |
 
 The remaining usable memory is reserved for spikes, system cache, network, and operating
@@ -2521,13 +2514,12 @@ re-budgeting.
 Measure simultaneous battles and completed battles per second separately. As a demand
 estimate, `CPU cores ≈ battles/s × CPU-ms/battle / 1000`, in addition to the cost of Server, network, serialization and
 persistence. The estimate does not replace actual load: formations, rounds and skills
-change the cost a lot. The Combat pool has a bounded queue and concurrency, with
-fairness and quotas per realm; do not create a process/thread per attack nor block the
+change the cost a lot. Each realm-owned combat pool has bounded queue and concurrency; do not create a process/thread per attack nor block the
 API event loop with calculation. Mathematical equivalence remains a requirement before
 optimization.
 
 Validate normal load, dozens of continuous combats, throne and KVK, including
-simultaneous peaks of both realms, workers, files and reconnections. Record
+simultaneous peaks of both realms, workers, API media and reconnections. Record
 command/calculation p99, CPU, maximum memory, runtime pauses, queue delay, RTT and
 provider quotas. Validate both default kingdoms with measurable margin and section 24
 goals met, without harming API and node control. If capacity is insufficient, increase CPU/RAM or move a
