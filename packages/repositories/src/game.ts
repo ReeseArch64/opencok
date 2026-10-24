@@ -10,6 +10,7 @@ import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
+import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
 import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
 import { and, asc, eq, getTableColumns, gt, inArray, or, sql } from "drizzle-orm";
@@ -19,6 +20,8 @@ import type { Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, loadPlayerSummaries } from "./players.ts";
 import { checkPowerStore, readPowerState } from "./power.ts";
 import { checkPublicProfileStore, loadPublicProfile } from "./profile.ts";
+import { loadFriendshipMine } from "./reconnect-mine.ts";
+import type { FriendshipMine, FriendshipMineStore } from "@opencok/contracts/reconnect";
 
 type GameRepositoryConfig = Pick<
   ServerConfig,
@@ -30,7 +33,7 @@ type GameRepositoryConfig = Pick<
   | "playerKingdoms"
 >;
 
-export class Database implements GameStore {
+export class Database implements GameStore, FriendshipMineStore {
   readonly databases;
   readonly kingdom;
   constructor(readonly config: GameRepositoryConfig) {
@@ -70,6 +73,7 @@ export class Database implements GameStore {
       user_army,
       user_item,
       user_lord,
+      user_mine,
       switches,
       parse_info,
     ])
@@ -169,6 +173,15 @@ export class Database implements GameStore {
   }
   publicProfile(uid: string, observerAllianceId: string) {
     return loadPublicProfile(this.databases, this.config.kingdomId, uid, observerAllianceId);
+  }
+  friendshipMine(uid: string, initial: () => FriendshipMine) {
+    return loadFriendshipMine(
+      this.databases.global.db,
+      this.kingdom.db,
+      this.config.kingdomId,
+      uid,
+      initial,
+    );
   }
   async world(uid: string, ids: number[]) {
     return this.kingdom.db.transaction(

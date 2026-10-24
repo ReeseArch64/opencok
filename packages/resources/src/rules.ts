@@ -160,6 +160,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     ].map(optional),
   );
   const [militaryRanks, servers] = await Promise.all([optional("wr_rank"), optional("servers")]);
+  const treasures = await optional("treasure");
   const achievementCount = (await exists(join(directory, "achievement.xml")))
     ? parseRecords(await read("achievement"), "achievement").length
     : 0;
@@ -208,6 +209,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
       monarchTitles,
     },
     { achievementCount, militaryRanks, servers },
+    { treasures },
   );
 }
 
