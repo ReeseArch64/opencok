@@ -2838,6 +2838,49 @@ this change; they do not establish behavioral parity or PostgreSQL concurrency.
 No services, sockets, applied migrations, client/ADB or CI were exercised. Existing
 schema test snapshots were preserved and may need an authorized refresh later.
 
+## Avatar report submission
+
+[Issue #218](https://github.com/ReeseArch64/opencok/issues/218) connects `report.picVer`
+to the existing realm `pic_upload_record` table. An authenticated, unbanned reporter
+in the process realm supplies String `uid`. Java whitespace-only values reject;
+otherwise the value is retained without trimming. The maintained boundary accepts
+up to 255 UTF-16 code units, rejects NUL and characters unavailable to the legacy
+three-byte MySQL UTF-8 collation, and ignores unrelated request fields. No target
+profile or same-owner exclusion is required. The response is the normal empty
+acknowledgment with `success: true` and request correlation.
+
+Each request increments the target's report counter, including repeated reports by
+the same player. Existing rows preserve every unrelated field; the signed Int counter
+wraps from 2147483647 to -2147483648. A null restored counter is treated as the primitive
+model's zero value. Missing rows are inserted with `report = 1`, `picVer = -1`, and
+zero update time, ban count, ban time and status. The command does not apply a ban,
+change the target profile, delete an image, send mail or publish chat metadata. Those
+are separate moderation lifecycle operations.
+
+Persistence revalidates and locks the reporter inside the transaction. A PostgreSQL
+transaction advisory lock derived from the existing MySQL UCA4 comparison key
+serializes report creation for equivalent identifiers; configured query/statement
+timeouts bound waiting. Candidate identifiers are filtered with the maintained
+collation key, and ambiguous restored aliases reject. Counter increments use one SQL
+expression, avoiding the reference's read/overwrite lost-update race. An exact-key
+concurrent avatar initialization is handled with the same atomic increment on conflict,
+without replacing its picture, cooldown or ban state. This preserves unrelated fields
+instead of rewriting the reference's complete cached moderation object.
+
+No report receipt or deduplication is invented: retrying after an uncertain command
+result may increment again, as in the original request semantics. Distinct equivalent
+keys introduced concurrently by another provider/import remain a coordination gap;
+existing ambiguous aliases reject, and imports must preserve the legacy logical key
+uniqueness. Candidate scans retain the existing collation adapter's performance
+limitation. Startup checks the moderation table even when files/chat integration is
+disabled, because report submission is independently available.
+
+No schema, migration, dependency, test or fixture was added for this command. Types,
+lint, formatting and diff review were run; test execution was deferred by instruction.
+PostgreSQL locks/concurrency, client/ADB, runtime services and moderation lifecycle
+remain unverified. This command does not complete avatar topic 7 or the version-wrap
+and restoration work tracked in #217.
+
 ## Realm chat sessions
 
 `chat.session.create`, tracked in [issue #74](https://github.com/ReeseArch64/opencok/issues/74),

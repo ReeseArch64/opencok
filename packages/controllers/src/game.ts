@@ -1,3 +1,4 @@
+import { reportAvatar } from "./avatar-report.ts";
 import { worldPointDetail } from "./world-point-detail.ts";
 import { profilePreference } from "./profile-preferences.ts";
 import { celebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
@@ -246,6 +247,9 @@ export class Game {
       case "world.favo.add":
       case "world.favo.delme":
         body = await this.worldFavorites(uid, command, params);
+        break;
+      case "report.picVer":
+        body = await reportAvatar(this.db, uid, this.config.kingdomId, params, this.now());
         break;
       case "user.update.picVer":
         body = await this.avatarVersion(uid);
