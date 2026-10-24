@@ -96,6 +96,10 @@ export async function loadRules(directory: string, kingdomId = 1) {
     vip,
     superVip,
     allianceSciences,
+    prestigeLevels,
+    civilizationFeatures,
+    militarySkills,
+    miracleBuffs,
   ] = await Promise.all(
     [
       "general",
@@ -113,6 +117,10 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "vip",
       "svip",
       "alliancescience",
+      "reputation_level",
+      "civilization_feature",
+      "wr_skill",
+      "miracle_buff",
     ].map(optional),
   );
   return new Rules(
@@ -143,6 +151,10 @@ export async function loadRules(directory: string, kingdomId = 1) {
       vip,
       superVip,
       allianceSciences,
+      prestigeLevels,
+      civilizationFeatures,
+      militarySkills,
+      miracleBuffs,
     },
   );
 }

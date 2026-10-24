@@ -1,33 +1,16 @@
 import type { GeneralSkill } from "@opencok/contracts/power";
 import type { Row } from "@opencok/contracts/rows";
 import { text } from "@opencok/contracts/rows";
-import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import type { Rule, Rules } from "./game.ts";
 import { ruleAvailable, type RuleContext } from "./availability.ts";
 import { serverFeature } from "./power-context.ts";
 
-function invalid(): never {
-  throw new GameError(errors.unsupported, "power_effect");
-}
-
-function integer(raw: unknown): number {
-  if (!/^[+-]?\d+$/.test(String(raw))) return invalid();
-  const value = Number(raw);
-  if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647) return invalid();
-  return value;
-}
-
-function float(raw: unknown): number {
-  if (
-    (typeof raw !== "number" && typeof raw !== "string") ||
-    !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(String(raw).trim())
-  )
-    return invalid();
-  const value = Math.fround(Number(raw));
-  if (!Number.isFinite(value)) return invalid();
-  return value;
-}
+import {
+  effectInteger as integer,
+  effectFloat as float,
+  invalidEffect as invalid,
+} from "./power-values.ts";
 
 function split(raw: string | undefined, delimiter = "|"): string[] {
   return raw?.split(delimiter).filter(Boolean) ?? [];

@@ -23,6 +23,9 @@ function fixture() {
     states: [],
     vip: undefined,
     allianceSciences: [],
+    prestige: [],
+    military: undefined,
+    miracle: undefined,
   };
   const rules = new Rules(
     new Map(),
