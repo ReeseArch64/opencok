@@ -861,6 +861,15 @@ legacy event-ordering or expected-previous CAS design. This command has received
 checks only: test generation/execution is deferred by the user, and topic 7 remains
 incomplete. The realm runbook records configuration, schema and retry boundaries.
 
+The authenticated `report.picVer` command updates only `pic_upload_record.report`.
+The repository locks and revalidates the reporter, serializes report writers by the
+legacy Unicode comparison key and atomically increments with signed-Int wrap. New
+records use explicit legacy defaults; ambiguous restored aliases reject. Reports
+require neither a target profile nor files/chat services and create no delivery
+intent. Other moderation state and media remain unchanged. Command units and a
+disposable PostgreSQL concurrency/restart test cover this boundary; moderation
+actions and cross-provider equivalent-key insertion remain separate concerns.
+
 ### Package groups
 
 | Group                       | Existing packages that can fulfill this role                                                                                  | Dependency rule                                                                           |
