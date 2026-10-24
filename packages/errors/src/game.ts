@@ -12,6 +12,7 @@ export class GameError extends Error {
       | "boss_members_rule"
       | "icon_date_rule"
       | "general_sale_rule"
+      | "account_rule"
       | "queue_kind"
       | "world_state",
   ) {

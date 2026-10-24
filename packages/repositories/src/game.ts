@@ -10,9 +10,11 @@ import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
+import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
+import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
 import { and, asc, eq, getTableColumns, gt, inArray, or, sql } from "drizzle-orm";
 import type { ServerConfig } from "@opencok/contracts/server";
-import type { GameStore, CityState } from "@opencok/contracts/game";
+import type { GameStore, CityState, LoginConfigurationState } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 
 type GameRepositoryConfig = Pick<
@@ -54,6 +56,8 @@ export class Database implements GameStore {
       user_army,
       user_item,
       user_lord,
+      switches,
+      parse_info,
     ])
       await this.kingdom.db.select().from(table).limit(0);
     await this.databases.global.db.select().from(account_new).limit(0);
@@ -137,6 +141,9 @@ export class Database implements GameStore {
       { isolationLevel: "repeatable read", accessMode: "read only" },
     );
   }
+  configuration(uid: string): Promise<LoginConfigurationState> {
+    return readLoginConfiguration(this.kingdom.db, uid);
+  }
   async world(uid: string, ids: number[]) {
     return this.kingdom.db.transaction(
       async (tx) => {
@@ -159,4 +166,25 @@ export class Database implements GameStore {
   close() {
     return this.databases.close();
   }
+}
+
+export function readLoginConfiguration(
+  db: Database["kingdom"]["db"],
+  uid: string,
+): Promise<LoginConfigurationState> {
+  return db.transaction(
+    async (tx) => {
+      const profile = (
+        await tx.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
+      )[0];
+      const flags = await tx.select().from(switches).orderBy(asc(switches.name));
+      const pushSettings = await tx
+        .select({ type: parse_info.type, status: parse_info.status, audio: parse_info.audio })
+        .from(parse_info)
+        .where(eq(parse_info.uid, uid))
+        .orderBy(asc(parse_info.type));
+      return { profile, switches: flags, pushSettings };
+    },
+    { isolationLevel: "repeatable read", accessMode: "read only" },
+  );
 }
