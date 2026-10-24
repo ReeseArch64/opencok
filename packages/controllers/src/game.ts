@@ -12,6 +12,7 @@ import {
   featureConfig,
   inventoryItem,
   serverClock,
+  settingConfig,
 } from "@opencok/dtos/bootstrap";
 
 type GameConfig = Pick<ServerConfig, "kingdomId">;
@@ -36,19 +37,22 @@ export class Game {
       throw new GameError(errors.invalid);
     return { ...state, profile: state.profile, resource: state.resource };
   }
-  private queueDto(q: Row, state: ReadyCity, helped = true): Fields {
+  private queueDto(q: Row, state: ReadyCity, helped = true, now = this.now()): Fields {
     const target = state.buildings.find((b) => text(b, "uuid") === text(q, "itemId"));
     if (num(q, "type") !== 0 && text(q, "itemId"))
       throw new GameError(errors.unsupported, "queue_kind");
-    return queue(q, target ? building(target, this.rules, true) : {}, helped);
+    return queue(q, target ? building(target, this.rules, true, now) : {}, helped);
   }
   private info(state: ReadyCity): Fields {
+    const now = this.now();
     return {
-      building: sfs.array(state.buildings.map((b) => sfs.object(building(b, this.rules)))),
+      building: sfs.array(
+        state.buildings.map((b) => sfs.object(building(b, this.rules, false, now))),
+      ),
       buildingQueue: sfs.array(
         state.queues
           .filter((q) => num(q, "type") === 0)
-          .map((q) => sfs.object(this.queueDto(q, state))),
+          .map((q) => sfs.object(this.queueDto(q, state, true, now))),
       ),
       resource: sfs.object(resource(state.resource)),
       gold: sfs.long(gold(state.profile)),
@@ -90,6 +94,9 @@ export class Game {
         break;
       case "login.dataconfig":
         body = dataConfig(this.rules);
+        break;
+      case "setting.xml":
+        body = settingConfig(this.rules);
         break;
       case "login.other":
         body = await this.otherLogin(uid, params);
