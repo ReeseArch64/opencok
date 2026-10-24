@@ -1,6 +1,7 @@
 import type { Row } from "@opencok/contracts/rows";
 import type {
   WorldResourceLoad,
+  WorldResourceArmy,
   WorldResourceCollection,
   WorldResourceMarch,
   WorldResourceOwnerDetail,
@@ -45,6 +46,52 @@ export function resourceLongFloat(value: bigint): number {
 }
 export function resourceRemaining(initial: number, cost: number): number {
   return (integer(initial) - integer(cost)) | 0;
+}
+export function resourceRawArmyLoad(army: WorldResourceArmy, rules: Rules): number {
+  const cached = integer(army.cachedLoad);
+  if (typeof army.residentOwner !== "boolean") return invalid();
+  if (!army.residentOwner && cached > 0) return cached;
+  if (!Array.isArray(army.soldiers) || army.soldiers.length > 4096) return invalid();
+  const float = (value: number): number => {
+    if (typeof value !== "number" || !Object.is(Math.fround(value), value)) return invalid();
+    return value;
+  };
+  let result = 0;
+  for (const soldier of army.soldiers) {
+    if (
+      typeof soldier.armsId !== "string" ||
+      soldier.armsId.length > 255 ||
+      !soldier.armsId.isWellFormed() ||
+      soldier.armsId.includes("\0")
+    )
+      return invalid();
+    const arms = rules.arms.get(soldier.armsId);
+    if (!arms) return invalid();
+    if (!Object.hasOwn(arms, "load")) continue;
+    let load: number;
+    try {
+      load = Number(javaDecimal(arms.load, 32));
+    } catch {
+      return invalid();
+    }
+    const remaining = (integer(soldier.total) - integer(soldier.dead)) | 0;
+    const base = Math.imul(load, remaining);
+    let effect = Math.fround(0);
+    if (army.effects) {
+      const e = army.effects;
+      effect = Math.fround(float(e.worldLoad) + float(e.worldLoadAdd));
+      effect = Math.fround(effect + float(e.general));
+      effect = Math.fround(effect + float(e.newGeneral));
+      effect = Math.fround(effect + float(e.expedition));
+    } else if (army.residentOwner) return invalid();
+    const multiplier = Math.max(
+      Math.fround(Math.fround(100 + effect) + Math.fround(integer(soldier.loadEffect))),
+      20,
+    );
+    const contribution = narrow(Math.fround(Math.fround(Math.fround(base) * multiplier) / 100));
+    result = (result + contribution) | 0;
+  }
+  return result;
 }
 export function resourceArmyLoad(input: WorldResourceLoad, rules: Rules): number {
   let load = integer(input.rawArmyLoad);

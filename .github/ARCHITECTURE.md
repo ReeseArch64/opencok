@@ -444,6 +444,15 @@ Java primitive oracle covers arithmetic boundaries without executing private gam
 classes. The [realm runbook](../apps/server/README.md#world-resource-detail-foundation)
 records the implemented fields and outstanding command dependencies.
 
+The resource rules also calculate raw troop load from explicit saved troop counts,
+load modifiers and resolved owner effects. The cached-load branch distinguishes
+resident owners from on-demand profile reads. Signed Int subtraction/multiplication,
+Float evaluation order, cast saturation and final Int wrapping are preserved. The
+calculation does not deserialize troop objects or resolve profile effects itself;
+those readers and runtime maximum-collection-time restoration remain dependencies
+of occupied-resource command composition. No march scheduling or cache write is
+performed by this pure projection.
+
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read
 transaction. Configured remote realms use a separate transaction and world zero after
