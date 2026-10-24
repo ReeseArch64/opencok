@@ -11,7 +11,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`, `report.picVer`, `chat.get.system.mails.v2`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `act.score.rank`, `global.celebrities.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `act.score.rank`, `global.celebrities.rank`, `dragon.battle.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -1452,11 +1452,16 @@ correlation. Oversized reads reject without truncation. The query publishes no s
 creates no matches, clears no boards and adds no TTL. Board import, score production,
 matchmaking and combat remain separate work.
 
-This slice has source review, package/server type checks and scoped lint/format checks.
-No tests or fixtures were generated and no tests, database/cache/services, client/ADB or
-CI fixes were performed. Runtime and behavioral validation remain deferred in
-[issue #215](https://github.com/ReeseArch64/opencok/issues/215); the completed query contracts, including `ctf.get.rank`, and runtime verification
-limits are documented in [the ranking inventory](RANKINGS.md).
+Six focused unit tests cover Java range decoding, upper caps and signed overflow,
+ordered duplicates, own-alliance append, public SFS fields, exact Long literals,
+conditional wins types, percentage saturation, authorization, read fallbacks and
+malformed/oversized data. A disposable Redis test executes actual negative/zero-limit
+windows, repeated ranges, reverse-rank lookup and self append while checking unchanged
+board contents/expiry, wrong-type keys and service loss. Package/server types, lint and
+formatting pass. This completes query acceptance in
+[issue #215](https://github.com/ReeseArch64/opencok/issues/215); native clients, production
+Redis, publishers and other ranking families such as `ctf.get.rank` remain unverified.
+Current query coverage is documented in [the ranking inventory](RANKINGS.md).
 
 ## Mailbox category status
 
