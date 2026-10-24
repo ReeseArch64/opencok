@@ -7,6 +7,27 @@ export interface MailCategoryQuery {
   now: number;
 }
 
+export interface MailTranslationLookup {
+  id: string;
+  language: string;
+}
+
+export interface MailCategoryReaders {
+  senders(uids: readonly string[]): Promise<ReadonlyMap<string, MailSender>>;
+  translations(
+    requests: readonly MailTranslationLookup[],
+  ): Promise<readonly (MailTranslationLookup & { contents: Buffer | null })[]>;
+}
+
+export type MailCategoryInspector = (
+  entries: readonly MailListEntry[],
+  readers: MailCategoryReaders,
+) => Promise<readonly string[]>;
+
+export interface MailCategorySnapshot {
+  profile: Row | undefined;
+}
+
 export interface MailListEntry extends MailContentsEntry {
   toUser: string;
   fromUser: string | null;

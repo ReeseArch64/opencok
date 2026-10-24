@@ -6,6 +6,7 @@ import {
 } from "@opencok/messages/legacy-json";
 import {
   encode,
+  extension,
   fields,
   ProtocolError,
   sfs,
@@ -15,10 +16,11 @@ import {
 } from "@opencok/messages/sfs";
 
 const structured = new Set([5, 7, 8, 9, 10, 12, 17, 18, 25, 26, 27, 30, 31, 32, 33, 36, 42]);
-export function storedMailText(data: Buffer | null): string {
+export function storedMailText(data: Buffer | null, trim = true): string {
   if (!data) return "";
   try {
     const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(data);
+    if (!trim) return text;
     let start = 0;
     let end = text.length;
     while (start < end && text.charCodeAt(start) <= 32) start++;
@@ -130,6 +132,6 @@ export function mailContentsProjection(
     result.push(sfs.object(body));
   }
   const body = { result: sfs.array(result) };
-  encode({ ...body, ...envelope });
+  encode(extension("mail.read", { ...body, ...envelope }));
   return { body, invalidIds };
 }

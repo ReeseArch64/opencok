@@ -1,6 +1,10 @@
+import { readMailCategory } from "./mail-category.ts";
+import { translationv2 } from "@opencok/drizzle/schema/opencok_kingdom/translationv2";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { readMailStatus } from "./mail.ts";
 import type {
+  MailCategoryQuery,
+  MailCategoryInspector,
   MailContentsQuery,
   MailContentsInspector,
   MailConversationSaveQuery,
@@ -108,6 +112,7 @@ export class Database implements GameStore, FriendshipMineStore {
       mail_update,
       mail_gift_opening,
       mail_contents,
+      translationv2,
       mail_group,
       alliance_invite_move,
       switches,
@@ -225,6 +230,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   mailSave(uid: string, query: MailSaveQuery) {
     return saveMail(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
+  mailCategory(uid: string, query: MailCategoryQuery, inspect: MailCategoryInspector) {
+    return readMailCategory(this.databases, this.config.kingdomId, uid, query, inspect);
   }
   mailContents(uid: string, query: MailContentsQuery, inspect: MailContentsInspector) {
     return readMailContents(this.kingdom.db, this.config.kingdomId, uid, query, inspect);

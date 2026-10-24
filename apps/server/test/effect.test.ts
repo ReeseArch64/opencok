@@ -23,6 +23,9 @@ const dependencies: ServerDependencies = {
     profile: async () => undefined,
     accounts: async () => [],
     playerSummaries: async () => [],
+    mailCategory: async () => {
+      throw new Error("Unexpected category lookup");
+    },
     mailContents: async () => {
       throw new Error("Unexpected mail contents");
     },
