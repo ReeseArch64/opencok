@@ -1,3 +1,4 @@
+import { readBuildingRanking } from "./ranking-building.ts";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
@@ -13,7 +14,7 @@ export function readPlayerRanking(
   if (
     !uid.trim() ||
     uid.length > 40 ||
-    !["power", "kills", "level"].includes(query.kind) ||
+    !["power", "kills", "level", "building"].includes(query.kind) ||
     !Number.isInteger(query.limit) ||
     query.limit < 1 ||
     query.limit > 32767 ||
@@ -37,6 +38,8 @@ export function readPlayerRanking(
       )[0];
       if (!profile || (profile.banFlag ?? 0) !== 0 || (profile.banTime ?? 0n) > BigInt(query.now))
         return { profile, candidates: [], fallbackRank: 1n };
+      if (query.kind === "building")
+        return { profile, ...(await readBuildingRanking(tx, uid, query.limit)) };
       const identity = {
         profileUid: userprofile.uid,
         name: userprofile.name,

@@ -1265,6 +1265,9 @@ member statistics and, for candidate power, alliance-science power. Batched scie
 and video reads supply public presentation. The rules preserve distinct candidate
 windows and member-only fallback positions; these reads grant no alliance write
 authority and introduce no cache or schema dependency.
+The castle board reuses the player-ranking boundary with distinct candidate and
+fallback ordering. Its fallback offset uses a SQL window within the snapshot;
+construction queues and persisted power are never recalculated by the query.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
