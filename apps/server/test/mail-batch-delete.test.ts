@@ -83,7 +83,7 @@ test("category deletes count pending rewards before mutation and preserve the di
   expect(reads).toHaveLength(4);
   for (const read of reads) {
     expect(read.text).toContain('"rewardStatus" = 0');
-    expect(read.text).toContain('coalesce("opencok_kingdom"."mail"."status", 0) = 0');
+    expect(read.text).toContain('coalesce("status", 0) = 0');
     expect(read.params[0]).toBe("self");
     expect(read.text).not.toContain('"saveFlag"');
   }
