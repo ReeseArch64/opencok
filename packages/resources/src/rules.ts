@@ -109,6 +109,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
     activityEvents,
     offices,
     treeSkins,
+    sagaScienceBases,
+    foreignSciences,
+    foreignScienceBases,
   ] = await Promise.all(
     [
       "general",
@@ -134,6 +137,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "activity_event",
       "office",
       "life_treeS",
+      "saga_tower_science_base",
+      "foreign_civilization_up",
+      "foreign_civilization_base",
     ].map(optional),
   );
   return new Rules(
@@ -172,6 +178,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
       activityEvents,
       offices,
       treeSkins,
+      sagaScienceBases,
+      foreignSciences,
+      foreignScienceBases,
     },
   );
 }
