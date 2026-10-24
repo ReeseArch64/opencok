@@ -1473,8 +1473,8 @@ and ignored trailing comma fields. Saved extras are bounded to 255 UTF-16 units;
 piece/effect collections are bounded to 4,096 entries. Missing consumed definitions,
 invalid enums, malformed values and unavailable modifiers propagate to the enclosing
 general module failure boundary. A missing item definition behaves as an empty map
-inside this already-bound calculation, including any saved extras; validating initial
-bindings before eligibility remains a separate restoration requirement.
+inside this already-bound calculation, including any saved extras; initial binding
+validation belongs to the separate restoration controller described below.
 
 Suit counts retain present empty suit IDs and traverse a fresh String HashMap. The
 two/four/six-piece thresholds each honor exact comma-separated general exclusivity.
@@ -1488,8 +1488,9 @@ that modifier 218 does not multiply itself. Twenty-two additional units include
 1,000 independent Java 8 equipment arithmetic vectors, the complete ordinary-source
 matrix for all twelve modifiers, concrete building-composition wiring and a bridge
 from current owner modifiers through general equipment to raw troop load. The
-existing 600 building-composition vectors also remain passing. Runtime owner reads,
-ordered bindings and occupied-resource endpoint integration are still pending.
+existing 600 building-composition vectors also remain passing. Resource-owner reads
+and ordered general bindings are described below; complete owner context and
+occupied-resource endpoint integration are still pending.
 
 The internal `WorldPointDetailQuery.resourceEffects` flag now requests a resource-owner
 snapshot for types 3/37 with a present saved march. The wire command does not enable
@@ -1527,8 +1528,41 @@ Readiness now probes sixteen point-detail table projections, including six owner
 projections, without reading data. No database, listener, client or migration is run.
 SQL failures and invalid requested snapshot rows become the existing dependency
 failure; these tests do not establish real database isolation or the legacy lazy
-cache's availability behavior. General/equipment ConcurrentHashMap restoration,
-slot selection, owner residency and final endpoint composition still remain pending.
+cache's availability behavior. Owner building/context restoration, residency and
+final endpoint composition still remain pending.
+
+`controllers/world-resource-generals` now converts the general portion of this raw
+snapshot into ordered general/equipment state. Saved talent, operation-time and base
+skill maps are validated before assignment filtering, including overwritten general
+rows. Nullable primitive state/star fields default to zero. State is a Java byte in
+the reference: values outside -128 through 127 reject rather than wrap, following
+the bundled JDBC driver's default read-truncation checks. Nondefault driver settings
+are not claimed equivalent. Bound strings retain their existing storage limits;
+general, status and equipment input collections are capped at 4,096 rows each.
+
+Status associations retain exact nullable Long timestamps. Orphan statuses and
+equipment are ignored without ownership repair. Transferred owners skip status and
+equipment restoration entirely. A present general's equipment catalog is looked up
+before its state is examined: a missing item definition fails restoration even for
+state 4. That state skips binding; other states require a nonnull slot, preserve its
+exact text (including empty strings), and keep the last loaded piece for that slot.
+The ordinary player's worn flag is not used for general equipment. No rows are mutated.
+
+General IDs and equipment slots traverse fresh Java 8 ConcurrentHashMaps through the
+shared messages order model. Updating an existing key deep in a collision bucket can
+trigger treeification or resizing without increasing the entry count; both insertion
+and replacement histories are retained. This differs from simply sorting IDs or
+deduplicating before map restoration, and can change Float cancellation. Ten added
+unit tests include 116 independent Java 8 Integer-map and 20 String-map fixtures,
+duplicate slot selection, relocation, malformed unused content and composition with
+the general effect failure boundary. Only JDK collections and synthetic values were
+executed to produce those fixtures; no private game classes were run.
+
+This projection defines fresh-map traversal from the repository's stable SQL ordering.
+It does not reconstruct historical resident caches or the legacy database's unspecified
+row order. Building selection, prestige/official owner context, residency, expedition
+state and maximum collection time still need composition before occupied-resource
+responses can be enabled. All current evidence is server-side unit coverage.
 
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries

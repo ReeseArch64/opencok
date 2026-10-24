@@ -21,6 +21,14 @@ export interface NewGeneralEffectState extends NewGeneralSkillState {
   opTime: string | null;
 }
 
+export function validateNewGeneralContent(
+  general: Pick<NewGeneralEffectState, "talent" | "opTime" | "baseSkill">,
+): void {
+  generalMap(general.talent, generalInteger, 5000);
+  generalMap(general.opTime, (value) => javaDecimal(value, 64), 200);
+  generalMap(general.baseSkill, generalInteger, 256);
+}
+
 export function newGeneralBuildingEffect<T extends NewGeneralEffectState>(
   read: () => {
     orderedGenerals: readonly T[];
@@ -41,9 +49,7 @@ export function newGeneralBuildingEffect<T extends NewGeneralEffectState>(
       const id = generalSavedInteger(general.id);
       if (ids.has(id)) throw new Error("Duplicate new-general traversal entry");
       ids.add(id);
-      generalMap(general.talent, generalInteger, 5000);
-      generalMap(general.opTime, (value) => javaDecimal(value, 64), 200);
-      generalMap(general.baseSkill, generalInteger, 256);
+      validateNewGeneralContent(general);
     }
     let result = 0;
     for (const general of orderedGenerals) {
