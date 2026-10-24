@@ -1,4 +1,5 @@
 import { worldPointDetail } from "./world-point-detail.ts";
+import { profilePreference } from "./profile-preferences.ts";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
 import { worldFavorites } from "@opencok/dtos/world-favorites";
 import { worldSearch } from "@opencok/dtos/world-search";
@@ -82,7 +83,12 @@ import { dragonAttackEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
-import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
+import {
+  errors,
+  MOBILE_CLIENT_VERSION,
+  PUSH_SETTING_COUNT,
+  WORLD_NEWS_PUSH_TYPE,
+} from "@opencok/constants/game";
 import {
   accountVerificationEnabled,
   accountVerificationRequired,
@@ -95,7 +101,9 @@ import {
   inventoryItem,
   serverClock,
   settingConfig,
-  loginConfiguration,
+  loginConfigurationPreferences,
+  loginSwitches,
+  pushPreferences,
 } from "@opencok/dtos/bootstrap";
 
 const playerRankingKinds = {
@@ -182,6 +190,21 @@ export class Game {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "equip.show":
+      case "medal.show":
+      case "march.soldier.show":
+      case "colorblind.set":
+      case "equip.scroll":
+      case "banner.set":
+      case "speed.cd.open":
+        body = await profilePreference(this.db, uid, command, params, this.now());
+        break;
+      case "pushSetting.get":
+        body = await this.getPushPreferences(uid);
+        break;
+      case "parse.push.set":
+        body = await this.setPushPreference(uid, params);
+        break;
       case "world.get.detail":
         if (!this.services.worldPointDetail) throw new GameError(errors.unsupported);
         body = await worldPointDetail(
@@ -948,26 +971,67 @@ export class Game {
       version: MOBILE_CLIENT_VERSION,
       kingdomId: this.config.kingdomId,
       now,
-      services: this.services.featureAvailability?.(profile, now),
+      bossRunning: (key) => this.services.featureAvailability?.(profile, now)[key] === true,
     };
   }
   private async configuration(uid: string): Promise<Fields> {
     const state = await this.db.configuration(uid);
     const profile = this.checkProfile(state.profile);
     const context = this.featureContext(profile);
-    const deviceId = text(profile, "deviceId");
-    let count: string | null = null;
-    if (deviceId && accountVerificationEnabled(this.rules, context)) {
-      if (!this.services.changeAccountCount)
-        throw new GameError(errors.unsupported, "account_rule");
-      count = await this.services.changeAccountCount(deviceId);
+    const result = loginConfigurationPreferences(this.rules, state);
+    await this.initializeWorldNewsPreference(uid, state.pushSettings, context.now);
+    try {
+      const switchRows = this.db.configurationSwitches
+        ? await this.db.configurationSwitches()
+        : state.switches;
+      if (switchRows !== undefined) {
+        Object.assign(result, loginSwitches(switchRows));
+        let count: string | null = null;
+        if (accountVerificationEnabled(this.rules, context)) {
+          if (!this.services.changeAccountCount)
+            throw new GameError(errors.unsupported, "account_rule");
+          count = await this.services.changeAccountCount(String(profile.deviceId ?? "null"));
+        }
+        result.isVerifyChangeAccount = sfs.bool(
+          accountVerificationRequired(this.rules, context, count),
+        );
+      }
+    } catch {}
+    Object.assign(result, featureConfig(this.rules, context));
+    return result;
+  }
+  private async initializeWorldNewsPreference(uid: string, rows: readonly Row[], now: number) {
+    if (
+      rows.length < PUSH_SETTING_COUNT &&
+      !rows.some((row) => num(row, "type") === WORLD_NEWS_PUSH_TYPE)
+    ) {
+      if (!this.db.initializeWorldNewsPreference)
+        throw new GameError(errors.unsupported, "config_record");
+      await this.db.initializeWorldNewsPreference(uid, now);
     }
-    return loginConfiguration(
-      this.rules,
-      state,
-      context,
-      accountVerificationRequired(this.rules, context, count),
-    );
+  }
+  private async getPushPreferences(uid: string): Promise<Fields> {
+    const state = await this.db.configuration(uid);
+    const now = this.now();
+    this.checkProfile(state.profile, now);
+    const pushSetting = pushPreferences(state.pushSettings);
+    await this.initializeWorldNewsPreference(uid, state.pushSettings, now);
+    return { pushSetting };
+  }
+  private async setPushPreference(uid: string, params: Fields): Promise<Fields> {
+    const audio = wireInt(params, "audio", 1);
+    const type = wireInt(params, "type");
+    const status = wireInt(params, "status");
+    if (
+      [type, status, audio].some(
+        (value) => !Number.isInteger(value) || value < -2147483648 || value > 2147483647,
+      )
+    )
+      throw new GameError(errors.invalid);
+    if (!this.db.setPushPreference) throw new GameError(errors.unsupported);
+    await this.profile(uid);
+    await this.db.setPushPreference(uid, { type, status, audio }, this.now());
+    return {};
   }
   private async otherLogin(uid: string, params: Fields): Promise<Fields> {
     if (!params.army) {

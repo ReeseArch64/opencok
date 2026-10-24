@@ -97,6 +97,13 @@ test("namespace migrations preserve existing PostgreSQL rows, object identity an
       await setupDatabases(admin, server.options, topology);
       expect(await target.db.select().from(ability_page)).toHaveLength(1);
       for (const pool of [target.pool, databases.global.pool]) {
+        const role = pool === target.pool ? "kingdom" : "global";
+        const journal = JSON.parse(
+          await readFile(
+            new URL(`../migrations/${role}/meta/_journal.json`, import.meta.url),
+            "utf8",
+          ),
+        );
         expect(
           (
             await pool.query(
@@ -107,7 +114,7 @@ test("namespace migrations preserve existing PostgreSQL rows, object identity an
         expect(
           (await pool.query("SELECT count(*)::integer AS n FROM drizzle.__drizzle_migrations"))
             .rows[0].n,
-        ).toBe(pool === target.pool ? 3 : 2);
+        ).toBe(journal.entries.length);
       }
     } finally {
       await admin.end();
