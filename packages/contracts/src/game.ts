@@ -1,4 +1,10 @@
 import type {
+  MailGroupQuery,
+  MailGroupInspector,
+  MailBatchQuery,
+  MailCategoryQuery,
+  MailCategoryInspector,
+  MailCategorySnapshot,
   MailContentsQuery,
   MailContentsSnapshot,
   MailContentsInspector,
@@ -37,6 +43,21 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  mailGroups(
+    uid: string,
+    query: MailGroupQuery,
+    inspect: MailGroupInspector,
+  ): Promise<MailCategorySnapshot>;
+  mailBatch(
+    uid: string,
+    query: MailBatchQuery,
+    inspect: MailCategoryInspector,
+  ): Promise<MailCategorySnapshot>;
+  mailCategory(
+    uid: string,
+    query: MailCategoryQuery,
+    inspect: MailCategoryInspector,
+  ): Promise<MailCategorySnapshot>;
   mailContents(
     uid: string,
     query: MailContentsQuery,

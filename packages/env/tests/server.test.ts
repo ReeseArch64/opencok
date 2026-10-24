@@ -38,3 +38,17 @@ test("public player realm routes are explicit, bounded and validated", () => {
       "GAME_PLAYER_KINGDOMS",
     );
 });
+
+test("mail translation defaults enabled and accepts explicit true or false only", () => {
+  expect(parseServerEnvironment(base).GAME_MAIL_TRANSLATION).toBe(true);
+  expect(
+    parseServerEnvironment({ ...base, GAME_MAIL_TRANSLATION: "false" }).GAME_MAIL_TRANSLATION,
+  ).toBe(false);
+  expect(
+    parseServerEnvironment({ ...base, GAME_MAIL_TRANSLATION: "true" }).GAME_MAIL_TRANSLATION,
+  ).toBe(true);
+  for (const value of ["0", "1", "yes", "FALSE", ""])
+    expect(() => parseServerEnvironment({ ...base, GAME_MAIL_TRANSLATION: value })).toThrow(
+      "GAME_MAIL_TRANSLATION",
+    );
+});

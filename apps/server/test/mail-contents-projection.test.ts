@@ -195,3 +195,12 @@ test("permissive comment syntax, duplicate JSON strings and split UTF-16 boundar
   expect(chunks).toEqual(sfs.array([sfs.string("x".repeat(4999) + "?"), sfs.string("?z")]));
   for (const raw of ["{1.0:1}"]) expect(() => decodeLegacyJsonObject(raw)).toThrow(ProtocolError);
 });
+
+test("mail detail rejects transport-envelope depth overflow before returning a removal plan", () => {
+  const raw = "{a:".repeat(29) + "{}" + "}".repeat(29);
+  const decoded = decodeLegacyJsonObject(raw);
+  expect(() => encode({ result: sfs.array([sfs.object(decoded)]) })).not.toThrow();
+  expect(() => mailContentsProjection([entry(5, "broken", "bad"), entry(5, raw, "deep")])).toThrow(
+    ProtocolError,
+  );
+});
