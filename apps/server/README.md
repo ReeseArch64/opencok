@@ -1742,13 +1742,37 @@ encoding. The JSON parser remains separate from the controller's resource-specif
 access rules and the pure collection arithmetic.
 
 The saved-data decoder and raw-load calculation are not yet composed into the
-occupied-resource command. Resolving the five modifier inputs, checking decoded
-army ownership and restoring collection state remain required before it can return
-the full resource projection. A database read is not evidence that an owner
+occupied-resource command. The controller now connects decoded army ownership and
+per-troop modifier resolution, but the endpoint still needs explicit residency,
+collection-state composition and runtime timing before it can return the full
+resource projection. A database read is not evidence that an owner
 was resident in the reference process. The runtime-only maximum collection time is assigned by destination-march rescheduling;
 it is not a persisted march column. Restoring its read value still needs an explicit
 policy backed by that lifecycle, without scheduling work from the query. This pure
 calculation does not make occupied-resource responses available yet.
+
+`controllers/world-resource-army-load` consumes the decoded army and an explicit
+march-owner/residency pair. The nonblank root owner must match the march before any
+cached return. This is the persisted-state consistency boundary; it rejects foreign
+army data instead of following the legacy getter into another player's profile.
+Soldier owner fields are unused by this calculation and never select the effect owner.
+The effect snapshot must match the march owner when an applicable troop needs it.
+
+A nonresident owner with positive saved load returns before troop traversal and
+owner-effect access. Otherwise each troop's catalog load and signed base calculation
+precede current-owner effects; missing load fields skip the troop. Concrete owner
+modifiers are read separately for each applicable troop, retaining dependency and
+clock evaluation order rather than caching the first troop's result for the army.
+An absent fallback owner contributes no current modifiers. Missing required resident
+owner state fails on the first applicable troop. The shared rule primitives preserve
+the previously verified Float order, casts, signed count arithmetic and final Int sum.
+
+Nine additional synthetic units cover decoded armies, cached and empty branches,
+unused fields, owner consistency, per-troop reads, failures without partial results
+and input immutability. The existing 2,400 arithmetic vectors also cover the shared
+primitives after extraction. These reads do not update `armyLoad`, persist data or
+establish historical profile-cache residency. The caller must still supply a runtime
+residency decision; the wire command does not invoke this controller yet.
 
 The point/owner read foundation below now supplies lookup, observer authorization,
 local/remote routing and base owner fields. Specialized point projections,
