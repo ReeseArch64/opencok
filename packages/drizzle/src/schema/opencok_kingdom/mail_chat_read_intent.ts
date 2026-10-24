@@ -8,8 +8,9 @@ export const mail_chat_read_intent = opencok_kingdom.table(
     commandId: uuid("commandId").notNull(),
     effectIndex: integer("effectIndex").notNull(),
     ownerUid: varchar("ownerUid", { length: 40 }).notNull(),
+    action: varchar("action", { length: 6 }).notNull().default(sql.raw("'read'")),
     others: varchar("others", { length: 40 }).notNull(),
-    chatTypes: varchar("chatTypes", { length: 4 }).notNull(),
+    chatTypes: varchar("chatTypes", { length: 8 }).notNull(),
     requestedAt: bigint("requestedAt", { mode: "bigint" }).notNull(),
   },
   (table) => [
@@ -28,7 +29,8 @@ export const mail_chat_read_intent = opencok_kingdom.table(
       sql.raw('"effectIndex" >= 0 AND "effectIndex" <= 1001'),
     ),
     check("mail_chat_read_intent_owner_nonempty", sql.raw('length("ownerUid") > 0')),
-    check("mail_chat_read_intent_types", sql.raw("\"chatTypes\" IN ('1,20', '2', '3')")),
+    check("mail_chat_read_intent_types", sql.raw("\"chatTypes\" IN ('1,20', '2', '3', '1,2,20')")),
+    check("mail_chat_read_intent_action", sql.raw("\"action\" IN ('read', 'delete')")),
     check("mail_chat_read_intent_time_nonnegative", sql.raw('"requestedAt" >= 0')),
   ],
 );

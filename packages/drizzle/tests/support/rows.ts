@@ -3,6 +3,7 @@ import type { ColumnContract, TableContract } from "./schema";
 export type Row = Record<string, unknown>;
 
 export function sampleValue(column: ColumnContract, variant: number): unknown {
+  if (column.value === "boolean") return variant === 1;
   if (column.value === "json") return [{ id: `synthetic-${variant}`, amount: variant }];
   if (column.type === "uuid") return `00000000-0000-4000-8000-${String(variant).padStart(12, "0")}`;
   if (column.calendar) {
@@ -34,8 +35,10 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     spec.columns.map((column) => [column.name, sampleValue(column, variant)]),
   );
   for (const key of spec.foreignKeys) for (const name of key.columns) row[name] = 9007199254740993n;
-  if (spec.indexes.some((key) => key.name === "mail_chat_read_intent_PRIMARY"))
+  if (spec.indexes.some((key) => key.name === "mail_chat_read_intent_PRIMARY")) {
     row.chatTypes = variant === 1 ? "1,20" : "2";
+    row.action = "read";
+  }
   if (spec.indexes.some((key) => key.name === "avatar_completion_PRIMARY")) {
     row.ownerUid = String(variant);
     row.hash = String(variant).repeat(64);

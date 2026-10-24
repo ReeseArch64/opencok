@@ -1,3 +1,4 @@
+import { createChatMailboxHandler } from "@opencok/controllers/chat-mailbox";
 import { createChatAvatarProfileHandler } from "@opencok/controllers/chat-avatar-profile";
 import { createChatNicknameHandler } from "@opencok/controllers/chat-nickname";
 import type { ChatRepository, Log } from "@opencok/contracts/chat";
@@ -57,6 +58,9 @@ export function createChatApp({
   });
   const server = createChatServer({
     isReady,
+    mailboxHandler: repository.mailbox
+      ? createChatMailboxHandler({ mailboxes: repository.mailbox, signingSecret, log })
+      : undefined,
     nicknameHandler: createChatNicknameHandler({
       nicknames: repository.nicknames,
       signingSecret,

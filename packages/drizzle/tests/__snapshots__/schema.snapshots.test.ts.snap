@@ -14050,19 +14050,21 @@ exports[`opencok_kingdom.mail_chat_read_intent: schema and CRUD SQL 1`] = `
 column ["commandId","uuid",true,null,null,null]
 column ["effectIndex","integer",true,null,null,null]
 column ["ownerUid","varchar(40)",true,null,null,null]
+column ["action","varchar(6)",true,"'read'",null,null]
 column ["others","varchar(40)",true,null,null,null]
-column ["chatTypes","varchar(4)",true,null,null,null]
+column ["chatTypes","varchar(8)",true,null,null,null]
 column ["requestedAt","bigint",true,null,null,null]
 primary ["mail_chat_read_intent_PRIMARY",["commandId","effectIndex"]]
 index ["mail_chat_read_intent_pending",false,["requestedAt","commandId","effectIndex"]]
 index ["mail_chat_read_intent_owner",false,["ownerUid"]]
 check ["mail_chat_read_intent_effect_range","\\"effectIndex\\" >= 0 AND \\"effectIndex\\" <= 1001"]
 check ["mail_chat_read_intent_owner_nonempty","length(\\"ownerUid\\") > 0"]
-check ["mail_chat_read_intent_types","\\"chatTypes\\" IN ('1,20', '2', '3')"]
+check ["mail_chat_read_intent_types","\\"chatTypes\\" IN ('1,20', '2', '3', '1,2,20')"]
+check ["mail_chat_read_intent_action","\\"action\\" IN ('read', 'delete')"]
 check ["mail_chat_read_intent_time_nonnegative","\\"requestedAt\\" >= 0"]
-insert into "opencok_kingdom"."mail_chat_read_intent" ("commandId", "effectIndex", "ownerUid", "others", "chatTypes", "requestedAt") values ($1, $2, $3, $4, $5, $6)
-select "commandId", "effectIndex", "ownerUid", "others", "chatTypes", "requestedAt" from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $1
-update "opencok_kingdom"."mail_chat_read_intent" set "commandId" = $1, "effectIndex" = $2, "ownerUid" = $3, "others" = $4, "chatTypes" = $5, "requestedAt" = $6 where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $7
+insert into "opencok_kingdom"."mail_chat_read_intent" ("commandId", "effectIndex", "ownerUid", "action", "others", "chatTypes", "requestedAt") values ($1, $2, $3, $4, $5, $6, $7)
+select "commandId", "effectIndex", "ownerUid", "action", "others", "chatTypes", "requestedAt" from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $1
+update "opencok_kingdom"."mail_chat_read_intent" set "commandId" = $1, "effectIndex" = $2, "ownerUid" = $3, "action" = $4, "others" = $5, "chatTypes" = $6, "requestedAt" = $7 where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $8
 delete from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $1"
 `;
 
@@ -14218,4 +14220,39 @@ insert into "opencok_kingdom"."nickname_change" ("operationId", "ownerUid", "new
 select "operationId", "ownerUid", "newName", "previousName", "state", "payment", "responseGold", "failureCode", "pendingEffects", "createdAt", "updatedAt", "notificationStage" from "opencok_kingdom"."nickname_change" where "opencok_kingdom"."nickname_change"."operationId" = $1
 update "opencok_kingdom"."nickname_change" set "operationId" = $1, "ownerUid" = $2, "newName" = $3, "previousName" = $4, "state" = $5, "payment" = $6, "responseGold" = $7, "failureCode" = $8, "pendingEffects" = $9, "createdAt" = $10, "updatedAt" = $11, "notificationStage" = $12 where "opencok_kingdom"."nickname_change"."operationId" = $13
 delete from "opencok_kingdom"."nickname_change" where "opencok_kingdom"."nickname_change"."operationId" = $1"
+`;
+
+exports[`opencok_chat.chat_mailbox_message: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["kingdom_id","integer",true,null,null,null]
+column ["owner_uid","varchar(40)",true,null,null,null]
+column ["message_id","varchar(100)",true,null,null,null]
+column ["peer_uid","varchar(40)",true,null,null,null]
+column ["chat_type","integer",true,null,null,null]
+column ["created_at","bigint",true,null,null,null]
+column ["body","text",true,null,null,null]
+column ["read","boolean",true,null,null,null]
+primary ["chat_mailbox_message_kingdom_id_owner_uid_message_id_pk",["kingdom_id","owner_uid","message_id"]]
+index ["chat_mailbox_message_conversation",false,["kingdom_id","owner_uid","peer_uid","chat_type","created_at"]]
+check ["chat_mailbox_message_type","\\"chat_type\\" IN (1, 2, 3, 20)"]
+check ["chat_mailbox_message_owner","\\"kingdom_id\\" > 0 AND length(\\"owner_uid\\") > 0 AND length(\\"message_id\\") > 0"]
+insert into "opencok_chat"."chat_mailbox_message" ("kingdom_id", "owner_uid", "message_id", "peer_uid", "chat_type", "created_at", "body", "read") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "kingdom_id", "owner_uid", "message_id", "peer_uid", "chat_type", "created_at", "body", "read" from "opencok_chat"."chat_mailbox_message" where "opencok_chat"."chat_mailbox_message"."kingdom_id" = $1
+update "opencok_chat"."chat_mailbox_message" set "kingdom_id" = $1, "owner_uid" = $2, "message_id" = $3, "peer_uid" = $4, "chat_type" = $5, "created_at" = $6, "body" = $7, "read" = $8 where "opencok_chat"."chat_mailbox_message"."kingdom_id" = $9
+delete from "opencok_chat"."chat_mailbox_message" where "opencok_chat"."chat_mailbox_message"."kingdom_id" = $1"
+`;
+
+exports[`opencok_chat.chat_mailbox_receipt: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["kingdom_id","integer",true,null,null,null]
+column ["operation_id","uuid",true,null,null,null]
+column ["effect_index","integer",true,null,null,null]
+column ["owner_uid","varchar(40)",true,null,null,null]
+column ["payload_hash","varchar(64)",true,null,null,null]
+column ["requested_at","bigint",true,null,null,null]
+primary ["chat_mailbox_receipt_kingdom_id_operation_id_effect_index_pk",["kingdom_id","operation_id","effect_index"]]
+insert into "opencok_chat"."chat_mailbox_receipt" ("kingdom_id", "operation_id", "effect_index", "owner_uid", "payload_hash", "requested_at") values ($1, $2, $3, $4, $5, $6)
+select "kingdom_id", "operation_id", "effect_index", "owner_uid", "payload_hash", "requested_at" from "opencok_chat"."chat_mailbox_receipt" where "opencok_chat"."chat_mailbox_receipt"."kingdom_id" = $1
+update "opencok_chat"."chat_mailbox_receipt" set "kingdom_id" = $1, "operation_id" = $2, "effect_index" = $3, "owner_uid" = $4, "payload_hash" = $5, "requested_at" = $6 where "opencok_chat"."chat_mailbox_receipt"."kingdom_id" = $7
+delete from "opencok_chat"."chat_mailbox_receipt" where "opencok_chat"."chat_mailbox_receipt"."kingdom_id" = $1"
 `;

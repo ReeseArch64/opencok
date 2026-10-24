@@ -1,3 +1,4 @@
+import { chatMailboxPath } from "@opencok/contracts/chat-mailbox";
 import { chatAvatarProfilePath } from "@opencok/contracts/chat-avatar-profile";
 import { chatNicknamePath } from "@opencok/contracts/chat-nickname";
 import type { AsyncHttpHandler, HttpHandler, WebSocketGateway } from "@opencok/contracts/chat";
@@ -10,6 +11,7 @@ export function createChatHttpHandler({
   sessionHandler,
   profileHandler,
   nicknameHandler,
+  mailboxHandler,
   configHandler,
   serverListHandler,
 }: {
@@ -17,6 +19,7 @@ export function createChatHttpHandler({
   sessionHandler?: AsyncHttpHandler;
   profileHandler?: AsyncHttpHandler;
   nicknameHandler?: AsyncHttpHandler;
+  mailboxHandler?: AsyncHttpHandler;
   configHandler?: HttpHandler;
   serverListHandler?: HttpHandler;
   websocketGateway?: WebSocketGateway;
@@ -72,6 +75,14 @@ export function createChatHttpHandler({
       return;
     }
 
+    if (request.method === "POST" && request.url === chatMailboxPath) {
+      if (mailboxHandler) void mailboxHandler(request, response);
+      else {
+        response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
+        response.end('{"code":0,"data":{}}');
+      }
+      return;
+    }
     response.setHeader("Content-Type", "text/plain; charset=utf-8");
 
     if (request.method === "GET" && request.url === "/_health") {

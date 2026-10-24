@@ -101,7 +101,7 @@ function database(
       if (text.startsWith('insert into "opencok_kingdom"."mail_chat_read_intent"')) {
         expect(text).not.toMatch(/on conflict|returning/);
         expect(text).toContain(
-          '("commandId", "effectIndex", "ownerUid", "others", "chatTypes", "requestedAt")',
+          '("commandId", "effectIndex", "ownerUid", "action", "others", "chatTypes", "requestedAt")',
         );
         for (let index = 0; index < params.length; index += 6) {
           const [commandId, effectIndex, ownerUid, others, chatTypes, requestedAt] = params.slice(
@@ -117,6 +117,7 @@ function database(
             commandId: commandId as string,
             effectIndex: effectIndex as number,
             ownerUid: ownerUid as string,
+            action: "read",
             others: others as string,
             chatTypes: chatTypes as string,
             requestedAt: BigInt(requestedAt as string),
@@ -170,6 +171,7 @@ test("conversation reads preserve exact unread status, sender, owner and subtype
         commandId: expect.any(String),
         effectIndex: 1,
         ownerUid: "self",
+        action: "read",
         others: "sender",
         chatTypes: mode === "moderator" ? "2" : mode === "bottle" ? "3" : "1,20",
         requestedAt: BigInt(now),
@@ -306,6 +308,7 @@ test("backlog admission is owner scoped and rejects before mailbox writes at cap
       commandId: "00000000-0000-4000-8000-000000000001",
       effectIndex,
       ownerUid: "other",
+      action: "read",
       others: "",
       chatTypes: "1,20",
       requestedAt: 0n,
