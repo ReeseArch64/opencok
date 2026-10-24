@@ -57,7 +57,12 @@ when `GAME_CHAT_SESSION_URL` targets this service's internal `/external/session`
 `CHAT_SIGNING_SECRET` matches. It binds issuance to the authenticated realm profile and
 returns the opaque token and second-based expiry. Socket-free units compose both sides
 with the existing token verifier; live cross-service and native-client behavior remain
-unverified. Game-facing endpoint/configuration discovery is still pending. See the
+unverified. The shared API/gateway now exposes the three public metadata GET routes
+when `API_CHAT_URL` points to this service's HTTP origin. Chat remains the source of
+configuration and readiness; the proxy forwards no caller credentials or query strings.
+The advertised `CHAT_WEBSOCKET_URL` must be directly reachable because the shared gateway
+does not proxy `/chat/ws` or expose `/external/session`. See the
+[API discovery contract](../api/README.md#public-chat-discovery) and the
 [realm session contract](../server/README.md#realm-chat-sessions) for bounds and errors.
 Broadcast is process-local: deploy one chat instance until cross-instance
 fanout is implemented. Seven-day archives, durable replay receipts after cleanup,

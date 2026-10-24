@@ -376,7 +376,15 @@ service remains the session storage owner. No cross-database transaction or dire
 write to chat storage is introduced. No URL means unsupported issuance. The adapter
 rejects redirects, bounds request/response size and deadlines, sanitizes failure detail
 and does not automatically retry an uncertain write. Socket-free units exercise issuance
-through the existing handler and token verifier. Game-facing discovery, private read-state
+through the existing handler and token verifier. Optional `API_CHAT_URL` connects the
+shared API to the chat service's three public metadata GET routes through
+`connection/chat-discovery`; exact gateway routes forward those paths to the API. The
+chat service remains the configuration/readiness authority, and HTTP bounds are shared
+with session issuance. The API strips caller credentials/query data and upstream headers,
+returns 404 when disabled and 503 on invalid/unavailable metadata, and advertises no
+local fallback endpoint. WebSocket traffic goes directly to the configured public chat
+URL; private issuance is not publicly routed. Unit composition and route declarations
+are checked without starting listeners. Live cross-service behavior, private read-state
 delivery, seven-day archival and production Node execution remain pending.
 
 ### Migrated files implementation

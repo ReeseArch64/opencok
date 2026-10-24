@@ -42,7 +42,8 @@ docker compose --profile dev up --build -d --wait
 ```
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the
-private `GAME_LOGIN_SECRET` exception. Other development values are direct
+private `GAME_LOGIN_SECRET` exception. Optional chat integration settings also come
+from the environment. Other development values are direct
 Compose settings, still validated by the shared Zod schemas through `@opencok/env/effect`. Authorized XML comes from the complete local reference
 copy at `data/reference/server/runtime/base/resource`; the runtime does not
 reference another checkout. Direct Bun execution requires providing the remaining
@@ -936,9 +937,12 @@ Server-side checks remain authoritative if caller-controlled fields or response 
 Socket-free unit tests compose the realm command, an in-memory HTTP exchange, the maintained
 session handler and token verifier. They cover stored-hash identity, exact expiry, fresh
 sessions on repeat, profile/realm isolation, signatures, bounded streams, timeouts and
-errors. No HTTP listener, WebSocket, database, client or ADB process is exercised. Endpoint
-advertisement through game configuration and private-conversation delivery remain separate
-work; issuing public-room sessions does not complete `chatMail.read`.
+errors. No HTTP listener, WebSocket, database, client or ADB process is exercised. The
+shared API/gateway now exposes the chat service's public metadata through its existing
+GET paths when `API_CHAT_URL` is configured; see the
+[discovery contract](../api/README.md#public-chat-discovery). No new realm login field is
+invented. Private-conversation delivery remains separate work; issuing public-room
+sessions does not complete `chatMail.read`.
 
 ## Conversation read persistence
 
@@ -1371,7 +1375,7 @@ use these descriptions before the reconnect task component is complete.
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
 | 7. Avatar integration                     | Standalone files service                                                                                                                                                                                                                                                            | Realm grants, confirmation and profile updates.                                                                                                           |
-| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance with bounded signed HTTP exchange and synthetic units                                                                                                                                                                 | Game-facing endpoint/configuration discovery; private conversations and read-state delivery. Native-client validation remains deferred by request.        |
+| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog

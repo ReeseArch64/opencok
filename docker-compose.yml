@@ -250,6 +250,7 @@ services:
       GLOBAL_DATABASE_NAME: opencok_global
       KINGDOM_ID: 1
       API_SERVERS_FILE: ""
+      API_CHAT_URL: ${API_CHAT_URL:-}
       API_HOST: 0.0.0.0
       API_PORT: 8080
       API_REDIS_URL: redis://redis:6379/0
