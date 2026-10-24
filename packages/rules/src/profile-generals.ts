@@ -1,4 +1,5 @@
 import type { GeneralAbility, GeneralPreview } from "@opencok/contracts/profile";
+import type { OwnGeneralSnapshot } from "@opencok/contracts/reconnect";
 import { text, type Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
@@ -119,7 +120,40 @@ export function publicGeneralPreviews(
   rules: Rules,
   now: number,
 ): readonly GeneralPreview[] {
-  if (!Number.isSafeInteger(now) || !uid || !generals.length) return invalid();
+  if (!generals.length) return invalid();
+  return projectGenerals(generals, skills, abilities, uid, rules, now, true).map((general) => {
+    const preview: GeneralPreview & { abilityIndex?: number } = { ...general };
+    delete preview.abilityIndex;
+    return preview;
+  });
+}
+
+export function ownGeneralSnapshots(
+  generals: readonly Row[],
+  skills: readonly Row[],
+  abilities: ReadonlyMap<string, readonly GeneralAbility[]>,
+  uid: string,
+  rules: Rules,
+  now: number,
+): readonly OwnGeneralSnapshot[] {
+  return projectGenerals(generals, skills, abilities, uid, rules, now, false).map((general) => {
+    const snapshot: OwnGeneralSnapshot & { plusSkillPoint?: number } = { ...general };
+    delete snapshot.plusSkillPoint;
+    return snapshot;
+  });
+}
+
+function projectGenerals(
+  generals: readonly Row[],
+  skills: readonly Row[],
+  abilities: ReadonlyMap<string, readonly GeneralAbility[]>,
+  uid: string,
+  rules: Rules,
+  now: number,
+  publicPreview: boolean,
+): readonly (GeneralPreview & { abilityIndex: number })[] {
+  if (!Number.isSafeInteger(now) || !uid) return invalid();
+  if (!generals.length) return [];
   const selected = new Map<string, Row>();
   for (const row of generals) {
     const uuid = text(row, "uuid");
@@ -139,7 +173,7 @@ export function publicGeneralPreviews(
     const trees = abilities.get(uuid);
     if (!rule || !progression || !trees) return invalid();
     const preview = repairedAbilities(trees, rules).flatMap((tree, index) => {
-      if (Object.hasOwn(tree, "ids")) return [];
+      if (publicPreview && Object.hasOwn(tree, "ids")) return [];
       const copy: Record<string, string | number | null> = { ...tree };
       if (index === 0) for (const id of injected) copy[id] = 1;
       delete copy["620700"];
@@ -152,7 +186,8 @@ export function publicGeneralPreviews(
       status: integer(row.status),
       attack: attribute(level, progression.k1, rule.attack),
       defence: attribute(level, progression.k2, rule.defence),
-      plusSkillPoint: integer(row.plusSkillPoint ?? 0),
+      plusSkillPoint: publicPreview ? integer(row.plusSkillPoint ?? 0) : 0,
+      abilityIndex: publicPreview ? 0 : integer(row.abilityIndex ?? 0),
       ability: preview,
       skills: initiative,
     };

@@ -9,7 +9,10 @@ import { publicGenerals } from "@opencok/dtos/profile";
 import { publicAllianceInfo } from "@opencok/dtos/profile-alliance";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
-export function decodeGeneralAbilities(raw: unknown): readonly GeneralAbility[] {
+export function decodeGeneralAbilities(
+  raw: unknown,
+  publicPreview = true,
+): readonly GeneralAbility[] {
   if (raw === null || raw === undefined) return [];
   try {
     if (!Buffer.isBuffer(raw)) throw new Error();
@@ -23,9 +26,12 @@ export function decodeGeneralAbilities(raw: unknown): readonly GeneralAbility[] 
       const tree: Record<string, string | number | null> = Object.create(null);
       for (const [key, value] of Object.entries(record)) {
         if (key === "id") tree[key] = value as string | null;
-        else if (key === "ids") tree[key] = "";
-        else {
+        else if (key === "ids") {
+          if (!publicPreview && value !== null && typeof value !== "string") throw new Error();
+          tree[key] = publicPreview ? "" : (value as string | null);
+        } else {
           if (
+            publicPreview &&
             metadata &&
             (record.id !== "50000" || !["602700", "601300", "601100", "601200"].includes(key))
           )

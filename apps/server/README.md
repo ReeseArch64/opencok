@@ -541,14 +541,21 @@ The current work is restricted to server implementation and unit tests. Do not r
 ADB, native-client validation, integration or end-to-end tests for this phase.
 
 The reconnect foundation tracked in [issue #58](https://github.com/ReeseArch64/opencok/issues/58)
-reads an owner's balance and army fields in one read-only repeatable-read transaction.
+reads an owner's balances, armies, generals and initiative skills in one read-only
+repeatable-read transaction.
 Its serializers preserve seven currency longs, signed 64-bit overflow in the combined
 gold balance, and conditional training fields without loading static army catalogs.
 Army rows have deterministic ID ordering and oversized collections reject instead of
 truncating. Synthetic adapter tests use an in-memory SQL client; they do not connect
-to PostgreSQL. This foundation is not yet exposed as `user.lv`: actual marches,
-full own-general state, settled resources, queues, task transitions and friendship-mine
-state still need to be composed before enabling the reconnect handler.
+to PostgreSQL. Own-general serialization retains the saved ability-page index and
+pending choice strings omitted by public previews, and omits the public skill-point
+wrapper. It shares the existing attribute, cooldown and ability-repair projections
+for the current v12.06.0 process; pre-2.0 version filters are outside that process's
+supported configuration. Repairs remain projections without persistence or notification
+side effects, and the shared hash traversal retains its documented exceptional-state
+limits. This foundation is not yet exposed as `user.lv`: actual marches, settled
+resources, queues, task transitions and friendship-mine state still need to be composed,
+including required authoritative mutations, before enabling the reconnect handler.
 
 | Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
