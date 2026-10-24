@@ -79,10 +79,12 @@ export function publicProfileProgress(
   state: PublicProfileState,
   rules: Rules,
   context: RuleContext,
+  profileKingdomId = context.kingdomId,
 ) {
   if (!state.profile || !Number.isSafeInteger(context.now)) return invalid();
   if (context.kingdomId !== rules.kingdomId || context.kingdomId <= 0) return invalid();
   integer(context.kingdomId);
+  if (integer(profileKingdomId) <= 0) return invalid();
   const level = integer(state.profile.level ?? 0);
   const roleId = String(Number(BigInt.asIntN(32, 100100n + BigInt(level))));
   const maxExp = integer(rules.roles.get(roleId)?.player_exp);
@@ -114,7 +116,7 @@ export function publicProfileProgress(
     achieveNum,
     armedLevel,
     market,
-    serverName: rules.profile.servers?.get(String(context.kingdomId))?.name ?? "",
+    serverName: rules.profile.servers?.get(String(profileKingdomId))?.name ?? "",
     equipmentStrengthen: serverFeature(rules, "equipment_strengthen", context),
   };
 }

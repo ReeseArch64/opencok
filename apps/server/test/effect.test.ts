@@ -23,6 +23,7 @@ const dependencies: ServerDependencies = {
     profile: async () => undefined,
     accounts: async () => [],
     playerSummaries: async () => [],
+    publicProfile: async () => undefined,
     power: async () => {
       throw new Error("unused");
     },

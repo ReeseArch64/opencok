@@ -90,10 +90,11 @@ export function publicProfileBase(
   rules: Rules,
   context: RuleContext,
   lastUpdateTime: string,
+  profileKingdomId = context.kingdomId,
 ): Fields {
   if (!state.profile || !state.lord) throw new GameError(errors.unsupported, "public_profile");
-  const progress = publicProfileProgress(state, rules, context);
-  const social = publicProfileSocial(state, context.kingdomId);
+  const progress = publicProfileProgress(state, rules, context, profileKingdomId);
+  const social = publicProfileSocial(state, profileKingdomId);
   const fields: Fields = {
     ...publicStatistics(state.statistics),
     score: sfs.int(integer(state.vip ?? {}, "score")),
@@ -106,7 +107,7 @@ export function publicProfileBase(
     showMedal: sfs.bool(integer(state.mixed ?? {}, "showMedal") === 1),
     showMarchSoldier: sfs.bool(integer(state.mixed ?? {}, "marchSoldierShow") === 1),
     achieveNum: { type: Type.Float, value: progress.achieveNum },
-    serverId: sfs.int(context.kingdomId),
+    serverId: sfs.int(profileKingdomId),
     serverName: sfs.string(progress.serverName),
     lastUpdateTime: sfs.string(lastUpdateTime),
     flowerVal: sfs.int(social.flowerVal),

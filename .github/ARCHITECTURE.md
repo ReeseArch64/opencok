@@ -1231,6 +1231,15 @@ realm-scoped Redis `player-update` namespace. See the server guide for exact key
 format, configuration and legacy compatibility details. This incremental query
 work is currently validated with unit tests and synthetic adapters only.
 
+The full `get.user.info` public query also uses configured realm reads. It routes
+through the global directory first, with a local-realm fallback only when the
+directory has no entry. The selected realm supplies a repeatable-read snapshot of
+identity/progression, statistics, general previews, equipment, medals, flowers,
+offices and alliance presentation. The observer's authenticated membership controls
+alliance capacity visibility. Target identity and realm mismatches reject the query;
+no public command grants cross-realm write authority. Legacy getter repairs and
+write side effects remain documented gaps in the server guide, not migrated mutations.
+
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
 fencing and recovery tests before enabling writes. Account provisioning,
