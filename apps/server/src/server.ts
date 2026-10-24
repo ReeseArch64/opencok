@@ -237,6 +237,8 @@ export const RealmDependenciesLive = Layer.effect(
           emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
           changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
           lastSystemMail: (uid) => cache.lastSystemMail(uid),
+          systemMailPage: (uid, ids, count, time, inspect) =>
+            cache.systemMailPage(uid, ids, count, time, inspect),
           playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
         }),
       ),

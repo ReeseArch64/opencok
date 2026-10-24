@@ -3903,7 +3903,7 @@ The reference's shared helper also constructs private conversations discarded by
 this system-mail handler. This implementation excludes them and does not invoke their
 optional external translations, translation persistence or sender-update-cache reads.
 That side effect difference is explicit; this is not a complete private-chat migration.
-The V1 command's sent-ID bookkeeping and send counter remain unavailable. Current
+The V1 command's sent-ID bookkeeping and send counter are covered below. Current
 v12.06.0 behavior is implemented; obsolete pre-1.1.8 content limits and pre-7.00.0
 special text filtering are outside this process's supported version contract.
 
@@ -3917,3 +3917,30 @@ mailbox state remains unchanged by reads. The full server unit suite and affecte
 static checks pass. Native client rendering and production Redis remain unverified.
 No schema, dependency or new service is introduced; maintained migrations run only
 in disposable test databases. No operator/player database or client/ADB is accessed.
+
+## V1 system-mail synchronization
+
+`chat.get.system.mails` shares the owner-authorized selection, sender enrichment,
+content bounds and wire fields of V2, but returns no `lastUid`. When all system
+messages fit, it returns them all, even if they were sent previously. Otherwise it
+skips IDs recorded for the request timestamp and stops after reaching `count`;
+zero or negative counts still admit the first unsent message. `more` compares the
+selected count with the requested count, preserving the extra empty final page.
+A zero timestamp neither reads nor accumulates the sent-ID set.
+
+The realm-scoped chat-user-info hash stores `chat_user_hassendmail` and
+`chat_user_sendtimemail`. Selection reads both fields, validates and encodes the
+complete response, then atomically compares and writes the metadata with Redis Lua.
+Contention retries at most five times; malformed state or an outage rejects the
+request. The send counter retains signed Int wrap. The hash has no added TTL and
+uses the existing Redis configuration. No authoritative mail or reward changes.
+Cache loss can resend messages; a lost successful response can advance the sent set,
+as in the reference. Reconnect with another timestamp resets that pagination cycle.
+
+`apps/server/integration/mail-system-v1.test.ts` exercises concurrent pages, terminal
+and nonpositive counts, timestamp changes, zero-time repeats, pre-write validation,
+malformed metadata, counter wrap and dependency failure in disposable Redis.
+Command tests verify correlation, exact Long timestamps and rejection before cache
+writes. This introduces no dependency or schema change. Rollback leaves compatible
+cache fields that older V2-only binaries ignore; operator Redis and native clients
+were not used for this validation.

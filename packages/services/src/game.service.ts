@@ -434,6 +434,9 @@ export class GameService {
       case "mail.delete":
         body = await this.mailDelete(uid, params);
         break;
+      case "chat.get.system.mails":
+        body = await this.mailSystem(uid, params, true);
+        break;
       case "chat.get.system.mails.v2":
         body = await this.mailSystem(uid, params);
         break;
@@ -912,7 +915,8 @@ export class GameService {
       throw new GameError(errors.invalid);
     return mailDeleted(state.deleted);
   }
-  private async mailSystem(uid: string, params: Fields): Promise<Fields> {
+  private async mailSystem(uid: string, params: Fields, legacy = false): Promise<Fields> {
+    if (legacy && !this.services.systemMailPage) throw new GameError(errors.unsupported);
     const clientseq = params.clientseq;
     if (
       !clientseq ||
@@ -950,7 +954,17 @@ export class GameService {
       uid,
       { anchor, time, now },
       async (entries, readers) => {
-        body = await systemMailProjection(uid, entries, readers, count, time, envelope);
+        body = await systemMailProjection(
+          uid,
+          entries,
+          readers,
+          count,
+          time,
+          envelope,
+          legacy
+            ? (ids, inspect) => this.services.systemMailPage!(uid, ids, count, time, inspect)
+            : undefined,
+        );
       },
     );
     const current = this.checkProfile(state.profile, now);
