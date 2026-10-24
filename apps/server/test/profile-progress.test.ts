@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { PublicProfileState } from "@opencok/contracts/profile";
 import { Rules } from "@opencok/rules/game";
-import { publicProfileProgress } from "@opencok/rules/profile";
+import { publicProfileProgress, publicProfileSocial } from "@opencok/rules/profile";
 import { publicProfileBase } from "@opencok/dtos/profile";
 import { decode, encode, sfs, Type } from "@opencok/messages/sfs";
 
@@ -15,6 +15,7 @@ function fixture() {
     mixed: { showEquip: 0, showMedal: 1, marchSoldierShow: 2 },
     military: { militaryRank: 501 },
     office: undefined,
+    flowers: undefined,
     taverns: [{ level: 4 }],
     generals: [],
     skills: [],
@@ -115,6 +116,8 @@ test("public base fields preserve privacy switches independently from equipment 
   expect(wire.serverId).toEqual(sfs.int(2));
   expect(wire.lastUpdateTime).toEqual(sfs.string("9007199254740993"));
   expect(wire.pic).toEqual(sfs.string(""));
+  expect(wire.flowerVal).toEqual(sfs.int(0));
+  expect(wire).not.toHaveProperty("officer");
   expect(wire).not.toHaveProperty("power");
   expect(wire).not.toHaveProperty("allianceId");
   state.mixed = undefined;
@@ -124,6 +127,57 @@ test("public base fields preserve privacy switches independently from equipment 
   expect(defaults.showMedal).toEqual(sfs.bool(false));
   state.lord = undefined;
   expect(() => publicProfileBase(state, rules, context, "")).toThrow();
+});
+
+test("public flower score uses signed flower-minus-egg arithmetic and the legacy empty default", () => {
+  const { state, rules } = fixture();
+  expect(publicProfileSocial(state, 2)).toEqual({ flowerVal: 0, officer: undefined });
+  for (const [flowerVal, eggVal, expected] of [
+    [90, 15, 75],
+    [15, 90, -75],
+    [2147483647, -1, -2147483648],
+    [-2147483648, 1, 2147483647],
+  ]) {
+    state.flowers = { flowerVal: flowerVal!, eggVal: eggVal!, scoreVal: 999, hideKing: 1 };
+    const before = { ...state.flowers };
+    expect(publicProfileSocial(state, 2).flowerVal).toBe(expected!);
+    expect(decode(encode(publicProfileBase(state, rules, context, ""))).flowerVal).toEqual(
+      sfs.int(expected!),
+    );
+    expect(state.flowers).toEqual(before);
+  }
+  for (const flowerVal of [null, "invalid", 2147483648, 1.5]) {
+    state.flowers = { flowerVal, eggVal: 0 };
+    expect(() => publicProfileSocial(state, 2)).toThrow();
+  }
+});
+
+test("public offices retain enum normalization, ready-king realm rules and optional wire presence", () => {
+  const { state, rules } = fixture();
+  for (let ordinal = 0; ordinal <= 16; ordinal++) {
+    state.office = { positionId: String(216000 + ordinal), serverId: 2 };
+    expect(publicProfileSocial(state, 2).officer).toBe(String(216000 + ordinal));
+    expect(publicProfileBase(state, rules, context, "").officer).toEqual(
+      sfs.string(String(216000 + ordinal)),
+    );
+  }
+  state.office = { positionId: "216000000", serverId: 2 };
+  expect(publicProfileBase(state, rules, context, "")).not.toHaveProperty("officer");
+  state.office = { positionId: "216000000", serverId: 3 };
+  expect(publicProfileSocial(state, 2).officer).toBe("216000");
+  state.office = { positionId: "0216000000", serverId: 2 };
+  expect(publicProfileSocial(state, 2).officer).toBe("216000");
+  state.office = { positionId: "999001", serverId: 2 };
+  expect(publicProfileSocial(state, 2).officer).toBe("216001");
+  for (const positionId of ["216017", "-1", "216099"]) {
+    state.office = { positionId, serverId: 2 };
+    expect(publicProfileSocial(state, 2).officer).toBeUndefined();
+  }
+  for (const positionId of ["", "bad", "2147483648"]) {
+    state.office = { positionId, serverId: 2 };
+    expect(() => publicProfileSocial(state, 2)).toThrow();
+  }
+  expect(() => publicProfileSocial(state, 0)).toThrow();
 });
 
 test("active missing catalogs, malformed state and conflicting realm context reject public progression", () => {
