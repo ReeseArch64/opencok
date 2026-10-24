@@ -71,8 +71,11 @@ and actual SHA-256. A client upload grant cannot authorize confirmation.
 The TypeScript realm can issue grants and inspect pending receipts when explicitly
 configured with `GAME_FILES_URL` and the same protected `FILES_SIGNING_KEY_FILE`; see
 [realm avatar grants](../server/README.md#realm-avatar-grants). The private confirmation
-route must be reachable only by trusted backend services. The realm does not yet commit
-avatar changes: `user.avatar.finish` and direct picture-version updates stay unsupported.
+route must be reachable only by trusted backend services. Grant-only configuration does
+not enable completion. The realm supports `user.avatar.finish` when its separate
+`GAME_AVATAR_CHAT_URL` and chat signing configuration are also supplied; see the
+[completion runtime](../server/README.md#avatar-completion-runtime). Direct picture-version
+updates and independently restored object/profile reconciliation remain unsupported.
 S3 receipts have no historical filesystem `completed` marker; restoring profile and object
 state independently or resetting versions has not been validated.
 No Android track is validated by this migration. GIF support, asynchronous processing,

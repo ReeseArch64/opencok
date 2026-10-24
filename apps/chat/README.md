@@ -114,6 +114,7 @@ other profile mutations, transfer reconciliation and restoring databases indepen
 need their own protocols. Old realm snapshots are not exposed after routing changes and
 are retained without automatic deletion. Public room frames and session userinfo handling
 do not consume or expose this projection yet. The receiver and readiness check are
-composed by `apps/chat`; realm command/relay composition is still pending. Unit evidence
+composed by `apps/chat`; the realm now supplies opt-in command and recovery composition
+through `GAME_AVATAR_CHAT_URL` as described in the [realm runbook](../server/README.md#avatar-completion-runtime). Unit evidence
 uses the real adapters with synthetic SQL clients and in-memory HTTP handlers. Migration
 application, real transaction concurrency and client integration remain unvalidated.

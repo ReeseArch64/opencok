@@ -210,8 +210,10 @@ not proven safe. The internal `repositories/avatar-mail` consumer now clears onl
 bit in the same transaction as message/extra/group insertion, without altering receipt
 history. The internal profile-marker consumer now acknowledges bit 2 only after bounded
 external publication; a failed or uncertain database commit can repeat that idempotent write. Chat
-bit 4 now has a corresponding authenticated receiver and internal consumer; production
-realm wiring remains pending, so the realm command stays unsupported.
+bit 4 now has a corresponding authenticated receiver and consumer. Opt-in realm completion
+and recovery composition wires all three consumers; startup inspects the required tables
+without applying migrations. A recovery-only completion read requires an existing matching
+receipt and cannot advance progression or manufacture an observed receipt.
 
 ## Chat avatar projection
 

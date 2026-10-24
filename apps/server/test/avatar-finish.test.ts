@@ -502,3 +502,29 @@ test("completion captures the authorized mail catalog when no template override 
   config.mail.get("10111")!.message = "changed after commit";
   expect(JSON.parse(f.state.completions[0]![5] as string).mail.message).toBe(template.message);
 });
+
+test("recovery-only reads cannot invent observed receipts or invoke a progression inspector", async () => {
+  const f = fixture();
+  let inspected = false;
+  const inspect = async (): Promise<never> => {
+    inspected = true;
+    throw new Error("Unexpected mutation");
+  };
+  for (const version of [1000004, 3000005, 3000006]) {
+    f.state.profile![4] = version;
+    await expect(
+      commitAvatarFinish(
+        f.db,
+        1,
+        "1001",
+        avatarFinishQuery(`5:${hash}`, now),
+        f.files.find,
+        inspect,
+        true,
+      ),
+    ).rejects.toThrow();
+  }
+  expect(inspected).toBe(false);
+  expect(f.state.completions).toEqual([]);
+  expect(f.queries.some((query) => /^(insert|update)/.test(query.text))).toBe(false);
+});
