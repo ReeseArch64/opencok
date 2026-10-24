@@ -908,8 +908,8 @@ returns `owner` (String), `sequence` (Int), `grant` (String) and `pendingHash` (
 It requires an authenticated numeric owner and, when supplied, an exactly matching
 String `gameuid`. Request version, sequence and endpoint fields cannot override stored
 state. Correlation is retained; grant issuance changes no profile, upload record or
-mail and emits no push. `user.avatar.finish` and direct `user.update.picVer` remain
-unsupported: the complete avatar-change workflow is not yet available.
+mail and emits no push. `user.avatar.finish` is now available under the separate completion
+configuration below. Direct `user.update.picVer` remains unsupported.
 
 The repository locks the owner's durable profile in a repeatable-read transaction and
 rejects missing, foreign, misplaced or banned profiles before eligibility or files reads.
@@ -944,8 +944,8 @@ a caller to recognize an upload already stored for that sequence.
 The maintained files service verifies immutable S3 receipts and actual object bytes. It
 has no historical filesystem `completed` marker; the durable profile version is the
 sequence authority. This slice does not establish equivalence for independently restored
-profile/object state or reset versions. Completion must still validate receipts, atomically
-update profile/upload state and restore required mail, synchronization and push effects.
+profile/object state or reset versions. The completion path below now verifies receipts,
+commits profile/upload state and coordinates mail, metadata publication and notifications.
 
 Socket-free unit tests compose the realm command with the maintained files handler and
 synthetic storage, and inspect generated SQL through a synthetic database client. They
@@ -957,8 +957,7 @@ or ADB execution is used. Real concurrency and deployment behavior remain unveri
 
 [Issue #77](https://github.com/ReeseArch64/opencok/issues/77) adds the internal
 `controllers/avatar-finish` workflow and `repositories/avatar-finish` transaction.
-They are not connected to `Game.execute` or production composition. The wire command
-`user.avatar.finish` remains unsupported until the required effect consumers exist.
+They are connected through the opt-in runtime composition described below.
 The migration is generated only; this work has not changed a running realm or database.
 
 Every attempt locks and authorizes the owner profile and verifies the requested
@@ -1004,8 +1003,8 @@ clients only.
 
 The authorized mail catalog and internal system-mail consumer are now implemented as
 described below. The internal profile-marker and chat metadata consumers are implemented
-below; notification/runtime composition remains pending. Persisted intents
-alone are not evidence of delivered mail or updated caches. Completion cannot be exposed until those behaviors are implemented.
+below, together with their command/notification/runtime composition. Persisted intents
+alone are not evidence of delivered mail or updated caches; delivery clears independent bits.
 
 ## Avatar system-mail delivery
 
@@ -1052,9 +1051,8 @@ The returned message has a tested `push.mail` projection: base fields, exact SFS
 normal-group counts of one, and optional full fields controlled by the caller's chat-mail
 switch. The default reference sender does not include a separate `contents` field. Full
 metadata uses `contentsLocal` and expands literal backslash-n sequences. Push projection
-is prepared here but no socket, listener, background relay or live notification is started.
-The final realm composition must coordinate delivery and mail/picture notifications with
-the remaining chat effect and the internal profile-marker consumer before enabling `user.avatar.finish`.
+is now consumed by the runtime coordinator below. No listener or live service was started
+for validation; notifications are tested through simulated connections.
 
 ## Avatar profile-marker publication
 
@@ -1098,8 +1096,7 @@ to the maintained implementation; ordinary tests need neither Lua nor Redis. Tes
 compose publication with the existing marker reader and simulate SQL failures, uncertain
 commits, deadlines, out-of-order updates, realm isolation and malformed projections.
 No listener, Redis/PostgreSQL service, migration or client is exercised. The consumer is
-not started by runtime composition yet. The chat receiver and publication path are described
-below; final command/relay and notification composition are still required.
+now started by the opt-in completion runtime described below, along with the chat consumer.
 
 ## Avatar chat metadata publication
 
@@ -1115,8 +1112,7 @@ configured HTTP(S) URL without credentials/query/fragment, the existing shared s
 secret and a 100–30,000 ms timeout. It bounds requests to 4 KiB and JSON responses to
 16 KiB, rejects redirects, honors the consumer abort signal through body consumption and
 accepts only a matching owner/realm/sequence acknowledgment. It does not automatically
-retry. Invalid responses and dependency errors are sanitized. No new environment setting
-or running realm worker is introduced in this slice.
+retry. Invalid responses and dependency errors are sanitized. The completion runtime below supplies the explicit endpoint and recovery worker.
 
 The [chat receiver contract](../chat/README.md#internal-avatar-metadata) describes durable
 sequence ordering and account routing checks. If chat commits but the response or realm
@@ -1130,8 +1126,65 @@ Unit tests compose the actual realm consumer, HTTP adapter, receiver and chat re
 with synthetic database clients, including SQL lock order, commit loss, ownership checks,
 clock rollback, input bounds, signatures and deadlines. No listener, service, database,
 ADB or client is started. Global migration `0002_chat_avatar_profiles` is generated only.
-`user.avatar.finish` remains unsupported until final command, relay and notification
-composition; this consumer is not scheduled automatically.
+The opt-in completion runtime now schedules this consumer.
+
+## Avatar completion runtime
+
+[Issue #81](https://github.com/ReeseArch64/opencok/issues/81) connects
+`user.avatar.finish` to the maintained receipt transaction, all three consumers and local
+session notifications. Enable it with `GAME_AVATAR_CHAT_URL` pointing to the chat service's
+exact private `/_internal/avatar-profile` endpoint, matching `CHAT_SIGNING_SECRET`, and
+the existing `GAME_FILES_URL`/`FILES_SIGNING_KEY_FILE` integration. The completion endpoint
+is independent of chat session issuance. Missing settings leave finish unsupported;
+configured startup checks the completion and mail tables. Previously generated kingdom
+`0006_avatar_completions` and global `0002_chat_avatar_profiles` must be provisioned
+through the deployment workflow; startup never applies migrations. Compose still needs
+an explicit operator override and read-only key mount. No new external dependency or
+schema is introduced here; the existing rules workspace becomes a server runtime dependency.
+
+The authenticated command accepts a String `receipt` containing `sequence:sha256`, and
+an optional String `gameuid` must match the session. It returns String `uid`, Int `picVer`
+and Bool `superseded`, and emits an independent copy as `push.picVer.update`. Correlation
+fields appear only in the command reply. Verified repeated/current/older receipts use
+durable state without reapplying moderation or creating duplicate mail. Direct
+`user.update.picVer` remains unsupported. A failed completion attempt gets one bounded
+recovery read through the same authorization and file verification path: recovery requires
+an existing matching completion receipt and a durable version at least as advanced, and
+cannot execute the mutation inspector or create an observed receipt. It resolves a lost
+commit reply without automatically retrying a progression write.
+
+Before a new moderated completion commits, its captured system mail must materialize
+through the maintained mail rules. Missing templates retain the no-mail behavior; invalid
+or symbolic reward templates without a resolver reject before progression is changed.
+The reference avatar notice has no reward. This preflight does not extend support to
+custom reward-ID resolution. Existing unmaterializable pending records remain pending and
+produce sanitized failure categories rather than being discarded.
+
+After a confirmed commit, mail, cache and chat delivery are attempted independently.
+Their failures leave the respective bits pending and do not turn committed progression
+into a failure response. Successful mail insertion can emit `push.mail` using the exact
+`chat_switch.k3` token `1` for full fields. Online notifications are best effort, matching
+the legacy push boundary: offline/disconnected recipients recover their durable mail
+through mailbox reads, and a lost notification never recreates a deleted or acknowledged
+message. There is no exactly-once notification guarantee.
+
+A scoped worker selects one pending owner/sequence every five seconds after its preceding
+attempt finishes. Its keyset cursor advances before delivery, passes failing entries,
+and wraps after reaching the end. Selection joins the current local profile realm; each
+consumer locks and revalidates ownership. Workers and request delivery can encounter the
+same record, but durable bit checks make acknowledged work idempotent. Each external
+publication has the configured deadline. Shutdown cancels scheduling, drains active work
+before releasing the database, and never starts a new delivery after an outstanding
+selection finishes. The cursor is ephemeral; restarting safely begins at the first key.
+This initial throughput and real multi-process SQL concurrency remain unmeasured.
+
+Local notification subscriptions are installed only after authenticated initialization.
+Delivery checks readiness, the current local session and its Redis ownership token, then
+rechecks the session after the asynchronous ownership check. Disconnect and replacement
+remove only the matching subscription. No public notification route is added. Unit tests
+use EventEmitter-based connection objects and encoded SFS frames; no real socket, listener,
+service, client or ADB is used. Full media restoration and moderation lifecycle remain
+separate migration work.
 
 ## Realm chat sessions
 
@@ -1608,7 +1661,7 @@ use these descriptions before the reconnect task component is complete.
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
-| 7. Avatar integration                     | Files service; realm grants and pending receipts; internal atomic completion/profile/moderation/intent foundation and system-mail/profile-marker consumers with synthetic units                                                                                                     | Connect completion after chat effect delivery, runtime wiring and mail/picture pushes; validate restored-state semantics.                                 |
+| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                              | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.

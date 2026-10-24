@@ -403,7 +403,7 @@ and database clients without sockets. An internal completion workflow now locks 
 verifies receipts and commits profile/moderation updates with an immutable `avatar_completion` receipt and pending
 effect snapshot in one realm transaction. The snapshot records the optional system-mail
 template, profile timestamp and chat metadata; receipt history survives effect delivery.
-This follows ADR-0002 and is not connected to the realm command. An internal
+This follows ADR-0002 and now connects to the opt-in realm completion command. An internal
 `repositories/avatar-mail` consumer now commits owned message/extra/group rows and mail-bit
 acknowledgment together; rules preserve captured XML and Java byte encoding, and DTOs supply
 the mail push projection. Static source/bytecode inspection shows this send path does not
@@ -416,8 +416,16 @@ The chat-owned global avatar projection orders captured snapshots by avatar sequ
 locks/checks global account routing and accepts exact retries. Only a validated response
 can acknowledge realm bit 4; the databases do not share a transaction. The receiver is
 composed in chat, but public room frames do not consume this avatar-event projection.
-Push delivery and realm production composition remain pending, as do
-restored-state semantics, full media lifecycle, animated formats and production Node execution.
+The realm now composes all consumers behind `GAME_AVATAR_CHAT_URL` plus the files/key
+configuration, preflights system mail and provides a non-overlapping cursor-based recovery
+worker. Each delivery keeps its own durable acknowledgment; failed effects do not undo a
+committed avatar. A recovery-only read resolves uncertain commits without repeating the
+mutation. Local notifications bind to initialized sessions and recheck Redis ownership
+before sending; notification loss is recovered through durable mailbox reads. Picture
+responses and pushes preserve the legacy fields without leaking request correlation.
+Only synthetic unit composition and fake connection objects have been exercised.
+Restored-state semantics, full moderation/media lifecycle, animated formats and production
+Node execution remain pending.
 
 ### Package groups
 

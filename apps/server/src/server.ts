@@ -1,3 +1,7 @@
+import { createAvatarRuntime } from "./avatar.ts";
+import { startAvatarRelay } from "./avatar-relay.ts";
+import { checkAvatarCompletionStore } from "@opencok/repositories/avatar-delivery";
+import { createRealmNotifications } from "@opencok/connection/notifications";
 import { loadAvatarFiles } from "@opencok/connection/avatar-files";
 import { readAvatarGrant, checkAvatarGrantStore } from "@opencok/repositories/avatar-grant";
 import { Context, Effect, Layer, ManagedRuntime } from "effect";
@@ -60,11 +64,49 @@ export const RealmDependenciesLive = Layer.effect(
     yield* fromPromise("realm.coordination.start", () => coordination.start()).pipe(
       Effect.uninterruptible,
     );
+    const notifications = createRealmNotifications();
+    const avatar =
+      config.avatarChat && avatarFiles
+        ? createAvatarRuntime({
+            db,
+            files: avatarFiles,
+            rules,
+            config: { ...config, avatarChat: config.avatarChat },
+            cache,
+            notifications,
+            report: (effect) =>
+              console.warn(
+                JSON.stringify({
+                  event: "avatar_delivery_failed",
+                  kingdom: config.kingdomId,
+                  effect,
+                }),
+              ),
+          })
+        : undefined;
+    if (config.avatarChat && !avatarFiles) throw new Error("Avatar files unavailable");
+    if (avatar) {
+      yield* fromPromise("realm.avatar-completion", () =>
+        checkAvatarCompletionStore(db.kingdom.db),
+      );
+      yield* acquireResource(
+        "realm.avatar-relay",
+        async () =>
+          startAvatarRelay(avatar.next, avatar.service.deliver, () =>
+            console.warn(
+              JSON.stringify({ event: "avatar_relay_failed", kingdom: config.kingdomId }),
+            ),
+          ),
+        (relay) => relay.close(),
+      );
+    }
     return {
+      notifications,
       db,
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        avatarFinish: avatar?.service,
         avatar: avatarFiles
           ? {
               ...avatarFiles,

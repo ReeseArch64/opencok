@@ -123,3 +123,12 @@ export interface AvatarProfileDelivery {
   profile: Row | undefined;
   published: boolean;
 }
+
+export interface AvatarFinishService {
+  finish(owner: string, receipt: string, now: number): Promise<AvatarFinishSnapshot>;
+  deliver(owner: string, sequence: number): Promise<void>;
+}
+export interface AvatarDeliveryKey {
+  owner: string;
+  sequence: number;
+}

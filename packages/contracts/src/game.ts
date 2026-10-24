@@ -1,3 +1,4 @@
+import type { AvatarFinishService } from "./files.ts";
 import type { AvatarGrantService } from "./files.ts";
 import type { ChatSessionIssuer } from "./chat.ts";
 import type {
@@ -104,6 +105,7 @@ export interface LoginConfigurationState {
 
 export interface GameServices {
   avatar?: AvatarGrantService;
+  avatarFinish?: AvatarFinishService;
   chatSession?: ChatSessionIssuer;
   expeditionRanking?(limit: number): Promise<readonly ExpeditionRankingEntry[] | undefined>;
   worldPowerEffects?(): Promise<ReadonlyMap<string, string>>;
