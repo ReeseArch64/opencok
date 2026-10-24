@@ -593,18 +593,30 @@ exhaustive code-unit checksum coverage; runtime and unit tests require no Java p
 The bad-word resource adapter now reads the adjacent UTF-8 gameconfig list and preserves
 append, ordering, single-removal, reload-lock and failure-retention behavior. Its matcher
 uses Java 8 Unicode boundary data and the restricted generated-pattern grammar, validated
-against independent standard-library fixtures. Providers are explicit; the nickname-check
-command remains disabled until the global name-mapping/account adapter and runtime resource
-composition are connected. The source mount is also pending. This foundation neither
-reserves names nor changes profiles, balances or items.
+against independent standard-library fixtures. Realm startup loads the real filter and
+supplies it to the authenticated `user.check.nickName` controller. Compose mounts only the
+adjacent bad-word file read-only, with host-path creation disabled. The controller checks
+the local authenticated profile, preserves lazy providers and emits the four Int fields
+with request correlation and no pushes. This path neither reserves names nor changes
+profiles, balances or items.
 Global nickname comparison now has a separate pure `utf8_unicode_ci` equality-key
 primitive. It preserves the reference DDL's UCA 4 primary weights and PAD SPACE
 semantics, with versioned Unicode data and its license in the rules package. It
 accepts only the legacy three-byte UTF-8 character domain and performs no SQL or
 modern Unicode normalization. Exhaustive valid-BMP evidence comes from public MySQL
-weight data, without starting a database. The global mapping/account adapter must
-apply these semantics to both name matching and account UID matching before the
-nickname command can be enabled; PostgreSQL text equality is not equivalent.
+weight data, without starting a database. The global mapping/account adapter applies
+these semantics to mapping type, name and account UID matching. PostgreSQL UTF-8 queries
+use bound, generated character-class candidate patterns with explicit C collation; pure
+keys confirm equality after each read. Candidate patterns are supersets, never the
+availability decision. The first query reads mapping UID/type/value only; Java-trimmed
+UIDs then select existing accounts with `active != -1`, without a realm filter or an
+own-name exemption. Mapping activity and current account display name are irrelevant.
+Recognized SQLSTATE failures yield an empty result as in the reference; other reached
+failures reject the request. The two statements retain separate read boundaries and
+perform no writes, locks or name reservation. This adapter adds a direct workspace
+rules dependency to reuse compatibility logic. Regex candidate scans are not an indexed
+collation-key lookup; performance and actual PostgreSQL execution remain unverified in
+the unit-only phase. Existing query/statement timeouts remain in force.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab

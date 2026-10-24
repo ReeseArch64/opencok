@@ -52,6 +52,8 @@ import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
 import { WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
 import { setPushPreference } from "./push-preferences.ts";
 import { updateProfilePreference } from "./profile-preferences.ts";
+import { nicknameOccupied } from "./nickname.ts";
+import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
 import { DependencyError } from "@opencok/errors/dependency";
 import {
   and,
@@ -145,6 +147,14 @@ export class Database implements GameStore, FriendshipMineStore {
     ])
       await this.kingdom.db.select().from(table).limit(0);
     await this.databases.global.db.select().from(account_new).limit(0);
+    await this.databases.global.db
+      .select({
+        uid: usermapping.gameUid,
+        type: usermapping.mappingType,
+        value: usermapping.mappingValue,
+      })
+      .from(usermapping)
+      .limit(0);
     await this.databases.global.db
       .select({
         uid: mail_gift_log.uid,
@@ -249,6 +259,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   setPushPreference(uid: string, preference: PushPreference, now: number): Promise<void> {
     return setPushPreference(this.kingdom.db, uid, this.config.kingdomId, preference, now);
+  }
+  nicknameOccupied(name: string): Promise<boolean> {
+    return nicknameOccupied(this.databases.global.db, name);
   }
   updateProfilePreference(
     uid: string,

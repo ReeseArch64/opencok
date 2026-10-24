@@ -16,6 +16,7 @@
     "./avatar-finish": "./src/avatar-finish.ts",
     "./account": "./src/account.ts",
     "./game": "./src/game.ts",
+    "./nickname": "./src/nickname.ts",
     "./push-preferences": "./src/push-preferences.ts",
     "./profile-preferences": "./src/profile-preferences.ts",
     "./chat": "./src/chat.ts",
@@ -52,6 +53,7 @@
     "@opencok/contracts": "workspace:*",
     "@opencok/drizzle": "workspace:*",
     "@opencok/errors": "workspace:*",
+    "@opencok/rules": "workspace:*",
     "drizzle-orm": "0.45.4"
   }
 }

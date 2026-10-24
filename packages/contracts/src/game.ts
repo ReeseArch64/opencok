@@ -91,6 +91,7 @@ export interface GameStore extends AuthenticationStore {
   configurationSwitches?(): Promise<Row[] | undefined>;
   initializeWorldNewsPreference?(uid: string, now: number): Promise<void>;
   setPushPreference?(uid: string, preference: PushPreference, now: number): Promise<void>;
+  nicknameOccupied?(name: string): Promise<boolean>;
   updateProfilePreference?(
     uid: string,
     field: ProfilePreferenceField,
@@ -132,6 +133,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  nicknameBadWords?(name: string): boolean | Promise<boolean>;
   worldPointDetail?: WorldPointDetailStore;
   playerSearch?: PlayerSearchStore;
   worldSearch?: WorldSearchStore;

@@ -1,5 +1,6 @@
 import { worldPointDetail } from "./world-point-detail.ts";
 import { profilePreference } from "./profile-preferences.ts";
+import { checkNickname } from "@opencok/rules/nickname";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
 import { worldFavorites } from "@opencok/dtos/world-favorites";
 import { worldSearch } from "@opencok/dtos/world-search";
@@ -190,6 +191,9 @@ export class Game {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "user.check.nickName":
+        body = await this.nicknameCheck(uid, params);
+        break;
       case "equip.show":
       case "medal.show":
       case "march.soldier.show":
@@ -1009,6 +1013,31 @@ export class Game {
         throw new GameError(errors.unsupported, "config_record");
       await this.db.initializeWorldNewsPreference(uid, now);
     }
+  }
+  private async nicknameCheck(uid: string, params: Fields): Promise<Fields> {
+    const profile = await this.profile(uid);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const result = await checkNickname(
+      wireString(params, "nickName"),
+      Object.hasOwn(params, "type") ? wireInt(params, "type") : 0,
+      {
+        containsBadWords: (name) => {
+          if (!this.services.nicknameBadWords) throw new GameError(errors.unsupported);
+          return this.services.nicknameBadWords(name);
+        },
+        occupied: (name) => {
+          if (!this.db.nicknameOccupied) throw new GameError(errors.unsupported);
+          return this.db.nicknameOccupied(name);
+        },
+      },
+    );
+    return {
+      occupied: sfs.int(result.occupied),
+      exist: sfs.int(result.exist),
+      length: sfs.int(result.length),
+      remainLength: sfs.int(result.remainLength),
+    };
   }
   private async getPushPreferences(uid: string): Promise<Fields> {
     const state = await this.db.configuration(uid);

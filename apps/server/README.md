@@ -6,7 +6,7 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when configured), `login.dataconfig`,
-`login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`,
+`login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `user.check.nickName`,
 `equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
@@ -330,13 +330,46 @@ characters against public MySQL weight tables, plus padding, expansion and histo
 exception cases. [Data provenance and license](../../packages/rules/UNICODE-NOTICE.md)
 are checked in. No database, Java classes or client are executed by these tests.
 
-`user.check.nickName` remains unsupported until the global name-mapping/account query
-and runtime providers are composed. The global mapping lookup is distinct from a local
-profile-name search. The loader/matcher has unit composition with the check rules but
-is not yet installed in realm startup; the corresponding container resource mount also
-remains pending. No always-available name answer is supplied. Name reservation, rename
-item/gold costs and downstream effects remain separate required work. This foundation
-performs no game-state persistence or notifications.
+`user.check.nickName` is now composed through the authenticated realm controller. It
+checks the session player's local profile and ban/realm state, requires String `nickName`
+and optional signed Int `type` (default 0), and returns Int `occupied`, `exist`, `length`
+and `remainLength` with request correlation. It emits no pushes and accepts no requested
+UID/realm override. Invalid text skips providers, bad words skip occupancy and nonzero
+types skip only occupancy. Reached missing providers or non-SQL failures reject the
+request. Realm startup loads the real filter; Compose mounts the ignored source file at
+`/gameconfig/badwords.txt` read-only without creating missing host paths. Local execution
+uses the existing `GAME_RESOURCES` directory and its adjacent `gameconfig` directory.
+The loader's previously documented empty-list behavior after a failed first read is
+retained.
+
+The global repository first selects name mappings, then selects their non-deleted
+accounts. It applies legacy collation to mapping type/value and account UID, Java-trims
+mapped UIDs and excludes both `active = -1` and SQL NULL account states. It does not
+exclude the requesting player or another realm, filter mapping activity, require the
+current account display name to match, or treat an orphan mapping as occupied. Both
+queries use generated, bound PostgreSQL character-class patterns under C collation to
+prefilter candidates; exact equality keys make the final decisions. Primary ignorables
+and padding characters remain eligible. The patterns contain no supplied regex syntax
+and do not interpolate names or UIDs into SQL. They intentionally admit false positives,
+which are removed before the next query or occupancy result. PostgreSQL cannot store
+NUL; candidate classes exclude it while a NUL in the check input remains primary
+ignorable. UTF-8 database encoding is required.
+
+The queries are separate reads, with no artificial snapshot, locks, writes or name
+reservation. Recognized SQLSTATE failures return an empty result at either stage, matching
+the legacy SQL-exception fallback; network/programming failures without SQLSTATE and
+invalid restored data reject the request. Startup checks the required mapping columns.
+The repository adds only a direct workspace dependency on the existing rules package.
+No database schema, migration or external runtime dependency is added.
+
+Fifteen new units cover SQL generation through fake Drizzle clients, candidate inclusion,
+exact matching after false positives, orphan/deleted/nullable accounts, UID trimming,
+SQL versus non-SQL failures, authenticated command responses and real resource-loader
+composition with temporary synthetic files. These do not validate PostgreSQL execution,
+query plans, production load or client behavior. Candidate filters may scan the global
+tables under the existing statement/query timeouts; they are not indexed equality-key
+lookups. Name reservation, rename item/gold costs and downstream effects remain separate
+required work.
 
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
@@ -3027,7 +3060,7 @@ use these descriptions before the reconnect task component is complete.
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                              |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                               |
 | 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                        |
-| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags; nickname text/evaluation rules                                                              | Nickname filter/global availability and handler composition; rename costs/effects and remaining profile commands.                                                                       |
+| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags; authenticated nickname validation with the real word filter and global availability         | Rename costs/effects and remaining profile commands; nickname query performance and real-service verification remain unverified.                                                        |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                            |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                       |
 
