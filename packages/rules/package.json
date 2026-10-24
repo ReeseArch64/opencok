@@ -32,7 +32,8 @@
     "./reconnect-mine": "./src/reconnect-mine.ts",
     "./rewards": "./src/rewards.ts",
     "./ranking": "./src/ranking.ts",
-    "./alliance-ranking": "./src/alliance-ranking.ts"
+    "./alliance-ranking": "./src/alliance-ranking.ts",
+    "./expedition-ranking": "./src/expedition-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
