@@ -1150,17 +1150,17 @@ flag. Missing positive local points return `E100169`. Positive remote queries an
 unfinished specialized branches return `102192`; they are still required work in
 [issue #85](https://github.com/ReeseArch64/opencok/issues/85), not removed scope.
 
-| Local point branch                                                        | Current command behavior                                                                                                                                                       |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Unoccupied resources 3/37                                                 | Int point and wrapped remaining quantity; type 37 also includes current member count. Returns before territory-effect additions.                                               |
-| Ordinary resources 3 without a nonblank owner's march pointer             | Public owner fields and, when applicable, the positive territory-effect flag. A nonblank owner/march pointer requires the pending occupied-resource resolver and rejects.      |
-| Monster 6                                                                 | Owner UID plus the selected existing exploration report/start/end fields, if its first destination match is occupying.                                                         |
-| Monster boss 15                                                           | Current and catalog-derived maximum HP, then point ID; no owner identity fields.                                                                                               |
-| Cities 1/2                                                                | Public base owner fields. City 1 rejects when the lost-battle feature is enabled and the target profile exists, until its additional effect/power/duel fields are implemented. |
-| Unoccupied world bosses 49/50                                             | Pending service/reward state; rejects. Occupied instances use the reference base owner fields.                                                                                 |
-| Territories 14/18/20/21/23/46/47, barbarian 44, occupied new resources 37 | Pending specialized state; rejects.                                                                                                                                            |
-| Neutral resource 60                                                       | Base owner fields; with a nonblank item and an occupying destination march, adds Long `occupybegintime` from the stored end time and catalog gathering duration.               |
-| Other known types 0–69                                                    | Public base owner fields and point ID, as in the reference handler. Unknown types reject.                                                                                      |
+| Local point branch                                                        | Current command behavior                                                                                                                                                          |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unoccupied resources 3/37                                                 | Int point and wrapped remaining quantity; type 37 also includes current member count. Returns before territory-effect additions.                                                  |
+| Ordinary resources 3 without a nonblank owner's march pointer             | Public owner fields and, when applicable, the positive territory-effect flag. A nonblank owner/march pointer requires the pending occupied-resource resolver and rejects.         |
+| Monster 6                                                                 | Owner UID plus the selected existing exploration report/start/end fields, if its first destination match is occupying.                                                            |
+| Monster boss 15                                                           | Current and catalog-derived maximum HP, then point ID; no owner identity fields.                                                                                                  |
+| Cities 1/2                                                                | Public base owner fields. City 1 with exact `lost_battle.k3 = "1"` and an existing target profile adds Bool `slowDown`/`targetTooStrong` and Long `targetPower`/`lastBeDuelTime`. |
+| Unoccupied world bosses 49/50                                             | Pending service/reward state; rejects. Occupied instances use the reference base owner fields.                                                                                    |
+| Territories 14/18/20/21/23/46/47, barbarian 44, occupied new resources 37 | Pending specialized state; rejects.                                                                                                                                               |
+| Neutral resource 60                                                       | Base owner fields; with a nonblank item and an occupying destination march, adds Long `occupybegintime` from the stored end time and catalog gathering duration.                  |
+| Other known types 0–69                                                    | Public base owner fields and point ID, as in the reference handler. Unknown types reject.                                                                                         |
 
 Every local query validates observer identity, realm and ban state before point
 access. Full response bounds include correlation fields and the SFS extension
@@ -1168,10 +1168,56 @@ envelope. The command emits no pushes and performs no game-state writes. Existin
 bootstrap/reconnect restrictions on march state remain part of the unfinished
 topic-2 work; this query does not establish complete gameplay or client compatibility.
 
-Eighteen command/adapter unit tests cover these branches, error behavior, owner
+Twenty-three command/adapter unit tests cover these branches, error behavior, owner
 isolation, bounded report selection, transaction failures and response limits.
 Fresh-map selection also reuses frozen Java 8 collision-order fixtures. Validation
 uses synthetic Drizzle clients; no live database, listener, service or client is run.
+
+## Local city detail extras
+
+For local player-city type 1, the exact item flag `lost_battle.k3 = "1"` enables
+`slowDown`, `targetTooStrong`, `targetPower` and `lastBeDuelTime` when the owner
+profile exists. City type 2, absent target profiles and other flag strings omit
+these additions without reading their dependencies. Client-supplied fields cannot
+override the projection.
+
+The point transaction reads the observer's persisted `playerinfo.power`, the target's
+existing statistics and `user_mixed_info.lastBeDuelTime`, plus the target's effect
+inputs. It does not recalculate power, load troop quantities or read inventory,
+construction, title or avatar-upload state. Missing statistics/duel records and
+foreign identities reject. Nullable stored primitive longs use zero.
+
+`repositories/power.readPlayerEffects` shares the existing effect queries with
+`get.power.info`; the point path keeps them inside its read-only repeatable-read
+snapshot. Collections are capped at 4,096 records, with a 4,097th sentinel row causing
+failure instead of truncated effects. Existing unique territory/activity checks
+remain separate. Standard power readiness already probes those tables; point
+readiness additionally checks the duel timestamp and required profile columns.
+
+`rules/power-resolver.playerGameEffect` composes effect 37 through the same ordinary
+realm sources and ordered float arithmetic as the existing dragon modifier 487:
+initial and research effects, VIP/status/general/alliance/office/equipment,
+territory/world/hero/lucky-day/dragon/military/prestige/miracle contributions and
+personal throne rewards. Equipment reconstruction and its effect-218 multiplier
+retain their existing order. This is persisted-state restoration: status rows ending
+at or before the captured request time are excluded, as in the reference status
+loader. It does not reproduce an already-resident profile's cache history or invoke
+status cleanup, lucky-day mutation, special-battle managers or player loading.
+
+Existing world-effect cache reads supply global contributions; emperor state is
+required only when saved personal throne rewards exist. Those reads occur after
+the database snapshot and are not atomic with it. Missing or malformed required
+cache/catalog state fails visibly. The target effect is compared strictly with zero
+for `slowDown`. `targetTooStrong` compares the target's exact persisted Long power
+against the observer's Long power multiplied by Java Long-parsed `lost_battle.k4`,
+with signed 64-bit overflow before comparison. No floating-point conversion occurs.
+
+Five command/adapter tests cover composition, gating, expiry, cache dependencies,
+identity and bounded failure paths. Three pure projection tests include 1,331 frozen
+synthetic Java 8 long-arithmetic oracle vectors and binary wire round trips; the
+shared resolver also checks all effect sources for both 37 and 487. These tests run
+without a client, live service or database. Remaining point-detail branches and the
+overall topics 1–8 migration are still incomplete.
 
 ## World resource detail foundation
 

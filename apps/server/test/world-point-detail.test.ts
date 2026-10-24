@@ -572,7 +572,7 @@ test("captured query fields cannot be changed during authorization and readiness
   expect(f.queries.every((q) => q.realm === 1)).toBe(true);
   f.queries.length = 0;
   await checkWorldPointDetailStore(f.db);
-  expect(f.queries).toHaveLength(8);
+  expect(f.queries).toHaveLength(9);
   expect(f.queries.every((q) => q.params[0] === 0)).toBe(true);
   expect(() => createWorldPointDetailStore(f.topology, 0)).toThrow();
   for (const patch of [{ point: 1.5 }, { kingdomId: 0 }, { now: -1 }])

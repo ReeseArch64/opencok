@@ -1,3 +1,5 @@
+import { readPlayerEffects } from "./power.ts";
+import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import type { createDatabases } from "@opencok/drizzle";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -182,6 +184,7 @@ async function ownerRows(
   db: Reader,
   point: Row,
   remote: boolean,
+  cityExtras: boolean,
 ): Promise<WorldPointOwnerSnapshot> {
   if (!remote && (point.pointType === 6 || point.pointType === 15)) return {};
   const uid = point.ownerId;
@@ -190,7 +193,21 @@ async function ownerRows(
   const result: WorldPointOwnerSnapshot = {};
   result.profile = single(
     await db
-      .select({ uid: userprofile.uid, pic: userprofile.pic, regTime: userprofile.regTime })
+      .select({
+        uid: userprofile.uid,
+        pic: userprofile.pic,
+        regTime: userprofile.regTime,
+        ...(cityExtras && point.pointType === 1
+          ? {
+              serverId: userprofile.serverId,
+              level: userprofile.level,
+              allianceId: userprofile.allianceId,
+              pf: userprofile.pf,
+              civilizationType: userprofile.civilizationType,
+              decomposeSuitEffect: userprofile.decomposesuiteffect,
+            }
+          : {}),
+      })
       .from(userprofile)
       .where(eq(userprofile.uid, uid))
       .limit(2),
@@ -245,7 +262,13 @@ async function ownerRows(
   }
   return result;
 }
-async function readPoint(db: Reader, id: number, worldId: number, remote: boolean) {
+async function readPoint(
+  db: Reader,
+  id: number,
+  worldId: number,
+  remote: boolean,
+  cityExtras = false,
+) {
   const point = single(
     await db
       .select(pointColumns)
@@ -256,7 +279,7 @@ async function readPoint(db: Reader, id: number, worldId: number, remote: boolea
   if (!point) return {};
   if (point.id !== id || point.worldId !== worldId || !integer(point.pointType))
     throw new Error("Invalid world point");
-  const owner = await ownerRows(db, point, remote);
+  const owner = await ownerRows(db, point, remote, cityExtras);
   return { point, owner };
 }
 export function createWorldPointDetailStore(
@@ -275,7 +298,8 @@ export function createWorldPointDetailStore(
         !integer(query.kingdomId) ||
         query.kingdomId < 1 ||
         !Number.isSafeInteger(query.now) ||
-        query.now < 0
+        query.now < 0 ||
+        (query.cityExtras !== undefined && typeof query.cityExtras !== "boolean")
       )
         throw new Error("Invalid world detail query");
       const remote = query.kingdomId !== kingdomId;
@@ -302,7 +326,7 @@ export function createWorldPointDetailStore(
             throw new Error("Missing observer world");
           const result = { ...snapshot, world };
           if (remote) return result;
-          const detail = await readPoint(tx, query.point, world.worldId, false);
+          const detail = await readPoint(tx, query.point, world.worldId, false, query.cityExtras);
           const exploration =
             detail.point?.pointType === 6 && selectExploration
               ? await readExploration(tx, observer, detail.point, selectExploration)
@@ -311,11 +335,16 @@ export function createWorldPointDetailStore(
             detail.point?.pointType === 60 && !blank(detail.point.pointItem)
               ? await readNeutralResource(tx, detail.point)
               : undefined;
+          const city =
+            query.cityExtras && detail.point?.pointType === 1 && detail.owner?.profile
+              ? await readCity(tx, observer, detail.owner.profile, kingdomId)
+              : undefined;
           return {
             ...result,
             ...detail,
             ...(exploration ? { exploration } : {}),
             ...(neutralResource ? { neutralResource } : {}),
+            ...(city ? { city } : {}),
           };
         }, options);
         if (
@@ -336,7 +365,33 @@ export function createWorldPointDetailStore(
     },
   };
 }
+async function readCity(db: Reader, observer: string, profile: Row, kingdomId: number) {
+  if (profile.serverId !== kingdomId) throw new Error("Invalid city realm");
+  const observerStatistics = single(
+    await db
+      .select({ uid: playerinfo.uid, power: playerinfo.power })
+      .from(playerinfo)
+      .where(eq(playerinfo.uid, observer))
+      .limit(2),
+  );
+  if (!observerStatistics || observerStatistics.uid !== observer)
+    throw new Error("Foreign observer statistics");
+  const mixed = single(
+    await db
+      .select({ uid: user_mixed_info.uid, lastBeDuelTime: user_mixed_info.lastBeDuelTime })
+      .from(user_mixed_info)
+      .where(eq(user_mixed_info.uid, profile.uid as string))
+      .limit(2),
+  );
+  if (!mixed || mixed.uid !== profile.uid) throw new Error("Foreign city duel state");
+  const effects = await readPlayerEffects(db, profile, true);
+  return { observerStatistics, mixed, effects };
+}
 export async function checkWorldPointDetailStore(db: Db): Promise<void> {
+  await db
+    .select({ uid: user_mixed_info.uid, lastBeDuelTime: user_mixed_info.lastBeDuelTime })
+    .from(user_mixed_info)
+    .limit(0);
   await db
     .select({
       ...marchColumns,
@@ -346,7 +401,15 @@ export async function checkWorldPointDetailStore(db: Db): Promise<void> {
     .from(world_march)
     .limit(0);
   await db
-    .select({ ...profileColumns, pic: userprofile.pic, regTime: userprofile.regTime })
+    .select({
+      ...profileColumns,
+      pic: userprofile.pic,
+      regTime: userprofile.regTime,
+      level: userprofile.level,
+      pf: userprofile.pf,
+      civilizationType: userprofile.civilizationType,
+      decomposeSuitEffect: userprofile.decomposesuiteffect,
+    })
     .from(userprofile)
     .limit(0);
   await db.select({ uid: user_world.uid, worldId: user_world.worldId }).from(user_world).limit(0);

@@ -191,6 +191,7 @@ export class Game {
           this.rules,
           this.config.kingdomId,
           this.now(),
+          this.services,
         );
         break;
       case "search.player":

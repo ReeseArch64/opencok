@@ -1,15 +1,21 @@
+import type { GameServices } from "@opencok/contracts/game";
+import { MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
+import { playerGameEffect } from "@opencok/rules/power-resolver";
+import { worldPowerEffects } from "@opencok/rules/power-world";
+import { generalSkillPoints, decodeWorldPowerEffects } from "./power.ts";
 import { worldNeutralResource } from "@opencok/dtos/world-resource-detail";
 import type { WorldPointDetailStore } from "@opencok/contracts/world-point-detail";
 import type { Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
-import { worldPointOwner } from "@opencok/dtos/world-point-detail";
+import { worldPointOwner, worldCityFields } from "@opencok/dtos/world-point-detail";
 import {
   worldMonsterHealth as healthFields,
   worldMonsterExploration,
 } from "@opencok/dtos/world-monster-detail";
 import {
   worldPointDetailQuery,
+  worldCityDetail,
   worldPointOccupied,
   worldPointOwnerBase,
 } from "@opencok/rules/world-point-detail";
@@ -50,6 +56,7 @@ export async function localWorldPointDetail(
   rules: Rules,
   kingdomId: number,
   now: number,
+  services: Pick<GameServices, "worldPowerEffects" | "emperorVersion"> = {},
 ): Promise<Fields> {
   if (
     params.point?.type !== Type.Int ||
@@ -65,8 +72,11 @@ export async function localWorldPointDetail(
     now,
   );
   if (query.kingdomId !== kingdomId && query.point > 0) return unsupported();
-  const state = await store.read(observer, query, (point, marches) =>
-    restoredExplorationMarch(observer, point, marches),
+  const cityFeature = rules.items.get("lost_battle");
+  const state = await store.read(
+    observer,
+    { ...query, cityExtras: cityFeature?.k3 === "1" },
+    (point, marches) => restoredExplorationMarch(observer, point, marches),
   );
   const profile = state.profile;
   if (!profile) throw new GameError(errors.missing);
@@ -117,13 +127,55 @@ export async function localWorldPointDetail(
     !mailBlank(point.ownerMarchUUid as string | null)
   )
     return unsupported();
-  if (type === 1 && rules.items.get("lost_battle")?.k3 === "1" && state.owner.profile)
-    return unsupported();
   const result: Fields = {
     ...owner,
     ...healthFields(worldMonsterHealth(point, false, rules)),
     point: sfs.int(query.point),
   };
+  if (type === 1 && cityFeature?.k3 === "1" && state.owner.profile) {
+    const city = state.city;
+    if (
+      !city ||
+      !city.observerStatistics ||
+      city.observerStatistics.uid !== observer ||
+      !city.mixed ||
+      city.mixed.uid !== point.ownerId ||
+      city.effects.profile.uid !== point.ownerId ||
+      city.effects.profile.serverId !== kingdomId ||
+      !services.worldPowerEffects
+    )
+      return unsupported();
+    const context = { now, kingdomId, version: MOBILE_CLIENT_VERSION };
+    const world = worldPowerEffects(
+      decodeWorldPowerEffects(await services.worldPowerEffects()),
+      rules,
+      context,
+    );
+    const emperor = city.effects.throneRewards.length
+      ? await services.emperorVersion?.()
+      : undefined;
+    const effect = playerGameEffect(
+      city.effects,
+      rules,
+      context,
+      generalSkillPoints(city.effects.generals),
+      world,
+      emperor,
+      37,
+    );
+    Object.assign(
+      result,
+      worldCityFields(
+        worldCityDetail(
+          city.observerStatistics.power,
+          state.owner.statistics?.power,
+          city.mixed.lastBeDuelTime,
+          effect,
+          cityFeature.k4,
+        ),
+      ),
+    );
+  }
   if (type === 6) {
     if (!state.exploration) return unsupported();
     const marches = state.exploration.march ? [state.exploration.march] : [];
