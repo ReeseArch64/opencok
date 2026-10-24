@@ -15,6 +15,22 @@ function number(value: unknown, cached: boolean): Value {
 }
 
 function player(row: Row, kind: PlayerRankingKind): Fields {
+  if (kind === "building") {
+    const result: Fields = {};
+    for (const key of ["uid", "name", "pic", "allianceId", "alliancename", "abbr", "icon"])
+      if (row[key] !== null && row[key] !== undefined) result[key] = sfs.string(text(row, key));
+    for (const key of [
+      "updateTime",
+      "level",
+      "star",
+      "picVer",
+      "picfraId",
+      "banTime",
+      "buildingPower",
+    ])
+      if (row[key] !== null && row[key] !== undefined) result[key] = number(row[key], true);
+    return result;
+  }
   const result: Fields = {
     uid: sfs.string(text(row, "uid")),
     name: sfs.string(text(row, "name")),

@@ -18,6 +18,8 @@ function fixture() {
     candidates: [
       {
         uid: "self",
+        uuid: "castle-self",
+        buildingPower: 9n,
         profileUid: "self",
         name: "Self",
         power: 2147483648n,
@@ -62,11 +64,21 @@ function fixture() {
   return { state, db, rules, game, calls, clockReads: () => clockReads };
 }
 
-test("all three ranking commands use authenticated identity, one clock and shared response correlation", async () => {
+test("all four player ranking commands use authenticated identity, one clock and shared response correlation", async () => {
   for (const [command, kind, metric] of [
     ["server.rank", "power", { power: sfs.long(2147483648n) }],
     ["kill.rank", "kills", { armyKill: sfs.int(9) }],
     ["level.rank", "level", { level: sfs.int(4), exp: sfs.int(10), banTime: sfs.int(0) }],
+    [
+      "building.rank",
+      "building",
+      {
+        level: sfs.int(4),
+        banTime: sfs.int(0),
+        buildingPower: sfs.int(9),
+        allianceId: sfs.string(""),
+      },
+    ],
   ] as const) {
     const { game, calls, clockReads } = fixture();
     const params = {
