@@ -1,7 +1,13 @@
 import type { FlowerRankingPublication, FlowerRankingState } from "./flower-ranking.ts";
 import type { CommunityRankingSnapshot, DonationScore } from "./community-ranking.ts";
 import type { ThroneRankingPeriod, ThroneRankingSnapshot } from "./throne-ranking.ts";
-import type { HeroRankingSnapshot, HeroRankingLookup } from "./hero-ranking.ts";
+import type {
+  HeroRankingSnapshot,
+  HeroRankingLookup,
+  HeroInsideRankingSnapshot,
+  HeroHistorySnapshot,
+  HeroHistoryPublication,
+} from "./hero-ranking.ts";
 import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
 import type { WorldPointDetailStore } from "./world-point-detail.ts";
 import type { WorldFavoriteStore } from "./world-favorites.ts";
@@ -66,6 +72,22 @@ export interface CityState {
 }
 export interface GameStore extends AuthenticationStore {
   rankingPrivacy?(uid: string, kind: "payment" | "consumption"): Promise<number>;
+  heroHistory?(
+    uid: string,
+    kingdomId: number,
+    type: number,
+    now: number,
+  ): Promise<HeroHistorySnapshot>;
+  heroHistoryPresentation?(
+    alliances: readonly string[],
+    realms: readonly number[],
+  ): Promise<{ alliances: readonly Row[]; realms: readonly Row[] }>;
+  heroInsideRanking?(
+    uid: string,
+    kingdomId: number,
+    eventId: string,
+    now: number,
+  ): Promise<HeroInsideRankingSnapshot>;
   heroRanking?(
     uid: string,
     kingdomId: number,
@@ -191,6 +213,10 @@ export interface GameServices {
     ranges: readonly DragonRankingRange[],
     allianceId: string,
   ): Promise<readonly DragonRankingEntry[]>;
+  heroHistoryPublication?(
+    keys: readonly string[],
+    alliance: boolean,
+  ): Promise<readonly HeroHistoryPublication[]>;
   heroRankingPosition?(query: HeroRankingLookup): Promise<number>;
   throneRankingPeriod?(realm: number): Promise<ThroneRankingPeriod | undefined>;
   donationScores?(

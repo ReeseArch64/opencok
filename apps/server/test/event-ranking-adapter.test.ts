@@ -64,3 +64,24 @@ test("throne adapter scopes the current fight, stabilizes kill ties and reads on
   expect(select.text).not.toContain("deadDetail");
   expect(queries.some((query) => /insert|update|delete/i.test(query.text))).toBe(false);
 });
+
+test("inside event adapter isolates the owner's alliance, scores and public metadata without settlement", async () => {
+  const { readHeroInsideRanking } = await import("@opencok/repositories/hero-ranking");
+  const { db, queries } = database({
+    userprofile: [["self", "own-alliance", 1, 0, "0"]],
+    hero_event: [[2]],
+  });
+  expect((await readHeroInsideRanking(db, "self", "event", 1000)).rows).toEqual([]);
+  const query = queries.find((query) =>
+    query.text.includes('from "opencok_kingdom"."score_act_in"'),
+  )!;
+  expect(query.params).toContain("own-alliance");
+  expect(query.params).toContain("event");
+  expect(query.text).toContain('"score" desc');
+  expect(query.text).toContain('"score_act_in"."uid" asc');
+  expect(queries.some((query) => /insert|update|delete/i.test(query.text))).toBe(false);
+  expect(query.text).not.toMatch(/device|password|email/);
+  const absent = database({ userprofile: [["self", "", 1, 0, "0"]] });
+  expect((await readHeroInsideRanking(absent.db, "self", "event", 1000)).rows).toEqual([]);
+  expect(absent.queries).toHaveLength(3);
+});

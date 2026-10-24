@@ -2,7 +2,12 @@ import { readFlowerRanking } from "./flower-ranking.ts";
 import { readDonationRanking, readCemeteryRanking } from "./community-ranking.ts";
 import { readThroneRanking } from "./throne-ranking.ts";
 import type { ThroneRankingPeriod } from "@opencok/contracts/throne-ranking";
-import { readHeroRanking } from "./hero-ranking.ts";
+import {
+  readHeroRanking,
+  readHeroInsideRanking,
+  readHeroHistory,
+  readHeroHistoryPresentation,
+} from "./hero-ranking.ts";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { reportAvatar } from "./avatar-report.ts";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
@@ -127,6 +132,19 @@ export class Database implements GameStore, FriendshipMineStore {
       .where(eq(user_mixed_info.uid, uid))
       .limit(1);
     return rows[0]?.hide ?? 0;
+  }
+  heroHistory(uid: string, kingdomId: number, type: number, now: number) {
+    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
+      throw new Error("Unconfigured hero ranking realm");
+    return readHeroHistory(this.databases.getKingdom(kingdomId).db, uid, type, now);
+  }
+  heroHistoryPresentation(alliances: readonly string[], realms: readonly number[]) {
+    return readHeroHistoryPresentation(this.databases.global.db, alliances, realms);
+  }
+  heroInsideRanking(uid: string, kingdomId: number, eventId: string, now: number) {
+    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
+      throw new Error("Unconfigured hero ranking realm");
+    return readHeroInsideRanking(this.databases.getKingdom(kingdomId).db, uid, eventId, now);
   }
   heroRanking(uid: string, kingdomId: number, activityId: string, now: number) {
     if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))

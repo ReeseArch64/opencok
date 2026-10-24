@@ -183,3 +183,29 @@ publication TTL and cannot rebuild missing score publications. Existing domain
 publishers or authorized imports must expose the three-key contract in the
 maintained shared Redis topology. Unit tests cover groups, publication barriers,
 metadata coherence, tie/order preservation, self matching, gates and correlation.
+
+## Hero event history and alliance members
+
+`hero.al.inside.ranking` selects the authenticated player's origin realm and
+alliance, then reads persisted `score_act_in` rows for the requested active
+alliance event. Scores descend and UID breaks ties; this replaces the legacy
+concurrent-map traversal order. Public appearance, power, alliance, VIP and
+presence fields retain their optional fields and integer widths. Reads do not
+create events, update scores, or enroll members.
+
+`hero.event.ranking.his.get` selects the current castle or alliance-power band
+and the ten most recent rewarded events of the requested type. The first active
+event supplies the `heroevent` reward configuration. Read-only Redis scripts
+retrieve each band's ascending top ten and published alliance metadata. Public
+player summaries and global alliance/kingdom records fill presentation fields;
+missing presentation retains the identity, reward and position. Equal end times
+collapse with the last event winning, as in the client handler. Kingdom rankings
+appear only for nonempty cross-kingdom boards.
+
+History is reconstructed from persisted completed events and published rankings,
+instead of depending on a process-local warm cache. Stable event ordering
+resolves legacy unspecified activity traversal. The query does not delete old
+rankings, distribute rewards, initialize member state or trigger settlement.
+Alliance power is summed with exact integers instead of a floating-point SQL
+conversion. Battle/event domains remain responsible for publishing current
+scores and persisting their member projections.

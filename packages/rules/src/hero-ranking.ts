@@ -12,6 +12,7 @@ export function heroRankingLookup(
   rules: Rules,
   realm: number,
   version: string,
+  enforceGate = true,
 ): HeroRankingLookup | number {
   const type = Number(javaDecimal(String(event.type), 32));
   if (![1, 2, 3, 4].includes(type)) throw new Error("Unsupported hero event type");
@@ -19,8 +20,9 @@ export function heroRankingLookup(
   const gate = rules.items.get("heroactivity_on");
   try {
     if (
-      !featureRealmEnabled(gate?.[alliance ? "k7" : "k3"], realm) ||
-      !versionAtLeast(version, gate?.[alliance ? "k8" : "k4"] ?? "")
+      enforceGate &&
+      (!featureRealmEnabled(gate?.[alliance ? "k7" : "k3"], realm) ||
+        !versionAtLeast(version, gate?.[alliance ? "k8" : "k4"] ?? ""))
     )
       return -1;
   } catch {
@@ -75,4 +77,33 @@ export function heroSelfRanking(
     if (result.type === 4) result.rankingAlliance = rank;
   });
   return result;
+}
+
+export function heroHistoryBand(type: number, castle: number, power: bigint, rules: Rules): number {
+  if (type === 1 || type === 3) return castle - 1;
+  if (power <= 0n) return -1;
+  const ranges = (rules.items.get("heroactivity")?.k1 ?? "").split("|");
+  if (!ranges[0] || ranges.length > 4096) throw new Error("Missing hero power bands");
+  const value = BigInt.asIntN(32, power / 1000n);
+  const index = ranges.findIndex((raw) => value <= BigInt.asIntN(32, javaDecimal(raw, 64) / 1000n));
+  return index < 0 ? ranges.length - 1 : index;
+}
+export function heroHistoryRewards(
+  rules: Rules,
+  eventId: string,
+  band: number,
+): readonly (string | undefined)[] {
+  const event = rules.ranking.heroEvents?.get(eventId);
+  if (!event) throw new Error("Missing hero event rules");
+  const rows = (event.rankreward ?? "").split("|").map((row) => row.split(";"));
+  const width = rows[0]?.length ?? 0;
+  if (rows.length > 4096 || width > 4096 || !rows[band] || rows.some((row) => row.length > width))
+    throw new Error("Invalid hero reward bands");
+  const rewards = rows[band]!.map((raw) => String(javaDecimal(raw, 32)));
+  while (rewards.length < width) rewards.push("0");
+  const thresholds = (event.ranklist ?? "").split("|").map((raw) => Number(javaDecimal(raw, 32)));
+  return Array.from({ length: 10 }, (_, i) => {
+    const index = thresholds.findIndex((bound) => i + 1 <= bound);
+    return index < 0 ? undefined : rewards[index];
+  });
 }
