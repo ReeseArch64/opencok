@@ -4,6 +4,9 @@ import { long, num, text, type Row } from "@opencok/contracts/rows";
 import { sfs, Type, type Fields, type Value } from "@opencok/messages/sfs";
 import { guidePlayerSummary, playerSummary } from "@opencok/dtos/players";
 import { building, gold, queue, resource, user } from "@opencok/dtos/city";
+import { powerInfo } from "@opencok/dtos/power";
+import { calculatePlayerPower } from "@opencok/rules/power";
+import { powerContext } from "./power.ts";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
@@ -119,6 +122,9 @@ export class Game {
         await this.profile(uid);
         body = await this.playerSummaries(params);
         break;
+      case "get.power.info":
+        body = await this.power(uid);
+        break;
       default:
         throw new GameError(errors.unsupported);
     }
@@ -128,6 +134,19 @@ export class Game {
   }
   private async profile(uid: string): Promise<Row> {
     return this.checkProfile(await this.db.profile(uid));
+  }
+  private async power(uid: string): Promise<Fields> {
+    const now = this.now();
+    const state = await this.db.power(uid, now);
+    const profile = this.checkProfile(state.profile, now);
+    if (text(profile, "uid") !== uid) throw new GameError(errors.invalid);
+    const context = powerContext(this.rules, state.knight, {
+      now,
+      kingdomId: this.config.kingdomId,
+      version: MOBILE_CLIENT_VERSION,
+    });
+    const power = calculatePlayerPower({ ...state, profile }, this.rules, context);
+    return powerInfo(state.statistics, power, state.upload, this.rules);
   }
   private async playerSummaries(params: Fields): Promise<Fields> {
     const value = params.uids;
@@ -171,9 +190,9 @@ export class Game {
     if (uids.includes("3000002")) out.push(sfs.object(guidePlayerSummary()));
     return { uids: sfs.array(out) };
   }
-  private checkProfile(profile: Row | undefined): Row {
+  private checkProfile(profile: Row | undefined, now = this.now()): Row {
     if (!profile) throw new GameError(errors.missing);
-    if (long(profile, "banTime") > BigInt(this.now()) || num(profile, "banFlag") !== 0)
+    if (long(profile, "banTime") > BigInt(now) || num(profile, "banFlag") !== 0)
       throw new GameError(errors.invalid);
     return profile;
   }

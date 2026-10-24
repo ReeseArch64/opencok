@@ -43,6 +43,7 @@ const unused = async (): Promise<never> => {
 function store(state: LoginConfigurationState): GameStore {
   return {
     playerSummaries: unused,
+    power: unused,
     configuration: async (uid) => {
       expect(uid).toBe("synthetic");
       return state;
@@ -281,6 +282,7 @@ test("army selection takes precedence over config as in the legacy deferred-logi
   const db: GameStore = {
     ...store(configuration()),
     configuration: unused,
+    power: unused,
     city: async () => state,
   };
   const output = await new Game(db, rules(), { kingdomId: 2 }).execute("synthetic", "login.other", {
