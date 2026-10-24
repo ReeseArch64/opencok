@@ -2,13 +2,11 @@ import { readFile } from "node:fs/promises";
 import { Effect } from "effect";
 import { readEnvironment } from "@opencok/env/effect";
 import { filesSchema } from "@opencok/env/files";
-import { serveHttp } from "@opencok/core/http";
 import { acquireResource, fromPromise } from "@opencok/core/resource";
 import { createHandler } from "@opencok/api/files";
-import { BODY_LIMIT } from "@opencok/contracts/files";
 import { s3Client, S3ImageStore } from "@opencok/storage/images";
 
-export const serveFiles = Effect.gen(function* () {
+export const createFiles = Effect.gen(function* () {
   const config = yield* readEnvironment(filesSchema);
   const key = yield* fromPromise("files.signing-key", async () => {
     const value = await readFile(config.FILES_SIGNING_KEY_FILE, "utf8");
@@ -33,14 +31,5 @@ export const serveFiles = Effect.gen(function* () {
       }),
     async (resource) => resource.destroy(),
   );
-  const handler = createHandler(new S3ImageStore(client, config.S3_BUCKET), key);
-  return yield* serveHttp(
-    {
-      host: config.FILES_HOST,
-      port: config.FILES_PORT,
-      maxRequestBodySize: BODY_LIMIT,
-      idleTimeout: 15,
-    },
-    handler,
-  );
+  return createHandler(new S3ImageStore(client, config.S3_BUCKET), key);
 });

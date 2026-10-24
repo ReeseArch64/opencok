@@ -42,7 +42,7 @@ instance. The initial limit is **two realms**.
 
 | Location                       | Defined components                                                                                                             |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| VPS Europe / Kubernetes        | Shared API, API Gateway, Traefik, ZooKeeper, one Server per realm, Combat TypeScript, workers/relay and Files.                 |
+| VPS Europe / Kubernetes        | Shared API, API Gateway, Traefik, ZooKeeper, one Server per realm, Combat TypeScript, workers/relay and media within the API.  |
 | Cloudflare Pages               | Landing page, public documentation and WebAdmin.                                                                               |
 | Vercel                         | Experimental Web Game in SSR; runtime/adapter compatible with the chosen framework.                                            |
 | Redis.io / Redis Cloud         | Redis for caching, sessions, presence and, only if adopted, separate Redis for BullMQ queues.                                  |
@@ -85,7 +85,6 @@ flowchart TB
     game1[Realm 1 Server]
     game2[Realm 2 Server - default topology]
     combat[Combat TypeScript - calculation pool]
-    files[Files]
     workers[Outbox workers and relay]
     zk[ZooKeeper - realm coordination]
   end
@@ -125,7 +124,6 @@ flowchart TB
   traefik -->|Realm 2 TCP| game2
   kong --> api
   kong --> router
-  kong --> files
   router --> game1
   router --> game2
   api -->|Authorized commands| game1
@@ -155,8 +153,7 @@ flowchart TB
   workers -->|Notifications after confirmed events| push
   push -->|Client prepared and permission enabled| apk
   push -->|Service worker in the browser| browser
-  files --> objects
-  files --> pgw
+  api --> objects
   browser -->|WS with ticket and endpoint discovered| chat
   chat --> pgw
   chat --> redis
@@ -214,7 +211,7 @@ mindmap
       Chat WS
         Archive global and alliance after 1 day
         Delete 7 days after sending
-      Files and media
+      Media within the shared API
       API and administration
       Auxiliary workers
       Python Bots
@@ -296,20 +293,19 @@ mindmap
 
 ## 3. Applications and responsibility boundaries
 
-| Application/component | Location and execution defined                              | Responsibility                                                                                                                                                   |
-| --------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/api`            | A shared API across VPS/Kubernetes, TypeScript              | Discovery, Firebase validation, identity binding, push preferences/devices, queries, Admin backend, Stripe orders, and webhooks. It is not replicated per realm. |
-| `apps/server`         | One active logical process/pod per realm on VPS, TypeScript | Authority over city, economy, troops, skills, marches and combat. A maximum of two realms at this stage.                                                         |
-| API Gateway + Traefik | VPS/Kubernetes                                              | Ingress, routing, HTTP/WSS policies and TCP passthrough; configuration in `infra/`, without gameplay rules.                                                      |
-| `apps/combat`         | VPS/Kubernetes, TypeScript initially                        | Limited calculation pool, separated from the network handling and economic state updates. Rust or Go are future alternatives after benchmarking and equivalence. |
-| `apps/workers`        | VPS/Kubernetes, TypeScript                                  | Outbox, CloudAMQP queues, projections, retention, push via FCM and auxiliary tasks; quotas per workload.                                                         |
-| `apps/files`          | VPS/Kubernetes, TypeScript                                  | Uploads, validation, metadata and access to external storage. Transformation CPU has its own limits.                                                             |
-| `apps/chat`           | Service external to VPS, hosting to be defined              | WS chat, channels, authorization, history, moderation and 1/7 day retention.                                                                                     |
-| `apps/bot`            | Service external to VPS, Python                             | Authenticated simulators with quotas without direct access to the realm state.                                                                                   |
-| `apps/admin`          | Cloudflare Pages, `admin.opencok.com`                       | Administrative panel; uses shared API and authorized identity.                                                                                                   |
-| `apps/www`            | Cloudflare Pages, `opencok.com`                             | Public landing page.                                                                                                                                             |
-| `apps/docs` — planned | Cloudflare Pages, `docs.opencok.com`                        | Documentation website; versioned content and publication.                                                                                                        |
-| `apps/web`            | Vercel, `game.opencok.com`                                  | Experimental SSR Web Game, with continuous rendering and in-browser game connection.                                                                             |
+| Application/component | Location and execution defined                              | Responsibility                                                                                                                                                                           |
+| --------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api`            | A shared API across VPS/Kubernetes, TypeScript              | Discovery, Firebase validation, identity binding, push preferences/devices, queries, media uploads/delivery, Admin backend, Stripe orders, and webhooks. It is not replicated per realm. |
+| `apps/server`         | One active logical process/pod per realm on VPS, TypeScript | Authority over city, economy, troops, skills, marches and combat. A maximum of two realms at this stage.                                                                                 |
+| API Gateway + Traefik | VPS/Kubernetes                                              | Ingress, routing, HTTP/WSS policies and TCP passthrough; configuration in `infra/`, without gameplay rules.                                                                              |
+| `apps/combat`         | VPS/Kubernetes, TypeScript initially                        | Limited calculation pool, separated from the network handling and economic state updates. Rust or Go are future alternatives after benchmarking and equivalence.                         |
+| `apps/workers`        | VPS/Kubernetes, TypeScript                                  | Outbox, CloudAMQP queues, projections, retention, push via FCM and auxiliary tasks; quotas per workload.                                                                                 |
+| `apps/chat`           | Service external to VPS, hosting to be defined              | WS chat, channels, authorization, history, moderation and 1/7 day retention.                                                                                                             |
+| `apps/bot`            | Service external to VPS, Python                             | Authenticated simulators with quotas without direct access to the realm state.                                                                                                           |
+| `apps/admin`          | Cloudflare Pages, `admin.opencok.com`                       | Administrative panel; uses shared API and authorized identity.                                                                                                                           |
+| `apps/www`            | Cloudflare Pages, `opencok.com`                             | Public landing page.                                                                                                                                                                     |
+| `apps/docs` — planned | Cloudflare Pages, `docs.opencok.com`                        | Documentation website; versioned content and publication.                                                                                                                                |
+| `apps/web`            | Vercel, `game.opencok.com`                                  | Experimental SSR Web Game, with continuous rendering and in-browser game connection.                                                                                                     |
 
 Vercel is responsible for the SSR frontend, not the authoritative state of the realms.
 Validate the framework, adapter, and deployment runtime; sharing TypeScript does not
@@ -325,7 +321,7 @@ credentials. [Reference: Pages Functions](https://developers.cloudflare.com/page
 ## 4. Organization of the monorepo
 
 The directories `apps/admin`, `apps/bot`, `apps/chat`, `apps/server`, `apps/web` and
-`apps/www` already exist as the initial structure. `apps/api`, `apps/files`,
+`apps/www` already exist as the initial structure. `apps/api`,
 `apps/workers`, `apps/combat`, `apps/docs` and the subdivisions below are organizational
 proposals; this document does not create the services.
 
@@ -334,7 +330,6 @@ opencok/
 ├── apps/
 │   ├── server/
 │   ├── chat/
-│   ├── files/
 │   ├── api/
 │   ├── admin/
 │   ├── www/
@@ -808,10 +803,10 @@ identity. Unit evidence and format bounds are recorded in the realm runbook.
 
 ### Migrated files implementation
 
-`apps/files` composes `api/files`, `identity/avatar`, `validations/image` and
+`apps/api` now composes `api/files`, `identity/avatar`, `validations/image` and
 `storage/images` through the shared scoped HTTP runtime. `contracts/files` defines
 storage ports and compatibility limits, while `env/files` validates configuration.
-The [files runbook](../apps/files/README.md) covers private S3/MinIO provisioning,
+The [files runbook](../apps/api/MEDIA.md) covers private S3/MinIO provisioning,
 signing keys, backup and the JPEG/PNG-only avatar contract. Opt-in realm grant issuance
 composes `controllers/game`, pure `rules/avatar`, an owner-locking
 `repositories/avatar-grant` reader and `connection/avatar-files`. The realm signs grants
@@ -992,7 +987,7 @@ not an indiscriminate wildcard.
 
 Traefik takes care of HTTP/WSS and L4 inbound to the cluster. Kong is the API Gateway
 service, with applicable authentication, quotas, body limits, correlation and routes for
-the single API, Files and WS adapter. Internal services use the Kubernetes private
+the single API with media and the WS adapter. Internal services use the Kubernetes private
 network. SFS TCP does not traverse Kong's HTTP plugins.
 
 The gateway resolves `realmId` to `server-realm-1` or `server-realm-2`; the API is not
