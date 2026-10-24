@@ -1,16 +1,16 @@
 export class AllianceVideoDto {
-  readonly allianceid!: string;
-  readonly videoURL!: string;
-  readonly thumbnailURL!: string;
-  readonly videoH!: number;
-  readonly videoW!: number;
-  readonly videoSize!: number;
-  readonly videoLength!: number;
-  readonly checksign!: number;
+  declare public readonly allianceid: string;
+  declare public readonly videoURL: string;
+  declare public readonly thumbnailURL: string;
+  declare public readonly videoH: number;
+  declare public readonly videoW: number;
+  declare public readonly videoSize: number;
+  declare public readonly videoLength: number;
+  declare public readonly checksign: number;
 }
 
 export class PublicAllianceInfoDto {
-  readonly alliance!: {
+  declare public readonly alliance: {
     readonly uid?: string;
     readonly alliancename?: string;
     readonly abbr?: string;

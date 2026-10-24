@@ -1,7 +1,7 @@
 export class PlayerRankingDto {
-  readonly selfRanking?: number;
-  readonly myRanking?: number;
-  readonly serverRanking!: {
+  declare public readonly selfRanking?: number;
+  declare public readonly myRanking?: number;
+  declare public readonly serverRanking: {
     readonly uid?: string;
     readonly name?: string;
     readonly pic?: string;

@@ -32,7 +32,7 @@ for (const { id, table, config, spec } of catalog) {
         ),
         ...config.indexes.map(
           ({ config: index }) =>
-            `index ${JSON.stringify([index.name, index.unique, index.columns.map((column) => ("name" in column ? column.name : dialect.sqlToQuery(column as SQL).sql))])}`,
+            `index ${JSON.stringify([index.name, index.unique, index.columns.map((column) => ("name" in column ? column.name : dialect.sqlToQuery(column as SQL).sql)), ...(index.where ? [dialect.sqlToQuery(index.where).sql] : [])])}`,
         ),
         ...config.checks.map(
           (check) => `check ${JSON.stringify([check.name, dialect.sqlToQuery(check.value).sql])}`,

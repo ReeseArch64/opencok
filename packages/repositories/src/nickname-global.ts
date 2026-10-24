@@ -10,7 +10,10 @@ import { withAvailableNickname, type NicknameGlobalTransaction } from "./nicknam
 const nameKey = mysqlUtf8UnicodeKey("name");
 const nameCandidates = mysqlUtf8UnicodeCandidates(["name"]);
 
-async function accountUid(tx: NicknameGlobalTransaction, owner: string): Promise<string> {
+export async function nicknameAccountUid(
+  tx: NicknameGlobalTransaction,
+  owner: string,
+): Promise<string> {
   try {
     const key = mysqlUtf8UnicodeKey(owner);
     const candidates = await tx
@@ -44,12 +47,12 @@ async function accountUid(tx: NicknameGlobalTransaction, owner: string): Promise
   }
 }
 
-async function writeName(
+export async function writeNicknameGlobal(
   tx: NicknameGlobalTransaction,
   owner: string,
   name: string,
 ): Promise<void> {
-  const uid = await accountUid(tx, owner);
+  const uid = await nicknameAccountUid(tx, owner);
   try {
     const updated = await tx
       .update(account_new)
@@ -125,7 +128,7 @@ export async function commitNicknameGlobal<T>(
   }
   return withAvailableNickname(db, name, async (tx) => {
     const prepared = await prepare();
-    await writeName(tx, owner, name);
+    await writeNicknameGlobal(tx, owner, name);
     return prepared;
   });
 }

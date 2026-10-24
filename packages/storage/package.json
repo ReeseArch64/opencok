@@ -18,7 +18,14 @@
     "./server-directory": "./src/server-directory.ts",
     "./session": "./src/session.ts",
     "./timeout": "./src/timeout.ts",
-    "./images": "./src/images.ts"
+    "./images": "./src/images.ts",
+    "./published-ranking": "./src/published-ranking.ts",
+    "./hero-ranking": "./src/hero-ranking.ts",
+    "./throne-ranking": "./src/throne-ranking.ts",
+    "./donation-ranking": "./src/donation-ranking.ts",
+    "./flower-ranking": "./src/flower-ranking.ts",
+    "./military-ranking": "./src/military-ranking.ts",
+    "./battle-ranking": "./src/battle-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

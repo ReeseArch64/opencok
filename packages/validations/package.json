@@ -35,7 +35,15 @@
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./configuration": "./src/configuration.ts",
     "./dto": "./src/dto.ts",
-    "./sfs": "./src/sfs.ts"
+    "./sfs": "./src/sfs.ts",
+    "./published-ranking": "./src/published-ranking.ts",
+    "./hero-ranking": "./src/hero-ranking.ts",
+    "./throne-ranking": "./src/throne-ranking.ts",
+    "./community-ranking": "./src/community-ranking.ts",
+    "./flower-ranking": "./src/flower-ranking.ts",
+    "./military-ranking": "./src/military-ranking.ts",
+    "./battle-ranking": "./src/battle-ranking.ts",
+    "./nickname-change": "./src/nickname-change.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

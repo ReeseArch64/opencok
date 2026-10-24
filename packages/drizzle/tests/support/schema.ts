@@ -19,6 +19,7 @@ export interface TableContract {
   columns: ColumnContract[];
   indexes: {
     name: string;
+    where?: string;
     kind: "primary" | "unique" | "index";
     columns: { name: string; prefix: number | null }[];
   }[];

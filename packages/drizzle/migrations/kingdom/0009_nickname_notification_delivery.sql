@@ -1,0 +1,2 @@
+ALTER TABLE "opencok_kingdom"."nickname_change" ADD COLUMN "notificationStage" integer DEFAULT 0 NOT NULL;
+ALTER TABLE "opencok_kingdom"."nickname_change" ADD CONSTRAINT "nickname_change_notification_stage" CHECK ("notificationStage" BETWEEN 0 AND 2 AND ("state" = 'refunded' OR "notificationStage" <= 1));

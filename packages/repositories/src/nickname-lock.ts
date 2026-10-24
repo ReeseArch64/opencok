@@ -21,6 +21,17 @@ export async function withAvailableNickname<T>(
   name: string,
   operation: (tx: NicknameGlobalTransaction) => Promise<T>,
 ): Promise<T> {
+  return withNicknameLock(db, name, async (tx) => {
+    if (await readNicknameOccupation(tx, name)) throw new GameError(errors.nicknameOccupied);
+    return operation(tx);
+  });
+}
+
+export async function withNicknameLock<T>(
+  db: GlobalDatabase,
+  name: string,
+  operation: (tx: NicknameGlobalTransaction) => Promise<T>,
+): Promise<T> {
   let key: string;
   try {
     if (
@@ -55,7 +66,6 @@ export async function withAvailableNickname<T>(
     if (result.rows.length !== 1 || typeof result.rows[0]?.acquired !== "boolean")
       throw new DependencyError("nickname lock result");
     if (!result.rows[0].acquired) throw new GameError(errors.nicknameOccupied);
-    if (await readNicknameOccupation(tx, name)) throw new GameError(errors.nicknameOccupied);
     const value = await operation(tx);
     await tx.execute(sql`commit`);
     ended = true;
