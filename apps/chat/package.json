@@ -15,7 +15,8 @@
     "@opencok/controllers": "workspace:*",
     "@opencok/connection": "workspace:*",
     "@opencok/repositories": "workspace:*",
-    "@opencok/env": "workspace:*"
+    "@opencok/env": "workspace:*",
+    "@opencok/core": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",

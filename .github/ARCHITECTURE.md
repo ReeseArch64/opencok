@@ -1455,6 +1455,15 @@ controlled reason. Avoid player payloads, credentials, tokens and keys. High-car
 IDs must not become Loki labels or per-player Prometheus series; the search uses
 structured fields when authorized. [Reference: cardinality in Loki](https://grafana.com/docs/loki/latest/get-started/labels/cardinality/).
 
+The current TypeScript development services use the external Evlog library through
+`packages/core/src/logging.ts` for operational JSON output. Shared runtime,
+resource and HTTP adapters instrument API, realm and Files; realm TCP sessions
+and Chat HTTP/WebSocket adapters attach generated correlation IDs and controlled
+outcomes. This is a console logging implementation; collectors, Loki hosting and
+persistent audit remain separate work. The
+[shared logging contract](../packages/core/README.md#operational-logging) defines
+severity, field filtering and retention boundaries.
+
 **Evelog:** name of the game's event and audit log, as confirmed by the operator; does
 not represent an external tool. The design proposes an append-only record in PostgreSQL,
 linked to the outbox, with voluminous details archived in MongoDB/storage as per

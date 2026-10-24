@@ -1,4 +1,5 @@
 import { Effect, Layer } from "effect";
+import { logEvent } from "@opencok/core/logging";
 import { runService } from "@opencok/core/runtime";
 import { EnvironmentLive } from "@opencok/env/effect";
 import { RealmConfig, RealmConfigLive } from "./config.ts";
@@ -14,16 +15,14 @@ runService(
   Effect.gen(function* () {
     const server = yield* RealmServer;
     const settings = yield* RealmConfig;
-    console.info(
-      JSON.stringify({
-        event: "started",
-        runtime: "bun",
-        kingdom: settings.kingdomId,
-        port: server.port,
-        healthPort: server.healthPort,
-        experimental: true,
-      }),
-    );
+    logEvent("started", {
+      outcome: "success",
+      runtime: "bun",
+      kingdom: settings.kingdomId,
+      port: server.port,
+      healthPort: server.healthPort,
+      experimental: true,
+    });
     yield* Effect.never;
   }).pipe(Effect.provide(services)),
 );

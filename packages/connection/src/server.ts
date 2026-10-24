@@ -1,5 +1,6 @@
 import { createServer, type Socket } from "node:net";
 import { Effect } from "effect";
+import { logEvent } from "@opencok/core/logging";
 import { serveHttp } from "@opencok/core/http";
 import { acquireResource, fromPromise, ResourceError } from "@opencok/core/resource";
 import { HEALTH_CHECK_INTERVAL_MS } from "@opencok/constants/connection";
@@ -13,11 +14,27 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
     const sockets = new Set<Socket>();
     const inFlight = new Set<Promise<void>>();
     let healthy = false;
+    let checked = false;
     let stopping = false;
     const metrics = { userId: 0, rejected: 0, commands: 0 };
     const check = fromPromise("realm.health", async () => {
       const results = await Promise.allSettled([db.health(), cache.command("PING")]);
-      healthy = results.every((result) => result.status === "fulfilled") && coordination.ready;
+      const next = results.every((result) => result.status === "fulfilled") && coordination.ready;
+      if (!checked || next !== healthy)
+        logEvent(
+          "readiness_changed",
+          {
+            component: "realm",
+            kingdom: config.kingdomId,
+            ready: next,
+            database: results[0]!.status === "fulfilled",
+            cache: results[1]!.status === "fulfilled",
+            coordination: coordination.ready,
+          },
+          next ? "info" : "warn",
+        );
+      checked = true;
+      healthy = next;
     }).pipe(Effect.uninterruptible);
     const ready = () => healthy && coordination.ready && !stopping;
     yield* check;
@@ -31,6 +48,7 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
         ),
       async (listener) => {
         stopping = true;
+        logEvent("connections_draining", { kingdom: config.kingdomId, connections: sockets.size });
         const closed = new Promise<void>((resolve) => listener.close(() => resolve()));
         for (const socket of sockets) socket.destroy();
         await closed;
