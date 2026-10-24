@@ -5,7 +5,14 @@ import { readPowerState } from "@opencok/repositories/power";
 import { generalSkillPoints, titleContractExpiries } from "@opencok/controllers/power";
 
 const now = 1792756800000;
-function database(options: { missing?: boolean; failure?: boolean } = {}) {
+function database(
+  options: {
+    missing?: boolean;
+    failure?: boolean;
+    allianceId?: string;
+    allianceFailure?: boolean;
+  } = {},
+) {
   const queries: { text: string; params: unknown[] }[] = [];
   const client = {
     query: async (query: { text: string }, params: unknown[] = []) => {
@@ -15,13 +22,23 @@ function database(options: { missing?: boolean; failure?: boolean } = {}) {
         return {
           rows: options.missing
             ? []
-            : [["synthetic", 5, "0", 0, "market_global", "", 1, "9001;0;0"]],
+            : [["synthetic", 5, "0", 0, "market_global", options.allianceId ?? "", 1, "9001;0;0"]],
         };
       if (table === "user_army") return { rows: [["107001", 1, 2, 3, 4]] };
       if (table === "user_general") return { rows: [["1001", 5, Buffer.from('[{"600001":2}]')]] };
       if (table === "user_equip") return { rows: [[1001, 1, "487,3", 4]] };
       if (table === "user_wall") return { rows: [["108001", 5]] };
       if (table === "user_state") return { rows: [[510001, "9007199254740993", 487, 25]] };
+      if (table === "user_vip") return { rows: [[250, "9007199254740993", 2]] };
+      if (table === "alliance_science") {
+        if (options.allianceFailure) throw new Error("Synthetic alliance read failure");
+        return {
+          rows: [
+            [1000, 2],
+            [2000, 0],
+          ],
+        };
+      }
       if (table === "user_civilization_science") return { rows: [[2000, 3]] };
       if (table === "t_hero") return { rows: [[7001]] };
       if (table === "user_knight_title")
@@ -61,7 +78,9 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const selects = queries.filter((query) => query.text.startsWith("select"));
-  expect(selects).toHaveLength(16);
+  expect(selects).toHaveLength(17);
+  expect(snapshot.vip).toEqual({ score: 250, vipEndTime: 9007199254740993n, sLevel: 2 });
+  expect(snapshot.allianceSciences).toEqual([]);
   expect(snapshot.states).toEqual([
     { stateId: 510001, endTime: 9007199254740993n, ranEffId: 487, ranEffValue: 25 },
   ]);
@@ -94,6 +113,29 @@ test("missing players skip dependent reads and late failures roll back the entir
   expect(result.armies).toEqual([]);
   expect(missing.queries).toHaveLength(3);
   const failure = database({ failure: true });
+  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  expect(failure.queries.at(-1)?.text).toBe("rollback");
+  expect(failure.queries.some((query) => query.text === "commit")).toBe(false);
+});
+
+test("alliance power reads follow the persisted membership and roll back on a late alliance failure", async () => {
+  const fixture = database({ allianceId: "synthetic-alliance" });
+  const snapshot = await readPowerState(fixture.db, "synthetic", now);
+  expect(snapshot.allianceSciences).toEqual([
+    { scienceId: 1000, level: 2 },
+    { scienceId: 2000, level: 0 },
+  ]);
+  const query = fixture.queries.find((query) =>
+    query.text.includes('from "opencok_kingdom"."alliance_science"'),
+  )!;
+  expect(query.params).toEqual(["synthetic-alliance"]);
+  expect(query.text).toContain('"alliance_science"."allianceId" = $1');
+  expect(query.text).not.toMatch(/researchstarttime|donateprogress|effectflag/);
+  expect(fixture.queries.at(-1)?.text).toBe("commit");
+  const blank = database({ allianceId: " " });
+  expect((await readPowerState(blank.db, "synthetic", now)).allianceSciences).toEqual([]);
+  expect(blank.queries.some((query) => query.text.includes('"alliance_science"'))).toBe(false);
+  const failure = database({ allianceId: "synthetic-alliance", allianceFailure: true });
   await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
   expect(failure.queries.at(-1)?.text).toBe("rollback");
   expect(failure.queries.some((query) => query.text === "commit")).toBe(false);

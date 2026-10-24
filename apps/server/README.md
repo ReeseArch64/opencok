@@ -194,7 +194,8 @@ research component is added to the total because the legacy total omits it.
 
 Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `saga_tower_science_up.xml`, `hero.xml`, `equipment.xml`, `dragon_words.xml`,
-`dragon_base.xml`, `dragon_new.xml`, `status.xml`, `sk.xml` and `suit.xml`.
+`dragon_base.xml`, `dragon_new.xml`, `status.xml`, `sk.xml`, `suit.xml`,
+`vip.xml`, `svip.xml` and `alliancescience.xml`.
 They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
@@ -233,6 +234,21 @@ set attributes are excluded and malformed strengthening tiers are skipped
 individually, matching the legacy handling. These projections do not equip items,
 consume materials or grant decomposed sets. The global equipment multiplier and
 other gameplay bonus providers still belong to the pending effect composition.
+
+VIP and alliance-science effect projections read the same transaction snapshot.
+`vipEffects` selects the last qualifying score threshold in the named VIP XML
+group, replaces repeated base effect IDs and adds super-VIP effects with float
+rounding. Activation ends exactly at the persisted deadline; the display level
+and visibility preference do not control effect availability. Missing VIP records
+produce no effects. This read does not grant daily login points, recalculate stored
+progression or send level-up rewards.
+
+`allianceScienceEffects` follows the profile's persisted alliance ID and completed
+research levels, including level zero. It retains signed rule-ID arithmetic and
+semicolon-separated effect accumulation. An empty alliance skips the shared
+research query. Reads neither settle research queues nor consume donations;
+missing catalogs for active data fail explicitly. Unit tests cover exact VIP
+deadlines, membership query ownership and rollback on late shared-state failures.
 
 This foundation does not yet enable `get.power.info`. Runtime snapshot wiring and
 the remaining effective dragon attack bonus providers still require migration.

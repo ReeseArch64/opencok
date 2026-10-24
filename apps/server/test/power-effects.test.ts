@@ -21,6 +21,8 @@ function fixture() {
     knight: undefined,
     items: [],
     states: [],
+    vip: undefined,
+    allianceSciences: [],
   };
   const rules = new Rules(
     new Map(),
