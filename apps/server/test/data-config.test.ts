@@ -5,6 +5,7 @@ import { Game } from "@opencok/controllers/game";
 import { dataConfig } from "@opencok/dtos/bootstrap";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, Type } from "@opencok/messages/sfs";
+import { kingdomSkill } from "./fixtures/kingdom-skill.ts";
 
 const now = Date.UTC(2026, 9, 23, 12);
 function catalog(records: Record<string, Record<string, string>> = {}, kingdomId = 2) {
@@ -39,8 +40,17 @@ test("data configuration routes item switches, world activity and kingdom skills
     kingdomskill: {},
   });
   rules.configuration.kingdomSkills = new Map<string, Rule>([
-    ["first", { id: "first", showTab: "3", tabIndex: "1", online: "2;bad", test: "3-2147483648" }],
-    ["missing", { id: "missing", showTab: "3", tabIndex: "2" }],
+    [
+      "first",
+      kingdomSkill({
+        id: "first",
+        showTab: "3",
+        tabIndex: "1",
+        online: "2;bad",
+        test: "3-2147483648",
+      }),
+    ],
+    ["missing", kingdomSkill({ id: "missing", showTab: "3", tabIndex: "2" })],
   ]);
   const before = structuredClone([...rules.items]);
   const result = project(rules);
@@ -283,9 +293,9 @@ test("auxiliary catalogs supply general sale limits, pay control and ordered kin
     ["other", { id: "other", k7: "hidden" }],
   ]);
   const skills: Rule[] = [
-    { id: "second", showTab: "3", tabIndex: "2", online: "2", test: "close" },
-    { id: "hidden", showTab: "3", tabIndex: "-1", online: "all", test: "all" },
-    { id: "first", showTab: "3", tabIndex: "1", online: "3", test: "all" },
+    kingdomSkill({ id: "second", showTab: "3", tabIndex: "2", online: "2", test: "close" }),
+    kingdomSkill({ id: "hidden", showTab: "3", tabIndex: "-1", online: "all", test: "all" }),
+    kingdomSkill({ id: "first", showTab: "3", tabIndex: "1", online: "3", test: "all" }),
   ];
   rules.configuration.kingdomSkills = new Map(skills.map((skill) => [skill.id!, skill]));
   rules.features.set("w_thedoor", { id: "w_thedoor", version: "12.6.0", online: "2" });
@@ -371,5 +381,22 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
       () => now,
     );
     await expect(game.execute("synthetic", "login.dataconfig", {})).rejects.toThrow();
+  }
+});
+
+test("configuration preserves function-on blank bypass and direct cross-realm version comparison", () => {
+  const rules = catalog();
+  rules.features.set("alliance_mission", { version: "12.6.0", online: "2" });
+  for (const version of ["", "\u2000", "13", ".12..6.0.1", "１２.６.０"])
+    expect(project(rules, { version }).alliance_mission?.value).toBe("on");
+  expect(project(rules, { version: "11" }).alliance_mission?.value).toBe("off");
+  expect(() => project(rules, { version: "13.bad" })).toThrow();
+  rules.features.clear();
+  for (const version of ["2", ".1..0.59.1", "１.０.５９"])
+    expect(project(rules, { version, crossOpen: true }).cross_open).toEqual(sfs.bool(true));
+  expect(project(rules, { version: "0", crossOpen: true }).cross_open).toEqual(sfs.bool(false));
+  for (const version of ["", "\u2000", "1.0", "2.bad"]) {
+    expect(() => project(rules, { version, crossOpen: true })).toThrow();
+    expect(project(rules, { version, crossOpen: false }).cross_open).toEqual(sfs.bool(false));
   }
 });

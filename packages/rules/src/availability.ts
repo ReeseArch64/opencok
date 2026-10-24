@@ -7,43 +7,29 @@ export interface RuleContext {
   now: number;
   testServer?: boolean;
   utcOffsetMinutes?: number;
-  versionPolicy?: "legacy-player";
 }
 
 export function legacyPlayerVersionAtLeast(actual: string, required: string | undefined): boolean {
   if (mailBlank(required)) return false;
   if (mailBlank(actual)) return true;
+  return versionAtLeast(actual, required!);
+}
+
+export function versionAtLeast(actual: string, required: string): boolean {
   const parse = (raw: string): number[] => {
-    if (raw.length > 65535) throw new Error("Oversized player feature version");
+    if (raw.length > 65535) throw new Error("Oversized feature version");
     const parts = raw.split(".").filter(Boolean);
-    if (parts.length > 4096) throw new Error("Too many player feature version parts");
+    if (parts.length > 4096) throw new Error("Too many feature version parts");
     return parts.map((part) => Number(javaDecimal(part, 32)));
   };
   const current = parse(actual);
-  const minimum = parse(required!);
+  const minimum = parse(required);
   for (let index = 0; index < 3; index++) {
     const value = current[index];
     const target = minimum[index];
     if (value === undefined || target === undefined)
-      throw new Error("Missing player feature version part");
+      throw new Error("Missing feature version part");
     if (value !== target) return value > target;
-  }
-  return true;
-}
-
-export function versionAtLeast(actual: string, required: string): boolean {
-  const parse = (value: string) =>
-    /^\d+\.\d+\.\d+$/.test(value) ? value.split(".").map(Number) : [];
-  const current = parse(actual);
-  const minimum = parse(required);
-  if (
-    current.length !== 3 ||
-    minimum.length !== 3 ||
-    ![...current, ...minimum].every(Number.isSafeInteger)
-  )
-    return false;
-  for (let index = 0; index < 3; index++) {
-    if (current[index] !== minimum[index]) return current[index]! > minimum[index]!;
   }
   return true;
 }
@@ -152,9 +138,7 @@ export function ruleAvailable(
     !rule ||
     !Number.isSafeInteger(context.now) ||
     mailBlank(context.testServer ? rule.test : rule.online) ||
-    !(context.versionPolicy === "legacy-player"
-      ? legacyPlayerVersionAtLeast(context.version, rule.version)
-      : versionAtLeast(context.version, rule.version ?? "")) ||
+    !legacyPlayerVersionAtLeast(context.version, rule.version) ||
     !featureRealmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
     return false;
