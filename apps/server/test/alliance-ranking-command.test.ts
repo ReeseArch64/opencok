@@ -44,6 +44,7 @@ function fixture() {
     city: unused,
     world: unused,
     playerRanking: unused,
+    mailRead: unused,
     mailSave: unused,
     mailStatus: unused,
     allianceRanking: async (uid, query) => {

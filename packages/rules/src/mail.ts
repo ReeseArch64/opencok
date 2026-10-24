@@ -1,4 +1,5 @@
 import type {
+  MailReadQuery,
   MailSaveMode,
   MailSaveQuery,
   MailStatusCount,
@@ -28,21 +29,8 @@ function int(value: number): boolean {
   return Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
 }
 
-export function mailSaveQuery(
-  mode: MailSaveMode,
-  value: string,
-  flag: number,
-  now: number,
-): MailSaveQuery {
-  if (
-    !["save", "cancel", "batch"].includes(mode) ||
-    typeof value !== "string" ||
-    !int(flag) ||
-    !Number.isSafeInteger(now) ||
-    now < 0 ||
-    new TextEncoder().encode(value).length > 65535
-  )
-    return invalid();
+function mailIds(value: string, batch: boolean): string[] {
+  if (typeof value !== "string" || new TextEncoder().encode(value).length > 65535) return invalid();
   const blank = Array.from(value).every((character) => {
     const code = character.charCodeAt(0);
     return (
@@ -55,15 +43,36 @@ export function mailSaveQuery(
       [0x2028, 0x2029, 0x205f, 0x3000].includes(code)
     );
   });
-  const parts = mode === "batch" ? (blank ? [] : value.split(",").filter(Boolean)) : [value];
+  const parts = batch ? (blank ? [] : value.split(",").filter(Boolean)) : [value];
   if (
     parts.length > 1000 ||
     parts.some((id) => id.length > 40 || id.includes("\0") || !id.isWellFormed())
   )
     return invalid();
+  return [...new Set(parts)];
+}
+
+export function mailReadQuery(batch: boolean, value: string, now: number): MailReadQuery {
+  if (typeof batch !== "boolean" || !Number.isSafeInteger(now) || now < 0) return invalid();
+  return { batch, ids: mailIds(value, batch), now };
+}
+
+export function mailSaveQuery(
+  mode: MailSaveMode,
+  value: string,
+  flag: number,
+  now: number,
+): MailSaveQuery {
+  if (
+    !["save", "cancel", "batch"].includes(mode) ||
+    !int(flag) ||
+    !Number.isSafeInteger(now) ||
+    now < 0
+  )
+    return invalid();
   return {
     mode,
-    ids: [...new Set(parts)],
+    ids: mailIds(value, mode === "batch"),
     flag: mode === "save" || (mode === "batch" && flag === 1) ? 1 : 0,
     now,
   };
