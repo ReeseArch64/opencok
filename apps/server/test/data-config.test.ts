@@ -267,6 +267,7 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
       calls++;
       return { uid, level: 5 };
     },
+    mailSave: unused,
     mailStatus: unused,
     allianceRanking: unused,
     playerRanking: unused,

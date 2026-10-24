@@ -1,4 +1,10 @@
-import type { MailStatusCount, MailStatusQuery, MailStatusResult } from "@opencok/contracts/mail";
+import type {
+  MailSaveMode,
+  MailSaveQuery,
+  MailStatusCount,
+  MailStatusQuery,
+  MailStatusResult,
+} from "@opencok/contracts/mail";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 
@@ -20,6 +26,47 @@ function invalid(): never {
 }
 function int(value: number): boolean {
   return Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
+}
+
+export function mailSaveQuery(
+  mode: MailSaveMode,
+  value: string,
+  flag: number,
+  now: number,
+): MailSaveQuery {
+  if (
+    !["save", "cancel", "batch"].includes(mode) ||
+    typeof value !== "string" ||
+    !int(flag) ||
+    !Number.isSafeInteger(now) ||
+    now < 0 ||
+    new TextEncoder().encode(value).length > 65535
+  )
+    return invalid();
+  const blank = Array.from(value).every((character) => {
+    const code = character.charCodeAt(0);
+    return (
+      (code >= 9 && code <= 13) ||
+      (code >= 28 && code <= 32) ||
+      code === 0x1680 ||
+      code === 0x180e ||
+      (code >= 0x2000 && code <= 0x2006) ||
+      (code >= 0x2008 && code <= 0x200a) ||
+      [0x2028, 0x2029, 0x205f, 0x3000].includes(code)
+    );
+  });
+  const parts = mode === "batch" ? (blank ? [] : value.split(",").filter(Boolean)) : [value];
+  if (
+    parts.length > 1000 ||
+    parts.some((id) => id.length > 40 || id.includes("\0") || !id.isWellFormed())
+  )
+    return invalid();
+  return {
+    mode,
+    ids: [...new Set(parts)],
+    flag: mode === "save" || (mode === "batch" && flag === 1) ? 1 : 0,
+    now,
+  };
 }
 
 export function mailStatusQuery(category: number | undefined, now: number): MailStatusQuery {

@@ -1152,14 +1152,14 @@ migration execution or deployment.
 ### 15.1. PostgreSQL database package
 
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
-Drizzle schemas in `src/schema` are the source of truth: 772 tables and 6,316 fields,
+Drizzle schemas in `src/schema` are the source of truth: 773 tables and 6,319 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
 `schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
 The default physical databases are `opencok_global`, `opencok_kingdom_1` and
 `opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
 `opencok_global`, `opencok_pay` and `opencok_chat` (113 tables). Both kingdom databases
-contain the same `opencok_kingdom` namespace (659 tables each). One set of kingdom
+contain the same `opencok_kingdom` namespace (660 tables each). One set of kingdom
 table modules and migrations serves every configured kingdom; there are no per-ID
 schema copies. Table/field names and values remain stable. Database names and
 credentials are configuration. Pools and local transactions belong to one physical database; there
@@ -1282,8 +1282,16 @@ are in the server guide.
 Mailbox category status reads the authenticated recipient's grouped counts with the
 owner profile in a read-only repeatable-read snapshot. Contents and reward payloads
 stay outside this read interface. Pure rules retain the combined versus selected
-category distinctions and numeric widths. Marking, saving, deletion and redemption
-require separate mutation interfaces; the status query grants none of those writes.
+category distinctions and numeric widths. The status query grants no mutations.
+Mailbox save/cancel commands use a separate recipient-scoped write interface. A locked
+owner profile authorizes each realm transaction; conditional saved-flag updates and
+durable `mail_update` markers commit together. Marker timestamps never decrease and
+only matched owned messages receive markers. The additive kingdom migration supplies
+the marker table; synchronization consumers, cleanup, read marking, deletion and
+redemption remain separate work. This follows ADR-0002/0005 without dual writes to
+Redis. Absolute flag assignments preserve repeat-request state absent intervening
+changes; correlation fields do not provide durable command receipts. The server guide
+records these limits, compatibility differences and unit-only validation.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
