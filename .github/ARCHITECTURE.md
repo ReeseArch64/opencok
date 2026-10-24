@@ -530,8 +530,13 @@ attributes now reject incomplete configurations, while optional and conditionall
 consumed records retain their distinct boundaries. Empty external feature/pay-control
 items remain empty objects. Scalar Int/Long fields use bounded Java decimal parsing;
 only the selected world-mode records are required. Synthetic catalogs are test inputs,
-not runtime defaults. General-sale restoration and the full configuration completion
-audit remain outstanding.
+not runtime defaults. General-sale metadata consumes every ordered declaration before
+final duplicate IDs replace earlier values, so invalid overwritten rows still reject
+the response. Blank IDs and literal limit strings remain valid. The item, general-sale,
+feature, pay-control and kingdom-skill readers use direct element attributes and retain
+top-level group precedence. Their ordered declaration lists remain separate from final
+ID indexes. SFS serialization retains the maintained UTF-8 key and string bounds;
+this does not emulate malformed legacy encodings for oversized non-ASCII keys.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
