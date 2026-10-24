@@ -9,6 +9,7 @@ export const readConfig = Effect.gen(function* () {
   url.pathname = `/${settings.GLOBAL_DATABASE_NAME}`;
   url.searchParams.delete("database");
   return {
+    filesEnabled: settings.API_FILES_ENABLED,
     chatUrl: settings.API_CHAT_URL,
     kingdomId: settings.KINGDOM_ID,
     host: settings.API_HOST,

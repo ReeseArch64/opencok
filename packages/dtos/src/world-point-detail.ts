@@ -1,17 +1,17 @@
 export class WorldPointOwnerDto {
-  readonly uid?: string;
-  readonly pic?: string;
-  readonly afn?: string;
-  readonly registerTime?: bigint;
-  readonly power?: bigint;
-  readonly killArmy?: bigint;
-  readonly rank?: number;
-  readonly vl?: number;
+  declare public readonly uid?: string;
+  declare public readonly pic?: string;
+  declare public readonly afn?: string;
+  declare public readonly registerTime?: bigint;
+  declare public readonly power?: bigint;
+  declare public readonly killArmy?: bigint;
+  declare public readonly rank?: number;
+  declare public readonly vl?: number;
 }
 
 export class WorldCityFieldsDto {
-  readonly slowDown!: boolean;
-  readonly targetTooStrong!: boolean;
-  readonly targetPower!: bigint;
-  readonly lastBeDuelTime!: bigint;
+  declare public readonly slowDown: boolean;
+  declare public readonly targetTooStrong: boolean;
+  declare public readonly targetPower: bigint;
+  declare public readonly lastBeDuelTime: bigint;
 }

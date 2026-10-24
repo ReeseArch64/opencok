@@ -72,3 +72,22 @@ or a historical evaluation was performed.
 - **Review again when**: the stated boundaries cannot be maintained, a required
   dependency becomes unsupported, or measured compatibility/operational results
   invalidate the choice. A replacement requires a linked superseding ADR.
+
+### 2026-10-24: Include the planned Bot application in TypeScript
+
+The maintainer explicitly selected TypeScript instead of Python for `apps/bot`.
+This dated update removes the earlier Python-bot exception; the original text
+above records the prior boundary. Bot has no implemented application to port.
+When introduced, it extends the shared strict TypeScript configuration, declares
+workspace dependencies and type/test commands, validates external input and uses
+authenticated player commands with quotas. It has no direct database authority;
+internal NPC behavior remains part of the realm simulation.
+
+The Node.js production mandate in ADR-0010 is deprecated and suspended. Node
+emit/type-scope tasks above are historical and are not active prerequisites.
+Existing Bun development tooling remains selected; production runtime selection
+and deployment validation remain open. No production runtime is chosen here.
+
+Implementation verification for this update is a consistent application map and
+Bot language across maintained architecture documentation. Bot implementation,
+end-to-end scenarios and capacity validation remain future work.
