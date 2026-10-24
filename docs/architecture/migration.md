@@ -338,6 +338,18 @@ The reference's malformed structured conversation failure is preserved without c
 ordinary malformed detail can authorize owned primary-row removal only after transport
 validation. No additional tables, dependencies or external calls are introduced.
 
+V2 new-system-mail synchronization uses a bounded read-only repeatable-read snapshot
+of the authenticated recipient and owned anchor. Metadata bounds the complete selected
+window before retrieving content and public sender enrichment. The controller preserves
+the raw synchronization envelope and timestamp-bucket pagination; no mail/cache mutation
+is authorized by this path. The optional last-ID cache follows the existing realm-scoped
+Redis adapter and fails closed on dependency errors; missing state widens only owned
+selection. Cache-only legacy contents require explicit import into existing authoritative
+extra storage. Discarded private-chat projection translation effects and V1 sent-ID
+bookkeeping remain separate limitations. Command/cache units and a disposable PostgreSQL
+selection/capacity/snapshot test cover the maintained boundary. Native client behavior
+and production cache operation remain unverified. See the server guide and issue #219.
+
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
 fencing and recovery tests before enabling writes. Account provisioning,

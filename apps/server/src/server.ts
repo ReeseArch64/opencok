@@ -190,6 +190,7 @@ export const RealmDependenciesLive = Layer.effect(
         worldPowerEffects: (kingdomId) => cache.worldEffects(kingdomId),
         emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
         changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
+        lastSystemMail: (uid) => cache.lastSystemMail(uid),
         playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
       }),
       world: new World(db, config.mapSize, config.kingdomId),

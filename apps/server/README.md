@@ -9,7 +9,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `user.check.nickName`,
 `equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
-`mail.read.status`, `mail.read.status.betch`, `report.picVer`, `user.update.picVer` (when configured),
+`mail.read.status`, `mail.read.status.betch`, `report.picVer`, `chat.get.system.mails.v2`, `user.update.picVer` (when configured),
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `act.score.rank`, `global.celebrities.rank`, `dragon.battle.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
@@ -3791,3 +3791,60 @@ Run `bun --no-env-file test apps/server/integration/nickname-change.test.ts` fro
 for the 23 integration scenarios. No mobile-client validation is claimed. The existing
 `@opencok/mappings` workspace dependency is now required at runtime rather than only in
 development; the lockfile retains the same package versions.
+
+## V2 new-system-mail synchronization
+
+`chat.get.system.mails.v2`, tracked in [issue #219](https://github.com/ReeseArch64/opencok/issues/219),
+now reads the authenticated owner's new system messages. Required `clientseq` is a
+String or null and `count` is an Int; optional String `time` uses strict Java signed
+Long parsing. Blank/zero client cursors use the realm-scoped cached last ID. A valid
+owned anchor supplies the inclusive timestamp; a missing nonblank anchor uses a
+positive request timestamp or the whole mailbox. Without an anchor, request time
+does not restrict the mailbox. Foreign anchors reveal no foreign metadata.
+
+The command uses a read-only repeatable-read snapshot, first bounding the complete
+selected window to 1,000 messages and 4 MiB of stored bodies/reward descriptors.
+It rejects overflow rather than returning an incomplete page. Extra bodies come
+from existing owner-authorized `mail_contents`; unresolved cache-only legacy bodies
+require a reviewed import and fail explicitly. System messages retain the raw
+`toUser`/`fromUser`, flags, reply bitmask, translation ID and String `save` envelope.
+Contents use 5,000 UTF-16-unit chunks, replacing isolated surrogate halves as the
+existing Java-compatible serializers do. Trade and invitation senders use existing
+public profile routing; invitation sender IDs come from the stored content object.
+All selected system messages are projected and enriched before pagination.
+
+Messages sort by ascending creation time with a deterministic UID tie-breaker.
+When the full result exceeds `count`, pagination retains the request's entire
+second bucket, then admits the first message outside that bucket before enforcing
+the count. Zero and negative counts retain that behavior. `lastUid` stays `0` when
+all messages fit; `more` reflects whether pagination omitted projected system mail.
+The complete correlated response is encoded before returning. No mailbox flags,
+rewards, groups, markers, content or cursor are mutated.
+
+The fallback cache reads hash `opencok:kingdom:<id>:chat-user-info:<uid>`, field
+`chat_last_mail_id`, through the existing bounded Redis adapter. It writes no cache
+state and sets no TTL. Missing cache state safely widens the owned selection; cache
+outages fail the fallback request. The unscoped legacy hash is not consulted.
+Existing cached cursor state therefore requires a separately reviewed scoped import;
+explicit client cursors do not require Redis. Cache loss cannot erase authoritative
+mail. This follows [ADR-0005](../../docs/decisions/0005-adopt-redis-for-cache.md) and
+[ADR-0002](../../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md).
+
+The reference's shared helper also constructs private conversations discarded by
+this system-mail handler. This implementation excludes them and does not invoke their
+optional external translations, translation persistence or sender-update-cache reads.
+That side effect difference is explicit; this is not a complete private-chat migration.
+The V1 command's sent-ID bookkeeping and send counter remain unavailable. Current
+v12.06.0 behavior is implemented; obsolete pre-1.1.8 content limits and pre-7.00.0
+special text filtering are outside this process's supported version contract.
+
+Seven focused unit tests cover the raw envelope/correlation, exact Long values, bucket
+pagination including nonpositive counts, cursor fallback/outage rejection, input and
+owner rejection, chunk boundaries, trade/invitation identity and realm-scoped read-only
+cache commands. A disposable PostgreSQL test covers inclusive/foreign anchors, realm
+and ban checks, deterministic ties, repeatable sender snapshots during concurrent
+updates, extra-body ownership, inspector failures and both capacity bounds. Existing
+mailbox state remains unchanged by reads. The full server unit suite and affected
+static checks pass. Native client rendering and production Redis remain unverified.
+No schema, dependency or new service is introduced; maintained migrations run only
+in disposable test databases. No operator/player database or client/ADB is accessed.
