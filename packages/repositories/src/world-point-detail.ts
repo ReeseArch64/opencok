@@ -12,6 +12,7 @@ import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import type {
   WorldPointDetailStore,
+  WorldPointDetailSnapshot,
   WorldExplorationSelector,
   WorldPointOwnerSnapshot,
 } from "@opencok/contracts/world-point-detail";
@@ -81,6 +82,62 @@ const marchColumns = {
   arrivalTime: world_march.arrivalTime,
   exploreTime: world_march.exploreTime,
 };
+const resourceMarchColumns = {
+  uuid: world_march.uuid,
+  ownerUid: world_march.ownerUid,
+  targetId: world_march.targetId,
+  worldId: world_march.worldId,
+  state: world_march.state,
+  armyInfo: world_march.armyInfo,
+  collectSpd: world_march.collectSpd,
+  marchArrivalTime: world_march.marchArrivalTime,
+  collectedBeforeSpd: world_march.collectedBeforeSpd,
+  changeCollectSpdTime: world_march.changeCollectSpdTime,
+  occupyResourceEndTime: world_march.occupyResourceEndTime,
+  plunderRes: world_march.plunderRes,
+};
+async function readResourceMarch(db: Reader, point: Row) {
+  const id = point.ownerMarchUUid;
+  if (!validText(id, 40) || !id) throw new Error("Invalid resource march pointer");
+  const march = single(
+    await db
+      .select(resourceMarchColumns)
+      .from(world_march)
+      .where(eq(world_march.uuid, id))
+      .limit(2),
+  );
+  if (march) {
+    if (
+      march.uuid !== id ||
+      march.ownerUid !== point.ownerId ||
+      !integer(march.targetId) ||
+      !integer(march.worldId) ||
+      (march.state !== null && !integer(march.state)) ||
+      (march.armyInfo !== null &&
+        (!Buffer.isBuffer(march.armyInfo) || march.armyInfo.length > 65535)) ||
+      (march.plunderRes !== null && !validText(march.plunderRes, 2048)) ||
+      (march.collectSpd !== null &&
+        (typeof march.collectSpd !== "number" ||
+          (Number.isFinite(march.collectSpd) && !Number.isFinite(Math.fround(march.collectSpd)))))
+    )
+      throw new Error("Invalid resource march state");
+    for (const field of [
+      "marchArrivalTime",
+      "collectedBeforeSpd",
+      "changeCollectSpdTime",
+      "occupyResourceEndTime",
+    ] as const) {
+      const value = march[field];
+      if (value !== null && (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value))
+        throw new Error("Invalid resource march time");
+    }
+  }
+  return {
+    march: march
+      ? { ...march, collectSpd: march.collectSpd === null ? null : Math.fround(march.collectSpd) }
+      : undefined,
+  };
+}
 async function readExploration(
   db: Reader,
   observer: string,
@@ -293,7 +350,11 @@ async function readPoint(
   worldId: number,
   remote: boolean,
   cityExtras = false,
-) {
+): Promise<
+  Pick<WorldPointDetailSnapshot, "owner" | "resource"> & {
+    point?: Pick<typeof worldpoint.$inferSelect, keyof typeof pointColumns>;
+  }
+> {
   const point = single(
     await db
       .select(pointColumns)
@@ -305,7 +366,13 @@ async function readPoint(
   if (point.id !== id || point.worldId !== worldId || !integer(point.pointType))
     throw new Error("Invalid world point");
   const owner = await ownerRows(db, point, remote, cityExtras);
-  return { point, owner };
+  const resource =
+    (point.pointType === 3 || point.pointType === 37) &&
+    !blank(point.ownerId) &&
+    !blank(point.ownerMarchUUid)
+      ? await readResourceMarch(db, point)
+      : undefined;
+  return { point, owner, ...(resource ? { resource } : {}) };
 }
 export function createWorldPointDetailStore(
   databases: Databases,
@@ -424,6 +491,7 @@ export async function checkWorldPointDetailStore(db: Db): Promise<void> {
   await db
     .select({
       ...marchColumns,
+      ...resourceMarchColumns,
       exploreReport: world_march.exploreReport,
       occupyResourceEndTime: world_march.occupyResourceEndTime,
     })

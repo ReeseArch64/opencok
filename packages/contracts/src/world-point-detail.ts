@@ -31,6 +31,7 @@ export interface WorldPointDetailSnapshot {
   };
   barbarian?: { row: Row | undefined };
   neutralResource?: { march: Row | undefined };
+  resource?: { march: Row | undefined };
 }
 
 export type WorldExplorationSelector = (point: Row, marches: readonly Row[]) => string | undefined;
