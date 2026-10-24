@@ -14,6 +14,8 @@ import { user_knight_title } from "@opencok/drizzle/schema/opencok_kingdom/user_
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
+import { user_vip } from "@opencok/drizzle/schema/opencok_kingdom/user_vip";
+import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Database } from "./game.ts";
@@ -58,6 +60,8 @@ export function readPowerState(
         knight: undefined,
         items: [],
         states: [],
+        vip: undefined,
+        allianceSciences: [],
       };
       if (!profile) return empty;
       const statistics = (
@@ -187,6 +191,24 @@ export function readPowerState(
         .from(user_state)
         .where(eq(user_state.uid, uid))
         .orderBy(asc(user_state.stateId));
+      const vip = (
+        await tx
+          .select({
+            score: user_vip.score,
+            vipEndTime: user_vip.vipEndTime,
+            sLevel: user_vip.sLevel,
+          })
+          .from(user_vip)
+          .where(eq(user_vip.uid, uid))
+          .limit(1)
+      )[0];
+      const allianceSciences = profile.allianceId?.trim()
+        ? await tx
+            .select({ scienceId: alliance_science.scienceId, level: alliance_science.level })
+            .from(alliance_science)
+            .where(eq(alliance_science.allianceId, profile.allianceId))
+            .orderBy(asc(alliance_science.scienceId))
+        : [];
       return {
         profile,
         statistics,
@@ -204,6 +226,8 @@ export function readPowerState(
         items,
         upload,
         states,
+        vip,
+        allianceSciences,
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

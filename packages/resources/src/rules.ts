@@ -22,8 +22,8 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
   const records: unknown[] = [];
   const collect = (node: unknown) => {
     if (!node || typeof node !== "object") return;
-    const group = node as { ItemSpec?: unknown[]; Group?: unknown[] };
-    if (group.ItemSpec) records.push(...group.ItemSpec);
+    const group = node as { id?: string; ItemSpec?: unknown[]; Group?: unknown[] };
+    if (group.ItemSpec && (name !== "vip" || group.id === "vip")) records.push(...group.ItemSpec);
     for (const child of group.Group ?? []) collect(child);
   };
   collect(parsed.database);
@@ -93,6 +93,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
     statuses,
     generalSkills,
     equipmentSets,
+    vip,
+    superVip,
+    allianceSciences,
   ] = await Promise.all(
     [
       "general",
@@ -107,6 +110,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "status",
       "sk",
       "suit",
+      "vip",
+      "svip",
+      "alliancescience",
     ].map(optional),
   );
   return new Rules(
@@ -134,6 +140,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
       statuses,
       generalSkills,
       equipmentSets,
+      vip,
+      superVip,
+      allianceSciences,
     },
   );
 }
