@@ -7,6 +7,7 @@ import { user_military_rank } from "@opencok/drizzle/schema/opencok_kingdom/user
 import { kingdom_position } from "@opencok/drizzle/schema/opencok_kingdom/kingdom_position";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
+import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_honor } from "@opencok/drizzle/schema/opencok_kingdom/user_honor";
 import { user_achievement } from "@opencok/drizzle/schema/opencok_kingdom/user_achievement";
@@ -50,6 +51,7 @@ export function readPublicProfile(
           office: undefined,
           taverns: [],
           generals: [],
+          skills: [],
           equipment: [],
           honors: [],
           completedAchievements: 0,
@@ -146,6 +148,25 @@ export function readPublicProfile(
         .orderBy(asc(user_general.uuid))
         .limit(32768);
       if (generals.length > 32767) throw new Error("Public profile collection exceeds wire limit");
+      const skills = generals.length
+        ? await tx
+            .select({
+              uuid: user_skill.uuid,
+              ownerId: user_skill.ownerId,
+              skillId: user_skill.skillId,
+              startTime: user_skill.startTime,
+              endTime: user_skill.endTime,
+              actTime: user_skill.actTime,
+              stat: user_skill.stat,
+              param1: user_skill.param1,
+              param2: user_skill.param2,
+            })
+            .from(user_skill)
+            .where(eq(user_skill.ownerId, uid))
+            .orderBy(asc(user_skill.endTime), asc(user_skill.uuid))
+            .limit(32768)
+        : [];
+      if (skills.length > 32767) throw new Error("Public profile collection exceeds wire limit");
       const equipment = await tx
         .select({
           uuid: user_equip.uuid,
@@ -189,6 +210,7 @@ export function readPublicProfile(
         office,
         taverns,
         generals,
+        skills,
         equipment,
         honors,
         completedAchievements: completedAchievements!,

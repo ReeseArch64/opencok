@@ -201,8 +201,29 @@ Equipment strengthening uses the server feature gate. Privacy switches remain
 separate from the equipment/medal arrays, following the legacy public contract.
 Missing required role/rank/active VIP data or lord state rejects the projection.
 
+`publicProfileGenerals` reconstructs the public general preview using the stored
+ability JSON and owner-scoped `user_skill` rows from the same snapshot. General
+attack/defence retain Java float operation order and signed-int saturation. The
+preview omits selection metadata and talent `620700`, while injecting the two
+special initiative skills only into the first raw tree. All initiative types
+loaded by the legacy manager are supported; unknown skill types are omitted.
+Known skills require their cooldown catalog entry. Each general receives the
+player's skill collection, with exact long timestamps, the five-second expiry
+cutoff, ready sentinels and disabled-to-active presentation normalization.
+Duplicate skills select the last expiry-ordered record; UUID ordering resolves
+ties that the legacy SQL left unspecified. Generals use UUID read order followed
+by the shared Java hash traversal; the first entry supplies additional skill points.
+The shared hash helper's 4,096-key and tree-bin restrictions still apply.
+
+Invalid rescue prerequisites clear the projected ability trees according to the
+legacy repair rule, including catalog/default maximum points. Cooldown, disabled
+state and ability repair adjustments affect only this read projection. The legacy
+database repairs and notification side effects remain pending compatibility work;
+the query does not create skills, update stored talent trees or send mail. Missing
+generals, required catalogs or malformed stored abilities reject the projection.
+
 These components have synthetic unit coverage; they are not yet connected to
-`get.user.info`. General skills, alliance/flower/office presentation, realm routing
+`get.user.info`. Alliance/flower/office presentation, realm routing
 and command dispatch remain required before enabling that full query. The base
 projection intentionally has no placeholder general/alliance response. No schema change, player write,
 client validation or live-service test is introduced by this foundation.
