@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
+import type { Row } from "@opencok/contracts/rows";
 import type {
   MailConversationReadQuery,
   MailConversationReadSnapshot,
@@ -121,13 +122,14 @@ test("chat-dependent conversation reads remain unavailable before any owned mail
 });
 
 test("malformed consumed request fields or acknowledgment encoding reject before writes", async () => {
-  for (const params of [
+  const inputs: Fields[] = [
     { mod: sfs.string("0") },
     { type: sfs.string("0") },
     { types: sfs.int(0) },
     { types: sfs.string("4,bad") },
     { type: sfs.int(4), _cok_: sfs.string("x".repeat(65536)) },
-  ]) {
+  ];
+  for (const params of inputs) {
     const app = fixture();
     await expect(app.game.execute("self", "chatMail.read", params)).rejects.toThrow();
     expect(app.calls).toEqual([]);
@@ -135,13 +137,14 @@ test("malformed consumed request fields or acknowledgment encoding reject before
 });
 
 test("mail read type commands reject missing foreign or banned owner snapshots", async () => {
-  for (const profile of [
+  const profiles: (Row | undefined)[] = [
     undefined,
     { uid: "other", serverId: 1 },
     { uid: "self", serverId: 2 },
     { uid: "self", serverId: 1, banFlag: 1 },
     { uid: "self", serverId: 1, banTime: BigInt(now + 1) },
-  ]) {
+  ];
+  for (const profile of profiles) {
     const app = fixture();
     app.state.profile = profile;
     await expect(app.game.execute("self", "chatMail.read", { type: sfs.int(4) })).rejects.toThrow();

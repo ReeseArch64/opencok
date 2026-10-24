@@ -1,5 +1,9 @@
+import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
+import { dragonRanking } from "@opencok/dtos/dragon-ranking";
+import { decodeDragonRanking } from "./dragon-ranking.ts";
 import { worldPointDetail } from "./world-point-detail.ts";
 import { profilePreference } from "./profile-preferences.ts";
+import { celebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
 import { checkNickname } from "@opencok/rules/nickname";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
 import { worldFavorites } from "@opencok/dtos/world-favorites";
@@ -34,8 +38,10 @@ import { resolveMailPresentation } from "./mail-presentation.ts";
 import { mailListProjection } from "./mail-list.ts";
 import { mailContentsProjection } from "./mail-contents.ts";
 import { mailConversationReadRequest } from "./mail-conversation-read.ts";
+import { mailCategoryDeleteQuery, mailTypeDeleteQuery } from "@opencok/rules/mail-batch-delete";
 import { planMailDeletion } from "./mail-delete.ts";
 import { mailUpdateCursor, mailUpdatesProjection } from "./mail-updates.ts";
+import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import {
   mailContentsQuery,
   mailCategoryQuery,
@@ -193,6 +199,19 @@ export class Game {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "celebrity.desc.get":
+        body = await celebrityDescription(this.db, uid, this.config.kingdomId, params, this.now());
+        break;
+      case "celebrity.desc.save":
+        body = await saveCelebrityDescription(
+          this.db,
+          this.services,
+          uid,
+          this.config.kingdomId,
+          params,
+          this.now(),
+        );
+        break;
       case "user.check.nickName":
         body = await this.nicknameCheck(uid, params);
         break;
@@ -301,6 +320,12 @@ export class Game {
       case "chatMail.read":
         body = await this.mailConversationRead(uid, params);
         break;
+      case "mail.delete.batch":
+        body = await this.mailCategoryDelete(uid, params);
+        break;
+      case "chatMail.delete":
+        body = await this.mailTypeDelete(uid, params);
+        break;
       case "mail.save":
       case "mail.cancel.save":
       case "mail.save.batch":
@@ -316,6 +341,15 @@ export class Game {
       case "alliance.rank":
       case "kill.al.rank":
         body = await this.allianceRanking(uid, command === "alliance.rank" ? "power" : "kills");
+        break;
+      case "act.score.rank":
+        body = await this.scoreActivityRanking(uid);
+        break;
+      case "dragon.battle.rank":
+        body = await this.dragonRanking(uid, params);
+        break;
+      case "global.celebrities.rank":
+        body = await this.globalCelebrityRanking(uid, params);
         break;
       case "server.rank":
       case "kill.rank":
@@ -339,6 +373,11 @@ export class Game {
       throw new GameError(errors.unsupported, "player_search");
     if (command === "world.get.detail" && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_point_detail");
+    if (
+      ["act.score.rank", "global.celebrities.rank", "dragon.battle.rank"].includes(command) &&
+      encode(extension(command, body)).length > MAX_FRAME
+    )
+      throw new GameError(errors.unsupported, "ranking");
     return { body, pushes };
   }
   private async playerSearch(uid: string, params: Fields): Promise<Fields> {
@@ -850,19 +889,106 @@ export class Game {
     return {};
   }
   private async mailConversationRead(uid: string, params: Fields): Promise<Fields> {
+    if (!this.db.mailConversationRead) throw new GameError(errors.unsupported, "mail");
     const query = mailConversationReadRequest(params, this.now());
-    if (!this.db.mailConversationRead || query.effects.some((effect) => effect.kind === "chat"))
-      throw new GameError(errors.unsupported, "chat_read_delivery");
+    if (query.effects.some((effect) => effect.kind === "chat"))
+      throw new GameError(errors.unsupported, "mail");
     const body: Fields = { success: sfs.bool(true) };
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) body[key] = params[key]!;
     if (encode(extension("chatMail.read", body)).length > MAX_FRAME)
-      throw new GameError(errors.unsupported, "mail_response_size");
+      throw new GameError(errors.unsupported, "mail");
     const state = await this.db.mailConversationRead(uid, query);
     const profile = this.checkProfile(state.profile, query.now);
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async mailCategoryDelete(uid: string, params: Fields): Promise<Fields> {
+    const read = (key: string) =>
+      params[key] === undefined || params[key]!.type === Type.Null ? null : wireString(params, key);
+    const query = mailCategoryDeleteQuery(read("uids"), read("types"), this.now());
+    if (!this.db.mailCategoryDelete) throw new GameError(errors.unsupported, "mail");
+    let body: Fields | undefined;
+    const state = await this.db.mailCategoryDelete(uid, query, (counts) => {
+      const result: Fields = Object.create(null);
+      for (const entry of counts) {
+        result[entry.raw] = sfs.int(entry.unread);
+        result[`total${entry.raw}`] = sfs.int(entry.total);
+      }
+      body = { RetObj: sfs.object(result) };
+      for (const key of ["_cok_", "cmdBaseTime"])
+        if (params[key] !== undefined) body[key] = params[key]!;
+      if (encode(extension("mail.delete.batch", body)).length > MAX_FRAME)
+        throw new GameError(errors.unsupported, "mail");
+    });
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
+      throw new GameError(errors.invalid);
+    return body;
+  }
+  private async mailTypeDelete(uid: string, params: Fields): Promise<Fields> {
+    wireInt(params, "mod", 0);
+    if (params.fromUser !== undefined) {
+      if (params.fromUser.type !== Type.Null) wireString(params, "fromUser");
+      throw new GameError(errors.unsupported, "mail");
+    }
+    const query = mailTypeDeleteQuery(
+      params.type === undefined ? undefined : wireInt(params, "type"),
+      this.now(),
+    );
+    if (!this.db.mailTypeDelete) throw new GameError(errors.unsupported, "mail");
+    const body: Fields = { success: sfs.bool(true) };
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) body[key] = params[key]!;
+    if (encode(extension("chatMail.delete", body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "mail");
+    const state = await this.db.mailTypeDelete(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return body;
+  }
+  private async dragonRanking(uid: string, params: Fields): Promise<Fields> {
+    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const ranges = dragonRankingRanges(wireString(params, "index_limit"));
+    if (ranges === undefined) return {};
+    if (!this.services.dragonRanking) throw new GameError(errors.unsupported, "ranking");
+    const entries = await this.services.dragonRanking(ranges, text(profile, "allianceId"));
+    return dragonRanking(decodeDragonRanking(entries));
+  }
+  private async globalCelebrityRanking(uid: string, params: Fields): Promise<Fields> {
+    if (this.config.kingdomId > 999999) return {};
+    if (!this.db.normalRankingRealm) throw new GameError(errors.unsupported, "ranking");
+    if (!(await this.db.normalRankingRealm())) return {};
+    const rankType = wireInt(params, "rankType");
+    if (!Number.isInteger(rankType) || rankType < -2147483648 || rankType > 2147483647)
+      throw new GameError(errors.invalid);
+    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (![0, 1, 2, 3, 4, 5, 6, 11].includes(rankType)) return {};
+    if (!this.services.globalCelebrityRanking) throw new GameError(errors.unsupported, "ranking");
+    const rows = await this.services.globalCelebrityRanking(rankType);
+    if (!Array.isArray(rows) || rows.length > (rankType === 4 ? 30 : 151))
+      throw new GameError(errors.unsupported, "ranking");
+    return { rankMap: sfs.array(rows.map((row) => sfs.object(decodeLegacyJsonObject(row)))) };
+  }
+  private async scoreActivityRanking(uid: string): Promise<Fields> {
+    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (!this.services.scoreActivityRanking) throw new GameError(errors.unsupported, "ranking");
+    const board = await this.services.scoreActivityRanking();
+    if (
+      !Array.isArray(board) ||
+      board.length > 32767 ||
+      board.some((value) => typeof value !== "string" || !value.isWellFormed())
+    )
+      throw new GameError(errors.unsupported, "ranking");
+    return { rank: { type: Type.StringArray, value: [...board] } };
   }
   private async expeditionRanking(uid: string): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)

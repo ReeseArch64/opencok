@@ -5,6 +5,7 @@ import { chmod, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Client } from "../../apps/server/integration/client";
+import { dataConfigXml } from "../../apps/server/test/fixtures/data-config";
 import { fields, sfs, Type } from "@opencok/messages/sfs";
 
 async function freePort() {
@@ -106,6 +107,9 @@ async function createStack() {
     DEPENDENCY_TIMEOUT_MS: "1000",
   });
   isolated.services.server.volumes.find((v: any) => v.target === "/resources").source = folder;
+  isolated.services.server.volumes.find(
+    (v: any) => v.target === "/gameconfig/badwords.txt",
+  ).source = join(folder, "badwords.txt");
   Object.assign(isolated.services.api.environment, {
     DATABASE_URL: databaseUrl,
     KINGDOM_ID: "2",
@@ -169,10 +173,14 @@ async function createStack() {
       '<ItemSpec id="400001" level="1" time="30"/><ItemSpec id="400002" level="2" time="40"/>',
     role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
     position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
-    item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/>',
+    item: dataConfigXml({
+      player_max: { k3: "30" },
+      resources_basics: { k7: "100", k8: "300" },
+    }),
   };
   for (const [name, records] of Object.entries(xml))
     await Bun.write(join(folder, name + ".xml"), `<database>${records}</database>`);
+  await Bun.write(join(folder, "badwords.txt"), "synthetic-forbidden\n");
   let started = false;
   async function cleanup(passed: boolean) {
     try {
