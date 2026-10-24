@@ -29,3 +29,22 @@ test("invalid API endpoints and private values report only variable names", () =
     expect(String(error)).not.toContain("synthetic-secret");
   }
 });
+
+test("public chat discovery uses an optional HTTP origin without private URL components", () => {
+  expect(parseApiEnvironment({}).API_CHAT_URL).toBeUndefined();
+  expect(parseApiEnvironment({ API_CHAT_URL: "" }).API_CHAT_URL).toBeUndefined();
+  expect(parseApiEnvironment({ API_CHAT_URL: "https://chat.internal:8083/" }).API_CHAT_URL).toBe(
+    "https://chat.internal:8083/",
+  );
+  for (const value of [
+    "invalid",
+    "ws://chat.internal",
+    "http://u:private-secret@chat.internal",
+    "https://chat.internal/external/session",
+    "https://chat.internal/?private=secret",
+    "https://chat.internal/#secret",
+    "https://cok.chat",
+    "https://other.cok.chat",
+  ])
+    expect(() => parseApiEnvironment({ API_CHAT_URL: value })).toThrow("API_CHAT_URL");
+});

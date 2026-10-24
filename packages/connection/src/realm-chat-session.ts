@@ -1,3 +1,4 @@
+import { fetchChatJson } from "./chat-http.ts";
 import { createHash } from "node:crypto";
 import { isChatSessionTicket, isRecord, type ChatSessionIssuer } from "@opencok/contracts/chat";
 
@@ -39,9 +40,6 @@ export function createRealmChatSessionIssuer(options: {
   const request = options.fetch ?? fetch;
   const now = options.now ?? Date.now;
   return async (input) => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let cancel: (() => Promise<void>) | undefined;
-    const controller = new AbortController();
     try {
       if (
         !input ||
@@ -71,62 +69,21 @@ export function createRealmChatSessionIssuer(options: {
       );
       const body = form.toString();
       if (Buffer.byteLength(body) > 16384) throw new Error();
-      const exchange = async () => {
-        const response = await request(endpoint, {
+      const value = await fetchChatJson(
+        endpoint,
+        {
           method: "POST",
           headers: { "content-type": "application/x-www-form-urlencoded" },
           body,
-          redirect: "error",
-          signal: controller.signal,
-        });
-        if (controller.signal.aborted) {
-          void response.body?.cancel().catch(() => {});
-          throw new Error();
-        }
-        if (
-          !response.ok ||
-          response.redirected ||
-          !/^application\/json(?:\s*;|$)/i.test(response.headers.get("content-type") ?? "") ||
-          !response.body
-        ) {
-          void response.body?.cancel().catch(() => {});
-          throw new Error();
-        }
-        const reader = response.body.getReader();
-        cancel = () => reader.cancel();
-        const length = response.headers.get("content-length");
-        if (length !== null && (!/^\d+$/.test(length) || Number(length) > 16384)) throw new Error();
-        const chunks: Uint8Array[] = [];
-        let size = 0;
-        while (true) {
-          const chunk = await reader.read();
-          if (chunk.done) break;
-          size += chunk.value.byteLength;
-          if (size > 16384) throw new Error();
-          chunks.push(chunk.value);
-        }
-        const value: unknown = JSON.parse(
-          new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks)),
-        );
-        if (!isRecord(value) || value.code !== 1 || !isChatSessionTicket(value.data, now()))
-          throw new Error();
-        return { session: value.data.session, expire: value.data.expire };
-      };
-      return await Promise.race([
-        exchange(),
-        new Promise<never>((_, reject) => {
-          timer = setTimeout(() => {
-            controller.abort();
-            reject(new Error());
-          }, timeoutMs);
-        }),
-      ]);
+        },
+        timeoutMs,
+        request,
+      );
+      if (!isRecord(value) || value.code !== 1 || !isChatSessionTicket(value.data, now()))
+        throw new Error();
+      return { session: value.data.session, expire: value.data.expire };
     } catch {
       throw new Error("Chat session unavailable");
-    } finally {
-      clearTimeout(timer);
-      controller.abort();
-      void cancel?.().catch(() => {});
     }
   };
 }

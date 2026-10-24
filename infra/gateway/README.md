@@ -4,15 +4,19 @@ Traefik routes HTTP discovery to `api:8080` and SFS/TCP to `server:9933`.
 Configuration lives in [traefik.yml](traefik.yml) and [dynamic.yml](dynamic.yml).
 No Docker socket or administration dashboard is exposed.
 
-| Public route                                                                                             | Methods         | Destination                  |
-| -------------------------------------------------------------------------------------------------------- | --------------- | ---------------------------- |
-| `/gameservice/getserverlist.php`, `/gameservice/getline.php`, `/gameservice/getserverlist_memoryold.php` | GET, POST, HEAD | Shared TypeScript API        |
-| `/healthz`, `/_health.php`                                                                               | GET, HEAD       | API process liveness         |
-| `/readyz`                                                                                                | GET, HEAD       | API database/Redis readiness |
-| Game port (default 9933)                                                                                 | TCP             | TypeScript realm server      |
+| Public route                                                                                             | Methods         | Destination                           |
+| -------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------- |
+| `/gameservice/getserverlist.php`, `/gameservice/getline.php`, `/gameservice/getserverlist_memoryold.php` | GET, POST, HEAD | Shared TypeScript API                 |
+| `/api/v1global_config`, `/chat/server/links`, `/chat/server/all`                                         | GET             | API proxy to configured chat metadata |
+| `/healthz`, `/_health.php`                                                                               | GET, HEAD       | API process liveness                  |
+| `/readyz`                                                                                                | GET, HEAD       | API database/Redis readiness          |
+| Game port (default 9933)                                                                                 | TCP             | TypeScript realm server               |
 
 The CDN routes `/cok/*` (excluding `/cok/img/*`) and `/100001/*` map to fixed
-MinIO bucket/host prefixes. Other paths, including chat, uploads, avatars and the
+MinIO bucket/host prefixes. The three chat metadata paths are forwarded to the API;
+`API_CHAT_URL` controls their upstream and an unset value preserves 404. The chat service
+supplies the public WebSocket endpoint; WebSocket traffic does not pass through this
+gateway. Other paths, including `/chat/ws`, `/external/session`, uploads, avatars and the
 PHP dispatcher, have no router and return 404. The discovery body limit is 64 KiB. Unknown methods
 are not forwarded. The internal API's account-name lookup is not a public route.
 
@@ -38,3 +42,7 @@ including discovery aliases, CDN reads/Range/ETag, body limits, private paths an
 real SFS handshake/login through the TCP proxy. No player database is used.
 Historical Nginx, Apache-upload and avatar configs have been removed from this
 stage instead of serving as misleading deployment alternatives.
+
+Chat discovery forwarding is unit-checked through the API and existing chat handlers,
+including unavailable replies and exact GET/path allowlisting. Traefik execution, live
+HTTP/WebSocket traffic and client behavior remain unverified in this unit-only phase.
