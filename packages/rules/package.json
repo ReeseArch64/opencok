@@ -31,7 +31,8 @@
     "./profile-generals": "./src/profile-generals.ts",
     "./reconnect-mine": "./src/reconnect-mine.ts",
     "./rewards": "./src/rewards.ts",
-    "./ranking": "./src/ranking.ts"
+    "./ranking": "./src/ranking.ts",
+    "./alliance-ranking": "./src/alliance-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
