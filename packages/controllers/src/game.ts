@@ -948,7 +948,7 @@ export class Game {
       version: MOBILE_CLIENT_VERSION,
       kingdomId: this.config.kingdomId,
       now,
-      services: this.services.featureAvailability?.(profile, now),
+      bossRunning: (key) => this.services.featureAvailability?.(profile, now)[key] === true,
     };
   }
   private async configuration(uid: string): Promise<Fields> {

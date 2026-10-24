@@ -545,6 +545,14 @@ announcement ID/platform/version strings reject the response; empty strings rema
 literal metadata. Loaded absent/empty catalogs never fall back to indexes. Star maxima
 parse Java Int values only after building and availability checks, retain overwritten
 declarations and propagate invalid applicable values instead of silently omitting them.
+Account announcement overrides follow the generic selector evaluation and then consume
+global feature rules and exact allowlists, without an additional backend flag.
+Subscription announcements use the configured selector and supported platform only.
+Boss announcements read running state lazily per declaration before consuming their
+service-specific global rule, bypassing the announcement selector. The current runtime
+has no boss lifecycle provider; absent running state remains closed. Account/subscription
+metadata does not implement their mutation handlers. Missing announcement platform/version
+fields fail after availability evaluation, while missing IDs fail before service reads.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab

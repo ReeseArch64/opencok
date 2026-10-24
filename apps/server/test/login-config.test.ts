@@ -91,7 +91,7 @@ test("feature announcements retain the legacy realm selector and version/platfor
   expect(JSON.stringify(announcement(context))).not.toContain(context.uid);
 });
 
-test("account-specific flags require exact channel/UID matches and an available provider", () => {
+test("account-specific flags use global feature gates and exact channel/UID matches", () => {
   const catalog = rules();
   const pay = { id: "payelex", ...base };
   const role = { id: "role_on", ...base };
@@ -102,9 +102,10 @@ test("account-specific flags require exact channel/UID matches and an available 
     k2: "synthetic;other",
   });
   catalog.items.set("role_info", { id: "role_info", k4: "all", k5: "synthetic" });
-  expect(featureAnnouncementEnabled(pay, catalog, context)).toBe(false);
+  expect(featureAnnouncementEnabled(pay, catalog, context)).toBe(true);
   expect(featureAnnouncementEnabled(role, catalog, context)).toBe(false);
-  const active = { ...context, services: { payelex: true, role_on: true } };
+  catalog.features.set("role_on", role);
+  const active = context;
   expect(featureAnnouncementEnabled(pay, catalog, active)).toBe(true);
   expect(featureAnnouncementEnabled(role, catalog, active)).toBe(true);
   expect(featureAnnouncementEnabled(pay, catalog, { ...active, uid: "syntheti" })).toBe(false);
@@ -117,7 +118,7 @@ test("account-specific flags require exact channel/UID matches and an available 
   expect(featureAnnouncementEnabled(pay, catalog, active)).toBe(false);
 });
 
-test("boss and subscription flags remain closed without authoritative service availability", () => {
+test("boss flags require running services while subscriptions use configured realm and platform", () => {
   const catalog = rules();
   for (const id of [
     "worldboss",
@@ -126,15 +127,16 @@ test("boss and subscription flags remain closed without authoritative service av
     "worldboss_npc",
   ] as const) {
     const rule = { id, ...base };
+    catalog.features.set(id === "worldboss" ? id : id.replace("worldboss", "world_boss"), rule);
     expect(featureAnnouncementEnabled(rule, catalog, context)).toBe(false);
-    expect(
-      featureAnnouncementEnabled(rule, catalog, { ...context, services: { [id]: true } }),
-    ).toBe(true);
+    expect(featureAnnouncementEnabled(rule, catalog, { ...context, bossRunning: () => true })).toBe(
+      true,
+    );
     expect(
       featureAnnouncementEnabled(rule, catalog, {
         ...context,
         kingdomId: 3,
-        services: { [id]: true },
+        bossRunning: () => true,
       }),
     ).toBe(false);
   }
@@ -144,17 +146,15 @@ test("boss and subscription flags remain closed without authoritative service av
       featureAnnouncementEnabled(subscription, catalog, {
         ...context,
         platform,
-        services: { subscribe: true },
       }),
     ).toBe(true);
   expect(
     featureAnnouncementEnabled(subscription, catalog, {
       ...context,
       platform: "Google",
-      services: { subscribe: true },
     }),
   ).toBe(false);
-  expect(featureAnnouncementEnabled(subscription, catalog, context)).toBe(false);
+  expect(featureAnnouncementEnabled(subscription, catalog, context)).toBe(true);
 });
 
 test("configuration includes share XML, persisted switches and stable push defaults without writes", () => {
@@ -340,10 +340,14 @@ test("army selection takes precedence over config as in the legacy deferred-logi
   expect(output.body.funcOn).toBeUndefined();
 });
 
-test("initial and deferred login announce the same generic feature availability", async () => {
+test("initial and deferred login announce ordinary, account and subscription metadata without reading boss state", async () => {
   const catalog = rules();
   catalog.roles.set("100100", { id: "100100", player_exp: "100" });
   catalog.features.set("ui", { id: "ui", ...base });
+  for (const id of ["payelex", "cn_bind", "role_on", "subscribe"])
+    catalog.features.set(id, { id, ...base });
+  catalog.items.set("cn_bind", { k1: "all", k2: "synthetic" });
+  catalog.items.set("role_info", { k4: "market_global", k5: "all" });
   const persisted = configuration();
   const state: CityState = {
     profile: persisted.profile,
@@ -361,22 +365,34 @@ test("initial and deferred login announce the same generic feature availability"
     catalog,
     { kingdomId: 2 },
     () => now,
+    {
+      featureAvailability: () => {
+        throw new Error("No boss announcement requested");
+      },
+    },
   );
   const initial = await game.initial("synthetic");
   const deferred = (await game.execute("synthetic", "login.other", { config: sfs.int(1) })).body;
   expect(initial.funcOn).toEqual(deferred.funcOn);
   expect(fields((initial.funcOn!.value as Value[])[0]).onOff?.value).toBe(true);
+  expect((initial.funcOn!.value as Value[]).map((value) => fields(value).onOff?.value)).toEqual([
+    true,
+    true,
+    true,
+    true,
+    true,
+  ]);
 });
 
-test("feature services receive the persisted player and server time rather than client overrides", async () => {
+test("boss availability receives the persisted player and server time rather than client overrides", async () => {
   const catalog = rules();
-  catalog.features.set("subscribe", { id: "subscribe", ...base });
+  catalog.features.set("worldboss", { id: "worldboss", ...base });
   const persisted = configuration();
   const game = new Game(store(persisted), catalog, { kingdomId: 2 }, () => now, {
     featureAvailability: (profile, instant) => {
       expect(profile.uid).toBe("synthetic");
       expect(instant).toBe(now);
-      return { subscribe: true };
+      return { worldboss: profile.pf === "market_global" };
     },
   });
   const input = {
