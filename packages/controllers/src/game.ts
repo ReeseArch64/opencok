@@ -1,5 +1,6 @@
-import { mailStatus } from "@opencok/dtos/mail";
-import { mailStatusQuery, calculateMailStatus } from "@opencok/rules/mail";
+import { mailSave, mailStatus } from "@opencok/dtos/mail";
+import { mailSaveQuery, mailStatusQuery, calculateMailStatus } from "@opencok/rules/mail";
+import type { MailSaveMode } from "@opencok/contracts/mail";
 import { expeditionRanking } from "@opencok/dtos/expedition-ranking";
 import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
 import { decodeExpeditionRanking } from "./expedition-ranking.ts";
@@ -154,6 +155,15 @@ export class Game {
       case "mail.category.status":
         body = await this.mailStatus(uid, params);
         break;
+      case "mail.save":
+      case "mail.cancel.save":
+      case "mail.save.batch":
+        body = await this.mailSave(
+          uid,
+          command === "mail.save" ? "save" : command === "mail.cancel.save" ? "cancel" : "batch",
+          params,
+        );
+        break;
       case "expedition.rank":
         body = await this.expeditionRanking(uid);
         break;
@@ -193,6 +203,25 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return mailStatus(calculateMailStatus(query, state.counts));
+  }
+  private async mailSave(uid: string, mode: MailSaveMode, params: Fields): Promise<Fields> {
+    const ids = mode === "batch" ? params.uids : params.uid;
+    const flag = mode === "batch" ? params.flag : params.type;
+    if (
+      !ids ||
+      ids.type !== Type.String ||
+      typeof ids.value !== "string" ||
+      !flag ||
+      flag.type !== Type.Int ||
+      typeof flag.value !== "number"
+    )
+      throw new GameError(errors.invalid);
+    const query = mailSaveQuery(mode, ids.value, flag.value, this.now());
+    const state = await this.db.mailSave(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return mailSave(state.result);
   }
   private async expeditionRanking(uid: string): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)

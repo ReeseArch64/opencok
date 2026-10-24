@@ -24,6 +24,7 @@ function game(
       expect(uid).toBe("observer");
       return profile;
     },
+    mailSave: unused,
     mailStatus: unused,
     allianceRanking: unused,
     playerRanking: unused,

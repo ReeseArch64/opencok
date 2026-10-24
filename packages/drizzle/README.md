@@ -2,13 +2,13 @@
 
 `@opencok/drizzle` owns the application's PostgreSQL schemas, typed client and
 versioned Drizzle migrations. The maintained source of truth is `src/schema`,
-with **772 tables / 6,316 fields** and one module per table.
+with **773 tables / 6,319 fields** and one module per table.
 
 | Default physical database | SQL namespaces                                  | Migration role | Tables |
 | ------------------------- | ----------------------------------------------- | -------------- | -----: |
 | `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    113 |
-| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    659 |
-| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    659 |
+| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    660 |
+| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    660 |
 
 Kingdom IDs **1 and 2** are configured by default. There is one maintained kingdom
 schema, one set of table modules and one kingdom migration history. Both physical
@@ -114,6 +114,14 @@ new migration to their existing physical databases; no database-name change or
 copy is required. Never edit a migration already applied to a deployment.
 
 ## Data contracts
+
+The additive `0003_mail_update_markers` kingdom migration creates the recipient/message
+update-marker table used by server mailbox mutations. The owner/time index supports
+future synchronization reads; no mail foreign key is present so deletion markers can
+outlive messages. Existing mail rows are unchanged. Apply the migration to all kingdoms
+before using the corresponding server version. Generation, synthetic schema contracts
+and SQL snapshots are verified; real migration execution and persistence/concurrency
+checks remain deferred under the current unit-only validation restriction.
 
 - Bigints, including the bounded full-width sequence ID, use TypeScript `bigint`.
   Serialize bigint explicitly at JSON/transport boundaries. Native sequences retain

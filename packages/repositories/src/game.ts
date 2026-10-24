@@ -1,6 +1,8 @@
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { readMailStatus } from "./mail.ts";
-import type { MailStatusQuery } from "@opencok/contracts/mail";
+import type { MailSaveQuery, MailStatusQuery } from "@opencok/contracts/mail";
+import { mail_update } from "@opencok/drizzle/schema/opencok_kingdom/mail_update";
+import { saveMail } from "./mail-save.ts";
 import { material_cost_ranking } from "@opencok/drizzle/schema/opencok_kingdom/material_cost_ranking";
 import { readAllianceRanking } from "./alliance-ranking.ts";
 import type { AllianceRankingQuery } from "@opencok/contracts/alliance-ranking";
@@ -84,6 +86,7 @@ export class Database implements GameStore, FriendshipMineStore {
       user_mine,
       material_cost_ranking,
       mail,
+      mail_update,
       switches,
       parse_info,
     ])
@@ -186,6 +189,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   mailStatus(uid: string, query: MailStatusQuery) {
     return readMailStatus(this.kingdom.db, uid, query);
+  }
+  mailSave(uid: string, query: MailSaveQuery) {
+    return saveMail(this.kingdom.db, this.config.kingdomId, uid, query);
   }
   allianceRanking(uid: string, query: AllianceRankingQuery) {
     return readAllianceRanking(this.kingdom.db, uid, query);

@@ -7,6 +7,7 @@ The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
 `login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
+`mail.save`, `mail.cancel.save`, `mail.save.batch`,
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
@@ -700,8 +701,58 @@ not loaded. SQL null status follows the legacy model's unread default. More than
 32,767 aggregate groups rejects with a sentinel instead of truncating. Missing/banned
 owners and unknown categories skip the mail query. Dependency failures reject instead
 of the reference's fallback to empty combined counters. The mail table is checked at
-startup. This command does not mark, save, delete or redeem messages; the remaining
-mailbox commands are still pending. Verification uses synthetic unit fixtures only.
+startup. This command does not mark, save, delete or redeem messages. Verification
+uses synthetic unit fixtures only.
+
+## Mailbox saving
+
+`mail.save`, `mail.cancel.save` and `mail.save.batch`, tracked in
+[issue #65](https://github.com/ReeseArch64/opencok/issues/65), persist saved flags in
+the selected realm. Single commands require a string `uid` identifying the message
+and an integer `type`; the latter is validated but does not select the message type.
+Saving changes null, zero or negative flags to 1 and returns `save: "success"`.
+Cancelling changes nonzero flags to 0 and returns `cancel: "success"`. Missing,
+foreign and already-set messages return the shared `success: true` acknowledgment.
+Neither command changes read status, message contents, attachments or balances.
+
+Batch requests use comma-separated string `uids` and integer `flag`. Exactly 1 saves;
+every other integer cancels. Empty segments are ignored, IDs are not trimmed, and
+duplicates collapse after checking the maximum of 1,000 nonempty segments. Empty or
+Java-whitespace-only input acknowledges without writes. Nonempty batches return
+`save: "success"` even when no owned messages match. IDs are limited to 40 UTF-16 code
+units and the input string to 65,535 UTF-8 bytes; NUL and invalid Unicode reject.
+These explicit bounds replace unbounded legacy batches. Correlation fields are echoed.
+
+The repository locks the authenticated owner profile in a read-write, read-committed
+transaction and checks identity, realm and bans before updating mail. Every mutation
+includes the recipient in its SQL predicate. Single writes apply their flag condition
+atomically; batch writes include every matched owned row, even if its flag is unchanged.
+Only returned message IDs receive update markers. This intentionally tightens the
+reference's ID-only mutations and marker creation for arbitrary requested IDs.
+
+The additive kingdom migration `0003_mail_update_markers.sql` creates `mail_update`,
+keyed by recipient and message, with an owner/time index. Flags and markers commit
+together; failure rolls back both. Marker upserts retain the greater timestamp when
+requests arrive out of clock order. PostgreSQL supplies durable synchronization state
+under ADR-0002/0005, replacing the legacy non-atomic Redis marker write. The marker
+has no mail foreign key so future deletion synchronization can retain tombstones.
+Synchronization consumers and cleanup are still pending; this slice does not emit
+mail pushes or claim reconnect synchronization is complete.
+
+Apply the additive migration to every kingdom before running this version; startup
+checks the new table. Migration generation and schema snapshots were checked locally,
+but no database migration or real PostgreSQL execution was performed. Existing mail
+rows are retained. A binary rollback can leave the unused additive table in place;
+do not discard markers needed for a later synchronization rollout. Repeated absolute
+assignments are state-idempotent without intervening changes; `_cok_` is correlation,
+not a durable receipt, so delayed retries after an opposite assignment follow arrival
+order. No new library or external service is required.
+
+Synthetic unit tests cover wire types, result strings, ownership predicates, profile
+locks, flag conditions, repeat requests and rollback on update/marker/commit failure.
+They do not prove PostgreSQL concurrency or native-client behavior. Read marking
+(including gift-opening logs), list/content reads, deletion, chat-mail save variants
+and synchronization remain pending; reward redemption is outside this wave.
 
 ## Gameplay migration: topics 1–8
 
@@ -756,7 +807,7 @@ use these descriptions before the reconnect task component is complete.
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests      | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                    | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                       |
-| 4. Basic mailbox                          | Authenticated category totals/unread counts, legacy category distinctions and synthetic unit coverage                                                                                           | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
+| 4. Basic mailbox                          | Authenticated category counts; save/cancel and batch save with atomic persisted flags/update markers and synthetic units                                                                        | List/content, read marking, deletion, chat-mail variants and synchronization readers/cleanup; redemption is outside this wave.                   |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                   | Point details, player search and favorites, including authorization for writes.                                                                  |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                           | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |
 | 7. Avatar integration                     | Standalone files service                                                                                                                                                                        | Realm grants, confirmation and profile updates.                                                                                                  |
