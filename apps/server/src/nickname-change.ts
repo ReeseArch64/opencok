@@ -4,6 +4,9 @@ import type { NicknameChangeConfiguration } from "@opencok/contracts/nickname-ch
 import type { RealmNotifications } from "@opencok/connection/notifications";
 import type { createDatabases } from "@opencok/drizzle";
 import type { Rules } from "@opencok/rules/game";
+import type { Cache } from "@opencok/storage/session";
+import type { SharedUserLayout } from "@opencok/contracts/shared-user";
+import { sharedUserInfo } from "@opencok/mappings/shared-user";
 
 export function createNicknameChangeRuntime(options: {
   databases: Pick<ReturnType<typeof createDatabases>, "global" | "getKingdom">;
@@ -13,6 +16,11 @@ export function createNicknameChangeRuntime(options: {
   notifications: RealmNotifications;
   timeoutMs: number;
   report(): void;
+  sharedUser?: {
+    cache: Pick<Cache, "publishSharedUserInfo">;
+    rules: Pick<Rules, "power">;
+    layout?: SharedUserLayout;
+  };
 }) {
   const goods = () => {
     const row = options.rules.goods.get("200021");
@@ -55,5 +63,22 @@ export function createNicknameChangeRuntime(options: {
     },
     deliverNotifications: (owner: string, operationId: string) =>
       store.deliverNotifications(owner, operationId, publish, options.timeoutMs),
+    async deliverSharedUser(owner: string, operationId: string, now: number) {
+      const shared = options.sharedUser;
+      if (!shared) throw new Error("Shared user runtime unavailable");
+      return store.deliverSharedUser(
+        owner,
+        operationId,
+        now,
+        (row, kingdomId, version, time) =>
+          sharedUserInfo(row, shared.rules, kingdomId, version, time),
+        async (update, signal) => {
+          signal.throwIfAborted();
+          await shared.cache.publishSharedUserInfo(update, shared.layout);
+          signal.throwIfAborted();
+        },
+        options.timeoutMs,
+      );
+    },
   };
 }

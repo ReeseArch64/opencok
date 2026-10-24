@@ -1,6 +1,6 @@
 export { opencok_global, opencok_pay, opencok_chat } from "./namespaces";
 export { nickname_change_receipt as opencok_global_nickname_change_receipt } from "./opencok_global/nickname_change_receipt";
-export { chatMessageSequence } from "./sequences";
+export { chatMessageSequence, sharedUserSequence } from "./sequences";
 export { account_device_mapping as opencok_global_account_device_mapping } from "./opencok_global/account_device_mapping";
 export { account_new as opencok_global_account_new } from "./opencok_global/account_new";
 export { account_new_oldbigone as opencok_global_account_new_oldbigone } from "./opencok_global/account_new_oldbigone";

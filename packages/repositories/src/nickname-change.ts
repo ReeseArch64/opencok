@@ -27,7 +27,9 @@ import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { DependencyError } from "@opencok/errors/dependency";
 import { withAvailableNickname, withNicknameLock } from "./nickname-lock.ts";
-import { writeNicknameGlobal } from "./nickname-global.ts";
+import { writeNicknameGlobal, nicknameAccountUid } from "./nickname-global.ts";
+import { readSharedUserProfile } from "./shared-user.ts";
+import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 
 const balanceKeys = [
   "gold",
@@ -644,6 +646,94 @@ export function createNicknameChangeStore(
     find,
     recover,
     deliverNotifications,
+    async deliverSharedUser(uid, operationId, now, project, publish, timeoutMs) {
+      key(uid, operationId);
+      time(now);
+      if (
+        typeof project !== "function" ||
+        typeof publish !== "function" ||
+        !integer(timeoutMs) ||
+        timeoutMs < 100 ||
+        timeoutMs > 30000
+      )
+        return invalid();
+      return databases.global.db.transaction(
+        async (global) =>
+          db.transaction(
+            async (tx) => {
+              const profile = await owner(tx, uid);
+              if (!profile || profile.uid !== uid || profile.serverId !== kingdomId)
+                return invalid();
+              const record = await operation(tx, uid, operationId);
+              if (!record || record.state !== "committed" || !(record.pendingEffects & 8))
+                return false;
+              const row = await readSharedUserProfile(tx, uid, kingdomId);
+              const canonical = await nicknameAccountUid(global, uid);
+              const [account] = await global
+                .select({ server: account_new.server, name: account_new.gameUserName })
+                .from(account_new)
+                .where(eq(account_new.gameUid, canonical))
+                .limit(1);
+              if (!account || account.server !== String(kingdomId) || account.name !== row.name)
+                return invalid();
+              const allocation = await global.execute<{ version: string }>(
+                sql`select nextval('opencok_global.shared_user_publication_seq'::regclass)::text as version`,
+              );
+              if (
+                allocation.rows.length !== 1 ||
+                !/^[1-9]\d{0,18}$/.test(allocation.rows[0]!.version)
+              )
+                return invalid();
+              const version = BigInt(allocation.rows[0]!.version);
+              if (version > 9223372036854775807n) return invalid();
+              const update = Object.freeze({
+                ...project(Object.freeze(row), kingdomId, version, now),
+              });
+              if (
+                update.owner !== uid ||
+                update.kingdomId !== kingdomId ||
+                update.version !== version ||
+                update.updatedAt !== String(BigInt(now) / 1000n) ||
+                typeof update.body !== "string" ||
+                Buffer.byteLength(update.body) > 65535 ||
+                !update.body.isWellFormed()
+              )
+                return invalid();
+              const controller = new AbortController();
+              let timer: ReturnType<typeof setTimeout> | undefined;
+              try {
+                await Promise.race([
+                  Promise.resolve().then(() => publish(update, controller.signal)),
+                  new Promise<never>((_, reject) => {
+                    timer = setTimeout(() => {
+                      controller.abort();
+                      reject(new Error("Shared user publication deadline"));
+                    }, timeoutMs);
+                  }),
+                ]);
+                controller.signal.throwIfAborted();
+              } finally {
+                clearTimeout(timer);
+                controller.abort();
+              }
+              const changed = await tx
+                .update(nickname_change)
+                .set({ pendingEffects: record.pendingEffects & ~8 })
+                .where(
+                  and(
+                    eq(nickname_change.operationId, operationId),
+                    eq(nickname_change.pendingEffects, record.pendingEffects),
+                  ),
+                )
+                .returning({ id: nickname_change.operationId });
+              if (changed.length !== 1 || changed[0]!.id !== operationId) return invalid();
+              return true;
+            },
+            { isolationLevel: "read committed", accessMode: "read write" },
+          ),
+        { isolationLevel: "read committed", accessMode: "read write" },
+      );
+    },
     async deliverChat(uid, operationId, publish, timeoutMs) {
       key(uid, operationId);
       if (

@@ -43,6 +43,13 @@
       "when": 1792881219110,
       "tag": "0005_chat_mailbox_effects",
       "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792883061077,
+      "tag": "0006_shared_user_publication_versions",
+      "breakpoints": false
     }
   ]
 }

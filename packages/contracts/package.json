@@ -73,7 +73,9 @@
     "./responses/configuration": "./src/responses/configuration.ts",
     "./responses/battle-ranking": "./src/responses/battle-ranking.ts",
     "./responses/flower-ranking": "./src/responses/flower-ranking.ts",
-    "./chat-mailbox": "./src/chat-mailbox.ts"
+    "./chat-mailbox": "./src/chat-mailbox.ts",
+    "./shared-user": "./src/shared-user.ts",
+    "./responses/shared-user": "./src/responses/shared-user.ts"
   },
   "dependencies": {}
 }
