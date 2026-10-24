@@ -2,6 +2,8 @@ import type { Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
+import type { OwnGeneralSnapshot } from "@opencok/contracts/reconnect";
+import { generalInfo } from "./profile.ts";
 
 function invalid(): never {
   throw new GameError(errors.unsupported, "reconnect");
@@ -59,6 +61,20 @@ export function reconnectArmies(rows: readonly Row[]): Fields {
         seen.add(id);
         return sfs.object(army);
       }),
+    ),
+  };
+}
+
+export function reconnectGenerals(generals: readonly OwnGeneralSnapshot[]): Fields {
+  if (generals.length > 32767) return invalid();
+  return {
+    userGenerals: sfs.array(
+      generals.map((general) =>
+        sfs.object({
+          ...generalInfo(general),
+          abilityIndex: sfs.int(general.abilityIndex),
+        }),
+      ),
     ),
   };
 }
