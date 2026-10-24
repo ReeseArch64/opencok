@@ -397,7 +397,7 @@ test("resource query flags are captured before authorization and readiness check
   ).rejects.toThrow("Invalid world detail query");
   f.queries.length = 0;
   await checkWorldPointDetailStore(f.db);
-  expect(f.queries).toHaveLength(16);
+  expect(f.queries).toHaveLength(24);
   expect(f.queries.every((query) => query.params.length === 1 && query.params[0] === 0)).toBe(true);
   expect(reads(f, "new_general")[0]!.text).not.toMatch(/skillInfo|predatoruid|oldrefineproperty/);
   await expect(readWorldResourceOwner(f.db, "bad\0owner")).rejects.toThrow(

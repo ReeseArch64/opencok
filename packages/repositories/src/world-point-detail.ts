@@ -1,3 +1,4 @@
+import { readSpecialWorldDetail, checkSpecialWorldDetail } from "./world-special-detail.ts";
 import { world_barbarion } from "@opencok/drizzle/schema/opencok_kingdom/world_barbarion";
 import { readPlayerEffects } from "./power.ts";
 import { readWorldResourceOwner, checkWorldResourceOwnerStore } from "./world-resource-owner.ts";
@@ -91,6 +92,7 @@ const resourceMarchColumns = {
   state: world_march.state,
   armyInfo: world_march.armyInfo,
   collectSpd: world_march.collectSpd,
+  arrivalTime: world_march.arrivalTime,
   marchArrivalTime: world_march.marchArrivalTime,
   collectedBeforeSpd: world_march.collectedBeforeSpd,
   changeCollectSpdTime: world_march.changeCollectSpdTime,
@@ -123,6 +125,7 @@ async function readResourceMarch(db: Reader, point: Row) {
     )
       throw new Error("Invalid resource march state");
     for (const field of [
+      "arrivalTime",
       "marchArrivalTime",
       "collectedBeforeSpd",
       "changeCollectSpdTime",
@@ -353,7 +356,7 @@ async function readPoint(
   cityExtras = false,
   resourceEffects = false,
 ): Promise<
-  Pick<WorldPointDetailSnapshot, "owner" | "resource"> & {
+  Pick<WorldPointDetailSnapshot, "owner" | "resource" | "resourceGroup"> & {
     point?: Pick<typeof worldpoint.$inferSelect, keyof typeof pointColumns>;
   }
 > {
@@ -374,6 +377,37 @@ async function readPoint(
     !blank(point.ownerMarchUUid)
       ? await readResourceMarch(db, point)
       : undefined;
+  const resourceGroup =
+    resourceEffects && point.pointType === 37 && (!blank(point.ownerId) || !blank(point.ownerName))
+      ? await db
+          .select({
+            uuid: world_march.uuid,
+            targetId: world_march.targetId,
+            worldId: world_march.worldId,
+            state: world_march.state,
+            collectSpd: world_march.collectSpd,
+            marchArrivalTime: world_march.marchArrivalTime,
+            collectedBeforeSpd: world_march.collectedBeforeSpd,
+            changeCollectSpdTime: world_march.changeCollectSpdTime,
+            occupyResourceEndTime: world_march.occupyResourceEndTime,
+          })
+          .from(world_march)
+          .where(
+            and(
+              eq(world_march.targetId, id),
+              eq(world_march.worldId, worldId),
+              eq(world_march.state, 1),
+            ),
+          )
+          .orderBy(asc(world_march.uuid))
+          .limit(4097)
+      : undefined;
+  if (
+    resourceGroup &&
+    (resourceGroup.length > 4096 ||
+      new Set(resourceGroup.map((row) => row.uuid)).size !== resourceGroup.length)
+  )
+    throw new Error("Invalid shared resource marches");
   const resourceOwner =
     resourceEffects && resource?.march
       ? await readWorldResourceOwner(db, point.ownerId!)
@@ -381,6 +415,7 @@ async function readPoint(
   return {
     point,
     owner,
+    ...(resourceGroup ? { resourceGroup } : {}),
     ...(resource
       ? { resource: { ...resource, ...(resourceOwner ? { owner: resourceOwner } : {}) } }
       : {}),
@@ -393,7 +428,7 @@ export function createWorldPointDetailStore(
   if (!integer(kingdomId) || kingdomId < 1 || !databases.kingdoms.has(kingdomId))
     throw new Error("Invalid world detail realm");
   return {
-    async read(observer, input, selectExploration) {
+    async read(observer, input, selectExploration, turret) {
       const query = Object.freeze({ ...input });
       if (
         !validText(observer, 255) ||
@@ -439,6 +474,9 @@ export function createWorldPointDetailStore(
             query.cityExtras,
             query.resourceEffects,
           );
+          const special = detail.point
+            ? await readSpecialWorldDetail(tx, detail.point, profile!, kingdomId, false, turret)
+            : undefined;
           const exploration =
             detail.point?.pointType === 6 && selectExploration
               ? await readExploration(tx, observer, detail.point, selectExploration)
@@ -456,6 +494,7 @@ export function createWorldPointDetailStore(
           return {
             ...result,
             ...detail,
+            ...(special ? { special } : {}),
             ...(exploration ? { exploration } : {}),
             ...(neutralResource ? { neutralResource } : {}),
             ...(city ? { city } : {}),
@@ -470,12 +509,20 @@ export function createWorldPointDetailStore(
           return local;
         if (!databases.kingdoms.has(query.kingdomId))
           throw new Error("Unconfigured world detail realm");
-        const detail = await databases
-          .getKingdom(query.kingdomId)
-          .db.transaction(
-            (tx) => readPoint(tx, query.point, 0, true, false, query.resourceEffects),
-            options,
-          );
+        const detail = await databases.getKingdom(query.kingdomId).db.transaction(async (tx) => {
+          const result = await readPoint(tx, query.point, 0, true, false, query.resourceEffects);
+          const special = result.point
+            ? await readSpecialWorldDetail(
+                tx,
+                result.point,
+                local.profile!,
+                query.kingdomId,
+                true,
+                turret,
+              )
+            : undefined;
+          return { ...result, ...(special ? { special } : {}) };
+        }, options);
         return { ...local, ...detail };
       } catch {
         throw new DependencyError("world point detail");
@@ -507,6 +554,7 @@ async function readCity(db: Reader, observer: string, profile: Row, kingdomId: n
 }
 export async function checkWorldPointDetailStore(db: Db): Promise<void> {
   await checkWorldResourceOwnerStore(db);
+  await checkSpecialWorldDetail(db);
   await db.select(barbarianColumns).from(world_barbarion).limit(0);
   await db
     .select({ uid: user_mixed_info.uid, lastBeDuelTime: user_mixed_info.lastBeDuelTime })
