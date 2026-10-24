@@ -1410,6 +1410,32 @@ readiness probe includes these columns with limit zero. Eight additional synthet
 adapter units cover local/remote snapshots, pointer selection, omitted reads,
 nullable/bounded payloads, Float32 normalization, precision, authorization and rollback.
 
+`messages/legacy-json` also decodes root arrays through the same bounded parser
+used for stored mailbox structures. The resource controller's plunder restoration
+maps SQL null to the model's initial empty array. A nonnull value must parse as an
+array, including when its entries will not be used for load subtraction. Only a
+single object can contribute `v`, and that value must retain its SFS Int type;
+strings, Longs, Doubles, nulls and duplicate-key arrays are not coerced. Missing `v`
+contributes nothing. Multiple entries and territory types 18/19 skip the value cast,
+matching the reference's access order. Malformed arrays and retained function/hole
+values still reject. The persisted text is limited to the column's 2,048 characters.
+
+`resourceSavedCollection` restores the saved collection fields independently of raw
+army load and runtime maximum collection time. Nullable primitive columns default
+to zero; times remain exact signed Long values, speed becomes Float32 and the
+collected-before-speed-change count becomes Int. That count is bigint in the
+TypeScript storage schema but INTEGER in the reference mapper and int in its model.
+Out-of-Int-range values reject rather than wrap, consistent with the bundled JDBC
+driver's default truncation-check setting; nondefault driver configurations are not
+claimed equivalent. Restoring these fields neither advances collection nor writes
+the saved row.
+
+Nine added units cover 459 frozen numeric-oracle outcomes, 28 frozen array-structure
+outcomes, permissive legacy syntax, typed plunder access, nullable primitives,
+signed-width boundaries and composition through resource arithmetic and SFS binary
+encoding. The JSON parser remains separate from the controller's resource-specific
+access rules and the pure collection arithmetic.
+
 The saved-data decoder and raw-load calculation are not yet composed into the
 occupied-resource command. Resolving the five modifier inputs, checking decoded
 army ownership and restoring collection state remain required before it can return

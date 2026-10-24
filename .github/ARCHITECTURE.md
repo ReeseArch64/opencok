@@ -458,8 +458,11 @@ identity and collection metadata, bounded army/plunder payloads and exact nullab
 Long fields, normalizing real speed to Float32. Missing marches remain absent;
 inconsistent owners reject without ownership repair. Decoder composition, decoded
 owner validation, effect resolution and runtime maximum-collection-time restoration remain dependencies
-of occupied-resource command composition. No march scheduling or cache write is
-performed by this pure projection.
+of occupied-resource command composition. Root stored JSON arrays share the existing
+bounded legacy parser; controller restoration preserves the single-item typed
+plunder access rules. Pure collection restoration applies nullable primitive defaults
+and checks the reference model's Int range before narrowing the saved count. No
+march scheduling or cache write is performed by these projections.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read

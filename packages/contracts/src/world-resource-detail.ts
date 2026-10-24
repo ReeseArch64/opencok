@@ -40,6 +40,15 @@ export interface WorldResourceMarch extends WorldResourceCollection {
   occupyResourceEndTime: bigint;
 }
 
+export type WorldResourceSavedCollection = Pick<
+  WorldResourceMarch,
+  | "collectSpd"
+  | "marchArrivalTime"
+  | "collectedBeforeSpd"
+  | "changeCollectSpdTime"
+  | "occupyResourceEndTime"
+>;
+
 export interface WorldResourceOwnerDetail {
   quantity: number;
   speed: number;
