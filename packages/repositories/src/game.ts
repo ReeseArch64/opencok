@@ -1,3 +1,5 @@
+import { reportAvatar } from "./avatar-report.ts";
+import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
 import { readMailBatch } from "./mail-batch.ts";
 import { readNormalRankingRealm } from "./ranking-realm.ts";
 import { readMailUpdates } from "./mail-updates.ts";
@@ -162,6 +164,7 @@ export class Database implements GameStore, FriendshipMineStore {
       switches,
       parse_info,
       celebrity,
+      pic_upload_record,
     ])
       await this.kingdom.db.select().from(table).limit(0);
     await this.databases.global.db.select().from(account_new).limit(0);
@@ -197,6 +200,9 @@ export class Database implements GameStore, FriendshipMineStore {
     return (
       await this.kingdom.db.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
     )[0];
+  }
+  updateAvatarReport(owner: string, target: string, now: number) {
+    return reportAvatar(this.kingdom.db, this.config.kingdomId, owner, target, now);
   }
   celebrityDescription(uid: string, kingdomId: number): Promise<Buffer | null> {
     return readCelebrityDescription(this.databases, uid, kingdomId);
