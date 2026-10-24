@@ -1407,12 +1407,55 @@ not require Java or local legacy inputs. Star lookup visits only present canonic
 catalog keys, avoiding a linear scan across missing stars and the legacy loop's
 Int overflow at maximum star. This is an explicit bounded-read difference.
 
-These two maps do not constitute the complete new-general load effect. Status,
-equipment and refinement contributions, building/official eligibility, general
-iteration order and authoritative owner reads still need composition. Exceptions
-remain visible to that future outer resolver, whose legacy boundary returns zero
-for the whole general contribution. The occupied-resource command remains gated
-until all required dependencies are supplied.
+`rules/new-general-building` now supplies building/official eligibility. Direct
+assignment requires state two, a matching building UUID and an existing building;
+it bypasses official feature gates. Official state six additionally requires the
+owner-version/realm/time feature, main-building level including stars, a nonempty
+office with nonzero position/start time, office/position unlocks and the first
+matching effect's headcount requirement. Future nonzero start times are accepted,
+as in the reference. Headcounts include all restored rows for the same office,
+without validating their positions or start times, and office IDs keep their first
+duplicate row. Unknown unlock types pass. Position multipliers preserve Float
+parsing, including zero and nonfinite values, and resolve after the component sum.
+Missing offices remain absent; this read does not create default office rows or
+repair general state.
+
+`rules/new-general-status` restores final duplicate statuses and traverses their
+fresh Integer HashMap order. Signed Long start/end comparisons are inclusive and
+nullable primitive timestamps become zero. Inactive statuses skip effect parsing;
+missing status definitions contribute zero. Active malformed effects propagate to
+the outer failure boundary. Refinement uses the owner-version feature gate,
+final duplicate slots, the reference's mixed separator rules and effect-set
+membership without duplicate contributions. A refinement exception discards its
+whole subtotal while retaining the other general components. Its saved text is
+bounded to the 300-unit storage field. Optional `general_official` and
+`general_random_effect` catalogs retain final duplicate definitions.
+
+`rules/new-general-effects` now composes status, passive skills, talents, an explicit
+equipment result and refinement before applying the official rate and accumulating
+generals as Float. Fresh saved talent, operation-time and base-skill maps restore
+before filtering eligibility; malformed operation times retain the module failure
+behavior even though the load calculation does not consume their values. Operation
+time text is bounded to 200 UTF-16 units and signed Long values. Any snapshot,
+restoration, eligibility, status, skill, equipment or rate exception returns zero
+for the entire general contribution. The separate refinement fallback remains local.
+Status time samples once per eligible general; feature gates use the supplied rule
+context. Neither clock nor equipment is read for an ineligible general.
+
+The composition requires a snapshot callback containing authoritative general
+traversal, buildings, level/prestige and office state, plus an equipment callback.
+It does not infer ConcurrentHashMap iteration or historical cache state from SQL
+order. The equipment callback must implement the general's equipment, modifier 218
+and exclusive suit contributions; ordinary player equipment accumulation is not a
+substitute. Owner relocation/loading policy, those readers and equipment calculation
+remain pending. No current endpoint substitutes an empty provider to enable this path.
+
+Twenty-four added units cover these rules and their catalog loading, reusing the
+earlier parsing/map oracles and adding 600 independent synthetic Java 8 component-sum
+and official-rate vectors. They cover skipped reads, clock order, restoration before
+filtering, failure boundaries, signed/nonfinite arithmetic and immutable snapshots.
+They use no live database, service or client. The occupied-resource command remains
+gated until all required runtime dependencies are supplied.
 
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries
