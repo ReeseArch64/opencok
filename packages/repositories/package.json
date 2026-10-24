@@ -25,7 +25,8 @@
     "./mail-save": "./src/mail-save.ts",
     "./mail-read": "./src/mail-read.ts",
     "./mail-gift-relay": "./src/mail-gift-relay.ts",
-    "./mail-delete": "./src/mail-delete.ts"
+    "./mail-delete": "./src/mail-delete.ts",
+    "./mail-conversation-save": "./src/mail-conversation-save.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",

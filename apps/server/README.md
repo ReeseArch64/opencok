@@ -7,7 +7,7 @@ The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
 `login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
-`mail.save`, `mail.cancel.save`, `mail.save.batch`,
+`mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`,
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
@@ -753,7 +753,7 @@ order. No new library or external service is required.
 Synthetic unit tests cover wire types, result strings, ownership predicates, profile
 locks, flag conditions, repeat requests and rollback on update/marker/commit failure.
 They do not prove PostgreSQL concurrency or native-client behavior. List/content reads,
-category/conversation deletion, chat-mail save variants and synchronization remain pending; reward redemption
+category/conversation deletion, chat-mail read variants and synchronization remain pending; reward redemption
 is outside this wave.
 
 ## Mailbox read status and gift opening
@@ -864,6 +864,37 @@ database, concurrent writers, client or ADB. `mail.delete.batch`, category/label
 deletion, chat-conversation deletion, list/content reads and synchronization readers
 remain separate unfinished portions of topic 4.
 
+## Conversation and type mailbox saving
+
+`chatMail.save`, tracked in [issue #68](https://github.com/ReeseArch64/opencok/issues/68),
+sets the saved flag for the authenticated recipient's conversation or exact message
+type. A present string `fromUser` takes precedence over `type`; empty senders remain
+valid selectors. With `mod` equal to 1, sender selection covers moderation types 23
+and 24; every other integer selects personal text types 20, 21 and 22. Media and
+drifting-bottle messages are excluded from sender selection. Without `fromUser`, an
+integer `type` maps client values 0, 1, 4, 10, 14 and 21 to stored values 21, 22, 7,
+14, 12 and 10 respectively; other values select their exact stored type.
+
+The selected branch requires an integer `flag` and preserves its full signed 32-bit
+value, including negative and nonbinary values. Without either selector, the command
+acknowledges without writes and ignores `flag`. Optional `mod` defaults to 0 and is
+always validated. Fields ignored by the selected branch do not affect the request.
+Sender strings are bounded to 40 UTF-16 code units and reject NUL or invalid Unicode.
+The shared empty-result response supplies `success: true` and correlation fields.
+
+The repository locks and validates the owner profile, then updates all matched owned
+rows with one statement in the same realm transaction. Conversation size is not
+truncated, and message contents are never loaded. SQL failures roll back the operation.
+Like the reference command, this path writes no synchronization markers and changes
+no read state, rewards, groups or chat-service state. No schema, dependency or service
+is added. Absolute flag assignments retain the existing arrival-order retry semantics.
+
+Synthetic unit tests cover wire validation, selector precedence, all type mappings,
+raw flag extremes, unauthorized profiles, recipient isolation, 1,500-message
+conversations and transaction failures. Real PostgreSQL execution, concurrency and
+native-client behavior remain unverified. Conversation read/delete commands and
+mailbox list/content and synchronization flows remain pending.
+
 ## Gameplay migration: topics 1–8
 
 The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)
@@ -917,7 +948,7 @@ use these descriptions before the reconnect task component is complete.
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests      | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                    | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                       |
-| 4. Basic mailbox                          | Category counts; saving/read marking; gift-opening retry; ordinary deletion with atomic related cleanup; synthetic units                                                                        | List/content, batch/category/conversation deletion, chat-mail variants and synchronization readers/cleanup; redemption is outside this wave.     |
+| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; gift-opening retry; ordinary deletion with atomic related cleanup; synthetic units                                              | List/content, batch/category/conversation deletion, chat-mail reading and synchronization readers/cleanup; redemption is outside this wave.      |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                   | Point details, player search and favorites, including authorization for writes.                                                                  |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                           | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |
 | 7. Avatar integration                     | Standalone files service                                                                                                                                                                        | Realm grants, confirmation and profile updates.                                                                                                  |

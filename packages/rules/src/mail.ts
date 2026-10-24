@@ -1,4 +1,5 @@
 import type {
+  MailConversationSaveQuery,
   MailDeleteEntry,
   MailDeleteGroup,
   MailDeleteQuery,
@@ -30,6 +31,41 @@ function invalid(): never {
 }
 function int(value: number): boolean {
   return Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
+}
+
+export function mailConversationSaveQuery(
+  input: { mod: number; fromUser?: string; type?: number; flag?: number },
+  now: number,
+): MailConversationSaveQuery {
+  if (!int(input.mod) || !Number.isSafeInteger(now) || now < 0) return invalid();
+  if (input.fromUser === undefined && input.type === undefined) return { scope: "none", now };
+  if (input.flag === undefined || !int(input.flag)) return invalid();
+  if (input.fromUser !== undefined) {
+    if (
+      typeof input.fromUser !== "string" ||
+      input.fromUser.length > 40 ||
+      input.fromUser.includes("\0") ||
+      !input.fromUser.isWellFormed()
+    )
+      return invalid();
+    return {
+      scope: "sender",
+      fromUser: input.fromUser,
+      moderation: input.mod === 1,
+      flag: input.flag,
+      now,
+    };
+  }
+  if (input.type === undefined || !int(input.type)) return invalid();
+  const types = new Map([
+    [0, 21],
+    [1, 22],
+    [4, 7],
+    [10, 14],
+    [14, 12],
+    [21, 10],
+  ]);
+  return { scope: "type", type: types.get(input.type) ?? input.type, flag: input.flag, now };
 }
 
 function mailIds(value: string, batch: boolean): string[] {
