@@ -24,6 +24,7 @@ function game(
       expect(uid).toBe("observer");
       return profile;
     },
+    publicProfile: unused,
     playerSummaries: async (uids, allServers) => {
       calls.push({ uids, allServers });
       return summaries;

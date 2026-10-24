@@ -1,5 +1,10 @@
 import type { Row } from "./rows.ts";
 
+export interface RoutedPublicProfile {
+  state: PublicProfileState;
+  kingdomId: number;
+}
+
 export interface PublicProfileState {
   profile: Row | undefined;
   statistics: Row | undefined;
