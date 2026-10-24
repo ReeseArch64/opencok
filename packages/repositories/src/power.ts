@@ -24,6 +24,8 @@ import { user_miracle_buff_active } from "@opencok/drizzle/schema/opencok_kingdo
 import { kingdom_position } from "@opencok/drizzle/schema/opencok_kingdom/kingdom_position";
 import { activity } from "@opencok/drizzle/schema/opencok_kingdom/activity";
 import { alliance_territory } from "@opencok/drizzle/schema/opencok_kingdom/alliance_territory";
+import { lucky_day } from "@opencok/drizzle/schema/opencok_kingdom/lucky_day";
+import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Database } from "./game.ts";
@@ -56,6 +58,8 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     kingdom_position,
     activity,
     alliance_territory,
+    lucky_day,
+    server_info,
   ])
     await db.select().from(table).limit(0);
 }
@@ -111,6 +115,8 @@ export function readPowerState(
         office: undefined,
         kingdomFights: [],
         territoryTrees: [],
+        luckyDay: undefined,
+        powerServer: undefined,
       };
       if (!profile) return empty;
       const statistics = (
@@ -338,6 +344,27 @@ export function readPowerState(
             .orderBy(asc(alliance_territory.uid))
             .limit(2)
         : [];
+      const luckyDay = (
+        await tx
+          .select({
+            status: lucky_day.status,
+            time: lucky_day.time,
+            effectId: lucky_day.effectId,
+            lucky_id: lucky_day.lucky_id,
+          })
+          .from(lucky_day)
+          .where(eq(lucky_day.uid, uid))
+          .limit(1)
+      )[0];
+      const powerServer = luckyDay
+        ? (
+            await tx
+              .select({ lastMergeMillis: server_info.lastMergeMillis })
+              .from(server_info)
+              .where(eq(server_info.uid, "server"))
+              .limit(1)
+          )[0]
+        : undefined;
       return {
         profile,
         statistics,
@@ -365,6 +392,8 @@ export function readPowerState(
         office,
         kingdomFights,
         territoryTrees,
+        luckyDay,
+        powerServer,
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },
