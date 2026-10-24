@@ -1,4 +1,9 @@
-import type { Row } from "@opencok/contracts/rows";
+import {
+  ownerInteger as integer,
+  ownerText as text,
+  ownerLong as long,
+  ownerRecords as bounded,
+} from "./world-resource-owner-values.ts";
 import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-detail";
 import { legacyIntegerOrder, legacyObjectOrder } from "@opencok/messages/legacy-object-order";
 import type { Rules } from "@opencok/rules/game";
@@ -8,34 +13,6 @@ import type {
   NewGeneralEquippedState,
 } from "@opencok/rules/new-general-equipment";
 import type { NewGeneralStatus } from "@opencok/rules/new-general-status";
-
-function integer(value: unknown): number {
-  if (value === null) return 0;
-  if (
-    typeof value !== "number" ||
-    !Number.isInteger(value) ||
-    value < -2147483648 ||
-    value > 2147483647
-  )
-    throw new Error("Invalid saved general integer");
-  return value;
-}
-function text(value: unknown, limit: number): string | null {
-  if (value === null) return null;
-  if (typeof value !== "string" || value.length > limit)
-    throw new Error("Invalid saved general text");
-  return value;
-}
-function long(value: unknown): bigint | null {
-  if (value === null) return null;
-  if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value)
-    throw new Error("Invalid saved general long");
-  return value;
-}
-function bounded(rows: readonly Row[]): readonly Row[] {
-  if (rows.length > 4096) throw new Error("Too many saved general records");
-  return rows;
-}
 
 export function restoredResourceGenerals(
   snapshot: WorldResourceOwnerSnapshot["newGenerals"],
