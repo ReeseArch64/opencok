@@ -1,4 +1,5 @@
 import type {
+  MailContentsQuery,
   MailConversationSaveQuery,
   MailDeleteEntry,
   MailDeleteGroup,
@@ -31,6 +32,24 @@ function invalid(): never {
 }
 function int(value: number): boolean {
   return Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
+}
+
+export function mailContentsQuery(value: string, now: number): MailContentsQuery {
+  if (
+    typeof value !== "string" ||
+    new TextEncoder().encode(value).length > 65535 ||
+    !Number.isSafeInteger(now) ||
+    now < 0
+  )
+    return invalid();
+  const ids = value.split("|").filter(Boolean);
+  if (
+    !ids.length ||
+    ids.length > 1000 ||
+    ids.some((id) => id.length > 40 || id.includes("\0") || !id.isWellFormed())
+  )
+    return invalid();
+  return { ids: [...new Set(ids)], now };
 }
 
 export function mailConversationSaveQuery(

@@ -13,7 +13,8 @@
   "exports": {
     "./frame": "./src/frame.ts",
     "./sfs": "./src/sfs.ts",
-    "./stored-json": "./src/stored-json.ts"
+    "./stored-json": "./src/stored-json.ts",
+    "./legacy-json": "./src/legacy-json.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"

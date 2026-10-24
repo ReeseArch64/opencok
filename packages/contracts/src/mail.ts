@@ -1,5 +1,24 @@
 import type { Row } from "./rows.ts";
 
+export interface MailContentsQuery {
+  ids: readonly string[];
+  now: number;
+}
+
+export interface MailContentsEntry {
+  uid: string;
+  type: number;
+  createTime: bigint;
+  contents: Buffer | null;
+  extra: Buffer | null;
+}
+
+export type MailContentsInspector = (entries: readonly MailContentsEntry[]) => readonly string[];
+
+export interface MailContentsSnapshot {
+  profile: Row | undefined;
+}
+
 export type MailConversationSaveQuery = { now: number } & (
   | { scope: "none" }
   | { scope: "sender"; fromUser: string; moderation: boolean; flag: number }
