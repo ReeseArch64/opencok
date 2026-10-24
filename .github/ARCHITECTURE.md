@@ -1757,6 +1757,15 @@ range, then the existing legacy JSON decoder reconstructs ordered `rankMap` obje
 Missing lists remain empty, while cache failures and malformed/oversized data reject.
 These public derived boards grant no score-write authority and add no lifecycle or TTL.
 The server guide records keys, bounds, metadata fallback and deferred validation.
+Dragon Battle ranking queries read the existing global published team list and reverse
+sorted-set rank through the runtime cache adapter. The controller supplies the verified
+local profile's alliance ID; request parameters select ranges only. Pure rules preserve
+Java range decoding/arithmetic, the decoder projects canonical published records with
+exact integers, and DTOs preserve the public field widths and conditional wins types.
+Sequential list/self reads retain the reference non-atomic snapshot and missing/read
+failure fallback. Maintained size bounds reject oversized results; no match, team, score
+or reward mutation is introduced. Producer/import lifecycle and lenient noncanonical
+JSON parity remain outside this query slice, as detailed in the server guide.
 Expedition ranking reads use the shared Redis instance with a global realm-pairing
 record and lower-realm score/metadata keys. A read-only Lua evaluation revalidates
 pairing and returns a consistent bounded board; one retry handles a rematch. The

@@ -1352,6 +1352,46 @@ slice. No new tests or fixtures were generated and no tests, real services or cl
 were run. Behavioral and runtime verification remain deferred; this command does not
 complete the cross-realm ranking family. See [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
 
+`dragon.battle.rank` reads published global team rankings after checking the local
+profile, realm and ban state. `index_limit` is a string of `start|limit` ranges separated
+by semicolons. Empty input or 35 or more retained segments produces an acknowledgment;
+trailing empty segments are discarded as in Java. Other malformed ranges reject. Each
+limit has an upper cap of 200, while negative starts/limits, zero limits and signed
+32-bit end/index overflow retain the reference Redis range semantics. Extra pipe fields
+are ignored. The reader uses `LRANGE dragon_battle_rank_data_key start end` sequentially
+and preserves range order and duplicate rows. Negative/zero limits may select more than
+200 entries; the cap is not a minimum or a returned-count promise.
+
+If the authenticated profile has a nonempty alliance ID, the reader then asks
+`ZREVRANK dragon_battle_rank_key <allianceId>` and appends the corresponding `LINDEX`
+team even when already present in the requested ranges. Spaces in alliance IDs are not
+trimmed. Missing lists, unavailable range reads and absent/unavailable self positions
+are skipped using the reference read fallback; malformed returned values reject.
+Separate reads retain the reference's non-atomic snapshot behavior during board updates.
+
+Public TeamInfo fields become `rank` objects with `type: 0`, both `teamId` and
+`allianceId`, team names, state, score, realm, membership, combat counts, exact signed
+64-bit `fightPower`, icon and abbreviation. Optional strings default to empty and
+missing/null primitive counters default to zero. `wins` is an SFS Int for zero matches
+and a Double otherwise; `wins2` truncates the percentage capped at 100 with Java's
+signed-integer lower saturation. `rankNum` is the requested start plus row offset plus
+one, or the appended reverse rank plus one, with signed 32-bit wrapping.
+
+The maintained decoder accepts canonical JSON objects from the publisher and preserves
+integer literals without floating-point rounding. Out-of-range integers, malformed
+records and absent team IDs reject. Lenient Gson-only syntax and noncanonical numeric
+coercions are not promised. Bounds are 65,535 bytes per stored record, 4 MiB total raw
+JSON, 32,767 returned rows and the existing encoded frame/string bounds including
+correlation. Oversized reads reject without truncation. The query publishes no scores,
+creates no matches, clears no boards and adds no TTL. Board import, score production,
+matchmaking and combat remain separate work.
+
+This slice has source review, package/server type checks and scoped lint/format checks.
+No tests or fixtures were generated and no tests, database/cache/services, client/ADB or
+CI fixes were performed. Runtime and behavioral validation remain deferred in
+[issue #215](https://github.com/ReeseArch64/opencok/issues/215); the cross-realm ranking
+family still requires `ctf.get.rank` and broader verification.
+
 ## Mailbox category status
 
 `mail.category.status`, tracked in [issue #64](https://github.com/ReeseArch64/opencok/issues/64),

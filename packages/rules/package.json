@@ -67,7 +67,8 @@
     "./kingdom-skills": "./src/kingdom-skills.ts",
     "./java-list-sort": "./src/java-list-sort.ts",
     "./java-calendar-date": "./src/java-calendar-date.ts",
-    "./java-integer": "./src/java-integer.ts"
+    "./java-integer": "./src/java-integer.ts",
+    "./dragon-ranking": "./src/dragon-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
