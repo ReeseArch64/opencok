@@ -1,5 +1,7 @@
+import { javaDecimal } from "./java-integer.ts";
 import type {
   WorldPointDetailQuery,
+  WorldCityDetail,
   WorldPointOwnerDetail,
   WorldPointOwnerSnapshot,
 } from "@opencok/contracts/world-point-detail";
@@ -101,4 +103,30 @@ export function worldPointOwnerBase(
     result.vl = 0;
   }
   return result;
+}
+
+export function worldCityDetail(
+  observerPower: unknown,
+  targetPower: unknown,
+  lastBeDuelTime: unknown,
+  slowDownEffect: number,
+  multiplier: string | undefined,
+): WorldCityDetail {
+  const observer = long(observerPower ?? 0n);
+  const target = long(targetPower ?? 0n);
+  const duel = long(lastBeDuelTime ?? 0n);
+  if (!Number.isFinite(slowDownEffect) || Math.fround(slowDownEffect) !== slowDownEffect)
+    return invalid();
+  let factor: bigint;
+  try {
+    factor = javaDecimal(multiplier, 64);
+  } catch {
+    return invalid();
+  }
+  return {
+    slowDown: slowDownEffect > 0,
+    targetTooStrong: BigInt.asIntN(64, observer * factor) < target,
+    targetPower: target,
+    lastBeDuelTime: duel,
+  };
 }
