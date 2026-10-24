@@ -20,7 +20,8 @@
     "./power-attributes": "./src/power-attributes.ts",
     "./power-memberships": "./src/power-memberships.ts",
     "./power-progression": "./src/power-progression.ts",
-    "./power-world": "./src/power-world.ts"
+    "./power-world": "./src/power-world.ts",
+    "./power-companions": "./src/power-companions.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

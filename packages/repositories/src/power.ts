@@ -10,6 +10,7 @@ import { saga_tower_science } from "@opencok/drizzle/schema/opencok_kingdom/saga
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { t_hero } from "@opencok/drizzle/schema/opencok_kingdom/t_hero";
 import { user_pet_dragon } from "@opencok/drizzle/schema/opencok_kingdom/user_pet_dragon";
+import { user_pet_dragon_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_pet_dragon_skill";
 import { user_knight_title } from "@opencok/drizzle/schema/opencok_kingdom/user_knight_title";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
@@ -37,6 +38,7 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     user_equip,
     t_hero,
     user_pet_dragon,
+    user_pet_dragon_skill,
     user_knight_title,
     user_item,
     pic_upload_record,
@@ -88,6 +90,7 @@ export function readPowerState(
         equipment: [],
         heroes: [],
         dragons: [],
+        dragonSkills: [],
         knight: undefined,
         items: [],
         states: [],
@@ -165,7 +168,7 @@ export function readPowerState(
         .where(and(eq(user_equip.uid, uid), eq(user_equip.on, 1)))
         .orderBy(asc(user_equip.uuid));
       const heroes = await tx
-        .select({ heroid: t_hero.heroid })
+        .select({ heroid: t_hero.heroid, level: t_hero.level, exp: t_hero.exp })
         .from(t_hero)
         .where(eq(t_hero.uid, uid))
         .orderBy(asc(t_hero.id));
@@ -174,10 +177,22 @@ export function readPowerState(
           itemId: user_pet_dragon.itemId,
           dragonState: user_pet_dragon.dragonState,
           lv: user_pet_dragon.lv,
+          useFlag: user_pet_dragon.useFlag,
         })
         .from(user_pet_dragon)
         .where(eq(user_pet_dragon.uid, uid))
         .orderBy(asc(user_pet_dragon.uuid));
+      const dragonSkills = await tx
+        .select({
+          ownerId: user_pet_dragon_skill.ownerId,
+          index1: user_pet_dragon_skill.index1,
+          skillId: user_pet_dragon_skill.skillId,
+          level: user_pet_dragon_skill.level,
+          strengthenLevel: user_pet_dragon_skill.strengthenLevel,
+        })
+        .from(user_pet_dragon_skill)
+        .where(eq(user_pet_dragon_skill.uid, uid))
+        .orderBy(asc(user_pet_dragon_skill.uuid));
       const knight = (
         await tx
           .select({
@@ -278,6 +293,7 @@ export function readPowerState(
         equipment,
         heroes,
         dragons,
+        dragonSkills,
         knight,
         items,
         upload,
