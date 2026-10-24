@@ -77,7 +77,7 @@ read-only mobile originals must be extracted in a separate working directory.
 `setting.xml` is optional. Its command returns every configured setting with its ID
 and values encoded as strings, or an empty array when the catalog is absent. XML
 catalogs accept single records and multiple/nested groups. Duplicate IDs fail except
-for goods, features, research, equipment and statuses, where the last record wins
+for goods, features, research, equipment, statuses and dragon skills, where the last record wins
 as in the legacy cache. Values retain leading
 zeroes and whitespace; malformed records and document type declarations fail loading.
 
@@ -196,7 +196,8 @@ Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `saga_tower_science_up.xml`, `hero.xml`, `equipment.xml`, `dragon_words.xml`,
 `dragon_base.xml`, `dragon_new.xml`, `status.xml`, `sk.xml`, `suit.xml`,
 `vip.xml`, `svip.xml`, `alliancescience.xml`, `reputation_level.xml`,
-`civilization_feature.xml`, `wr_skill.xml` and `miracle_buff.xml`.
+`civilization_feature.xml`, `wr_skill.xml`, `miracle_buff.xml`,
+`dragon_skill.xml` and `activity_event.xml`.
 They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
@@ -261,6 +262,21 @@ catalog entry with the active `order`, independently of its item ID, and replace
 duplicate effect definitions. Prestige/miracle gates include the client version;
 military availability uses the server gate. These reads do not change civilization,
 settle military seasons, grant rewards or create inactive miracle records.
+
+Hero effects follow the activity-event date window with inclusive boundaries.
+Contiguous parameter groups accumulate using float arithmetic. Heroes in the
+same ID family are selected by level, then experience, retaining the last exact
+tie in persisted order. Both effect projection and hero power use that selection
+without deleting duplicate records, awarding new heroes or advancing levels.
+
+Dragon skill projection reads each player's skill slots alongside dragon state.
+Only mature dragons with the active flag contribute, under the base/level-up
+server gates. Skills match the dragon's base owner ID; the last persisted entry
+for a slot wins. Only unlocked passive skills apply. Base plus level increments
+and reached strengthening thresholds retain double precision, with signed level
+subtraction and per-dragon accumulation. Battle-only skills, inactive dragons and
+other owners do not contribute. The calculator neither equips skills nor creates
+missing defaults. Catalog duplicate replacement now includes dragon skills.
 
 World effects can be read with one `HGETALL` from
 `opencok:kingdom:<kingdomId>:world-effects`. The hash retains numeric effect IDs
