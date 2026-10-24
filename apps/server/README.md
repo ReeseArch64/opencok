@@ -200,7 +200,7 @@ Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `dragon_skill.xml`, `activity_event.xml`, `office.xml`, `life_treeS.xml`,
 `saga_tower_science_base.xml`, `foreign_civilization_up.xml` and
 `foreign_civilization_base.xml`, `activity_panel.xml`, `merge_activity.xml`
-and `lucky_effect.xml`.
+`lucky_effect.xml` and `monarch_title_lord.xml`.
 They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
@@ -356,6 +356,20 @@ that server gate, with the legacy cross-throne bypass represented explicitly.
 Records without a value are ignored; malformed active values fail. This adapter
 and projection are unit-tested dependencies for the pending complete resolver,
 not a separate grant or activation command.
+
+Personal throne rewards read only owner-targeted lord titles for throne type 2.
+Their effects apply for the explicitly supplied emperor version, retaining paired
+token handling and float accumulation. The reader bounds history to 4,097 records
+so the resolver can reject inputs exceeding 4,096 without silently truncating them.
+It does not infer the active version from the newest historical reward or king row.
+
+`Cache.emperorVersion` reads `opencok:kingdom:<kingdomId>:emperor-version`.
+A canonical signed-integer string identifies the version; `none` explicitly means
+there is no emperor. An absent key means state has not been supplied, and cannot
+resolve saved personal rewards. Realms without personal rewards do not need that
+version for power. Importing this marker from authoritative global throne state
+is an operator step until the global event feed is migrated. No reader writes the
+marker or falls back to a legacy/global key.
 
 `get.power.info` now dispatches to the selected realm's power snapshot, checks the
 authenticated owner and ban status, calculates components and emits the detailed

@@ -39,6 +39,7 @@ export interface PowerSnapshot {
   territoryTrees: readonly Row[];
   luckyDay: Row | undefined;
   powerServer: Row | undefined;
+  throneRewards: readonly Row[];
 }
 
 export interface PowerState extends Omit<PowerSnapshot, "profile"> {

@@ -71,6 +71,7 @@ function database(
       }
       if (table === "user_civilization_science") return { rows: [[2000, 3]] };
       if (table === "foreigen_sciences") return { rows: [[3000, 2]] };
+      if (table === "cross_throne_reward_record") return { rows: [[7, 1001]] };
       if (table === "lucky_day")
         return { rows: options.lucky ? [[1, "9007199254740993", "8001", 1]] : [] };
       if (table === "server_info") {
@@ -126,7 +127,8 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const selects = queries.filter((query) => query.text.startsWith("select"));
-  expect(selects).toHaveLength(24);
+  expect(selects).toHaveLength(25);
+  expect(snapshot.throneRewards).toEqual([{ version: 7, rewardId: 1001 }]);
   expect(snapshot.luckyDay).toBeUndefined();
   expect(snapshot.powerServer).toBeUndefined();
   expect(selects.some((query) => query.text.includes('"server_info"'))).toBe(false);
@@ -161,6 +163,12 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(foreign.params).toEqual(["synthetic"]);
   expect(foreign.text).toContain('"foreigen_sciences"."uid" = $1');
   expect(foreign.text).not.toMatch(/cdtime|reserve/);
+  const throne = selects.find((query) => query.text.includes('"cross_throne_reward_record"'))!;
+  expect(throne.params).toEqual(["synthetic", 2, 2, 4097]);
+  expect(throne.text).toContain('"cross_throne_reward_record"."target_uid" = $1');
+  expect(throne.text).toContain('"cross_throne_reward_record"."reward_type" = $2');
+  expect(throne.text).toContain('"cross_throne_reward_record"."throne_type" = $3');
+  expect(throne.text).not.toMatch(/from_uid|pic_ver|alliance_abbr/);
   const equipment = selects.find((query) =>
     query.text.includes('from "opencok_kingdom"."user_equip"'),
   )!;
@@ -295,7 +303,7 @@ test("power readiness checks each required table without reading records or writ
   };
   await checkPowerStore(drizzle(client as unknown as NodePgClient, { schema }));
   const tables = queries.map((query) => query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1]);
-  expect(new Set(tables).size).toBe(28);
+  expect(new Set(tables).size).toBe(29);
   for (const table of [
     "userprofile",
     "playerinfo",
@@ -325,6 +333,7 @@ test("power readiness checks each required table without reading records or writ
     "alliance_territory",
     "lucky_day",
     "server_info",
+    "cross_throne_reward_record",
   ])
     expect(tables).toContain(table);
   for (const query of queries) {
