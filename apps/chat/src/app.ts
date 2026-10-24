@@ -1,4 +1,5 @@
 import { createChatAvatarProfileHandler } from "@opencok/controllers/chat-avatar-profile";
+import { createChatNicknameHandler } from "@opencok/controllers/chat-nickname";
 import type { ChatRepository, Log } from "@opencok/contracts/chat";
 
 import { createTokenVerifier } from "@opencok/identity/chat-token";
@@ -56,6 +57,11 @@ export function createChatApp({
   });
   const server = createChatServer({
     isReady,
+    nicknameHandler: createChatNicknameHandler({
+      nicknames: repository.nicknames,
+      signingSecret,
+      log,
+    }),
     profileHandler: createChatAvatarProfileHandler({
       profiles: repository.profiles,
       signingSecret,

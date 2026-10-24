@@ -175,3 +175,36 @@ test("session replacement and disconnect during ownership checks cannot receive 
   second.destroy();
   await f.drain();
 });
+
+test("aborting a notification during the session ownership check prevents a late packet", async () => {
+  const f = fixture(),
+    socket = f.connect();
+  await f.login(socket);
+  const before = socket.packets.length;
+  const gate = Promise.withResolvers<boolean>();
+  f.setGate(gate.promise);
+  const controller = new AbortController();
+  const pending = f.notifications.publish(
+    "1001",
+    "push.mobile.gold.change",
+    { freeGold: sfs.long(7n) },
+    controller.signal,
+  );
+  controller.abort();
+  gate.resolve(true);
+  expect(await pending).toBe(false);
+  expect(socket.packets).toHaveLength(before);
+  expect(
+    await f.notifications.publish("1001", "push.mobile.gold.change", {}, controller.signal),
+  ).toBe(false);
+  expect(socket.packets).toHaveLength(before);
+  f.setGate();
+  expect(
+    await f.notifications.publish("1001", "push.mobile.gold.change", { freeGold: sfs.long(9n) }),
+  ).toBe(true);
+  expect(socket.packets.at(-1)).toEqual(
+    extension("push.mobile.gold.change", { freeGold: sfs.long(9n) }),
+  );
+  socket.destroy();
+  await f.drain();
+});

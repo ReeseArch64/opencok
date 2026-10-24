@@ -1,9 +1,11 @@
 import { createChatAvatarProfileStore } from "./chat-avatar-profile.ts";
+import { createChatNicknameStore } from "./chat-nickname.ts";
 import { chat_avatar_profile } from "@opencok/drizzle/schema/opencok_chat/chat_avatar_profile";
 import { createDatabases, type DatabaseTopology } from "@opencok/drizzle";
 import { chat_message } from "@opencok/drizzle/schema/opencok_chat/chat_message";
 import { chat_session } from "@opencok/drizzle/schema/opencok_chat/chat_session";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
+import { nickname_change_receipt } from "@opencok/drizzle/schema/opencok_global/nickname_change_receipt";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import { and, asc, desc, eq, gt, inArray, lt, lte, sql } from "drizzle-orm";
@@ -63,6 +65,7 @@ export function createChatRepository(config: {
   const now = () => utc(config.now?.() ?? new Date());
   const repository: ChatRepository = {
     profiles: createChatAvatarProfileStore(db),
+    nicknames: createChatNicknameStore(db),
     sessions: {
       async create(session) {
         await db.insert(chat_session).values({
@@ -213,6 +216,7 @@ export function createChatRepository(config: {
       return { messages: messages.length, sessions: sessions.length };
     },
     async health() {
+      await db.select().from(nickname_change_receipt).limit(0);
       await db.select().from(chat_avatar_profile).limit(0);
       await db.select().from(chat_session).limit(0);
       await db.select().from(chat_message).limit(0);

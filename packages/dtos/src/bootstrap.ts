@@ -1,11 +1,11 @@
 export class ServerClockDto {
-  readonly db_utc_timestamp!: number;
-  readonly db_timezone_offset!: number;
-  readonly tomorrow!: number;
+  declare public readonly db_utc_timestamp: number;
+  declare public readonly db_timezone_offset: number;
+  declare public readonly tomorrow: number;
 }
 
 export class FeatureConfigDto {
-  readonly funcOn!: {
+  declare public readonly funcOn: {
     readonly funcKey: string;
     readonly pf: string;
     readonly version: string;
@@ -14,18 +14,18 @@ export class FeatureConfigDto {
 }
 
 export class PushPreferenceDto {
-  readonly type!: number;
-  readonly status!: number;
-  readonly audio?: number;
+  declare public readonly type: number;
+  declare public readonly status: number;
+  declare public readonly audio?: number;
 }
 
 export class LoginConfigurationPreferencesDto {
-  readonly fbShare!: { readonly [key: string]: string }[];
-  readonly pushSetting!: PushPreferenceDto[];
+  declare public readonly fbShare: { readonly [key: string]: string }[];
+  declare public readonly pushSetting: PushPreferenceDto[];
 }
 
 export class LoginSwitchesDto {
-  readonly switches!: {
+  declare public readonly switches: {
     readonly name: string;
     readonly stat: number | null;
     readonly appVersion: string | null;
@@ -33,72 +33,72 @@ export class LoginSwitchesDto {
 }
 
 export class LoginConfigurationDto {
-  readonly fbShare!: { readonly [key: string]: string }[];
-  readonly pushSetting!: PushPreferenceDto[];
-  readonly funcOn!: {
+  declare public readonly fbShare: { readonly [key: string]: string }[];
+  declare public readonly pushSetting: PushPreferenceDto[];
+  declare public readonly funcOn: {
     readonly funcKey: string;
     readonly pf: string;
     readonly version: string;
     readonly onOff: boolean;
   }[];
-  readonly switches?: {
+  declare public readonly switches?: {
     readonly name: string;
     readonly stat: number | null;
     readonly appVersion: string | null;
   }[];
-  readonly isVerifyChangeAccount?: boolean;
+  declare public readonly isVerifyChangeAccount?: boolean;
 }
 
 export class SettingConfigDto {
-  readonly setting!: { readonly [key: string]: string }[];
+  declare public readonly setting: { readonly [key: string]: string }[];
 }
 
 export class ArmySnapshotDto {
-  readonly id!: string;
-  readonly science?: string;
-  readonly free!: number;
-  readonly march!: number;
-  readonly level!: number;
-  readonly train?: number;
-  readonly health?: number;
-  readonly range?: number;
-  readonly move?: number;
-  readonly speed?: number;
-  readonly wood?: number;
-  readonly stone?: number;
-  readonly iron?: number;
-  readonly food?: number;
-  readonly time?: number;
-  readonly heal_res?: number;
-  readonly heal_time?: number;
-  readonly load?: number;
-  readonly new_arms!: number;
-  readonly weak_res?: number;
-  readonly weak_time?: number;
-  readonly fine_iron?: number;
-  readonly mix_numtype?: number;
-  readonly unlock_civi_science?: number;
-  readonly attack!: number;
-  readonly defen!: number;
-  readonly finish?: bigint;
-  readonly upkeep!: number;
-  readonly power!: number;
+  declare public readonly id: string;
+  declare public readonly science?: string;
+  declare public readonly free: number;
+  declare public readonly march: number;
+  declare public readonly level: number;
+  declare public readonly train?: number;
+  declare public readonly health?: number;
+  declare public readonly range?: number;
+  declare public readonly move?: number;
+  declare public readonly speed?: number;
+  declare public readonly wood?: number;
+  declare public readonly stone?: number;
+  declare public readonly iron?: number;
+  declare public readonly food?: number;
+  declare public readonly time?: number;
+  declare public readonly heal_res?: number;
+  declare public readonly heal_time?: number;
+  declare public readonly load?: number;
+  declare public readonly new_arms: number;
+  declare public readonly weak_res?: number;
+  declare public readonly weak_time?: number;
+  declare public readonly fine_iron?: number;
+  declare public readonly mix_numtype?: number;
+  declare public readonly unlock_civi_science?: number;
+  declare public readonly attack: number;
+  declare public readonly defen: number;
+  declare public readonly finish?: bigint;
+  declare public readonly upkeep: number;
+  declare public readonly power: number;
 }
 
 export class InventoryItemDto {
-  readonly uuid!: string;
-  readonly itemId!: string;
-  readonly para1?: string;
-  readonly para2?: string;
-  readonly para3?: string;
-  readonly para4?: string;
-  readonly para5?: string;
-  readonly para6?: string;
-  readonly para7?: string;
-  readonly para8?: string;
-  readonly para9?: string;
-  readonly count!: number;
-  readonly vanishTime!: bigint;
+  declare public readonly uuid: string;
+  declare public readonly itemId: string;
+  declare public readonly para1?: string;
+  declare public readonly para2?: string;
+  declare public readonly para3?: string;
+  declare public readonly para4?: string;
+  declare public readonly para5?: string;
+  declare public readonly para6?: string;
+  declare public readonly para7?: string;
+  declare public readonly para8?: string;
+  declare public readonly para9?: string;
+  declare public readonly count: number;
+  declare public readonly vanishTime: bigint;
 }
 
 export { DataConfigDto } from "./configuration.ts";

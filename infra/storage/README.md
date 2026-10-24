@@ -1,6 +1,6 @@
 # Local MinIO CDN
 
-The development Compose stack has one MinIO service (`storage`) and one
+The development Compose stack has one MinIO service (`minio`) and one
 idempotent initialization job (`minio-setup`), both in profiles `all` and `dev`.
 Local development credentials, ports and bucket names are written directly in
 Compose and the initialization script. Production deployment is separate.
@@ -20,7 +20,8 @@ source mount is read-only. The existing `minio-data` volume is retained.
 
 Public bucket permissions allow object reads only beneath the two CDN host
 prefixes. Bucket listing, root archives and the `opencok-uploads` bucket remain
-private. This stage has no media/files application or upload gateway route.
+private. Avatar uploads use the opt-in shared API, with their own private bucket and
+[media configuration](../../apps/api/MEDIA.md).
 
 The gateway serves `/cok/*` (excluding `/cok/img/*`) and `/100001/*`, preserving
 Range, ETag and HEAD behavior. Requests use the MinIO upstream Host and fixed
@@ -29,7 +30,7 @@ components, partial files and script paths have no public router. MinIO itself
 is also published on port 9000; its authenticated console uses port 9001.
 
 ```sh
-docker compose --profile dev up -d storage minio-setup
+docker compose --profile dev up -d minio minio-setup
 docker compose --profile dev logs minio-setup
 ```
 

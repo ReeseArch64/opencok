@@ -9,9 +9,9 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `user.check.nickName`,
 `equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
-`mail.read.status`, `mail.read.status.betch`, `report.picVer`,
+`mail.read.status`, `mail.read.status.betch`, `report.picVer`, `chat.get.system.mails.v2`, `user.update.picVer` (when configured),
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `act.score.rank`, `global.celebrities.rank`, `dragon.battle.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -1230,8 +1230,8 @@ is the final deterministic tie breaker where the reference leaves ties unspecifi
 names and UIDs use PostgreSQL `C` collation, which can differ from the legacy database
 collation. Synthetic units verify query structure, mapping, selection, numeric types,
 authentication and rollback. Real database execution, cache timing and native-client
-rendering remain unverified. Event and cross-realm ranking families
-are still unavailable; this player slice implements the three commands tracked in
+rendering remain unverified. Additional event and cross-realm query contracts are
+documented in [the topic 3 inventory](RANKINGS.md). This player slice implements the three commands tracked in
 [issue #59](https://github.com/ReeseArch64/opencok/issues/59).
 
 `alliance.rank` and `kill.al.rank`, tracked in
@@ -1366,16 +1366,19 @@ per string and the existing encoded response/frame bounds including correlation.
 This is a read-only derived-cache query. The event publisher owns list replacement,
 invalidation and expiry; this reader adds no TTL, score writer, reward or lifecycle
 scheduler. The original realm-qualified key remains usable for an authorized restored
-board. `hero.self.rank` still requires actual activity/event state and rank maps, including
-cross-origin routing; it is not enabled by treating missing state as an empty activity.
-Other event and cross-realm ranking families remain incomplete.
+board. `hero.self.rank` now reads actual activity/event state and published rank maps,
+including owner-origin routing; see [the event contracts](RANKINGS.md).
 
-Code review and storage/controllers/server type checks pass for this slice. No new tests
-or fixtures were generated and no tests were executed, following the user's latest
-instruction to prioritize migration. Unit and runtime validation are deferred. No real
-cache/database/services, integration tests or client/ADB were used; no schema, dependency
-or CI workflow changed. The incomplete event-ranking family receives no completed-group
-credit from this unverified command alone.
+Four focused unit tests cover exact SFS StringArray output, correlation, ignored
+selectors, authenticated owner checks, missing-provider versus reached-failure behavior
+and complete string/collection/frame bounds. A disposable Redis 6.2.24 test executes
+real list reads for two realms and checks duplicates, empty/NUL/Unicode strings, repeated
+reads, unchanged contents/expiry, wrong-type fallback and service loss. Affected types,
+lint and formatting pass. Native clients and production Redis remain unverified. No
+schema, dependency or CI workflow changes are required. This evidence completes the
+query acceptance in issue #177; event publishing and other ranking families remain
+separate work.
+Current query coverage and remaining verification limits are documented in [the ranking inventory](RANKINGS.md).
 
 `global.celebrities.rank` reads the existing published global boards for the local
 realm. Before decoding `rankType`, it checks the global `server_info` row: realm IDs
@@ -1405,10 +1408,15 @@ including correlation remains bounded by the existing frame limit. Decoder numer
 nesting and collection limits also apply. Type 7 has no handler mapping in the reference.
 The query adds no score publisher, invalidation, TTL, settlement or cross-realm routing.
 
-Storage, repository, controller and server type checks plus source review cover this
-slice. No new tests or fixtures were generated and no tests, real services or client/ADB
-were run. Behavioral and runtime verification remain deferred; this command does not
-complete the cross-realm ranking family. See [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
+Five focused unit tests cover category keys and aliases, inclusive window sizes,
+exact Long transport, ordered duplicate rows, correlation, gate/selector/owner ordering,
+missing providers, malformed/oversized data and metadata SQLSTATE/transport failures.
+A disposable PostgreSQL/Redis test executes fresh realm-type changes, category windows,
+power aliases, empty boards, unchanged list contents/expiry and dependency failures.
+Affected types, lint and formatting pass. Native clients and production services remain
+unverified; the broader cross-realm ranking family stays separate from the completed
+query acceptance in [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
+Current query coverage and remaining verification limits are documented in [the ranking inventory](RANKINGS.md).
 
 `dragon.battle.rank` reads published global team rankings after checking the local
 profile, realm and ban state. `index_limit` is a string of `start|limit` ranges separated
@@ -1444,11 +1452,16 @@ correlation. Oversized reads reject without truncation. The query publishes no s
 creates no matches, clears no boards and adds no TTL. Board import, score production,
 matchmaking and combat remain separate work.
 
-This slice has source review, package/server type checks and scoped lint/format checks.
-No tests or fixtures were generated and no tests, database/cache/services, client/ADB or
-CI fixes were performed. Runtime and behavioral validation remain deferred in
-[issue #215](https://github.com/ReeseArch64/opencok/issues/215); the cross-realm ranking
-family still requires `ctf.get.rank` and broader verification.
+Six focused unit tests cover Java range decoding, upper caps and signed overflow,
+ordered duplicates, own-alliance append, public SFS fields, exact Long literals,
+conditional wins types, percentage saturation, authorization, read fallbacks and
+malformed/oversized data. A disposable Redis test executes actual negative/zero-limit
+windows, repeated ranges, reverse-rank lookup and self append while checking unchanged
+board contents/expiry, wrong-type keys and service loss. Package/server types, lint and
+formatting pass. This completes query acceptance in
+[issue #215](https://github.com/ReeseArch64/opencok/issues/215); native clients, production
+Redis and ranking publishers remain unverified.
+Current query coverage and remaining verification limits are documented in [the ranking inventory](RANKINGS.md).
 
 ## Mailbox category status
 
@@ -3110,7 +3123,8 @@ or invalid templates reject rather than committing an undeliverable mail intent.
 The owner-locked transaction commits profile version, applicable moderation state and
 an `avatar_version_update` outbox record together. This deliberately replaces the
 reference's sequential writes with atomic persistence under ADR-0002. The generated
-`0007_avatar_version_updates.sql` migration is additive and has not been applied. It
+`0007_avatar_version_updates.sql` migration is additive and is tested in disposable
+PostgreSQL; it has not been applied to operator/player databases. It
 contains an opaque server-generated operation ID, captured version/time/configuration
 and mail/cache/chat pending bits; it contains no image hash or asset receipt. Distinct
 requests allocate distinct versions, matching the legacy command's lack of request
@@ -3136,11 +3150,20 @@ without changing verified upload receipts. Historical media reconciliation, full
 moderation lifecycle, unavailable original assets and public-chat projection consumption
 remain pending. Topic 7 is not complete.
 
-No new tests or fixtures were generated and no tests were executed, following the
-latest user instruction. Static type checks, lint, formatting and diff review cover
-this change; they do not establish behavioral parity or PostgreSQL concurrency.
-No services, sockets, applied migrations, client/ADB or CI were exercised. Existing
-schema test snapshots were preserved and may need an authorized refresh later.
+Six focused unit tests cover persisted-version/configuration selection, captured
+mail templates, exact correlated response types, distinct requests, check precedence,
+signed-long interval wrapping, unavailable providers and independent delivery failures.
+A disposable PostgreSQL/Redis test uses the production runtime composition and signed
+chat handler with real chat persistence. It covers atomic profile/moderation/outbox
+writes, 20 concurrent allocations, successful-COMMIT reply loss, explicit recovery
+without another allocation, pending-bit retry after PostgreSQL restart, bounded
+publication timeout, idempotent mail, superseded effects and cache/chat delivery.
+A failing outbox trigger proves rollback of profile and moderation changes; unsupported
+versions and invalid realm/ban state produce no allocation. Files stubs reject any
+asset/grant access, and the verified-upload completion table remains unchanged.
+Affected types, lint, formatting and the full unit regression pass. Native clients,
+production deployment and the separately documented restored/wrap lifecycle remain
+unverified; this completes the supported query/mutation scope of issue #217.
 
 ## Avatar report submission
 
@@ -3763,3 +3786,103 @@ A focused mutation check runs the login tests against seven disabled auth guards
 a temporary test bundle: signature, device binding, account activation, realm,
 account device and both ban checks. Every mutant must fail its tests. This is a
 bounded auth check, not the architecture's future repository-wide Stryker suite.
+
+## Nickname change persistence and notifications
+
+`user.modify.nickName` remains unsupported under
+[issue #89](https://github.com/ReeseArch64/opencok/issues/89). The internal
+`src/nickname-change.ts` runtime now composes the actual goods catalog, owned payment
+store and session notification bus. Its caller must supply the authenticated UID,
+stable operation UUID, validated name and a real CN1 refund-ratio provider. Reserved
+Java-pattern matching, CN1 session accounting, alliance/throne/shared-user effects,
+command orchestration and the background recovery relay remain pending.
+
+The runtime reads goods 200021 `type`, `price` and nonblank `para1` through `para9`.
+It commits payment before attempting the debit push, and commits any refund before its
+refund push. Items use `push.item.del` or `push.item.add` with final signed Int count;
+item-add includes the Long `vanishTime` and available parameters. Gold uses
+`push.mobile.gold.change` or exact-platform `push.dmm.gold.change`, with three signed
+Long category balances. The typed terminal reply keeps optional original debit `gold`
+before boolean `status`, including a failed change that later refunded at another price.
+
+Kingdom migration `0009_nickname_notification_delivery` adds `notificationStage` with
+default zero. Stage one acknowledges debit and stage two acknowledges refund. A
+notification acknowledgment commits with that stage and its pending bit; a missing
+recipient, SQL failure or deadline leaves work pending. The global receipt migrations
+and kingdom journal migration must already be applied. Back up before schema changes
+and retain the additive column and migration history when rolling application code back.
+No existing account balance, name or inventory is rewritten by the migration.
+
+Recovery publishes current authoritative counts and balances under the realm owner
+lock. It coalesces an unseen debit/refund into the current final state, preserving the
+online debit-then-refund sequence when both reached an active recipient. Packet queueing
+does not prove client receipt; retries may repeat absolute values. An abort signal is
+checked around session ownership refresh so expired publication cannot send a late
+packet after its database lock is released. Notification failures never cause another
+economic charge or undo a committed name.
+
+Disposable PostgreSQL and the actual runtime cover item/mobile/DMM/CN1 paths, current-price
+refunds, intervening inventory changes and signed wrap, offline reconciliation, failed
+acknowledgments, lost commit replies and restart recovery. Typed packet and session units
+cover field widths/order, optional parameters, terminal replies and late-send cancellation.
+Run `bun --no-env-file test apps/server/integration/nickname-change.test.ts` from the root
+for the 23 integration scenarios. No mobile-client validation is claimed. The existing
+`@opencok/mappings` workspace dependency is now required at runtime rather than only in
+development; the lockfile retains the same package versions.
+
+## V2 new-system-mail synchronization
+
+`chat.get.system.mails.v2`, tracked in [issue #219](https://github.com/ReeseArch64/opencok/issues/219),
+now reads the authenticated owner's new system messages. Required `clientseq` is a
+String or null and `count` is an Int; optional String `time` uses strict Java signed
+Long parsing. Blank/zero client cursors use the realm-scoped cached last ID. A valid
+owned anchor supplies the inclusive timestamp; a missing nonblank anchor uses a
+positive request timestamp or the whole mailbox. Without an anchor, request time
+does not restrict the mailbox. Foreign anchors reveal no foreign metadata.
+
+The command uses a read-only repeatable-read snapshot, first bounding the complete
+selected window to 1,000 messages and 4 MiB of stored bodies/reward descriptors.
+It rejects overflow rather than returning an incomplete page. Extra bodies come
+from existing owner-authorized `mail_contents`; unresolved cache-only legacy bodies
+require a reviewed import and fail explicitly. System messages retain the raw
+`toUser`/`fromUser`, flags, reply bitmask, translation ID and String `save` envelope.
+Contents use 5,000 UTF-16-unit chunks, replacing isolated surrogate halves as the
+existing Java-compatible serializers do. Trade and invitation senders use existing
+public profile routing; invitation sender IDs come from the stored content object.
+All selected system messages are projected and enriched before pagination.
+
+Messages sort by ascending creation time with a deterministic UID tie-breaker.
+When the full result exceeds `count`, pagination retains the request's entire
+second bucket, then admits the first message outside that bucket before enforcing
+the count. Zero and negative counts retain that behavior. `lastUid` stays `0` when
+all messages fit; `more` reflects whether pagination omitted projected system mail.
+The complete correlated response is encoded before returning. No mailbox flags,
+rewards, groups, markers, content or cursor are mutated.
+
+The fallback cache reads hash `opencok:kingdom:<id>:chat-user-info:<uid>`, field
+`chat_last_mail_id`, through the existing bounded Redis adapter. It writes no cache
+state and sets no TTL. Missing cache state safely widens the owned selection; cache
+outages fail the fallback request. The unscoped legacy hash is not consulted.
+Existing cached cursor state therefore requires a separately reviewed scoped import;
+explicit client cursors do not require Redis. Cache loss cannot erase authoritative
+mail. This follows [ADR-0005](../../docs/decisions/0005-adopt-redis-for-cache.md) and
+[ADR-0002](../../docs/decisions/0002-adopt-postgresql-for-authoritative-state.md).
+
+The reference's shared helper also constructs private conversations discarded by
+this system-mail handler. This implementation excludes them and does not invoke their
+optional external translations, translation persistence or sender-update-cache reads.
+That side effect difference is explicit; this is not a complete private-chat migration.
+The V1 command's sent-ID bookkeeping and send counter remain unavailable. Current
+v12.06.0 behavior is implemented; obsolete pre-1.1.8 content limits and pre-7.00.0
+special text filtering are outside this process's supported version contract.
+
+Seven focused unit tests cover the raw envelope/correlation, exact Long values, bucket
+pagination including nonpositive counts, cursor fallback/outage rejection, input and
+owner rejection, chunk boundaries, trade/invitation identity and realm-scoped read-only
+cache commands. A disposable PostgreSQL test covers inclusive/foreign anchors, realm
+and ban checks, deterministic ties, repeatable sender snapshots during concurrent
+updates, extra-body ownership, inspector failures and both capacity bounds. Existing
+mailbox state remains unchanged by reads. The full server unit suite and affected
+static checks pass. Native client rendering and production Redis remain unverified.
+No schema, dependency or new service is introduced; maintained migrations run only
+in disposable test databases. No operator/player database or client/ADB is accessed.

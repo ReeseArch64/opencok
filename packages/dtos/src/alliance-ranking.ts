@@ -1,6 +1,6 @@
 export class AllianceRankingDto {
-  readonly selfRanking?: number;
-  readonly allianceRanking!: {
+  declare public readonly selfRanking?: number;
+  declare public readonly allianceRanking: {
     readonly uid: string;
     readonly alliancename: string;
     readonly abbr: string;
