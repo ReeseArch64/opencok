@@ -50,6 +50,8 @@ import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
 import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
 import { WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
+import { setPushPreference } from "./push-preferences.ts";
+import { updateProfilePreference } from "./profile-preferences.ts";
 import { DependencyError } from "@opencok/errors/dependency";
 import {
   and,
@@ -63,7 +65,13 @@ import {
   DrizzleQueryError,
 } from "drizzle-orm";
 import type { ServerConfig } from "@opencok/contracts/server";
-import type { GameStore, CityState, LoginConfigurationState } from "@opencok/contracts/game";
+import type {
+  GameStore,
+  CityState,
+  LoginConfigurationState,
+  PushPreference,
+  ProfilePreferenceField,
+} from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, loadPlayerSummaries } from "./players.ts";
 import { checkPowerStore, readPowerState } from "./power.ts";
@@ -238,6 +246,24 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   initializeWorldNewsPreference(uid: string, now: number): Promise<void> {
     return initializeWorldNewsPreference(this.kingdom.db, uid, this.config.kingdomId, now);
+  }
+  setPushPreference(uid: string, preference: PushPreference, now: number): Promise<void> {
+    return setPushPreference(this.kingdom.db, uid, this.config.kingdomId, preference, now);
+  }
+  updateProfilePreference(
+    uid: string,
+    field: ProfilePreferenceField,
+    now: number,
+    readValue: () => number,
+  ): Promise<number | undefined> {
+    return updateProfilePreference(
+      this.kingdom.db,
+      uid,
+      this.config.kingdomId,
+      field,
+      now,
+      readValue,
+    );
   }
   power(uid: string, now: number) {
     return readPowerState(this.kingdom.db, uid, now);

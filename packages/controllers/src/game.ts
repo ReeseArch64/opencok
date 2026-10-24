@@ -1,4 +1,5 @@
 import { worldPointDetail } from "./world-point-detail.ts";
+import { profilePreference } from "./profile-preferences.ts";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
 import { worldFavorites } from "@opencok/dtos/world-favorites";
 import { worldSearch } from "@opencok/dtos/world-search";
@@ -102,6 +103,7 @@ import {
   settingConfig,
   loginConfigurationPreferences,
   loginSwitches,
+  pushPreferences,
 } from "@opencok/dtos/bootstrap";
 
 const playerRankingKinds = {
@@ -188,6 +190,21 @@ export class Game {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "equip.show":
+      case "medal.show":
+      case "march.soldier.show":
+      case "colorblind.set":
+      case "equip.scroll":
+      case "banner.set":
+      case "speed.cd.open":
+        body = await profilePreference(this.db, uid, command, params, this.now());
+        break;
+      case "pushSetting.get":
+        body = await this.getPushPreferences(uid);
+        break;
+      case "parse.push.set":
+        body = await this.setPushPreference(uid, params);
+        break;
       case "world.get.detail":
         if (!this.services.worldPointDetail) throw new GameError(errors.unsupported);
         body = await worldPointDetail(
@@ -962,14 +979,7 @@ export class Game {
     const profile = this.checkProfile(state.profile);
     const context = this.featureContext(profile);
     const result = loginConfigurationPreferences(this.rules, state);
-    if (
-      state.pushSettings.length < PUSH_SETTING_COUNT &&
-      !state.pushSettings.some((row) => num(row, "type") === WORLD_NEWS_PUSH_TYPE)
-    ) {
-      if (!this.db.initializeWorldNewsPreference)
-        throw new GameError(errors.unsupported, "config_record");
-      await this.db.initializeWorldNewsPreference(uid, context.now);
-    }
+    await this.initializeWorldNewsPreference(uid, state.pushSettings, context.now);
     try {
       const switchRows = this.db.configurationSwitches
         ? await this.db.configurationSwitches()
@@ -989,6 +999,39 @@ export class Game {
     } catch {}
     Object.assign(result, featureConfig(this.rules, context));
     return result;
+  }
+  private async initializeWorldNewsPreference(uid: string, rows: readonly Row[], now: number) {
+    if (
+      rows.length < PUSH_SETTING_COUNT &&
+      !rows.some((row) => num(row, "type") === WORLD_NEWS_PUSH_TYPE)
+    ) {
+      if (!this.db.initializeWorldNewsPreference)
+        throw new GameError(errors.unsupported, "config_record");
+      await this.db.initializeWorldNewsPreference(uid, now);
+    }
+  }
+  private async getPushPreferences(uid: string): Promise<Fields> {
+    const state = await this.db.configuration(uid);
+    const now = this.now();
+    this.checkProfile(state.profile, now);
+    const pushSetting = pushPreferences(state.pushSettings);
+    await this.initializeWorldNewsPreference(uid, state.pushSettings, now);
+    return { pushSetting };
+  }
+  private async setPushPreference(uid: string, params: Fields): Promise<Fields> {
+    const audio = wireInt(params, "audio", 1);
+    const type = wireInt(params, "type");
+    const status = wireInt(params, "status");
+    if (
+      [type, status, audio].some(
+        (value) => !Number.isInteger(value) || value < -2147483648 || value > 2147483647,
+      )
+    )
+      throw new GameError(errors.invalid);
+    if (!this.db.setPushPreference) throw new GameError(errors.unsupported);
+    await this.profile(uid);
+    await this.db.setPushPreference(uid, { type, status, audio }, this.now());
+    return {};
   }
   private async otherLogin(uid: string, params: Fields): Promise<Fields> {
     if (!params.army) {

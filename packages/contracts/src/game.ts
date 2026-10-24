@@ -90,12 +90,34 @@ export interface GameStore extends AuthenticationStore {
   configuration(uid: string): Promise<LoginConfigurationState>;
   configurationSwitches?(): Promise<Row[] | undefined>;
   initializeWorldNewsPreference?(uid: string, now: number): Promise<void>;
+  setPushPreference?(uid: string, preference: PushPreference, now: number): Promise<void>;
+  updateProfilePreference?(
+    uid: string,
+    field: ProfilePreferenceField,
+    now: number,
+    readValue: () => number,
+  ): Promise<number | undefined>;
   city(uid: string, now: number): Promise<CityState>;
   world(
     uid: string,
     ids: number[],
   ): Promise<{ world: Row | undefined; points: Row[]; hasMarches: boolean }>;
 }
+
+export interface PushPreference {
+  type: number;
+  status: number;
+  audio: number;
+}
+
+export type ProfilePreferenceField =
+  | "showEquip"
+  | "showMedal"
+  | "marchSoldierShow"
+  | "colorblind"
+  | "scrollEquip"
+  | "showBanner"
+  | "clientSaveFlag";
 
 export interface PlayerSummary {
   data: Row;
