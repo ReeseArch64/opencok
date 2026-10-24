@@ -484,9 +484,20 @@ the narrower refinement failure boundary. Its snapshot callback must supply the
 authoritative general traversal and owner state. `rules/new-general-equipment` now
 calculates bound general equipment and exclusive suits and supplies a concrete
 adapter into the composition. The shared player-effect resolver exposes color/site/
-all-equipment modifiers 207–218. Runtime owner snapshot composition and authoritative
-general/equipment traversal remain required before connecting this calculation to
-occupied-resource queries; callback-based units do not establish runtime parity.
+all-equipment modifiers 207–218. `controllers/world-resource-generals` restores saved
+general content and status/equipment associations, selects the last loaded piece per
+exact slot, and supplies fresh Integer/String ConcurrentHashMap traversal. Duplicate
+key updates retain their collision-treeification behavior. Restoration preserves the
+transferred-owner skip and rejects missing binding catalogs before eligibility, while
+orphan associations are ignored without database repair. The owner-context controller
+now selects buildings through the same fresh String-map traversal and connects saved
+generals to building composition. Stronghold level/star addition wraps as Int; player
+level, prestige and office projections are consumed only when eligibility needs them.
+Prestige scans ordered catalog records, including duplicate IDs, independently of the
+civilization-effect feature gate. Feature checks use the saved owner version and the
+execution realm; blank owner versions skip version comparison. The ordinary modifier
+provider and endpoint integration remain required; callback-based units do not
+establish runtime parity.
 
 The point repository now accepts an internal `resourceEffects` request to read the
 saved march owner's ordinary effects, buildings and new-general records in the same
@@ -495,9 +506,12 @@ march and owner profile. Remote reads use the destination transaction after loca
 authorization. The bounded reader preserves exact owner version, home/cross-fight
 realm fields and nullable state. The transferred-owner Long-max ban marker skips
 general status/equipment loading while retaining general and office rows. SQL
-sorting provides stable raw snapshots, not legacy map traversal; restoration, slot
-selection, eligibility context and endpoint composition remain separate work. Invalid
-or unavailable requested state fails the point snapshot rather than fabricating effects.
+sorting provides stable insertion inputs for fresh general/equipment maps, not a
+reconstruction of historical process-cache traversal or unordered legacy SQL reads.
+The owner-context projection supplies building traversal and official eligibility.
+Runtime residency, authoritative world/expedition effects and endpoint composition
+remain separate work. Invalid or unavailable requested state fails the point snapshot
+rather than fabricating effects.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read

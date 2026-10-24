@@ -1,4 +1,4 @@
-import { ruleAvailable, type RuleContext } from "./availability.ts";
+import type { RuleContext } from "./availability.ts";
 import type { Rules } from "./game.ts";
 import { javaFloat } from "./java-float.ts";
 import { javaIntHashMapOrder } from "./java-hash-map-order.ts";
@@ -9,6 +9,7 @@ import {
   generalMap,
   generalSavedInteger,
   generalSavedLong,
+  generalFeatureAvailable,
 } from "./new-general-content.ts";
 
 export interface NewGeneralStatus {
@@ -47,7 +48,7 @@ export function newGeneralRefinementEffect(
   effect: number,
 ): number {
   try {
-    if (!ruleAvailable(rules.features.get("general_random_effect"), context)) return 0;
+    if (!generalFeatureAvailable(rules, "general_random_effect", context)) return 0;
     generalSavedInteger(effect);
     const selected = new Map<number, string[]>();
     for (const entry of generalContent(raw, "|", 300)) {

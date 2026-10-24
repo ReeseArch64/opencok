@@ -113,7 +113,9 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     expect(rules.configuration.kingdomSkills?.size).toBe(0);
     expect(rules.configuration.facebookShare?.size).toBe(0);
     expect(rules.configuration.serverConfig?.size).toBe(0);
-    expect(Object.values(rules.power).every((catalog) => catalog.size === 0)).toBe(true);
+    const { prestigeLevelRecords: emptyPrestige, ...emptyPower } = rules.power;
+    expect(emptyPrestige).toEqual([]);
+    expect(Object.values(emptyPower).every((catalog) => catalog.size === 0)).toBe(true);
     for (const name of [
       "general",
       "science",
@@ -158,8 +160,12 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       '<database><Group id="vip"><ItemSpec id="001" power="007"/></Group></database>',
     );
     const power = (await loadRules(directory)).power;
-    expect(Object.keys(power)).toHaveLength(34);
-    expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
+    const { prestigeLevelRecords, ...indexedPower } = power;
+    expect(Object.keys(indexedPower)).toHaveLength(34);
+    expect(prestigeLevelRecords).toEqual([{ id: "001", power: "007" }]);
+    expect(
+      Object.values(indexedPower).every((catalog) => catalog.get("001")?.power === "007"),
+    ).toBe(true);
     for (const name of [
       "general_sale",
       "pay_servercontrol",
@@ -422,6 +428,37 @@ test("new-general office and refinement catalogs load optionally with exact stri
       '<database><ItemSpec id=""/></database>',
     );
     await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("prestige catalogs retain every ordered definition for first-range selection alongside the final ID index", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-prestige-order-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const absent = (await loadRules(directory)).power;
+    expect(absent.prestigeLevelRecords).toEqual([]);
+    expect(absent.prestigeLevels?.size).toBe(0);
+    await writeFile(
+      join(directory, "reputation_level.xml"),
+      '<database><Group id="first"><ItemSpec id="same" reputation_point="100" reputation_level="5"/></Group><Group id="second"><ItemSpec id="same" reputation_point="100" reputation_level="9"/><ItemSpec id="last" reputation_point="0;100" reputation_level="1"/></Group></database>',
+    );
+    const power = (await loadRules(directory)).power;
+    expect(power.prestigeLevelRecords?.map((rule) => rule.reputation_level)).toEqual([
+      "5",
+      "9",
+      "1",
+    ]);
+    expect(power.prestigeLevels?.get("same")?.reputation_level).toBe("9");
+    await writeFile(
+      join(directory, "reputation_level.xml"),
+      '<database><ItemSpec id=""/></database>',
+    );
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+    await writeFile(join(directory, "reputation_level.xml"), "<database/>");
+    await expect(loadRules(directory)).rejects.toThrow("Missing gameplay resource records");
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
