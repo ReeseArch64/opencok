@@ -1622,8 +1622,8 @@ not claimed. No migration or gameplay write is executed by publication.
 
 ## Parallel bridge merge readiness
 
-The current snapshot integrates PR #182 and the already merged descendant PRs in this parallel
-block: #182, #183.
+The current snapshot integrates PR #181 and the already merged descendant PRs in this parallel
+block: #181, #182, #183.
 
 The maintainer authorized readiness and merge after all applicable CI checks pass on the final head.
 Original source-stage validation above remains historical; this record does not claim native-client,
