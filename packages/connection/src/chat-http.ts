@@ -5,16 +5,21 @@ export async function fetchChatJson(
   request: (url: string, options: RequestInit) => Promise<Response>,
 ): Promise<unknown> {
   const controller = new AbortController();
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, controller.signal])
+    : controller.signal;
+  signal.throwIfAborted();
+  let abort: (() => void) | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let cancel: (() => Promise<void>) | undefined;
   const exchange = async () => {
     const response = await request(url, {
       ...options,
       redirect: "error",
-      signal: controller.signal,
+      signal,
     });
     if (
-      controller.signal.aborted ||
+      signal.aborted ||
       !response.ok ||
       response.redirected ||
       !/^application\/json(?:\s*;|$)/i.test(response.headers.get("content-type") ?? "") ||
@@ -43,6 +48,11 @@ export async function fetchChatJson(
     return await Promise.race([
       exchange(),
       new Promise<never>((_, reject) => {
+        abort = () => reject(new Error("Chat request aborted"));
+        signal.addEventListener("abort", abort, { once: true });
+        if (signal.aborted) abort();
+      }),
+      new Promise<never>((_, reject) => {
         timer = setTimeout(() => {
           controller.abort();
           reject(new Error("Chat request timed out"));
@@ -50,6 +60,7 @@ export async function fetchChatJson(
       }),
     ]);
   } finally {
+    if (abort) signal.removeEventListener("abort", abort);
     clearTimeout(timer);
     controller.abort();
     void cancel?.().catch(() => {});

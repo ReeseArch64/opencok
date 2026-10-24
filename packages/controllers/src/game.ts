@@ -1,3 +1,17 @@
+import { worldPointDetail } from "./world-point-detail.ts";
+import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
+import { worldFavorites } from "@opencok/dtos/world-favorites";
+import { worldSearch } from "@opencok/dtos/world-search";
+import { worldSearchName, worldSearchOffset } from "@opencok/rules/world-search";
+import { playerSearch } from "@opencok/dtos/player-search";
+import {
+  playerSearchQuery,
+  playerSearchRemoteBudget,
+  selectPlayerSearch,
+  sharedSearchProfile,
+} from "@opencok/rules/player-search";
+import { MAX_FRAME } from "@opencok/messages/frame";
+import { encode, extension } from "@opencok/messages/sfs";
 import {
   avatarSequence,
   avatarMinimumLevel,
@@ -92,7 +106,7 @@ const playerRankingKinds = {
   "silver.contribute.rank": "contribution",
 } as const;
 
-type GameConfig = Pick<ServerConfig, "kingdomId" | "mailTranslationEnabled">;
+type GameConfig = Pick<ServerConfig, "kingdomId" | "mailTranslationEnabled" | "crossSearchEnabled">;
 
 type ReadyCity = CityState & { profile: Row; resource: Row };
 export interface Result {
@@ -166,7 +180,35 @@ export class Game {
   }
   async execute(uid: string, command: string, params: Fields): Promise<Result> {
     let body: Fields;
+    let pushes: Result["pushes"] = [];
     switch (command) {
+      case "world.get.detail":
+        if (!this.services.worldPointDetail) throw new GameError(errors.unsupported);
+        body = await worldPointDetail(
+          this.services.worldPointDetail,
+          uid,
+          params,
+          this.rules,
+          this.config.kingdomId,
+          this.now(),
+          this.services,
+          this.now,
+        );
+        break;
+      case "search.player":
+        body = await this.playerSearch(uid, params);
+        break;
+      case "world.search.user":
+        body = await this.worldSearch(uid, params);
+        break;
+      case "world.favo.get":
+      case "world.favo.add":
+      case "world.favo.delme":
+        body = await this.worldFavorites(uid, command, params);
+        break;
+      case "user.avatar.finish":
+        ({ body, pushes } = await this.avatarFinish(uid, params));
+        break;
       case "user.avatar.grant":
         body = await this.avatarGrant(uid, params);
         break;
@@ -250,10 +292,183 @@ export class Game {
       default:
         throw new GameError(errors.unsupported);
     }
-    if (Object.keys(body).length === 0) body.success = sfs.bool(true);
+    if (Object.keys(body).length === 0 && command !== "world.get.detail")
+      body.success = sfs.bool(true);
     if (params._cok_) body._cok_ = params._cok_;
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
-    return { body, pushes: [] };
+    if (command.startsWith("world.favo.") && encode(extension(command, body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "world_favorite_size");
+    if (command === "world.search.user" && encode(extension(command, body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "world_search_size");
+    if (command === "search.player" && encode(extension(command, body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "player_search");
+    if (command === "world.get.detail" && encode(extension(command, body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "world_point_detail");
+    return { body, pushes };
+  }
+  private async playerSearch(uid: string, params: Fields): Promise<Fields> {
+    const store = this.services.playerSearch;
+    if (!store) throw new GameError(errors.unsupported);
+    if (
+      params.key?.type !== Type.String ||
+      !worldSearchName(params.key.value) ||
+      params.page?.type !== Type.Int ||
+      !favoriteInteger(params.page.value)
+    )
+      throw new GameError(errors.invalid);
+    const query = playerSearchQuery(
+      params.key.value,
+      params.page.value,
+      this.config.crossSearchEnabled ?? true,
+      this.config.kingdomId,
+      this.rules,
+    );
+    const now = this.now();
+    if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid);
+    const state = await store.search(uid, query, now, (rows) =>
+      playerSearchRemoteBudget(query, rows),
+    );
+    const profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || profile.serverId !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const remote = state.remote.map((entry) => ({
+      ...entry,
+      data: entry.data.uid == null ? entry.data : sharedSearchProfile(entry.data, this.rules, now),
+    }));
+    return playerSearch(selectPlayerSearch(query, state.local, remote));
+  }
+  private async worldSearch(uid: string, params: Fields): Promise<Fields> {
+    const store = this.services.worldSearch;
+    if (!store) throw new GameError(errors.unsupported);
+    const integer = (key: string, fallback: number) => {
+      const field = params[key];
+      if (field === undefined) return fallback;
+      if (field.type !== Type.Int || !favoriteInteger(field.value))
+        throw new GameError(errors.invalid);
+      return field.value;
+    };
+    const name = params.name === undefined ? "" : params.name.value;
+    if ((params.name !== undefined && params.name.type !== Type.String) || !worldSearchName(name))
+      throw new GameError(errors.invalid);
+    const kingdomId = integer("serverId", this.config.kingdomId);
+    const offset = worldSearchOffset(integer("page", 1));
+    const now = this.now();
+    if (kingdomId < 1 || !Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid);
+    const state = await store.search(uid, { name, offset, kingdomId, now });
+    const profile = this.checkProfile(state.profile, now);
+    if (
+      profile.uid !== uid ||
+      profile.serverId !== this.config.kingdomId ||
+      state.kingdomId !== kingdomId
+    )
+      throw new GameError(errors.invalid);
+    return worldSearch(state.rows);
+  }
+  private async worldFavorites(uid: string, command: string, params: Fields): Promise<Fields> {
+    const store = this.services.worldFavorites;
+    if (!store) throw new GameError(errors.unsupported);
+    const now = this.now();
+    if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid);
+    const check = (profile: Row | undefined) => {
+      const owned = this.checkProfile(profile, now);
+      if (owned.uid !== uid || owned.serverId !== this.config.kingdomId)
+        throw new GameError(errors.invalid);
+    };
+    if (command === "world.favo.get") {
+      const state = await store.list(uid, now);
+      check(state.profile);
+      return worldFavorites(state, uid);
+    }
+    const integer = (key: string, fallback?: number) => {
+      const field = params[key];
+      if (field === undefined && fallback !== undefined) return fallback;
+      if (field?.type !== Type.Int || !favoriteInteger(field.value))
+        throw new GameError(errors.invalid);
+      return field.value;
+    };
+    if (command === "world.favo.add") {
+      if (params.name?.type !== Type.String || !favoriteName(params.name.value))
+        throw new GameError(errors.invalid);
+      const query = {
+        point: integer("point"),
+        type: integer("type"),
+        cityType: integer("cityType", -1),
+        resType: integer("resType", -1),
+        name: params.name.value,
+        server: favoriteServer(
+          params.server === undefined ? undefined : integer("server"),
+          this.config.kingdomId,
+          this.rules,
+        ),
+        now,
+      };
+      const state = await store.add(uid, query);
+      check(state.profile);
+      const repliedAt = this.now();
+      if (!Number.isSafeInteger(repliedAt) || repliedAt < 0) throw new GameError(errors.invalid);
+      return { state: sfs.int(1), createTime: sfs.long(repliedAt), point: sfs.int(query.point) };
+    }
+    const selection = (key: string): number[] => {
+      const field = params[key];
+      if (field?.type !== Type.Array || !Array.isArray(field.value) || field.value.length > 32767)
+        throw new GameError(errors.invalid);
+      return field.value.map((entry: Value) => {
+        if (entry?.type !== Type.Int || !favoriteInteger(entry.value))
+          throw new GameError(errors.invalid);
+        return entry.value;
+      });
+    };
+    const points = selection("point"),
+      servers = selection("server");
+    if (points.length !== servers.length) throw new GameError(errors.invalid);
+    const result = await store.remove(
+      uid,
+      points.map((point, index) => ({ point, server: servers[index]! })),
+      now,
+    );
+    check(result.profile);
+    return {
+      state: sfs.int(result.success ? 1 : 0),
+      pointArray: sfs.array(points.map(sfs.int)),
+      serverArray: sfs.array(servers.map(sfs.int)),
+    };
+  }
+  private async avatarFinish(uid: string, params: Fields): Promise<Result> {
+    const service = this.services.avatarFinish;
+    if (!service) throw new GameError(errors.unsupported);
+    if (
+      !/^[0-9]{1,20}$/.test(uid) ||
+      params.receipt?.type !== Type.String ||
+      typeof params.receipt.value !== "string" ||
+      !/^[1-9][0-9]{0,5}:[a-f0-9]{64}$/.test(params.receipt.value) ||
+      (params.gameuid !== undefined &&
+        (params.gameuid.type !== Type.String || params.gameuid.value !== uid))
+    )
+      throw new GameError(errors.invalid);
+    const now = this.now();
+    const receipt = params.receipt.value;
+    const state = await service.finish(uid, receipt, now);
+    const profile = this.checkProfile(state.profile, now);
+    const sequence = Number(receipt.split(":")[0]);
+    if (
+      profile.uid !== uid ||
+      profile.serverId !== this.config.kingdomId ||
+      !Number.isInteger(state.picVer) ||
+      state.picVer! < 0 ||
+      state.picVer! > 2147483647 ||
+      state.picVer! % 1000000 < sequence ||
+      state.superseded !== sequence < state.picVer! % 1000000
+    )
+      throw new GameError(errors.invalid);
+    try {
+      await service.deliver(uid, sequence);
+    } catch {}
+    const body: Fields = {
+      uid: sfs.string(uid),
+      picVer: sfs.int(state.picVer!),
+      superseded: sfs.bool(state.superseded),
+    };
+    return { body, pushes: [{ command: "push.picVer.update", body: { ...body } }] };
   }
   private async avatarGrant(uid: string, params: Fields): Promise<Fields> {
     const service = this.services.avatar;
