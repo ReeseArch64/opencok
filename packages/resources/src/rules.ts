@@ -3,7 +3,7 @@ import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { join } from "node:path";
 import { Rules, type Rule } from "@opencok/rules/game";
 
-export function parseRules(xml: string, name: string): Map<string, Rule> {
+function parseRecords(xml: string, name: string): Rule[] {
   if (
     Buffer.byteLength(xml) > 16 * 1024 * 1024 ||
     /<!DOCTYPE|<!ENTITY/i.test(xml) ||
@@ -19,6 +19,7 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     removeNSPrefix: true,
     isArray: (tag) => tag === "Group" || tag === "ItemSpec",
   }).parse(xml);
+  if (!Object.hasOwn(parsed, "database")) throw new Error("Invalid gameplay resource root");
   const records: unknown[] = [];
   const collect = (node: unknown) => {
     if (!node || typeof node !== "object") return;
@@ -27,6 +28,19 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     for (const child of group.Group ?? []) collect(child);
   };
   collect(parsed.database);
+  for (const record of records)
+    if (
+      !record ||
+      typeof record !== "object" ||
+      Array.isArray(record) ||
+      Object.values(record).some((value) => typeof value !== "string")
+    )
+      throw new Error("Invalid gameplay resource record");
+  return records as Rule[];
+}
+
+export function parseRules(xml: string, name: string): Map<string, Rule> {
+  const records = parseRecords(xml, name);
   if (!records.length) throw new Error("Missing gameplay resource records");
   const map = new Map<string, Rule>();
   const replaceDuplicates = [
@@ -39,14 +53,7 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     "activity_panel",
   ].includes(name);
   for (const record of records) {
-    if (
-      !record ||
-      typeof record !== "object" ||
-      Array.isArray(record) ||
-      Object.values(record).some((value) => typeof value !== "string")
-    )
-      throw new Error("Invalid gameplay resource record");
-    const item = record as Rule;
+    const item = record;
     if (name === "goods" && !item.id) continue;
     if (!item.id?.trim() || (!replaceDuplicates && map.has(item.id)))
       throw new Error("Invalid gameplay resource ID");
@@ -56,12 +63,13 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
 }
 
 export async function loadRules(directory: string, kingdomId = 1) {
-  const load = async (name: string): Promise<Map<string, Rule>> => {
+  const read = async (name: string): Promise<string> => {
     const file = join(directory, `${name}.xml`);
     if ((await stat(file)).size > 16 * 1024 * 1024) throw new Error("Oversized gameplay resource");
-    const xml = await readFile(file, "utf8");
-    return parseRules(xml, name);
+    return readFile(file, "utf8");
   };
+  const load = async (name: string): Promise<Map<string, Rule>> =>
+    parseRules(await read(name), name);
   const [buildings, roles, positions] = await Promise.all([
     load("building"),
     load("role"),
@@ -151,6 +159,10 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "monarch_title_lord",
     ].map(optional),
   );
+  const [militaryRanks, servers] = await Promise.all([optional("wr_rank"), optional("servers")]);
+  const achievementCount = (await exists(join(directory, "achievement.xml")))
+    ? parseRecords(await read("achievement"), "achievement").length
+    : 0;
   return new Rules(
     buildings,
     roles,
@@ -195,6 +207,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
       luckyEffects,
       monarchTitles,
     },
+    { achievementCount, militaryRanks, servers },
   );
 }
 
