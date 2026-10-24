@@ -16,7 +16,8 @@
     "./stored-json": "./src/stored-json.ts",
     "./legacy-json": "./src/legacy-json.ts",
     "./legacy-object-order": "./src/legacy-object-order.ts",
-    "./java-int-map": "./src/java-int-map.ts"
+    "./java-int-map": "./src/java-int-map.ts",
+    "./world-resource-army": "./src/world-resource-army.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"
