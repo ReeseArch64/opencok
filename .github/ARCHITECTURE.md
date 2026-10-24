@@ -857,9 +857,12 @@ cannot establish asset availability. Its independent mail/cache/chat acknowledgm
 and scoped recovery relay reuse existing transports; superseded metadata effects do
 not replace the current profile. Normal supported versions are implemented, while
 negative/restored versions and modulo wrap reject before mutation pending a separate
-legacy event-ordering or expected-previous CAS design. This command has received static
-checks only: test generation/execution is deferred by the user, and topic 7 remains
-incomplete. The realm runbook records configuration, schema and retry boundaries.
+legacy event-ordering or expected-previous CAS design. Command/rule units and a
+disposable PostgreSQL/Redis integration exercise the production allocation runtime,
+concurrent requests, atomic rollback, uncertain-commit recovery and mail/cache/chat
+retry after restart without fabricating upload receipts. Native client behavior and
+the broader topic-7 lifecycle remain unverified. The realm runbook records
+configuration, schema, retry boundaries and the supported-version limits.
 
 The authenticated `report.picVer` command updates only `pic_upload_record.report`.
 The repository locks and revalidates the reporter, serializes report writers by the
