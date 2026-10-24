@@ -39,7 +39,8 @@
     "./mail": "./src/mail.ts",
     "./mail-groups": "./src/mail-groups.ts",
     "./avatar": "./src/avatar.ts",
-    "./mail-conversation-read": "./src/mail-conversation-read.ts"
+    "./mail-conversation-read": "./src/mail-conversation-read.ts",
+    "./world-favorites": "./src/world-favorites.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -1,3 +1,4 @@
+import type { WorldFavoriteStore } from "./world-favorites.ts";
 import type { AvatarFinishService } from "./files.ts";
 import type { AvatarGrantService } from "./files.ts";
 import type { ChatSessionIssuer } from "./chat.ts";
@@ -104,6 +105,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  worldFavorites?: WorldFavoriteStore;
   avatar?: AvatarGrantService;
   avatarFinish?: AvatarFinishService;
   chatSession?: ChatSessionIssuer;
