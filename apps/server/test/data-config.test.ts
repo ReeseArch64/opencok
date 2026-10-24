@@ -262,17 +262,17 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
   };
   let calls = 0;
   const store: GameStore = {
-    profile: async (uid) => {
+    getProfileById: async (uid) => {
       expect(uid).toBe("synthetic");
       calls++;
       return { uid, level: 5 };
     },
-    playerSummaries: unused,
-    configuration: unused,
-    power: unused,
-    accounts: unused,
-    city: unused,
-    world: unused,
+    getPlayerSummariesByIds: unused,
+    getConfigurationByPlayerId: unused,
+    getPowerByPlayerId: unused,
+    getAccountsByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
   };
   const result = await new Game(store, rules, { kingdomId: 2 }, () => now).execute(
     "synthetic",
@@ -287,7 +287,7 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
   const rejected: (Row | undefined)[] = [undefined, { banFlag: 1 }, { banTime: BigInt(now + 1) }];
   for (const profile of rejected) {
     const game = new Game(
-      { ...store, profile: async () => profile },
+      { ...store, getProfileById: async () => profile },
       rules,
       { kingdomId: 2 },
       () => now,

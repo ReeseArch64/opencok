@@ -17,11 +17,11 @@ export class Discovery {
     const bound = ["market_global", "csmods_studio", "mycard"].includes(params.pf ?? "");
     let account: Account | undefined;
     if (bound && !phpEmpty(params.pfId))
-      account = (await this.accounts.valid(params.pf!, params.pfId!, true))[0];
+      account = (await this.accounts.getAll(params.pf!, params.pfId!, true))[0];
     if (!account && !phpEmpty(params.uuid)) {
       if (params.terminal === "facebook")
-        account = (await this.accounts.valid("facebook", params.uuid!, bound))[0];
-      account ??= (await this.accounts.valid("device", params.uuid!, bound))[0];
+        account = (await this.accounts.getAll("facebook", params.uuid!, bound))[0];
+      account ??= (await this.accounts.getAll("device", params.uuid!, bound))[0];
     }
     if (account) {
       const server = servers.get(account.server);

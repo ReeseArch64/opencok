@@ -81,7 +81,7 @@ export class World {
     )
       throw new GameError(errors.unsupported);
     const ids = mode ? [1 + x + y * this.size] : viewport(x, y, this.size);
-    const { world, points, hasMarches } = await this.db.world(uid, ids);
+    const { world, points, hasMarches } = await this.db.getWorldByPointIds(uid, ids);
     if (!world || num(world, "worldId") !== 0 || hasMarches)
       throw new GameError(errors.unsupported);
     const byId = new Map(points.map((row) => [num(row, "id"), row]));

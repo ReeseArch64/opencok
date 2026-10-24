@@ -13,7 +13,7 @@ export function createTokenVerifier(sessionStore: SessionStore): TokenVerifier {
     if (decoded.length !== 32 || decoded.toString("base64url") !== token) return null;
 
     const tokenHash = createHash("sha256").update(token).digest();
-    const session = await sessionStore.findByTokenHash(tokenHash);
+    const session = await sessionStore.getById(tokenHash);
     if (!session?.uid) return null;
     return claimedUid === undefined || session.uid === claimedUid ? { uid: session.uid } : null;
   };

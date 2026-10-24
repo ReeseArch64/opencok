@@ -59,7 +59,7 @@ export async function authenticate(
     .update(timestamp + config.loginSecret + uid)
     .digest("hex");
   if (!equal(signature, expected)) throw new LoginError("signature");
-  const profile = await db.profile(uid);
+  const profile = await db.getProfileById(uid);
   if (!profile) throw new LoginError("profile_missing");
   if (!equal(deviceUuid, text(profile, "deviceUuid"))) throw new LoginError("device");
   if (long(profile, "banTime") > BigInt(now) || num(profile, "banFlag") !== 0)
@@ -69,7 +69,7 @@ export async function authenticate(
   const devicePlatforms = ["csmod_games", "Google", "market_global"];
   if (!devicePlatforms.includes(platform) || !devicePlatforms.includes(text(profile, "pf")))
     throw new LoginError("platform");
-  const accounts = await db.accounts(uid);
+  const accounts = await db.getAccountsByPlayerId(uid);
   if (
     !accounts.some(
       (a) =>

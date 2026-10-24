@@ -3,7 +3,7 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { getTableColumns } from "drizzle-orm";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
-import { readLoginConfiguration } from "@opencok/repositories/game";
+import { getConfigurationByPlayerId } from "@opencok/repositories/game";
 import { Cache } from "@opencok/storage/session";
 
 function database(failPreferences = false) {
@@ -35,7 +35,7 @@ function database(failPreferences = false) {
 
 test("configuration persistence uses one read-only snapshot and filters both player projections", async () => {
   const { db, queries } = database();
-  const result = await readLoginConfiguration(db, "synthetic-player");
+  const result = await getConfigurationByPlayerId(db, "synthetic-player");
   expect(result.profile?.uid).toBe("synthetic-player");
   expect(result.switches).toEqual([{ name: "synthetic-switch", stat: 1, appVersion: "12.6.0" }]);
   expect(result.pushSettings).toEqual([{ type: 3, status: 0, audio: 1 }]);
@@ -57,7 +57,7 @@ test("configuration persistence uses one read-only snapshot and filters both pla
 
 test("configuration query failure rolls back and never returns a partial snapshot", async () => {
   const { db, queries } = database(true);
-  await expect(readLoginConfiguration(db, "synthetic-player")).rejects.toThrow();
+  await expect(getConfigurationByPlayerId(db, "synthetic-player")).rejects.toThrow();
   expect(queries.at(-1)?.text).toBe("rollback");
   expect(queries.some((query) => query.text === "commit")).toBe(false);
 });

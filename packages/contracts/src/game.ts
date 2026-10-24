@@ -2,8 +2,8 @@ import type { Row } from "./rows.ts";
 import type { PowerState } from "./power.ts";
 
 export interface AuthenticationStore {
-  profile(uid: string): Promise<Row | undefined>;
-  accounts(uid: string): Promise<Row[]>;
+  getProfileById(uid: string): Promise<Row | undefined>;
+  getAccountsByPlayerId(uid: string): Promise<Row[]>;
 }
 export interface CityState {
   profile: Row | undefined;
@@ -17,11 +17,11 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
-  power(uid: string, now: number): Promise<PowerState>;
-  playerSummaries(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
-  configuration(uid: string): Promise<LoginConfigurationState>;
-  city(uid: string, now: number): Promise<CityState>;
-  world(
+  getPowerByPlayerId(uid: string, now: number): Promise<PowerState>;
+  getPlayerSummariesByIds(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
+  getConfigurationByPlayerId(uid: string): Promise<LoginConfigurationState>;
+  getCityByPlayerId(uid: string, now: number): Promise<CityState>;
+  getWorldByPointIds(
     uid: string,
     ids: number[],
   ): Promise<{ world: Row | undefined; points: Row[]; hasMarches: boolean }>;

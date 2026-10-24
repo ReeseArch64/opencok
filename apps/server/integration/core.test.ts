@@ -214,7 +214,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       servers.push(server);
       const adapter = new Database(settings);
       adapters.push(adapter);
-      const before = await adapter.city(`synthetic-player-${id}`, Date.now());
+      const before = await adapter.getCityByPlayerId(`synthetic-player-${id}`, Date.now());
       const client = new Client(server.port, id);
       clients.push(client);
       expect((await client.handshake()).tk?.type).toBe(Type.String);
@@ -265,7 +265,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         JSON.parse(String(part.value)),
       );
       expect(points.map((p: string) => JSON.parse(p).o)).toContain(`Synthetic ${id}`);
-      expect(await adapter.city(`synthetic-player-${id}`, Date.now())).toEqual(before);
+      expect(await adapter.getCityByPlayerId(`synthetic-player-${id}`, Date.now())).toEqual(before);
       expect((await fetch(`http://127.0.0.1:${server.healthPort}/readyz`)).status).toBe(200);
       const replacement = new Client(server.port, id);
       clients.push(replacement);

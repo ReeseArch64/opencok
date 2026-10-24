@@ -27,7 +27,7 @@ test("API Effect scope serves discovery and closes HTTP before dependencies", as
     ApiDependencies,
     Effect.acquireRelease(
       Effect.succeed({
-        accounts: { valid: async () => [], health: async () => {} },
+        accounts: { getAll: async () => [], health: async () => {} },
         directory: { read: async () => new Map() },
         redis: { health: async () => {} },
       }),

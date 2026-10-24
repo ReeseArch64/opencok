@@ -42,7 +42,7 @@ export class Game {
     readonly services: GameServices = {},
   ) {}
   private async state(uid: string): Promise<ReadyCity> {
-    const state = await this.db.city(uid, this.now());
+    const state = await this.db.getCityByPlayerId(uid, this.now());
     if (!state.profile || !state.resource) throw new GameError(errors.missing);
     if (long(state.profile, "banTime") > BigInt(this.now()) || num(state.profile, "banFlag") !== 0)
       throw new GameError(errors.invalid);
@@ -133,11 +133,11 @@ export class Game {
     return { body, pushes: [] };
   }
   private async profile(uid: string): Promise<Row> {
-    return this.checkProfile(await this.db.profile(uid));
+    return this.checkProfile(await this.db.getProfileById(uid));
   }
   private async power(uid: string): Promise<Fields> {
     const now = this.now();
-    const state = await this.db.power(uid, now);
+    const state = await this.db.getPowerByPlayerId(uid, now);
     const profile = this.checkProfile(state.profile, now);
     if (text(profile, "uid") !== uid) throw new GameError(errors.invalid);
     const context = powerContext(this.rules, state.knight, {
@@ -162,7 +162,7 @@ export class Game {
       uids.push(entry.value);
     }
     if (!uids.length || uids.length > 50) return { uids: sfs.array() };
-    const summaries = await this.db.playerSummaries(
+    const summaries = await this.db.getPlayerSummariesByIds(
       uids.filter((id) => id !== "3000002"),
       "allservers" in params,
     );
@@ -208,7 +208,7 @@ export class Game {
     };
   }
   private async configuration(uid: string): Promise<Fields> {
-    const state = await this.db.configuration(uid);
+    const state = await this.db.getConfigurationByPlayerId(uid);
     const profile = this.checkProfile(state.profile);
     const context = this.featureContext(profile);
     const deviceId = text(profile, "deviceId");

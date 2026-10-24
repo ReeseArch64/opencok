@@ -7,5 +7,5 @@ export interface Account {
   lastTime: string;
 }
 export interface AccountReader {
-  valid(type: string, value: string, bound: boolean): Promise<Account[]>;
+  getAll(type: string, value: string, bound: boolean): Promise<Account[]>;
 }

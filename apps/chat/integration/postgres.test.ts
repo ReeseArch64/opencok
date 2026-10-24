@@ -54,11 +54,11 @@ test("PostgreSQL preserves concurrent receipts, expiration, realm routing and re
       `postgres://postgres:${pg.options.password}@127.0.0.1:${pg.options.port}/opencok_global`;
     store = createChatRepository({ databaseUrl: databaseUrl(), now: () => time });
     await store.health();
-    expect((await store.loadPlayerState("player-2"))?.serverId).toBe(2);
-    expect((await store.loadPlayerState("player-1"))?.originalServerId).toBe(1);
-    expect(await store.loadPlayerState("absent")).toBeNull();
+    expect((await store.getPlayerStateById("player-2"))?.serverId).toBe(2);
+    expect((await store.getPlayerStateById("player-1"))?.originalServerId).toBe(1);
+    expect(await store.getPlayerStateById("absent")).toBeNull();
     const hash = Buffer.alloc(32, 7);
-    await store.sessions.save({
+    await store.sessions.create({
       tokenHash: hash,
       uid: "player-2",
       createdAt: time,
@@ -71,21 +71,21 @@ test("PostgreSQL preserves concurrent receipts, expiration, realm routing and re
       body: "Olá 世界",
       now: time,
     };
-    const results = await Promise.all([store.messages.send(input), store.messages.send(input)]);
+    const results = await Promise.all([store.messages.create(input), store.messages.create(input)]);
     expect(results.filter((result) => result.inserted)).toHaveLength(1);
     expect(results[0]!.sequenceId).toBe(results[1]!.sequenceId);
-    expect(await store.messages.listRecent("country_1")).toHaveLength(0);
+    expect(await store.messages.getAll("country_1")).toHaveLength(0);
     await store.close();
     store = undefined;
     await pg.restart();
     store = createChatRepository({ databaseUrl: databaseUrl(), now: () => time });
-    expect(await store.sessions.findByTokenHash(hash)).toEqual({ uid: "player-2" });
-    expect((await store.messages.listRecent("country_2"))[0]?.body).toBe("Olá 世界");
+    expect(await store.sessions.getById(hash)).toEqual({ uid: "player-2" });
+    expect((await store.messages.getAll("country_2"))[0]?.body).toBe("Olá 世界");
     time = new Date(time.getTime() + 86400000);
-    expect(await store.sessions.findByTokenHash(hash)).toBeNull();
-    expect(await store.messages.listRecent("country_2")).toHaveLength(0);
-    await expect(store.messages.send(input)).rejects.toThrow();
-    expect(await store.cleanup()).toEqual({ messages: 1, sessions: 1 });
+    expect(await store.sessions.getById(hash)).toBeNull();
+    expect(await store.messages.getAll("country_2")).toHaveLength(0);
+    await expect(store.messages.create(input)).rejects.toThrow();
+    expect(await store.deleteExpired()).toEqual({ messages: 1, sessions: 1 });
   } finally {
     await store?.close();
     await databases?.close();

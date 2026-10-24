@@ -61,7 +61,7 @@ export function createHistoryHandlers({
         if (!supportedPrefix.test(roomId)) continue;
         if (!isSafeInteger(afterMs) || afterMs < 0) throw new ChatCommandError("invalid_time");
         const room = await requireRoom({ uid, roomId, connection, authorizeRoom });
-        const items = await messages.listRecent(roomId, afterMs);
+        const items = await messages.getAll(roomId, afterMs);
         const first = items[0];
         const last = items.at(-1);
         rooms.push({
@@ -82,7 +82,7 @@ export function createHistoryHandlers({
       if (!isSafeInteger(start) || start < 0 || !isSafeInteger(end) || end <= start)
         throw new ChatCommandError("invalid_time");
       const room = await requireRoom({ uid, roomId, connection, authorizeRoom });
-      const items = await messages.listRange(room.roomId, start, end);
+      const items = await messages.getAllByRange(room.roomId, start, end);
       return { msg: items.map((item) => messageFrame(item, room.group)) };
     },
   };

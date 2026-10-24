@@ -173,7 +173,7 @@ request. No legacy Redis key import or profile writer is introduced here; topic 
 must update this namespace after profile changes. No gameplay state is cached by
 this query. Server-native behavior has unit coverage only; the client remains untested.
 
-The detailed-power foundation now includes `readPowerState`,
+The detailed-power foundation now includes `getPowerByPlayerId`,
 `calculatePlayerPower` and the `powerInfo` DTO. The read adapter captures the
 requested player's persisted components in one read-only repeatable-read
 transaction. The calculator covers role, generals, completed troops/traps, building

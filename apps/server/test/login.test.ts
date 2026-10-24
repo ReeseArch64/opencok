@@ -32,8 +32,8 @@ function packet(timestamp = "42") {
   };
 }
 const store: AuthenticationStore = {
-  profile: async () => ({ ...profile }),
-  accounts: async () => [{ active: 0, server: "2", uuid: profile.deviceUuid }],
+  getProfileById: async () => ({ ...profile }),
+  getAccountsByPlayerId: async () => [{ active: 0, server: "2", uuid: profile.deviceUuid }],
 };
 
 test("mobile timestamps remain opaque and global account must match the selected realm", async () => {
@@ -43,21 +43,27 @@ test("mobile timestamps remain opaque and global account must match the selected
   await expect(
     authenticate(
       packet(),
-      { ...store, accounts: async () => [{ active: 0, server: "1", uuid: profile.deviceUuid }] },
+      {
+        ...store,
+        getAccountsByPlayerId: async () => [{ active: 0, server: "1", uuid: profile.deviceUuid }],
+      },
       cfg,
     ),
   ).rejects.toMatchObject({ reason: "global_account" });
   await expect(
     authenticate(
       packet(),
-      { ...store, accounts: async () => [{ active: 1, server: "2", uuid: profile.deviceUuid }] },
+      {
+        ...store,
+        getAccountsByPlayerId: async () => [{ active: 1, server: "2", uuid: profile.deviceUuid }],
+      },
       cfg,
     ),
   ).rejects.toMatchObject({ reason: "global_account" });
   await expect(
     authenticate(
       packet(),
-      { ...store, accounts: async () => [{ active: 0, server: "2", uuid: "other" }] },
+      { ...store, getAccountsByPlayerId: async () => [{ active: 0, server: "2", uuid: "other" }] },
       cfg,
     ),
   ).rejects.toMatchObject({ reason: "global_account" });
@@ -84,11 +90,15 @@ test("invalid identity, zone, signature, device, version and platform are reject
 
 test("missing and banned profiles cannot authenticate", async () => {
   await expect(
-    authenticate(packet(), { ...store, profile: async () => undefined }, cfg),
+    authenticate(packet(), { ...store, getProfileById: async () => undefined }, cfg),
   ).rejects.toMatchObject({ reason: "profile_missing" });
   for (const ban of [{ banFlag: 1 }, { banTime: BigInt(Date.now() + 60000) }]) {
     await expect(
-      authenticate(packet(), { ...store, profile: async () => ({ ...profile, ...ban }) }, cfg),
+      authenticate(
+        packet(),
+        { ...store, getProfileById: async () => ({ ...profile, ...ban }) },
+        cfg,
+      ),
     ).rejects.toMatchObject({ reason: "banned" });
   }
 });

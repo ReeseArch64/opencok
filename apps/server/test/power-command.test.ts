@@ -51,13 +51,13 @@ function fixture() {
   rules.items.set("hero", { id: "hero", k7: "60" });
   const calls: { uid: string; now: number }[] = [];
   const db: GameStore = {
-    profile: unused,
-    accounts: unused,
-    playerSummaries: unused,
-    configuration: unused,
-    city: unused,
-    world: unused,
-    power: async (uid, time) => {
+    getProfileById: unused,
+    getAccountsByPlayerId: unused,
+    getPlayerSummariesByIds: unused,
+    getConfigurationByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
+    getPowerByPlayerId: async (uid, time) => {
       calls.push({ uid, now: time });
       return state;
     },
@@ -155,7 +155,7 @@ test("command failure preserves state and never substitutes missing catalogs or 
 
 test("storage failures propagate without returning a partial power result", async () => {
   const { game, db } = fixture();
-  db.power = async () => {
+  db.getPowerByPlayerId = async () => {
     throw new Error("Synthetic storage failure");
   };
   await expect(game.execute("synthetic", "get.power.info", {})).rejects.toThrow(

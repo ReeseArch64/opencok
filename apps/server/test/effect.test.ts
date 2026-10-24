@@ -20,17 +20,21 @@ const dependencies: ServerDependencies = {
     start: async () => {},
     health: async () => {},
     close: async () => {},
-    profile: async () => undefined,
-    accounts: async () => [],
-    playerSummaries: async () => [],
-    power: async () => {
+    getProfileById: async () => undefined,
+    getAccountsByPlayerId: async () => [],
+    getPlayerSummariesByIds: async () => [],
+    getPowerByPlayerId: async () => {
       throw new Error("unused");
     },
-    configuration: async () => ({ profile: undefined, switches: [], pushSettings: [] }),
-    city: async () => {
+    getConfigurationByPlayerId: async () => ({
+      profile: undefined,
+      switches: [],
+      pushSettings: [],
+    }),
+    getCityByPlayerId: async () => {
       throw new Error("unused");
     },
-    world: async () => ({ world: undefined, points: [], hasMarches: false }),
+    getWorldByPointIds: async () => ({ world: undefined, points: [], hasMarches: false }),
   },
   cache: {
     command: async () => "PONG",

@@ -49,31 +49,31 @@ test("signed sessions bind opaque tokens to identities and gate real HTTP/WebSoc
   let available = true;
   const repository: ChatRepository = {
     sessions: {
-      async save(session) {
+      async create(session) {
         sessions.set(session.tokenHash.toString("hex"), session);
       },
-      async findByTokenHash(hash) {
+      async getById(hash) {
         return sessions.get(hash.toString("hex")) ?? null;
       },
     },
     messages: {
-      async send() {
+      async create() {
         throw new Error("unused");
       },
-      async listRecent() {
+      async getAll() {
         return [];
       },
-      async listRange() {
+      async getAllByRange() {
         return [];
       },
     },
-    async loadPlayerState() {
+    async getPlayerStateById() {
       return null;
     },
     async health() {
       if (!available) throw new Error("offline");
     },
-    async cleanup() {
+    async deleteExpired() {
       return { messages: 0, sessions: 0 };
     },
   };

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
-import { checkPowerStore, readPowerState } from "@opencok/repositories/power";
+import { checkPowerStore, getPowerByPlayerId } from "@opencok/repositories/power";
 import { Database } from "@opencok/repositories/game";
 import { generalSkillPoints, titleContractExpiries } from "@opencok/controllers/power";
 
@@ -96,7 +96,7 @@ function database(
 
 test("power snapshot scopes every domain to the owner, retains long values and performs no writes", async () => {
   const { db, queries } = database();
-  const snapshot = await Database.prototype.power.call(
+  const snapshot = await Database.prototype.getPowerByPlayerId.call(
     { kingdom: { db } } as Database,
     "synthetic",
     now,
@@ -180,19 +180,19 @@ test("power snapshot scopes every domain to the owner, retains long values and p
 
 test("missing players skip dependent reads and late failures roll back the entire snapshot", async () => {
   const missing = database({ missing: true });
-  const result = await readPowerState(missing.db, "synthetic", now);
+  const result = await getPowerByPlayerId(missing.db, "synthetic", now);
   expect(result.profile).toBeUndefined();
   expect(result.armies).toEqual([]);
   expect(missing.queries).toHaveLength(3);
   const failure = database({ failure: true });
-  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  await expect(getPowerByPlayerId(failure.db, "synthetic", now)).rejects.toThrow();
   expect(failure.queries.at(-1)?.text).toBe("rollback");
   expect(failure.queries.some((query) => query.text === "commit")).toBe(false);
 });
 
 test("alliance power reads follow the persisted membership and roll back on a late alliance failure", async () => {
   const fixture = database({ allianceId: "synthetic-alliance" });
-  const snapshot = await readPowerState(fixture.db, "synthetic", now);
+  const snapshot = await getPowerByPlayerId(fixture.db, "synthetic", now);
   expect(snapshot.allianceSciences).toEqual([
     { scienceId: 1000, level: 2 },
     { scienceId: 2000, level: 0 },
@@ -205,17 +205,17 @@ test("alliance power reads follow the persisted membership and roll back on a la
   expect(query.text).not.toMatch(/researchstarttime|donateprogress|effectflag/);
   expect(fixture.queries.at(-1)?.text).toBe("commit");
   const blank = database({ allianceId: " " });
-  expect((await readPowerState(blank.db, "synthetic", now)).allianceSciences).toEqual([]);
+  expect((await getPowerByPlayerId(blank.db, "synthetic", now)).allianceSciences).toEqual([]);
   expect(blank.queries.some((query) => query.text.includes('"alliance_science"'))).toBe(false);
   const failure = database({ allianceId: "synthetic-alliance", allianceFailure: true });
-  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  await expect(getPowerByPlayerId(failure.db, "synthetic", now)).rejects.toThrow();
   expect(failure.queries.at(-1)?.text).toBe("rollback");
   expect(failure.queries.some((query) => query.text === "commit")).toBe(false);
 });
 
 test("tree power reads follow alliance membership, bound duplicate detection and roll back failures", async () => {
   const fixture = database({ allianceId: "synthetic-alliance" });
-  const result = await readPowerState(fixture.db, "synthetic", now);
+  const result = await getPowerByPlayerId(fixture.db, "synthetic", now);
   expect(result.territoryTrees).toEqual([
     {
       allianceId: "synthetic-alliance",
@@ -234,16 +234,16 @@ test("tree power reads follow alliance membership, bound duplicate detection and
   expect(query.text).not.toMatch(/buildingSpd|activateTime|updateTime|createId/);
   expect(fixture.queries.at(-1)?.text).toBe("commit");
   const blank = database({ allianceId: " " });
-  expect((await readPowerState(blank.db, "synthetic", now)).territoryTrees).toEqual([]);
+  expect((await getPowerByPlayerId(blank.db, "synthetic", now)).territoryTrees).toEqual([]);
   expect(blank.queries.some((entry) => entry.text.includes('"alliance_territory"'))).toBe(false);
   const failure = database({ allianceId: "synthetic-alliance", treeFailure: true });
-  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  await expect(getPowerByPlayerId(failure.db, "synthetic", now)).rejects.toThrow();
   expect(failure.queries.at(-1)?.text).toBe("rollback");
 });
 
 test("office snapshots use owner membership and bounded realm fight reads in the same transaction", async () => {
   const fixture = database({ office: true });
-  const result = await readPowerState(fixture.db, "synthetic", now);
+  const result = await getPowerByPlayerId(fixture.db, "synthetic", now);
   expect(result.office).toEqual({ positionId: "216002", serverId: 2 });
   expect(result.kingdomFights).toEqual([
     { type: 0, openTime: 1792756790000n, startTime: 1792756800000n, endTime: 9007199254740993n },
@@ -262,13 +262,13 @@ test("office snapshots use owner membership and bounded realm fight reads in the
     true,
   );
   const failure = database({ office: true, fightFailure: true });
-  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  await expect(getPowerByPlayerId(failure.db, "synthetic", now)).rejects.toThrow();
   expect(failure.queries.at(-1)?.text).toBe("rollback");
 });
 
 test("lucky-day snapshots retain exact deadlines and read metadata only from the selected realm", async () => {
   const fixture = database({ lucky: true });
-  const result = await readPowerState(fixture.db, "synthetic", now);
+  const result = await getPowerByPlayerId(fixture.db, "synthetic", now);
   expect(result.luckyDay).toEqual({
     status: 1,
     time: 9007199254740993n,
@@ -289,7 +289,7 @@ test("lucky-day snapshots retain exact deadlines and read metadata only from the
     true,
   );
   const failure = database({ lucky: true, serverFailure: true });
-  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  await expect(getPowerByPlayerId(failure.db, "synthetic", now)).rejects.toThrow();
   expect(failure.queries.at(-1)?.text).toBe("rollback");
 });
 

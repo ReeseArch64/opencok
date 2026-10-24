@@ -16,8 +16,8 @@ import { and, asc, eq, getTableColumns, gt, inArray, or, sql } from "drizzle-orm
 import type { ServerConfig } from "@opencok/contracts/server";
 import type { GameStore, CityState, LoginConfigurationState } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import { checkPlayerSummaryStore, loadPlayerSummaries } from "./players.ts";
-import { checkPowerStore, readPowerState } from "./power.ts";
+import { checkPlayerSummaryStore, getPlayerSummariesByIds } from "./players.ts";
+import { checkPowerStore, getPowerByPlayerId } from "./power.ts";
 
 type GameRepositoryConfig = Pick<
   ServerConfig,
@@ -83,18 +83,18 @@ export class Database implements GameStore {
       this.databases.global.db.execute(sql`select 1`),
     ]);
   }
-  async profile(uid: string): Promise<Row | undefined> {
+  async getProfileById(uid: string): Promise<Row | undefined> {
     return (
       await this.kingdom.db.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
     )[0];
   }
-  async accounts(uid: string): Promise<Row[]> {
+  async getAccountsByPlayerId(uid: string): Promise<Row[]> {
     return this.databases.global.db
       .select({ active: account_new.active, server: account_new.server, uuid: account_new.uuid })
       .from(account_new)
       .where(eq(account_new.gameUid, uid));
   }
-  async city(uid: string, now: number): Promise<CityState> {
+  async getCityByPlayerId(uid: string, now: number): Promise<CityState> {
     return this.kingdom.db.transaction(
       async (tx) => {
         const profile = (
@@ -156,16 +156,16 @@ export class Database implements GameStore {
       { isolationLevel: "repeatable read", accessMode: "read only" },
     );
   }
-  configuration(uid: string): Promise<LoginConfigurationState> {
-    return readLoginConfiguration(this.kingdom.db, uid);
+  getConfigurationByPlayerId(uid: string): Promise<LoginConfigurationState> {
+    return getConfigurationByPlayerId(this.kingdom.db, uid);
   }
-  power(uid: string, now: number) {
-    return readPowerState(this.kingdom.db, uid, now);
+  getPowerByPlayerId(uid: string, now: number) {
+    return getPowerByPlayerId(this.kingdom.db, uid, now);
   }
-  playerSummaries(uids: string[], allServers: boolean) {
-    return loadPlayerSummaries(this.databases, this.config.kingdomId, uids, allServers);
+  getPlayerSummariesByIds(uids: string[], allServers: boolean) {
+    return getPlayerSummariesByIds(this.databases, this.config.kingdomId, uids, allServers);
   }
-  async world(uid: string, ids: number[]) {
+  async getWorldByPointIds(uid: string, ids: number[]) {
     return this.kingdom.db.transaction(
       async (tx) => {
         const world = (
@@ -189,7 +189,7 @@ export class Database implements GameStore {
   }
 }
 
-export function readLoginConfiguration(
+export function getConfigurationByPlayerId(
   db: Database["kingdom"]["db"],
   uid: string,
 ): Promise<LoginConfigurationState> {

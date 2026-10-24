@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { createHandler } from "@opencok/api/handler";
 import { DependencyError } from "@opencok/errors/dependency";
 
-const accounts = { valid: async () => [], health: async () => {} };
+const accounts = { getAll: async () => [], health: async () => {} };
 const directory = { read: async () => new Map() };
 const redis = { health: async () => {} };
 

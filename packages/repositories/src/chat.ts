@@ -61,7 +61,7 @@ export function createChatRepository(config: {
   const now = () => utc(config.now?.() ?? new Date());
   const repository: ChatRepository = {
     sessions: {
-      async save(session) {
+      async create(session) {
         await db.insert(chat_session).values({
           token_hash: session.tokenHash,
           uid: session.uid,
@@ -69,7 +69,7 @@ export function createChatRepository(config: {
           expires_at: utc(session.expiresAt),
         });
       },
-      async findByTokenHash(hash) {
+      async getById(hash) {
         const [session] = await db
           .select({ uid: chat_session.uid })
           .from(chat_session)
@@ -79,7 +79,7 @@ export function createChatRepository(config: {
       },
     },
     messages: {
-      async send(input) {
+      async create(input) {
         validate(input);
         const key = Buffer.from(input.idempotencyKey);
         const rows = await db
@@ -116,7 +116,7 @@ export function createChatRepository(config: {
         if (!row) throw new Error("Chat message unavailable after write");
         return { ...parseRow(row), inserted };
       },
-      async listRecent(roomId, afterMs = 0) {
+      async getAll(roomId, afterMs = 0) {
         room(roomId);
         if (!Number.isSafeInteger(afterMs) || afterMs < 0) throw new TypeError("Invalid time");
         const rows = await db
@@ -133,7 +133,7 @@ export function createChatRepository(config: {
           .limit(100);
         return rows.reverse().map(parseRow);
       },
-      async listRange(roomId, startMs, endMs) {
+      async getAllByRange(roomId, startMs, endMs) {
         room(roomId);
         if (
           !Number.isSafeInteger(startMs) ||
@@ -158,7 +158,7 @@ export function createChatRepository(config: {
         return rows.reverse().map(parseRow);
       },
     },
-    async loadPlayerState(uid) {
+    async getPlayerStateById(uid) {
       const [account] = await db
         .select({ server: account_new.server })
         .from(account_new)
@@ -186,7 +186,7 @@ export function createChatRepository(config: {
         originalServerId: state.originalServerId > 0 ? state.originalServerId : state.serverId,
       };
     },
-    async cleanup() {
+    async deleteExpired() {
       const expiredMessages = db
         .select({ id: chat_message.sequence_id })
         .from(chat_message)

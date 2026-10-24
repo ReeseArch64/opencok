@@ -20,7 +20,7 @@ export function createSendHandler({ authorizeRoom, messages }: RoomHandlerOption
 
     let saved;
     try {
-      saved = await messages.send({
+      saved = await messages.create({
         roomId,
         senderUid: uid,
         idempotencyKey: String(sendTime),

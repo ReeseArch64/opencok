@@ -20,19 +20,19 @@ function game(
 ) {
   const calls: { uids: string[]; allServers: boolean }[] = [];
   const db: GameStore = {
-    profile: async (uid) => {
+    getProfileById: async (uid) => {
       expect(uid).toBe("observer");
       return profile;
     },
-    playerSummaries: async (uids, allServers) => {
+    getPlayerSummariesByIds: async (uids, allServers) => {
       calls.push({ uids, allServers });
       return summaries;
     },
-    accounts: unused,
-    configuration: unused,
-    power: unused,
-    city: unused,
-    world: unused,
+    getAccountsByPlayerId: unused,
+    getConfigurationByPlayerId: unused,
+    getPowerByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
   };
   const rules = new Rules(
     new Map(),
@@ -231,7 +231,7 @@ test("missing or banned observers cannot query summaries and cache failures reje
     expect(calls).toEqual([]);
   }
   const missing = game([], {}, undefined);
-  missing.controller.db.profile = async () => undefined;
+  missing.controller.db.getProfileById = async () => undefined;
   await expect(query(missing.controller)).rejects.toThrow("E100169");
   const { controller } = game([summary()], {
     playerUpdateTimes: async () => {
