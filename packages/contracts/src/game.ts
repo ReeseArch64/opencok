@@ -146,6 +146,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  scoreActivityRanking?(): Promise<readonly string[]>;
   nicknameBadWords?(name: string): boolean | Promise<boolean>;
   nicknameReservedPatterns?(): readonly string[];
   worldPointDetail?: WorldPointDetailStore;

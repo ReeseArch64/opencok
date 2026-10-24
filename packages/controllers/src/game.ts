@@ -321,6 +321,9 @@ export class Game {
       case "kill.al.rank":
         body = await this.allianceRanking(uid, command === "alliance.rank" ? "power" : "kills");
         break;
+      case "act.score.rank":
+        body = await this.scoreActivityRanking(uid);
+        break;
       case "server.rank":
       case "kill.rank":
       case "level.rank":
@@ -343,6 +346,8 @@ export class Game {
       throw new GameError(errors.unsupported, "player_search");
     if (command === "world.get.detail" && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_point_detail");
+    if (command === "act.score.rank" && encode(extension(command, body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "ranking");
     return { body, pushes };
   }
   private async playerSearch(uid: string, params: Fields): Promise<Fields> {
@@ -867,6 +872,20 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async scoreActivityRanking(uid: string): Promise<Fields> {
+    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (!this.services.scoreActivityRanking) throw new GameError(errors.unsupported, "ranking");
+    const board = await this.services.scoreActivityRanking();
+    if (
+      !Array.isArray(board) ||
+      board.length > 32767 ||
+      board.some((value) => typeof value !== "string" || !value.isWellFormed())
+    )
+      throw new GameError(errors.unsupported, "ranking");
+    return { rank: { type: Type.StringArray, value: [...board] } };
   }
   private async expeditionRanking(uid: string): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)
