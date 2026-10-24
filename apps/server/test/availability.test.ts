@@ -37,22 +37,19 @@ test("direct version gates compare Java integer components and expose malformed 
   expect(versionAtLeast("12.6.0.1", "12.6.0")).toBe(true);
 });
 
-test("legacy rule dates use an explicit offset and reject calendar rollover", () => {
-  expect(ruleTime("2026-10-23-12-00")).toBe(now);
-  expect(ruleTime("2026-10-23-12-00", -180)).toBe(now + 3 * 3_600_000);
-  expect(ruleTime("2026-10-23-12-00", 480)).toBe(now - 8 * 3_600_000);
-  expect(ruleTime("2024-02-29-00-00")).toBe(Date.UTC(2024, 1, 29));
-  for (const date of [
-    "",
-    "2026-02-29-00-00",
-    "2026-13-01-00-00",
-    "2026-10-23-24-00",
-    "2026-10-23-12-60",
-    "2026-10-00-00-00",
-  ])
-    expect(ruleTime(date), date).toBeUndefined();
-  expect(ruleTime("2026-10-23-12-00", 841)).toBeUndefined();
-  expect(ruleTime("2026-10-23-12-00", 0.5)).toBeUndefined();
+test("legacy rule dates use an explicit offset, normalize fields and retain parse-failure zero", () => {
+  expect(ruleTime("2026-10-23-12-00")).toBe(BigInt(now));
+  expect(ruleTime("2026-10-23-12-00", -180)).toBe(BigInt(now + 3 * 3_600_000));
+  expect(ruleTime("2026-10-23-12-00", 480)).toBe(BigInt(now - 8 * 3_600_000));
+  expect(ruleTime("2024-02-29-00-00")).toBe(BigInt(Date.UTC(2024, 1, 29)));
+  expect(ruleTime("2026-02-29-00-00")).toBe(BigInt(Date.UTC(2026, 2, 1)));
+  expect(ruleTime("2026-13-01-00-00")).toBe(BigInt(Date.UTC(2027, 0, 1)));
+  expect(ruleTime("2026-10-23-24-00")).toBe(BigInt(Date.UTC(2026, 9, 24)));
+  expect(ruleTime("2026-10-23-12-60")).toBe(BigInt(Date.UTC(2026, 9, 23, 13)));
+  expect(ruleTime("2026-10-00-00-00")).toBe(BigInt(Date.UTC(2026, 8, 30)));
+  expect(ruleTime("")).toBe(0n);
+  expect(() => ruleTime("2026-10-23-12-00", 841)).toThrow();
+  expect(() => ruleTime("2026-10-23-12-00", 0.5)).toThrow();
 });
 
 test("availability combines version, realm, test selector, and inclusive time boundaries", () => {
@@ -73,7 +70,7 @@ test("availability combines version, realm, test selector, and inclusive time bo
   expect(ruleAvailable(rule, { ...context, testServer: true, kingdomId: 9 })).toBe(true);
   expect(ruleAvailable(rule, { ...context, utcOffsetMinutes: -180 })).toBe(false);
   expect(ruleAvailable({ ...rule, start: "2026-10-25-12-00" }, context)).toBe(false);
-  expect(ruleAvailable({ ...rule, start: "invalid" }, context)).toBe(false);
+  expect(ruleAvailable({ ...rule, start: "invalid" }, context)).toBe(true);
   expect(ruleAvailable({ ...rule, end: "" }, context)).toBe(false);
   expect(ruleAvailable({ ...rule, online: "" }, context)).toBe(false);
   expect(ruleAvailable({ ...rule, version: "" }, context)).toBe(false);

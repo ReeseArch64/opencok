@@ -57,7 +57,8 @@
     "./new-general-equipment": "./src/new-general-equipment.ts",
     "./new-general-prestige": "./src/new-general-prestige.ts",
     "./kingdom-skills": "./src/kingdom-skills.ts",
-    "./java-list-sort": "./src/java-list-sort.ts"
+    "./java-list-sort": "./src/java-list-sort.ts",
+    "./java-calendar-date": "./src/java-calendar-date.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

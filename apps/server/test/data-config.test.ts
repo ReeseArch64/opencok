@@ -314,12 +314,14 @@ test("auxiliary catalogs supply general sale limits, pay control and ordered kin
   expect(skills[0]?.id).toBe("second");
 });
 
-test("malformed integers, long overflows and invalid dates fail before emitting corrupted config", () => {
+test("malformed integers and long overflows fail while avatar dates retain calendar normalization", () => {
   for (const value of ["1.5", "NaN", "", "2147483648", "-2147483649", "1e3"])
     expect(() => project(catalog({ resources_basics: { k8: value } }))).toThrow();
   for (const value of ["9223372036854775808", "-9223372036854775809", "2.5", "no"])
     expect(() => project(catalog({ wa_score: { k10: value } }))).toThrow();
-  expect(() => project(catalog({ icon: { k4: "2026-02-30" } }))).toThrow();
+  expect(fields(project(catalog({ icon: { k4: "2026-02-30" } })).icon).k4?.value).toBe(
+    String(Date.UTC(2026, 2, 2)),
+  );
   expect(() => project(catalog({ monster: { k11: "missing-separator" } }))).toThrow();
   expect(project(catalog({ resources_basics: { k8: "2147483647" } })).freeSpdT?.value).toBe(
     2147483647,
@@ -399,4 +401,19 @@ test("configuration preserves function-on blank bypass and direct cross-realm ve
     expect(() => project(rules, { version, crossOpen: true })).toThrow();
     expect(project(rules, { version, crossOpen: false }).cross_open).toEqual(sfs.bool(false));
   }
+});
+
+test("avatar configuration dates use date-only parsing, zero fallback and exact Long strings", () => {
+  const rules = catalog({ icon: { k1: "keep", k4: "2026-2-30suffix", k5: "bad" } });
+  expect(fields(project(rules).icon)).toEqual({
+    k1: sfs.string("keep"),
+    k4: sfs.string(String(Date.UTC(2026, 2, 2))),
+    k5: sfs.string("0"),
+  });
+  rules.items.get("icon")!.k4 = "2147483648-1-1";
+  rules.items.get("icon")!.k5 = "2026-10-23-12-45";
+  const icon = fields(project(rules).icon);
+  expect(icon.k4).toEqual(sfs.string("6017484157321406464"));
+  expect(icon.k5).toEqual(sfs.string(String(Date.UTC(2026, 9, 23))));
+  expect(rules.items.get("icon")!.k4).toBe("2147483648-1-1");
 });

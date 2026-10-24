@@ -6,9 +6,9 @@ import {
   featureRealmEnabled,
   worldActivityRealmEnabled,
   ruleAvailable,
-  ruleTime,
   versionAtLeast,
 } from "@opencok/rules/availability";
+import { javaCalendarDate } from "@opencok/rules/java-calendar-date";
 import type { Rule, Rules } from "@opencok/rules/game";
 import { restoredKingdomSkills, type KingdomSkill } from "@opencok/rules/kingdom-skills";
 import { javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
@@ -352,8 +352,7 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
     const value = strings(icon);
     for (const key of ["k4", "k5"]) {
       if (icon[key] === undefined) continue;
-      const date = ruleTime(`${icon[key]}-00-00`);
-      if (date === undefined) throw new GameError(errors.unsupported, "icon_date_rule");
+      const date = javaCalendarDate(icon[key], 3) ?? 0n;
       value[key] = sfs.string(String(date));
     }
     result.icon = sfs.object(value);

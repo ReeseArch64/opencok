@@ -1,6 +1,7 @@
 import type { Row } from "@opencok/contracts/rows";
 import { text } from "@opencok/contracts/rows";
-import { ruleTime, type RuleContext } from "./availability.ts";
+import type { RuleContext } from "./availability.ts";
+import { javaCalendarDate } from "./java-calendar-date.ts";
 import type { Rule, Rules } from "./game.ts";
 import { powerFeatureContext } from "./power-context.ts";
 import {
@@ -35,11 +36,21 @@ export function heroEffects(
 ): ReadonlyMap<number, number> {
   const effects = new Map<number, number>();
   const event = rules.power.activityEvents?.get("9005005");
-  if (!event?.k1 || !event.k2 || !Number.isSafeInteger(context.now)) return effects;
-  const start = ruleTime(event.k1, context.utcOffsetMinutes);
-  const end = ruleTime(event.k2, context.utcOffsetMinutes);
-  if (start === undefined || end === undefined || context.now < start || context.now > end)
-    return effects;
+  if (!Number.isSafeInteger(context.now)) return effects;
+  let start = 0n;
+  let end = 0n;
+  if (event && Object.keys(event).length) {
+    const parsedStart = javaCalendarDate(event.k1!, 5, context.utcOffsetMinutes);
+    if (parsedStart !== undefined) {
+      const parsedEnd = javaCalendarDate(event.k2!, 5, context.utcOffsetMinutes, parsedStart);
+      if (parsedEnd !== undefined) {
+        start = parsedStart;
+        end = parsedEnd;
+      }
+    }
+  }
+  const now = BigInt(context.now);
+  if (now < start || now > end) return effects;
   for (const hero of selectHeroes(heroes)) {
     const rule = rules.power.heroes?.get(text(hero, "heroid"));
     if (!rule) return invalid();

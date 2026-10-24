@@ -513,8 +513,14 @@ malformed extra components throw and missing positions fail only when reached.
 Function-on contexts share the Java-blank player bypass, while account switches,
 cross-open configuration and lucky-day eligibility use direct comparison. Ordinary
 announcement metadata and server-only gates retain their lack of client comparison.
-The login composition still selects the supported process version. Lenient dates
-still require compatibility work. Kingdom-skill presentation now consumes
+The login composition still selects the supported process version. Shared calendar
+parsing now retains Java 8 numeric field normalization, prefix consumption, Gregorian
+cutover and signed Long timestamps. Configuration/function-on parse failures become
+zero; activity panels retain -1 and exception-to-closed behavior, and hero pairs retain
+their shared formatter and all-or-zero endpoint assignment. Function-on end dates are
+consumed only after the start gate passes. The runtime remains explicitly UTC; locale
+selection, regional timezone transitions and non-Gregorian calendar systems are not
+emulated. Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
 traversal. A bounded Java 8 list sort preserves the comparator's ID equality, signed

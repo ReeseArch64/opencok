@@ -99,8 +99,8 @@ whitespace; malformed XML, nonstring values and document type declarations fail 
 Building star availability evaluates numeric client versions, realm selectors and
 inclusive start/end boundaries at the command's injected time. Legacy dates use
 `yyyy-MM-dd-HH-mm`, interpreted in UTC for this server, independently of the host
-timezone. Dates and default version checks still reject unsupported formats; Java's
-lenient date rollover and invalid-date epoch fallback remain pending. Function-on
+timezone. Dates now retain lenient field normalization and parse-failure epoch fallback;
+version checks use the reference component and blank-player policies. Function-on
 realm selectors now retain ordered Java parsing and propagate reached parse failures.
 Test-realm selectors and explicit timezone offsets are supported by the pure availability
 evaluator; the running realm uses the online selector and UTC. This changes only
@@ -118,8 +118,9 @@ The command reads the authenticated realm profile to select the level-dependent
 stamina cap when `stamina_limit` is available. Realm switches control quest metadata,
 service terms and scout settings; the mission switch also checks version and time.
 Avatar calendar dates are returned as UTC epoch-millisecond strings. Malformed
-numeric fields, overflows and invalid dates produce the existing unsupported error
-instead of an invalid SFS value. These metadata reads never settle production or
+numeric fields and overflows produce the existing unsupported error instead of an
+invalid SFS value. Avatar dates retain lenient date-only parsing and serialize parse
+failures as the string `0`. These metadata reads never settle production or
 modify a player. Cross-realm gameplay remains disabled, and the running realm uses
 the normal-world configuration with chat interval 1 and feed limit 3. Alternative
 world-cup projections and explicit server values have unit coverage, but are not
@@ -163,7 +164,32 @@ account-counter reads after a version failure. The login runtime continues to se
 the supported process client version; this change does not restore per-session version
 negotiation. Eight added units include 1,280 independent Java 8 version-pair fixtures
 with 2,560 direct/function-on outcomes, DTO serialization, event effects and controller
-failure ordering. Lenient legacy date parsing remains pending.
+failure ordering. Date behavior is described below.
+
+`rules/java-calendar-date` independently restores the numeric `yyyy-MM-dd` and
+`yyyy-MM-dd-HH-mm` parsing paths of Java 8 Gregorian calendars with US numeric symbols.
+Fields accept variable widths, Java decimal digits, leading spaces/tabs, signed values
+and numeric exponents. Parsing consumes a valid prefix and normalizes overflowing
+months, days, hours and minutes. The Julian/Gregorian cutover, Int field narrowing,
+Double-to-Int saturation and signed Long timestamp wrapping remain explicit. Results
+use bigint, including dates outside JavaScript Date's range. Avatar metadata uses the
+three-field pattern directly rather than appending a midnight suffix.
+
+Failure behavior follows each caller. Configuration and function-on dates return epoch
+zero for a parse failure. Function-on windows check the start before reading the end,
+so a future start skips even an invalid end. Activity-panel dates independently fall
+back to -1 and retain the panel's exception-to-closed boundary. Hero windows parse both
+dates before assigning either endpoint: a parse failure leaves both at zero and an
+invalid start skips end parsing, while absent required fields still throw. Hero pairs
+also retain their reused formatter's previous calendar at ambiguous cutover dates.
+No parser repairs catalog data or writes player state.
+
+Inputs are bounded to 65,535 characters. Offsets remain explicit integral minutes within
+14 hours of UTC; the runtime uses UTC. This models a fixed-offset Gregorian server,
+not host locale selection, regional daylight-saving transitions or alternative Java
+calendar systems. Nine added units include 2,971 independent Java 8 single-date cases
+and 108 reused-formatter pairs, plus configuration, effect and failure-order checks.
+The fixtures contain synthetic inputs only and tests require no Java or game services.
 
 Function-on availability, server-side effect gates and ordinary feature announcements
 use `featureRealmEnabled`. It recognizes exact `all`/`close`, skips empty semicolon
@@ -1710,7 +1736,7 @@ exact Long thresholds, duplicate catalog
 records, resource loading and ordinary prestige regression. This supplies the general
 owner projection; ordinary modifier composition is described below, and complete
 occupied-resource responses remain pending. Function-on realm parsing now uses the
-ordered Java-compatible selector described above; lenient legacy dates remain pending.
+ordered Java-compatible selector and lenient calendar parser described above.
 
 `controllers/world-resource-owner-effects` now composes the resource owner's saved
 abilities and ordinary effects with the building/general projection. It reads world
