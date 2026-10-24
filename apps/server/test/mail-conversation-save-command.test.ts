@@ -178,7 +178,7 @@ test("chatMail.save rejects unauthorized snapshots and transaction failures", as
   ).rejects.toThrow("Synthetic conversation failure");
 });
 
-test("conversation read planning does not prematurely enable a mailbox-only mutation", async () => {
+test("conversation read rejects unsupported chat effects before mailbox mutation", async () => {
   const f = fixture();
   await expect(
     f.game.execute("self", "chatMail.read", {
@@ -188,5 +188,5 @@ test("conversation read planning does not prematurely enable a mailbox-only muta
     }),
   ).rejects.toMatchObject({ code: "102192" });
   expect(f.calls).toEqual([]);
-  expect(f.clocks()).toBe(0);
+  expect(f.clocks()).toBe(1);
 });

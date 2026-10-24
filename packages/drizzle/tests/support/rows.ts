@@ -41,6 +41,12 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.picVer = variant;
     row.effects = "{}";
   }
+  if (spec.indexes.some((key) => key.name === "avatar_version_update_PRIMARY")) {
+    row.operationId = String(variant).repeat(32);
+    row.ownerUid = String(variant);
+    row.picVer = variant;
+    row.effects = "{}";
+  }
   if (spec.indexes.some((key) => key.name === "chat_avatar_profile_PRIMARY")) {
     row.owner_uid = String(variant);
     row.pic_ver = variant;

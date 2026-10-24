@@ -846,6 +846,21 @@ Only synthetic unit composition and fake connection objects have been exercised.
 Restored-state semantics, full moderation/media lifecycle, animated formats and production
 Node execution remain pending.
 
+The legacy `user.update.picVer` command is a separate version-allocation operation.
+`controllers/avatar-version` and `repositories/avatar-version` commit the authenticated
+profile and applicable moderation state with a distinct `avatar_version_update` intent
+under the same PostgreSQL authority from ADR-0002. The event kind is represented by its
+separate table/consumer; it contains a server-owned operation ID, version and captured
+effects, never a fabricated hash or upload-completion receipt. Existing files ownership,
+asset verification and `avatar_completion` invariants remain intact. Allocation alone
+cannot establish asset availability. Its independent mail/cache/chat acknowledgments
+and scoped recovery relay reuse existing transports; superseded metadata effects do
+not replace the current profile. Normal supported versions are implemented, while
+negative/restored versions and modulo wrap reject before mutation pending a separate
+legacy event-ordering or expected-previous CAS design. This command has received static
+checks only: test generation/execution is deferred by the user, and topic 7 remains
+incomplete. The realm runbook records configuration, schema and retry boundaries.
+
 ### Package groups
 
 | Group                       | Existing packages that can fulfill this role                                                                                  | Dependency rule                                                                           |
@@ -1619,14 +1634,14 @@ migration execution or deployment.
 ### 15.1. PostgreSQL database package
 
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
-Drizzle schemas in `src/schema` are the source of truth: 777 tables and 6,343 fields,
+Drizzle schemas in `src/schema` are the source of truth: 778 tables and 6,350 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
 `schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
 The default physical databases are `opencok_global`, `opencok_kingdom_1` and
 `opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
 `opencok_global`, `opencok_pay` and `opencok_chat` (114 tables). Both kingdom databases
-contain the same `opencok_kingdom` namespace (663 tables each). One set of kingdom
+contain the same `opencok_kingdom` namespace (664 tables each). One set of kingdom
 table modules and migrations serves every configured kingdom; there are no per-ID
 schema copies. Table/field names and values remain stable. Database names and
 credentials are configuration. Pools and local transactions belong to one physical database; there
