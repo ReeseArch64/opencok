@@ -16,7 +16,8 @@
     "./features": "./src/features.ts",
     "./power": "./src/power.ts",
     "./power-context": "./src/power-context.ts",
-    "./power-effects": "./src/power-effects.ts"
+    "./power-effects": "./src/power-effects.ts",
+    "./power-attributes": "./src/power-attributes.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
