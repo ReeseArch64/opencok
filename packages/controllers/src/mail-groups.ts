@@ -5,6 +5,7 @@ import type {
   MailGroupPage,
   MailGroupPreview,
   MailGroupQuery,
+  MailListCommand,
 } from "@opencok/contracts/mail";
 import {
   encode,
@@ -64,6 +65,7 @@ export function mailGroupProjection(
   page: MailGroupPage,
   presentation: MailCategoryPresentation,
   envelope: Fields = {},
+  command: MailListCommand = "mread.batch",
 ): { body: Fields; cleanup: MailGroupCleanup } {
   const selected = mailGroupWindow(owner, query, page.groups);
   if (page.previews.length !== selected.length) throw new ProtocolError();
@@ -110,7 +112,7 @@ export function mailGroupProjection(
         entries,
         presentation,
         "conversation",
-        "mread.batch",
+        command,
       ).body.result!;
     }
     message.unread = sfs.int(rule.kind === "uid" ? 0 : Number(preview.unread));
@@ -118,6 +120,6 @@ export function mailGroupProjection(
     result.push(sfs.object(message));
   }
   const body = { result: sfs.array(result) };
-  encode(extension("mread.batch", { ...body, ...envelope }));
+  encode(extension(command, { ...body, ...envelope }));
   return { body, cleanup: { groups, mailIds: [...mailIds] } };
 }
