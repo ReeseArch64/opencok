@@ -1,13 +1,16 @@
 import type { RuleContext } from "./availability.ts";
-import { realmEnabled, ruleTime } from "./availability.ts";
+import { featureRealmEnabled, ruleTime } from "./availability.ts";
+import { mailBlank } from "./mail.ts";
 import type { Rules } from "./game.ts";
 
 export function serverFeature(rules: Rules, key: string, context: RuleContext): boolean {
   const rule = rules.features.get(key);
   if (
-    !rule?.version?.trim() ||
+    !rule ||
+    mailBlank(rule.version) ||
+    mailBlank(context.testServer ? rule.test : rule.online) ||
     !Number.isSafeInteger(context.now) ||
-    !realmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
+    !featureRealmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
     return false;
   const start =

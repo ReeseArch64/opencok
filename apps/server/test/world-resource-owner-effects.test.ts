@@ -118,6 +118,16 @@ const expected = {
   expedition: 9,
 };
 
+test("expedition selector failures remain local while early matching selectors reach the saved phase", async () => {
+  const f = fixture();
+  f.rules.features.set("17_wk", { version: "99.0.0", online: "+２;bad" });
+  expect(await f.resolve()).toEqual(expected);
+  expect(f.state.expeditionReads).toBe(1);
+  f.rules.features.set("17_wk", { version: "99.0.0", online: "bad;2" });
+  expect(await f.resolve()).toEqual({ ...expected, expedition: 0 });
+  expect(f.state.expeditionReads).toBe(1);
+});
+
 test("saved owner abilities and realm effects feed all five load contributions and concrete general equipment modifiers", async () => {
   const f = fixture();
   const before = structuredClone(f.snapshot);

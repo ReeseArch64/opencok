@@ -64,6 +64,32 @@ export function realmEnabled(selector: string | undefined, kingdomId: number): b
   return enabled;
 }
 
+export function featureRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
+  if (
+    typeof selector !== "string" ||
+    selector.length > 65535 ||
+    !Number.isInteger(kingdomId) ||
+    kingdomId < -2147483648 ||
+    kingdomId > 2147483647
+  )
+    throw new Error("Invalid feature realm selector");
+  if (selector === "all") return true;
+  if (selector === "close") return false;
+  const entries = selector.split(";").filter(Boolean);
+  if (entries.length > 4096) throw new Error("Too many feature realm selectors");
+  for (const entry of entries) {
+    if (/^[0-9]+-[0-9]+/.exec(entry)?.[0] === entry) {
+      const [lower, upper] = entry.split("-");
+      if (
+        kingdomId >= Number(javaDecimal(lower, 32)) &&
+        kingdomId <= Number(javaDecimal(upper, 32))
+      )
+        return true;
+    } else if (kingdomId === Number(javaDecimal(entry, 32))) return true;
+  }
+  return false;
+}
+
 export function ruleTime(value: string, utcOffsetMinutes = 0): number | undefined {
   if (
     !/^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}$/.test(value) ||
@@ -99,12 +125,11 @@ export function ruleAvailable(
   if (
     !rule ||
     !Number.isSafeInteger(context.now) ||
-    (context.versionPolicy === "legacy-player" &&
-      mailBlank(context.testServer ? rule.test : rule.online)) ||
+    mailBlank(context.testServer ? rule.test : rule.online) ||
     !(context.versionPolicy === "legacy-player"
       ? legacyPlayerVersionAtLeast(context.version, rule.version)
       : versionAtLeast(context.version, rule.version ?? "")) ||
-    !realmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
+    !featureRealmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
     return false;
   const start =

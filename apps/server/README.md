@@ -97,9 +97,10 @@ zeroes and whitespace; malformed records and document type declarations fail loa
 Building star availability evaluates numeric client versions, realm selectors and
 inclusive start/end boundaries at the command's injected time. Legacy dates use
 `yyyy-MM-dd-HH-mm`, interpreted in UTC for this server, independently of the host
-timezone. Invalid dates, versions and selectors fail closed instead of inheriting
-the Java parser's lenient date rollover or invalid-date epoch fallback. Test-realm
-selectors and explicit timezone offsets are supported by the pure availability
+timezone. Dates and default version checks still reject unsupported formats; Java's
+lenient date rollover and invalid-date epoch fallback remain pending. Function-on
+realm selectors now retain ordered Java parsing and propagate reached parse failures.
+Test-realm selectors and explicit timezone offsets are supported by the pure availability
 evaluator; the running realm uses the online selector and UTC. This changes only
 availability/read previews; construction remains unsupported.
 
@@ -140,6 +141,31 @@ Boss, payment, subscription and multiple-role announcements additionally require
 an available backend service. They remain closed in the current composition;
 ordinary configured feature metadata is no longer forced off. This does not enable
 unsupported gameplay commands or establish client rendering.
+
+Function-on availability, server-side effect gates and ordinary feature announcements
+use `featureRealmEnabled`. It recognizes exact `all`/`close`, skips empty semicolon
+segments, accepts Java signed Integer members and returns immediately on the first
+match. Ranges require the reference ASCII-digit pattern; Unicode digits remain valid
+for individual Integer members. The upper range bound is parsed only when the lower
+comparison succeeds. Consequently `2;bad` enables realm 2, while `bad;2` throws;
+`3-2147483648` returns false for realm 2 without parsing the oversized upper bound.
+Trailing line terminators do not turn malformed tokens into valid ranges.
+
+Required version and realm metadata use Java blank semantics before selection.
+Server-only gates require version metadata without comparing a client version.
+Availability still applies its selected version policy before realm parsing. Invalid
+selectors propagate to their existing caller boundary: the expedition contribution
+falls back to zero, while an ordinary required effect/configuration read may fail.
+The primitive accepts signed Int realm values, while command/runtime validation
+continues to restrict physical realm IDs. Inputs are bounded to 65,535 characters
+and 4,096 nonempty segments. Six added units include 1,020 independent Java 8
+Integer/regexp query fixtures and resource-owner fallback composition. Tests require
+no Java installation, ignored reference inputs or external services.
+
+The existing generic `realmEnabled` helper remains distinct for item switches and
+event controls; those reference methods differ from function-on selection and still
+need their own compatibility audit. This change does not complete date parsing or
+remove the documented strict default client-version policy.
 
 Account-change verification uses the configured version/realm threshold and the
 global Redis key `opencok:global:device-account-change:<deviceId>`. Reads preserve
@@ -1609,8 +1635,8 @@ Seventeen added unit tests cover these projections, deferred failures, overflow,
 exact Long thresholds, duplicate catalog
 records, resource loading and ordinary prestige regression. This supplies the general
 owner projection; ordinary modifier composition is described below, and complete
-occupied-resource responses remain pending. The shared realm/date gates still need a separate
-compatibility audit for exceptional legacy selectors and lenient date strings.
+occupied-resource responses remain pending. Function-on realm parsing now uses the
+ordered Java-compatible selector described above; lenient legacy dates remain pending.
 
 `controllers/world-resource-owner-effects` now composes the resource owner's saved
 abilities and ordinary effects with the building/general projection. It reads world
@@ -2676,16 +2702,16 @@ uses the existing bounded Java hash traversal helper, with its documented except
 limits. Task visibility, discovery, completion writes and their pushes still need to
 use these descriptions before the reconnect task component is complete.
 
-| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                            |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests                                                                                                   | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable.          |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                                 | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
-| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
-| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.          |
-| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                                        | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
-| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
-| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
+| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                                                                         |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; ordered function-on realm parsing; synthetic unit and adapter tests                                                                | Item-switch/event selectors, lenient dates and version-policy compatibility. Native-client and real-service validation remain deferred; bosses, commerce and account switching stay outside this wave. |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                                 | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                                                                 |
+| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                                             |
+| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                                              |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                                       |
+| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                                        | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                                                              |
+| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                                           |
+| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                                      |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog
