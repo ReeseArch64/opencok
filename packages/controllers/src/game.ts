@@ -1,12 +1,45 @@
+import { mailDeleted, mailSave, mailStatus } from "@opencok/dtos/mail";
+import { mailContentsProjection } from "./mail-contents.ts";
+import { planMailDeletion } from "./mail-delete.ts";
+import {
+  mailContentsQuery,
+  mailConversationSaveQuery,
+  mailDeleteQuery,
+  mailReadQuery,
+  mailSaveQuery,
+  mailStatusQuery,
+  calculateMailStatus,
+} from "@opencok/rules/mail";
+import type { MailSaveMode } from "@opencok/contracts/mail";
+import { expeditionRanking } from "@opencok/dtos/expedition-ranking";
+import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
+import { decodeExpeditionRanking } from "./expedition-ranking.ts";
+import { allianceRanking } from "@opencok/dtos/alliance-ranking";
+import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
+import type { AllianceRankingKind } from "@opencok/contracts/alliance-ranking";
 import type { ServerConfig } from "@opencok/contracts/server";
 import type { CityState, GameServices, GameStore } from "@opencok/contracts/game";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
-import { sfs, Type, type Fields, type Value } from "@opencok/messages/sfs";
+import {
+  sfs,
+  Type,
+  int as wireInt,
+  str as wireString,
+  type Fields,
+  type Value,
+} from "@opencok/messages/sfs";
 import { guidePlayerSummary, playerSummary } from "@opencok/dtos/players";
 import { building, gold, queue, resource, user } from "@opencok/dtos/city";
 import { powerInfo } from "@opencok/dtos/power";
+import { publicProfileBase } from "@opencok/dtos/profile";
+import { publicProfileAlliance, publicProfileGenerals } from "./profile.ts";
+import { playerRanking } from "@opencok/dtos/ranking";
+import { playerRankingQuery, selectPlayerRanking } from "@opencok/rules/ranking";
+import type { PlayerRankingKind } from "@opencok/contracts/ranking";
 import { calculatePlayerPower } from "@opencok/rules/power";
-import { powerContext } from "./power.ts";
+import { powerContext, decodeWorldPowerEffects, generalSkillPoints } from "./power.ts";
+import { dragonAttackEffect } from "@opencok/rules/power-resolver";
+import { worldPowerEffects } from "@opencok/rules/power-world";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
@@ -24,6 +57,14 @@ import {
   settingConfig,
   loginConfiguration,
 } from "@opencok/dtos/bootstrap";
+
+const playerRankingKinds = {
+  "server.rank": "power",
+  "kill.rank": "kills",
+  "level.rank": "level",
+  "building.rank": "building",
+  "silver.contribute.rank": "contribution",
+} as const;
 
 type GameConfig = Pick<ServerConfig, "kingdomId">;
 
@@ -122,12 +163,55 @@ export class Game {
         await this.profile(uid);
         body = await this.playerSummaries(params);
         break;
+      case "get.user.info":
+        body = await this.publicProfile(uid, params);
+        break;
       case "get.power.info":
         body = await this.power(uid);
+        break;
+      case "mail.category.status":
+        body = await this.mailStatus(uid, params);
+        break;
+      case "mail.read.status":
+      case "mail.read.status.betch":
+        body = await this.mailRead(uid, command === "mail.read.status.betch", params);
+        break;
+      case "mail.read":
+        body = await this.mailContents(uid, params);
+        break;
+      case "mail.delete":
+        body = await this.mailDelete(uid, params);
+        break;
+      case "chatMail.save":
+        body = await this.mailConversationSave(uid, params);
+        break;
+      case "mail.save":
+      case "mail.cancel.save":
+      case "mail.save.batch":
+        body = await this.mailSave(
+          uid,
+          command === "mail.save" ? "save" : command === "mail.cancel.save" ? "cancel" : "batch",
+          params,
+        );
+        break;
+      case "expedition.rank":
+        body = await this.expeditionRanking(uid);
+        break;
+      case "alliance.rank":
+      case "kill.al.rank":
+        body = await this.allianceRanking(uid, command === "alliance.rank" ? "power" : "kills");
+        break;
+      case "server.rank":
+      case "kill.rank":
+      case "level.rank":
+      case "building.rank":
+      case "silver.contribute.rank":
+        body = await this.ranking(uid, playerRankingKinds[command]);
         break;
       default:
         throw new GameError(errors.unsupported);
     }
+    if (Object.keys(body).length === 0) body.success = sfs.bool(true);
     if (params._cok_) body._cok_ = params._cok_;
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
     return { body, pushes: [] };
@@ -135,16 +219,232 @@ export class Game {
   private async profile(uid: string): Promise<Row> {
     return this.checkProfile(await this.db.getProfileById(uid));
   }
+  private async mailStatus(uid: string, params: Fields): Promise<Fields> {
+    const field = params.category;
+    let category: number | undefined;
+    if (field !== undefined) {
+      if (field.type !== Type.Int || typeof field.value !== "number")
+        throw new GameError(errors.invalid);
+      category = field.value;
+    }
+    const query = mailStatusQuery(category, this.now());
+    const state = await this.db.mailStatus(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return mailStatus(calculateMailStatus(query, state.counts));
+  }
+  private async mailSave(uid: string, mode: MailSaveMode, params: Fields): Promise<Fields> {
+    const ids = mode === "batch" ? params.uids : params.uid;
+    const flag = mode === "batch" ? params.flag : params.type;
+    if (
+      !ids ||
+      ids.type !== Type.String ||
+      typeof ids.value !== "string" ||
+      !flag ||
+      flag.type !== Type.Int ||
+      typeof flag.value !== "number"
+    )
+      throw new GameError(errors.invalid);
+    const query = mailSaveQuery(mode, ids.value, flag.value, this.now());
+    const state = await this.db.mailSave(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return mailSave(state.result);
+  }
+  private async mailRead(uid: string, batch: boolean, params: Fields): Promise<Fields> {
+    const ids = batch ? params.uids : params.uid;
+    const type = params.type;
+    if (
+      !ids ||
+      ids.type !== Type.String ||
+      typeof ids.value !== "string" ||
+      (!batch &&
+        (!type ||
+          type.type !== Type.Int ||
+          typeof type.value !== "number" ||
+          !Number.isInteger(type.value) ||
+          type.value < -2147483648 ||
+          type.value > 2147483647))
+    )
+      throw new GameError(errors.invalid);
+    const query = mailReadQuery(batch, ids.value, this.now());
+    const state = await this.db.mailRead(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return {};
+  }
+  private async mailDelete(uid: string, params: Fields): Promise<Fields> {
+    const ids = params.uids;
+    const legacyNum = params.num;
+    if (
+      !ids ||
+      ids.type !== Type.String ||
+      typeof ids.value !== "string" ||
+      (legacyNum !== undefined &&
+        (legacyNum.type !== Type.Int ||
+          typeof legacyNum.value !== "number" ||
+          !Number.isInteger(legacyNum.value) ||
+          legacyNum.value < -2147483648 ||
+          legacyNum.value > 2147483647))
+    )
+      throw new GameError(errors.invalid);
+    const query = mailDeleteQuery(ids.value, this.now());
+    const state = await this.db.mailDelete(uid, query, (entries) => planMailDeletion(uid, entries));
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return mailDeleted(state.deleted);
+  }
+  private async mailContents(uid: string, params: Fields): Promise<Fields> {
+    const ids = wireString(params, "uid");
+    if (typeof wireString(params, "type") !== "string") throw new GameError(errors.invalid);
+    const query = mailContentsQuery(ids, this.now());
+    let body: Fields | undefined;
+    const envelope: Fields = {};
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) envelope[key] = params[key]!;
+    const state = await this.db.mailContents(uid, query, (entries) => {
+      const projection = mailContentsProjection(entries, envelope);
+      body = projection.body;
+      return projection.invalidIds;
+    });
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
+      throw new GameError(errors.invalid);
+    return body;
+  }
+  private async mailConversationSave(uid: string, params: Fields): Promise<Fields> {
+    const sender = params.fromUser !== undefined;
+    const type = params.type !== undefined;
+    if (
+      sender
+        ? typeof params.fromUser!.value !== "string"
+        : type && typeof params.type!.value !== "number"
+    )
+      throw new GameError(errors.invalid);
+    const query = mailConversationSaveQuery(
+      {
+        mod: wireInt(params, "mod", 0),
+        ...(sender
+          ? { fromUser: wireString(params, "fromUser") }
+          : type
+            ? { type: wireInt(params, "type") }
+            : {}),
+        ...(sender || type ? { flag: wireInt(params, "flag") } : {}),
+      },
+      this.now(),
+    );
+    const state = await this.db.mailConversationSave(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return {};
+  }
+  private async expeditionRanking(uid: string): Promise<Fields> {
+    if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)
+      throw new GameError(errors.unsupported, "ranking");
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const limit = expeditionRankingLimit(this.rules);
+    const entries = await this.services.expeditionRanking(limit);
+    return expeditionRanking(selectExpeditionRanking(uid, limit, decodeExpeditionRanking(entries)));
+  }
+  private async allianceRanking(uid: string, kind: AllianceRankingKind): Promise<Fields> {
+    if (this.rules.kingdomId !== this.config.kingdomId)
+      throw new GameError(errors.unsupported, "ranking");
+    const query = allianceRankingQuery(kind, this.rules, this.now());
+    const snapshot = await this.db.allianceRanking(uid, query);
+    const profile = this.checkProfile(snapshot.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return allianceRanking(kind, selectAllianceRanking(query, snapshot, this.rules));
+  }
+  private async ranking(uid: string, kind: PlayerRankingKind): Promise<Fields> {
+    if (this.rules.kingdomId !== this.config.kingdomId)
+      throw new GameError(errors.unsupported, "ranking");
+    const query = playerRankingQuery(kind, this.rules, this.now());
+    const snapshot = await this.db.playerRanking(uid, query);
+    const profile = this.checkProfile(snapshot.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return playerRanking(kind, selectPlayerRanking(uid, query, snapshot));
+  }
+  private async publicProfile(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const observer = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (text(observer, "uid") !== uid) throw new GameError(errors.invalid);
+    const target = params.uid;
+    if (!target || target.type === Type.Null) throw new GameError(errors.missing);
+    if (target.type !== Type.String || typeof target.value !== "string")
+      throw new GameError(errors.invalid);
+    if (!target.value.trim()) throw new GameError(errors.missing);
+    if (!/^[0-9]{1,40}$/.test(target.value)) throw new GameError(errors.invalid);
+    const result = await this.db.publicProfile(target.value, text(observer, "allianceId"));
+    if (!result?.state.profile) throw new GameError(errors.missing);
+    const { state, kingdomId } = result;
+    if (
+      !Number.isInteger(kingdomId) ||
+      kingdomId <= 0 ||
+      kingdomId > 2147483647 ||
+      text(state.profile!, "uid") !== target.value ||
+      num(state.profile!, "serverId") !== kingdomId
+    )
+      throw new GameError(errors.invalid);
+    if (
+      state.alliance &&
+      state.alliance.withEffects !==
+        (text(observer, "allianceId") !== text(state.profile!, "allianceId"))
+    )
+      throw new GameError(errors.invalid);
+    const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
+    const body = {
+      ...publicProfileBase(state, this.rules, context, "", kingdomId),
+      ...publicProfileGenerals(state, this.rules, now),
+      ...publicProfileAlliance(state, this.rules, kingdomId !== this.config.kingdomId),
+    };
+    const updates = await this.services.playerUpdateTimes?.(kingdomId, [target.value]);
+    body.lastUpdateTime = sfs.string(updates?.get(target.value) ?? "");
+    return body;
+  }
   private async power(uid: string): Promise<Fields> {
     const now = this.now();
     const state = await this.db.getPowerByPlayerId(uid, now);
     const profile = this.checkProfile(state.profile, now);
     if (text(profile, "uid") !== uid) throw new GameError(errors.invalid);
-    const context = powerContext(this.rules, state.knight, {
+    const ruleContext = {
       now,
       kingdomId: this.config.kingdomId,
       version: MOBILE_CLIENT_VERSION,
-    });
+    };
+    const context = powerContext(this.rules, state.knight, ruleContext);
+    if (
+      context.dragonLevelUp &&
+      context.dragonScience &&
+      state.dragons.some((dragon) => num(dragon, "dragonState") === 3)
+    ) {
+      if (!this.services.worldPowerEffects) throw new GameError(errors.unsupported, "power_state");
+      const world = worldPowerEffects(
+        decodeWorldPowerEffects(await this.services.worldPowerEffects()),
+        this.rules,
+        ruleContext,
+      );
+      const emperor = state.throneRewards.length
+        ? await this.services.emperorVersion?.()
+        : undefined;
+      context.dragonAttackPercent = dragonAttackEffect(
+        { ...state, profile },
+        this.rules,
+        ruleContext,
+        generalSkillPoints(state.generals),
+        world,
+        emperor,
+      );
+    }
     const power = calculatePlayerPower({ ...state, profile }, this.rules, context);
     return powerInfo(state.statistics, power, state.upload, this.rules);
   }

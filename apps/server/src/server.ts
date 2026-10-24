@@ -9,6 +9,7 @@ import { Coordination } from "@opencok/storage/coordination";
 import { loadRules } from "@opencok/resources/rules";
 import { Game } from "@opencok/controllers/game";
 import { World } from "@opencok/controllers/world";
+import { startMailGiftRelay } from "./mail-gift-relay.ts";
 
 export class RealmDependencies extends Context.Service<RealmDependencies, ServerDependencies>()(
   "@opencok/server/Dependencies",
@@ -33,6 +34,19 @@ export const RealmDependenciesLive = Layer.effect(
       async (coordination) => coordination.close(),
     );
     yield* fromPromise("realm.database.start", () => db.start()).pipe(Effect.uninterruptible);
+    yield* acquireResource(
+      "realm.mail-gift-relay",
+      async () =>
+        startMailGiftRelay(
+          () => db.relayMailGifts(),
+          () => {
+            console.warn(
+              JSON.stringify({ event: "mail_gift_relay_failed", kingdom: config.kingdomId }),
+            );
+          },
+        ),
+      (relay) => relay.close(),
+    );
     yield* fromPromise("realm.cache", () => cache.command("PING")).pipe(Effect.uninterruptible);
     yield* fromPromise("realm.coordination.start", () => coordination.start()).pipe(
       Effect.uninterruptible,
@@ -42,6 +56,9 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        expeditionRanking: (limit) => cache.expeditionRanking(limit),
+        worldPowerEffects: () => cache.worldEffects(),
+        emperorVersion: () => cache.emperorVersion(),
         changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
         playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
       }),

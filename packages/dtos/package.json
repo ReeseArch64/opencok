@@ -14,7 +14,15 @@
     "./bootstrap": "./src/bootstrap.ts",
     "./city": "./src/city.ts",
     "./players": "./src/players.ts",
-    "./power": "./src/power.ts"
+    "./power": "./src/power.ts",
+    "./profile": "./src/profile.ts",
+    "./profile-alliance": "./src/profile-alliance.ts",
+    "./reconnect": "./src/reconnect.ts",
+    "./rewards": "./src/rewards.ts",
+    "./ranking": "./src/ranking.ts",
+    "./alliance-ranking": "./src/alliance-ranking.ts",
+    "./expedition-ranking": "./src/expedition-ranking.ts",
+    "./mail": "./src/mail.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

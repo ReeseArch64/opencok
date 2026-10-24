@@ -25,7 +25,16 @@
     "./power-office": "./src/power-office.ts",
     "./power-territory": "./src/power-territory.ts",
     "./power-lucky-day": "./src/power-lucky-day.ts",
-    "./power-throne": "./src/power-throne.ts"
+    "./power-throne": "./src/power-throne.ts",
+    "./power-resolver": "./src/power-resolver.ts",
+    "./profile": "./src/profile.ts",
+    "./profile-generals": "./src/profile-generals.ts",
+    "./reconnect-mine": "./src/reconnect-mine.ts",
+    "./rewards": "./src/rewards.ts",
+    "./ranking": "./src/ranking.ts",
+    "./alliance-ranking": "./src/alliance-ranking.ts",
+    "./expedition-ranking": "./src/expedition-ranking.ts",
+    "./mail": "./src/mail.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -14015,3 +14015,32 @@ select "token_hash", "uid", "created_at", "expires_at" from "opencok_chat"."chat
 update "opencok_chat"."chat_session" set "token_hash" = $1, "uid" = $2, "created_at" = $3, "expires_at" = $4 where "opencok_chat"."chat_session"."token_hash" = $5
 delete from "opencok_chat"."chat_session" where "opencok_chat"."chat_session"."token_hash" = $1"
 `;
+
+exports[`opencok_kingdom.mail_update: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["toUser","varchar(40)",true,null,null,null]
+column ["mailUid","varchar(40)",true,null,null,null]
+column ["updateTime","bigint",true,null,null,null]
+primary ["mail_update_PRIMARY",["toUser","mailUid"]]
+index ["mail_update_owner_time",false,["toUser","updateTime"]]
+check ["mail_update_time_nonnegative","\\"updateTime\\" >= 0"]
+insert into "opencok_kingdom"."mail_update" ("toUser", "mailUid", "updateTime") values ($1, $2, $3)
+select "toUser", "mailUid", "updateTime" from "opencok_kingdom"."mail_update" where "opencok_kingdom"."mail_update"."toUser" = $1
+update "opencok_kingdom"."mail_update" set "toUser" = $1, "mailUid" = $2, "updateTime" = $3 where "opencok_kingdom"."mail_update"."toUser" = $4
+delete from "opencok_kingdom"."mail_update" where "opencok_kingdom"."mail_update"."toUser" = $1"
+`;
+
+exports[`opencok_kingdom.mail_gift_opening: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["mailUid","varchar(40)",true,null,null,null]
+column ["sendTime","bigint",true,null,null,null]
+column ["toUser","varchar(40)",true,null,null,null]
+column ["openedAt","bigint",true,null,null,null]
+primary ["mail_gift_opening_PRIMARY",["mailUid","sendTime"]]
+index ["mail_gift_opening_pending",false,["openedAt","mailUid","sendTime"]]
+check ["mail_gift_opening_time_nonnegative","\\"openedAt\\" >= 0"]
+insert into "opencok_kingdom"."mail_gift_opening" ("mailUid", "sendTime", "toUser", "openedAt") values ($1, $2, $3, $4)
+select "mailUid", "sendTime", "toUser", "openedAt" from "opencok_kingdom"."mail_gift_opening" where "opencok_kingdom"."mail_gift_opening"."mailUid" = $1
+update "opencok_kingdom"."mail_gift_opening" set "mailUid" = $1, "sendTime" = $2, "toUser" = $3, "openedAt" = $4 where "opencok_kingdom"."mail_gift_opening"."mailUid" = $5
+delete from "opencok_kingdom"."mail_gift_opening" where "opencok_kingdom"."mail_gift_opening"."mailUid" = $1"
+`;

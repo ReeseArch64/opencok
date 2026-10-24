@@ -7,6 +7,96 @@ import { loadRules, parseRules } from "../src/rules.ts";
 const records =
   '<database><ItemSpec id="100100" level="0"/><ItemSpec id="100101" level="1"/></database>';
 
+test("reconnect treasure catalogs preserve declaration order and exact level strings", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-reconnect-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).reconnect.treasures?.size).toBe(0);
+    await writeFile(
+      join(directory, "treasure.xml"),
+      '<database><ItemSpec id="9000" lv="1" exp="03" helper="2"/><Group id="later"><ItemSpec id="8000" lv="01" exp="4" helper="3"/></Group></database>',
+    );
+    const catalog = (await loadRules(directory)).reconnect.treasures!;
+    expect([...catalog.keys()]).toEqual(["9000", "8000"]);
+    expect(catalog.get("9000")?.exp).toBe("03");
+    expect(catalog.get("8000")?.lv).toBe("01");
+    await writeFile(
+      join(directory, "treasure.xml"),
+      '<database><ItemSpec id="9000"/><ItemSpec id="9000"/></database>',
+    );
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("reward catalogs retain the final duplicate definition required by the reference resources", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-reward-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).reconnect.rewards?.size).toBe(0);
+    await writeFile(
+      join(directory, "reward.xml"),
+      '<database><ItemSpec id="synthetic" gold="1"/><ItemSpec id="synthetic" gold="007" item="200100;200200" rate="1;2" num="3;4" circle="2"/></database>',
+    );
+    const reward = (await loadRules(directory)).reconnect.rewards!;
+    expect(reward.size).toBe(1);
+    expect(reward.get("synthetic")).toEqual({
+      id: "synthetic",
+      gold: "007",
+      item: "200100;200200",
+      rate: "1;2",
+      num: "3;4",
+      circle: "2",
+    });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("profile catalogs count every achievement record and keep military/server lookups optional", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-profile-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const missing = (await loadRules(directory)).profile;
+    expect(missing.achievementCount).toBe(0);
+    expect(missing.militaryRanks?.size).toBe(0);
+    expect(missing.servers?.size).toBe(0);
+    await writeFile(
+      join(directory, "achievement.xml"),
+      '<database><ItemSpec id="1"/><Group id="a"><ItemSpec id="1"/><Group id="b"><ItemSpec id="2"/></Group></Group></database>',
+    );
+    await writeFile(
+      join(directory, "wr_rank.xml"),
+      '<database><ItemSpec id="501" level="8"/></database>',
+    );
+    await writeFile(
+      join(directory, "servers.xml"),
+      '<database><ItemSpec id="2" name="Synthetic Kingdom"/></database>',
+    );
+    const profile = (await loadRules(directory)).profile;
+    expect(profile.achievementCount).toBe(3);
+    expect(profile.militaryRanks?.get("501")?.level).toBe("8");
+    expect(profile.servers?.get("2")?.name).toBe("Synthetic Kingdom");
+    await writeFile(join(directory, "achievement.xml"), "<database/>");
+    expect((await loadRules(directory)).profile.achievementCount).toBe(0);
+    for (const invalid of [
+      "<wrong/>",
+      "<database>",
+      "<!DOCTYPE database><database/>",
+      '<database><ItemSpec id="1"><value><nested/></value></ItemSpec></database>',
+    ]) {
+      await writeFile(join(directory, "achievement.xml"), invalid);
+      await expect(loadRules(directory)).rejects.toThrow();
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("resource loading preserves optional files, duplicate policy and realm-specific rules", async () => {
   const directory = await mkdtemp(join(tmpdir(), "opencok-rules-"));
   try {
@@ -22,6 +112,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     expect(rules.configuration.payControl?.size).toBe(0);
     expect(rules.configuration.kingdomSkills?.size).toBe(0);
     expect(rules.configuration.facebookShare?.size).toBe(0);
+    expect(rules.configuration.serverConfig?.size).toBe(0);
     expect(Object.values(rules.power).every((catalog) => catalog.size === 0)).toBe(true);
     for (const name of [
       "general",
@@ -65,7 +156,13 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     const power = (await loadRules(directory)).power;
     expect(Object.keys(power)).toHaveLength(30);
     expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
-    for (const name of ["general_sale", "pay_servercontrol", "kingdomskill", "fb_share"])
+    for (const name of [
+      "general_sale",
+      "pay_servercontrol",
+      "kingdomskill",
+      "fb_share",
+      "servers_config",
+    ])
       await writeFile(
         join(directory, `${name}.xml`),
         '<database><Group id="synthetic"><ItemSpec id="001" value="007"/></Group></database>',
@@ -75,6 +172,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     expect(catalogs.payControl?.get("001")?.value).toBe("007");
     expect(catalogs.kingdomSkills?.get("001")?.value).toBe("007");
     expect(catalogs.facebookShare?.get("001")?.value).toBe("007");
+    expect(catalogs.serverConfig?.get("001")?.value).toBe("007");
     await writeFile(
       join(directory, "setting.xml"),
       '<database><Group id="settings"><ItemSpec id="001" value="0007"/></Group></database>',

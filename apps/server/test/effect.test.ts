@@ -23,6 +23,31 @@ const dependencies: ServerDependencies = {
     getProfileById: async () => undefined,
     getAccountsByPlayerId: async () => [],
     getPlayerSummariesByIds: async () => [],
+    mailContents: async () => {
+      throw new Error("Unexpected mail contents");
+    },
+    mailConversationSave: async () => {
+      throw new Error("Unexpected conversation save");
+    },
+    mailDelete: async () => {
+      throw new Error("Unexpected mailbox deletion");
+    },
+    mailRead: async () => {
+      throw new Error("Unexpected mailbox read");
+    },
+    mailSave: async () => {
+      throw new Error("Unexpected mailbox save");
+    },
+    mailStatus: async () => {
+      throw new Error("Unexpected dependency call");
+    },
+    allianceRanking: async () => {
+      throw new Error("Unexpected dependency call");
+    },
+    playerRanking: async () => {
+      throw new Error("Unexpected ranking query");
+    },
+    publicProfile: async () => undefined,
     getPowerByPlayerId: async () => {
       throw new Error("unused");
     },
