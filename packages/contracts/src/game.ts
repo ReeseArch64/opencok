@@ -1,4 +1,6 @@
 import type {
+  MailConversationSaveQuery,
+  MailConversationSaveSnapshot,
   MailDeleteQuery,
   MailDeletePlanner,
   MailDeleteSnapshot,
@@ -32,6 +34,10 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  mailConversationSave(
+    uid: string,
+    query: MailConversationSaveQuery,
+  ): Promise<MailConversationSaveSnapshot>;
   mailDelete(
     uid: string,
     query: MailDeleteQuery,

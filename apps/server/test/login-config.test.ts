@@ -42,6 +42,7 @@ const unused = async (): Promise<never> => {
 };
 function store(state: LoginConfigurationState): GameStore {
   return {
+    mailConversationSave: unused,
     mailDelete: unused,
     mailRead: unused,
     mailSave: unused,

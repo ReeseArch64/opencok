@@ -45,6 +45,7 @@ function fixture() {
     configuration: unused,
     city: unused,
     world: unused,
+    mailConversationSave: unused,
     mailDelete: unused,
     mailRead: unused,
     mailSave: unused,
