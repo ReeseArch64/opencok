@@ -1,4 +1,4 @@
-import { ruleAvailable, type RuleContext } from "./availability.ts";
+import type { RuleContext } from "./availability.ts";
 import type { Rule, Rules } from "./game.ts";
 import { javaFloat } from "./java-float.ts";
 import { javaIntHashMapOrder } from "./java-hash-map-order.ts";
@@ -8,6 +8,7 @@ import {
   generalMap,
   generalSavedInteger,
   generalSavedLong,
+  generalFeatureAvailable,
 } from "./new-general-content.ts";
 
 export interface NewGeneralOffice {
@@ -63,7 +64,7 @@ export function newGeneralBuildingMultiplier(
     general.buildingUuid === state.buildingUuid
   )
     return () => 1;
-  if (!ruleAvailable(rules.features.get("general_official"), context)) return undefined;
+  if (!generalFeatureAvailable(rules, "general_official", context)) return undefined;
   if (
     generalSavedInteger(state.mainBuildingLevel) <
     generalInteger(rules.items.get("general_official")?.k1)
