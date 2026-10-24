@@ -21,6 +21,7 @@ export interface PowerSnapshot {
   sciences: readonly Row[];
   civilizationSciences: readonly Row[];
   sagaSciences: readonly Row[];
+  foreignSciences: readonly Row[];
   equipment: readonly Row[];
   heroes: readonly Row[];
   dragons: readonly Row[];

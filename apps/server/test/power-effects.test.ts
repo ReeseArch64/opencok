@@ -15,6 +15,7 @@ function fixture() {
     sciences: [],
     civilizationSciences: [],
     sagaSciences: [],
+    foreignSciences: [],
     equipment: [],
     heroes: [],
     dragons: [],
@@ -46,6 +47,11 @@ function fixture() {
     {
       sciences: new Map(),
       statuses: new Map(),
+      civilizationSciences: new Map(),
+      sagaSciences: new Map(),
+      sagaScienceBases: new Map(),
+      foreignSciences: new Map(),
+      foreignScienceBases: new Map(),
     },
   );
   return { state, rules };
@@ -115,5 +121,108 @@ test("missing or malformed active effect rules cannot become an implicit zero bo
   state.states = [{ stateId: 510001, endTime: BigInt(now + 1) }];
   expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
   rules.power.statuses!.set("510001", { id: "510001", effect: "487;2147483648" });
+  expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
+});
+
+test("stored research effects follow initial ordinary saga foreign civilization float accumulation", () => {
+  const { state, rules } = fixture();
+  rules.items.set("effect", { id: "effect", k1: "487;16777216" });
+  state.sciences = [{ itemId: 1000, level: 1 }];
+  rules.power.sciences!.set("1001", { id: "1001", para1: "487", para2: "1" });
+  state.sagaSciences = [{ itemid: 2000, level: 1 }];
+  rules.power.sagaScienceBases!.set("2000", { id: "2000", hide: "0" });
+  rules.power.sagaSciences!.set("102001", { id: "102001", effect: "487", value: "-16777216" });
+  state.foreignSciences = [{ itemid: 3000, level: 2 }];
+  rules.power.foreignScienceBases!.set("3000", { id: "3000", hide: "0" });
+  rules.power.foreignSciences!.set("103002", { id: "103002", effect: "487", value: "0.3" });
+  state.civilizationSciences = [{ baseItemID: 4000, level: 3 }];
+  rules.power.civilizationSciences!.set("4003", { id: "4003", para1: "487", para2: "10" });
+  const before = structuredClone(state);
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(Math.fround(0.4));
+  expect(state).toEqual(before);
+  expect(rules.features.size).toBe(0);
+});
+
+test("tower research includes stored level zero and ignores hidden entries without requiring level rules", () => {
+  const { state, rules } = fixture();
+  state.sagaSciences = [
+    { itemid: 2000, level: 0 },
+    { itemid: 3000, level: 1 },
+  ];
+  rules.power.sagaScienceBases!.set("2000", { id: "2000", hide: "0" });
+  rules.power.sagaScienceBases!.set("3000", { id: "3000", hide: "1" });
+  rules.power.sagaSciences!.set("102000", { id: "102000", effect: "487", value: "2.5" });
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(2.5);
+  state.foreignSciences = [{ itemid: 4000, level: 0 }];
+  rules.power.foreignScienceBases!.set("4000", { id: "4000", hide: "1" });
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(2.5);
+  rules.power.foreignScienceBases!.get("4000")!.hide = "2";
+  rules.power.foreignSciences!.set("104000", { id: "104000", effect: "487", value: "-3.5" });
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(-1);
+});
+
+test("tower token pairs skip empty tokens and stop when either vector ends", () => {
+  const { state, rules } = fixture();
+  state.foreignSciences = [{ itemid: 3000, level: 1 }];
+  rules.power.foreignScienceBases!.set("3000", { id: "3000", hide: "0" });
+  const rule = { id: "103001", effect: ";487;;218;487;999;", value: ";1.25;;8;2.5;" };
+  rules.power.foreignSciences!.set(rule.id, rule);
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(3.75);
+  expect(storedPowerEffects(state, rules, now, 218).initialAndScience).toBe(8);
+  rule.effect = "487";
+  rule.value = "4;malformed-unused-tail";
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(4);
+  rule.value = " ";
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(0);
+});
+
+test("civilization research scales float percentages and replaces duplicate base rows in hash order", () => {
+  const { state, rules } = fixture();
+  state.civilizationSciences = [
+    { baseItemID: 17, level: 0 },
+    { baseItemID: 1, level: 0 },
+    { baseItemID: 2, level: 0 },
+    { baseItemID: 17, level: 1 },
+  ];
+  rules.power.civilizationSciences!.set("17", { id: "17", para1: "487", para2: "999" });
+  rules.power.civilizationSciences!.set("18", { id: "18", para1: "487", para2: "1677721600" });
+  rules.power.civilizationSciences!.set("1", { id: "1", para1: "487", para2: "100" });
+  rules.power.civilizationSciences!.set("2", { id: "2", para1: "487", para2: "-1677721600" });
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(0);
+  state.civilizationSciences = [{ baseItemID: 1, level: 0 }];
+  rules.power.civilizationSciences!.set("1", { id: "1", para1: "487|218|487", para2: "33.333333" });
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(
+    Math.fround(Math.fround(Math.fround(33.333333) / 100) * 2),
+  );
+  rules.power.civilizationSciences!.set("1", { id: "1", para1: "487" });
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(-1);
+});
+
+test("research catalog IDs preserve signed addition before lookup", () => {
+  const { state, rules } = fixture();
+  state.foreignSciences = [{ itemid: 2147483647, level: 1 }];
+  rules.power.foreignScienceBases!.set("2147483647", { id: "2147483647", hide: "0" });
+  rules.power.foreignSciences!.set("-2147383648", { id: "-2147383648", effect: "487", value: "5" });
+  state.civilizationSciences = [{ baseItemID: 2147483647, level: 1 }];
+  rules.power.civilizationSciences!.set("-2147483648", {
+    id: "-2147483648",
+    para1: "487",
+    para2: "200",
+  });
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(7);
+});
+
+test("missing active research rules and malformed paired values fail without consuming progression", () => {
+  const { state, rules } = fixture();
+  state.foreignSciences = [{ itemid: 3000, level: 0 }];
+  expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
+  rules.power.foreignScienceBases!.set("3000", { id: "3000", hide: "0" });
+  expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
+  rules.power.foreignSciences!.set("103000", { id: "103000", effect: "218;487", value: "NaN;5" });
+  expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
+  state.foreignSciences = [];
+  state.civilizationSciences = [{ baseItemID: 4000, level: 1 }];
+  expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
+  rules.power.civilizationSciences!.set("4001", { id: "4001", para1: "487", para2: "Infinity" });
   expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
 });

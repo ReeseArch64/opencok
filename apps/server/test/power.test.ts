@@ -45,6 +45,7 @@ function fixture() {
     power,
   );
   const state: PowerSnapshot = {
+    foreignSciences: [],
     profile: { level: 5 },
     statistics: { questPower: 9, power: 1n, buildingPower: 1n },
     generals: [{ generalId: "7000", level: 3 }],
@@ -95,6 +96,7 @@ function empty(): PowerSnapshot {
     sciences: [],
     civilizationSciences: [],
     sagaSciences: [],
+    foreignSciences: [],
     equipment: [],
     heroes: [],
     dragons: [],
