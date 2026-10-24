@@ -1,5 +1,15 @@
 import type { Row } from "./rows.ts";
 
+export interface MailReadQuery {
+  batch: boolean;
+  ids: readonly string[];
+  now: number;
+}
+
+export interface MailReadSnapshot {
+  profile: Row | undefined;
+}
+
 export type MailSaveMode = "save" | "cancel" | "batch";
 
 export interface MailSaveQuery {

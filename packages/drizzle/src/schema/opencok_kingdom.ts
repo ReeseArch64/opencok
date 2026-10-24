@@ -658,3 +658,4 @@ export { world_update_gridtype_tmp } from "./opencok_kingdom/world_update_gridty
 export { worldcup_apply } from "./opencok_kingdom/worldcup_apply";
 export { worldpoint } from "./opencok_kingdom/worldpoint";
 export { mail_update } from "./opencok_kingdom/mail_update";
+export { mail_gift_opening } from "./opencok_kingdom/mail_gift_opening";
