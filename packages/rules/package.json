@@ -30,6 +30,13 @@
     "./power-throne": "./src/power-throne.ts",
     "./power-resolver": "./src/power-resolver.ts",
     "./profile": "./src/profile.ts",
+    "./nickname": "./src/nickname.ts",
+    "./nickname-change": "./src/nickname-change.ts",
+    "./cn1-rewards": "./src/cn1-rewards.ts",
+    "./mysql-unicode": "./src/mysql-unicode.ts",
+    "./nickname-words": "./src/nickname-words.ts",
+    "./java-nickname-characters": "./src/java-nickname-characters.ts",
+    "./java-gbk": "./src/java-gbk.ts",
     "./profile-generals": "./src/profile-generals.ts",
     "./reconnect-mine": "./src/reconnect-mine.ts",
     "./rewards": "./src/rewards.ts",
@@ -37,6 +44,7 @@
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./mail": "./src/mail.ts",
+    "./mail-batch-delete": "./src/mail-batch-delete.ts",
     "./mail-groups": "./src/mail-groups.ts",
     "./avatar": "./src/avatar.ts",
     "./mail-conversation-read": "./src/mail-conversation-read.ts",
@@ -57,7 +65,10 @@
     "./new-general-equipment": "./src/new-general-equipment.ts",
     "./new-general-prestige": "./src/new-general-prestige.ts",
     "./kingdom-skills": "./src/kingdom-skills.ts",
-    "./java-list-sort": "./src/java-list-sort.ts"
+    "./java-list-sort": "./src/java-list-sort.ts",
+    "./java-calendar-date": "./src/java-calendar-date.ts",
+    "./java-integer": "./src/java-integer.ts",
+    "./dragon-ranking": "./src/dragon-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

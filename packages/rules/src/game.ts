@@ -1,6 +1,7 @@
 import { GameError } from "@opencok/errors/game";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { ruleAvailable } from "./availability.ts";
+import { javaDecimal } from "./java-integer.ts";
 
 export type Rule = Record<string, string>;
 export interface WorldCatalogs {
@@ -19,12 +20,18 @@ export interface ProfileCatalogs {
   servers?: Map<string, Rule>;
 }
 export interface ConfigurationCatalogs {
+  settingRecords?: readonly Rule[];
+  starRecords?: readonly Rule[];
+  featureRecords?: readonly Rule[];
+  dataConfig?: Map<string | null, Rule>;
   serverConfig?: Map<string, Rule>;
   generalSales?: Map<string, Rule>;
+  generalSaleRecords?: readonly Rule[];
   payControl?: Map<string, Rule>;
   kingdomSkills?: Map<string, Rule>;
   kingdomSkillRecords?: readonly Rule[];
   facebookShare?: Map<string, Rule>;
+  facebookShareRecords?: readonly Rule[];
 }
 export interface PowerCatalogs {
   generals?: Map<string, Rule>;
@@ -145,18 +152,15 @@ export class Rules {
     return out;
   }
   maxStar(itemId: string, now: number): number {
-    const prefix = String(Math.floor(Number(itemId) / 100) * 100);
+    const prefix = `${javaDecimal(itemId, 32) / 100n}00`;
     let max = 0;
 
-    for (const rule of this.stars.values()) {
+    for (const rule of this.configuration.starRecords ?? this.stars.values()) {
       if (
         rule.build_id === prefix &&
-        ruleAvailable(rule, { kingdomId: this.kingdomId, version: MOBILE_CLIENT_VERSION, now }) &&
-        /^\d+$/.test(rule.star ?? "") &&
-        Number.isSafeInteger(Number(rule.star)) &&
-        Number(rule.star) <= 2147483647
+        ruleAvailable(rule, { kingdomId: this.kingdomId, version: MOBILE_CLIENT_VERSION, now })
       )
-        max = Math.max(max, Number(rule.star));
+        max = Math.max(max, Number(javaDecimal(rule.star ?? "", 32)));
     }
     return max;
   }

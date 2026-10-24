@@ -1,3 +1,4 @@
+import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
 import type { WorldPointDetailStore } from "./world-point-detail.ts";
 import type { WorldFavoriteStore } from "./world-favorites.ts";
 import type { WorldSearchStore } from "./world-search.ts";
@@ -17,6 +18,12 @@ import type {
   MailContentsInspector,
   MailConversationSaveQuery,
   MailConversationSaveSnapshot,
+  MailConversationReadQuery,
+  MailConversationReadSnapshot,
+  MailCategoryDeleteQuery,
+  MailCategoryDeleteInspector,
+  MailCategoryDeleteSnapshot,
+  MailTypeDeleteQuery,
   MailDeleteQuery,
   MailDeletePlanner,
   MailDeleteSnapshot,
@@ -30,6 +37,7 @@ import type {
 import type { ExpeditionRankingEntry } from "./expedition-ranking.ts";
 import type { AllianceRankingQuery, AllianceRankingSnapshot } from "./alliance-ranking.ts";
 import type { Row } from "./rows.ts";
+import type { MailUpdateInspector, MailUpdateQuery, MailUpdateSnapshot } from "./mail-updates.ts";
 import type { PowerState } from "./power.ts";
 import type { RoutedPublicProfile } from "./profile.ts";
 import type { PlayerRankingQuery, PlayerRankingSnapshot } from "./ranking.ts";
@@ -50,6 +58,12 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  normalRankingRealm?(): Promise<boolean>;
+  mailUpdates?(
+    uid: string,
+    query: MailUpdateQuery,
+    inspect: MailUpdateInspector,
+  ): Promise<MailUpdateSnapshot>;
   mailGroups(
     uid: string,
     query: MailGroupQuery,
@@ -80,6 +94,16 @@ export interface GameStore extends AuthenticationStore {
     plan: MailDeletePlanner,
   ): Promise<MailDeleteSnapshot>;
   mailRead(uid: string, query: MailReadQuery): Promise<MailReadSnapshot>;
+  mailConversationRead?(
+    uid: string,
+    query: MailConversationReadQuery,
+  ): Promise<MailConversationReadSnapshot>;
+  mailCategoryDelete?(
+    uid: string,
+    query: MailCategoryDeleteQuery,
+    inspect: MailCategoryDeleteInspector,
+  ): Promise<MailCategoryDeleteSnapshot>;
+  mailTypeDelete?(uid: string, query: MailTypeDeleteQuery): Promise<MailCategoryDeleteSnapshot>;
   mailSave(uid: string, query: MailSaveQuery): Promise<MailSaveSnapshot>;
   mailStatus(uid: string, query: MailStatusQuery): Promise<MailStatusSnapshot>;
   allianceRanking(uid: string, query: AllianceRankingQuery): Promise<AllianceRankingSnapshot>;
@@ -88,12 +112,43 @@ export interface GameStore extends AuthenticationStore {
   power(uid: string, now: number): Promise<PowerState>;
   playerSummaries(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
   configuration(uid: string): Promise<LoginConfigurationState>;
+  configurationSwitches?(): Promise<Row[] | undefined>;
+  initializeWorldNewsPreference?(uid: string, now: number): Promise<void>;
+  setPushPreference?(uid: string, preference: PushPreference, now: number): Promise<void>;
+  nicknameOccupied?(name: string): Promise<boolean>;
+  celebrityDescription?(uid: string, kingdomId: number): Promise<Buffer | null>;
+  saveCelebrityDescription?(
+    uid: string,
+    now: number,
+    readDescription: () => Buffer | null,
+  ): Promise<void>;
+  updateProfilePreference?(
+    uid: string,
+    field: ProfilePreferenceField,
+    now: number,
+    readValue: () => number,
+  ): Promise<number | undefined>;
   city(uid: string, now: number): Promise<CityState>;
   world(
     uid: string,
     ids: number[],
   ): Promise<{ world: Row | undefined; points: Row[]; hasMarches: boolean }>;
 }
+
+export interface PushPreference {
+  type: number;
+  status: number;
+  audio: number;
+}
+
+export type ProfilePreferenceField =
+  | "showEquip"
+  | "showMedal"
+  | "marchSoldierShow"
+  | "colorblind"
+  | "scrollEquip"
+  | "showBanner"
+  | "clientSaveFlag";
 
 export interface PlayerSummary {
   data: Row;
@@ -103,11 +158,20 @@ export interface PlayerSummary {
 
 export interface LoginConfigurationState {
   profile: Row | undefined;
-  switches: Row[];
+  switches: Row[] | undefined;
   pushSettings: Row[];
 }
 
 export interface GameServices {
+  dragonRanking?(
+    ranges: readonly DragonRankingRange[],
+    allianceId: string,
+  ): Promise<readonly DragonRankingEntry[]>;
+  globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
+  scoreActivityRanking?(): Promise<readonly string[]>;
+  nicknameBadWords?(name: string): boolean | Promise<boolean>;
+  nicknameReservedPatterns?(): readonly string[];
+  filterBadWords?(text: string): string;
   worldPointDetail?: WorldPointDetailStore;
   playerSearch?: PlayerSearchStore;
   worldSearch?: WorldSearchStore;
@@ -120,6 +184,6 @@ export interface GameServices {
   worldPowerEffects?(kingdomId?: number): Promise<ReadonlyMap<string, string>>;
   emperorVersion?(kingdomId?: number): Promise<number | null | undefined>;
   playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;
-  changeAccountCount?(deviceId: string): Promise<bigint | null>;
+  changeAccountCount?(deviceId: string): Promise<string | null>;
   featureAvailability?(profile: Row, now: number): Readonly<Record<string, boolean>>;
 }

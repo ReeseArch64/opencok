@@ -5,6 +5,7 @@ import { Game } from "@opencok/controllers/game";
 import { dataConfig } from "@opencok/dtos/bootstrap";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, Type } from "@opencok/messages/sfs";
+import { dataConfigItems } from "./fixtures/data-config.ts";
 import { kingdomSkill } from "./fixtures/kingdom-skill.ts";
 
 const now = Date.UTC(2026, 9, 23, 12);
@@ -14,14 +15,12 @@ function catalog(records: Record<string, Record<string, string>> = {}, kingdomId
     new Map(),
     new Map(),
     new Map(),
-    new Map(),
+    dataConfigItems(records),
     new Map(),
     new Map(),
     new Map(),
     kingdomId,
   );
-  rules.items.set("player_max", { id: "player_max", k1: "0010" });
-  for (const [id, values] of Object.entries(records)) rules.items.set(id, { id, ...values });
   return rules;
 }
 const project = (rules: Rules, context: Parameters<typeof dataConfig>[1] = {}) =>
@@ -31,7 +30,7 @@ test("data configuration routes item switches, world activity and kingdom skills
   const rules = catalog({
     function_on8: { k2: "+２;bad" },
     alliance_quest: { k12: "quest" },
-    alliance_quest_chat: { k4: "2;bad", k5: "3-2147483648" },
+    alliance_quest_chat: { k1: "0", k4: "2;bad", k5: "3-2147483648" },
     on_trumpet: { k2: "2;bad" },
     scoutmark_on: { k1: "2;bad", k2: "scout" },
     serviceterms_on: { k1: "1", k2: "terms", k3: "2;bad" },
@@ -85,12 +84,15 @@ test("present required item selectors fail when absent or malformed while option
   for (const [id, key, other] of cases) {
     for (const value of [undefined, "bad;2"]) {
       const record = value === undefined ? other : { ...other, [key]: value };
-      expect(() => project(catalog({ [id]: record }))).toThrow();
+      const rules = catalog({ [id]: record });
+      if (value === undefined) delete rules.items.get(id)![key];
+      expect(() => project(rules)).toThrow();
     }
   }
   const rules = catalog({
     function_on8: { k2: "2" },
-    alliance_quest_chat: {},
+    alliance_quest: { k12: "quest" },
+    alliance_quest_chat: { k1: "0" },
     wa_switch: { k2: "keep" },
   });
   const result = project(rules);
@@ -138,7 +140,7 @@ test("data config exposes supported game catalogs while preserving strings and e
   expect(result.hero_soul).toBeUndefined();
   expect(result.FB_follow).toBeUndefined();
   expect(fields(result.world_fire1).k1).toEqual(sfs.string("1000"));
-  expect(result.cityDefMax).toEqual(sfs.int(1000));
+  expect(result.cityDefMax).toBeUndefined();
   expect(result.cityDefInterval).toEqual(sfs.int(30));
   expect(fields(result.world_fire2).k1?.value).toBe("second");
   expect(result.neutral_row).toEqual(sfs.int(1200));
@@ -314,12 +316,14 @@ test("auxiliary catalogs supply general sale limits, pay control and ordered kin
   expect(skills[0]?.id).toBe("second");
 });
 
-test("malformed integers, long overflows and invalid dates fail before emitting corrupted config", () => {
+test("malformed integers and long overflows fail while avatar dates retain calendar normalization", () => {
   for (const value of ["1.5", "NaN", "", "2147483648", "-2147483649", "1e3"])
     expect(() => project(catalog({ resources_basics: { k8: value } }))).toThrow();
   for (const value of ["9223372036854775808", "-9223372036854775809", "2.5", "no"])
     expect(() => project(catalog({ wa_score: { k10: value } }))).toThrow();
-  expect(() => project(catalog({ icon: { k4: "2026-02-30" } }))).toThrow();
+  expect(fields(project(catalog({ icon: { k4: "2026-02-30" } })).icon).k4?.value).toBe(
+    String(Date.UTC(2026, 2, 2)),
+  );
   expect(() => project(catalog({ monster: { k11: "missing-separator" } }))).toThrow();
   expect(project(catalog({ resources_basics: { k8: "2147483647" } })).freeSpdT?.value).toBe(
     2147483647,
@@ -372,6 +376,17 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
   expect(result.body.cmdBaseTime?.value).toBe("123");
   expect(result.pushes).toEqual([]);
   expect(calls).toBe(1);
+  const required = rules.items.get("kingdomskill")!;
+  rules.items.delete("kingdomskill");
+  await expect(
+    new Game(store, rules, { kingdomId: 2 }, () => now).execute(
+      "synthetic",
+      "login.dataconfig",
+      {},
+    ),
+  ).rejects.toThrow();
+  expect(calls).toBe(2);
+  rules.items.set("kingdomskill", required);
   const rejected: (Row | undefined)[] = [undefined, { banFlag: 1 }, { banTime: BigInt(now + 1) }];
   for (const profile of rejected) {
     const game = new Game(
@@ -398,5 +413,94 @@ test("configuration preserves function-on blank bypass and direct cross-realm ve
   for (const version of ["", "\u2000", "1.0", "2.bad"]) {
     expect(() => project(rules, { version, crossOpen: true })).toThrow();
     expect(project(rules, { version, crossOpen: false }).cross_open).toEqual(sfs.bool(false));
+  }
+});
+
+test("avatar configuration dates use date-only parsing, zero fallback and exact Long strings", () => {
+  const rules = catalog({ icon: { k1: "keep", k4: "2026-2-30suffix", k5: "bad" } });
+  expect(fields(project(rules).icon)).toEqual({
+    k1: sfs.string("keep"),
+    k4: sfs.string(String(Date.UTC(2026, 2, 2))),
+    k5: sfs.string("0"),
+  });
+  rules.items.get("icon")!.k4 = "2147483648-1-1";
+  rules.items.get("icon")!.k5 = "2026-10-23-12-45";
+  const icon = fields(project(rules).icon);
+  expect(icon.k4).toEqual(sfs.string("6017484157321406464"));
+  expect(icon.k5).toEqual(sfs.string(String(Date.UTC(2026, 9, 23))));
+  expect(rules.items.get("icon")!.k4).toBe("2147483648-1-1");
+});
+
+test("data configuration uses its group view while the overlord scalar keeps the global item lookup", () => {
+  const rules = catalog({
+    player_max: { k1: "group" },
+    worldmap_pve: { k5: "group-low", k6: "group-high" },
+    function_on8: { k2: "2" },
+    alliance_quest: { k12: "group-quest" },
+    alliance_quest_chat: { k1: "1", k2: "group-chat", k4: "2" },
+    on_trumpet: { k2: "2" },
+    graveyard: { k3: "2" },
+    wa_score: { k10: "123" },
+    icon: { k4: "2026-3-1" },
+    worldboss: { k1: "10", k10: "20" },
+    overlord: { k1: "group-overlord" },
+  });
+  rules.configuration.dataConfig = new Map(rules.items);
+  for (const id of rules.items.keys()) rules.items.set(id, { id, k1: "global-decoy", k2: "bad" });
+  rules.items.set("overlord", { k1: "global-overlord" });
+  rules.items.set("private_unrelated", { k1: "never-expose" });
+  rules.features.set("w_thedoor", { version: "feature-catalog" });
+  rules.configuration.payControl = new Map([["69008", { k1: "pay-catalog" }]]);
+  const result = project(rules);
+  expect(fields(result.player_max).k1?.value).toBe("group");
+  expect(fields(result.worldmap_pve).k1?.value).toBe("group-low");
+  expect(result.alliance_quest?.value).toBe("group-quest");
+  expect(result.alliance_quest_chat?.value).toBe("group-chat");
+  expect(result.alliance_quest_tab).toEqual(sfs.int(1));
+  expect(result.on_trumpet_k2).toEqual(sfs.int(1));
+  expect(fields(result.graveyard).k3?.value).toBe("1");
+  expect(result.dbf_maxScoreView).toEqual(sfs.long(123n));
+  expect(fields(result.icon).k4?.value).toBe(String(Date.UTC(2026, 2, 1)));
+  expect(fields(result.worldboss).physicalcost?.value).toBe("20");
+  expect(result.overlord_open_type?.value).toBe("global-overlord");
+  expect(fields(result.w_thedoor).version?.value).toBe("feature-catalog");
+  expect(fields(result["69008"]).k1?.value).toBe("pay-catalog");
+  expect(result.private_unrelated).toBeUndefined();
+  expect(rules.items.get("player_max")?.k1).toBe("global-decoy");
+  expect(rules.configuration.dataConfig.get("player_max")?.k1).toBe("group");
+});
+
+test("an explicitly empty data-config group never falls back to populated global items", () => {
+  const rules = catalog();
+  rules.configuration.dataConfig = new Map();
+  expect(() => project(rules)).toThrow();
+  rules.configuration.dataConfig = dataConfigItems({ player_max: { k1: "group-only" } });
+  rules.items.clear();
+  rules.items.set("overlord", { k1: "global" });
+  expect(fields(project(rules).player_max).k1?.value).toBe("group-only");
+});
+
+test("PVE aliases number only selected present attributes and omit fields absent from the legacy projection", () => {
+  for (const [rule, expected] of [
+    [{ k1: "hidden" }, {}],
+    [{ k6: "upper" }, { k1: sfs.string("upper") }],
+    [{ k5: "lower" }, { k1: sfs.string("lower") }],
+    [
+      { k6: "upper", k5: "lower" },
+      { k1: sfs.string("lower"), k2: sfs.string("upper") },
+    ],
+  ] as const) {
+    const result = project(
+      catalog({
+        worldmap_pve: rule,
+        world_fire: { k1: "unused" },
+        world_fire1: { k1: "100", k2: "30" },
+      }),
+    );
+    expect(fields(result.worldmap_pve)).toEqual(expected);
+    expect(result.world_fire).toBeUndefined();
+    expect(result.cityDefMax).toBeUndefined();
+    expect(fields(result.world_fire1).k1?.value).toBe("100");
+    expect(result.cityDefInterval).toEqual(sfs.int(30));
   }
 });

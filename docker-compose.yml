@@ -215,6 +215,11 @@ services:
         target: /resources
         read_only: true
         bind: { create_host_path: false }
+      - type: bind
+        source: ./data/reference/server/runtime/base/gameconfig/badwords.txt
+        target: /gameconfig/badwords.txt
+        read_only: true
+        bind: { create_host_path: false }
     healthcheck:
       test:
         [
