@@ -1,11 +1,16 @@
 import type { ServerConfig } from "@opencok/contracts/server";
-import type { CityState, GameStore } from "@opencok/contracts/game";
+import type { CityState, GameServices, GameStore } from "@opencok/contracts/game";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { building, gold, queue, resource, user } from "@opencok/dtos/city";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
-import { errors } from "@opencok/constants/game";
+import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
+import {
+  accountVerificationEnabled,
+  accountVerificationRequired,
+  type FeatureContext,
+} from "@opencok/rules/features";
 import {
   armySnapshot,
   dataConfig,
@@ -13,6 +18,7 @@ import {
   inventoryItem,
   serverClock,
   settingConfig,
+  loginConfiguration,
 } from "@opencok/dtos/bootstrap";
 
 type GameConfig = Pick<ServerConfig, "kingdomId">;
@@ -29,6 +35,7 @@ export class Game {
     readonly rules: Rules,
     readonly config: GameConfig,
     readonly now = Date.now,
+    readonly services: GameServices = {},
   ) {}
   private async state(uid: string): Promise<ReadyCity> {
     const state = await this.db.city(uid, this.now());
@@ -65,7 +72,7 @@ export class Game {
       throw new GameError(errors.unsupported, "world_state");
     return {
       ...serverClock(this.now(), 0),
-      ...featureConfig(this.rules),
+      ...featureConfig(this.rules, this.featureContext(state.profile)),
       ...this.info(state),
       user: sfs.object(user(state.profile, this.rules, this.config.kingdomId)),
       newAccount: sfs.bool(false),
@@ -115,16 +122,49 @@ export class Game {
     return { body, pushes: [] };
   }
   private async profile(uid: string): Promise<Row> {
-    const profile = await this.db.profile(uid);
+    return this.checkProfile(await this.db.profile(uid));
+  }
+  private checkProfile(profile: Row | undefined): Row {
     if (!profile) throw new GameError(errors.missing);
     if (long(profile, "banTime") > BigInt(this.now()) || num(profile, "banFlag") !== 0)
       throw new GameError(errors.invalid);
     return profile;
   }
+  private featureContext(profile: Row): FeatureContext {
+    const now = this.now();
+    return {
+      uid: text(profile, "uid"),
+      platform: text(profile, "pf"),
+      version: MOBILE_CLIENT_VERSION,
+      kingdomId: this.config.kingdomId,
+      now,
+      services: this.services.featureAvailability?.(profile, now),
+    };
+  }
+  private async configuration(uid: string): Promise<Fields> {
+    const state = await this.db.configuration(uid);
+    const profile = this.checkProfile(state.profile);
+    const context = this.featureContext(profile);
+    const deviceId = text(profile, "deviceId");
+    let count: bigint | null = null;
+    if (deviceId && accountVerificationEnabled(this.rules, context)) {
+      if (!this.services.changeAccountCount)
+        throw new GameError(errors.unsupported, "account_rule");
+      count = await this.services.changeAccountCount(deviceId);
+    }
+    return loginConfiguration(
+      this.rules,
+      state,
+      context,
+      accountVerificationRequired(this.rules, context, count),
+    );
+  }
   private async otherLogin(uid: string, params: Fields): Promise<Fields> {
-    if (params.config) return featureConfig(this.rules);
-    if (params.store) return { store: sfs.array() };
-    if (params.exchange) return { exchange: sfs.array(), exchange_gift: sfs.array() };
+    if (!params.army) {
+      if (params.config) return this.configuration(uid);
+      if (params.store) return { store: sfs.array() };
+      if (params.exchange) return { exchange: sfs.array(), exchange_gift: sfs.array() };
+    }
     const state = await this.state(uid);
     if (params.army)
       return {

@@ -50,3 +50,24 @@ Synthetic authenticated/banned/missing profiles exercise explicit field mappings
 wire integer/long/string types, realm switches and stamina gates. The projection
 performs no player-state mutation. No live services, clients or integration tests
 were used. The draft CI deferral described above still applies.
+
+## Deferred-login foundation: issue 54
+
+Source commit: `ef47dac`, dependent on the data-config foundation. This step adds
+share metadata, saved preferences, switches, account-verification counter reads and
+feature-announcement composition. Later reference-restoration commits change integer
+and omission semantics, declaration ordering, service-specific overrides and the
+missing world-news preference write. This initial read-only foundation must not be
+confused with those completed refinements or with complete topic 1 parity.
+
+Validation on this isolated publication branch, 2026-10-24:
+
+- `bun --no-env-file test apps/server/test/availability.test.ts apps/server/test/settings.test.ts apps/server/test/data-config.test.ts apps/server/test/login-config.test.ts apps/server/test/configuration-adapters.test.ts packages/resources/tests tests/packages/boundaries.test.ts`:
+  35 tests across seven files, 1,536 assertions, all passing.
+- Type checks: rules, resources, DTOs, controllers, contracts, repositories, storage
+  and realm server passed.
+- Repository lint, formatting and diff checks passed.
+
+The adapter tests inject fake SQL clients and override cache transport. No database,
+Redis, listener, native client or integration suite is started. The draft CI deferral
+and requirement to validate authorized full workflows before merge remain unchanged.
