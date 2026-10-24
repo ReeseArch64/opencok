@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: deprecated
 date: 2026-10-23
 decision-makers: ReeseArch64
 ---
@@ -82,3 +82,16 @@ or a historical evaluation was performed.
 - **Review again when**: the stated boundaries cannot be maintained, a required
   dependency becomes unsupported, or measured compatibility/operational results
   invalidate the choice. A replacement requires a linked superseding ADR.
+
+### 2026-10-24: Suspend the production Node.js mandate
+
+The maintainer explicitly suspended this decision. Status is `deprecated`, the
+existing lifecycle status for a decision that no longer governs new work. The
+original decision and unchecked implementation plan above remain historical;
+Node migration and rollout prerequisites are suspended, not completed.
+
+No replacement production runtime is selected. Existing Bun development images
+and tests remain valid development evidence only. Reinstating a production
+runtime mandate requires a reviewed decision and deployment verification.
+ADR-0009 and ADR-0011 references to this mandate must be read with this update;
+their development-tooling and TypeScript constraints remain active.

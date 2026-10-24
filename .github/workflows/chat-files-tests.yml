@@ -1,11 +1,11 @@
-name: Chat and files services
+name: Chat and API media
 
 on:
   pull_request:
     paths:
       [
         "apps/chat/**",
-        "apps/files/**",
+        "apps/api/**",
         "packages/**",
         "package.json",
         "bun.lock",
@@ -16,7 +16,7 @@ on:
     paths:
       [
         "apps/chat/**",
-        "apps/files/**",
+        "apps/api/**",
         "packages/**",
         "package.json",
         "bun.lock",
@@ -41,7 +41,7 @@ jobs:
       - run: bun run --cwd apps/chat test:integration
       - run: bun run test:packages
 
-  files:
+  api-media:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -50,7 +50,7 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
-      - run: bun run --cwd apps/files check-types
-      - run: bun run --cwd apps/files test
-      - run: bun run --cwd apps/files test:integration
+      - run: bun run --cwd apps/api check-types
+      - run: bun run --cwd apps/api test
+      - run: bun run --cwd apps/api test:media
       - run: bun run --cwd packages/core test

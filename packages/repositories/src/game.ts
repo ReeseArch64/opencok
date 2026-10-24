@@ -1,7 +1,19 @@
+import { readBattleRankingState } from "./battle-ranking.ts";
+import { readFlowerRanking } from "./flower-ranking.ts";
+import { readDonationRanking, readCemeteryRanking } from "./community-ranking.ts";
+import { readThroneRanking } from "./throne-ranking.ts";
+import type { ThroneRankingPeriod } from "@opencok/contracts/throne-ranking";
+import {
+  readHeroRanking,
+  readHeroInsideRanking,
+  readHeroHistory,
+  readHeroHistoryPresentation,
+} from "./hero-ranking.ts";
+import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { reportAvatar } from "./avatar-report.ts";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
 import { readMailBatch } from "./mail-batch.ts";
-import { readNormalRankingRealm } from "./ranking-realm.ts";
+import { readNormalRankingRealm, readCrossRankingRealm } from "./ranking-realm.ts";
 import { readMailUpdates } from "./mail-updates.ts";
 import type { MailUpdateInspector, MailUpdateQuery } from "@opencok/contracts/mail-updates";
 import { markMailConversationRead } from "./mail-conversation-read.ts";
@@ -111,6 +123,67 @@ type GameRepositoryConfig = Pick<
 export class Database implements GameStore, FriendshipMineStore {
   readonly databases;
   readonly kingdom;
+  async rankingPrivacy(uid: string, kind: "payment" | "consumption"): Promise<number> {
+    if (!uid || uid.length > 40 || (kind !== "payment" && kind !== "consumption"))
+      throw new Error("Invalid ranking privacy request");
+    const column = kind === "payment" ? user_mixed_info.payHide : user_mixed_info.costHide;
+    const rows = await this.kingdom.db
+      .select({ hide: column })
+      .from(user_mixed_info)
+      .where(eq(user_mixed_info.uid, uid))
+      .limit(1);
+    return rows[0]?.hide ?? 0;
+  }
+  battleRankingState(uid: string, now: number) {
+    return readBattleRankingState(
+      this.kingdom.db,
+      this.databases.global.db,
+      uid,
+      this.config.kingdomId,
+      now,
+    );
+  }
+  heroHistory(uid: string, kingdomId: number, type: number, now: number) {
+    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
+      throw new Error("Unconfigured hero ranking realm");
+    return readHeroHistory(this.databases.getKingdom(kingdomId).db, uid, type, now);
+  }
+  heroHistoryPresentation(alliances: readonly string[], realms: readonly number[]) {
+    return readHeroHistoryPresentation(this.databases.global.db, alliances, realms);
+  }
+  heroInsideRanking(uid: string, kingdomId: number, eventId: string, now: number) {
+    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
+      throw new Error("Unconfigured hero ranking realm");
+    return readHeroInsideRanking(this.databases.getKingdom(kingdomId).db, uid, eventId, now);
+  }
+  heroRanking(uid: string, kingdomId: number, activityId: string, now: number) {
+    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
+      throw new Error("Unconfigured hero ranking realm");
+    return readHeroRanking(this.databases.getKingdom(kingdomId).db, uid, activityId, now);
+  }
+  throneRanking(kingdomId: number, publication?: ThroneRankingPeriod) {
+    if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
+      throw new Error("Unconfigured throne ranking realm");
+    return readThroneRanking(
+      this.databases.getKingdom(kingdomId).db,
+      this.databases.global.db,
+      publication,
+    );
+  }
+  donationRanking(uid: string, now: number) {
+    return readDonationRanking(this.kingdom.db, uid, now);
+  }
+  cemeteryRanking(uid: string, type: "0" | "1", now: number) {
+    return readCemeteryRanking(this.kingdom.db, uid, type, now);
+  }
+  crossRankingRealm(): Promise<boolean> {
+    return readCrossRankingRealm(this.databases.global.db, this.config.kingdomId);
+  }
+  flowerRanking(uid: string, realm: number, uids: readonly string[]) {
+    if (!Number.isInteger(realm) || realm < 1 || !this.databases.kingdoms.has(realm))
+      throw new Error("Unconfigured flower ranking realm");
+    return readFlowerRanking(this.databases.getKingdom(realm).db, uid, uids);
+  }
   normalRankingRealm(): Promise<boolean> {
     return readNormalRankingRealm(this.databases.global.db, this.config.kingdomId);
   }

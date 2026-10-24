@@ -4,9 +4,8 @@
     "**/dist/**",
     "**/coverage/**",
     "**/*.tsbuildinfo",
-    "mobile/**",
-    "legacy/**",
     "data/**",
+    ".husky/_/**",
     "packages/drizzle/migrations/**",
     "**/__snapshots__/**",
     "packages/drizzle/tests/fixtures/**"

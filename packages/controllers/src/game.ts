@@ -1,3 +1,37 @@
+import { decodeFightRanking, decodePlayoffTeams } from "./battle-ranking.ts";
+import { fightRanking, playoffRanking } from "@opencok/mappings/battle-ranking";
+import { battleRankingOpen } from "@opencok/rules/battle-ranking";
+import { javaDecimal } from "@opencok/rules/java-integer";
+import { militaryRanking } from "@opencok/mappings/military-ranking";
+import { militaryRankingGroup } from "@opencok/rules/military-ranking";
+import { flowerRanking, flowerRankingEntries } from "@opencok/mappings/flower-ranking";
+import { flowerRankingRefresh } from "@opencok/rules/flower-ranking";
+import type { DonationRankingKind } from "@opencok/contracts/community-ranking";
+import {
+  donationRanking,
+  resourceDonationRanking,
+  cemeteryRanking,
+} from "@opencok/mappings/community-ranking";
+import { rankingCalendar } from "@opencok/rules/community-ranking";
+import {
+  throneRanking,
+  throneRankingBoard,
+  throneRankingOpen,
+} from "@opencok/mappings/throne-ranking";
+import {
+  heroRankingLookup,
+  heroSelfRanking,
+  heroHistoryBand,
+  heroHistoryRewards,
+} from "@opencok/rules/hero-ranking";
+import {
+  heroSelfRanking as mapHeroSelfRanking,
+  heroInsideRanking,
+  heroHistory,
+} from "@opencok/mappings/hero-ranking";
+import { versionAtLeast } from "@opencok/rules/availability";
+import { attributeRanking, publishedRanking } from "@opencok/mappings/published-ranking";
+import { serverFeature } from "@opencok/rules/power-context";
 import { reportAvatar } from "./avatar-report.ts";
 import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
 import { dragonRanking } from "@opencok/mappings/dragon-ranking";
@@ -362,6 +396,49 @@ export class Game {
       case "dragon.battle.rank":
         body = await this.dragonRanking(uid, params);
         break;
+      case "al.donate.rank.all":
+      case "al.donate.rank.today":
+      case "al.donate.rank.week":
+      case "al.donate.res.rank.day":
+      case "al.donate.res.rank.week":
+      case "al.donate.res.rank.history":
+        body = await this.donationRanking(uid, command);
+        break;
+      case "cemetery.get.ranking":
+        body = await this.cemeteryRanking(uid, params);
+        break;
+      case "flower.ranking":
+        body = await this.flowerRanking(uid);
+        break;
+      case "military.ranking":
+        body = await this.militaryRanking(uid, params);
+        break;
+      case "ctf.get.rank":
+        body = await this.throneRanking(uid, params);
+        break;
+      case "dragon.battle.fight.rank":
+      case "dragon.playoff.rank.info":
+        body = await this.battleRanking(uid, command);
+        break;
+      case "hero.event.ranking.his.get":
+        body = await this.heroHistory(uid, params);
+        break;
+      case "hero.al.inside.ranking":
+        body = await this.heroInsideRanking(uid, params);
+        break;
+      case "hero.self.rank":
+        body = await this.heroSelfRanking(uid, params);
+        break;
+      case "attributeRank.info":
+        body = await this.attributeRanking(uid, params);
+        break;
+      case "paytotal.ranking":
+      case "continuedcost.ranking":
+        body = await this.publishedRanking(
+          uid,
+          command === "paytotal.ranking" ? "payment" : "consumption",
+        );
+        break;
       case "global.celebrities.rank":
         body = await this.globalCelebrityRanking(uid, params);
         break;
@@ -388,7 +465,29 @@ export class Game {
     if (command === "world.get.detail" && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_point_detail");
     if (
-      ["act.score.rank", "global.celebrities.rank", "dragon.battle.rank"].includes(command) &&
+      [
+        "al.donate.rank.all",
+        "al.donate.rank.today",
+        "al.donate.rank.week",
+        "al.donate.res.rank.day",
+        "al.donate.res.rank.week",
+        "al.donate.res.rank.history",
+        "cemetery.get.ranking",
+        "flower.ranking",
+        "military.ranking",
+        "ctf.get.rank",
+        "hero.self.rank",
+        "hero.al.inside.ranking",
+        "hero.event.ranking.his.get",
+        "dragon.battle.fight.rank",
+        "dragon.playoff.rank.info",
+        "act.score.rank",
+        "global.celebrities.rank",
+        "dragon.battle.rank",
+        "attributeRank.info",
+        "paytotal.ranking",
+        "continuedcost.ranking",
+      ].includes(command) &&
       encode(extension(command, body)).length > MAX_FRAME
     )
       throw new GameError(errors.unsupported, "ranking");
@@ -996,6 +1095,382 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async militaryRanking(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (
+      !serverFeature(this.rules, "wr_switch", {
+        kingdomId: this.config.kingdomId,
+        now,
+        version: MOBILE_CLIENT_VERSION,
+      })
+    )
+      throw new GameError(errors.unsupported, "ranking");
+    const type = wireInt(params, "type");
+    if (![0, 1].includes(type)) throw new GameError(errors.invalid);
+    if (!this.services.militaryRanking) throw new GameError(errors.unsupported, "ranking");
+    const group = militaryRankingGroup(this.rules, this.config.kingdomId);
+    return militaryRanking(
+      await this.services.militaryRanking(type, group),
+      uid,
+      this.config.kingdomId,
+      type,
+    );
+  }
+  private async flowerRanking(uid: string): Promise<Fields> {
+    const now = this.now();
+    const current = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (
+      !this.db.crossRankingRealm ||
+      !this.db.flowerRanking ||
+      !this.services.flowerRankingPublication
+    )
+      throw new GameError(errors.unsupported, "ranking");
+    const cross = await this.db.crossRankingRealm();
+    const realm = cross ? Number(current.crossFightSrcServerId) : this.config.kingdomId;
+    if (!Number.isInteger(realm) || realm < 1) throw new GameError(errors.invalid);
+    const limit = Number(this.rules.items.get("ranking")?.k2);
+    if (!Number.isInteger(limit) || limit < 1 || limit > 32767)
+      throw new GameError(errors.unsupported, "ranking");
+    const feature = this.rules.features.get("flowers_all_sev");
+    const global =
+      serverFeature(this.rules, "flowers_all_sev", {
+        kingdomId: this.config.kingdomId,
+        now,
+        version: MOBILE_CLIENT_VERSION,
+      }) && versionAtLeast(MOBILE_CLIENT_VERSION, feature!.version!);
+    const publication = await this.services.flowerRankingPublication(realm, uid, limit, global);
+    const state = await this.db.flowerRanking(
+      uid,
+      realm,
+      flowerRankingEntries(publication.local).map((row) => row.uid),
+    );
+    const profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || num(profile, "serverId") !== realm)
+      throw new GameError(errors.invalid);
+    if (global && cross) {
+      const own = await this.db.flowerRanking(uid, this.config.kingdomId, []);
+      const ownProfile = this.checkProfile(own.profile, now);
+      if (ownProfile.uid !== uid || num(ownProfile, "serverId") !== this.config.kingdomId)
+        throw new GameError(errors.invalid);
+      state.hide = own.hide;
+    }
+    return flowerRanking(
+      publication,
+      state,
+      uid,
+      flowerRankingRefresh(now, state.time, Number(this.rules.items.get("flowers")?.k5)),
+      global,
+    );
+  }
+  private async donationRanking(uid: string, command: string): Promise<Fields> {
+    const now = this.now();
+    const resource = command.startsWith("al.donate.res.");
+    const current = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (resource) {
+      if (!this.db.crossRankingRealm) throw new GameError(errors.unsupported, "ranking");
+      if (await this.db.crossRankingRealm()) return {};
+    }
+    if (!this.db.donationRanking) throw new GameError(errors.unsupported, "ranking");
+    const snapshot = await this.db.donationRanking(uid, now);
+    const profile = this.checkProfile(snapshot.profile, now);
+    if (
+      profile.uid !== uid ||
+      num(profile, "serverId") !== this.config.kingdomId ||
+      !text(profile, "allianceId").trim()
+    )
+      throw new GameError(errors.invalid);
+    const suffix = command.split(".").at(-1)!;
+    const kind = (resource ? `resource-${suffix}` : suffix) as DonationRankingKind;
+    if (!resource) return donationRanking(snapshot, kind, now);
+    if (!this.services.donationScores) throw new GameError(errors.unsupported, "ranking");
+    const date = rankingCalendar(now);
+    const scores = await this.services.donationScores(
+      text(profile, "allianceId"),
+      kind as "resource-day" | "resource-week" | "resource-history",
+      kind === "resource-day" ? date.dayKey : date.weekKey,
+    );
+    return resourceDonationRanking(snapshot, scores, kind === "resource-week", now);
+  }
+  private async cemeteryRanking(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const type = wireString(params, "type");
+    if (type !== "0" && type !== "1") throw new GameError(errors.invalid);
+    if (!this.db.cemeteryRanking) throw new GameError(errors.unsupported, "ranking");
+    const snapshot = await this.db.cemeteryRanking(uid, type, now);
+    const owner = this.checkProfile(snapshot.profile, now);
+    if (owner.uid !== uid || num(owner, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return cemeteryRanking(snapshot, uid);
+  }
+  private async throneRanking(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const own = this.config.kingdomId;
+    const peer = own % 2 === 0 ? own - 1 : own + 1;
+    const enabled = (realm: number) =>
+      serverFeature(this.rules, "wk_switch", {
+        kingdomId: realm,
+        version: MOBILE_CLIENT_VERSION,
+        now,
+      });
+    const target = enabled(own) && enabled(peer) ? peer : -1;
+    const selected = params.serverId === undefined ? undefined : wireInt(params, "serverId");
+    if (selected !== undefined && selected <= 0) throw new GameError(errors.invalid);
+    if (selected !== undefined && selected !== own && selected !== target) return throneRanking([]);
+    if (!this.services.throneRankingPeriod || !this.db.throneRanking)
+      throw new GameError(errors.unsupported, "ranking");
+    const boards: Fields[] = [];
+    for (const realm of [own, ...(target > 0 ? [target] : [])]) {
+      if (selected !== undefined && selected !== realm) continue;
+      const period = await this.services.throneRankingPeriod(realm);
+      if (realm !== own && !period) continue;
+      if (period && !throneRankingOpen(period)) continue;
+      const snapshot = await this.db.throneRanking(realm, period);
+      const board = throneRankingBoard(snapshot, realm, realm === own ? uid : "");
+      if (board) boards.push(board);
+    }
+    return throneRanking(boards);
+  }
+  private async battleRanking(uid: string, command: string): Promise<Fields> {
+    const now = this.now();
+    if (!this.db.battleRankingState) throw new GameError(errors.unsupported, "ranking");
+    const state = await this.db.battleRankingState(uid, now);
+    const profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const playoff = command === "dragon.playoff.rank.info" || [7, 8].includes(state.realmType);
+    if (
+      (playoff || [3, 5].includes(state.realmType)) &&
+      !battleRankingOpen(
+        this.rules,
+        state,
+        this.config.kingdomId,
+        now,
+        playoff,
+        MOBILE_CLIENT_VERSION,
+      )
+    )
+      throw new GameError(errors.battleClosed, "ranking");
+    if (command === "dragon.playoff.rank.info") {
+      if (!this.services.playoffPublication) throw new GameError(errors.unsupported, "ranking");
+      const publication = await this.services.playoffPublication();
+      const teams = decodePlayoffTeams(publication.teams);
+      const weekday = Number(javaDecimal(this.rules.items.get("wap_info")?.k9 ?? "", 32));
+      return playoffRanking(
+        publication,
+        teams,
+        text(profile, "allianceId"),
+        state.tickets,
+        now,
+        weekday,
+      );
+    }
+    if (![3, 5, 7, 8, 13, 14].includes(state.realmType)) return fightRanking();
+    const teamId = state.observerTeam ?? text(profile, "allianceId");
+    if (!teamId) throw new GameError(errors.invalid);
+    if (!this.services.battleFightPublication) throw new GameError(errors.unsupported, "ranking");
+    return fightRanking(decodeFightRanking(await this.services.battleFightPublication(), teamId));
+  }
+  private async heroHistory(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const current = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const source = current.crossFightSrcServerId;
+    const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
+    const type = wireInt(params, "type");
+    if (!Number.isInteger(type) || type < 0 || type > 4) throw new GameError(errors.invalid);
+    if (!this.db.heroHistory) throw new GameError(errors.unsupported, "ranking");
+    const state = await this.db.heroHistory(uid, realm, type, now);
+    const profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || num(profile, "serverId") !== realm)
+      throw new GameError(errors.invalid);
+    if (!state.active || !state.events.length) return heroHistory([]);
+    const alliance = type === 2 || type === 4;
+    const band = heroHistoryBand(type, state.castleLevel, state.alliancePower, this.rules);
+    if (band < 0 || (!alliance && band >= 40)) return heroHistory([]);
+    const rewards = heroHistoryRewards(this.rules, text(state.active, "eventId"), band);
+    const keys = state.events.map((event) => {
+      const lookup = heroRankingLookup(
+        event,
+        uid,
+        text(profile, "allianceId"),
+        this.rules,
+        realm,
+        MOBILE_CLIENT_VERSION,
+        false,
+      );
+      if (typeof lookup === "number" || !lookup.keys[band]) throw new GameError(errors.invalid);
+      return lookup.keys[band]!;
+    });
+    if (!this.services.heroHistoryPublication || !this.db.heroHistoryPresentation)
+      throw new GameError(errors.unsupported, "ranking");
+    const publications = await this.services.heroHistoryPublication(keys, alliance);
+    if (publications.length !== state.events.length) throw new GameError(errors.invalid);
+    const ids = [...new Set(publications.flatMap((row) => [...row.members]))];
+    const realmIds = [
+      ...new Set(
+        state.events.flatMap((event) =>
+          type >= 3 && event.kingdomRank
+            ? String(event.kingdomRank)
+                .split("|")
+                .map((id) => Number(javaDecimal(id, 32)))
+            : [],
+        ),
+      ),
+    ];
+    const presentation = await this.db.heroHistoryPresentation(alliance ? ids : [], realmIds);
+    const players = new Map<string, Row>();
+    if (!alliance) {
+      for (let offset = 0; offset < ids.length; offset += 50) {
+        const summaries = await this.db.getPlayerSummariesByIds(
+          ids.slice(offset, offset + 50),
+          true,
+        );
+        for (const summary of summaries)
+          players.set(text(summary.data, "uid"), { ...summary.data, server: summary.kingdomId });
+      }
+    }
+    return heroHistory(
+      state.events.map((event, index) => {
+        const publication = publications[index]!;
+        const members = publication.members.flatMap((id, position) => {
+          const rewardId = rewards[position];
+          if (rewardId === undefined) return [];
+          const member: Row = {
+            [alliance ? "allianceId" : "uid"]: id,
+            rewardId,
+            rank: position + 1,
+          };
+          if (alliance) {
+            const raw = publication.alliances[position];
+            const data: unknown = raw
+              ? JSON.parse(raw)
+              : presentation.alliances.find((row) => row.allianceId === id);
+            if (data != null && (typeof data !== "object" || Array.isArray(data)))
+              throw new GameError(errors.invalid);
+            if (data)
+              for (const key of ["name", "server", "abbr", "icon"])
+                if ((data as Row)[key] != null) member[key] = (data as Row)[key]!;
+          } else {
+            const data = players.get(id);
+            if (data && text(data, "name").trim()) {
+              member.name = text(data, "name");
+              member.server = data.server!;
+              member.pic = text(data, "pic");
+              member.picVer = num(data, "picVer");
+              member.picfraId = num(data, "picfraId");
+              member.abbr = text(data, "abbr");
+            }
+          }
+          return [member];
+        });
+        const realms =
+          type >= 3 && members.length && event.kingdomRank
+            ? String(event.kingdomRank)
+                .split("|")
+                .map((raw, rank) => {
+                  const id = Number(javaDecimal(raw, 32));
+                  return {
+                    ...presentation.realms.find((row) => Number(row.id) === id),
+                    id,
+                    rank: rank + 1,
+                  };
+                })
+            : [];
+        return { event, members, realms };
+      }),
+    );
+  }
+  private async heroInsideRanking(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const current = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const source = current.crossFightSrcServerId;
+    const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
+    if (!this.db.heroInsideRanking) throw new GameError(errors.unsupported, "ranking");
+    const state = await this.db.heroInsideRanking(uid, realm, wireString(params, "actId"), now);
+    const profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || num(profile, "serverId") !== realm)
+      throw new GameError(errors.invalid);
+    return heroInsideRanking(state.rows);
+  }
+  private async heroSelfRanking(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const current = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const source = current.crossFightSrcServerId;
+    const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
+    const activityId = wireString(params, "activityId");
+    if (!this.db.heroRanking) throw new GameError(errors.unsupported, "ranking");
+    const state = await this.db.heroRanking(uid, realm, activityId, now);
+    const profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || num(profile, "serverId") !== realm)
+      throw new GameError(errors.invalid);
+    const positions: number[] = [];
+    for (const event of state.events) {
+      const query = heroRankingLookup(
+        event,
+        uid,
+        text(profile, "allianceId"),
+        this.rules,
+        realm,
+        MOBILE_CLIENT_VERSION,
+      );
+      if (typeof query === "number") positions.push(query);
+      else {
+        if (!this.services.heroRankingPosition) throw new GameError(errors.unsupported, "ranking");
+        positions.push(await this.services.heroRankingPosition(query));
+      }
+    }
+    return mapHeroSelfRanking(heroSelfRanking(state.events, positions));
+  }
+  private async publishedRanking(uid: string, kind: "payment" | "consumption"): Promise<Fields> {
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const key = kind === "payment" ? "new_rank_recharge" : "new_rank_cost";
+    if (
+      !serverFeature(this.rules, key, {
+        kingdomId: this.config.kingdomId,
+        version: MOBILE_CLIENT_VERSION,
+        now,
+      })
+    )
+      return {};
+    if (!versionAtLeast(MOBILE_CLIENT_VERSION, this.rules.features.get(key)!.version!)) return {};
+    if (!this.services.publishedGlobalRanking || !this.db.rankingPrivacy)
+      throw new GameError(errors.unsupported, "ranking");
+    const hide = await this.db.rankingPrivacy(uid, kind);
+    return publishedRanking(await this.services.publishedGlobalRanking(kind), uid, hide);
+  }
+  private async attributeRanking(uid: string, params: Fields): Promise<Fields> {
+    if (this.config.kingdomId > 999999) return {};
+    if (!this.db.normalRankingRealm) throw new GameError(errors.unsupported, "ranking");
+    if (!(await this.db.normalRankingRealm())) return {};
+    const type = wireInt(params, "rankType");
+    const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (![0, 1, 2].includes(type)) return {};
+    if (!this.services.attributeRanking) throw new GameError(errors.unsupported, "ranking");
+    return attributeRanking(await this.services.attributeRanking(type), type);
   }
   private async dragonRanking(uid: string, params: Fields): Promise<Fields> {
     const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
