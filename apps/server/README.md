@@ -1353,6 +1353,256 @@ separately. The percentage has a lower bound of 20, including for negative infin
 NaN and positive infinity preserve Java cast behavior. Single-player siege load is
 not included because the resource query requests the ordinary calculation.
 
+`rules/world-resource-effects` now resolves ordinary load effects 78 and 2196
+through the shared player-effect composition and obtains effect 133 only from the
+restored general skills. Global, equipment, status or base effects with ID 133 are
+not substituted for that general-only contribution. The existing equipment-load
+ordering, modifier 218, per-general Float accumulation and ordinary-realm source
+boundaries also apply to these load effects. The shared resolver additionally
+supports effect 895 for the conditional expedition branch.
+
+The expedition rule uses server-side `tech_newEffect` and `17_wk` feature gates,
+rejects merged realms and the replacement `wk_switch_new` feature, requires
+collection stage 3 and checks the player's effective home realm against the current
+realm. These feature checks do not compare the client's version. Only an eligible
+request resolves effect 895. Context/effect exceptions return zero, preserving this
+specific reference boundary; ordinary load-effect failures still propagate. Inputs
+are an explicit merge/stage/home-realm snapshot callback and an effect callback.
+The effective home realm must follow the reference's cross-fight-origin rule, and
+stage must represent the applicable runtime or request-override stage. Those data
+providers are not yet wired to this point query; no stage or home realm is invented
+from the observer or destination point.
+
+Ten added units extend the complete ordinary-source matrix to 78, 895 and 2196,
+verify general-only 133 and Float ordering, compose the result with troop load and
+cover conditional feature/time/realm/stage gates, skipped effect reads and failure
+fallback. New-general stronghold/official contributions remain a separate required
+resolver; this step does not replace them with zero.
+
+`rules/new-general-skills` restores the passive base-skill and talent components
+separately from ordinary general effect 133. Optional `general_base.xml` and
+`general_skill.xml` catalogs retain exact strings and final duplicate definitions;
+they do not replace `sk.xml`. Saved `baseSkill` and `talent` strings retain final
+duplicate integer levels, Java integer digits and whole-separator parsing behavior.
+Their storage bounds are 256 and 5,000 UTF-16 units; lists/maps are bounded to 4,096
+entries. Missing required skill definitions and malformed consumed numbers reject.
+
+Base skills start at level one when no saved level exists. Star-specific skill
+lists append in numeric star order, preserve duplicates, and cannot populate an
+empty initial list. Only passive type zero contributes. Nonblank `condition_type`
+excludes a base skill from this calculation but does not exclude a talent. Short
+base/add arrays supply zero; extra malformed numeric values still reject. Level
+minus one wraps as Int before conversion to Float, and multiplication, addition
+and per-effect accumulation each round as Float. Talents traverse a fresh Java 8
+Integer HashMap reconstructed from the saved text; historical cache mutation order
+is not claimed. Returned effect maps also preserve fresh HashMap traversal.
+
+Direct decimal/hexadecimal Float parsing retains signed zero, subnormals, infinities
+and NaN, including decimal halfway cases that differ from double-then-float parsing.
+Independent synthetic Java 8 JDK probes supply 1,529 parsing cases, 80 integer-map
+orders and 400 arithmetic cases. Ten unit tests compare these fixtures and cover
+skill selection, restoration, limits and immutable inputs; an additional resource
+unit checks the catalog boundary. No private classes execute and normal tests do
+not require Java or local legacy inputs. Star lookup visits only present canonical
+catalog keys, avoiding a linear scan across missing stars and the legacy loop's
+Int overflow at maximum star. This is an explicit bounded-read difference.
+
+`rules/new-general-building` now supplies building/official eligibility. Direct
+assignment requires state two, a matching building UUID and an existing building;
+it bypasses official feature gates. Official state six additionally requires the
+owner-version/realm/time feature, main-building level including stars, a nonempty
+office with nonzero position/start time, office/position unlocks and the first
+matching effect's headcount requirement. Future nonzero start times are accepted,
+as in the reference. Headcounts include all restored rows for the same office,
+without validating their positions or start times, and office IDs keep their first
+duplicate row. Unknown unlock types pass. Position multipliers preserve Float
+parsing, including zero and nonfinite values, and resolve after the component sum.
+Missing offices remain absent; this read does not create default office rows or
+repair general state.
+
+`rules/new-general-status` restores final duplicate statuses and traverses their
+fresh Integer HashMap order. Signed Long start/end comparisons are inclusive and
+nullable primitive timestamps become zero. Inactive statuses skip effect parsing;
+missing status definitions contribute zero. Active malformed effects propagate to
+the outer failure boundary. Refinement uses the owner-version feature gate,
+final duplicate slots, the reference's mixed separator rules and effect-set
+membership without duplicate contributions. A refinement exception discards its
+whole subtotal while retaining the other general components. Its saved text is
+bounded to the 300-unit storage field. Optional `general_official` and
+`general_random_effect` catalogs retain final duplicate definitions.
+
+`rules/new-general-effects` now composes status, passive skills, talents, an explicit
+equipment result and refinement before applying the official rate and accumulating
+generals as Float. Fresh saved talent, operation-time and base-skill maps restore
+before filtering eligibility; malformed operation times retain the module failure
+behavior even though the load calculation does not consume their values. Operation
+time text is bounded to 200 UTF-16 units and signed Long values. Any snapshot,
+restoration, eligibility, status, skill, equipment or rate exception returns zero
+for the entire general contribution. The separate refinement fallback remains local.
+Status time samples once per eligible general; feature gates use the supplied rule
+context. Neither clock nor equipment is read for an ineligible general.
+
+The composition requires a snapshot callback containing authoritative general
+traversal, buildings, level/prestige and office state, plus an equipment callback.
+It does not infer ConcurrentHashMap iteration or historical cache state from SQL
+order. The concrete `equippedGeneralBuildingEffect` adapter now supplies the general's
+equipment calculation from explicit ordered equipment bindings and current owner
+modifiers. Owner relocation/loading policy, authoritative traversal and those readers
+remain pending. No current endpoint substitutes an empty provider to enable this path.
+
+Twenty-four added units cover these rules and their catalog loading, reusing the
+earlier parsing/map oracles and adding 600 independent synthetic Java 8 component-sum
+and official-rate vectors. They cover skipped reads, clock order, restoration before
+filtering, failure boundaries, signed/nonfinite arithmetic and immutable snapshots.
+They use no live database, service or client. The occupied-resource command remains
+gated until all required runtime dependencies are supplied.
+
+`rules/new-general-equipment` calculates each bound item's base and extra effects,
+rereading the owner's color/site modifiers for the extra stage as in the reference.
+Color effects 214–217 and site effects 207–213 combine before division by 100;
+modifier 218 applies separately to each item-effect entry. Every operation rounds
+as Float. Negative values remain negative, and nonfinite values retain Float
+arithmetic. An already bound general item does not require the player's worn `on`
+flag. The input is the selected equipment map's traversal, not an unfiltered SQL
+inventory. Duplicate site selection and cache history remain reader responsibilities.
+
+Ordinary equipment parameters stop at the first blank group or after group 99.
+Only canonical site string `6` selects parallel dragon values. Extra properties
+preserve the distinct pipe, comma and at-sign split rules, duplicate sums
+and ignored trailing comma fields. Saved extras are bounded to 255 UTF-16 units;
+piece/effect collections are bounded to 4,096 entries. Missing consumed definitions,
+invalid enums, malformed values and unavailable modifiers propagate to the enclosing
+general module failure boundary. A missing item definition behaves as an empty map
+inside this already-bound calculation, including any saved extras; initial binding
+validation belongs to the separate restoration controller described below.
+
+Suit counts retain present empty suit IDs and traverse a fresh String HashMap. The
+two/four/six-piece thresholds each honor exact comma-separated general exclusivity.
+Suit values use strict Float parsing and whole-separator effect lists, including
+duplicate effects. Suit bonuses apply after item effects without modifier 218,
+the ordinary player's suit feature gate, strengthening or decomposition selections.
+This is why the ordinary player's equipment accumulator is not reused here.
+
+The shared player-effect resolver now exposes 207–218, preserving the special case
+that modifier 218 does not multiply itself. Twenty-two additional units include
+1,000 independent Java 8 equipment arithmetic vectors, the complete ordinary-source
+matrix for all twelve modifiers, concrete building-composition wiring and a bridge
+from current owner modifiers through general equipment to raw troop load. The
+existing 600 building-composition vectors also remain passing. Resource-owner reads
+and ordered general bindings are described below; complete owner context and
+occupied-resource endpoint integration are still pending.
+
+The internal `WorldPointDetailQuery.resourceEffects` flag now requests a resource-owner
+snapshot for types 3/37 with a present saved march. The wire command does not enable
+this flag yet. `repositories/world-resource-owner` reads the owner by UID in the
+point's existing read-only repeatable-read transaction, then reuses bounded ordinary
+effect reads and selects the additional general/building inputs. Remote queries use
+only the destination realm after local observer authorization. Missing marches and
+missing owner profiles skip these inputs; no fallback owner or effects are invented.
+
+| Input             | Selected scope                                                                                                                                                | Stable SQL ordering                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Owner profile     | Level, realm/cross-fight origin, ban time, app version, alliance/platform, civilization and suit selection; no credentials or account identifiers beyond UID. | Unique UID, duplicate detection.   |
+| Ordinary effects  | Existing bounded player-effect projection for the owner.                                                                                                      | Existing source-specific ordering. |
+| Buildings         | Owner UID, UUID, item ID, level and star.                                                                                                                     | UUID.                              |
+| New generals      | Owner UID, ID, state, building UUID, star, saved skill/talent/operation-time/refinement text.                                                                 | Numeric ID.                        |
+| General statuses  | Owner/general/status IDs and exact nullable start/end Longs.                                                                                                  | General ID, status ID.             |
+| General equipment | Owner UID, UUID, positive general ID, item ID and saved extras; no worn-flag filter.                                                                          | UUID.                              |
+| Offices           | Owner UID, general ID, office ID, nullable position and start Long.                                                                                           | Numeric general ID.                |
+
+Collections read at most 4,097 records and reject above 4,096. Duplicate identities,
+foreign owner rows, invalid integer/Long widths, oversized text, NULs and unpaired
+surrogates reject. Nullable values remain nullable for subsequent primitive restoration.
+Orphan status/equipment associations and malformed numeric content inside bounded
+saved strings remain present for the restoration rules; this reader neither repairs
+ownership nor parses catalogs. The reference transferred-owner marker is exactly
+`banTime = Long.MAX_VALUE`: general statuses and equipment skip loading in that case,
+while ordinary worn equipment, general rows and office rows remain separate inputs.
+An ordinary temporary ban does not become a relocation flag. Owner home realm and
+cross-fight origin are retained even when they differ from the destination database.
+
+Eight additional driver-fake unit tests cover local/remote snapshot boundaries,
+owner predicates and bounded projections, opt-in/skipped reads, moved-owner behavior,
+ordinary-source limits, nullable/orphan records, invalid data, rollback and readiness.
+Readiness now probes sixteen point-detail table projections, including six owner
+projections, without reading data. No database, listener, client or migration is run.
+SQL failures and invalid requested snapshot rows become the existing dependency
+failure; these tests do not establish real database isolation or the legacy lazy
+cache's availability behavior. Owner building/context restoration is described below;
+residency and final endpoint composition still remain pending.
+
+`controllers/world-resource-generals` now converts the general portion of this raw
+snapshot into ordered general/equipment state. Saved talent, operation-time and base
+skill maps are validated before assignment filtering, including overwritten general
+rows. Nullable primitive state/star fields default to zero. State is a Java byte in
+the reference: values outside -128 through 127 reject rather than wrap, following
+the bundled JDBC driver's default read-truncation checks. Nondefault driver settings
+are not claimed equivalent. Bound strings retain their existing storage limits;
+general, status and equipment input collections are capped at 4,096 rows each.
+
+Status associations retain exact nullable Long timestamps. Orphan statuses and
+equipment are ignored without ownership repair. Transferred owners skip status and
+equipment restoration entirely. A present general's equipment catalog is looked up
+before its state is examined: a missing item definition fails restoration even for
+state 4. That state skips binding; other states require a nonnull slot, preserve its
+exact text (including empty strings), and keep the last loaded piece for that slot.
+The ordinary player's worn flag is not used for general equipment. No rows are mutated.
+
+General IDs and equipment slots traverse fresh Java 8 ConcurrentHashMaps through the
+shared messages order model. Updating an existing key deep in a collision bucket can
+trigger treeification or resizing without increasing the entry count; both insertion
+and replacement histories are retained. This differs from simply sorting IDs or
+deduplicating before map restoration, and can change Float cancellation. Ten added
+unit tests include 116 independent Java 8 Integer-map and 20 String-map fixtures,
+duplicate slot selection, relocation, malformed unused content and composition with
+the general effect failure boundary. Only JDK collections and synthetic values were
+executed to produce those fixtures; no private game classes were run.
+
+This projection defines fresh-map traversal from the repository's stable SQL ordering.
+It does not reconstruct historical resident caches or the legacy database's unspecified
+row order. Residency, authoritative owner/world modifiers, expedition state and maximum
+collection time still need composition before occupied-resource responses can be
+enabled. All current evidence is server-side unit coverage.
+
+`controllers/world-resource-owner-context` now selects the requested building by item
+ID after fresh String ConcurrentHashMap restoration of UUIDs. The default target is
+the stronghold. Multiple buildings of that type select the first map entry, not the
+highest level or first SQL row. Duplicate UUIDs retain the final loaded record. The
+main-building level adds level and star with signed Int wrapping; nullable primitive
+stars default to zero. An absent requested building returns before general content,
+equipment modifiers or status clocks are consumed.
+
+The controller connects the restored generals and building state to the concrete
+equipment/building effect composition. Player level, prestige and office getters defer
+restoration until the eligibility branch requests them. Direct assignments therefore
+do not fail because of unused official catalog or prestige data. Reached restoration
+errors retain the whole-general-module zero fallback, including sums accumulated by
+earlier generals. No office repairs, building initialization or data writes occur.
+
+Official prestige selects the owner's current civilization, including type zero,
+without applying the ordinary civilization-effect feature gate. Missing saved records
+or unmatched ranges yield level zero. The first matching range uses exact signed Long
+comparisons: one positive threshold is inclusive above, one nonpositive threshold is
+exclusive below, and two thresholds form a half-open interval. Whole-separator parsing
+retains malformed trailing values and rejects them when consumed. Level parsing occurs
+only after a match. `reputation_level` now retains all ordered XML records alongside
+its final-definition ID index; both official and ordinary prestige lookup use the
+ordered records, preserving overlapping ranges and duplicate IDs.
+
+Official and refinement features use the saved owner's app version, not an observer's
+version. Null and Java-blank owner versions skip version comparison while retaining
+the configured feature, execution-realm and time gates. The execution realm remains
+separate from saved home/cross-fight origin. Nonblank general feature versions parse
+all supplied dot-separated Java Integer components, ignoring empty segments, before
+short-circuit comparison of the first three components. Missing components fail only
+when comparison reaches them; malformed extra components still fail parsing.
+Seventeen added unit tests cover these projections, deferred failures, overflow,
+exact Long thresholds, duplicate catalog
+records, resource loading and ordinary prestige regression. This supplies the general
+owner projection; authoritative ordinary modifier resolution and complete occupied
+resource responses remain pending. The shared realm/date gates still need a separate
+compatibility audit for exceptional legacy selectors and lenient date strings.
+
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries
 without a load field skip the troop. Malformed required fields reject. Snapshots
@@ -1391,9 +1641,55 @@ schema defaults, malformed handles/counts, every truncated fixture prefix and
 composition with the raw-load rule. Null or unwell-formed saved values are not
 silently converted into valid gameplay inputs.
 
-The saved-data reader is not yet connected to an occupied-resource repository query.
-Resolving the five modifier inputs and validating ownership remain required before
-the command can use the calculation. A database read is not evidence that an owner
+The point repository now reads the pointed resource march for types 3/37 when
+both owner ID and march UUID are nonblank. That read shares the point/owner snapshot,
+including the destination snapshot for remote requests. Selection uses the saved
+UUID alone, matching the reference's march index; it does not substitute a world,
+destination or occupancy-state search. The snapshot retains those metadata fields
+for subsequent resolution, even when they differ from the point. It rejects a row
+with another UUID or owner and duplicate rows, rather than expose another owner's
+saved army through an inconsistent point pointer.
+
+Only army bytes, collection speed/times, collected-before-speed-change count and
+plunder text are read alongside identity metadata. Exploration reports, combat
+payloads and unrelated march columns are omitted. Nullable columns retain null;
+Int64 values stay bigint, and PostgreSQL real values are normalized to Float32.
+Payload sizes follow existing column bounds. Missing marches remain explicitly
+absent; no ownership repair, fake zero-load army or scheduling is performed. The
+readiness probe includes these columns with limit zero. Eight additional synthetic
+adapter units cover local/remote snapshots, pointer selection, omitted reads,
+nullable/bounded payloads, Float32 normalization, precision, authorization and rollback.
+
+`messages/legacy-json` also decodes root arrays through the same bounded parser
+used for stored mailbox structures. The resource controller's plunder restoration
+maps SQL null to the model's initial empty array. A nonnull value must parse as an
+array, including when its entries will not be used for load subtraction. Only a
+single object can contribute `v`, and that value must retain its SFS Int type;
+strings, Longs, Doubles, nulls and duplicate-key arrays are not coerced. Missing `v`
+contributes nothing. Multiple entries and territory types 18/19 skip the value cast,
+matching the reference's access order. Malformed arrays and retained function/hole
+values still reject. The persisted text is limited to the column's 2,048 characters.
+
+`resourceSavedCollection` restores the saved collection fields independently of raw
+army load and runtime maximum collection time. Nullable primitive columns default
+to zero; times remain exact signed Long values, speed becomes Float32 and the
+collected-before-speed-change count becomes Int. That count is bigint in the
+TypeScript storage schema but INTEGER in the reference mapper and int in its model.
+Out-of-Int-range values reject rather than wrap, consistent with the bundled JDBC
+driver's default truncation-check setting; nondefault driver configurations are not
+claimed equivalent. Restoring these fields neither advances collection nor writes
+the saved row.
+
+Nine added units cover 459 frozen numeric-oracle outcomes, 28 frozen array-structure
+outcomes, permissive legacy syntax, typed plunder access, nullable primitives,
+signed-width boundaries and composition through resource arithmetic and SFS binary
+encoding. The JSON parser remains separate from the controller's resource-specific
+access rules and the pure collection arithmetic.
+
+The saved-data decoder and raw-load calculation are not yet composed into the
+occupied-resource command. Resolving the five modifier inputs, checking decoded
+army ownership and restoring collection state remain required before it can return
+the full resource projection. A database read is not evidence that an owner
 was resident in the reference process. The runtime-only maximum collection time is assigned by destination-march rescheduling;
 it is not a persisted march column. Restoring its read value still needs an explicit
 policy backed by that lifecycle, without scheduling work from the query. This pure

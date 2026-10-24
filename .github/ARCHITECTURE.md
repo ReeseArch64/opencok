@@ -452,10 +452,66 @@ calculation does not deserialize troop objects or resolve profile effects itself
 The separate messages codec projects saved army/soldier fields through a bounded
 Java object-stream data reader, without executing any classes or serialization
 hooks. Consumed class identities/field types are validated; unrelated object graphs
-are traversed structurally and discarded. Repository integration, owner validation,
-effect resolution and runtime maximum-collection-time restoration remain dependencies
-of occupied-resource command composition. No march scheduling or cache write is
-performed by this pure projection.
+are traversed structurally and discarded. The point repository reads a nonblank
+resource owner's saved march pointer by UUID in the same point snapshot. It retains
+identity and collection metadata, bounded army/plunder payloads and exact nullable
+Long fields, normalizing real speed to Float32. Missing marches remain absent;
+inconsistent owners reject without ownership repair. Decoder composition, decoded
+owner validation, effect resolution and runtime maximum-collection-time restoration remain dependencies
+of occupied-resource command composition. Root stored JSON arrays share the existing
+bounded legacy parser; controller restoration preserves the single-item typed
+plunder access rules. Pure collection restoration applies nullable primitive defaults
+and checks the reference model's Int range before narrowing the saved count. No
+march scheduling or cache write is performed by these projections. Resource load
+resolves ordinary effects 78/2196 with the shared player-effect engine and general
+133 from general skills alone. Conditional expedition effect 895 has its own
+feature, merge, stage and effective-home-realm gate, preserving its zero-on-exception
+boundary. Authoritative expedition context and new-general stronghold/official
+contributions still need to be connected; explicit callbacks are not runtime parity.
+
+The separate `rules/new-general-skills` projection restores passive base-skill and
+talent effect maps from bounded saved level strings and optional `general_base` /
+`general_skill` catalogs. It preserves star ordering, duplicate contributions,
+conditional-base-skill exclusion, fresh Java Integer HashMap talent traversal and
+Float arithmetic. Decimal and hexadecimal Float parsing rounds directly to binary32,
+including halfway values that cannot safely pass through a JavaScript double first.
+`rules/new-general-building` now determines direct assignment and official eligibility
+from explicit building/office state; `rules/new-general-status` supplies active status
+and gated refinement contributions. `rules/new-general-effects` composes these with
+skills/talents and an obligatory equipment resolver, preserving Float ordering,
+per-general status clocks, late official scaling, whole-module failure fallback and
+the narrower refinement failure boundary. Its snapshot callback must supply the
+authoritative general traversal and owner state. `rules/new-general-equipment` now
+calculates bound general equipment and exclusive suits and supplies a concrete
+adapter into the composition. The shared player-effect resolver exposes color/site/
+all-equipment modifiers 207–218. `controllers/world-resource-generals` restores saved
+general content and status/equipment associations, selects the last loaded piece per
+exact slot, and supplies fresh Integer/String ConcurrentHashMap traversal. Duplicate
+key updates retain their collision-treeification behavior. Restoration preserves the
+transferred-owner skip and rejects missing binding catalogs before eligibility, while
+orphan associations are ignored without database repair. The owner-context controller
+now selects buildings through the same fresh String-map traversal and connects saved
+generals to building composition. Stronghold level/star addition wraps as Int; player
+level, prestige and office projections are consumed only when eligibility needs them.
+Prestige scans ordered catalog records, including duplicate IDs, independently of the
+civilization-effect feature gate. Feature checks use the saved owner version and the
+execution realm; blank owner versions skip version comparison. The ordinary modifier
+provider and endpoint integration remain required; callback-based units do not
+establish runtime parity.
+
+The point repository now accepts an internal `resourceEffects` request to read the
+saved march owner's ordinary effects, buildings and new-general records in the same
+point transaction. It is opt-in and only applies to resource types 3/37 with a present
+march and owner profile. Remote reads use the destination transaction after local
+authorization. The bounded reader preserves exact owner version, home/cross-fight
+realm fields and nullable state. The transferred-owner Long-max ban marker skips
+general status/equipment loading while retaining general and office rows. SQL
+sorting provides stable insertion inputs for fresh general/equipment maps, not a
+reconstruction of historical process-cache traversal or unordered legacy SQL reads.
+The owner-context projection supplies building traversal and official eligibility.
+Runtime residency, authoritative world/expedition effects and endpoint composition
+remain separate work. Invalid or unavailable requested state fails the point snapshot
+rather than fabricating effects.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read

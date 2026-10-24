@@ -92,11 +92,14 @@ function fixture() {
       }
       if (text === "commit" || text === "rollback") return { rows: [] };
       expect(text).toStartWith("select ");
-      expect(text).not.toMatch(/for update|for share|armyInfo|plunderRes|monsterInfo/);
+      expect(text).not.toMatch(/for update|for share|monsterInfo/);
       const table = /from "opencok_kingdom"\."([^"]+)"/.exec(text)![1]!;
+      const resource = table === "world_march" && text.includes('"armyInfo"');
+      if (!resource) expect(text).not.toMatch(/armyInfo|plunderRes/);
       const report = table === "world_march" && text.includes('"exploreReport"');
-      const neutral = table === "world_march" && text.includes('"occupyResourceEndTime"');
-      const key = table + (report ? ":report" : neutral ? ":neutral" : "");
+      const neutral =
+        !resource && table === "world_march" && text.includes('"occupyResourceEndTime"');
+      const key = table + (resource ? ":resource" : report ? ":report" : neutral ? ":neutral" : "");
       if (key === state.fail) throw new Error("Synthetic private failure");
       let rows: Row[] = [];
       if (table === "userprofile")
@@ -127,7 +130,11 @@ function fixture() {
         expect(text).not.toMatch(/lastAwardArmyMapByteArray|currentHP|worldId|ownerId/);
         rows = state.barbarian ? [state.barbarian] : [];
       } else if (table === "world_march") {
-        if (neutral) {
+        if (resource) {
+          expect(params).toEqual([state.point!.ownerMarchUUid, 2]);
+          expect(text).toContain('"world_march"."uuid" = $1');
+          rows = state.marches.filter((row) => row.uuid === params[0]);
+        } else if (neutral) {
           expect(params).toEqual([701, 1, 1]);
           expect(text).toContain('"world_march"."targetId" = $1');
           expect(text).toContain('"world_march"."state" = $2');

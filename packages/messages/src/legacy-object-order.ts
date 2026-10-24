@@ -1,10 +1,10 @@
-interface Entry {
-  key: string;
+interface Entry<T> {
+  key: T;
   hash: number;
 }
-interface Bucket {
-  items: Entry[];
-  added: Entry[];
+interface Bucket<T> {
+  items: Entry<T>[];
+  added: Entry<T>[];
   tree: boolean;
 }
 function hashCode(value: string): number {
@@ -13,17 +13,17 @@ function hashCode(value: string): number {
     hash = (Math.imul(hash, 31) + value.charCodeAt(index)) | 0;
   return (hash ^ (hash >>> 16)) & 0x7fffffff;
 }
-function entries(bucket: Bucket): Entry[] {
+function entries<T>(bucket: Bucket<T>): Entry<T>[] {
   return bucket.added.length ? bucket.added.slice().reverse().concat(bucket.items) : bucket.items;
 }
 
-export function legacyObjectOrder(keys: readonly string[]): string[] {
-  let buckets: (Bucket | undefined)[] = Array(16);
+function concurrentOrder<T>(keys: readonly T[], spread: (key: T) => number): T[] {
+  let buckets: (Bucket<T> | undefined)[] = Array(16);
   let count = 0;
-  const seen = new Set<string>();
+  const seen = new Set<T>();
   function resize() {
     const capacity = buckets.length;
-    const grown: (Bucket | undefined)[] = Array(capacity * 2);
+    const grown: (Bucket<T> | undefined)[] = Array(capacity * 2);
     for (let index = 0; index < capacity; index++) {
       const bucket = buckets[index];
       if (!bucket) continue;
@@ -48,25 +48,43 @@ export function legacyObjectOrder(keys: readonly string[]): string[] {
     buckets = grown;
   }
   for (const key of keys) {
-    if (seen.has(key)) continue;
-    seen.add(key);
-    const hash = hashCode(key);
+    const duplicate = seen.has(key);
+    const hash = spread(key);
     const index = hash & (buckets.length - 1);
     let bucket = buckets[index];
     const entry = { key, hash };
     if (!bucket) buckets[index] = bucket = { items: [entry], added: [], tree: false };
-    else if (bucket.tree) bucket.added.push(entry);
-    else {
-      bucket.items.push(entry);
-      if (bucket.items.length >= 9) {
+    else if (bucket.tree) {
+      if (!duplicate) bucket.added.push(entry);
+    } else {
+      const traversed = duplicate
+        ? bucket.items.findIndex((item) => item.key === key) + 1
+        : bucket.items.length;
+      if (!duplicate) bucket.items.push(entry);
+      if (traversed >= 8) {
         if (buckets.length < 64) {
           const target = buckets.length * 4;
           while (buckets.length * 0.75 < target) resize();
         } else bucket.tree = true;
       }
     }
+    if (duplicate) continue;
+    seen.add(key);
     count++;
     while (count >= buckets.length * 0.75) resize();
   }
   return buckets.flatMap((bucket) => (bucket ? entries(bucket).map((entry) => entry.key) : []));
+}
+
+export function legacyObjectOrder(keys: readonly string[]): string[] {
+  return concurrentOrder(keys, hashCode);
+}
+
+export function legacyIntegerOrder(keys: readonly number[]): number[] {
+  if (
+    keys.length > 4096 ||
+    keys.some((key) => !Number.isInteger(key) || key < -2147483648 || key > 2147483647)
+  )
+    throw new Error("Invalid legacy integer map keys");
+  return concurrentOrder(keys, (key) => (key ^ (key >>> 16)) & 0x7fffffff);
 }

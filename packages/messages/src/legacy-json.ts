@@ -273,6 +273,14 @@ export function decodeLegacyJsonObject(source: string): Fields {
   return convert(sfs.object(parser.object(0))).value as Fields;
 }
 
+export function decodeLegacyJsonArray(source: string): Value[] {
+  if (typeof source !== "string" || Buffer.byteLength(source) > 4 * 1024 * 1024)
+    throw new ProtocolError();
+  const parser = new Parser(trim(source));
+  if (parser.clean() !== "[") throw new LegacyJsonError();
+  return convert(sfs.array(parser.array(0))).value as Value[];
+}
+
 export function roundTripLegacyIntegerObject(fields: Fields): Fields {
   const entries = Object.entries(fields);
   if (entries.length > 32767) throw new ProtocolError();
