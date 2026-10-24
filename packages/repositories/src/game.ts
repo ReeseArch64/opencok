@@ -1,3 +1,5 @@
+import { readAllianceRanking } from "./alliance-ranking.ts";
+import type { AllianceRankingQuery } from "@opencok/contracts/alliance-ranking";
 import { createDatabases } from "@opencok/drizzle";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -175,6 +177,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   publicProfile(uid: string, observerAllianceId: string) {
     return loadPublicProfile(this.databases, this.config.kingdomId, uid, observerAllianceId);
+  }
+  allianceRanking(uid: string, query: AllianceRankingQuery) {
+    return readAllianceRanking(this.kingdom.db, uid, query);
   }
   playerRanking(uid: string, query: PlayerRankingQuery) {
     return readPlayerRanking(this.kingdom.db, uid, query);

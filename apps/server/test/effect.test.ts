@@ -23,6 +23,9 @@ const dependencies: ServerDependencies = {
     profile: async () => undefined,
     accounts: async () => [],
     playerSummaries: async () => [],
+    allianceRanking: async () => {
+      throw new Error("Unexpected dependency call");
+    },
     playerRanking: async () => {
       throw new Error("Unexpected ranking query");
     },

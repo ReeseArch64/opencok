@@ -42,6 +42,7 @@ const unused = async (): Promise<never> => {
 };
 function store(state: LoginConfigurationState): GameStore {
   return {
+    allianceRanking: unused,
     playerRanking: unused,
     publicProfile: unused,
     playerSummaries: unused,

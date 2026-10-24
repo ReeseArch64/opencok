@@ -1,3 +1,4 @@
+import type { AllianceRankingQuery, AllianceRankingSnapshot } from "./alliance-ranking.ts";
 import type { Row } from "./rows.ts";
 import type { PowerState } from "./power.ts";
 import type { RoutedPublicProfile } from "./profile.ts";
@@ -19,6 +20,7 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  allianceRanking(uid: string, query: AllianceRankingQuery): Promise<AllianceRankingSnapshot>;
   playerRanking(uid: string, query: PlayerRankingQuery): Promise<PlayerRankingSnapshot>;
   publicProfile(uid: string, observerAllianceId: string): Promise<RoutedPublicProfile | undefined>;
   power(uid: string, now: number): Promise<PowerState>;
