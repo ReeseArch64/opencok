@@ -1,3 +1,6 @@
+import { versionAtLeast } from "@opencok/rules/availability";
+import { attributeRanking, publishedRanking } from "@opencok/mappings/published-ranking";
+import { serverFeature } from "@opencok/rules/power-context";
 import { reportAvatar } from "./avatar-report.ts";
 import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
 import { dragonRanking } from "@opencok/mappings/dragon-ranking";
@@ -362,6 +365,16 @@ export class Game {
       case "dragon.battle.rank":
         body = await this.dragonRanking(uid, params);
         break;
+      case "attributeRank.info":
+        body = await this.attributeRanking(uid, params);
+        break;
+      case "paytotal.ranking":
+      case "continuedcost.ranking":
+        body = await this.publishedRanking(
+          uid,
+          command === "paytotal.ranking" ? "payment" : "consumption",
+        );
+        break;
       case "global.celebrities.rank":
         body = await this.globalCelebrityRanking(uid, params);
         break;
@@ -388,7 +401,14 @@ export class Game {
     if (command === "world.get.detail" && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_point_detail");
     if (
-      ["act.score.rank", "global.celebrities.rank", "dragon.battle.rank"].includes(command) &&
+      [
+        "act.score.rank",
+        "global.celebrities.rank",
+        "dragon.battle.rank",
+        "attributeRank.info",
+        "paytotal.ranking",
+        "continuedcost.ranking",
+      ].includes(command) &&
       encode(extension(command, body)).length > MAX_FRAME
     )
       throw new GameError(errors.unsupported, "ranking");
@@ -996,6 +1016,38 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async publishedRanking(uid: string, kind: "payment" | "consumption"): Promise<Fields> {
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const key = kind === "payment" ? "new_rank_recharge" : "new_rank_cost";
+    if (
+      !serverFeature(this.rules, key, {
+        kingdomId: this.config.kingdomId,
+        version: MOBILE_CLIENT_VERSION,
+        now,
+      })
+    )
+      return {};
+    if (!versionAtLeast(MOBILE_CLIENT_VERSION, this.rules.features.get(key)!.version!)) return {};
+    if (!this.services.publishedGlobalRanking || !this.db.rankingPrivacy)
+      throw new GameError(errors.unsupported, "ranking");
+    const hide = await this.db.rankingPrivacy(uid, kind);
+    return publishedRanking(await this.services.publishedGlobalRanking(kind), uid, hide);
+  }
+  private async attributeRanking(uid: string, params: Fields): Promise<Fields> {
+    if (this.config.kingdomId > 999999) return {};
+    if (!this.db.normalRankingRealm) throw new GameError(errors.unsupported, "ranking");
+    if (!(await this.db.normalRankingRealm())) return {};
+    const type = wireInt(params, "rankType");
+    const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (![0, 1, 2].includes(type)) return {};
+    if (!this.services.attributeRanking) throw new GameError(errors.unsupported, "ranking");
+    return attributeRanking(await this.services.attributeRanking(type), type);
   }
   private async dragonRanking(uid: string, params: Fields): Promise<Fields> {
     const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());

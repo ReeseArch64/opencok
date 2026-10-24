@@ -35,7 +35,8 @@
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./configuration": "./src/configuration.ts",
     "./dto": "./src/dto.ts",
-    "./sfs": "./src/sfs.ts"
+    "./sfs": "./src/sfs.ts",
+    "./published-ranking": "./src/published-ranking.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

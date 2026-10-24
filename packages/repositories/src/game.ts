@@ -1,3 +1,4 @@
+import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { reportAvatar } from "./avatar-report.ts";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
 import { readMailBatch } from "./mail-batch.ts";
@@ -111,6 +112,17 @@ type GameRepositoryConfig = Pick<
 export class Database implements GameStore, FriendshipMineStore {
   readonly databases;
   readonly kingdom;
+  async rankingPrivacy(uid: string, kind: "payment" | "consumption"): Promise<number> {
+    if (!uid || uid.length > 40 || (kind !== "payment" && kind !== "consumption"))
+      throw new Error("Invalid ranking privacy request");
+    const column = kind === "payment" ? user_mixed_info.payHide : user_mixed_info.costHide;
+    const rows = await this.kingdom.db
+      .select({ hide: column })
+      .from(user_mixed_info)
+      .where(eq(user_mixed_info.uid, uid))
+      .limit(1);
+    return rows[0]?.hide ?? 0;
+  }
   normalRankingRealm(): Promise<boolean> {
     return readNormalRankingRealm(this.databases.global.db, this.config.kingdomId);
   }

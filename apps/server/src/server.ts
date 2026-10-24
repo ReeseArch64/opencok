@@ -173,6 +173,8 @@ export const RealmDependenciesLive = Layer.effect(
           : undefined,
         expeditionRanking: (limit) => cache.expeditionRanking(limit),
         scoreActivityRanking: () => cache.scoreActivityRanking(),
+        attributeRanking: (type) => cache.attributeRanking(type),
+        publishedGlobalRanking: (kind) => cache.publishedGlobalRanking(kind),
         globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
         dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
         expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
