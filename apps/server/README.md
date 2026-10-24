@@ -452,6 +452,46 @@ unchanged. These are SQL-contract and lifecycle simulations, not proof from a ru
 PostgreSQL instance. The guarded mutation is still not exposed and no new schema,
 configuration or dependency is added.
 
+`repositories/nickname-global` now provides `commitNicknameGlobal`. It first enters the
+name guard and confirms availability, then awaits a required preparation callback before
+checking the global account. This keeps the source order in which item/gold preparation
+precedes the account-existence failure. The callback's result is returned only after the
+global transaction commits. The callback must eventually be the owner-authorized durable
+payment/preparation operation; an arbitrary callback is not proof of a paid rename.
+This component is not exposed through a player command.
+
+The account lookup compares the authenticated owner's supplied UID using the legacy
+collation, rejects ambiguous canonical matches and locks only the selected exact stored
+UID. It does not filter by account activity or realm. Missing account, disappearance
+before lock, or a reached SQLSTATE account-read failure yields `E100123`; other read
+failures reject as dependency failures. No private account fields are selected. The
+writer updates only `account_new.gameUserName`, preserving account time, level, realm,
+activity and binding metadata. It neither compares nor requires the old display name.
+
+Owned name mappings are selected with legacy UID/type comparison, then deleted by their
+exact stored `(gameUid, mappingType)` keys in batches of at most 500. This handles
+collation aliases without deleting unrelated types or another owner's regex false
+positives. The new `name` row uses the supplied owner UID and new name, with default
+`lastTime = 0` and `active = 0`, matching delete/insert semantics instead of retaining old
+metadata. An absent old mapping is allowed; another owner's orphan mapping is preserved.
+The owner account row serializes updates for the same UID even when target names differ.
+
+Write-stage SQL failures and malformed write results produce `E100179` after a confirmed
+rollback. Commit acknowledgment loss and rollback failure stay dependency failures,
+without an automatic retry or an assertion that a refund is safe. The future workflow
+still requires receipts that distinguish a committed global change from an uncommitted
+attempt and coordinate this result with realm charges/profile updates. This global
+transaction cannot undo a separate committed realm charge. World/alliance/chat/throne/
+shared-user effects are not delivered here.
+
+Thirteen new fake-pool units cover selected-column writes, metadata preservation,
+collation aliases, missing/deleted/nullable accounts, preparation order, occupied/orphan
+names, bounded deletion, failures at each stage, ambiguous commit handling and concurrent
+global changes. Failed rollback disposes of the simulated connection. These tests prove
+the adapter contract against synthetic state; actual PostgreSQL execution and economic
+recovery remain unverified. No new schema, migration, configuration or dependency is
+added, and `user.modify.nickName` remains unsupported.
+
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
 separately checks version and start/end dates for stamina, star unlocks and

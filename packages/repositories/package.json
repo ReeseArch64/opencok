@@ -18,6 +18,7 @@
     "./game": "./src/game.ts",
     "./nickname": "./src/nickname.ts",
     "./nickname-lock": "./src/nickname-lock.ts",
+    "./nickname-global": "./src/nickname-global.ts",
     "./push-preferences": "./src/push-preferences.ts",
     "./profile-preferences": "./src/profile-preferences.ts",
     "./chat": "./src/chat.ts",
