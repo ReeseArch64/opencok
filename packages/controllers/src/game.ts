@@ -1,3 +1,6 @@
+import { allianceRanking } from "@opencok/dtos/alliance-ranking";
+import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
+import type { AllianceRankingKind } from "@opencok/contracts/alliance-ranking";
 import type { ServerConfig } from "@opencok/contracts/server";
 import type { CityState, GameServices, GameStore } from "@opencok/contracts/game";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
@@ -135,6 +138,10 @@ export class Game {
       case "get.power.info":
         body = await this.power(uid);
         break;
+      case "alliance.rank":
+      case "kill.al.rank":
+        body = await this.allianceRanking(uid, command === "alliance.rank" ? "power" : "kills");
+        break;
       case "server.rank":
       case "kill.rank":
       case "level.rank":
@@ -152,6 +159,16 @@ export class Game {
   }
   private async profile(uid: string): Promise<Row> {
     return this.checkProfile(await this.db.profile(uid));
+  }
+  private async allianceRanking(uid: string, kind: AllianceRankingKind): Promise<Fields> {
+    if (this.rules.kingdomId !== this.config.kingdomId)
+      throw new GameError(errors.unsupported, "ranking");
+    const query = allianceRankingQuery(kind, this.rules, this.now());
+    const snapshot = await this.db.allianceRanking(uid, query);
+    const profile = this.checkProfile(snapshot.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return allianceRanking(kind, selectAllianceRanking(query, snapshot, this.rules));
   }
   private async ranking(uid: string, kind: PlayerRankingKind): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId)

@@ -7,7 +7,7 @@ The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
 `login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`,
-`server.rank`, `kill.rank`, `level.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -564,9 +564,43 @@ is the final deterministic tie breaker where the reference leaves ties unspecifi
 names and UIDs use PostgreSQL `C` collation, which can differ from the legacy database
 collation. Synthetic units verify query structure, mapping, selection, numeric types,
 authentication and rollback. Real database execution, cache timing and native-client
-rendering remain unverified. Building, alliance, event and cross-realm ranking families
-are still unavailable; this implements only the three commands tracked in
+rendering remain unverified. Building, event and cross-realm ranking families
+are still unavailable; this player slice implements the three commands tracked in
 [issue #59](https://github.com/ReeseArch64/opencok/issues/59).
+
+`alliance.rank` and `kill.al.rank`, tracked in
+[issue #60](https://github.com/ReeseArch64/opencok/issues/60), return `allianceRanking`
+and the authenticated player's alliance position. Unaffiliated players receive no
+`selfRanking`. The `ranking` item's `k1` controls their top-list size with the same
+1–32,767 bounds. These commands also ignore client target and pagination selectors.
+
+Both boards aggregate members with existing statistics, require a rank-five leader
+profile, exclude cross-throne alliances and order by score descending, then current
+member count ascending. They do not filter banned members or cross-realm visitors.
+Power adds persisted alliance-science power to the member total and fetches `2*k1-1`
+candidates. Kills fetches `2*k1` and deliberately drops the final candidate before
+selection, preserving the reference loop even when only one alliance exists. Multiple
+leader records retain duplicate alliance entries and the final ordinal supplies that
+alliance's self position. Final alliance/leader UID ordering makes unspecified ties
+deterministic. Outside the candidate window, both fallback positions count strictly
+greater member-only aggregates, including alliances without leaders or with the
+cross-throne flag; power fallback excludes science power.
+
+Presentation uses current alliance labels/icon, member count, science-expanded maximum
+membership and optional video metadata. Missing name/abbreviation drops the entry
+without refilling its slot. Science expansion retains float accumulation, Java integer
+conversion and wrapping. Aggregated scores pass through the legacy decimal-to-double
+conversion: integral magnitudes below ten million decode from cached JSON as SFS ints,
+while larger magnitudes use doubles and inherit their rounding. Counts retain the
+separate cached integer/long behavior. SQL null scores and leader names are omitted.
+
+The repository reads candidates, fallback and batched presentation inputs in one
+read-only snapshot. Presentation science input is capped at 32,767 rows for the whole
+displayed board, detected with a sentinel; oversized input rejects without truncation.
+Malformed science/video inputs and dependency errors reject the response rather than
+returning the legacy handler's partially enriched list. Freshness, collation and
+verification limitations match the player boards. No alliance score, membership,
+science, video, cost, reward or timer is modified by these queries.
 
 ## Gameplay migration: topics 1–8
 
@@ -620,7 +654,7 @@ use these descriptions before the reconnect task component is complete.
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                               | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
-| 3. Ranking queries                        | Ordinary-realm power, kill and level lists and self positions; explicit tie ordering, typed DTOs and synthetic unit coverage                                                               | Building, alliance, event and cross-realm families; pagination where supported; documented cache and collation differences.                      |
+| 3. Ranking queries                        | Ordinary-realm player power, kills and level; alliance power/kills; self positions, capacity/video presentation and synthetic unit coverage                                                | Building, event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.             |
 | 4. Basic mailbox                          | Persistence schema                                                                                                                                                                         | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                              | Point details, player search and favorites, including authorization for writes.                                                                  |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                      | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |

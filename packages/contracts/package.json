@@ -21,7 +21,8 @@
     "./rows": "./src/rows.ts",
     "./server": "./src/server.ts",
     "./chat": "./src/chat.ts",
-    "./files": "./src/files.ts"
+    "./files": "./src/files.ts",
+    "./alliance-ranking": "./src/alliance-ranking.ts"
   },
   "dependencies": {}
 }

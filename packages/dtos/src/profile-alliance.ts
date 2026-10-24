@@ -73,7 +73,7 @@ function signed(value: unknown, bits: 8 | 32 | 64): bigint {
   return parsed;
 }
 
-function allianceVideo(row: Row): Fields {
+export function allianceVideo(row: Row): Fields {
   const fields: Fields = {};
   for (const [wire, column] of [
     ["allianceid", "allianceId"],
