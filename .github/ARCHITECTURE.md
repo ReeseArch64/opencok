@@ -430,6 +430,19 @@ import applications. Their source exports and direct workspace dependencies are 
 | `storage`             | Redis leases/readiness, ZooKeeper registration, dependency timeouts and validated server-directory files.               |
 | `constants`, `errors` | Named connection limits, session TTL, mobile compatibility values and error types/codes.                                |
 
+The reconnect friendship-mine use case adds a narrow realm write to the otherwise
+read-only player-query repositories. The controller supplies a validated initial mine
+from the treasure catalog. The repository reads the global account binding, verifies
+the local owner and realm under a shared row lock, and reads or creates the mine by
+its existing `(uid, fId)` key in a read-committed transaction. An insert conflict reads
+the winner instead of overwriting progress or returning an unpersisted default. An
+unbound account receives an ephemeral default without a mine-table write. This
+cost-free initialization grants no reward and changes no existing mine. Global binding
+and realm state are not one distributed transaction; each invocation uses the binding
+observed at its start, and subsequent invocations observe a rebind under another key.
+The provider has unit coverage with injected SQL clients; real database and native-client
+validation remain deferred, and the complete `user.lv` command is not yet enabled.
+
 Unit and integration suites consume public package exports. `bun run test:packages`
 checks declared imports, package exports, dependency cycles and the rule/resource
 boundary; CI runs it and triggers service integration checks on package changes.
