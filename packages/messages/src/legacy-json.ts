@@ -1,3 +1,4 @@
+import { legacyObjectOrder } from "./legacy-object-order.ts";
 import { legacyHexCodeUnit, legacyJsonNumber } from "./legacy-number.ts";
 import { ProtocolError, sfs, Type, type Fields, type Value } from "./sfs.ts";
 
@@ -14,6 +15,8 @@ function trim(value: string): string {
   while (end > start && value.charCodeAt(end - 1) <= 32) end--;
   return value.slice(start, end);
 }
+const parsedKeys = new WeakMap<Fields, string[]>();
+const convertedKeys = new WeakMap<Fields, string[]>();
 const excluded = new Set(["class", "declaringClass", "metaClass"]);
 const unrepresentable: Value = { type: Type.Null, value: Symbol("unrepresentable JSON value") };
 const functionHeader = /^function ?\(.*?\)$/;
@@ -142,6 +145,8 @@ class Parser {
   object(depth: number): Fields {
     this.position++;
     const result: Fields = Object.create(null);
+    const keys: string[] = [];
+    parsedKeys.set(result, keys);
     let size = 0;
     for (;;) {
       if (this.clean() === "}") {
@@ -219,6 +224,7 @@ class Parser {
           result[key] = sfs.array([first, value]);
         } else {
           result[key] = value;
+          keys.push(key);
           if (++size > 32767) throw new ProtocolError();
         }
       }
@@ -238,12 +244,22 @@ function convert(value: Value, depth = 0): Value {
     return sfs.array((value.value as Value[]).map((item) => convert(item, depth + 1)));
   if (value.type !== Type.Object) return value;
   const object: Fields = Object.create(null);
-  for (const [key, item] of Object.entries(value.value as Fields)) {
+  const source = value.value as Fields;
+  const keys = parsedKeys.get(source) ?? Object.keys(source);
+  for (const key of keys) {
+    const item = source[key]!;
     const normalized = wireText(key);
     if (Object.hasOwn(object, normalized)) throw new ProtocolError();
     object[normalized] = convert(item, depth + 1);
   }
+  convertedKeys.set(object, legacyObjectOrder(keys).map(wireText));
   return sfs.object(object);
+}
+
+export function legacyJsonEntries(object: Fields): [string, Value][] {
+  return (convertedKeys.get(object) ?? Object.keys(object))
+    .filter((key) => Object.hasOwn(object, key))
+    .map((key) => [key, object[key]!]);
 }
 
 export function decodeLegacyJsonObject(source: string): Fields {
