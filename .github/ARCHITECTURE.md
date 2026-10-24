@@ -448,8 +448,12 @@ The resource rules also calculate raw troop load from explicit saved troop count
 load modifiers and resolved owner effects. The cached-load branch distinguishes
 resident owners from on-demand profile reads. Signed Int subtraction/multiplication,
 Float evaluation order, cast saturation and final Int wrapping are preserved. The
-calculation does not deserialize troop objects or resolve profile effects itself;
-those readers and runtime maximum-collection-time restoration remain dependencies
+calculation does not deserialize troop objects or resolve profile effects itself.
+The separate messages codec projects saved army/soldier fields through a bounded
+Java object-stream data reader, without executing any classes or serialization
+hooks. Consumed class identities/field types are validated; unrelated object graphs
+are traversed structurally and discarded. Repository integration, owner validation,
+effect resolution and runtime maximum-collection-time restoration remain dependencies
 of occupied-resource command composition. No march scheduling or cache write is
 performed by this pure projection.
 
