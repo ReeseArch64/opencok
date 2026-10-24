@@ -1,4 +1,6 @@
-import { roundTripLegacyIntegerObject } from "@opencok/messages/legacy-json";
+import { specialWorldFields } from "./world-special-detail.ts";
+import { occupiedResourceFields } from "./world-resource-query.ts";
+import { roundTripLegacyObject } from "@opencok/messages/legacy-json";
 import { decodeJavaIntMap } from "@opencok/messages/java-int-map";
 import { barbarianArmyPlan, barbarianPower } from "@opencok/rules/world-barbarian-detail";
 import type { GameServices } from "@opencok/contracts/game";
@@ -59,7 +61,10 @@ export async function worldPointDetail(
   rules: Rules,
   kingdomId: number,
   now: number,
-  services: Pick<GameServices, "worldPowerEffects" | "emperorVersion"> = {},
+  services: Pick<
+    GameServices,
+    "worldPowerEffects" | "emperorVersion" | "expeditionStage" | "worldTurretKills"
+  > = {},
   clock: () => number = () => now,
 ): Promise<Fields> {
   if (
@@ -78,8 +83,9 @@ export async function worldPointDetail(
   const cityFeature = rules.items.get("lost_battle");
   const state = await store.read(
     observer,
-    { ...query, cityExtras: cityFeature?.k3 === "1" },
+    { ...query, cityExtras: cityFeature?.k3 === "1", resourceEffects: true },
     (point, marches) => restoredExplorationMarch(observer, point, marches),
+    services.worldTurretKills,
   );
   const profile = state.profile;
   if (!profile) throw new GameError(errors.missing);
@@ -107,22 +113,19 @@ export async function worldPointDetail(
   )
     return unsupported();
   const type = point.pointType;
-  if (type < 0 || type > 69 || [14, 18, 20, 21, 23, 46, 47].includes(type)) return unsupported();
+  if (type < 0 || type > 69) return unsupported();
   const occupied = worldPointOccupied(point);
   if (state.remote) {
     if (type === 3 && !occupied)
-      return roundTripLegacyIntegerObject({
+      return roundTripLegacyObject({
         point: sfs.int(query.point),
         tq: sfs.int(resourceRemaining(point.resInitValue as number, point.resCostValue as number)),
       });
-    if (
-      (type === 3 || type === 37) &&
-      !mailBlank(point.ownerId as string | null) &&
-      !mailBlank(point.ownerMarchUUid as string | null)
-    )
-      return unsupported();
-    return roundTripLegacyIntegerObject({
+
+    return roundTripLegacyObject({
       ...worldPointOwner(worldPointOwnerBase(point, state.owner, true)),
+      ...(await specialWorldFields(state, observer, rules, now, services)),
+      ...(await occupiedResourceFields(state, rules, now, services, clock)),
       point: sfs.int(query.point),
     });
   }
@@ -139,15 +142,16 @@ export async function worldPointDetail(
     }
     return result;
   }
-  if ((!occupied && (type === 49 || type === 50)) || type === 37) return unsupported();
-  if (
-    type === 3 &&
-    !mailBlank(point.ownerId as string | null) &&
-    !mailBlank(point.ownerMarchUUid as string | null)
-  )
-    return unsupported();
+  if (!occupied && (type === 49 || type === 50))
+    return {
+      ...owner,
+      ...(await specialWorldFields(state, observer, rules, now, services)),
+      point: sfs.int(query.point),
+    };
   const result: Fields = {
     ...owner,
+    ...(await specialWorldFields(state, observer, rules, now, services)),
+    ...(await occupiedResourceFields(state, rules, now, services, clock)),
     ...healthFields(worldMonsterHealth(point, false, rules)),
     point: sfs.int(query.point),
   };
@@ -226,7 +230,7 @@ export async function worldPointDetail(
     );
   }
   if (
-    type === 3 &&
+    (type === 3 || type === 18) &&
     point.active === 1 &&
     !mailBlank(point.territoryAlliance as string | null) &&
     point.territoryAlliance === profile.allianceId

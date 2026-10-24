@@ -94,7 +94,8 @@ function fixture() {
       expect(text).toStartWith("select ");
       expect(text).not.toMatch(/for update|for share|monsterInfo/);
       const table = /from "opencok_kingdom"\."([^"]+)"/.exec(text)![1]!;
-      const resource = table === "world_march" && text.includes('"armyInfo"');
+      const resource =
+        table === "world_march" && (text.includes('"armyInfo"') || text.includes('"collectSpd"'));
       if (!resource) expect(text).not.toMatch(/armyInfo|plunderRes/);
       const report = table === "world_march" && text.includes('"exploreReport"');
       const neutral =
@@ -123,14 +124,23 @@ function fixture() {
         expect(text).not.toMatch(/clientRecord|activitypopup|friend|session/);
         rows = state.mixed ? [state.mixed] : [];
       } else if (table === "stat_reg") rows = [{ uid: "target", type: 2, time: 200n }];
-      else if (table === "alliance") rows = [{ uid: "A", abbr: "SYN" }];
+      else if (table === "alliance") rows = [{ uid: "A", abbr: "SYN", bannerStyle: "UN" }];
       else if (table === "alliance_member") rows = [{ uid: "target", rank: 4 }];
       else if (table === "world_barbarion") {
         expect(params).toEqual([701, 2]);
         expect(text).not.toMatch(/lastAwardArmyMapByteArray|currentHP|worldId|ownerId/);
         rows = state.barbarian ? [state.barbarian] : [];
+      } else if (table === "alliance_territory" && typeof params[0] === "number") {
+        rows = [];
+      } else if (["t_worldboss", "t_worldbossrank"].includes(table)) {
+        rows = [];
       } else if (table === "world_march") {
-        if (resource) {
+        if (resource && params.length === 4) {
+          rows = state.marches.filter(
+            (row) =>
+              row.targetId === params[0] && row.worldId === params[1] && row.state === params[2],
+          );
+        } else if (resource) {
           expect(params).toEqual([state.point!.ownerMarchUUid, 2]);
           expect(text).toContain('"world_march"."uuid" = $1');
           rows = state.marches.filter((row) => row.uuid === params[0]);
@@ -339,7 +349,7 @@ test("ordinary occupied resources without owner march retain owner and positive 
   f.state.point.territoryAlliance = "other";
   expect((await f.execute()).body.territory_positive_effect).toBeUndefined();
   f.state.point.ownerMarchUUid = "existing";
-  await expect(f.execute()).rejects.toThrow("102192");
+  expect((await f.execute()).body.uid).toEqual(sfs.string("target"));
 });
 
 test("base point kinds and disabled city extras use public owner fields", async () => {
@@ -360,8 +370,13 @@ test("base point kinds and disabled city extras use public owner fields", async 
   expect((await f.execute()).body.targetPower).toBeUndefined();
 });
 
-test("unfinished territory, boss and occupied new-resource paths reject explicitly", async () => {
-  for (const type of [14, 18, 20, 21, 23, 37, 46, 47, -1, 70]) {
+test("specialized points without optional persisted objects return base state and unknown kinds reject", async () => {
+  for (const type of [14, 18, 20, 21, 23, 37, 46, 47]) {
+    const f = fixture();
+    f.state.point = samplePoint({ pointType: type });
+    expect((await f.execute()).body.point).toEqual(sfs.int(701));
+  }
+  for (const type of [-1, 70]) {
     const f = fixture();
     f.state.point = samplePoint({ pointType: type });
     await expect(f.execute()).rejects.toThrow("102192");
@@ -369,11 +384,8 @@ test("unfinished territory, boss and occupied new-resource paths reject explicit
   for (const type of [49, 50]) {
     const f = fixture();
     f.state.point = samplePoint({ pointType: type, ownerId: null, ownerName: null });
-    await expect(f.execute()).rejects.toThrow("102192");
+    expect((await f.execute()).body).toEqual({ point: sfs.int(701) });
   }
-  const f = fixture();
-  f.state.point = samplePoint({ pointType: 60, pointItem: null });
-  expect((await f.execute()).body.point).toEqual(sfs.int(701));
 });
 
 test("nonpositive points preserve empty responses and correlation; missing points are errors", async () => {

@@ -243,6 +243,7 @@ export const RealmDependenciesLive = Layer.effect(
           dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
           expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
           worldPowerEffects: (kingdomId) => cache.worldEffects(kingdomId),
+          worldTurretKills: (kingdomId, territory) => cache.worldTurretKills(kingdomId, territory),
           emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
           changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
           lastSystemMail: (uid) => cache.lastSystemMail(uid),

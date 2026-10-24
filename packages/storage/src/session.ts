@@ -279,6 +279,40 @@ export class Cache {
     if (version < -2147483648 || version > 2147483647) throw new DependencyError("redis");
     return version;
   }
+  async worldTurretKills(
+    kingdomId: number,
+    territory: string,
+  ): Promise<ReadonlyMap<string, string>> {
+    if (
+      !Number.isSafeInteger(kingdomId) ||
+      kingdomId < 1 ||
+      !/^[a-zA-Z0-9_-]{1,40}$/.test(territory)
+    )
+      throw new DependencyError("redis");
+    const values = await this.command(
+      "HGETALL",
+      `opencok:kingdom:${kingdomId}:turret:${territory}`,
+    );
+    if (!Array.isArray(values) || values.length > 2000 || values.length % 2 !== 0)
+      throw new DependencyError("redis");
+    const result = new Map<string, string>();
+    let bytes = 0;
+    for (let i = 0; i < values.length; i += 2) {
+      const uid = values[i];
+      const content = values[i + 1];
+      if (
+        typeof uid !== "string" ||
+        !/^[a-zA-Z0-9_-]{1,40}$/.test(uid) ||
+        typeof content !== "string" ||
+        result.has(uid)
+      )
+        throw new DependencyError("redis");
+      bytes += Buffer.byteLength(content);
+      if (bytes > 4 * 1024 * 1024) throw new DependencyError("redis");
+      result.set(uid, content);
+    }
+    return result;
+  }
   async worldEffects(kingdomId = this.config.kingdomId): Promise<ReadonlyMap<string, string>> {
     if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
     const values = await this.command("HGETALL", `opencok:kingdom:${kingdomId}:world-effects`);

@@ -154,7 +154,13 @@ function fixture() {
             expect(params).toEqual(["observer", 2]);
             return { rows: values(state.world, ["uid", "worldId"]) };
           }
-          if (table === "world_barbarion") return { rows: [] };
+          if (
+            ["world_barbarion", "alliance_territory", "t_worldboss", "t_worldbossrank"].includes(
+              table!,
+            )
+          )
+            return { rows: [] };
+          if (table === "world_march" && params.length === 4) return { rows: [] };
           if (table === "world_march") {
             expect(params).toEqual([state.points.get(realm)![0]!.ownerMarchUUid, 2]);
             expect(text).toContain('"world_march"."uuid" = $1');
@@ -600,7 +606,7 @@ test("captured query fields cannot be changed during authorization and readiness
   expect(f.queries.every((q) => q.realm === 1)).toBe(true);
   f.queries.length = 0;
   await checkWorldPointDetailStore(f.db);
-  expect(f.queries).toHaveLength(16);
+  expect(f.queries).toHaveLength(24);
   expect(f.queries.every((q) => q.params[0] === 0)).toBe(true);
   expect(() => createWorldPointDetailStore(f.topology, 0)).toThrow();
   for (const patch of [{ point: 1.5 }, { kingdomId: 0 }, { now: -1 }])
@@ -772,13 +778,13 @@ test("remote resource service preserves its separate early return and new-resour
   point.territoryAlliance = "observer-alliance";
   expect((await f.execute()).body.territory_positive_effect).toBeUndefined();
   point.ownerMarchUUid = "existing";
-  await expect(f.execute()).rejects.toThrow("102192");
+  expect((await f.execute()).body.uid).toEqual(sfs.string("remote"));
   point.pointType = 37;
-  await expect(f.execute()).rejects.toThrow("102192");
+  expect((await f.execute()).body.uid).toEqual(sfs.string("remote"));
 });
 
-test("remote point commands reject missing routes, points and unfinished territory state without local fallback", async () => {
-  for (const type of [14, 18, 20, 21, 23, 46, 47, -1, 70]) {
+test("remote point commands reject missing routes, points and unknown kinds without local fallback", async () => {
+  for (const type of [-1, 70]) {
     const f = remoteCommandFixture();
     f.state.points.get(2)![0]!.pointType = type;
     await expect(f.execute()).rejects.toThrow("102192");
@@ -857,6 +863,7 @@ const resourceMarch = (patch: Row = {}): Row => ({
   armyInfo: Buffer.from(armyVectors.arrayList, "base64"),
   collectSpd: 0.1,
   marchArrivalTime: 9007199254740993n,
+  arrivalTime: null,
   collectedBeforeSpd: 2147483647n,
   changeCollectSpdTime: -9223372036854775808n,
   occupyResourceEndTime: 9223372036854775807n,
@@ -1026,8 +1033,8 @@ test("resource authorization precedes payload reads and readiness probes the req
   }
   const f = resourceFixture();
   await checkWorldPointDetailStore(f.db);
-  expect(f.queries).toHaveLength(16);
-  const probe = reads(f, "world_march")[0]!;
+  expect(f.queries).toHaveLength(24);
+  const probe = reads(f, "world_march").find((query) => query.text.includes("collectSpd"))!;
   expect(probe.params).toEqual([0]);
   for (const column of [
     "armyInfo",
