@@ -30,7 +30,8 @@
     "./chat-rooms": "./src/chat-rooms.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
-    "./avatar-completion": "./src/avatar-completion.ts"
+    "./avatar-completion": "./src/avatar-completion.ts",
+    "./world-resource-detail": "./src/world-resource-detail.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
