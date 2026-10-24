@@ -28,7 +28,8 @@
     "./chat-send": "./src/chat-send.ts",
     "./chat-history": "./src/chat-history.ts",
     "./chat-rooms": "./src/chat-rooms.ts",
-    "./expedition-ranking": "./src/expedition-ranking.ts"
+    "./expedition-ranking": "./src/expedition-ranking.ts",
+    "./chat-avatar-profile": "./src/chat-avatar-profile.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
@@ -36,6 +37,7 @@
     "@opencok/dtos": "workspace:*",
     "@opencok/errors": "workspace:*",
     "@opencok/messages": "workspace:*",
-    "@opencok/rules": "workspace:*"
+    "@opencok/rules": "workspace:*",
+    "@opencok/identity": "workspace:*"
   }
 }

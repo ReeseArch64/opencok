@@ -18,7 +18,8 @@
     "./chat-discovery": "./src/chat-discovery.ts",
     "./realm-chat-session": "./src/realm-chat-session.ts",
     "./chat-server": "./src/chat-server.ts",
-    "./chat-websocket": "./src/chat-websocket.ts"
+    "./chat-websocket": "./src/chat-websocket.ts",
+    "./chat-avatar-profile": "./src/chat-avatar-profile.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

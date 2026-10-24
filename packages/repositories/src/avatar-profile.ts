@@ -8,7 +8,20 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { and, eq } from "drizzle-orm";
 import type { Database } from "./game.ts";
 
-export function publishAvatarProfile(
+type Publication = (
+  db: Database["kingdom"]["db"],
+  kingdomId: number,
+  owner: string,
+  sequence: number,
+  project: AvatarProfileProjector,
+  publish: AvatarProfilePublisher,
+  timeoutMs: number,
+) => Promise<AvatarProfileDelivery>;
+export const publishAvatarProfile: Publication = (...args) => publishAvatarEffect(2, ...args);
+export const publishAvatarChat: Publication = (...args) => publishAvatarEffect(4, ...args);
+
+function publishAvatarEffect(
+  bit: 2 | 4,
   db: Database["kingdom"]["db"],
   kingdomId: number,
   owner: string,
@@ -59,7 +72,7 @@ export function publishAvatarProfile(
         entry.pendingEffects > 7
       )
         throw new Error("Invalid avatar profile state");
-      if (!(entry.pendingEffects & 2)) return { profile, published: false };
+      if (!(entry.pendingEffects & bit)) return { profile, published: false };
       const update = Object.freeze({ ...project(Object.freeze({ ...entry }), kingdomId) });
       if (
         update.owner !== owner ||
@@ -104,7 +117,7 @@ export function publishAvatarProfile(
       }
       const changed = await tx
         .update(avatar_completion)
-        .set({ pendingEffects: entry.pendingEffects & ~2 })
+        .set({ pendingEffects: entry.pendingEffects & ~bit })
         .where(and(key, eq(avatar_completion.pendingEffects, entry.pendingEffects)))
         .returning({ ownerUid: avatar_completion.ownerUid });
       if (changed.length !== 1 || changed[0]!.ownerUid !== owner)

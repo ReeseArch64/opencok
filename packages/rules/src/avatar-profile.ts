@@ -3,7 +3,8 @@ import type { AvatarCompletionRecord, AvatarProfileUpdate } from "@opencok/contr
 function invalid(): never {
   throw new Error("Invalid avatar profile intent");
 }
-export function avatarProfileUpdate(
+function projectAvatarProfile(
+  bit: 2 | 4,
   entry: AvatarCompletionRecord,
   kingdomId: number,
 ): AvatarProfileUpdate {
@@ -28,7 +29,7 @@ export function avatarProfileUpdate(
     !Number.isInteger(entry.pendingEffects) ||
     entry.pendingEffects < 0 ||
     entry.pendingEffects > 7 ||
-    !(entry.pendingEffects & 2) ||
+    !(entry.pendingEffects & bit) ||
     typeof entry.effects !== "string" ||
     new TextEncoder().encode(entry.effects).length > 65535
   )
@@ -66,4 +67,17 @@ export function avatarProfileUpdate(
     userName: profile.userName,
     platform: profile.platform,
   };
+}
+
+export function avatarProfileUpdate(
+  entry: AvatarCompletionRecord,
+  kingdomId: number,
+): AvatarProfileUpdate {
+  return projectAvatarProfile(2, entry, kingdomId);
+}
+export function avatarChatUpdate(
+  entry: AvatarCompletionRecord,
+  kingdomId: number,
+): AvatarProfileUpdate {
+  return projectAvatarProfile(4, entry, kingdomId);
 }

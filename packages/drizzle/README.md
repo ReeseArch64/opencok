@@ -2,11 +2,11 @@
 
 `@opencok/drizzle` owns the application's PostgreSQL schemas, typed client and
 versioned Drizzle migrations. The maintained source of truth is `src/schema`,
-with **776 tables / 6,336 fields** and one module per table.
+with **777 tables / 6,343 fields** and one module per table.
 
 | Default physical database | SQL namespaces                                  | Migration role | Tables |
 | ------------------------- | ----------------------------------------------- | -------------- | -----: |
-| `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    113 |
+| `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    114 |
 | `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    663 |
 | `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    663 |
 
@@ -210,4 +210,19 @@ not proven safe. The internal `repositories/avatar-mail` consumer now clears onl
 bit in the same transaction as message/extra/group insertion, without altering receipt
 history. The internal profile-marker consumer now acknowledges bit 2 only after bounded
 external publication; a failed or uncertain database commit can repeat that idempotent write. Chat
-bit 4 and production wiring remain pending; the realm command stays unsupported.
+bit 4 now has a corresponding authenticated receiver and internal consumer; production
+realm wiring remains pending, so the realm command stays unsupported.
+
+## Chat avatar projection
+
+Global migration `0002_chat_avatar_profiles` adds `opencok_chat.chat_avatar_profile`
+with an owner/realm primary key, seven non-null fields and owner, realm, sequence,
+picture-version and timestamp checks. Chat owns writes and validates global account
+routing while holding that row lock before the projection lock. Larger avatar sequences
+win regardless of clock rollback; exact duplicates are idempotent and conflicting equal
+sequences fail. Reads join the current account route. This is a captured avatar-event
+projection, not authoritative progression or a complete current-profile directory.
+The realm acknowledges its separate pending bit only after the bounded HTTP receiver
+confirms the write. There is no cross-database transaction or automatic transfer/restore
+reconciliation. The migration has been generated and metadata/snapshots checked only;
+application and real PostgreSQL concurrency remain unvalidated.

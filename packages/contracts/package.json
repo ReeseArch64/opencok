@@ -24,7 +24,8 @@
     "./files": "./src/files.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
-    "./mail": "./src/mail.ts"
+    "./mail": "./src/mail.ts",
+    "./chat-avatar-profile": "./src/chat-avatar-profile.ts"
   },
   "dependencies": {}
 }

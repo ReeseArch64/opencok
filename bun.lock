@@ -262,6 +262,7 @@
         "@opencok/contracts": "workspace:*",
         "@opencok/dtos": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/identity": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/rules": "workspace:*",
       },
