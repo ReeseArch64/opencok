@@ -21,7 +21,7 @@ export async function readResourceRawArmyLoad(
   identity: { ownerUid: string; residentOwner: boolean },
   owner: WorldResourceOwnerSnapshot | undefined,
   rules: Rules,
-  environment: Omit<RuleContext, "version" | "versionPolicy">,
+  environment: Omit<RuleContext, "version">,
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,
   clock: () => bigint,
 ): Promise<number> {

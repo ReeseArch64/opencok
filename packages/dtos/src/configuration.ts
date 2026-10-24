@@ -1,8 +1,18 @@
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
-import { realmEnabled, ruleAvailable, ruleTime, versionAtLeast } from "@opencok/rules/availability";
+import {
+  switchRealmEnabled,
+  featureRealmEnabled,
+  worldActivityRealmEnabled,
+  ruleAvailable,
+  ruleTime,
+  versionAtLeast,
+} from "@opencok/rules/availability";
 import type { Rule, Rules } from "@opencok/rules/game";
+import { restoredKingdomSkills, type KingdomSkill } from "@opencok/rules/kingdom-skills";
+import { javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
+import { javaListSort } from "@opencok/rules/java-list-sort";
 
 const objectKeys = [
   "player_max",
@@ -220,7 +230,7 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
       now,
       testServer: context.testServer,
     });
-  const enabled = (selector: string | undefined) => realmEnabled(selector, rules.kingdomId);
+  const enabled = (selector: string | undefined) => switchRealmEnabled(selector, rules.kingdomId);
   const object = (target: string, rule: Rule | undefined, projection?: Record<string, string>) => {
     if (rule) result[target] = sfs.object(strings(rule, projection));
   };
@@ -289,7 +299,8 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
   if (terms?.k1 === "1" && enabled(terms.k3) && terms.k2 !== undefined)
     result.serviceTerms_on = sfs.string(terms.k2);
 
-  const quests = enabled(rules.items.get("function_on8")?.k2);
+  const questSwitch = rules.items.get("function_on8");
+  const quests = questSwitch !== undefined && enabled(questSwitch.k2);
   const questChat = rules.items.get("alliance_quest_chat");
   result.alliance_quest = sfs.string(
     quests ? (rules.items.get("alliance_quest")?.k12 ?? "0") : "0",
@@ -297,9 +308,14 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
   result.alliance_quest_chat = sfs.string(
     quests && questChat?.k1 === "1" ? (questChat.k2 ?? "0") : "0",
   );
-  result.alliance_quest_tab = sfs.int(quests && enabled(questChat?.k4) ? 1 : 0);
-  result.alliance_quest_push = sfs.int(quests && enabled(questChat?.k5) ? 1 : 0);
-  result.on_trumpet_k2 = sfs.int(enabled(rules.items.get("on_trumpet")?.k2) ? 1 : 0);
+  result.alliance_quest_tab = sfs.int(
+    quests && questChat?.k4 !== undefined && enabled(questChat.k4) ? 1 : 0,
+  );
+  result.alliance_quest_push = sfs.int(
+    quests && questChat?.k5 !== undefined && enabled(questChat.k5) ? 1 : 0,
+  );
+  const trumpet = rules.items.get("on_trumpet");
+  result.on_trumpet_k2 = sfs.int(trumpet !== undefined && enabled(trumpet.k2) ? 1 : 0);
   result.alliance_mission = sfs.string(available("alliance_mission") ? "on" : "off");
 
   const prefix = context.worldCup ? "wag" : "wa";
@@ -315,8 +331,13 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
     const rule = rules.items.get(key);
     if (rule) {
       const value = strings(rule);
-      if (rule[switchKey] !== undefined)
-        value[switchKey] = sfs.string(enabled(rule[switchKey]) ? "1" : "0");
+      if (key === "graveyard" || rule[switchKey] !== undefined) {
+        const open =
+          key === "wa_switch"
+            ? worldActivityRealmEnabled(rule[switchKey], rules.kingdomId)
+            : enabled(rule[switchKey]);
+        value[switchKey] = sfs.string(open ? "1" : "0");
+      }
       result[key] = sfs.object(value);
     }
   }
@@ -361,24 +382,28 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
   const skillConfig = rules.items.get("kingdomskill");
   if (skillConfig) {
     const value = strings(skillConfig);
-    const tabs = new Map<number, Rule[]>();
-    for (const skill of rules.configuration.kingdomSkills?.values() ?? []) {
-      const tab = integer(skill.showTab ?? "");
-      integer(skill.tabIndex ?? "");
+    const tabs = new Map<number, KingdomSkill[]>();
+    const records = rules.configuration.kingdomSkillRecords ?? [
+      ...(rules.configuration.kingdomSkills?.values() ?? []),
+    ];
+    for (const skill of restoredKingdomSkills(records)) {
+      const tab = skill.showTab;
       const list = tabs.get(tab) ?? [];
       list.push(skill);
       tabs.set(tab, list);
     }
-    for (const [tab, skills] of tabs) {
+    for (const tab of javaIntHashMapOrder(tabs.keys())) {
+      const skills = tabs.get(tab)!;
       value[`k${tab}`] = sfs.string(
-        skills
-          .sort((a, b) => integer(a.tabIndex!) - integer(b.tabIndex!))
-          .filter((skill) => integer(skill.tabIndex!) !== -1)
-          .map(
-            (skill) =>
-              `${skill.id}_${enabled(context.testServer ? skill.test : skill.online) ? "1" : "0"}`,
-          )
-          .join(";"),
+        javaListSort(skills, (a, b) => (a.id === b.id ? 0 : (a.tabIndex - b.tabIndex) | 0))
+          .map((skill, index) => {
+            if (skill.tabIndex === -1) return "";
+            const selector = context.testServer ? skill.test : skill.online;
+            const enabled =
+              selector !== undefined && featureRealmEnabled(selector, rules.kingdomId);
+            return `${skill.id}_${enabled ? "1" : "0"}${index === skills.length - 1 ? "" : ";"}`;
+          })
+          .join(""),
       );
     }
     result.kingdomskill = sfs.object(value);

@@ -500,7 +500,27 @@ generals to building composition. Stronghold level/star addition wraps as Int; p
 level, prestige and office projections are consumed only when eligibility needs them.
 Prestige scans ordered catalog records, including duplicate IDs, independently of the
 civilization-effect feature gate. Feature checks use the saved owner version and the
-execution realm; blank owner versions skip version comparison. The resource-owner
+execution realm; blank owner versions skip version comparison. Function-on realm
+selection uses ordered Java Integer parsing and ASCII range matching, including
+early success and deferred upper-bound parsing. Required metadata follows Java blank
+semantics. Parse failures propagate to the consuming module's existing failure
+boundary. Item switches, event controls and world-activity switches now use separate
+selector functions matching their reference methods. Deferred-login configuration,
+account verification and lucky-day effects select the appropriate parser; kingdom
+skill availability uses the function-on parser. Shared version comparison now parses
+all nonempty Java Integer components before short-circuit comparison of three positions;
+malformed extra components throw and missing positions fail only when reached.
+Function-on contexts share the Java-blank player bypass, while account switches,
+cross-open configuration and lucky-day eligibility use direct comparison. Ordinary
+announcement metadata and server-only gates retain their lack of client comparison.
+The login composition still selects the supported process version. Lenient dates
+still require compatibility work. Kingdom-skill presentation now consumes
+ordered catalog declarations separately from the final ID index, restores each row
+with its constructor validation/failure boundary, and uses fresh Integer-map tab
+traversal. A bounded Java 8 list sort preserves the comparator's ID equality, signed
+subtraction, merge order and contract failures. Hidden entries retain the reference
+separator behavior without evaluating availability. This projection neither executes
+skills nor changes catalog records. The resource-owner
 effect controller now decodes current saved abilities, reads execution-realm world
 effects and conditional emperor state, and connects ordinary load, general-only 133
 and new-general equipment modifiers. It preserves separate general and expedition
