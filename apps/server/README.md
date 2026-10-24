@@ -232,8 +232,22 @@ database repairs and notification side effects remain pending compatibility work
 the query does not create skills, update stored talent trees or send mail. Missing
 generals, required catalogs or malformed stored abilities reject the projection.
 
+`publicProfileAlliance` preserves the nested public alliance envelope, explicit
+alliance columns, legacy leader aliases, permission objects and video fields.
+Membership, leader, aggregate power, research and video reads share the profile
+transaction. The leader query detects absent or ambiguous leadership; the totals
+count only members joined to existing statistics. Missing alliance records or
+zero qualifying members reject instead of fabricating an aggregate-only response.
+Research is skipped for observers in the same alliance. Other observers receive
+the membership-capacity effect with float-to-int conversion and signed addition.
+SQL decimal aggregates are doubles in local replies and narrowed signed longs in
+remote replies, preserving the two legacy serialization paths. Base bigint fields
+remain exact in both paths. Null database columns are omitted; malformed permission
+JSON or video fields reject the result. No player/account data is exposed by the
+alliance projection. No membership, permission, video or research mutation occurs.
+
 These components have synthetic unit coverage; they are not yet connected to
-`get.user.info`. Alliance presentation, realm routing
+`get.user.info`. Realm routing
 and command dispatch remain required before enabling that full query. The base
 projection intentionally has no placeholder general/alliance response. No schema change, player write,
 client validation or live-service test is introduced by this foundation.
