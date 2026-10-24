@@ -21,7 +21,8 @@
     "./chat-join": "./src/chat-join.ts",
     "./chat-send": "./src/chat-send.ts",
     "./chat-history": "./src/chat-history.ts",
-    "./chat-rooms": "./src/chat-rooms.ts"
+    "./chat-rooms": "./src/chat-rooms.ts",
+    "./expedition-ranking": "./src/expedition-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

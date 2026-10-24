@@ -22,7 +22,8 @@
     "./server": "./src/server.ts",
     "./chat": "./src/chat.ts",
     "./files": "./src/files.ts",
-    "./alliance-ranking": "./src/alliance-ranking.ts"
+    "./alliance-ranking": "./src/alliance-ranking.ts",
+    "./expedition-ranking": "./src/expedition-ranking.ts"
   },
   "dependencies": {}
 }

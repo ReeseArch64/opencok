@@ -7,7 +7,7 @@ The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
 `login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`,
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -637,6 +637,42 @@ produce fallback position one when the visible board is nonempty. The existing
 read-only snapshot and deterministic tie policy as the other boards; it does not
 accept donations, reset scores, grant rewards or advance activities.
 
+`expedition.rank`, tracked in [issue #63](https://github.com/ReeseArch64/opencok/issues/63),
+reads the current paired expedition through a narrow Redis service. The selected
+realm's authenticated profile must exist and match the process realm. The command
+uses `ranking.k2`, ignores client target/realm/score selectors and returns no pushes.
+Absent pairing or an empty sorted set returns an empty object, retaining correlation.
+A populated score list with no usable metadata returns an empty `serverRanking` and
+`selfRanking=-1`. Missing metadata consumes a candidate slot; visible entries receive
+contiguous ranks, and self position exists only when the requester appears among them.
+Scores retain descending Redis order, including its reverse-lexicographic member
+ordering for ties. Floor and Java signed-int saturation produce the displayed score.
+
+The shared Redis instance uses these keys:
+
+| Key                                                     | Type and content                                                                                                                                               |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `opencok:global:expedition-match:<realm>`               | String JSON with integer `serverId` matching the realm and integer `matchServerId`. A negative match ID means unmatched; zero and malformed identities reject. |
+| `opencok:kingdom:<lower-realm>:expedition-ranking`      | Sorted set of player UID members and expedition scores. The lower realm is the minimum of the two paired IDs.                                                  |
+| `opencok:kingdom:<lower-realm>:expedition-ranking-info` | Hash from player UID to JSON containing `name`, `pic`, `picVer`, `abbr`, `serverId` and signed-64-bit `power`.                                                 |
+
+The metadata decoder preserves integer lexemes before converting to SFS values;
+large power values never pass through JavaScript number rounding. Only the public
+fields above reach the client; UID, rank and score come from the selected entry and
+cannot be overridden by metadata. Each metadata value is limited to 65,535 bytes,
+and the selected payload to 1 MiB. The adapter rechecks the pairing and reads scores
+and metadata in one read-only Lua evaluation. A changed pairing retries once, then
+rejects continued churn. This gives a coherent board instead of the legacy sequence
+of separate reads. Dependency failures reject rather than masquerading as absent data.
+
+Existing authoritative expedition state needs a controlled import into these keys;
+the reader does not fall back to legacy keys, create matches, update scores, clear
+old boards or settle events. Event writers/importers must keep pairing and board
+contents consistent, including resetting data when the lower realm is reused for a
+new match. Synthetic units inject Redis command results and inspect the script contract;
+Lua execution against Redis, real service availability and client rendering remain
+unverified in this phase.
+
 ## Gameplay migration: topics 1–8
 
 The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)
@@ -685,16 +721,16 @@ uses the existing bounded Java hash traversal helper, with its documented except
 limits. Task visibility, discovery, completion writes and their pushes still need to
 use these descriptions before the reconnect task component is complete.
 
-| Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                               | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
-| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills; self positions, capacity/video presentation and synthetic unit coverage                        | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                       |
-| 4. Basic mailbox                          | Persistence schema                                                                                                                                                                         | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
-| 5. Additional map queries                 | Base viewport                                                                                                                                                                              | Point details, player search and favorites, including authorization for writes.                                                                  |
-| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                      | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |
-| 7. Avatar integration                     | Standalone files service                                                                                                                                                                   | Realm grants, confirmation and profile updates.                                                                                                  |
-| 8. Basic chat integration                 | Standalone chat service                                                                                                                                                                    | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                      |
+| Topic                                     | Implemented evidence                                                                                                                                                                            | Remaining work                                                                                                                                   |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests      | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                    | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
+| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                       |
+| 4. Basic mailbox                          | Persistence schema                                                                                                                                                                              | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
+| 5. Additional map queries                 | Base viewport                                                                                                                                                                                   | Point details, player search and favorites, including authorization for writes.                                                                  |
+| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                           | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |
+| 7. Avatar integration                     | Standalone files service                                                                                                                                                                        | Realm grants, confirmation and profile updates.                                                                                                  |
+| 8. Basic chat integration                 | Standalone chat service                                                                                                                                                                         | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                      |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog
