@@ -7,10 +7,11 @@ import {
 export async function loadNicknameServices(
   resources: string,
   readForbidden?: NicknameForbiddenReader,
-): Promise<Pick<GameServices, "nicknameBadWords" | "nicknameReservedPatterns">> {
+): Promise<Pick<GameServices, "nicknameBadWords" | "nicknameReservedPatterns" | "filterBadWords">> {
   const filter = await loadNicknameWordFilter(resources, readForbidden);
   return {
     nicknameBadWords: (name) => filter.contains(name),
     nicknameReservedPatterns: () => filter.reservedNamePatterns(),
+    filterBadWords: (text) => filter.filter(text),
   };
 }
