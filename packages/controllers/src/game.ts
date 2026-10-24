@@ -35,6 +35,14 @@ import {
   loginConfiguration,
 } from "@opencok/dtos/bootstrap";
 
+const playerRankingKinds = {
+  "server.rank": "power",
+  "kill.rank": "kills",
+  "level.rank": "level",
+  "building.rank": "building",
+  "silver.contribute.rank": "contribution",
+} as const;
+
 type GameConfig = Pick<ServerConfig, "kingdomId">;
 
 type ReadyCity = CityState & { profile: Row; resource: Row };
@@ -146,16 +154,8 @@ export class Game {
       case "kill.rank":
       case "level.rank":
       case "building.rank":
-        body = await this.ranking(
-          uid,
-          command === "server.rank"
-            ? "power"
-            : command === "kill.rank"
-              ? "kills"
-              : command === "level.rank"
-                ? "level"
-                : "building",
-        );
+      case "silver.contribute.rank":
+        body = await this.ranking(uid, playerRankingKinds[command]);
         break;
       default:
         throw new GameError(errors.unsupported);

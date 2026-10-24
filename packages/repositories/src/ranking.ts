@@ -1,3 +1,4 @@
+import { material_cost_ranking } from "@opencok/drizzle/schema/opencok_kingdom/material_cost_ranking";
 import { readBuildingRanking } from "./ranking-building.ts";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
@@ -14,7 +15,7 @@ export function readPlayerRanking(
   if (
     !uid.trim() ||
     uid.length > 40 ||
-    !["power", "kills", "level", "building"].includes(query.kind) ||
+    !["power", "kills", "level", "building", "contribution"].includes(query.kind) ||
     !Number.isInteger(query.limit) ||
     query.limit < 1 ||
     query.limit > 32767 ||
@@ -54,6 +55,34 @@ export function readPlayerRanking(
       };
       const joinAlliance = eq(alliance.uid, userprofile.allianceId);
       const countRank = { rank: sql<string>`(count(*) + 1)::text`.mapWith(BigInt) };
+      if (query.kind === "contribution") {
+        const candidates = await tx
+          .select({
+            uid: material_cost_ranking.uid,
+            contributeSum: material_cost_ranking.contributeSum,
+            ...identity,
+          })
+          .from(material_cost_ranking)
+          .leftJoin(userprofile, eq(userprofile.uid, material_cost_ranking.uid))
+          .leftJoin(alliance, joinAlliance)
+          .where(gt(material_cost_ranking.contributeSum, 0))
+          .orderBy(
+            sql`${material_cost_ranking.contributeSum} desc`,
+            sql`${material_cost_ranking.uid} collate "C" asc`,
+          )
+          .limit(query.limit);
+        const own = tx
+          .select({ score: material_cost_ranking.contributeSum })
+          .from(material_cost_ranking)
+          .where(eq(material_cost_ranking.uid, uid))
+          .limit(1);
+        const counts = await tx
+          .select(countRank)
+          .from(material_cost_ranking)
+          .where(gt(material_cost_ranking.contributeSum, own));
+        if (counts.length !== 1) throw new Error("Missing contribution ranking count");
+        return { profile, candidates, fallbackRank: counts[0]!.rank };
+      }
       if (query.kind === "level") {
         const candidates = await tx
           .select({

@@ -1,6 +1,6 @@
 import type { Row } from "./rows.ts";
 
-export type PlayerRankingKind = "power" | "kills" | "level" | "building";
+export type PlayerRankingKind = "power" | "kills" | "level" | "building" | "contribution";
 
 export interface PlayerRankingQuery {
   kind: PlayerRankingKind;
