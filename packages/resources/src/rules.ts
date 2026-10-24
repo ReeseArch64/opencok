@@ -95,6 +95,7 @@ function indexRules(records: Rule[], name: string): Map<string, Rule> {
     "activity_panel",
     "reward",
     "mail",
+    "alliance_teleport",
     "field_monster",
     "army",
     "sp_resources",
@@ -257,6 +258,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
   const prestigeLevels = prestigeLevelRecords
     ? indexRules(prestigeLevelRecords, "reputation_level")
     : new Map<string, Rule>();
+  const allianceTeleport = await optional("alliance_teleport");
   const [militaryGroups, heroEvents] = await Promise.all([
     optional("wr_sever"),
     optional("heroevent"),
@@ -294,6 +296,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     kingdomId,
     settingCatalog?.items ?? new Map<string, Rule>(),
     {
+      allianceTeleport,
       settingRecords: settingCatalog?.records ?? [],
       starRecords: starCatalog?.records ?? [],
       featureRecords: featureCatalog?.groups.get("function_on") ?? [],

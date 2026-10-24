@@ -26,6 +26,7 @@ export interface ProfileCatalogs {
   servers?: Map<string, Rule>;
 }
 export interface ConfigurationCatalogs {
+  allianceTeleport?: Map<string, Rule>;
   settingRecords?: readonly Rule[];
   starRecords?: readonly Rule[];
   featureRecords?: readonly Rule[];

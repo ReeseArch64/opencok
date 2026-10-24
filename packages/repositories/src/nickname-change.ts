@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { and, asc, eq, sql } from "drizzle-orm";
 import type { createDatabases } from "@opencok/drizzle";
 import { nickname_change } from "@opencok/drizzle/schema/opencok_kingdom/nickname_change";
@@ -29,6 +30,8 @@ import { DependencyError } from "@opencok/errors/dependency";
 import { withAvailableNickname, withNicknameLock } from "./nickname-lock.ts";
 import { writeNicknameGlobal, nicknameAccountUid } from "./nickname-global.ts";
 import { readSharedUserProfile } from "./shared-user.ts";
+import { user_alliance_task } from "@opencok/drizzle/schema/opencok_kingdom/user_alliance_task";
+import { insertSystemMail } from "./system-mail.ts";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 
 const balanceKeys = [
@@ -646,6 +649,74 @@ export function createNicknameChangeStore(
     find,
     recover,
     deliverNotifications,
+    async deliverAlliance(uid, operationId, now, plan) {
+      key(uid, operationId);
+      const createdAt = time(now);
+      if (typeof plan !== "function") return invalid();
+      return db.transaction(
+        async (tx) => {
+          const profile = await owner(tx, uid);
+          if (!profile || profile.uid !== uid || profile.serverId !== kingdomId) return invalid();
+          const record = await operation(tx, uid, operationId);
+          if (!record || record.state !== "committed" || !(record.pendingEffects & 1)) return false;
+          const tasks = await tx
+            .select()
+            .from(user_alliance_task)
+            .where(eq(user_alliance_task.uid, uid))
+            .limit(14)
+            .for("update");
+          const stem = createHash("sha256")
+            .update(`nickname-alliance\n${uid}\n${operationId}`)
+            .digest("hex")
+            .slice(0, 32);
+          const result = plan(Object.freeze(tasks.map((row) => Object.freeze({ ...row }))), stem);
+          if (
+            !Array.isArray(result.updates) ||
+            result.updates.length > 3 ||
+            typeof result.complete !== "boolean" ||
+            (result.mail !== null && !result.complete)
+          )
+            return invalid();
+          const seen = new Set<string>();
+          for (const update of result.updates) {
+            const before = tasks.find((task) => task.id === update.id);
+            if (!before || seen.has(update.id) || !["46608", "46609", "00000"].includes(update.id))
+              return invalid();
+            seen.add(update.id);
+            const timer = update.id === "46609";
+            if (
+              timer
+                ? update.state !== (before.state ?? 0) ||
+                  (before.num ?? 0n) !== 0n ||
+                  update.num !== createdAt
+                : update.state !== 1 || update.num !== (before.num ?? 0n)
+            )
+              return invalid();
+            const changed = await tx
+              .update(user_alliance_task)
+              .set({ state: update.state, num: update.num })
+              .where(and(eq(user_alliance_task.uid, uid), eq(user_alliance_task.id, update.id)))
+              .returning({ id: user_alliance_task.id });
+            if (changed.length !== 1 || changed[0]!.id !== update.id) return invalid();
+          }
+          if (result.complete !== seen.has("00000")) return invalid();
+          if (result.mail !== null) await insertSystemMail(tx, result.mail, uid, stem, createdAt);
+          const changed = await tx
+            .update(nickname_change)
+            .set({ pendingEffects: record.pendingEffects & ~1 })
+            .where(
+              and(
+                eq(nickname_change.operationId, operationId),
+                eq(nickname_change.pendingEffects, record.pendingEffects),
+              ),
+            )
+            .returning({ id: nickname_change.operationId });
+          if (changed.length !== 1 || changed[0]!.id !== operationId) return invalid();
+          return true;
+        },
+        { isolationLevel: "read committed", accessMode: "read write" },
+      );
+    },
     async deliverSharedUser(uid, operationId, now, project, publish, timeoutMs) {
       key(uid, operationId);
       time(now);

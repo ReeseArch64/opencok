@@ -681,3 +681,32 @@ test("ranking resources load military groups and hero reward bands without requi
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("nickname alliance catalog is optional and retains the last duplicate with exact strings", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-alliance-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).configuration.allianceTeleport?.size).toBe(0);
+    await writeFile(
+      join(directory, "alliance_teleport.xml"),
+      '<database><ItemSpec id="46608" function_on="0"/><ItemSpec id="46608" function_on="+1" para1="007"/></database>',
+    );
+    expect((await loadRules(directory)).configuration.allianceTeleport?.get("46608")).toEqual({
+      id: "46608",
+      function_on: "+1",
+      para1: "007",
+    });
+    await writeFile(
+      join(directory, "alliance_teleport.xml"),
+      '<database><ItemSpec id="46608" function_on="broken"/></database>',
+    );
+    expect(
+      (await loadRules(directory)).configuration.allianceTeleport?.get("46608")?.function_on,
+    ).toBe("broken");
+    await writeFile(join(directory, "alliance_teleport.xml"), "<database>");
+    await expect(loadRules(directory)).rejects.toThrow();
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
