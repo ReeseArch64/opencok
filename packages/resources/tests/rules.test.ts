@@ -113,7 +113,9 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     expect(rules.configuration.kingdomSkills?.size).toBe(0);
     expect(rules.configuration.facebookShare?.size).toBe(0);
     expect(rules.configuration.serverConfig?.size).toBe(0);
-    expect(Object.values(rules.power).every((catalog) => catalog.size === 0)).toBe(true);
+    const { prestigeLevelRecords: emptyPrestige, ...emptyPower } = rules.power;
+    expect(emptyPrestige).toEqual([]);
+    expect(Object.values(emptyPower).every((catalog) => catalog.size === 0)).toBe(true);
     for (const name of [
       "general",
       "science",
@@ -126,6 +128,10 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "dragon_new",
       "status",
       "sk",
+      "general_base",
+      "general_skill",
+      "general_official",
+      "general_random_effect",
       "suit",
       "svip",
       "alliancescience",
@@ -154,8 +160,12 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       '<database><Group id="vip"><ItemSpec id="001" power="007"/></Group></database>',
     );
     const power = (await loadRules(directory)).power;
-    expect(Object.keys(power)).toHaveLength(30);
-    expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
+    const { prestigeLevelRecords, ...indexedPower } = power;
+    expect(Object.keys(indexedPower)).toHaveLength(34);
+    expect(prestigeLevelRecords).toEqual([{ id: "001", power: "007" }]);
+    expect(
+      Object.values(indexedPower).every((catalog) => catalog.get("001")?.power === "007"),
+    ).toBe(true);
     for (const name of [
       "general_sale",
       "pay_servercontrol",
@@ -321,6 +331,134 @@ test("neutral resource durations load optionally and preserve final duplicate de
       '<database><ItemSpec id="" gather_time="1"/></database>',
     );
     await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("barbarian catalogs load optionally and retain final duplicate definitions independently of formations", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-barbarian-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).world.barbarians?.size).toBe(0);
+    await writeFile(
+      join(directory, "barbarion.xml"),
+      '<database><Group id="a"><ItemSpec id="camp" army="first" para3="1"/></Group><Group id="b"><ItemSpec id="camp" army="formation" para3=" 0x1p2D "/></Group></database>',
+    );
+    const rules = await loadRules(directory);
+    expect(rules.world.barbarians!.get("camp")).toEqual({
+      id: "camp",
+      army: "formation",
+      para3: " 0x1p2D ",
+    });
+    expect(rules.world.armies!.size).toBe(0);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("new-general catalogs are optional, preserve final definitions and stay separate from ordinary general skills", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-new-general-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const absent = (await loadRules(directory)).power;
+    expect(absent.newGeneralBases?.size).toBe(0);
+    expect(absent.newGeneralSkills?.size).toBe(0);
+    await writeFile(
+      join(directory, "general_base.xml"),
+      '<database><ItemSpec id="1" base_skill="10" base_skill_2="11;10"/></database>',
+    );
+    await writeFile(
+      join(directory, "general_skill.xml"),
+      '<database><Group id="a"><ItemSpec id="10" type="1"/></Group><Group id="b"><ItemSpec id="10" type="0" para1="78;78" base=" 0x1p2F ;1" condition_type=" "/></Group></database>',
+    );
+    await writeFile(
+      join(directory, "sk.xml"),
+      '<database><ItemSpec id="10" effect="133;2"/></database>',
+    );
+    const rules = await loadRules(directory);
+    expect(rules.power.newGeneralBases!.get("1")).toEqual({
+      id: "1",
+      base_skill: "10",
+      base_skill_2: "11;10",
+    });
+    expect(rules.power.newGeneralSkills!.get("10")).toEqual({
+      id: "10",
+      type: "0",
+      para1: "78;78",
+      base: " 0x1p2F ;1",
+      condition_type: " ",
+    });
+    expect(rules.power.generalSkills!.get("10")).toEqual({ id: "10", effect: "133;2" });
+    await writeFile(join(directory, "general_skill.xml"), '<database><ItemSpec id=""/></database>');
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("new-general office and refinement catalogs load optionally with exact strings and final duplicate definitions", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-new-general-effects-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const absent = (await loadRules(directory)).power;
+    expect(absent.newGeneralOffices?.size).toBe(0);
+    expect(absent.newGeneralRefinement?.size).toBe(0);
+    await writeFile(
+      join(directory, "general_official.xml"),
+      '<database><Group id="first"><ItemSpec id="office" effect="1"/></Group><Group id="last"><ItemSpec id="office" effect="78|91" unlock_person_num="1|2" pos_unlock="1;0;0"/></Group></database>',
+    );
+    await writeFile(
+      join(directory, "general_random_effect.xml"),
+      '<database><ItemSpec id="a" effect="1"/><ItemSpec id="a" effect="78;78;91"/></database>',
+    );
+    const rules = await loadRules(directory);
+    expect(rules.power.newGeneralOffices!.get("office")).toEqual({
+      id: "office",
+      effect: "78|91",
+      unlock_person_num: "1|2",
+      pos_unlock: "1;0;0",
+    });
+    expect(rules.power.newGeneralRefinement!.get("a")).toEqual({ id: "a", effect: "78;78;91" });
+    await writeFile(
+      join(directory, "general_official.xml"),
+      '<database><ItemSpec id=""/></database>',
+    );
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("prestige catalogs retain every ordered definition for first-range selection alongside the final ID index", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-prestige-order-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const absent = (await loadRules(directory)).power;
+    expect(absent.prestigeLevelRecords).toEqual([]);
+    expect(absent.prestigeLevels?.size).toBe(0);
+    await writeFile(
+      join(directory, "reputation_level.xml"),
+      '<database><Group id="first"><ItemSpec id="same" reputation_point="100" reputation_level="5"/></Group><Group id="second"><ItemSpec id="same" reputation_point="100" reputation_level="9"/><ItemSpec id="last" reputation_point="0;100" reputation_level="1"/></Group></database>',
+    );
+    const power = (await loadRules(directory)).power;
+    expect(power.prestigeLevelRecords?.map((rule) => rule.reputation_level)).toEqual([
+      "5",
+      "9",
+      "1",
+    ]);
+    expect(power.prestigeLevels?.get("same")?.reputation_level).toBe("9");
+    await writeFile(
+      join(directory, "reputation_level.xml"),
+      '<database><ItemSpec id=""/></database>',
+    );
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+    await writeFile(join(directory, "reputation_level.xml"), "<database/>");
+    await expect(loadRules(directory)).rejects.toThrow("Missing gameplay resource records");
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

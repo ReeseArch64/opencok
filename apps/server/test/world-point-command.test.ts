@@ -11,6 +11,7 @@ import { sfs, Type, encode, decode, encodeArray, type Fields } from "@opencok/me
 import { MAX_FRAME } from "@opencok/messages/frame";
 
 import orderVectors from "./fixtures/mail-helper-order-vectors.json";
+import barbarianVectors from "./fixtures/world-barbarian-vectors.json";
 
 const now = 1792756800123;
 const samplePoint = (patch: Row = {}): Row => ({
@@ -76,6 +77,7 @@ function fixture() {
     emperorCalls: 0,
     emperor: null as number | null | undefined,
     marches: [sampleMarch()],
+    barbarian: undefined as Row | undefined,
     overrides: new Map<string, Row[]>(),
     fail: "",
   };
@@ -90,11 +92,14 @@ function fixture() {
       }
       if (text === "commit" || text === "rollback") return { rows: [] };
       expect(text).toStartWith("select ");
-      expect(text).not.toMatch(/for update|for share|armyInfo|plunderRes|monsterInfo/);
+      expect(text).not.toMatch(/for update|for share|monsterInfo/);
       const table = /from "opencok_kingdom"\."([^"]+)"/.exec(text)![1]!;
+      const resource = table === "world_march" && text.includes('"armyInfo"');
+      if (!resource) expect(text).not.toMatch(/armyInfo|plunderRes/);
       const report = table === "world_march" && text.includes('"exploreReport"');
-      const neutral = table === "world_march" && text.includes('"occupyResourceEndTime"');
-      const key = table + (report ? ":report" : neutral ? ":neutral" : "");
+      const neutral =
+        !resource && table === "world_march" && text.includes('"occupyResourceEndTime"');
+      const key = table + (resource ? ":resource" : report ? ":report" : neutral ? ":neutral" : "");
       if (key === state.fail) throw new Error("Synthetic private failure");
       let rows: Row[] = [];
       if (table === "userprofile")
@@ -120,8 +125,16 @@ function fixture() {
       } else if (table === "stat_reg") rows = [{ uid: "target", type: 2, time: 200n }];
       else if (table === "alliance") rows = [{ uid: "A", abbr: "SYN" }];
       else if (table === "alliance_member") rows = [{ uid: "target", rank: 4 }];
-      else if (table === "world_march") {
-        if (neutral) {
+      else if (table === "world_barbarion") {
+        expect(params).toEqual([701, 2]);
+        expect(text).not.toMatch(/lastAwardArmyMapByteArray|currentHP|worldId|ownerId/);
+        rows = state.barbarian ? [state.barbarian] : [];
+      } else if (table === "world_march") {
+        if (resource) {
+          expect(params).toEqual([state.point!.ownerMarchUUid, 2]);
+          expect(text).toContain('"world_march"."uuid" = $1');
+          rows = state.marches.filter((row) => row.uuid === params[0]);
+        } else if (neutral) {
           expect(params).toEqual([701, 1, 1]);
           expect(text).toContain('"world_march"."targetId" = $1');
           expect(text).toContain('"world_march"."state" = $2');
@@ -347,8 +360,8 @@ test("base point kinds and disabled city extras use public owner fields", async 
   expect((await f.execute()).body.targetPower).toBeUndefined();
 });
 
-test("unfinished territory, boss, occupied new-resource and barbarian paths reject explicitly", async () => {
-  for (const type of [14, 18, 20, 21, 23, 37, 44, 46, 47, -1, 70]) {
+test("unfinished territory, boss and occupied new-resource paths reject explicitly", async () => {
+  for (const type of [14, 18, 20, 21, 23, 37, 46, 47, -1, 70]) {
     const f = fixture();
     f.state.point = samplePoint({ pointType: type });
     await expect(f.execute()).rejects.toThrow("102192");
@@ -383,7 +396,6 @@ test("command validates integer parameters, local realm routing and observer sta
     { point: sfs.int(1.5) },
     { serverId: sfs.string("1") },
     { serverId: sfs.int(0) },
-    { serverId: sfs.int(2) },
   ];
   for (const params of invalidParams) {
     const f = fixture();
@@ -764,4 +776,115 @@ test("city dependencies fail visibly on missing state, foreign rows, oversized e
   f.queries.length = 0;
   await expect(f.execute()).rejects.toThrow("E000000");
   expect(f.queries.some((q) => q.text.includes('"user_mixed_info"'))).toBe(false);
+});
+
+function barbarianFixture() {
+  const f = fixture();
+  f.state.point = samplePoint({ pointType: 44, pointItem: "unused-point-config" });
+  f.state.barbarian = {
+    pointId: 701,
+    configId: "camp",
+    lastBeAttackedTime: BigInt(now),
+    lastArmyMapByteArray: Buffer.from(barbarianVectors.maps[1]!.data, "base64"),
+  };
+  f.rules.world.barbarians = new Map([["camp", { para3: "1", army: "formation" }]]);
+  f.rules.world.armies = new Map([["formation", { arm: "a;100|b;100" }]]);
+  f.rules.arms.set("a", { power: "1.5" });
+  f.rules.arms.set("b", { power: "2.25" });
+  return f;
+}
+
+test("barbarian point command reads saved troop state and returns public power without combat or reward reads", async () => {
+  const f = barbarianFixture();
+  const before = structuredClone(f.state.barbarian);
+  const result = await f.execute({ _cok_: sfs.int(44), barbarionPower: sfs.long(999999n) });
+  expect(result.body).toEqual({
+    uid: sfs.string("target"),
+    registerTime: sfs.long(200n),
+    point: sfs.int(701),
+    barbarionPower: sfs.long(157n),
+    _cok_: sfs.int(44),
+  });
+  expect(result.pushes).toEqual([]);
+  expect(decode(encode(result.body))).toEqual(result.body);
+  expect(f.state.barbarian).toEqual(before);
+  expect(
+    f.queries.filter((q) => q.text.includes('from "opencok_kingdom"."world_barbarion"')),
+  ).toHaveLength(1);
+  expect(
+    f.queries.some((q) => /world_march|lastAwardArmyMapByteArray|currentHP/.test(q.text)),
+  ).toBe(false);
+  expect(f.queries.filter((q) => q.text.startsWith("begin"))).toHaveLength(1);
+  expect(f.queries.at(-1)!.text).toBe("commit");
+  expect(f.state.worldCalls).toBe(0);
+});
+
+test("barbarian regeneration samples server time at projection and respects full recovery and future attacks", async () => {
+  const f = barbarianFixture();
+  let clocks = 0;
+  const game = new Game({} as GameStore, f.rules, { kingdomId: 1 }, () => now + clocks++ * 1000, {
+    worldPointDetail: f.store,
+  });
+  expect(
+    (await game.execute("observer", "world.get.detail", { point: sfs.int(701) })).body
+      .barbarionPower,
+  ).toEqual(sfs.long(161n));
+  expect(clocks).toBe(2);
+  f.state.barbarian!.lastBeAttackedTime = BigInt(now - 100000);
+  expect((await f.execute()).body.barbarionPower).toEqual(sfs.long(375n));
+  f.state.barbarian!.lastBeAttackedTime = BigInt(now + 1000);
+  expect((await f.execute()).body.barbarionPower).toEqual(sfs.long(153n));
+});
+
+test("missing barbarian state returns zero and empty formations do not deserialize unused troop payloads", async () => {
+  const f = barbarianFixture();
+  f.state.barbarian = undefined;
+  f.rules.world.barbarians!.clear();
+  expect((await f.execute()).body.barbarionPower).toEqual(sfs.long(0n));
+  const empty = barbarianFixture();
+  empty.rules.world.armies!.get("formation")!.arm = "";
+  empty.state.barbarian!.lastArmyMapByteArray = Buffer.from("invalid-unused");
+  expect((await empty.execute()).body.barbarionPower).toEqual(sfs.long(0n));
+  empty.state.barbarian!.lastArmyMapByteArray = null;
+  expect((await empty.execute()).body.barbarionPower).toEqual(sfs.long(0n));
+  empty.state.point!.pointType = 7;
+  empty.queries.length = 0;
+  expect((await empty.execute()).body.barbarionPower).toBeUndefined();
+  expect(empty.queries.some((q) => q.text.includes('"world_barbarion"'))).toBe(false);
+});
+
+test("barbarian dependencies reject corrupt maps, missing catalogs and inconsistent read snapshots", async () => {
+  for (const data of [
+    null,
+    Buffer.alloc(0),
+    Buffer.from("{}"),
+    Buffer.from(barbarianVectors.nullMap, "base64"),
+  ]) {
+    const f = barbarianFixture();
+    f.state.barbarian!.lastArmyMapByteArray = data;
+    await expect(f.execute()).rejects.toThrow("102192");
+  }
+  for (const patch of [
+    { pointId: 702 },
+    { configId: "\0" },
+    { lastArmyMapByteArray: Buffer.alloc(65536) },
+  ]) {
+    const f = barbarianFixture();
+    Object.assign(f.state.barbarian!, patch);
+    await expect(f.execute()).rejects.toThrow("world point detail unavailable");
+    expect(f.queries.at(-1)!.text).toBe("rollback");
+  }
+  const f = barbarianFixture();
+  f.state.overrides.set("world_barbarion", [f.state.barbarian!, f.state.barbarian!]);
+  await expect(f.execute()).rejects.toThrow("world point detail unavailable");
+  f.state.overrides.clear();
+  f.state.fail = "world_barbarion";
+  await expect(f.execute()).rejects.toThrow("world point detail unavailable");
+  f.state.fail = "";
+  f.rules.world.barbarians!.clear();
+  await expect(f.execute()).rejects.toThrow("102192");
+  f.state.observer!.banFlag = 1;
+  f.queries.length = 0;
+  await expect(f.execute()).rejects.toThrow("E000000");
+  expect(f.queries.some((q) => q.text.includes('"world_barbarion"'))).toBe(false);
 });
