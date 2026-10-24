@@ -103,7 +103,7 @@ export interface PlayerSummary {
 
 export interface LoginConfigurationState {
   profile: Row | undefined;
-  switches: Row[];
+  switches: Row[] | undefined;
   pushSettings: Row[];
 }
 

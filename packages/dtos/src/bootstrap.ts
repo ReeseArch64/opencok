@@ -37,12 +37,21 @@ export function featureConfig(rules: Rules, context: FeatureContext): Fields {
   };
 }
 
-export function loginConfiguration(
+export function loginConfigurationPreferences(
   rules: Rules,
   state: LoginConfigurationState,
-  context: FeatureContext,
-  verifyChangeAccount: boolean,
 ): Fields {
+  const fbShare = sfs.array(
+    [
+      ...(rules.configuration.facebookShareRecords ??
+        rules.configuration.facebookShare?.values() ??
+        []),
+    ].map((rule) =>
+      sfs.object(
+        Object.fromEntries(Object.entries(rule).map(([key, value]) => [key, sfs.string(value)])),
+      ),
+    ),
+  );
   const present = new Set(state.pushSettings.map((row) => num(row, "type")));
   const pushSettings = state.pushSettings.map((row) =>
     sfs.object({
@@ -61,21 +70,15 @@ export function loginConfiguration(
           }),
         );
   return {
-    ...featureConfig(rules, context),
-    fbShare: sfs.array(
-      [
-        ...(rules.configuration.facebookShareRecords ??
-          rules.configuration.facebookShare?.values() ??
-          []),
-      ].map((rule) =>
-        sfs.object(
-          Object.fromEntries(Object.entries(rule).map(([key, value]) => [key, sfs.string(value)])),
-        ),
-      ),
-    ),
+    fbShare,
     pushSetting: sfs.array(pushSettings),
+  };
+}
+
+export function loginSwitches(rows: readonly Row[]): Fields {
+  return {
     switches: sfs.array(
-      state.switches.map((row) =>
+      rows.map((row) =>
         sfs.object({
           name: sfs.string(text(row, "name")),
           stat: row.stat === null ? sfs.null() : sfs.int(num(row, "stat")),
@@ -83,7 +86,22 @@ export function loginConfiguration(
         }),
       ),
     ),
-    isVerifyChangeAccount: sfs.bool(verifyChangeAccount),
+  };
+}
+
+export function loginConfiguration(
+  rules: Rules,
+  state: LoginConfigurationState,
+  context: FeatureContext,
+  verifyChangeAccount: boolean | undefined,
+): Fields {
+  return {
+    ...loginConfigurationPreferences(rules, state),
+    ...(state.switches === undefined ? {} : loginSwitches(state.switches)),
+    ...(state.switches !== undefined && verifyChangeAccount !== undefined
+      ? { isVerifyChangeAccount: sfs.bool(verifyChangeAccount) }
+      : {}),
+    ...featureConfig(rules, context),
   };
 }
 
