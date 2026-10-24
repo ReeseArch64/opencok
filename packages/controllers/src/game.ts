@@ -1,6 +1,8 @@
 import { mailDeleted, mailSave, mailStatus } from "@opencok/dtos/mail";
+import { mailContentsProjection } from "./mail-contents.ts";
 import { planMailDeletion } from "./mail-delete.ts";
 import {
+  mailContentsQuery,
   mailConversationSaveQuery,
   mailDeleteQuery,
   mailReadQuery,
@@ -174,6 +176,9 @@ export class Game {
       case "mail.read.status.betch":
         body = await this.mailRead(uid, command === "mail.read.status.betch", params);
         break;
+      case "mail.read":
+        body = await this.mailContents(uid, params);
+        break;
       case "mail.delete":
         body = await this.mailDelete(uid, params);
         break;
@@ -292,6 +297,24 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return mailDeleted(state.deleted);
+  }
+  private async mailContents(uid: string, params: Fields): Promise<Fields> {
+    const ids = wireString(params, "uid");
+    if (typeof wireString(params, "type") !== "string") throw new GameError(errors.invalid);
+    const query = mailContentsQuery(ids, this.now());
+    let body: Fields | undefined;
+    const envelope: Fields = {};
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) envelope[key] = params[key]!;
+    const state = await this.db.mailContents(uid, query, (entries) => {
+      const projection = mailContentsProjection(entries, envelope);
+      body = projection.body;
+      return projection.invalidIds;
+    });
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
+      throw new GameError(errors.invalid);
+    return body;
   }
   private async mailConversationSave(uid: string, params: Fields): Promise<Fields> {
     const sender = params.fromUser !== undefined;
