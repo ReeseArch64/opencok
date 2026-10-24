@@ -4,6 +4,11 @@ const digitZeros = [
   0x1c40, 0x1c50, 0xa620, 0xa8d0, 0xa900, 0xa9d0, 0xaa50, 0xabf0, 0xff10,
 ];
 
+export function javaDigit(code: number): number | undefined {
+  const zero = digitZeros.find((zero) => code >= zero && code <= zero + 9);
+  return zero === undefined ? undefined : code - zero;
+}
+
 export function javaDecimal(raw: unknown, bits: 32 | 64): bigint {
   if (typeof raw !== "string" || raw.length > 65535) throw new Error("Invalid decimal integer");
   const negative = raw[0] === "-";
@@ -12,10 +17,9 @@ export function javaDecimal(raw: unknown, bits: 32 | 64): bigint {
   const bound = (1n << BigInt(bits - 1)) - (negative ? 0n : 1n);
   let value = 0n;
   for (let index = start; index < raw.length; index++) {
-    const code = raw.charCodeAt(index);
-    const zero = digitZeros.find((zero) => code >= zero && code <= zero + 9);
-    if (zero === undefined) throw new Error("Invalid decimal integer");
-    value = value * 10n + BigInt(code - zero);
+    const digit = javaDigit(raw.charCodeAt(index));
+    if (digit === undefined) throw new Error("Invalid decimal integer");
+    value = value * 10n + BigInt(digit);
     if (value > bound) throw new Error("Invalid decimal integer");
   }
   return negative ? -value : value;

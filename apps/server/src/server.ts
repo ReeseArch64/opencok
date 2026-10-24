@@ -30,6 +30,7 @@ import { Game } from "@opencok/controllers/game";
 import { World } from "@opencok/controllers/world";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
 import { startMailGiftRelay } from "./mail-gift-relay.ts";
+import { loadNicknameServices } from "./nickname.ts";
 
 export class RealmDependencies extends Context.Service<RealmDependencies, ServerDependencies>()(
   "@opencok/server/Dependencies",
@@ -70,6 +71,9 @@ export const RealmDependenciesLive = Layer.effect(
         })
       : undefined;
     const cache = new Cache(config);
+    const nicknameServices = yield* fromPromise("realm.nickname-words", () =>
+      loadNicknameServices(config.resources, (key) => cache.nicknameForbiddenWords(key)),
+    );
     const coordination = yield* acquireResource(
       "realm.coordination",
       async () => new Coordination(config),
@@ -135,6 +139,7 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        ...nicknameServices,
         worldPointDetail,
         playerSearch,
         worldSearch,
@@ -154,6 +159,9 @@ export const RealmDependenciesLive = Layer.effect(
             })
           : undefined,
         expeditionRanking: (limit) => cache.expeditionRanking(limit),
+        scoreActivityRanking: () => cache.scoreActivityRanking(),
+        globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
+        dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
         expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
         worldPowerEffects: (kingdomId) => cache.worldEffects(kingdomId),
         emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),

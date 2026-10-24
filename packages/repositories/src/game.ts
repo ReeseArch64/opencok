@@ -1,4 +1,9 @@
 import { readMailBatch } from "./mail-batch.ts";
+import { readNormalRankingRealm } from "./ranking-realm.ts";
+import { readMailUpdates } from "./mail-updates.ts";
+import type { MailUpdateInspector, MailUpdateQuery } from "@opencok/contracts/mail-updates";
+import { markMailConversationRead } from "./mail-conversation-read.ts";
+import { deleteMailCategories, deleteMailType } from "./mail-batch-delete.ts";
 import { readMailGroups } from "./mail-groups.ts";
 import { readMailCategory } from "./mail-category.ts";
 import { translationv2 } from "@opencok/drizzle/schema/opencok_kingdom/translationv2";
@@ -13,6 +18,10 @@ import type {
   MailContentsQuery,
   MailContentsInspector,
   MailConversationSaveQuery,
+  MailConversationReadQuery,
+  MailCategoryDeleteQuery,
+  MailCategoryDeleteInspector,
+  MailTypeDeleteQuery,
   MailDeleteQuery,
   MailDeletePlanner,
   MailReadQuery,
@@ -49,9 +58,33 @@ import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
 import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
-import { and, asc, eq, getTableColumns, gt, inArray, or, sql } from "drizzle-orm";
+import { WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
+import { setPushPreference } from "./push-preferences.ts";
+import { updateProfilePreference } from "./profile-preferences.ts";
+import { nicknameOccupied } from "./nickname.ts";
+import { readCelebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
+import { celebrity } from "@opencok/drizzle/schema/opencok_kingdom/celebrity";
+import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
+import { DependencyError } from "@opencok/errors/dependency";
+import {
+  and,
+  asc,
+  eq,
+  getTableColumns,
+  gt,
+  inArray,
+  or,
+  sql,
+  DrizzleQueryError,
+} from "drizzle-orm";
 import type { ServerConfig } from "@opencok/contracts/server";
-import type { GameStore, CityState, LoginConfigurationState } from "@opencok/contracts/game";
+import type {
+  GameStore,
+  CityState,
+  LoginConfigurationState,
+  PushPreference,
+  ProfilePreferenceField,
+} from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, loadPlayerSummaries } from "./players.ts";
 import { checkPowerStore, readPowerState } from "./power.ts";
@@ -74,6 +107,9 @@ type GameRepositoryConfig = Pick<
 export class Database implements GameStore, FriendshipMineStore {
   readonly databases;
   readonly kingdom;
+  normalRankingRealm(): Promise<boolean> {
+    return readNormalRankingRealm(this.databases.global.db, this.config.kingdomId);
+  }
   constructor(readonly config: GameRepositoryConfig) {
     const kingdoms = [...(config.playerKingdoms ?? [])];
     const own = kingdoms.find((realm) => realm.id === config.kingdomId);
@@ -122,9 +158,18 @@ export class Database implements GameStore, FriendshipMineStore {
       alliance_invite_move,
       switches,
       parse_info,
+      celebrity,
     ])
       await this.kingdom.db.select().from(table).limit(0);
     await this.databases.global.db.select().from(account_new).limit(0);
+    await this.databases.global.db
+      .select({
+        uid: usermapping.gameUid,
+        type: usermapping.mappingType,
+        value: usermapping.mappingValue,
+      })
+      .from(usermapping)
+      .limit(0);
     await this.databases.global.db
       .select({
         uid: mail_gift_log.uid,
@@ -149,6 +194,18 @@ export class Database implements GameStore, FriendshipMineStore {
     return (
       await this.kingdom.db.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
     )[0];
+  }
+  celebrityDescription(uid: string, kingdomId: number): Promise<Buffer | null> {
+    return readCelebrityDescription(this.databases, uid, kingdomId);
+  }
+  saveCelebrityDescription(uid: string, now: number, readDescription: () => Buffer | null) {
+    return saveCelebrityDescription(
+      this.kingdom.db,
+      uid,
+      this.config.kingdomId,
+      now,
+      readDescription,
+    );
   }
   async accounts(uid: string): Promise<Row[]> {
     return this.databases.global.db
@@ -221,6 +278,33 @@ export class Database implements GameStore, FriendshipMineStore {
   configuration(uid: string): Promise<LoginConfigurationState> {
     return readLoginConfiguration(this.kingdom.db, uid);
   }
+  configurationSwitches(): Promise<Row[] | undefined> {
+    return readLoginSwitches(this.kingdom.db);
+  }
+  initializeWorldNewsPreference(uid: string, now: number): Promise<void> {
+    return initializeWorldNewsPreference(this.kingdom.db, uid, this.config.kingdomId, now);
+  }
+  setPushPreference(uid: string, preference: PushPreference, now: number): Promise<void> {
+    return setPushPreference(this.kingdom.db, uid, this.config.kingdomId, preference, now);
+  }
+  nicknameOccupied(name: string): Promise<boolean> {
+    return nicknameOccupied(this.databases.global.db, name);
+  }
+  updateProfilePreference(
+    uid: string,
+    field: ProfilePreferenceField,
+    now: number,
+    readValue: () => number,
+  ): Promise<number | undefined> {
+    return updateProfilePreference(
+      this.kingdom.db,
+      uid,
+      this.config.kingdomId,
+      field,
+      now,
+      readValue,
+    );
+  }
   power(uid: string, now: number) {
     return readPowerState(this.kingdom.db, uid, now);
   }
@@ -254,8 +338,26 @@ export class Database implements GameStore, FriendshipMineStore {
   mailRead(uid: string, query: MailReadQuery) {
     return markMailRead(this.kingdom.db, this.config.kingdomId, uid, query);
   }
+  mailConversationRead(uid: string, query: MailConversationReadQuery) {
+    if (query.effects.some((effect) => effect.kind === "chat"))
+      throw new DependencyError("chat read delivery unavailable");
+    return markMailConversationRead(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
+  mailCategoryDelete(
+    uid: string,
+    query: MailCategoryDeleteQuery,
+    inspect: MailCategoryDeleteInspector,
+  ) {
+    return deleteMailCategories(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
+  }
+  mailTypeDelete(uid: string, query: MailTypeDeleteQuery) {
+    return deleteMailType(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
   mailDelete(uid: string, query: MailDeleteQuery, plan: MailDeletePlanner) {
     return deleteMail(this.kingdom.db, this.config.kingdomId, uid, query, plan);
+  }
+  mailUpdates(uid: string, query: MailUpdateQuery, inspect: MailUpdateInspector) {
+    return readMailUpdates(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
   }
   relayMailGifts() {
     return relayMailGiftOpenings(this.kingdom.db, this.databases.global.db);
@@ -308,14 +410,74 @@ export function readLoginConfiguration(
       const profile = (
         await tx.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
       )[0];
-      const flags = await tx.select().from(switches).orderBy(asc(switches.name));
       const pushSettings = await tx
         .select({ type: parse_info.type, status: parse_info.status, audio: parse_info.audio })
         .from(parse_info)
         .where(eq(parse_info.uid, uid))
         .orderBy(asc(parse_info.type));
-      return { profile, switches: flags, pushSettings };
+      return { profile, switches: undefined, pushSettings };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },
+  );
+}
+
+export async function readLoginSwitches(db: Database["kingdom"]["db"]): Promise<Row[] | undefined> {
+  try {
+    return await db.select().from(switches).orderBy(asc(switches.name));
+  } catch (error) {
+    const cause = error instanceof DrizzleQueryError ? error.cause : error;
+    if (
+      cause &&
+      typeof cause === "object" &&
+      "code" in cause &&
+      typeof cause.code === "string" &&
+      /^[0-9A-Z]{5}$/.test(cause.code)
+    )
+      return [];
+    return undefined;
+  }
+}
+
+export async function initializeWorldNewsPreference(
+  db: Database["kingdom"]["db"],
+  uid: string,
+  kingdomId: number,
+  now: number,
+): Promise<void> {
+  if (
+    !uid ||
+    uid.length > 40 ||
+    !Number.isSafeInteger(now) ||
+    now < 0 ||
+    !Number.isInteger(kingdomId) ||
+    kingdomId < 1
+  )
+    throw new DependencyError("configuration preference input");
+  await db.transaction(
+    async (tx) => {
+      const profile = (
+        await tx
+          .select({
+            uid: userprofile.uid,
+            serverId: userprofile.serverId,
+            banFlag: userprofile.banFlag,
+            banTime: userprofile.banTime,
+          })
+          .from(userprofile)
+          .where(eq(userprofile.uid, uid))
+          .limit(1)
+          .for("update")
+      )[0];
+      if (
+        !profile ||
+        profile.uid !== uid ||
+        profile.serverId !== kingdomId ||
+        (profile.banFlag ?? 0) !== 0 ||
+        (profile.banTime ?? 0n) > BigInt(now)
+      )
+        throw new DependencyError("configuration preference owner");
+      await tx.insert(parse_info).values({ uid, type: WORLD_NEWS_PUSH_TYPE, status: 0, audio: 1 });
+    },
+    { isolationLevel: "read committed", accessMode: "read write" },
   );
 }

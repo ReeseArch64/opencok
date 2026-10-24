@@ -1,3 +1,4 @@
+import { javaCalendarDate } from "./java-calendar-date.ts";
 import { javaDecimal } from "./java-integer.ts";
 import { mailBlank } from "./mail.ts";
 
@@ -102,32 +103,20 @@ export function worldActivityRealmEnabled(
   return false;
 }
 
-export function ruleTime(value: string, utcOffsetMinutes = 0): number | undefined {
-  if (
-    !/^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}$/.test(value) ||
-    !Number.isInteger(utcOffsetMinutes) ||
-    Math.abs(utcOffsetMinutes) > 14 * 60
-  )
-    return undefined;
-  const [year, month, day, hour, minute] = value.split("-").map(Number) as [
-    number,
-    number,
-    number,
-    number,
-    number,
-  ];
-  const date = new Date(0);
-  date.setUTCFullYear(year, month - 1, day);
-  date.setUTCHours(hour, minute, 0, 0);
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day ||
-    date.getUTCHours() !== hour ||
-    date.getUTCMinutes() !== minute
-  )
-    return undefined;
-  return date.getTime() - utcOffsetMinutes * 60_000;
+export function ruleTime(value: string, utcOffsetMinutes = 0): bigint {
+  return javaCalendarDate(value, 5, utcOffsetMinutes) ?? 0n;
+}
+
+export function ruleTimeWindow(
+  rule: Readonly<Record<string, string>>,
+  context: RuleContext,
+): boolean {
+  if (!Number.isSafeInteger(context.now)) return false;
+  const now = BigInt(context.now);
+  if (rule.start !== undefined && now < ruleTime(rule.start, context.utcOffsetMinutes))
+    return false;
+  if (rule.end !== undefined && now > ruleTime(rule.end, context.utcOffsetMinutes)) return false;
+  return true;
 }
 
 export function ruleAvailable(
@@ -142,14 +131,5 @@ export function ruleAvailable(
     !featureRealmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
     return false;
-  const start =
-    rule.start === undefined ? -Infinity : ruleTime(rule.start, context.utcOffsetMinutes);
-  const end = rule.end === undefined ? Infinity : ruleTime(rule.end, context.utcOffsetMinutes);
-  return (
-    start !== undefined &&
-    end !== undefined &&
-    start <= end &&
-    context.now >= start &&
-    context.now <= end
-  );
+  return ruleTimeWindow(rule, context);
 }

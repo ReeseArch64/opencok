@@ -6,7 +6,8 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when configured), `login.dataconfig`,
-`login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
+`login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `user.check.nickName`,
+`equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
@@ -99,8 +100,8 @@ whitespace; malformed XML, nonstring values and document type declarations fail 
 Building star availability evaluates numeric client versions, realm selectors and
 inclusive start/end boundaries at the command's injected time. Legacy dates use
 `yyyy-MM-dd-HH-mm`, interpreted in UTC for this server, independently of the host
-timezone. Dates and default version checks still reject unsupported formats; Java's
-lenient date rollover and invalid-date epoch fallback remain pending. Function-on
+timezone. Dates now retain lenient field normalization and parse-failure epoch fallback;
+version checks use the reference component and blank-player policies. Function-on
 realm selectors now retain ordered Java parsing and propagate reached parse failures.
 Test-realm selectors and explicit timezone offsets are supported by the pure availability
 evaluator; the running realm uses the online selector and UTC. This changes only
@@ -111,15 +112,63 @@ types. XML values remain strings inside objects, while the documented integer an
 long fields are checked before serialization. Long scores retain signed 64-bit
 precision. Optional `general_sale.xml`, `pay_servercontrol.xml` and `kingdomskill.xml`
 provide sale limits, the `69008` control record and ordered skill-tab metadata.
-Unrelated item records are not exposed. Missing optional records remain omitted;
-missing sale catalogs produce an empty `general_buy` object.
+Unrelated item records are not exposed. Missing optional records follow their individual
+contracts; missing sale catalogs produce an empty `general_buy` object. Missing external
+`w_thedoor` and `69008` entries produce empty objects, as their legacy item getters do.
+
+The item loader now retains the final `data_config` group independently of the global
+item ID index. Duplicate IDs are replaced within each view; a later group with the
+same name replaces that group without removing earlier global entries. A declaration
+in another group can replace the global ID while the data-config group keeps its own
+value. When top-level groups exist, root item declarations are ignored. Group records
+use direct child element attributes, matching the reference loader; nested elements
+are not recursively added to the item index. Missing IDs use the literal `null` global
+cache suffix, while group maps retain a distinct null key. Blank IDs remain intact.
+Other catalog parsing keeps its existing behavior.
+
+Resource loading always supplies the group view, including an empty map for absent,
+empty or ungrouped configuration. An empty view rejects `login.dataconfig` and never
+falls back to unrelated global records. Directly constructed Rules without a supplied
+group view retain their explicitly provided item map as the configuration catalog.
+The overlord scalar deliberately keeps its global item lookup; feature, pay-control,
+sale and kingdom-skill catalogs remain separate. PVE attributes are assigned contiguous
+`k1`/`k2` aliases from the selected present fields; `k6` alone becomes `k1`. The extra
+`world_fire` object and `cityDefMax` scalar were removed from this response because the
+reference does not emit them. `world_fire1` and `cityDefInterval` remain present.
+
+Seven added unit tests cover group/global collisions, repeated groups, missing groups,
+root-versus-group precedence, null/blank IDs, direct element attributes, DTO source
+selection and projection aliases. General-sale record restoration and the broader
+configuration completion audit remain outstanding topic 1 work.
+
+Required data-config records and scalar fields now reject incomplete catalogs instead
+of emitting partial metadata. The normal-world synthetic contract exercises 200
+required records, including the separate global overlord lookup, and 53 required scalar
+or boss attributes. Empty plain objects remain valid when their projection requires no
+attributes. The selected normal/world-cup army, score and scene records are mandatory;
+the unselected alternative is not consumed. Quest/chat, scout and service-term text
+fields are required only after their reference gates pass. Optional follower/lord-tip
+records distinguish absent/empty maps from nonempty ID-only records, while a nonempty
+loading-show record requires its scalar. Optional quest initial level remains conditional
+on field presence. Reached errors reject the command without a partial response or
+player mutation.
+
+Configuration Int and Long scalars now share the bounded Java decimal parser, preserving
+Unicode digits, ASCII signs, leading zeroes and exact signed-width limits. Whitespace,
+fractional/exponential forms and overflows fail. Text scalars retain valid empty strings.
+Six added unit tests cover required-record deletion, required attributes, optional and
+conditional fields, selected world mode and numeric boundaries; an existing controller
+unit now also verifies rejection of incomplete catalogs after owner authentication.
+Fixtures are complete synthetic declarations, never defaults injected into runtime
+catalogs. General-sale restoration still remains separate work.
 
 The command reads the authenticated realm profile to select the level-dependent
 stamina cap when `stamina_limit` is available. Realm switches control quest metadata,
 service terms and scout settings; the mission switch also checks version and time.
 Avatar calendar dates are returned as UTC epoch-millisecond strings. Malformed
-numeric fields, overflows and invalid dates produce the existing unsupported error
-instead of an invalid SFS value. These metadata reads never settle production or
+numeric fields and overflows produce the existing unsupported error instead of an
+invalid SFS value. Avatar dates retain lenient date-only parsing and serialize parse
+failures as the string `0`. These metadata reads never settle production or
 modify a player. Cross-realm gameplay remains disabled, and the running realm uses
 the normal-world configuration with chat interval 1 and feed limit 3. Alternative
 world-cup projections and explicit server values have unit coverage, but are not
@@ -127,22 +176,436 @@ enabled in the runtime composition.
 
 `login.other` with `config` now returns `fbShare`, `pushSetting`, `switches`,
 `isVerifyChangeAccount` and `funcOn`. Optional `fb_share.xml` records preserve all
-string values and IDs. Profile, switches and saved notification preferences are
-read in one repeatable-read PostgreSQL transaction. Missing notification settings
-are synthesized using the legacy 20-type defaults, with world news off. Unlike
-the Java read path, this query never inserts a preference row; explicit preference
-updates belong to topic 6. Dependency failures reject the query instead of silently
-returning a partial configuration.
+string values and IDs. Profile and saved notification preferences are read in one
+read-only repeatable-read PostgreSQL transaction. Missing notification settings
+are synthesized using the legacy 20-type defaults, with world news off. When the
+original saved list has fewer than 20 rows and no type 15, the controller persists
+that world-news default before querying switches. A separate read-write transaction
+locks and revalidates the owner in the configured realm, then inserts type 15,
+status 0 and audio 1 into the existing `parse_info` table. Other synthesized defaults
+are not persisted. The first response retains the synthesized type/status shape;
+later reads include the stored audio field. Existing preferences are not updated.
+
+Required profile/preference failures reject the query. Initialization failures also
+reject before switches or announcements. A duplicate insert from a stale snapshot
+fails without overwriting the saved choice; a retry reads the current preference.
+A lost commit acknowledgment may leave the row saved despite a failed request.
+Later switch or announcement failures cannot undo an already committed default.
+The explicit preference commands below share this saved state. No schema migration or
+external dependency is added; repositories reuse the existing constants workspace.
+
+The optional switches query runs independently after the required snapshot and any
+default initialization. Recognized PostgreSQL SQLSTATE errors become
+empty switch arrays, matching the legacy SQL adapter's SQLException fallback, and
+verification continues. Other query exceptions omit both `switches` and
+`isVerifyChangeAccount`. An empty successful query also retains its empty array.
+Verification failures retain already projected switches and omit only the verification
+field. Feature announcements run afterward, outside that failure boundary.
+
+`pushSetting.get` returns the same `pushSetting` array and conditional world-news
+initialization independently of share metadata, switches, verification and announcements.
+Saved rows contain Int `type`, `status` and `audio`; synthesized defaults contain only
+Int `type` and `status`. A saved list of at least 20 rows suppresses defaults even when
+those rows have unknown types. Request-supplied player/realm fields do not select an owner.
+
+`parse.push.set` requires SFS Int `type` and `status`; optional SFS Int `audio` defaults
+to 1 when omitted, including when updating an existing row. All three fields retain
+the signed 32-bit domain instead of being limited to known notification types or
+boolean flags. The realm repository locks/revalidates the authenticated owner, reads
+the selected `(uid, type)` row and inserts it or updates both status and audio in one
+read-committed transaction. Other owners and types are untouched. Successful writes
+return Bool `success` with ordinary request correlation and no push payload.
+
+Owner locking serializes concurrent writes before selecting an insert/update branch.
+Repeating a committed request updates the same row to the same values. Database failures
+reject without a success response, and rollback preserves prior state; a lost commit
+acknowledgment may leave the choice saved, so a retry uses the existing-row branch.
+The initializer remains a plain insert and cannot overwrite an explicit news choice.
+No schema, configuration or dependency change is required. Device registration,
+notification delivery and other profile mutation commands remain separate work.
+Unit tests exercise protocol, controller and generated SQL behavior with synthetic
+state, including a simulated owner-lock schedule. They do not establish live database
+concurrency or native-client compatibility; neither was exercised in this phase.
+
+Seven profile preference commands persist mapped fields in the existing
+`user_mixed_info` row:
+
+| Command              | Input               | Stored field       | Response                                                          |
+| -------------------- | ------------------- | ------------------ | ----------------------------------------------------------------- |
+| `equip.show`         | Int `show`          | `showEquip`        | Int `show`                                                        |
+| `medal.show`         | Int `show`          | `showMedal`        | Int `show`                                                        |
+| `march.soldier.show` | Int `show`          | `marchSoldierShow` | Int `show`                                                        |
+| `colorblind.set`     | Int `set`           | `colorblind`       | Int `show`                                                        |
+| `equip.scroll`       | Int `setting`       | `scrollEquip`      | Bool `scrollEquip` for 0/1; ordinary success for other Int values |
+| `banner.set`         | Optional Int `set`  | `showBanner`       | Int `show` when the row exists; ordinary success otherwise        |
+| `speed.cd.open`      | Optional Int `open` | `clientSaveFlag`   | Ordinary success                                                  |
+
+All fields retain signed Int values except equipment scrolling, whose effective
+updates accept only 0/1. Other scroll integers skip the mixed-state read entirely.
+Banner/speed requests skip mixed-state reads when their parameter is absent; a missing
+profile also produces their empty-result acknowledgment. Missing mixed rows are tolerated
+only for those two commands, and their values are decoded only after locating the row.
+Required settings reject missing state. These handlers never create mixed-state rows.
+
+The repository locks/revalidates the owner and locks the selected mixed row in one
+read-committed transaction, then updates only the mapped column. Unchanged primitive
+values skip the update, except speed flags, which always write. Nullable integer fields
+compare SQL null as zero. Banner storage uses bigint but compares within the signed Int
+domain and writes an exact bigint; out-of-range restored values reject. The banner setter
+preserves its literal value; country-specific public display remains a separate read rule.
+Existing public-profile projections consume the three visibility fields and show them
+only when the value equals 1. No cache, notification or unsolicited push is emitted.
+
+Input and write failures reject without a success response; rollback preserves previous
+state. A lost commit acknowledgment can leave a value saved, and retries follow the
+unchanged-value or speed-write rule. Unit coverage uses fake SQL and a simulated owner-lock
+schedule, including different-field updates preserving both values. Live concurrency,
+client behavior, nickname changes and their costs remain outside this completed slice.
+
+Nickname checking now has a pure text/evaluation foundation in `rules/nickname`.
+It uses Java trim (boundary code units at most U+0020), Java 8 blank classification,
+balanced braces and the original JSON/emoji/supplementary-character exclusions.
+Weighted length counts U+007E–U+05FF units as one each, removes them, then measures
+the remaining UTF-16 text using Java GBK byte widths and replacement behavior.
+Removing those units can join surrogate halves; supplementary or unmappable characters
+use the encoder's replacement width. Pure inputs are bounded to 65,535 UTF-16 units;
+this does not expand the existing SFS transport bounds or admit malformed wire text.
+
+The 3–16 gate uses the trimmed weighted length. Response `length` adds every ASCII
+space in the original input, including internal spaces already counted by the weighted
+length; `remainLength` can therefore be negative while this gate still passes. A leading
+parenthesis sets `exist` to -1 but does not skip otherwise eligible filter or availability
+calls. Invalid length/characters skip both providers; a filter match skips availability.
+Only type 0 checks occupation, while other signed Int types still filter. Providers
+receive the trimmed name, are required explicitly and preserve reached failures.
+
+The GBK width table contains 139 intervals covering 23,940 two-byte BMP characters.
+An independently authored Temurin 8.0.504+1 standard-library probe supplied an exhaustive
+65,536-unit width checksum and 2,264 synthetic text vectors. The checked-in vectors store
+UTF-16 as hex to retain surrogate and control cases. Normal unit tests execute only
+TypeScript; no private game classes were executed to generate evidence. Character
+validation follows the collected original's balanced-brace return rather than an
+inconsistent reconstructed source variant.
+
+The nickname bad-word matcher now models the specific generated patterns rather than
+using JavaScript word boundaries. ASCII-word entries use ASCII case folding with Java 8
+Unicode letter/digit/underscore boundaries and its combining-mark base behavior.
+Other entries retain case, allow ASCII whitespace after each literal UTF-16 unit and
+preserve the generated unescaped `^`, `$` and `|` semantics. Escaped punctuation stays
+literal. Supplementary/surrogate matching and final line-terminator anchors follow the
+Java primitive vectors. A matching exception stops the remaining list and returns false;
+the loading lock returns true before inspecting entries or text.
+
+`resources/nickname-words` reads UTF-8 `../gameconfig/badwords.txt` relative to the supplied
+resource directory, with the existing resource-size policy of 16 MiB. It splits CR/LF
+lines and commas, drops empty tokens without trimming, stably orders new entries by
+descending UTF-16 length, appends them to retained entries and removes only the first
+exact space and `v` from the combined list. Reloads keep duplicates. Read failures unlock
+and retain previous entries, including an empty list after an unsuccessful first load;
+this is the reference loader's failure behavior. Overlapping reloads retain its shared
+lock-flag behavior rather than introducing a reference counter. The original launch
+configuration specifies UTF-8, and BOM/entry whitespace is preserved.
+
+Fourteen new units cover the matcher and resource lifecycle with synthetic input only.
+An independently authored Java 8 probe supplies 4,071 generated-pattern outcomes and a
+checksum over all 1,114,112 Unicode code points: 107,270 letter/digit points and 1,280
+nonspacing marks, represented by 735 intervals. Normal unit tests use TypeScript,
+injected reads and temporary synthetic files; they do not execute private game classes.
+
+Global name comparison now has a pure `rules/mysql-unicode` equality-key primitive.
+The reference global DDL uses `utf8_unicode_ci` for both `usermapping` and `account_new`.
+The primitive preserves UCA 4 primary weights, expansions such as sharp-s to `ss`,
+primary-ignorable characters and trailing space-weight padding. Case/accent equivalence
+is character-specific: `Æ` differs from `AE`, Cyrillic short-I differs from I, and newer
+uppercase sharp-s does not acquire modern case equivalence. Hangul syllables are not
+decomposed; contractions and normalization are not introduced. The historical U+FDFA
+implicit-weight exception is retained. Surrogates and supplementary characters are
+outside the legacy three-byte UTF-8 domain and are rejected; pure text remains bounded
+to 65,535 code units. NUL is a primary ignorable in this primitive; transport and SQL
+representability remain separate concerns for the adapter.
+
+The 12,072 explicit characters are stored in 3,963 runs derived from public Unicode
+data. Six synthetic units include an exhaustive checksum for all 63,488 valid BMP
+characters against public MySQL weight tables, plus padding, expansion and historical
+exception cases. [Data provenance and license](../../packages/rules/UNICODE-NOTICE.md)
+are checked in. No database, Java classes or client are executed by these tests.
+
+`user.check.nickName` is now composed through the authenticated realm controller. It
+checks the session player's local profile and ban/realm state, requires String `nickName`
+and optional signed Int `type` (default 0), and returns Int `occupied`, `exist`, `length`
+and `remainLength` with request correlation. It emits no pushes and accepts no requested
+UID/realm override. Invalid text skips providers, bad words skip occupancy and nonzero
+types skip only occupancy. Reached missing providers or non-SQL failures reject the
+request. Realm startup loads the real filter; Compose mounts the ignored source file at
+`/gameconfig/badwords.txt` read-only without creating missing host paths. Local execution
+uses the existing `GAME_RESOURCES` directory and its adjacent `gameconfig` directory.
+The loader's previously documented empty-list behavior after a failed first read is
+retained.
+
+The global repository first selects name mappings, then selects their non-deleted
+accounts. It applies legacy collation to mapping type/value and account UID, Java-trims
+mapped UIDs and excludes both `active = -1` and SQL NULL account states. It does not
+exclude the requesting player or another realm, filter mapping activity, require the
+current account display name to match, or treat an orphan mapping as occupied. Both
+queries use generated, bound PostgreSQL character-class patterns under C collation to
+prefilter candidates; exact equality keys make the final decisions. Primary ignorables
+and padding characters remain eligible. The patterns contain no supplied regex syntax
+and do not interpolate names or UIDs into SQL. They intentionally admit false positives,
+which are removed before the next query or occupancy result. PostgreSQL cannot store
+NUL; candidate classes exclude it while a NUL in the check input remains primary
+ignorable. UTF-8 database encoding is required.
+
+The queries are separate reads, with no artificial snapshot, locks, writes or name
+reservation. Recognized SQLSTATE failures return an empty result at either stage, matching
+the legacy SQL-exception fallback; network/programming failures without SQLSTATE and
+invalid restored data reject the request. Startup checks the required mapping columns.
+The repository adds only a direct workspace dependency on the existing rules package.
+No database schema, migration or external runtime dependency is added.
+
+Fifteen new units cover SQL generation through fake Drizzle clients, candidate inclusion,
+exact matching after false positives, orphan/deleted/nullable accounts, UID trimming,
+SQL versus non-SQL failures, authenticated command responses and real resource-loader
+composition with temporary synthetic files. These do not validate PostgreSQL execution,
+query plans, production load or client behavior. Candidate filters may scan the global
+tables under the existing statement/query timeouts; they are not indexed equality-key
+lookups. Name reservation, rename item/gold costs and downstream effects remain separate
+required work.
+
+The separate rename mutation now has pure validation and item/gold debit/refund rules
+in `rules/nickname-change`. Unlike the check command, it replaces both actual LF and
+literal backslash-n before filtering. The reserved-name provider receives Java-trimmed
+text; the bad-word provider receives replaced text before trimming. Both run before
+ISO-control, blank, leading-parenthesis, weighted-length and character gates. Their
+reached failures propagate. Reserved/bad-word/control rejection uses `105251`, a leading
+parenthesis uses `113995`, invalid length or blank text uses `E000000`, and disallowed
+characters use `105229`. The 3–16 weighted-length gate reuses the original Java rules.
+The actual reserved-name regex loader/matcher is still required; the pure validator
+requires an explicit provider and does not supply an empty substitute.
+
+The rename item is `200021`. Its pure debit validates the configured Java Int item type
+before checking the signed inventory count, consumes one item and preserves the two
+insufficient-item error families. A later orchestrator must retain the source's fallback
+to gold on a game exception from item consumption, without swallowing configuration or
+transport failures. No item selection or write is performed by these pure functions.
+
+Gold debit parses the current price as a Java signed Int, rejects negative cost and
+negative wrapped total, and uses `E100001` for insufficient total. It spends the selected
+platform's free, special-paid and paid buckets in that order. Other platform balances
+are unchanged. Signed long arithmetic and negative restored buckets retain their
+reference behavior rather than being clamped. Ordinary replies use the remaining total;
+the exact lowercase `dmm` branch retains the source's pre-debit total in its return value.
+The functions consume already-restored signed long balances; nullable database decoding
+remains the responsibility of the eventual repository.
+
+Gold refund reparses the current configured price and credits the free bucket, without
+restoring the paid buckets originally spent. Its Int-to-float, float multiply and
+float-to-long cast preserve Java rounding, truncation, saturation, NaN and long overflow.
+Only exact `cn1` reads the supplied reduction-ratio provider, after successful price
+parsing; other platforms use one without reading that provider. The DMM refund changes
+DMM free gold but returns the ordinary-pool total, as in the reference. Negative refund
+prices are not rejected by the increment path. A changed price or float rounding can
+make the returned amount differ from the original debit. The actual CN1 ratio provider
+and economic persistence/recovery are still pending.
+
+Twelve new units cover ordered validation, distinct failures, item counts, exhaustive
+small-balance allocation, platform behavior and signed arithmetic. A separate Java 8
+standard-library probe supplies 294 synthetic price/float-bit/cast vectors; normal units
+execute only TypeScript and never private game classes. `user.modify.nickName` remains
+unsupported until reserved-name patterns, name serialization, authoritative charges and
+profile/global mutations, rollback/recovery and required downstream effects are connected.
+No balance, profile, inventory or mapping is changed by this foundation.
+
+`repositories/nickname-lock` now provides `withAvailableNickname` for the future
+mutation. It requires an already-normalized, nonempty BMP name fitting the existing
+200-unit storage boundary. The UCA 4 equality key, prefixed with
+`opencok:nickname-change:uca400:`, is SHA-256 hashed; the first eight bytes interpreted as
+a signed big-endian integer identify a PostgreSQL transaction advisory lock. The key is
+bound as a bigint parameter, without placing the requested text into SQL. Equivalent
+case/accent/width/padding/ignorable spellings share one key independently of kingdom.
+Rare hash collisions add contention rather than permitting conflicting holders.
+
+The helper pins one global connection, begins a read-committed read-write transaction
+and tries the lock without waiting for another holder. Contention or confirmed occupation
+returns `105251` before the callback runs. The strict mapping/account reader uses the
+same pinned connection and does not convert SQL errors into availability. The callback's
+awaited global SQL runs before commit. The guard covers connection acquisition and BEGIN
+failures, attempts rollback after failures, and discards the connection when rollback
+cannot confirm transaction end. A lost commit acknowledgment rejects the request; it is
+not retried and cannot establish whether work was committed. The guard is not a durable
+receipt or a promise of atomicity with realm writes or external effects.
+
+This deliberately strengthens coordination compared with the reference's exact-text
+Redis `HSETNX`/`HDEL` behavior, where equivalent names could use different fields and a
+caught command error could appear successful. Informational `user.check.nickName`
+continues to preserve its SQL-error empty-result behavior. The future mutation must use
+the strict guard, durable payment/recovery records and the same lock convention in every
+writer. Other processes that bypass it remain outside its protection. Lock lifetime is
+the global transaction/backend lifetime, with no application TTL or manual unlock.
+PostgreSQL documents [transaction advisory lock lifetime](https://www.postgresql.org/docs/17/explicit-locking.html#ADVISORY-LOCKS)
+and [nonblocking acquisition](https://www.postgresql.org/docs/17/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS).
+
+Ten new unit tests use fake pools and controlled promises to cover concurrent equivalent
+names, independent names, lock/read order, occupied versus orphan mappings, pool/BEGIN/
+lock/lookup failures, malformed replies, callback errors, ambiguous commits and failed
+rollback disposal. They also verify that the existing informational fallback remains
+unchanged. These are SQL-contract and lifecycle simulations, not proof from a running
+PostgreSQL instance. The guarded mutation is still not exposed and no new schema,
+configuration or dependency is added.
+
+`celebrity.desc.get` now reads a target's public celebrity description from its requested
+configured realm. The authenticated caller must be local and unbanned. A Java-blank
+`uid` returns an empty String `description` before reading `serverId`; otherwise the
+server requires the signed Int field and routes only to that realm. Unconfigured realms,
+missing targets, a target whose `gmFlag` is not 11, or missing description state return
+empty. Target bans and account activity do not add filters to this public read.
+
+The repository selects only target UID/flag, then UID/description when needed. Both
+lookups preserve legacy `utf8_unicode_ci` equality through bound generated candidates
+and exact keys. Ambiguous canonical aliases reject. It does not consult global account
+routing, mutate state or reserve names. Existing statement timeouts apply; candidate
+scans have no new index or production performance claim. Startup checks the existing
+local `celebrity` table. Reached SQL failures reject instead of masquerading as an empty
+profile. Blob decoding is strict UTF-8 followed by Java trim/blank behavior: malformed
+bytes become empty, BOM remains, and nonblank interior text is preserved. Responses use
+ordinary correlation and no pushes.
+
+Eight synthetic unit cases exercise the actual controller and Drizzle adapter together,
+including local/remote routing, lazy decoding, caller authorization, target gating,
+collation aliases, strict binary decoding and failures. They use fake query clients only.
+The focused tests pass; broad regression execution is deferred under the user's current
+parallel-work instruction. Device/AVD behavior remains pending.
+
+`celebrity.desc.save` now saves the authenticated celebrity's description through the
+actual loaded bad-word filter. Profiles whose `gmFlag` is not 11 acknowledge before
+reading the description or reaching the filter. Eligible requests lock/revalidate their
+owner, select the existing celebrity row using legacy UID equality, then decode the
+required String. The filter performs sequential Java-style replacement with two asterisks,
+including Unicode word boundaries with ASCII-only case folding, generated alternatives,
+anchors and greedy ASCII whitespace. While the shared word list is loading, it returns
+the original text; a later filtering error retains earlier replacements.
+
+Saving updates only the existing row's description or inserts the Java-trimmed owner UID.
+It uses the existing table and no upsert. Unrelated rows remain unchanged, and same-owner
+writes serialize. Blank or malformed UTF-16 text becomes a null blob; valid text retains
+the Java UTF-8 encoder's backing-array padding. The database blob limit remains 65,535
+bytes. Success uses the ordinary correlated acknowledgment with no notification.
+
+Replacement vectors and save tests were written before the user paused test generation
+and execution. The replacement primitive matched 4,071 synthetic Java 8 standard-library
+vectors before that pause. A preliminary save run found three incorrect acknowledgment
+expectations, which were corrected to the framework's `success: true` response. That final
+save suite has not been rerun, and no broad regression or service/database execution is
+claimed. The generated replacement grammar does not implement arbitrary reserved-name
+regex matching, so this command does not complete nickname mutation.
+
+Reserved-name configuration now participates in the word-filter reload. After the
+adjacent bad-word file has been read and appended, the server reads the global Redis
+lists `forbidden_words_regular`, `forbidden_words_strict`, `forbidden_words_pattern`,
+`forbidden_words_weight` and `forbidden_words_name`, in that order. It preserves list
+order, duplicates, blanks and exact pattern text. A missing word file prevents all
+five reads. A thrown earlier reader error retains the prior name-pattern snapshot,
+while the already-appended bad words remain. The loading flag stays set through the
+last read, and name patterns switch only after that read succeeds.
+
+`Cache.nicknameForbiddenWords` uses `LRANGE 0 -1` against the existing shared Redis
+URL and exact global keys. As in the source command boundary, a caught command failure
+returns an empty list; this replaces a previously loaded list. Malformed replies and
+limits above 65,536 entries, 65,535 UTF-8 bytes per entry or 16 MiB total reject the
+read. The adapter neither seeds nor writes these operator-provided configuration
+lists and applies no TTL. Startup passes this reader into `loadNicknameServices`;
+`nicknameReservedPatterns` returns a copied snapshot, separate from `nicknameBadWords`.
+
+Ten new unit tests use an overridden cache command and synthetic temporary files to
+cover exact reads, ordering, reload retention, empty/error replacement, size/type
+validation, loading visibility and runtime service composition. No Redis connection
+or game service is opened. The reserved snapshot is not yet evaluated: Java 8
+lowercase/default-locale normalization and arbitrary Java Pattern matching remain
+required before the actual rename provider is complete. Invalid pattern syntax is
+preserved until that future matching stage, matching the source loader's boundary.
+No command is newly enabled by configuration loading alone.
+
+`repositories/nickname-global` now provides `commitNicknameGlobal`. It first enters the
+name guard and confirms availability, then awaits a required preparation callback before
+checking the global account. This keeps the source order in which item/gold preparation
+precedes the account-existence failure. The callback's result is returned only after the
+global transaction commits. The callback must eventually be the owner-authorized durable
+payment/preparation operation; an arbitrary callback is not proof of a paid rename.
+This component is not exposed through a player command.
+
+The account lookup compares the authenticated owner's supplied UID using the legacy
+collation, rejects ambiguous canonical matches and locks only the selected exact stored
+UID. It does not filter by account activity or realm. Missing account, disappearance
+before lock, or a reached SQLSTATE account-read failure yields `E100123`; other read
+failures reject as dependency failures. No private account fields are selected. The
+writer updates only `account_new.gameUserName`, preserving account time, level, realm,
+activity and binding metadata. It neither compares nor requires the old display name.
+
+Owned name mappings are selected with legacy UID/type comparison, then deleted by their
+exact stored `(gameUid, mappingType)` keys in batches of at most 500. This handles
+collation aliases without deleting unrelated types or another owner's regex false
+positives. The new `name` row uses the supplied owner UID and new name, with default
+`lastTime = 0` and `active = 0`, matching delete/insert semantics instead of retaining old
+metadata. An absent old mapping is allowed; another owner's orphan mapping is preserved.
+The owner account row serializes updates for the same UID even when target names differ.
+
+Write-stage SQL failures and malformed write results produce `E100179` after a confirmed
+rollback. Commit acknowledgment loss and rollback failure stay dependency failures,
+without an automatic retry or an assertion that a refund is safe. The future workflow
+still requires receipts that distinguish a committed global change from an uncommitted
+attempt and coordinate this result with realm charges/profile updates. This global
+transaction cannot undo a separate committed realm charge. World/alliance/chat/throne/
+shared-user effects are not delivered here.
+
+Thirteen new fake-pool units cover selected-column writes, metadata preservation,
+collation aliases, missing/deleted/nullable accounts, preparation order, occupied/orphan
+names, bounded deletion, failures at each stage, ambiguous commit handling and concurrent
+global changes. Failed rollback disposes of the simulated connection. These tests prove
+the adapter contract against synthetic state; actual PostgreSQL execution and economic
+recovery remain unverified. No new schema, migration, configuration or dependency is
+added, and `user.modify.nickName` remains unsupported.
+
+The pure `rules/cn1-rewards` evaluator now supplies the configured reward ratio used by
+CN1 gold refunds. It accepts the established cached session object or explicit `null`,
+reads pay-control record `69036` from the existing resource catalog and preserves the
+order of version, realm and saved-time checks. Undefined/unavailable session state and
+reached malformed Int fields reject; they do not become zero online minutes. Any nonzero
+`isAddict` value reaches the control, including restored negative values. Known absent or
+exempt state, missing/empty control and a closed event return one.
+
+Reward bands stay in declaration order. Empty separator fields are skipped, thresholds
+use Java Int parsing and only the selected ratio uses Java Float parsing. Alert-only
+fields and later bands remain unread. Equality with the greatest visited threshold keeps
+the initial ratio of one; exceeding it produces zero. Empty bands also retain this
+zero-based boundary. Ratios are not clamped or normalized: negative zero, NaN, infinities,
+hexadecimal literals and rounding feed the existing Java-style refund conversion.
+Strings are bounded to 65,535 UTF-16 units. The evaluator reads neither the clock nor
+profile/database elapsed time, and does not mutate session state.
+
+Ten units include 755 synthetic vectors from an independently authored Java 8
+standard-library probe using integer/float parsing and tokenization. They compare float
+bits and reached failures, exercise gating/laziness and compose actual refund rules with
+temporary synthetic XML through the real resource loader. Tests require no Java process,
+database, sockets or external verification API. The session restoration/accounting
+lifecycle, authoritative payment/refund operation and `user.modify.nickName` integration
+remain pending. No schema, dependency or startup behavior changes in this slice.
 
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
 separately checks version and start/end dates for stamina, star unlocks and
 account-specific eligibility. Account binding and multiple-role flags also check
 exact channel and player allowlists; subscriptions check their supported channels.
-Boss, payment, subscription and multiple-role announcements additionally require
-an available backend service. They remain closed in the current composition;
-ordinary configured feature metadata is no longer forced off. This does not enable
-unsupported gameplay commands or establish client rendering.
+Account flags evaluate their announcement selector before replacing that result with
+the global `cn_bind`/`role_on` rule and allowlists. Empty tokens are ignored; Java-blank
+lists and exact `0` close the flag, while `all` also matches blank player/channel values.
+Subscriptions use the announcement's realm selector and exact supported platform,
+without a separate service flag, version comparison or time window.
+Boss announcements alone require running service state. Each declaration reads that
+state lazily before its global feature rule; elite, special and NPC bosses use the
+`world_boss_*` keys, separately from their `worldboss_*` announcement IDs. Announcement
+selectors do not gate bosses, and stopped/absent services skip feature parsing. The
+runtime has no boss lifecycle provider yet, so those flags remain closed. Configured
+account/subscription metadata does not enable commerce, account-switching handlers or
+establish client rendering.
 
 Feature-version comparison now parses every nonempty dot-separated component as a
 signed Java Integer before comparing the first three positions. Unicode decimal
@@ -163,7 +626,32 @@ account-counter reads after a version failure. The login runtime continues to se
 the supported process client version; this change does not restore per-session version
 negotiation. Eight added units include 1,280 independent Java 8 version-pair fixtures
 with 2,560 direct/function-on outcomes, DTO serialization, event effects and controller
-failure ordering. Lenient legacy date parsing remains pending.
+failure ordering. Date behavior is described below.
+
+`rules/java-calendar-date` independently restores the numeric `yyyy-MM-dd` and
+`yyyy-MM-dd-HH-mm` parsing paths of Java 8 Gregorian calendars with US numeric symbols.
+Fields accept variable widths, Java decimal digits, leading spaces/tabs, signed values
+and numeric exponents. Parsing consumes a valid prefix and normalizes overflowing
+months, days, hours and minutes. The Julian/Gregorian cutover, Int field narrowing,
+Double-to-Int saturation and signed Long timestamp wrapping remain explicit. Results
+use bigint, including dates outside JavaScript Date's range. Avatar metadata uses the
+three-field pattern directly rather than appending a midnight suffix.
+
+Failure behavior follows each caller. Configuration and function-on dates return epoch
+zero for a parse failure. Function-on windows check the start before reading the end,
+so a future start skips even an invalid end. Activity-panel dates independently fall
+back to -1 and retain the panel's exception-to-closed boundary. Hero windows parse both
+dates before assigning either endpoint: a parse failure leaves both at zero and an
+invalid start skips end parsing, while absent required fields still throw. Hero pairs
+also retain their reused formatter's previous calendar at ambiguous cutover dates.
+No parser repairs catalog data or writes player state.
+
+Inputs are bounded to 65,535 characters. Offsets remain explicit integral minutes within
+14 hours of UTC; the runtime uses UTC. This models a fixed-offset Gregorian server,
+not host locale selection, regional daylight-saving transitions or alternative Java
+calendar systems. Nine added units include 2,971 independent Java 8 single-date cases
+and 108 reused-formatter pairs, plus configuration, effect and failure-order checks.
+The fixtures contain synthetic inputs only and tests require no Java or game services.
 
 Function-on availability, server-side effect gates and ordinary feature announcements
 use `featureRealmEnabled`. It recognizes exact `all`/`close`, skips empty semicolon
@@ -206,7 +694,8 @@ typed configuration, account-counter and lucky-day composition. Original catalog
 records remain unchanged. The existing optional-catalog projection remains: absent
 item records can stay omitted/closed, while a reached required selector in a present
 record rejects when missing. Optional quest tab/push fields and absent `wa_switch.k1`
-remain optional. These projections do not claim legacy missing-catalog failures.
+remain optional. Required data-config catalog failures now follow the separate
+configuration contract described above.
 Kingdom-skill tab restoration, sorting and separators are described below. Lenient
 dates, default version policies and other exceptional catalog projections remain
 separate compatibility work.
@@ -242,9 +731,16 @@ failure. Normal tests execute no Java or private game code. This implements conf
 presentation only; skill execution, material costs, timers and rewards remain separate.
 
 Account-change verification uses the configured version/realm threshold and the
-global Redis key `opencok:global:device-account-change:<deviceId>`. Reads preserve
-integer precision and reject malformed counters. No count is fetched when the
-gate is closed or the profile has no device ID. This phase does not implement
+global Redis key `opencok:global:device-account-change:<deviceId>`. The adapter returns
+the literal string or null, rejecting non-string responses and values longer than
+65,535 characters. After the feature gate, a missing count or missing threshold returns
+false without numeric parsing. Otherwise both values use signed Java Int parsing,
+including plus signs, leading zeroes and supported Unicode digits; malformed or
+overflowing values reach the switch projection's omission boundary. Negative values
+remain signed comparisons. No count is fetched when the gate is closed or the switches
+are unavailable after a non-SQL query exception. Empty device IDs retain an empty key suffix; null/missing IDs use the
+literal `null` suffix, as in Java string concatenation. Whitespace remains literal.
+This phase does not implement
 account switching or import legacy Redis keys; a future switching writer must use
 this namespace. The shared local Redis instance supplies the global counter across
 the configured realms. Preference and counter adapters are unit-tested with fake
@@ -795,6 +1291,107 @@ new match. Synthetic units inject Redis command results and inspect the script c
 Lua execution against Redis, real service availability and client rendering remain
 unverified in this phase.
 
+`act.score.rank` now exposes the realm's published score-activity board. The command
+checks the authenticated local profile, ban state and realm, then reads the existing
+`SCORE_ACT_RANK_<kingdomId>` list through the runtime cache provider. It ignores request
+selectors and returns `rank` as an SFS StringArray, preserving list order, duplicates,
+blank strings and opaque contents. It neither decodes board entries nor recomputes ranks.
+Correlation fields are retained and no pushes are emitted.
+
+The list read uses `LRANGE 0 -1`. A missing list produces the ordinary empty board;
+reached cache-command failures also return an empty board, retaining the reference
+list-reader fallback. An absent runtime provider remains an unsupported command.
+Malformed non-string entries, invalid UTF-16 strings and oversized responses reject
+rather than silently truncate. Maintained limits are 32,767 entries, 32,767 UTF-8 bytes
+per string and the existing encoded response/frame bounds including correlation.
+
+This is a read-only derived-cache query. The event publisher owns list replacement,
+invalidation and expiry; this reader adds no TTL, score writer, reward or lifecycle
+scheduler. The original realm-qualified key remains usable for an authorized restored
+board. `hero.self.rank` still requires actual activity/event state and rank maps, including
+cross-origin routing; it is not enabled by treating missing state as an empty activity.
+Other event and cross-realm ranking families remain incomplete.
+
+Code review and storage/controllers/server type checks pass for this slice. No new tests
+or fixtures were generated and no tests were executed, following the user's latest
+instruction to prioritize migration. Unit and runtime validation are deferred. No real
+cache/database/services, integration tests or client/ADB were used; no schema, dependency
+or CI workflow changed. The incomplete event-ranking family receives no completed-group
+credit from this unverified command alone.
+
+`global.celebrities.rank` reads the existing published global boards for the local
+realm. Before decoding `rankType`, it checks the global `server_info` row: realm IDs
+above 999999 and types other than 0, 1, 6 or 23 produce the ordinary acknowledgment.
+A missing row or reached SQL error also disables the query; dependency and malformed-row
+errors reject. This uses a fresh metadata read in place of the Java process-local type
+cache, so metadata changes become visible immediately. The profile identity, realm and
+ban checks run after decoding the integer selector. Unknown integer types acknowledge
+without reading a board.
+
+| `rankType` | Realm-qualified Redis list prefix | Inclusive range |
+| ---------- | --------------------------------- | --------------- |
+| 0          | `global_kill_ranking`             | 0–150           |
+| 1, 5       | `global_power_rank`               | 0–150           |
+| 2          | `global_train_rank`               | 0–150           |
+| 3          | `global_attack_wins_ranking`      | 0–150           |
+| 4          | `global_defence_wins_ranking`     | 0–29            |
+| 6          | `global_honor_point_rank`         | 0–150           |
+| 11         | `global_military_point_rank`      | 0–150           |
+
+Each key appends `_<kingdomId>`. Ordered JSON objects become the `rankMap` SFSArray
+through the existing legacy JSON decoder; duplicates remain and no scores or fields are
+recomputed. Empty lists produce an empty array. Cache failures, malformed JSON and data
+outside the maintained decoder/frame bounds reject instead of pretending the board is
+empty. The raw JSON budget is 4 MiB across the selected entries, and the encoded response
+including correlation remains bounded by the existing frame limit. Decoder numeric,
+nesting and collection limits also apply. Type 7 has no handler mapping in the reference.
+The query adds no score publisher, invalidation, TTL, settlement or cross-realm routing.
+
+Storage, repository, controller and server type checks plus source review cover this
+slice. No new tests or fixtures were generated and no tests, real services or client/ADB
+were run. Behavioral and runtime verification remain deferred; this command does not
+complete the cross-realm ranking family. See [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
+
+`dragon.battle.rank` reads published global team rankings after checking the local
+profile, realm and ban state. `index_limit` is a string of `start|limit` ranges separated
+by semicolons. Empty input or 35 or more retained segments produces an acknowledgment;
+trailing empty segments are discarded as in Java. Other malformed ranges reject. Each
+limit has an upper cap of 200, while negative starts/limits, zero limits and signed
+32-bit end/index overflow retain the reference Redis range semantics. Extra pipe fields
+are ignored. The reader uses `LRANGE dragon_battle_rank_data_key start end` sequentially
+and preserves range order and duplicate rows. Negative/zero limits may select more than
+200 entries; the cap is not a minimum or a returned-count promise.
+
+If the authenticated profile has a nonempty alliance ID, the reader then asks
+`ZREVRANK dragon_battle_rank_key <allianceId>` and appends the corresponding `LINDEX`
+team even when already present in the requested ranges. Spaces in alliance IDs are not
+trimmed. Missing lists, unavailable range reads and absent/unavailable self positions
+are skipped using the reference read fallback; malformed returned values reject.
+Separate reads retain the reference's non-atomic snapshot behavior during board updates.
+
+Public TeamInfo fields become `rank` objects with `type: 0`, both `teamId` and
+`allianceId`, team names, state, score, realm, membership, combat counts, exact signed
+64-bit `fightPower`, icon and abbreviation. Optional strings default to empty and
+missing/null primitive counters default to zero. `wins` is an SFS Int for zero matches
+and a Double otherwise; `wins2` truncates the percentage capped at 100 with Java's
+signed-integer lower saturation. `rankNum` is the requested start plus row offset plus
+one, or the appended reverse rank plus one, with signed 32-bit wrapping.
+
+The maintained decoder accepts canonical JSON objects from the publisher and preserves
+integer literals without floating-point rounding. Out-of-range integers, malformed
+records and absent team IDs reject. Lenient Gson-only syntax and noncanonical numeric
+coercions are not promised. Bounds are 65,535 bytes per stored record, 4 MiB total raw
+JSON, 32,767 returned rows and the existing encoded frame/string bounds including
+correlation. Oversized reads reject without truncation. The query publishes no scores,
+creates no matches, clears no boards and adds no TTL. Board import, score production,
+matchmaking and combat remain separate work.
+
+This slice has source review, package/server type checks and scoped lint/format checks.
+No tests or fixtures were generated and no tests, database/cache/services, client/ADB or
+CI fixes were performed. Runtime and behavioral validation remain deferred in
+[issue #215](https://github.com/ReeseArch64/opencok/issues/215); the cross-realm ranking
+family still requires `ctf.get.rank` and broader verification.
+
 ## Mailbox category status
 
 `mail.category.status`, tracked in [issue #64](https://github.com/ReeseArch64/opencok/issues/64),
@@ -927,6 +1524,43 @@ applied migrations, integration/E2E or ADB. Real PostgreSQL lock/concurrency beh
 and client rendering remain unverified. Content/list reads, category/conversation deletion, chat-mail variants
 and synchronization readers/marker cleanup still need migration.
 
+## Mailbox update synchronization
+
+`chat.get.update.mails` now reads the existing recipient-scoped `mail_update` records.
+It authenticates the local profile before decoding the optional String `time`. Omitted
+time returns the ordinary empty acknowledgment; null or a failed Java Long parse uses
+zero. Signed values, Unicode decimal digits and inclusive cursor comparisons are retained.
+The repository locks and revalidates the local owner in a repeatable-read transaction.
+
+The `data` JSON contains `update` entries with UID, read/reward/save flags and the exact
+decimal Long update time, plus `delete` IDs for missing or foreign messages. No contents,
+reward payloads or foreign flags enter the reply. Null persisted read/save flags restore
+as zero. IDs are ordered deterministically; this is not the reference cache's unspecified
+hash iteration order. At 32,767 UTF-16 units, `data` becomes empty and `updatemailArr`
+contains 5,000-unit chunks. Split surrogate halves use the same replacement behavior as
+the existing mailbox chunk projection. Correlation fields are included in preflight
+encoding before any marker cleanup.
+
+Foreign markers are deleted only when their stored timestamp still matches the observed
+row. Missing-message markers remain available for repeat synchronization. Aging deletes
+only this recipient's markers strictly older than both the cursor and its five-day cutoff,
+with signed Java Long subtraction. Equal cutoff timestamps remain. Reads and cleanup
+never mutate mail flags, contents or groups. A failure before commit rolls back cleanup;
+a lost commit acknowledgment can leave cleanup committed and is not automatically retried.
+
+The existing PostgreSQL marker authority replaces the original cache lookup. SQL errors
+reject instead of returning an empty result. Deltas over 10,000 markers reject without
+truncation or cleanup. This bound is a maintained capacity limit, not pagination. Owner
+locking coordinates existing maintained writers; external writers can cause transaction
+conflicts. No new schema, migration, configuration or dependency is added.
+
+Eight synthetic units are authored for the controller, projection and fake database:
+cursor parsing, exact numeric output, chunk boundaries, ownership, inclusive selection,
+aging, observed-time cleanup and rollback/failure paths. Their execution and the combined
+regression are deferred under the user's latest instruction to prioritize implementation
+and PR publication. Static type checks pass. No real database/services or client/ADB was
+used; this command is not counted as fully verified in the migration percentage yet.
+
 ## Ordinary mailbox deletion
 
 `mail.delete`, tracked in [issue #67](https://github.com/ReeseArch64/opencok/issues/67),
@@ -981,6 +1615,59 @@ metadata bounds, and rollback at each cleanup stage. They do not exercise a real
 database, concurrent writers, client or ADB. `mail.delete.batch`, category/label
 deletion, chat-conversation deletion, content edge cases and synchronization readers
 remain separate unfinished portions of topic 4.
+
+## Category and type mailbox deletion
+
+`mail.delete.batch` now accepts category-only requests: `uids` must be absent, null,
+Java-blank or contain only commas. Optional String `types` uses comma-separated Java
+Int labels, preserving raw spellings as response keys. Labels 0–5 select respectively
+personal/system (stored type below 13 or above 16), saved-category types 14–16, studio
+13, fight types 6/7/8/9/30, moderator types 23/24 and boss reward 32. Other signed labels
+select types 13–16. These are the reference deletion selectors, not the listing/status
+category mappings. Repeated labels and numeric aliases retain their separate raw keys.
+
+The reply contains `RetObj`, with Int fields `<raw label>` for unread messages whose
+`rewardStatus` is exactly zero, and `total<raw label>` for all messages whose
+`rewardStatus` is exactly zero. Counts are read before category deletion and retain
+signed Java Int wrapping. SQL-null status restores to the Java model's primitive zero
+and therefore counts as unread. These counters ignore saved flags and are not a count
+of deleted mail.
+Unclaimed saved messages count; already-claimed saved messages do not. The bounded raw
+request permits at most 1,000 labels; at most seven distinct SQL selectors are read.
+No mailbox contents are loaded and matching mailbox size is not truncated.
+
+The owner profile is locked and its realm/ban state revalidated. The complete correlated
+response must encode before any deletion. Matching owned auxiliary content is deleted
+for every selected primary mail, including primary messages retained because their
+saved flag or reward status prevents deletion; this unusual distinction follows the
+reference category path. Explicitly foreign auxiliary ownership is preserved. Primary
+mail is deleted only when `saveFlag = 0` and `rewardStatus != 0`. Both statements commit
+atomically. Category deletion does not change groups, synchronization markers, invitation
+records, rewards or chat state, matching the reference branch. Missing/empty categories
+still authorize the owner and return an empty `RetObj`.
+
+`chatMail.delete` now accepts scalar `type` or an empty selection. `mod` is validated
+when present. The ordinary inverse client-type mapping applies. It deletes only owned
+mail of that type with `rewardStatus != 0`, regardless of the saved flag. Resource type
+5, trade type 10 and monster type 18 additionally remove the empty-index group 200, 400
+or 300 respectively, even if unclaimed messages remain. This path leaves auxiliary
+content, markers and invitation state unchanged, and returns the correlated success
+acknowledgment without pushes. The transaction and reply are validated before commit.
+
+Nonempty explicit IDs in `mail.delete.batch`, sender-selected `chatMail.delete` and
+`chatMail.delete.batch` remain unsupported before writes. Explicit-ID batches have
+different whole-group, invitation and chat effects; they must not be routed through
+ordinary deletion as an approximation. Sender deletion requires the still-missing
+private-chat deletion consumer. These implementations advance the original mailbox
+scope but do not complete the deletion family or topic 4.
+
+Nine synthetic units cover parser/selector boundaries, exact response keys, owner
+scoping, SQL predicates, no-op and error behavior, statement order, type groups and
+pre-write rejection of unsupported scopes. The focused deletion/conversation-read
+selection passed 14 units and 169 assertions before the final SQL-null status predicate
+correction. That final predicate/assertion edit was reviewed but not rerun; affected
+types, lint and formatting passed before it. Broad regression remains deferred under
+the maintainer's request to prioritize implementation. No new schema, dependency, configuration, live service or client test.
 
 ## Conversation and type mailbox saving
 
@@ -1710,7 +2397,7 @@ exact Long thresholds, duplicate catalog
 records, resource loading and ordinary prestige regression. This supplies the general
 owner projection; ordinary modifier composition is described below, and complete
 occupied-resource responses remain pending. Function-on realm parsing now uses the
-ordered Java-compatible selector described above; lenient legacy dates remain pending.
+ordered Java-compatible selector and lenient calendar parser described above.
 
 `controllers/world-resource-owner-effects` now composes the resource owner's saved
 abilities and ordinary effects with the building/general projection. It reads world
@@ -2358,10 +3045,13 @@ sessions does not complete `chatMail.read`.
 [Issue #73](https://github.com/ReeseArch64/opencok/issues/73) tracks `chatMail.read`.
 Its complete wire parser and ordered effect planner now have synthetic unit coverage.
 An independent repository adapter now persists owned mailbox assignments and chat
-intents atomically. The command still returns unsupported: enabling it requires durable
-chat intent delivery and a maintained private-conversation read-state consumer. The
-current chat room history implementation does not supply that consumer. The parser and
-planner remain pure; the adapter is not connected to command dispatch.
+intents atomically. The command now connects requests whose complete plan contains
+mailbox assignments only. Scalar `type`, ordinary `types` lists and empty requests use the existing owned
+transaction. Any plan containing a chat intent still returns unsupported before mailbox
+writes: sender-selected requests and the exact raw `types = "0,1,20"` trigger require
+durable delivery and a maintained private-conversation read-state consumer. Public room
+history does not supply that consumer. This is partial command support, not completion
+of issue #73.
 
 | Selection                                   | Mailbox assignment                                                   | Chat intent                                                              |
 | ------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
@@ -2428,6 +3118,17 @@ predicates, owner/realm isolation, large selections, bounded backlog, durable in
 identity, captured plans and rollback. These units do not prove real database concurrency
 or resolve commit acknowledgment loss. Delivery, cross-database recovery and chat
 read-state integration remain pending.
+
+The type-only command validates the complete correlated success envelope before entering
+persistence, uses the authenticated owner rather than request identity fields, and
+rechecks the returned owner/realm/ban snapshot. Runtime repository dispatch independently
+rejects plans containing chat effects, so it cannot quietly drop an intent. Missing
+adapters, malformed consumed fields and storage failures do not return success. Empty
+plans still authorize the owner. No new schema, worker, dependency or configuration is
+introduced. Five command units cover mapping/order, deferred chat cases, authorization,
+encoding and failures. They pass in the focused 14-unit deletion/conversation-read
+selection, with affected types, lint and formatting also passing. Broad regression
+remains deferred under the maintainer's request to prioritize implementation.
 
 ## Mailbox content reads
 
@@ -2775,16 +3476,28 @@ uses the existing bounded Java hash traversal helper, with its documented except
 limits. Task visibility, discovery, completion writes and their pushes still need to
 use these descriptions before the reconnect task component is complete.
 
-| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                                                                    |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; ordered feature/item/event realm parsing and kingdom-skill tabs; synthetic unit and adapter tests                                  | Lenient dates, version policies and other exceptional catalog behavior. Native-client and real-service validation remain deferred; bosses, commerce and account switching stay outside this wave. |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                                 | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                                                            |
-| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                                        |
-| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                                         |
-| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                                  |
-| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                                        | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                                                         |
-| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                                      |
-| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                                 |
+| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                                                                         |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. Configuration and feature availability | Settings/data-config and deferred-login projections; ordered XML declarations; legacy numeric dates, versions and selectors; timed star previews; kingdom-skill tabs; account/subscription overrides and lazy boss availability; synthetic unit and adapter tests                            | Local acceptance for settings, data-config and deferred-login configuration is complete. Final parity review remains; boss lifecycle, commerce and account switching stay outside this metadata slice. |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                                 | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                                                                 |
+| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                                             |
+| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                                              |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                                       |
+| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags; authenticated nickname validation with the real word filter and global availability         | Rename rule foundations exist; actual rename providers/persistence/effects and remaining profile commands are pending. Nickname query performance is unverified.                                       |
+| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                                           |
+| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway discovery; socket-free command units for room access, send/replay/broadcast and history                                                                                                                    | Basic send/history now has direct socket-free unit evidence. Private-chat expansion belongs to original topic 24; chat-dependent mailbox read delivery remains topic 4. Live validation is deferred.   |
+
+The 2026-10-24 [scope audit](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19166562)
+decomposes the original eight topics into 45 delivery groups. After the direct basic-chat
+command units, 32 groups have connected implementation and executed unit evidence
+(approximately 71%). Partial or unverified groups receive no completed credit. This is
+an estimate by unequal delivery groups, not effort, time remaining, merged delivery or
+complete Java parity. The denominator can grow when the final audit finds missing scope.
+New mailbox update synchronization and mailbox-only conversation-read units are written
+but not executed under the user's latest acceleration instruction, so they do not yet
+increase the completed count. The residual profile group also remains incomplete after
+adding celebrity description reads. Test execution and CI fixes are currently deferred;
+PR publication is active. The full migration objective remains incomplete.
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog
