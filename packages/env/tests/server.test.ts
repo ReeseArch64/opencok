@@ -115,3 +115,29 @@ test("realm avatar integration is optional and requires an explicit files origin
       "GAME_FILES_URL",
     );
 });
+
+test("avatar completion requires its own private chat endpoint, files and signing secret", () => {
+  const configured = {
+    ...base,
+    GAME_AVATAR_CHAT_URL: "http://chat.internal/_internal/avatar-profile",
+    GAME_FILES_URL: "http://files.internal",
+    FILES_SIGNING_KEY_FILE: "/synthetic/key",
+    CHAT_SIGNING_SECRET: "synthetic",
+  };
+  expect(parseServerEnvironment(base).GAME_AVATAR_CHAT_URL).toBeUndefined();
+  expect(parseServerEnvironment(configured).GAME_AVATAR_CHAT_URL).toBe(
+    configured.GAME_AVATAR_CHAT_URL,
+  );
+  for (const field of ["GAME_FILES_URL", "FILES_SIGNING_KEY_FILE", "CHAT_SIGNING_SECRET"])
+    expect(() => parseServerEnvironment({ ...configured, [field]: undefined })).toThrow(field);
+  for (const url of [
+    "http://chat.internal/external/session",
+    configured.GAME_AVATAR_CHAT_URL + "?x=1",
+    configured.GAME_AVATAR_CHAT_URL + "/",
+    "http://u:p@chat.internal/_internal/avatar-profile",
+    "https://cok.chat/_internal/avatar-profile",
+  ])
+    expect(() => parseServerEnvironment({ ...configured, GAME_AVATAR_CHAT_URL: url })).toThrow(
+      "GAME_AVATAR_CHAT_URL",
+    );
+});

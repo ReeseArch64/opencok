@@ -29,7 +29,8 @@
     "./chat-history": "./src/chat-history.ts",
     "./chat-rooms": "./src/chat-rooms.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
-    "./chat-avatar-profile": "./src/chat-avatar-profile.ts"
+    "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
+    "./avatar-completion": "./src/avatar-completion.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -21,6 +21,7 @@ export function commitAvatarFinish(
   input: AvatarFinishQuery,
   find: AvatarFiles["find"],
   inspect: AvatarFinishInspector,
+  recoverOnly = false,
 ): Promise<AvatarFinishSnapshot> {
   const query = Object.freeze({ ...input });
   if (
@@ -102,6 +103,7 @@ export function commitAvatarFinish(
       )
         return invalid();
       const current = version % 1000000;
+      if (recoverOnly && (!prior || query.sequence > current)) return invalid();
       if (query.sequence <= current) {
         if (query.sequence === current && !prior)
           await tx.insert(avatar_completion).values({

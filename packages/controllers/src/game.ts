@@ -166,7 +166,11 @@ export class Game {
   }
   async execute(uid: string, command: string, params: Fields): Promise<Result> {
     let body: Fields;
+    let pushes: Result["pushes"] = [];
     switch (command) {
+      case "user.avatar.finish":
+        ({ body, pushes } = await this.avatarFinish(uid, params));
+        break;
       case "user.avatar.grant":
         body = await this.avatarGrant(uid, params);
         break;
@@ -253,7 +257,44 @@ export class Game {
     if (Object.keys(body).length === 0) body.success = sfs.bool(true);
     if (params._cok_) body._cok_ = params._cok_;
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
-    return { body, pushes: [] };
+    return { body, pushes };
+  }
+  private async avatarFinish(uid: string, params: Fields): Promise<Result> {
+    const service = this.services.avatarFinish;
+    if (!service) throw new GameError(errors.unsupported);
+    if (
+      !/^[0-9]{1,20}$/.test(uid) ||
+      params.receipt?.type !== Type.String ||
+      typeof params.receipt.value !== "string" ||
+      !/^[1-9][0-9]{0,5}:[a-f0-9]{64}$/.test(params.receipt.value) ||
+      (params.gameuid !== undefined &&
+        (params.gameuid.type !== Type.String || params.gameuid.value !== uid))
+    )
+      throw new GameError(errors.invalid);
+    const now = this.now();
+    const receipt = params.receipt.value;
+    const state = await service.finish(uid, receipt, now);
+    const profile = this.checkProfile(state.profile, now);
+    const sequence = Number(receipt.split(":")[0]);
+    if (
+      profile.uid !== uid ||
+      profile.serverId !== this.config.kingdomId ||
+      !Number.isInteger(state.picVer) ||
+      state.picVer! < 0 ||
+      state.picVer! > 2147483647 ||
+      state.picVer! % 1000000 < sequence ||
+      state.superseded !== sequence < state.picVer! % 1000000
+    )
+      throw new GameError(errors.invalid);
+    try {
+      await service.deliver(uid, sequence);
+    } catch {}
+    const body: Fields = {
+      uid: sfs.string(uid),
+      picVer: sfs.int(state.picVer!),
+      superseded: sfs.bool(state.superseded),
+    };
+    return { body, pushes: [{ command: "push.picVer.update", body: { ...body } }] };
   }
   private async avatarGrant(uid: string, params: Fields): Promise<Fields> {
     const service = this.services.avatar;

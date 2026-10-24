@@ -9,6 +9,9 @@ export type Config = ServerConfig;
 export const config = Effect.gen(function* () {
   const settings = yield* readEnvironment(serverSchema);
   return {
+    avatarChat: settings.GAME_AVATAR_CHAT_URL
+      ? { url: settings.GAME_AVATAR_CHAT_URL, signingSecret: settings.CHAT_SIGNING_SECRET! }
+      : undefined,
     avatarFiles: settings.GAME_FILES_URL
       ? { origin: settings.GAME_FILES_URL, keyFile: settings.FILES_SIGNING_KEY_FILE! }
       : undefined,
