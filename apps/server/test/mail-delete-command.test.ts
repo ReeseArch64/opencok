@@ -35,6 +35,8 @@ function fixture() {
     mailStatus: unused,
     mailSave: unused,
     mailRead: unused,
+    mailGroups: unused,
+    mailBatch: unused,
     mailCategory: unused,
     mailContents: unused,
     mailConversationSave: unused,

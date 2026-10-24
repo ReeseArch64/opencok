@@ -22,6 +22,7 @@ test("mail migration preserves ordinary text and supports lossless NUL strings w
     database = createDatabase("kingdom", { ...server.options, database: "mail_upgrade" });
     const history = new URL("../migrations/kingdom/", import.meta.url);
     const journal = JSON.parse(await readFile(new URL("meta/_journal.json", history), "utf8"));
+    const migrationCount = journal.entries.length;
     journal.entries = journal.entries.slice(0, 2);
     await mkdir(join(folder, "meta"));
     await writeFile(join(folder, "meta/_journal.json"), JSON.stringify(journal));
@@ -62,7 +63,7 @@ test("mail migration preserves ordinary text and supports lossless NUL strings w
     expect(
       (await database.pool.query("SELECT count(*)::integer AS n FROM drizzle.__drizzle_migrations"))
         .rows[0].n,
-    ).toBe(3);
+    ).toBe(migrationCount);
   } finally {
     try {
       await database?.close();
