@@ -569,6 +569,17 @@ This foundation is not yet exposed as `user.lv`: actual marches, settled resourc
 queues and task transitions still need implementation, and the available components
 must be composed with required authoritative mutations before enabling the handler.
 
+Task reward descriptions have a pure rules implementation and typed SFS serializer.
+It preserves resource ordering, weighted item draws, repeated-item aggregation and
+display ordering, equipment classification, military feature gates and prestige values.
+The random source is injected and validated; this path only constructs descriptions
+and performs no grants. Reward resources retain the final definition of duplicate IDs,
+matching the legacy cache. Quantity calculations preserve signed 32-bit wrapping and
+the legacy float conversion in guaranteed groups. Grouped item and prestige ordering
+uses the existing bounded Java hash traversal helper, with its documented exceptional
+limits. Task visibility, discovery, completion writes and their pushes still need to
+use these descriptions before the reconnect task component is complete.
+
 | Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |

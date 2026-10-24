@@ -5,6 +5,7 @@ import { ruleAvailable } from "./availability.ts";
 export type Rule = Record<string, string>;
 export interface ReconnectCatalogs {
   treasures?: Map<string, Rule>;
+  rewards?: Map<string, Rule>;
 }
 export interface ProfileCatalogs {
   achievementCount?: number;
