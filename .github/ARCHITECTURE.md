@@ -627,6 +627,22 @@ inventory nor mutate state. `user.modify.nickName` remains disabled pending real
 patterns, global name serialization, owned economic persistence and cross-database
 recovery, then world/alliance/chat/throne/shared-user effects. No atomic transaction
 across the global and kingdom databases is assumed.
+The rename repository now provides a transaction-scoped availability guard for the
+future mutation. A namespaced SHA-256 digest of the UCA 4 equality key supplies a signed
+64-bit PostgreSQL advisory-lock key in the configured global database. Equivalent
+spellings share the lock across kingdoms. `pg_try_advisory_xact_lock` contention returns
+the occupied-name game error before protected work; strict mapping/account reads then
+run on the same connection. The guard explicitly manages acquisition, BEGIN, COMMIT,
+rollback and release, including BEGIN failure and disposal after an unsuccessful
+rollback. It does not retry ambiguous commits or claim cross-database atomicity.
+This is an intentional coordination change from the legacy exact-text Redis hash lock:
+equivalent spellings contend and coordination/read failures cannot authorize charges.
+The informational check keeps its original SQL-error fallback. All rename writers must
+use this guard; a hash collision can add contention, and external writers that bypass
+it are not serialized. The helper is not yet connected to a mutation or durable receipt.
+Authoritative payment/recovery and downstream effects remain required before enabling
+the command. Existing PostgreSQL authority under ADR-0002 is unchanged; no new service,
+Redis key, table or migration is introduced by the guard.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
