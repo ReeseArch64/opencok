@@ -432,11 +432,12 @@ records query contracts, cache/collation/ordering differences and unit-only evid
 ### World resource detail foundation
 
 `contracts/world-resource-detail`, `rules/world-resource-detail` and
-`dtos/world-resource-detail` define a pure resource-read foundation for the pending
-`world.get.detail` command. Rules preserve Java signed arithmetic, direct long-to-float
+`dtos/world-resource-detail` define a pure resource-read foundation for
+`world.get.detail`. Rules preserve Java signed arithmetic, direct long-to-float
 rounding, resource-weight conversion and per-march collection clocks. DTOs preserve
-owner Long timestamps and aggregate Double timestamp overrides. No repository or
-runtime command consumes this foundation yet. Army load and runtime-only maximum
+owner Long timestamps and aggregate Double timestamp overrides. The local runtime
+command now consumes remaining-quantity arithmetic for unoccupied resources;
+occupied-resource collection/load composition remains pending. Army load and runtime-only maximum
 collection time remain explicit inputs; resolving them must not create or schedule
 marches or trigger the reference getter's ownership repair. An independent synthetic
 Java primitive oracle covers arithmetic boundaries without executing private game
@@ -449,11 +450,12 @@ transaction. Configured remote realms use a separate transaction and world zero 
 local authorization. Public owner profile, registration, statistics and point-alliance
 metadata share the point's snapshot; registration selection prefers type 2 before
 the latest timestamp. Owner reads omit private account and registration fields. The corresponding rules and
-DTO provide the base owner fields and preserve local monster early exits, without
-claiming the specialized monster/territory fields. Current database reads replace
-legacy process-local profile/alliance caches for this path. This reader and its
-readiness helper are not connected to the runtime yet; complete command composition,
-specialized state and remote JSON/wire conversion remain pending. Details are in the
+DTO provide the base owner fields and preserve local monster early exits, while
+specialized additions remain separate from base owner projection. Current database reads replace
+legacy process-local profile/alliance caches for this path. The runtime now connects
+this reader and its readiness helper through
+`GameServices.worldPointDetail` for implemented local branches. Remaining specialized
+state and remote JSON/wire conversion are explicit unsupported command paths. Details are in the
 [realm runbook](../apps/server/README.md#world-point-and-owner-read-foundation).
 
 The monster-detail foundation adds optional `field_monster` and `army` catalogs
@@ -462,8 +464,14 @@ derive maximum HP and exploration timestamps; DTOs preserve local boss health an
 existing exploration report fields. The messages codec supports bounded root SFS
 arrays for persisted reports. Exploration selection consumes an explicitly ordered
 owner-march snapshot, selecting the first destination match before checking its state.
-The persisted-to-runtime march-order resolver and full command remain pending; no
-repository order or march restoration behavior is fabricated by this foundation.
+For local exploration reads, the repository reads at most 4,096 owned march metadata
+rows in the point snapshot. The controller reconstructs a fresh Java concurrent-map
+traversal from UUIDs sorted by UTF-16 code units, selects the first destination and
+only then tests occupancy. The repository reads just that report by UUID and owner.
+This defines a canonical persisted-state query order, not the historical legacy
+process map or its capacity/insertion/deletion history. The reference has no persisted
+map order. No march object restoration, scheduling or queue advancement occurs. The
+complete command remains pending; implemented local cases are documented in the runbook.
 
 ### Migrated files implementation
 

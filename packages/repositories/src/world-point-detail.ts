@@ -1,3 +1,4 @@
+import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import type { createDatabases } from "@opencok/drizzle";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
@@ -8,6 +9,7 @@ import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
 import type {
   WorldPointDetailStore,
+  WorldExplorationSelector,
   WorldPointOwnerSnapshot,
 } from "@opencok/contracts/world-point-detail";
 import type { Row } from "@opencok/contracts/rows";
@@ -42,6 +44,63 @@ const pointColumns = {
   active: worldpoint.active,
   reserve: worldpoint.reserve,
 };
+const marchColumns = {
+  uuid: world_march.uuid,
+  ownerUid: world_march.ownerUid,
+  targetId: world_march.targetId,
+  worldId: world_march.worldId,
+  state: world_march.state,
+  marchStartTime: world_march.marchStartTime,
+  arrivalTime: world_march.arrivalTime,
+  exploreTime: world_march.exploreTime,
+};
+async function readExploration(
+  db: Reader,
+  observer: string,
+  point: Row,
+  select: WorldExplorationSelector,
+) {
+  const rows = await db
+    .select(marchColumns)
+    .from(world_march)
+    .where(eq(world_march.ownerUid, observer))
+    .orderBy(asc(world_march.uuid))
+    .limit(4097);
+  if (
+    rows.length > 4096 ||
+    rows.some((row) => row.ownerUid !== observer || !validText(row.uuid, 40) || !row.uuid) ||
+    new Set(rows.map((row) => row.uuid)).size !== rows.length
+  )
+    throw new Error("Invalid exploration marches");
+  const id = select(
+    Object.freeze({ ...point }),
+    Object.freeze(rows.map((row) => Object.freeze({ ...row }))),
+  );
+  if (id === undefined) return { march: undefined };
+  const selected = rows.find((row) => row.uuid === id);
+  if (!selected || selected.targetId !== point.id || selected.state !== 1)
+    throw new Error("Invalid exploration selection");
+  const report = single(
+    await db
+      .select({
+        uuid: world_march.uuid,
+        ownerUid: world_march.ownerUid,
+        exploreReport: world_march.exploreReport,
+      })
+      .from(world_march)
+      .where(and(eq(world_march.uuid, id), eq(world_march.ownerUid, observer)))
+      .limit(2),
+  );
+  if (
+    !report ||
+    report.uuid !== id ||
+    report.ownerUid !== observer ||
+    (report.exploreReport !== null &&
+      (!Buffer.isBuffer(report.exploreReport) || report.exploreReport.length > 65535))
+  )
+    throw new Error("Invalid exploration report");
+  return { march: { ...selected, exploreReport: report.exploreReport } };
+}
 function integer(value: unknown): value is number {
   return (
     typeof value === "number" &&
@@ -181,7 +240,7 @@ export function createWorldPointDetailStore(
   if (!integer(kingdomId) || kingdomId < 1 || !databases.kingdoms.has(kingdomId))
     throw new Error("Invalid world detail realm");
   return {
-    async read(observer, input) {
+    async read(observer, input, selectExploration) {
       const query = Object.freeze({ ...input });
       if (
         !validText(observer, 255) ||
@@ -216,9 +275,13 @@ export function createWorldPointDetailStore(
           if (!world || world.uid !== observer || !integer(world.worldId))
             throw new Error("Missing observer world");
           const result = { ...snapshot, world };
-          return remote
-            ? result
-            : { ...result, ...(await readPoint(tx, query.point, world.worldId, false)) };
+          if (remote) return result;
+          const detail = await readPoint(tx, query.point, world.worldId, false);
+          const exploration =
+            detail.point?.pointType === 6 && selectExploration
+              ? await readExploration(tx, observer, detail.point, selectExploration)
+              : undefined;
+          return { ...result, ...detail, ...(exploration ? { exploration } : {}) };
         }, options);
         if (
           !authorized(local.profile, observer, kingdomId, query.now) ||
@@ -239,6 +302,10 @@ export function createWorldPointDetailStore(
   };
 }
 export async function checkWorldPointDetailStore(db: Db): Promise<void> {
+  await db
+    .select({ ...marchColumns, exploreReport: world_march.exploreReport })
+    .from(world_march)
+    .limit(0);
   await db
     .select({ ...profileColumns, pic: userprofile.pic, regTime: userprofile.regTime })
     .from(userprofile)

@@ -10,7 +10,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -1029,7 +1029,7 @@ with synthetic database clients. It covers defaults, pages, routing, observer ch
 ban sentinels, null joins, exact longs, bound patterns, failures and transport limits.
 No listeners, databases or client sessions are used. Live collation, query plans,
 concurrent snapshots and native rendering remain unvalidated. The separate general
-`search.player` command is documented below; point-detail queries remain pending within topic 5.
+`search.player` command is documented below; implemented local point-detail branches and remaining topic-5 gaps are documented below.
 
 ## General player search policy
 
@@ -1140,12 +1140,46 @@ search tables and, only when cross search is enabled, global directory columns;
 remote realm availability does not gate startup. Disabling GAME_CROSS_SEARCH removes
 this command's global/remote search reads and global search readiness probes.
 
+## Local world point detail command
+
+`world.get.detail` is connected to `GameServices.worldPointDetail` for the local
+branches listed below. It requires Int `point`, accepts optional Int `serverId`
+with omitted/`-1` meaning the local realm, and retains normal correlation fields.
+Authenticated nonpositive points return an empty object without an added success
+flag. Missing positive local points return `E100169`. Positive remote queries and
+unfinished specialized branches return `102192`; they are still required work in
+[issue #85](https://github.com/ReeseArch64/opencok/issues/85), not removed scope.
+
+| Local point branch                                                        | Current command behavior                                                                                                                                                       |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unoccupied resources 3/37                                                 | Int point and wrapped remaining quantity; type 37 also includes current member count. Returns before territory-effect additions.                                               |
+| Ordinary resources 3 without a nonblank owner's march pointer             | Public owner fields and, when applicable, the positive territory-effect flag. A nonblank owner/march pointer requires the pending occupied-resource resolver and rejects.      |
+| Monster 6                                                                 | Owner UID plus the selected existing exploration report/start/end fields, if its first destination match is occupying.                                                         |
+| Monster boss 15                                                           | Current and catalog-derived maximum HP, then point ID; no owner identity fields.                                                                                               |
+| Cities 1/2                                                                | Public base owner fields. City 1 rejects when the lost-battle feature is enabled and the target profile exists, until its additional effect/power/duel fields are implemented. |
+| Unoccupied world bosses 49/50                                             | Pending service/reward state; rejects. Occupied instances use the reference base owner fields.                                                                                 |
+| Territories 14/18/20/21/23/46/47, barbarian 44, occupied new resources 37 | Pending specialized state; rejects.                                                                                                                                            |
+| Neutral resource 60                                                       | Base owner fields when item is blank; nonblank items require the pending occupying-march timing reader and reject.                                                             |
+| Other known types 0–69                                                    | Public base owner fields and point ID, as in the reference handler. Unknown types reject.                                                                                      |
+
+Every local query validates observer identity, realm and ban state before point
+access. Full response bounds include correlation fields and the SFS extension
+envelope. The command emits no pushes and performs no game-state writes. Existing
+bootstrap/reconnect restrictions on march state remain part of the unfinished
+topic-2 work; this query does not establish complete gameplay or client compatibility.
+
+Thirteen command/adapter unit tests cover these branches, error behavior, owner
+isolation, bounded report selection, transaction failures and response limits.
+Fresh-map selection also reuses frozen Java 8 collision-order fixtures. Validation
+uses synthetic Drizzle clients; no live database, listener, service or client is run.
+
 ## World resource detail foundation
 
 The pure resource calculations and SFS projections for
 [issue #85](https://github.com/ReeseArch64/opencok/issues/85) are available in
 `rules/world-resource-detail` and `dtos/world-resource-detail`. `world.get.detail`
-is not connected to the runtime yet; these helpers do not read or change game state.
+now uses remaining-quantity arithmetic for implemented local resource reads. Occupied-resource
+collection/load composition is still pending; the pure helpers do not read or change game state.
 
 | Calculation        | Preserved behavior                                                                                                                                                                                                                                                         |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1181,9 +1215,10 @@ not establish full point-detail compatibility or complete topic 5.
 
 ## World point and owner read foundation
 
-`repositories/world-point-detail` supplies a read-only snapshot for the pending
-`world.get.detail` command. Its port and readiness helper are not yet composed into
-the runtime. The current ordinary-realm implementation uses existing tables and adds
+`repositories/world-point-detail` supplies a read-only snapshot for
+`world.get.detail`. Its port and readiness helper are composed into
+the runtime through `GameServices.worldPointDetail` for the local branches listed above.
+The current ordinary-realm implementation uses existing tables and adds
 no schema or configuration. It does not start a march, repair ownership, create
 missing player/statistics rows or mutate caches.
 
@@ -1195,7 +1230,9 @@ ID and that world's ID; a configured remote realm is read at world zero, after t
 local authorization transaction commits. Remote access uses the supplied public-read
 database topology without a global account-directory lookup. Unknown realms fail
 explicitly. Missing points remain absent in the snapshot rather than becoming a
-fabricated resource or empty owner; final command error mapping remains pending.
+fabricated resource or empty owner; the connected local command maps their absence to
+`E100169`. The reader supports remote snapshots, but the command rejects positive
+remote requests until the complete remote projection/wire conversion is implemented.
 
 Each realm read uses a read-only repeatable-read transaction. Point and owner data
 share that transaction; local authorization and remote reads are not atomic together.
@@ -1215,7 +1252,7 @@ registration behavior.
 
 Local monster type 6 stops base-owner projection after UID, and local monster-boss
 type 15 has no base owner fields. The specialized exploration/HP projection foundation
-is documented below; its full query composition remains pending.
+is documented below and is connected for local queries.
 Remote reads do not take these observer-specific early exits. Territory
 and other specialized additions are also pending; the base fields alone are not a
 complete response. The DTO preserves direct/local SFS field types; it does not yet
@@ -1235,7 +1272,7 @@ inputs and read-only readiness. No database, service, listener or client is star
 ## World monster detail foundation
 
 `rules/world-monster-detail` and `dtos/world-monster-detail` supply local monster
-detail fields for the pending `world.get.detail` composition. `loadRules` now loads
+detail fields for the implemented local `world.get.detail` branches. `loadRules` now loads
 optional `field_monster.xml` and `army.xml` into `Rules.world.fieldMonsters` and
 `Rules.world.armies`. The `army` formation catalog is distinct from the existing
 `arms` troop-attribute catalog. Both new catalogs retain the final definition of a
@@ -1264,11 +1301,21 @@ not the separate `marchArrivalTime`. Nullable stored arrival/duration primitives
 default to zero. A missing report becomes an empty array; present reports decode
 from bounded root SFS-array binary data and preserve nested type tags and longs.
 
-The ordered march snapshot remains an explicit required input. The Java accessor
-traverses an in-memory concurrent map; reconstructing that order and reading the
-selected persisted report have not been implemented. Sorting by UUID, selecting
-only occupying rows or filtering by world would silently change the selection and
-is not substituted here. The reader does not create, restore, schedule or advance
+The rule consumes an ordered march snapshot. The connected reader fetches up to
+4,096 owned metadata rows, with a 4,097th-row overflow check, in the same read-only
+snapshot as the point. The controller sorts UUIDs by UTF-16 code units and reconstructs
+a fresh Java 8 concurrent-map traversal using the existing verified map-order helper.
+Selection uses that traversal, not UUID order directly, and occurs before any
+occupancy check. Only the selected report is then read by both UUID and owner; other
+report blobs are not loaded. Foreign/duplicate metadata, a missing selected report
+row or failed reads reject rather than return an empty exploration result.
+
+This is a canonical persisted-state query order. The database does not retain the
+legacy process map's original insertion/deletion history, high-water capacity or global-to-owner
+map restoration order, so historical traversal equivalence is not claimed. Reads
+use current persisted marches and do not run the reference login's expired-return
+cleanup. No world, march-type or OCCUPY-only SQL filter replaces the reference
+destination-first selection. The reader does not create, restore, schedule or advance
 marches. Remote queries omit these observer-specific monster additions; their JSON
 wire conversion remains separate unfinished work.
 
@@ -2040,7 +2087,7 @@ use these descriptions before the reconnect task component is complete.
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; resource arithmetic, point/owner reads and monster projection foundations with synthetic unit coverage                         | Point details; documented search cache/collation/exceptional-state differences; live behavior remains deferred.                                           |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage   | Remaining specialized and remote point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                     |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                              | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |

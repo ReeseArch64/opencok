@@ -14,7 +14,8 @@
     "./frame": "./src/frame.ts",
     "./sfs": "./src/sfs.ts",
     "./stored-json": "./src/stored-json.ts",
-    "./legacy-json": "./src/legacy-json.ts"
+    "./legacy-json": "./src/legacy-json.ts",
+    "./legacy-object-order": "./src/legacy-object-order.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"

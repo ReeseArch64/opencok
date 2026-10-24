@@ -21,10 +21,17 @@ export interface WorldPointDetailSnapshot {
   remote: boolean;
   point?: Row;
   owner?: WorldPointOwnerSnapshot;
+  exploration?: { march: Row | undefined };
 }
 
+export type WorldExplorationSelector = (point: Row, marches: readonly Row[]) => string | undefined;
+
 export interface WorldPointDetailStore {
-  read(observer: string, query: WorldPointDetailQuery): Promise<WorldPointDetailSnapshot>;
+  read(
+    observer: string,
+    query: WorldPointDetailQuery,
+    selectExploration?: WorldExplorationSelector,
+  ): Promise<WorldPointDetailSnapshot>;
 }
 
 export interface WorldPointOwnerDetail {
