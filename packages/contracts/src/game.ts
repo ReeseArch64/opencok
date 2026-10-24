@@ -57,6 +57,7 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  normalRankingRealm?(): Promise<boolean>;
   mailUpdates?(
     uid: string,
     query: MailUpdateQuery,
@@ -161,6 +162,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
   scoreActivityRanking?(): Promise<readonly string[]>;
   nicknameBadWords?(name: string): boolean | Promise<boolean>;
   nicknameReservedPatterns?(): readonly string[];

@@ -1748,6 +1748,15 @@ truncating it. The reader does not mutate scores or rebuild/expire the board; th
 publisher remains responsible for its derived-cache lifecycle. No event lifecycle or
 `hero.self.rank` in-memory activity/rank-map provider is implied. This extends the accepted
 Redis query-cache boundary without adding a schema, service or authoritative ledger.
+Global celebrity ranking queries first read the selected realm's global `server_info`
+type, accepting the reference normal/test/inner-test/green types before decoding the
+selector. A fresh metadata read replaces the reference process-local type cache. The
+local authenticated profile is checked before the selected published Redis list is read;
+types 1 and 5 share the power list. The cache adapter selects only the bounded reference
+range, then the existing legacy JSON decoder reconstructs ordered `rankMap` objects.
+Missing lists remain empty, while cache failures and malformed/oversized data reject.
+These public derived boards grant no score-write authority and add no lifecycle or TTL.
+The server guide records keys, bounds, metadata fallback and deferred validation.
 Expedition ranking reads use the shared Redis instance with a global realm-pairing
 record and lower-realm score/metadata keys. A read-only Lua evaluation revalidates
 pairing and returns a consistent bounded board; one retry handles a rematch. The

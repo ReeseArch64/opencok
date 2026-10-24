@@ -1319,6 +1319,39 @@ cache/database/services, integration tests or client/ADB were used; no schema, d
 or CI workflow changed. The incomplete event-ranking family receives no completed-group
 credit from this unverified command alone.
 
+`global.celebrities.rank` reads the existing published global boards for the local
+realm. Before decoding `rankType`, it checks the global `server_info` row: realm IDs
+above 999999 and types other than 0, 1, 6 or 23 produce the ordinary acknowledgment.
+A missing row or reached SQL error also disables the query; dependency and malformed-row
+errors reject. This uses a fresh metadata read in place of the Java process-local type
+cache, so metadata changes become visible immediately. The profile identity, realm and
+ban checks run after decoding the integer selector. Unknown integer types acknowledge
+without reading a board.
+
+| `rankType` | Realm-qualified Redis list prefix | Inclusive range |
+| ---------- | --------------------------------- | --------------- |
+| 0          | `global_kill_ranking`             | 0–150           |
+| 1, 5       | `global_power_rank`               | 0–150           |
+| 2          | `global_train_rank`               | 0–150           |
+| 3          | `global_attack_wins_ranking`      | 0–150           |
+| 4          | `global_defence_wins_ranking`     | 0–29            |
+| 6          | `global_honor_point_rank`         | 0–150           |
+| 11         | `global_military_point_rank`      | 0–150           |
+
+Each key appends `_<kingdomId>`. Ordered JSON objects become the `rankMap` SFSArray
+through the existing legacy JSON decoder; duplicates remain and no scores or fields are
+recomputed. Empty lists produce an empty array. Cache failures, malformed JSON and data
+outside the maintained decoder/frame bounds reject instead of pretending the board is
+empty. The raw JSON budget is 4 MiB across the selected entries, and the encoded response
+including correlation remains bounded by the existing frame limit. Decoder numeric,
+nesting and collection limits also apply. Type 7 has no handler mapping in the reference.
+The query adds no score publisher, invalidation, TTL, settlement or cross-realm routing.
+
+Storage, repository, controller and server type checks plus source review cover this
+slice. No new tests or fixtures were generated and no tests, real services or client/ADB
+were run. Behavioral and runtime verification remain deferred; this command does not
+complete the cross-realm ranking family. See [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
+
 ## Mailbox category status
 
 `mail.category.status`, tracked in [issue #64](https://github.com/ReeseArch64/opencok/issues/64),
