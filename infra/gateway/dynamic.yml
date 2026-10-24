@@ -13,6 +13,15 @@ http:
       entryPoints: [web]
       rule: (Path(`/api/v1global_config`) || Path(`/chat/server/links`) || Path(`/chat/server/all`)) && Method(`GET`)
       service: api
+    avatar-upload:
+      entryPoints: [web]
+      rule: Path(`/gameservice/www/gateway/json.php`) && Method(`POST`)
+      middlewares: [upload-body]
+      service: api
+    avatar-images:
+      entryPoints: [web]
+      rule: PathRegexp(`^/cok/img/[0-9]{1,6}/[a-f0-9]{32}\.jpg$`) && (Method(`GET`) || Method(`HEAD`))
+      service: api
     cdn-cok:
       entryPoints: [web]
       rule: PathPrefix(`/cok/`) && !PathPrefix(`/cok/img/`) && !PathRegexp(`(^|/)\.`) && !PathRegexp(`(?i)\.part(/|$)`) && !PathRegexp(`(?i)\.(php[0-9]*|phtml|phar|cgi|pl|py|sh|bash|asp|aspx|jsp)([./]|$)`) && (Method(`GET`) || Method(`HEAD`))
@@ -24,6 +33,9 @@ http:
       middlewares: [cdn-assets-path]
       service: cdn-storage
   middlewares:
+    upload-body:
+      buffering:
+        maxRequestBodyBytes: 2162688
     cdn-cok-path:
       addPrefix:
         prefix: /opencok-cdn/cok.eleximg.com

@@ -4,6 +4,10 @@ import { ruleAvailable } from "./availability.ts";
 import { javaDecimal } from "./java-integer.ts";
 
 export type Rule = Record<string, string>;
+export interface RankingCatalogs {
+  militaryGroups?: Map<string, Rule>;
+  heroEvents?: Map<string, Rule>;
+}
 export interface WorldCatalogs {
   fieldMonsters?: Map<string, Rule>;
   armies?: Map<string, Rule>;
@@ -90,6 +94,7 @@ export class Rules {
     readonly reconnect: ReconnectCatalogs = {},
     readonly mail: Map<string, Rule> = new Map(),
     readonly world: WorldCatalogs = {},
+    readonly ranking: RankingCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (

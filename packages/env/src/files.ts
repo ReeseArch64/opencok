@@ -1,10 +1,7 @@
 import { z } from "zod";
-import { port } from "./service.schema";
 import { blankToUndefined, validateEnvironment } from "./validation";
 export const filesSchema = z
   .object({
-    FILES_HOST: z.string().min(1).default("127.0.0.1"),
-    FILES_PORT: port(8084),
     FILES_SIGNING_KEY_FILE: z.string().min(1).default("/run/opencok/image-upload-key"),
     AWS_ACCESS_KEY_ID: z.string().min(1).optional(),
     AWS_SECRET_ACCESS_KEY: z.string().min(1).optional(),

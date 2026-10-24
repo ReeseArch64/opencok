@@ -1,3 +1,5 @@
+import { HttpError } from "@opencok/errors/http";
+
 export type Parameters = Record<string, string>;
 
 export function phpEmpty(value: unknown): boolean {
@@ -31,6 +33,27 @@ export async function requestParameters(request: Request): Promise<Parameters> {
   for (const [name, value] of new URL(request.url).searchParams) addParameter(result, name, value);
 
   if (request.method === "POST") {
+    const limit = 65536;
+    if (Number(request.headers.get("content-length")) > limit)
+      throw new HttpError(413, "Request too large");
+    const reader = request.body?.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    try {
+      while (reader) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.length;
+        if (size > limit) {
+          await reader.cancel();
+          throw new HttpError(413, "Request too large");
+        }
+        chunks.push(value);
+      }
+    } finally {
+      reader?.releaseLock();
+    }
+    request = new Request(request, { method: "POST", body: Buffer.concat(chunks) });
     const contentType = request.headers.get("content-type") ?? "";
     if (contentType.startsWith("application/x-www-form-urlencoded")) {
       for (const [name, value] of new URLSearchParams(await request.text()))
