@@ -415,6 +415,43 @@ unsupported until reserved-name patterns, name serialization, authoritative char
 profile/global mutations, rollback/recovery and required downstream effects are connected.
 No balance, profile, inventory or mapping is changed by this foundation.
 
+`repositories/nickname-lock` now provides `withAvailableNickname` for the future
+mutation. It requires an already-normalized, nonempty BMP name fitting the existing
+200-unit storage boundary. The UCA 4 equality key, prefixed with
+`opencok:nickname-change:uca400:`, is SHA-256 hashed; the first eight bytes interpreted as
+a signed big-endian integer identify a PostgreSQL transaction advisory lock. The key is
+bound as a bigint parameter, without placing the requested text into SQL. Equivalent
+case/accent/width/padding/ignorable spellings share one key independently of kingdom.
+Rare hash collisions add contention rather than permitting conflicting holders.
+
+The helper pins one global connection, begins a read-committed read-write transaction
+and tries the lock without waiting for another holder. Contention or confirmed occupation
+returns `105251` before the callback runs. The strict mapping/account reader uses the
+same pinned connection and does not convert SQL errors into availability. The callback's
+awaited global SQL runs before commit. The guard covers connection acquisition and BEGIN
+failures, attempts rollback after failures, and discards the connection when rollback
+cannot confirm transaction end. A lost commit acknowledgment rejects the request; it is
+not retried and cannot establish whether work was committed. The guard is not a durable
+receipt or a promise of atomicity with realm writes or external effects.
+
+This deliberately strengthens coordination compared with the reference's exact-text
+Redis `HSETNX`/`HDEL` behavior, where equivalent names could use different fields and a
+caught command error could appear successful. Informational `user.check.nickName`
+continues to preserve its SQL-error empty-result behavior. The future mutation must use
+the strict guard, durable payment/recovery records and the same lock convention in every
+writer. Other processes that bypass it remain outside its protection. Lock lifetime is
+the global transaction/backend lifetime, with no application TTL or manual unlock.
+PostgreSQL documents [transaction advisory lock lifetime](https://www.postgresql.org/docs/17/explicit-locking.html#ADVISORY-LOCKS)
+and [nonblocking acquisition](https://www.postgresql.org/docs/17/functions-admin.html#FUNCTIONS-ADVISORY-LOCKS).
+
+Ten new unit tests use fake pools and controlled promises to cover concurrent equivalent
+names, independent names, lock/read order, occupied versus orphan mappings, pool/BEGIN/
+lock/lookup failures, malformed replies, callback errors, ambiguous commits and failed
+rollback disposal. They also verify that the existing informational fallback remains
+unchanged. These are SQL-contract and lifecycle simulations, not proof from a running
+PostgreSQL instance. The guarded mutation is still not exposed and no new schema,
+configuration or dependency is added.
+
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
 separately checks version and start/end dates for stamina, star unlocks and
