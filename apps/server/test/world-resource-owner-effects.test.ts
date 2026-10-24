@@ -10,6 +10,7 @@ import { Rules, type Rule } from "@opencok/rules/game";
 function fixture() {
   const rules = new Rules(new Map(), new Map(), new Map());
   rules.items.set("effect", { k1: "78;10|2196;20|214;10|207;20|218;50|895;8" });
+  rules.items.set("merge_server", { k5: "" });
   rules.power.equipment = new Map<string, Rule>([
     ["9001", { para1: "214", num1: "5" }],
     ["9002", { site: "0", color: "2", para1: "78", num1: "2" }],
@@ -25,7 +26,7 @@ function fixture() {
         civilizationType: 2,
         appVersion: "12.6.0",
         serverId: 99,
-        crossFightSrcServerId: 88,
+        crossFightSrcServerId: 2,
         decomposeSuitEffect: null,
       },
       generals: [{ ability: Buffer.from('[{"5001":2}]') }],
@@ -79,12 +80,17 @@ function fixture() {
   const calls: [string, number | undefined][] = [];
   const state = {
     emperor: undefined as number | null | undefined,
-    expedition: { mergeServer: false, stage: 3, homeKingdomId: 2 },
+    expeditionStage: 3,
     failExpedition: false,
     ticks: 0,
     expeditionReads: 0,
   };
-  const services: Pick<GameServices, "worldPowerEffects" | "emperorVersion"> = {
+  const services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage"> = {
+    expeditionStage: async () => {
+      state.expeditionReads++;
+      if (state.failExpedition) throw new Error("Synthetic expedition failure");
+      return state.expeditionStage;
+    },
     worldPowerEffects: async (realm) => {
       calls.push(["world", realm]);
       return world;
@@ -96,21 +102,10 @@ function fixture() {
   };
   const resolve = (patch: Partial<RuleContext> = {}) => {
     const context = { now: 1000, kingdomId: 2, version: "0.0.0", ...patch };
-    return readResourceOwnerLoadEffects(
-      snapshot,
-      rules,
-      context,
-      services,
-      () => {
-        state.expeditionReads++;
-        if (state.failExpedition) throw new Error("Synthetic expedition failure");
-        return state.expedition;
-      },
-      () => {
-        state.ticks++;
-        return 1000n;
-      },
-    );
+    return readResourceOwnerLoadEffects(snapshot, rules, context, services, () => {
+      state.ticks++;
+      return 1000n;
+    });
   };
   return { rules, snapshot, world, calls, state, services, resolve };
 }
@@ -241,7 +236,7 @@ test("expedition dependencies are consumed only after gates and preserve their l
   expect(f.state.expeditionReads).toBe(1);
   f.state.failExpedition = false;
   f.rules.features.set("17_wk", { version: "99.0.0", online: "2" });
-  f.state.expedition.homeKingdomId = 99;
+  f.snapshot.effects.profile.crossFightSrcServerId = 99;
   expect(await f.resolve()).toEqual({ ...expected, expedition: 0 });
 });
 

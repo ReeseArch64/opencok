@@ -7,10 +7,8 @@ import type { RuleContext } from "@opencok/rules/availability";
 import type { Rules } from "@opencok/rules/game";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
-import {
-  resourceOrdinaryLoadEffects,
-  resourceExpeditionLoadEffect,
-} from "@opencok/rules/world-resource-effects";
+import { resourceOrdinaryLoadEffects } from "@opencok/rules/world-resource-effects";
+import { readResourceExpeditionLoadEffect } from "./world-resource-expedition.ts";
 import { decodeWorldPowerEffects, generalSkillPoints } from "./power.ts";
 import {
   resourceGeneralBuildingEffect,
@@ -21,8 +19,7 @@ export async function readResourceOwnerLoadEffects(
   snapshot: WorldResourceOwnerSnapshot,
   rules: Rules,
   environment: Omit<RuleContext, "version" | "versionPolicy">,
-  services: Pick<GameServices, "worldPowerEffects" | "emperorVersion">,
-  expedition: () => { mergeServer: boolean; stage: number; homeKingdomId: number },
+  services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,
   clock: () => bigint,
 ): Promise<WorldResourceLoadEffects> {
   if (
@@ -50,6 +47,12 @@ export async function readResourceOwnerLoadEffects(
   return {
     ...resourceOrdinaryLoadEffects(state, rules, context, abilities, world, emperor),
     newGeneral: resourceGeneralBuildingEffect(snapshot, rules, context, 78, resolve, clock),
-    expedition: resourceExpeditionLoadEffect(rules, context, expedition, resolve),
+    expedition: await readResourceExpeditionLoadEffect(
+      state.profile,
+      rules,
+      context,
+      services,
+      resolve,
+    ),
   };
 }

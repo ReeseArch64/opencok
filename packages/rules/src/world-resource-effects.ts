@@ -5,6 +5,26 @@ import type { Rules } from "./game.ts";
 import { generalSkillEffects } from "./power-attributes.ts";
 import { serverFeature } from "./power-context.ts";
 import { playerGameEffect } from "./power-resolver.ts";
+import { generalContent, generalInteger } from "./new-general-content.ts";
+
+export function resourceExpeditionConfigured(
+  rules: Rules,
+  context: RuleContext,
+  mergeServer: () => boolean,
+): boolean {
+  return (
+    serverFeature(rules, "tech_newEffect", context) &&
+    serverFeature(rules, "17_wk", context) &&
+    mergeServer() === false &&
+    !serverFeature(rules, "wk_switch_new", context)
+  );
+}
+
+export function resourceMergeServer(rules: Rules, kingdomId: number): boolean {
+  const rule = rules.items.get("merge_server");
+  if (!rule) throw new Error("Missing resource merge-server rule");
+  return generalContent(rule.k5, ";").map(generalInteger).includes(kingdomId);
+}
 
 export function resourceOrdinaryLoadEffects(
   state: PlayerEffectSnapshot,
@@ -28,10 +48,9 @@ export function resourceExpeditionLoadEffect(
   resolve: (effect: 895) => number,
 ): number {
   try {
-    if (!serverFeature(rules, "tech_newEffect", context) || !serverFeature(rules, "17_wk", context))
-      return 0;
-    const state = read();
-    if (state.mergeServer !== false || serverFeature(rules, "wk_switch_new", context)) return 0;
+    let state: ReturnType<typeof read> | undefined;
+    if (!resourceExpeditionConfigured(rules, context, () => (state = read()).mergeServer)) return 0;
+    if (!state) return 0;
     if (state.stage !== 3 || state.homeKingdomId !== context.kingdomId) return 0;
     const value = resolve(895);
     return typeof value === "number" ? Math.fround(value) : 0;

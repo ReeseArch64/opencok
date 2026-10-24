@@ -466,8 +466,8 @@ march scheduling or cache write is performed by these projections. Resource load
 resolves ordinary effects 78/2196 with the shared player-effect engine and general
 133 from general skills alone. Conditional expedition effect 895 has its own
 feature, merge, stage and effective-home-realm gate, preserving its zero-on-exception
-boundary. Authoritative expedition context and new-general stronghold/official
-contributions still need to be connected; explicit callbacks are not runtime parity.
+boundary. Persisted owner, stronghold/official and expedition projections are connected
+below; the occupied-resource command still requires runtime-state composition.
 
 The separate `rules/new-general-skills` projection restores passive base-skill and
 talent effect maps from bounded saved level strings and optional `general_base` /
@@ -499,9 +499,11 @@ execution realm; blank owner versions skip version comparison. The resource-owne
 effect controller now decodes current saved abilities, reads execution-realm world
 effects and conditional emperor state, and connects ordinary load, general-only 133
 and new-general equipment modifiers. It preserves separate general and expedition
-failure boundaries; ordinary dependency failures propagate. Expedition context is
-still supplied explicitly, and endpoint integration remains required; callback-based
-units do not establish runtime parity.
+failure boundaries; ordinary dependency failures propagate. The expedition adapter
+reads the execution realm's persisted phase from the existing global pairing record,
+applies the configured merge list and uses the owner's cross-fight origin unless it
+is exactly -1. Missing phase data remains unavailable; failures clear only effect 895. This read does not reconstruct Java's minute-synchronized in-memory phase or
+thread-local overrides. Event writers and endpoint integration remain required.
 
 The point repository now accepts an internal `resourceEffects` request to read the
 saved march owner's ordinary effects, buildings and new-general records in the same
@@ -516,7 +518,7 @@ The owner-context projection supplies building traversal and official eligibilit
 World/emperor cache ports accept an explicit destination realm while retaining local
 defaults for existing callers. Runtime wiring forwards that realm. These cache reads
 occur after the database snapshot and are not an atomic cross-store snapshot. Runtime
-residency, authoritative expedition context and endpoint composition remain separate
+residency, expedition phase synchronization and endpoint composition remain separate
 work. Invalid or unavailable requested state fails rather than fabricating effects.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
@@ -1524,7 +1526,9 @@ pairing and returns a consistent bounded board; one retry handles a rematch. The
 controller authenticates the local owner, decodes integer-preserving metadata and
 projects only public fields. Importing authoritative event state and maintaining
 pairings/scores remain separate from the reader; namespace and verification details
-are in the server guide.
+are in the server guide. Resource-load queries independently consume the pairing
+record's optional canonical `status` enum and never infer a phase from dates or a
+match ID. Older pairing records remain valid for ranking, but supply no known phase.
 
 Mailbox category status reads the authenticated recipient's grouped counts with the
 owner profile in a read-only repeatable-read snapshot. Contents and reward payloads

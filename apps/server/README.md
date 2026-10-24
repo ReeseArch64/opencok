@@ -669,6 +669,15 @@ The shared Redis instance uses these keys:
 | `opencok:kingdom:<lower-realm>:expedition-ranking`      | Sorted set of player UID members and expedition scores. The lower realm is the minimum of the two paired IDs.                                                  |
 | `opencok:kingdom:<lower-realm>:expedition-ranking-info` | Hash from player UID to JSON containing `name`, `pic`, `picVer`, `abbr`, `serverId` and signed-64-bit `power`.                                                 |
 
+The pairing record may also contain `status` for resource-load phase reads. Its
+canonical values, in ordinal order 0–8, are `WAITING_STATE`, `MATCHING_STATE`,
+`PREPARING_STATE`, `COLLECT_STATE`, `KILL_MONSTER_STATE`, `BUILDING_STATE`,
+`SCIENCE_STATE`, `TRAIN_ARMY_STATE` and `FIGHTING_STATE`. Ranking does not consume
+this field. A missing record or field leaves the phase unavailable; malformed
+phase data rejects at the cache boundary. Phase reads validate the realm identity
+and 65,535-byte record bound without requiring ranking fields. They never infer a
+phase from match IDs or timestamps and never initialize a missing event.
+
 The metadata decoder preserves integer lexemes before converting to SFS values;
 large power values never pass through JavaScript number rounding. Only the public
 fields above reach the client; UID, rank and score come from the selected entry and
@@ -1617,8 +1626,8 @@ Ordinary load effects 78/2196 and general-only 133 are resolved first. Bound gen
 equipment resolves its color/site/all-equipment modifiers from the same current owner
 state, without mixing general pieces into the player's worn-equipment collection.
 The concrete building contribution retains its own zero-on-failure boundary.
-Conditional 895 resolution consumes the explicit expedition provider only after its
-feature gates and retains its separate fallback. Missing world dependencies, malformed
+Conditional 895 resolution consumes the saved expedition phase only after its
+feature and merge gates and retains its separate fallback. Missing world dependencies, malformed
 abilities, invalid ordinary effect state and unavailable required emperor state fail
 the composition instead of returning fabricated zero modifiers. An explicit no-emperor
 state remains different from an unavailable emperor version.
@@ -1628,9 +1637,26 @@ owner version handling, world expiration, missing dependencies, moved-owner stat
 separate failure boundaries and destination cache routing. Redis commands are replaced
 with in-memory doubles; no connections or listeners are created. The cache reads occur
 after the persisted snapshot, without cross-store atomicity. The endpoint still needs
-an authoritative expedition provider, resident-owner policy, decoded ownership checks
+expedition runtime synchronization, resident-owner policy, decoded ownership checks
 and runtime maximum collection time. It must also avoid consuming owner effects on
 the cached-load or no-applicable-troop branches.
+
+`controllers/world-resource-expedition` now connects effect 895 to the cache phase
+reader using the execution realm. The `merge_server.k5` list uses Java Integer
+parsing, including every supplied member before membership is checked. Missing item
+records fail; missing or blank lists mean no merged realms. The effective owner realm
+uses `crossFightSrcServerId` unless it is exactly -1, when `serverId` is used. Other
+nonpositive origin values do not fall back to the saved home realm. Only phase 3 and
+an effective home equal to the execution realm reach effect resolution. Missing phase
+data, malformed merge rules and failed stage/effect reads return zero for 895 alone.
+
+Seven added in-memory unit tests cover all phase values, invalid/absent records,
+explicit destination routing, merge parsing, origin selection, skipped dependencies
+and the isolated fallback. The normalized persisted-phase reader does not reproduce
+the Java module's startup initialization, minute-synchronized runtime cache,
+thread-local stage override or event transitions. Importers/writers must maintain
+the phase field; scheduling and writes are not implemented by this read. These limits
+remain distinct from the pending occupied-resource wire command.
 
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries
