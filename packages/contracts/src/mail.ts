@@ -11,6 +11,10 @@ export interface MailConversationReadQuery {
   effects: readonly MailConversationReadEffect[];
 }
 
+export interface MailConversationReadSnapshot {
+  profile: Row | undefined;
+}
+
 export interface MailGroupQuery {
   moderation: boolean;
   begin: number;
