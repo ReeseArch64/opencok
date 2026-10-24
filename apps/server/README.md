@@ -262,6 +262,23 @@ duplicate effect definitions. Prestige/miracle gates include the client version;
 military availability uses the server gate. These reads do not change civilization,
 settle military seasons, grant rewards or create inactive miracle records.
 
+World effects can be read with one `HGETALL` from
+`opencok:kingdom:<kingdomId>:world-effects`. The hash retains numeric effect IDs
+and JSON objects with a string `value` plus an optional signed-long `endTime`.
+Importing legacy `world_effect<serverId>` data into that namespace is an explicit
+operator migration; the adapter neither falls back to the legacy key nor writes
+it. Missing hashes are empty, while malformed replies fail. The read limits are
+4,096 fields, 65,535 bytes per JSON value and 1 MiB in total.
+
+`decodeWorldPowerEffects` preserves integer-token precision and
+`worldPowerEffects` reconstructs active float values at the supplied instant,
+without inheriting the legacy cache's ten-minute refresh delay. Ordinary modifiers
+are independent of the `server_buff` gate; the special event-effect family honors
+that server gate, with the legacy cross-throne bypass represented explicitly.
+Records without a value are ignored; malformed active values fail. This adapter
+and projection are unit-tested dependencies for the pending complete resolver,
+not a separate grant or activation command.
+
 `get.power.info` now dispatches to the selected realm's power snapshot, checks the
 authenticated owner and ban status, calculates components and emits the detailed
 wire DTO with correlation fields. It captures one server instant and ignores any
