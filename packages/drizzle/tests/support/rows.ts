@@ -3,6 +3,7 @@ import type { ColumnContract, TableContract } from "./schema";
 export type Row = Record<string, unknown>;
 
 export function sampleValue(column: ColumnContract, variant: number): unknown {
+  if (column.type === "uuid") return `00000000-0000-4000-8000-${String(variant).padStart(12, "0")}`;
   if (column.calendar) {
     if (column.calendar === "date") return `2020-01-0${variant}`;
     const precision = Number(column.calendar.match(/\((\d+)\)/)?.[1] ?? 0);
@@ -32,6 +33,8 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     spec.columns.map((column) => [column.name, sampleValue(column, variant)]),
   );
   for (const key of spec.foreignKeys) for (const name of key.columns) row[name] = 9007199254740993n;
+  if (spec.indexes.some((key) => key.name === "mail_chat_read_intent_PRIMARY"))
+    row.chatTypes = variant === 1 ? "1,20" : "2";
   return row;
 }
 

@@ -5,6 +5,10 @@ import { port, timeout, databaseName, redisUrl, realmSettings } from "./service.
 
 export const serverSchema = z
   .object({
+    GAME_MAIL_TRANSLATION: z
+      .enum(["true", "false"])
+      .default("true")
+      .transform((value) => value === "true"),
     GAME_HOST: z.string().min(1).default("127.0.0.1"),
     GAME_PORT: port(19933),
     GAME_HEALTH_PORT: port(18090),
