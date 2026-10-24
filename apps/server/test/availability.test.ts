@@ -1,18 +1,27 @@
 import { expect, test } from "bun:test";
-import { realmEnabled, ruleAvailable, ruleTime, versionAtLeast } from "@opencok/rules/availability";
+import {
+  switchRealmEnabled,
+  ruleAvailable,
+  ruleTime,
+  versionAtLeast,
+} from "@opencok/rules/availability";
 import { Rules } from "@opencok/rules/game";
 import { building } from "@opencok/dtos/city";
 
 const now = Date.UTC(2026, 9, 23, 12);
 const context = { kingdomId: 2, version: "12.06.0", now };
 
-test("realm switches match exact realms and inclusive ranges without prefix matching", () => {
-  for (const selector of ["all", "2", "1-2", "2-4", "7;2;11-20", ";2;"])
-    expect(realmEnabled(selector, 2), selector).toBe(true);
-  for (const selector of [undefined, "", "0", "close", "20", "3-8", "1;3-8", "2;bad", "4-2"])
-    expect(realmEnabled(selector, 2), selector).toBe(false);
-  expect(realmEnabled("9007199254740992", 2)).toBe(false);
-  for (const realm of [0, -1, 1.5, NaN, Infinity]) expect(realmEnabled("all", realm)).toBe(false);
+test("item switches retain exact realms, inclusive ranges and early matching before later invalid entries", () => {
+  for (const selector of ["all", "2", "1-2", "2-4", "7;2;11-20", ";2;", "2;bad"])
+    expect(switchRealmEnabled(selector, 2), selector).toBe(true);
+  for (const selector of ["", "0", "close", "20", "3-8", "1;3-8", "4-2"])
+    expect(switchRealmEnabled(selector, 2), selector).toBe(false);
+  for (const selector of [undefined, "bad;2", "9007199254740992"])
+    expect(() => switchRealmEnabled(selector, 2)).toThrow();
+  for (const realm of [1.5, NaN, Infinity])
+    expect(() => switchRealmEnabled("all", realm)).toThrow();
+  expect(switchRealmEnabled("all", 0)).toBe(true);
+  expect(switchRealmEnabled("0", 0)).toBe(false);
 });
 
 test("version gates compare numeric components and reject malformed versions", () => {

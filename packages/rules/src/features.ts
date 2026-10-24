@@ -2,7 +2,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import type { Rules, Rule } from "./game.ts";
 import {
-  realmEnabled,
+  switchRealmEnabled,
   featureRealmEnabled,
   ruleAvailable,
   versionAtLeast,
@@ -87,7 +87,10 @@ export function featureAnnouncementEnabled(
 export function accountVerificationEnabled(rules: Rules, context: RuleContext): boolean {
   const rule = rules.items.get("function_on7");
   return (
-    versionAtLeast(context.version, rule?.k5 ?? "") && realmEnabled(rule?.k6, context.kingdomId)
+    !mailBlank(rule?.k5) &&
+    !mailBlank(rule?.k6) &&
+    versionAtLeast(context.version, rule?.k5 ?? "") &&
+    switchRealmEnabled(rule?.k6, context.kingdomId)
   );
 }
 
