@@ -1002,11 +1002,59 @@ one effect record. There is no automatic transaction retry. Actual PostgreSQL co
 and isolation behavior have not been exercised; SQL and failure paths use synthetic
 clients only.
 
-The next delivery slice must load the authorized mail catalog, apply template 10111 with
-its mailbox capacity/reward/group semantics, publish the realm profile timestamp and chat
-metadata, and restore mail/picture pushes. It must also preserve replay identity while
-acknowledging effects. Persisted intents alone are not evidence of delivered mail or
-updated caches. Completion cannot be exposed until those behaviors are implemented.
+The authorized mail catalog and internal system-mail consumer are now implemented as
+described below. Profile timestamp/chat metadata delivery and notification composition
+remain pending. Persisted intents alone are not evidence of delivered mail or updated
+caches. Completion cannot be exposed until those behaviors are implemented.
+
+## Avatar system-mail delivery
+
+[Issue #78](https://github.com/ReeseArch64/opencok/issues/78) adds the internal consumer
+for pending mail bit 1. The resource loader reads optional authorized `mail.xml`, preserving
+strings and the final duplicate definition. Completion captures template `10111` by default;
+a missing catalog/template retains the legacy no-mail outcome. Templates are copied before
+asynchronous work and serialized in the completion receipt, so subsequent XML edits do not
+change already committed mail intent.
+
+Static source inspection and read-only disassembly of the supplied compiled mail sender
+corrected an earlier assumption: the two `mail` overloads do not invoke `getCheckInfo`.
+The capacity/discard helper exists but is not called by this path. Accordingly, this
+consumer does not prune the mailbox, redeem old rewards, reuse an older message or inherit
+saved flags. It creates a new unread unsaved message. The earlier capacity/reward-retention
+prerequisite for avatar completion is withdrawn; unrelated mailbox behavior is unaffected.
+
+Projection preserves the exact blank/`0` notice-type branch, sender/title Java trimming,
+two-code-unit category suffix and signed 32-bit share shift. Normal system mail has type 2
+and a UID group; notice type 15 has no group. The reference avatar template has no reward.
+Literal comma-containing reward strings retain the legacy encoded bytes; symbolic reward
+IDs require an explicit resolver and otherwise fail without acknowledgment. This slice does
+not implement the full reward-ID resolver or grant attached rewards.
+
+Text encoding preserves Java 8's UTF-8 encoder backing-array capacity, including trailing
+zero bytes, rather than replacing it with a tightly sized byte array. The 40,000-byte
+extra-content threshold therefore applies to that encoded capacity. Exact `MAILTEST` also
+uses owned `mail_contents`; primary contents become `extra`. Blank message bodies reject
+before writes because the maintained primary contents column is non-nullable. Fifty-seven
+frozen synthetic Java 8 vectors cover ASCII, Unicode, BOM, trimming and threshold lengths;
+normal unit runs do not start Java or read the private reference inputs.
+
+`repositories/avatar-mail` locks the owning profile before the completion row, consistent
+with completion's lock order. Already committed intent can be delivered to an existing
+owner even if the account is subsequently banned; a missing or misplaced owner is skipped.
+A stable domain-separated digest of owner/sequence/hash supplies the mail ID stem. The
+message, optional extra row, UID group and clearing of bit 1 commit together. Other pending
+bits and all completion history remain unchanged. Collisions reject instead of overwriting
+existing mail. A repeat after acknowledgment does not insert again, even if the mail was
+later deleted. Failure or an uncertain commit is resolved by retry against the durable bit.
+The creation timestamp comes from the captured completion time, not the relay's wall clock.
+
+The returned message has a tested `push.mail` projection: base fields, exact SFS types,
+normal-group counts of one, and optional full fields controlled by the caller's chat-mail
+switch. The default reference sender does not include a separate `contents` field. Full
+metadata uses `contentsLocal` and expands literal backslash-n sequences. Push projection
+is prepared here but no socket, listener, background relay or live notification is started.
+The final realm composition must coordinate delivery and mail/picture notifications with
+the remaining profile/cache/chat effects before enabling `user.avatar.finish`.
 
 ## Realm chat sessions
 
@@ -1483,7 +1531,7 @@ use these descriptions before the reconnect task component is complete.
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
-| 7. Avatar integration                     | Files service; realm grants and pending receipts; internal atomic completion/profile/moderation/intent foundation with synthetic units                                                                                                                                              | Connect completion after mail/profile/chat effect delivery and pushes; validate restored-state semantics.                                                 |
+| 7. Avatar integration                     | Files service; realm grants and pending receipts; internal atomic completion/profile/moderation/intent foundation and system-mail consumer with synthetic units                                                                                                                     | Connect completion after profile/chat effect delivery and mail/picture pushes; validate restored-state semantics.                                         |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.

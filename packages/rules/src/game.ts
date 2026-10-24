@@ -67,6 +67,7 @@ export class Rules {
     readonly power: PowerCatalogs = {},
     readonly profile: ProfileCatalogs = {},
     readonly reconnect: ReconnectCatalogs = {},
+    readonly mail: Map<string, Rule> = new Map(),
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (

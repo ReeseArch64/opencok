@@ -206,4 +206,6 @@ pending effects; its timestamp records observation, not the original profile mut
 Consumers must acknowledge only completed effects and retain the completion row after
 all bits clear. Deleting receipt history can permit reuse after a profile reset. Back up
 receipts, profiles, moderation and object storage consistently; independent restores are
-not proven safe. The realm command remains unsupported pending effect delivery.
+not proven safe. The internal `repositories/avatar-mail` consumer now clears only the mail bit in the same
+transaction as message/extra/group insertion, without altering receipt history. Other effect
+consumers and production wiring remain pending; the realm command stays unsupported.

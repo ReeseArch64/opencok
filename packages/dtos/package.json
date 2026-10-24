@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./avatar-mail": "./src/avatar-mail.ts",
     "./bootstrap": "./src/bootstrap.ts",
     "./city": "./src/city.ts",
     "./players": "./src/players.ts",

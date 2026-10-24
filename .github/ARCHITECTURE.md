@@ -403,8 +403,12 @@ and database clients without sockets. An internal completion workflow now locks 
 verifies receipts and commits profile/moderation updates with an immutable `avatar_completion` receipt and pending
 effect snapshot in one realm transaction. The snapshot records the optional system-mail
 template, profile timestamp and chat metadata; receipt history survives effect delivery.
-This follows ADR-0002 and is not connected to the realm command. Mailbox retention/group
-handling, effect consumers, pushes and production composition remain pending, as do
+This follows ADR-0002 and is not connected to the realm command. An internal
+`repositories/avatar-mail` consumer now commits owned message/extra/group rows and mail-bit
+acknowledgment together; rules preserve captured XML and Java byte encoding, and DTOs supply
+the mail push projection. Static source/bytecode inspection shows this send path does not
+call its mailbox capacity/discard helper, correcting the earlier prerequisite. Profile/chat
+effect consumers, push delivery and production composition remain pending, as do
 restored-state semantics, full media lifecycle, animated formats and production Node execution.
 
 ### Package groups
