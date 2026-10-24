@@ -142,7 +142,7 @@ receipts intentionally suppress duplicate effects.
 
 `apps/server/test` and `apps/chat/test` cover command envelopes, all existing mailbox
 families, ownership, wire validation, content cleanup, chat authentication and failure
-paths. `tests/mailbox/transaction.test.ts` runs real migrations and adapters against
+paths. `apps/server/integration/mailbox-effects.test.ts` runs real migrations and adapters against
 disposable PostgreSQL: local rollback, saved/reward bypass, remote owner/realm/cutoff
 isolation, lost acknowledgment, database restart, duplicate delivery and conflicting
 replay. `apps/server/integration/mail-system-v1.test.ts` exercises real Redis concurrency,
