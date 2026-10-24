@@ -2224,3 +2224,20 @@ the authoritative outcomes.
 
 No new tests, dependencies, private inputs or player-data mutations are introduced by this
 readiness record.
+
+## Parallel merge readiness for PR #213
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #214, #216, #220.
+
+The integration target remains the original feature branch
+`feat/review-connect-mail-category-deletion`. The enclosing stack will be integrated into
+develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
