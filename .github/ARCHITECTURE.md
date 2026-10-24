@@ -1293,6 +1293,13 @@ Redis. Absolute flag assignments preserve repeat-request state absent intervenin
 changes; correlation fields do not provide durable command receipts. The server guide
 records these limits, compatibility differences and unit-only validation.
 
+Conversation/type saving uses a separate owner-locked transaction with a recipient
+predicate and one set-based update. Rules map client message types and select personal
+text or moderation conversations; raw signed saved flags are retained. This command
+does not emit synchronization markers or contact chat, matching its legacy behavior.
+It loads no message contents and imposes no conversation-size truncation. Wire rules,
+transaction failures and ownership are covered by synthetic units only.
+
 Read-status commands share the owner-lock and atomic marker boundary. Individual
 unread gift transitions additionally insert a realm `mail_gift_opening` outbox record;
 batch marking deliberately omits that event. A lifecycle-owned relay locks bounded

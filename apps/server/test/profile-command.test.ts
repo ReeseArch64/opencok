@@ -81,6 +81,7 @@ function fixture(remote = false) {
       calls.push(["observer", uid]);
       return observer;
     },
+    mailConversationSave: unused,
     mailDelete: unused,
     mailRead: unused,
     mailSave: unused,

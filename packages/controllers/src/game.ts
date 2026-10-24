@@ -1,6 +1,7 @@
 import { mailDeleted, mailSave, mailStatus } from "@opencok/dtos/mail";
 import { planMailDeletion } from "./mail-delete.ts";
 import {
+  mailConversationSaveQuery,
   mailDeleteQuery,
   mailReadQuery,
   mailSaveQuery,
@@ -17,7 +18,14 @@ import type { AllianceRankingKind } from "@opencok/contracts/alliance-ranking";
 import type { ServerConfig } from "@opencok/contracts/server";
 import type { CityState, GameServices, GameStore } from "@opencok/contracts/game";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
-import { sfs, Type, type Fields, type Value } from "@opencok/messages/sfs";
+import {
+  sfs,
+  Type,
+  int as wireInt,
+  str as wireString,
+  type Fields,
+  type Value,
+} from "@opencok/messages/sfs";
 import { guidePlayerSummary, playerSummary } from "@opencok/dtos/players";
 import { building, gold, queue, resource, user } from "@opencok/dtos/city";
 import { powerInfo } from "@opencok/dtos/power";
@@ -169,6 +177,9 @@ export class Game {
       case "mail.delete":
         body = await this.mailDelete(uid, params);
         break;
+      case "chatMail.save":
+        body = await this.mailConversationSave(uid, params);
+        break;
       case "mail.save":
       case "mail.cancel.save":
       case "mail.save.batch":
@@ -281,6 +292,33 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return mailDeleted(state.deleted);
+  }
+  private async mailConversationSave(uid: string, params: Fields): Promise<Fields> {
+    const sender = params.fromUser !== undefined;
+    const type = params.type !== undefined;
+    if (
+      sender
+        ? typeof params.fromUser!.value !== "string"
+        : type && typeof params.type!.value !== "number"
+    )
+      throw new GameError(errors.invalid);
+    const query = mailConversationSaveQuery(
+      {
+        mod: wireInt(params, "mod", 0),
+        ...(sender
+          ? { fromUser: wireString(params, "fromUser") }
+          : type
+            ? { type: wireInt(params, "type") }
+            : {}),
+        ...(sender || type ? { flag: wireInt(params, "flag") } : {}),
+      },
+      this.now(),
+    );
+    const state = await this.db.mailConversationSave(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return {};
   }
   private async expeditionRanking(uid: string): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)
