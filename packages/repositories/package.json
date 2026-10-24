@@ -57,7 +57,8 @@
     "./throne-ranking": "./src/throne-ranking.ts",
     "./community-ranking": "./src/community-ranking.ts",
     "./flower-ranking": "./src/flower-ranking.ts",
-    "./battle-ranking": "./src/battle-ranking.ts"
+    "./battle-ranking": "./src/battle-ranking.ts",
+    "./mail-system": "./src/mail-system.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
