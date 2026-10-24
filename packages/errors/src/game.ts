@@ -24,7 +24,9 @@ export class GameError extends Error {
       | "power_effect"
       | "power_state"
       | "queue_kind"
-      | "world_state",
+      | "world_state"
+      | "world_favorite_catalog"
+      | "world_favorite_size",
   ) {
     super(code);
   }

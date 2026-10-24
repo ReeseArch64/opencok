@@ -1,3 +1,7 @@
+import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
+import { worldFavorites } from "@opencok/dtos/world-favorites";
+import { MAX_FRAME } from "@opencok/messages/frame";
+import { encode, extension } from "@opencok/messages/sfs";
 import {
   avatarSequence,
   avatarMinimumLevel,
@@ -168,6 +172,11 @@ export class Game {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "world.favo.get":
+      case "world.favo.add":
+      case "world.favo.delme":
+        body = await this.worldFavorites(uid, command, params);
+        break;
       case "user.avatar.finish":
         ({ body, pushes } = await this.avatarFinish(uid, params));
         break;
@@ -257,7 +266,78 @@ export class Game {
     if (Object.keys(body).length === 0) body.success = sfs.bool(true);
     if (params._cok_) body._cok_ = params._cok_;
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
+    if (command.startsWith("world.favo.") && encode(extension(command, body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "world_favorite_size");
     return { body, pushes };
+  }
+  private async worldFavorites(uid: string, command: string, params: Fields): Promise<Fields> {
+    const store = this.services.worldFavorites;
+    if (!store) throw new GameError(errors.unsupported);
+    const now = this.now();
+    if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid);
+    const check = (profile: Row | undefined) => {
+      const owned = this.checkProfile(profile, now);
+      if (owned.uid !== uid || owned.serverId !== this.config.kingdomId)
+        throw new GameError(errors.invalid);
+    };
+    if (command === "world.favo.get") {
+      const state = await store.list(uid, now);
+      check(state.profile);
+      return worldFavorites(state, uid);
+    }
+    const integer = (key: string, fallback?: number) => {
+      const field = params[key];
+      if (field === undefined && fallback !== undefined) return fallback;
+      if (field?.type !== Type.Int || !favoriteInteger(field.value))
+        throw new GameError(errors.invalid);
+      return field.value;
+    };
+    if (command === "world.favo.add") {
+      if (params.name?.type !== Type.String || !favoriteName(params.name.value))
+        throw new GameError(errors.invalid);
+      const query = {
+        point: integer("point"),
+        type: integer("type"),
+        cityType: integer("cityType", -1),
+        resType: integer("resType", -1),
+        name: params.name.value,
+        server: favoriteServer(
+          params.server === undefined ? undefined : integer("server"),
+          this.config.kingdomId,
+          this.rules,
+        ),
+        now,
+      };
+      const state = await store.add(uid, query);
+      check(state.profile);
+      const repliedAt = this.now();
+      if (!Number.isSafeInteger(repliedAt) || repliedAt < 0) throw new GameError(errors.invalid);
+      return { state: sfs.int(1), createTime: sfs.long(repliedAt), point: sfs.int(query.point) };
+    }
+    const selection = (key: string): number[] => {
+      const field = params[key];
+      if (field?.type !== Type.Array || !Array.isArray(field.value) || field.value.length > 32767)
+        throw new GameError(errors.invalid);
+      return field.value.map((entry: Value) => {
+        if (entry?.type !== Type.Int || !favoriteInteger(entry.value))
+          throw new GameError(errors.invalid);
+        return entry.value;
+      });
+    };
+    const points = selection("point"),
+      servers = selection("server");
+    if (points.length !== servers.length) throw new GameError(errors.invalid);
+    const result = await store.remove(
+      uid,
+      points.map((point, index) => ({ point, server: servers[index]! })),
+      now,
+    );
+    check(result.profile);
+    return {
+      state: sfs.int(result.success ? 1 : 0),
+      pointArray: sfs.array(points.map(sfs.int)),
+      serverArray: sfs.array(servers.map(sfs.int)),
+    };
   }
   private async avatarFinish(uid: string, params: Fields): Promise<Result> {
     const service = this.services.avatarFinish;

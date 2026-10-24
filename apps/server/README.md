@@ -10,7 +10,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -901,6 +901,71 @@ conversations and transaction failures. Real PostgreSQL execution, concurrency a
 native-client behavior remain unverified. `chatMail.read`, conversation deletion,
 content edge cases and synchronization flows remain pending.
 
+## World favorites
+
+[Issue #82](https://github.com/ReeseArch64/opencok/issues/82) connects all three owned
+favorites commands through `GameServices.worldFavorites`, backed by the existing kingdom
+`world_favorite` table and read-only global `server_info` metadata. Startup checks both
+tables; no schema, migration, new package or environment setting is added. The realm
+identity needs SELECT on global server metadata and ordinary favorite-table read/write
+permissions. These commands manage bookmarks and do not load or modify map points.
+
+| Command            | Inputs                                                                        | Response                                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `world.favo.get`   | Authenticated owner                                                           | `favo`: SFS array of objects with stored non-null `point`, `type`, `name`, `server`, `createTime`, `cityType`, `resType`, plus normalized `serverType` |
+| `world.favo.add`   | Int `point`/`type`, String `name`; optional Int `server`/`cityType`/`resType` | Int `state: 1`, Int `point`, Long `createTime` sampled after persistence                                                                               |
+| `world.favo.delme` | Equal-length SFS arrays `point` and `server`, each containing Int elements    | Int `state`, plus `pointArray`/`serverArray` echoing order and duplicates                                                                              |
+
+Every operation validates the authenticated local profile and ban state. An owner lock
+serializes mutations; list uses a repeatable-read snapshot and shared profile lock. A
+favorite is identified by owner, point and server. Add replaces all mutable fields and
+persisted creation time through one atomic upsert, improving the legacy separate
+DELETE/INSERT failure boundary. Repeating an add refreshes that favorite's timestamp;
+it is not a request receipt. Supplied owner fields never override session identity.
+The persisted timestamp is captured at command start; the add response samples time
+again after the write, preserving the reference's separate clock reads.
+
+Names retain their original whitespace. Empty names are accepted; JSON-special characters,
+BMP emoji ranges, supplementary characters and unbalanced braces reject as in the
+reference. A frozen synthetic Java 8 primitive oracle covers every BMP character and
+49 additional boundary strings. PostgreSQL-incompatible NUL/unpaired surrogates and
+names longer than 255 UTF-16 units reject explicitly, including overlong whitespace that
+the legacy blank-length helper allowed to reach its database. These are documented
+storage boundaries, not silent normalization. Existing readable names are projected as
+stored; listing does not reapply add-time name validation.
+
+Omitted server uses the local realm, independently of the catalog. An explicit server
+must not exceed the largest ID in authorized `servers.xml` whose `test` value is not
+exactly `true`; IDs use the existing Java decimal parser. Empty catalogs retain the
+reference minimum-integer maximum, and malformed non-test IDs fail. Point, type and
+server fields remain signed 32-bit integers; no new coordinate or lower-bound rule is
+invented. The referenced realm need not have a configured game database because this
+operation stores bookmark metadata only.
+
+Listing orders by server ascending and creation time descending with nulls last, matching
+legacy null placement. Equal timestamps have a deterministic point tie-breaker where the
+legacy query specified no order. Nullable fields are omitted and stored longs remain
+exact. Global types normalize special/test families with the reference's server-ID cutoff;
+missing rows and unrecognized types become ordinary type zero. Fresh bounded global reads
+replace the legacy process-local type cache. A failed global query rejects the list rather
+than fabricating metadata. The kingdom and global snapshots are independent.
+
+Deletion matches complete point/server pairs under the session owner, never the Cartesian
+product of both arrays. Duplicate pairs are deduplicated only for SQL; echoed arrays keep
+them. Up to 500 unique pairs are deleted per statement within one transaction. Empty,
+missing and repeated selections succeed. A database failure after authorization rolls
+back and returns `state: 0`; a lost commit acknowledgment can return zero after deletion,
+and repeating it is safe. Failures before owner validation remain command errors. No
+push or mailbox synchronization side effect is introduced.
+
+No gameplay favorite quota is added. Reads bound allocations to the SFS array limit plus
+one sentinel row, and the complete correlated response must fit the maintained transport
+frame limit. Oversized output fails without returning a partial list or deleting rows.
+Unit tests compose actual commands, rules, DTOs and Drizzle adapters with synthetic
+clients and wire round trips, including rollback, lost replies, owner isolation, server
+metadata, pair deletion and limits. No socket, listener, live database, ADB or client was
+used; PostgreSQL concurrency, collation and live client rendering remain unvalidated.
+
 ## Realm avatar grants
 
 `user.avatar.grant`, tracked in [issue #76](https://github.com/ReeseArch64/opencok/issues/76),
@@ -1659,7 +1724,7 @@ use these descriptions before the reconnect task component is complete.
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
+| 5. Additional map queries                 | Base viewport; owned world favorites list/add/delete with atomic replacement, paired deletion, metadata normalization and synthetic unit coverage                                                                                                                                   | Point details and player search; live behavior remains deferred.                                                                                          |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                              | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |

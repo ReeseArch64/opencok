@@ -1,3 +1,7 @@
+import {
+  createWorldFavoriteStore,
+  checkWorldFavoriteStore,
+} from "@opencok/repositories/world-favorites";
 import { createAvatarRuntime } from "./avatar.ts";
 import { startAvatarRelay } from "./avatar-relay.ts";
 import { checkAvatarCompletionStore } from "@opencok/repositories/avatar-delivery";
@@ -33,6 +37,14 @@ export const RealmDependenciesLive = Layer.effect(
       "realm.database",
       async () => new Database(config),
       (db) => db.close(),
+    );
+    yield* fromPromise("realm.world-favorites", () =>
+      checkWorldFavoriteStore(db.kingdom.db, db.databases.global.db),
+    );
+    const worldFavorites = createWorldFavoriteStore(
+      db.kingdom.db,
+      db.databases.global.db,
+      config.kingdomId,
     );
     const avatarFiles = config.avatarFiles
       ? yield* fromPromise("realm.avatar-files", async () => {
@@ -106,6 +118,7 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        worldFavorites,
         avatarFinish: avatar?.service,
         avatar: avatarFiles
           ? {

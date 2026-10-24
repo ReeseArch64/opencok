@@ -387,6 +387,21 @@ URL; private issuance is not publicly routed. Unit composition and route declara
 are checked without starting listeners. Live cross-service behavior, private read-state
 delivery, seven-day archival and production Node execution remain pending.
 
+### Migrated world favorites
+
+The realm composes `GameServices.worldFavorites` from `repositories/world-favorites`.
+`controllers/game` parses the three favorite commands, pure `rules/world-favorites`
+validates names/catalog limits and normalizes server families, and `dtos/world-favorites`
+preserves nullable fields and exact longs. The existing local `world_favorite` table
+owns bookmarks; global `server_info` supplies read-only presentation metadata. Owner locks
+serialize atomic replacement and transactional pair deletion. Listing is a local
+repeatable-read snapshot followed by a separate bounded global read, with no claimed
+cross-database atomicity. No map simulation, movement or coordinate mutation is introduced.
+Startup checks the existing tables. Source-compatible ordering includes explicit nulls
+last and a documented deterministic tie-breaker. Storage-only name exclusions and SFS
+response bounds are documented in the [realm runbook](../apps/server/README.md#world-favorites).
+Unit composition uses synthetic clients; no migration or live validation was performed.
+
 ### Migrated files implementation
 
 `apps/files` composes `api/files`, `identity/avatar`, `validations/image` and
