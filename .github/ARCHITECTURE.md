@@ -508,7 +508,13 @@ boundary. Item switches, event controls and world-activity switches now use sepa
 selector functions matching their reference methods. Deferred-login configuration,
 account verification and lucky-day effects select the appropriate parser; kingdom
 skill availability uses the function-on parser. Lenient dates and remaining version
-policies still require compatibility work. The resource-owner
+policies still require compatibility work. Kingdom-skill presentation now consumes
+ordered catalog declarations separately from the final ID index, restores each row
+with its constructor validation/failure boundary, and uses fresh Integer-map tab
+traversal. A bounded Java 8 list sort preserves the comparator's ID equality, signed
+subtraction, merge order and contract failures. Hidden entries retain the reference
+separator behavior without evaluating availability. This projection neither executes
+skills nor changes catalog records. The resource-owner
 effect controller now decodes current saved abilities, reads execution-realm world
 effects and conditional emperor state, and connects ordinary load, general-only 133
 and new-general equipment modifiers. It preserves separate general and expedition

@@ -10,6 +10,9 @@ import {
   versionAtLeast,
 } from "@opencok/rules/availability";
 import type { Rule, Rules } from "@opencok/rules/game";
+import { restoredKingdomSkills, type KingdomSkill } from "@opencok/rules/kingdom-skills";
+import { javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
+import { javaListSort } from "@opencok/rules/java-list-sort";
 
 const objectKeys = [
   "player_max",
@@ -379,24 +382,28 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
   const skillConfig = rules.items.get("kingdomskill");
   if (skillConfig) {
     const value = strings(skillConfig);
-    const tabs = new Map<number, Rule[]>();
-    for (const skill of rules.configuration.kingdomSkills?.values() ?? []) {
-      const tab = integer(skill.showTab ?? "");
-      integer(skill.tabIndex ?? "");
+    const tabs = new Map<number, KingdomSkill[]>();
+    const records = rules.configuration.kingdomSkillRecords ?? [
+      ...(rules.configuration.kingdomSkills?.values() ?? []),
+    ];
+    for (const skill of restoredKingdomSkills(records)) {
+      const tab = skill.showTab;
       const list = tabs.get(tab) ?? [];
       list.push(skill);
       tabs.set(tab, list);
     }
-    for (const [tab, skills] of tabs) {
+    for (const tab of javaIntHashMapOrder(tabs.keys())) {
+      const skills = tabs.get(tab)!;
       value[`k${tab}`] = sfs.string(
-        skills
-          .sort((a, b) => integer(a.tabIndex!) - integer(b.tabIndex!))
-          .filter((skill) => integer(skill.tabIndex!) !== -1)
-          .map((skill) => {
+        javaListSort(skills, (a, b) => (a.id === b.id ? 0 : (a.tabIndex - b.tabIndex) | 0))
+          .map((skill, index) => {
+            if (skill.tabIndex === -1) return "";
             const selector = context.testServer ? skill.test : skill.online;
-            return `${skill.id}_${selector !== undefined && featureRealmEnabled(selector, rules.kingdomId) ? "1" : "0"}`;
+            const enabled =
+              selector !== undefined && featureRealmEnabled(selector, rules.kingdomId);
+            return `${skill.id}_${enabled ? "1" : "0"}${index === skills.length - 1 ? "" : ";"}`;
           })
-          .join(";"),
+          .join(""),
       );
     }
     result.kingdomskill = sfs.object(value);
