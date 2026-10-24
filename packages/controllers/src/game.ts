@@ -123,7 +123,10 @@ const playerRankingKinds = {
   "silver.contribute.rank": "contribution",
 } as const;
 
-type GameConfig = Pick<ServerConfig, "kingdomId" | "mailTranslationEnabled" | "crossSearchEnabled">;
+type GameConfig = Pick<
+  ServerConfig,
+  "kingdomId" | "mailTranslationEnabled" | "crossSearchEnabled" | "chatInterval" | "feedMaxCount"
+>;
 
 type ReadyCity = CityState & { profile: Row; resource: Row };
 export interface Result {
@@ -275,6 +278,8 @@ export class Game {
         body = dataConfig(this.rules, {
           profileLevel: num(await this.profile(uid), "level"),
           now: this.now(),
+          chatInterval: this.config.chatInterval,
+          feedMaxCount: this.config.feedMaxCount,
         });
         break;
       case "setting.xml":

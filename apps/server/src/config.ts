@@ -22,6 +22,8 @@ export const config = Effect.gen(function* () {
         }
       : undefined,
     host: settings.GAME_HOST,
+    chatInterval: settings.GAME_CHAT_INTERVAL,
+    feedMaxCount: settings.GAME_FEED_MAX_COUNT,
     mailTranslationEnabled: settings.GAME_MAIL_TRANSLATION,
     crossSearchEnabled: settings.GAME_CROSS_SEARCH,
     port: settings.GAME_PORT,
