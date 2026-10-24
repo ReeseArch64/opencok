@@ -507,8 +507,14 @@ semantics. Parse failures propagate to the consuming module's existing failure
 boundary. Item switches, event controls and world-activity switches now use separate
 selector functions matching their reference methods. Deferred-login configuration,
 account verification and lucky-day effects select the appropriate parser; kingdom
-skill availability uses the function-on parser. Lenient dates and remaining version
-policies still require compatibility work. Kingdom-skill presentation now consumes
+skill availability uses the function-on parser. Shared version comparison now parses
+all nonempty Java Integer components before short-circuit comparison of three positions;
+malformed extra components throw and missing positions fail only when reached.
+Function-on contexts share the Java-blank player bypass, while account switches,
+cross-open configuration and lucky-day eligibility use direct comparison. Ordinary
+announcement metadata and server-only gates retain their lack of client comparison.
+The login composition still selects the supported process version. Lenient dates
+still require compatibility work. Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
 traversal. A bounded Java 8 list sort preserves the comparator's ID equality, signed

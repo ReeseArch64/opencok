@@ -144,6 +144,27 @@ an available backend service. They remain closed in the current composition;
 ordinary configured feature metadata is no longer forced off. This does not enable
 unsupported gameplay commands or establish client rendering.
 
+Feature-version comparison now parses every nonempty dot-separated component as a
+signed Java Integer before comparing the first three positions. Unicode decimal
+digits, ASCII signs, leading zeroes and repeated dots retain their reference meaning.
+Extra valid components do not affect ordering, but malformed extra components throw.
+Missing components throw only if comparison reaches that position: `13` is newer than
+`12.6.0`, while `12.6` cannot be compared with `12.6.0`. Inputs are bounded to 65,535
+characters and 4,096 nonempty components; these limits are maintained safeguards.
+
+Function-on checks require nonblank configured version/realm metadata and bypass the
+numeric comparison for a Java-blank player version. Direct comparisons for account
+verification, cross-open configuration and lucky-day eligibility have no player-blank
+bypass. Account switches first reject blank required metadata; the other two direct
+paths retain their existing outer eligibility checks. Ordinary announcement metadata
+and server-only feature gates still do not compare a client version. Invalid versions
+propagate through each consuming module's existing error boundary, including skipping
+account-counter reads after a version failure. The login runtime continues to select
+the supported process client version; this change does not restore per-session version
+negotiation. Eight added units include 1,280 independent Java 8 version-pair fixtures
+with 2,560 direct/function-on outcomes, DTO serialization, event effects and controller
+failure ordering. Lenient legacy date parsing remains pending.
+
 Function-on availability, server-side effect gates and ordinary feature announcements
 use `featureRealmEnabled`. It recognizes exact `all`/`close`, skips empty semicolon
 segments, accepts Java signed Integer members and returns immediately on the first
@@ -155,7 +176,7 @@ Trailing line terminators do not turn malformed tokens into valid ranges.
 
 Required version and realm metadata use Java blank semantics before selection.
 Server-only gates require version metadata without comparing a client version.
-Availability still applies its selected version policy before realm parsing. Invalid
+Availability applies the function-on player-version policy before realm parsing. Invalid
 selectors propagate to their existing caller boundary: the expedition contribution
 falls back to zero, while an ordinary required effect/configuration read may fail.
 The primitive accepts signed Int realm values, while command/runtime validation
@@ -1697,9 +1718,8 @@ effects for the execution realm and reads that realm's emperor version only when
 saved throne reward records require it. The cache methods and runtime service wiring
 accept an explicit destination realm; calls without one retain their local default.
 Saved home/cross-fight origin and observer version do not replace the execution realm
-or the owner's version. Persisted-owner contexts explicitly opt into legacy player
-version comparison for ordinary feature gates; other contexts retain their existing
-strict version checks.
+or the owner's version. Persisted-owner and ordinary contexts now share the same
+function-on player-version comparison, including its blank-player bypass.
 
 Ordinary load effects 78/2196 and general-only 133 are resolved first. Bound general
 equipment resolves its color/site/all-equipment modifiers from the same current owner

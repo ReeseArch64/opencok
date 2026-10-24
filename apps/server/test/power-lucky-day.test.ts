@@ -216,3 +216,22 @@ test("active dependency gaps and malformed effect vectors fail rather than inven
     ]),
   );
 });
+
+test("lucky-day player versions retain direct Java comparison before realm and event state", () => {
+  const rules = fixture();
+  const control = rules.configuration.payControl!.get("69028")!;
+  for (const version of ["13", ".12..6.0.1", "１２.６.０"])
+    expect(luckyDayEffects(profile, lucky, server, rules, { ...context, version }).get(487)).toBe(
+      15,
+    );
+  for (const version of ["", "\u2000", "12.6", "13.bad"])
+    expect(() => luckyDayEffects(profile, lucky, server, rules, { ...context, version })).toThrow();
+  control.k2 = "bad";
+  expect(luckyDayEffects(profile, lucky, server, rules, { ...context, version: "11" }).size).toBe(
+    0,
+  );
+  delete control.k1;
+  expect(() => luckyDayEffects(profile, lucky, server, rules, context)).toThrow();
+  rules.features.get("luckyday_server")!.online = "close";
+  expect(luckyDayEffects(profile, lucky, server, rules, context).size).toBe(0);
+});
