@@ -31,7 +31,6 @@ const objectKeys = [
   "world_distance",
   "world_marchtime",
   "world_detect",
-  "world_fire",
   "world_fire1",
   "world_fire2",
   "world_rally",
@@ -219,7 +218,8 @@ function strings(rule: Rule | undefined, projection?: Record<string, string>): F
 }
 
 export function dataConfig(rules: Rules, context: DataConfigContext = {}): Fields {
-  if (!rules.items.size) throw new GameError(errors.unsupported);
+  const items = rules.configuration.dataConfig ?? rules.items;
+  if (!items.size) throw new GameError(errors.unsupported);
   const result: Fields = {};
   const version = context.version ?? MOBILE_CLIENT_VERSION;
   const now = context.now ?? Date.now();
@@ -234,24 +234,30 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
   const object = (target: string, rule: Rule | undefined, projection?: Record<string, string>) => {
     if (rule) result[target] = sfs.object(strings(rule, projection));
   };
-  for (const key of objectKeys) object(key, rules.items.get(key));
+  for (const key of objectKeys) object(key, items.get(key));
   for (const [target, source] of [
     ["hero", "hero_soul"],
     ["hero_yutao", "hero"],
     ["followFB", "FB_follow"],
   ])
-    object(target!, rules.items.get(source!));
+    object(target!, items.get(source!));
   object("w_thedoor", rules.features.get("w_thedoor"));
   object("69008", rules.configuration.payControl?.get("69008"));
-  object("worldmap_pve", rules.items.get("worldmap_pve"), { k1: "k5", k2: "k6" });
-  object("facebook_gift", rules.items.get("facebook_gift"), { k7: "k7" });
-  if (rules.items.get("ranking")?.k3 !== undefined)
-    object("ranking", rules.items.get("ranking"), { k3: "k3" });
+  const pve = items.get("worldmap_pve");
+  if (pve)
+    result.worldmap_pve = sfs.object(
+      Object.fromEntries(
+        [pve.k5, pve.k6]
+          .filter((value) => value !== undefined)
+          .map((value, index) => [`k${index + 1}`, sfs.string(value)]),
+      ),
+    );
+  object("facebook_gift", items.get("facebook_gift"), { k7: "k7" });
+  if (items.get("ranking")?.k3 !== undefined) object("ranking", items.get("ranking"), { k3: "k3" });
 
   for (const [target, id, key] of [
     ["freeSpdT", "resources_basics", "k8"],
     ["resources_basics", "resources_basics", "k7"],
-    ["cityDefMax", "world_fire1", "k1"],
     ["cityDefInterval", "world_fire1", "k2"],
     ["monster_count", "monster", "k3"],
     ["monster_decr", "monster", "k6"],
@@ -266,7 +272,7 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
     ["neutral_row", "kingdom_neutralServer", "k4"],
     ["neutral_CD_time", "kingdom_neutralServer_time", "k7"],
   ] as const) {
-    const value = rules.items.get(id)?.[key];
+    const value = items.get(id)?.[key];
     if (value !== undefined) result[target] = sfs.int(integer(value));
   }
   for (const [target, id, key] of [
@@ -276,35 +282,34 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
     ["monster_power_limit", "monster", "k8"],
     ["boss_decr", "monster", "k10"],
     ["loading_show_type", "loading_show_type", "k1"],
-    ["overlord_open_type", "overlord", "k1"],
   ] as const) {
-    const value = rules.items.get(id)?.[key];
+    const value = items.get(id)?.[key];
     if (value !== undefined) result[target] = sfs.string(value);
   }
+  const overlord = rules.items.get("overlord")?.k1;
+  if (overlord !== undefined) result.overlord_open_type = sfs.string(overlord);
   if (context.profileLevel !== undefined && available("stamina_limit")) {
     const stamina = rules.role(context.profileLevel).stamina;
     if (stamina === undefined) throw new GameError(errors.unsupported, "stamina_rule");
     result.monster_count = sfs.int(integer(stamina));
   }
-  const bossMembers = rules.items.get("monster")?.k11;
+  const bossMembers = items.get("monster")?.k11;
   if (bossMembers !== undefined) {
     const value = bossMembers.split(";").filter(Boolean)[1];
     if (value === undefined) throw new GameError(errors.unsupported, "boss_members_rule");
     result.boss_max_member = sfs.string(value);
   }
   result.cross_open = sfs.bool(!!context.crossOpen && versionAtLeast(version, "1.0.59"));
-  const scout = rules.items.get("scoutmark_on");
+  const scout = items.get("scoutmark_on");
   if (scout?.k2 !== undefined && enabled(scout.k1)) result.scoutmark_on = sfs.string(scout.k2);
-  const terms = rules.items.get("serviceterms_on");
+  const terms = items.get("serviceterms_on");
   if (terms?.k1 === "1" && enabled(terms.k3) && terms.k2 !== undefined)
     result.serviceTerms_on = sfs.string(terms.k2);
 
-  const questSwitch = rules.items.get("function_on8");
+  const questSwitch = items.get("function_on8");
   const quests = questSwitch !== undefined && enabled(questSwitch.k2);
-  const questChat = rules.items.get("alliance_quest_chat");
-  result.alliance_quest = sfs.string(
-    quests ? (rules.items.get("alliance_quest")?.k12 ?? "0") : "0",
-  );
+  const questChat = items.get("alliance_quest_chat");
+  result.alliance_quest = sfs.string(quests ? (items.get("alliance_quest")?.k12 ?? "0") : "0");
   result.alliance_quest_chat = sfs.string(
     quests && questChat?.k1 === "1" ? (questChat.k2 ?? "0") : "0",
   );
@@ -314,21 +319,21 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
   result.alliance_quest_push = sfs.int(
     quests && questChat?.k5 !== undefined && enabled(questChat.k5) ? 1 : 0,
   );
-  const trumpet = rules.items.get("on_trumpet");
+  const trumpet = items.get("on_trumpet");
   result.on_trumpet_k2 = sfs.int(trumpet !== undefined && enabled(trumpet.k2) ? 1 : 0);
   result.alliance_mission = sfs.string(available("alliance_mission") ? "on" : "off");
 
   const prefix = context.worldCup ? "wag" : "wa";
-  object("wa_army", rules.items.get(`${prefix}_army`));
-  const score = rules.items.get(`${prefix}_score`)?.k10;
+  object("wa_army", items.get(`${prefix}_army`));
+  const score = items.get(`${prefix}_score`)?.k10;
   if (score !== undefined) result.dbf_maxScoreView = sfs.long(signedLong(score));
-  const rows = rules.items.get(`${prefix}_scene`)?.k1;
+  const rows = items.get(`${prefix}_scene`)?.k1;
   if (rows !== undefined) result.dragon_world_row = sfs.int(integer(rows));
   for (const [key, switchKey] of [
     ["wa_switch", "k1"],
     ["graveyard", "k3"],
   ] as const) {
-    const rule = rules.items.get(key);
+    const rule = items.get(key);
     if (rule) {
       const value = strings(rule);
       if (key === "graveyard" || rule[switchKey] !== undefined) {
@@ -341,13 +346,13 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
       result[key] = sfs.object(value);
     }
   }
-  const activity = rules.items.get("activityconfig2");
+  const activity = items.get("activityconfig2");
   if (activity) {
     const value = strings(activity);
     if (version === "1.1.10") value.k12 = sfs.string("0");
     result.activityconfig2 = sfs.object(value);
   }
-  const icon = rules.items.get("icon");
+  const icon = items.get("icon");
   if (icon) {
     const value = strings(icon);
     for (const key of ["k4", "k5"]) {
@@ -358,14 +363,14 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
     result.icon = sfs.object(value);
   }
   for (const family of ["worldboss", "worldboss_elite", "worldboss_special"]) {
-    object(family, rules.items.get(family), { physicalcost: "k10", citylevel: "k1" });
+    object(family, items.get(family), { physicalcost: "k10", citylevel: "k1" });
     for (const range of ["10_19", "20_29", "30_40"]) {
       const key = `${family}_${range}`;
-      object(key, rules.items.get(key), { physicalcost: "k10", citylevel: "k1" });
-      object(`${key}_other`, rules.items.get(`${key}_other`));
+      object(key, items.get(key), { physicalcost: "k10", citylevel: "k1" });
+      object(`${key}_other`, items.get(`${key}_other`));
     }
   }
-  object("worldboss_npc", rules.items.get("worldboss_npc"), {
+  object("worldboss_npc", items.get("worldboss_npc"), {
     physicalcost: "k10",
     citylevel: "k1",
   });
@@ -378,7 +383,7 @@ export function dataConfig(rules: Rules, context: DataConfigContext = {}): Field
       }),
     ),
   );
-  const skillConfig = rules.items.get("kingdomskill");
+  const skillConfig = items.get("kingdomskill");
   if (skillConfig) {
     const value = strings(skillConfig);
     const tabs = new Map<number, KingdomSkill[]>();

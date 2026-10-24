@@ -520,7 +520,14 @@ zero; activity panels retain -1 and exception-to-closed behavior, and hero pairs
 their shared formatter and all-or-zero endpoint assignment. Function-on end dates are
 consumed only after the start gate passes. The runtime remains explicitly UTC; locale
 selection, regional timezone transitions and non-Gregorian calendar systems are not
-emulated. Kingdom-skill presentation now consumes
+emulated. Resource loading now separates the final item `data_config` group from the
+global ID index; duplicate groups replace their own view without clearing global
+entries. Data-config projections consume that group, while the overlord scalar keeps
+its reference global lookup. Loaded empty groups never fall back to other item groups.
+PVE aliases number only present selected fields, and the projection omits the extra
+world_fire/cityDefMax fields absent from the reference. Mandatory-record failures,
+remaining scalar parsing differences and general-sale restoration still require work.
+Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
 traversal. A bounded Java 8 list sort preserves the comparator's ID equality, signed

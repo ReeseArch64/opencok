@@ -3,14 +3,15 @@ import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { join } from "node:path";
 import { Rules, type Rule } from "@opencok/rules/game";
 
-function parseRecords(xml: string, name: string): Rule[] {
+function parseDocument(xml: string, preserveOrder = false) {
   if (
     Buffer.byteLength(xml) > 16 * 1024 * 1024 ||
     /<!DOCTYPE|<!ENTITY/i.test(xml) ||
     XMLValidator.validate(xml) !== true
   )
     throw new Error("Invalid gameplay resource XML");
-  const parsed = new XMLParser({
+  return new XMLParser({
+    preserveOrder,
     ignoreAttributes: false,
     attributeNamePrefix: "",
     parseAttributeValue: false,
@@ -19,6 +20,10 @@ function parseRecords(xml: string, name: string): Rule[] {
     removeNSPrefix: true,
     isArray: (tag) => tag === "Group" || tag === "ItemSpec",
   }).parse(xml);
+}
+
+function parseRecords(xml: string, name: string): Rule[] {
+  const parsed = parseDocument(xml);
   if (!Object.hasOwn(parsed, "database")) throw new Error("Invalid gameplay resource root");
   const records: unknown[] = [];
   const collect = (node: unknown) => {
@@ -37,6 +42,43 @@ function parseRecords(xml: string, name: string): Rule[] {
     )
       throw new Error("Invalid gameplay resource record");
   return records as Rule[];
+}
+
+function parseItemCatalogs(xml: string): {
+  items: Map<string, Rule>;
+  dataConfig: Map<string | null, Rule>;
+} {
+  type Element = Record<string, unknown> & { ":@"?: Rule };
+  const parsed = parseDocument(xml, true) as Element[];
+  const root = parsed.find((element) => Object.hasOwn(element, "database"));
+  if (!root || !Array.isArray(root.database)) throw new Error("Invalid gameplay resource root");
+  const elements = (nodes: Element[]) =>
+    nodes.filter((node) =>
+      Object.keys(node).some((key) => key !== ":@" && !key.startsWith("#") && !key.startsWith("?")),
+    );
+  const children = elements(root.database as Element[]);
+  const groups = children.filter((node) => Object.hasOwn(node, "Group"));
+  const items = new Map<string, Rule>();
+  let dataConfig = new Map<string | null, Rule>();
+  const records = (nodes: Element[]): Rule[] =>
+    elements(nodes).map((node) => {
+      const record = { ...node[":@"] };
+      if (Object.values(record).some((value) => typeof value !== "string"))
+        throw new Error("Invalid gameplay resource record");
+      items.set(record.id ?? "null", record);
+      return record;
+    });
+  if (!groups.length) records(children);
+  else
+    for (const group of groups) {
+      const id = group[":@"]?.id;
+      if (typeof id !== "string" || !Array.isArray(group.Group))
+        throw new Error("Invalid gameplay resource group");
+      const values = records(group.Group as Element[]);
+      if (id === "data_config")
+        dataConfig = new Map(values.map((record) => [record.id ?? null, record]));
+    }
+  return { items, dataConfig };
 }
 
 function indexRules(records: Rule[], name: string): Map<string, Rule> {
@@ -75,6 +117,7 @@ function indexRules(records: Rule[], name: string): Map<string, Rule> {
 }
 
 export function parseRules(xml: string, name: string): Map<string, Rule> {
+  if (name === "item") return parseItemCatalogs(xml).items;
   return indexRules(parseRecords(xml, name), name);
 }
 
@@ -94,9 +137,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
   const stars = (await exists(join(directory, "function_star.xml")))
     ? await load("function_star")
     : new Map<string, Rule>();
-  const items = (await exists(join(directory, "item.xml")))
-    ? await load("item")
-    : new Map<string, Rule>();
+  const { items, dataConfig } = (await exists(join(directory, "item.xml")))
+    ? parseItemCatalogs(await read("item"))
+    : { items: new Map<string, Rule>(), dataConfig: new Map<string | null, Rule>() };
   const optional = async (name: string) =>
     (await exists(join(directory, `${name}.xml`))) ? load(name) : new Map<string, Rule>();
   const [
@@ -227,6 +270,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     kingdomId,
     settings,
     {
+      dataConfig,
       generalSales,
       payControl,
       kingdomSkills: indexRules(kingdomSkillRecords, "kingdomskill"),
