@@ -35,6 +35,7 @@ function fixture() {
     mailSave: unused,
     mailRead: unused,
     mailDelete: unused,
+    mailContents: unused,
     mailConversationSave: async (uid, query) => {
       calls.push({ uid, query });
       return state;

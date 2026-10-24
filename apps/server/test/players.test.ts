@@ -24,6 +24,7 @@ function game(
       expect(uid).toBe("observer");
       return profile;
     },
+    mailContents: unused,
     mailConversationSave: unused,
     mailDelete: unused,
     mailRead: unused,
