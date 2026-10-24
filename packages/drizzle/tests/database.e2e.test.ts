@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { eq } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
@@ -181,7 +182,10 @@ test("default setup is repeatable, preserves records and keeps both kingdom data
       (await pool.query("SELECT count(*)::integer AS n FROM drizzle.__drizzle_migrations")).rows[0]
         .n,
     ).toBe(before);
-    expect(before).toBe(role === "kingdom" ? 3 : 2);
+    const journal = JSON.parse(
+      await readFile(new URL(`../migrations/${role}/meta/_journal.json`, import.meta.url), "utf8"),
+    );
+    expect(before).toBe(journal.entries.length);
     await expect(migrateDatabase(pool, role === "global" ? "kingdom" : "global")).rejects.toThrow(
       "different role",
     );
@@ -206,7 +210,7 @@ test("default setup is repeatable, preserves records and keeps both kingdom data
           "SELECT count(*)::integer AS n FROM information_schema.tables WHERE table_schema='opencok_kingdom'",
         )
       ).rows[0].n,
-    ).toBe(659);
+    ).toBe(catalog.filter((entry) => entry.namespace === "opencok_kingdom").length);
     expect(
       (
         await kingdom.pool.query(
