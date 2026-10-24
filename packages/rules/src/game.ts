@@ -32,6 +32,7 @@ export interface PowerCatalogs {
   dragonSkills?: Map<string, Rule>;
   activityEvents?: Map<string, Rule>;
   offices?: Map<string, Rule>;
+  treeSkins?: Map<string, Rule>;
 }
 export class Rules {
   constructor(
