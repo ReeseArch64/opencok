@@ -856,12 +856,12 @@ export class Game {
   private async mailConversationRead(uid: string, params: Fields): Promise<Fields> {
     const query = mailConversationReadRequest(params, this.now());
     if (!this.db.mailConversationRead || query.effects.some((effect) => effect.kind === "chat"))
-      throw new GameError(errors.unsupported, "chat_read_delivery");
+      throw new GameError(errors.unsupported, "mail");
     const body: Fields = { success: sfs.bool(true) };
     for (const key of ["_cok_", "cmdBaseTime"])
       if (params[key] !== undefined) body[key] = params[key]!;
     if (encode(extension("chatMail.read", body)).length > MAX_FRAME)
-      throw new GameError(errors.unsupported, "mail_response_size");
+      throw new GameError(errors.unsupported, "mail");
     const state = await this.db.mailConversationRead(uid, query);
     const profile = this.checkProfile(state.profile, query.now);
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
