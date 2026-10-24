@@ -64,6 +64,8 @@ test("stored JSON separates malformed content from bounded or unresolved decodin
     "",
     "[]",
     "{a:bare}",
+    "{a:[1,,2]}",
+    "{a:function(){}}",
     "{a:1e999}",
     "{a:'line\nbreak'}",
     "{a:'\\xGG'}",
@@ -72,9 +74,6 @@ test("stored JSON separates malformed content from bounded or unresolved decodin
   ])
     expect(() => decodeLegacyJsonObject(input)).toThrow(LegacyJsonError);
   for (const input of [
-    "{a:[1,,2]}",
-    "{class:[1,,2],a:1}",
-    "{a:function(){}}",
     '{"a":' + "[".repeat(34) + "0" + "]".repeat(34) + "}",
     '{"' + "k".repeat(256) + '":0}',
     "{[]:0}",
@@ -194,6 +193,5 @@ test("permissive comment syntax, duplicate JSON strings and split UTF-16 boundar
   });
   const chunks = result([entry(2, "x".repeat(4999) + "😀" + "z")])[0]!.contentsArr;
   expect(chunks).toEqual(sfs.array([sfs.string("x".repeat(4999) + "?"), sfs.string("?z")]));
-  for (const raw of ['{a:"\\uD800"}', "{1.0:1}"])
-    expect(() => decodeLegacyJsonObject(raw)).toThrow(ProtocolError);
+  for (const raw of ["{1.0:1}"]) expect(() => decodeLegacyJsonObject(raw)).toThrow(ProtocolError);
 });

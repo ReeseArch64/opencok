@@ -917,7 +917,14 @@ boundaries, overflow rejection and signed zero. Integer overflow falls through t
 legacy long/double/string alternatives rather than wrapping. Frozen synthetic oracle
 vectors cover 459 numeric inputs without loading Java libraries during maintained tests.
 The decoder also preserves default excluded properties and the legacy distinction
-between immediately quoted JSON strings and strings following whitespace. Combat
+between immediately quoted JSON strings and strings following whitespace. JSON-looking
+strings in arrays retain the reference's extra quote characters. Function-shaped values
+are parsed as data and never executed. Retained function values and array holes cannot
+be converted to SFS and make structured mail malformed; the same forms in discarded
+properties do not invalidate the message. Function headers follow the reference's
+special property-exclusion behavior. Escaped isolated UTF-16 surrogates use Java's UTF-8
+replacement byte, while valid pairs and signed/Unicode hexadecimal escapes are retained.
+An additional 144 frozen synthetic structural vectors exercise those distinctions. Combat
 reports convert old helper maps to arrays and remove general skill/ability fields;
 scout reports filter five obsolete ability IDs. Old plain scout reports remain text.
 Each result overrides `createTime` and `u` from storage, clears `contentStr` and carries
@@ -940,9 +947,9 @@ auxiliary contents, group pointers, synchronization markers and reward state are
 changed. Projection and complete correlated SFS encoding run before any removal, so
 storage, byte/depth/item limits or serialization failures roll back all changes.
 
-Some decoder edge cases remain unfinished: complex/numeric-double object keys,
-function values, array holes and escaped unpaired surrogates reject the
-whole request without deleting mail. Helper-map output follows parsed key order rather
+Complex/numeric-double object keys remain unfinished and reject the whole request
+without deleting mail. Keys that collide after UTF-8 surrogate replacement also reject
+without removal, avoiding duplicate wire keys. Helper-map output follows parsed key order rather
 than the reference's concurrent hash-map traversal. These differences remain explicit
 work under #69; this implementation is not proof of complete content parity. No new
 schema, dependency, translation provider or external service is introduced.
