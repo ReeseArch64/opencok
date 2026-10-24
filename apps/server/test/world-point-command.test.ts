@@ -39,6 +39,7 @@ const sampleMarch = (patch: Row = {}): Row => ({
   marchStartTime: 9007199254740993n,
   arrivalTime: 9223372036854775807n,
   exploreTime: 1n,
+  occupyResourceEndTime: 5000n,
   exploreReport: encodeArray([sfs.object({ id: sfs.int(7), time: sfs.long(9007199254740993n) })]),
   ...patch,
 });
@@ -74,7 +75,8 @@ function fixture() {
       expect(text).not.toMatch(/for update|for share|armyInfo|plunderRes|monsterInfo/);
       const table = /from "opencok_kingdom"\."([^"]+)"/.exec(text)![1]!;
       const report = table === "world_march" && text.includes('"exploreReport"');
-      const key = table + (report ? ":report" : "");
+      const neutral = table === "world_march" && text.includes('"occupyResourceEndTime"');
+      const key = table + (report ? ":report" : neutral ? ":neutral" : "");
       if (key === state.fail) throw new Error("Synthetic private failure");
       let rows: Row[] = [];
       if (table === "userprofile")
@@ -91,7 +93,18 @@ function fixture() {
       else if (table === "alliance") rows = [{ uid: "A", abbr: "SYN" }];
       else if (table === "alliance_member") rows = [{ uid: "target", rank: 4 }];
       else if (table === "world_march") {
-        if (report) {
+        if (neutral) {
+          expect(params).toEqual([701, 1, 1]);
+          expect(text).toContain('"world_march"."targetId" = $1');
+          expect(text).toContain('"world_march"."state" = $2');
+          expect(text).toContain('order by "opencok_kingdom"."world_march"."uuid" asc limit $3');
+          expect(text.slice(text.indexOf(" where "))).not.toMatch(/ownerUid|worldId/);
+          expect(text).not.toMatch(/exploreReport|armyInfo|collectSpd|plunderRes/);
+          rows = state.marches
+            .filter((row) => row.targetId === params[0] && row.state === params[1])
+            .sort((a, b) => (String(a.uuid) < String(b.uuid) ? -1 : 1))
+            .slice(0, 1);
+        } else if (report) {
           expect(text).toContain('"world_march"."uuid" = $1');
           expect(text).toContain('"world_march"."ownerUid" = $2');
           expect(params.slice(1)).toEqual(["observer", 2]);
@@ -126,6 +139,7 @@ function fixture() {
   } as unknown as Parameters<typeof createWorldPointDetailStore>[0];
   const store = createWorldPointDetailStore(databases, 1);
   const rules = new Rules(new Map(), new Map(), new Map());
+  rules.world.neutralResources = new Map([["monster", { gather_time: "2" }]]);
   rules.world.fieldMonsters = new Map([["monster", { NPC: "1", Gift: "100" }]]);
   const game = new Game({} as GameStore, rules, { kingdomId: 1 }, () => now, {
     worldPointDetail: store,
@@ -261,8 +275,8 @@ test("base-only point kinds and city branches use public owner fields without fa
   expect((await f.execute()).body.targetPower).toBeUndefined();
 });
 
-test("unfinished territory, boss, occupied new-resource, neutral and barbarian paths reject explicitly", async () => {
-  for (const type of [14, 18, 20, 21, 23, 37, 44, 46, 47, 60, -1, 70]) {
+test("unfinished territory, boss, occupied new-resource and barbarian paths reject explicitly", async () => {
+  for (const type of [14, 18, 20, 21, 23, 37, 44, 46, 47, -1, 70]) {
     const f = fixture();
     f.state.point = samplePoint({ pointType: type });
     await expect(f.execute()).rejects.toThrow("102192");
@@ -388,4 +402,144 @@ test("fresh owner-map restoration matches existing Java 8 collision traversal or
       expect(reportReads(f)[0]!.params[0]).toBe(keys[order[position]!]!);
     }
   }
+});
+
+test("neutral resources select an occupying destination march across owners and worlds in the local ordinary realm", async () => {
+  const f = fixture();
+  f.state.point = samplePoint({ pointType: 60 });
+  f.state.marches = [
+    sampleMarch({ uuid: "00", state: 0, occupyResourceEndTime: 99n }),
+    sampleMarch({ uuid: "01", targetId: 702, occupyResourceEndTime: 100n }),
+    sampleMarch({ uuid: "b", occupyResourceEndTime: 7000n }),
+    sampleMarch({
+      uuid: "a",
+      ownerUid: "another-player",
+      worldId: 99,
+      occupyResourceEndTime: 6000n,
+      exploreReport: Buffer.alloc(65536),
+    }),
+  ];
+  const result = await f.execute({ _cok_: sfs.int(42) });
+  expect(result).toEqual({
+    body: {
+      uid: sfs.string("target"),
+      registerTime: sfs.long(200n),
+      point: sfs.int(701),
+      occupybegintime: sfs.long(4000n),
+      _cok_: sfs.int(42),
+    },
+    pushes: [],
+  });
+  expect(decode(encode(result.body))).toEqual(result.body);
+  expect(reportReads(f)).toHaveLength(0);
+  expect(f.queries.filter((q) => q.text.includes('"occupyResourceEndTime"'))).toHaveLength(1);
+  expect(f.state.marches[3]!.occupyResourceEndTime).toBe(6000n);
+});
+
+test("neutral timing omits the field without a selected march and skips catalogs for blank items", async () => {
+  const f = fixture();
+  f.state.point = samplePoint({ pointType: 60 });
+  f.rules.world.neutralResources!.clear();
+  f.state.marches = [];
+  expect((await f.execute()).body.occupybegintime).toBeUndefined();
+  f.state.marches = [sampleMarch({ state: 2 })];
+  expect((await f.execute()).body.occupybegintime).toBeUndefined();
+  for (const pointItem of [null, "", "\u180e\u2003"]) {
+    f.state.point.pointItem = pointItem;
+    f.queries.length = 0;
+    f.state.marches = [sampleMarch()];
+    expect((await f.execute()).body.occupybegintime).toBeUndefined();
+    expect(f.queries.some((q) => q.text.includes('from "opencok_kingdom"."world_march"'))).toBe(
+      false,
+    );
+  }
+  f.state.point = samplePoint({ pointType: 60, ownerId: null, ownerName: null });
+  f.rules.world.neutralResources!.set("monster", { gather_time: "2" });
+  expect((await f.execute()).body).toEqual({
+    point: sfs.int(701),
+    occupybegintime: sfs.long(3000n),
+  });
+});
+
+test("neutral timestamps widen signed durations before multiplication and preserve exact long wrapping", async () => {
+  const vectors: [bigint | null, string, bigint][] = [
+    [5000n, "2", 3000n],
+    [null, "2", -2000n],
+    [9007199254740993n, "+٣", 9007199254737993n],
+    [-9223372036854775808n, "1", 9223372036854774808n],
+    [9223372036854775807n, "-1", -9223372036854774809n],
+    [0n, "2147483647", -2147483647000n],
+    [0n, "-2147483648", 2147483648000n],
+    [-5000n, "-2", -3000n],
+  ];
+  for (const [end, duration, expected] of vectors) {
+    const f = fixture();
+    f.state.point = samplePoint({ pointType: 60 });
+    f.state.marches = [sampleMarch({ occupyResourceEndTime: end })];
+    f.rules.world.neutralResources!.set("monster", { gather_time: duration });
+    const result = await f.execute();
+    expect(result.body.occupybegintime).toEqual(sfs.long(expected));
+    expect(decode(encode(result.body))).toEqual(result.body);
+  }
+});
+
+test("neutral selected-march dependencies reject missing or malformed durations without fabricated times", async () => {
+  for (const record of [
+    undefined,
+    {},
+    { gather_time: "" },
+    { gather_time: " 2" },
+    { gather_time: "2.0" },
+    { gather_time: "2147483648" },
+    { gather_time: "-2147483649" },
+  ]) {
+    const f = fixture();
+    f.state.point = samplePoint({ pointType: 60 });
+    f.rules.world.neutralResources = new Map();
+    if (record) f.rules.world.neutralResources.set("monster", record as Record<string, string>);
+    await expect(f.execute()).rejects.toThrow("102192");
+  }
+  const f = fixture();
+  f.state.point = samplePoint({ pointType: 60, pointItem: "null" });
+  await expect(f.execute()).rejects.toThrow("102192");
+  f.rules.world.neutralResources!.set("null", { gather_time: "0" });
+  expect((await f.execute()).body.occupybegintime).toEqual(sfs.long(5000n));
+});
+
+test("neutral lookup failures and inconsistent selected rows fail visibly in the read-only snapshot", async () => {
+  for (const rows of [
+    [sampleMarch({ targetId: 702 })],
+    [sampleMarch({ state: 2 })],
+    [sampleMarch({ uuid: "" })],
+    [sampleMarch({ worldId: 1.5 })],
+    [sampleMarch(), sampleMarch()],
+  ]) {
+    const f = fixture();
+    f.state.point = samplePoint({ pointType: 60 });
+    f.state.overrides.set("world_march:neutral", rows);
+    await expect(f.execute()).rejects.toThrow("world point detail unavailable");
+    expect(f.queries.at(-1)!.text).toBe("rollback");
+  }
+  const f = fixture();
+  f.state.point = samplePoint({ pointType: 60 });
+  f.state.fail = "world_march:neutral";
+  await expect(f.execute()).rejects.toThrow("world point detail unavailable");
+  f.state.fail = "";
+  f.state.marches[0]!.occupyResourceEndTime = 9223372036854775808n;
+  await expect(f.execute()).rejects.toThrow("102192");
+  f.state.marches[0]!.occupyResourceEndTime = 5000n;
+  const snapshot = await f.store.read("observer", { point: 701, kingdomId: 1, now });
+  const missing: WorldPointDetailStore = {
+    read: async () => ({ ...snapshot, neutralResource: undefined }),
+  };
+  const game = new Game({} as GameStore, f.rules, { kingdomId: 1 }, () => now, {
+    worldPointDetail: missing,
+  });
+  await expect(
+    game.execute("observer", "world.get.detail", { point: sfs.int(701) }),
+  ).rejects.toThrow("102192");
+  f.state.observer!.banFlag = 1;
+  f.queries.length = 0;
+  await expect(f.execute()).rejects.toThrow("E000000");
+  expect(f.queries.some((q) => q.text.includes('"occupyResourceEndTime"'))).toBe(false);
 });

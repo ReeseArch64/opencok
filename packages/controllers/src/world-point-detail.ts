@@ -1,3 +1,4 @@
+import { worldNeutralResource } from "@opencok/dtos/world-resource-detail";
 import type { WorldPointDetailStore } from "@opencok/contracts/world-point-detail";
 import type { Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
@@ -17,7 +18,7 @@ import {
   worldExplorationDetail,
   selectWorldExplorationMarch,
 } from "@opencok/rules/world-monster-detail";
-import { resourceRemaining } from "@opencok/rules/world-resource-detail";
+import { resourceRemaining, neutralResourceStart } from "@opencok/rules/world-resource-detail";
 import { favoriteInteger } from "@opencok/rules/world-favorites";
 import { mailBlank } from "@opencok/rules/mail";
 import type { Rules } from "@opencok/rules/game";
@@ -116,7 +117,6 @@ export async function localWorldPointDetail(
     !mailBlank(point.ownerMarchUUid as string | null)
   )
     return unsupported();
-  if (type === 60 && !mailBlank(point.pointItem as string | null)) return unsupported();
   if (type === 1 && rules.items.get("lost_battle")?.k3 === "1" && state.owner.profile)
     return unsupported();
   const result: Fields = {
@@ -130,6 +130,13 @@ export async function localWorldPointDetail(
     Object.assign(
       result,
       worldMonsterExploration(worldExplorationDetail(observer, point, marches, false)),
+    );
+  }
+  if (type === 60 && !mailBlank(point.pointItem as string | null)) {
+    if (!state.neutralResource) return unsupported();
+    Object.assign(
+      result,
+      worldNeutralResource(neutralResourceStart(point, state.neutralResource.march, rules)),
     );
   }
   if (

@@ -22,6 +22,7 @@ export interface WorldPointDetailSnapshot {
   point?: Row;
   owner?: WorldPointOwnerSnapshot;
   exploration?: { march: Row | undefined };
+  neutralResource?: { march: Row | undefined };
 }
 
 export type WorldExplorationSelector = (point: Row, marches: readonly Row[]) => string | undefined;

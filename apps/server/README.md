@@ -90,7 +90,7 @@ read-only mobile originals must be extracted in a separate working directory.
 and values encoded as strings, or an empty array when the catalog is absent. XML
 catalogs accept single records and multiple/nested groups. Duplicate IDs fail except
 for goods, features, research, equipment, statuses, dragon skills, activity panels,
-rewards, mail, field monsters and army formations, where the last record wins
+rewards, mail, field monsters, army formations and neutral resources, where the last record wins
 as in the legacy cache. Values retain leading
 zeroes and whitespace; malformed records and document type declarations fail loading.
 
@@ -1159,7 +1159,7 @@ unfinished specialized branches return `102192`; they are still required work in
 | Cities 1/2                                                                | Public base owner fields. City 1 rejects when the lost-battle feature is enabled and the target profile exists, until its additional effect/power/duel fields are implemented. |
 | Unoccupied world bosses 49/50                                             | Pending service/reward state; rejects. Occupied instances use the reference base owner fields.                                                                                 |
 | Territories 14/18/20/21/23/46/47, barbarian 44, occupied new resources 37 | Pending specialized state; rejects.                                                                                                                                            |
-| Neutral resource 60                                                       | Base owner fields when item is blank; nonblank items require the pending occupying-march timing reader and reject.                                                             |
+| Neutral resource 60                                                       | Base owner fields; with a nonblank item and an occupying destination march, adds Long `occupybegintime` from the stored end time and catalog gathering duration.               |
 | Other known types 0–69                                                    | Public base owner fields and point ID, as in the reference handler. Unknown types reject.                                                                                      |
 
 Every local query validates observer identity, realm and ban state before point
@@ -1168,7 +1168,7 @@ envelope. The command emits no pushes and performs no game-state writes. Existin
 bootstrap/reconnect restrictions on march state remain part of the unfinished
 topic-2 work; this query does not establish complete gameplay or client compatibility.
 
-Thirteen command/adapter unit tests cover these branches, error behavior, owner
+Eighteen command/adapter unit tests cover these branches, error behavior, owner
 isolation, bounded report selection, transaction failures and response limits.
 Fresh-map selection also reuses frozen Java 8 collision-order fixtures. Validation
 uses synthetic Drizzle clients; no live database, listener, service or client is run.
@@ -1212,6 +1212,32 @@ Raw troop load and runtime-only `maxCollectTime` must be resolved explicitly; th
 persisted march row alone does not provide both values. The read path must not
 silently schedule marches, start combat or repair ownership. This foundation does
 not establish full point-detail compatibility or complete topic 5.
+
+For local neutral-resource type 60, `sp_resources.xml` is loaded optionally into
+`Rules.world.neutralResources`, retaining the final duplicate ID definition. When
+the point item is nonblank, the reader selects one state-1 march by destination ID
+in the same read-only snapshot as the point. It selects only UUID, destination,
+world, state and resource end time; army data and report blobs are not read. Missing
+marches omit `occupybegintime` without consulting the catalog. Blank items skip
+both the march query and duration lookup. The point's owner/name occupancy flag
+does not suppress this branch.
+
+The ordinary-realm reference destination index ignores the supplied world ID and
+does not restrict march owner, so those extra filters are not introduced. Selection
+uses database UUID ascending order with limit one. The Java set contains march
+objects with identity-based hashes, and saved rows do not retain that process's
+traversal order. This deterministic selection is a documented restoration difference;
+it does not claim historical first-march equivalence or implement the per-world
+indexes of special battle/neutral server processes.
+
+`occupybegintime` is an exact SFS Long: stored `occupyResourceEndTime` minus signed
+Java Int `gather_time` widened to Long and multiplied by 1,000. Nullable end time
+defaults to zero; negative durations and signed-long wrapping are preserved.
+Missing/malformed required catalog data rejects instead of inventing a timestamp.
+The literal item string `null` is nonblank and requires its own catalog record when
+a march exists. Five added command/adapter units cover selection across owners and
+worlds, omitted fields, malformed dependencies, authorization, exact numeric
+boundaries and failure rollback; a loader unit covers optional files and duplicates.
 
 ## World point and owner read foundation
 

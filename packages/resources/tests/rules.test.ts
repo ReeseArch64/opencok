@@ -301,3 +301,27 @@ test("world monster catalogs load optionally, preserve final duplicates and stay
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("neutral resource durations load optionally and preserve final duplicate definitions and exact strings", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-neutral-resource-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).world.neutralResources?.size).toBe(0);
+    await writeFile(
+      join(directory, "sp_resources.xml"),
+      '<database><Group id="a"><ItemSpec id="res" gather_time="1"/></Group><Group id="b"><ItemSpec id="res" gather_time="+003"/></Group></database>',
+    );
+    expect((await loadRules(directory)).world.neutralResources!.get("res")).toEqual({
+      id: "res",
+      gather_time: "+003",
+    });
+    await writeFile(
+      join(directory, "sp_resources.xml"),
+      '<database><ItemSpec id="" gather_time="1"/></database>',
+    );
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

@@ -6,6 +6,7 @@ export type Rule = Record<string, string>;
 export interface WorldCatalogs {
   fieldMonsters?: Map<string, Rule>;
   armies?: Map<string, Rule>;
+  neutralResources?: Map<string, Rule>;
 }
 export interface ReconnectCatalogs {
   treasures?: Map<string, Rule>;
