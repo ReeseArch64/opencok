@@ -1,4 +1,6 @@
 export interface ServerConfig {
+  chatInterval?: number;
+  feedMaxCount?: number;
   crossSearchEnabled?: boolean;
   avatarChat?: { url: string; signingSecret: string };
   avatarFiles?: { origin: string; keyFile: string };

@@ -2,6 +2,16 @@ import { expect, test } from "bun:test";
 import { parseServerEnvironment } from "../src/server.schema";
 
 const base = { GAME_LOGIN_SECRET: "synthetic-secret", GAME_RESOURCES: "synthetic-resources" };
+test("client configuration limits retain defaults and reject invalid SFS integers at startup", () => {
+  expect(parseServerEnvironment(base).GAME_CHAT_INTERVAL).toBe(1);
+  expect(parseServerEnvironment(base).GAME_FEED_MAX_COUNT).toBe(3);
+  for (const key of ["GAME_CHAT_INTERVAL", "GAME_FEED_MAX_COUNT"] as const) {
+    for (const value of ["0", "7", "2147483647"])
+      expect(parseServerEnvironment({ ...base, [key]: value })[key]).toBe(Number(value));
+    for (const value of ["-1", "1.5", "2147483648", "NaN", "Infinity", "invalid"])
+      expect(() => parseServerEnvironment({ ...base, [key]: value })).toThrow(key);
+  }
+});
 test("general player search defaults to cross mode and accepts explicit true or false only", () => {
   expect(parseServerEnvironment(base).GAME_CROSS_SEARCH).toBe(true);
   expect(parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: "false" }).GAME_CROSS_SEARCH).toBe(
