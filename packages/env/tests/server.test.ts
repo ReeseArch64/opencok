@@ -164,3 +164,30 @@ test("avatar completion requires its own private chat endpoint, files and signin
       "GAME_AVATAR_CHAT_URL",
     );
 });
+
+test("mailbox delivery requires an exact maintained endpoint and matching signing configuration", () => {
+  const url = "http://chat.internal/_internal/mailbox";
+  expect(parseServerEnvironment(base).GAME_MAIL_CHAT_URL).toBeUndefined();
+  expect(
+    parseServerEnvironment({ ...base, GAME_MAIL_CHAT_URL: url, CHAT_SIGNING_SECRET: "synthetic" })
+      .GAME_MAIL_CHAT_URL,
+  ).toBe(url);
+  expect(() => parseServerEnvironment({ ...base, GAME_MAIL_CHAT_URL: url })).toThrow(
+    "CHAT_SIGNING_SECRET",
+  );
+  for (const value of [
+    url + "/",
+    url + "?x=1",
+    url + "#x",
+    "http://cok.chat/_internal/mailbox",
+    "http://user:pass@chat.internal/_internal/mailbox",
+    "ftp://chat.internal/_internal/mailbox",
+  ])
+    expect(() =>
+      parseServerEnvironment({
+        ...base,
+        GAME_MAIL_CHAT_URL: value,
+        CHAT_SIGNING_SECRET: "synthetic",
+      }),
+    ).toThrow("GAME_MAIL_CHAT_URL");
+});

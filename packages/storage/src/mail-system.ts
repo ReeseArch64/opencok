@@ -70,7 +70,21 @@ export async function selectSystemMailPage(
           throw new DependencyError("mail pagination");
         if (BigInt(parts[0]!) === time)
           for (const id of javaSplit(parts[1]!, ","))
-            if ([...id].some((character) => character.charCodeAt(0) > 32)) sent.add(id);
+            if (
+              [...id].some((character) => {
+                const code = character.charCodeAt(0);
+                return !(
+                  (code >= 9 && code <= 13) ||
+                  (code >= 28 && code <= 32) ||
+                  code === 0x1680 ||
+                  code === 0x180e ||
+                  (code >= 0x2000 && code <= 0x2006) ||
+                  (code >= 0x2008 && code <= 0x200a) ||
+                  [0x2028, 0x2029, 0x205f, 0x3000].includes(code)
+                );
+              })
+            )
+              sent.add(id);
       }
       indices = [];
       for (const [index, id] of ids.entries()) {
