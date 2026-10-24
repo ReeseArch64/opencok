@@ -93,7 +93,10 @@ export class Game {
         body = { serverNowTime: sfs.long(this.now()) };
         break;
       case "login.dataconfig":
-        body = dataConfig(this.rules);
+        body = dataConfig(this.rules, {
+          profileLevel: num(await this.profile(uid), "level"),
+          now: this.now(),
+        });
         break;
       case "setting.xml":
         body = settingConfig(this.rules);
@@ -110,6 +113,13 @@ export class Game {
     if (params._cok_) body._cok_ = params._cok_;
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
     return { body, pushes: [] };
+  }
+  private async profile(uid: string): Promise<Row> {
+    const profile = await this.db.profile(uid);
+    if (!profile) throw new GameError(errors.missing);
+    if (long(profile, "banTime") > BigInt(this.now()) || num(profile, "banFlag") !== 0)
+      throw new GameError(errors.invalid);
+    return profile;
   }
   private async otherLogin(uid: string, params: Fields): Promise<Fields> {
     if (params.config) return featureConfig(this.rules);

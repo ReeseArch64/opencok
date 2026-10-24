@@ -18,6 +18,18 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     expect(rules.stars.size).toBe(0);
     expect(rules.goods.size).toBe(0);
     expect(rules.settings.size).toBe(0);
+    expect(rules.configuration.generalSales?.size).toBe(0);
+    expect(rules.configuration.payControl?.size).toBe(0);
+    expect(rules.configuration.kingdomSkills?.size).toBe(0);
+    for (const name of ["general_sale", "pay_servercontrol", "kingdomskill"])
+      await writeFile(
+        join(directory, `${name}.xml`),
+        '<database><Group id="synthetic"><ItemSpec id="001" value="007"/></Group></database>',
+      );
+    const catalogs = (await loadRules(directory)).configuration;
+    expect(catalogs.generalSales?.get("001")?.value).toBe("007");
+    expect(catalogs.payControl?.get("001")?.value).toBe("007");
+    expect(catalogs.kingdomSkills?.get("001")?.value).toBe("007");
     await writeFile(
       join(directory, "setting.xml"),
       '<database><Group id="settings"><ItemSpec id="001" value="0007"/></Group></database>',
