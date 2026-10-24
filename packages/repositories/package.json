@@ -53,7 +53,8 @@
     "./player-search": "./src/player-search.ts",
     "./world-point-detail": "./src/world-point-detail.ts",
     "./world-resource-owner": "./src/world-resource-owner.ts",
-    "./nickname-change": "./src/nickname-change.ts"
+    "./nickname-change": "./src/nickname-change.ts",
+    "./chat-nickname": "./src/chat-nickname.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

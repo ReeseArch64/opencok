@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
+import type { AddressInfo } from "node:net";
 import { eq } from "drizzle-orm";
 import { createDatabases } from "@opencok/drizzle";
 import { nickname_change } from "@opencok/drizzle/schema/opencok_kingdom/nickname_change";
@@ -9,6 +10,11 @@ import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
+import { createChatRepository } from "@opencok/repositories/chat";
+import { createChatAvatarProfileStore } from "@opencok/repositories/chat-avatar-profile";
+import { createChatNicknamePublisher } from "@opencok/connection/chat-nickname";
+import type { AvatarProfileUpdate } from "@opencok/contracts/files";
+import { createChatApp } from "../../chat/src/app.ts";
 import {
   createNicknameChangeStore,
   nicknameChangePayment,
@@ -144,6 +150,53 @@ function loseCommit(pool: ReturnType<typeof createDatabases>["global"]["pool"], 
   return {
     restore: () => Object.defineProperty(pool, "connect", { value: originalConnect }),
     fired: () => !armed,
+  };
+}
+
+function pauseGlobalCommit() {
+  const pool = databases.global.pool,
+    originalConnect = pool.connect,
+    connect = pool.connect.bind(pool);
+  const reached = Promise.withResolvers<void>(),
+    resume = Promise.withResolvers<void>();
+  let armed = true;
+  Object.defineProperty(pool, "connect", {
+    configurable: true,
+    value: (...connectArgs: unknown[]) => {
+      if (connectArgs.length) return Reflect.apply(originalConnect, pool, connectArgs);
+      return connect().then((client) => {
+        let touched = false;
+        return {
+          async query(...args: unknown[]) {
+            const first = args[0],
+              text =
+                typeof first === "string"
+                  ? first
+                  : first && typeof first === "object" && "text" in first
+                    ? first.text
+                    : undefined;
+            if (typeof text === "string" && text.startsWith("begin")) touched = false;
+            if (
+              typeof text === "string" &&
+              text.startsWith('insert into "opencok_global"."nickname_change_receipt"')
+            )
+              touched = true;
+            if (armed && touched && text === "commit") {
+              armed = false;
+              reached.resolve();
+              await resume.promise;
+            }
+            return Reflect.apply(client.query, client, args);
+          },
+          release: (destroy?: boolean) => client.release(destroy),
+        };
+      });
+    },
+  });
+  return {
+    reached: reached.promise,
+    resume: () => resume.resolve(),
+    restore: () => Object.defineProperty(pool, "connect", { value: originalConnect }),
   };
 }
 
@@ -549,6 +602,208 @@ test("unreadable or mismatched global evidence leaves the charged operation pend
   expect(await store().recover(uid, operationId, now + 3)).toMatchObject({ state: "committed" });
   expect(await profile(uid)).toMatchObject({ name: "Evidence Name", chNameCount: "1" });
   expect(await item(uid)).toMatchObject({ count: 0 });
+});
+
+test("real Chat HTTP delivery uses committed authority and late avatar events cannot revert a rename", async () => {
+  const uid = await seed({ items: 3 }),
+    outsider = await seed({ items: 1 });
+  const repository = createChatRepository({
+    databaseUrl: `postgres://postgres:${pg.options.password}@127.0.0.1:${pg.options.port}/nickname_global`,
+    topology,
+  });
+  const app = createChatApp({
+    repository,
+    signingSecret: "synthetic-name-delivery",
+    websocketUrl: "ws://127.0.0.1/chat/ws",
+  });
+  try {
+    expect(await app.runMaintenance()).toBe(true);
+    await new Promise<void>((resolve) => app.server.listen(0, "127.0.0.1", resolve));
+    const port = (app.server.address() as AddressInfo).port;
+    let requests = 0,
+      loseReply = false;
+    const publish = createChatNicknamePublisher({
+      url: `http://127.0.0.1:${port}/_internal/nickname`,
+      signingSecret: "synthetic-name-delivery",
+      now: Date.now,
+      timeoutMs: 1000,
+      fetch: async (url, options) => {
+        requests++;
+        const response = await fetch(url, options);
+        if (loseReply) {
+          loseReply = false;
+          await response.arrayBuffer();
+          throw new Error("Synthetic lost HTTP response");
+        }
+        return response;
+      },
+    });
+    const avatar: AvatarProfileUpdate = {
+      owner: uid,
+      kingdomId: 1,
+      sequence: 1,
+      picVer: 1000001,
+      committedAt: BigInt(now),
+      updatedAt: String(Math.floor(now / 1000)),
+      userName: `Before ${uid}`,
+      platform: "synthetic",
+    };
+    await repository.profiles.publish(avatar);
+    await repository.profiles.publish({
+      ...avatar,
+      owner: outsider,
+      userName: `Before ${outsider}`,
+    });
+    const first = randomUUID(),
+      second = randomUUID();
+    await store().change(uid, first, "Chat First", now);
+    await store().change(uid, second, "Chat Second", now + 1);
+    expect(await store().deliverChat(uid, first, publish, 1500)).toBe(true);
+    expect(await repository.profiles.find(uid, 1)).toEqual({ ...avatar, userName: "Chat Second" });
+    expect((await store().find(uid, first))?.pendingEffects).toBe(29);
+    expect(await store().deliverChat(uid, first, publish, 1500)).toBe(false);
+    expect(requests).toBe(1);
+    expect(await repository.profiles.publish(avatar)).toBe("unchanged");
+    const newer = {
+      ...avatar,
+      sequence: 2,
+      picVer: 1000002,
+      committedAt: BigInt(now + 1000),
+      updatedAt: String(Math.floor((now + 1000) / 1000)),
+    };
+    expect(await repository.profiles.publish(newer)).toBe("applied");
+    expect(await repository.profiles.find(uid, 1)).toEqual({ ...newer, userName: "Chat Second" });
+    expect(await repository.profiles.publish(avatar)).toBe("superseded");
+    await expect(repository.profiles.publish({ ...newer, platform: "conflict" })).rejects.toThrow();
+    loseReply = true;
+    await expect(store().deliverChat(uid, second, publish, 1500)).rejects.toThrow();
+    expect((await store().find(uid, second))?.pendingEffects).toBe(31);
+    expect(await store().deliverChat(uid, second, publish, 1500)).toBe(true);
+    expect(await repository.profiles.find(outsider, 1)).toEqual({
+      ...avatar,
+      owner: outsider,
+      userName: `Before ${outsider}`,
+    });
+    for (const update of [
+      { owner: uid, kingdomId: 1, operationId: randomUUID() },
+      { owner: outsider, kingdomId: 1, operationId: first },
+      { owner: uid, kingdomId: 2, operationId: first },
+    ])
+      await expect(publish(update, new AbortController().signal)).rejects.toThrow();
+    const third = randomUUID();
+    await store().change(uid, third, "Chat Third", now + 2);
+    await realm().pool.query(
+      "CREATE TRIGGER reject_nickname BEFORE UPDATE ON opencok_kingdom.nickname_change FOR EACH ROW EXECUTE FUNCTION public.reject_nickname()",
+    );
+    try {
+      await expect(store().deliverChat(uid, third, publish, 1500)).rejects.toThrow();
+      expect((await store().find(uid, third))?.pendingEffects).toBe(31);
+      expect((await repository.profiles.find(uid, 1))?.userName).toBe("Chat Third");
+    } finally {
+      await realm().pool.query("DROP TRIGGER reject_nickname ON opencok_kingdom.nickname_change");
+    }
+    const fault = loseCommit(realm().pool, 'update "opencok_kingdom"."nickname_change"');
+    try {
+      await expect(store().deliverChat(uid, third, publish, 1500)).rejects.toThrow();
+      expect(fault.fired()).toBe(true);
+      expect((await store().find(uid, third))?.pendingEffects).toBe(29);
+      expect(await store().deliverChat(uid, third, publish, 1500)).toBe(false);
+    } finally {
+      fault.restore();
+    }
+    const noAvatar = await seed({ items: 1, realm: 2 }),
+      noAvatarId = randomUUID();
+    await store(2).change(noAvatar, noAvatarId, "No Avatar Yet", now);
+    expect(await store(2).deliverChat(noAvatar, noAvatarId, publish, 1500)).toBe(true);
+    expect(await repository.profiles.find(noAvatar, 2)).toBeNull();
+    await repository.profiles.publish({ ...avatar, owner: noAvatar, kingdomId: 2 });
+    expect((await repository.profiles.find(noAvatar, 2))?.userName).toBe("No Avatar Yet");
+  } finally {
+    await app.close();
+    await repository.close();
+  }
+  await databases.close();
+  await pg.restart();
+  databases = createDatabases(pg.options, topology);
+  expect((await createChatAvatarProfileStore(databases.global.db).find(uid, 1))?.userName).toBe(
+    "Chat Third",
+  );
+  expect(await profile(uid)).toMatchObject({ name: "Chat Third", chNameCount: "3" });
+  expect(await item(uid)).toMatchObject({ count: 0 });
+}, 60_000);
+
+test("an avatar blocked by an uncommitted rename reads the receipt after acquiring its account lock", async () => {
+  const uid = await seed({ items: 1 }),
+    operationId = randomUUID();
+  const avatar = createChatAvatarProfileStore(databases.global.db);
+  const update: AvatarProfileUpdate = {
+    owner: uid,
+    kingdomId: 1,
+    sequence: 1,
+    picVer: 1000001,
+    committedAt: BigInt(now),
+    updatedAt: String(Math.floor(now / 1000)),
+    userName: `Before ${uid}`,
+    platform: "synthetic",
+  };
+  const pause = pauseGlobalCommit();
+  const change = store().change(uid, operationId, "Locked Rename", now);
+  let publication: Promise<unknown> | undefined;
+  try {
+    await pause.reached;
+    publication = avatar.publish(update);
+    let waiting = false;
+    for (let attempt = 0; attempt < 200 && !waiting; attempt++) {
+      const result = await databases.global.pool.query(
+        "SELECT count(*)::int AS count FROM pg_stat_activity WHERE datname = 'nickname_global' AND pid <> pg_backend_pid() AND wait_event_type = 'Lock' AND query LIKE '%account_new%' AND query LIKE '%for update%'",
+      );
+      waiting = result.rows[0].count > 0;
+      if (!waiting) await Bun.sleep(10);
+    }
+    expect(waiting).toBe(true);
+    pause.resume();
+    expect((await change).state).toBe("committed");
+    expect(await publication).toBe("applied");
+    expect((await avatar.find(uid, 1))?.userName).toBe("Locked Rename");
+  } finally {
+    pause.resume();
+    await Promise.allSettled([change, publication]);
+    pause.restore();
+  }
+});
+
+test("Chat delivery deadlines preserve the pending bit and abort the publication", async () => {
+  const uid = await seed({ items: 1 }),
+    operationId = randomUUID();
+  await store().change(uid, operationId, "Chat Timeout", now);
+  let signal: AbortSignal | undefined;
+  await expect(
+    store().deliverChat(
+      uid,
+      operationId,
+      async (_, value) => {
+        signal = value;
+        await new Promise(() => {});
+      },
+      100,
+    ),
+  ).rejects.toThrow();
+  expect(signal?.aborted).toBe(true);
+  expect((await store().find(uid, operationId))?.pendingEffects).toBe(31);
+  expect(await profile(uid)).toMatchObject({ name: "Chat Timeout", chNameCount: "1" });
+  const refunded = await seed({ items: 1, account: false }),
+    refundId = randomUUID();
+  await store().change(refunded, refundId, "Refund No Chat", now);
+  expect(
+    await store().deliverChat(
+      refunded,
+      refundId,
+      async () => {
+        throw new Error("Must not publish refund");
+      },
+      100,
+    ),
+  ).toBe(false);
 });
 
 test("global receipt survives PostgreSQL restart and completes a failed realm finalization", async () => {

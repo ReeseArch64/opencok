@@ -38,7 +38,8 @@
     "./world-resource-owner-effects": "./src/world-resource-owner-effects.ts",
     "./world-resource-expedition": "./src/world-resource-expedition.ts",
     "./world-resource-army-load": "./src/world-resource-army-load.ts",
-    "./avatar-version": "./src/avatar-version.ts"
+    "./avatar-version": "./src/avatar-version.ts",
+    "./chat-nickname": "./src/chat-nickname.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

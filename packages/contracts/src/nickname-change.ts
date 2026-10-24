@@ -1,4 +1,5 @@
 import type { Row } from "./rows.ts";
+import type { ChatNicknamePublisher } from "./chat-nickname.ts";
 
 export interface NicknameChangeRecord {
   operationId: string;
@@ -23,6 +24,12 @@ export interface NicknameChangeStore {
   ): Promise<NicknameChangeRecord>;
   recover(owner: string, operationId: string, now: number): Promise<NicknameChangeRecord>;
   find(owner: string, operationId: string): Promise<NicknameChangeRecord | undefined>;
+  deliverChat(
+    owner: string,
+    operationId: string,
+    publish: ChatNicknamePublisher,
+    timeoutMs: number,
+  ): Promise<boolean>;
 }
 
 export interface NicknameChangeConfiguration {

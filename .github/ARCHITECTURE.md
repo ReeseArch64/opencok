@@ -743,15 +743,44 @@ session provider; an unavailable provider leaves a recoverable prepared charge. 
 refund metadata includes its own price, ratio, delta and before/after balances. Terminal
 journals reserve pending bits 1/2/4/8/16 for alliance, chat, throne, shared-user and
 notification delivery respectively; a refund reserves notification delivery only. These
-consumers, their ordering and acknowledgments are not implemented by this store.
+consumers remain separate. The Chat consumer now acknowledges bit 2 only after the
+authenticated receiver confirms the durable operation; the other consumers and their
+command-level ordering remain pending.
 
 Disposable PostgreSQL integration covers both realms, UCA-equivalent contention,
 concurrent retries, item/gold/DMM/CN1 paths, transactional SQL failures, lost commit
 responses and restart recovery. The production composition, reserved-pattern matcher,
-CN1 session lifecycle, downstream delivery and typed command reply remain pending.
+CN1 session lifecycle, remaining downstream delivery and typed command reply remain pending.
 `user.modify.nickName` stays unavailable. Retain both new tables and their migration
 history when rolling application code back; unresolved operations require reconciliation
 before destructive restoration or pruning. No private input or new dependency is added.
+
+Chat now exposes exact private `POST /_internal/nickname` with its own HMAC protocol
+domain and the existing trusted-backend secret. It accepts only owner, kingdom and
+operation UUID, never a proposed name. The Chat-owned repository verifies the matching
+global rename receipt and current account route while locking the same account row used
+by rename and avatar publication. It updates only the projection's user name from the
+current global account. Delivery of an older operation therefore converges to the latest
+committed name. No avatar projection is created solely for a rename; a later avatar
+publication obtains that name from the account once rename receipts exist.
+
+Avatar publication still uses sequence order and exact captured metadata, with one
+explicit exception for names after a committed rename. It obtains the account lock
+first, then reads the current name and receipt existence in a separate read-committed
+statement. A snapshot taken before a blocked account lock cannot authorize an obsolete
+name. The receipt owner/kingdom index supports that lookup. Same-sequence retry checks
+continue to reject conflicting version, timestamp and platform; delayed higher-sequence
+events retain the current committed name. Other profile fields retain their existing
+avatar-event semantics. Chat readiness now checks the receipt table as a dependency.
+
+The bounded realm publisher and `NicknameChangeStore.deliverChat` keep the realm owner
+and operation locks until publication completes and the Chat bit is cleared in the
+local transaction. Failures, deadlines and late results leave it pending. Lost remote
+or realm commit responses are safe to retry because the receiver reads current authority
+and the realm checks its durable bit. Actual Chat application HTTP, separate service
+pools and disposable PostgreSQL prove replay, two-kingdom routing, failure recovery,
+account-lock races and restart persistence. This consumer is not yet invoked by an
+authenticated rename command or background relay; the complete command remains disabled.
 
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row

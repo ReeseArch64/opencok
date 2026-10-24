@@ -504,6 +504,56 @@ export function createNicknameChangeStore(
   return {
     find,
     recover,
+    async deliverChat(uid, operationId, publish, timeoutMs) {
+      key(uid, operationId);
+      if (
+        typeof publish !== "function" ||
+        !integer(timeoutMs) ||
+        timeoutMs < 100 ||
+        timeoutMs > 30000
+      )
+        return invalid();
+      return db.transaction(
+        async (tx) => {
+          const profile = await owner(tx, uid);
+          if (!profile || profile.uid !== uid || profile.serverId !== kingdomId) return invalid();
+          const record = await operation(tx, uid, operationId);
+          if (!record || record.state !== "committed" || !(record.pendingEffects & 2)) return false;
+          const controller = new AbortController();
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          try {
+            await Promise.race([
+              Promise.resolve().then(() =>
+                publish(Object.freeze({ owner: uid, kingdomId, operationId }), controller.signal),
+              ),
+              new Promise<never>((_, reject) => {
+                timer = setTimeout(() => {
+                  controller.abort();
+                  reject(new Error("Chat nickname deadline"));
+                }, timeoutMs);
+              }),
+            ]);
+            controller.signal.throwIfAborted();
+          } finally {
+            clearTimeout(timer);
+            controller.abort();
+          }
+          const changed = await tx
+            .update(nickname_change)
+            .set({ pendingEffects: record.pendingEffects & ~2 })
+            .where(
+              and(
+                eq(nickname_change.operationId, operationId),
+                eq(nickname_change.pendingEffects, record.pendingEffects),
+              ),
+            )
+            .returning({ id: nickname_change.operationId });
+          if (changed.length !== 1 || changed[0]!.id !== operationId) return invalid();
+          return true;
+        },
+        { isolationLevel: "read committed", accessMode: "read write" },
+      );
+    },
     async change(uid, operationId, name, now) {
       key(uid, operationId);
       time(now);
