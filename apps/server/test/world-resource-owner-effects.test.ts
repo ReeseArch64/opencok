@@ -118,6 +118,16 @@ const expected = {
   expedition: 9,
 };
 
+test("expedition selector failures remain local while early matching selectors reach the saved phase", async () => {
+  const f = fixture();
+  f.rules.features.set("17_wk", { version: "99.0.0", online: "+２;bad" });
+  expect(await f.resolve()).toEqual(expected);
+  expect(f.state.expeditionReads).toBe(1);
+  f.rules.features.set("17_wk", { version: "99.0.0", online: "bad;2" });
+  expect(await f.resolve()).toEqual({ ...expected, expedition: 0 });
+  expect(f.state.expeditionReads).toBe(1);
+});
+
 test("saved owner abilities and realm effects feed all five load contributions and concrete general equipment modifiers", async () => {
   const f = fixture();
   const before = structuredClone(f.snapshot);
@@ -193,24 +203,15 @@ test("ordinary owner feature gates use saved legacy versions including blanks ra
   await expect(f.resolve()).rejects.toThrow();
 });
 
-test("ordinary feature defaults remain strict while persisted-owner contexts opt into legacy version comparison", () => {
+test("ordinary feature gates share the restored-owner version behavior", () => {
   const rule = { version: "12.6.0", online: "2" };
   const context = { now: 1000, kingdomId: 2, version: "" };
-  expect(ruleAvailable(rule, context)).toBe(false);
-  expect(ruleAvailable(rule, { ...context, versionPolicy: "legacy-player" })).toBe(true);
-  expect(ruleAvailable(rule, { ...context, version: "13" })).toBe(false);
-  expect(ruleAvailable(rule, { ...context, version: "13", versionPolicy: "legacy-player" })).toBe(
-    true,
-  );
-  expect(
-    ruleAvailable(
-      { ...rule, online: "" },
-      { ...context, version: "bad", versionPolicy: "legacy-player" },
-    ),
-  ).toBe(false);
-  expect(
-    ruleAvailable({ ...rule, version: "" }, { ...context, versionPolicy: "legacy-player" }),
-  ).toBe(false);
+  expect(ruleAvailable(rule, context)).toBe(true);
+  expect(ruleAvailable(rule, { ...context, version: "13" })).toBe(true);
+  expect(ruleAvailable(rule, { ...context, version: "11" })).toBe(false);
+  expect(() => ruleAvailable(rule, { ...context, version: "13.bad" })).toThrow();
+  expect(ruleAvailable({ ...rule, online: "" }, { ...context, version: "bad" })).toBe(false);
+  expect(ruleAvailable({ ...rule, version: "" }, context)).toBe(false);
 });
 
 test("new-general restoration failure clears only that contribution and keeps ordinary and expedition effects", async () => {

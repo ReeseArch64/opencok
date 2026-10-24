@@ -463,3 +463,42 @@ test("prestige catalogs retain every ordered definition for first-range selectio
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("kingdom skill catalogs retain source order and duplicate or absent IDs independently of the final cache index", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-kingdom-skill-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const absent = (await loadRules(directory)).configuration;
+    expect(absent.kingdomSkillRecords).toEqual([]);
+    expect(absent.kingdomSkills?.size).toBe(0);
+    await writeFile(
+      join(directory, "kingdomskill.xml"),
+      '<database><Group id="first"><ItemSpec id="same" value="1"/><ItemSpec value="missing"/></Group><Group id="second"><ItemSpec id="same" value="2"/><ItemSpec id="null" value="literal"/><ItemSpec id="" value="empty"/></Group></database>',
+    );
+    const catalog = (await loadRules(directory)).configuration;
+    expect(catalog.kingdomSkillRecords?.map((rule) => rule.value)).toEqual([
+      "1",
+      "missing",
+      "2",
+      "literal",
+      "empty",
+    ]);
+    expect(catalog.kingdomSkills?.get("same")?.value).toBe("2");
+    expect(catalog.kingdomSkills?.get("null")?.value).toBe("literal");
+    expect(catalog.kingdomSkills?.get("")?.value).toBe("empty");
+    expect(catalog.kingdomSkillRecords?.[1]?.id).toBeUndefined();
+    expect(
+      parseRules(
+        '<database><ItemSpec id="same" value="1"/><ItemSpec id="same" value="2"/></database>',
+        "kingdomskill",
+      ).get("same")?.value,
+    ).toBe("2");
+    await writeFile(join(directory, "kingdomskill.xml"), "<database/>");
+    const empty = (await loadRules(directory)).configuration;
+    expect(empty.kingdomSkillRecords).toEqual([]);
+    expect(empty.kingdomSkills?.size).toBe(0);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

@@ -18,7 +18,7 @@ import {
 export async function readResourceOwnerLoadEffects(
   snapshot: WorldResourceOwnerSnapshot,
   rules: Rules,
-  environment: Omit<RuleContext, "version" | "versionPolicy">,
+  environment: Omit<RuleContext, "version">,
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,
   clock: () => bigint,
 ): Promise<WorldResourceLoadEffects> {
