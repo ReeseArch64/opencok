@@ -19,6 +19,7 @@ export interface PowerCatalogs {
   titles?: Map<string, Rule>;
   dragonBases?: Map<string, Rule>;
   dragonLevels?: Map<string, Rule>;
+  statuses?: Map<string, Rule>;
 }
 export class Rules {
   constructor(

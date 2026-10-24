@@ -13,6 +13,7 @@ import { user_pet_dragon } from "@opencok/drizzle/schema/opencok_kingdom/user_pe
 import { user_knight_title } from "@opencok/drizzle/schema/opencok_kingdom/user_knight_title";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
+import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Database } from "./game.ts";
@@ -55,6 +56,7 @@ export function readPowerState(
         dragons: [],
         knight: undefined,
         items: [],
+        states: [],
       };
       if (!profile) return empty;
       const statistics = (
@@ -165,6 +167,16 @@ export function readPowerState(
           .where(eq(pic_upload_record.uid, uid))
           .limit(1)
       )[0];
+      const states = await tx
+        .select({
+          stateId: user_state.stateId,
+          endTime: user_state.endTime,
+          ranEffId: user_state.ranEffId,
+          ranEffValue: user_state.ranEffValue,
+        })
+        .from(user_state)
+        .where(eq(user_state.uid, uid))
+        .orderBy(asc(user_state.stateId));
       return {
         profile,
         statistics,
@@ -181,6 +193,7 @@ export function readPowerState(
         knight,
         items,
         upload,
+        states,
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

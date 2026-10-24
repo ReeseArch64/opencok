@@ -16,6 +16,7 @@ export class GameError extends Error {
       | "player_summary"
       | "power_rule"
       | "power_effect"
+      | "power_state"
       | "queue_kind"
       | "world_state",
   ) {

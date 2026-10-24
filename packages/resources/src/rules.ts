@@ -29,7 +29,9 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
   collect(parsed.database);
   if (!records.length) throw new Error("Missing gameplay resource records");
   const map = new Map<string, Rule>();
-  const replaceDuplicates = name === "goods" || name === "function_on";
+  const replaceDuplicates = ["goods", "function_on", "science", "equipment", "status"].includes(
+    name,
+  );
   for (const record of records) {
     if (
       !record ||
@@ -88,6 +90,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     titles,
     dragonBases,
     dragonLevels,
+    statuses,
   ] = await Promise.all(
     [
       "general",
@@ -99,6 +102,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "dragon_words",
       "dragon_base",
       "dragon_new",
+      "status",
     ].map(optional),
   );
   return new Rules(
@@ -123,6 +127,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
       titles,
       dragonBases,
       dragonLevels,
+      statuses,
     },
   );
 }
