@@ -1,8 +1,22 @@
 import { mailDeleted, mailSave, mailStatus } from "@opencok/dtos/mail";
+import { mailCategoryProjection } from "./mail-category.ts";
+import { mailGroupProjection } from "./mail-groups.ts";
+import {
+  mailGroupQuery,
+  mailGroupRule,
+  mailGroupSenders,
+  mailGroupWindow,
+} from "@opencok/rules/mail-groups";
+import { resolveMailPresentation } from "./mail-presentation.ts";
+import { mailListProjection } from "./mail-list.ts";
 import { mailContentsProjection } from "./mail-contents.ts";
 import { planMailDeletion } from "./mail-delete.ts";
 import {
   mailContentsQuery,
+  mailCategoryQuery,
+  mailBatchQuery,
+  mailBatchIsChat,
+  selectMailCategory,
   mailConversationSaveQuery,
   mailDeleteQuery,
   mailReadQuery,
@@ -10,7 +24,12 @@ import {
   mailStatusQuery,
   calculateMailStatus,
 } from "@opencok/rules/mail";
-import type { MailSaveMode } from "@opencok/contracts/mail";
+import type {
+  MailSaveMode,
+  MailGroupQuery,
+  MailGroupPreview,
+  MailListCommand,
+} from "@opencok/contracts/mail";
 import { expeditionRanking } from "@opencok/dtos/expedition-ranking";
 import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
 import { decodeExpeditionRanking } from "./expedition-ranking.ts";
@@ -66,7 +85,7 @@ const playerRankingKinds = {
   "silver.contribute.rank": "contribution",
 } as const;
 
-type GameConfig = Pick<ServerConfig, "kingdomId">;
+type GameConfig = Pick<ServerConfig, "kingdomId" | "mailTranslationEnabled">;
 
 type ReadyCity = CityState & { profile: Row; resource: Row };
 export interface Result {
@@ -175,6 +194,13 @@ export class Game {
       case "mail.read.status":
       case "mail.read.status.betch":
         body = await this.mailRead(uid, command === "mail.read.status.betch", params);
+        break;
+      case "mread.batch":
+      case "mread.chat":
+        body = await this.mailBatch(uid, params, command);
+        break;
+      case "mread.batch.category":
+        body = await this.mailCategory(uid, params);
         break;
       case "mail.read":
         body = await this.mailContents(uid, params);
@@ -297,6 +323,133 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return mailDeleted(state.deleted);
+  }
+  private async mailBatch(uid: string, params: Fields, command: MailListCommand): Promise<Fields> {
+    const fromUser =
+      params.fromUser === undefined || params.fromUser.type === Type.Null
+        ? null
+        : wireString(params, "fromUser");
+    if (fromUser !== null && typeof fromUser !== "string") throw new GameError(errors.invalid);
+    const type =
+      command === "mread.chat" && params.type === undefined ? 4 : wireInt(params, "type");
+    const begin = wireInt(params, "num");
+    const limit = wireInt(params, "offset");
+    const now = this.now();
+    if (type === 10 || type === 1000)
+      return this.mailGroups(uid, params, mailGroupQuery(type, begin, limit, now), command);
+    const query = mailBatchQuery(type, begin, limit, fromUser, now);
+    const chat = mailBatchIsChat(query);
+    let body: Fields | undefined;
+    const envelope: Fields = {};
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) envelope[key] = params[key]!;
+    const state = await this.db.mailBatch(uid, query, async (entries, readers) => {
+      if (entries.length > query.limit) throw new GameError(errors.invalid);
+      const presentation = await resolveMailPresentation(
+        entries,
+        readers,
+        chat,
+        this.config.mailTranslationEnabled ?? true,
+        async () =>
+          (await this.services.playerUpdateTimes?.(this.config.kingdomId, [uid]))?.get(uid) ?? "",
+      );
+      const projection = mailListProjection(
+        uid,
+        entries,
+        presentation,
+        chat ? "conversation" : "ordinary",
+        command,
+        envelope,
+      );
+      body = projection.body;
+      return projection.invalidIds;
+    });
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
+      throw new GameError(errors.invalid);
+    return body;
+  }
+  private async mailGroups(
+    uid: string,
+    params: Fields,
+    query: MailGroupQuery,
+    command: MailListCommand,
+  ): Promise<Fields> {
+    const envelope: Fields = {};
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) envelope[key] = params[key]!;
+    let body: Fields | undefined;
+    const state = await this.db.mailGroups(uid, query, async (groups, readers) => {
+      const selected = mailGroupWindow(uid, query, groups);
+      const senders = await readers.senders(mailGroupSenders(groups));
+      const previews: MailGroupPreview[] = [];
+      for (const group of selected) {
+        const rule = mailGroupRule(group.groupType);
+        previews.push(
+          rule && (rule.kind !== "sender" || senders.has(group.groupIndex))
+            ? await readers.preview(group, rule)
+            : { entries: [], total: 0n, unread: 0n },
+        );
+      }
+      const chatEntries = previews.flatMap((preview, index) =>
+        mailGroupRule(selected[index]!.groupType)?.kind === "uid" ? [] : [...preview.entries],
+      );
+      const presentation = await resolveMailPresentation(
+        chatEntries,
+        readers,
+        true,
+        this.config.mailTranslationEnabled ?? true,
+        async () =>
+          (await this.services.playerUpdateTimes?.(this.config.kingdomId, [uid]))?.get(uid) ?? "",
+        senders,
+      );
+      const projection = mailGroupProjection(
+        uid,
+        query,
+        { groups, previews },
+        presentation,
+        envelope,
+        command,
+      );
+      body = projection.body;
+      return projection.cleanup;
+    });
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
+      throw new GameError(errors.invalid);
+    return body;
+  }
+  private async mailCategory(uid: string, params: Fields): Promise<Fields> {
+    const query = mailCategoryQuery(
+      wireInt(params, "category"),
+      wireInt(params, "num"),
+      wireInt(params, "offset"),
+      this.now(),
+    );
+    if (params.fromUser !== undefined && typeof wireString(params, "fromUser") !== "string")
+      throw new GameError(errors.invalid);
+    const envelope: Fields = {};
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) envelope[key] = params[key]!;
+    let body: Fields | undefined;
+    const state = await this.db.mailCategory(uid, query, async (window, readers) => {
+      const entries = selectMailCategory(query, window);
+      const presentation = await resolveMailPresentation(
+        entries,
+        readers,
+        query.category === 4 || query.category === 7,
+        this.config.mailTranslationEnabled ?? true,
+        async () =>
+          (await this.services.playerUpdateTimes?.(this.config.kingdomId, [uid]))?.get(uid) ?? "",
+      );
+      const projection = mailCategoryProjection(uid, query, window, presentation, envelope);
+      body = projection.body;
+      return projection.invalidIds;
+    });
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
+      throw new GameError(errors.invalid);
+    return body;
   }
   private async mailContents(uid: string, params: Fields): Promise<Fields> {
     const ids = wireString(params, "uid");
