@@ -1348,6 +1348,10 @@ category listing. Their selector predicates run before pagination; categories re
 post-window filtering. Both use the same presentation readers and serializers, with
 separate ordinary, category-chat and conversation envelopes. Unsupported group selectors
 remain explicit until whole-group counts and stale-group maintenance are migrated.
+Group projection now has a pure contract separating the complete bounded group window
+from seven newest-message previews and full-group counts. It validates owned snapshots
+and the complete response before returning primary-message/group-key cleanup plans.
+It does not perform I/O; the owner-locked adapter and command connection remain pending.
 The reference's malformed structured conversation failure is preserved without cleanup;
 ordinary malformed detail can authorize owned primary-row removal only after transport
 validation. No additional tables, dependencies or external calls are introduced.

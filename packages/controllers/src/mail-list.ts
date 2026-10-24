@@ -13,7 +13,7 @@ import {
 import { mailBlank, mailClientType, mailTranslationRequest } from "@opencok/rules/mail";
 import { decodeMailContent, storedMailText } from "./mail-contents.ts";
 
-function senderFields(entry: MailListEntry, sender: MailSender | undefined): Fields {
+export function mailSenderFields(entry: MailListEntry, sender: MailSender | undefined): Fields {
   const info = !mailBlank(entry.fromUser) ? sender : undefined;
   const fromName = info ? info.name : entry.fromName;
   const oldName = mailBlank(entry.fromName) ? fromName : entry.fromName;
@@ -50,7 +50,7 @@ function fightPreview(contents: string, owner: string): Value | undefined {
   }
 }
 
-function commonEnvelope(entry: MailListEntry, contents: string): Fields {
+export function mailEnvelope(entry: MailListEntry, contents: string): Fields {
   const result: Fields = {
     uid: sfs.string(entry.uid),
     fromUid: sfs.string(entry.fromUser ?? ""),
@@ -94,7 +94,7 @@ export function mailListProjection(
   for (const entry of entries) {
     const sender = entry.fromUser === null ? undefined : presentation.senders.get(entry.fromUser);
     const identity =
-      mode !== "conversation" || entry.type === 10 ? senderFields(entry, sender) : {};
+      mode !== "conversation" || entry.type === 10 ? mailSenderFields(entry, sender) : {};
     const decoded = decodeMailContent(entry);
     if (!decoded) {
       if (mode === "conversation") throw new ProtocolError();
@@ -133,7 +133,7 @@ export function mailListProjection(
         }
       }
     } else {
-      message = { ...commonEnvelope(entry, contents), ...identity, detail: sfs.object(detail) };
+      message = { ...mailEnvelope(entry, contents), ...identity, detail: sfs.object(detail) };
     }
     result.push(sfs.object(message));
   }

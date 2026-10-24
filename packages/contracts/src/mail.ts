@@ -1,5 +1,38 @@
 import type { Row } from "./rows.ts";
 
+export interface MailGroupQuery {
+  moderation: boolean;
+  begin: number;
+  limit: number;
+  now: number;
+}
+
+export interface MailGroupKey {
+  groupType: number;
+  groupIndex: string;
+}
+
+export interface MailGroupEntry extends MailGroupKey {
+  uid: string;
+  updateTime: bigint;
+}
+
+export interface MailGroupPreview {
+  total: bigint;
+  unread: bigint;
+  entries: readonly MailListEntry[];
+}
+
+export interface MailGroupPage {
+  groups: readonly MailGroupEntry[];
+  previews: readonly MailGroupPreview[];
+}
+
+export interface MailGroupCleanup {
+  groups: readonly MailGroupKey[];
+  mailIds: readonly string[];
+}
+
 export type MailBatchKind =
   | "notices"
   | "studio"
