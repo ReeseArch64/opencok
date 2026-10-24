@@ -1,29 +1,12 @@
 import type { Row } from "@opencok/contracts/rows";
-import { errors } from "@opencok/constants/game";
-import { GameError } from "@opencok/errors/game";
 import type { Rule, Rules } from "./game.ts";
 
-function invalid(): never {
-  throw new GameError(errors.unsupported, "power_effect");
-}
-
-function integer(raw: unknown): number {
-  if (!/^[+-]?\d+$/.test(String(raw))) return invalid();
-  const value = Number(raw);
-  if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647) return invalid();
-  return value;
-}
-
-function float(raw: unknown): number {
-  if (
-    (typeof raw !== "string" && typeof raw !== "number") ||
-    !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(String(raw).trim())
-  )
-    return invalid();
-  const value = Math.fround(Number(raw));
-  if (!Number.isFinite(value)) return invalid();
-  return value;
-}
+import {
+  effectInteger as integer,
+  effectFloat as float,
+  effectLong as long,
+  invalidEffect as invalid,
+} from "./power-values.ts";
 
 function pairs(source: string | undefined): [number, number][] {
   if (source === undefined) return invalid();
@@ -43,15 +26,8 @@ export function vipEffects(
 ): ReadonlyMap<number, number> {
   const effects = new Map<number, number>();
   if (!vip) return effects;
-  const deadline = vip.vipEndTime;
-  if (
-    !Number.isSafeInteger(now) ||
-    (typeof deadline === "number" && !Number.isSafeInteger(deadline)) ||
-    !/^[+-]?\d+$/.test(String(deadline))
-  )
-    return invalid();
-  const end = BigInt(String(deadline));
-  if (BigInt.asIntN(64, end) !== end) return invalid();
+  if (!Number.isSafeInteger(now)) return invalid();
+  const end = long(vip.vipEndTime);
   if (end <= BigInt(now)) return effects;
   if (!rules.power.vip?.size) return invalid();
   const score = integer(vip.score);

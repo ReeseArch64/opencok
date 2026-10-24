@@ -195,7 +195,8 @@ research component is added to the total because the legacy total omits it.
 Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `saga_tower_science_up.xml`, `hero.xml`, `equipment.xml`, `dragon_words.xml`,
 `dragon_base.xml`, `dragon_new.xml`, `status.xml`, `sk.xml`, `suit.xml`,
-`vip.xml`, `svip.xml` and `alliancescience.xml`.
+`vip.xml`, `svip.xml`, `alliancescience.xml`, `reputation_level.xml`,
+`civilization_feature.xml`, `wr_skill.xml` and `miracle_buff.xml`.
 They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
@@ -249,6 +250,17 @@ semicolon-separated effect accumulation. An empty alliance skips the shared
 research query. Reads neither settle research queues nor consume donations;
 missing catalogs for active data fail explicitly. Unit tests cover exact VIP
 deadlines, membership query ownership and rollback on late shared-state failures.
+
+Prestige, military skills and miracle bonuses also have read-only effect
+projections. Prestige uses the current civilization and exact signed-long point
+ranges, taking the first matching level and feature row. Military skills select
+the highest positive level in each group, deduplicate stored IDs and accumulate
+status effects with signed integer wrapping. Equal-level ties follow persisted
+skill order instead of Java hash-map order. Miracle bonuses select the last
+catalog entry with the active `order`, independently of its item ID, and replace
+duplicate effect definitions. Prestige/miracle gates include the client version;
+military availability uses the server gate. These reads do not change civilization,
+settle military seasons, grant rewards or create inactive miracle records.
 
 `get.power.info` now dispatches to the selected realm's power snapshot, checks the
 authenticated owner and ban status, calculates components and emits the detailed

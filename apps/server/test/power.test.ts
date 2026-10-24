@@ -74,6 +74,9 @@ function fixture() {
     states: [],
     vip: undefined,
     allianceSciences: [],
+    prestige: [],
+    military: undefined,
+    miracle: undefined,
   };
   return { state, rules };
 }
@@ -96,6 +99,9 @@ function empty(): PowerSnapshot {
     states: [],
     vip: undefined,
     allianceSciences: [],
+    prestige: [],
+    military: undefined,
+    miracle: undefined,
   };
 }
 

@@ -29,6 +29,9 @@ function fixture() {
     states: [],
     vip: undefined,
     allianceSciences: [],
+    prestige: [],
+    military: undefined,
+    miracle: undefined,
     upload: { updateTime: 9007199254740993n, banTime: 9007199254740995n, banCount: 2 },
   };
   const rules = new Rules(

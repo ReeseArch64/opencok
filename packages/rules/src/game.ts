@@ -25,6 +25,10 @@ export interface PowerCatalogs {
   vip?: Map<string, Rule>;
   superVip?: Map<string, Rule>;
   allianceSciences?: Map<string, Rule>;
+  prestigeLevels?: Map<string, Rule>;
+  civilizationFeatures?: Map<string, Rule>;
+  militarySkills?: Map<string, Rule>;
+  miracleBuffs?: Map<string, Rule>;
 }
 export class Rules {
   constructor(
