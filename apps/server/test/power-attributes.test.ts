@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { Row } from "@opencok/contracts/rows";
-import { generalSkillPoints } from "@opencok/controllers/power";
+import { generalSkillPoints } from "@opencok/services/power";
 import {
   generalSkillEffects,
   equipmentEffects,

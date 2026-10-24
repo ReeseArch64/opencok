@@ -3,7 +3,7 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { deleteMail } from "@opencok/repositories/mail-delete";
 import { mailDeleteQuery } from "@opencok/rules/mail";
-import { planMailDeletion } from "@opencok/controllers/mail-delete";
+import { planMailDeletion } from "@opencok/services/mail-delete";
 
 const now = 1792756800000;
 const plan = (entries: Parameters<typeof planMailDeletion>[1]) => planMailDeletion("self", entries);

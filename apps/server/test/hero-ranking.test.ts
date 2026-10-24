@@ -3,7 +3,7 @@ import { heroRankingLookup, heroSelfRanking } from "@opencok/rules/hero-ranking"
 import { loadHeroRankingPosition } from "@opencok/storage/hero-ranking";
 import { heroSelfRanking as mapResult } from "@opencok/mappings/hero-ranking";
 import { Rules } from "@opencok/rules/game";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs } from "@opencok/messages/sfs";
 

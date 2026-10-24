@@ -1,4 +1,4 @@
-import { createAvatarVersion } from "@opencok/controllers/avatar-version";
+import { createAvatarVersion } from "@opencok/services/avatar-version";
 import {
   commitAvatarVersion,
   deliverAvatarVersionMail,
@@ -11,7 +11,7 @@ import type { Rules } from "@opencok/rules/game";
 import type { Database } from "@opencok/repositories/game";
 import type { Cache } from "@opencok/storage/session";
 import type { RealmNotifications } from "@opencok/connection/notifications";
-import { createAvatarCompletion } from "@opencok/controllers/avatar-completion";
+import { createAvatarCompletion } from "@opencok/services/avatar-completion";
 import { commitAvatarFinish } from "@opencok/repositories/avatar-finish";
 import { deliverAvatarMail } from "@opencok/repositories/avatar-mail";
 import { publishAvatarProfile, publishAvatarChat } from "@opencok/repositories/avatar-profile";

@@ -10,7 +10,7 @@ import {
   type Fields,
   type Value,
 } from "@opencok/messages/sfs";
-import { mailContentsProjection } from "@opencok/controllers/mail-contents";
+import { mailContentsProjection } from "@opencok/services/mail-contents";
 import vectors from "./fixtures/mail-structure-vectors.json";
 
 function describe(value: Value): string {

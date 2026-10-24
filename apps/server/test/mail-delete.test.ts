@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { mailDeleteGroups, mailDeleteQuery } from "@opencok/rules/mail";
-import { planMailDeletion } from "@opencok/controllers/mail-delete";
+import { planMailDeletion } from "@opencok/services/mail-delete";
 import type { MailDeleteEntry } from "@opencok/contracts/mail";
 
 const now = 1792756800000;

@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Effect } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { avatarSequence, avatarMinimumLevel, checkAvatarRecord } from "@opencok/rules/avatar";
 import { createAvatarFiles, loadAvatarFiles } from "@opencok/connection/avatar-files";

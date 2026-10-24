@@ -1,6 +1,9 @@
 import { z } from "zod";
-import type { PlayerSummaryDto, GuidePlayerSummaryDto } from "@opencok/dtos/players";
-import { field } from "./dto.ts";
+import type {
+  PlayerSummaryResponse,
+  GuidePlayerSummaryResponse,
+} from "@opencok/contracts/responses/players";
+import { field } from "./response.ts";
 
 export const playerSummarySchema = z.strictObject({
   lastUpdateTime: field.string,
@@ -24,7 +27,7 @@ export const playerSummarySchema = z.strictObject({
   vipLevel: field.int,
   showBanner: field.int.optional(),
   endTime: field.long,
-}) satisfies z.ZodType<PlayerSummaryDto>;
+}) satisfies z.ZodType<PlayerSummaryResponse>;
 
 export const guidePlayerSummarySchema = z.strictObject({
   uid: field.string,
@@ -43,4 +46,4 @@ export const guidePlayerSummarySchema = z.strictObject({
   lastUpdateTime: field.int,
   svipLevel: field.int,
   vipEndTime: field.long,
-}) satisfies z.ZodType<GuidePlayerSummaryDto>;
+}) satisfies z.ZodType<GuidePlayerSummaryResponse>;

@@ -1,10 +1,10 @@
 import { z } from "zod";
 import type {
-  WorldResourceOwnerDto,
-  WorldResourceGroupDto,
-  WorldNeutralResourceDto,
-} from "@opencok/dtos/world-resource-detail";
-import { field } from "./dto.ts";
+  WorldResourceOwnerResponse,
+  WorldResourceGroupResponse,
+  WorldNeutralResourceResponse,
+} from "@opencok/contracts/responses/world-resource-detail";
+import { field } from "./response.ts";
 
 export const worldResourceOwnerSchema = z.strictObject({
   q: field.int,
@@ -14,14 +14,14 @@ export const worldResourceOwnerSchema = z.strictObject({
   sdt: field.long,
   changeCollectSpdTime: field.long,
   occupyEndTime: field.long,
-}) satisfies z.ZodType<WorldResourceOwnerDto>;
+}) satisfies z.ZodType<WorldResourceOwnerResponse>;
 
 export const worldResourceGroupSchema = z.union([
   z.strictObject({}),
   z.strictObject({ spd: field.float, tq: field.int, sdt: field.double }),
-]) satisfies z.ZodType<WorldResourceGroupDto>;
+]) satisfies z.ZodType<WorldResourceGroupResponse>;
 
 export const worldNeutralResourceSchema = z.union([
   z.strictObject({}),
   z.strictObject({ occupybegintime: field.long }),
-]) satisfies z.ZodType<WorldNeutralResourceDto>;
+]) satisfies z.ZodType<WorldNeutralResourceResponse>;

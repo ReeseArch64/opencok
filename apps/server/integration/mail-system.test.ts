@@ -4,7 +4,7 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { mail_contents } from "@opencok/drizzle/schema/opencok_kingdom/mail_contents";
 import { readSystemMail } from "@opencok/repositories/mail-system";
-import { systemMailProjection } from "@opencok/controllers/mail-system";
+import { systemMailProjection } from "@opencok/services/mail-system";
 import type { MailListEntry } from "@opencok/contracts/mail";
 import { migrateDatabase } from "../../../packages/drizzle/scripts/migrate.ts";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";

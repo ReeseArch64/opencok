@@ -1,6 +1,6 @@
 import { decodeWorldResourceArmy } from "@opencok/messages/world-resource-army";
 import armyVectors from "./fixtures/world-resource-army-vectors.json";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { Type } from "@opencok/messages/sfs";

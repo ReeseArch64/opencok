@@ -3,7 +3,7 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { checkPowerStore, getPowerByPlayerId } from "@opencok/repositories/power";
 import { Database } from "@opencok/repositories/game";
-import { generalSkillPoints, titleContractExpiries } from "@opencok/controllers/power";
+import { generalSkillPoints, titleContractExpiries } from "@opencok/services/power";
 
 const now = 1792756800000;
 function database(

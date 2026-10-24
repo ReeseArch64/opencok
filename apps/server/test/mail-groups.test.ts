@@ -6,7 +6,7 @@ import type {
   MailGroupPreview,
   MailListEntry,
 } from "@opencok/contracts/mail";
-import { mailGroupProjection } from "@opencok/controllers/mail-groups";
+import { mailGroupProjection } from "@opencok/services/mail-groups";
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import {
   encode,

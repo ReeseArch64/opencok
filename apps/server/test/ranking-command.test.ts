@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { PlayerRankingQuery, PlayerRankingSnapshot } from "@opencok/contracts/ranking";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 

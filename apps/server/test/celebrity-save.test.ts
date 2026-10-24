@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { saveCelebrityDescription } from "@opencok/repositories/celebrity";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { NicknameWordFilter } from "@opencok/resources/nickname-words";
 import type { GameServices, GameStore } from "@opencok/contracts/game";

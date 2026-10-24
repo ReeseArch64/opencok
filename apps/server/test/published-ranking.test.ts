@@ -5,7 +5,7 @@ import {
 } from "@opencok/storage/published-ranking";
 import { attributeRanking, publishedRanking } from "@opencok/mappings/published-ranking";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 

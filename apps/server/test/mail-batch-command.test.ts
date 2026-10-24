@@ -9,7 +9,7 @@ import type {
   MailSender,
   MailTranslationLookup,
 } from "@opencok/contracts/mail";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { mailBatchQuery, mailBatchIsChat } from "@opencok/rules/mail";
 import {

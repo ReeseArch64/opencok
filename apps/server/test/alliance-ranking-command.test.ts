@@ -5,7 +5,7 @@ import type {
   AllianceRankingQuery,
   AllianceRankingSnapshot,
 } from "@opencok/contracts/alliance-ranking";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 

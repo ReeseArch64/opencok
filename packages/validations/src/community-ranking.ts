@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { field } from "./dto.ts";
+import { field } from "./response.ts";
 import type {
-  DonationMemberDto,
-  CemeteryMemberDto,
-  DonationRankingDto,
-  ResourceDonationRankingDto,
-  CemeteryRankingDto,
-} from "@opencok/dtos/community-ranking";
+  DonationMemberResponse,
+  CemeteryMemberResponse,
+  DonationRankingResponse,
+  ResourceDonationRankingResponse,
+  CemeteryRankingResponse,
+} from "@opencok/contracts/responses/community-ranking";
 export const donationMemberSchema = z.strictObject({
   uid: field.string,
   name: field.string,
@@ -21,7 +21,7 @@ export const donationMemberSchema = z.strictObject({
   key: field.int.optional(),
   allianceId: field.string.optional(),
   score: field.double.optional(),
-}) satisfies z.ZodType<DonationMemberDto>;
+}) satisfies z.ZodType<DonationMemberResponse>;
 export const cemeteryMemberSchema = z.strictObject({
   uid: field.string,
   name: field.string,
@@ -33,16 +33,16 @@ export const cemeteryMemberSchema = z.strictObject({
   alliancename: field.string.optional(),
   useItemSum: field.int,
   deadSum: field.long,
-}) satisfies z.ZodType<CemeteryMemberDto>;
+}) satisfies z.ZodType<CemeteryMemberResponse>;
 export const donationRankingSchema = z.strictObject({
   donateRank: z.array(donationMemberSchema).max(32767),
   refreshTime: field.long.optional(),
-}) satisfies z.ZodType<DonationRankingDto>;
+}) satisfies z.ZodType<DonationRankingResponse>;
 export const resourceDonationRankingSchema = z.strictObject({
   ranks: z.array(donationMemberSchema).max(32767),
   weekendTime: field.long.optional(),
-}) satisfies z.ZodType<ResourceDonationRankingDto>;
+}) satisfies z.ZodType<ResourceDonationRankingResponse>;
 export const cemeteryRankingSchema = z.strictObject({
   myRanking: field.int,
   serverRanking: z.array(cemeteryMemberSchema).max(49),
-}) satisfies z.ZodType<CemeteryRankingDto>;
+}) satisfies z.ZodType<CemeteryRankingResponse>;

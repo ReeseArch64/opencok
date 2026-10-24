@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Effect, Layer } from "effect";
 import type { GameStore } from "@opencok/contracts/game";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { EnvironmentSource } from "@opencok/env/effect";
 import { decode, encode, fields, sfs, Type } from "@opencok/messages/sfs";
 import { loadRules } from "@opencok/resources/rules";

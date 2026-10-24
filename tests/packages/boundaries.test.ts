@@ -61,3 +61,19 @@ test("workspace source imports use declared package APIs without application dep
       "@opencok/enums",
     ]).toContain(dependency);
 });
+
+test("Services stay independent of Controllers and DTO classes describe create/update inputs", async () => {
+  const services = JSON.parse(await readFile(join(root, "services/package.json"), "utf8"));
+  expect(Object.keys(services.dependencies)).not.toContain("@opencok/controllers");
+  const dtos = join(root, "dtos/src");
+  const files = (await readdir(dtos, { recursive: true })).filter((file) => file.endsWith(".ts"));
+  expect(files.length).toBeGreaterThan(0);
+  for (const file of files) {
+    expect(file).toMatch(/(?:create|update)-[\w-]+\.dto\.ts$/);
+    const source = await readFile(join(dtos, file), "utf8");
+    const classes = [...source.matchAll(/export class (\w+)/g)].map((match) => match[1]);
+    expect(classes.length, file).toBeGreaterThan(0);
+    for (const name of classes) expect(name, file).toMatch(/^(Create|Update)\w+Dto$/);
+    expect(source, file).not.toMatch(/\b(?:constructor|static|extends)\b/);
+  }
+});

@@ -1,0 +1,58 @@
+{
+  "name": "@opencok/services",
+  "private": true,
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@opencok/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./game": "./src/game.service.ts",
+    "./mail-updates": "./src/mail-updates.ts",
+    "./world-resource-owner-effects": "./src/world-resource-owner-effects.ts",
+    "./reconnect": "./src/reconnect.ts",
+    "./reconnect-marches": "./src/reconnect-marches.ts",
+    "./mail-delete": "./src/mail-delete.ts",
+    "./reconnect-progress": "./src/reconnect-progress.ts",
+    "./profile-preferences": "./src/profile-preferences.ts",
+    "./avatar-completion": "./src/avatar-completion.ts",
+    "./mail-conversation-read": "./src/mail-conversation-read.ts",
+    "./avatar-version": "./src/avatar-version.ts",
+    "./dragon-ranking": "./src/dragon-ranking.ts",
+    "./world-resource-generals": "./src/world-resource-generals.ts",
+    "./celebrity": "./src/celebrity.ts",
+    "./mail-groups": "./src/mail-groups.ts",
+    "./avatar-report": "./src/avatar-report.ts",
+    "./world-resource-expedition": "./src/world-resource-expedition.ts",
+    "./world-resource-owner-context": "./src/world-resource-owner-context.ts",
+    "./mail-list": "./src/mail-list.ts",
+    "./world-resource-owner-values": "./src/world-resource-owner-values.ts",
+    "./world-point-detail": "./src/world-point-detail.ts",
+    "./realm-chat-session": "./src/realm-chat-session.ts",
+    "./profile": "./src/profile.ts",
+    "./world-resource-detail": "./src/world-resource-detail.ts",
+    "./avatar-finish": "./src/avatar-finish.ts",
+    "./power": "./src/power.ts",
+    "./expedition-ranking": "./src/expedition-ranking.ts",
+    "./mail-category": "./src/mail-category.ts",
+    "./world": "./src/world.service.ts",
+    "./mail-contents": "./src/mail-contents.ts",
+    "./world-resource-army-load": "./src/world-resource-army-load.ts",
+    "./mail-presentation": "./src/mail-presentation.ts",
+    "./mail-system": "./src/mail-system.ts",
+    "./battle-ranking": "./src/battle-ranking.ts"
+  },
+  "dependencies": {
+    "@opencok/constants": "workspace:*",
+    "@opencok/contracts": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/messages": "workspace:*",
+    "@opencok/rules": "workspace:*",
+    "@opencok/mappings": "workspace:*",
+    "@opencok/dtos": "workspace:*"
+  }
+}

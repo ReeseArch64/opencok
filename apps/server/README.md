@@ -22,7 +22,7 @@ preserved. Construction, queue completion, combat and other mutations return
 `src/config.ts` provides the RealmConfig service from the shared environment Layer. The composition root wires the shared packages described
 in the [architecture package map](../../.github/ARCHITECTURE.md#implemented-api-and-realm-package-boundaries).
 `src/server.ts` loads the rule catalog and connects `@opencok/connection/server`
-to repositories, Redis/ZooKeeper adapters and command controllers. The dependency
+to repositories, Redis/ZooKeeper adapters and application Services injected into command Controllers. The dependency
 Layer owns pools and coordination; the connection Layer owns TCP/health listeners
 and a scoped readiness fiber. Shutdown waits for health checks, stops accepting
 connections and drains session work before releasing dependencies. API and realm
@@ -2206,7 +2206,7 @@ overall topics 1–8 migration are still incomplete.
 
 The pure resource calculations and SFS projections for
 [issue #85](https://github.com/ReeseArch64/opencok/issues/85) are available in
-`rules/world-resource-detail` and `dtos/world-resource-detail`. `world.get.detail`
+`rules/world-resource-detail` and `contracts/responses/world-resource-detail`. `world.get.detail`
 now uses remaining-quantity arithmetic for implemented local resource reads. Occupied-resource
 collection/load composition is still pending; the pure helpers do not read or change game state.
 
@@ -2427,7 +2427,7 @@ failure; these tests do not establish real database isolation or the legacy lazy
 cache's availability behavior. Owner building/context restoration is described below;
 residency and final endpoint composition still remain pending.
 
-`controllers/world-resource-generals` now converts the general portion of this raw
+`services/world-resource-generals` now converts the general portion of this raw
 snapshot into ordered general/equipment state. Saved talent, operation-time and base
 skill maps are validated before assignment filtering, including overwritten general
 rows. Nullable primitive state/star fields default to zero. State is a Java byte in
@@ -2460,7 +2460,7 @@ row order. Residency, authoritative expedition state and maximum
 collection time still need composition before occupied-resource responses can be
 enabled. All current evidence is server-side unit coverage.
 
-`controllers/world-resource-owner-context` now selects the requested building by item
+`services/world-resource-owner-context` now selects the requested building by item
 ID after fresh String ConcurrentHashMap restoration of UUIDs. The default target is
 the stronghold. Multiple buildings of that type select the first map entry, not the
 highest level or first SQL row. Duplicate UUIDs retain the final loaded record. The
@@ -2499,7 +2499,7 @@ owner projection; ordinary modifier composition is described below, and complete
 occupied-resource responses remain pending. Function-on realm parsing now uses the
 ordered Java-compatible selector and lenient calendar parser described above.
 
-`controllers/world-resource-owner-effects` now composes the resource owner's saved
+`services/world-resource-owner-effects` now composes the resource owner's saved
 abilities and ordinary effects with the building/general projection. It reads world
 effects for the execution realm and reads that realm's emperor version only when
 saved throne reward records require it. The cache methods and runtime service wiring
@@ -2527,7 +2527,7 @@ expedition runtime synchronization, resident-owner policy, decoded ownership che
 and runtime maximum collection time. It must also avoid consuming owner effects on
 the cached-load or no-applicable-troop branches.
 
-`controllers/world-resource-expedition` now connects effect 895 to the cache phase
+`services/world-resource-expedition` now connects effect 895 to the cache phase
 reader using the execution realm. The `merge_server.k5` list uses Java Integer
 parsing, including every supplied member before membership is checked. Missing item
 records fail; missing or blank lists mean no merged realms. The effective owner realm
@@ -2637,7 +2637,7 @@ it is not a persisted march column. Restoring its read value still needs an expl
 policy backed by that lifecycle, without scheduling work from the query. This pure
 calculation does not make occupied-resource responses available yet.
 
-`controllers/world-resource-army-load` consumes the decoded army and an explicit
+`services/world-resource-army-load` consumes the decoded army and an explicit
 march-owner/residency pair. The nonblank root owner must match the march before any
 cached return. This is the persisted-state consistency boundary; it rejects foreign
 army data instead of following the legacy getter into another player's profile.
@@ -2752,7 +2752,7 @@ inputs and read-only readiness. No database, service, listener or client is star
 
 ## World monster detail foundation
 
-`rules/world-monster-detail` and `dtos/world-monster-detail` supply local monster
+`rules/world-monster-detail` and `contracts/responses/world-monster-detail` supply local monster
 detail fields for the implemented local `world.get.detail` branches. `loadRules` now loads
 optional `field_monster.xml` and `army.xml` into `Rules.world.fieldMonsters` and
 `Rules.world.armies`. The `army` formation catalog is distinct from the existing
@@ -2866,7 +2866,7 @@ or ADB execution is used. Real concurrency and deployment behavior remain unveri
 ## Avatar completion transaction foundation
 
 [Issue #77](https://github.com/ReeseArch64/opencok/issues/77) adds the internal
-`controllers/avatar-finish` workflow and `repositories/avatar-finish` transaction.
+`services/avatar-finish` workflow and `repositories/avatar-finish` transaction.
 They are connected through the opt-in runtime composition described below.
 The migration is generated only; this work has not changed a running realm or database.
 

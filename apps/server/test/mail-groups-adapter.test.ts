@@ -4,7 +4,7 @@ import * as schema from "@opencok/drizzle/schema/kingdom";
 import * as globalSchema from "@opencok/drizzle/schema/global";
 import { readMailGroups } from "@opencok/repositories/mail-groups";
 import { Database } from "@opencok/repositories/game";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { mailGroupQuery, mailGroupRule } from "@opencok/rules/mail-groups";
 import type { MailGroupEntry, MailGroupPreview, MailListEntry } from "@opencok/contracts/mail";

@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { commitAvatarFinish } from "@opencok/repositories/avatar-finish";
-import { finishAvatar } from "@opencok/controllers/avatar-finish";
+import { finishAvatar } from "@opencok/services/avatar-finish";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { avatarFinishQuery, avatarFinishPlan } from "@opencok/rules/avatar";
 import type { AvatarFinishInspector, AvatarGrantReaders } from "@opencok/contracts/files";

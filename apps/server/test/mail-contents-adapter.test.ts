@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { readMailContents } from "@opencok/repositories/mail-contents";
-import { mailContentsProjection } from "@opencok/controllers/mail-contents";
+import { mailContentsProjection } from "@opencok/services/mail-contents";
 import type { MailContentsEntry } from "@opencok/contracts/mail";
 
 const now = 1792756800000;

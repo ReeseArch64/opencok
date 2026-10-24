@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { decodeLegacyJsonArray } from "@opencok/messages/legacy-json";
-import { restoredResourcePlunder } from "@opencok/controllers/world-resource-detail";
+import { restoredResourcePlunder } from "@opencok/services/world-resource-detail";
 import {
   resourceArmyLoad,
   resourceOwnerDetail,

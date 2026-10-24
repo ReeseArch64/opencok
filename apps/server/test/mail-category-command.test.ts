@@ -9,7 +9,7 @@ import type {
   MailTranslationLookup,
 } from "@opencok/contracts/mail";
 import type { Row } from "@opencok/contracts/rows";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { mailListEntry, mailCategoryNow as now } from "./fixtures/mail-category.ts";

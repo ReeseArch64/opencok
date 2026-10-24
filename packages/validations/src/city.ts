@@ -1,6 +1,11 @@
 import { z } from "zod";
-import type { BuildingDto, QueueDto, ResourceDto, UserDto } from "@opencok/dtos/city";
-import { field, dtoFieldsSchema } from "./dto.ts";
+import type {
+  BuildingResponse,
+  QueueResponse,
+  ResourceResponse,
+  UserResponse,
+} from "@opencok/contracts/responses/city";
+import { field, responseFieldsSchema } from "./response.ts";
 
 export const buildingSchema = z.strictObject({
   uuid: field.string,
@@ -43,7 +48,7 @@ export const buildingSchema = z.strictObject({
   refreshTime: field.long.optional(),
   cdTime: field.long.optional(),
   effectTime: field.long.optional(),
-}) satisfies z.ZodType<BuildingDto>;
+}) satisfies z.ZodType<BuildingResponse>;
 
 export const queueSchema = z
   .strictObject({
@@ -56,7 +61,7 @@ export const queueSchema = z
     updateTime: field.long,
     totalTime: field.long,
   })
-  .extend({ itemObj: dtoFieldsSchema }) satisfies z.ZodType<QueueDto>;
+  .extend({ itemObj: responseFieldsSchema }) satisfies z.ZodType<QueueResponse>;
 
 export const resourceSchema = z.strictObject({
   wood: field.long,
@@ -77,7 +82,7 @@ export const resourceSchema = z.strictObject({
   limestone: field.int,
   dragonFood: field.int,
   dragonGold: field.int,
-}) satisfies z.ZodType<ResourceDto>;
+}) satisfies z.ZodType<ResourceResponse>;
 
 export const userSchema = z.strictObject({
   buildcode: field.string,
@@ -120,4 +125,4 @@ export const userSchema = z.strictObject({
   neutralScore: field.long,
   csmodBalance: field.long,
   payTotalDollar: field.double,
-}) satisfies z.ZodType<UserDto>;
+}) satisfies z.ZodType<UserResponse>;

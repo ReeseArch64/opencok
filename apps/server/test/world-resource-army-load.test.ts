@@ -3,7 +3,7 @@ import type { GameServices } from "@opencok/contracts/game";
 import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-detail";
 import type { SavedResourceArmy } from "@opencok/messages/world-resource-army";
 import { decodeWorldResourceArmy } from "@opencok/messages/world-resource-army";
-import { readResourceRawArmyLoad } from "@opencok/controllers/world-resource-army-load";
+import { readResourceRawArmyLoad } from "@opencok/services/world-resource-army-load";
 import { Rules } from "@opencok/rules/game";
 import vectors from "./fixtures/world-resource-army-vectors.json";
 

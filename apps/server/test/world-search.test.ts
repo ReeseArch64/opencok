@@ -4,7 +4,7 @@ import * as kingdom from "@opencok/drizzle/schema/kingdom";
 import { createWorldSearchStore, checkWorldSearchStore } from "@opencok/repositories/world-search";
 import { worldSearchOffset, worldSearchName } from "@opencok/rules/world-search";
 import { worldSearch } from "@opencok/mappings/world-search";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore, GameServices } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";

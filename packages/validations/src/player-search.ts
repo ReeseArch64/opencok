@@ -1,6 +1,9 @@
 import { z } from "zod";
-import type { PlayerSearchEntryDto, PlayerSearchDto } from "@opencok/dtos/player-search";
-import { field } from "./dto.ts";
+import type {
+  PlayerSearchEntryResponse,
+  PlayerSearchResponse,
+} from "@opencok/contracts/responses/player-search";
+import { field } from "./response.ts";
 
 export const playerSearchEntrySchema = z.strictObject({
   uid: field.string,
@@ -23,7 +26,7 @@ export const playerSearchEntrySchema = z.strictObject({
   power: field.long.optional(),
   vipEndTime: field.long.optional(),
   offLineTime: field.long.optional(),
-}) satisfies z.ZodType<PlayerSearchEntryDto>;
+}) satisfies z.ZodType<PlayerSearchEntryResponse>;
 
 export const playerSearchSchema = z.strictObject({
   list: z.array(playerSearchEntrySchema).refine((field) => field.length <= 10),
@@ -31,4 +34,4 @@ export const playerSearchSchema = z.strictObject({
   total: field.long,
   max: field.long,
   key: field.string,
-}) satisfies z.ZodType<PlayerSearchDto>;
+}) satisfies z.ZodType<PlayerSearchResponse>;

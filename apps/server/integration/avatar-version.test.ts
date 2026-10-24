@@ -14,7 +14,7 @@ import {
 } from "@opencok/repositories/avatar-version";
 import { createChatAvatarProfileStore } from "@opencok/repositories/chat-avatar-profile";
 import { createChatAvatarProfileHandler } from "@opencok/controllers/chat-avatar-profile";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs } from "@opencok/messages/sfs";

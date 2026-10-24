@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { PlayerRankingDto } from "@opencok/dtos/ranking";
-import { field } from "./dto.ts";
+import type { PlayerRankingResponse } from "@opencok/contracts/responses/ranking";
+import { field } from "./response.ts";
 
 export const playerRankingSchema = z.strictObject({
   selfRanking: field.int.optional(),
@@ -32,4 +32,4 @@ export const playerRankingSchema = z.strictObject({
         }),
     )
     .max(32767),
-}) satisfies z.ZodType<PlayerRankingDto>;
+}) satisfies z.ZodType<PlayerRankingResponse>;

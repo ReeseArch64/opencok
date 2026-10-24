@@ -1,22 +1,22 @@
 import { z } from "zod";
 import type {
-  ServerClockDto,
-  FeatureConfigDto,
-  PushPreferenceDto,
-  LoginConfigurationPreferencesDto,
-  LoginSwitchesDto,
-  LoginConfigurationDto,
-  SettingConfigDto,
-  ArmySnapshotDto,
-  InventoryItemDto,
-} from "@opencok/dtos/bootstrap";
-import { field, dtoRecord } from "./dto.ts";
+  ServerClockResponse,
+  FeatureConfigResponse,
+  PushPreferenceResponse,
+  LoginConfigurationPreferencesResponse,
+  LoginSwitchesResponse,
+  LoginConfigurationResponse,
+  SettingConfigResponse,
+  ArmySnapshotResponse,
+  InventoryItemResponse,
+} from "@opencok/contracts/responses/bootstrap";
+import { field, responseRecord } from "./response.ts";
 
 export const serverClockSchema = z.strictObject({
   db_utc_timestamp: field.int,
   db_timezone_offset: field.int,
   tomorrow: field.int,
-}) satisfies z.ZodType<ServerClockDto>;
+}) satisfies z.ZodType<ServerClockResponse>;
 
 export const featureConfigSchema = z.strictObject({
   funcOn: z
@@ -29,16 +29,16 @@ export const featureConfigSchema = z.strictObject({
       }),
     )
     .max(32767),
-}) satisfies z.ZodType<FeatureConfigDto>;
+}) satisfies z.ZodType<FeatureConfigResponse>;
 
 export const pushPreferencesSchema = z
   .array(z.strictObject({ type: field.int, status: field.int, audio: field.int.optional() }))
-  .max(32767) satisfies z.ZodType<PushPreferenceDto[]>;
+  .max(32767) satisfies z.ZodType<PushPreferenceResponse[]>;
 
 export const loginConfigurationPreferencesSchema = z.strictObject({
-  fbShare: z.array(dtoRecord(z.string(), field.string)).max(32767),
+  fbShare: z.array(responseRecord(z.string(), field.string)).max(32767),
   pushSetting: pushPreferencesSchema,
-}) satisfies z.ZodType<LoginConfigurationPreferencesDto>;
+}) satisfies z.ZodType<LoginConfigurationPreferencesResponse>;
 
 export const loginSwitchesSchema = z.strictObject({
   switches: z
@@ -50,17 +50,17 @@ export const loginSwitchesSchema = z.strictObject({
       }),
     )
     .max(32767),
-}) satisfies z.ZodType<LoginSwitchesDto>;
+}) satisfies z.ZodType<LoginSwitchesResponse>;
 
 export const loginConfigurationSchema = loginConfigurationPreferencesSchema.extend({
   funcOn: featureConfigSchema.shape.funcOn,
   switches: loginSwitchesSchema.shape.switches.optional(),
   isVerifyChangeAccount: field.bool.optional(),
-}) satisfies z.ZodType<LoginConfigurationDto>;
+}) satisfies z.ZodType<LoginConfigurationResponse>;
 
 export const settingConfigSchema = z.strictObject({
-  setting: z.array(dtoRecord(z.string(), field.string)).max(32767),
-}) satisfies z.ZodType<SettingConfigDto>;
+  setting: z.array(responseRecord(z.string(), field.string)).max(32767),
+}) satisfies z.ZodType<SettingConfigResponse>;
 
 export const armySnapshotSchema = z.strictObject({
   id: field.string,
@@ -92,7 +92,7 @@ export const armySnapshotSchema = z.strictObject({
   finish: field.long.optional(),
   upkeep: field.float,
   power: field.float,
-}) satisfies z.ZodType<ArmySnapshotDto>;
+}) satisfies z.ZodType<ArmySnapshotResponse>;
 
 export const inventoryItemSchema = z.strictObject({
   uuid: field.string,
@@ -108,4 +108,4 @@ export const inventoryItemSchema = z.strictObject({
   para9: field.string.optional(),
   count: field.int,
   vanishTime: field.long,
-}) satisfies z.ZodType<InventoryItemDto>;
+}) satisfies z.ZodType<InventoryItemResponse>;

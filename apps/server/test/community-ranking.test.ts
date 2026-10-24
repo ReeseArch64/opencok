@@ -128,7 +128,7 @@ test("cemetery rankings retain candidate self positions, skipped metadata and 49
 });
 
 test("community commands retain authenticated membership, type selectors and correlation", async () => {
-  const { Game } = await import("@opencok/controllers/game");
+  const { GameService: Game } = await import("@opencok/services/game");
   const { Rules } = await import("@opencok/rules/game");
   const state = snapshot();
   state.profile = { uid: "self", serverId: 1, allianceId: "alliance", banFlag: 0 };

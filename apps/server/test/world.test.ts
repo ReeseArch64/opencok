@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { compactPoint, pointSections, viewport } from "@opencok/controllers/world";
+import { compactPoint, pointSections, viewport } from "@opencok/services/world";
 import { Type } from "@opencok/messages/sfs";
 
 test("legacy isometric viewport has 340 tiles at center and clips at kingdom edges", () => {

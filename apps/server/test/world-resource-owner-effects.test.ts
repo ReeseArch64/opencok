@@ -3,7 +3,7 @@ import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-
 import type { GameServices } from "@opencok/contracts/game";
 import type { RuleContext } from "@opencok/rules/availability";
 import { ruleAvailable } from "@opencok/rules/availability";
-import { readResourceOwnerLoadEffects } from "@opencok/controllers/world-resource-owner-effects";
+import { readResourceOwnerLoadEffects } from "@opencok/services/world-resource-owner-effects";
 import { resourceRawArmyLoad } from "@opencok/rules/world-resource-detail";
 import { Rules, type Rule } from "@opencok/rules/game";
 

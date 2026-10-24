@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { decodeStoredJson } from "@opencok/messages/stored-json";
 import { encode, sfs } from "@opencok/messages/sfs";
-import { titleContractExpiries, powerContext } from "@opencok/controllers/power";
+import { titleContractExpiries, powerContext } from "@opencok/services/power";
 import { Rules } from "@opencok/rules/game";
 import { powerFeatureContext } from "@opencok/rules/power-context";
 import type { RuleContext } from "@opencok/rules/availability";

@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { CityState, GameStore, LoginConfigurationState } from "@opencok/contracts/game";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { featureConfig, loginConfiguration } from "@opencok/mappings/bootstrap";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";

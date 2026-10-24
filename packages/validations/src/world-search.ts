@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { WorldSearchDto } from "@opencok/dtos/world-search";
-import { field } from "./dto.ts";
+import type { WorldSearchResponse } from "@opencok/contracts/responses/world-search";
+import { field } from "./response.ts";
 
 const searchText = (maximum: number) =>
   field.string.refine(
@@ -24,4 +24,4 @@ export const worldSearchSchema = z.strictObject({
       (value) =>
         value.length <= 8 && new Set(value.map((entry) => entry.uid)).size === value.length,
     ),
-}) satisfies z.ZodType<WorldSearchDto>;
+}) satisfies z.ZodType<WorldSearchResponse>;

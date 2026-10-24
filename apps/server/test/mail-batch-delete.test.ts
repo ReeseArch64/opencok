@@ -5,7 +5,7 @@ import { deleteMailCategories, deleteMailType } from "@opencok/repositories/mail
 import { mailCategoryDeleteQuery, mailTypeDeleteQuery } from "@opencok/rules/mail-batch-delete";
 import type { GameStore } from "@opencok/contracts/game";
 import type { MailCategoryDeleteCount } from "@opencok/contracts/mail";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
 

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { decodeExpeditionRanking } from "@opencok/controllers/expedition-ranking";
+import { decodeExpeditionRanking } from "@opencok/services/expedition-ranking";
 import { selectExpeditionRanking, expeditionRankingLimit } from "@opencok/rules/expedition-ranking";
 import { expeditionRanking } from "@opencok/mappings/expedition-ranking";
 import type { ExpeditionRankingEntry } from "@opencok/contracts/expedition-ranking";

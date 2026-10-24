@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { friendshipMineView, initialFriendshipMine } from "@opencok/rules/reconnect-mine";
-import { reconnectFriendshipMine } from "@opencok/controllers/reconnect";
+import { reconnectFriendshipMine } from "@opencok/services/reconnect";
 import { reconnectMine } from "@opencok/mappings/reconnect";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 import type { Row } from "@opencok/contracts/rows";

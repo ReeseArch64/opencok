@@ -4,7 +4,7 @@ import * as schema from "@opencok/drizzle/schema/kingdom";
 import * as globalSchema from "@opencok/drizzle/schema/global";
 import { readMailBatch } from "@opencok/repositories/mail-batch";
 import { Database } from "@opencok/repositories/game";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { mailBatchQuery } from "@opencok/rules/mail";
 import type { MailBatchQuery, MailListEntry } from "@opencok/contracts/mail";

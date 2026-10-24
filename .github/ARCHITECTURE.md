@@ -80,11 +80,20 @@ are local references, never required private artifacts committed as dependencies
 | Packages                                                            | Boundary                                                                                                   |
 | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `env`, `config`, `core`                                             | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging. |
-| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and command orchestration.                                                  |
+| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and thin command Controllers.                                               |
 | `contracts`, `messages`, `dtos`, `enums`, `validations`, `mappings` | Versioned ports, wire types, DTOs, runtime validation and serialization.                                   |
+| `services`                                                          | Application workflows and orchestration of rules, contracts and persistence ports.                         |
 | `rules`, domain packages including `combat`                         | Pure rule evaluation; no sockets, ORM or broker imports.                                                   |
 | `resources`                                                         | Validated, versioned XML and rule catalogs.                                                                |
 | `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                       |
+
+Realm composition injects `GameService` and `WorldService` into `GameController`
+and `WorldController`. Controllers delegate commands; Services coordinate use
+cases, rule evaluation and persistence ports. NestJS supplies the organizational
+pattern; the existing Effect runtime continues to own process lifecycle.
+Create/update inputs use DTO classes; reads, deletion selections and mobile
+responses use contracts. Response interfaces live in `contracts/responses/*`,
+while validation and wire serialization remain in their existing packages.
 
 Packages never import applications. Declare direct workspace dependencies and
 public exports; do not turn helpers into a cross-domain rules container.

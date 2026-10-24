@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { createHash } from "node:crypto";
 import { decodeLegacyJsonObject, legacyJsonEntries } from "@opencok/messages/legacy-json";
-import { mailContentsProjection } from "@opencok/controllers/mail-contents";
+import { mailContentsProjection } from "@opencok/services/mail-contents";
 import { decode, encode, fields, ProtocolError, sfs, type Value } from "@opencok/messages/sfs";
 import vectors from "./fixtures/mail-helper-order-vectors.json";
 

@@ -1,12 +1,12 @@
 import { z } from "zod";
 import type {
-  ReconnectBalancesDto,
-  ReconnectArmyDto,
-  ReconnectArmiesDto,
-  ReconnectGeneralsDto,
-  ReconnectMineDto,
-} from "@opencok/dtos/reconnect";
-import { field } from "./dto.ts";
+  ReconnectBalancesResponse,
+  ReconnectArmyResponse,
+  ReconnectArmiesResponse,
+  ReconnectGeneralsResponse,
+  ReconnectMineResponse,
+} from "@opencok/contracts/responses/reconnect";
+import { field } from "./response.ts";
 import { generalInfoSchema } from "./profile.ts";
 
 export const reconnectBalancesSchema = z.strictObject({
@@ -17,7 +17,7 @@ export const reconnectBalancesSchema = z.strictObject({
   freeGold: field.long,
   paidGold: field.long,
   paidSpecialGold: field.long,
-}) satisfies z.ZodType<ReconnectBalancesDto>;
+}) satisfies z.ZodType<ReconnectBalancesResponse>;
 
 export const reconnectArmySchema = z.strictObject({
   id: field.string.refine((value) => value.length > 0 && value.length <= 20),
@@ -26,15 +26,15 @@ export const reconnectArmySchema = z.strictObject({
   level: field.int,
   train: field.int.optional(),
   finish: field.long.optional(),
-}) satisfies z.ZodType<ReconnectArmyDto>;
+}) satisfies z.ZodType<ReconnectArmyResponse>;
 
 export const reconnectArmiesSchema = z.strictObject({
   army: z.array(reconnectArmySchema).max(32767),
-}) satisfies z.ZodType<ReconnectArmiesDto>;
+}) satisfies z.ZodType<ReconnectArmiesResponse>;
 
 export const reconnectGeneralsSchema = z.strictObject({
   userGenerals: z.array(generalInfoSchema.extend({ abilityIndex: field.int })).max(32767),
-}) satisfies z.ZodType<ReconnectGeneralsDto>;
+}) satisfies z.ZodType<ReconnectGeneralsResponse>;
 
 export const reconnectMineSchema = z.strictObject({
   mine: z.strictObject({
@@ -47,21 +47,21 @@ export const reconnectMineSchema = z.strictObject({
     xml_miner: field.int,
     mineTime: field.long,
   }),
-}) satisfies z.ZodType<ReconnectMineDto>;
+}) satisfies z.ZodType<ReconnectMineResponse>;
 
 import { queueSchema } from "./city.ts";
 import { rewardPreviewArraySchema } from "./rewards.ts";
 import type {
-  ReconnectQueuesDto,
-  ReconnectResourceDto,
-  ReconnectResourcesDto,
-  ReconnectTaskDto,
-  ReconnectTasksDto,
-} from "@opencok/dtos/reconnect";
+  ReconnectQueuesResponse,
+  ReconnectResourceResponse,
+  ReconnectResourcesResponse,
+  ReconnectTaskResponse,
+  ReconnectTasksResponse,
+} from "@opencok/contracts/responses/reconnect";
 
 export const reconnectQueuesSchema = z.strictObject({
   queue: z.array(queueSchema).max(32767),
-}) satisfies z.ZodType<ReconnectQueuesDto>;
+}) satisfies z.ZodType<ReconnectQueuesResponse>;
 
 export const reconnectResourceSchema = z.strictObject({
   wood: field.long,
@@ -82,11 +82,11 @@ export const reconnectResourceSchema = z.strictObject({
   marble: field.int,
   granite: field.int,
   limestone: field.int,
-}) satisfies z.ZodType<ReconnectResourceDto>;
+}) satisfies z.ZodType<ReconnectResourceResponse>;
 
 export const reconnectResourcesSchema = z.strictObject({
   resource: reconnectResourceSchema,
-}) satisfies z.ZodType<ReconnectResourcesDto>;
+}) satisfies z.ZodType<ReconnectResourcesResponse>;
 
 export const reconnectTaskSchema = z.strictObject({
   id: field.string,
@@ -96,10 +96,10 @@ export const reconnectTaskSchema = z.strictObject({
   currPhase: field.int.optional(),
   maxPhase: field.int.optional(),
   reward: rewardPreviewArraySchema.optional(),
-}) satisfies z.ZodType<ReconnectTaskDto>;
+}) satisfies z.ZodType<ReconnectTaskResponse>;
 
 export const reconnectTasksSchema = z.strictObject({
   task: z.array(reconnectTaskSchema).max(32767),
   ckfTask: z.array(reconnectTaskSchema).max(32767),
   taskCompleteNum: field.int,
-}) satisfies z.ZodType<ReconnectTasksDto>;
+}) satisfies z.ZodType<ReconnectTasksResponse>;

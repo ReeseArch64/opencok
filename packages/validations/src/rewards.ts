@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { RewardPreviewDto } from "@opencok/dtos/rewards";
-import { field } from "./dto.ts";
+import type { RewardPreviewResponse } from "@opencok/contracts/responses/rewards";
+import { field } from "./response.ts";
 
 export const rewardPreviewArraySchema = z
   .array(
@@ -13,4 +13,4 @@ export const rewardPreviewArraySchema = z
       ]),
     }),
   )
-  .max(32767) satisfies z.ZodType<RewardPreviewDto[]>;
+  .max(32767) satisfies z.ZodType<RewardPreviewResponse[]>;

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { PublicProfileState } from "@opencok/contracts/profile";
 import type { Row } from "@opencok/contracts/rows";
-import { decodeGeneralAbilities, publicProfileGenerals } from "@opencok/controllers/profile";
+import { decodeGeneralAbilities, publicProfileGenerals } from "@opencok/services/profile";
 import { Rules } from "@opencok/rules/game";
 import { publicGeneralPreviews } from "@opencok/rules/profile-generals";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";

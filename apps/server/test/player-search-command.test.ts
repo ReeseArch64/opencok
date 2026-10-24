@@ -11,7 +11,7 @@ import {
   playerSearchRemoteBudget,
   sharedSearchProfile,
 } from "@opencok/rules/player-search";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import { Rules } from "@opencok/rules/game";
