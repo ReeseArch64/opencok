@@ -371,6 +371,50 @@ tables under the existing statement/query timeouts; they are not indexed equalit
 lookups. Name reservation, rename item/gold costs and downstream effects remain separate
 required work.
 
+The separate rename mutation now has pure validation and item/gold debit/refund rules
+in `rules/nickname-change`. Unlike the check command, it replaces both actual LF and
+literal backslash-n before filtering. The reserved-name provider receives Java-trimmed
+text; the bad-word provider receives replaced text before trimming. Both run before
+ISO-control, blank, leading-parenthesis, weighted-length and character gates. Their
+reached failures propagate. Reserved/bad-word/control rejection uses `105251`, a leading
+parenthesis uses `113995`, invalid length or blank text uses `E000000`, and disallowed
+characters use `105229`. The 3–16 weighted-length gate reuses the original Java rules.
+The actual reserved-name regex loader/matcher is still required; the pure validator
+requires an explicit provider and does not supply an empty substitute.
+
+The rename item is `200021`. Its pure debit validates the configured Java Int item type
+before checking the signed inventory count, consumes one item and preserves the two
+insufficient-item error families. A later orchestrator must retain the source's fallback
+to gold on a game exception from item consumption, without swallowing configuration or
+transport failures. No item selection or write is performed by these pure functions.
+
+Gold debit parses the current price as a Java signed Int, rejects negative cost and
+negative wrapped total, and uses `E100001` for insufficient total. It spends the selected
+platform's free, special-paid and paid buckets in that order. Other platform balances
+are unchanged. Signed long arithmetic and negative restored buckets retain their
+reference behavior rather than being clamped. Ordinary replies use the remaining total;
+the exact lowercase `dmm` branch retains the source's pre-debit total in its return value.
+The functions consume already-restored signed long balances; nullable database decoding
+remains the responsibility of the eventual repository.
+
+Gold refund reparses the current configured price and credits the free bucket, without
+restoring the paid buckets originally spent. Its Int-to-float, float multiply and
+float-to-long cast preserve Java rounding, truncation, saturation, NaN and long overflow.
+Only exact `cn1` reads the supplied reduction-ratio provider, after successful price
+parsing; other platforms use one without reading that provider. The DMM refund changes
+DMM free gold but returns the ordinary-pool total, as in the reference. Negative refund
+prices are not rejected by the increment path. A changed price or float rounding can
+make the returned amount differ from the original debit. The actual CN1 ratio provider
+and economic persistence/recovery are still pending.
+
+Twelve new units cover ordered validation, distinct failures, item counts, exhaustive
+small-balance allocation, platform behavior and signed arithmetic. A separate Java 8
+standard-library probe supplies 294 synthetic price/float-bit/cast vectors; normal units
+execute only TypeScript and never private game classes. `user.modify.nickName` remains
+unsupported until reserved-name patterns, name serialization, authoritative charges and
+profile/global mutations, rollback/recovery and required downstream effects are connected.
+No balance, profile, inventory or mapping is changed by this foundation.
+
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
 separately checks version and start/end dates for stamina, star unlocks and
@@ -3060,7 +3104,7 @@ use these descriptions before the reconnect task component is complete.
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                              |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                               |
 | 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                        |
-| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags; authenticated nickname validation with the real word filter and global availability         | Rename costs/effects and remaining profile commands; nickname query performance and real-service verification remain unverified.                                                        |
+| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags; authenticated nickname validation with the real word filter and global availability         | Rename rule foundations exist; actual rename providers/persistence/effects and remaining profile commands are pending. Nickname query performance is unverified.                        |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                            |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                       |
 
