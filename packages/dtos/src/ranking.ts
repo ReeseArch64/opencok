@@ -1,0 +1,42 @@
+import type { PlayerRankingKind, PlayerRankingResult } from "@opencok/contracts/ranking";
+import { text, type Row } from "@opencok/contracts/rows";
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
+import { sfs, type Fields, type Value } from "@opencok/messages/sfs";
+
+function number(value: unknown, cached: boolean): Value {
+  if (typeof value === "number" && !Number.isSafeInteger(value))
+    throw new GameError(errors.unsupported, "ranking");
+  if (!/^[+-]?\d+$/.test(String(value))) throw new GameError(errors.unsupported, "ranking");
+  const parsed = BigInt(String(value));
+  if (BigInt.asIntN(64, parsed) !== parsed || (!cached && BigInt.asIntN(32, parsed) !== parsed))
+    throw new GameError(errors.unsupported, "ranking");
+  return BigInt.asIntN(32, parsed) === parsed ? sfs.int(Number(parsed)) : sfs.long(parsed);
+}
+
+function player(row: Row, kind: PlayerRankingKind): Fields {
+  const result: Fields = {
+    uid: sfs.string(text(row, "uid")),
+    name: sfs.string(text(row, "name")),
+    pic: sfs.string(text(row, "pic")),
+    picVer: number(row.picVer ?? 0, false),
+    picfraId: number(row.picfraId ?? 0, false),
+  };
+  for (const key of kind === "power"
+    ? ["power"]
+    : kind === "kills"
+      ? ["armyKill"]
+      : ["level", "exp", "banTime"])
+    if (row[key] !== null && row[key] !== undefined) result[key] = number(row[key], true);
+  if (text(row, "allianceId").trim())
+    for (const key of ["allianceId", "abbr", "alliancename"])
+      result[key] = sfs.string(text(row, key));
+  return result;
+}
+
+export function playerRanking(kind: PlayerRankingKind, ranking: PlayerRankingResult): Fields {
+  return {
+    selfRanking: sfs.int(ranking.selfRanking),
+    serverRanking: sfs.array(ranking.rows.map((row) => sfs.object(player(row, kind)))),
+  };
+}

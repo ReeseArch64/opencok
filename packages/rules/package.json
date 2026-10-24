@@ -30,7 +30,8 @@
     "./profile": "./src/profile.ts",
     "./profile-generals": "./src/profile-generals.ts",
     "./reconnect-mine": "./src/reconnect-mine.ts",
-    "./rewards": "./src/rewards.ts"
+    "./rewards": "./src/rewards.ts",
+    "./ranking": "./src/ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

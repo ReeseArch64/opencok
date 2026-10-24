@@ -1253,6 +1253,14 @@ alliance capacity visibility. Target identity and realm mismatches reject the qu
 no public command grants cross-realm write authority. Legacy getter repairs and
 write side effects remain documented gaps in the server guide, not migrated mutations.
 
+Ordinary-realm power, kill and level ranking queries read the requester, bounded
+candidates and fallback position in a single read-only repeatable-read transaction.
+The rules layer preserves each board's exclusions and candidate-window semantics;
+the DTO layer exposes only public ranking fields. These commands read persisted
+scores without introducing score writers or Redis ranking state. Fresh snapshots
+and deterministic final UID ordering replace the legacy cache lifecycle and
+unspecified ties; the server guide records collation and verification limitations.
+
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
 fencing and recovery tests before enabling writes. Account provisioning,
