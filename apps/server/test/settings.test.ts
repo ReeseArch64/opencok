@@ -123,4 +123,8 @@ test("build.info uses the injected clock for buildings and queue previews withou
     0,
   );
   expect(state).toEqual(before);
+  now = Date.UTC(2026, 9, 23, 12);
+  rules.stars.get("first")!.star = "invalid";
+  await expect(game.execute("synthetic-player", "build.info", {})).rejects.toThrow();
+  expect(state).toEqual(before);
 });

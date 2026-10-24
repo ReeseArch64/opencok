@@ -84,8 +84,6 @@ function parseDeclaredCatalog(xml: string): {
 }
 
 function indexRules(records: Rule[], name: string): Map<string, Rule> {
-  if (name === "kingdomskill")
-    return new Map(records.map((record) => [record.id ?? "null", record]));
   if (!records.length) throw new Error("Missing gameplay resource records");
   const map = new Map<string, Rule>();
   const replaceDuplicates = [
@@ -118,7 +116,18 @@ function indexRules(records: Rule[], name: string): Map<string, Rule> {
 }
 
 export function parseRules(xml: string, name: string): Map<string, Rule> {
-  if (["item", "general_sale", "pay_servercontrol", "function_on", "kingdomskill"].includes(name))
+  if (
+    [
+      "item",
+      "general_sale",
+      "pay_servercontrol",
+      "function_on",
+      "kingdomskill",
+      "setting",
+      "fb_share",
+      "function_star",
+    ].includes(name)
+  )
     return parseDeclaredCatalog(xml).items;
   return indexRules(parseRecords(xml, name), name);
 }
@@ -131,14 +140,16 @@ export async function loadRules(directory: string, kingdomId = 1) {
   };
   const load = async (name: string): Promise<Map<string, Rule>> =>
     parseRules(await read(name), name);
+  const declared = async (name: string) =>
+    (await exists(join(directory, `${name}.xml`)))
+      ? parseDeclaredCatalog(await read(name))
+      : undefined;
   const [buildings, roles, positions] = await Promise.all([
     load("building"),
     load("role"),
     load("position"),
   ]);
-  const stars = (await exists(join(directory, "function_star.xml")))
-    ? await load("function_star")
-    : new Map<string, Rule>();
+  const starCatalog = await declared("function_star");
   const itemCatalog = (await exists(join(directory, "item.xml")))
     ? parseDeclaredCatalog(await read("item"))
     : undefined;
@@ -151,28 +162,22 @@ export async function loadRules(directory: string, kingdomId = 1) {
   const [
     arms,
     goods,
-    features,
-    settings,
+    featureCatalog,
+    settingCatalog,
     generalSaleCatalog,
     payControl,
-    kingdomSkillRecords,
-    facebookShare,
+    kingdomSkillCatalog,
+    facebookShareCatalog,
     serverConfig,
   ] = await Promise.all([
     optional("arms"),
     optional("goods"),
-    optional("function_on"),
-    optional("setting"),
-    (async () =>
-      (await exists(join(directory, "general_sale.xml")))
-        ? parseDeclaredCatalog(await read("general_sale"))
-        : undefined)(),
+    declared("function_on"),
+    declared("setting"),
+    declared("general_sale"),
     optional("pay_servercontrol"),
-    (async () =>
-      (await exists(join(directory, "kingdomskill.xml")))
-        ? parseDeclaredCatalog(await read("kingdomskill")).records
-        : [])(),
-    optional("fb_share"),
+    declared("kingdomskill"),
+    declared("fb_share"),
     optional("servers_config"),
   ]);
   const [
@@ -271,21 +276,25 @@ export async function loadRules(directory: string, kingdomId = 1) {
     buildings,
     roles,
     positions,
-    stars,
+    starCatalog?.items ?? new Map<string, Rule>(),
     items,
     arms,
     goods,
-    features,
+    featureCatalog?.items ?? new Map<string, Rule>(),
     kingdomId,
-    settings,
+    settingCatalog?.items ?? new Map<string, Rule>(),
     {
+      settingRecords: settingCatalog?.records ?? [],
+      starRecords: starCatalog?.records ?? [],
+      featureRecords: featureCatalog?.groups.get("function_on") ?? [],
       dataConfig,
       generalSales: generalSaleCatalog?.items ?? new Map<string, Rule>(),
       generalSaleRecords: generalSaleCatalog?.records ?? [],
       payControl,
-      kingdomSkills: indexRules(kingdomSkillRecords, "kingdomskill"),
-      kingdomSkillRecords,
-      facebookShare,
+      kingdomSkills: kingdomSkillCatalog?.items ?? new Map<string, Rule>(),
+      kingdomSkillRecords: kingdomSkillCatalog?.records ?? [],
+      facebookShare: facebookShareCatalog?.items ?? new Map<string, Rule>(),
+      facebookShareRecords: facebookShareCatalog?.records ?? [],
       serverConfig,
     },
     {

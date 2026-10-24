@@ -537,6 +537,14 @@ feature, pay-control and kingdom-skill readers use direct element attributes and
 top-level group precedence. Their ordered declaration lists remain separate from final
 ID indexes. SFS serialization retains the maintained UTF-8 key and string bounds;
 this does not emulate malformed legacy encodings for oversized non-ASCII keys.
+Settings, Facebook-share metadata and building-star availability also consume ordered
+declarations, including duplicate and absent IDs. Settings and share arrays preserve
+all direct attributes. Feature announcements consume only the final `function_on`
+group, independently of the global feature index used by other gates. Missing required
+announcement ID/platform/version strings reject the response; empty strings remain
+literal metadata. Loaded absent/empty catalogs never fall back to indexes. Star maxima
+parse Java Int values only after building and availability checks, retain overwritten
+declarations and propagate invalid applicable values instead of silently omitting them.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab

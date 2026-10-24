@@ -21,14 +21,16 @@ export function serverClock(now: number, offsetHours: number): Fields {
 export function featureConfig(rules: Rules, context: FeatureContext): Fields {
   return {
     funcOn: sfs.array(
-      [...rules.features.values()].map((rule) =>
-        sfs.object({
+      [...(rules.configuration.featureRecords ?? rules.features.values())].map((rule) => {
+        if ([rule.id, rule.pf, rule.version].some((value) => typeof value !== "string"))
+          throw new GameError(errors.unsupported, "config_string");
+        return sfs.object({
           funcKey: sfs.string(rule.id!),
-          pf: sfs.string(rule.pf ?? "all"),
-          version: sfs.string(rule.version ?? ""),
+          pf: sfs.string(rule.pf!),
+          version: sfs.string(rule.version!),
           onOff: sfs.bool(featureAnnouncementEnabled(rule, rules, context)),
-        }),
-      ),
+        });
+      }),
     ),
   };
 }
@@ -59,7 +61,11 @@ export function loginConfiguration(
   return {
     ...featureConfig(rules, context),
     fbShare: sfs.array(
-      [...(rules.configuration.facebookShare?.values() ?? [])].map((rule) =>
+      [
+        ...(rules.configuration.facebookShareRecords ??
+          rules.configuration.facebookShare?.values() ??
+          []),
+      ].map((rule) =>
         sfs.object(
           Object.fromEntries(Object.entries(rule).map(([key, value]) => [key, sfs.string(value)])),
         ),
@@ -82,7 +88,7 @@ export function loginConfiguration(
 export function settingConfig(rules: Rules): Fields {
   return {
     setting: sfs.array(
-      [...rules.settings.values()].map((rule) =>
+      [...(rules.configuration.settingRecords ?? rules.settings.values())].map((rule) =>
         sfs.object(
           Object.fromEntries(Object.entries(rule).map(([key, value]) => [key, sfs.string(value)])),
         ),
