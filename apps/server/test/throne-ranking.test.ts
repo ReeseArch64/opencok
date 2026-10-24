@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { loadThroneRankingPeriod } from "@opencok/storage/throne-ranking";
 import { throneRanking, throneRankingBoard } from "@opencok/mappings/throne-ranking";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
 import { Rules } from "@opencok/rules/game";
 import { sfs, fields, type Value } from "@opencok/messages/sfs";

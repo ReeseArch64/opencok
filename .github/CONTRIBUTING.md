@@ -64,17 +64,22 @@ package source, Drizzle TypeScript schemas, agent skills and hook configuration
 remain included. These exclusions preserve the
 boundaries described in [the architecture](ARCHITECTURE.md).
 
-DTOs must be standalone classes with explicit `declare public readonly` data
-properties, following the NestJS DTO style without decorators. Keep Zod schemas
-in `packages/validations` and serialization in `packages/mappings`. DTO classes
-must not inherit from schema factories or contain constructors, methods or static
-schemas. See the [DTO package](../packages/dtos/README.md). Validate at the mapping
-or application boundary and preserve mobile wire types and field order.
-Do not use definite-assignment or non-null assertions (`!`) in DTO declarations.
-Use `?` only when the transferred field is optional; keep required fields required.
-`declare` avoids runtime initialization fields while preserving strict checking.
-Reserve `private` state and `static` helpers for implementation classes that need
-them; DTOs expose transferred instance data and contain no such behavior.
+Controllers receive Services through constructor injection and delegate application
+operations to them, following the NestJS Controller/Service pattern. Services own
+use cases and coordinate rules and persistence through contracts. Compose the
+instances in `apps/`; packages must not import applications. Keep transport
+handling in Controllers and adapters and application workflows in Services.
+
+Reserve DTO classes for create and update inputs, named `Create<Resource>Dto`
+and `Update<Resource>Dto`, such as `CreateCityDto`. Declare explicit
+`declare public readonly` data properties without decorators, constructors,
+methods, static schemas, definite-assignment or non-null assertions. Use `?`
+only for optional input fields. See the [DTO package](../packages/dtos/README.md).
+Read queries, deletion selections, response payloads and protocol snapshots use
+contracts, with response interfaces named `<Resource>Response` in
+`packages/contracts/src/responses`. Keep Zod schemas in `packages/validations`
+and serialization in `packages/mappings`. Validate at the mapping or application
+boundary and preserve mobile wire types and field order.
 
 ## Commits
 

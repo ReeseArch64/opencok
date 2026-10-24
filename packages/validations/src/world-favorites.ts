@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { WorldFavoritesDto } from "@opencok/dtos/world-favorites";
-import { field } from "./dto.ts";
+import type { WorldFavoritesResponse } from "@opencok/contracts/responses/world-favorites";
+import { field } from "./response.ts";
 
 export const worldFavoritesSchema = z.strictObject({
   favo: z
@@ -17,4 +17,4 @@ export const worldFavoritesSchema = z.strictObject({
       }),
     )
     .max(32767),
-}) satisfies z.ZodType<WorldFavoritesDto>;
+}) satisfies z.ZodType<WorldFavoritesResponse>;

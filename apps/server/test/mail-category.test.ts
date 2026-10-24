@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import type { MailListEntry, MailCategoryPresentation } from "@opencok/contracts/mail";
-import { mailCategoryProjection } from "@opencok/controllers/mail-category";
+import { mailCategoryProjection } from "@opencok/services/mail-category";
 import {
   decode,
   encode,

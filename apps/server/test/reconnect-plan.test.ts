@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import type { ReconnectProgressState } from "@opencok/contracts/reconnect";
-import { planReconnectProgress } from "@opencok/controllers/reconnect-progress";
+import { planReconnectProgress } from "@opencok/services/reconnect-progress";
 import { Rules } from "@opencok/rules/game";
 import { fields, sfs } from "@opencok/messages/sfs";
 
@@ -203,7 +203,7 @@ test("repair notifications and invalid serialization are planned before any writ
 });
 
 test("user.lv ignores target input, preserves correlation, and returns only a committed owner result", async () => {
-  const { Game } = await import("@opencok/controllers/game");
+  const { GameService: Game } = await import("@opencok/services/game");
   const { state, rules, context, services } = fixture();
   let committed = false;
   const game = new Game(
@@ -238,7 +238,7 @@ test("user.lv ignores target input, preserves correlation, and returns only a co
 });
 
 test("login with an existing march and non-building queue reaches the full reconnect snapshot", async () => {
-  const { Game } = await import("@opencok/controllers/game");
+  const { GameService: Game } = await import("@opencok/services/game");
   const { state, rules, context, services } = fixture();
   state.world = { worldId: 0 };
   rules.roles.set("100101", { id: "100101", player_exp: "100" });
@@ -276,7 +276,7 @@ test("login with an existing march and non-building queue reaches the full recon
 });
 
 test("an oversized correlated response fails inside the transaction planner", async () => {
-  const { Game } = await import("@opencok/controllers/game");
+  const { GameService: Game } = await import("@opencok/services/game");
   const { state, rules, context, services } = fixture();
   let committed = false;
   const game = new Game(

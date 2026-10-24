@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
 import type { MailSaveQuery, MailSaveSnapshot } from "@opencok/contracts/mail";
 import type { Row } from "@opencok/contracts/rows";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
 

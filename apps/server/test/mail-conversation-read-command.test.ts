@@ -5,7 +5,7 @@ import type {
   MailConversationReadQuery,
   MailConversationReadSnapshot,
 } from "@opencok/contracts/mail";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Database } from "@opencok/repositories/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";

@@ -1,7 +1,7 @@
 import type { RealmNotifications } from "./notifications.ts";
 import type { GameStore } from "@opencok/contracts/game";
-import type { Game } from "@opencok/controllers/game";
-import type { World } from "@opencok/controllers/world";
+import type { GameController } from "@opencok/controllers/game";
+import type { WorldController } from "@opencok/controllers/world";
 import type { ServerConfig } from "@opencok/contracts/server";
 
 export type ConnectionConfig = Pick<
@@ -19,6 +19,6 @@ export interface ServerDependencies {
     release(uid: string, token: string): Promise<void>;
   };
   coordination: { readonly ready: boolean; start(): Promise<void>; close(): void };
-  game: Pick<Game, "initialize" | "execute">;
-  world: Pick<World, "get">;
+  game: Pick<GameController, "initialize" | "execute">;
+  world: Pick<WorldController, "get">;
 }

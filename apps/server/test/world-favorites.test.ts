@@ -8,7 +8,7 @@ import {
 } from "@opencok/repositories/world-favorites";
 import { favoriteName, favoriteServer, favoriteServerType } from "@opencok/rules/world-favorites";
 import { Rules, type Rule } from "@opencok/rules/game";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, fields, encode, decode, Type, type Fields } from "@opencok/messages/sfs";

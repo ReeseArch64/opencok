@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { AllianceRankingDto } from "@opencok/dtos/alliance-ranking";
-import { field } from "./dto.ts";
+import type { AllianceRankingResponse } from "@opencok/contracts/responses/alliance-ranking";
+import { field } from "./response.ts";
 import { allianceVideoSchema } from "./profile-alliance.ts";
 
 export const allianceRankingSchema = z.strictObject({
@@ -25,4 +25,4 @@ export const allianceRankingSchema = z.strictObject({
         }),
     )
     .max(32767),
-}) satisfies z.ZodType<AllianceRankingDto>;
+}) satisfies z.ZodType<AllianceRankingResponse>;

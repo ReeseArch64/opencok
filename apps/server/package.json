@@ -21,7 +21,8 @@
     "effect": "catalog:",
     "@opencok/core": "workspace:*",
     "@opencok/rules": "workspace:*",
-    "@opencok/mappings": "workspace:*"
+    "@opencok/mappings": "workspace:*",
+    "@opencok/services": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",

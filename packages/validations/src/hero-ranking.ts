@@ -1,19 +1,19 @@
 import { z } from "zod";
 import type {
-  HeroSelfRankingDto,
-  HeroInsideRankingDto,
-  HeroInsideMemberDto,
-  HeroHistoryDto,
-  HeroHistoryMemberDto,
-} from "@opencok/dtos/hero-ranking";
-import { field } from "./dto.ts";
+  HeroSelfRankingResponse,
+  HeroInsideRankingResponse,
+  HeroInsideMemberResponse,
+  HeroHistoryResponse,
+  HeroHistoryMemberResponse,
+} from "@opencok/contracts/responses/hero-ranking";
+import { field } from "./response.ts";
 
 export const heroSelfRankingSchema = z.strictObject({
   eventList: z.array(z.never()).length(0),
   ranking: field.int,
   rankingAlliance: field.int,
   type: field.int,
-}) satisfies z.ZodType<HeroSelfRankingDto>;
+}) satisfies z.ZodType<HeroSelfRankingResponse>;
 
 export const heroInsideMemberSchema = z.strictObject({
   uid: z.string().optional(),
@@ -34,10 +34,10 @@ export const heroInsideMemberSchema = z.strictObject({
   offLineTime: field.long.optional(),
   rank: field.int,
   score: field.int,
-}) satisfies z.ZodType<HeroInsideMemberDto>;
+}) satisfies z.ZodType<HeroInsideMemberResponse>;
 export const heroInsideRankingSchema = z.strictObject({
   rankList: z.array(heroInsideMemberSchema).max(32767),
-}) satisfies z.ZodType<HeroInsideRankingDto>;
+}) satisfies z.ZodType<HeroInsideRankingResponse>;
 
 export const heroHistoryMemberSchema = z.strictObject({
   uid: z.string().optional(),
@@ -51,7 +51,7 @@ export const heroHistoryMemberSchema = z.strictObject({
   picfraId: field.int.optional(),
   abbr: z.string().optional(),
   icon: z.string().optional(),
-}) satisfies z.ZodType<HeroHistoryMemberDto>;
+}) satisfies z.ZodType<HeroHistoryMemberResponse>;
 export const heroHistorySchema = z.strictObject({
   history: z
     .array(
@@ -72,4 +72,4 @@ export const heroHistorySchema = z.strictObject({
       }),
     )
     .max(10),
-}) satisfies z.ZodType<HeroHistoryDto>;
+}) satisfies z.ZodType<HeroHistoryResponse>;

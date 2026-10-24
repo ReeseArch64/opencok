@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { ReconnectBaseState } from "@opencok/contracts/reconnect";
-import { reconnectOwnGenerals } from "@opencok/controllers/reconnect";
-import { decodeGeneralAbilities } from "@opencok/controllers/profile";
+import { reconnectOwnGenerals } from "@opencok/services/reconnect";
+import { decodeGeneralAbilities } from "@opencok/services/profile";
 import { Rules } from "@opencok/rules/game";
 import { publicGeneralPreviews, reconnectGeneralRepairs } from "@opencok/rules/profile-generals";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";

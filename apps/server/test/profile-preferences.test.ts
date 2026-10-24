@@ -5,7 +5,7 @@ import type { GameStore, ProfilePreferenceField } from "@opencok/contracts/game"
 import type { Row } from "@opencok/contracts/rows";
 import { Database } from "@opencok/repositories/game";
 import { updateProfilePreference } from "@opencok/repositories/profile-preferences";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
 

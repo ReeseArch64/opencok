@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { decodeLegacyJsonObject, LegacyJsonError } from "@opencok/messages/legacy-json";
-import { mailContentsProjection } from "@opencok/controllers/mail-contents";
+import { mailContentsProjection } from "@opencok/services/mail-contents";
 import { decode, encode, fields, ProtocolError, sfs, type Value } from "@opencok/messages/sfs";
 import type { MailContentsEntry } from "@opencok/contracts/mail";
 import { mailContentsQuery } from "@opencok/rules/mail";

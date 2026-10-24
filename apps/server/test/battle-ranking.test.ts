@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type { BattleRankingState } from "@opencok/contracts/battle-ranking";
@@ -7,10 +7,7 @@ import { loadBattleFightRanking, loadPlayoffRanking } from "@opencok/storage/bat
 import { playoffPairs, playoffTimes } from "@opencok/rules/battle-ranking";
 import { sfs } from "@opencok/messages/sfs";
 import { decodeStoredJson, decodePublishedJson } from "@opencok/messages/stored-json";
-import {
-  decodeFightRanking,
-  decodePlayoffTeams,
-} from "../../../packages/controllers/src/battle-ranking.ts";
+import { decodeFightRanking, decodePlayoffTeams } from "@opencok/services/battle-ranking";
 
 function rules() {
   const rules = new Rules(new Map(), new Map(), new Map());

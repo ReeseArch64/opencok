@@ -34,7 +34,6 @@
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./configuration": "./src/configuration.ts",
-    "./dto": "./src/dto.ts",
     "./sfs": "./src/sfs.ts",
     "./published-ranking": "./src/published-ranking.ts",
     "./hero-ranking": "./src/hero-ranking.ts",
@@ -44,13 +43,13 @@
     "./military-ranking": "./src/military-ranking.ts",
     "./battle-ranking": "./src/battle-ranking.ts",
     "./nickname-change": "./src/nickname-change.ts",
-    "./reconnect-marches": "./src/reconnect-marches.ts"
+    "./reconnect-marches": "./src/reconnect-marches.ts",
+    "./response": "./src/response.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",
     "@opencok/contracts": "workspace:*",
     "sharp": "^0.34.0",
-    "@opencok/dtos": "workspace:*",
     "@opencok/messages": "workspace:*",
     "zod": "catalog:"
   }

@@ -4,7 +4,7 @@ import type { GameServices } from "@opencok/contracts/game";
 import { Cache } from "@opencok/storage/session";
 import { Rules } from "@opencok/rules/game";
 import { resourceMergeServer } from "@opencok/rules/world-resource-effects";
-import { readResourceExpeditionLoadEffect } from "@opencok/controllers/world-resource-expedition";
+import { readResourceExpeditionLoadEffect } from "@opencok/services/world-resource-expedition";
 
 class StageCache extends Cache {
   calls: string[][] = [];

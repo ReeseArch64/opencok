@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { AvatarMailPushDto } from "@opencok/dtos/avatar-mail";
-import { field } from "./dto.ts";
+import type { AvatarMailPushResponse } from "@opencok/contracts/responses/avatar-mail";
+import { field } from "./response.ts";
 
 export const avatarMailPushSchema = z.strictObject({
   title: field.string,
@@ -22,4 +22,4 @@ export const avatarMailPushSchema = z.strictObject({
   saveFlag: field.int.optional(),
   reply: field.int.optional(),
   createTime: field.long,
-}) satisfies z.ZodType<AvatarMailPushDto>;
+}) satisfies z.ZodType<AvatarMailPushResponse>;

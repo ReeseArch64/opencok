@@ -3,7 +3,7 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { getTableColumns } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { Database } from "@opencok/repositories/game";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { CityState, GameStore } from "@opencok/contracts/game";
 import { user } from "@opencok/mappings/city";

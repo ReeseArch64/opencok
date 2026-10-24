@@ -1,3 +1,5 @@
+import { GameController } from "@opencok/controllers/game";
+import { WorldController } from "@opencok/controllers/world";
 import {
   createWorldPointDetailStore,
   checkWorldPointDetailStore,
@@ -27,8 +29,8 @@ import { Database } from "@opencok/repositories/game";
 import { Cache } from "@opencok/storage/session";
 import { Coordination } from "@opencok/storage/coordination";
 import { loadRules } from "@opencok/resources/rules";
-import { Game } from "@opencok/controllers/game";
-import { World } from "@opencok/controllers/world";
+import { GameService } from "@opencok/services/game";
+import { WorldService } from "@opencok/services/world";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
 import { startMailGiftRelay } from "./mail-gift-relay.ts";
 import { loadNicknameServices } from "./nickname.ts";
@@ -157,62 +159,64 @@ export const RealmDependenciesLive = Layer.effect(
       db,
       cache,
       coordination,
-      game: new Game(db, rules, config, Date.now, {
-        reconnect: async (uid, now, plan) => {
-          authority.assertReady();
-          const binding = await readFriendshipBinding(
-            db.databases.global.db,
-            config.kingdomId,
-            uid,
-          );
-          return executeReconnectProgress(db.kingdom.db, authority, uid, BigInt(now), plan, {
-            binding,
-            initial: () => initialFriendshipMine(rules),
-          });
-        },
-        ...nicknameServices,
-        worldPointDetail,
-        playerSearch,
-        worldSearch,
-        worldFavorites,
-        avatarFinish: avatar?.service,
-        avatarVersion: avatar?.versionService,
-        avatar: avatarFiles
-          ? {
-              ...avatarFiles,
-              read: (uid, now, inspect) =>
-                readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect),
-            }
-          : undefined,
-        chatSession: config.chatSession
-          ? createRealmChatSessionIssuer({
-              ...config.chatSession,
-              timeoutMs: config.timeoutMs,
-            })
-          : undefined,
-        expeditionRanking: (limit) => cache.expeditionRanking(limit),
-        scoreActivityRanking: () => cache.scoreActivityRanking(),
-        battleFightPublication: () => cache.battleFightPublication(),
-        playoffPublication: () => cache.playoffPublication(),
-        heroHistoryPublication: (keys, alliance) => cache.heroHistoryPublication(keys, alliance),
-        heroRankingPosition: (query) => cache.heroRankingPosition(query),
-        throneRankingPeriod: (realm) => cache.throneRankingPeriod(realm),
-        donationScores: (allianceId, kind, date) => cache.donationScores(allianceId, kind, date),
-        flowerRankingPublication: (realm, uid, limit, global) =>
-          cache.flowerRankingPublication(realm, uid, limit, global),
-        militaryRanking: (type, group) => cache.militaryRanking(type, group),
-        attributeRanking: (type) => cache.attributeRanking(type),
-        publishedGlobalRanking: (kind) => cache.publishedGlobalRanking(kind),
-        globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
-        dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
-        expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
-        worldPowerEffects: (kingdomId) => cache.worldEffects(kingdomId),
-        emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
-        changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
-        lastSystemMail: (uid) => cache.lastSystemMail(uid),
-        playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
-      }),
-      world: new World(db, config.mapSize, config.kingdomId),
+      game: new GameController(
+        new GameService(db, rules, config, Date.now, {
+          reconnect: async (uid, now, plan) => {
+            authority.assertReady();
+            const binding = await readFriendshipBinding(
+              db.databases.global.db,
+              config.kingdomId,
+              uid,
+            );
+            return executeReconnectProgress(db.kingdom.db, authority, uid, BigInt(now), plan, {
+              binding,
+              initial: () => initialFriendshipMine(rules),
+            });
+          },
+          ...nicknameServices,
+          worldPointDetail,
+          playerSearch,
+          worldSearch,
+          worldFavorites,
+          avatarFinish: avatar?.service,
+          avatarVersion: avatar?.versionService,
+          avatar: avatarFiles
+            ? {
+                ...avatarFiles,
+                read: (uid, now, inspect) =>
+                  readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect),
+              }
+            : undefined,
+          chatSession: config.chatSession
+            ? createRealmChatSessionIssuer({
+                ...config.chatSession,
+                timeoutMs: config.timeoutMs,
+              })
+            : undefined,
+          expeditionRanking: (limit) => cache.expeditionRanking(limit),
+          scoreActivityRanking: () => cache.scoreActivityRanking(),
+          battleFightPublication: () => cache.battleFightPublication(),
+          playoffPublication: () => cache.playoffPublication(),
+          heroHistoryPublication: (keys, alliance) => cache.heroHistoryPublication(keys, alliance),
+          heroRankingPosition: (query) => cache.heroRankingPosition(query),
+          throneRankingPeriod: (realm) => cache.throneRankingPeriod(realm),
+          donationScores: (allianceId, kind, date) => cache.donationScores(allianceId, kind, date),
+          flowerRankingPublication: (realm, uid, limit, global) =>
+            cache.flowerRankingPublication(realm, uid, limit, global),
+          militaryRanking: (type, group) => cache.militaryRanking(type, group),
+          attributeRanking: (type) => cache.attributeRanking(type),
+          publishedGlobalRanking: (kind) => cache.publishedGlobalRanking(kind),
+          globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
+          dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
+          expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
+          worldPowerEffects: (kingdomId) => cache.worldEffects(kingdomId),
+          emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
+          changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
+          lastSystemMail: (uid) => cache.lastSystemMail(uid),
+          playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
+        }),
+      ),
+      world: new WorldController(new WorldService(db, config.mapSize, config.kingdomId)),
     };
   }),
 );

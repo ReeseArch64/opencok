@@ -70,6 +70,7 @@
         "@opencok/repositories": "workspace:*",
         "@opencok/resources": "workspace:*",
         "@opencok/rules": "workspace:*",
+        "@opencok/services": "workspace:*",
         "@opencok/storage": "workspace:*",
         "effect": "catalog:",
       },
@@ -252,16 +253,14 @@
     "packages/controllers": {
       "name": "@opencok/controllers",
       "dependencies": {
-        "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
-        "@opencok/errors": "workspace:*",
         "@opencok/identity": "workspace:*",
-        "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
-        "@opencok/rules": "workspace:*",
+        "@opencok/services": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
+        "@opencok/rules": "workspace:*",
         "@types/bun": "catalog:",
         "typescript": "catalog:",
       },
@@ -596,6 +595,23 @@
         "typescript": "catalog:",
       },
     },
+    "packages/services": {
+      "name": "@opencok/services",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/dtos": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/mappings": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/rules": "workspace:*",
+      },
+      "devDependencies": {
+        "@opencok/config": "workspace:*",
+        "@types/bun": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
     "packages/share": {
       "name": "@opencok/share",
       "devDependencies": {
@@ -664,7 +680,6 @@
       "name": "@opencok/validations",
       "dependencies": {
         "@opencok/contracts": "workspace:*",
-        "@opencok/dtos": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/messages": "workspace:*",
         "sharp": "^0.34.0",
@@ -1008,6 +1023,8 @@
     "@opencok/scripts": ["@opencok/scripts@workspace:packages/scripts"],
 
     "@opencok/server": ["@opencok/server@workspace:apps/server"],
+
+    "@opencok/services": ["@opencok/services@workspace:packages/services"],
 
     "@opencok/share": ["@opencok/share@workspace:packages/share"],
 

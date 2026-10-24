@@ -1,24 +1,24 @@
 import { z } from "zod";
 import type {
-  PublicStatisticsDto,
-  PublicMedalDto,
-  GeneralInfoDto,
-  PublicGeneralsDto,
-  PublicEquipmentDto,
-  PublicProfileBaseDto,
-} from "@opencok/dtos/profile";
-import { field, dtoRecord } from "./dto.ts";
+  PublicStatisticsResponse,
+  PublicMedalResponse,
+  GeneralInfoResponse,
+  PublicGeneralsResponse,
+  PublicEquipmentResponse,
+  PublicProfileBaseResponse,
+} from "@opencok/contracts/responses/profile";
+import { field, responseRecord } from "./response.ts";
 import { playerStatisticsSchema } from "./power.ts";
 
 export const publicStatisticsSchema = z.union([
   z.strictObject({}),
   playerStatisticsSchema.extend({ power: field.long }),
-]) satisfies z.ZodType<PublicStatisticsDto>;
+]) satisfies z.ZodType<PublicStatisticsResponse>;
 
 export const publicMedalSchema = z.strictObject({
   id: field.string,
   level: field.int,
-}) satisfies z.ZodType<PublicMedalDto>;
+}) satisfies z.ZodType<PublicMedalResponse>;
 
 export const generalInfoSchema = z.strictObject({
   uuid: field.string,
@@ -28,7 +28,7 @@ export const generalInfoSchema = z.strictObject({
   att: field.int,
   defence: field.int,
   ability: z
-    .array(dtoRecord(z.string(), z.union([field.null, field.string, field.int])))
+    .array(responseRecord(z.string(), z.union([field.null, field.string, field.int])))
     .max(32767),
   skill: z
     .array(
@@ -45,12 +45,12 @@ export const generalInfoSchema = z.strictObject({
       }),
     )
     .max(32767),
-}) satisfies z.ZodType<GeneralInfoDto>;
+}) satisfies z.ZodType<GeneralInfoResponse>;
 
 export const publicGeneralsSchema = z.strictObject({
   skillPoint: field.int,
   userGenerals: z.array(generalInfoSchema).max(32767),
-}) satisfies z.ZodType<PublicGeneralsDto>;
+}) satisfies z.ZodType<PublicGeneralsResponse>;
 
 export const publicEquipmentSchema = z.strictObject({
   uuid: field.string,
@@ -71,7 +71,7 @@ export const publicEquipmentSchema = z.strictObject({
   on: field.int,
   reforgeCount: field.int,
   strength_level: field.int.optional(),
-}) satisfies z.ZodType<PublicEquipmentDto>;
+}) satisfies z.ZodType<PublicEquipmentResponse>;
 
 export const publicProfileBaseSchema = z
   .strictObject({
@@ -105,4 +105,4 @@ export const publicProfileBaseSchema = z
     power: field.long.optional(),
     medalList: z.array(publicMedalSchema).max(32767),
     equip: z.array(publicEquipmentSchema).max(32767),
-  }) satisfies z.ZodType<PublicProfileBaseDto>;
+  }) satisfies z.ZodType<PublicProfileBaseResponse>;

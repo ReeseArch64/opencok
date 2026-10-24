@@ -4,7 +4,7 @@ import * as schema from "@opencok/drizzle/schema/kingdom";
 import type { ReconnectMarchState } from "@opencok/contracts/reconnect";
 import type { Row } from "@opencok/contracts/rows";
 import { readReconnectMarches } from "@opencok/repositories/reconnect-marches";
-import { projectReconnectMarches } from "@opencok/controllers/reconnect-marches";
+import { projectReconnectMarches } from "@opencok/services/reconnect-marches";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 import fixture from "./fixtures/reconnect-march-army.json";

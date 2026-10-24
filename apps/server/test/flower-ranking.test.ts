@@ -74,7 +74,7 @@ test("flower rows hydrate current profiles, skip missing identities and preserve
 });
 
 test("flower command routes local presentation to the origin and reads visibility from the executing realm", async () => {
-  const { Game } = await import("@opencok/controllers/game");
+  const { GameService: Game } = await import("@opencok/services/game");
   const { Rules } = await import("@opencok/rules/game");
   const rules = new Rules(new Map(), new Map(), new Map());
   rules.items.set("ranking", { k2: "2" });

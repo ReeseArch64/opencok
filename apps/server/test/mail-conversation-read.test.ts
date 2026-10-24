@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mailConversationReadRequest } from "@opencok/controllers/mail-conversation-read";
+import { mailConversationReadRequest } from "@opencok/services/mail-conversation-read";
 import { mailConversationReadQuery } from "@opencok/rules/mail-conversation-read";
 import { mailServerType } from "@opencok/rules/mail";
 import { sfs, type Fields } from "@opencok/messages/sfs";

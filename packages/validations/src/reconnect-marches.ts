@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { field, dtoValueSchema } from "./dto.ts";
+import { field, responseValueSchema } from "./response.ts";
 
 import type {
-  ReconnectMarchArmyDto,
-  ReconnectMarchDragonDto,
-  ReconnectMarchGeneralDto,
-  ReconnectMarchDto,
-  ReconnectMarchesDto,
-} from "@opencok/dtos/reconnect-marches";
+  ReconnectMarchArmyResponse,
+  ReconnectMarchDragonResponse,
+  ReconnectMarchGeneralResponse,
+  ReconnectMarchResponse,
+  ReconnectMarchesResponse,
+} from "@opencok/contracts/responses/reconnect-marches";
 
 export const reconnectMarchArmySchema = z.strictObject({
   armId: field.int,
@@ -15,7 +15,7 @@ export const reconnectMarchArmySchema = z.strictObject({
   dead: field.int,
   knight_total: field.int.optional(),
   knight_dead: field.int.optional(),
-}) satisfies z.ZodType<ReconnectMarchArmyDto>;
+}) satisfies z.ZodType<ReconnectMarchArmyResponse>;
 
 export const reconnectMarchDragonSchema = z.strictObject({
   uuid: field.string,
@@ -23,14 +23,14 @@ export const reconnectMarchDragonSchema = z.strictObject({
   friendShip: field.int,
   userId: field.string.optional(),
   nickName: field.string.optional(),
-}) satisfies z.ZodType<ReconnectMarchDragonDto>;
+}) satisfies z.ZodType<ReconnectMarchDragonResponse>;
 
 export const reconnectMarchGeneralSchema = z.strictObject({
   userId: field.string,
   generalId: field.string,
   level: field.int,
   skillList: z.array(field.string).max(32767).optional(),
-}) satisfies z.ZodType<ReconnectMarchGeneralDto>;
+}) satisfies z.ZodType<ReconnectMarchGeneralResponse>;
 
 export const reconnectMarchSchema = z.strictObject({
   uuid: field.string,
@@ -74,14 +74,14 @@ export const reconnectMarchSchema = z.strictObject({
   tali: field.string.optional(),
   officer: field.string.optional(),
   team: field.string.optional(),
-  mt2: z.array(dtoValueSchema).max(32767).optional(),
+  mt2: z.array(responseValueSchema).max(32767).optional(),
   army: z.array(reconnectMarchArmySchema).max(32767),
   leaderArmy: z.array(reconnectMarchArmySchema).max(32767).optional(),
   petDragon: reconnectMarchDragonSchema.optional(),
   dragonList: z.array(reconnectMarchDragonSchema).max(32767).optional(),
   generalList: z.array(reconnectMarchGeneralSchema).max(32767).optional(),
-}) satisfies z.ZodType<ReconnectMarchDto>;
+}) satisfies z.ZodType<ReconnectMarchResponse>;
 
 export const reconnectMarchesSchema = z.strictObject({
   worldMarch: z.array(reconnectMarchSchema).max(32767),
-}) satisfies z.ZodType<ReconnectMarchesDto>;
+}) satisfies z.ZodType<ReconnectMarchesResponse>;

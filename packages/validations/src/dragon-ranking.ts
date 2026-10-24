@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { DragonRankingDto } from "@opencok/dtos/dragon-ranking";
-import { field } from "./dto.ts";
+import type { DragonRankingResponse } from "@opencok/contracts/responses/dragon-ranking";
+import { field } from "./response.ts";
 
 export const dragonRankingSchema = z.strictObject({
   rank: z
@@ -28,4 +28,4 @@ export const dragonRankingSchema = z.strictObject({
         .extend({ wins: z.union([field.int, field.double]) }),
     )
     .max(32767),
-}) satisfies z.ZodType<DragonRankingDto>;
+}) satisfies z.ZodType<DragonRankingResponse>;

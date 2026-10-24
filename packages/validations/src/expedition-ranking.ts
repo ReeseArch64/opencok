@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { ExpeditionRankingDto } from "@opencok/dtos/expedition-ranking";
-import { field } from "./dto.ts";
+import type { ExpeditionRankingResponse } from "@opencok/contracts/responses/expedition-ranking";
+import { field } from "./response.ts";
 
 export const expeditionRankingSchema = z.union([
   z.strictObject({}),
@@ -23,4 +23,4 @@ export const expeditionRankingSchema = z.union([
       )
       .max(32767),
   }),
-]) satisfies z.ZodType<ExpeditionRankingDto>;
+]) satisfies z.ZodType<ExpeditionRankingResponse>;

@@ -1,6 +1,9 @@
 import { z } from "zod";
-import type { MilitaryRankingDto, MilitaryRankingEntryDto } from "@opencok/dtos/military-ranking";
-import { field } from "./dto.ts";
+import type {
+  MilitaryRankingResponse,
+  MilitaryRankingEntryResponse,
+} from "@opencok/contracts/responses/military-ranking";
+import { field } from "./response.ts";
 export const militaryRankingEntrySchema = z.strictObject({
   serverId: field.string,
   uid: field.string,
@@ -12,8 +15,8 @@ export const militaryRankingEntrySchema = z.strictObject({
   rankingExp: field.int.optional(),
   militaryRank: field.int.optional(),
   ranking: field.int,
-}) satisfies z.ZodType<MilitaryRankingEntryDto>;
+}) satisfies z.ZodType<MilitaryRankingEntryResponse>;
 export const militaryRankingSchema = z.strictObject({
   playerArr: z.array(militaryRankingEntrySchema).max(151),
   selfRanking: field.int,
-}) satisfies z.ZodType<MilitaryRankingDto>;
+}) satisfies z.ZodType<MilitaryRankingResponse>;

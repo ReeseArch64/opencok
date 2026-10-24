@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { Row } from "@opencok/contracts/rows";
 import type { WorldResourceOwnerSnapshot } from "@opencok/contracts/world-point-detail";
-import { restoredResourceGenerals } from "@opencok/controllers/world-resource-generals";
+import { restoredResourceGenerals } from "@opencok/services/world-resource-generals";
 import { legacyIntegerOrder, legacyObjectOrder } from "@opencok/messages/legacy-object-order";
 import { Rules } from "@opencok/rules/game";
 import { equippedGeneralBuildingEffect } from "@opencok/rules/new-general-equipment";

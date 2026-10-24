@@ -1,6 +1,9 @@
 import { z } from "zod";
-import type { PlayerStatisticsDto, PowerInfoDto } from "@opencok/dtos/power";
-import { field } from "./dto.ts";
+import type {
+  PlayerStatisticsResponse,
+  PowerInfoResponse,
+} from "@opencok/contracts/responses/power";
+import { field } from "./response.ts";
 
 export const playerStatisticsSchema = z.strictObject({
   battleWin: field.int,
@@ -13,7 +16,7 @@ export const playerStatisticsSchema = z.strictObject({
   armyCure: field.int,
   cityDes: field.int,
   armyKill: field.long,
-}) satisfies z.ZodType<PlayerStatisticsDto>;
+}) satisfies z.ZodType<PlayerStatisticsResponse>;
 
 export const powerInfoSchema = playerStatisticsSchema.extend({
   playerPower: field.int,
@@ -32,4 +35,4 @@ export const powerInfoSchema = playerStatisticsSchema.extend({
   prinessPower: field.long,
   nextUpdateTime: field.long,
   banTime: field.long,
-}) satisfies z.ZodType<PowerInfoDto>;
+}) satisfies z.ZodType<PowerInfoResponse>;

@@ -1,18 +1,18 @@
 import { z } from "zod";
 import type {
-  NicknameItemDeleteDto,
-  NicknameItemAddDto,
-  NicknameMobileGoldDto,
-  NicknameDmmGoldDto,
-  NicknameChangeReplyDto,
-} from "@opencok/dtos/nickname-change";
-import { field } from "./dto.ts";
+  NicknameItemDeleteResponse,
+  NicknameItemAddResponse,
+  NicknameMobileGoldResponse,
+  NicknameDmmGoldResponse,
+  NicknameChangeReplyResponse,
+} from "@opencok/contracts/responses/nickname-change";
+import { field } from "./response.ts";
 
 export const nicknameItemDeleteSchema = z.strictObject({
   uuid: field.string,
   itemId: field.string,
   count: field.int,
-}) satisfies z.ZodType<NicknameItemDeleteDto>;
+}) satisfies z.ZodType<NicknameItemDeleteResponse>;
 export const nicknameItemAddSchema = z.strictObject({
   uuid: field.string,
   itemId: field.string,
@@ -27,18 +27,18 @@ export const nicknameItemAddSchema = z.strictObject({
   para7: field.string.optional(),
   para8: field.string.optional(),
   para9: field.string.optional(),
-}) satisfies z.ZodType<NicknameItemAddDto>;
+}) satisfies z.ZodType<NicknameItemAddResponse>;
 export const nicknameMobileGoldSchema = z.strictObject({
   freeGold: field.long,
   paidGold: field.long,
   paidSpecialGold: field.long,
-}) satisfies z.ZodType<NicknameMobileGoldDto>;
+}) satisfies z.ZodType<NicknameMobileGoldResponse>;
 export const nicknameDmmGoldSchema = z.strictObject({
   dmmGold: field.long,
   dmmPaidGold: field.long,
   dmmPaidSpecialGold: field.long,
-}) satisfies z.ZodType<NicknameDmmGoldDto>;
+}) satisfies z.ZodType<NicknameDmmGoldResponse>;
 export const nicknameChangeReplySchema = z.strictObject({
   gold: field.long.optional(),
   status: field.bool,
-}) satisfies z.ZodType<NicknameChangeReplyDto>;
+}) satisfies z.ZodType<NicknameChangeReplyResponse>;

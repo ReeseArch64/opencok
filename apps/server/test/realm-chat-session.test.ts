@@ -3,7 +3,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { createHash } from "node:crypto";
 import { Effect } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { createSessionHandler, verifyForm } from "@opencok/controllers/chat-session";
 import { createTokenVerifier } from "@opencok/identity/chat-token";
 import {

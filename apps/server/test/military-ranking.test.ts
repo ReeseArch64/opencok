@@ -4,7 +4,7 @@ import { militaryRankingGroup } from "@opencok/rules/military-ranking";
 import { loadMilitaryRanking } from "@opencok/storage/military-ranking";
 import { militaryRanking } from "@opencok/mappings/military-ranking";
 import { sfs, fields, type Value } from "@opencok/messages/sfs";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
 
 const entry = {

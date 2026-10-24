@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { Rules, type Rule } from "@opencok/rules/game";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
 import type { AvatarProfileUpdate } from "@opencok/contracts/files";
 import { sfs, encode, decode, type Fields } from "@opencok/messages/sfs";

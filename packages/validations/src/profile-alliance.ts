@@ -1,6 +1,9 @@
 import { z } from "zod";
-import type { AllianceVideoDto, PublicAllianceInfoDto } from "@opencok/dtos/profile-alliance";
-import { field, dtoRecord } from "./dto.ts";
+import type {
+  AllianceVideoResponse,
+  PublicAllianceInfoResponse,
+} from "@opencok/contracts/responses/profile-alliance";
+import { field, responseRecord } from "./response.ts";
 
 export const allianceStringFields = [
   "uid",
@@ -66,7 +69,7 @@ export const allianceVideoSchema = z.strictObject({
   videoSize: field.int,
   videoLength: field.int,
   checksign: field.byte,
-}) satisfies z.ZodType<AllianceVideoDto>;
+}) satisfies z.ZodType<AllianceVideoResponse>;
 
 export const publicAllianceInfoSchema = z.strictObject({
   alliance: z.strictObject({
@@ -80,7 +83,7 @@ export const publicAllianceInfoSchema = z.strictObject({
     maxMember: field.int.optional(),
     learderUid: field.string,
     learderName: field.string.optional(),
-    permission: dtoRecord(z.string(), field.int).optional(),
+    permission: responseRecord(z.string(), field.int).optional(),
     allianceVideo: allianceVideoSchema.optional(),
   }),
-}) satisfies z.ZodType<PublicAllianceInfoDto>;
+}) satisfies z.ZodType<PublicAllianceInfoResponse>;

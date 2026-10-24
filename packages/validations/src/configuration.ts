@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { DataConfigDto } from "@opencok/dtos/configuration";
-import { field, dtoRecord } from "./dto.ts";
+import type { DataConfigResponse } from "@opencok/contracts/responses/configuration";
+import { field, responseRecord } from "./response.ts";
 
 export const dataConfigObjectKeys = [
   "player_max",
@@ -160,7 +160,7 @@ export const dataConfigObjectKeys = [
   "red_envelopes",
   "overlord_random",
 ] as const;
-const configStrings = dtoRecord(z.string(), field.string);
+const configStrings = responseRecord(z.string(), field.string);
 
 export const dataConfigSchema = z.strictObject({
   dataConfig: z.strictObject({
@@ -241,4 +241,4 @@ export const dataConfigSchema = z.strictObject({
     worldboss_special_30_40_other: configStrings,
     worldboss_npc: configStrings,
   }),
-}) satisfies z.ZodType<DataConfigDto>;
+}) satisfies z.ZodType<DataConfigResponse>;

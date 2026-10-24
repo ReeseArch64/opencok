@@ -5,7 +5,7 @@ import type {
   MailConversationSaveSnapshot,
 } from "@opencok/contracts/mail";
 import type { Row } from "@opencok/contracts/rows";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
 import { mailConversationSaveQuery } from "@opencok/rules/mail";
 import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";

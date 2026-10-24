@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { Cache } from "@opencok/storage/session";
-import { decodeWorldPowerEffects } from "@opencok/controllers/power";
+import { decodeWorldPowerEffects } from "@opencok/services/power";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { Rules } from "@opencok/rules/game";
 

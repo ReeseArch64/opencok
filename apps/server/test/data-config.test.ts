@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
-import { Game } from "@opencok/controllers/game";
+import { GameService as Game } from "@opencok/services/game";
 import { dataConfig } from "@opencok/mappings/bootstrap";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, Type } from "@opencok/messages/sfs";
