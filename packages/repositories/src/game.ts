@@ -1,4 +1,5 @@
 import { readMailBatch } from "./mail-batch.ts";
+import { readNormalRankingRealm } from "./ranking-realm.ts";
 import { readMailUpdates } from "./mail-updates.ts";
 import type { MailUpdateInspector, MailUpdateQuery } from "@opencok/contracts/mail-updates";
 import { markMailConversationRead } from "./mail-conversation-read.ts";
@@ -106,6 +107,9 @@ type GameRepositoryConfig = Pick<
 export class Database implements GameStore, FriendshipMineStore {
   readonly databases;
   readonly kingdom;
+  normalRankingRealm(): Promise<boolean> {
+    return readNormalRankingRealm(this.databases.global.db, this.config.kingdomId);
+  }
   constructor(readonly config: GameRepositoryConfig) {
     const kingdoms = [...(config.playerKingdoms ?? [])];
     const own = kingdoms.find((realm) => realm.id === config.kingdomId);

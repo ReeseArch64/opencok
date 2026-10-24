@@ -1,3 +1,4 @@
+import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
 import type { WorldPointDetailStore } from "./world-point-detail.ts";
 import type { WorldFavoriteStore } from "./world-favorites.ts";
 import type { WorldSearchStore } from "./world-search.ts";
@@ -57,6 +58,7 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  normalRankingRealm?(): Promise<boolean>;
   mailUpdates?(
     uid: string,
     query: MailUpdateQuery,
@@ -161,6 +163,12 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  dragonRanking?(
+    ranges: readonly DragonRankingRange[],
+    allianceId: string,
+  ): Promise<readonly DragonRankingEntry[]>;
+  globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
+  scoreActivityRanking?(): Promise<readonly string[]>;
   nicknameBadWords?(name: string): boolean | Promise<boolean>;
   nicknameReservedPatterns?(): readonly string[];
   filterBadWords?(text: string): string;

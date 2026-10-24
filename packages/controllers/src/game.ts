@@ -1,3 +1,6 @@
+import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
+import { dragonRanking } from "@opencok/dtos/dragon-ranking";
+import { decodeDragonRanking } from "./dragon-ranking.ts";
 import { worldPointDetail } from "./world-point-detail.ts";
 import { profilePreference } from "./profile-preferences.ts";
 import { celebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
@@ -38,6 +41,7 @@ import { mailConversationReadRequest } from "./mail-conversation-read.ts";
 import { mailCategoryDeleteQuery, mailTypeDeleteQuery } from "@opencok/rules/mail-batch-delete";
 import { planMailDeletion } from "./mail-delete.ts";
 import { mailUpdateCursor, mailUpdatesProjection } from "./mail-updates.ts";
+import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import {
   mailContentsQuery,
   mailCategoryQuery,
@@ -338,6 +342,15 @@ export class Game {
       case "kill.al.rank":
         body = await this.allianceRanking(uid, command === "alliance.rank" ? "power" : "kills");
         break;
+      case "act.score.rank":
+        body = await this.scoreActivityRanking(uid);
+        break;
+      case "dragon.battle.rank":
+        body = await this.dragonRanking(uid, params);
+        break;
+      case "global.celebrities.rank":
+        body = await this.globalCelebrityRanking(uid, params);
+        break;
       case "server.rank":
       case "kill.rank":
       case "level.rank":
@@ -360,6 +373,11 @@ export class Game {
       throw new GameError(errors.unsupported, "player_search");
     if (command === "world.get.detail" && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_point_detail");
+    if (
+      ["act.score.rank", "global.celebrities.rank", "dragon.battle.rank"].includes(command) &&
+      encode(extension(command, body)).length > MAX_FRAME
+    )
+      throw new GameError(errors.unsupported, "ranking");
     return { body, pushes };
   }
   private async playerSearch(uid: string, params: Fields): Promise<Fields> {
@@ -871,8 +889,9 @@ export class Game {
     return {};
   }
   private async mailConversationRead(uid: string, params: Fields): Promise<Fields> {
+    if (!this.db.mailConversationRead) throw new GameError(errors.unsupported, "mail");
     const query = mailConversationReadRequest(params, this.now());
-    if (!this.db.mailConversationRead || query.effects.some((effect) => effect.kind === "chat"))
+    if (query.effects.some((effect) => effect.kind === "chat"))
       throw new GameError(errors.unsupported, "mail");
     const body: Fields = { success: sfs.bool(true) };
     for (const key of ["_cok_", "cmdBaseTime"])
@@ -929,6 +948,47 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async dragonRanking(uid: string, params: Fields): Promise<Fields> {
+    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const ranges = dragonRankingRanges(wireString(params, "index_limit"));
+    if (ranges === undefined) return {};
+    if (!this.services.dragonRanking) throw new GameError(errors.unsupported, "ranking");
+    const entries = await this.services.dragonRanking(ranges, text(profile, "allianceId"));
+    return dragonRanking(decodeDragonRanking(entries));
+  }
+  private async globalCelebrityRanking(uid: string, params: Fields): Promise<Fields> {
+    if (this.config.kingdomId > 999999) return {};
+    if (!this.db.normalRankingRealm) throw new GameError(errors.unsupported, "ranking");
+    if (!(await this.db.normalRankingRealm())) return {};
+    const rankType = wireInt(params, "rankType");
+    if (!Number.isInteger(rankType) || rankType < -2147483648 || rankType > 2147483647)
+      throw new GameError(errors.invalid);
+    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (![0, 1, 2, 3, 4, 5, 6, 11].includes(rankType)) return {};
+    if (!this.services.globalCelebrityRanking) throw new GameError(errors.unsupported, "ranking");
+    const rows = await this.services.globalCelebrityRanking(rankType);
+    if (!Array.isArray(rows) || rows.length > (rankType === 4 ? 30 : 151))
+      throw new GameError(errors.unsupported, "ranking");
+    return { rankMap: sfs.array(rows.map((row) => sfs.object(decodeLegacyJsonObject(row)))) };
+  }
+  private async scoreActivityRanking(uid: string): Promise<Fields> {
+    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (!this.services.scoreActivityRanking) throw new GameError(errors.unsupported, "ranking");
+    const board = await this.services.scoreActivityRanking();
+    if (
+      !Array.isArray(board) ||
+      board.length > 32767 ||
+      board.some((value) => typeof value !== "string" || !value.isWellFormed())
+    )
+      throw new GameError(errors.unsupported, "ranking");
+    return { rank: { type: Type.StringArray, value: [...board] } };
   }
   private async expeditionRanking(uid: string): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)

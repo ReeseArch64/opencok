@@ -1738,6 +1738,34 @@ construction queues and persisted power are never recalculated by the query.
 Material-contribution rankings read the existing contribution table with their own
 window and empty-list response contract; score writers and activity resets remain
 outside the query boundary.
+The `act.score.rank` query reads the existing `SCORE_ACT_RANK_<kingdomId>` Redis list
+through the realm cache adapter. This is an opaque published board: strings, duplicates,
+empty values and list order remain unchanged. The local authenticated owner and realm
+are checked before reading; request parameters cannot select a different realm. Missing
+lists and reached command failures return an empty board, matching the reference list
+reader's fallback. Invalid data or maintained SFS bounds reject the response instead of
+truncating it. The reader does not mutate scores or rebuild/expire the board; the event
+publisher remains responsible for its derived-cache lifecycle. No event lifecycle or
+`hero.self.rank` in-memory activity/rank-map provider is implied. This extends the accepted
+Redis query-cache boundary without adding a schema, service or authoritative ledger.
+Global celebrity ranking queries first read the selected realm's global `server_info`
+type, accepting the reference normal/test/inner-test/green types before decoding the
+selector. A fresh metadata read replaces the reference process-local type cache. The
+local authenticated profile is checked before the selected published Redis list is read;
+types 1 and 5 share the power list. The cache adapter selects only the bounded reference
+range, then the existing legacy JSON decoder reconstructs ordered `rankMap` objects.
+Missing lists remain empty, while cache failures and malformed/oversized data reject.
+These public derived boards grant no score-write authority and add no lifecycle or TTL.
+The server guide records keys, bounds, metadata fallback and deferred validation.
+Dragon Battle ranking queries read the existing global published team list and reverse
+sorted-set rank through the runtime cache adapter. The controller supplies the verified
+local profile's alliance ID; request parameters select ranges only. Pure rules preserve
+Java range decoding/arithmetic, the decoder projects canonical published records with
+exact integers, and DTOs preserve the public field widths and conditional wins types.
+Sequential list/self reads retain the reference non-atomic snapshot and missing/read
+failure fallback. Maintained size bounds reject oversized results; no match, team, score
+or reward mutation is introduced. Producer/import lifecycle and lenient noncanonical
+JSON parity remain outside this query slice, as detailed in the server guide.
 Expedition ranking reads use the shared Redis instance with a global realm-pairing
 record and lower-realm score/metadata keys. A read-only Lua evaluation revalidates
 pairing and returns a consistent bounded board; one retry handles a rematch. The
