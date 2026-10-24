@@ -13,6 +13,7 @@
   "exports": {
     "./game": "./src/game.ts",
     "./power": "./src/power.ts",
+    "./profile": "./src/profile.ts",
     "./world": "./src/world.ts",
     "./chat-session": "./src/chat-session.ts",
     "./chat-config": "./src/chat-config.ts",

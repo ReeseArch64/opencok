@@ -4,7 +4,13 @@ import * as schema from "@opencok/drizzle/schema/kingdom";
 import { readPublicProfile } from "@opencok/repositories/profile";
 
 function database(
-  options: { missing?: boolean; fail?: string; overflow?: string; taverns?: number } = {},
+  options: {
+    missing?: boolean;
+    fail?: string;
+    overflow?: string;
+    taverns?: number;
+    noGenerals?: boolean;
+  } = {},
 ) {
   const queries: { text: string; params: unknown[] }[] = [];
   const rows: Record<string, unknown[][]> = {
@@ -17,6 +23,19 @@ function database(
     kingdom_position: [["216001", 2]],
     user_building: Array.from({ length: options.taverns ?? 1 }, () => [4]),
     user_general: [["general-a", "1001", 5, 1, Buffer.from('[{"600001":2}]'), 1, 3]],
+    user_skill: [
+      [
+        "skill-a",
+        "synthetic",
+        "622800",
+        "9007199254740993",
+        "9223372036854775807",
+        "9007199254740995",
+        2,
+        3,
+        4,
+      ],
+    ],
     user_equip: [["equip-a", 8001, 1, "7,8", "9,10", 2, 3, "7,1|8,0"]],
     user_honor: [["medal-a", 3]],
     user_achievement: [["3"]],
@@ -28,6 +47,7 @@ function database(
       if (!table) return { rows: [] };
       if (table === options.fail) throw new Error("Synthetic profile read failure");
       if (table === "userprofile" && options.missing) return { rows: [] };
+      if (table === "user_general" && options.noGenerals) return { rows: [] };
       if (table === options.overflow)
         return { rows: Array.from({ length: 32768 }, () => rows[table]![0]) };
       return { rows: rows[table] ?? [] };
@@ -67,15 +87,28 @@ test("public profile persistence binds one owner throughout a repeatable read sn
     plusSkillPoint: 3,
   });
   expect(state.equipment[0]).toMatchObject({ uuid: "equip-a", on: 1, lockProperty: "7,1|8,0" });
+  expect(state.skills).toEqual([
+    {
+      uuid: "skill-a",
+      ownerId: "synthetic",
+      skillId: "622800",
+      startTime: 9007199254740993n,
+      endTime: 9223372036854775807n,
+      actTime: 9007199254740995n,
+      stat: 2,
+      param1: 3,
+      param2: 4,
+    },
+  ]);
   expect(state.honors).toEqual([{ id: "medal-a", level: 3 }]);
   expect(state.completedAchievements).toBe(3);
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const reads = queries.slice(1, -1);
-  expect(reads).toHaveLength(12);
+  expect(reads).toHaveLength(13);
   for (const query of reads) {
     expect(query.params[0]).toBe("synthetic");
-    expect(query.text).toMatch(/where .*\."uid" = \$1/);
+    expect(query.text).toMatch(/where .*\."(?:uid|ownerId)" = \$1/);
     expect(query.text).not.toMatch(
       /\b(insert|update|delete)\b|deviceId|deviceUuid|email|passmd5|gold|clientRecord|mdata|userSign|"cost"|select \*/,
     );
@@ -89,10 +122,23 @@ test("public profile persistence binds one owner throughout a repeatable read sn
     query.text.includes('from "opencok_kingdom"."user_building"'),
   )!;
   expect(tavern.params).toEqual(["synthetic", 401000, 2]);
+  const skills = reads.find((query) => query.text.includes('from "opencok_kingdom"."user_skill"'))!;
+  expect(skills.params).toEqual(["synthetic", 32768]);
+  expect(skills.text).toContain(
+    'order by "opencok_kingdom"."user_skill"."endTime" asc, "opencok_kingdom"."user_skill"."uuid" asc',
+  );
   const achievements = reads.at(-1)!;
   expect(achievements.text).toContain("count(*)");
   expect(achievements.text).toContain('"user_achievement"."state" in ($2, $3)');
   expect(achievements.params).toEqual(["synthetic", 1, 2]);
+});
+
+test("public profile snapshots skip skill reads when there are no generals", async () => {
+  const { db, queries } = database({ noGenerals: true, fail: "user_skill" });
+  expect((await readPublicProfile(db, "synthetic")).skills).toEqual([]);
+  expect(queries.some((query) => query.text.includes('from "opencok_kingdom"."user_skill"'))).toBe(
+    false,
+  );
 });
 
 test("missing profiles skip all dependent reads and invalid identities never reach SQL", async () => {
@@ -111,8 +157,10 @@ test("dependent failures and unrepresentable arrays reject the whole public snap
   for (const options of [
     { fail: "user_vip" },
     { fail: "user_achievement" },
+    { fail: "user_skill" },
     { taverns: 2 },
     { overflow: "user_general" },
+    { overflow: "user_skill" },
     { overflow: "user_equip" },
     { overflow: "user_honor" },
   ]) {

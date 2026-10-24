@@ -27,7 +27,8 @@
     "./power-lucky-day": "./src/power-lucky-day.ts",
     "./power-throne": "./src/power-throne.ts",
     "./power-resolver": "./src/power-resolver.ts",
-    "./profile": "./src/profile.ts"
+    "./profile": "./src/profile.ts",
+    "./profile-generals": "./src/profile-generals.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
