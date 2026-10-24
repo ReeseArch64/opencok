@@ -36,6 +36,13 @@
       "when": 1792877023435,
       "tag": "0004_nickname_receipt_owner_lookup",
       "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792881219110,
+      "tag": "0005_chat_mailbox_effects",
+      "breakpoints": false
     }
   ]
 }

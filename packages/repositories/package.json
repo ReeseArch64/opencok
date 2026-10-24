@@ -64,7 +64,8 @@
     "./realm-authority": "./src/realm-authority.ts",
     "./reconnect-progress": "./src/reconnect-progress.ts",
     "./reconnect-write": "./src/reconnect-write.ts",
-    "./reconnect-marches": "./src/reconnect-marches.ts"
+    "./reconnect-marches": "./src/reconnect-marches.ts",
+    "./chat-mailbox": "./src/chat-mailbox.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -78,6 +78,13 @@
       "when": 1792877948097,
       "tag": "0010_reconnect_authority",
       "breakpoints": false
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792881273511,
+      "tag": "0011_mailbox_chat_actions",
+      "breakpoints": false
     }
   ]
 }

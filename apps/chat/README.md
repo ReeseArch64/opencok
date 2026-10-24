@@ -158,3 +158,33 @@ kingdoms, no-avatar owners and restart persistence. The nickname command, remain
 effects and background relay are still pending under
 [issue #89](https://github.com/ReeseArch64/opencok/issues/89). Public room frames and
 session userinfo do not yet consume this projection.
+
+## Mailbox read and deletion effects
+
+`POST /_internal/mailbox` accepts realm-signed, owner-scoped mailbox read/delete
+operations. Its domain-separated HMAC covers the exact body and timestamp; requests
+expire after 30 seconds. The receiver bounds JSON bodies to 4 KiB, enforces strict
+operation fields, and acknowledges only committed effects with the same realm,
+owner, operation ID and effect index.
+
+Global migration `0005_chat_mailbox_effects.sql` adds owned private-message copies
+and durable operation receipts. The consumer marks or removes matching
+`chat_mailbox_message` rows within the owner/realm, peer and chat categories at or
+before the request's cutoff. Empty peer selects all conversations in those
+categories. Later messages and other owners' copies are untouched. Receipt and
+message changes commit together; replay returns unchanged, while a reused operation
+identity with a different payload is rejected. The maintained mailbox reader reads
+these same affected rows. No public room message is targeted.
+
+These tables hold the maintained representation of authorized historical private
+message copies. Existing legacy copies require an explicit owner/realm import before
+cutover; creating the table does not migrate legacy messages. Sending, direct-message
+permissions, blocking and complete private-chat retention remain topic 24. Mailbox
+mutations do not claim that broader social behavior is implemented.
+
+The realm stores outgoing intents atomically with mailbox mutations and retries
+after outages or lost acknowledgments. Apply the global migration before enabling
+the realm publisher. Keep receipts for replay recovery; do not truncate them while
+an older realm intent can still be retried. Rollback should disable new admission,
+drain pending intents and retain both receipts and message state before reverting
+binaries. No existing message body or reward is modified by the schema migration.
