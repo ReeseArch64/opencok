@@ -1,7 +1,7 @@
 ## Parallel block merge readiness
 
-The current snapshot integrates PR #172 and the already merged descendant PRs in this parallel
-block: #172, #173, #174, #175.
+The current snapshot integrates PR #171 and the already merged descendant PRs in this parallel
+block: #171, #172, #173, #174, #175.
 
 The maintainer authorized readiness and merge after all applicable CI checks pass on the final head.
 Original source-stage validation above remains historical; this record does not claim native-client,
