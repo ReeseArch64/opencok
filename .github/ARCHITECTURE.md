@@ -525,8 +525,86 @@ global ID index; duplicate groups replace their own view without clearing global
 entries. Data-config projections consume that group, while the overlord scalar keeps
 its reference global lookup. Loaded empty groups never fall back to other item groups.
 PVE aliases number only present selected fields, and the projection omits the extra
-world_fire/cityDefMax fields absent from the reference. Mandatory-record failures,
-remaining scalar parsing differences and general-sale restoration still require work.
+world_fire/cityDefMax fields absent from the reference. Required records and scalar
+attributes now reject incomplete configurations, while optional and conditionally
+consumed records retain their distinct boundaries. Empty external feature/pay-control
+items remain empty objects. Scalar Int/Long fields use bounded Java decimal parsing;
+only the selected world-mode records are required. Synthetic catalogs are test inputs,
+not runtime defaults. General-sale metadata consumes every ordered declaration before
+final duplicate IDs replace earlier values, so invalid overwritten rows still reject
+the response. Blank IDs and literal limit strings remain valid. The item, general-sale,
+feature, pay-control and kingdom-skill readers use direct element attributes and retain
+top-level group precedence. Their ordered declaration lists remain separate from final
+ID indexes. SFS serialization retains the maintained UTF-8 key and string bounds;
+this does not emulate malformed legacy encodings for oversized non-ASCII keys.
+Settings, Facebook-share metadata and building-star availability also consume ordered
+declarations, including duplicate and absent IDs. Settings and share arrays preserve
+all direct attributes. Feature announcements consume only the final `function_on`
+group, independently of the global feature index used by other gates. Missing required
+announcement ID/platform/version strings reject the response; empty strings remain
+literal metadata. Loaded absent/empty catalogs never fall back to indexes. Star maxima
+parse Java Int values only after building and availability checks, retain overwritten
+declarations and propagate invalid applicable values instead of silently omitting them.
+Account announcement overrides follow the generic selector evaluation and then consume
+global feature rules and exact allowlists, without an additional backend flag.
+Subscription announcements use the configured selector and supported platform only.
+Boss announcements read running state lazily per declaration before consuming their
+service-specific global rule, bypassing the announcement selector. The current runtime
+has no boss lifecycle provider; absent running state remains closed. Account/subscription
+metadata does not implement their mutation handlers. Missing announcement platform/version
+fields fail after availability evaluation, while missing IDs fail before service reads.
+Deferred-login configuration distinguishes unavailable switch rows from a successful
+empty result. The repository first reads required profile/preferences in a read-only
+repeatable-read snapshot. If the original list has fewer than 20 rows and lacks type 15,
+the controller invokes a separate read-write transaction to lock/revalidate the owner
+and insert the world-news default with status 0 and audio 1. The first response keeps
+the synthesized type/status shape; subsequent reads include the stored audio. The
+insert never updates an existing preference, and duplicate/write failures reject.
+Initialization precedes switches and announcements, so later failures cannot undo
+the committed row. Lost commit acknowledgments can leave it persisted despite a
+failed request. Standalone `pushSetting.get` shares the preference projection and
+initialization without evaluating other configuration providers. `parse.push.set`
+accepts signed SFS Int type/status/audio values and defaults omitted audio to 1.
+Its realm repository locks/revalidates the owner before selecting the existing row,
+then inserts or updates only that owner's selected type in a read-committed transaction.
+Repeated writes preserve a single row; status/audio are both replaced. Success uses
+the ordinary acknowledgment and correlation, with no notification delivery implied.
+The existing `parse_info` schema supplies this state; no new schema or provider is required.
+The optional switch query then runs independently: recognized PostgreSQL SQLSTATE
+errors produce empty switches, matching the legacy SQL adapter's SQLException fallback,
+while other exceptions produce unavailable switches. Required snapshot and preference
+transaction failures still reject. The controller omits both switch fields after an
+unavailable query, or only verification after a later account-gate/
+counter failure. Announcements remain outside this boundary. Empty device IDs retain
+empty Redis suffixes; null/missing IDs use literal `null`, with no blank-device bypass.
+Profile visibility and client flags use the existing `user_mixed_info` schema through
+a separate narrow repository. The controller maps seven commands to explicit fields
+and preserves eager versus optional/deferred Int decoding. The repository locks and
+revalidates the owner, locks the mixed row and updates only the selected field in one
+read-committed transaction. Missing optional state is not created. Unchanged primitive
+values skip writes except the speed flag; banner bigint storage retains Int protocol
+limits. Public-profile reads already consume the visibility columns. No cache delivery
+or notification is introduced. The server guide records command-specific no-op and
+failure behavior, with synthetic unit validation only.
+Nickname text rules remain pure: Java trim/blank behavior, weighted GBK length and
+character eligibility feed an ordered filter/availability evaluation. The GBK width
+table is derived from an independently authored Java 8 standard-library probe and has
+exhaustive code-unit checksum coverage; runtime and unit tests require no Java process.
+The bad-word resource adapter now reads the adjacent UTF-8 gameconfig list and preserves
+append, ordering, single-removal, reload-lock and failure-retention behavior. Its matcher
+uses Java 8 Unicode boundary data and the restricted generated-pattern grammar, validated
+against independent standard-library fixtures. Providers are explicit; the nickname-check
+command remains disabled until the global name-mapping/account adapter and runtime resource
+composition are connected. The source mount is also pending. This foundation neither
+reserves names nor changes profiles, balances or items.
+Global nickname comparison now has a separate pure `utf8_unicode_ci` equality-key
+primitive. It preserves the reference DDL's UCA 4 primary weights and PAD SPACE
+semantics, with versioned Unicode data and its license in the rules package. It
+accepts only the legacy three-byte UTF-8 character domain and performs no SQL or
+modern Unicode normalization. Exhaustive valid-BMP evidence comes from public MySQL
+weight data, without starting a database. The global mapping/account adapter must
+apply these semantics to both name matching and account UID matching before the
+nickname command can be enabled; PostgreSQL text equality is not equivalent.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab

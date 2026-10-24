@@ -88,12 +88,36 @@ export interface GameStore extends AuthenticationStore {
   power(uid: string, now: number): Promise<PowerState>;
   playerSummaries(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
   configuration(uid: string): Promise<LoginConfigurationState>;
+  configurationSwitches?(): Promise<Row[] | undefined>;
+  initializeWorldNewsPreference?(uid: string, now: number): Promise<void>;
+  setPushPreference?(uid: string, preference: PushPreference, now: number): Promise<void>;
+  updateProfilePreference?(
+    uid: string,
+    field: ProfilePreferenceField,
+    now: number,
+    readValue: () => number,
+  ): Promise<number | undefined>;
   city(uid: string, now: number): Promise<CityState>;
   world(
     uid: string,
     ids: number[],
   ): Promise<{ world: Row | undefined; points: Row[]; hasMarches: boolean }>;
 }
+
+export interface PushPreference {
+  type: number;
+  status: number;
+  audio: number;
+}
+
+export type ProfilePreferenceField =
+  | "showEquip"
+  | "showMedal"
+  | "marchSoldierShow"
+  | "colorblind"
+  | "scrollEquip"
+  | "showBanner"
+  | "clientSaveFlag";
 
 export interface PlayerSummary {
   data: Row;
@@ -103,7 +127,7 @@ export interface PlayerSummary {
 
 export interface LoginConfigurationState {
   profile: Row | undefined;
-  switches: Row[];
+  switches: Row[] | undefined;
   pushSettings: Row[];
 }
 
@@ -120,6 +144,6 @@ export interface GameServices {
   worldPowerEffects?(kingdomId?: number): Promise<ReadonlyMap<string, string>>;
   emperorVersion?(kingdomId?: number): Promise<number | null | undefined>;
   playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;
-  changeAccountCount?(deviceId: string): Promise<bigint | null>;
+  changeAccountCount?(deviceId: string): Promise<string | null>;
   featureAvailability?(profile: Row, now: number): Readonly<Record<string, boolean>>;
 }

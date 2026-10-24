@@ -30,6 +30,11 @@
     "./power-throne": "./src/power-throne.ts",
     "./power-resolver": "./src/power-resolver.ts",
     "./profile": "./src/profile.ts",
+    "./nickname": "./src/nickname.ts",
+    "./mysql-unicode": "./src/mysql-unicode.ts",
+    "./nickname-words": "./src/nickname-words.ts",
+    "./java-nickname-characters": "./src/java-nickname-characters.ts",
+    "./java-gbk": "./src/java-gbk.ts",
     "./profile-generals": "./src/profile-generals.ts",
     "./reconnect-mine": "./src/reconnect-mine.ts",
     "./rewards": "./src/rewards.ts",
@@ -58,7 +63,8 @@
     "./new-general-prestige": "./src/new-general-prestige.ts",
     "./kingdom-skills": "./src/kingdom-skills.ts",
     "./java-list-sort": "./src/java-list-sort.ts",
-    "./java-calendar-date": "./src/java-calendar-date.ts"
+    "./java-calendar-date": "./src/java-calendar-date.ts",
+    "./java-integer": "./src/java-integer.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
