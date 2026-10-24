@@ -82,6 +82,8 @@ function fixture() {
     office: undefined,
     kingdomFights: [],
     territoryTrees: [],
+    luckyDay: undefined,
+    powerServer: undefined,
   };
   return { state, rules };
 }
@@ -112,6 +114,8 @@ function empty(): PowerSnapshot {
     office: undefined,
     kingdomFights: [],
     territoryTrees: [],
+    luckyDay: undefined,
+    powerServer: undefined,
   };
 }
 

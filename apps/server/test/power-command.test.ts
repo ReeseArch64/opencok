@@ -37,6 +37,8 @@ function fixture() {
     office: undefined,
     kingdomFights: [],
     territoryTrees: [],
+    luckyDay: undefined,
+    powerServer: undefined,
     upload: { updateTime: 9007199254740993n, banTime: 9007199254740995n, banCount: 2 },
   };
   const rules = new Rules(
