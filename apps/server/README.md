@@ -287,11 +287,56 @@ TypeScript; no private game classes were executed to generate evidence. Characte
 validation follows the collected original's balanced-brace return rather than an
 inconsistent reconstructed source variant.
 
-`user.check.nickName` remains unsupported until the bad-word loader/matcher and global
-name-mapping/account query are composed with these rules. The global mapping lookup is
-distinct from a local profile-name search. No default empty filter or available-name
-answer is supplied. Name reservation, rename item/gold costs and downstream effects
-remain separate required work. This foundation performs no persistence or notifications.
+The nickname bad-word matcher now models the specific generated patterns rather than
+using JavaScript word boundaries. ASCII-word entries use ASCII case folding with Java 8
+Unicode letter/digit/underscore boundaries and its combining-mark base behavior.
+Other entries retain case, allow ASCII whitespace after each literal UTF-16 unit and
+preserve the generated unescaped `^`, `$` and `|` semantics. Escaped punctuation stays
+literal. Supplementary/surrogate matching and final line-terminator anchors follow the
+Java primitive vectors. A matching exception stops the remaining list and returns false;
+the loading lock returns true before inspecting entries or text.
+
+`resources/nickname-words` reads UTF-8 `../gameconfig/badwords.txt` relative to the supplied
+resource directory, with the existing resource-size policy of 16 MiB. It splits CR/LF
+lines and commas, drops empty tokens without trimming, stably orders new entries by
+descending UTF-16 length, appends them to retained entries and removes only the first
+exact space and `v` from the combined list. Reloads keep duplicates. Read failures unlock
+and retain previous entries, including an empty list after an unsuccessful first load;
+this is the reference loader's failure behavior. Overlapping reloads retain its shared
+lock-flag behavior rather than introducing a reference counter. The original launch
+configuration specifies UTF-8, and BOM/entry whitespace is preserved.
+
+Fourteen new units cover the matcher and resource lifecycle with synthetic input only.
+An independently authored Java 8 probe supplies 4,071 generated-pattern outcomes and a
+checksum over all 1,114,112 Unicode code points: 107,270 letter/digit points and 1,280
+nonspacing marks, represented by 735 intervals. Normal unit tests use TypeScript,
+injected reads and temporary synthetic files; they do not execute private game classes.
+
+Global name comparison now has a pure `rules/mysql-unicode` equality-key primitive.
+The reference global DDL uses `utf8_unicode_ci` for both `usermapping` and `account_new`.
+The primitive preserves UCA 4 primary weights, expansions such as sharp-s to `ss`,
+primary-ignorable characters and trailing space-weight padding. Case/accent equivalence
+is character-specific: `Æ` differs from `AE`, Cyrillic short-I differs from I, and newer
+uppercase sharp-s does not acquire modern case equivalence. Hangul syllables are not
+decomposed; contractions and normalization are not introduced. The historical U+FDFA
+implicit-weight exception is retained. Surrogates and supplementary characters are
+outside the legacy three-byte UTF-8 domain and are rejected; pure text remains bounded
+to 65,535 code units. NUL is a primary ignorable in this primitive; transport and SQL
+representability remain separate concerns for the adapter.
+
+The 12,072 explicit characters are stored in 3,963 runs derived from public Unicode
+data. Six synthetic units include an exhaustive checksum for all 63,488 valid BMP
+characters against public MySQL weight tables, plus padding, expansion and historical
+exception cases. [Data provenance and license](../../packages/rules/UNICODE-NOTICE.md)
+are checked in. No database, Java classes or client are executed by these tests.
+
+`user.check.nickName` remains unsupported until the global name-mapping/account query
+and runtime providers are composed. The global mapping lookup is distinct from a local
+profile-name search. The loader/matcher has unit composition with the check rules but
+is not yet installed in realm startup; the corresponding container resource mount also
+remains pending. No always-available name answer is supplied. Name reservation, rename
+item/gold costs and downstream effects remain separate required work. This foundation
+performs no game-state persistence or notifications.
 
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
