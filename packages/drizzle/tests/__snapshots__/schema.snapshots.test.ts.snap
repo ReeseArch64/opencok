@@ -14065,3 +14065,27 @@ select "commandId", "effectIndex", "ownerUid", "others", "chatTypes", "requested
 update "opencok_kingdom"."mail_chat_read_intent" set "commandId" = $1, "effectIndex" = $2, "ownerUid" = $3, "others" = $4, "chatTypes" = $5, "requestedAt" = $6 where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $7
 delete from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $1"
 `;
+
+exports[`opencok_kingdom.avatar_completion: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["ownerUid","varchar(20)",true,null,null,null]
+column ["sequence","integer",true,null,null,null]
+column ["hash","varchar(64)",true,null,null,null]
+column ["picVer","integer",true,null,null,null]
+column ["committedAt","bigint",true,null,null,null]
+column ["effects","text",true,null,null,null]
+column ["pendingEffects","integer",true,null,null,null]
+primary ["avatar_completion_PRIMARY",["ownerUid","sequence"]]
+index ["avatar_completion_pending",false,["pendingEffects","committedAt","ownerUid","sequence"]]
+check ["avatar_completion_owner","\\"ownerUid\\" ~ '^[0-9]{1,20}$'"]
+check ["avatar_completion_sequence","\\"sequence\\" >= 1 AND \\"sequence\\" <= 999999"]
+check ["avatar_completion_hash","\\"hash\\" ~ '^[a-f0-9]{64}$'"]
+check ["avatar_completion_version","\\"picVer\\" >= 0 AND \\"picVer\\" % 1000000 = \\"sequence\\""]
+check ["avatar_completion_time","\\"committedAt\\" >= 0"]
+check ["avatar_completion_effects_size","octet_length(\\"effects\\") <= 65535"]
+check ["avatar_completion_pending_range","\\"pendingEffects\\" >= 0 AND \\"pendingEffects\\" <= 7"]
+insert into "opencok_kingdom"."avatar_completion" ("ownerUid", "sequence", "hash", "picVer", "committedAt", "effects", "pendingEffects") values ($1, $2, $3, $4, $5, $6, $7)
+select "ownerUid", "sequence", "hash", "picVer", "committedAt", "effects", "pendingEffects" from "opencok_kingdom"."avatar_completion" where "opencok_kingdom"."avatar_completion"."ownerUid" = $1
+update "opencok_kingdom"."avatar_completion" set "ownerUid" = $1, "sequence" = $2, "hash" = $3, "picVer" = $4, "committedAt" = $5, "effects" = $6, "pendingEffects" = $7 where "opencok_kingdom"."avatar_completion"."ownerUid" = $8
+delete from "opencok_kingdom"."avatar_completion" where "opencok_kingdom"."avatar_completion"."ownerUid" = $1"
+`;

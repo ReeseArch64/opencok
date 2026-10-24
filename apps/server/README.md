@@ -953,6 +953,61 @@ cover ownership, eligibility, expiry, pending receipts, fresh retries, exact wir
 rollback, bounded responses and timeouts. No real database, object store, listener, client
 or ADB execution is used. Real concurrency and deployment behavior remain unverified.
 
+## Avatar completion transaction foundation
+
+[Issue #77](https://github.com/ReeseArch64/opencok/issues/77) adds the internal
+`controllers/avatar-finish` workflow and `repositories/avatar-finish` transaction.
+They are not connected to `Game.execute` or production composition. The wire command
+`user.avatar.finish` remains unsupported until the required effect consumers exist.
+The migration is generated only; this work has not changed a running realm or database.
+
+Every attempt locks and authorizes the owner profile and verifies the requested
+`sequence:sha256` against the maintained files receipt, including repeated and older
+receipts. A same-sequence request returns the current durable version without applying
+eligibility or effects again. If no completion receipt exists for that current version,
+it stores an observed receipt with no pending effects, matching the legacy completion
+marker without inventing past notifications. Such receipts record their observation time,
+not an inferred original commit time, and accept any nonnegative encoded picture state. An older receipt returns the current version with
+`superseded: true`. A future sequence must be exactly next and have no prior completion
+receipt. A stored completion prevents reuse after an isolated profile version reset;
+it cannot reconstruct historical filesystem markers or recover independently restored
+object and database snapshots.
+
+An advancing request rechecks raw castle level, cooldown and report ban. Finish differs
+from grant: a missing `function_on5.k2` is invalid, and `hero.k7` is parsed after the level
+check but before reading the upload record, even if no record exists. The exact `0`
+bypass stores `2000000 + sequence` (Waiting) and leaves moderation records unchanged.
+Otherwise the record gets the new sequence, zero reports, current millisecond timestamp
+and WAITING status, preserving existing ban count/time. New records explicitly initialize
+those ban fields to zero. Java signed-long overflow and exact deadlines remain covered.
+
+The profile update, moderation upsert and immutable `avatar_completion` receipt share
+one repeatable-read transaction. The receipt contains owner/sequence, SHA-256, committed
+picture version/time, a bounded versioned JSON effect snapshot and pending-effect bits.
+Bit 1 represents system mail, bit 2 profile timestamp publication, and bit 4 chat metadata
+publication. A nonempty supplied XML mail template is copied for later delivery; missing
+or empty templates retain the legacy no-mail behavior. The snapshot retains profile name,
+platform and the commit timestamp in seconds, avoiding a later lookup of changed intent.
+Each owner may have at most 1,000 pending completions; saturation rejects before writes.
+Unlike the legacy best-effort filesystem marker, an observed receipt write must succeed
+or the request fails. This preserves database replay protection instead of silently
+acknowledging missing history.
+Delivery must clear only the successfully applied bits, never delete the receipt.
+
+Repository boundaries validate the plan and owned reads, preserve report-ban fields on
+upsert, condition the profile write on the locked version, and roll back every local
+write if any step fails. Readers cannot escape the transaction. An uncertain commit is
+resolved by a fresh verified retry: a committed version skips the mutation and retains
+one effect record. There is no automatic transaction retry. Actual PostgreSQL concurrency
+and isolation behavior have not been exercised; SQL and failure paths use synthetic
+clients only.
+
+The next delivery slice must load the authorized mail catalog, apply template 10111 with
+its mailbox capacity/reward/group semantics, publish the realm profile timestamp and chat
+metadata, and restore mail/picture pushes. It must also preserve replay identity while
+acknowledging effects. Persisted intents alone are not evidence of delivered mail or
+updated caches. Completion cannot be exposed until those behaviors are implemented.
+
 ## Realm chat sessions
 
 `chat.session.create`, tracked in [issue #74](https://github.com/ReeseArch64/opencok/issues/74),
@@ -1428,7 +1483,7 @@ use these descriptions before the reconnect task component is complete.
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
-| 7. Avatar integration                     | Standalone files service; authenticated realm grants, eligibility, private pending-receipt lookup and synthetic units                                                                                                                                                               | Completion, atomic profile/upload-record updates, mail/synchronization/push effects and restored-state semantics.                                         |
+| 7. Avatar integration                     | Files service; realm grants and pending receipts; internal atomic completion/profile/moderation/intent foundation with synthetic units                                                                                                                                              | Connect completion after mail/profile/chat effect delivery and pushes; validate restored-state semantics.                                                 |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.

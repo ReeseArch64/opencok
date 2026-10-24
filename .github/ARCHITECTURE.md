@@ -399,9 +399,13 @@ composes `controllers/game`, pure `rules/avatar`, an owner-locking
 with the protected shared key and uses separate short-lived confirmation authorization
 to inspect bounded receipts. Profile versions remain authoritative; the maintained store
 has no historical filesystem completion marker. Unit composition uses synthetic storage
-and database clients without sockets. Avatar completion, atomic profile/upload-record
-updates and associated mail/synchronization/push effects remain pending, as do restored-state
-semantics, full media lifecycle, animated formats and production Node execution.
+and database clients without sockets. An internal completion workflow now locks the owner,
+verifies receipts and commits profile/moderation updates with an immutable `avatar_completion` receipt and pending
+effect snapshot in one realm transaction. The snapshot records the optional system-mail
+template, profile timestamp and chat metadata; receipt history survives effect delivery.
+This follows ADR-0002 and is not connected to the realm command. Mailbox retention/group
+handling, effect consumers, pushes and production composition remain pending, as do
+restored-state semantics, full media lifecycle, animated formats and production Node execution.
 
 ### Package groups
 
@@ -1176,14 +1180,14 @@ migration execution or deployment.
 ### 15.1. PostgreSQL database package
 
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
-Drizzle schemas in `src/schema` are the source of truth: 775 tables and 6,329 fields,
+Drizzle schemas in `src/schema` are the source of truth: 776 tables and 6,336 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
 `schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
 The default physical databases are `opencok_global`, `opencok_kingdom_1` and
 `opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
 `opencok_global`, `opencok_pay` and `opencok_chat` (113 tables). Both kingdom databases
-contain the same `opencok_kingdom` namespace (662 tables each). One set of kingdom
+contain the same `opencok_kingdom` namespace (663 tables each). One set of kingdom
 table modules and migrations serves every configured kingdom; there are no per-ID
 schema copies. Table/field names and values remain stable. Database names and
 credentials are configuration. Pools and local transactions belong to one physical database; there
