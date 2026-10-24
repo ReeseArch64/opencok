@@ -39,6 +39,7 @@ function database(
     user_equip: [["equip-a", 8001, 1, "7,8", "9,10", 2, 3, "7,1|8,0"]],
     user_honor: [["medal-a", 3]],
     user_achievement: [["3"]],
+    flower_ranking: [[90, 15]],
   };
   const client = {
     query: async (query: { text: string }, params: unknown[] = []) => {
@@ -102,10 +103,11 @@ test("public profile persistence binds one owner throughout a repeatable read sn
   ]);
   expect(state.honors).toEqual([{ id: "medal-a", level: 3 }]);
   expect(state.completedAchievements).toBe(3);
+  expect(state.flowers).toEqual({ flowerVal: 90, eggVal: 15 });
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const reads = queries.slice(1, -1);
-  expect(reads).toHaveLength(13);
+  expect(reads).toHaveLength(14);
   for (const query of reads) {
     expect(query.params[0]).toBe("synthetic");
     expect(query.text).toMatch(/where .*\."(?:uid|ownerId)" = \$1/);
@@ -127,10 +129,16 @@ test("public profile persistence binds one owner throughout a repeatable read sn
   expect(skills.text).toContain(
     'order by "opencok_kingdom"."user_skill"."endTime" asc, "opencok_kingdom"."user_skill"."uuid" asc',
   );
-  const achievements = reads.at(-1)!;
+  const achievements = reads.find((query) =>
+    query.text.includes('from "opencok_kingdom"."user_achievement"'),
+  )!;
   expect(achievements.text).toContain("count(*)");
   expect(achievements.text).toContain('"user_achievement"."state" in ($2, $3)');
   expect(achievements.params).toEqual(["synthetic", 1, 2]);
+  const flowers = reads.at(-1)!;
+  expect(flowers.text).toContain('select "flowerVal", "eggVal"');
+  expect(flowers.text).not.toMatch(/scoreVal|hideKing/);
+  expect(flowers.params).toEqual(["synthetic", 1]);
 });
 
 test("public profile snapshots skip skill reads when there are no generals", async () => {
@@ -158,6 +166,7 @@ test("dependent failures and unrepresentable arrays reject the whole public snap
     { fail: "user_vip" },
     { fail: "user_achievement" },
     { fail: "user_skill" },
+    { fail: "flower_ranking" },
     { taverns: 2 },
     { overflow: "user_general" },
     { overflow: "user_skill" },
