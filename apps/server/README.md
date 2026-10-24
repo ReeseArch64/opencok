@@ -1139,6 +1139,44 @@ search tables and, only when cross search is enabled, global directory columns;
 remote realm availability does not gate startup. Disabling GAME_CROSS_SEARCH removes
 this command's global/remote search reads and global search readiness probes.
 
+## World resource detail foundation
+
+The pure resource calculations and SFS projections for
+[issue #85](https://github.com/ReeseArch64/opencok/issues/85) are available in
+`rules/world-resource-detail` and `dtos/world-resource-detail`. `world.get.detail`
+is not connected to the runtime yet; these helpers do not read or change game state.
+
+| Calculation        | Preserved behavior                                                                                                                                                                                                                                                         |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Remaining quantity | Signed 32-bit subtraction of initial and consumed quantity.                                                                                                                                                                                                                |
+| Army capacity      | Supplied raw load divided by resource weights for numeric items 0–5, using Java integer division; a single plunder value is subtracted except for point types 18/19.                                                                                                       |
+| Collected quantity | Wrapped signed-long elapsed time, direct float32 conversion, float32 seconds/rate multiplication and Java float-to-int saturation. Ordinary resources retain quantity/load caps and the one-unit remainder rule; territory type 18 uses the load cap; type 37 is uncapped. |
+| Owner projection   | Int `q`, `tq`, `collected`; Float `spd`; Long `sdt`, `changeCollectSpdTime`, `occupyEndTime`. Type 37 computes `q` from maximum collection time, truncating to whole seconds before float multiplication.                                                                  |
+| Occupying group    | Float32 speed accumulation and wrapped signed collection totals, with one clock sample per march. A separate final sample becomes Double `sdt`; `spd` and `tq` override owner fields without removing other metadata. An empty group adds no fields and samples no clock.  |
+
+Inputs require signed integer ranges, finite representable float speeds and bounded
+collections. Finite speeds can overflow the aggregate to infinity, as in Java, and
+that output retains its Float wire type. The resource item identifier must fit its
+255-character storage field and valid PostgreSQL text; missing or invalid required
+weights reject explicitly. These exceptional-input checks are not claims of matching
+every legacy failure path.
+
+`test/fixtures/world-resource-detail.json` contains 4,450 independently generated
+Java 8 primitive arithmetic cases: 1,809 direct long-to-float conversions, 81 quantity
+subtractions, 2,048 elapsed collection calculations, 384 owner quantities and 128
+group aggregates. Eight unit tests compare those results and cover weight/plunder
+rules, malformed inputs, clock sampling, immutable inputs and SFS encode/decode.
+The fixtures include cases where converting a long through a JavaScript double
+before float rounding would produce the wrong result. Normal tests require no Java
+runtime, ignored source inputs, database, listener or client.
+
+Point lookup, observer authorization, local/remote routing, owner and specialized
+point projections, existing-march restoration and command composition remain pending.
+Raw troop load and runtime-only `maxCollectTime` must be resolved explicitly; the
+persisted march row alone does not provide both values. The read path must not
+silently schedule marches, start combat or repair ownership. This foundation does
+not establish full point-detail compatibility or complete topic 5.
+
 ## Realm avatar grants
 
 `user.avatar.grant`, tracked in [issue #76](https://github.com/ReeseArch64/opencok/issues/76),
@@ -1897,7 +1935,7 @@ use these descriptions before the reconnect task component is complete.
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields, compatibility pagination and synthetic unit coverage                                                                                                        | Point details; documented search cache/collation/exceptional-state differences; live behavior remains deferred.                                           |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; resource-detail arithmetic/projection foundation with synthetic unit coverage                                                  | Point details; documented search cache/collation/exceptional-state differences; live behavior remains deferred.                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                              | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |

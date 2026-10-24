@@ -28,7 +28,8 @@
     "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
     "./world-favorites": "./src/world-favorites.ts",
     "./world-search": "./src/world-search.ts",
-    "./player-search": "./src/player-search.ts"
+    "./player-search": "./src/player-search.ts",
+    "./world-resource-detail": "./src/world-resource-detail.ts"
   },
   "dependencies": {}
 }

@@ -429,6 +429,20 @@ controls global/remote search reads and global readiness probes. Remote availabi
 does not gate local startup. The [realm runbook](../apps/server/README.md#general-player-search-policy)
 records query contracts, cache/collation/ordering differences and unit-only evidence.
 
+### World resource detail foundation
+
+`contracts/world-resource-detail`, `rules/world-resource-detail` and
+`dtos/world-resource-detail` define a pure resource-read foundation for the pending
+`world.get.detail` command. Rules preserve Java signed arithmetic, direct long-to-float
+rounding, resource-weight conversion and per-march collection clocks. DTOs preserve
+owner Long timestamps and aggregate Double timestamp overrides. No repository or
+runtime command consumes this foundation yet. Army load and runtime-only maximum
+collection time remain explicit inputs; resolving them must not create or schedule
+marches or trigger the reference getter's ownership repair. An independent synthetic
+Java primitive oracle covers arithmetic boundaries without executing private game
+classes. The [realm runbook](../apps/server/README.md#world-resource-detail-foundation)
+records the implemented fields and outstanding command dependencies.
+
 ### Migrated files implementation
 
 `apps/files` composes `api/files`, `identity/avatar`, `validations/image` and
