@@ -1,22 +1,17 @@
-import type { WorldPointOwnerDetail, WorldCityDetail } from "@opencok/contracts/world-point-detail";
-import { sfs, type Fields } from "@opencok/messages/sfs";
-
-export function worldPointOwner(detail: WorldPointOwnerDetail): Fields {
-  const result: Fields = {};
-  for (const key of ["uid", "pic", "afn"] as const)
-    if (detail[key] !== undefined) result[key] = sfs.string(detail[key]);
-  for (const key of ["registerTime", "power", "killArmy"] as const)
-    if (detail[key] !== undefined) result[key] = sfs.long(detail[key]);
-  for (const key of ["rank", "vl"] as const)
-    if (detail[key] !== undefined) result[key] = sfs.int(detail[key]);
-  return result;
+export class WorldPointOwnerDto {
+  declare public readonly uid?: string;
+  declare public readonly pic?: string;
+  declare public readonly afn?: string;
+  declare public readonly registerTime?: bigint;
+  declare public readonly power?: bigint;
+  declare public readonly killArmy?: bigint;
+  declare public readonly rank?: number;
+  declare public readonly vl?: number;
 }
 
-export function worldCityFields(detail: WorldCityDetail): Fields {
-  return {
-    slowDown: sfs.bool(detail.slowDown),
-    targetTooStrong: sfs.bool(detail.targetTooStrong),
-    targetPower: sfs.long(detail.targetPower),
-    lastBeDuelTime: sfs.long(detail.lastBeDuelTime),
-  };
+export class WorldCityFieldsDto {
+  declare public readonly slowDown: boolean;
+  declare public readonly targetTooStrong: boolean;
+  declare public readonly targetPower: bigint;
+  declare public readonly lastBeDuelTime: bigint;
 }

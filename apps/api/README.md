@@ -36,7 +36,8 @@ point; the API has no directly published container port.
 
 Container/process settings are validated through `@opencok/env/api` and
 `@opencok/env/database`; local Compose values are direct declarations except for the
-optional chat origin forwarded from the environment:
+optional chat origin forwarded from the environment. Media is opt-in; see
+[API media](MEDIA.md) for S3/key settings, gateway routes and migration from Files:
 
 | Setting                     | Purpose                                                                                                                |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -142,3 +143,10 @@ handshake/login through Traefik, exact bigint responses, unchanged resources and
 inactive accounts, rejected out-of-scope routes, body limits and Redis failure/recovery.
 It never connects to the imported player databases. A native APK remains a separate
 validation step; previous PHP/MariaDB checks do not establish this port's compatibility.
+
+## Avatar media
+
+`API_FILES_ENABLED=true` composes signed avatar uploads, public JPEG delivery and
+private receipt confirmation into this API process. There is no separate Files
+application or listener. See [API media](MEDIA.md) for provisioning, limits,
+realm configuration and recovery. Discovery continues to work without media configuration.

@@ -5,8 +5,8 @@ import { GameError } from "@opencok/errors/game";
 import { decodeStoredJson } from "@opencok/messages/stored-json";
 import type { Rules } from "@opencok/rules/game";
 import { publicGeneralPreviews } from "@opencok/rules/profile-generals";
-import { publicGenerals } from "@opencok/dtos/profile";
-import { publicAllianceInfo } from "@opencok/dtos/profile-alliance";
+import { publicGenerals } from "@opencok/mappings/profile";
+import { publicAllianceInfo } from "@opencok/mappings/profile-alliance";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
 export function decodeGeneralAbilities(

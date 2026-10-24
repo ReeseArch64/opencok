@@ -7,7 +7,7 @@ import {
   resourceOwnerDetail,
   resourceGroupDetail,
 } from "@opencok/rules/world-resource-detail";
-import { worldResourceOwner, worldResourceGroup } from "@opencok/dtos/world-resource-detail";
+import { worldResourceOwner, worldResourceGroup } from "@opencok/mappings/world-resource-detail";
 import type {
   WorldResourceCollection,
   WorldResourceMarch,

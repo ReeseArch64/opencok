@@ -1,149 +1,120 @@
-import { sfs, type Fields } from "@opencok/messages/sfs";
-import { long, num, text, type Row } from "@opencok/contracts/rows";
-import { Rules } from "@opencok/rules/game";
-import { createHash } from "node:crypto";
+import type { DtoValue } from "./value.ts";
 
-export const FOREVER = 9223372036854775807n;
-export function building(row: Row, rules: Rules, next = false, now = Date.now()): Fields {
-  const itemId = text(row, "itemId");
-  const rule = next
-    ? rules.nextBuilding(itemId, num(row, "level"), num(row, "star"), num(row, "progress"), now)
-    : rules.building(itemId, num(row, "level"), num(row, "star"), num(row, "progress"));
-  const level = Number(rule.level);
-  const out: Fields = {
-    uuid: sfs.string(text(row, "uuid")),
-    itemId: sfs.string(text(row, "itemId")),
-    pos: sfs.int(num(row, "pos")),
-    level: sfs.int(level),
-    opType: sfs.int(num(row, "opType")),
-    starNum: sfs.int(Number(rule.s)),
-    starRate: sfs.int(Number(rule.p)),
-    starMax: sfs.int(rules.maxStar(itemId, now)),
-    putId: sfs.string(text(row, "putId")),
-    unlockFlag: sfs.int(next ? 0 : num(row, "unlockFlag")),
-    unlock_costNum: sfs.int(num(row, "costUnlockTimes")),
-  };
-  for (const key of [
-    "building",
-    "star_building",
-    "star_building_new",
-    "unlock_type",
-    "unlock_value",
-  ])
-    out[key] = sfs.string(rule[key] ?? "");
-  for (const key of ["wood", "stone", "iron", "food", "silver"])
-    out[key] = sfs.long(rules.cost(rule, key));
-  for (const key of [
-    "time",
-    "exp",
-    "civilization_level",
-    "resource",
-    "ban_luckyday",
-    "destroy_time",
-  ])
-    out[key] = sfs.int(Number(rule[key] ?? 0));
-  for (const key of ["power", "unlock_costType", "unlock_costValue"])
-    if (rule[key] !== undefined) out[key] = sfs.int(Number(rule[key]));
-  for (const key of ["item", "para1", "para2", "para3", "para4", "para5"])
-    if (rule[key] !== undefined) out[key] = sfs.string(rule[key]);
-  const nextRule = rules.nextBuilding(itemId, level, Number(rule.s), Number(rule.p), now);
-  const paras = [1, 2, 3, 4, 5].map((i) => nextRule?.[`para${i}`]).filter((v) => v !== undefined);
-  if (paras.length) out.nextLevelParas = sfs.string(paras.join(","));
-  if (long(row, "refreshTime")) out.refreshTime = sfs.long(long(row, "refreshTime"));
-  if (long(row, "effectTime")) {
-    if (text(row, "itemId") === "417000") out.cdTime = sfs.long(long(row, "effectTime") / 1000n);
-    else out.effectTime = sfs.long(long(row, "effectTime"));
-  }
-  return out;
+export class BuildingDto {
+  declare public readonly uuid: string;
+  declare public readonly itemId: string;
+  declare public readonly putId: string;
+  declare public readonly building: string;
+  declare public readonly star_building: string;
+  declare public readonly star_building_new: string;
+  declare public readonly unlock_type: string;
+  declare public readonly unlock_value: string;
+  declare public readonly item?: string;
+  declare public readonly para1?: string;
+  declare public readonly para2?: string;
+  declare public readonly para3?: string;
+  declare public readonly para4?: string;
+  declare public readonly para5?: string;
+  declare public readonly nextLevelParas?: string;
+  declare public readonly pos: number;
+  declare public readonly level: number;
+  declare public readonly opType: number;
+  declare public readonly starNum: number;
+  declare public readonly starRate: number;
+  declare public readonly starMax: number;
+  declare public readonly unlockFlag: number;
+  declare public readonly unlock_costNum: number;
+  declare public readonly time: number;
+  declare public readonly exp: number;
+  declare public readonly civilization_level: number;
+  declare public readonly resource: number;
+  declare public readonly ban_luckyday: number;
+  declare public readonly destroy_time: number;
+  declare public readonly power?: number;
+  declare public readonly unlock_costType?: number;
+  declare public readonly unlock_costValue?: number;
+  declare public readonly wood: bigint;
+  declare public readonly stone: bigint;
+  declare public readonly iron: bigint;
+  declare public readonly food: bigint;
+  declare public readonly silver: bigint;
+  declare public readonly refreshTime?: bigint;
+  declare public readonly cdTime?: bigint;
+  declare public readonly effectTime?: bigint;
 }
-export function queue(row: Row, item: Fields = {}, helped = true): Fields {
-  const timestamp = (key: string) => sfs.long(long(row, key) === FOREVER ? 0n : long(row, key));
-  const result: Fields = {
-    uuid: sfs.string(text(row, "uuid")),
-    qid: sfs.int(num(row, "qid")),
-    type: sfs.int(num(row, "type")),
-    itemObj: sfs.object(item),
-    startTime: timestamp("startTime"),
-    endTime: timestamp("endTime"),
-    updateTime: timestamp("updateTime"),
-    totalTime: sfs.long(long(row, "totalTime") || long(row, "updateTime") - long(row, "startTime")),
-  };
-  if (helped) result.isHelped = sfs.int(num(row, "isHelped"));
-  return result;
+
+export class QueueDto {
+  declare public readonly uuid: string;
+  declare public readonly qid: number;
+  declare public readonly type: number;
+  declare public readonly isHelped?: number;
+  declare public readonly startTime: bigint;
+  declare public readonly endTime: bigint;
+  declare public readonly updateTime: bigint;
+  declare public readonly totalTime: bigint;
+  declare public readonly itemObj: { readonly [key: string]: DtoValue };
 }
-export function resource(row: Row): Fields {
-  const result: Fields = {};
-  for (const key of ["wood", "stone", "iron", "food"]) {
-    result[key] = sfs.long(long(row, key) < 0n ? 0n : long(row, key));
-    result[`${key}_bind`] = sfs.long(long(row, `${key}bind`));
-  }
-  for (const key of [
-    "silver",
-    "chip",
-    "diamond",
-    "sandstone",
-    "diamondstone",
-    "marble",
-    "granite",
-    "limestone",
-  ])
-    result[key] = sfs.int(Math.max(0, num(row, key)));
-  result.dragonFood = sfs.int(num(row, "dragon_food"));
-  result.dragonGold = sfs.int(num(row, "dragon_gold"));
-  return result;
+
+export class ResourceDto {
+  declare public readonly wood: bigint;
+  declare public readonly wood_bind: bigint;
+  declare public readonly stone: bigint;
+  declare public readonly stone_bind: bigint;
+  declare public readonly iron: bigint;
+  declare public readonly iron_bind: bigint;
+  declare public readonly food: bigint;
+  declare public readonly food_bind: bigint;
+  declare public readonly silver: number;
+  declare public readonly chip: number;
+  declare public readonly diamond: number;
+  declare public readonly sandstone: number;
+  declare public readonly diamondstone: number;
+  declare public readonly marble: number;
+  declare public readonly granite: number;
+  declare public readonly limestone: number;
+  declare public readonly dragonFood: number;
+  declare public readonly dragonGold: number;
 }
-export function gold(profile: Row) {
-  return long(profile, "gold") + long(profile, "paidGold") + long(profile, "paidSpecialGold");
-}
-export function user(
-  profile: Row,
-  rules: Rules,
-  kingdomId: number,
-  civilizationPrestige = 0n,
-): Fields {
-  const result: Fields = {
-    buildcode: sfs.string(createHash("md5").update(text(profile, "uid")).digest("hex")),
-    serverType: sfs.int(0),
-    civilization_type: sfs.int(num(profile, "civilizationType")),
-    civilization_score: sfs.long(long(profile, "civilizationSorce")),
-    civilization_prestige: sfs.long(civilizationPrestige),
-    payTotalDollar: sfs.double(num(profile, "payTotalDollar")),
-    uuid: sfs.string(text(profile, "deviceUuid")),
-    gold: sfs.long(gold(profile)),
-    freeGold: sfs.long(long(profile, "gold")),
-    serverId: sfs.int(kingdomId),
-    serverMax: sfs.int(kingdomId),
-    country: sfs.int(1),
-    newCountry: sfs.string(text(profile, "country")),
-    maxExp: sfs.int(Number(rules.role(num(profile, "level")).player_exp)),
-    material: sfs.long(long(profile, "skillMaterial")),
-    allBuildScore: sfs.long(long(profile, "allianceBuildScore")),
-  };
-  for (const key of ["uid", "name", "allianceId", "openedPos", "pic", "guideStep"])
-    result[key] = sfs.string(text(profile, key));
-  for (const key of [
-    "level",
-    "exp",
-    "chNameCount",
-    "picVer",
-    "picfraId",
-    "gmFlag",
-    "crossFightSrcServerId",
-  ])
-    result[key] = sfs.int(num(profile, key));
-  for (const key of [
-    "paidGold",
-    "paidSpecialGold",
-    "crystal",
-    "crystalGold",
-    "dmmGold",
-    "dmmPaidGold",
-    "dmmPaidSpecialGold",
-    "payTotal",
-    "regTime",
-    "neutralScore",
-    "csmodBalance",
-  ])
-    result[key] = sfs.long(long(profile, key));
-  return result;
+
+export class UserDto {
+  declare public readonly buildcode: string;
+  declare public readonly uuid: string;
+  declare public readonly newCountry: string;
+  declare public readonly uid: string;
+  declare public readonly name: string;
+  declare public readonly allianceId: string;
+  declare public readonly openedPos: string;
+  declare public readonly pic: string;
+  declare public readonly guideStep: string;
+  declare public readonly serverType: number;
+  declare public readonly civilization_type: number;
+  declare public readonly serverId: number;
+  declare public readonly serverMax: number;
+  declare public readonly country: number;
+  declare public readonly maxExp: number;
+  declare public readonly level: number;
+  declare public readonly exp: number;
+  declare public readonly chNameCount: number;
+  declare public readonly picVer: number;
+  declare public readonly picfraId: number;
+  declare public readonly gmFlag: number;
+  declare public readonly crossFightSrcServerId: number;
+  declare public readonly civilization_score: bigint;
+  declare public readonly civilization_prestige: bigint;
+  declare public readonly gold: bigint;
+  declare public readonly freeGold: bigint;
+  declare public readonly material: bigint;
+  declare public readonly allBuildScore: bigint;
+  declare public readonly paidGold: bigint;
+  declare public readonly paidSpecialGold: bigint;
+  declare public readonly crystal: bigint;
+  declare public readonly crystalGold: bigint;
+  declare public readonly dmmGold: bigint;
+  declare public readonly dmmPaidGold: bigint;
+  declare public readonly dmmPaidSpecialGold: bigint;
+  declare public readonly payTotal: bigint;
+  declare public readonly regTime: bigint;
+  declare public readonly neutralScore: bigint;
+  declare public readonly csmodBalance: bigint;
+  declare public readonly payTotalDollar: number;
 }

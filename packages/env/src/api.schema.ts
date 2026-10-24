@@ -29,6 +29,10 @@ export const apiSchema = z
         })
         .optional(),
     ),
+    API_FILES_ENABLED: z
+      .enum(["true", "false"])
+      .default("false")
+      .transform((value) => value === "true"),
     API_HOST: z.string().min(1).default("127.0.0.1"),
     API_PORT: port(8082),
     API_DEPENDENCY_TIMEOUT_MS: timeout(3000),

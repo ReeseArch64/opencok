@@ -2,7 +2,8 @@
   "name": "@opencok/validations",
   "private": true,
   "scripts": {
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "bun --no-env-file test ./tests"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
@@ -11,11 +12,37 @@
   },
   "type": "module",
   "exports": {
-    "./image": "./src/image.ts"
+    "./image": "./src/image.ts",
+    "./bootstrap": "./src/bootstrap.ts",
+    "./reconnect": "./src/reconnect.ts",
+    "./mail": "./src/mail.ts",
+    "./city": "./src/city.ts",
+    "./world-favorites": "./src/world-favorites.ts",
+    "./avatar-mail": "./src/avatar-mail.ts",
+    "./world-monster-detail": "./src/world-monster-detail.ts",
+    "./dragon-ranking": "./src/dragon-ranking.ts",
+    "./ranking": "./src/ranking.ts",
+    "./profile-alliance": "./src/profile-alliance.ts",
+    "./players": "./src/players.ts",
+    "./world-point-detail": "./src/world-point-detail.ts",
+    "./profile": "./src/profile.ts",
+    "./player-search": "./src/player-search.ts",
+    "./world-search": "./src/world-search.ts",
+    "./rewards": "./src/rewards.ts",
+    "./world-resource-detail": "./src/world-resource-detail.ts",
+    "./power": "./src/power.ts",
+    "./expedition-ranking": "./src/expedition-ranking.ts",
+    "./alliance-ranking": "./src/alliance-ranking.ts",
+    "./configuration": "./src/configuration.ts",
+    "./dto": "./src/dto.ts",
+    "./sfs": "./src/sfs.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",
     "@opencok/contracts": "workspace:*",
-    "sharp": "^0.34.0"
+    "sharp": "^0.34.0",
+    "@opencok/dtos": "workspace:*",
+    "@opencok/messages": "workspace:*",
+    "zod": "catalog:"
   }
 }

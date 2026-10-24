@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { PublicProfileState } from "@opencok/contracts/profile";
 import { Rules } from "@opencok/rules/game";
 import { publicProfileProgress, publicProfileSocial } from "@opencok/rules/profile";
-import { publicProfileBase } from "@opencok/dtos/profile";
+import { publicProfileBase } from "@opencok/mappings/profile";
 import { decode, encode, sfs, Type } from "@opencok/messages/sfs";
 
 const context = { now: 1792756800000, kingdomId: 2, version: "12.06.0" };

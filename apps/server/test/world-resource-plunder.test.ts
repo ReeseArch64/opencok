@@ -6,7 +6,7 @@ import {
   resourceOwnerDetail,
   resourceSavedCollection,
 } from "@opencok/rules/world-resource-detail";
-import { worldResourceOwner } from "@opencok/dtos/world-resource-detail";
+import { worldResourceOwner } from "@opencok/mappings/world-resource-detail";
 import { Rules } from "@opencok/rules/game";
 import {
   decode,

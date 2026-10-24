@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { avatarSystemMail, javaMailBytes } from "@opencok/rules/avatar-mail";
-import { avatarMailPush } from "@opencok/dtos/avatar-mail";
+import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import { deliverAvatarMail } from "@opencok/repositories/avatar-mail";
 import type { AvatarCompletionRecord, AvatarMailPlanner } from "@opencok/contracts/files";
 import { decode, encode, sfs } from "@opencok/messages/sfs";

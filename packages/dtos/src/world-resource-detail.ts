@@ -1,31 +1,19 @@
-import type {
-  WorldResourceOwnerDetail,
-  WorldResourceGroupDetail,
-} from "@opencok/contracts/world-resource-detail";
-import { sfs, Type, type Fields } from "@opencok/messages/sfs";
-
-export function worldResourceOwner(detail: WorldResourceOwnerDetail): Fields {
-  return {
-    q: sfs.int(detail.quantity),
-    spd: { type: Type.Float, value: detail.speed },
-    sdt: sfs.long(detail.startTime),
-    tq: sfs.int(detail.remaining),
-    collected: sfs.int(detail.collected),
-    changeCollectSpdTime: sfs.long(detail.speedChangedAt),
-    occupyEndTime: sfs.long(detail.occupyEndTime),
-  };
+export class WorldResourceOwnerDto {
+  declare public readonly q: number;
+  declare public readonly tq: number;
+  declare public readonly collected: number;
+  declare public readonly spd: number;
+  declare public readonly sdt: bigint;
+  declare public readonly changeCollectSpdTime: bigint;
+  declare public readonly occupyEndTime: bigint;
 }
 
-export function worldResourceGroup(detail: WorldResourceGroupDetail | undefined): Fields {
-  return detail === undefined
-    ? {}
-    : {
-        spd: { type: Type.Float, value: detail.speed },
-        tq: sfs.int(detail.remaining),
-        sdt: sfs.double(detail.sampledAt),
-      };
+export class WorldResourceGroupDto {
+  declare public readonly spd?: number;
+  declare public readonly tq?: number;
+  declare public readonly sdt?: number;
 }
 
-export function worldNeutralResource(startTime: bigint | undefined): Fields {
-  return startTime === undefined ? {} : { occupybegintime: sfs.long(startTime) };
+export class WorldNeutralResourceDto {
+  declare public readonly occupybegintime?: bigint;
 }

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { publicEquipment, publicMedal, publicStatistics } from "@opencok/dtos/profile";
+import { publicEquipment, publicMedal, publicStatistics } from "@opencok/mappings/profile";
 import { decode, encode, sfs, Type } from "@opencok/messages/sfs";
 
 test("public statistics distinguish absent records from zero totals and retain exact stored power", () => {

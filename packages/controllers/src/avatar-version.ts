@@ -14,7 +14,7 @@ import {
   checkAvatarRecord,
 } from "@opencok/rules/avatar";
 import { avatarVersionPlan } from "@opencok/rules/avatar-version";
-import { avatarMailPush } from "@opencok/dtos/avatar-mail";
+import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 

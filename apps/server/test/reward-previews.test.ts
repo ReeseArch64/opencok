@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { previewRewards } from "@opencok/rules/rewards";
-import { rewardPreviewArray } from "@opencok/dtos/rewards";
+import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 
 const context = { kingdomId: 2, version: "12.06.0", now: 1792756800000 };

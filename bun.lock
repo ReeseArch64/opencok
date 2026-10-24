@@ -9,6 +9,7 @@
         "@opencok/config": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@types/bun": "catalog:",
+        "husky": "9.1.7",
         "typescript": "catalog:",
         "vite-plus": "^1.3.0",
       },
@@ -18,6 +19,7 @@
       "dependencies": {
         "@opencok/api": "workspace:*",
         "@opencok/connection": "workspace:*",
+        "@opencok/contracts": "workspace:*",
         "@opencok/core": "workspace:*",
         "@opencok/env": "workspace:*",
         "@opencok/repositories": "workspace:*",
@@ -25,11 +27,13 @@
         "effect": "catalog:",
       },
       "devDependencies": {
+        "@aws-sdk/client-s3": "^3.0.0",
         "@opencok/config": "workspace:*",
-        "@opencok/contracts": "workspace:*",
         "@opencok/controllers": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/identity": "workspace:*",
         "@types/bun": "catalog:",
+        "sharp": "^0.34.0",
         "typescript": "catalog:",
       },
     },
@@ -54,26 +58,6 @@
         "ws": "8.22.0",
       },
     },
-    "apps/files": {
-      "name": "@opencok/files",
-      "dependencies": {
-        "@opencok/api": "workspace:*",
-        "@opencok/contracts": "workspace:*",
-        "@opencok/core": "workspace:*",
-        "@opencok/env": "workspace:*",
-        "@opencok/storage": "workspace:*",
-        "effect": "catalog:",
-      },
-      "devDependencies": {
-        "@aws-sdk/client-s3": "^3.0.0",
-        "@opencok/config": "workspace:*",
-        "@opencok/errors": "workspace:*",
-        "@opencok/identity": "workspace:*",
-        "@types/bun": "catalog:",
-        "sharp": "^0.34.0",
-        "typescript": "catalog:",
-      },
-    },
     "apps/server": {
       "name": "@opencok/server",
       "dependencies": {
@@ -92,8 +76,8 @@
         "@opencok/api": "workspace:*",
         "@opencok/config": "workspace:*",
         "@opencok/drizzle": "workspace:*",
-        "@opencok/dtos": "workspace:*",
         "@opencok/identity": "workspace:*",
+        "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@types/bun": "catalog:",
         "drizzle-orm": "0.45.4",
@@ -270,9 +254,9 @@
       "dependencies": {
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
-        "@opencok/dtos": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/identity": "workspace:*",
+        "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/rules": "workspace:*",
       },
@@ -328,13 +312,6 @@
     },
     "packages/dtos": {
       "name": "@opencok/dtos",
-      "dependencies": {
-        "@opencok/constants": "workspace:*",
-        "@opencok/contracts": "workspace:*",
-        "@opencok/errors": "workspace:*",
-        "@opencok/messages": "workspace:*",
-        "@opencok/rules": "workspace:*",
-      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -457,6 +434,14 @@
     },
     "packages/mappings": {
       "name": "@opencok/mappings",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "@opencok/validations": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -679,8 +664,11 @@
       "name": "@opencok/validations",
       "dependencies": {
         "@opencok/contracts": "workspace:*",
+        "@opencok/dtos": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/messages": "workspace:*",
         "sharp": "^0.34.0",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -968,8 +956,6 @@
     "@opencok/errors": ["@opencok/errors@workspace:packages/errors"],
 
     "@opencok/events": ["@opencok/events@workspace:packages/events"],
-
-    "@opencok/files": ["@opencok/files@workspace:apps/files"],
 
     "@opencok/generators": ["@opencok/generators@workspace:packages/generators"],
 
@@ -1406,6 +1392,8 @@
     "get-tsconfig": ["get-tsconfig@4.14.3", "", { "dependencies": { "resolve-pkg-maps": "^1.0.0" } }, "sha512-++QEw4DIY7WGoukz+/+A/8dGYPT9l9yIadnmSgZ8Rjr3YVSVDipQSO9CdnJo9ePqFqUUqh+wk9uIaoiAwsiPkA=="],
 
     "global-directory": ["global-directory@5.0.0", "", { "dependencies": { "ini": "6.0.0" } }, "sha512-1pgFdhK3J2LeM+dVf2Pd424yHx2ou338lC0ErNP2hPx4j8eW1Sp0XqSjNxtk6Tc4Kr5wlWtSvz8cn2yb7/SG/w=="],
+
+    "husky": ["husky@9.1.7", "", { "bin": { "husky": "bin.js" } }, "sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA=="],
 
     "import-fresh": ["import-fresh@3.3.1", "", { "dependencies": { "parent-module": "^1.0.0", "resolve-from": "^4.0.0" } }, "sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ=="],
 

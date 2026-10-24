@@ -1,25 +1,14 @@
-import type { MailSaveResult, MailStatusResult } from "@opencok/contracts/mail";
-import { sfs, type Fields } from "@opencok/messages/sfs";
-
-export function mailDeleted(count: number): Fields {
-  return { delete: sfs.int(count) };
+export class MailDeletedDto {
+  declare public readonly delete: number;
 }
 
-export function mailSave(result: MailSaveResult): Fields {
-  return result === "unchanged" ? {} : { [result]: sfs.string("success") };
+export class MailSaveDto {
+  declare public readonly save?: string;
+  declare public readonly cancel?: string;
 }
 
-export function mailStatus(result: MailStatusResult): Fields {
-  if (result.mode === "unknown") return {};
-  if (result.mode === "category")
-    return { total: sfs.long(result.total), unread: sfs.long(result.unread) };
-  return Object.fromEntries(
-    result.categories.map(({ total, unread }, index) => [
-      String(index + 1),
-      sfs.object({
-        total: sfs.int(total),
-        unread: sfs.int(unread),
-      }),
-    ]),
-  );
+export class MailStatusDto {
+  declare public readonly total?: bigint;
+  declare public readonly unread?: bigint;
+  readonly [category: `${number}`]: { readonly total: number; readonly unread: number };
 }

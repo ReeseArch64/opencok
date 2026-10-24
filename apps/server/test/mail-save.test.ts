@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { mailSaveQuery } from "@opencok/rules/mail";
-import { mailSave } from "@opencok/dtos/mail";
+import { mailSave } from "@opencok/mappings/mail";
 import { sfs } from "@opencok/messages/sfs";
 
 const now = 1792756800000;

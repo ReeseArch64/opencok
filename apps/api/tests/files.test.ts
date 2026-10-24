@@ -1,7 +1,11 @@
 import { expect, test } from "bun:test";
-import { createHmac } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 import sharp from "sharp";
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
+import { ApiDependencies, createApp, serveApi } from "../src/app";
+import { ApiConfigLive } from "../src/config";
+import { EnvironmentSource } from "@opencok/env/effect";
+import { createHandler as createApiHandler } from "@opencok/api/handler";
 import { createHandler } from "@opencok/api/files";
 import {
   BODY_LIMIT,
@@ -151,4 +155,124 @@ test("shared HTTP runtime accepts media bodies above the API default and enforce
       }),
     ),
   );
+});
+
+test("API routes media and discovery on one listener while preserving independent body limits", async () => {
+  const store = storage();
+  const files = createHandler(store, key);
+  const dependencies = Layer.succeed(ApiDependencies, {
+    accounts: { getAll: async () => [], health: async () => {} },
+    directory: { read: async () => new Map() },
+    redis: { health: async () => {} },
+    files,
+  });
+  const environment = Layer.succeed(EnvironmentSource, {
+    DATABASE_URL: "postgresql://synthetic:secret@localhost/synthetic",
+    API_FILES_ENABLED: "true",
+    API_PORT: "0",
+  });
+  const layers = Layer.merge(dependencies, ApiConfigLive).pipe(Layer.provide(environment));
+  await Effect.runPromise(
+    Effect.scoped(
+      Effect.gen(function* () {
+        const app = yield* createApp;
+        const server = yield* serveApi;
+        const origin = `http://127.0.0.1:${server.port}`;
+        const bytes = yield* Effect.promise(() =>
+          sharp(randomBytes(256 * 256 * 3), { raw: { width: 256, height: 256, channels: 3 } })
+            .png()
+            .toBuffer(),
+        );
+        const image = yield* Effect.promise(() => upload(grant(), "image/png", owner, bytes));
+        const body = new Uint8Array(yield* Effect.promise(() => image.arrayBuffer()));
+        expect(body.byteLength).toBeGreaterThan(65536);
+        const uploaded = yield* Effect.promise(() =>
+          fetch(origin + UPLOAD_PATH, { method: "POST", headers: image.headers, body }),
+        );
+        expect(uploaded.status).toBe(200);
+        expect(uploaded.headers.get("X-Request-ID")).toBeTruthy();
+        const payload = (yield* Effect.promise(() => uploaded.json())) as {
+          response: { data: { path: string } }[];
+        };
+        const path = payload.response[0]!.data.path;
+        const head = yield* Effect.promise(() => fetch(origin + path, { method: "HEAD" }));
+        expect(head.status).toBe(200);
+        expect(yield* Effect.promise(() => head.text())).toBe("");
+        const confirmation = yield* Effect.promise(() =>
+          fetch(`${origin}/_internal/avatars/${owner}/1`),
+        );
+        expect(confirmation.status).toBe(401);
+        for (const headers of [new Headers(), new Headers({ "Content-Length": "65537" })]) {
+          const oversized = yield* Effect.promise(() =>
+            app.fetch(
+              new Request(origin + "/gameservice/getline.php", {
+                method: "POST",
+                headers,
+                body: new Uint8Array(65537),
+              }),
+            ),
+          );
+          expect(oversized.status).toBe(413);
+        }
+        store.get = async () => {
+          throw new Error("synthetic-provider-detail");
+        };
+        const unavailable = yield* Effect.promise(() => fetch(origin + path));
+        expect(unavailable.status).toBe(503);
+        expect(yield* Effect.promise(() => unavailable.text())).not.toContain(
+          "synthetic-provider-detail",
+        );
+        const discovery = yield* Effect.promise(() =>
+          fetch(origin + "/gameservice/getline.php?loginFlag=1"),
+        );
+        expect(discovery.status).toBe(200);
+        expect(yield* Effect.promise(() => discovery.json())).toEqual({
+          serverList: [],
+          country: 1,
+        });
+      }),
+    ).pipe(Effect.provide(layers)),
+  );
+});
+
+test("API media stays unavailable when its dependency is disabled", async () => {
+  const app = createApiHandler(
+    { getAll: async () => [], health: async () => {} },
+    { read: async () => new Map() },
+    { health: async () => {} },
+  );
+  for (const path of [
+    UPLOAD_PATH,
+    `/_internal/avatars/${owner}/1`,
+    `/cok/img/234567/${"a".repeat(32)}.jpg`,
+  ])
+    expect((await app.fetch(new Request(`http://localhost${path}`))).status).toBe(404);
+});
+
+test("gateway routes exact public avatar paths to API and keeps confirmation private", async () => {
+  const gateway = Bun.YAML.parse(
+    await Bun.file(new URL("../../../infra/gateway/dynamic.yml", import.meta.url)).text(),
+  ) as {
+    http: {
+      routers: Record<string, { rule: string; service: string; middlewares?: string[] }>;
+      middlewares: Record<string, { buffering?: { maxRequestBodyBytes: number } }>;
+    };
+  };
+  const { routers, middlewares } = gateway.http;
+  expect(routers["avatar-upload"]!.service).toBe("api");
+  expect(routers["avatar-upload"]!.rule).toBe(`Path(\`${UPLOAD_PATH}\`) && Method(\`POST\`)`);
+  expect(routers["avatar-upload"]!.middlewares).toEqual(["upload-body"]);
+  expect(middlewares["upload-body"]!.buffering!.maxRequestBodyBytes).toBe(BODY_LIMIT);
+  expect(middlewares["discovery-body"]!.buffering!.maxRequestBodyBytes).toBe(65536);
+  const images = routers["avatar-images"]!;
+  expect(images.service).toBe("api");
+  const pattern = new RegExp(/PathRegexp\(`([^`]+)`\)/.exec(images.rule)![1]!);
+  expect(pattern.test(`/cok/img/234567/${"a".repeat(32)}.jpg`)).toBe(true);
+  for (const path of [
+    "/cok/img/1/file.php",
+    "/cok/img/1/file.jpg",
+    `/_internal/avatars/${owner}/1`,
+  ])
+    expect(pattern.test(path)).toBe(false);
+  for (const route of Object.values(routers)) expect(route.rule).not.toContain("/_internal");
 });

@@ -1,83 +1,30 @@
-import type { PlayerSearchEntry, PlayerSearchResult } from "@opencok/contracts/player-search";
-import type { Row } from "@opencok/contracts/rows";
-import { GameError } from "@opencok/errors/game";
-import { errors } from "@opencok/constants/game";
-import { sfs, type Fields } from "@opencok/messages/sfs";
+export class PlayerSearchEntryDto {
+  declare public readonly uid: string;
+  declare public readonly name?: string;
+  declare public readonly lang?: string;
+  declare public readonly pic?: string;
+  declare public readonly abbr?: string;
+  declare public readonly alliancename?: string;
+  declare public readonly allianceId?: string;
+  declare public readonly serverId: number;
+  declare public readonly picVer?: number;
+  declare public readonly level?: number;
+  declare public readonly picfraId?: number;
+  declare public readonly gmFlag?: number;
+  declare public readonly vipLevel?: number;
+  declare public readonly svipLevel?: number;
+  declare public readonly rank?: number;
+  declare public readonly crossFightSrcServerId?: number;
+  declare public readonly mainBuildingLevel?: number;
+  declare public readonly power?: bigint;
+  declare public readonly vipEndTime?: bigint;
+  declare public readonly offLineTime?: bigint;
+}
 
-function invalid(): never {
-  throw new GameError(errors.unsupported, "player_search");
-}
-function integer(value: unknown): number {
-  if (
-    typeof value !== "number" ||
-    !Number.isInteger(value) ||
-    value < -2147483648 ||
-    value > 2147483647
-  )
-    return invalid();
-  return value;
-}
-function long(value: unknown): bigint {
-  if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) return invalid();
-  return value;
-}
-function strings(row: Row, result: Fields, keys: readonly string[]) {
-  for (const key of keys) {
-    const value = row[key];
-    if (value == null) continue;
-    if (
-      typeof value !== "string" ||
-      !value.isWellFormed() ||
-      value.includes("\0") ||
-      new TextEncoder().encode(value).length > 32767
-    )
-      return invalid();
-    result[key] = sfs.string(value);
-  }
-}
-export function playerSearchEntry(entry: PlayerSearchEntry): Fields {
-  const { data, remote } = entry;
-  const kingdomId = integer(entry.kingdomId);
-  if (kingdomId < 1 || typeof remote !== "boolean" || typeof data.uid !== "string" || !data.uid)
-    return invalid();
-  const result: Fields = { serverId: sfs.int(kingdomId) };
-  strings(data, result, ["uid", "name", "lang", "pic", "abbr"]);
-  if (!remote) {
-    strings(data, result, ["alliancename"]);
-    for (const key of ["picVer", "level"])
-      if (data[key] != null) result[key] = sfs.int(integer(data[key]));
-    if (data.power != null) result.power = sfs.long(long(data.power));
-    return result;
-  }
-  strings(data, result, ["allianceId"]);
-  for (const key of ["picVer", "picfraId", "gmFlag", "vipLevel", "svipLevel", "rank"])
-    result[key] = sfs.int(integer(data[key] ?? 0));
-  result.crossFightSrcServerId = sfs.int(integer(data.crossFightSrcServerId ?? -1));
-  for (const key of ["power", "vipEndTime", "offLineTime"]) {
-    const value = long(data[key] ?? 0n);
-    if (value > 0n) result[key] = sfs.long(value);
-  }
-  const level = integer(data.mainBuildingLevel ?? 0);
-  if (level > 0) {
-    result.mainBuildingLevel = sfs.int(level);
-    result.level = sfs.int(level);
-  }
-  return result;
-}
-export function playerSearch(result: PlayerSearchResult): Fields {
-  if (
-    result.entries.length > 10 ||
-    long(result.total) < BigInt(result.entries.length) ||
-    long(result.maximum) < 0n
-  )
-    return invalid();
-  const body: Fields = {
-    list: sfs.array(result.entries.map((entry) => sfs.object(playerSearchEntry(entry)))),
-    page: sfs.int(integer(result.page)),
-    total: sfs.long(result.total),
-    max: sfs.long(result.maximum),
-  };
-  strings({ key: result.key }, body, ["key"]);
-  if (!body.key) return invalid();
-  return body;
+export class PlayerSearchDto {
+  declare public readonly list: PlayerSearchEntryDto[];
+  declare public readonly page: number;
+  declare public readonly total: bigint;
+  declare public readonly max: bigint;
+  declare public readonly key: string;
 }

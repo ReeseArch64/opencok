@@ -55,10 +55,26 @@ keeps its existing prose wrapping. Lint enables correctness rules for the
 default TypeScript, Unicorn and Oxc plugins. Type checking remains separate;
 use `bun run --cwd <workspace> check-types` for each implemented workspace.
 
-Both tools exclude mobile/legacy inputs, local data, build output, coverage,
-Drizzle migrations, snapshot output and database fixture data. Maintained
-Drizzle TypeScript schemas remain included. These exclusions preserve the
+Both tools exclude private inputs under `data/`, generated Husky adapters under
+`.husky/_/`, workspace `node_modules/`, `dist/`, coverage, TypeScript build metadata,
+Drizzle migrations, snapshots and database fixture data. The former root
+`mobile/` and `legacy/` input directories are no longer part of this checkout;
+keep authorized originals in the ignored data area. Maintained application and
+package source, Drizzle TypeScript schemas, agent skills and hook configuration
+remain included. These exclusions preserve the
 boundaries described in [the architecture](ARCHITECTURE.md).
+
+DTOs must be standalone classes with explicit `declare public readonly` data
+properties, following the NestJS DTO style without decorators. Keep Zod schemas
+in `packages/validations` and serialization in `packages/mappings`. DTO classes
+must not inherit from schema factories or contain constructors, methods or static
+schemas. See the [DTO package](../packages/dtos/README.md). Validate at the mapping
+or application boundary and preserve mobile wire types and field order.
+Do not use definite-assignment or non-null assertions (`!`) in DTO declarations.
+Use `?` only when the transferred field is optional; keep required fields required.
+`declare` avoids runtime initialization fields while preserving strict checking.
+Reserve `private` state and `static` helpers for implementation classes that need
+them; DTOs expose transferred instance data and contain no such behavior.
 
 ## Commits
 
@@ -95,6 +111,28 @@ with the following format and rules:
 ```text
 fix(app): correct menu focus on keyboard
 ```
+
+### Local commit-message hook
+
+Husky 9 manages the repository-local `commit-msg` hook. `bun install` runs the
+root `prepare` script (`husky`); after an installation with `--ignore-scripts`, enable it
+explicitly with `bun run prepare`. Git's `core.hooksPath` points to `.husky/_`.
+The generated adapters stay ignored; `.husky/commit-msg` is a maintained project
+file.
+
+The hook runs `bunx commitlint --edit "$1"` with the root
+`commitlint.config.cjs`. Install workspace dependencies before committing so
+`bunx` resolves the local CLI. It validates
+the message file supplied by Git, including paths containing spaces. It does not
+rewrite messages or stage files. CI continues validating committed messages
+independently of local hooks.
+
+Use `HUSKY=0` when hook setup should be disabled, or install with
+`--ignore-scripts`. Existing container builds use `--ignore-scripts`, including
+production-only dependency installs where Husky is not installed. Run
+`bun run prepare` to install the hooks locally. See the
+[Husky setup](https://typicode.github.io/husky/how-to.html)
+and [commitlint local setup](https://commitlint.js.org/guides/local-setup.html).
 
 ### Issue, pull request, and discussion labels
 
