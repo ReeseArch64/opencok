@@ -19,6 +19,7 @@
     "./profile": "./src/profile.ts",
     "./profile-alliance": "./src/profile-alliance.ts",
     "./reconnect": "./src/reconnect.ts",
+    "./reconnect-marches": "./src/reconnect-marches.ts",
     "./rewards": "./src/rewards.ts",
     "./ranking": "./src/ranking.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
