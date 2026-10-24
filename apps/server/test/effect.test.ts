@@ -23,6 +23,9 @@ const dependencies: ServerDependencies = {
     profile: async () => undefined,
     accounts: async () => [],
     playerSummaries: async () => [],
+    power: async () => {
+      throw new Error("unused");
+    },
     configuration: async () => ({ profile: undefined, switches: [], pushSettings: [] }),
     city: async () => {
       throw new Error("unused");

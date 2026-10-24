@@ -1,7 +1,8 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
-import { readPowerState } from "@opencok/repositories/power";
+import { checkPowerStore, readPowerState } from "@opencok/repositories/power";
+import { Database } from "@opencok/repositories/game";
 import { generalSkillPoints, titleContractExpiries } from "@opencok/controllers/power";
 
 const now = 1792756800000;
@@ -56,7 +57,11 @@ function database(
 
 test("power snapshot scopes every domain to the owner, retains long values and performs no writes", async () => {
   const { db, queries } = database();
-  const snapshot = await readPowerState(db, "synthetic", now);
+  const snapshot = await Database.prototype.power.call(
+    { kingdom: { db } } as Database,
+    "synthetic",
+    now,
+  );
   expect(snapshot.profile?.uid).toBe("synthetic");
   expect(generalSkillPoints(snapshot.generals)).toEqual([[{ id: "600001", points: 2 }]]);
   expect(snapshot.equipment).toEqual([
@@ -139,4 +144,51 @@ test("alliance power reads follow the persisted membership and roll back on a la
   await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
   expect(failure.queries.at(-1)?.text).toBe("rollback");
   expect(failure.queries.some((query) => query.text === "commit")).toBe(false);
+});
+
+test("power readiness checks each required table without reading records or writing data", async () => {
+  const queries: { text: string; params: unknown[] }[] = [];
+  const client = {
+    query: async (query: { text: string }, params: unknown[]) => {
+      queries.push({ text: query.text, params });
+      return { rows: [] };
+    },
+  };
+  await checkPowerStore(drizzle(client as unknown as NodePgClient, { schema }));
+  const tables = queries.map((query) => query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1]);
+  expect(new Set(tables).size).toBe(18);
+  for (const table of [
+    "userprofile",
+    "playerinfo",
+    "user_general",
+    "user_army",
+    "user_wall",
+    "user_building",
+    "user_science",
+    "user_civilization_science",
+    "saga_tower_science",
+    "user_equip",
+    "t_hero",
+    "user_pet_dragon",
+    "user_knight_title",
+    "user_item",
+    "pic_upload_record",
+    "user_state",
+    "user_vip",
+    "alliance_science",
+  ])
+    expect(tables).toContain(table);
+  for (const query of queries) {
+    expect(query.text.startsWith("select ")).toBe(true);
+    expect(query.text).toContain(" limit $1");
+    expect(query.params).toEqual([0]);
+  }
+  const failure = {
+    query: async () => {
+      throw new Error("Synthetic missing table");
+    },
+  };
+  await expect(
+    checkPowerStore(drizzle(failure as unknown as NodePgClient, { schema })),
+  ).rejects.toThrow();
 });

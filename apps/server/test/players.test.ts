@@ -30,6 +30,7 @@ function game(
     },
     accounts: unused,
     configuration: unused,
+    power: unused,
     city: unused,
     world: unused,
   };

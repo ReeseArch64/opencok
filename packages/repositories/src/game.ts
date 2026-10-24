@@ -17,6 +17,7 @@ import type { ServerConfig } from "@opencok/contracts/server";
 import type { GameStore, CityState, LoginConfigurationState } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import { checkPlayerSummaryStore, loadPlayerSummaries } from "./players.ts";
+import { checkPowerStore, readPowerState } from "./power.ts";
 
 type GameRepositoryConfig = Pick<
   ServerConfig,
@@ -74,6 +75,7 @@ export class Database implements GameStore {
       await this.kingdom.db.select().from(table).limit(0);
     await this.databases.global.db.select().from(account_new).limit(0);
     await checkPlayerSummaryStore(this.kingdom.db);
+    await checkPowerStore(this.kingdom.db);
   }
   async health() {
     await Promise.all([
@@ -156,6 +158,9 @@ export class Database implements GameStore {
   }
   configuration(uid: string): Promise<LoginConfigurationState> {
     return readLoginConfiguration(this.kingdom.db, uid);
+  }
+  power(uid: string, now: number) {
+    return readPowerState(this.kingdom.db, uid, now);
   }
   playerSummaries(uids: string[], allServers: boolean) {
     return loadPlayerSummaries(this.databases, this.config.kingdomId, uids, allServers);

@@ -20,6 +20,30 @@ import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Database } from "./game.ts";
 
+export async function checkPowerStore(db: Database["kingdom"]["db"]) {
+  for (const table of [
+    userprofile,
+    playerinfo,
+    user_general,
+    user_army,
+    user_wall,
+    user_building,
+    user_science,
+    user_civilization_science,
+    saga_tower_science,
+    user_equip,
+    t_hero,
+    user_pet_dragon,
+    user_knight_title,
+    user_item,
+    pic_upload_record,
+    user_state,
+    user_vip,
+    alliance_science,
+  ])
+    await db.select().from(table).limit(0);
+}
+
 export function readPowerState(
   db: Database["kingdom"]["db"],
   uid: string,
