@@ -24,16 +24,17 @@ test("item switches retain exact realms, inclusive ranges and early matching bef
   expect(switchRealmEnabled("0", 0)).toBe(false);
 });
 
-test("version gates compare numeric components and reject malformed versions", () => {
+test("direct version gates compare Java integer components and expose malformed versions", () => {
   expect(versionAtLeast("12.06.0", "12.6.0")).toBe(true);
   expect(versionAtLeast("12.10.0", "12.9.99")).toBe(true);
   expect(versionAtLeast("13.0.0", "12.99.99")).toBe(true);
   expect(versionAtLeast("12.6.1", "12.6.0")).toBe(true);
   expect(versionAtLeast("12.6.0", "12.6.1")).toBe(false);
   expect(versionAtLeast("9.99.99", "12.0.0")).toBe(false);
-  for (const version of ["", "12.6", "12.6.0-beta", "12.x.0", "12.6.0.1", "9007199254740992.0.0"])
-    expect(versionAtLeast(version, "12.6.0")).toBe(false);
-  expect(versionAtLeast("12.6.0", "")).toBe(false);
+  for (const version of ["", "12.6", "12.6.0-beta", "12.x.0", "9007199254740992.0.0"])
+    expect(() => versionAtLeast(version, "12.6.0")).toThrow();
+  expect(() => versionAtLeast("12.6.0", "")).toThrow();
+  expect(versionAtLeast("12.6.0.1", "12.6.0")).toBe(true);
 });
 
 test("legacy rule dates use an explicit offset and reject calendar rollover", () => {

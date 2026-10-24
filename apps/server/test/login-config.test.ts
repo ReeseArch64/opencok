@@ -391,3 +391,27 @@ test("feature services receive the persisted player and server time rather than 
   const unavailable = await game.execute("synthetic", "login.other", input);
   expect(fields((unavailable.body.funcOn!.value as Value[])[0]).onOff?.value).toBe(false);
 });
+
+test("account version failures precede counter reads and noncanonical required versions reach the provider", async () => {
+  const catalog = rules();
+  const rule = { id: "function_on7", k5: "11.bad", k6: "2", k7: "3" };
+  catalog.items.set(rule.id, rule);
+  let reads = 0;
+  const game = new Game(store(configuration()), catalog, { kingdomId: 2 }, () => now, {
+    changeAccountCount: async () => {
+      reads++;
+      return 3n;
+    },
+  });
+  for (const version of ["11.bad", "12.6", "12.6.0.bad"]) {
+    rule.k5 = version;
+    await expect(
+      game.execute("synthetic", "login.other", { config: sfs.int(0) }),
+    ).rejects.toThrow();
+    expect(reads).toBe(0);
+  }
+  rule.k5 = ".１２..+6.-0.99";
+  const result = await game.execute("synthetic", "login.other", { config: sfs.int(0) });
+  expect(result.body.isVerifyChangeAccount).toEqual(sfs.bool(true));
+  expect(reads).toBe(1);
+});

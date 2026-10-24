@@ -66,14 +66,13 @@ export function restoredResourceBuilding(
 
 export function resourceOwnerRuleContext(
   snapshot: WorldResourceOwnerSnapshot,
-  context: Omit<RuleContext, "version" | "versionPolicy">,
+  context: Omit<RuleContext, "version">,
 ): RuleContext {
   return {
     kingdomId: context.kingdomId,
     now: context.now,
     testServer: context.testServer,
     utcOffsetMinutes: context.utcOffsetMinutes,
-    versionPolicy: "legacy-player",
     get version() {
       return text(snapshot.effects.profile.appVersion, 40) ?? "";
     },

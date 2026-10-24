@@ -41,22 +41,20 @@ test("feature ranges defer the upper bound until the lower comparison succeeds a
 });
 
 test("feature availability applies blank and version checks before parsing the selected realm", () => {
-  const legacy = { ...context, versionPolicy: "legacy-player" as const };
   expect(ruleAvailable({ version: "99.0.0", online: "bad" }, context)).toBe(false);
-  expect(ruleAvailable({ version: "99.0.0", online: "bad" }, legacy)).toBe(false);
   expect(() => ruleAvailable({ version: "1.0.0", online: "bad" }, context)).toThrow();
   expect(() =>
-    ruleAvailable({ version: "1.0.0", online: "bad" }, { ...legacy, version: "" }),
+    ruleAvailable({ version: "1.0.0", online: "bad" }, { ...context, version: "" }),
   ).toThrow();
-  expect(ruleAvailable({ version: "bad", online: "\u2000" }, legacy)).toBe(false);
-  expect(ruleAvailable({ version: "1.0.0", online: "+２;bad", test: "3" }, legacy)).toBe(true);
+  expect(ruleAvailable({ version: "bad", online: "\u2000" }, context)).toBe(false);
+  expect(ruleAvailable({ version: "1.0.0", online: "+２;bad", test: "3" }, context)).toBe(true);
   expect(
     ruleAvailable(
       { version: "1.0.0", online: "bad", test: "+２;bad" },
-      { ...legacy, testServer: true },
+      { ...context, testServer: true },
     ),
   ).toBe(true);
-  expect(ruleAvailable({ version: "1.0.0", online: "bad" }, { ...legacy, now: NaN })).toBe(false);
+  expect(ruleAvailable({ version: "1.0.0", online: "bad" }, { ...context, now: NaN })).toBe(false);
   const closed = {
     version: "1.0.0",
     online: "3",
