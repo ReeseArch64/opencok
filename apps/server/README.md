@@ -473,7 +473,30 @@ Eight synthetic unit cases exercise the actual controller and Drizzle adapter to
 including local/remote routing, lazy decoding, caller authorization, target gating,
 collation aliases, strict binary decoding and failures. They use fake query clients only.
 The focused tests pass; broad regression execution is deferred under the user's current
-parallel-work instruction. `celebrity.desc.save` and device/AVD behavior remain pending.
+parallel-work instruction. Device/AVD behavior remains pending.
+
+`celebrity.desc.save` now saves the authenticated celebrity's description through the
+actual loaded bad-word filter. Profiles whose `gmFlag` is not 11 acknowledge before
+reading the description or reaching the filter. Eligible requests lock/revalidate their
+owner, select the existing celebrity row using legacy UID equality, then decode the
+required String. The filter performs sequential Java-style replacement with two asterisks,
+including Unicode word boundaries with ASCII-only case folding, generated alternatives,
+anchors and greedy ASCII whitespace. While the shared word list is loading, it returns
+the original text; a later filtering error retains earlier replacements.
+
+Saving updates only the existing row's description or inserts the Java-trimmed owner UID.
+It uses the existing table and no upsert. Unrelated rows remain unchanged, and same-owner
+writes serialize. Blank or malformed UTF-16 text becomes a null blob; valid text retains
+the Java UTF-8 encoder's backing-array padding. The database blob limit remains 65,535
+bytes. Success uses the ordinary correlated acknowledgment with no notification.
+
+Replacement vectors and save tests were written before the user paused test generation
+and execution. The replacement primitive matched 4,071 synthetic Java 8 standard-library
+vectors before that pause. A preliminary save run found three incorrect acknowledgment
+expectations, which were corrected to the framework's `success: true` response. That final
+save suite has not been rerun, and no broad regression or service/database execution is
+claimed. The generated replacement grammar does not implement arbitrary reserved-name
+regex matching, so this command does not complete nickname mutation.
 
 Reserved-name configuration now participates in the word-filter reload. After the
 adjacent bad-word file has been read and appended, the server reads the global Redis
@@ -1268,6 +1291,107 @@ new match. Synthetic units inject Redis command results and inspect the script c
 Lua execution against Redis, real service availability and client rendering remain
 unverified in this phase.
 
+`act.score.rank` now exposes the realm's published score-activity board. The command
+checks the authenticated local profile, ban state and realm, then reads the existing
+`SCORE_ACT_RANK_<kingdomId>` list through the runtime cache provider. It ignores request
+selectors and returns `rank` as an SFS StringArray, preserving list order, duplicates,
+blank strings and opaque contents. It neither decodes board entries nor recomputes ranks.
+Correlation fields are retained and no pushes are emitted.
+
+The list read uses `LRANGE 0 -1`. A missing list produces the ordinary empty board;
+reached cache-command failures also return an empty board, retaining the reference
+list-reader fallback. An absent runtime provider remains an unsupported command.
+Malformed non-string entries, invalid UTF-16 strings and oversized responses reject
+rather than silently truncate. Maintained limits are 32,767 entries, 32,767 UTF-8 bytes
+per string and the existing encoded response/frame bounds including correlation.
+
+This is a read-only derived-cache query. The event publisher owns list replacement,
+invalidation and expiry; this reader adds no TTL, score writer, reward or lifecycle
+scheduler. The original realm-qualified key remains usable for an authorized restored
+board. `hero.self.rank` still requires actual activity/event state and rank maps, including
+cross-origin routing; it is not enabled by treating missing state as an empty activity.
+Other event and cross-realm ranking families remain incomplete.
+
+Code review and storage/controllers/server type checks pass for this slice. No new tests
+or fixtures were generated and no tests were executed, following the user's latest
+instruction to prioritize migration. Unit and runtime validation are deferred. No real
+cache/database/services, integration tests or client/ADB were used; no schema, dependency
+or CI workflow changed. The incomplete event-ranking family receives no completed-group
+credit from this unverified command alone.
+
+`global.celebrities.rank` reads the existing published global boards for the local
+realm. Before decoding `rankType`, it checks the global `server_info` row: realm IDs
+above 999999 and types other than 0, 1, 6 or 23 produce the ordinary acknowledgment.
+A missing row or reached SQL error also disables the query; dependency and malformed-row
+errors reject. This uses a fresh metadata read in place of the Java process-local type
+cache, so metadata changes become visible immediately. The profile identity, realm and
+ban checks run after decoding the integer selector. Unknown integer types acknowledge
+without reading a board.
+
+| `rankType` | Realm-qualified Redis list prefix | Inclusive range |
+| ---------- | --------------------------------- | --------------- |
+| 0          | `global_kill_ranking`             | 0–150           |
+| 1, 5       | `global_power_rank`               | 0–150           |
+| 2          | `global_train_rank`               | 0–150           |
+| 3          | `global_attack_wins_ranking`      | 0–150           |
+| 4          | `global_defence_wins_ranking`     | 0–29            |
+| 6          | `global_honor_point_rank`         | 0–150           |
+| 11         | `global_military_point_rank`      | 0–150           |
+
+Each key appends `_<kingdomId>`. Ordered JSON objects become the `rankMap` SFSArray
+through the existing legacy JSON decoder; duplicates remain and no scores or fields are
+recomputed. Empty lists produce an empty array. Cache failures, malformed JSON and data
+outside the maintained decoder/frame bounds reject instead of pretending the board is
+empty. The raw JSON budget is 4 MiB across the selected entries, and the encoded response
+including correlation remains bounded by the existing frame limit. Decoder numeric,
+nesting and collection limits also apply. Type 7 has no handler mapping in the reference.
+The query adds no score publisher, invalidation, TTL, settlement or cross-realm routing.
+
+Storage, repository, controller and server type checks plus source review cover this
+slice. No new tests or fixtures were generated and no tests, real services or client/ADB
+were run. Behavioral and runtime verification remain deferred; this command does not
+complete the cross-realm ranking family. See [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
+
+`dragon.battle.rank` reads published global team rankings after checking the local
+profile, realm and ban state. `index_limit` is a string of `start|limit` ranges separated
+by semicolons. Empty input or 35 or more retained segments produces an acknowledgment;
+trailing empty segments are discarded as in Java. Other malformed ranges reject. Each
+limit has an upper cap of 200, while negative starts/limits, zero limits and signed
+32-bit end/index overflow retain the reference Redis range semantics. Extra pipe fields
+are ignored. The reader uses `LRANGE dragon_battle_rank_data_key start end` sequentially
+and preserves range order and duplicate rows. Negative/zero limits may select more than
+200 entries; the cap is not a minimum or a returned-count promise.
+
+If the authenticated profile has a nonempty alliance ID, the reader then asks
+`ZREVRANK dragon_battle_rank_key <allianceId>` and appends the corresponding `LINDEX`
+team even when already present in the requested ranges. Spaces in alliance IDs are not
+trimmed. Missing lists, unavailable range reads and absent/unavailable self positions
+are skipped using the reference read fallback; malformed returned values reject.
+Separate reads retain the reference's non-atomic snapshot behavior during board updates.
+
+Public TeamInfo fields become `rank` objects with `type: 0`, both `teamId` and
+`allianceId`, team names, state, score, realm, membership, combat counts, exact signed
+64-bit `fightPower`, icon and abbreviation. Optional strings default to empty and
+missing/null primitive counters default to zero. `wins` is an SFS Int for zero matches
+and a Double otherwise; `wins2` truncates the percentage capped at 100 with Java's
+signed-integer lower saturation. `rankNum` is the requested start plus row offset plus
+one, or the appended reverse rank plus one, with signed 32-bit wrapping.
+
+The maintained decoder accepts canonical JSON objects from the publisher and preserves
+integer literals without floating-point rounding. Out-of-range integers, malformed
+records and absent team IDs reject. Lenient Gson-only syntax and noncanonical numeric
+coercions are not promised. Bounds are 65,535 bytes per stored record, 4 MiB total raw
+JSON, 32,767 returned rows and the existing encoded frame/string bounds including
+correlation. Oversized reads reject without truncation. The query publishes no scores,
+creates no matches, clears no boards and adds no TTL. Board import, score production,
+matchmaking and combat remain separate work.
+
+This slice has source review, package/server type checks and scoped lint/format checks.
+No tests or fixtures were generated and no tests, database/cache/services, client/ADB or
+CI fixes were performed. Runtime and behavioral validation remain deferred in
+[issue #215](https://github.com/ReeseArch64/opencok/issues/215); the cross-realm ranking
+family still requires `ctf.get.rank` and broader verification.
+
 ## Mailbox category status
 
 `mail.category.status`, tracked in [issue #64](https://github.com/ReeseArch64/opencok/issues/64),
@@ -1491,6 +1615,59 @@ metadata bounds, and rollback at each cleanup stage. They do not exercise a real
 database, concurrent writers, client or ADB. `mail.delete.batch`, category/label
 deletion, chat-conversation deletion, content edge cases and synchronization readers
 remain separate unfinished portions of topic 4.
+
+## Category and type mailbox deletion
+
+`mail.delete.batch` now accepts category-only requests: `uids` must be absent, null,
+Java-blank or contain only commas. Optional String `types` uses comma-separated Java
+Int labels, preserving raw spellings as response keys. Labels 0–5 select respectively
+personal/system (stored type below 13 or above 16), saved-category types 14–16, studio
+13, fight types 6/7/8/9/30, moderator types 23/24 and boss reward 32. Other signed labels
+select types 13–16. These are the reference deletion selectors, not the listing/status
+category mappings. Repeated labels and numeric aliases retain their separate raw keys.
+
+The reply contains `RetObj`, with Int fields `<raw label>` for unread messages whose
+`rewardStatus` is exactly zero, and `total<raw label>` for all messages whose
+`rewardStatus` is exactly zero. Counts are read before category deletion and retain
+signed Java Int wrapping. SQL-null status restores to the Java model's primitive zero
+and therefore counts as unread. These counters ignore saved flags and are not a count
+of deleted mail.
+Unclaimed saved messages count; already-claimed saved messages do not. The bounded raw
+request permits at most 1,000 labels; at most seven distinct SQL selectors are read.
+No mailbox contents are loaded and matching mailbox size is not truncated.
+
+The owner profile is locked and its realm/ban state revalidated. The complete correlated
+response must encode before any deletion. Matching owned auxiliary content is deleted
+for every selected primary mail, including primary messages retained because their
+saved flag or reward status prevents deletion; this unusual distinction follows the
+reference category path. Explicitly foreign auxiliary ownership is preserved. Primary
+mail is deleted only when `saveFlag = 0` and `rewardStatus != 0`. Both statements commit
+atomically. Category deletion does not change groups, synchronization markers, invitation
+records, rewards or chat state, matching the reference branch. Missing/empty categories
+still authorize the owner and return an empty `RetObj`.
+
+`chatMail.delete` now accepts scalar `type` or an empty selection. `mod` is validated
+when present. The ordinary inverse client-type mapping applies. It deletes only owned
+mail of that type with `rewardStatus != 0`, regardless of the saved flag. Resource type
+5, trade type 10 and monster type 18 additionally remove the empty-index group 200, 400
+or 300 respectively, even if unclaimed messages remain. This path leaves auxiliary
+content, markers and invitation state unchanged, and returns the correlated success
+acknowledgment without pushes. The transaction and reply are validated before commit.
+
+Nonempty explicit IDs in `mail.delete.batch`, sender-selected `chatMail.delete` and
+`chatMail.delete.batch` remain unsupported before writes. Explicit-ID batches have
+different whole-group, invitation and chat effects; they must not be routed through
+ordinary deletion as an approximation. Sender deletion requires the still-missing
+private-chat deletion consumer. These implementations advance the original mailbox
+scope but do not complete the deletion family or topic 4.
+
+Nine synthetic units cover parser/selector boundaries, exact response keys, owner
+scoping, SQL predicates, no-op and error behavior, statement order, type groups and
+pre-write rejection of unsupported scopes. The focused deletion/conversation-read
+selection passed 14 units and 169 assertions before the final SQL-null status predicate
+correction. That final predicate/assertion edit was reviewed but not rerun; affected
+types, lint and formatting passed before it. Broad regression remains deferred under
+the maintainer's request to prioritize implementation. No new schema, dependency, configuration, live service or client test.
 
 ## Conversation and type mailbox saving
 
@@ -2948,9 +3125,10 @@ rechecks the returned owner/realm/ban snapshot. Runtime repository dispatch inde
 rejects plans containing chat effects, so it cannot quietly drop an intent. Missing
 adapters, malformed consumed fields and storage failures do not return success. Empty
 plans still authorize the owner. No new schema, worker, dependency or configuration is
-introduced. Five new command units are written for mapping/order, deferred chat cases,
-authorization, encoding and failures; their execution and type/lint checks are deferred
-under the maintainer's current request to prioritize implementation.
+introduced. Five command units cover mapping/order, deferred chat cases, authorization,
+encoding and failures. They pass in the focused 14-unit deletion/conversation-read
+selection, with affected types, lint and formatting also passing. Broad regression
+remains deferred under the maintainer's request to prioritize implementation.
 
 ## Mailbox content reads
 

@@ -2069,3 +2069,175 @@ parity. Required follow-ups and limitations remain in the linked source report.
 The nonempty evidence commit retains `[skip ci]`; workflows and required checks
 are unchanged, integration/client execution is deferred and merge readiness is
 not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 115: connect-mail-category-deletion
+
+Source implementation: `fcca2a0`. Tracking: #199.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19166854).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 116: connect-celebrity-description-save
+
+Source implementation: `4213ea7`. Tracking: #146.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19166813).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 117: connect-event-score-ranking
+
+Source implementation: `3f65481`. Tracking: #177.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19166829).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 118: connect-global-celebrity-ranking
+
+Source implementation: `7a55001`. Tracking: #205.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19166922).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 119: connect-dragon-battle-ranking
+
+Source implementation: `820ca13`. Tracking: #215.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19166939).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Parallel merge readiness for PR #220
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: none.
+
+The integration target remains the original feature branch
+`feat/review-connect-global-celebrity-ranking`. The enclosing stack will be integrated into
+develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+The first full server run found two integration mismatches. The existing category-deletion
+assertion now matches Drizzle's unqualified single-table status predicate while retaining
+ownership, category and reward checks. Missing conversation-read adapters reject before
+clock capture; supported adapters retain request parsing and chat-effect validation.
+The 19 affected mailbox tests, server types, lint and formatting pass locally. Full CI
+must pass again on the fix commit before merge.
+
+The complete catalog and nickname resource contracts also exposed outdated integration
+fixtures. Server and Compose fixtures now serialize the existing synthetic data-config
+catalog into its declared group. Compose mounts a generated temporary nickname word file,
+without reading ignored reference inputs. Production validation and mounts are unchanged.
+The two-realm server integration passes 63 assertions; all 14 disposable Compose checks
+pass 122 assertions locally, including state recovery. Full final-head CI remains required.
+
+## Parallel merge readiness for PR #216
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #220.
+
+The integration target remains the original feature branch
+`feat/review-connect-event-score-ranking`. The enclosing stack will be integrated into develop
+through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+## Parallel merge readiness for PR #214
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #216, #220.
+
+The integration target remains the original feature branch
+`feat/review-connect-celebrity-description-save`. The enclosing stack will be integrated into
+develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
+
+## Parallel merge readiness for PR #213
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #214, #216, #220.
+
+The integration target remains the original feature branch
+`feat/review-connect-mail-category-deletion`. The enclosing stack will be integrated into
+develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.

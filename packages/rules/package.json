@@ -44,6 +44,7 @@
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./mail": "./src/mail.ts",
+    "./mail-batch-delete": "./src/mail-batch-delete.ts",
     "./mail-groups": "./src/mail-groups.ts",
     "./avatar": "./src/avatar.ts",
     "./mail-conversation-read": "./src/mail-conversation-read.ts",
@@ -66,7 +67,8 @@
     "./kingdom-skills": "./src/kingdom-skills.ts",
     "./java-list-sort": "./src/java-list-sort.ts",
     "./java-calendar-date": "./src/java-calendar-date.ts",
-    "./java-integer": "./src/java-integer.ts"
+    "./java-integer": "./src/java-integer.ts",
+    "./dragon-ranking": "./src/dragon-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
