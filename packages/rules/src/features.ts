@@ -1,7 +1,14 @@
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import type { Rules, Rule } from "./game.ts";
-import { realmEnabled, ruleAvailable, versionAtLeast, type RuleContext } from "./availability.ts";
+import {
+  realmEnabled,
+  featureRealmEnabled,
+  ruleAvailable,
+  versionAtLeast,
+  type RuleContext,
+} from "./availability.ts";
+import { mailBlank } from "./mail.ts";
 
 export interface FeatureContext extends RuleContext {
   uid: string;
@@ -47,8 +54,9 @@ export function featureAnnouncementEnabled(
     );
   }
   if (
-    !rule.version?.trim() ||
-    !realmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
+    mailBlank(rule.version) ||
+    mailBlank(context.testServer ? rule.test : rule.online) ||
+    !featureRealmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
     return false;
   switch (key) {
