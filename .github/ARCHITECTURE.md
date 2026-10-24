@@ -643,6 +643,22 @@ it are not serialized. The helper is not yet connected to a mutation or durable 
 Authoritative payment/recovery and downstream effects remain required before enabling
 the command. Existing PostgreSQL authority under ADR-0002 is unchanged; no new service,
 Redis key, table or migration is introduced by the guard.
+The global nickname writer now composes that guard with an explicit preparation
+callback and the account/mapping transaction. Preparation runs only after confirmed
+availability, before the legacy account-existence read. Owner UID and mapping type
+selection use the legacy equality key; only the selected account row is locked, not
+all regex candidates. Ambiguous canonical account IDs reject the operation. The writer
+updates only the account display name, deletes the owner's name mappings by exact
+stored primary keys in bounded batches and inserts the replacement with schema defaults.
+Unrelated mappings and account metadata remain unchanged. Confirmed missing-account or
+account SQL-read failures produce the original missing-account game error; write-stage
+failures produce the original network game error only after confirmed rollback. Lost
+commit acknowledgment or failed rollback remains an uncertain dependency failure.
+The writer returns the preparation result only after global commit. The preparation
+callback is not yet an owned payment repository, and the global transaction cannot roll
+back a committed realm charge. Durable operation receipts/recovery, local profile state
+and effects remain required. No rename handler or new persistence schema is enabled by
+this component.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
