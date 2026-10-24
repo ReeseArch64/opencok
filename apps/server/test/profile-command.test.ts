@@ -81,6 +81,7 @@ function fixture(remote = false) {
       calls.push(["observer", uid]);
       return observer;
     },
+    mailStatus: unused,
     allianceRanking: unused,
     playerRanking: unused,
     publicProfile: async (uid, allianceId) => {

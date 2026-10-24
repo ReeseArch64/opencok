@@ -21,7 +21,8 @@
     "./rewards": "./src/rewards.ts",
     "./ranking": "./src/ranking.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
-    "./expedition-ranking": "./src/expedition-ranking.ts"
+    "./expedition-ranking": "./src/expedition-ranking.ts",
+    "./mail": "./src/mail.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

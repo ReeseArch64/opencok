@@ -18,6 +18,7 @@ export class GameError extends Error {
       | "reconnect"
       | "reward_preview"
       | "ranking"
+      | "mail"
       | "power_rule"
       | "power_effect"
       | "power_state"
