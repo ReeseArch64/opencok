@@ -54,6 +54,13 @@ export interface MailCategoryDeleteSnapshot {
   profile: Row | undefined;
 }
 
+export interface MailConversationDeleteQuery {
+  now: number;
+  senders: readonly (string | null)[];
+  moderation: boolean;
+  bottle: boolean;
+}
+
 export interface MailTypeDeleteQuery {
   type?: number;
   now: number;
