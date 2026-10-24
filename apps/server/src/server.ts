@@ -1,3 +1,4 @@
+import { createChatMailboxPublisher } from "@opencok/connection/chat-mailbox";
 import { GameController } from "@opencok/controllers/game";
 import { WorldController } from "@opencok/controllers/world";
 import {
@@ -100,6 +101,28 @@ export const RealmDependenciesLive = Layer.effect(
         ),
       (relay) => relay.close(),
     );
+    if (config.mailChat) {
+      const publish = createChatMailboxPublisher({
+        ...config.mailChat,
+        timeoutMs: config.timeoutMs,
+      });
+      yield* acquireResource(
+        "realm.mail-chat-relay",
+        async () =>
+          startMailGiftRelay(
+            async () => {
+              let delivered = 0;
+              while (delivered < 50 && (await db.relayMailChat(publish))) delivered++;
+              return delivered;
+            },
+            () =>
+              console.warn(
+                JSON.stringify({ event: "mail_chat_relay_failed", kingdom: config.kingdomId }),
+              ),
+          ),
+        (relay) => relay.close(),
+      );
+    }
     yield* fromPromise("realm.cache", () => cache.command("PING")).pipe(Effect.uninterruptible);
     yield* fromPromise("realm.coordination.start", () => coordination.start()).pipe(
       Effect.uninterruptible,
@@ -187,6 +210,7 @@ export const RealmDependenciesLive = Layer.effect(
                   readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect),
               }
             : undefined,
+          mailChatEnabled: !!config.mailChat,
           chatSession: config.chatSession
             ? createRealmChatSessionIssuer({
                 ...config.chatSession,
@@ -213,6 +237,8 @@ export const RealmDependenciesLive = Layer.effect(
           emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
           changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
           lastSystemMail: (uid) => cache.lastSystemMail(uid),
+          systemMailPage: (uid, ids, count, time, inspect) =>
+            cache.systemMailPage(uid, ids, count, time, inspect),
           playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
         }),
       ),

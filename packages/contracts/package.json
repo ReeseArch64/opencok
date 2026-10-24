@@ -72,7 +72,8 @@
     "./responses/alliance-ranking": "./src/responses/alliance-ranking.ts",
     "./responses/configuration": "./src/responses/configuration.ts",
     "./responses/battle-ranking": "./src/responses/battle-ranking.ts",
-    "./responses/flower-ranking": "./src/responses/flower-ranking.ts"
+    "./responses/flower-ranking": "./src/responses/flower-ranking.ts",
+    "./chat-mailbox": "./src/chat-mailbox.ts"
   },
   "dependencies": {}
 }

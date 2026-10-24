@@ -14,6 +14,10 @@ export async function systemMailProjection(
   count: number,
   time: bigint,
   envelope: Fields,
+  page?: (
+    ids: readonly string[],
+    inspect: (indices: readonly number[], more: boolean) => void,
+  ) => Promise<void>,
 ): Promise<Fields> {
   validateMailWindow(owner, entries);
   if (
@@ -91,6 +95,35 @@ export async function systemMailProjection(
     message.body.picVer = sfs.string(sender.picVer ?? "0");
   }
   messages.sort((left, right) => (left.time < right.time ? -1 : left.time > right.time ? 1 : 0));
+  if (page) {
+    let result: Fields | undefined;
+    await page(
+      messages.map((message) => message.uid),
+      (indices, more) => {
+        if (
+          indices.length > messages.length ||
+          new Set(indices).size !== indices.length ||
+          indices.some(
+            (index) => !Number.isInteger(index) || index < 0 || index >= messages.length,
+          ) ||
+          typeof more !== "boolean"
+        )
+          throw new Error("Invalid system mail page");
+        const body: Fields = {
+          id: sfs.string("0"),
+          type: sfs.int(4),
+          firstSeqId: sfs.string("-1"),
+          lastSeqId: sfs.string("-1"),
+          more: sfs.bool(more),
+          msg: sfs.array(indices.map((index) => sfs.object(messages[index]!.body))),
+        };
+        encode(extension("chat.get.system.mails", { ...body, ...envelope }));
+        result = body;
+      },
+    );
+    if (!result) throw new Error("Missing system mail page");
+    return result;
+  }
   const selected: typeof messages = [];
   let lastUid = "0";
   if (messages.length > count) {

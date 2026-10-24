@@ -1,3 +1,4 @@
+import type { ChatMailboxStore } from "./chat-mailbox.ts";
 import type { ChatAvatarProfileStore } from "./chat-avatar-profile.ts";
 import type { ChatNicknameStore } from "./chat-nickname.ts";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
@@ -109,6 +110,7 @@ export function isSafeInteger(value: unknown): value is number {
 }
 
 export interface ChatRepository {
+  mailbox?: ChatMailboxStore;
   profiles: ChatAvatarProfileStore;
   nicknames: ChatNicknameStore;
   sessions: SessionStore;

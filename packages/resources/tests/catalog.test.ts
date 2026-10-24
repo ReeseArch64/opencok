@@ -44,6 +44,7 @@ test("records without IDs remain in the full catalog and are excluded from ordin
   const catalog = createGameplayCatalog(parseGameplayCatalog(xml).ordered);
   expect((catalog.unordered.database as { ItemSpec: unknown[] }).ItemSpec).toHaveLength(3);
   expect([...parseRules(catalog, "status")]).toEqual([["valid", { id: "valid", value: "007" }]]);
+  expect(parseRules('<database><ItemSpec value="ignored"/></database>', "goods").size).toBe(0);
 });
 
 test("bundled rules load for both realms and isolate mutable indexes", async () => {

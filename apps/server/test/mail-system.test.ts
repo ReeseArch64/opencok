@@ -57,6 +57,7 @@ function fixture() {
     services,
   );
   return {
+    game,
     entries,
     queries,
     senderIds,
@@ -249,4 +250,54 @@ test("system-mail cache cursors are realm scoped, validated and read only", asyn
     throw new Error("Synthetic Redis outage");
   };
   await expect(cache.lastSystemMail("self")).rejects.toThrow();
+});
+
+test("V1 system sync pre-encodes selected pages and exposes no V2 cursor", async () => {
+  const f = fixture();
+  f.entries.push(mailListEntry({ uid: "b", createTime: 2000n }));
+  let committed = 0;
+  f.services.systemMailPage = async (uid, ids, count, time, inspect) => {
+    expect([uid, ids, count, time]).toEqual(["self", ["a", "b"], 1, 9007199254740993n]);
+    inspect([1], true);
+    committed++;
+  };
+  const params = {
+    clientseq: sfs.string("anchor"),
+    count: sfs.int(1),
+    time: sfs.string("9007199254740993"),
+    _cok_: sfs.string("request"),
+  };
+  const result = await f.game.execute("self", "chat.get.system.mails", params);
+  expect(ids(result.body)).toEqual(["b"]);
+  expect(result.body.more).toEqual(sfs.bool(true));
+  expect(result.body.lastUid).toBeUndefined();
+  expect(result.body._cok_).toEqual(sfs.string("request"));
+  expect(committed).toBe(1);
+  await expect(
+    f.game.execute("self", "chat.get.system.mails", {
+      ...params,
+      _cok_: sfs.string("x".repeat(32768)),
+    }),
+  ).rejects.toThrow();
+  expect(committed).toBe(1);
+  f.profile({ uid: "foreign", serverId: 1 });
+  await expect(f.game.execute("self", "chat.get.system.mails", params)).rejects.toThrow();
+  expect(committed).toBe(1);
+});
+
+test("V1 cache detects contention, invalid metadata and poisoned selections without unchecked writes", async () => {
+  const cache = new Cache({ redisUrl: "redis://unused", timeoutMs: 100, kingdomId: 1 });
+  let writes = 0;
+  cache.command = async (name) => {
+    if (name === "HMGET") return [null, null];
+    writes++;
+    return 0;
+  };
+  await expect(cache.systemMailPage("self", ["a"], 1, 1n, () => {})).rejects.toThrow("contention");
+  expect(writes).toBe(5);
+  for (const value of [["a:b"], ["a", "a"], ["\0"], ["a".repeat(41)]])
+    await expect(cache.systemMailPage("self", value, 1, 1n, () => {})).rejects.toThrow();
+  expect(writes).toBe(5);
+  cache.command = async () => [7, null];
+  await expect(cache.systemMailPage("self", ["a"], 1, 1n, () => {})).rejects.toThrow();
 });

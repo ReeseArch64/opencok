@@ -117,7 +117,7 @@ function indexRules(records: Rule[], name: string): Map<string, Rule> {
       throw new Error(`Invalid gameplay resource ID: ${name}`);
     map.set(item.id, item);
   }
-  if (!map.size) throw new Error(`Invalid gameplay resource ID: ${name}`);
+  if (!map.size && name !== "goods") throw new Error(`Invalid gameplay resource ID: ${name}`);
   return map;
 }
 

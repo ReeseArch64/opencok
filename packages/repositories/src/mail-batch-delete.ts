@@ -1,3 +1,4 @@
+import { enqueueMailChat } from "./mail-chat-intents.ts";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { mail_contents } from "@opencok/drizzle/schema/opencok_kingdom/mail_contents";
 import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
@@ -85,6 +86,7 @@ async function deleteExplicit(
   owner: string,
   query: MailCategoryDeleteQuery,
   invitations: MailBatchInvitationPlanner | undefined,
+  chatEnabled: boolean,
 ) {
   if (!query.ids?.length) return;
   if (typeof invitations !== "function") throw new Error("Missing invitation deletion planner");
@@ -121,8 +123,44 @@ async function deleteExplicit(
     throw new Error("Mailbox deletion contents exceed limit");
   const affected = selected.filter((entry) => entry.rewardStatus !== 0);
   const chatTypes = new Set([20, 21, 22, 23, 24, 37, 38, 39, 40, 45, 46]);
-  if (affected.some((entry) => chatTypes.has(entry.type)))
-    throw new GameError(errors.unsupported, "mail");
+  const chats = affected.filter((entry) => chatTypes.has(entry.type));
+  if (chats.length) {
+    if (!chatEnabled) throw new GameError(errors.unsupported, "mail");
+    const moderator = chats.some((entry) => [23, 24, 39, 40].includes(entry.type));
+    const personal = chats.some((entry) => ![23, 24, 39, 40].includes(entry.type));
+    const types = moderator && personal ? [1, 2, 20] : moderator ? [2] : [1, 20];
+    const senders = [
+      ...new Set(chats.map((entry) => (entry.fromUser === null ? "null" : entry.fromUser))),
+    ];
+    await enqueueMailChat(
+      tx,
+      owner,
+      query.now,
+      senders.map((others) => ({ action: "delete", others, types })),
+    );
+    const selections = new Map(
+      chats
+        .filter((entry) => [20, 21, 22, 23, 24, 39, 40].includes(entry.type))
+        .map((entry) => [
+          JSON.stringify([entry.fromUser, [23, 24, 39, 40].includes(entry.type)]),
+          entry,
+        ]),
+    );
+    for (const entry of selections.values()) {
+      const types = [23, 24, 39, 40].includes(entry.type) ? [23, 24] : [20, 21, 22];
+      await tx
+        .delete(mail)
+        .where(
+          and(
+            eq(mail.toUser, owner),
+            entry.fromUser === null
+              ? sql`${mail.fromUser} = ${null}`
+              : eq(mail.fromUser, entry.fromUser),
+            inArray(mail.type, types),
+          ),
+        );
+    }
+  }
   const invitationIds = affected.filter((entry) => entry.type === 26).map((entry) => entry.uid);
   const invitationEntries = invitationIds.length
     ? await tx
@@ -175,7 +213,9 @@ async function deleteExplicit(
       .where(
         and(eq(mail.toUser, owner), inArray(mail.type, expandedTypes), ne(mail.rewardStatus, 0)),
       );
-  const grouped = new Set([2, 5, 10, 11, 12, 17, 18, 25, 26, 27, 28, 29, 33, 34]);
+  const grouped = new Set([
+    2, 5, 10, 11, 12, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 33, 34, 39, 40,
+  ]);
   const pointers = affected.filter((entry) => grouped.has(entry.type));
   for (let offset = 0; offset < pointers.length; offset += 200)
     await tx
@@ -216,6 +256,7 @@ export function deleteMailCategories(
   input: MailCategoryDeleteQuery,
   inspect: MailCategoryDeleteInspector,
   invitations?: MailBatchInvitationPlanner,
+  chatEnabled = false,
 ): Promise<MailCategoryDeleteSnapshot> {
   identity(owner, kingdomId, input.now);
   if (
@@ -248,7 +289,7 @@ export function deleteMailCategories(
     async (tx) => {
       const { profile, authorized } = await owned(tx, owner, kingdomId, query.now);
       if (!authorized) return { profile };
-      await deleteExplicit(tx, owner, query, invitations);
+      await deleteExplicit(tx, owner, query, invitations, chatEnabled);
       const counts = new Map<number, { total: number; unread: number }>();
       for (const key of new Set(query.labels.map((label) => categoryKey(label.category)))) {
         const [row] = await tx

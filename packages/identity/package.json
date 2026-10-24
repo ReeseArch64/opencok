@@ -16,7 +16,8 @@
     "./chat-rooms": "./src/chat-rooms.ts",
     "./avatar": "./src/avatar.ts",
     "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
-    "./chat-nickname": "./src/chat-nickname.ts"
+    "./chat-nickname": "./src/chat-nickname.ts",
+    "./chat-mailbox": "./src/chat-mailbox.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

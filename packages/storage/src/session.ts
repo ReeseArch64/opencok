@@ -1,3 +1,4 @@
+import { selectSystemMailPage } from "./mail-system.ts";
 import { loadBattleFightRanking, loadPlayoffRanking } from "./battle-ranking.ts";
 import { loadMilitaryRanking } from "./military-ranking.ts";
 import { loadFlowerRanking } from "./flower-ranking.ts";
@@ -191,6 +192,23 @@ export class Cache {
       this.config.kingdomId,
       uid,
       updatedAt,
+    );
+  }
+  systemMailPage(
+    uid: string,
+    ids: readonly string[],
+    count: number,
+    time: bigint,
+    inspect: (indices: readonly number[], more: boolean) => void,
+  ): Promise<void> {
+    return selectSystemMailPage(
+      (command, ...args) => this.command(command, ...args),
+      this.config.kingdomId,
+      uid,
+      ids,
+      count,
+      time,
+      inspect,
     );
   }
   async lastSystemMail(uid: string): Promise<string | null> {

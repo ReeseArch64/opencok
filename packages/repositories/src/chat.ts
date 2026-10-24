@@ -1,3 +1,6 @@
+import { createChatMailboxStore } from "./chat-mailbox.ts";
+import { chat_mailbox_message } from "@opencok/drizzle/schema/opencok_chat/chat_mailbox_message";
+import { chat_mailbox_receipt } from "@opencok/drizzle/schema/opencok_chat/chat_mailbox_receipt";
 import { createChatAvatarProfileStore } from "./chat-avatar-profile.ts";
 import { createChatNicknameStore } from "./chat-nickname.ts";
 import { chat_avatar_profile } from "@opencok/drizzle/schema/opencok_chat/chat_avatar_profile";
@@ -64,6 +67,7 @@ export function createChatRepository(config: {
   const db = databases.global.db;
   const now = () => utc(config.now?.() ?? new Date());
   const repository: ChatRepository = {
+    mailbox: createChatMailboxStore(db),
     profiles: createChatAvatarProfileStore(db),
     nicknames: createChatNicknameStore(db),
     sessions: {
@@ -218,6 +222,8 @@ export function createChatRepository(config: {
     async health() {
       await db.select().from(nickname_change_receipt).limit(0);
       await db.select().from(chat_avatar_profile).limit(0);
+      await db.select().from(chat_mailbox_message).limit(0);
+      await db.select().from(chat_mailbox_receipt).limit(0);
       await db.select().from(chat_session).limit(0);
       await db.select().from(chat_message).limit(0);
       await db.select({ id: account_new.gameUid }).from(account_new).limit(0);

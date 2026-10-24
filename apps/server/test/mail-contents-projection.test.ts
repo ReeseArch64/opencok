@@ -204,3 +204,18 @@ test("mail detail rejects transport-envelope depth overflow before returning a r
     ProtocolError,
   );
 });
+
+test("auxiliary content preserves Java trim and scout fallback without treating missing storage as corruption", () => {
+  const plain = result([
+    { ...entry(2, "\u0000 ExTrA\n"), extra: Buffer.from("\u0000\t\u00a0text\u00a0\n") },
+  ])[0]!;
+  expect(plain.contents).toEqual(sfs.string("\u00a0text\u00a0"));
+  const scout = result([{ ...entry(8, "extra"), extra: Buffer.from("plain\\nscout") }])[0]!;
+  expect(scout.contents).toEqual(sfs.string("plain\nscout"));
+  expect(
+    mailContentsProjection([{ ...entry(5, "extra"), extra: Buffer.from([0xc3, 0x28]) }]).invalidIds,
+  ).toEqual(["message"]);
+  expect(() =>
+    mailContentsProjection([entry(5, "broken", "corrupt"), entry(5, "extra", "missing")]),
+  ).toThrow("Missing persisted mail contents");
+});

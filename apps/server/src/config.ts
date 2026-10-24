@@ -14,6 +14,9 @@ export const config = Effect.gen(function* () {
     avatarFiles: settings.GAME_FILES_URL
       ? { origin: settings.GAME_FILES_URL, keyFile: settings.FILES_SIGNING_KEY_FILE! }
       : undefined,
+    mailChat: settings.GAME_MAIL_CHAT_URL
+      ? { url: settings.GAME_MAIL_CHAT_URL, signingSecret: settings.CHAT_SIGNING_SECRET! }
+      : undefined,
     chatSession: settings.GAME_CHAT_SESSION_URL
       ? {
           url: settings.GAME_CHAT_SESSION_URL,
