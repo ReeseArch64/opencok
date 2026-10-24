@@ -269,6 +269,7 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
     },
     playerSummaries: unused,
     configuration: unused,
+    power: unused,
     accounts: unused,
     city: unused,
     world: unused,
