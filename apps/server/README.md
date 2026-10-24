@@ -111,8 +111,9 @@ types. XML values remain strings inside objects, while the documented integer an
 long fields are checked before serialization. Long scores retain signed 64-bit
 precision. Optional `general_sale.xml`, `pay_servercontrol.xml` and `kingdomskill.xml`
 provide sale limits, the `69008` control record and ordered skill-tab metadata.
-Unrelated item records are not exposed. Missing optional records remain omitted;
-missing sale catalogs produce an empty `general_buy` object.
+Unrelated item records are not exposed. Missing optional records follow their individual
+contracts; missing sale catalogs produce an empty `general_buy` object. Missing external
+`w_thedoor` and `69008` entries produce empty objects, as their legacy item getters do.
 
 The item loader now retains the final `data_config` group independently of the global
 item ID index. Duplicate IDs are replaced within each view; a later group with the
@@ -136,10 +137,29 @@ reference does not emit them. `world_fire1` and `cityDefInterval` remain present
 
 Seven added unit tests cover group/global collisions, repeated groups, missing groups,
 root-versus-group precedence, null/blank IDs, direct element attributes, DTO source
-selection and projection aliases. Required-record failure parity, numeric scalar edge
-cases and general-sale restoration remain incomplete; sparse catalogs can still omit
-fields that the reference requires. These are outstanding topic 1 work, not a claim
-that the configuration contract is complete.
+selection and projection aliases. General-sale record restoration and the broader
+configuration completion audit remain outstanding topic 1 work.
+
+Required data-config records and scalar fields now reject incomplete catalogs instead
+of emitting partial metadata. The normal-world synthetic contract exercises 200
+required records, including the separate global overlord lookup, and 53 required scalar
+or boss attributes. Empty plain objects remain valid when their projection requires no
+attributes. The selected normal/world-cup army, score and scene records are mandatory;
+the unselected alternative is not consumed. Quest/chat, scout and service-term text
+fields are required only after their reference gates pass. Optional follower/lord-tip
+records distinguish absent/empty maps from nonempty ID-only records, while a nonempty
+loading-show record requires its scalar. Optional quest initial level remains conditional
+on field presence. Reached errors reject the command without a partial response or
+player mutation.
+
+Configuration Int and Long scalars now share the bounded Java decimal parser, preserving
+Unicode digits, ASCII signs, leading zeroes and exact signed-width limits. Whitespace,
+fractional/exponential forms and overflows fail. Text scalars retain valid empty strings.
+Six added unit tests cover required-record deletion, required attributes, optional and
+conditional fields, selected world mode and numeric boundaries; an existing controller
+unit now also verifies rejection of incomplete catalogs after owner authentication.
+Fixtures are complete synthetic declarations, never defaults injected into runtime
+catalogs. General-sale restoration still remains separate work.
 
 The command reads the authenticated realm profile to select the level-dependent
 stamina cap when `stamina_limit` is available. Realm switches control quest metadata,
@@ -259,7 +279,8 @@ typed configuration, account-counter and lucky-day composition. Original catalog
 records remain unchanged. The existing optional-catalog projection remains: absent
 item records can stay omitted/closed, while a reached required selector in a present
 record rejects when missing. Optional quest tab/push fields and absent `wa_switch.k1`
-remain optional. These projections do not claim legacy missing-catalog failures.
+remain optional. Required data-config catalog failures now follow the separate
+configuration contract described above.
 Kingdom-skill tab restoration, sorting and separators are described below. Lenient
 dates, default version policies and other exceptional catalog projections remain
 separate compatibility work.

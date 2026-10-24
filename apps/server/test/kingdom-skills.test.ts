@@ -4,6 +4,7 @@ import { restoredKingdomSkills } from "@opencok/rules/kingdom-skills";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { dataConfig } from "@opencok/dtos/bootstrap";
 import { decode, encode, fields } from "@opencok/messages/sfs";
+import { dataConfigItems } from "./fixtures/data-config.ts";
 import { kingdomSkill } from "./fixtures/kingdom-skill.ts";
 import vectors from "./fixtures/kingdom-skill-sort-vectors.json";
 
@@ -33,7 +34,7 @@ function project(records: Rule[]) {
     new Map(),
     new Map(),
     new Map(),
-    new Map(),
+    dataConfigItems(),
     new Map(),
     new Map(),
     new Map(),

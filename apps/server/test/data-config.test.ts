@@ -5,6 +5,7 @@ import { Game } from "@opencok/controllers/game";
 import { dataConfig } from "@opencok/dtos/bootstrap";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, Type } from "@opencok/messages/sfs";
+import { dataConfigItems } from "./fixtures/data-config.ts";
 import { kingdomSkill } from "./fixtures/kingdom-skill.ts";
 
 const now = Date.UTC(2026, 9, 23, 12);
@@ -14,14 +15,12 @@ function catalog(records: Record<string, Record<string, string>> = {}, kingdomId
     new Map(),
     new Map(),
     new Map(),
-    new Map(),
+    dataConfigItems(records),
     new Map(),
     new Map(),
     new Map(),
     kingdomId,
   );
-  rules.items.set("player_max", { id: "player_max", k1: "0010" });
-  for (const [id, values] of Object.entries(records)) rules.items.set(id, { id, ...values });
   return rules;
 }
 const project = (rules: Rules, context: Parameters<typeof dataConfig>[1] = {}) =>
@@ -31,7 +30,7 @@ test("data configuration routes item switches, world activity and kingdom skills
   const rules = catalog({
     function_on8: { k2: "+２;bad" },
     alliance_quest: { k12: "quest" },
-    alliance_quest_chat: { k4: "2;bad", k5: "3-2147483648" },
+    alliance_quest_chat: { k1: "0", k4: "2;bad", k5: "3-2147483648" },
     on_trumpet: { k2: "2;bad" },
     scoutmark_on: { k1: "2;bad", k2: "scout" },
     serviceterms_on: { k1: "1", k2: "terms", k3: "2;bad" },
@@ -85,12 +84,15 @@ test("present required item selectors fail when absent or malformed while option
   for (const [id, key, other] of cases) {
     for (const value of [undefined, "bad;2"]) {
       const record = value === undefined ? other : { ...other, [key]: value };
-      expect(() => project(catalog({ [id]: record }))).toThrow();
+      const rules = catalog({ [id]: record });
+      if (value === undefined) delete rules.items.get(id)![key];
+      expect(() => project(rules)).toThrow();
     }
   }
   const rules = catalog({
     function_on8: { k2: "2" },
-    alliance_quest_chat: {},
+    alliance_quest: { k12: "quest" },
+    alliance_quest_chat: { k1: "0" },
     wa_switch: { k2: "keep" },
   });
   const result = project(rules);
@@ -374,6 +376,17 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
   expect(result.body.cmdBaseTime?.value).toBe("123");
   expect(result.pushes).toEqual([]);
   expect(calls).toBe(1);
+  const required = rules.items.get("kingdomskill")!;
+  rules.items.delete("kingdomskill");
+  await expect(
+    new Game(store, rules, { kingdomId: 2 }, () => now).execute(
+      "synthetic",
+      "login.dataconfig",
+      {},
+    ),
+  ).rejects.toThrow();
+  expect(calls).toBe(2);
+  rules.items.set("kingdomskill", required);
   const rejected: (Row | undefined)[] = [undefined, { banFlag: 1 }, { banTime: BigInt(now + 1) }];
   for (const profile of rejected) {
     const game = new Game(
@@ -461,8 +474,9 @@ test("an explicitly empty data-config group never falls back to populated global
   const rules = catalog();
   rules.configuration.dataConfig = new Map();
   expect(() => project(rules)).toThrow();
-  rules.configuration.dataConfig.set("player_max", { id: "player_max", k1: "group-only" });
+  rules.configuration.dataConfig = dataConfigItems({ player_max: { k1: "group-only" } });
   rules.items.clear();
+  rules.items.set("overlord", { k1: "global" });
   expect(fields(project(rules).player_max).k1?.value).toBe("group-only");
 });
 

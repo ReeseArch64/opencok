@@ -58,7 +58,8 @@
     "./new-general-prestige": "./src/new-general-prestige.ts",
     "./kingdom-skills": "./src/kingdom-skills.ts",
     "./java-list-sort": "./src/java-list-sort.ts",
-    "./java-calendar-date": "./src/java-calendar-date.ts"
+    "./java-calendar-date": "./src/java-calendar-date.ts",
+    "./java-integer": "./src/java-integer.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

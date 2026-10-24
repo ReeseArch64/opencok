@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { dataConfig, serverClock } from "@opencok/dtos/bootstrap";
-import { Rules, type Rule } from "@opencok/rules/game";
+import { Rules } from "@opencok/rules/game";
+import { dataConfigItems } from "./fixtures/data-config.ts";
 import { fields, Type } from "@opencok/messages/sfs";
 
 test("core data config preserves XML strings and legacy numeric field types", () => {
@@ -9,10 +10,10 @@ test("core data config preserves XML strings and legacy numeric field types", ()
     new Map(),
     new Map(),
     new Map(),
-    new Map<string, Rule>([
-      ["player_max", { id: "player_max", k3: "30" }],
-      ["resources_basics", { id: "resources_basics", k7: "100", k8: "300" }],
-    ]),
+    dataConfigItems({
+      player_max: { k3: "30" },
+      resources_basics: { k7: "100", k8: "300" },
+    }),
   );
   const config = fields(dataConfig(rules).dataConfig);
   expect(fields(config.player_max).k3).toEqual({ type: Type.String, value: "30" });
