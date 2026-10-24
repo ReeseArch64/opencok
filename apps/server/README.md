@@ -965,6 +965,54 @@ extra-content rules, capacity and transaction failures. No real database, concur
 writer, socket, native client or ADB was exercised. List/category/conversation queries,
 chat read/delete and synchronization consumers remain separate pending work.
 
+## Category mailbox projection
+
+The pure selection and response projection for `mread.batch.category` is prepared in
+[issue #70](https://github.com/ReeseArch64/opencok/issues/70). The command is not enabled
+yet: authenticated transactional storage, public sender routing, recipient update
+metadata and persisted translation reads must be connected before it can serve requests.
+
+Selection consumes a newest-first prefix of the owner's entire mailbox. The reference
+breaks immediately for positive `num`; otherwise the prefix length is the positive
+signed-32-bit result of `num + offset`. Filtering happens after this window, so skipped
+categories still consume positions. Invalid categories acknowledge without a result
+array; valid empty windows return an empty result array. Category 1 excludes title
+`115429`, category 5 includes that title regardless of type, and type 34 belongs to both
+categories for ordinary titles. The pure boundary rejects supplied windows above 1,000
+rows or 4 MiB of inline-plus-extra bodies instead of silently truncating them. The future
+adapter must bound metadata before fetching bodies and preserve newest-first ordering.
+
+Ordinary list entries contain the stored identity, client type mapping, reward descriptor,
+status/save/item flags, reply bits and a nested decoded `detail`. Database-backed entries
+use transient `mbLevel` zero. Upgrade notices preserve their version default. Combat
+previews add attacker/defender or NPC presentation and win/loss/draw when their required
+fields are valid; failure to build a preview does not invalidate otherwise valid detail.
+Categories 4 and 7 use chat-shaped content with the recipient's update marker. Category 8
+bottle messages retain the ordinary envelope. List detail does not acquire the content
+reader's raw chunks or metadata overrides; existing stored fields remain intact.
+
+Sender projection preserves current and historical names, string portrait versions and
+optional alliance abbreviations. A supplied sender without a portrait rejects the result,
+as the reference's string setter rejects null; it does not authorize malformed-mail
+cleanup. The sender lookup allowlist is distinct from category membership. Public sender
+metadata must be supplied from maintained authoritative routing, not inferred from a
+request's identity fields.
+
+Optional translation presentation applies only to personal/moderator text types 22 and
+24 when enabled and sender language is not null. Missing sender metadata uses the
+reference's empty-language fallback. Language aliases, the allowlisted target language
+and pipe-separated translation IDs follow the reference. Missing translations preserve
+original text and any nonblank translation ID. This projection accepts resolved data; it
+does not implement a translation database reader or external machine translation.
+
+The content decoder is shared with `mail.read`. Malformed structured entries produce a
+removal plan only after the entire correlated response encodes successfully. Unknown
+stored types, missing extra bodies, unresolved decoder forms, capacity failures and
+foreign/duplicate entries reject without returning a plan. No persistence is changed by
+this pure stage. Synthetic unit fixtures cover all category memberships, arithmetic
+boundaries, both envelopes, names, translation gates, preview outcomes and failure cases.
+No client, ADB, database or service was used to validate it.
+
 ## Gameplay migration: topics 1–8
 
 The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)

@@ -1,5 +1,46 @@
 import type { Row } from "./rows.ts";
 
+export interface MailCategoryQuery {
+  category: number;
+  begin: number;
+  offset: number;
+  now: number;
+}
+
+export interface MailListEntry extends MailContentsEntry {
+  toUser: string;
+  fromUser: string | null;
+  fromName: string | null;
+  title: string | null;
+  rewardId: string | null;
+  rewardStatus: number;
+  status: number | null;
+  itemIdFlag: number | null;
+  saveFlag: number | null;
+  reply: number;
+  translationId: string | null;
+}
+
+export interface MailSender {
+  name: string | null;
+  pic: string | null;
+  picVer?: string;
+  abbr?: string | null;
+  lang: string | null;
+}
+
+export interface MailTranslation {
+  originalLang: string;
+  translationMsg: string;
+}
+
+export interface MailCategoryPresentation {
+  senders: ReadonlyMap<string, MailSender>;
+  recipientUpdateTime: string;
+  translations: ReadonlyMap<string, MailTranslation>;
+  translationEnabled: boolean;
+}
+
 export interface MailContentsQuery {
   ids: readonly string[];
   now: number;
