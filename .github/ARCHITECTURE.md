@@ -1732,11 +1732,24 @@ Mailbox save/cancel commands use a separate recipient-scoped write interface. A 
 owner profile authorizes each realm transaction; conditional saved-flag updates and
 durable `mail_update` markers commit together. Marker timestamps never decrease and
 only matched owned messages receive markers. The additive kingdom migration supplies
-the marker table; synchronization consumers, cleanup, category/conversation deletion and
-redemption remain separate work. This follows ADR-0002/0005 without dual writes to
+the marker table; category/conversation deletion and redemption remain separate work.
+This follows ADR-0002/0005 without dual writes to
 Redis. Absolute flag assignments preserve repeat-request state absent intervening
 changes; correlation fields do not provide durable command receipts. The server guide
 records these limits, compatibility differences and unit-only validation.
+
+The `chat.get.update.mails` reader now consumes those existing realm markers in an
+owner-authorized repeatable-read write transaction. It selects inclusive cursor deltas,
+joins only message identity/recipient/flags and validates the response before cleanup.
+Foreign or missing messages become deletion IDs; foreign markers are removed by exact
+owner/ID/observed-time predicates. Aging uses both the requested cursor and its wrapped
+signed-Long five-day cutoff, preserving strict boundaries. A fresh same-owner profile
+lock coordinates maintained writers. Complete deltas are limited to 10,000 markers;
+overflow rejects without partial output or cleanup. Stable UID ordering replaces the
+unspecified cache/hash iteration order. SQL failures reject rather than masquerade as
+an empty cache result, and cleanup commits atomically after projection, unlike the
+reference's independent cache deletions. No schema or cache-key addition is required.
+Unit cases are authored but execution of this new reader is deferred by user instruction.
 
 Conversation/type saving uses a separate owner-locked transaction with a recipient
 predicate and one set-based update. Rules map client message types and select personal

@@ -1377,6 +1377,43 @@ applied migrations, integration/E2E or ADB. Real PostgreSQL lock/concurrency beh
 and client rendering remain unverified. Content/list reads, category/conversation deletion, chat-mail variants
 and synchronization readers/marker cleanup still need migration.
 
+## Mailbox update synchronization
+
+`chat.get.update.mails` now reads the existing recipient-scoped `mail_update` records.
+It authenticates the local profile before decoding the optional String `time`. Omitted
+time returns the ordinary empty acknowledgment; null or a failed Java Long parse uses
+zero. Signed values, Unicode decimal digits and inclusive cursor comparisons are retained.
+The repository locks and revalidates the local owner in a repeatable-read transaction.
+
+The `data` JSON contains `update` entries with UID, read/reward/save flags and the exact
+decimal Long update time, plus `delete` IDs for missing or foreign messages. No contents,
+reward payloads or foreign flags enter the reply. Null persisted read/save flags restore
+as zero. IDs are ordered deterministically; this is not the reference cache's unspecified
+hash iteration order. At 32,767 UTF-16 units, `data` becomes empty and `updatemailArr`
+contains 5,000-unit chunks. Split surrogate halves use the same replacement behavior as
+the existing mailbox chunk projection. Correlation fields are included in preflight
+encoding before any marker cleanup.
+
+Foreign markers are deleted only when their stored timestamp still matches the observed
+row. Missing-message markers remain available for repeat synchronization. Aging deletes
+only this recipient's markers strictly older than both the cursor and its five-day cutoff,
+with signed Java Long subtraction. Equal cutoff timestamps remain. Reads and cleanup
+never mutate mail flags, contents or groups. A failure before commit rolls back cleanup;
+a lost commit acknowledgment can leave cleanup committed and is not automatically retried.
+
+The existing PostgreSQL marker authority replaces the original cache lookup. SQL errors
+reject instead of returning an empty result. Deltas over 10,000 markers reject without
+truncation or cleanup. This bound is a maintained capacity limit, not pagination. Owner
+locking coordinates existing maintained writers; external writers can cause transaction
+conflicts. No new schema, migration, configuration or dependency is added.
+
+Eight synthetic units are authored for the controller, projection and fake database:
+cursor parsing, exact numeric output, chunk boundaries, ownership, inclusive selection,
+aging, observed-time cleanup and rollback/failure paths. Their execution and the combined
+regression are deferred under the user's latest instruction to prioritize implementation
+and PR publication. Static type checks pass. No real database/services or client/ADB was
+used; this command is not counted as fully verified in the migration percentage yet.
+
 ## Ordinary mailbox deletion
 
 `mail.delete`, tracked in [issue #67](https://github.com/ReeseArch64/opencok/issues/67),

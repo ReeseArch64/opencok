@@ -30,6 +30,7 @@ import type {
 import type { ExpeditionRankingEntry } from "./expedition-ranking.ts";
 import type { AllianceRankingQuery, AllianceRankingSnapshot } from "./alliance-ranking.ts";
 import type { Row } from "./rows.ts";
+import type { MailUpdateInspector, MailUpdateQuery, MailUpdateSnapshot } from "./mail-updates.ts";
 import type { PowerState } from "./power.ts";
 import type { RoutedPublicProfile } from "./profile.ts";
 import type { PlayerRankingQuery, PlayerRankingSnapshot } from "./ranking.ts";
@@ -50,6 +51,11 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  mailUpdates?(
+    uid: string,
+    query: MailUpdateQuery,
+    inspect: MailUpdateInspector,
+  ): Promise<MailUpdateSnapshot>;
   mailGroups(
     uid: string,
     query: MailGroupQuery,
