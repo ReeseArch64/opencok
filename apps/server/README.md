@@ -553,9 +553,21 @@ wrapper. It shares the existing attribute, cooldown and ability-repair projectio
 for the current v12.06.0 process; pre-2.0 version filters are outside that process's
 supported configuration. Repairs remain projections without persistence or notification
 side effects, and the shared hash traversal retains its documented exceptional-state
-limits. This foundation is not yet exposed as `user.lv`: actual marches, settled
-resources, queues, task transitions and friendship-mine state still need to be composed,
-including required authoritative mutations, before enabling the reconnect handler.
+limits. The friendship-mine provider resolves the current global account binding,
+returns an ephemeral level-one mine for unbound accounts, and reads or initializes
+the bound owner's persisted mine. Initialization uses the existing composite key with
+conflict handling and reads the winner after a competing insert, preserving progress
+on retries. It makes no reward, cost, timer or helper changes. The `treasure` catalog
+provides initial selection and level-dependent display values; binding and help history
+are excluded from the wire response. Global binding lookup and realm persistence are
+separate transactions, so each request uses the binding observed at its start; a later
+rebind selects another composite key. The provider rejects realm mismatches and missing
+local owners. Unit tests simulate conflicts and lost commit responses; real database
+concurrency remains untested in this phase.
+
+This foundation is not yet exposed as `user.lv`: actual marches, settled resources,
+queues and task transitions still need implementation, and the available components
+must be composed with required authoritative mutations before enabling the handler.
 
 | Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |

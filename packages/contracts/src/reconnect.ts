@@ -11,3 +11,21 @@ export interface ReconnectBaseState {
 export interface OwnGeneralSnapshot extends Omit<GeneralPreview, "plusSkillPoint"> {
   abilityIndex: number;
 }
+
+export interface FriendshipMine {
+  itemId: number;
+  level: number;
+  exp: number;
+  miner: number;
+  mineTime: bigint;
+  call: number;
+}
+
+export interface FriendshipMineView extends FriendshipMine {
+  requiredExp: number;
+  maxMiners: number;
+}
+
+export interface FriendshipMineStore {
+  friendshipMine(uid: string, initial: () => FriendshipMine): Promise<Row>;
+}
