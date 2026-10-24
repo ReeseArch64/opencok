@@ -1,5 +1,5 @@
 {
-  "id": "6f8f23f4-5fd5-4a4d-a4f8-a48001bef904",
+  "id": "c0968f74-233b-4c04-8703-9f5553c2611a",
   "prevId": "85883fbf-3e63-402d-93f4-f2de81802f81",
   "version": "7",
   "dialect": "postgresql",
@@ -30772,6 +30772,168 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "opencok_kingdom.nickname_change": {
+      "name": "nickname_change",
+      "schema": "opencok_kingdom",
+      "columns": {
+        "operationId": {
+          "name": "operationId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ownerUid": {
+          "name": "ownerUid",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "newName": {
+          "name": "newName",
+          "type": "varchar(200)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "previousName": {
+          "name": "previousName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payment": {
+          "name": "payment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "responseGold": {
+          "name": "responseGold",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "failureCode": {
+          "name": "failureCode",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pendingEffects": {
+          "name": "pendingEffects",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "nickname_change_prepared_owner": {
+          "name": "nickname_change_prepared_owner",
+          "columns": [
+            {
+              "expression": "ownerUid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"opencok_kingdom\".\"nickname_change\".\"state\" = 'prepared'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "nickname_change_pending": {
+          "name": "nickname_change_pending",
+          "columns": [
+            {
+              "expression": "state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "pendingEffects",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "ownerUid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "operationId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "nickname_change_PRIMARY": {
+          "name": "nickname_change_PRIMARY",
+          "columns": [
+            "operationId"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "nickname_change_state": {
+          "name": "nickname_change_state",
+          "value": "\"state\" IN ('prepared', 'committed', 'refunded')"
+        },
+        "nickname_change_owner": {
+          "name": "nickname_change_owner",
+          "value": "length(\"ownerUid\") > 0"
+        },
+        "nickname_change_name": {
+          "name": "nickname_change_name",
+          "value": "length(\"newName\") > 0"
+        },
+        "nickname_change_payment_bound": {
+          "name": "nickname_change_payment_bound",
+          "value": "octet_length(\"payment\") <= 8192"
+        },
+        "nickname_change_pending_range": {
+          "name": "nickname_change_pending_range",
+          "value": "\"pendingEffects\" BETWEEN 0 AND 31"
+        },
+        "nickname_change_time": {
+          "name": "nickname_change_time",
+          "value": "\"createdAt\" >= 0 AND \"updatedAt\" >= \"createdAt\""
+        }
+      },
+      "isRLSEnabled": false
+    },
     "opencok_kingdom.notice_cost_log": {
       "name": "notice_cost_log",
       "schema": "opencok_kingdom",
@@ -33502,59 +33664,6 @@
       },
       "isRLSEnabled": false
     },
-    "opencok_kingdom.realm_authority": {
-      "name": "realm_authority",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "kingdomId": {
-          "name": "kingdomId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ownerEpoch": {
-          "name": "ownerEpoch",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "instanceId": {
-          "name": "instanceId",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "acquiredAt": {
-          "name": "acquiredAt",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "realm_authority_PRIMARY": {
-          "name": "realm_authority_PRIMARY",
-          "columns": [
-            "kingdomId"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "realm_authority_kingdom_positive": {
-          "name": "realm_authority_kingdom_positive",
-          "value": "\"opencok_kingdom\".\"realm_authority\".\"kingdomId\" > 0"
-        },
-        "realm_authority_epoch_positive": {
-          "name": "realm_authority_epoch_positive",
-          "value": "\"opencok_kingdom\".\"realm_authority\".\"ownerEpoch\" > 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
     "opencok_kingdom.receive_heart": {
       "name": "receive_heart",
       "schema": "opencok_kingdom",
@@ -34302,101 +34411,6 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "opencok_kingdom.resource_settlement": {
-      "name": "resource_settlement",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "uid": {
-          "name": "uid",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "fromTime": {
-          "name": "fromTime",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "toTime": {
-          "name": "toTime",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ownerEpoch": {
-          "name": "ownerEpoch",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "foodBefore": {
-          "name": "foodBefore",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "foodAfter": {
-          "name": "foodAfter",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "boundBefore": {
-          "name": "boundBefore",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "boundAfter": {
-          "name": "boundAfter",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "starvingMillis": {
-          "name": "starvingMillis",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "troopChanges": {
-          "name": "troopChanges",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "resource_settlement_uid_fromTime_toTime_pk": {
-          "name": "resource_settlement_uid_fromTime_toTime_pk",
-          "columns": [
-            "uid",
-            "fromTime",
-            "toTime"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "resource_settlement_interval": {
-          "name": "resource_settlement_interval",
-          "value": "\"opencok_kingdom\".\"resource_settlement\".\"toTime\" > \"opencok_kingdom\".\"resource_settlement\".\"fromTime\""
-        },
-        "resource_settlement_epoch": {
-          "name": "resource_settlement_epoch",
-          "value": "\"opencok_kingdom\".\"resource_settlement\".\"ownerEpoch\" > 0"
-        },
-        "resource_settlement_starvation": {
-          "name": "resource_settlement_starvation",
-          "value": "\"opencok_kingdom\".\"resource_settlement\".\"starvingMillis\" >= 0"
-        }
-      },
       "isRLSEnabled": false
     },
     "opencok_kingdom.reward_107": {

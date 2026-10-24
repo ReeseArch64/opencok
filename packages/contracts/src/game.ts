@@ -19,6 +19,8 @@ import type { AvatarVersionService } from "./avatar-version.ts";
 import type { AvatarGrantService } from "./files.ts";
 import type { ChatSessionIssuer } from "./chat.ts";
 import type {
+  MailSystemQuery,
+  MailSystemInspector,
   MailGroupQuery,
   MailGroupInspector,
   MailBatchQuery,
@@ -106,6 +108,11 @@ export interface GameStore extends AuthenticationStore {
   crossRankingRealm?(): Promise<boolean>;
   flowerRanking?(uid: string, realm: number, uids: readonly string[]): Promise<FlowerRankingState>;
   normalRankingRealm?(): Promise<boolean>;
+  getSystemMailByPlayerId?(
+    uid: string,
+    query: MailSystemQuery,
+    inspect: MailSystemInspector,
+  ): Promise<MailCategorySnapshot>;
   mailUpdates?(
     uid: string,
     query: MailUpdateQuery,
@@ -260,6 +267,7 @@ export interface GameServices {
   expeditionStage?(kingdomId: number): Promise<number | undefined>;
   worldPowerEffects?(kingdomId?: number): Promise<ReadonlyMap<string, string>>;
   emperorVersion?(kingdomId?: number): Promise<number | null | undefined>;
+  lastSystemMail?(uid: string): Promise<string | null>;
   playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;
   changeAccountCount?(deviceId: string): Promise<string | null>;
   featureAvailability?(profile: Row, now: number): Readonly<Record<string, boolean>>;

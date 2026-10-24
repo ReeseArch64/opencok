@@ -20,7 +20,8 @@
     "@opencok/storage": "workspace:*",
     "effect": "catalog:",
     "@opencok/core": "workspace:*",
-    "@opencok/rules": "workspace:*"
+    "@opencok/rules": "workspace:*",
+    "@opencok/mappings": "workspace:*"
   },
   "devDependencies": {
     "@opencok/api": "workspace:*",
@@ -30,7 +31,6 @@
     "@opencok/drizzle": "workspace:*",
     "@opencok/identity": "workspace:*",
     "@opencok/messages": "workspace:*",
-    "drizzle-orm": "0.45.4",
-    "@opencok/mappings": "workspace:*"
+    "drizzle-orm": "0.45.4"
   }
 }

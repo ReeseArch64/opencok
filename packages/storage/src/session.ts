@@ -193,6 +193,24 @@ export class Cache {
       updatedAt,
     );
   }
+  async lastSystemMail(uid: string): Promise<string | null> {
+    if (!uid || uid.length > 40 || uid.includes("\0") || !uid.isWellFormed())
+      throw new DependencyError("mail cursor");
+    const value = await this.command(
+      "HGET",
+      `opencok:kingdom:${this.config.kingdomId}:chat-user-info:${uid}`,
+      "chat_last_mail_id",
+    );
+    if (value === null) return null;
+    if (
+      typeof value !== "string" ||
+      value.length > 40 ||
+      value.includes("\0") ||
+      !value.isWellFormed()
+    )
+      throw new DependencyError("mail cursor");
+    return value;
+  }
   async playerUpdateTimes(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>> {
     if (
       !Number.isSafeInteger(kingdomId) ||

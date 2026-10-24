@@ -44,14 +44,14 @@ migration execution or deployment.
 ### 15.1. PostgreSQL database package
 
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
-Drizzle schemas in `src/schema` are the source of truth: 778 tables and 6,350 fields,
+Drizzle schemas in `src/schema` are the source of truth: 782 tables and 6,381 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
 `schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
 The default physical databases are `opencok_global`, `opencok_kingdom_1` and
 `opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
-`opencok_global`, `opencok_pay` and `opencok_chat` (114 tables). Both kingdom databases
-contain the same `opencok_kingdom` namespace (664 tables each). One set of kingdom
+`opencok_global`, `opencok_pay` and `opencok_chat` (115 tables). Both kingdom databases
+contain the same `opencok_kingdom` namespace (667 tables each). One set of kingdom
 table modules and migrations serves every configured kingdom; there are no per-ID
 schema copies. Table/field names and values remain stable. Database names and
 credentials are configuration. Pools and local transactions belong to one physical database; there
@@ -173,6 +173,8 @@ truncating it. The reader does not mutate scores or rebuild/expire the board; th
 publisher remains responsible for its derived-cache lifecycle. No event lifecycle or
 `hero.self.rank` in-memory activity/rank-map provider is implied. This extends the accepted
 Redis query-cache boundary without adding a schema, service or authoritative ledger.
+Focused command/cache units and disposable Redis tests verify realm isolation, exact
+opaque strings, bounds, outage fallback and unchanged board contents/expiry.
 Global celebrity ranking queries first read the selected realm's global `server_info`
 type, accepting the reference normal/test/inner-test/green types before decoding the
 selector. A fresh metadata read replaces the reference process-local type cache. The
@@ -181,7 +183,9 @@ types 1 and 5 share the power list. The cache adapter selects only the bounded r
 range, then the existing legacy JSON decoder reconstructs ordered `rankMap` objects.
 Missing lists remain empty, while cache failures and malformed/oversized data reject.
 These public derived boards grant no score-write authority and add no lifecycle or TTL.
-The server guide records keys, bounds, metadata fallback and deferred validation.
+Command/cache/repository units and disposable PostgreSQL/Redis tests cover category
+windows, aliases, fresh realm metadata, exact wire values and dependency failures.
+The server guide records keys, bounds, metadata fallback and verification limits.
 Dragon Battle ranking queries read the existing global published team list and reverse
 sorted-set rank through the runtime cache adapter. The controller supplies the verified
 local profile's alliance ID; request parameters select ranges only. Pure rules preserve
@@ -191,6 +195,8 @@ Sequential list/self reads retain the reference non-atomic snapshot and missing/
 failure fallback. Maintained size bounds reject oversized results; no match, team, score
 or reward mutation is introduced. Producer/import lifecycle and lenient noncanonical
 JSON parity remain outside this query slice, as detailed in the server guide.
+Command/rule/cache units and disposable Redis tests cover range arithmetic, duplicate
+rows, own-alliance lookup, public wire types, maintained bounds and read-only state.
 Expedition ranking reads use the shared Redis instance with a global realm-pairing
 record and lower-realm score/metadata keys. A read-only Lua evaluation revalidates
 pairing and returns a consistent bounded board; one retry handles a rematch. The
@@ -332,6 +338,18 @@ The reference's malformed structured conversation failure is preserved without c
 ordinary malformed detail can authorize owned primary-row removal only after transport
 validation. No additional tables, dependencies or external calls are introduced.
 
+V2 new-system-mail synchronization uses a bounded read-only repeatable-read snapshot
+of the authenticated recipient and owned anchor. Metadata bounds the complete selected
+window before retrieving content and public sender enrichment. The controller preserves
+the raw synchronization envelope and timestamp-bucket pagination; no mail/cache mutation
+is authorized by this path. The optional last-ID cache follows the existing realm-scoped
+Redis adapter and fails closed on dependency errors; missing state widens only owned
+selection. Cache-only legacy contents require explicit import into existing authoritative
+extra storage. Discarded private-chat projection translation effects and V1 sent-ID
+bookkeeping remain separate limitations. Command/cache units and a disposable PostgreSQL
+selection/capacity/snapshot test cover the maintained boundary. Native client behavior
+and production cache operation remain unverified. See the server guide and issue #219.
+
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
 fencing and recovery tests before enabling writes. Account provisioning,
@@ -372,3 +390,137 @@ See the [local stack guide](../../infra/compose/README.md) for profiles, configu
 private resource mounts and recovery. A disposable Compose test builds images and
 exercises PostgreSQL discovery and real SFS login through Traefik, preserving
 synthetic state and testing dependency failure without using player databases.
+
+## Nickname persistence and avatar allocation verification
+
+Rename writers that bypass the global name guard are not serialized. The owned rename
+store uses this guard for payment and recovery.
+Downstream effects remain required before enabling the command. Existing PostgreSQL
+authority under ADR-0002 is unchanged; the guard introduces no service or Redis key.
+
+The writer returns the preparation result only after global commit. The global
+transaction cannot roll back a committed realm charge. The separate owned rename store
+coordinates that charge through durable state; this writer alone provides no
+cross-database recovery.
+
+The owned rename store adds a kingdom `nickname_change` journal and a global
+`nickname_change_receipt`. Callers supply the authenticated UID, a stable UUID operation
+identifier, the already validated name and a safe millisecond timestamp. The store is
+an internal persistence port; it does not authorize a client-supplied owner or expose a
+new command. It locks the realm profile before inventory or operation rows and rejects
+missing, banned or incorrectly routed profiles before charging. One prepared operation
+per owner is enforced in both code and a partial unique index. At most 1,000 unconsumed
+effect records per owner are admitted. Equivalent target names share the global mutex
+across configured kingdoms.
+
+Preparation selects the first owned item 200021 by UUID, consumes one and records the
+exact item identity and restoration metadata. This deterministic SQL order makes
+duplicate restored stacks explicit. Only a game error from item debit reaches gold;
+configuration, inventory SQL and transport failures cannot authorize fallback. The
+caller supplies current `goods[200021].type` and `.price`, rather than an item-catalog
+substitute. Gold charges preserve the ordinary or exact DMM pool and capture all six
+before/after buckets and the original reply total. The signed rename counter increments
+with payment, including wrap, while the display name remains unchanged until global
+confirmation. Charge, counter and prepared journal commit in one realm transaction.
+
+The protected global transaction then changes account/name mappings and inserts the
+receipt. Recovery first locks the profile while reading the journal, resolving an
+uncertain realm preparation commit. It subsequently acquires the same name mutex before
+reading the global receipt. A matching receipt authorizes the realm name and owned world
+point updates; confirmed absence authorizes refund. Lock, read or receipt-identity
+failures leave the operation prepared. A lost global commit response cannot justify a
+refund by itself. Recovery re-reads terminal state after an uncertain final realm commit,
+and completed operation retries preserve the original result without another charge.
+Restarts retain the journal and receipt, with no distributed atomic-commit claim.
+
+Refund restores the captured item stack or re-reads the current gold price, parses it
+before reaching CN1 state and credits only the selected free bucket. It keeps the
+incremented counter and original debit reply total. CN1 requires an explicit available
+session provider; an unavailable provider leaves a recoverable prepared charge. Gold
+refund metadata includes its own price, ratio, delta and before/after balances. Terminal
+journals reserve pending bits 1/2/4/8/16 for alliance, chat, throne, shared-user and
+notification delivery respectively; a refund reserves notification delivery only. These
+consumers remain separate. The Chat consumer acknowledges bit 2 only after the
+authenticated receiver confirms the durable operation. Inventory/gold notification
+delivery now acknowledges bit 16 through the persisted delivery stage described below.
+Alliance, throne, shared-user and command-level ordering remain pending.
+
+Disposable PostgreSQL integration covers both realms, UCA-equivalent contention,
+concurrent retries, item/gold/DMM/CN1 paths, transactional SQL failures, lost commit
+responses and restart recovery. The production composition, reserved-pattern matcher,
+CN1 session lifecycle, remaining downstream delivery and authenticated command wiring remain pending.
+`user.modify.nickName` stays unavailable. Retain both new tables and their migration
+history when rolling application code back; unresolved operations require reconciliation
+before destructive restoration or pruning. No private input or new dependency is added.
+
+Chat now exposes exact private `POST /_internal/nickname` with its own HMAC protocol
+domain and the existing trusted-backend secret. It accepts only owner, kingdom and
+operation UUID, never a proposed name. The Chat-owned repository verifies the matching
+global rename receipt and current account route while locking the same account row used
+by rename and avatar publication. It updates only the projection's user name from the
+current global account. Delivery of an older operation therefore converges to the latest
+committed name. No avatar projection is created solely for a rename; a later avatar
+publication obtains that name from the account once rename receipts exist.
+
+Avatar publication still uses sequence order and exact captured metadata, with one
+explicit exception for names after a committed rename. It obtains the account lock
+first, then reads the current name and receipt existence in a separate read-committed
+statement. A snapshot taken before a blocked account lock cannot authorize an obsolete
+name. The receipt owner/kingdom index supports that lookup. Same-sequence retry checks
+continue to reject conflicting version, timestamp and platform; delayed higher-sequence
+events retain the current committed name. Other profile fields retain their existing
+avatar-event semantics. Chat readiness now checks the receipt table as a dependency.
+
+The bounded realm publisher and `NicknameChangeStore.deliverChat` keep the realm owner
+and operation locks until publication completes and the Chat bit is cleared in the
+local transaction. Failures, deadlines and late results leave it pending. Lost remote
+or realm commit responses are safe to retry because the receiver reads current authority
+and the realm checks its durable bit. Actual Chat application HTTP, separate service
+pools and disposable PostgreSQL prove replay, two-kingdom routing, failure recovery,
+account-lock races and restart persistence. This consumer is not yet invoked by an
+authenticated rename command or background relay; the complete command remains disabled.
+
+Nickname inventory/gold notifications now have a durable `notificationStage` in the
+kingdom journal: zero is unseen, one acknowledges debit and two acknowledges refund.
+Additive migration `0009_nickname_notification_delivery` defaults existing records to
+zero without changing balances, inventory or names. Item refunds also record their
+actual before/after count, including intervening changes, missing-stack recreation and
+signed wrap. Existing item refund records without that optional audit field remain
+readable. Gold refund snapshots retain their existing price/ratio/bucket audit.
+
+`apps/server/src/nickname-change.ts` composes the owned store, actual goods catalog,
+notification mapping and session notification registry. It requires a validated name,
+authenticated caller UID and explicit CN1 ratio provider from its future command
+orchestrator. It reads type, price and optional item parameters from goods 200021 only.
+Preparation commits before attempting the debit notification; that attempt precedes
+the protected global identity write. A failed rename commits its refund before the
+refund notification. Notification failures do not trigger another charge or refund:
+they retain the delivery stage and pending bit. Successful item/gold paths preserve
+the reference command names, field order, signed widths and optional reply gold.
+DTO classes, Zod schemas and SFS serialization remain in their dedicated packages.
+
+`deliverNotifications` locks the realm owner, operation and reached item row, reads
+current authoritative counts/balances, publishes with an abortable deadline and commits
+the delivery stage with its local acknowledgment. Current-state publication prevents
+old receipts from restoring stale UI values after another mutation. A recipient that
+missed debit and reconnects after refund receives the current final state only; the
+online path receives both debit and refund. Missing recipients remain pending. Socket
+acceptance is not client acknowledgment, and uncertain publication may repeat an
+absolute snapshot. No exactly-once network delivery is claimed.
+
+The notification registry now forwards an optional abort signal. Session recipients
+check it before and after Redis ownership refresh, preventing timed-out work from
+writing an old packet after the realm lock has been released. Durable cursor commit
+loss, SQL acknowledgment failure, offline reconciliation, debit/refund ordering, current
+DMM/mobile balances, item parameters and restart recovery have actual PostgreSQL and
+typed frame evidence. The runtime remains an internal composition; no rename command
+or background relay is enabled. The existing mappings workspace dependency is promoted
+from development to runtime use without adding a library or changing locked versions.
+
+Negative or restored avatar versions and modulo wrap require a legacy event-ordering
+or expected-previous CAS design. Command/rule units and a
+disposable PostgreSQL/Redis integration exercise the production allocation runtime,
+concurrent requests, atomic rollback, uncertain-commit recovery and mail/cache/chat
+retry after restart without fabricating upload receipts. Native client behavior and
+the broader topic-7 lifecycle remain unverified. The realm runbook records
+configuration, schema, retry boundaries and the supported-version limits.

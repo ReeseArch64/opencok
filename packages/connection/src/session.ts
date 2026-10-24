@@ -153,19 +153,28 @@ export function createSessionHandler(
           send(extension("init", initial));
           for (const push of initializedState.pushes) send(extension(push.command, push.body));
           if (!socket.destroyed)
-            unsubscribe = dependencies.notifications?.subscribe(uid, async (command, body) => {
-              if (
-                socket.destroyed ||
-                !ready() ||
-                sessions.get(claimed!)?.socket !== socket ||
-                !(await cache.refresh(claimed!, token))
-              )
-                return false;
-              if (socket.destroyed || !ready() || sessions.get(claimed!)?.socket !== socket)
-                return false;
-              send(extension(command, body));
-              return !socket.destroyed;
-            });
+            unsubscribe = dependencies.notifications?.subscribe(
+              uid,
+              async (command, body, signal) => {
+                if (
+                  signal?.aborted ||
+                  socket.destroyed ||
+                  !ready() ||
+                  sessions.get(claimed!)?.socket !== socket ||
+                  !(await cache.refresh(claimed!, token))
+                )
+                  return false;
+                if (
+                  signal?.aborted ||
+                  socket.destroyed ||
+                  !ready() ||
+                  sessions.get(claimed!)?.socket !== socket
+                )
+                  return false;
+                send(extension(command, body));
+                return !socket.destroyed;
+              },
+            );
           report("login_accepted", {
             initialization: "partial",
             outcome: "success",

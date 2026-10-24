@@ -58,10 +58,13 @@
     "./community-ranking": "./src/community-ranking.ts",
     "./flower-ranking": "./src/flower-ranking.ts",
     "./battle-ranking": "./src/battle-ranking.ts",
+    "./mail-system": "./src/mail-system.ts",
+    "./nickname-change": "./src/nickname-change.ts",
+    "./chat-nickname": "./src/chat-nickname.ts",
     "./realm-authority": "./src/realm-authority.ts",
-    "./reconnect-marches": "./src/reconnect-marches.ts",
     "./reconnect-progress": "./src/reconnect-progress.ts",
-    "./reconnect-write": "./src/reconnect-write.ts"
+    "./reconnect-write": "./src/reconnect-write.ts",
+    "./reconnect-marches": "./src/reconnect-marches.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

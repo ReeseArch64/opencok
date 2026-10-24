@@ -1,4 +1,5 @@
 import { chatAvatarProfilePath } from "@opencok/contracts/chat-avatar-profile";
+import { chatNicknamePath } from "@opencok/contracts/chat-nickname";
 import type { AsyncHttpHandler, HttpHandler, WebSocketGateway } from "@opencok/contracts/chat";
 import { createServer, type RequestListener } from "node:http";
 import { randomUUID } from "node:crypto";
@@ -8,12 +9,14 @@ export function createChatHttpHandler({
   isReady = () => true,
   sessionHandler,
   profileHandler,
+  nicknameHandler,
   configHandler,
   serverListHandler,
 }: {
   isReady?: () => boolean;
   sessionHandler?: AsyncHttpHandler;
   profileHandler?: AsyncHttpHandler;
+  nicknameHandler?: AsyncHttpHandler;
   configHandler?: HttpHandler;
   serverListHandler?: HttpHandler;
   websocketGateway?: WebSocketGateway;
@@ -53,6 +56,15 @@ export function createChatHttpHandler({
 
     if (request.method === "POST" && request.url === chatAvatarProfilePath) {
       if (profileHandler) void profileHandler(request, response);
+      else {
+        response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
+        response.end('{"code":0,"data":{}}');
+      }
+      return;
+    }
+
+    if (request.method === "POST" && request.url === chatNicknamePath) {
+      if (nicknameHandler) void nicknameHandler(request, response);
       else {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');

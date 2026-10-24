@@ -175,7 +175,7 @@ async function createStack() {
       '<ItemSpec id="400001" level="1" time="30"/><ItemSpec id="400002" level="2" time="40"/>',
     role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
     position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
-    item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/>',
+    item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/><ItemSpec id="on_trumpet" k2="0"/>',
   };
   for (const [name, records] of Object.entries(xml))
     await Bun.write(join(folder, name + ".xml"), `<database>${records}</database>`);

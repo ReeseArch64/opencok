@@ -14170,3 +14170,52 @@ select "uid", "fromTime", "toTime", "ownerEpoch", "foodBefore", "foodAfter", "bo
 update "opencok_kingdom"."resource_settlement" set "uid" = $1, "fromTime" = $2, "toTime" = $3, "ownerEpoch" = $4, "foodBefore" = $5, "foodAfter" = $6, "boundBefore" = $7, "boundAfter" = $8, "starvingMillis" = $9, "troopChanges" = $10 where "opencok_kingdom"."resource_settlement"."uid" = $11
 delete from "opencok_kingdom"."resource_settlement" where "opencok_kingdom"."resource_settlement"."uid" = $1"
 `;
+
+exports[`opencok_global.nickname_change_receipt: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["operationId","uuid",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["newName","varchar(200)",true,null,null,null]
+column ["committedAt","bigint",true,null,null,null]
+primary ["nickname_change_receipt_PRIMARY",["operationId"]]
+index ["nickname_change_receipt_owner_realm",false,["ownerUid","kingdomId"]]
+check ["nickname_change_receipt_owner","length(\\"ownerUid\\") > 0"]
+check ["nickname_change_receipt_realm","\\"kingdomId\\" > 0"]
+check ["nickname_change_receipt_name","length(\\"newName\\") > 0"]
+check ["nickname_change_receipt_time","\\"committedAt\\" >= 0"]
+insert into "opencok_global"."nickname_change_receipt" ("operationId", "ownerUid", "kingdomId", "newName", "committedAt") values ($1, $2, $3, $4, $5)
+select "operationId", "ownerUid", "kingdomId", "newName", "committedAt" from "opencok_global"."nickname_change_receipt" where "opencok_global"."nickname_change_receipt"."operationId" = $1
+update "opencok_global"."nickname_change_receipt" set "operationId" = $1, "ownerUid" = $2, "kingdomId" = $3, "newName" = $4, "committedAt" = $5 where "opencok_global"."nickname_change_receipt"."operationId" = $6
+delete from "opencok_global"."nickname_change_receipt" where "opencok_global"."nickname_change_receipt"."operationId" = $1"
+`;
+
+exports[`opencok_kingdom.nickname_change: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["operationId","uuid",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["newName","varchar(200)",true,null,null,null]
+column ["previousName","varchar(255)",true,null,null,null]
+column ["state","varchar(16)",true,null,null,null]
+column ["payment","text",true,null,null,null]
+column ["responseGold","bigint",false,null,null,null]
+column ["failureCode","varchar(20)",false,null,null,null]
+column ["pendingEffects","integer",true,"0",null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["updatedAt","bigint",true,null,null,null]
+column ["notificationStage","integer",true,"0",null,null]
+primary ["nickname_change_PRIMARY",["operationId"]]
+index ["nickname_change_prepared_owner",true,["ownerUid"],"\\"opencok_kingdom\\".\\"nickname_change\\".\\"state\\" = 'prepared'"]
+index ["nickname_change_pending",false,["state","pendingEffects","ownerUid","operationId"]]
+check ["nickname_change_state","\\"state\\" IN ('prepared', 'committed', 'refunded')"]
+check ["nickname_change_owner","length(\\"ownerUid\\") > 0"]
+check ["nickname_change_name","length(\\"newName\\") > 0"]
+check ["nickname_change_payment_bound","octet_length(\\"payment\\") <= 8192"]
+check ["nickname_change_pending_range","\\"pendingEffects\\" BETWEEN 0 AND 31"]
+check ["nickname_change_notification_stage","\\"notificationStage\\" BETWEEN 0 AND 2 AND (\\"state\\" = 'refunded' OR \\"notificationStage\\" <= 1)"]
+check ["nickname_change_time","\\"createdAt\\" >= 0 AND \\"updatedAt\\" >= \\"createdAt\\""]
+insert into "opencok_kingdom"."nickname_change" ("operationId", "ownerUid", "newName", "previousName", "state", "payment", "responseGold", "failureCode", "pendingEffects", "createdAt", "updatedAt", "notificationStage") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+select "operationId", "ownerUid", "newName", "previousName", "state", "payment", "responseGold", "failureCode", "pendingEffects", "createdAt", "updatedAt", "notificationStage" from "opencok_kingdom"."nickname_change" where "opencok_kingdom"."nickname_change"."operationId" = $1
+update "opencok_kingdom"."nickname_change" set "operationId" = $1, "ownerUid" = $2, "newName" = $3, "previousName" = $4, "state" = $5, "payment" = $6, "responseGold" = $7, "failureCode" = $8, "pendingEffects" = $9, "createdAt" = $10, "updatedAt" = $11, "notificationStage" = $12 where "opencok_kingdom"."nickname_change"."operationId" = $13
+delete from "opencok_kingdom"."nickname_change" where "opencok_kingdom"."nickname_change"."operationId" = $1"
+`;

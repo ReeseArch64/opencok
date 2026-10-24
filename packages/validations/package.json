@@ -43,6 +43,7 @@
     "./flower-ranking": "./src/flower-ranking.ts",
     "./military-ranking": "./src/military-ranking.ts",
     "./battle-ranking": "./src/battle-ranking.ts",
+    "./nickname-change": "./src/nickname-change.ts",
     "./reconnect-marches": "./src/reconnect-marches.ts"
   },
   "dependencies": {
