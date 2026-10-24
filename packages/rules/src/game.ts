@@ -13,6 +13,8 @@ export interface WorldCatalogs {
 export interface ReconnectCatalogs {
   treasures?: Map<string, Rule>;
   rewards?: Map<string, Rule>;
+  quests?: readonly Rule[];
+  positionUnlock?: readonly Rule[];
 }
 export interface ProfileCatalogs {
   achievementCount?: number;

@@ -263,6 +263,12 @@ export async function loadRules(directory: string, kingdomId = 1) {
     optional("reward"),
     optional("mail"),
   ]);
+  const quests = (await exists(join(directory, "quest.xml")))
+    ? parseDeclaredCatalog(await read("quest")).records
+    : undefined;
+  const positionUnlock = (await exists(join(directory, "position_unlock.xml")))
+    ? parseDeclaredCatalog(await read("position_unlock")).records
+    : undefined;
   const [fieldMonsters, armies, neutralResources, barbarians] = await Promise.all([
     optional("field_monster"),
     optional("army"),
@@ -335,7 +341,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
       monarchTitles,
     },
     { achievementCount, militaryRanks, servers },
-    { treasures, rewards },
+    { treasures, rewards, quests, positionUnlock },
     mail,
     { fieldMonsters, armies, neutralResources, barbarians },
   );
