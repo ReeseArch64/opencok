@@ -60,7 +60,7 @@ Both tools exclude private inputs under `data/`, generated Husky adapters under
 Drizzle migrations, snapshots and database fixture data. The former root
 `mobile/` and `legacy/` input directories are no longer part of this checkout;
 keep authorized originals in the ignored data area. Maintained application and
-package source, Drizzle TypeScript schemas, agent skills and hook setup scripts
+package source, Drizzle TypeScript schemas, agent skills and hook configuration
 remain included. These exclusions preserve the
 boundaries described in [the architecture](ARCHITECTURE.md).
 
@@ -106,6 +106,28 @@ with the following format and rules:
 ```text
 fix(app): correct menu focus on keyboard
 ```
+
+### Local commit-message hook
+
+Husky 9 manages the repository-local `commit-msg` hook. `bun install` runs the
+root `prepare` script (`husky`); after an installation with `--ignore-scripts`, enable it
+explicitly with `bun run prepare`. Git's `core.hooksPath` points to `.husky/_`.
+The generated adapters stay ignored; `.husky/commit-msg` is a maintained project
+file.
+
+The hook runs `bunx commitlint --edit "$1"` with the root
+`commitlint.config.cjs`. Install workspace dependencies before committing so
+`bunx` resolves the local CLI. It validates
+the message file supplied by Git, including paths containing spaces. It does not
+rewrite messages or stage files. CI continues validating committed messages
+independently of local hooks.
+
+Use `HUSKY=0` when hook setup should be disabled, or install with
+`--ignore-scripts`. Existing container builds use `--ignore-scripts`, including
+production-only dependency installs where Husky is not installed. Run
+`bun run prepare` to install the hooks locally. See the
+[Husky setup](https://typicode.github.io/husky/how-to.html)
+and [commitlint local setup](https://commitlint.js.org/guides/local-setup.html).
 
 ### Issue, pull request, and discussion labels
 

@@ -201,6 +201,10 @@ These create disposable resources and synthetic accounts/assets rather than
 connecting to imported player databases. A passing suite does not prove all
 client versions, production load, mobile rendering or provider recovery.
 
+Husky installs a local `commit-msg` hook during `bun install` and checks messages
+with the existing commitlint configuration. If scripts were skipped, run
+`bun run prepare` once. The prepare script invokes `husky` directly.
+
 Use feature branches, focused Conventional Commits and small PRs in a `gh stack`.
 The [contribution guide](.github/CONTRIBUTING.md) defines issue/discussion,
 validation and review requirements. [Migration evidence](docs/migration-validation.md)
