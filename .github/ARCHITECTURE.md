@@ -407,8 +407,11 @@ This follows ADR-0002 and is not connected to the realm command. An internal
 `repositories/avatar-mail` consumer now commits owned message/extra/group rows and mail-bit
 acknowledgment together; rules preserve captured XML and Java byte encoding, and DTOs supply
 the mail push projection. Static source/bytecode inspection shows this send path does not
-call its mailbox capacity/discard helper, correcting the earlier prerequisite. Profile/chat
-effect consumers, push delivery and production composition remain pending, as do
+call its mailbox capacity/discard helper, correcting the earlier prerequisite. The internal
+profile-marker consumer now publishes exact epoch-second timestamps through a monotonic
+realm-scoped Redis update before acknowledging bit 2. Publication is bounded;
+late responses cannot acknowledge rolled-back work, and retries preserve newer cache values.
+Chat effect delivery, push delivery and production composition remain pending, as do
 restored-state semantics, full media lifecycle, animated formats and production Node execution.
 
 ### Package groups

@@ -1003,9 +1003,9 @@ and isolation behavior have not been exercised; SQL and failure paths use synthe
 clients only.
 
 The authorized mail catalog and internal system-mail consumer are now implemented as
-described below. Profile timestamp/chat metadata delivery and notification composition
-remain pending. Persisted intents alone are not evidence of delivered mail or updated
-caches. Completion cannot be exposed until those behaviors are implemented.
+described below. The internal profile-marker consumer is also implemented below; chat
+metadata delivery and notification/runtime composition remain pending. Persisted intents
+alone are not evidence of delivered mail or updated caches. Completion cannot be exposed until those behaviors are implemented.
 
 ## Avatar system-mail delivery
 
@@ -1054,7 +1054,52 @@ switch. The default reference sender does not include a separate `contents` fiel
 metadata uses `contentsLocal` and expands literal backslash-n sequences. Push projection
 is prepared here but no socket, listener, background relay or live notification is started.
 The final realm composition must coordinate delivery and mail/picture notifications with
-the remaining profile/cache/chat effects before enabling `user.avatar.finish`.
+the remaining chat effect and the internal profile-marker consumer before enabling `user.avatar.finish`.
+
+## Avatar profile-marker publication
+
+[Issue #79](https://github.com/ReeseArch64/opencok/issues/79) adds the internal consumer
+for pending profile/cache bit 2. `rules/avatar-profile` validates captured owner, realm,
+sequence, picture version, commit time and metadata before publication. The timestamp is
+an exact epoch-second decimal string derived from the receipt's millisecond time; name
+and platform come from the captured snapshot. This does not write new progression or
+send chat metadata.
+
+`Cache.publishPlayerUpdateTime` writes the existing
+`opencok:kingdom:<realm>:player-update:<uid>` key used by profile query readers. It uses
+one Lua command with exact decimal comparison, not floating-point conversion. A newer
+marker wins over a late older publication, equal markers are idempotent, and legacy
+leading-zero values compare by their normalized numeric value. Missing or empty values
+are initialized. Malformed nonempty values, values outside signed-long range and invalid
+Redis replies fail with a sanitized dependency error. The caller supplies canonical
+nonnegative decimal timestamps; the realm is taken from cache configuration.
+
+Markers have no TTL, matching the reference. The monotonic maximum is an intentional
+reliability guarantee for reordered durable delivery; a future-valued marker is retained
+instead of being overwritten by an older event. Redis is only a query-cache marker.
+The durable picture version and delivery history stay in PostgreSQL. Cache loss does not
+reapply profile changes; existing readers return missing markers through their established
+fallbacks (including an empty `lastUpdateTime` in public profile replies). This slice does
+not add automatic replay of already acknowledged history after cache loss.
+
+`repositories/avatar-profile` takes the owner lock before the completion lock, publishes
+through a deadline-bounded port, then clears only bit 2. Missing/misplaced owners and
+already acknowledged work do not publish. Failures before acknowledgment roll back the
+bit change while retaining mail/chat bits and receipt history. An external write may
+succeed before a database failure or a timeout; retry is safe because the writer is
+idempotent and monotonic. The port receives an abort signal. A late response cannot
+acknowledge rolled-back work, although an adapter unable to cancel an in-flight Redis
+command may still complete its safe external write. Actual Redis commands retain the
+configured connection/operation timeout in the existing cache adapter.
+
+Unit evidence includes 154 frozen cases from the exact Lua script executed with an
+isolated Lua 5.1 engine and synthetic GET/SET functions. A script digest ties that oracle
+to the maintained implementation; ordinary tests need neither Lua nor Redis. Tests also
+compose publication with the existing marker reader and simulate SQL failures, uncertain
+commits, deadlines, out-of-order updates, realm isolation and malformed projections.
+No listener, Redis/PostgreSQL service, migration or client is exercised. The consumer is
+not started by runtime composition yet. Chat bit 4 remains pending until its receiver and
+publication path exist; final command/relay and notification composition are still required.
 
 ## Realm chat sessions
 
@@ -1531,7 +1576,7 @@ use these descriptions before the reconnect task component is complete.
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
-| 7. Avatar integration                     | Files service; realm grants and pending receipts; internal atomic completion/profile/moderation/intent foundation and system-mail consumer with synthetic units                                                                                                                     | Connect completion after profile/chat effect delivery and mail/picture pushes; validate restored-state semantics.                                         |
+| 7. Avatar integration                     | Files service; realm grants and pending receipts; internal atomic completion/profile/moderation/intent foundation and system-mail/profile-marker consumers with synthetic units                                                                                                     | Connect completion after chat effect delivery, runtime wiring and mail/picture pushes; validate restored-state semantics.                                 |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
