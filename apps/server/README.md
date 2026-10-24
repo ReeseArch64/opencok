@@ -173,6 +173,28 @@ request. No legacy Redis key import or profile writer is introduced here; topic 
 must update this namespace after profile changes. No gameplay state is cached by
 this query. Server-native behavior has unit coverage only; the client remains untested.
 
+The full public profile foundation exposes `readPublicProfile` and the
+`publicStatistics`, `publicMedal` and `publicEquipment` serializers. The adapter
+selects public identity/progression, statistics, VIP, medal/privacy presentation,
+military rank, office, tavern, general preview inputs, worn equipment and honors
+in a single read-only repeatable-read transaction. Every dependent read binds the
+target UID. Achievement completion is counted in SQL for completed/rewarded states;
+balances, account/device fields and unrelated player settings are never selected.
+Missing profiles skip auxiliary reads. Array reads detect the SFS collection limit
+of 32,767 entries with an extra sentinel row and reject overflow without truncating
+the response. Multiple taverns are rejected because the legacy first-row query has
+no defined ordering. Failures roll back the whole snapshot.
+
+Public statistics omit all battle fields when no statistics record exists and use
+the persisted signed 64-bit total power when present. Equipment serialization
+preserves nullable properties, locked-property flag selection, gated strengthening
+presentation and exact case-sensitive aliases. Medal/equipment serializers select
+only their documented wire fields. These components have synthetic unit coverage;
+they are not yet connected to `get.user.info`. VIP/achievement/role projection,
+general skills, alliance/flower presentation, realm routing and command dispatch
+remain required before enabling that full query. No schema change, player write,
+client validation or live-service test is introduced by this foundation.
+
 The detailed-power foundation now includes `readPowerState`,
 `calculatePlayerPower` and the `powerInfo` DTO. The read adapter captures the
 requested player's persisted components in one read-only repeatable-read
