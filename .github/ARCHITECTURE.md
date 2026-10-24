@@ -590,9 +590,13 @@ Nickname text rules remain pure: Java trim/blank behavior, weighted GBK length a
 character eligibility feed an ordered filter/availability evaluation. The GBK width
 table is derived from an independently authored Java 8 standard-library probe and has
 exhaustive code-unit checksum coverage; runtime and unit tests require no Java process.
-Providers are explicit, and the nickname-check command remains disabled until the
-bad-word source/matcher and global name-mapping/account adapter are connected. This
-foundation neither reserves names nor changes profiles, balances or items.
+The bad-word resource adapter now reads the adjacent UTF-8 gameconfig list and preserves
+append, ordering, single-removal, reload-lock and failure-retention behavior. Its matcher
+uses Java 8 Unicode boundary data and the restricted generated-pattern grammar, validated
+against independent standard-library fixtures. Providers are explicit; the nickname-check
+command remains disabled until the global name-mapping/account adapter and runtime resource
+composition are connected. The source mount is also pending. This foundation neither
+reserves names nor changes profiles, balances or items.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
