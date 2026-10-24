@@ -44,6 +44,7 @@ function fixture() {
     city: unused,
     world: unused,
     playerRanking: unused,
+    mailBatch: unused,
     mailCategory: unused,
     mailContents: unused,
     mailConversationSave: unused,

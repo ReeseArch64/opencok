@@ -1343,6 +1343,15 @@ unavailable. The server guide records configuration, limits and degraded behavio
 category and detail readers validate the wrapped extension response before authorizing
 owned primary-row cleanup. SQL, routing, projection and cleanup remain unit-verified only.
 
+Paginated message and conversation reads share the owned mailbox-window boundary with
+category listing. Their selector predicates run before pagination; categories retain
+post-window filtering. Both use the same presentation readers and serializers, with
+separate ordinary, category-chat and conversation envelopes. Unsupported group selectors
+remain explicit until whole-group counts and stale-group maintenance are migrated.
+The reference's malformed structured conversation failure is preserved without cleanup;
+ordinary malformed detail can authorize owned primary-row removal only after transport
+validation. No additional tables, dependencies or external calls are introduced.
+
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
 fencing and recovery tests before enabling writes. Account provisioning,

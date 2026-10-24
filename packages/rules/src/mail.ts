@@ -1,4 +1,6 @@
 import type {
+  MailBatchKind,
+  MailBatchQuery,
   MailCategoryQuery,
   MailListEntry,
   MailContentsQuery,
@@ -103,6 +105,51 @@ export function mailBlank(value: string | null | undefined): boolean {
       [0x2028, 0x2029, 0x205f, 0x3000].includes(code)
     );
   });
+}
+
+export function mailBatchQuery(
+  type: number,
+  begin: number,
+  limit: number,
+  fromUser: string | null,
+  now: number,
+): MailBatchQuery {
+  if (
+    ![type, begin, limit].every(int) ||
+    !Number.isSafeInteger(now) ||
+    now < 0 ||
+    (fromUser !== null && typeof fromUser !== "string")
+  )
+    throw new GameError(errors.invalid, "mail");
+  if (type === 10 || type === 1000) throw new GameError(errors.unsupported, "mail_groups");
+  const kinds = new Map<number, MailBatchKind>([
+    [2, "notices"],
+    [3, "studio"],
+    [4, "personal"],
+    [5, "resources"],
+    [6, "fight"],
+    [7, "monsters"],
+    [8, "trade"],
+    [9, "moderation"],
+    [11, "boss"],
+  ]);
+  const kind = kinds.get(type) ?? "empty";
+  if (kind === "empty") return { kind, begin: 0, limit: 0, fromUser: null, now };
+  if (limit < 0) throw new GameError(errors.invalid, "mail");
+  const sender = kind === "personal" || kind === "moderation";
+  if (
+    sender &&
+    (mailBlank(fromUser) ||
+      fromUser!.length > 40 ||
+      fromUser!.includes("\0") ||
+      !fromUser!.isWellFormed())
+  )
+    throw new GameError(errors.invalid, "mail");
+  return { kind, begin: Math.max(0, begin), limit, fromUser: sender ? fromUser : null, now };
+}
+
+export function mailBatchIsChat(query: MailBatchQuery): boolean {
+  return ["personal", "resources", "monsters", "trade", "moderation"].includes(query.kind);
 }
 
 export function mailCategoryQuery(

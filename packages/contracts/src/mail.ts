@@ -1,5 +1,25 @@
 import type { Row } from "./rows.ts";
 
+export type MailBatchKind =
+  | "notices"
+  | "studio"
+  | "personal"
+  | "resources"
+  | "fight"
+  | "monsters"
+  | "trade"
+  | "moderation"
+  | "boss"
+  | "empty";
+
+export interface MailBatchQuery {
+  kind: MailBatchKind;
+  begin: number;
+  limit: number;
+  fromUser: string | null;
+  now: number;
+}
+
 export interface MailCategoryQuery {
   category: number;
   begin: number;

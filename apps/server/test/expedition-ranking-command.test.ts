@@ -28,6 +28,7 @@ function fixture() {
     playerSummaries: unused,
     publicProfile: unused,
     playerRanking: unused,
+    mailBatch: unused,
     mailCategory: unused,
     mailContents: unused,
     mailConversationSave: unused,

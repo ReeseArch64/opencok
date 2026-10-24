@@ -30,6 +30,7 @@ function fixture() {
     allianceRanking: unused,
     mailStatus: unused,
     mailSave: unused,
+    mailBatch: unused,
     mailCategory: unused,
     mailContents: unused,
     mailConversationSave: unused,
