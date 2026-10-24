@@ -1,3 +1,4 @@
+import { createChatAvatarProfileHandler } from "@opencok/controllers/chat-avatar-profile";
 import type { ChatRepository, Log } from "@opencok/contracts/chat";
 
 import { createTokenVerifier } from "@opencok/identity/chat-token";
@@ -55,6 +56,11 @@ export function createChatApp({
   });
   const server = createChatServer({
     isReady,
+    profileHandler: createChatAvatarProfileHandler({
+      profiles: repository.profiles,
+      signingSecret,
+      log,
+    }),
     sessionHandler: createSessionHandler({ sessionStore, signingSecret, log }),
     configHandler: createConfigHandler({ websocketUrl, isReady }),
     serverListHandler: createServerListHandler({ websocketUrl, isReady }),

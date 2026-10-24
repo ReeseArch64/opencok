@@ -1,6 +1,7 @@
-import type { GeneralSkill, PowerSnapshot } from "@opencok/contracts/power";
+import type { GeneralSkill, PlayerEffectSnapshot } from "@opencok/contracts/power";
 import type { RuleContext } from "./availability.ts";
 import type { Rules } from "./game.ts";
+import type { NewGeneralEquipmentModifier } from "./new-general-equipment.ts";
 import { equipmentEffects, equipmentSetEffects, generalSkillEffects } from "./power-attributes.ts";
 import { heroEffects, dragonSkillEffects } from "./power-companions.ts";
 import { storedPowerEffects } from "./power-effects.ts";
@@ -12,14 +13,21 @@ import { territoryTreeEffects } from "./power-territory.ts";
 import { personalThroneEffect } from "./power-throne.ts";
 import { effectFloat as float, invalidEffect as invalid } from "./power-values.ts";
 
-export function dragonAttackEffect(
-  state: PowerSnapshot,
+export function playerGameEffect(
+  state: PlayerEffectSnapshot,
   rules: Rules,
   context: RuleContext,
   abilities: readonly (readonly GeneralSkill[])[],
   world: ReadonlyMap<number, number>,
   emperorVersion: number | null | undefined,
+  effect: 37 | 78 | 487 | 895 | 2196 | NewGeneralEquipmentModifier,
 ): number {
+  if (
+    ![37, 78, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 487, 895, 2196].includes(
+      effect,
+    )
+  )
+    return invalid();
   const vip = vipEffects(state.vip, rules, context.now);
   const general = generalSkillEffects(abilities, rules);
   const alliance = allianceScienceEffects(state.allianceSciences, rules);
@@ -88,5 +96,16 @@ export function dragonAttackEffect(
   if (selection !== undefined && selection !== null && typeof selection !== "string")
     return invalid();
   const complete = equipmentSetEffects(state.equipment, selection, rules, context, equipment);
-  return resolve(487, complete, false);
+  return resolve(effect, complete, false);
+}
+
+export function dragonAttackEffect(
+  state: PlayerEffectSnapshot,
+  rules: Rules,
+  context: RuleContext,
+  abilities: readonly (readonly GeneralSkill[])[],
+  world: ReadonlyMap<number, number>,
+  emperorVersion: number | null | undefined,
+): number {
+  return playerGameEffect(state, rules, context, abilities, world, emperorVersion, 487);
 }
