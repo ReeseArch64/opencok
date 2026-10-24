@@ -32,6 +32,7 @@
     "./world-monster-detail": "./src/world-monster-detail.ts",
     "./dragon-ranking": "./src/dragon-ranking.ts",
     "./value": "./src/value.ts",
-    "./configuration": "./src/configuration.ts"
+    "./configuration": "./src/configuration.ts",
+    "./nickname-change": "./src/nickname-change.ts"
   }
 }

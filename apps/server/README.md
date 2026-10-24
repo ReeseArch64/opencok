@@ -3746,3 +3746,46 @@ A focused mutation check runs the login tests against seven disabled auth guards
 a temporary test bundle: signature, device binding, account activation, realm,
 account device and both ban checks. Every mutant must fail its tests. This is a
 bounded auth check, not the architecture's future repository-wide Stryker suite.
+
+## Nickname change persistence and notifications
+
+`user.modify.nickName` remains unsupported under
+[issue #89](https://github.com/ReeseArch64/opencok/issues/89). The internal
+`src/nickname-change.ts` runtime now composes the actual goods catalog, owned payment
+store and session notification bus. Its caller must supply the authenticated UID,
+stable operation UUID, validated name and a real CN1 refund-ratio provider. Reserved
+Java-pattern matching, CN1 session accounting, alliance/throne/shared-user effects,
+command orchestration and the background recovery relay remain pending.
+
+The runtime reads goods 200021 `type`, `price` and nonblank `para1` through `para9`.
+It commits payment before attempting the debit push, and commits any refund before its
+refund push. Items use `push.item.del` or `push.item.add` with final signed Int count;
+item-add includes the Long `vanishTime` and available parameters. Gold uses
+`push.mobile.gold.change` or exact-platform `push.dmm.gold.change`, with three signed
+Long category balances. The typed terminal reply keeps optional original debit `gold`
+before boolean `status`, including a failed change that later refunded at another price.
+
+Kingdom migration `0009_nickname_notification_delivery` adds `notificationStage` with
+default zero. Stage one acknowledges debit and stage two acknowledges refund. A
+notification acknowledgment commits with that stage and its pending bit; a missing
+recipient, SQL failure or deadline leaves work pending. The global receipt migrations
+and kingdom journal migration must already be applied. Back up before schema changes
+and retain the additive column and migration history when rolling application code back.
+No existing account balance, name or inventory is rewritten by the migration.
+
+Recovery publishes current authoritative counts and balances under the realm owner
+lock. It coalesces an unseen debit/refund into the current final state, preserving the
+online debit-then-refund sequence when both reached an active recipient. Packet queueing
+does not prove client receipt; retries may repeat absolute values. An abort signal is
+checked around session ownership refresh so expired publication cannot send a late
+packet after its database lock is released. Notification failures never cause another
+economic charge or undo a committed name.
+
+Disposable PostgreSQL and the actual runtime cover item/mobile/DMM/CN1 paths, current-price
+refunds, intervening inventory changes and signed wrap, offline reconciliation, failed
+acknowledgments, lost commit replies and restart recovery. Typed packet and session units
+cover field widths/order, optional parameters, terminal replies and late-send cancellation.
+Run `bun --no-env-file test apps/server/integration/nickname-change.test.ts` from the root
+for the 23 integration scenarios. No mobile-client validation is claimed. The existing
+`@opencok/mappings` workspace dependency is now required at runtime rather than only in
+development; the lockfile retains the same package versions.

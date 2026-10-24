@@ -31,7 +31,8 @@
     "./power": "./src/power.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
-    "./configuration": "./src/configuration.ts"
+    "./configuration": "./src/configuration.ts",
+    "./nickname-change": "./src/nickname-change.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

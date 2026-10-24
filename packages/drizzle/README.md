@@ -2,7 +2,7 @@
 
 `@opencok/drizzle` owns the application's PostgreSQL schemas, typed client and
 versioned Drizzle migrations. The maintained source of truth is `src/schema`,
-with **780 tables / 6,366 fields** and one module per table.
+with **780 tables / 6,367 fields** and one module per table.
 
 | Default physical database | SQL namespaces                                  | Migration role | Tables |
 | ------------------------- | ----------------------------------------------- | -------------- | -----: |

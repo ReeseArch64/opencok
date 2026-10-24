@@ -9,6 +9,9 @@ import type {
   NicknameChangeConfiguration,
   NicknameChangeRecord,
   NicknameChangeStore,
+  NicknameNotificationDelivery,
+  NicknameNotificationPublisher,
+  NicknameNotification,
 } from "@opencok/contracts/nickname-change";
 import type { Row } from "@opencok/contracts/rows";
 import {
@@ -43,6 +46,7 @@ type ItemPayment = {
   vanishTime: string | null;
   before: number;
   after: number;
+  refund?: { before: number | null; after: number };
 };
 type GoldPayment = {
   version: 1;
@@ -138,6 +142,17 @@ export function nicknameChangePayment(record: NicknameChangeRecord): Payment {
       return invalid();
     if (value.vanishTime !== null) javaDecimal(value.vanishTime, 64);
     if (record.responseGold !== null) return invalid();
+    if (value.refund !== undefined) {
+      if (record.state !== "refunded" || !value.refund || typeof value.refund !== "object")
+        return invalid();
+      const refund = value.refund as Record<string, unknown>;
+      if (
+        (refund.before !== null && !integer(refund.before)) ||
+        !integer(refund.after) ||
+        refund.after !== (refund.before === null ? 1 : (Number(refund.before) + 1) | 0)
+      )
+        return invalid();
+    }
     return value as ItemPayment;
   }
   if (
@@ -192,6 +207,10 @@ function validateRecord(record: NicknameChangeRecord, owner: string, operationId
     !integer(record.pendingEffects) ||
     record.pendingEffects < 0 ||
     record.pendingEffects > 31 ||
+    !integer(record.notificationStage) ||
+    record.notificationStage < 0 ||
+    record.notificationStage > 2 ||
+    (record.state !== "refunded" && record.notificationStage > 1) ||
     (record.state === "prepared" && record.pendingEffects !== 0)
   )
     return invalid();
@@ -235,6 +254,7 @@ export function createNicknameChangeStore(
   databases: Pick<Databases, "getKingdom" | "global">,
   kingdomId: number,
   configuration: NicknameChangeConfiguration,
+  notifications?: NicknameNotificationDelivery,
 ): NicknameChangeStore {
   if (
     !integer(kingdomId) ||
@@ -242,6 +262,15 @@ export function createNicknameChangeStore(
     typeof configuration.itemType !== "function" ||
     typeof configuration.price !== "function" ||
     typeof configuration.refundRatio !== "function"
+  )
+    return invalid();
+  if (
+    notifications &&
+    (typeof notifications.publish !== "function" ||
+      typeof notifications.report !== "function" ||
+      !integer(notifications.timeoutMs) ||
+      notifications.timeoutMs < 100 ||
+      notifications.timeoutMs > 30000)
   )
     return invalid();
   const db = databases.getKingdom(kingdomId).db;
@@ -256,6 +285,109 @@ export function createNicknameChangeStore(
       },
       { isolationLevel: "read committed", accessMode: "read write" },
     );
+  };
+  const deliverNotifications = async (
+    uid: string,
+    operationId: string,
+    publish: NicknameNotificationPublisher,
+    timeoutMs: number,
+  ): Promise<boolean> => {
+    key(uid, operationId);
+    if (
+      typeof publish !== "function" ||
+      !integer(timeoutMs) ||
+      timeoutMs < 100 ||
+      timeoutMs > 30000
+    )
+      return invalid();
+    return db.transaction(
+      async (tx) => {
+        const profile = await owner(tx, uid);
+        if (!profile || profile.uid !== uid || profile.serverId !== kingdomId) return invalid();
+        const record = await operation(tx, uid, operationId);
+        if (!record) return false;
+        const stage = record.state === "refunded" ? 2 : 1;
+        if (record.notificationStage >= stage) return false;
+        const payment = nicknameChangePayment(record);
+        let snapshot: NicknameNotification;
+        if (payment.kind === "gold")
+          snapshot = {
+            kind: "gold",
+            stage: stage === 2 ? "refund" : "debit",
+            platform: payment.platform,
+            balances: balances(profile),
+          };
+        else {
+          const [item] = await tx
+            .select()
+            .from(user_item)
+            .where(eq(user_item.uuid, payment.uuid))
+            .limit(1)
+            .for("update");
+          if (item && (item.ownerId !== uid || item.itemId !== "200021")) return invalid();
+          snapshot = {
+            kind: "item",
+            stage: stage === 2 ? "refund" : "debit",
+            item: {
+              uuid: payment.uuid,
+              count: item?.count ?? 0,
+              vanishTime: item?.vanishTime ?? 0n,
+            },
+          };
+        }
+        const controller = new AbortController();
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        let delivered: boolean;
+        try {
+          delivered = await Promise.race([
+            Promise.resolve().then(() => publish(uid, Object.freeze(snapshot), controller.signal)),
+            new Promise<never>((_, reject) => {
+              timer = setTimeout(() => {
+                controller.abort();
+                reject(new Error("Nickname notification deadline"));
+              }, timeoutMs);
+            }),
+          ]);
+          controller.signal.throwIfAborted();
+        } finally {
+          clearTimeout(timer);
+          controller.abort();
+        }
+        if (typeof delivered !== "boolean") return invalid();
+        if (!delivered) return false;
+        const changed = await tx
+          .update(nickname_change)
+          .set({ notificationStage: stage, pendingEffects: record.pendingEffects & ~16 })
+          .where(
+            and(
+              eq(nickname_change.operationId, operationId),
+              eq(nickname_change.notificationStage, record.notificationStage),
+              eq(nickname_change.pendingEffects, record.pendingEffects),
+            ),
+          )
+          .returning({ id: nickname_change.operationId });
+        if (changed.length !== 1 || changed[0]!.id !== operationId) return invalid();
+        return true;
+      },
+      { isolationLevel: "read committed", accessMode: "read write" },
+    );
+  };
+  const notify = async (uid: string, operationId: string) => {
+    if (!notifications) return;
+    try {
+      await deliverNotifications(uid, operationId, notifications.publish, notifications.timeoutMs);
+    } catch {
+      try {
+        notifications.report();
+      } catch {}
+    }
+  };
+  const deliveredResult = async (record: NicknameChangeRecord) => {
+    if (!notifications) return record;
+    await notify(record.ownerUid, record.operationId);
+    const current = await find(record.ownerUid, record.operationId);
+    if (!current) return invalid();
+    return current;
   };
   const prepare = async (uid: string, operationId: string, name: string, now: number) => {
     const requestedAt = time(now);
@@ -365,6 +497,7 @@ export function createNicknameChangeStore(
           responseGold,
           failureCode: null,
           pendingEffects: 0,
+          notificationStage: 0,
           createdAt: requestedAt,
           updatedAt: requestedAt,
         };
@@ -408,6 +541,10 @@ export function createNicknameChangeStore(
             .limit(1)
             .for("update");
           if (item && (item.ownerId !== uid || item.itemId !== "200021")) return invalid();
+          nextPayment = {
+            ...payment,
+            refund: { before: item?.count ?? null, after: item ? (item.count + 1) | 0 : 1 },
+          };
           if (item)
             await tx
               .update(user_item)
@@ -449,7 +586,7 @@ export function createNicknameChangeStore(
           state: committed ? "committed" : "refunded",
           payment: JSON.stringify(nextPayment),
           failureCode: committed ? null : failureCode,
-          pendingEffects: committed ? 31 : 16,
+          pendingEffects: committed ? (record.notificationStage === 1 ? 15 : 31) : 16,
           updatedAt: timestamp < record.updatedAt ? record.updatedAt : timestamp,
         };
         const [updated] = await tx
@@ -478,9 +615,10 @@ export function createNicknameChangeStore(
     time(now);
     const record = await find(uid, operationId);
     if (!record) return invalid();
-    if (record.state !== "prepared") return record;
+    if (record.state !== "prepared") return deliveredResult(record);
+    let terminal: NicknameChangeRecord;
     try {
-      return await withNicknameLock(databases.global.db, record.newName, async (tx) => {
+      terminal = await withNicknameLock(databases.global.db, record.newName, async (tx) => {
         const [receipt] = await tx
           .select()
           .from(nickname_change_receipt)
@@ -497,13 +635,15 @@ export function createNicknameChangeStore(
       });
     } catch (error) {
       const completed = await find(uid, operationId);
-      if (completed && completed.state !== "prepared") return completed;
-      throw error;
+      if (completed && completed.state !== "prepared") terminal = completed;
+      else throw error;
     }
+    return deliveredResult(terminal);
   };
   return {
     find,
     recover,
+    deliverNotifications,
     async deliverChat(uid, operationId, publish, timeoutMs) {
       key(uid, operationId);
       if (
@@ -567,6 +707,7 @@ export function createNicknameChangeStore(
       try {
         await withAvailableNickname(databases.global.db, name, async (tx) => {
           await prepare(uid, operationId, name, now);
+          await notify(uid, operationId);
           await writeNicknameGlobal(tx, uid, name);
           try {
             await tx.insert(nickname_change_receipt).values({

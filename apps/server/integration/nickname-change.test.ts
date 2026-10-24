@@ -15,6 +15,9 @@ import { createChatAvatarProfileStore } from "@opencok/repositories/chat-avatar-
 import { createChatNicknamePublisher } from "@opencok/connection/chat-nickname";
 import type { AvatarProfileUpdate } from "@opencok/contracts/files";
 import { createChatApp } from "../../chat/src/app.ts";
+import { createRealmNotifications } from "@opencok/connection/notifications";
+import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
+import { createNicknameChangeRuntime } from "../src/nickname-change.ts";
 import {
   createNicknameChangeStore,
   nicknameChangePayment,
@@ -160,6 +163,7 @@ function pauseGlobalCommit() {
   const reached = Promise.withResolvers<void>(),
     resume = Promise.withResolvers<void>();
   let armed = true;
+  let rejected = false;
   Object.defineProperty(pool, "connect", {
     configurable: true,
     value: (...connectArgs: unknown[]) => {
@@ -185,6 +189,7 @@ function pauseGlobalCommit() {
               armed = false;
               reached.resolve();
               await resume.promise;
+              if (rejected) throw new Error("Synthetic rejected global commit");
             }
             return Reflect.apply(client.query, client, args);
           },
@@ -195,9 +200,39 @@ function pauseGlobalCommit() {
   });
   return {
     reached: reached.promise,
-    resume: () => resume.resolve(),
+    resume: (fail = false) => {
+      rejected ||= fail;
+      resume.resolve();
+    },
     restore: () => Object.defineProperty(pool, "connect", { value: originalConnect }),
   };
+}
+
+function notificationFixture(
+  options: { timeoutMs?: number; refundRatio?: NicknameChangeConfiguration["refundRatio"] } = {},
+) {
+  const notifications = createRealmNotifications(),
+    events: { command: string; body: Fields }[] = [],
+    reports: string[] = [];
+  const goods = { type: "17", price: "100", para1: "restored", para2: " ", para9: "last" };
+  const runtime = createNicknameChangeRuntime({
+    databases,
+    kingdomId: 1,
+    rules: { goods: new Map([["200021", goods]]) },
+    refundRatio: options.refundRatio ?? configuration.refundRatio,
+    notifications,
+    timeoutMs: options.timeoutMs ?? 1000,
+    report: () => {
+      reports.push("notification");
+    },
+  });
+  const listen = (uid: string) =>
+    notifications.subscribe(uid, async (command, body, signal) => {
+      if (signal?.aborted) return false;
+      events.push({ command, body: decode(encode(body)) });
+      return true;
+    });
+  return { runtime, notifications, events, reports, goods, listen };
 }
 
 beforeAll(async () => {
@@ -805,6 +840,325 @@ test("Chat delivery deadlines preserve the pending bit and abort the publication
     ),
   ).toBe(false);
 });
+
+test("nickname runtime sends committed item debit/refund packets and persists their delivery stage", async () => {
+  for (const account of [true, false]) {
+    const uid = await seed({ items: account ? 2 : 1, account }),
+      operationId = randomUUID(),
+      f = notificationFixture();
+    f.notifications.subscribe(uid, async (command, body, signal) => {
+      if (signal?.aborted) return false;
+      const saved = await item(uid);
+      expect(body.count).toEqual(sfs.int(saved!.count));
+      f.events.push({ command, body: decode(encode(body)) });
+      return true;
+    });
+    const reply = await f.runtime.change(uid, operationId, `Notify ${uid}`, now);
+    expect(reply).toEqual({ status: sfs.bool(account) });
+    expect(f.events[0]).toEqual({
+      command: "push.item.del",
+      body: {
+        uuid: sfs.string(`item-${uid}`),
+        itemId: sfs.string("200021"),
+        count: sfs.int(account ? 1 : 0),
+      },
+    });
+    if (account) {
+      expect(f.events).toHaveLength(1);
+      expect(await f.runtime.store.find(uid, operationId)).toMatchObject({
+        notificationStage: 1,
+        pendingEffects: 15,
+      });
+    } else {
+      expect(f.events[1]).toEqual({
+        command: "push.item.add",
+        body: {
+          uuid: sfs.string(`item-${uid}`),
+          itemId: sfs.string("200021"),
+          count: sfs.int(1),
+          vanishTime: sfs.long(9007199254740993n),
+          para1: sfs.string("restored"),
+          para9: sfs.string("last"),
+        },
+      });
+      expect(await f.runtime.store.find(uid, operationId)).toMatchObject({
+        notificationStage: 2,
+        pendingEffects: 0,
+      });
+    }
+    const before = f.events.length;
+    expect(await f.runtime.change(uid, operationId, `Notify ${uid}`, now + 1)).toEqual(reply);
+    expect(f.events).toHaveLength(before);
+    expect(f.reports).toEqual([]);
+    expect(await profile(uid)).toMatchObject({ chNameCount: "1" });
+  }
+});
+
+test("gold runtime sends exact mobile/DMM buckets and current-price CN1 refunds without changing reply gold", async () => {
+  for (const pf of ["synthetic", "dmm", "cn1"]) {
+    const uid = await seed({ account: false, pf }),
+      operationId = randomUUID();
+    let ratios = 0;
+    const f = notificationFixture({
+      refundRatio: async () => {
+        ratios++;
+        return 0.5;
+      },
+    });
+    f.notifications.subscribe(uid, async (command, body, signal) => {
+      if (signal?.aborted) return false;
+      f.events.push({ command, body: decode(encode(body)) });
+      f.goods.price = "200";
+      return true;
+    });
+    const reply = await f.runtime.change(uid, operationId, `Gold ${uid}`, now);
+    expect(reply).toEqual({ gold: sfs.long(pf === "dmm" ? 150n : 100n), status: sfs.bool(false) });
+    expect(f.events).toHaveLength(2);
+    expect(f.events[0]).toEqual(
+      pf === "dmm"
+        ? {
+            command: "push.dmm.gold.change",
+            body: {
+              dmmGold: sfs.long(0n),
+              dmmPaidGold: sfs.long(50n),
+              dmmPaidSpecialGold: sfs.long(0n),
+            },
+          }
+        : {
+            command: "push.mobile.gold.change",
+            body: {
+              freeGold: sfs.long(100n),
+              paidGold: sfs.long(0n),
+              paidSpecialGold: sfs.long(0n),
+            },
+          },
+    );
+    expect(f.events[1]).toEqual(
+      pf === "dmm"
+        ? {
+            command: "push.dmm.gold.change",
+            body: {
+              dmmGold: sfs.long(200n),
+              dmmPaidGold: sfs.long(50n),
+              dmmPaidSpecialGold: sfs.long(0n),
+            },
+          }
+        : {
+            command: "push.mobile.gold.change",
+            body: {
+              freeGold: sfs.long(pf === "cn1" ? 200n : 300n),
+              paidGold: sfs.long(0n),
+              paidSpecialGold: sfs.long(0n),
+            },
+          },
+    );
+    expect(ratios).toBe(pf === "cn1" ? 1 : 0);
+    expect(await f.runtime.store.find(uid, operationId)).toMatchObject({
+      notificationStage: 2,
+      pendingEffects: 0,
+    });
+  }
+  const uid = await seed(),
+    f = notificationFixture();
+  f.goods.price = "0";
+  f.listen(uid);
+  expect(await f.runtime.change(uid, randomUUID(), "Zero Gold", now)).toEqual({
+    gold: sfs.long(200n),
+    status: sfs.bool(true),
+  });
+  expect(f.events).toHaveLength(1);
+  expect(f.events[0]!.body.freeGold).toEqual(sfs.long(200n));
+});
+
+test("offline notification recovery uses current inventory and balances and coalesces unseen refunds", async () => {
+  const uid = await seed({ items: 1 }),
+    operationId = randomUUID(),
+    f = notificationFixture();
+  await f.runtime.change(uid, operationId, "Offline Item", now);
+  expect(await f.runtime.store.find(uid, operationId)).toMatchObject({
+    notificationStage: 0,
+    pendingEffects: 31,
+  });
+  await realm().db.update(user_item).set({ count: 7 }).where(eq(user_item.ownerId, uid));
+  f.listen(uid);
+  expect(await f.runtime.deliverNotifications(uid, operationId)).toBe(true);
+  expect(f.events.at(-1)?.body.count).toEqual(sfs.int(7));
+  expect(await item(uid)).toMatchObject({ count: 7 });
+  expect(await f.runtime.deliverNotifications(uid, operationId)).toBe(false);
+  const refunded = await seed({ account: false, items: 1 }),
+    refundId = randomUUID();
+  await f.runtime.change(refunded, refundId, "Offline Refund", now);
+  await realm().db.delete(user_item).where(eq(user_item.ownerId, refunded));
+  f.listen(refunded);
+  expect(await f.runtime.deliverNotifications(refunded, refundId)).toBe(true);
+  expect(f.events.at(-1)).toEqual({
+    command: "push.item.del",
+    body: { uuid: sfs.string(`item-${refunded}`), itemId: sfs.string("200021"), count: sfs.int(0) },
+  });
+  expect(await f.runtime.store.find(refunded, refundId)).toMatchObject({
+    notificationStage: 2,
+    pendingEffects: 0,
+  });
+  const dmm = await seed({ pf: "dmm" }),
+    dmmId = randomUUID();
+  await f.runtime.change(dmm, dmmId, "Offline DMM", now);
+  await realm()
+    .db.update(userprofile)
+    .set({ dmmGold: 9007199254740993n, dmmPaidGold: -5n, dmmPaidSpecialGold: 3n })
+    .where(eq(userprofile.uid, dmm));
+  f.listen(dmm);
+  expect(await f.runtime.deliverNotifications(dmm, dmmId)).toBe(true);
+  expect(f.events.at(-1)?.body).toEqual({
+    dmmGold: sfs.long(9007199254740993n),
+    dmmPaidGold: sfs.long(-5n),
+    dmmPaidSpecialGold: sfs.long(3n),
+  });
+  expect(f.reports).toEqual([]);
+});
+
+test("item refunds capture actual intervening counts, signed wrap and recreated-stack metadata", async () => {
+  for (const count of [7, 2147483647, null]) {
+    const uid = await seed({ items: 1 }),
+      operationId = randomUUID(),
+      f = notificationFixture();
+    f.listen(uid);
+    const pause = pauseGlobalCommit(),
+      change = f.runtime.change(uid, operationId, `Intervening ${uid}`, now);
+    try {
+      await pause.reached;
+      if (count === null) await realm().db.delete(user_item).where(eq(user_item.ownerId, uid));
+      else
+        await realm()
+          .db.update(user_item)
+          .set({ count, vanishTime: 9007199254740999n })
+          .where(eq(user_item.ownerId, uid));
+      pause.resume(true);
+      expect(await change).toEqual({ status: sfs.bool(false) });
+      const expected = count === null ? 1 : (count + 1) | 0;
+      expect(await item(uid)).toMatchObject({ count: expected });
+      const record = (await f.runtime.store.find(uid, operationId))!;
+      expect(nicknameChangePayment(record)).toMatchObject({
+        kind: "item",
+        refund: { before: count, after: expected },
+      });
+      expect(f.events).toHaveLength(2);
+      expect(f.events[1]!.body.count).toEqual(sfs.int(expected));
+      expect(f.events[1]!.body.vanishTime).toEqual(
+        sfs.long(count === null ? 9007199254740993n : 9007199254740999n),
+      );
+    } finally {
+      pause.resume();
+      await Promise.allSettled([change]);
+      pause.restore();
+    }
+  }
+});
+
+test("notification acknowledgment failures preserve payment and recover without another charge", async () => {
+  const uid = await seed({ items: 2 }),
+    operationId = randomUUID(),
+    f = notificationFixture();
+  f.listen(uid);
+  await realm().pool.query(
+    'CREATE TRIGGER reject_notification BEFORE UPDATE OF "notificationStage" ON opencok_kingdom.nickname_change FOR EACH ROW EXECUTE FUNCTION public.reject_nickname()',
+  );
+  try {
+    expect(await f.runtime.change(uid, operationId, "Ack Failure", now)).toEqual({
+      status: sfs.bool(true),
+    });
+    expect(await f.runtime.store.find(uid, operationId)).toMatchObject({
+      notificationStage: 0,
+      pendingEffects: 31,
+    });
+    expect(f.reports).toHaveLength(2);
+  } finally {
+    await realm().pool.query("DROP TRIGGER reject_notification ON opencok_kingdom.nickname_change");
+  }
+  expect(await f.runtime.deliverNotifications(uid, operationId)).toBe(true);
+  expect(await item(uid)).toMatchObject({ count: 1 });
+  expect(await profile(uid)).toMatchObject({ chNameCount: "1", name: "Ack Failure" });
+  expect(f.events.every((event) => event.body.count?.value === 1)).toBe(true);
+  const lost = await seed({ items: 2 }),
+    lostId = randomUUID(),
+    g = notificationFixture();
+  g.listen(lost);
+  const fault = loseCommit(realm().pool, 'update "opencok_kingdom"."nickname_change"');
+  try {
+    expect(await g.runtime.change(lost, lostId, "Lost Ack", now)).toEqual({
+      status: sfs.bool(true),
+    });
+    expect(fault.fired()).toBe(true);
+    expect(g.events).toHaveLength(1);
+    expect(await g.runtime.store.find(lost, lostId)).toMatchObject({
+      notificationStage: 1,
+      pendingEffects: 15,
+    });
+    expect(await g.runtime.deliverNotifications(lost, lostId)).toBe(false);
+    expect(await item(lost)).toMatchObject({ count: 1 });
+  } finally {
+    fault.restore();
+  }
+});
+
+test("notification deadlines abort late recipients and preserve current-state recovery", async () => {
+  const uid = await seed({ items: 1 }),
+    operationId = randomUUID(),
+    f = notificationFixture({ timeoutMs: 100 });
+  const gate = Promise.withResolvers<void>();
+  f.notifications.subscribe(uid, async (command, body, signal) => {
+    await gate.promise;
+    if (signal?.aborted) return false;
+    f.events.push({ command, body });
+    return true;
+  });
+  expect(await f.runtime.change(uid, operationId, "Notify Deadline", now)).toEqual({
+    status: sfs.bool(true),
+  });
+  expect(f.reports).toHaveLength(2);
+  expect(await f.runtime.store.find(uid, operationId)).toMatchObject({
+    notificationStage: 0,
+    pendingEffects: 31,
+  });
+  await realm().db.update(user_item).set({ count: 11 }).where(eq(user_item.ownerId, uid));
+  gate.resolve();
+  await Bun.sleep(0);
+  expect(f.events).toEqual([]);
+  f.listen(uid);
+  expect(await f.runtime.deliverNotifications(uid, operationId)).toBe(true);
+  expect(f.events[0]!.body.count).toEqual(sfs.int(11));
+  expect(await profile(uid)).toMatchObject({ chNameCount: "1" });
+});
+
+test("notified CN1 preparation survives restart and emits only its eventual refund", async () => {
+  const uid = await seed({ account: false, pf: "cn1" }),
+    operationId = randomUUID(),
+    f = notificationFixture();
+  f.listen(uid);
+  await expect(f.runtime.change(uid, operationId, "CN1 Notified", now)).rejects.toThrow();
+  expect(f.events).toHaveLength(1);
+  expect(f.events[0]!.body.freeGold).toEqual(sfs.long(100n));
+  expect(await f.runtime.store.find(uid, operationId)).toMatchObject({
+    state: "prepared",
+    notificationStage: 1,
+  });
+  await databases.close();
+  await pg.restart();
+  databases = createDatabases(pg.options, topology);
+  const g = notificationFixture({ refundRatio: async () => 0.5 });
+  g.listen(uid);
+  expect(await g.runtime.recover(uid, operationId, now + 10)).toEqual({
+    gold: sfs.long(100n),
+    status: sfs.bool(false),
+  });
+  expect(g.events).toHaveLength(1);
+  expect(g.events[0]!.body.freeGold).toEqual(sfs.long(150n));
+  expect(await g.runtime.store.find(uid, operationId)).toMatchObject({
+    state: "refunded",
+    notificationStage: 2,
+    pendingEffects: 0,
+  });
+  expect(await profile(uid)).toMatchObject({ gold: 150n, chNameCount: "1" });
+}, 60_000);
 
 test("global receipt survives PostgreSQL restart and completes a failed realm finalization", async () => {
   const uid = await seed({ items: 1 }),

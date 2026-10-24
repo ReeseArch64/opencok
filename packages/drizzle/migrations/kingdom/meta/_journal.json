@@ -64,6 +64,13 @@
       "when": 1792875563878,
       "tag": "0008_nickname_change_journal",
       "breakpoints": false
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792877948096,
+      "tag": "0009_nickname_notification_delivery",
+      "breakpoints": false
     }
   ]
 }
