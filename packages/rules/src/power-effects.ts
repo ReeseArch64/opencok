@@ -4,13 +4,7 @@ import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import type { Rules } from "./game.ts";
 
-function integer(raw: unknown): number {
-  if (!/^[+-]?\d+$/.test(String(raw))) throw new GameError(errors.unsupported, "power_effect");
-  const value = Number(raw);
-  if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647)
-    throw new GameError(errors.unsupported, "power_effect");
-  return value;
-}
+import { effectInteger as integer } from "./power-values.ts";
 
 function effectValues(source: string | undefined, requested: number): number[] {
   if (!source?.trim()) return [];

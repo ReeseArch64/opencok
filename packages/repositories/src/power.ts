@@ -16,6 +16,9 @@ import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_u
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { user_vip } from "@opencok/drizzle/schema/opencok_kingdom/user_vip";
 import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science";
+import { user_civilization_prestige } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_prestige";
+import { user_military_rank } from "@opencok/drizzle/schema/opencok_kingdom/user_military_rank";
+import { user_miracle_buff_active } from "@opencok/drizzle/schema/opencok_kingdom/user_miracle_buff_active";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Database } from "./game.ts";
@@ -40,6 +43,9 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     user_state,
     user_vip,
     alliance_science,
+    user_civilization_prestige,
+    user_military_rank,
+    user_miracle_buff_active,
   ])
     await db.select().from(table).limit(0);
 }
@@ -62,6 +68,7 @@ export function readPowerState(
             allianceId: userprofile.allianceId,
             serverId: userprofile.serverId,
             decomposeSuitEffect: userprofile.decomposesuiteffect,
+            civilizationType: userprofile.civilizationType,
           })
           .from(userprofile)
           .where(eq(userprofile.uid, uid))
@@ -86,6 +93,9 @@ export function readPowerState(
         states: [],
         vip: undefined,
         allianceSciences: [],
+        prestige: [],
+        military: undefined,
+        miracle: undefined,
       };
       if (!profile) return empty;
       const statistics = (
@@ -233,6 +243,28 @@ export function readPowerState(
             .where(eq(alliance_science.allianceId, profile.allianceId))
             .orderBy(asc(alliance_science.scienceId))
         : [];
+      const prestige = await tx
+        .select({
+          civilizationType: user_civilization_prestige.civilizationType,
+          prestigeValue: user_civilization_prestige.prestigeValue,
+        })
+        .from(user_civilization_prestige)
+        .where(eq(user_civilization_prestige.uid, uid))
+        .orderBy(asc(user_civilization_prestige.civilizationType));
+      const military = (
+        await tx
+          .select({ skill: user_military_rank.skill })
+          .from(user_military_rank)
+          .where(eq(user_military_rank.uid, uid))
+          .limit(1)
+      )[0];
+      const miracle = (
+        await tx
+          .select({ level: user_miracle_buff_active.level })
+          .from(user_miracle_buff_active)
+          .where(eq(user_miracle_buff_active.uid, uid))
+          .limit(1)
+      )[0];
       return {
         profile,
         statistics,
@@ -252,6 +284,9 @@ export function readPowerState(
         states,
         vip,
         allianceSciences,
+        prestige,
+        military,
+        miracle,
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

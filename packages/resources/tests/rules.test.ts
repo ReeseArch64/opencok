@@ -38,6 +38,10 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "suit",
       "svip",
       "alliancescience",
+      "reputation_level",
+      "civilization_feature",
+      "wr_skill",
+      "miracle_buff",
     ])
       await writeFile(
         join(directory, `${name}.xml`),
@@ -48,7 +52,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       '<database><Group id="vip"><ItemSpec id="001" power="007"/></Group></database>',
     );
     const power = (await loadRules(directory)).power;
-    expect(Object.keys(power)).toHaveLength(15);
+    expect(Object.keys(power)).toHaveLength(19);
     expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
     for (const name of ["general_sale", "pay_servercontrol", "kingdomskill", "fb_share"])
       await writeFile(
