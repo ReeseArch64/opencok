@@ -79,6 +79,8 @@ export const serverSchema = z
       .default("true")
       .transform((value) => value === "true"),
     GAME_HOST: z.string().min(1).default("127.0.0.1"),
+    GAME_CHAT_INTERVAL: z.coerce.number().int().min(0).max(2147483647).default(1),
+    GAME_FEED_MAX_COUNT: z.coerce.number().int().min(0).max(2147483647).default(3),
     GAME_PORT: port(19933),
     GAME_HEALTH_PORT: port(18090),
     ...realmSettings,
