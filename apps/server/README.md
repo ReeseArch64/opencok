@@ -6,7 +6,8 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when configured), `login.dataconfig`,
-`login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
+`login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`,
+`equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
@@ -225,6 +226,117 @@ notification delivery and other profile mutation commands remain separate work.
 Unit tests exercise protocol, controller and generated SQL behavior with synthetic
 state, including a simulated owner-lock schedule. They do not establish live database
 concurrency or native-client compatibility; neither was exercised in this phase.
+
+Seven profile preference commands persist mapped fields in the existing
+`user_mixed_info` row:
+
+| Command              | Input               | Stored field       | Response                                                          |
+| -------------------- | ------------------- | ------------------ | ----------------------------------------------------------------- |
+| `equip.show`         | Int `show`          | `showEquip`        | Int `show`                                                        |
+| `medal.show`         | Int `show`          | `showMedal`        | Int `show`                                                        |
+| `march.soldier.show` | Int `show`          | `marchSoldierShow` | Int `show`                                                        |
+| `colorblind.set`     | Int `set`           | `colorblind`       | Int `show`                                                        |
+| `equip.scroll`       | Int `setting`       | `scrollEquip`      | Bool `scrollEquip` for 0/1; ordinary success for other Int values |
+| `banner.set`         | Optional Int `set`  | `showBanner`       | Int `show` when the row exists; ordinary success otherwise        |
+| `speed.cd.open`      | Optional Int `open` | `clientSaveFlag`   | Ordinary success                                                  |
+
+All fields retain signed Int values except equipment scrolling, whose effective
+updates accept only 0/1. Other scroll integers skip the mixed-state read entirely.
+Banner/speed requests skip mixed-state reads when their parameter is absent; a missing
+profile also produces their empty-result acknowledgment. Missing mixed rows are tolerated
+only for those two commands, and their values are decoded only after locating the row.
+Required settings reject missing state. These handlers never create mixed-state rows.
+
+The repository locks/revalidates the owner and locks the selected mixed row in one
+read-committed transaction, then updates only the mapped column. Unchanged primitive
+values skip the update, except speed flags, which always write. Nullable integer fields
+compare SQL null as zero. Banner storage uses bigint but compares within the signed Int
+domain and writes an exact bigint; out-of-range restored values reject. The banner setter
+preserves its literal value; country-specific public display remains a separate read rule.
+Existing public-profile projections consume the three visibility fields and show them
+only when the value equals 1. No cache, notification or unsolicited push is emitted.
+
+Input and write failures reject without a success response; rollback preserves previous
+state. A lost commit acknowledgment can leave a value saved, and retries follow the
+unchanged-value or speed-write rule. Unit coverage uses fake SQL and a simulated owner-lock
+schedule, including different-field updates preserving both values. Live concurrency,
+client behavior, nickname changes and their costs remain outside this completed slice.
+
+Nickname checking now has a pure text/evaluation foundation in `rules/nickname`.
+It uses Java trim (boundary code units at most U+0020), Java 8 blank classification,
+balanced braces and the original JSON/emoji/supplementary-character exclusions.
+Weighted length counts U+007E–U+05FF units as one each, removes them, then measures
+the remaining UTF-16 text using Java GBK byte widths and replacement behavior.
+Removing those units can join surrogate halves; supplementary or unmappable characters
+use the encoder's replacement width. Pure inputs are bounded to 65,535 UTF-16 units;
+this does not expand the existing SFS transport bounds or admit malformed wire text.
+
+The 3–16 gate uses the trimmed weighted length. Response `length` adds every ASCII
+space in the original input, including internal spaces already counted by the weighted
+length; `remainLength` can therefore be negative while this gate still passes. A leading
+parenthesis sets `exist` to -1 but does not skip otherwise eligible filter or availability
+calls. Invalid length/characters skip both providers; a filter match skips availability.
+Only type 0 checks occupation, while other signed Int types still filter. Providers
+receive the trimmed name, are required explicitly and preserve reached failures.
+
+The GBK width table contains 139 intervals covering 23,940 two-byte BMP characters.
+An independently authored Temurin 8.0.504+1 standard-library probe supplied an exhaustive
+65,536-unit width checksum and 2,264 synthetic text vectors. The checked-in vectors store
+UTF-16 as hex to retain surrogate and control cases. Normal unit tests execute only
+TypeScript; no private game classes were executed to generate evidence. Character
+validation follows the collected original's balanced-brace return rather than an
+inconsistent reconstructed source variant.
+
+The nickname bad-word matcher now models the specific generated patterns rather than
+using JavaScript word boundaries. ASCII-word entries use ASCII case folding with Java 8
+Unicode letter/digit/underscore boundaries and its combining-mark base behavior.
+Other entries retain case, allow ASCII whitespace after each literal UTF-16 unit and
+preserve the generated unescaped `^`, `$` and `|` semantics. Escaped punctuation stays
+literal. Supplementary/surrogate matching and final line-terminator anchors follow the
+Java primitive vectors. A matching exception stops the remaining list and returns false;
+the loading lock returns true before inspecting entries or text.
+
+`resources/nickname-words` reads UTF-8 `../gameconfig/badwords.txt` relative to the supplied
+resource directory, with the existing resource-size policy of 16 MiB. It splits CR/LF
+lines and commas, drops empty tokens without trimming, stably orders new entries by
+descending UTF-16 length, appends them to retained entries and removes only the first
+exact space and `v` from the combined list. Reloads keep duplicates. Read failures unlock
+and retain previous entries, including an empty list after an unsuccessful first load;
+this is the reference loader's failure behavior. Overlapping reloads retain its shared
+lock-flag behavior rather than introducing a reference counter. The original launch
+configuration specifies UTF-8, and BOM/entry whitespace is preserved.
+
+Fourteen new units cover the matcher and resource lifecycle with synthetic input only.
+An independently authored Java 8 probe supplies 4,071 generated-pattern outcomes and a
+checksum over all 1,114,112 Unicode code points: 107,270 letter/digit points and 1,280
+nonspacing marks, represented by 735 intervals. Normal unit tests use TypeScript,
+injected reads and temporary synthetic files; they do not execute private game classes.
+
+Global name comparison now has a pure `rules/mysql-unicode` equality-key primitive.
+The reference global DDL uses `utf8_unicode_ci` for both `usermapping` and `account_new`.
+The primitive preserves UCA 4 primary weights, expansions such as sharp-s to `ss`,
+primary-ignorable characters and trailing space-weight padding. Case/accent equivalence
+is character-specific: `Æ` differs from `AE`, Cyrillic short-I differs from I, and newer
+uppercase sharp-s does not acquire modern case equivalence. Hangul syllables are not
+decomposed; contractions and normalization are not introduced. The historical U+FDFA
+implicit-weight exception is retained. Surrogates and supplementary characters are
+outside the legacy three-byte UTF-8 domain and are rejected; pure text remains bounded
+to 65,535 code units. NUL is a primary ignorable in this primitive; transport and SQL
+representability remain separate concerns for the adapter.
+
+The 12,072 explicit characters are stored in 3,963 runs derived from public Unicode
+data. Six synthetic units include an exhaustive checksum for all 63,488 valid BMP
+characters against public MySQL weight tables, plus padding, expansion and historical
+exception cases. [Data provenance and license](../../packages/rules/UNICODE-NOTICE.md)
+are checked in. No database, Java classes or client are executed by these tests.
+
+`user.check.nickName` remains unsupported until the global name-mapping/account query
+and runtime providers are composed. The global mapping lookup is distinct from a local
+profile-name search. The loader/matcher has unit composition with the check rules but
+is not yet installed in realm startup; the corresponding container resource mount also
+remains pending. No always-available name answer is supplied. Name reservation, rename
+item/gold costs and downstream effects remain separate required work. This foundation
+performs no game-state persistence or notifications.
 
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
@@ -2915,7 +3027,7 @@ use these descriptions before the reconnect task component is complete.
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                              |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                               |
 | 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                        |
-| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update                                                                                                                                               | Nicknames, validation, applicable costs and remaining profile flags/preferences.                                                                                                        |
+| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags; nickname text/evaluation rules                                                              | Nickname filter/global availability and handler composition; rename costs/effects and remaining profile commands.                                                                       |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                            |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                       |
 
