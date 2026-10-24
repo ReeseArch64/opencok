@@ -11,6 +11,8 @@
   },
   "type": "module",
   "exports": {
+    "./mail-conversation-read": "./src/mail-conversation-read.ts",
+    "./mail-groups": "./src/mail-groups.ts",
     "./mail-category": "./src/mail-category.ts",
     "./mail-contents": "./src/mail-contents.ts",
     "./mail-delete": "./src/mail-delete.ts",

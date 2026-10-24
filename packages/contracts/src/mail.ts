@@ -1,10 +1,113 @@
 import type { Row } from "./rows.ts";
 
+export type MailListCommand = "mread.batch" | "mread.chat";
+
+export type MailConversationReadEffect =
+  | { kind: "mail"; types: readonly number[]; fromUser?: string | null; unreadOnly: boolean }
+  | { kind: "chat"; others: string; types: readonly ("1" | "2" | "3" | "20")[] };
+
+export interface MailConversationReadQuery {
+  now: number;
+  effects: readonly MailConversationReadEffect[];
+}
+
+export interface MailConversationReadSnapshot {
+  profile: Row | undefined;
+}
+
+export interface MailGroupQuery {
+  moderation: boolean;
+  begin: number;
+  limit: number;
+  now: number;
+}
+
+export interface MailGroupKey {
+  groupType: number;
+  groupIndex: string;
+}
+
+export interface MailGroupEntry extends MailGroupKey {
+  uid: string;
+  updateTime: bigint;
+}
+
+export interface MailGroupPreview {
+  total: bigint;
+  unread: bigint;
+  entries: readonly MailListEntry[];
+}
+
+export interface MailGroupPage {
+  groups: readonly MailGroupEntry[];
+  previews: readonly MailGroupPreview[];
+}
+
+export interface MailGroupCleanup {
+  groups: readonly MailGroupKey[];
+  mailIds: readonly string[];
+}
+
+export interface MailGroupSelection {
+  kind: "sender" | "type" | "uid";
+  types: readonly number[];
+}
+
+export interface MailGroupReaders extends MailCategoryReaders {
+  preview(group: MailGroupKey, selection: MailGroupSelection): Promise<MailGroupPreview>;
+}
+
+export type MailGroupInspector = (
+  groups: readonly MailGroupEntry[],
+  readers: MailGroupReaders,
+) => Promise<MailGroupCleanup>;
+
+export type MailBatchKind =
+  | "notices"
+  | "studio"
+  | "personal"
+  | "resources"
+  | "fight"
+  | "monsters"
+  | "trade"
+  | "moderation"
+  | "boss"
+  | "empty";
+
+export interface MailBatchQuery {
+  kind: MailBatchKind;
+  begin: number;
+  limit: number;
+  fromUser: string | null;
+  now: number;
+}
+
 export interface MailCategoryQuery {
   category: number;
   begin: number;
   offset: number;
   now: number;
+}
+
+export interface MailTranslationLookup {
+  id: string;
+  language: string;
+}
+
+export interface MailCategoryReaders {
+  senders(uids: readonly string[]): Promise<ReadonlyMap<string, MailSender>>;
+  translations(
+    requests: readonly MailTranslationLookup[],
+  ): Promise<readonly (MailTranslationLookup & { contents: Buffer | null })[]>;
+}
+
+export type MailCategoryInspector = (
+  entries: readonly MailListEntry[],
+  readers: MailCategoryReaders,
+) => Promise<readonly string[]>;
+
+export interface MailCategorySnapshot {
+  profile: Row | undefined;
 }
 
 export interface MailListEntry extends MailContentsEntry {
