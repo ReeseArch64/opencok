@@ -22,6 +22,25 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     expect(rules.configuration.payControl?.size).toBe(0);
     expect(rules.configuration.kingdomSkills?.size).toBe(0);
     expect(rules.configuration.facebookShare?.size).toBe(0);
+    expect(Object.values(rules.power).every((catalog) => catalog.size === 0)).toBe(true);
+    for (const name of [
+      "general",
+      "science",
+      "scienceRace",
+      "saga_tower_science_up",
+      "hero",
+      "equipment",
+      "dragon_words",
+      "dragon_base",
+      "dragon_new",
+    ])
+      await writeFile(
+        join(directory, `${name}.xml`),
+        '<database><ItemSpec id="001" power="007"/></database>',
+      );
+    const power = (await loadRules(directory)).power;
+    expect(Object.keys(power)).toHaveLength(9);
+    expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
     for (const name of ["general_sale", "pay_servercontrol", "kingdomskill", "fb_share"])
       await writeFile(
         join(directory, `${name}.xml`),

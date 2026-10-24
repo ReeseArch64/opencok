@@ -172,6 +172,39 @@ request. No legacy Redis key import or profile writer is introduced here; topic 
 must update this namespace after profile changes. No gameplay state is cached by
 this query. Server-native behavior has unit coverage only; the client remains untested.
 
+The detailed-power foundation now includes `readPowerState`,
+`calculatePlayerPower` and the `powerInfo` DTO. The read adapter captures the
+requested player's persisted components in one read-only repeatable-read
+transaction. The calculator covers role, generals, completed troops/traps, building
+star progress, ordinary/civilization/saga research, equipped items, eligible titles,
+mature dragons and heroes. Training, construction and research deadlines never
+complete during these reads. Active title contracts take priority until expiry;
+ordinary titles require their available talismans. These checks do not consume
+items or rewrite expired titles.
+
+Power arithmetic preserves Java signed integer wrapping, double troop aggregation
+before truncation, float dragon intermediates and long saturation/wrapping. Avatar
+upload deadlines remain exact signed 64-bit values. The detailed wire DTO preserves
+the legacy misspellings and intentionally omits the aggregate `power` field.
+Missing records have nonpersistent zero defaults; missing catalogs for populated
+domains and malformed numeric rules fail explicitly. Row ordering is deterministic
+by persisted IDs, rather than depending on Java hash-map iteration. No foreign
+research component is added to the total because the legacy total omits it.
+
+Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
+`saga_tower_science_up.xml`, `hero.xml`, `equipment.xml`, `dragon_words.xml`,
+`dragon_base.xml` and `dragon_new.xml`. They use the same validated XML loader.
+Only an internal `rules` → `contracts` dependency is added; no external library
+or schema migration is required. Synthetic unit tests cover calculations, wire
+types, catalog loading, query ownership and rollback.
+
+This foundation does not yet enable `get.power.info`. Runtime snapshot wiring,
+title-contract decoding, feature-gate selection and effective dragon attack bonus
+resolution remain required. A science-enabled dragon requires its authoritative
+attack modifier; the calculator rejects a missing modifier instead of assuming
+zero. Effective bonuses include multiple gameplay domains and need their own
+consistent read projection before this command can be advertised as complete.
+
 Use runtime credentials with SELECT access to the required global/realm tables,
 separate from the administrative setup account. Startup checks the required
 projections and dependencies before opening listeners. `/healthz` and `/readyz`
@@ -224,7 +257,7 @@ ADB, native-client validation, integration or end-to-end tests for this phase.
 | Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
-| 2. Player/progression queries             | Initial player DTO; public summary batches with local/cross-realm routing, guide identity, VIP/alliance/banner projections and synthetic adapter tests                                     | Full own/public profile, power and reconnect projections, including level and experience contracts.                                              |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; power snapshot/calculation/wire foundation with synthetic unit tests                                                                           | Full own/public profiles and reconnect; power runtime wiring and effective bonus resolution.                                                     |
 | 3. Ranking queries                        | Persistence schema                                                                                                                                                                         | Lists, player positions, pagination and tie-breaking.                                                                                            |
 | 4. Basic mailbox                          | Persistence schema                                                                                                                                                                         | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                              | Point details, player search and favorites, including authorization for writes.                                                                  |
