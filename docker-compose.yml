@@ -235,7 +235,6 @@ services:
       GAME_PLAYER_KINGDOMS: ${GAME_PLAYER_KINGDOMS:-}
       GAME_CHAT_SESSION_URL: ${GAME_CHAT_SESSION_URL:-}
       CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-}
-      GAME_RESOURCES: /resources
       GAME_MAP_SIZE: 1200
       DEPENDENCY_TIMEOUT_MS: 5000
     depends_on:
@@ -245,12 +244,6 @@ services:
         condition: service_healthy
       zookeeper:
         condition: service_healthy
-    volumes:
-      - type: bind
-        source: ./data/reference/server/runtime/base/resource
-        target: /resources
-        read_only: true
-        bind: { create_host_path: false }
     healthcheck:
       test:
         [

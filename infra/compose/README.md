@@ -32,13 +32,12 @@ docker compose --profile dev up -d --no-deps --wait server
 A container restart retains its previous environment. A stale login secret causes
 signature rejection (`LoginErr`) even when the root `.env` is correct.
 
-The full authorized server reference is copied into `data/reference/server`.
-The runtime mounts only `data/reference/server/runtime/base/resource` read-only at
-`/resources`. It has no dependency on another checkout or a user home directory.
-The nickname filter is bundled as `packages/resources/data/badwords.json` and needs
-no additional volume. Rebuild the server image to apply list edits.
-The reference contains private legacy inputs and stays ignored by Git, outside
-runtime images; maintained TypeScript code remains under `apps/server`.
+Gameplay catalogs are included as readable TypeScript in `packages/resources/src/catalogs`.
+The nickname filter is bundled as `packages/resources/data/badwords.json`.
+The server has no resource volume and does not require the ignored reference tree.
+Rebuild and recreate it after catalog edits; see the
+[catalog guide](../../packages/resources/README.md). Original private references
+remain ignored and outside runtime images.
 
 The CDN source is `data/cdn/data`; see the [CDN guide](../storage/README.md) for
 its two extracted host trees. These local inputs are not supplied by the public
@@ -121,7 +120,7 @@ bun run test:stack
 ```
 
 The integration test creates an isolated Compose configuration with synthetic
-accounts, XML and CDN files, unique ports/networks and disposable volumes. It
+accounts, a compiled synthetic catalog registry and CDN files, unique ports/networks and disposable volumes. It
 checks that `dev` and `all` select the same complete service set and runs a named
 lifecycle/functional test for each of the 12 services. Long-running containers must
 be running; `postgres-setup` and `minio-setup` must exit successfully. Checks cover

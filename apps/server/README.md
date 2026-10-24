@@ -98,10 +98,11 @@ docker compose --profile dev up --build -d --wait
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the
 private `GAME_LOGIN_SECRET` exception. Optional chat and avatar integration settings also come
 from the environment. Other development values are direct
-Compose settings, still validated by the shared Zod schemas through `@opencok/env/effect`. Authorized XML comes from the complete local reference
-copy at `data/reference/server/runtime/base/resource`; the runtime does not
-reference another checkout. Direct Bun execution requires providing the remaining
-service/resource settings through its process environment.
+Compose settings, still validated by the shared Zod schemas through `@opencok/env/effect`.
+Gameplay catalogs are included as readable TypeScript with enum identifiers; the
+runtime uses no external XML directory or resource volume. See the
+[catalog editing guide](../../packages/resources/README.md). Direct Bun execution
+requires the remaining service settings through its process environment.
 
 | Setting                          | Purpose/default                                                                                                                      |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
@@ -114,7 +115,6 @@ service/resource settings through its process environment.
 | `GAME_FILES_URL`                 | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                        |
 | `FILES_SIGNING_KEY_FILE`         | Required explicit key-file path when the files origin is configured; same protected key as the files service.                        |
 | `GAME_LOGIN_SECRET`              | Required private secret matching the legacy mobile login issuer.                                                                     |
-| `GAME_RESOURCES`                 | Required directory of authorized, extracted 12.06.0 XML rules.                                                                       |
 | `GAME_REDIS_URL`                 | Defaults to `redis://127.0.0.1:6379/0`.                                                                                              |
 | `GAME_ZOOKEEPER`                 | Defaults to `127.0.0.1:2181`.                                                                                                        |
 | `GAME_HOST`                      | Bind address, default `127.0.0.1`.                                                                                                   |

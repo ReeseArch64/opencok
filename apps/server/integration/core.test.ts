@@ -202,7 +202,6 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       zookeeper: `127.0.0.1:${await endpoint(zk, 2181)}`,
       zkPath: "/opencok-experiment/COK1",
       loginSecret: "synthetic-secret",
-      resources,
       mapSize: 1200,
       timeoutMs: 2000,
     };

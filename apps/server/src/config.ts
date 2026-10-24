@@ -1,6 +1,5 @@
-import { resolve } from "node:path";
 import { Context, Effect, Layer } from "effect";
-import { databaseUrl, readEnvironment, workspaceRoot } from "@opencok/env/effect";
+import { databaseUrl, readEnvironment } from "@opencok/env/effect";
 import { serverSchema } from "@opencok/env/server/schema";
 import type { ServerConfig } from "@opencok/contracts/server";
 
@@ -37,7 +36,6 @@ export const config = Effect.gen(function* () {
     zookeeper: settings.GAME_ZOOKEEPER,
     zkPath: `/opencok-experiment/COK${settings.KINGDOM_ID}`,
     loginSecret: settings.GAME_LOGIN_SECRET,
-    resources: resolve(workspaceRoot, settings.GAME_RESOURCES),
     mapSize: settings.GAME_MAP_SIZE,
     timeoutMs: settings.DEPENDENCY_TIMEOUT_MS,
   } satisfies Config;

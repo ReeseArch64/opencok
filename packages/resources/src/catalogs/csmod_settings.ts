@@ -1,0 +1,29 @@
+import { createGameplayCatalog, type GameplayCatalogDocument } from "../catalog.ts";
+
+export function createCatalog(): GameplayCatalogDocument {
+  return createGameplayCatalog([
+    {
+      "?xml": [{ "#text": "" }],
+      ":@": { "version": "1.0", "encoding": "UTF-8", "standalone": "no" },
+    },
+    {
+      "database": [
+        { "#text": "\n" },
+        {
+          "ItemSpec": [],
+          ":@": {
+            "id": "global_rank",
+            "attackPercent": "1",
+            "attackWins": "1",
+            "defenceWins": "1",
+            "honorPoint": "1",
+            "kill": "1",
+            "militaryPoint": "1",
+            "power": "1",
+          },
+        },
+        { "#text": "\n\n" },
+      ],
+    },
+  ]);
+}

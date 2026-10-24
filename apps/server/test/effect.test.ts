@@ -9,7 +9,6 @@ import type { ServerDependencies } from "@opencok/connection/dependencies";
 const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://synthetic:secret@localhost/postgres",
   GAME_LOGIN_SECRET: "synthetic",
-  GAME_RESOURCES: "fixtures",
   GAME_PORT: "0",
   GAME_HEALTH_PORT: "0",
   KINGDOM_ID: "2",
@@ -91,7 +90,7 @@ test("realm configuration derives database and ownership from the shared snapsho
   expect(settings.kingdomId).toBe(2);
   expect(settings.kingdomDatabase).toBe("opencok_kingdom_2");
   expect(settings.zkPath).toBe("/opencok-experiment/COK2");
-  expect(settings.resources.startsWith("/")).toBe(true);
+  expect(settings).not.toHaveProperty("resources");
 });
 
 test("realm runtime disposes live sockets and health before closing dependencies, exactly once", async () => {

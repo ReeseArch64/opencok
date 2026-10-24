@@ -1,0 +1,120 @@
+import { createGameplayCatalog, type GameplayCatalogDocument } from "../catalog.ts";
+
+export function createCatalog(): GameplayCatalogDocument {
+  return createGameplayCatalog([
+    {
+      "?xml": [{ "#text": "" }],
+      ":@": { "version": "1.0", "encoding": "UTF-8", "standalone": "no" },
+    },
+    {
+      "database": [
+        { "#text": "\n  " },
+        {
+          "ItemSpec": [],
+          ":@": {
+            "id": "1001",
+            "time": "180",
+            "roll": "50000",
+            "rangmin": "5",
+            "rangmax": "30",
+            "lvlmin": "1",
+            "lvlmax": "50",
+            "reward": "241008",
+            "colour": "1",
+          },
+        },
+        { "#text": "\n  " },
+        {
+          "ItemSpec": [],
+          ":@": {
+            "id": "1002",
+            "time": "300",
+            "roll": "0",
+            "rangmin": "10",
+            "rangmax": "60",
+            "lvlmin": "1",
+            "lvlmax": "50",
+            "reward": "241009",
+            "colour": "2",
+          },
+        },
+        { "#text": "\n  " },
+        {
+          "ItemSpec": [],
+          ":@": {
+            "id": "1003",
+            "time": "600",
+            "roll": "0",
+            "rangmin": "20",
+            "rangmax": "80",
+            "lvlmin": "1",
+            "lvlmax": "50",
+            "reward": "241010",
+            "colour": "3",
+          },
+        },
+        { "#text": "\n  " },
+        {
+          "ItemSpec": [],
+          ":@": {
+            "id": "1004",
+            "time": "1800",
+            "roll": "0",
+            "rangmin": "30",
+            "rangmax": "100",
+            "lvlmin": "1",
+            "lvlmax": "50",
+            "reward": "241010",
+            "colour": "4",
+          },
+        },
+        { "#text": "\n  " },
+        {
+          "ItemSpec": [],
+          ":@": {
+            "id": "1005",
+            "time": "3600",
+            "roll": "2500",
+            "rangmin": "50",
+            "rangmax": "150",
+            "lvlmin": "1",
+            "lvlmax": "50",
+            "reward": "241010",
+            "colour": "5",
+          },
+        },
+        { "#text": "\n  " },
+        {
+          "ItemSpec": [],
+          ":@": {
+            "id": "1006",
+            "time": "300",
+            "roll": "30000",
+            "rangmin": "10",
+            "rangmax": "60",
+            "lvlmin": "1",
+            "lvlmax": "50",
+            "reward": "241009",
+            "colour": "2",
+          },
+        },
+        { "#text": "\n  " },
+        {
+          "ItemSpec": [],
+          ":@": {
+            "id": "1007",
+            "time": "900",
+            "roll": "100000",
+            "rangmin": "10",
+            "rangmax": "60",
+            "lvlmin": "1",
+            "lvlmax": "50",
+            "reward": "241279",
+            "colour": "3",
+          },
+        },
+        { "#text": "\n" },
+      ],
+    },
+  ]);
+}

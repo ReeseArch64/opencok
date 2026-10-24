@@ -1,3 +1,6 @@
+import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
+import { gameplayCatalogs } from "./catalogs.ts";
+import type { GameplayCatalogDocument } from "./catalog.ts";
 import { readFile, stat, access } from "node:fs/promises";
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { join } from "node:path";
@@ -22,8 +25,8 @@ function parseDocument(xml: string, preserveOrder = false) {
   }).parse(xml);
 }
 
-function parseRecords(xml: string, name: string): Rule[] {
-  const parsed = parseDocument(xml);
+function parseRecords(source: string | GameplayCatalogDocument, name: string): Rule[] {
+  const parsed = typeof source === "string" ? parseDocument(source) : source.unordered;
   if (!Object.hasOwn(parsed, "database")) throw new Error("Invalid gameplay resource root");
   const records: unknown[] = [];
   const collect = (node: unknown) => {
@@ -44,13 +47,15 @@ function parseRecords(xml: string, name: string): Rule[] {
   return records as Rule[];
 }
 
-function parseDeclaredCatalog(xml: string): {
+function parseDeclaredCatalog(source: string | GameplayCatalogDocument): {
   items: Map<string, Rule>;
   groups: Map<string, Rule[]>;
   records: Rule[];
 } {
   type Element = Record<string, unknown> & { ":@"?: Rule };
-  const parsed = parseDocument(xml, true) as Element[];
+  const parsed = (
+    typeof source === "string" ? parseDocument(source, true) : source.ordered
+  ) as Element[];
   const root = parsed.find((element) => Object.hasOwn(element, "database"));
   if (!root || !Array.isArray(root.database)) throw new Error("Invalid gameplay resource root");
   const elements = (nodes: Element[]) =>
@@ -107,15 +112,16 @@ function indexRules(records: Rule[], name: string): Map<string, Rule> {
   ].includes(name);
   for (const record of records) {
     const item = record;
-    if (name === "goods" && !item.id) continue;
-    if (!item.id?.trim() || (!replaceDuplicates && map.has(item.id)))
-      throw new Error("Invalid gameplay resource ID");
+    if (!item.id?.trim()) continue;
+    if (!replaceDuplicates && map.has(item.id))
+      throw new Error(`Invalid gameplay resource ID: ${name}`);
     map.set(item.id, item);
   }
+  if (!map.size) throw new Error(`Invalid gameplay resource ID: ${name}`);
   return map;
 }
 
-export function parseRules(xml: string, name: string): Map<string, Rule> {
+export function parseRules(xml: string | GameplayCatalogDocument, name: string): Map<string, Rule> {
   if (
     [
       "item",
@@ -132,33 +138,43 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
   return indexRules(parseRecords(xml, name), name);
 }
 
-export async function loadRules(directory: string, kingdomId = 1) {
-  const read = async (name: string): Promise<string> => {
+export function parseGameplayCatalog(xml: string): GameplayCatalogDocument {
+  return { ordered: parseDocument(xml, true), unordered: parseDocument(xml) };
+}
+
+export async function loadRules(directory?: string, kingdomId = 1) {
+  const available = async (name: GameplayCatalog): Promise<boolean> =>
+    directory === undefined
+      ? Object.hasOwn(gameplayCatalogs, name)
+      : exists(join(directory, `${name}.xml`));
+  const read = async (name: GameplayCatalog): Promise<string | GameplayCatalogDocument> => {
+    if (directory === undefined) {
+      if (!Object.hasOwn(gameplayCatalogs, name)) throw new Error("Missing gameplay catalog");
+      return gameplayCatalogs[name]();
+    }
     const file = join(directory, `${name}.xml`);
     if ((await stat(file)).size > 16 * 1024 * 1024) throw new Error("Oversized gameplay resource");
     return readFile(file, "utf8");
   };
-  const load = async (name: string): Promise<Map<string, Rule>> =>
+  const load = async (name: GameplayCatalog): Promise<Map<string, Rule>> =>
     parseRules(await read(name), name);
-  const declared = async (name: string) =>
-    (await exists(join(directory, `${name}.xml`)))
-      ? parseDeclaredCatalog(await read(name))
-      : undefined;
+  const declared = async (name: GameplayCatalog) =>
+    (await available(name)) ? parseDeclaredCatalog(await read(name)) : undefined;
   const [buildings, roles, positions] = await Promise.all([
-    load("building"),
-    load("role"),
-    load("position"),
+    load(GameplayCatalog.Building),
+    load(GameplayCatalog.Role),
+    load(GameplayCatalog.Position),
   ]);
-  const starCatalog = await declared("function_star");
-  const itemCatalog = (await exists(join(directory, "item.xml")))
-    ? parseDeclaredCatalog(await read("item"))
+  const starCatalog = await declared(GameplayCatalog.FunctionStar);
+  const itemCatalog = (await available(GameplayCatalog.Item))
+    ? parseDeclaredCatalog(await read(GameplayCatalog.Item))
     : undefined;
   const items = itemCatalog?.items ?? new Map<string, Rule>();
   const dataConfig = new Map(
     (itemCatalog?.groups.get("data_config") ?? []).map((record) => [record.id ?? null, record]),
   );
-  const optional = async (name: string) =>
-    (await exists(join(directory, `${name}.xml`))) ? load(name) : new Map<string, Rule>();
+  const optional = async (name: GameplayCatalog) =>
+    (await available(name)) ? load(name) : new Map<string, Rule>();
   const [
     arms,
     goods,
@@ -170,15 +186,15 @@ export async function loadRules(directory: string, kingdomId = 1) {
     facebookShareCatalog,
     serverConfig,
   ] = await Promise.all([
-    optional("arms"),
-    optional("goods"),
-    declared("function_on"),
-    declared("setting"),
-    declared("general_sale"),
-    optional("pay_servercontrol"),
-    declared("kingdomskill"),
-    declared("fb_share"),
-    optional("servers_config"),
+    optional(GameplayCatalog.Arms),
+    optional(GameplayCatalog.Goods),
+    declared(GameplayCatalog.FunctionOn),
+    declared(GameplayCatalog.Setting),
+    declared(GameplayCatalog.GeneralSale),
+    optional(GameplayCatalog.PayServercontrol),
+    declared(GameplayCatalog.Kingdomskill),
+    declared(GameplayCatalog.FbShare),
+    optional(GameplayCatalog.ServersConfig),
   ]);
   const [
     generals,
@@ -216,71 +232,74 @@ export async function loadRules(directory: string, kingdomId = 1) {
     monarchTitles,
   ] = await Promise.all(
     [
-      "general",
-      "science",
-      "scienceRace",
-      "saga_tower_science_up",
-      "hero",
-      "equipment",
-      "dragon_words",
-      "dragon_base",
-      "dragon_new",
-      "status",
-      "sk",
-      "general_base",
-      "general_skill",
-      "general_official",
-      "general_random_effect",
-      "suit",
-      "vip",
-      "svip",
-      "alliancescience",
-      "civilization_feature",
-      "wr_skill",
-      "miracle_buff",
-      "dragon_skill",
-      "activity_event",
-      "office",
-      "life_treeS",
-      "saga_tower_science_base",
-      "foreign_civilization_up",
-      "foreign_civilization_base",
-      "activity_panel",
-      "merge_activity",
-      "lucky_effect",
-      "monarch_title_lord",
+      GameplayCatalog.General,
+      GameplayCatalog.Science,
+      GameplayCatalog.ScienceRace,
+      GameplayCatalog.SagaTowerScienceUp,
+      GameplayCatalog.Hero,
+      GameplayCatalog.Equipment,
+      GameplayCatalog.DragonWords,
+      GameplayCatalog.DragonBase,
+      GameplayCatalog.DragonNew,
+      GameplayCatalog.Status,
+      GameplayCatalog.Sk,
+      GameplayCatalog.GeneralBase,
+      GameplayCatalog.GeneralSkill,
+      GameplayCatalog.GeneralOfficial,
+      GameplayCatalog.GeneralRandomEffect,
+      GameplayCatalog.Suit,
+      GameplayCatalog.Vip,
+      GameplayCatalog.Svip,
+      GameplayCatalog.Alliancescience,
+      GameplayCatalog.CivilizationFeature,
+      GameplayCatalog.WrSkill,
+      GameplayCatalog.MiracleBuff,
+      GameplayCatalog.DragonSkill,
+      GameplayCatalog.ActivityEvent,
+      GameplayCatalog.Office,
+      GameplayCatalog.LifeTreeS,
+      GameplayCatalog.SagaTowerScienceBase,
+      GameplayCatalog.ForeignCivilizationUp,
+      GameplayCatalog.ForeignCivilizationBase,
+      GameplayCatalog.ActivityPanel,
+      GameplayCatalog.MergeActivity,
+      GameplayCatalog.LuckyEffect,
+      GameplayCatalog.MonarchTitleLord,
     ].map(optional),
   );
-  const prestigeLevelRecords = (await exists(join(directory, "reputation_level.xml")))
-    ? parseRecords(await read("reputation_level"), "reputation_level")
+  const prestigeLevelRecords = (await available(GameplayCatalog.ReputationLevel))
+    ? parseRecords(await read(GameplayCatalog.ReputationLevel), GameplayCatalog.ReputationLevel)
     : undefined;
   const prestigeLevels = prestigeLevelRecords
-    ? indexRules(prestigeLevelRecords, "reputation_level")
+    ? indexRules(prestigeLevelRecords, GameplayCatalog.ReputationLevel)
     : new Map<string, Rule>();
   const [militaryGroups, heroEvents] = await Promise.all([
-    optional("wr_sever"),
-    optional("heroevent"),
+    optional(GameplayCatalog.WrSever),
+    optional(GameplayCatalog.Heroevent),
   ]);
-  const [militaryRanks, servers] = await Promise.all([optional("wr_rank"), optional("servers")]);
+  const [militaryRanks, servers] = await Promise.all([
+    optional(GameplayCatalog.WrRank),
+    optional(GameplayCatalog.Servers),
+  ]);
   const [treasures, rewards, mail] = await Promise.all([
-    optional("treasure"),
-    optional("reward"),
-    optional("mail"),
+    optional(GameplayCatalog.Treasure),
+    optional(GameplayCatalog.Reward),
+    optional(GameplayCatalog.Mail),
   ]);
-  const quests = (await exists(join(directory, "quest.xml")))
-    ? parseDeclaredCatalog(await read("quest")).records
+  const quests = (await available(GameplayCatalog.Quest))
+    ? parseDeclaredCatalog(await read(GameplayCatalog.Quest)).records
     : undefined;
-  const positionUnlock = (await exists(join(directory, "position_unlock.xml")))
-    ? parseDeclaredCatalog(await read("position_unlock")).records
+  const positionUnlock = (await available(GameplayCatalog.PositionUnlock))
+    ? parseDeclaredCatalog(await read(GameplayCatalog.PositionUnlock)).records
     : undefined;
   const [fieldMonsters, armies, neutralResources, barbarians] = await Promise.all([
-    optional("field_monster"),
-    optional("army"),
-    optional("sp_resources"),
-    optional("barbarion"),
+    optional(GameplayCatalog.FieldMonster),
+    optional(GameplayCatalog.Army),
+    optional(GameplayCatalog.SpResources),
+    optional(GameplayCatalog.Barbarion),
   ]);
-  const achievementCount = (await exists(join(directory, "achievement.xml")))
-    ? parseRecords(await read("achievement"), "achievement").length
+  const achievementCount = (await available(GameplayCatalog.Achievement))
+    ? parseRecords(await read(GameplayCatalog.Achievement), GameplayCatalog.Achievement).length
     : 0;
   return new Rules(
     buildings,
@@ -296,7 +315,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     {
       settingRecords: settingCatalog?.records ?? [],
       starRecords: starCatalog?.records ?? [],
-      featureRecords: featureCatalog?.groups.get("function_on") ?? [],
+      featureRecords: featureCatalog?.groups.get(GameplayCatalog.FunctionOn) ?? [],
       dataConfig,
       generalSales: generalSaleCatalog?.items ?? new Map<string, Rule>(),
       generalSaleRecords: generalSaleCatalog?.records ?? [],

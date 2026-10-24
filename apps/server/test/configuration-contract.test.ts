@@ -83,7 +83,6 @@ test("complete configuration wire contract survives XML loading, realm compositi
       const source = Layer.succeed(EnvironmentSource, {
         DATABASE_URL: "postgresql://unused.invalid/global",
         GAME_LOGIN_SECRET: "synthetic",
-        GAME_RESOURCES: directory,
         KINGDOM_ID: String(kingdomId),
         GAME_CHAT_INTERVAL: String(kingdomId + 4),
         GAME_FEED_MAX_COUNT: String(kingdomId + 8),
@@ -91,7 +90,7 @@ test("complete configuration wire contract survives XML loading, realm compositi
       let previous: Buffer | undefined;
       for (let reload = 0; reload < 2; reload++) {
         const settings = await Effect.runPromise(config.pipe(Effect.provide(source)));
-        const rules = await loadRules(settings.resources, settings.kingdomId);
+        const rules = await loadRules(directory, settings.kingdomId);
         const game = new Game(store, rules, settings, () => now);
         const response = await game.execute("synthetic", "login.dataconfig", {
           uid: sfs.string("untrusted"),

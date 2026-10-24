@@ -48,7 +48,7 @@ export const RealmDependenciesLive = Layer.effect(
   Effect.gen(function* () {
     const config = yield* RealmConfig;
     const rules = yield* fromPromise("realm.resources", () =>
-      loadRules(config.resources, config.kingdomId),
+      loadRules(undefined, config.kingdomId),
     );
     const db = yield* acquireResource(
       "realm.database",

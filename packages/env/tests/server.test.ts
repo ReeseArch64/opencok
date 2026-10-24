@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { parseServerEnvironment } from "../src/server.schema";
 
-const base = { GAME_LOGIN_SECRET: "synthetic-secret", GAME_RESOURCES: "synthetic-resources" };
+const base = { GAME_LOGIN_SECRET: "synthetic-secret" };
 test("client configuration limits retain defaults and reject invalid SFS integers at startup", () => {
   expect(parseServerEnvironment(base).GAME_CHAT_INTERVAL).toBe(1);
   expect(parseServerEnvironment(base).GAME_FEED_MAX_COUNT).toBe(3);
@@ -25,7 +25,7 @@ test("general player search defaults to cross mode and accepts explicit true or 
       "GAME_CROSS_SEARCH",
     );
 });
-test("server settings validate realm routing and require private inputs", () => {
+test("server settings validate realm routing and require a login secret", () => {
   expect(parseServerEnvironment(base).KINGDOM_ID).toBe(1);
   expect(parseServerEnvironment({ ...base, KINGDOM_ID: "2", GAME_PORT: "0" }).KINGDOM_ID).toBe(2);
   expect(() => parseServerEnvironment({})).toThrow("GAME_LOGIN_SECRET");
@@ -163,4 +163,10 @@ test("avatar completion requires its own private chat endpoint, files and signin
     expect(() => parseServerEnvironment({ ...configured, GAME_AVATAR_CHAT_URL: url })).toThrow(
       "GAME_AVATAR_CHAT_URL",
     );
+});
+
+test("realm startup no longer accepts an external XML resource path", () => {
+  expect(parseServerEnvironment({ ...base, GAME_RESOURCES: "obsolete" })).not.toHaveProperty(
+    "GAME_RESOURCES",
+  );
 });

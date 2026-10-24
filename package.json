@@ -33,7 +33,8 @@
     "@types/bun": "catalog:",
     "husky": "9.1.7",
     "typescript": "catalog:",
-    "vite-plus": "^1.3.0"
+    "vite-plus": "^1.3.0",
+    "@opencok/resources": "workspace:*"
   },
   "packageManager": "bun@1.4.2"
 }

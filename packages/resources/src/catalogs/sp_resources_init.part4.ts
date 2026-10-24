@@ -1,0 +1,1442 @@
+import { type GameplayCatalogElement } from "../catalog.ts";
+
+export function part4(): GameplayCatalogElement[] {
+  return [
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520731", "area_level": "6", "res_id": "518078", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520732", "area_level": "6", "res_id": "518087", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520733", "area_level": "6", "res_id": "518094", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520734", "area_level": "6", "res_id": "518101", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520735", "area_level": "6", "res_id": "518108", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520736", "area_level": "6", "res_id": "518115", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520737", "area_level": "6", "res_id": "518122", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520738", "area_level": "6", "res_id": "518129", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520739", "area_level": "6", "res_id": "518136", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520740", "area_level": "6", "res_id": "518143", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520741", "area_level": "6", "res_id": "518150", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520742", "area_level": "6", "res_id": "518157", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520760", "area_level": "5", "res_id": "518002", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520761", "area_level": "5", "res_id": "518009", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520762", "area_level": "5", "res_id": "518016", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520763", "area_level": "5", "res_id": "518023", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520764", "area_level": "5", "res_id": "518030", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520765", "area_level": "5", "res_id": "518037", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520766", "area_level": "5", "res_id": "518044", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520767", "area_level": "5", "res_id": "518051", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520768", "area_level": "5", "res_id": "518058", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520769", "area_level": "5", "res_id": "518065", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520770", "area_level": "5", "res_id": "518072", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520771", "area_level": "5", "res_id": "518079", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520772", "area_level": "5", "res_id": "518087", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520773", "area_level": "5", "res_id": "518094", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520774", "area_level": "5", "res_id": "518101", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520775", "area_level": "5", "res_id": "518108", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520776", "area_level": "5", "res_id": "518115", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520777", "area_level": "5", "res_id": "518122", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520778", "area_level": "5", "res_id": "518129", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520779", "area_level": "5", "res_id": "518136", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520780", "area_level": "5", "res_id": "518143", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520781", "area_level": "5", "res_id": "518150", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520782", "area_level": "5", "res_id": "518157", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520800", "area_level": "4", "ratio": "0", "res_id": "518003", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520801", "area_level": "4", "ratio": "0", "res_id": "518010", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520802", "area_level": "4", "ratio": "0", "res_id": "518017", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520803",
+        "area_level": "4",
+        "ratio": "15000",
+        "res_id": "518024",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520804", "area_level": "4", "ratio": "0", "res_id": "518031", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520805", "area_level": "4", "ratio": "1000", "res_id": "518038", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520806", "area_level": "4", "ratio": "7000", "res_id": "518045", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520807", "area_level": "4", "ratio": "7000", "res_id": "518052", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520808", "area_level": "4", "ratio": "9000", "res_id": "518059", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520809", "area_level": "4", "ratio": "5000", "res_id": "518066", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520810", "area_level": "4", "ratio": "1000", "res_id": "518073", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520811",
+        "area_level": "4",
+        "ratio": "20000",
+        "res_id": "518080",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520812", "area_level": "4", "ratio": "0", "res_id": "518087", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520813", "area_level": "4", "ratio": "0", "res_id": "518094", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520814", "area_level": "4", "ratio": "0", "res_id": "518101", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520815", "area_level": "4", "ratio": "5000", "res_id": "518108", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520816", "area_level": "4", "ratio": "5000", "res_id": "518115", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520817",
+        "area_level": "4",
+        "ratio": "12500",
+        "res_id": "518122",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520818", "area_level": "4", "ratio": "0", "res_id": "518129", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520819", "area_level": "4", "ratio": "0", "res_id": "518136", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520820", "area_level": "4", "ratio": "0", "res_id": "518143", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520821", "area_level": "4", "ratio": "0", "res_id": "518150", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520822",
+        "area_level": "4",
+        "ratio": "12500",
+        "res_id": "518157",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520840", "area_level": "3", "ratio": "0", "res_id": "518004", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520841", "area_level": "3", "ratio": "0", "res_id": "518011", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520842",
+        "area_level": "3",
+        "ratio": "15000",
+        "res_id": "518018",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520843",
+        "area_level": "3",
+        "ratio": "10000",
+        "res_id": "518025",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520844", "area_level": "3", "ratio": "0", "res_id": "518032", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520845", "area_level": "3", "ratio": "0", "res_id": "518039", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520846", "area_level": "3", "ratio": "8000", "res_id": "518046", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520847", "area_level": "3", "ratio": "4000", "res_id": "518053", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520848", "area_level": "3", "ratio": "5000", "res_id": "518060", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520849", "area_level": "3", "ratio": "8000", "res_id": "518067", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520850", "area_level": "3", "ratio": "0", "res_id": "518074", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520851",
+        "area_level": "3",
+        "ratio": "20000",
+        "res_id": "518081",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520852", "area_level": "3", "ratio": "0", "res_id": "518087", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520853", "area_level": "3", "ratio": "0", "res_id": "518094", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520854",
+        "area_level": "3",
+        "ratio": "10000",
+        "res_id": "518101",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520855", "area_level": "3", "ratio": "0", "res_id": "518108", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520856", "area_level": "3", "ratio": "0", "res_id": "518115", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520857", "area_level": "3", "ratio": "0", "res_id": "518122", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520858",
+        "area_level": "3",
+        "ratio": "10000",
+        "res_id": "518129",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520859",
+        "area_level": "3",
+        "ratio": "10000",
+        "res_id": "518136",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520860", "area_level": "3", "ratio": "0", "res_id": "518143", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520861", "area_level": "3", "ratio": "0", "res_id": "518150", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520862", "area_level": "3", "ratio": "0", "res_id": "518157", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520880",
+        "area_level": "2",
+        "ratio": "13000",
+        "res_id": "518005",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520881",
+        "area_level": "2",
+        "ratio": "13000",
+        "res_id": "518012",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520882", "area_level": "2", "ratio": "5000", "res_id": "518019", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520883", "area_level": "2", "ratio": "5000", "res_id": "518026", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520884", "area_level": "2", "ratio": "0", "res_id": "518033", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520885", "area_level": "2", "ratio": "0", "res_id": "518040", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520886", "area_level": "2", "ratio": "0", "res_id": "518047", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520887", "area_level": "2", "ratio": "0", "res_id": "518054", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520888", "area_level": "2", "ratio": "8000", "res_id": "518061", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520889", "area_level": "2", "ratio": "0", "res_id": "518068", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520890", "area_level": "2", "ratio": "0", "res_id": "518075", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520891",
+        "area_level": "2",
+        "ratio": "20000",
+        "res_id": "518082",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520892", "area_level": "2", "ratio": "8000", "res_id": "518087", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520893", "area_level": "2", "ratio": "8000", "res_id": "518094", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520894", "area_level": "2", "ratio": "0", "res_id": "518101", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520895", "area_level": "2", "ratio": "0", "res_id": "518108", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520896", "area_level": "2", "ratio": "0", "res_id": "518115", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520897", "area_level": "2", "ratio": "0", "res_id": "518122", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520898", "area_level": "2", "ratio": "0", "res_id": "518129", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520899", "area_level": "2", "ratio": "0", "res_id": "518136", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520900",
+        "area_level": "2",
+        "ratio": "10000",
+        "res_id": "518143",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520901",
+        "area_level": "2",
+        "ratio": "10000",
+        "res_id": "518150",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520902", "area_level": "2", "ratio": "0", "res_id": "518157", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520920",
+        "area_level": "1",
+        "ratio": "30000",
+        "res_id": "518006",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520921",
+        "area_level": "1",
+        "ratio": "35000",
+        "res_id": "518013",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520922",
+        "area_level": "1",
+        "ratio": "25000",
+        "res_id": "518020",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "520923",
+        "area_level": "1",
+        "ratio": "10000",
+        "res_id": "518027",
+        "type": "7",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520924", "area_level": "1", "ratio": "0", "res_id": "518034", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520925", "area_level": "1", "ratio": "0", "res_id": "518041", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520926", "area_level": "1", "ratio": "0", "res_id": "518048", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520927", "area_level": "1", "ratio": "0", "res_id": "518055", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520928", "area_level": "1", "ratio": "0", "res_id": "518062", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520929", "area_level": "1", "ratio": "0", "res_id": "518069", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520930", "area_level": "1", "ratio": "0", "res_id": "518076", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520931", "area_level": "1", "ratio": "0", "res_id": "518083", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520932", "area_level": "1", "ratio": "0", "res_id": "518087", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520933", "area_level": "1", "ratio": "0", "res_id": "518094", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520934", "area_level": "1", "ratio": "0", "res_id": "518101", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520935", "area_level": "1", "ratio": "0", "res_id": "518108", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520936", "area_level": "1", "ratio": "0", "res_id": "518115", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520937", "area_level": "1", "ratio": "0", "res_id": "518122", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520938", "area_level": "1", "ratio": "0", "res_id": "518129", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520939", "area_level": "1", "ratio": "0", "res_id": "518136", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520940", "area_level": "1", "ratio": "0", "res_id": "518143", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520941", "area_level": "1", "ratio": "0", "res_id": "518150", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520942", "area_level": "1", "ratio": "0", "res_id": "518157", "type": "7" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520960", "area_level": "7", "res_id": "518000", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520961", "area_level": "7", "res_id": "518007", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520962", "area_level": "7", "res_id": "518014", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520963", "area_level": "7", "res_id": "518021", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520964", "area_level": "7", "res_id": "518028", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520965", "area_level": "7", "res_id": "518035", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520966", "area_level": "7", "res_id": "518042", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520967", "area_level": "7", "res_id": "518049", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520968", "area_level": "7", "res_id": "518056", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520969", "area_level": "7", "res_id": "518063", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520970", "area_level": "7", "res_id": "518070", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520971", "area_level": "7", "res_id": "518077", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520972", "area_level": "7", "res_id": "518087", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520973", "area_level": "7", "res_id": "518094", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520974", "area_level": "7", "res_id": "518101", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520975", "area_level": "7", "res_id": "518108", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520976", "area_level": "7", "res_id": "518115", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520977", "area_level": "7", "res_id": "518122", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520978", "area_level": "7", "res_id": "518129", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520979", "area_level": "7", "res_id": "518136", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520980", "area_level": "7", "res_id": "518143", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520981", "area_level": "7", "res_id": "518150", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "520982", "area_level": "7", "res_id": "518157", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521000", "area_level": "6", "res_id": "518001", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521001", "area_level": "6", "res_id": "518008", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521002", "area_level": "6", "res_id": "518015", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521003", "area_level": "6", "res_id": "518022", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521004", "area_level": "6", "res_id": "518029", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521005", "area_level": "6", "res_id": "518036", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521006", "area_level": "6", "res_id": "518043", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521007", "area_level": "6", "res_id": "518050", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521008", "area_level": "6", "res_id": "518057", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521009", "area_level": "6", "res_id": "518064", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521010", "area_level": "6", "res_id": "518071", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521011", "area_level": "6", "res_id": "518078", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521012", "area_level": "6", "res_id": "518087", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521013", "area_level": "6", "res_id": "518094", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521014", "area_level": "6", "res_id": "518101", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521015", "area_level": "6", "res_id": "518108", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521016", "area_level": "6", "res_id": "518115", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521017", "area_level": "6", "res_id": "518122", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521018", "area_level": "6", "res_id": "518129", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521019", "area_level": "6", "res_id": "518136", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521020", "area_level": "6", "res_id": "518143", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521021", "area_level": "6", "res_id": "518150", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521022", "area_level": "6", "res_id": "518157", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521040", "area_level": "5", "res_id": "518002", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521041", "area_level": "5", "res_id": "518009", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521042", "area_level": "5", "res_id": "518016", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521043", "area_level": "5", "res_id": "518023", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521044", "area_level": "5", "res_id": "518030", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521045", "area_level": "5", "res_id": "518037", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521046", "area_level": "5", "res_id": "518044", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521047", "area_level": "5", "res_id": "518051", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521048", "area_level": "5", "res_id": "518058", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521049", "area_level": "5", "res_id": "518065", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521050", "area_level": "5", "res_id": "518072", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521051", "area_level": "5", "res_id": "518079", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521052", "area_level": "5", "res_id": "518087", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521053", "area_level": "5", "res_id": "518094", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521054", "area_level": "5", "res_id": "518101", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521055", "area_level": "5", "res_id": "518108", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521056", "area_level": "5", "res_id": "518115", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521057", "area_level": "5", "res_id": "518122", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521058", "area_level": "5", "res_id": "518129", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521059", "area_level": "5", "res_id": "518136", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521060", "area_level": "5", "res_id": "518143", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521061", "area_level": "5", "res_id": "518150", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521062", "area_level": "5", "res_id": "518157", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521080", "area_level": "4", "ratio": "0", "res_id": "518003", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521081", "area_level": "4", "ratio": "0", "res_id": "518010", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521082", "area_level": "4", "ratio": "0", "res_id": "518017", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521083",
+        "area_level": "4",
+        "ratio": "15000",
+        "res_id": "518024",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521084", "area_level": "4", "ratio": "0", "res_id": "518031", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521085", "area_level": "4", "ratio": "1000", "res_id": "518038", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521086", "area_level": "4", "ratio": "7000", "res_id": "518045", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521087", "area_level": "4", "ratio": "7000", "res_id": "518052", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521088", "area_level": "4", "ratio": "9000", "res_id": "518059", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521089", "area_level": "4", "ratio": "5000", "res_id": "518066", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521090", "area_level": "4", "ratio": "4000", "res_id": "518073", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521091", "area_level": "4", "ratio": "7000", "res_id": "518080", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521092",
+        "area_level": "4",
+        "ratio": "20000",
+        "res_id": "518087",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521093", "area_level": "4", "ratio": "0", "res_id": "518094", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521094", "area_level": "4", "ratio": "0", "res_id": "518101", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521095", "area_level": "4", "ratio": "0", "res_id": "518108", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521096", "area_level": "4", "ratio": "0", "res_id": "518115", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521097",
+        "area_level": "4",
+        "ratio": "12500",
+        "res_id": "518122",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521098", "area_level": "4", "ratio": "0", "res_id": "518129", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521099", "area_level": "4", "ratio": "0", "res_id": "518136", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521100", "area_level": "4", "ratio": "0", "res_id": "518143", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521101", "area_level": "4", "ratio": "0", "res_id": "518150", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521102",
+        "area_level": "4",
+        "ratio": "12500",
+        "res_id": "518157",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521120", "area_level": "3", "ratio": "0", "res_id": "518004", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521121", "area_level": "3", "ratio": "0", "res_id": "518011", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521122",
+        "area_level": "3",
+        "ratio": "15000",
+        "res_id": "518018",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521123",
+        "area_level": "3",
+        "ratio": "10000",
+        "res_id": "518025",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521124", "area_level": "3", "ratio": "0", "res_id": "518032", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521125", "area_level": "3", "ratio": "0", "res_id": "518039", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521126", "area_level": "3", "ratio": "8000", "res_id": "518046", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521127", "area_level": "3", "ratio": "4000", "res_id": "518053", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521128", "area_level": "3", "ratio": "5000", "res_id": "518060", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521129", "area_level": "3", "ratio": "8000", "res_id": "518067", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521130", "area_level": "3", "ratio": "0", "res_id": "518074", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521131",
+        "area_level": "3",
+        "ratio": "10000",
+        "res_id": "518081",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521132",
+        "area_level": "3",
+        "ratio": "20000",
+        "res_id": "518087",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521133", "area_level": "3", "ratio": "0", "res_id": "518094", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521134", "area_level": "3", "ratio": "0", "res_id": "518101", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521135", "area_level": "3", "ratio": "0", "res_id": "518108", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521136", "area_level": "3", "ratio": "0", "res_id": "518115", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521137", "area_level": "3", "ratio": "0", "res_id": "518122", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521138",
+        "area_level": "3",
+        "ratio": "10000",
+        "res_id": "518129",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521139",
+        "area_level": "3",
+        "ratio": "10000",
+        "res_id": "518136",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521140", "area_level": "3", "ratio": "0", "res_id": "518143", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521141", "area_level": "3", "ratio": "0", "res_id": "518150", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521142", "area_level": "3", "ratio": "0", "res_id": "518157", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521160",
+        "area_level": "2",
+        "ratio": "13000",
+        "res_id": "518005",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": {
+        "id": "521161",
+        "area_level": "2",
+        "ratio": "13000",
+        "res_id": "518012",
+        "type": "8",
+      },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521162", "area_level": "2", "ratio": "9000", "res_id": "518019", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521163", "area_level": "2", "ratio": "9000", "res_id": "518026", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521164", "area_level": "2", "ratio": "0", "res_id": "518033", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521165", "area_level": "2", "ratio": "0", "res_id": "518040", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521166", "area_level": "2", "ratio": "0", "res_id": "518047", "type": "8" },
+    },
+    { "#text": "\n    " },
+    {
+      "ItemSpec": [],
+      ":@": { "id": "521167", "area_level": "2", "ratio": "0", "res_id": "518054", "type": "8" },
+    },
+  ];
+}
