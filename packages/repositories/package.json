@@ -19,6 +19,7 @@
     "./nickname": "./src/nickname.ts",
     "./nickname-lock": "./src/nickname-lock.ts",
     "./nickname-global": "./src/nickname-global.ts",
+    "./mail-updates": "./src/mail-updates.ts",
     "./push-preferences": "./src/push-preferences.ts",
     "./profile-preferences": "./src/profile-preferences.ts",
     "./chat": "./src/chat.ts",

@@ -34,6 +34,7 @@ import { resolveMailPresentation } from "./mail-presentation.ts";
 import { mailListProjection } from "./mail-list.ts";
 import { mailContentsProjection } from "./mail-contents.ts";
 import { planMailDeletion } from "./mail-delete.ts";
+import { mailUpdateCursor, mailUpdatesProjection } from "./mail-updates.ts";
 import {
   mailContentsQuery,
   mailCategoryQuery,
@@ -289,6 +290,9 @@ export class Game {
         break;
       case "mail.delete":
         body = await this.mailDelete(uid, params);
+        break;
+      case "chat.get.update.mails":
+        body = await this.mailUpdates(uid, params);
         break;
       case "chatMail.save":
         body = await this.mailConversationSave(uid, params);
@@ -641,6 +645,33 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return mailDeleted(state.deleted);
+  }
+  private async mailUpdates(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.profile(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (!Object.hasOwn(params, "time")) return {};
+    const time = params.time;
+    if (
+      !time ||
+      (time.type !== Type.Null && (time.type !== Type.String || typeof time.value !== "string"))
+    )
+      throw new GameError(errors.invalid);
+    if (!this.db.mailUpdates) throw new GameError(errors.unsupported);
+    const after = mailUpdateCursor(time.type === Type.Null ? null : (time.value as string));
+    const envelope: Fields = {};
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) envelope[key] = params[key]!;
+    let body: Fields | undefined;
+    const state = await this.db.mailUpdates(uid, { after, now }, (entries) => {
+      body = mailUpdatesProjection(entries, envelope);
+    });
+    const current = this.checkProfile(state.profile, now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (!body) throw new GameError(errors.unsupported);
+    return body;
   }
   private async mailBatch(uid: string, params: Fields, command: MailListCommand): Promise<Fields> {
     const fromUser =

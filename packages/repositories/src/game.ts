@@ -1,4 +1,6 @@
 import { readMailBatch } from "./mail-batch.ts";
+import { readMailUpdates } from "./mail-updates.ts";
+import type { MailUpdateInspector, MailUpdateQuery } from "@opencok/contracts/mail-updates";
 import { readMailGroups } from "./mail-groups.ts";
 import { readMailCategory } from "./mail-category.ts";
 import { translationv2 } from "@opencok/drizzle/schema/opencok_kingdom/translationv2";
@@ -313,6 +315,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   mailDelete(uid: string, query: MailDeleteQuery, plan: MailDeletePlanner) {
     return deleteMail(this.kingdom.db, this.config.kingdomId, uid, query, plan);
+  }
+  mailUpdates(uid: string, query: MailUpdateQuery, inspect: MailUpdateInspector) {
+    return readMailUpdates(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
   }
   relayMailGifts() {
     return relayMailGiftOpenings(this.kingdom.db, this.databases.global.db);
