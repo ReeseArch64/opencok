@@ -273,13 +273,13 @@ test("authenticated mail update command preserves optional time correlation and 
     throw new Error("Unexpected mail update dependency");
   };
   const db: GameStore = {
-    profile: async () => profile,
-    accounts: unused,
-    city: unused,
-    world: unused,
-    configuration: unused,
-    power: unused,
-    playerSummaries: unused,
+    getProfileById: async () => profile,
+    getAccountsByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
+    getConfigurationByPlayerId: unused,
+    getPowerByPlayerId: unused,
+    getPlayerSummariesByIds: unused,
     publicProfile: unused,
     playerRanking: unused,
     allianceRanking: unused,
@@ -323,6 +323,6 @@ test("authenticated mail update command preserves optional time correlation and 
   await expect(
     game.execute("self", "chat.get.update.mails", { time: sfs.string("0") }),
   ).rejects.toThrow();
-  db.profile = async () => ({ ...profile, uid: "other" });
+  db.getProfileById = async () => ({ ...profile, uid: "other" });
   await expect(game.execute("self", "chat.get.update.mails", {} as Fields)).rejects.toThrow();
 });

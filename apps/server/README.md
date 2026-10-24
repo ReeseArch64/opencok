@@ -928,7 +928,7 @@ coverage only. Legacy repair/write differences, exceptional-state limits and spe
 battle-realm behavior remain unresolved; native-client and live-service validation
 remain deferred. No schema migration or authoritative write is introduced here.
 
-The detailed-power foundation now includes `readPowerState`,
+The detailed-power foundation now includes `getPowerByPlayerId`,
 `calculatePlayerPower` and the `powerInfo` DTO. The read adapter captures the
 requested player's persisted components in one read-only repeatable-read
 transaction. The calculator covers role, generals, completed troops/traps, building

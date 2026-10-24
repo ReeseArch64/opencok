@@ -44,17 +44,17 @@ function fixture() {
   let history: ChatMessage[] = [];
   let failure: Error | undefined;
   const messages: MessageStore = {
-    async send(input) {
+    async create(input) {
       writes.push(input);
       if (failure) throw failure;
       return writeResult;
     },
-    async listRecent(...args) {
+    async getAll(...args) {
       reads.push(["recent", ...args]);
       if (failure) throw failure;
       return history;
     },
-    async listRange(...args) {
+    async getAllByRange(...args) {
       reads.push(["range", ...args]);
       if (failure) throw failure;
       return history;
@@ -471,11 +471,11 @@ test("chat commands reject stale or missing subscriptions and propagate reached 
       throw new Error("synthetic identity unavailable");
     },
     messages: {
-      send: async () => {
+      create: async () => {
         throw new Error("must not write");
       },
-      listRange: async () => [],
-      listRecent: async () => [],
+      getAllByRange: async () => [],
+      getAll: async () => [],
     },
   });
   owner.context.params = { roomId: "country_1", msg: "message" };

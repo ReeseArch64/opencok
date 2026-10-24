@@ -67,7 +67,7 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     await db.select().from(table).limit(0);
 }
 
-export function readPowerState(
+export function getPowerByPlayerId(
   db: Database["kingdom"]["db"],
   uid: string,
   now: number,

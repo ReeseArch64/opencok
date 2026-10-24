@@ -912,6 +912,10 @@ import applications. Their source exports and direct workspace dependencies are 
 | `storage`             | Redis leases/readiness, ZooKeeper registration, dependency timeouts and validated server-directory files.               |
 | `constants`, `errors` | Named connection limits, session TTL, mobile compatibility values and error types/codes.                                |
 
+Repository data operations follow the [repository method conventions](../packages/repositories/README.md):
+entity stores use CRUD verbs, while aggregate reads name their resource and lookup key.
+These names do not expand write authority or change snapshot/transaction boundaries.
+
 The reconnect friendship-mine use case adds a narrow realm write to the otherwise
 read-only player-query repositories. The controller supplies a validated initial mine
 from the treasure catalog. The repository reads the global account binding, verifies

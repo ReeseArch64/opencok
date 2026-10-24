@@ -13,10 +13,10 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
     throw new Error("Settings must not access player state");
   };
   const store: GameStore = {
-    profile: unused,
-    accounts: unused,
-    city: unused,
-    world: unused,
+    getProfileById: unused,
+    getAccountsByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
     mailGroups: unused,
     mailBatch: unused,
     mailCategory: unused,
@@ -29,9 +29,9 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
     allianceRanking: unused,
     playerRanking: unused,
     publicProfile: unused,
-    playerSummaries: unused,
-    configuration: unused,
-    power: unused,
+    getPlayerSummariesByIds: unused,
+    getConfigurationByPlayerId: unused,
+    getPowerByPlayerId: unused,
   };
   const game = new Game(store, rules, { kingdomId: 1 });
   const result = await game.execute("synthetic-player", "setting.xml", {
@@ -90,7 +90,7 @@ test("build.info uses the injected clock for buildings and queue previews withou
     throw new Error("Unexpected query");
   };
   const store: GameStore = {
-    profile: unused,
+    getProfileById: unused,
     mailGroups: unused,
     mailBatch: unused,
     mailCategory: unused,
@@ -103,12 +103,12 @@ test("build.info uses the injected clock for buildings and queue previews withou
     allianceRanking: unused,
     playerRanking: unused,
     publicProfile: unused,
-    playerSummaries: unused,
-    configuration: unused,
-    power: unused,
-    accounts: unused,
-    city: async () => state,
-    world: unused,
+    getPlayerSummariesByIds: unused,
+    getConfigurationByPlayerId: unused,
+    getPowerByPlayerId: unused,
+    getAccountsByPlayerId: unused,
+    getCityByPlayerId: async () => state,
+    getWorldByPointIds: unused,
   };
   let now = Date.UTC(2026, 9, 23, 12);
   const game = new Game(store, rules, { kingdomId: 1 }, () => now);

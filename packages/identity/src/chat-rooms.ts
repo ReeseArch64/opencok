@@ -37,10 +37,10 @@ function roomsForState(state: PlayerState | null): Room[] {
   return rooms;
 }
 
-export function createRoomAuthorizer(loadPlayerState: PlayerStateLoader): RoomAuthorizer {
+export function createRoomAuthorizer(getPlayerStateById: PlayerStateLoader): RoomAuthorizer {
   return async (uid, claimedRoomId) => {
     if (typeof uid !== "string" || !uid || typeof claimedRoomId !== "string") return null;
-    const state = await loadPlayerState(uid);
+    const state = await getPlayerStateById(uid);
     return roomsForState(state).find((room) => room.roomId === claimedRoomId) ?? null;
   };
 }

@@ -3,7 +3,7 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import { getTableColumns } from "drizzle-orm";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
-import { readLoginConfiguration, readLoginSwitches } from "@opencok/repositories/game";
+import { getConfigurationByPlayerId, readLoginSwitches } from "@opencok/repositories/game";
 import { Cache } from "@opencok/storage/session";
 
 function database(
@@ -63,7 +63,7 @@ function database(
 
 test("configuration persistence uses one read-only snapshot and filters both player projections", async () => {
   const { db, queries } = database();
-  const result = await readLoginConfiguration(db, "synthetic-player");
+  const result = await getConfigurationByPlayerId(db, "synthetic-player");
   expect(result.profile?.uid).toBe("synthetic-player");
   expect(result.switches).toBeUndefined();
   expect(queries.some(({ text }) => text.includes('from "opencok_kingdom"."switches"'))).toBe(
@@ -88,7 +88,7 @@ test("configuration persistence uses one read-only snapshot and filters both pla
 
 test("required preference query failure rolls back and never returns a snapshot", async () => {
   const { db, queries } = database({ failure: "preferences" });
-  await expect(readLoginConfiguration(db, "synthetic-player")).rejects.toThrow();
+  await expect(getConfigurationByPlayerId(db, "synthetic-player")).rejects.toThrow();
   expect(queries.at(-1)?.text).toBe("rollback");
   expect(queries.some((query) => query.text === "commit")).toBe(false);
 });
@@ -136,7 +136,7 @@ test("invalid Redis transport responses and bounded keys fail before configurati
 
 test("optional switches run independently after required configuration and recover non-SQL failures by omission", async () => {
   const { db, queries } = database({ failure: "switches" });
-  const result = await readLoginConfiguration(db, "synthetic-player");
+  const result = await getConfigurationByPlayerId(db, "synthetic-player");
   expect(result.profile?.uid).toBe("synthetic-player");
   expect(result.pushSettings).toEqual([{ type: 3, status: 0, audio: 1 }]);
   expect(queries.at(-1)?.text).toBe("commit");
@@ -151,7 +151,7 @@ test("empty switches remain successful while required snapshot failures cannot b
   expect(await readLoginSwitches(db)).toEqual([]);
   for (const failure of ["profile", "preferences", "commit"] as const) {
     const { db, queries } = database({ failure });
-    await expect(readLoginConfiguration(db, "synthetic-player")).rejects.toThrow();
+    await expect(getConfigurationByPlayerId(db, "synthetic-player")).rejects.toThrow();
     expect(queries.at(-1)?.text).toBe("rollback");
     if (failure !== "commit") expect(queries.some(({ text }) => text === "commit")).toBe(false);
     expect(queries.some(({ text }) => text.includes('from "opencok_kingdom"."switches"'))).toBe(

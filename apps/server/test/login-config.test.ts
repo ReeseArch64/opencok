@@ -54,20 +54,20 @@ function store(state: LoginConfigurationState): GameStore {
     allianceRanking: unused,
     playerRanking: unused,
     publicProfile: unused,
-    playerSummaries: unused,
-    power: unused,
+    getPlayerSummariesByIds: unused,
+    getPowerByPlayerId: unused,
     initializeWorldNewsPreference: async (uid, instant) => {
       expect(uid).toBe("synthetic");
       expect(instant).toBe(now);
     },
-    configuration: async (uid) => {
+    getConfigurationByPlayerId: async (uid) => {
       expect(uid).toBe("synthetic");
       return state;
     },
-    profile: unused,
-    accounts: unused,
-    city: unused,
-    world: unused,
+    getProfileById: unused,
+    getAccountsByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
   };
 }
 
@@ -336,9 +336,9 @@ test("army selection takes precedence over config as in the legacy deferred-logi
   };
   const db: GameStore = {
     ...store(configuration()),
-    configuration: unused,
-    power: unused,
-    city: async () => state,
+    getConfigurationByPlayerId: unused,
+    getPowerByPlayerId: unused,
+    getCityByPlayerId: async () => state,
   };
   const output = await new Game(db, rules(), { kingdomId: 2 }).execute("synthetic", "login.other", {
     army: sfs.int(0),
@@ -369,7 +369,7 @@ test("initial and deferred login announce ordinary, account and subscription met
     hasMarches: false,
   };
   const game = new Game(
-    { ...store(persisted), city: async () => state },
+    { ...store(persisted), getCityByPlayerId: async () => state },
     catalog,
     { kingdomId: 2 },
     () => now,
@@ -632,7 +632,7 @@ test("required snapshot and later announcement failures remain outside the optio
     },
   };
   const requiredFailure = new Game(
-    { ...store(state), configuration: unused },
+    { ...store(state), getConfigurationByPlayerId: unused },
     catalog,
     { kingdomId: 2 },
     () => now,
@@ -699,7 +699,7 @@ test("initial preference persistence precedes switches and survives later announ
   let saved = false;
   const db = {
     ...store(state),
-    configuration: async () => {
+    getConfigurationByPlayerId: async () => {
       calls.push("snapshot");
       return { ...state, pushSettings: saved ? [{ type: 15, status: 0, audio: 1 }] : [] };
     },

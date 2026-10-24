@@ -16,7 +16,7 @@ export async function celebrityDescription(
   params: Fields,
   now: number,
 ): Promise<Fields> {
-  const profile = await db.profile(owner);
+  const profile = await db.getProfileById(owner);
   if (!profile) throw new GameError(errors.missing);
   if (
     profile.uid !== owner ||
@@ -54,7 +54,7 @@ export async function saveCelebrityDescription(
   params: Fields,
   now: number,
 ): Promise<Fields> {
-  const profile = await db.profile(owner);
+  const profile = await db.getProfileById(owner);
   if (!profile) throw new GameError(errors.missing);
   if (
     profile.uid !== owner ||

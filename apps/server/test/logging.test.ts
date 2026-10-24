@@ -44,7 +44,7 @@ test("sessions correlate successful commands and every repeated failure without 
   };
   const dependencies: ServerDependencies = {
     db: {
-      playerSummaries: async () => [],
+      getPlayerSummariesByIds: async () => [],
       mailGroups: async () => {
         throw new Error("Unexpected mail groups");
       },
@@ -79,27 +79,27 @@ test("sessions correlate successful commands and every repeated failure without 
         throw new Error("Unexpected ranking query");
       },
       publicProfile: async () => undefined,
-      power: async () => {
+      getPowerByPlayerId: async () => {
         throw new Error("unused");
       },
-      configuration: async () => {
+      getConfigurationByPlayerId: async () => {
         throw new Error("unused");
       },
       start: async () => {},
       health: async () => {},
       close: async () => {},
-      profile: async () => ({
+      getProfileById: async () => ({
         uid: "private-player",
         deviceUuid: "private-device",
         pf: "Google",
         banTime: 0n,
         banFlag: 0,
       }),
-      accounts: async () => [{ active: 0, server: "2", uuid: "private-device" }],
-      city: async () => {
+      getAccountsByPlayerId: async () => [{ active: 0, server: "2", uuid: "private-device" }],
+      getCityByPlayerId: async () => {
         throw new Error("unused");
       },
-      world: async () => ({ world: undefined, points: [], hasMarches: false }),
+      getWorldByPointIds: async () => ({ world: undefined, points: [], hasMarches: false }),
     },
     cache: {
       command: async () => "PONG",

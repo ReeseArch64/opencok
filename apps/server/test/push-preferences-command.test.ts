@@ -15,12 +15,12 @@ function fixture() {
     throw new Error("Unexpected configuration dependency");
   };
   const db = {
-    profile: async (uid: string) => {
+    getProfileById: async (uid: string) => {
       expect(uid).toBe("self");
       calls.push("profile");
       return profile;
     },
-    configuration: async (uid: string) => {
+    getConfigurationByPlayerId: async (uid: string) => {
       expect(uid).toBe("self");
       calls.push("preferences");
       return { profile, pushSettings: structuredClone(rows), switches: undefined };
@@ -215,7 +215,7 @@ test("missing and banned players cannot initialize or change preferences", async
 
 test("failed required reads and preference writes propagate without a success response", async () => {
   for (const stage of [
-    "configuration",
+    "getConfigurationByPlayerId",
     "initializeWorldNewsPreference",
     "setPushPreference",
   ] as const) {

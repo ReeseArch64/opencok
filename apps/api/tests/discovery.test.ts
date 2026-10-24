@@ -32,7 +32,7 @@ const directory = { read: async () => new Map([["1", server]]) };
 test("existing device discovery uses configured realm and exposes only compatibility fields", async () => {
   const calls: unknown[] = [];
   const accounts: AccountReader = {
-    valid: async (...args) => {
+    getAll: async (...args) => {
       calls.push(args);
       return [account];
     },
@@ -64,7 +64,7 @@ test("existing device discovery uses configured realm and exposes only compatibi
 test("platform mappings take priority and absent realms never produce a fake endpoint", async () => {
   const calls: unknown[] = [];
   const accounts: AccountReader = {
-    valid: async (...args) => {
+    getAll: async (...args) => {
       calls.push(args);
       return [account];
     },
@@ -77,7 +77,7 @@ test("platform mappings take priority and absent realms never produce a fake end
   });
   expect(calls).toEqual([["market_global", "synthetic-platform", true]]);
   expect(
-    await new Discovery({ valid: async () => [{ ...account, server: "2" }] }, directory).run({
+    await new Discovery({ getAll: async () => [{ ...account, server: "2" }] }, directory).run({
       loginFlag: "1",
       uuid: "synthetic-device",
     }),
@@ -88,7 +88,7 @@ test("invalid login flags perform no lookups and new devices receive metadata wi
   let calls = 0;
   const discovery = new Discovery(
     {
-      valid: async () => {
+      getAll: async () => {
         calls++;
         return [];
       },

@@ -3,7 +3,10 @@ import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import * as globalSchema from "@opencok/drizzle/schema/global";
 import type { Row } from "@opencok/contracts/rows";
-import { loadPlayerSummaries, readPlayerSummaries } from "@opencok/repositories/players";
+import {
+  getPlayerSummariesByIds,
+  getLocalPlayerSummariesByIds,
+} from "@opencok/repositories/players";
 import { Database } from "@opencok/repositories/game";
 import { Cache } from "@opencok/storage/session";
 
@@ -84,7 +87,7 @@ function databases(
     kingdoms,
     getKingdom: (id: number) => kingdoms.get(id)!,
     global: { db: drizzle(client as unknown as NodePgClient, { schema: globalSchema }) },
-  } as unknown as Parameters<typeof loadPlayerSummaries>[0];
+  } as unknown as Parameters<typeof getPlayerSummariesByIds>[0];
   return { dbs, queries };
 }
 
@@ -106,7 +109,7 @@ test("player persistence reads only public columns and binds IDs in one read-onl
       registrationCountry: "TW",
     },
   ]);
-  const rows = await readPlayerSummaries(db, ["1001"]);
+  const rows = await getLocalPlayerSummariesByIds(db, ["1001"]);
   expect(rows).toHaveLength(1);
   expect(rows[0]).toMatchObject({
     uid: "1001",
@@ -146,16 +149,16 @@ test("player persistence reads only public columns and binds IDs in one read-onl
 
 test("empty reads skip SQL, unknown players skip auxiliary reads and errors roll back", async () => {
   const empty = kingdom([]);
-  expect(await readPlayerSummaries(empty.db, [])).toEqual([]);
+  expect(await getLocalPlayerSummariesByIds(empty.db, [])).toEqual([]);
   expect(empty.queries).toEqual([]);
-  expect(await readPlayerSummaries(empty.db, ["unknown"])).toEqual([]);
+  expect(await getLocalPlayerSummariesByIds(empty.db, ["unknown"])).toEqual([]);
   expect(empty.queries).toHaveLength(3);
   const failure = kingdom([{ uid: "1001" }], true);
-  await expect(readPlayerSummaries(failure.db, ["1001"])).rejects.toThrow();
+  await expect(getLocalPlayerSummariesByIds(failure.db, ["1001"])).rejects.toThrow();
   expect(failure.queries.at(-1)?.text).toBe("rollback");
   expect(failure.queries.some((query) => query.text === "commit")).toBe(false);
   await expect(
-    readPlayerSummaries(
+    getLocalPlayerSummariesByIds(
       empty.db,
       Array.from({ length: 51 }, () => "1001"),
     ),
@@ -165,7 +168,7 @@ test("empty reads skip SQL, unknown players skip auxiliary reads and errors roll
 test("local requests preserve requested order and duplicates without reading the global directory", async () => {
   const local = kingdom([{ uid: "1001" }, { uid: "1002" }]);
   const { dbs, queries } = databases(local, undefined);
-  const rows = await loadPlayerSummaries(dbs, 1, ["1002", "missing", "1001", "1002"], false);
+  const rows = await getPlayerSummariesByIds(dbs, 1, ["1002", "missing", "1001", "1002"], false);
   expect(rows.map((row) => row.data.uid)).toEqual(["1002", "1001", "1002"]);
   expect(rows.every((row) => row.kingdomId === 1 && !row.remote)).toBe(true);
   expect(queries).toEqual([]);
@@ -175,7 +178,7 @@ test("cross-realm lookups route only missing normalized numeric IDs through the 
   const local = kingdom([{ uid: "1001", profileServerId: 1 }]);
   const remote = kingdom([{ uid: "2001", name: "Remote", profileServerId: 2 }]);
   const { dbs, queries } = databases(local, remote, [{ uid: "2001", server: "2" }]);
-  const rows = await loadPlayerSummaries(
+  const rows = await getPlayerSummariesByIds(
     dbs,
     1,
     ["2001@mod", "1001", "2001@mod", "unknown", "2002"],
@@ -203,11 +206,11 @@ test("cross-realm missing configuration, ownership mismatch and read failure rej
   ]) {
     const local = kingdom([{ uid: "1001", profileServerId: 1 }]);
     const { dbs } = databases(local, remote, [{ uid: "2001", server: "2" }]);
-    await expect(loadPlayerSummaries(dbs, 1, ["1001", "2001"], true)).rejects.toThrow();
+    await expect(getPlayerSummariesByIds(dbs, 1, ["1001", "2001"], true)).rejects.toThrow();
   }
   const local = kingdom([{ uid: "1001" }]);
   const { dbs, queries } = databases(local, undefined);
-  await loadPlayerSummaries(dbs, 1, ["1001"], true);
+  await getPlayerSummariesByIds(dbs, 1, ["1001"], true);
   expect(queries).toEqual([]);
 });
 

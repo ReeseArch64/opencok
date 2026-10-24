@@ -45,8 +45,8 @@ import type { RoutedPublicProfile } from "./profile.ts";
 import type { PlayerRankingQuery, PlayerRankingSnapshot } from "./ranking.ts";
 
 export interface AuthenticationStore {
-  profile(uid: string): Promise<Row | undefined>;
-  accounts(uid: string): Promise<Row[]>;
+  getProfileById(uid: string): Promise<Row | undefined>;
+  getAccountsByPlayerId(uid: string): Promise<Row[]>;
 }
 export interface CityState {
   profile: Row | undefined;
@@ -113,9 +113,9 @@ export interface GameStore extends AuthenticationStore {
   allianceRanking(uid: string, query: AllianceRankingQuery): Promise<AllianceRankingSnapshot>;
   playerRanking(uid: string, query: PlayerRankingQuery): Promise<PlayerRankingSnapshot>;
   publicProfile(uid: string, observerAllianceId: string): Promise<RoutedPublicProfile | undefined>;
-  power(uid: string, now: number): Promise<PowerState>;
-  playerSummaries(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
-  configuration(uid: string): Promise<LoginConfigurationState>;
+  getPowerByPlayerId(uid: string, now: number): Promise<PowerState>;
+  getPlayerSummariesByIds(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
+  getConfigurationByPlayerId(uid: string): Promise<LoginConfigurationState>;
   configurationSwitches?(): Promise<Row[] | undefined>;
   initializeWorldNewsPreference?(uid: string, now: number): Promise<void>;
   setPushPreference?(uid: string, preference: PushPreference, now: number): Promise<void>;
@@ -132,8 +132,8 @@ export interface GameStore extends AuthenticationStore {
     now: number,
     readValue: () => number,
   ): Promise<number | undefined>;
-  city(uid: string, now: number): Promise<CityState>;
-  world(
+  getCityByPlayerId(uid: string, now: number): Promise<CityState>;
+  getWorldByPointIds(
     uid: string,
     ids: number[],
   ): Promise<{ world: Row | undefined; points: Row[]; hasMarches: boolean }>;

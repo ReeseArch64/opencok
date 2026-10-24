@@ -16,7 +16,7 @@ function fixture(services?: GameServices) {
     blocked = false;
   let failure = "";
   const store = {
-    async profile(uid: string) {
+    async getProfileById(uid: string) {
       expect(uid).toBe("self");
       calls.push("profile");
       return profile;

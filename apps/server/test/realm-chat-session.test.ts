@@ -44,17 +44,17 @@ function fixture(issuer?: ChatSessionIssuer, clock = () => now) {
   };
   const calls: string[] = [];
   const db: GameStore = {
-    profile: async (uid) => {
+    getProfileById: async (uid) => {
       calls.push(uid);
       return profile;
     },
-    accounts: unused,
-    city: unused,
-    world: unused,
-    power: unused,
+    getAccountsByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
+    getPowerByPlayerId: unused,
     publicProfile: unused,
-    playerSummaries: unused,
-    configuration: unused,
+    getPlayerSummariesByIds: unused,
+    getConfigurationByPlayerId: unused,
     mailGroups: unused,
     mailBatch: unused,
     mailCategory: unused,
@@ -126,10 +126,10 @@ test("authenticated realm command issues a usable chat token through the maintai
   let clock = now;
   const sessions = new Map<string, Session>();
   const store: SessionStore = {
-    save: async (session) => {
+    create: async (session) => {
       sessions.set(session.tokenHash.toString("hex"), session);
     },
-    findByTokenHash: async (hash) => {
+    getById: async (hash) => {
       const session = sessions.get(hash.toString("hex"));
       return session && session.expiresAt.getTime() > clock ? { uid: session.uid } : null;
     },
@@ -321,20 +321,20 @@ test("HTTP issuer validates successful responses and sanitizes transport, authen
   ])
     await expect(issuer(async () => response)(request)).rejects.toThrow("Chat session unavailable");
   const unavailable: SessionStore = {
-    save: async () => {
+    create: async () => {
       throw new Error("private-store-failure");
     },
-    findByTokenHash: unused,
+    getById: unused,
   };
   await expect(issuer(memoryExchange(unavailable))(request)).rejects.toThrow(
     "Chat session unavailable",
   );
   let writes = 0;
   const store: SessionStore = {
-    save: async () => {
+    create: async () => {
       writes++;
     },
-    findByTokenHash: unused,
+    getById: unused,
   };
   await expect(
     issuer(memoryExchange(store, () => now, "wrong-synthetic-secret"))(request),
