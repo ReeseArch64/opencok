@@ -596,7 +596,20 @@ realms, profiles, celebrity flag 11 or description rows produce an empty string;
 query failures reject. Strict UTF-8 decoding preserves BOM and applies Java trim/blank
 rules; malformed bytes produce empty text as in the source. The maintained protocol
 limits still apply to the resulting string. This completes the read command's local
-implementation; description saving/filtering remains separate and unsupported.
+implementation; saving uses the separate owned mutation described below.
+Celebrity-description saves now expose `celebrity.desc.save` with the source celebrity
+flag gate before description decoding. The repository locks and revalidates the owner,
+selects the existing canonical UID row, then reaches the required String and actual
+loaded filter. It updates only the selected description or inserts the trimmed owner
+UID; it never upserts unrelated state. The generated-pattern replacement evaluator
+retains ASCII-only case folding, Java word boundaries/anchors, ordered alternatives,
+greedy ASCII whitespace and sequential replacement. Loading bypasses replacement;
+a reached filter error returns the text transformed by earlier entries. This is the
+restricted generated bad-word grammar, not arbitrary reserved-name Java Pattern support.
+The blob encoder retains Java trim, blank/malformed-text null results and backing-array
+padding. The existing 65,535-byte blob bound applies. No notification or profile counter
+is added. Final save-path tests were not rerun after the user paused test generation and
+execution; written earlier tests are retained, and broad/runtime validation remains open.
 Nickname text rules remain pure: Java trim/blank behavior, weighted GBK length and
 character eligibility feed an ordered filter/availability evaluation. The GBK width
 table is derived from an independently authored Java 8 standard-library probe and has

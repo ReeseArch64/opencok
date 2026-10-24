@@ -1,10 +1,11 @@
-import type { GameStore } from "@opencok/contracts/game";
+import type { GameServices, GameStore } from "@opencok/contracts/game";
 import { long, num } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { int, str, sfs, type Fields } from "@opencok/messages/sfs";
 import { mailBlank } from "@opencok/rules/mail";
 import { nicknameTrim } from "@opencok/rules/nickname";
+import { javaMailBytes } from "@opencok/rules/avatar-mail";
 
 const utf8 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
 
@@ -43,4 +44,36 @@ export async function celebrityDescription(
     return empty;
   }
   return mailBlank(description) ? empty : { description: sfs.string(description) };
+}
+
+export async function saveCelebrityDescription(
+  db: GameStore,
+  services: GameServices,
+  owner: string,
+  kingdomId: number,
+  params: Fields,
+  now: number,
+): Promise<Fields> {
+  const profile = await db.profile(owner);
+  if (!profile) throw new GameError(errors.missing);
+  if (
+    profile.uid !== owner ||
+    num(profile, "serverId") !== kingdomId ||
+    num(profile, "banFlag") !== 0 ||
+    long(profile, "banTime") > BigInt(now)
+  )
+    throw new GameError(errors.invalid);
+  if (num(profile, "gmFlag") !== 11) return {};
+  if (!db.saveCelebrityDescription) throw new GameError(errors.unsupported);
+  await db.saveCelebrityDescription(owner, now, () => {
+    const description = str(params, "description");
+    if (typeof description !== "string") throw new GameError(errors.invalid);
+    if (!services.filterBadWords) throw new GameError(errors.unsupported);
+    const filtered = services.filterBadWords(description);
+    if (typeof filtered !== "string") throw new GameError(errors.unsupported);
+    if (!filtered.isWellFormed()) return null;
+    const bytes = javaMailBytes(filtered);
+    return bytes === null ? null : Buffer.from(bytes);
+  });
+  return {};
 }

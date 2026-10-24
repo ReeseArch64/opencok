@@ -115,6 +115,11 @@ export interface GameStore extends AuthenticationStore {
   setPushPreference?(uid: string, preference: PushPreference, now: number): Promise<void>;
   nicknameOccupied?(name: string): Promise<boolean>;
   celebrityDescription?(uid: string, kingdomId: number): Promise<Buffer | null>;
+  saveCelebrityDescription?(
+    uid: string,
+    now: number,
+    readDescription: () => Buffer | null,
+  ): Promise<void>;
   updateProfilePreference?(
     uid: string,
     field: ProfilePreferenceField,
@@ -158,6 +163,7 @@ export interface LoginConfigurationState {
 export interface GameServices {
   nicknameBadWords?(name: string): boolean | Promise<boolean>;
   nicknameReservedPatterns?(): readonly string[];
+  filterBadWords?(text: string): string;
   worldPointDetail?: WorldPointDetailStore;
   playerSearch?: PlayerSearchStore;
   worldSearch?: WorldSearchStore;
