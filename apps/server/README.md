@@ -77,7 +77,8 @@ read-only mobile originals must be extracted in a separate working directory.
 `setting.xml` is optional. Its command returns every configured setting with its ID
 and values encoded as strings, or an empty array when the catalog is absent. XML
 catalogs accept single records and multiple/nested groups. Duplicate IDs fail except
-for the existing goods and feature replacement policies. Values retain leading
+for goods, features, research, equipment and statuses, where the last record wins
+as in the legacy cache. Values retain leading
 zeroes and whitespace; malformed records and document type declarations fail loading.
 
 Building star availability evaluates numeric client versions, realm selectors and
@@ -193,14 +194,28 @@ research component is added to the total because the legacy total omits it.
 
 Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `saga_tower_science_up.xml`, `hero.xml`, `equipment.xml`, `dragon_words.xml`,
-`dragon_base.xml` and `dragon_new.xml`. They use the same validated XML loader.
+`dragon_base.xml`, `dragon_new.xml` and `status.xml`. They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
 types, catalog loading, query ownership and rollback.
 
-This foundation does not yet enable `get.power.info`. Runtime snapshot wiring,
-title-contract decoding, feature-gate selection and effective dragon attack bonus
-resolution remain required. A science-enabled dragon requires its authoritative
+Stored title contracts now decode from bounded UTF-8 JSON, including trailing
+padding used by the legacy encoder. Integer tokens retain exact precision through
+JSON parsing. Invalid shapes, binary SFS input and out-of-range deadlines fail
+explicitly. The read-adapter fixture uses the actual JSON storage format.
+
+Power context evaluates base/level-up/science dragon gates by realm and inclusive
+time boundaries. As with the legacy server calls that pass a null player version,
+the version attribute must be nonblank but is not compared with the client version.
+Malformed dates fail closed. The effect projection also reads persisted statuses
+in the same snapshot and computes initial-item, completed-research and active-status
+contributions, including random effects and the throne override. Float addition
+order and signed status overflow are preserved. Statuses ending at the snapshot
+time are excluded, matching reconstruction of the legacy active-state map.
+
+This foundation does not yet enable `get.power.info`. Runtime snapshot wiring and
+the remaining effective dragon attack bonus providers still require migration.
+A science-enabled dragon requires its authoritative
 attack modifier; the calculator rejects a missing modifier instead of assuming
 zero. Effective bonuses include multiple gameplay domains and need their own
 consistent read projection before this command can be advertised as complete.

@@ -71,6 +71,7 @@ function fixture() {
     ],
     knight: { activity_title: 8001, contract_activity_title: -1 },
     items: [],
+    states: [],
   };
   return { state, rules };
 }
@@ -90,6 +91,7 @@ function empty(): PowerSnapshot {
     dragons: [],
     knight: undefined,
     items: [],
+    states: [],
   };
 }
 

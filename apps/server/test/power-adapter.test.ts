@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { readPowerState } from "@opencok/repositories/power";
-import { sfs, encode } from "@opencok/messages/sfs";
+import { titleContractExpiries } from "@opencok/controllers/power";
 
 const now = 1792756800000;
 function database(options: { missing?: boolean; failure?: boolean } = {}) {
@@ -15,10 +15,11 @@ function database(options: { missing?: boolean; failure?: boolean } = {}) {
         return { rows: options.missing ? [] : [["synthetic", 5, "0", 0, "market_global", "", 1]] };
       if (table === "user_army") return { rows: [["107001", 1, 2, 3, 4]] };
       if (table === "user_wall") return { rows: [["108001", 5]] };
+      if (table === "user_state") return { rows: [[510001, "9007199254740993", 487, 25]] };
       if (table === "user_civilization_science") return { rows: [[2000, 3]] };
       if (table === "t_hero") return { rows: [[7001]] };
       if (table === "user_knight_title")
-        return { rows: [[8001, 8002, encode({ "8002": sfs.long(now + 1) })]] };
+        return { rows: [[8001, 8002, Buffer.from(`{"8002":${now + 1}}`)]] };
       if (table === "user_item") return { rows: [["talisman", 1, "9007199254740993"]] };
       if (table === "pic_upload_record") {
         if (options.failure) throw new Error("Synthetic upload read failure");
@@ -45,10 +46,14 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   });
   expect(snapshot.items[0]?.vanishTime).toBe(9007199254740993n);
   expect(Buffer.isBuffer(snapshot.knight?.contract_unlock_title)).toBe(true);
+  expect(titleContractExpiries(snapshot.knight)).toEqual(new Map([["8002", BigInt(now + 1)]]));
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const selects = queries.filter((query) => query.text.startsWith("select"));
-  expect(selects).toHaveLength(15);
+  expect(selects).toHaveLength(16);
+  expect(snapshot.states).toEqual([
+    { stateId: 510001, endTime: 9007199254740993n, ranEffId: 487, ranEffValue: 25 },
+  ]);
   for (const query of selects) {
     expect(query.params[0]).toBe("synthetic");
     expect(query.text).toContain(" where ");
