@@ -2,7 +2,8 @@
 
 [Issue #273](https://github.com/ReeseArch64/opencok/issues/273) completes the basic
 mailbox slice from discussion 27, topic 4: list, read, mark, save and delete owned
-messages. The baseline is `origin/develop` at `dda44f7`. The maintained runtime uses
+messages. The work started from `origin/develop` at `dda44f7` and was rebased onto `f6749a7`,
+including its Controller/Service separation. The maintained runtime uses
 no private Java source or legacy chat service. Attachment redemption is a separate
 slice; this change never grants rewards or consumes an attachment.
 
