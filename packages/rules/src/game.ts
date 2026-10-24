@@ -9,6 +9,17 @@ export interface ConfigurationCatalogs {
   kingdomSkills?: Map<string, Rule>;
   facebookShare?: Map<string, Rule>;
 }
+export interface PowerCatalogs {
+  generals?: Map<string, Rule>;
+  sciences?: Map<string, Rule>;
+  civilizationSciences?: Map<string, Rule>;
+  sagaSciences?: Map<string, Rule>;
+  heroes?: Map<string, Rule>;
+  equipment?: Map<string, Rule>;
+  titles?: Map<string, Rule>;
+  dragonBases?: Map<string, Rule>;
+  dragonLevels?: Map<string, Rule>;
+}
 export class Rules {
   constructor(
     readonly buildings: Map<string, Rule>,
@@ -22,6 +33,7 @@ export class Rules {
     readonly kingdomId = 1,
     readonly settings: Map<string, Rule> = new Map(),
     readonly configuration: ConfigurationCatalogs = {},
+    readonly power: PowerCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (

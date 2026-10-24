@@ -78,6 +78,29 @@ export async function loadRules(directory: string, kingdomId = 1) {
       optional("kingdomskill"),
       optional("fb_share"),
     ]);
+  const [
+    generals,
+    sciences,
+    civilizationSciences,
+    sagaSciences,
+    heroes,
+    equipment,
+    titles,
+    dragonBases,
+    dragonLevels,
+  ] = await Promise.all(
+    [
+      "general",
+      "science",
+      "scienceRace",
+      "saga_tower_science_up",
+      "hero",
+      "equipment",
+      "dragon_words",
+      "dragon_base",
+      "dragon_new",
+    ].map(optional),
+  );
   return new Rules(
     buildings,
     roles,
@@ -90,6 +113,17 @@ export async function loadRules(directory: string, kingdomId = 1) {
     kingdomId,
     settings,
     { generalSales, payControl, kingdomSkills, facebookShare },
+    {
+      generals,
+      sciences,
+      civilizationSciences,
+      sagaSciences,
+      heroes,
+      equipment,
+      titles,
+      dragonBases,
+      dragonLevels,
+    },
   );
 }
 
