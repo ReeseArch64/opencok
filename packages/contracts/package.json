@@ -39,7 +39,9 @@
     "./throne-ranking": "./src/throne-ranking.ts",
     "./community-ranking": "./src/community-ranking.ts",
     "./flower-ranking": "./src/flower-ranking.ts",
-    "./battle-ranking": "./src/battle-ranking.ts"
+    "./battle-ranking": "./src/battle-ranking.ts",
+    "./nickname-change": "./src/nickname-change.ts",
+    "./chat-nickname": "./src/chat-nickname.ts"
   },
   "dependencies": {}
 }

@@ -9,8 +9,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `user.check.nickName`,
 `equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
-`mail.read.status`, `mail.read.status.betch`, `report.picVer`, `user.update.picVer` (when configured),
-Current query coverage is documented in [the ranking inventory](RANKINGS.md).
+`mail.read.status`, `mail.read.status.betch`, `report.picVer`, `chat.get.system.mails.v2`, `user.update.picVer` (when configured),
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `act.score.rank`, `global.celebrities.rank`, `dragon.battle.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
@@ -1379,7 +1378,7 @@ lint and formatting pass. Native clients and production Redis remain unverified.
 schema, dependency or CI workflow changes are required. This evidence completes the
 query acceptance in issue #177; event publishing and other ranking families remain
 separate work.
-Current query coverage is documented in [the ranking inventory](RANKINGS.md).
+Current query coverage and remaining verification limits are documented in [the ranking inventory](RANKINGS.md).
 
 `global.celebrities.rank` reads the existing published global boards for the local
 realm. Before decoding `rankType`, it checks the global `server_info` row: realm IDs
@@ -1417,7 +1416,7 @@ power aliases, empty boards, unchanged list contents/expiry and dependency failu
 Affected types, lint and formatting pass. Native clients and production services remain
 unverified; the broader cross-realm ranking family stays separate from the completed
 query acceptance in [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
-Current query coverage is documented in [the ranking inventory](RANKINGS.md).
+Current query coverage and remaining verification limits are documented in [the ranking inventory](RANKINGS.md).
 
 `dragon.battle.rank` reads published global team rankings after checking the local
 profile, realm and ban state. `index_limit` is a string of `start|limit` ranges separated
@@ -1461,8 +1460,8 @@ windows, repeated ranges, reverse-rank lookup and self append while checking unc
 board contents/expiry, wrong-type keys and service loss. Package/server types, lint and
 formatting pass. This completes query acceptance in
 [issue #215](https://github.com/ReeseArch64/opencok/issues/215); native clients, production
-Redis, publishers and other ranking families such as `ctf.get.rank` remain unverified.
-Current query coverage is documented in [the ranking inventory](RANKINGS.md).
+Redis and ranking publishers remain unverified.
+Current query coverage and remaining verification limits are documented in [the ranking inventory](RANKINGS.md).
 
 ## Mailbox category status
 
@@ -3749,6 +3748,49 @@ A focused mutation check runs the login tests against seven disabled auth guards
 a temporary test bundle: signature, device binding, account activation, realm,
 account device and both ban checks. Every mutant must fail its tests. This is a
 bounded auth check, not the architecture's future repository-wide Stryker suite.
+
+## Nickname change persistence and notifications
+
+`user.modify.nickName` remains unsupported under
+[issue #89](https://github.com/ReeseArch64/opencok/issues/89). The internal
+`src/nickname-change.ts` runtime now composes the actual goods catalog, owned payment
+store and session notification bus. Its caller must supply the authenticated UID,
+stable operation UUID, validated name and a real CN1 refund-ratio provider. Reserved
+Java-pattern matching, CN1 session accounting, alliance/throne/shared-user effects,
+command orchestration and the background recovery relay remain pending.
+
+The runtime reads goods 200021 `type`, `price` and nonblank `para1` through `para9`.
+It commits payment before attempting the debit push, and commits any refund before its
+refund push. Items use `push.item.del` or `push.item.add` with final signed Int count;
+item-add includes the Long `vanishTime` and available parameters. Gold uses
+`push.mobile.gold.change` or exact-platform `push.dmm.gold.change`, with three signed
+Long category balances. The typed terminal reply keeps optional original debit `gold`
+before boolean `status`, including a failed change that later refunded at another price.
+
+Kingdom migration `0009_nickname_notification_delivery` adds `notificationStage` with
+default zero. Stage one acknowledges debit and stage two acknowledges refund. A
+notification acknowledgment commits with that stage and its pending bit; a missing
+recipient, SQL failure or deadline leaves work pending. The global receipt migrations
+and kingdom journal migration must already be applied. Back up before schema changes
+and retain the additive column and migration history when rolling application code back.
+No existing account balance, name or inventory is rewritten by the migration.
+
+Recovery publishes current authoritative counts and balances under the realm owner
+lock. It coalesces an unseen debit/refund into the current final state, preserving the
+online debit-then-refund sequence when both reached an active recipient. Packet queueing
+does not prove client receipt; retries may repeat absolute values. An abort signal is
+checked around session ownership refresh so expired publication cannot send a late
+packet after its database lock is released. Notification failures never cause another
+economic charge or undo a committed name.
+
+Disposable PostgreSQL and the actual runtime cover item/mobile/DMM/CN1 paths, current-price
+refunds, intervening inventory changes and signed wrap, offline reconciliation, failed
+acknowledgments, lost commit replies and restart recovery. Typed packet and session units
+cover field widths/order, optional parameters, terminal replies and late-send cancellation.
+Run `bun --no-env-file test apps/server/integration/nickname-change.test.ts` from the root
+for the 23 integration scenarios. No mobile-client validation is claimed. The existing
+`@opencok/mappings` workspace dependency is now required at runtime rather than only in
+development; the lockfile retains the same package versions.
 
 ## V2 new-system-mail synchronization
 

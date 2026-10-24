@@ -2,13 +2,13 @@
 
 `@opencok/drizzle` owns the application's PostgreSQL schemas, typed client and
 versioned Drizzle migrations. The maintained source of truth is `src/schema`,
-with **778 tables / 6,350 fields** and one module per table.
+with **780 tables / 6,367 fields** and one module per table.
 
 | Default physical database | SQL namespaces                                  | Migration role | Tables |
 | ------------------------- | ----------------------------------------------- | -------------- | -----: |
-| `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    114 |
-| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    664 |
-| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    664 |
+| `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    115 |
+| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    665 |
+| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    665 |
 
 Kingdom IDs **1 and 2** are configured by default. There is one maintained kingdom
 schema, one set of table modules and one kingdom migration history. Both physical

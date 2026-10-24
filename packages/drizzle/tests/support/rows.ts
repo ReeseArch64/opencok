@@ -52,6 +52,12 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.pic_ver = variant;
     row.committed_at = BigInt(variant);
   }
+  if (spec.indexes.some((key) => key.name === "nickname_change_PRIMARY")) {
+    row.state = "prepared";
+    row.notificationStage = 0;
+    row.pendingEffects = 0;
+    row.payment = "{}";
+  }
   return row;
 }
 

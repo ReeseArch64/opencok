@@ -88,3 +88,4 @@ export { userbindmappingreverse } from "./opencok_global/userbindmappingreverse"
 export { userbindmappingreverse_oldbigone } from "./opencok_global/userbindmappingreverse_oldbigone";
 export { usermapping } from "./opencok_global/usermapping";
 export { worldcup_team } from "./opencok_global/worldcup_team";
+export { nickname_change_receipt } from "./opencok_global/nickname_change_receipt";

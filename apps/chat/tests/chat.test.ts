@@ -49,6 +49,7 @@ test("signed sessions bind opaque tokens to identities and gate real HTTP/WebSoc
   let available = true;
   const repository: ChatRepository = {
     profiles: { publish: async () => "applied", find: async () => null },
+    nicknames: { refresh: async () => "unchanged" },
     sessions: {
       async create(session) {
         sessions.set(session.tokenHash.toString("hex"), session);
