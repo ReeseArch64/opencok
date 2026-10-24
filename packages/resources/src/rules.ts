@@ -36,6 +36,7 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     "equipment",
     "status",
     "dragon_skill",
+    "activity_panel",
   ].includes(name);
   for (const record of records) {
     if (
@@ -112,6 +113,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
     sagaScienceBases,
     foreignSciences,
     foreignScienceBases,
+    activityPanels,
+    mergeActivities,
+    luckyEffects,
   ] = await Promise.all(
     [
       "general",
@@ -140,6 +144,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "saga_tower_science_base",
       "foreign_civilization_up",
       "foreign_civilization_base",
+      "activity_panel",
+      "merge_activity",
+      "lucky_effect",
     ].map(optional),
   );
   return new Rules(
@@ -181,6 +188,9 @@ export async function loadRules(directory: string, kingdomId = 1) {
       sagaScienceBases,
       foreignSciences,
       foreignScienceBases,
+      activityPanels,
+      mergeActivities,
+      luckyEffects,
     },
   );
 }
