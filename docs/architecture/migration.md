@@ -443,7 +443,8 @@ notification delivery respectively; a refund reserves notification delivery only
 consumers remain separate. The Chat consumer acknowledges bit 2 only after the
 authenticated receiver confirms the durable operation. Inventory/gold notification
 delivery now acknowledges bit 16 through the persisted delivery stage described below.
-Alliance, throne and command-level ordering remain pending.
+The alliance consumer now acknowledges bit 1 as described below. Throne and
+command-level ordering remain pending.
 
 Disposable PostgreSQL integration covers both realms, UCA-equivalent contention,
 concurrent retries, item/gold/DMM/CN1 paths, transactional SQL failures, lost commit
@@ -565,7 +566,46 @@ sequence exhaustion, clock rollback, timed-out late writes, lost commits and res
 recovery. This does not introduce a new service, dependency, environment setting or
 cache authority for player progress. Existing cross-player search keeps its fresh SQL
 reads. The nickname command and recovery relay remain disabled pending the remaining
-providers, alliance/throne consumers and authenticated orchestration.
+providers, throne consumers and authenticated orchestration.
+
+The nickname alliance consumer applies the LORDNAME event to the persisted
+`user_alliance_task` lifecycle under the same owner and journal locks. It reads the
+`function_on6.k12` realm selector and optional `alliance_teleport` catalog, preserving
+signed Java Int parsing of `function_on` and the reached `para1`. A disabled task
+marks itself complete without reading `para1`; an enabled already-complete LORDNAME
+returns before another completion scan. The event never increments its `num` or
+changes membership, inventory or unrelated tasks.
+
+Completion scans exclude INIT and distinguish ordinary prerequisites from TIME.
+Finishing ordinary prerequisites starts a zero TIME counter with epoch milliseconds;
+an existing positive or negative counter is retained. TIME must itself be complete
+before the final notification. That transition inserts the actual mail template
+10113 through the existing system-mail producer, including its category/group,
+reward, padded UTF-8 content and optional overflow contents, then marks INIT done.
+A missing optional mail template retains the source's skip behavior. An unresolved
+reward identifier or malformed reached template rejects without completing tasks.
+The runtime accepts an explicit reward resolver; it never substitutes an empty reward.
+
+Task updates, mail/group/overflow insertion and clearing only nickname journal bit 1
+commit in one realm transaction. A failed task write, mail insert or acknowledgment
+rolls them all back without reversing or repeating the earlier nickname payment.
+The deterministic mail stem identifies the owned operation. Lost COMMIT replies are
+resolved by reading the durable journal after restart; concurrent consumers cannot
+send a second mail for a completed lifecycle. A disabled realm, absent LORDNAME task
+or persisted completed INIT has an explicit no-op path. Unknown task IDs or missing
+INIT/TIME evidence needed for an active transition keep delivery pending rather than
+inventing progress. No task rows are provisioned by this consumer. Registration,
+login-time task initialization and other task triggers remain separate lifecycle work.
+
+The optional `alliance` port and `deliverAlliance` method on the internal runtime
+compose `createNicknameAllianceDelivery` from Services with the real catalog, pure task
+rule and owned transaction. Disposable PostgreSQL
+tests cover both kingdoms, timer activation, 12 concurrent attempts, actual grouped
+mail, missing resources, reward resolution, injected task/mail/ack failures, lost
+commit replies and restart recovery. This adds no schema, environment or external
+dependency. No authenticated nickname command or background relay is enabled;
+reserved patterns, CN1 accounting, throne state and complete orchestration still
+require their own implementations.
 
 Negative or restored avatar versions and modulo wrap require a legacy event-ordering
 or expected-previous CAS design. Command/rule units and a

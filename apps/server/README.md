@@ -3825,7 +3825,7 @@ bounded auth check, not the architecture's future repository-wide Stryker suite.
 `src/nickname-change.ts` runtime now composes the actual goods catalog, owned payment
 store and session notification bus. Its caller must supply the authenticated UID,
 stable operation UUID, validated name and a real CN1 refund-ratio provider. Reserved
-Java-pattern matching, CN1 session accounting, alliance/throne effects,
+Java-pattern matching, CN1 session accounting, throne effects,
 command orchestration and the background recovery relay remain pending.
 
 The runtime reads goods 200021 `type`, `price` and nonblank `para1` through `para9`.
@@ -3898,6 +3898,33 @@ application does not silently reset it. Cached profile loss does not remove Post
 state. Real PostgreSQL/Redis tests cover full/sparse data, both kingdoms/layouts,
 concurrent replay, malformed Redis state, Long precision, late publication, commit loss
 and restart recovery in `integration/nickname-shared-user.test.ts`.
+
+### Alliance task delivery after nickname changes
+
+The optional `alliance` port supplies the real `items`, `configuration` and `mail`
+catalogs, with an explicit `resolveMailReward` callback when template 10113 references
+a reward ID. Call `deliverAlliance(owner, operationId, now)` for a committed owned
+operation. It applies LORDNAME (46608) to existing `user_alliance_task` rows, preserving
+the original realm/task gates and signed parameter parsing. It changes no membership
+or task count and creates no task rows.
+
+When all ordinary prerequisites finish, a zero TIME counter starts at the supplied
+millisecond instant. Existing timer values remain unchanged. The lifecycle completes
+only after TIME is also done: the real system-mail producer inserts template 10113
+and its group/overflow data, INIT becomes done, and only journal bit 1 is acknowledged.
+All writes share one realm transaction. A failed write rolls the effect back;
+concurrent replay or a lost COMMIT reply cannot cause another payment or duplicate
+completion mail. No-op paths for a disabled realm, absent LORDNAME or completed INIT
+are explicit. Missing required lifecycle evidence, unknown task IDs or unresolved
+reward IDs retain the pending effect. A missing optional mail template skips mail,
+as in the reference, while allowing the lifecycle to finish.
+
+The optional `alliance_teleport.xml` catalog preserves exact strings and final duplicate
+IDs. It is only required when an active configured LORDNAME task reaches it. This
+consumer assumes an existing persisted lifecycle; registration/login initialization
+and other task triggers remain separate. Tests in `integration/nickname-alliance.test.ts`
+exercise both kingdoms, real task/mail rows, 12 concurrent attempts, failures and
+PostgreSQL restart. No migration, dependency or environment setting was added.
 
 ## V2 new-system-mail synchronization
 

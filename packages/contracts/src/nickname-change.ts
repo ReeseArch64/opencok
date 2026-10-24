@@ -1,3 +1,4 @@
+import type { AvatarSystemMail } from "./files.ts";
 import type { Row } from "./rows.ts";
 import type { ChatNicknamePublisher } from "./chat-nickname.ts";
 import type { SharedUserProjector, SharedUserPublisher } from "./shared-user.ts";
@@ -37,6 +38,12 @@ export interface NicknameChangeStore {
     operationId: string,
     publish: NicknameNotificationPublisher,
     timeoutMs: number,
+  ): Promise<boolean>;
+  deliverAlliance(
+    owner: string,
+    operationId: string,
+    now: number,
+    plan: NicknameAlliancePlanner,
   ): Promise<boolean>;
   deliverSharedUser(
     owner: string,
@@ -83,3 +90,17 @@ export interface NicknameChangeConfiguration {
   price(): unknown;
   refundRatio(profile: Row): Promise<number>;
 }
+
+export interface NicknameAllianceTask {
+  readonly id: string;
+  readonly num: bigint | null;
+  readonly state: number | null;
+}
+export interface NicknameAlliancePlan {
+  readonly updates: readonly NicknameAllianceTask[];
+  readonly complete: boolean;
+}
+export type NicknameAlliancePlanner = (
+  tasks: readonly NicknameAllianceTask[],
+  stem: string,
+) => NicknameAlliancePlan & { readonly mail: AvatarSystemMail | null };

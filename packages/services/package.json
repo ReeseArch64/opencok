@@ -44,7 +44,8 @@
     "./world-resource-army-load": "./src/world-resource-army-load.ts",
     "./mail-presentation": "./src/mail-presentation.ts",
     "./mail-system": "./src/mail-system.ts",
-    "./battle-ranking": "./src/battle-ranking.ts"
+    "./battle-ranking": "./src/battle-ranking.ts",
+    "./nickname-alliance": "./src/nickname-alliance.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
