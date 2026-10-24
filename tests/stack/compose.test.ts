@@ -106,6 +106,10 @@ async function createStack() {
     DEPENDENCY_TIMEOUT_MS: "1000",
   });
   isolated.services.server.volumes.find((v: any) => v.target === "/resources").source = folder;
+  isolated.services.server.volumes.find(
+    (v: any) => v.target === "/gameconfig/badwords.txt",
+  ).source = join(folder, "badwords.txt");
+  await Bun.write(join(folder, "badwords.txt"), "synthetic-filtered-word\n");
   Object.assign(isolated.services.api.environment, {
     DATABASE_URL: databaseUrl,
     KINGDOM_ID: "2",
