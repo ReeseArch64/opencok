@@ -11,7 +11,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`, `report.picVer`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `act.score.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `act.score.rank`, `global.celebrities.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -1408,10 +1408,14 @@ including correlation remains bounded by the existing frame limit. Decoder numer
 nesting and collection limits also apply. Type 7 has no handler mapping in the reference.
 The query adds no score publisher, invalidation, TTL, settlement or cross-realm routing.
 
-Storage, repository, controller and server type checks plus source review cover this
-slice. No new tests or fixtures were generated and no tests, real services or client/ADB
-were run. Behavioral and runtime verification remain deferred; this command does not
-complete the cross-realm ranking family. See [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
+Five focused unit tests cover category keys and aliases, inclusive window sizes,
+exact Long transport, ordered duplicate rows, correlation, gate/selector/owner ordering,
+missing providers, malformed/oversized data and metadata SQLSTATE/transport failures.
+A disposable PostgreSQL/Redis test executes fresh realm-type changes, category windows,
+power aliases, empty boards, unchanged list contents/expiry and dependency failures.
+Affected types, lint and formatting pass. Native clients and production services remain
+unverified; the broader cross-realm ranking family stays separate from the completed
+query acceptance in [issue #205](https://github.com/ReeseArch64/opencok/issues/205).
 
 `dragon.battle.rank` reads published global team rankings after checking the local
 profile, realm and ban state. `index_limit` is a string of `start|limit` ranges separated
