@@ -11,6 +11,7 @@ import type { Rules } from "./game.ts";
 import { javaDecimal } from "./java-integer.ts";
 import { hashOrder } from "./power-hash-order.ts";
 import { worldSearchName } from "./world-search.ts";
+import { mailBlank } from "./mail.ts";
 
 function invalid(): never {
   throw new GameError(errors.unsupported, "player_search");
@@ -151,5 +152,52 @@ export function selectPlayerSearch(
     total: BigInt(combined.length),
     maximum: BigInt(query.maximum),
     entries: playerSearchPage(combined, query.page, maximumPages),
+  };
+}
+
+export function sharedSearchProfile(row: Row, rules: Rules, now: number): Row {
+  if (!Number.isSafeInteger(now) || now < 0) return invalid();
+  const number = (key: string, fallback = 0) => {
+    const value = row[key] ?? fallback;
+    if (!integer(value)) return invalid();
+    return value;
+  };
+  const deadline = (key: string) => {
+    const value = row[key] ?? 0n;
+    if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) return invalid();
+    return value;
+  };
+  for (const key of ["allianceId", "abbr"])
+    if (row[key] != null && typeof row[key] !== "string") return invalid();
+  const allianceId = row.allianceId as string | null | undefined;
+  const abbr = row.abbr as string | null | undefined;
+  const expiry = deadline("vipEndTime");
+  let vipLevel = 0;
+  if (expiry > BigInt(now)) {
+    if (!rules.power.vip?.size) return invalid();
+    const score = number("vipScore");
+    try {
+      let selected: string | undefined;
+      for (const rule of rules.power.vip.values())
+        if (javaDecimal(rule.point, 32) <= BigInt(score)) selected = rule.id;
+      if (selected !== undefined) vipLevel = (Number(javaDecimal(selected, 32)) % 100) + 1;
+    } catch {
+      return invalid();
+    }
+  }
+  return {
+    ...row,
+    mainBuildingLevel: number("mainBuildingLevel"),
+    picVer: number("picVer"),
+    picfraId: number("picfraId"),
+    gmFlag: number("gmFlag"),
+    crossFightSrcServerId: number("crossFightSrcServerId", -1),
+    power: deadline("power"),
+    vipEndTime: expiry,
+    offLineTime: deadline("offLineTime"),
+    vipLevel,
+    svipLevel: number("svipLevel"),
+    rank: mailBlank(allianceId) ? 0 : number("rank"),
+    abbr: mailBlank(allianceId) || mailBlank(abbr) ? "" : abbr!,
   };
 }
