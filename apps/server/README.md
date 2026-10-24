@@ -189,10 +189,22 @@ Public statistics omit all battle fields when no statistics record exists and us
 the persisted signed 64-bit total power when present. Equipment serialization
 preserves nullable properties, locked-property flag selection, gated strengthening
 presentation and exact case-sensitive aliases. Medal/equipment serializers select
-only their documented wire fields. These components have synthetic unit coverage;
-they are not yet connected to `get.user.info`. VIP/achievement/role projection,
-general skills, alliance/flower presentation, realm routing and command dispatch
-remain required before enabling that full query. No schema change, player write,
+only their documented wire fields. `publicProfileProgress` and `publicProfileBase`
+now project identity, role experience, score-derived VIP, achievement ratio, military
+level, tavern availability, realm name and privacy switches. Active VIP uses the last
+qualifying record in the named VIP group, ignoring persisted level/SVIP, with a
+strict expiry cutoff. VIP expiry seconds retain signed 32-bit narrowing. Achievement
+counts use float rounding at division, allow ratios above one and default to one for
+an empty catalog. The loader counts achievement records without deduplicating IDs;
+military and realm names come from optional `wr_rank` and `servers` catalogs.
+Equipment strengthening uses the server feature gate. Privacy switches remain
+separate from the equipment/medal arrays, following the legacy public contract.
+Missing required role/rank/active VIP data or lord state rejects the projection.
+
+These components have synthetic unit coverage; they are not yet connected to
+`get.user.info`. General skills, alliance/flower/office presentation, realm routing
+and command dispatch remain required before enabling that full query. The base
+projection intentionally has no placeholder general/alliance response. No schema change, player write,
 client validation or live-service test is introduced by this foundation.
 
 The detailed-power foundation now includes `readPowerState`,
