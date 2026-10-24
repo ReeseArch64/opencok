@@ -31,6 +31,8 @@
     "./power-resolver": "./src/power-resolver.ts",
     "./profile": "./src/profile.ts",
     "./nickname": "./src/nickname.ts",
+    "./nickname-change": "./src/nickname-change.ts",
+    "./cn1-rewards": "./src/cn1-rewards.ts",
     "./mysql-unicode": "./src/mysql-unicode.ts",
     "./nickname-words": "./src/nickname-words.ts",
     "./java-nickname-characters": "./src/java-nickname-characters.ts",
@@ -42,6 +44,7 @@
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./mail": "./src/mail.ts",
+    "./mail-batch-delete": "./src/mail-batch-delete.ts",
     "./mail-groups": "./src/mail-groups.ts",
     "./avatar": "./src/avatar.ts",
     "./mail-conversation-read": "./src/mail-conversation-read.ts",
@@ -64,7 +67,8 @@
     "./kingdom-skills": "./src/kingdom-skills.ts",
     "./java-list-sort": "./src/java-list-sort.ts",
     "./java-calendar-date": "./src/java-calendar-date.ts",
-    "./java-integer": "./src/java-integer.ts"
+    "./java-integer": "./src/java-integer.ts",
+    "./dragon-ranking": "./src/dragon-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
