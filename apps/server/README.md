@@ -10,7 +10,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -66,6 +66,8 @@ service/resource settings through its process environment.
 | `GAME_HOST`                      | Bind address, default `127.0.0.1`.                                                                                                   |
 | `GAME_PORT` / `GAME_HEALTH_PORT` | Defaults to `19933` / `18090`.                                                                                                       |
 | `GAME_MAP_SIZE`                  | Defaults to `1200`.                                                                                                                  |
+| `GAME_CROSS_SEARCH`              | Defaults to `true`; `false` restricts general player search to the local realm without global search reads.                          |
+| `GAME_PLAYER_KINGDOMS`           | Optional public-read routes, such as `1:opencok_kingdom_1,2:opencok_kingdom_2`; at most two realms.                                  |
 | `GAME_MAIL_TRANSLATION`          | Defaults to `true`; `false` suppresses category-chat translation IDs and stored-translation reads.                                   |
 | `DEPENDENCY_TIMEOUT_MS`          | Defaults to `5000`.                                                                                                                  |
 
@@ -1026,24 +1028,29 @@ with synthetic database clients. It covers defaults, pages, routing, observer ch
 ban sentinels, null joins, exact longs, bound patterns, failures and transport limits.
 No listeners, databases or client sessions are used. Live collation, query plans,
 concurrent snapshots and native rendering remain unvalidated. The separate general
-`search.player` command and point-detail query remain pending within topic 5.
+`search.player` command is documented below; point-detail queries remain pending within topic 5.
 
 ## General player search policy
 
-General `search.player` remains unavailable until its global/local/remote adapters
-and runtime composition are connected. [Issue #84](https://github.com/ReeseArch64/opencok/issues/84)
-tracks that remaining work. `rules/player-search`, `contracts/player-search` and
-`dtos/player-search` now define its query, candidate selection and wire projection;
-they do not substitute the map-search command or establish endpoint availability.
+`search.player` is connected through `GameServices.playerSearch`, using the existing
+profile, building, statistics, alliance and global-directory tables. It requires
+String `key` and Int `page`; neither parameter has a default. The runtime passes
+`GAME_CROSS_SEARCH`, which defaults to true as in the reference. Explicit false uses
+only local search. Remote reads are restricted to `GAME_PLAYER_KINGDOMS`; unknown
+routes fail visibly rather than returning a fabricated local or empty result.
+Both settings are forwarded by Compose. [Issue #84](https://github.com/ReeseArch64/opencok/issues/84)
+tracks local delivery and review. No schema migration or new dependency is required.
 
 The query uses Java-compatible signed decimal parsing for `lookfor.k1` (minimum
 castle level) and `lookfor.k2` (advertised maximum), including BMP decimal digits.
 It retains the supplied prefix key and page without trimming or clamping. The local
 candidate limit is maximum plus one. Catalog maximum must be between zero and
 32,766, so candidates fit the existing collection bound; malformed or larger catalogs
-reject explicitly. Prefix SQL, observer authorization and realm routing must be supplied
-by the forthcoming adapter. Local rows are expected to have already passed its name,
-main-building and statistics joins; the selector additionally checks UID and level.
+reject explicitly. The adapter validates the authenticated local observer's identity,
+realm and bans before querying candidates. The local query uses a bound prefix ILIKE
+pattern, a left alliance join and inner main-building/statistics joins; the selector
+additionally checks UID and level. Raw castle level is used without star levels.
+Target ban flags/times do not add a filter for this general command.
 
 The compatibility pipeline is intentionally asymmetric:
 
@@ -1057,8 +1064,8 @@ entries. Arrays with ten entries or fewer bypass slicing entirely, even for a
 nonpositive or out-of-range page. Longer arrays use maximum divided by ten as the
 page cap. The pure slicer preserves signed 32-bit start/end wrapping; negative
 indices that would throw in Java reject, while wrapped empty ranges remain empty.
-A null within a sliced window ends that window. The adapter must not silently replace
-these rules with ordinary SQL pagination or an uncapped row count.
+A null within a sliced window ends that window. SQL fetches the bounded candidate
+window before the compatibility selector applies these page rules.
 
 Directory filtering uses minimum castle level minus two with signed wrapping. The
 remote candidate budget must fit 32,767 entries. Remote inputs model insertion order
@@ -1069,9 +1076,10 @@ and rejecting tree-bin collision cases instead of inventing their order. A missi
 is skipped; a mismatched UID/key or malformed present level rejects. Only positive
 main-building levels at or above the configured threshold enter the combined list.
 Unlike the legacy per-entry catch-and-skip behavior, malformed present identities and
-castle levels fail explicitly. The adapter must retain missing-entry placeholders
-when they affect map traversal and must not bypass candidate limits by silently
-filtering them before selection.
+castle levels fail explicitly. The adapter retains missing-profile placeholders after
+found profiles, preserving their participation in hash traversal before result filtering.
+Directory mapping rows are limited before account eligibility is checked. That window
+is not refilled after missing, local-realm or low-level accounts are excluded.
 
 Local projection emits the selected nullable identity, language, picture, power,
 alliance name/abbreviation and castle level fields, omitting null values. Zero and
@@ -1081,18 +1089,55 @@ power, VIP expiry and offline time appear only when positive; picture/frame, GM,
 cross-fight origin, VIP/SVIP and membership-rank integers retain their defaults.
 Remote alliance ID is optional and alliance name is not added. Each entry carries
 its selected serverId. Only public fields are serialized; no private profile data or
-unsolicited push is introduced. Correlation and complete-frame validation belong in
-the subsequent command integration.
+unsolicited push is introduced. The connected command retains ordinary correlation and
+checks the complete extension against MAX_FRAME, rejecting oversized output without
+truncating it.
 
 `test/fixtures/player-search.json` freezes 4,065 cases from an independently authored
 Java 8 primitive list/arithmetic/HashMap probe: 1,680 slicing cases and 2,385 search
 cases. Inputs use synthetic identifiers and no private game class was executed.
 Ordinary unit tests require no Java runtime. Additional tests exercise catalog syntax,
 remote budgets, sparse/default fields, long boundaries and malformed inputs, with SFS
-round trips. These units prove the pure policy and serialization only. Global
-`usermapping`/`account_new` reads, remote public metadata/VIP calculation, legacy cache
-lifecycle equivalence, cross-search configuration, runtime authentication, SQL collation
-and live behavior remain pending; no database or client was used for this slice.
+round trips. `test/player-search-command.test.ts` additionally composes the actual
+command/rules/DTOs/Drizzle adapters with synthetic clients, covering authentication,
+SQL predicates, routing, two-stage directory selection, sparse profiles, VIP, failures,
+batch snapshots and exact frame boundaries. All verification remains unit-only; no
+listener, database service or client was used.
+
+Local observer and candidate reads share one read-only repeatable-read snapshot.
+Cross mode then reads global `usermapping` rows of mappingType name with a bound
+prefix pattern, followed by eligible `account_new` rows in the same global snapshot.
+The second query selects only gameUid/server, excludes the local server and uses the
+wrapped minimum-level-minus-two threshold. Mapping/account active flags do not add a
+filter. Only canonical positive decimal server strings are accepted; malformed aliases,
+unknown routes and directory/profile realm mismatches fail. No account repair occurs.
+
+Each selected remote realm uses one read-only repeatable-read snapshot and batches at
+most 500 player IDs per query. Only public profile metadata and the required statistics,
+raw castle level, VIP score/expiry/SVIP level and membership rank are selected. Missing
+statistics, castle or VIP rows yield their documented empty/default presentation without
+creating rows. Ambiguous duplicate castles/profiles reject rather than choose one.
+The membership rank is looked up by UID and used only for a nonblank alliance ID,
+matching the reference accessor. Blank alliance abbreviations use an empty string.
+VIP is zero at or after expiry; while active, the last qualifying entry in catalog
+order determines level from score. Stored VIP level is not substituted for this rule.
+
+This path reads current authoritative remote metadata instead of consuming the legacy
+shared-profile Redis cache. It can therefore show a changed name, picture, VIP expiry
+or missing profile sooner than that cache, and it needs the configured remote database
+available at query time. No cache repair, cache import or derived profile write is
+performed. Restoring or depending on the legacy cache's stale/TTL behavior is not claimed.
+Local, global and remote snapshots are separate, with no cross-database atomicity claim.
+
+Local rows use UID/building-UUID order and directory rows use UID order where the
+reference SQL left order unspecified. Prefix patterns retain wildcards and backslash
+pattern escapes; PostgreSQL case/accent matching follows database collation. Unicode
+collation parity, live concurrency and query plans remain unverified. Query failures
+and malformed dependencies reject explicitly rather than emulate the local Java
+helper's empty-result fallback or drop malformed remote entries. Startup checks local
+search tables and, only when cross search is enabled, global directory columns;
+remote realm availability does not gate startup. Disabling GAME_CROSS_SEARCH removes
+this command's global/remote search reads and global search readiness probes.
 
 ## Realm avatar grants
 
@@ -1852,7 +1897,7 @@ use these descriptions before the reconnect task component is complete.
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport; owned world favorites; local/configured-realm map player search with typed public fields, pagination and synthetic unit coverage                                                                                                                                     | Point details; general `search.player` adapters/runtime (pure policy/DTOs have unit coverage); live behavior and collation parity remain deferred.        |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields, compatibility pagination and synthetic unit coverage                                                                                                        | Point details; documented search cache/collation/exceptional-state differences; live behavior remains deferred.                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                              | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |

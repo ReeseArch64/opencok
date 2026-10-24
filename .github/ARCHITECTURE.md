@@ -417,13 +417,17 @@ Collation, pattern escapes, nulls and the reference fixed point identifier are d
 in the [realm runbook](../apps/server/README.md#map-player-search). Unit composition uses
 synthetic database clients; live database and client behavior remain unvalidated.
 
-General player search has separate pure contracts, selection rules and wire DTOs.
-Its two-stage cross-realm pagination and shared-profile shape must be retained when
-the global name directory and configured-realm readers are connected. The current
-policy layer performs no I/O and exposes no command. Bounded Java hash traversal is
-reused for remote selection, with the same explicit exceptional-state limits. The
-[realm runbook](../apps/server/README.md#general-player-search-policy) records exact
-semantics, synthetic primitive-oracle evidence and the pending adapter/runtime work.
+General `search.player` uses its own `GameServices.playerSearch` repository port,
+pure selection rules and wire DTOs. The local observer/candidates share a read-only
+snapshot; a separate global snapshot limits name mappings before account/realm/level
+filtering. Explicitly configured remote realms provide public profiles in bounded
+batches within one snapshot per realm. The controller derives active VIP from catalog
+score/expiry and applies the verified two-stage pagination and bounded Java hash
+traversal. Current authoritative reads replace the legacy shared-profile cache for this
+path; no cache equivalence or cross-database atomicity is claimed. GAME_CROSS_SEARCH
+controls global/remote search reads and global readiness probes. Remote availability
+does not gate local startup. The [realm runbook](../apps/server/README.md#general-player-search-policy)
+records query contracts, cache/collation/ordering differences and unit-only evidence.
 
 ### Migrated files implementation
 
