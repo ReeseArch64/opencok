@@ -31,6 +31,31 @@ test("reconnect treasure catalogs preserve declaration order and exact level str
   }
 });
 
+test("reward catalogs retain the final duplicate definition required by the reference resources", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-reward-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).reconnect.rewards?.size).toBe(0);
+    await writeFile(
+      join(directory, "reward.xml"),
+      '<database><ItemSpec id="synthetic" gold="1"/><ItemSpec id="synthetic" gold="007" item="200100;200200" rate="1;2" num="3;4" circle="2"/></database>',
+    );
+    const reward = (await loadRules(directory)).reconnect.rewards!;
+    expect(reward.size).toBe(1);
+    expect(reward.get("synthetic")).toEqual({
+      id: "synthetic",
+      gold: "007",
+      item: "200100;200200",
+      rate: "1;2",
+      num: "3;4",
+      circle: "2",
+    });
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("profile catalogs count every achievement record and keep military/server lookups optional", async () => {
   const directory = await mkdtemp(join(tmpdir(), "opencok-profile-rules-"));
   try {
