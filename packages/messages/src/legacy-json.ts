@@ -1,4 +1,4 @@
-import { legacyJsonNumber } from "./legacy-number.ts";
+import { legacyHexCodeUnit, legacyJsonNumber } from "./legacy-number.ts";
 import { ProtocolError, sfs, Type, type Fields, type Value } from "./sfs.ts";
 
 export class LegacyJsonError extends Error {
@@ -15,6 +15,15 @@ function trim(value: string): string {
   return value.slice(start, end);
 }
 const excluded = new Set(["class", "declaringClass", "metaClass"]);
+const unrepresentable: Value = { type: Type.Null, value: Symbol("unrepresentable JSON value") };
+const functionHeader = /^function ?\(.*?\)$/;
+const functionValue = /^function ?\(.*?\)[ \n\t]*\{.*?\}$/;
+const mayBeJson = (value: string) =>
+  value === "null" ||
+  (value.startsWith("{") && value.endsWith("}")) ||
+  (value.startsWith("[") && value.endsWith("]"));
+const wireText = (value: string) =>
+  value.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "?");
 const delimiters = new Set(',:]}/\\"[{;=#');
 
 class Parser {
@@ -51,10 +60,7 @@ class Parser {
     let result = "";
     while (this.position < this.source.length) {
       let char = this.source[this.position++]!;
-      if (char === quote) {
-        if (!result.isWellFormed()) throw new ProtocolError();
-        return result;
-      }
+      if (char === quote) return result;
       if (char === "\0" || char === "\r" || char === "\n") return this.fail();
       if (char === "\\") {
         char = this.source[this.position++] ?? "";
@@ -62,8 +68,9 @@ class Parser {
         if (char === "u" || char === "x") {
           const size = char === "u" ? 4 : 2;
           const hex = this.source.slice(this.position, this.position + size);
-          if (hex.length !== size || !/^[\da-f]+$/i.test(hex)) return this.fail();
-          result += String.fromCharCode(Number.parseInt(hex, 16));
+          const code = legacyHexCodeUnit(hex);
+          if (hex.length !== size || code === undefined) return this.fail();
+          result += String.fromCharCode(code);
           this.position += size;
         } else result += escape[char] ?? char;
       } else result += char;
@@ -88,7 +95,7 @@ class Parser {
     if (/^false$/i.test(token)) return sfs.bool(false);
     if (token === "null") return sfs.null();
     if (/^[\d.+-]/.test(token)) return legacyJsonNumber(token) ?? this.fail();
-    if (/^function\s*\(/.test(token)) throw new ProtocolError();
+    if (functionHeader.test(token) || functionValue.test(token)) return sfs.string(token);
     if (",[]{}".includes(this.source[this.position] ?? "\0")) return this.fail();
     return sfs.string(token);
   }
@@ -100,10 +107,14 @@ class Parser {
       return result;
     }
     for (;;) {
-      if (this.clean() === ",") throw new ProtocolError();
-      const value = this.value(depth + 1);
-      if (value.type === Type.String && /^function\s*\(/.test(value.value as string))
-        throw new ProtocolError();
+      const hole = this.clean() === ",";
+      if (hole && --this.remaining < 0) throw new ProtocolError();
+      let value = hole ? unrepresentable : this.value(depth + 1);
+      if (value.type === Type.String) {
+        if (functionHeader.test(value.value as string)) value = this.functionBody();
+        else if (functionValue.test(value.value as string)) value = unrepresentable;
+        else if (mayBeJson(value.value as string)) value = sfs.string(`"${value.value}"`);
+      }
       result.push(value);
       if (result.length > 32767) throw new ProtocolError();
       const delimiter = this.clean();
@@ -115,6 +126,18 @@ class Parser {
         return result;
       }
     }
+  }
+  functionBody(): Value {
+    const start = this.position;
+    let braces = 0;
+    do {
+      const char = this.source[this.position++];
+      if (char === undefined || char === "\0") return this.fail();
+      if (char === "{") braces++;
+      if (char === "}") braces--;
+    } while (braces !== 0);
+    if (this.position - start < 2) return this.fail();
+    return unrepresentable;
   }
   object(depth: number): Fields {
     this.position++;
@@ -133,7 +156,7 @@ class Parser {
       )
         throw new ProtocolError();
       const key = String(keyValue.value);
-      if (Buffer.byteLength(key) > 255) throw new ProtocolError();
+      if (Buffer.byteLength(wireText(key)) > 255) throw new ProtocolError();
       const delimiter = this.clean();
       this.position++;
       if (delimiter === "=") {
@@ -142,10 +165,11 @@ class Parser {
       const directlyQuoted =
         this.source[this.position] === '"' || this.source[this.position] === "'";
       let value = this.value(depth + 1);
-      if (value.type === Type.String && /^function\s*\(/.test(value.value as string)) {
-        if (!directlyQuoted) throw new ProtocolError();
-        value = sfs.string(`"${value.value}"`);
-      }
+      const body =
+        !directlyQuoted && value.type === Type.String && functionHeader.test(value.value as string);
+      if (body) value = this.functionBody();
+      else if (value.type === Type.String && functionValue.test(value.value as string))
+        value = directlyQuoted ? sfs.string(`"${value.value}"`) : unrepresentable;
       if (!directlyQuoted && value.type === Type.String) {
         const string = value.value as string;
         if (string === "null") value = sfs.null();
@@ -163,8 +187,15 @@ class Parser {
           this.remaining = nested.remaining;
         }
       }
-      if (!excluded.has(key)) {
+      if (!excluded.has(key) || body) {
         const previous = result[key];
+        if (
+          previous &&
+          directlyQuoted &&
+          value.type === Type.String &&
+          mayBeJson(value.value as string)
+        )
+          value = sfs.string(`"${value.value}"`);
         if (previous?.type === Type.Array) (previous.value as Value[]).push(value);
         else if (previous) {
           let first = previous;
@@ -199,6 +230,22 @@ class Parser {
   }
 }
 
+function convert(value: Value, depth = 0): Value {
+  if (depth > 32) throw new ProtocolError();
+  if (value === unrepresentable) throw new LegacyJsonError();
+  if (value.type === Type.String) return sfs.string(wireText(value.value as string));
+  if (value.type === Type.Array)
+    return sfs.array((value.value as Value[]).map((item) => convert(item, depth + 1)));
+  if (value.type !== Type.Object) return value;
+  const object: Fields = Object.create(null);
+  for (const [key, item] of Object.entries(value.value as Fields)) {
+    const normalized = wireText(key);
+    if (Object.hasOwn(object, normalized)) throw new ProtocolError();
+    object[normalized] = convert(item, depth + 1);
+  }
+  return sfs.object(object);
+}
+
 export function decodeLegacyJsonObject(source: string): Fields {
   if (typeof source !== "string" || Buffer.byteLength(source) > 4 * 1024 * 1024)
     throw new ProtocolError();
@@ -206,5 +253,5 @@ export function decodeLegacyJsonObject(source: string): Fields {
   if (/^null[^\r\n]*$/.test(text)) return Object.create(null);
   const parser = new Parser(text);
   if (parser.clean() !== "{") throw new LegacyJsonError();
-  return parser.object(0);
+  return convert(sfs.object(parser.object(0))).value as Fields;
 }
