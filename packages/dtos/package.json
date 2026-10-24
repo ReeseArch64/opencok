@@ -33,6 +33,7 @@
     "./dragon-ranking": "./src/dragon-ranking.ts",
     "./value": "./src/value.ts",
     "./configuration": "./src/configuration.ts",
-    "./nickname-change": "./src/nickname-change.ts"
+    "./nickname-change": "./src/nickname-change.ts",
+    "./shared-user": "./src/shared-user.ts"
   }
 }

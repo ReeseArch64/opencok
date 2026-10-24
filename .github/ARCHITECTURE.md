@@ -746,7 +746,7 @@ notification delivery respectively; a refund reserves notification delivery only
 consumers remain separate. The Chat consumer acknowledges bit 2 only after the
 authenticated receiver confirms the durable operation. Inventory/gold notification
 delivery now acknowledges bit 16 through the persisted delivery stage described below.
-Alliance, throne, shared-user and command-level ordering remain pending.
+Alliance, throne and command-level ordering remain pending.
 
 Disposable PostgreSQL integration covers both realms, UCA-equivalent contention,
 concurrent retries, item/gold/DMM/CN1 paths, transactional SQL failures, lost commit
@@ -819,6 +819,50 @@ DMM/mobile balances, item parameters and restart recovery have actual PostgreSQL
 typed frame evidence. The runtime remains an internal composition; no rename command
 or background relay is enabled. The existing mappings workspace dependency is promoted
 from development to runtime use without adding a library or changing locked versions.
+
+The nickname shared-user consumer now restores the complete public profile from the
+realm profile, player statistics, castle, alliance, membership and VIP rows. It reuses
+the existing shared-search VIP/default projection and emits the reference's 17-field
+public snapshot, with sparse positive Long fields and no search-only aliases or private
+profile attributes. The plain JSON body preserves signed Long decimals without a
+JavaScript-number conversion. DTOs, validation and serialization remain separate.
+
+`deliverSharedUser` holds the realm owner and journal locks, then locks the global
+account and verifies its current route and exact name against the realm snapshot.
+Unavailable or ambiguous inputs leave bit 8 pending. A new global PostgreSQL sequence,
+`opencok_global.shared_user_publication_seq`, allocates publication versions while the
+account lock is held. Migration `0005_shared_user_publication_versions` adds this
+noncycling signed-Long sequence without changing tables or player rows. Gaps after
+failed attempts are expected; exhaustion fails publication and retains pending work.
+
+The Redis adapter supports the original `cross_user_info_global` hash or `USER_INFO_<uid>`
+key layout, the latter with the source 30-day TTL. One script checks the publication
+fence before writing the profile and last-update markers. The legacy
+`USER_LAST_UPDATE_TIME_<uid>` marker retains direct epoch-second replacement, including
+clock rollback; the maintained realm marker keeps its existing monotonic contract.
+Payload ordering uses the exact decimal publication version, independent of either
+clock. Late writes after a timeout cannot replace a newer confirmed publication.
+An equal-version/different-body conflict or a stale version fails without acknowledgment.
+Malformed metadata and wrong Redis types are checked before writes. The version fence
+is retained in a separate namespaced hash until the derived cache is discarded.
+
+`Cache.publishSharedUserInfo` and `Cache.sharedUserInfo` own this bounded Redis boundary;
+the optional shared-user port in the internal nickname runtime composes it with the
+real rule catalog and database consumer. A successful publication precedes local bit-8
+acknowledgment. Global/realm commit reply loss, cache failure or acknowledgment failure
+may repeat a fresh projection and consume another sequence value without another
+economic mutation. PostgreSQL and Redis do not share an atomic commit. Restore the
+global sequence and cache consistently, or advance the sequence above retained fences
+before resuming publication; do not restart its counter while newer fences remain.
+Sequence usage privileges are required for the runtime database role.
+
+Disposable PostgreSQL/Redis evidence covers both kingdoms, full and sparse profiles,
+both layouts, concurrent delivery, precision above JavaScript's integer range, signed
+sequence exhaustion, clock rollback, timed-out late writes, lost commits and restart
+recovery. This does not introduce a new service, dependency, environment setting or
+cache authority for player progress. Existing cross-player search keeps its fresh SQL
+reads. The nickname command and recovery relay remain disabled pending the remaining
+providers, alliance/throne consumers and authenticated orchestration.
 
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row

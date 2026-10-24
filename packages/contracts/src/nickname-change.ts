@@ -1,5 +1,6 @@
 import type { Row } from "./rows.ts";
 import type { ChatNicknamePublisher } from "./chat-nickname.ts";
+import type { SharedUserProjector, SharedUserPublisher } from "./shared-user.ts";
 
 export interface NicknameChangeRecord {
   operationId: string;
@@ -35,6 +36,14 @@ export interface NicknameChangeStore {
     owner: string,
     operationId: string,
     publish: NicknameNotificationPublisher,
+    timeoutMs: number,
+  ): Promise<boolean>;
+  deliverSharedUser(
+    owner: string,
+    operationId: string,
+    now: number,
+    project: SharedUserProjector,
+    publish: SharedUserPublisher,
     timeoutMs: number,
   ): Promise<boolean>;
 }

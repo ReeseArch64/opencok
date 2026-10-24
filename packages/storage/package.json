@@ -18,7 +18,8 @@
     "./server-directory": "./src/server-directory.ts",
     "./session": "./src/session.ts",
     "./timeout": "./src/timeout.ts",
-    "./images": "./src/images.ts"
+    "./images": "./src/images.ts",
+    "./shared-user": "./src/shared-user.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

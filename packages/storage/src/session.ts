@@ -1,6 +1,8 @@
 import { loadDragonRanking } from "./dragon-ranking.ts";
 import type { DragonRankingRange } from "@opencok/contracts/dragon-ranking";
 import { publishPlayerUpdate } from "./player-update.ts";
+import { publishSharedUser, loadSharedUser } from "./shared-user.ts";
+import type { SharedUserLayout, SharedUserUpdate } from "@opencok/contracts/shared-user";
 import { loadExpeditionRanking } from "./expedition-ranking.ts";
 import { loadScoreActivityRanking } from "./score-activity-ranking.ts";
 import { loadGlobalCelebrityRanking } from "./global-celebrity-ranking.ts";
@@ -119,6 +121,16 @@ export class Cache {
       uid,
       updatedAt,
     );
+  }
+  async publishSharedUserInfo(
+    update: SharedUserUpdate,
+    layout: SharedUserLayout = "hash",
+  ): Promise<void> {
+    if (update.kingdomId !== this.config.kingdomId) throw new DependencyError("shared user cache");
+    return publishSharedUser((command, ...args) => this.command(command, ...args), update, layout);
+  }
+  sharedUserInfo(owner: string, layout: SharedUserLayout = "hash"): Promise<string | null> {
+    return loadSharedUser((command, ...args) => this.command(command, ...args), owner, layout);
   }
   async playerUpdateTimes(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>> {
     if (

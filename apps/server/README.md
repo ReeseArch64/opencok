@@ -3754,7 +3754,7 @@ bounded auth check, not the architecture's future repository-wide Stryker suite.
 `src/nickname-change.ts` runtime now composes the actual goods catalog, owned payment
 store and session notification bus. Its caller must supply the authenticated UID,
 stable operation UUID, validated name and a real CN1 refund-ratio provider. Reserved
-Java-pattern matching, CN1 session accounting, alliance/throne/shared-user effects,
+Java-pattern matching, CN1 session accounting, alliance/throne effects,
 command orchestration and the background recovery relay remain pending.
 
 The runtime reads goods 200021 `type`, `price` and nonblank `para1` through `para9`.
@@ -3789,3 +3789,38 @@ Run `bun --no-env-file test apps/server/integration/nickname-change.test.ts` fro
 for the 23 integration scenarios. No mobile-client validation is claimed. The existing
 `@opencok/mappings` workspace dependency is now required at runtime rather than only in
 development; the lockfile retains the same package versions.
+
+### Shared-user publication after nickname changes
+
+The internal runtime can now deliver the complete shared public profile through its
+optional `sharedUser` port and `deliverSharedUser(owner, operationId, now)`. Supply the
+actual shared Redis cache and VIP catalog. It reads current profile, power, castle,
+alliance, member rank and VIP data under the realm owner lock, then verifies current
+global account routing/name under the global account lock. A missing active VIP catalog,
+ambiguous castle or inconsistent route/name leaves the shared-user bit pending.
+
+Global migration `0005_shared_user_publication_versions` adds a noncycling signed-Long
+publication sequence. Apply it before using this consumer and grant sequence usage to
+the runtime role where that role differs from the migration owner. Each attempt obtains
+a fresh version; failed attempts may leave sequence gaps. The Redis script rejects
+older versions and conflicting same-version bodies before they can replace newer data,
+including after a publisher timeout or clock rollback. Local acknowledgment clears only
+the shared-user bit after confirmed publication. No debit, refund or name write is
+repeated by this consumer.
+
+Default layout is the global `cross_user_info_global` hash keyed by UID, with no expiry.
+Optional `keys` layout uses `USER_INFO_<uid>` and the source 2,592,000-second lifetime.
+These layouts are tested with the maintained standalone Redis 6.2 topology; they do not
+constitute a sharded Redis deployment implementation. A separate namespaced version hash
+retains the publication fences. The source last-update marker replaces its epoch-second
+value directly, while the existing realm-scoped marker remains monotonic. The public
+profile JSON preserves exact Long decimals; neither cache layout becomes the authority
+for balances or player progress. Existing cross-player search continues to read SQL.
+
+Retain the sequence and its migration history on application rollback. Restore the
+global sequence and cache together, or reconcile retained fences before resuming after
+a database restore. A lower or exhausted counter fails and leaves work pending; the
+application does not silently reset it. Cached profile loss does not remove PostgreSQL
+state. Real PostgreSQL/Redis tests cover full/sparse data, both kingdoms/layouts,
+concurrent replay, malformed Redis state, Long precision, late publication, commit loss
+and restart recovery in `integration/nickname-shared-user.test.ts`.
