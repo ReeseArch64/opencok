@@ -20,6 +20,7 @@ function fixture() {
         uid: "self",
         uuid: "castle-self",
         buildingPower: 9n,
+        contributeSum: 9,
         profileUid: "self",
         name: "Self",
         power: 2147483648n,
@@ -55,7 +56,7 @@ function fixture() {
     new Map(),
     new Map(),
     undefined,
-    new Map([["ranking", { k2: "2" }]]),
+    new Map([["ranking", { k2: "2", k4: "2" }]]),
   );
   const game = new Game(db, rules, { kingdomId: 1 }, () => {
     clockReads++;
@@ -64,7 +65,7 @@ function fixture() {
   return { state, db, rules, game, calls, clockReads: () => clockReads };
 }
 
-test("all four player ranking commands use authenticated identity, one clock and shared response correlation", async () => {
+test("all five player ranking commands use authenticated identity, one clock and shared response correlation", async () => {
   for (const [command, kind, metric] of [
     ["server.rank", "power", { power: sfs.long(2147483648n) }],
     ["kill.rank", "kills", { armyKill: sfs.int(9) }],
@@ -79,6 +80,7 @@ test("all four player ranking commands use authenticated identity, one clock and
         allianceId: sfs.string(""),
       },
     ],
+    ["silver.contribute.rank", "contribution", { contributeSum: sfs.int(9) }],
   ] as const) {
     const { game, calls, clockReads } = fixture();
     const params = {
@@ -93,14 +95,14 @@ test("all four player ranking commands use authenticated identity, one clock and
     expect(clockReads()).toBe(1);
     expect(result.pushes).toEqual([]);
     expect(decode(encode(result.body))).toEqual({
-      selfRanking: sfs.int(1),
+      [kind === "contribution" ? "myRanking" : "selfRanking"]: sfs.int(1),
       serverRanking: sfs.array([
         sfs.object({
           uid: sfs.string("self"),
           name: sfs.string("Self"),
           pic: sfs.string(""),
           picVer: sfs.int(0),
-          picfraId: sfs.int(0),
+          ...(kind === "contribution" ? {} : { picfraId: sfs.int(0) }),
           ...metric,
         }),
       ]),
@@ -118,11 +120,18 @@ test("ranking authentication and required provider failures never produce a succ
     { uid: "other", serverId: 1 },
     { uid: "self", serverId: 2 },
   ];
-  for (const profile of profiles) {
-    const { game, state } = fixture();
-    state.profile = profile;
-    await expect(game.execute("self", "server.rank", {})).rejects.toThrow();
-  }
+  for (const command of [
+    "server.rank",
+    "kill.rank",
+    "level.rank",
+    "building.rank",
+    "silver.contribute.rank",
+  ])
+    for (const profile of profiles) {
+      const { game, state } = fixture();
+      state.profile = profile;
+      await expect(game.execute("self", command, {})).rejects.toThrow();
+    }
   const failure = fixture();
   failure.db.playerRanking = async () => {
     throw new Error("Synthetic provider failure");
@@ -134,4 +143,10 @@ test("ranking authentication and required provider failures never produce a succ
   malformed.rules.items.get("ranking")!.k2 = "0";
   await expect(malformed.game.execute("self", "kill.rank", {})).rejects.toThrow("102192");
   expect(malformed.calls).toEqual([]);
+  const malformedContribution = fixture();
+  malformedContribution.rules.items.get("ranking")!.k4 = "0";
+  await expect(
+    malformedContribution.game.execute("self", "silver.contribute.rank", {}),
+  ).rejects.toThrow("102192");
+  expect(malformedContribution.calls).toEqual([]);
 });

@@ -36,13 +36,15 @@ function player(row: Row, kind: PlayerRankingKind): Fields {
     name: sfs.string(text(row, "name")),
     pic: sfs.string(text(row, "pic")),
     picVer: number(row.picVer ?? 0, false),
-    picfraId: number(row.picfraId ?? 0, false),
   };
+  if (kind !== "contribution") result.picfraId = number(row.picfraId ?? 0, false);
   for (const key of kind === "power"
     ? ["power"]
     : kind === "kills"
       ? ["armyKill"]
-      : ["level", "exp", "banTime"])
+      : kind === "contribution"
+        ? ["contributeSum"]
+        : ["level", "exp", "banTime"])
     if (row[key] !== null && row[key] !== undefined) result[key] = number(row[key], true);
   if (text(row, "allianceId").trim())
     for (const key of ["allianceId", "abbr", "alliancename"])
@@ -52,7 +54,9 @@ function player(row: Row, kind: PlayerRankingKind): Fields {
 
 export function playerRanking(kind: PlayerRankingKind, ranking: PlayerRankingResult): Fields {
   return {
-    selfRanking: sfs.int(ranking.selfRanking),
+    [kind === "contribution" ? "myRanking" : "selfRanking"]: sfs.int(
+      kind === "contribution" && ranking.rows.length === 0 ? -1 : ranking.selfRanking,
+    ),
     serverRanking: sfs.array(ranking.rows.map((row) => sfs.object(player(row, kind)))),
   };
 }

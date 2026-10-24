@@ -18,7 +18,7 @@ export function playerRankingQuery(
   rules: Rules,
   now: number,
 ): PlayerRankingQuery {
-  const raw = rules.items.get("ranking")?.k2;
+  const raw = rules.items.get("ranking")?.[kind === "contribution" ? "k4" : "k2"];
   if (!raw || !/^[+-]?\d+$/.test(raw) || !Number.isSafeInteger(now)) return invalid();
   const limit = Number(raw);
   if (!Number.isInteger(limit) || limit < 1 || limit > 32767) return invalid();
@@ -37,7 +37,8 @@ export function selectPlayerRanking(
 ): PlayerRankingResult {
   if (!uid || snapshot.fallbackRank < 1n || snapshot.fallbackRank > 9223372036854775807n)
     return invalid();
-  if (snapshot.candidates.length > query.limit * (query.kind === "level" ? 3 : 2)) return invalid();
+  const multiplier = query.kind === "level" ? 3 : query.kind === "contribution" ? 1 : 2;
+  if (snapshot.candidates.length > query.limit * multiplier) return invalid();
   const seen = new Set<string>();
   const candidates = snapshot.candidates.filter((row) => {
     const id = text(row, "uid");

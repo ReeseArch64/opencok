@@ -1268,6 +1268,9 @@ authority and introduce no cache or schema dependency.
 The castle board reuses the player-ranking boundary with distinct candidate and
 fallback ordering. Its fallback offset uses a SQL window within the snapshot;
 construction queues and persisted power are never recalculated by the query.
+Material-contribution rankings read the existing contribution table with their own
+window and empty-list response contract; score writers and activity resets remain
+outside the query boundary.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
