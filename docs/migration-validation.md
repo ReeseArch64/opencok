@@ -1899,3 +1899,20 @@ its original composite key, preserving the exact unique-violation assertion and 
 checks. The identical later-schema fixture suite passed 1446 tests and 34488 assertions
 in the upper validation worktree. This worktree also passed server integration, all 14
 Compose checks, affected types, lint and formatting; its fresh full CI must pass before merge.
+
+## Parallel merge readiness for PR #196
+
+This review preserves the complete current source tree, including already merged descendant
+PRs: #197.
+
+The integration target remains the original feature branch
+`feat/review-restore-nickname-validation-rules`. The enclosing stack will be integrated into
+develop through its lower pull requests.
+
+Earlier draft and skipped-CI statements describe historical publication evidence. Merge now
+requires all applicable checks on this final head to pass, including code quality, package
+tests, service integration, commit messages and security scanning. GitHub check runs provide
+the authoritative outcomes.
+
+No new tests, dependencies, private inputs or player-data mutations are introduced by this
+readiness record.
