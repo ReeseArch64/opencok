@@ -1,3 +1,4 @@
+import { realmChatSessionRequest, realmChatSessionResponse } from "./realm-chat-session.ts";
 import { mailDeleted, mailSave, mailStatus } from "@opencok/dtos/mail";
 import { mailCategoryProjection } from "./mail-category.ts";
 import { mailGroupProjection } from "./mail-groups.ts";
@@ -160,6 +161,9 @@ export class Game {
   async execute(uid: string, command: string, params: Fields): Promise<Result> {
     let body: Fields;
     switch (command) {
+      case "chat.session.create":
+        body = await this.chatSession(uid);
+        break;
       case "cmd.ping":
         body = { serverNowTime: sfs.long(this.now()) };
         break;
@@ -241,6 +245,17 @@ export class Game {
     if (params._cok_) body._cok_ = params._cok_;
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
     return { body, pushes: [] };
+  }
+  private async chatSession(uid: string): Promise<Fields> {
+    if (!this.services.chatSession) throw new GameError(errors.unsupported);
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.profile(uid), now);
+    const request = realmChatSessionRequest(profile, uid, this.config.kingdomId);
+    try {
+      return realmChatSessionResponse(await this.services.chatSession(request), this.now());
+    } catch {
+      throw new GameError(errors.invalid);
+    }
   }
   private async profile(uid: string): Promise<Row> {
     return this.checkProfile(await this.db.profile(uid));

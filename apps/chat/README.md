@@ -52,8 +52,14 @@ Run `bun run --cwd apps/chat check-types`, `bun run --cwd apps/chat test` and
 containers, applies the real migrations, checks both realm lookups, concurrent writes,
 Unicode, exact expiry and persistence after restart. It does not touch local game data.
 
-Android tracks are untested. The current TypeScript realm does not yet issue chat
-sessions. Broadcast is process-local: deploy one chat instance until cross-instance
+Android tracks are untested. The TypeScript realm now supports `chat.session.create`
+when `GAME_CHAT_SESSION_URL` targets this service's internal `/external/session` route and
+`CHAT_SIGNING_SECRET` matches. It binds issuance to the authenticated realm profile and
+returns the opaque token and second-based expiry. Socket-free units compose both sides
+with the existing token verifier; live cross-service and native-client behavior remain
+unverified. Game-facing endpoint/configuration discovery is still pending. See the
+[realm session contract](../server/README.md#realm-chat-sessions) for bounds and errors.
+Broadcast is process-local: deploy one chat instance until cross-instance
 fanout is implemented. Seven-day archives, durable replay receipts after cleanup,
 moderation and direct messages remain future work; the imported 24-hour behavior does
 not satisfy the full target architecture. Production Node execution remains pending

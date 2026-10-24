@@ -5,7 +5,7 @@ concept. It preserves the mobile **12.06.0** SFS binary protocol and adapts its
 login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
-Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
+Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when configured), `login.dataconfig`,
 `login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
@@ -54,6 +54,8 @@ service/resource settings through its process environment.
 | `KINGDOM_ID`                     | Realm ID, default `1`; selects SFS zone `COK1` or `COK2`.                                                                            |
 | `KINGDOM_DATABASE_NAME`          | Defaults to `opencok_kingdom_<KINGDOM_ID>`.                                                                                          |
 | `GLOBAL_DATABASE_NAME`           | Defaults to `opencok_global`.                                                                                                        |
+| `GAME_CHAT_SESSION_URL`          | Optional internal HTTP(S) endpoint ending in `/external/session`; unset disables chat session issuance.                              |
+| `CHAT_SIGNING_SECRET`            | Required when the session URL is configured; must match the maintained chat service.                                                 |
 | `GAME_LOGIN_SECRET`              | Required private secret matching the legacy mobile login issuer.                                                                     |
 | `GAME_RESOURCES`                 | Required directory of authorized, extracted 12.06.0 XML rules.                                                                       |
 | `GAME_REDIS_URL`                 | Defaults to `redis://127.0.0.1:6379/0`.                                                                                              |
@@ -896,6 +898,48 @@ conversations and transaction failures. Real PostgreSQL execution, concurrency a
 native-client behavior remain unverified. `chatMail.read`, conversation deletion,
 content edge cases and synchronization flows remain pending.
 
+## Realm chat sessions
+
+`chat.session.create`, tracked in [issue #74](https://github.com/ReeseArch64/opencok/issues/74),
+uses the authenticated player's stored profile and returns the maintained chat service's
+`session` token and `expire` timestamp in seconds. Request identity, realm, TTL, metadata
+and endpoint fields are ignored; command correlation is retained and no push is emitted.
+Missing, foreign, misplaced or banned profiles cannot issue sessions. Ordinary kingdoms
+send server type `0`. The profile supplies name, level, device ID, country, platform,
+application version, language, alliance and phone device; all metadata is sent as strings.
+A null phone device becomes empty. Other null metadata rejects, preserving the Java
+string-field behavior instead of inventing profile defaults.
+
+Configure `GAME_CHAT_SESSION_URL` with the internal `/external/session` URL reachable from
+the realm process and set `CHAT_SIGNING_SECRET` to the chat service's configured value.
+The development Compose realm forwards these optional settings; it does not provision a
+chat service. An absent URL keeps the command unsupported. URLs require HTTP(S), the exact
+route and no embedded credentials, query or fragment; legacy production chat hosts reject.
+The game-facing WebSocket endpoint remains the chat service's `CHAT_WEBSOCKET_URL` setting.
+
+The connection adapter signs the legacy form with application ID `100001` and a TTL of
+86,400 seconds. The current chat service stores only a SHA-256 token digest. Signature
+input includes the unencoded JSON string and sorted form keys; Unicode and reserved form
+characters survive encoding. Both the encoded request and streamed response are bounded
+to 16 KiB. `DEPENDENCY_TIMEOUT_MS` bounds the exchange including response consumption;
+redirects reject. The adapter makes one attempt, leaving retries to a later command rather
+than silently minting additional tokens after an uncertain response. A lost response can
+leave a valid stored session until expiry; this is not an idempotent issuance operation.
+No body, token, signature, secret or upstream error detail is logged by the realm adapter.
+
+Successful replies require a canonical 32-byte base64url token and a future integer expiry.
+Expiry uses SFS Int through the signed 32-bit maximum and Long afterward, as confirmed by
+an isolated synthetic Java probe. The original code/data wrapper is not exposed. Failed
+exchanges return the legacy invalid-operation code; unconfigured issuance is unsupported.
+Server-side checks remain authoritative if caller-controlled fields or response extras exist.
+
+Socket-free unit tests compose the realm command, an in-memory HTTP exchange, the maintained
+session handler and token verifier. They cover stored-hash identity, exact expiry, fresh
+sessions on repeat, profile/realm isolation, signatures, bounded streams, timeouts and
+errors. No HTTP listener, WebSocket, database, client or ADB process is exercised. Endpoint
+advertisement through game configuration and private-conversation delivery remain separate
+work; issuing public-room sessions does not complete `chatMail.read`.
+
 ## Conversation read persistence
 
 [Issue #73](https://github.com/ReeseArch64/opencok/issues/73) tracks `chatMail.read`.
@@ -1327,7 +1371,7 @@ use these descriptions before the reconnect task component is complete.
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
 | 7. Avatar integration                     | Standalone files service                                                                                                                                                                                                                                                            | Realm grants, confirmation and profile updates.                                                                                                           |
-| 8. Basic chat integration                 | Standalone chat service                                                                                                                                                                                                                                                             | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                               |
+| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance with bounded signed HTTP exchange and synthetic units                                                                                                                                                                 | Game-facing endpoint/configuration discovery; private conversations and read-state delivery. Native-client validation remains deferred by request.        |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog

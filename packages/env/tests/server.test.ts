@@ -52,3 +52,42 @@ test("mail translation defaults enabled and accepts explicit true or false only"
       "GAME_MAIL_TRANSLATION",
     );
 });
+
+test("realm chat session issuance is opt-in and requires a valid internal endpoint and shared secret", () => {
+  expect(parseServerEnvironment(base).GAME_CHAT_SESSION_URL).toBeUndefined();
+  expect(
+    parseServerEnvironment({ ...base, CHAT_SIGNING_SECRET: "synthetic" }).GAME_CHAT_SESSION_URL,
+  ).toBeUndefined();
+  expect(
+    parseServerEnvironment({ ...base, GAME_CHAT_SESSION_URL: "", CHAT_SIGNING_SECRET: "" })
+      .CHAT_SIGNING_SECRET,
+  ).toBeUndefined();
+  const url = "https://chat.internal/external/session";
+  expect(
+    parseServerEnvironment({
+      ...base,
+      GAME_CHAT_SESSION_URL: url,
+      CHAT_SIGNING_SECRET: "synthetic",
+    }).GAME_CHAT_SESSION_URL,
+  ).toBe(url);
+  expect(() => parseServerEnvironment({ ...base, GAME_CHAT_SESSION_URL: url })).toThrow(
+    "CHAT_SIGNING_SECRET",
+  );
+  for (const value of [
+    "invalid",
+    "ws://chat.internal/external/session",
+    "http://u:p@chat.internal/external/session",
+    "https://chat.internal/other",
+    "https://chat.internal/external/session?private=x",
+    "https://chat.internal/external/session#x",
+    "https://cok.chat/external/session",
+    "https://x.cok.chat/external/session",
+  ])
+    expect(() =>
+      parseServerEnvironment({
+        ...base,
+        GAME_CHAT_SESSION_URL: value,
+        CHAT_SIGNING_SECRET: "synthetic",
+      }),
+    ).toThrow("GAME_CHAT_SESSION_URL");
+});
