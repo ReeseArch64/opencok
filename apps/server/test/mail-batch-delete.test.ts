@@ -26,6 +26,7 @@ function storage() {
       queries.push({ text, params });
       if (failOn && text.startsWith(failOn)) throw new Error("Synthetic mailbox SQL failure");
       if (text.includes('from "opencok_kingdom"."userprofile"')) return { rows: profile };
+      if (text.includes('from "opencok_kingdom"."mail_chat_read_intent"')) return { rows: [["0"]] };
       if (text.startsWith("select count(*) filter")) return { rows: counts };
       if (text.includes("octet_length(")) return { rows: selected };
       return { rows: [] };
@@ -365,4 +366,33 @@ test("explicit chat IDs reject and roll back before deletion or invalidation", a
   ).rejects.toMatchObject({ code: "102192" });
   expect(app.queries.some((query) => /^(delete|insert|update) /.test(query.text))).toBe(false);
   expect(app.queries.at(-1)!.text).toBe("rollback");
+});
+
+test("mixed chat ID deletion enqueues the source cross-product while scoping local conversations independently", async () => {
+  const app = storage();
+  app.selected([
+    ["personal", 20, 1, "peer-a", 0, 0],
+    ["moderator", 23, 1, "peer-b", 0, 0],
+  ]);
+  await deleteMailCategories(
+    app.db,
+    1,
+    "self",
+    mailCategoryDeleteQuery("personal,moderator", null, now),
+    () => {},
+    () => [],
+    true,
+  );
+  const outbox = app.queries.find((query) =>
+    query.text.includes('insert into "opencok_kingdom"."mail_chat_read_intent"'),
+  )!;
+  expect(outbox.params).toContain("peer-a");
+  expect(outbox.params).toContain("peer-b");
+  expect(outbox.params.filter((value) => value === "1,2,20")).toHaveLength(2);
+  const deletions = app.queries.filter((query) =>
+    query.text.startsWith('delete from "opencok_kingdom"."mail"'),
+  );
+  expect(deletions[0]!.params).toEqual(["self", "peer-a", 20, 21, 22]);
+  expect(deletions[1]!.params).toEqual(["self", "peer-b", 23, 24]);
+  expect(app.queries.at(-1)!.text).toBe("commit");
 });

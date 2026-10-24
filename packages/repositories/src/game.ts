@@ -1,3 +1,6 @@
+import { deleteMailConversations } from "./mail-conversation-delete.ts";
+import { relayMailChat } from "./mail-chat-intents.ts";
+import type { ChatMailboxPublisher } from "@opencok/contracts/chat-mailbox";
 import { readBattleRankingState } from "./battle-ranking.ts";
 import { readFlowerRanking } from "./flower-ranking.ts";
 import { readDonationRanking, readCemeteryRanking } from "./community-ranking.ts";
@@ -40,6 +43,7 @@ import type {
   MailCategoryDeleteInspector,
   MailBatchInvitationPlanner,
   MailTypeDeleteQuery,
+  MailConversationDeleteQuery,
   MailDeleteQuery,
   MailDeletePlanner,
   MailReadQuery,
@@ -121,6 +125,7 @@ type GameRepositoryConfig = Pick<
   | "kingdomId"
   | "kingdomDatabase"
   | "playerKingdoms"
+  | "mailChat"
 >;
 
 export class Database implements GameStore, FriendshipMineStore {
@@ -451,7 +456,7 @@ export class Database implements GameStore, FriendshipMineStore {
     return markMailRead(this.kingdom.db, this.config.kingdomId, uid, query);
   }
   mailConversationRead(uid: string, query: MailConversationReadQuery) {
-    if (query.effects.some((effect) => effect.kind === "chat"))
+    if (query.effects.some((effect) => effect.kind === "chat") && !this.config.mailChat)
       throw new DependencyError("chat read delivery unavailable");
     return markMailConversationRead(this.kingdom.db, this.config.kingdomId, uid, query);
   }
@@ -460,6 +465,7 @@ export class Database implements GameStore, FriendshipMineStore {
     query: MailCategoryDeleteQuery,
     inspect: MailCategoryDeleteInspector,
     invitations?: MailBatchInvitationPlanner,
+    chatEnabled = false,
   ) {
     return deleteMailCategories(
       this.kingdom.db,
@@ -468,7 +474,12 @@ export class Database implements GameStore, FriendshipMineStore {
       query,
       inspect,
       invitations,
+      chatEnabled && !!this.config.mailChat,
     );
+  }
+  mailConversationDelete(uid: string, query: MailConversationDeleteQuery) {
+    if (!this.config.mailChat) throw new DependencyError("chat deletion delivery unavailable");
+    return deleteMailConversations(this.kingdom.db, this.config.kingdomId, uid, query);
   }
   mailTypeDelete(uid: string, query: MailTypeDeleteQuery) {
     return deleteMailType(this.kingdom.db, this.config.kingdomId, uid, query);
@@ -481,6 +492,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   mailUpdates(uid: string, query: MailUpdateQuery, inspect: MailUpdateInspector) {
     return readMailUpdates(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
+  }
+  relayMailChat(publish: ChatMailboxPublisher) {
+    return relayMailChat(this.kingdom.db, this.config.kingdomId, publish, this.config.timeoutMs);
   }
   relayMailGifts() {
     return relayMailGiftOpenings(this.kingdom.db, this.databases.global.db);

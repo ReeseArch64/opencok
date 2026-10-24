@@ -109,6 +109,7 @@ test("chat-dependent conversation reads remain unavailable before any owned mail
     expect(app.calls).toEqual([]);
   }
   const context = {
+    config: {},
     get kingdom(): never {
       throw new Error("Must not enter persistence");
     },

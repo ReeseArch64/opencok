@@ -39,6 +39,7 @@ import type {
   MailBatchInvitationPlanner,
   MailCategoryDeleteSnapshot,
   MailTypeDeleteQuery,
+  MailConversationDeleteQuery,
   MailDeleteQuery,
   MailDeletePlanner,
   MailDeleteSnapshot,
@@ -157,6 +158,11 @@ export interface GameStore extends AuthenticationStore {
     query: MailCategoryDeleteQuery,
     inspect: MailCategoryDeleteInspector,
     invitations?: MailBatchInvitationPlanner,
+    chatEnabled?: boolean,
+  ): Promise<MailCategoryDeleteSnapshot>;
+  mailConversationDelete?(
+    uid: string,
+    query: MailConversationDeleteQuery,
   ): Promise<MailCategoryDeleteSnapshot>;
   mailTypeDelete?(uid: string, query: MailTypeDeleteQuery): Promise<MailCategoryDeleteSnapshot>;
   mailSave(uid: string, query: MailSaveQuery): Promise<MailSaveSnapshot>;
@@ -219,6 +225,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  mailChatEnabled?: boolean;
   reconnect?<T>(
     uid: string,
     now: number,

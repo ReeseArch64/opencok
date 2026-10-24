@@ -449,6 +449,9 @@ export class GameService {
       case "mail.delete.batch":
         body = await this.mailCategoryDelete(uid, params);
         break;
+      case "chatMail.delete.batch":
+        body = await this.mailConversationDelete(uid, params, true);
+        break;
       case "chatMail.delete":
         body = await this.mailTypeDelete(uid, params);
         break;
@@ -1157,7 +1160,10 @@ export class GameService {
   }
   private async mailConversationRead(uid: string, params: Fields): Promise<Fields> {
     const query = mailConversationReadRequest(params, this.now());
-    if (!this.db.mailConversationRead || query.effects.some((effect) => effect.kind === "chat"))
+    if (
+      !this.db.mailConversationRead ||
+      (query.effects.some((effect) => effect.kind === "chat") && !this.services.mailChatEnabled)
+    )
       throw new GameError(errors.unsupported, "mail");
     const body: Fields = { success: sfs.bool(true) };
     for (const key of ["_cok_", "cmdBaseTime"])
@@ -1192,18 +1198,60 @@ export class GameService {
           throw new GameError(errors.unsupported, "mail");
       },
       (entries) => planMailBatchInvitations(uid, entries),
+      !!this.services.mailChatEnabled,
     );
     const profile = this.checkProfile(state.profile, query.now);
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
       throw new GameError(errors.invalid);
     return body;
   }
+  private async mailConversationDelete(
+    uid: string,
+    params: Fields,
+    batch: boolean,
+  ): Promise<Fields> {
+    if (!this.services.mailChatEnabled || !this.db.mailConversationDelete)
+      throw new GameError(errors.unsupported, "mail");
+    const mod = wireInt(params, "mod", 0);
+    const bottle = batch && wireInt(params, "driftingBottle", 0) === 1;
+    let senders: (string | null)[];
+    if (batch) {
+      const raw = wireString(params, "users");
+      senders = raw.split(",");
+      if (raw !== "") while (senders.at(-1) === "") senders.pop();
+    } else senders = [params.fromUser?.type === Type.Null ? null : wireString(params, "fromUser")];
+    if (
+      senders.length > 1000 ||
+      senders.some(
+        (sender) =>
+          sender !== null &&
+          (sender.length > 40 || sender.includes("\0") || !sender.isWellFormed()),
+      )
+    )
+      throw new GameError(errors.invalid, "mail");
+    const body: Fields = { success: sfs.bool(true) };
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) body[key] = params[key]!;
+    if (
+      encode(extension(batch ? "chatMail.delete.batch" : "chatMail.delete", body)).length >
+      MAX_FRAME
+    )
+      throw new GameError(errors.unsupported, "mail");
+    const now = this.now();
+    const state = await this.db.mailConversationDelete(uid, {
+      now,
+      senders,
+      moderation: mod === 1,
+      bottle,
+    });
+    const profile = this.checkProfile(state.profile, now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return body;
+  }
   private async mailTypeDelete(uid: string, params: Fields): Promise<Fields> {
     wireInt(params, "mod", 0);
-    if (params.fromUser !== undefined) {
-      if (params.fromUser.type !== Type.Null) wireString(params, "fromUser");
-      throw new GameError(errors.unsupported, "mail");
-    }
+    if (params.fromUser !== undefined) return this.mailConversationDelete(uid, params, false);
     const query = mailTypeDeleteQuery(
       params.type === undefined ? undefined : wireInt(params, "type"),
       this.now(),
