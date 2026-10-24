@@ -64,12 +64,17 @@ package source, Drizzle TypeScript schemas, agent skills and hook configuration
 remain included. These exclusions preserve the
 boundaries described in [the architecture](ARCHITECTURE.md).
 
-DTOs must be standalone classes with explicitly declared `readonly` data
+DTOs must be standalone classes with explicit `declare public readonly` data
 properties, following the NestJS DTO style without decorators. Keep Zod schemas
 in `packages/validations` and serialization in `packages/mappings`. DTO classes
 must not inherit from schema factories or contain constructors, methods or static
 schemas. See the [DTO package](../packages/dtos/README.md). Validate at the mapping
 or application boundary and preserve mobile wire types and field order.
+Do not use definite-assignment or non-null assertions (`!`) in DTO declarations.
+Use `?` only when the transferred field is optional; keep required fields required.
+`declare` avoids runtime initialization fields while preserving strict checking.
+Reserve `private` state and `static` helpers for implementation classes that need
+them; DTOs expose transferred instance data and contain no such behavior.
 
 ## Commits
 
