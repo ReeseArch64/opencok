@@ -1,5 +1,5 @@
 export class DataConfigDto {
-  readonly dataConfig!: {
+  declare public readonly dataConfig: {
     readonly "69008": { readonly [key: string]: string };
     readonly player_max: { readonly [key: string]: string };
     readonly hero_up: { readonly [key: string]: string };

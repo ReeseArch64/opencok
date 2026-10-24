@@ -1,3 +1,14 @@
+import type { BattleRankingState, PlayoffPublication } from "./battle-ranking.ts";
+import type { FlowerRankingPublication, FlowerRankingState } from "./flower-ranking.ts";
+import type { CommunityRankingSnapshot, DonationScore } from "./community-ranking.ts";
+import type { ThroneRankingPeriod, ThroneRankingSnapshot } from "./throne-ranking.ts";
+import type {
+  HeroRankingSnapshot,
+  HeroRankingLookup,
+  HeroInsideRankingSnapshot,
+  HeroHistorySnapshot,
+  HeroHistoryPublication,
+} from "./hero-ranking.ts";
 import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
 import type { WorldPointDetailStore } from "./world-point-detail.ts";
 import type { WorldFavoriteStore } from "./world-favorites.ts";
@@ -8,6 +19,8 @@ import type { AvatarVersionService } from "./avatar-version.ts";
 import type { AvatarGrantService } from "./files.ts";
 import type { ChatSessionIssuer } from "./chat.ts";
 import type {
+  MailSystemQuery,
+  MailSystemInspector,
   MailGroupQuery,
   MailGroupInspector,
   MailBatchQuery,
@@ -61,7 +74,44 @@ export interface CityState {
   civilizationPrestige?: bigint;
 }
 export interface GameStore extends AuthenticationStore {
+  rankingPrivacy?(uid: string, kind: "payment" | "consumption"): Promise<number>;
+  battleRankingState?(uid: string, now: number): Promise<BattleRankingState>;
+  heroHistory?(
+    uid: string,
+    kingdomId: number,
+    type: number,
+    now: number,
+  ): Promise<HeroHistorySnapshot>;
+  heroHistoryPresentation?(
+    alliances: readonly string[],
+    realms: readonly number[],
+  ): Promise<{ alliances: readonly Row[]; realms: readonly Row[] }>;
+  heroInsideRanking?(
+    uid: string,
+    kingdomId: number,
+    eventId: string,
+    now: number,
+  ): Promise<HeroInsideRankingSnapshot>;
+  heroRanking?(
+    uid: string,
+    kingdomId: number,
+    activityId: string,
+    now: number,
+  ): Promise<HeroRankingSnapshot>;
+  throneRanking?(
+    kingdomId: number,
+    publication?: ThroneRankingPeriod,
+  ): Promise<ThroneRankingSnapshot>;
+  donationRanking?(uid: string, now: number): Promise<CommunityRankingSnapshot>;
+  cemeteryRanking?(uid: string, type: "0" | "1", now: number): Promise<CommunityRankingSnapshot>;
+  crossRankingRealm?(): Promise<boolean>;
+  flowerRanking?(uid: string, realm: number, uids: readonly string[]): Promise<FlowerRankingState>;
   normalRankingRealm?(): Promise<boolean>;
+  getSystemMailByPlayerId?(
+    uid: string,
+    query: MailSystemQuery,
+    inspect: MailSystemInspector,
+  ): Promise<MailCategorySnapshot>;
   mailUpdates?(
     uid: string,
     query: MailUpdateQuery,
@@ -172,6 +222,28 @@ export interface GameServices {
     ranges: readonly DragonRankingRange[],
     allianceId: string,
   ): Promise<readonly DragonRankingEntry[]>;
+  battleFightPublication?(): Promise<string | undefined>;
+  playoffPublication?(): Promise<PlayoffPublication>;
+  heroHistoryPublication?(
+    keys: readonly string[],
+    alliance: boolean,
+  ): Promise<readonly HeroHistoryPublication[]>;
+  heroRankingPosition?(query: HeroRankingLookup): Promise<number>;
+  throneRankingPeriod?(realm: number): Promise<ThroneRankingPeriod | undefined>;
+  donationScores?(
+    allianceId: string,
+    kind: "resource-day" | "resource-week" | "resource-history",
+    date: string,
+  ): Promise<readonly DonationScore[]>;
+  flowerRankingPublication?(
+    realm: number,
+    uid: string,
+    limit: number,
+    global: boolean,
+  ): Promise<FlowerRankingPublication>;
+  militaryRanking?(type: number, group: number): Promise<readonly string[]>;
+  attributeRanking?(type: number): Promise<readonly string[]>;
+  publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
   globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
   scoreActivityRanking?(): Promise<readonly string[]>;
   nicknameBadWords?(name: string): boolean | Promise<boolean>;
@@ -189,6 +261,7 @@ export interface GameServices {
   expeditionStage?(kingdomId: number): Promise<number | undefined>;
   worldPowerEffects?(kingdomId?: number): Promise<ReadonlyMap<string, string>>;
   emperorVersion?(kingdomId?: number): Promise<number | null | undefined>;
+  lastSystemMail?(uid: string): Promise<string | null>;
   playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;
   changeAccountCount?(deviceId: string): Promise<string | null>;
   featureAvailability?(profile: Row, now: number): Readonly<Record<string, boolean>>;

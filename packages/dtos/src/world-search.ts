@@ -1,5 +1,5 @@
 export class WorldSearchDto {
-  readonly list!: {
+  declare public readonly list: {
     readonly uid: string;
     readonly name: string;
     readonly pic?: string;

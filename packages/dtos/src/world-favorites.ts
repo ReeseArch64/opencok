@@ -1,5 +1,5 @@
 export class WorldFavoritesDto {
-  readonly favo!: {
+  declare public readonly favo: {
     readonly name?: string;
     readonly point?: number;
     readonly type?: number;

@@ -1,3 +1,5 @@
+import { BODY_LIMIT } from "@opencok/contracts/files";
+import { createFiles } from "./files.ts";
 import { createChatDiscovery } from "@opencok/connection/chat-discovery";
 import { Context, Effect, Layer } from "effect";
 import { logEvent } from "@opencok/core/logging";
@@ -16,6 +18,7 @@ export class ApiDependencies extends Context.Service<
     directory: Parameters<typeof createHandler>[1];
     redis: Parameters<typeof createHandler>[2];
     chatDiscovery?: Parameters<typeof createHandler>[3];
+    files?: Parameters<typeof createHandler>[4];
   }
 >()("@opencok/api/Dependencies") {}
 
@@ -34,6 +37,7 @@ export const ApiDependenciesLive = Layer.effect(
     yield* fromPromise("api.accounts.start", () => accounts.start()).pipe(Effect.uninterruptible);
     yield* fromPromise("api.redis", () => redis.health()).pipe(Effect.uninterruptible);
     return {
+      files: config.filesEnabled ? yield* createFiles : undefined,
       accounts,
       directory,
       redis,
@@ -48,14 +52,17 @@ export const ApiDependenciesLive = Layer.effect(
 );
 
 export const createApp = Effect.gen(function* () {
-  const { accounts, directory, redis, chatDiscovery } = yield* ApiDependencies;
-  return createHandler(accounts, directory, redis, chatDiscovery);
+  const { accounts, directory, redis, chatDiscovery, files } = yield* ApiDependencies;
+  return createHandler(accounts, directory, redis, chatDiscovery, files);
 });
 
 export const serveApi = Effect.gen(function* () {
   const config = yield* ApiConfig;
   const app = yield* createApp;
-  const server = yield* serveHttp(config, app.fetch);
+  const server = yield* serveHttp(
+    { ...config, maxRequestBodySize: config.filesEnabled ? BODY_LIMIT : 65536, idleTimeout: 15 },
+    app.fetch,
+  );
   logEvent("listening", { host: config.host, port: server.port, outcome: "success" });
   return server;
 });
