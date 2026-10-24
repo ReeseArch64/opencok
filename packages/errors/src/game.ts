@@ -6,6 +6,12 @@ export class GameError extends Error {
       | "building_rule"
       | "role_rule"
       | "cost_rule"
+      | "config_integer"
+      | "config_long"
+      | "stamina_rule"
+      | "boss_members_rule"
+      | "icon_date_rule"
+      | "general_sale_rule"
       | "queue_kind"
       | "world_state",
   ) {

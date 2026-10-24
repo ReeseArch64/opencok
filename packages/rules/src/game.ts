@@ -3,6 +3,11 @@ import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
 import { ruleAvailable } from "./availability.ts";
 
 export type Rule = Record<string, string>;
+export interface ConfigurationCatalogs {
+  generalSales?: Map<string, Rule>;
+  payControl?: Map<string, Rule>;
+  kingdomSkills?: Map<string, Rule>;
+}
 export class Rules {
   constructor(
     readonly buildings: Map<string, Rule>,
@@ -15,6 +20,7 @@ export class Rules {
     readonly features: Map<string, Rule> = new Map(),
     readonly kingdomId = 1,
     readonly settings: Map<string, Rule> = new Map(),
+    readonly configuration: ConfigurationCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (

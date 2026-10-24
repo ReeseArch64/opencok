@@ -89,6 +89,25 @@ selectors and explicit timezone offsets are supported by the pure availability
 evaluator; the running realm uses the online selector and UTC. This changes only
 availability/read previews; construction remains unsupported.
 
+`login.dataconfig` projects the legacy game catalogs with explicit wire names and
+types. XML values remain strings inside objects, while the documented integer and
+long fields are checked before serialization. Long scores retain signed 64-bit
+precision. Optional `general_sale.xml`, `pay_servercontrol.xml` and `kingdomskill.xml`
+provide sale limits, the `69008` control record and ordered skill-tab metadata.
+Unrelated item records are not exposed. Missing optional records remain omitted;
+missing sale catalogs produce an empty `general_buy` object.
+
+The command reads the authenticated realm profile to select the level-dependent
+stamina cap when `stamina_limit` is available. Realm switches control quest metadata,
+service terms and scout settings; the mission switch also checks version and time.
+Avatar calendar dates are returned as UTC epoch-millisecond strings. Malformed
+numeric fields, overflows and invalid dates produce the existing unsupported error
+instead of an invalid SFS value. These metadata reads never settle production or
+modify a player. Cross-realm access remains disabled, and the running realm uses
+the normal-world configuration with chat interval 1 and feed limit 3. Alternative
+world-cup projections and explicit server values have unit coverage, but are not
+enabled in the runtime composition.
+
 Use runtime credentials with SELECT access to the required global/realm tables,
 separate from the administrative setup account. Startup checks the required
 projections and dependencies before opening listeners. `/healthz` and `/readyz`
@@ -119,7 +138,9 @@ query/driver errors.
   unchanged. MySQL/MariaDB records are **not transferred** by this change;
   preparing existing accounts/cities requires a separate reviewed data migration.
   Empty databases do not automatically create or reset player state.
-- Optional features and commerce remain closed. Other client versions, APK
+- Unimplemented gameplay commands and commerce remain unavailable. Configuration
+  metadata does not enable their handlers; `funcOn` announcements remain closed.
+  Other client versions, APK
   rendering and real-client discovery against this PostgreSQL server remain
   unvalidated. The source proof of concept's successful APK connection does not
   establish that validation for this port.
@@ -135,16 +156,16 @@ the table records gaps rather than treating package scaffolding as completed beh
 The current work is restricted to server implementation and unit tests. Do not run
 ADB, native-client validation, integration or end-to-end tests for this phase.
 
-| Topic                                     | Implemented evidence                                                                                 | Remaining work                                                                                                                                                                |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Configuration and feature availability | Settings command; grouped XML loading; version/realm/time evaluator; timed star previews; unit tests | Complete data-config projections and feature availability, including player-specific conditions and implemented-service gates. Feature announcements currently remain closed. |
-| 2. Player/progression queries             | Initial player DTO                                                                                   | Level, experience, power, own/public and multi-player query contracts.                                                                                                        |
-| 3. Ranking queries                        | Persistence schema                                                                                   | Lists, player positions, pagination and tie-breaking.                                                                                                                         |
-| 4. Basic mailbox                          | Persistence schema                                                                                   | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                                                          |
-| 5. Additional map queries                 | Base viewport                                                                                        | Point details, player search and favorites, including authorization for writes.                                                                                               |
-| 6. Profile/preferences                    | Initial profile reads                                                                                | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                                     |
-| 7. Avatar integration                     | Standalone files service                                                                             | Realm grants, confirmation and profile updates.                                                                                                                               |
-| 8. Basic chat integration                 | Standalone chat service                                                                              | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                                                   |
+| Topic                                     | Implemented evidence                                                                                                                                               | Remaining work                                                                                                                                                                      |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Configuration and feature availability | Settings command; grouped XML loading; expanded data-config projections and level-dependent stamina; version/realm/time evaluator; timed star previews; unit tests | Complete deferred-login configuration and feature announcements, including player-specific conditions and implemented-service gates. Feature announcements currently remain closed. |
+| 2. Player/progression queries             | Initial player DTO                                                                                                                                                 | Level, experience, power, own/public and multi-player query contracts.                                                                                                              |
+| 3. Ranking queries                        | Persistence schema                                                                                                                                                 | Lists, player positions, pagination and tie-breaking.                                                                                                                               |
+| 4. Basic mailbox                          | Persistence schema                                                                                                                                                 | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                                                                |
+| 5. Additional map queries                 | Base viewport                                                                                                                                                      | Point details, player search and favorites, including authorization for writes.                                                                                                     |
+| 6. Profile/preferences                    | Initial profile reads                                                                                                                                              | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                                           |
+| 7. Avatar integration                     | Standalone files service                                                                                                                                           | Realm grants, confirmation and profile updates.                                                                                                                                     |
+| 8. Basic chat integration                 | Standalone chat service                                                                                                                                            | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                                                         |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog
