@@ -36,13 +36,19 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "status",
       "sk",
       "suit",
+      "svip",
+      "alliancescience",
     ])
       await writeFile(
         join(directory, `${name}.xml`),
         '<database><ItemSpec id="001" power="007"/></database>',
       );
+    await writeFile(
+      join(directory, "vip.xml"),
+      '<database><Group id="vip"><ItemSpec id="001" power="007"/></Group></database>',
+    );
     const power = (await loadRules(directory)).power;
-    expect(Object.keys(power)).toHaveLength(12);
+    expect(Object.keys(power)).toHaveLength(15);
     expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
     for (const name of ["general_sale", "pay_servercontrol", "kingdomskill", "fb_share"])
       await writeFile(
@@ -112,4 +118,16 @@ test("duplicates remain explicit across groups and malformed resource records ar
     '<!DOCTYPE database [<!ENTITY secret "private">]><database><ItemSpec id="a"/></database>',
   ])
     expect(() => parseRules(xml, "setting")).toThrow();
+});
+
+test("VIP resources select only the named group and retain threshold declaration order", () => {
+  const rules = parseRules(
+    '<database><ItemSpec id="root" point="0"/><Group id="other"><ItemSpec id="decoy" point="0"/></Group><Group id="vip"><ItemSpec id="7002" point="300"/><ItemSpec id="7000" point="0"/></Group></database>',
+    "vip",
+  );
+  expect([...rules.keys()]).toEqual(["7002", "7000"]);
+  expect(rules.get("7000")?.point).toBe("0");
+  expect(() =>
+    parseRules('<database><Group id="other"><ItemSpec id="7000"/></Group></database>', "vip"),
+  ).toThrow("Missing gameplay resource records");
 });

@@ -22,6 +22,9 @@ export interface PowerCatalogs {
   statuses?: Map<string, Rule>;
   generalSkills?: Map<string, Rule>;
   equipmentSets?: Map<string, Rule>;
+  vip?: Map<string, Rule>;
+  superVip?: Map<string, Rule>;
+  allianceSciences?: Map<string, Rule>;
 }
 export class Rules {
   constructor(
