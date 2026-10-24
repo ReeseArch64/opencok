@@ -4,6 +4,7 @@ import type {
   WorldResourceArmy,
   WorldResourceCollection,
   WorldResourceMarch,
+  WorldResourceSavedCollection,
   WorldResourceOwnerDetail,
   WorldResourceGroupDetail,
 } from "@opencok/contracts/world-resource-detail";
@@ -46,6 +47,20 @@ export function resourceLongFloat(value: bigint): number {
 }
 export function resourceRemaining(initial: number, cost: number): number {
   return (integer(initial) - integer(cost)) | 0;
+}
+export function resourceSavedCollection(row: Row): WorldResourceSavedCollection {
+  const rate = row.collectSpd ?? 0;
+  if (typeof rate !== "number" || (Number.isFinite(rate) && !Number.isFinite(Math.fround(rate))))
+    return invalid();
+  const collected = long((row.collectedBeforeSpd ?? 0n) as bigint);
+  if (collected < -2147483648n || collected > 2147483647n) return invalid();
+  return {
+    collectSpd: Math.fround(rate),
+    marchArrivalTime: long((row.marchArrivalTime ?? 0n) as bigint),
+    collectedBeforeSpd: Number(collected),
+    changeCollectSpdTime: long((row.changeCollectSpdTime ?? 0n) as bigint),
+    occupyResourceEndTime: long((row.occupyResourceEndTime ?? 0n) as bigint),
+  };
 }
 export function resourceRawArmyLoad(army: WorldResourceArmy, rules: Rules): number {
   const cached = integer(army.cachedLoad);
