@@ -53,6 +53,7 @@ function fixture() {
   const db: GameStore = {
     profile: unused,
     accounts: unused,
+    mailBatch: unused,
     mailCategory: unused,
     mailContents: unused,
     mailConversationSave: unused,

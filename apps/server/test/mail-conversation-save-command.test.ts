@@ -35,6 +35,7 @@ function fixture() {
     mailSave: unused,
     mailRead: unused,
     mailDelete: unused,
+    mailBatch: unused,
     mailCategory: unused,
     mailContents: unused,
     mailConversationSave: async (uid, query) => {

@@ -19,6 +19,7 @@ export class GameError extends Error {
       | "reward_preview"
       | "ranking"
       | "mail"
+      | "mail_groups"
       | "power_rule"
       | "power_effect"
       | "power_state"
