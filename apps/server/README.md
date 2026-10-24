@@ -1338,6 +1338,38 @@ The fixtures include cases where converting a long through a JavaScript double
 before float rounding would produce the wrong result. Normal tests require no Java
 runtime, ignored source inputs, database, listener or client.
 
+`resourceRawArmyLoad` now supplies the pure troop-load calculation that precedes
+resource-weight division and plunder subtraction. Its explicit snapshot distinguishes
+an owner already resident in the legacy process from one loaded on demand: a positive
+cached load is used only when the owner is not resident. Otherwise, each troop entry
+uses signed Int total-minus-dead and catalog-load multiplication before Float
+modifiers and saturating Float-to-Int conversion; the final sum wraps as Int. Duplicate
+entries and negative remaining counts are retained, not merged or clamped away.
+
+The modifier inputs are ordinary load (78), added load (2196), general effect 133,
+the stronghold general's load effect and conditional expedition load (895), in that
+order, followed by the troop's saved load modifier. Each Float operation rounds
+separately. The percentage has a lower bound of 20, including for negative infinity;
+NaN and positive infinity preserve Java cast behavior. Single-player siege load is
+not included because the resource query requests the ordinary calculation.
+
+An absent fallback profile supplies no current owner modifiers; a resident profile
+requires explicit effects for troops with a load catalog entry. Catalog entries
+without a load field skip the troop. Malformed required fields reject. Snapshots
+are bounded to 4,096 troop entries and remain unchanged by calculation, including
+the cached load. Seven units include 2,400 independently authored Java 8 arithmetic
+vectors, cached/fallback paths, Unicode integer catalog parsing, overflow, float
+special values and composition with resource weight/plunder. Fixtures contain only
+synthetic primitive inputs and outputs.
+
+Reading the saved troop object and resolving these five modifier inputs remain
+required before the occupied-resource command can call this calculation. A database
+read is not evidence that an owner was resident in the reference process. The
+runtime-only maximum collection time is assigned by destination-march rescheduling;
+it is not a persisted march column. Restoring its read value still needs an explicit
+policy backed by that lifecycle, without scheduling work from the query. This pure
+calculation does not make occupied-resource responses available yet.
+
 The point/owner read foundation below now supplies lookup, observer authorization,
 local/remote routing and base owner fields. Specialized point projections,
 existing-march restoration and command composition remain pending.
