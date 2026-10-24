@@ -368,7 +368,16 @@ opencok/
 Drizzle PostgreSQL schemas and routes player reads through the global account realm.
 `env/chat` owns configuration. The [chat runbook](../apps/chat/README.md) documents
 24-hour retention, process-local broadcasts, startup, recovery and unvalidated client
-integration. Seven-day archival and production Node execution remain pending.
+integration. The realm now composes optional `connection/realm-chat-session` issuance
+through `GameServices.chatSession`. The authenticated command loads the local profile,
+checks realm/ban state and sends server-owned metadata to the configured internal chat
+endpoint. A bounded signed HTTP exchange returns a validated token/expiry pair; the chat
+service remains the session storage owner. No cross-database transaction or direct realm
+write to chat storage is introduced. No URL means unsupported issuance. The adapter
+rejects redirects, bounds request/response size and deadlines, sanitizes failure detail
+and does not automatically retry an uncertain write. Socket-free units exercise issuance
+through the existing handler and token verifier. Game-facing discovery, private read-state
+delivery, seven-day archival and production Node execution remain pending.
 
 ### Migrated files implementation
 
