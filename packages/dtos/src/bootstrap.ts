@@ -37,21 +37,34 @@ export function featureConfig(rules: Rules, context: FeatureContext): Fields {
   };
 }
 
-export function loginConfiguration(
+export function loginConfigurationPreferences(
   rules: Rules,
   state: LoginConfigurationState,
-  context: FeatureContext,
-  verifyChangeAccount: boolean,
 ): Fields {
-  const present = new Set(state.pushSettings.map((row) => num(row, "type")));
-  const pushSettings = state.pushSettings.map((row) =>
+  const fbShare = sfs.array(
+    [
+      ...(rules.configuration.facebookShareRecords ??
+        rules.configuration.facebookShare?.values() ??
+        []),
+    ].map((rule) =>
+      sfs.object(
+        Object.fromEntries(Object.entries(rule).map(([key, value]) => [key, sfs.string(value)])),
+      ),
+    ),
+  );
+  return { fbShare, pushSetting: pushPreferences(state.pushSettings) };
+}
+
+export function pushPreferences(rows: readonly Row[]) {
+  const present = new Set(rows.map((row) => num(row, "type")));
+  const pushSettings = rows.map((row) =>
     sfs.object({
       type: sfs.int(num(row, "type")),
       status: sfs.int(num(row, "status")),
       audio: sfs.int(num(row, "audio")),
     }),
   );
-  if (state.pushSettings.length < PUSH_SETTING_COUNT)
+  if (rows.length < PUSH_SETTING_COUNT)
     for (let type = 0; type < PUSH_SETTING_COUNT; type++)
       if (!present.has(type))
         pushSettings.push(
@@ -60,22 +73,13 @@ export function loginConfiguration(
             status: sfs.int(type === WORLD_NEWS_PUSH_TYPE ? 0 : 1),
           }),
         );
+  return sfs.array(pushSettings);
+}
+
+export function loginSwitches(rows: readonly Row[]): Fields {
   return {
-    ...featureConfig(rules, context),
-    fbShare: sfs.array(
-      [
-        ...(rules.configuration.facebookShareRecords ??
-          rules.configuration.facebookShare?.values() ??
-          []),
-      ].map((rule) =>
-        sfs.object(
-          Object.fromEntries(Object.entries(rule).map(([key, value]) => [key, sfs.string(value)])),
-        ),
-      ),
-    ),
-    pushSetting: sfs.array(pushSettings),
     switches: sfs.array(
-      state.switches.map((row) =>
+      rows.map((row) =>
         sfs.object({
           name: sfs.string(text(row, "name")),
           stat: row.stat === null ? sfs.null() : sfs.int(num(row, "stat")),
@@ -83,7 +87,22 @@ export function loginConfiguration(
         }),
       ),
     ),
-    isVerifyChangeAccount: sfs.bool(verifyChangeAccount),
+  };
+}
+
+export function loginConfiguration(
+  rules: Rules,
+  state: LoginConfigurationState,
+  context: FeatureContext,
+  verifyChangeAccount: boolean | undefined,
+): Fields {
+  return {
+    ...loginConfigurationPreferences(rules, state),
+    ...(state.switches === undefined ? {} : loginSwitches(state.switches)),
+    ...(state.switches !== undefined && verifyChangeAccount !== undefined
+      ? { isVerifyChangeAccount: sfs.bool(verifyChangeAccount) }
+      : {}),
+    ...featureConfig(rules, context),
   };
 }
 

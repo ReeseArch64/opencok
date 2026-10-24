@@ -56,6 +56,10 @@ function store(state: LoginConfigurationState): GameStore {
     publicProfile: unused,
     playerSummaries: unused,
     power: unused,
+    initializeWorldNewsPreference: async (uid, instant) => {
+      expect(uid).toBe("synthetic");
+      expect(instant).toBe(now);
+    },
     configuration: async (uid) => {
       expect(uid).toBe("synthetic");
       return state;
@@ -262,7 +266,10 @@ test("account selector failure skips counter reads while an early realm match pe
       return "3";
     },
   });
-  await expect(game.execute("synthetic", "login.other", { config: sfs.int(0) })).rejects.toThrow();
+  expect(
+    (await game.execute("synthetic", "login.other", { config: sfs.int(0) })).body
+      .isVerifyChangeAccount,
+  ).toBeUndefined();
   expect(reads).toBe(0);
   rule.k6 = "2;bad";
   const result = await game.execute("synthetic", "login.other", { config: sfs.int(0) });
@@ -270,7 +277,7 @@ test("account selector failure skips counter reads while an early realm match pe
   expect(reads).toBe(1);
 });
 
-test("login.other config preserves correlation, reads counts only when enabled and fails on dependency errors", async () => {
+test("login.other config preserves correlation and omits verification when its dependency fails", async () => {
   const catalog = rules();
   const state = configuration();
   let reads = 0;
@@ -301,13 +308,14 @@ test("login.other config preserves correlation, reads counts only when enabled a
   const failing = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
     changeAccountCount: unused,
   });
-  await expect(failing.execute("synthetic", "login.other", request)).rejects.toThrow(
-    "Unexpected dependency call",
-  );
+  const unavailable = (await failing.execute("synthetic", "login.other", request)).body;
+  expect(unavailable.isVerifyChangeAccount).toBeUndefined();
+  expect(unavailable.switches).toEqual(sfs.array());
+  expect(unavailable._cok_).toEqual(sfs.string("request"));
   state.profile!.deviceId = "";
   expect(
     (await failing.execute("synthetic", "login.other", request)).body.isVerifyChangeAccount?.value,
-  ).toBe(false);
+  ).toBeUndefined();
   state.profile!.banFlag = 1;
   await expect(game.execute("synthetic", "login.other", request)).rejects.toThrow();
   state.profile = undefined;
@@ -421,9 +429,10 @@ test("account version failures precede counter reads and noncanonical required v
   });
   for (const version of ["11.bad", "12.6", "12.6.0.bad"]) {
     rule.k5 = version;
-    await expect(
-      game.execute("synthetic", "login.other", { config: sfs.int(0) }),
-    ).rejects.toThrow();
+    expect(
+      (await game.execute("synthetic", "login.other", { config: sfs.int(0) })).body
+        .isVerifyChangeAccount,
+    ).toBeUndefined();
     expect(reads).toBe(0);
   }
   rule.k5 = ".１２..+6.-0.99";
@@ -474,7 +483,7 @@ test("account counters and thresholds use signed Unicode Java Int parsing after 
   expect(accountVerificationRequired(catalog, context, "invalid")).toBe(false);
 });
 
-test("deferred account verification fetches enabled state before skipping absent thresholds and rejects consumed malformed counters", async () => {
+test("deferred account verification fetches enabled state before skipping absent thresholds and omits malformed results", async () => {
   const catalog = rules();
   const rule = { id: "function_on7", k5: "12.6.0", k6: "2" };
   catalog.items.set("function_on7", rule);
@@ -494,7 +503,9 @@ test("deferred account verification fetches enabled state before skipping absent
   ).toEqual(sfs.bool(false));
   expect(reads).toBe(1);
   catalog.items.get("function_on7")!.k7 = "2";
-  await expect(game.execute("synthetic", "login.other", request)).rejects.toThrow();
+  expect(
+    (await game.execute("synthetic", "login.other", request)).body.isVerifyChangeAccount,
+  ).toBeUndefined();
   expect(reads).toBe(2);
   counter = null;
   catalog.items.get("function_on7")!.k7 = "bad";
@@ -507,4 +518,275 @@ test("deferred account verification fetches enabled state before skipping absent
     (await game.execute("synthetic", "login.other", request)).body.isVerifyChangeAccount,
   ).toEqual(sfs.bool(true));
   expect(state).toEqual(before);
+});
+
+test("deferred verification reads empty, null and missing device IDs using legacy string suffixes", async () => {
+  const catalog = rules();
+  catalog.items.set("function_on7", { k5: "12.6.0", k6: "2", k7: "2" });
+  const state = configuration();
+  const devices: string[] = [];
+  const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    changeAccountCount: async (device) => {
+      devices.push(device);
+      return "2";
+    },
+  });
+  for (const device of ["", null, undefined, "null", " "]) {
+    if (device === undefined) delete state.profile!.deviceId;
+    else state.profile!.deviceId = device;
+    const result = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
+    expect(result.body.isVerifyChangeAccount).toEqual(sfs.bool(true));
+  }
+  expect(devices).toEqual(["", "null", "null", "null", " "]);
+  catalog.items.get("function_on7")!.k6 = "close";
+  expect(
+    (await game.execute("synthetic", "login.other", { config: sfs.int(1) })).body
+      .isVerifyChangeAccount,
+  ).toEqual(sfs.bool(false));
+  expect(devices).toHaveLength(5);
+});
+
+test("failed switch reads omit both switch fields without blocking other configuration or reading counters", async () => {
+  const catalog = rules();
+  catalog.items.set("function_on7", { k5: "bad", k6: "bad", k7: "bad" });
+  catalog.features.set("ui", { id: "ui", ...base });
+  catalog.configuration.facebookShare = new Map([["share", { id: "share", value: "001" }]]);
+  const state = configuration();
+  state.switches = undefined;
+  const before = structuredClone(state);
+  const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    changeAccountCount: unused,
+  });
+  const output = decode(
+    encode(
+      (
+        await game.execute("synthetic", "login.other", {
+          config: sfs.int(1),
+          _cok_: sfs.string("switch-failure"),
+          cmdBaseTime: sfs.string("42"),
+        })
+      ).body,
+    ),
+  );
+  expect(Object.hasOwn(output, "switches")).toBe(false);
+  expect(Object.hasOwn(output, "isVerifyChangeAccount")).toBe(false);
+  expect(output.fbShare).toEqual(
+    sfs.array([sfs.object({ id: sfs.string("share"), value: sfs.string("001") })]),
+  );
+  expect(output.pushSetting!.value as Value[]).toHaveLength(20);
+  expect(fields((output.funcOn!.value as Value[])[0]).onOff).toEqual(sfs.bool(true));
+  expect(output._cok_).toEqual(sfs.string("switch-failure"));
+  expect(output.cmdBaseTime).toEqual(sfs.string("42"));
+  expect(loginConfiguration(catalog, state, context, true).isVerifyChangeAccount).toBeUndefined();
+  expect(state).toEqual(before);
+});
+
+test("verification failures preserve queried switches and later announcements without inventing false", async () => {
+  const catalog = rules();
+  catalog.items.set("function_on7", { k5: "12.6.0", k6: "2", k7: "2" });
+  catalog.features.set("worldboss", { id: "worldboss", ...base });
+  const state = configuration();
+  state.switches = [{ name: "saved", stat: null, appVersion: null }];
+  const calls: string[] = [];
+  const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    changeAccountCount: async () => {
+      calls.push("counter");
+      throw new Error("unavailable");
+    },
+    featureAvailability: () => {
+      calls.push("announcements");
+      return { worldboss: true };
+    },
+  });
+  const output = decode(
+    encode((await game.execute("synthetic", "login.other", { config: sfs.int(1) })).body),
+  );
+  expect(output.switches).toEqual(
+    sfs.array([
+      sfs.object({ name: sfs.string("saved"), stat: sfs.null(), appVersion: sfs.null() }),
+    ]),
+  );
+  expect(Object.hasOwn(output, "isVerifyChangeAccount")).toBe(false);
+  expect(fields((output.funcOn!.value as Value[])[0]).onOff).toEqual(sfs.bool(true));
+  expect(calls).toEqual(["counter", "announcements"]);
+  const noCounterProvider = new Game(store(state), catalog, { kingdomId: 2 }, () => now);
+  expect(
+    (await noCounterProvider.execute("synthetic", "login.other", { config: sfs.int(1) })).body
+      .isVerifyChangeAccount,
+  ).toBeUndefined();
+});
+
+test("required snapshot and later announcement failures remain outside the optional switch boundary", async () => {
+  const catalog = rules();
+  catalog.items.set("function_on7", { k5: "12.6.0", k6: "2", k7: "2" });
+  catalog.features.set("worldboss", { id: "worldboss", ...base });
+  const state = configuration();
+  let reads = 0;
+  const services = {
+    changeAccountCount: async () => {
+      reads++;
+      return "3";
+    },
+    featureAvailability: () => {
+      throw new Error("announcement failure");
+    },
+  };
+  const requiredFailure = new Game(
+    { ...store(state), configuration: unused },
+    catalog,
+    { kingdomId: 2 },
+    () => now,
+    services,
+  );
+  await expect(
+    requiredFailure.execute("synthetic", "login.other", { config: sfs.int(1) }),
+  ).rejects.toThrow("Unexpected dependency call");
+  expect(reads).toBe(0);
+  const laterFailure = new Game(store(state), catalog, { kingdomId: 2 }, () => now, services);
+  await expect(
+    laterFailure.execute("synthetic", "login.other", { config: sfs.int(1) }),
+  ).rejects.toThrow("announcement failure");
+  expect(reads).toBe(1);
+});
+
+test("world-news preference initialization is conditioned on the original saved list", async () => {
+  const state = configuration();
+  const initialized: string[] = [];
+  const game = new Game(
+    {
+      ...store(state),
+      initializeWorldNewsPreference: async (uid, instant) => {
+        expect(instant).toBe(now);
+        initialized.push(uid);
+      },
+    },
+    rules(),
+    { kingdomId: 2 },
+    () => now,
+  );
+  for (const saved of [[], [{ type: 3, status: 0, audio: 0 }]]) {
+    state.pushSettings = saved;
+    const result = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
+    const news = (result.body.pushSetting!.value as Value[])
+      .map(fields)
+      .find((item) => item.type?.value === 15)!;
+    expect(news).toEqual({ type: sfs.int(15), status: sfs.int(0) });
+    expect(state.pushSettings).toEqual(saved);
+  }
+  expect(initialized).toEqual(["synthetic", "synthetic"]);
+  state.pushSettings = [{ type: 15, status: 1, audio: 0 }];
+  const existing = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
+  expect(fields((existing.body.pushSetting!.value as Value[])[0])).toEqual({
+    type: sfs.int(15),
+    status: sfs.int(1),
+    audio: sfs.int(0),
+  });
+  state.pushSettings = Array.from({ length: 20 }, (_, index) => ({
+    type: index + 20,
+    status: 0,
+    audio: 0,
+  }));
+  const full = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
+  expect(full.body.pushSetting!.value as Value[]).toHaveLength(20);
+  expect(initialized).toHaveLength(2);
+});
+
+test("initial preference persistence precedes switches and survives later announcement failure", async () => {
+  const state = configuration();
+  const catalog = rules();
+  catalog.features.set("worldboss", { id: "worldboss", ...base });
+  const calls: string[] = [];
+  let saved = false;
+  const db = {
+    ...store(state),
+    configuration: async () => {
+      calls.push("snapshot");
+      return { ...state, pushSettings: saved ? [{ type: 15, status: 0, audio: 1 }] : [] };
+    },
+    initializeWorldNewsPreference: async () => {
+      calls.push("initialize");
+      saved = true;
+    },
+    configurationSwitches: async () => {
+      calls.push("switches");
+      return [];
+    },
+  };
+  const game = new Game(db, catalog, { kingdomId: 2 }, () => now, {
+    featureAvailability: () => {
+      calls.push("announcements");
+      throw new Error("later failure");
+    },
+  });
+  await expect(game.execute("synthetic", "login.other", { config: sfs.int(1) })).rejects.toThrow(
+    "later failure",
+  );
+  expect(saved).toBe(true);
+  expect(calls).toEqual(["snapshot", "initialize", "switches", "announcements"]);
+  catalog.features.clear();
+  calls.length = 0;
+  const retry = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
+  expect(fields((retry.body.pushSetting!.value as Value[])[0])).toEqual({
+    type: sfs.int(15),
+    status: sfs.int(0),
+    audio: sfs.int(1),
+  });
+  expect(calls).toEqual(["snapshot", "switches"]);
+});
+
+test("failed or unavailable preference initialization rejects before optional switches and announcements", async () => {
+  const state = configuration();
+  const catalog = rules();
+  let switches = 0;
+  const db = {
+    ...store(state),
+    configurationSwitches: async () => {
+      switches++;
+      return [];
+    },
+    initializeWorldNewsPreference: unused,
+  };
+  const game = new Game(db, catalog, { kingdomId: 2 }, () => now);
+  await expect(game.execute("synthetic", "login.other", { config: sfs.int(1) })).rejects.toThrow(
+    "Unexpected dependency call",
+  );
+  expect(switches).toBe(0);
+  const missing = new Game(
+    { ...db, initializeWorldNewsPreference: undefined },
+    catalog,
+    { kingdomId: 2 },
+    () => now,
+  );
+  await expect(
+    missing.execute("synthetic", "login.other", { config: sfs.int(1) }),
+  ).rejects.toThrow();
+  expect(switches).toBe(0);
+  state.profile!.banFlag = 1;
+  await expect(game.execute("synthetic", "login.other", { config: sfs.int(1) })).rejects.toThrow();
+  expect(switches).toBe(0);
+});
+
+test("a switch-provider exception after preference initialization omits its fields and keeps the saved default", async () => {
+  const state = configuration();
+  let saved = false;
+  const db = {
+    ...store(state),
+    initializeWorldNewsPreference: async () => {
+      saved = true;
+    },
+    configurationSwitches: async () => {
+      expect(saved).toBe(true);
+      throw new Error("optional query failure");
+    },
+  };
+  const result = await new Game(db, rules(), { kingdomId: 2 }, () => now).execute(
+    "synthetic",
+    "login.other",
+    { config: sfs.int(1) },
+  );
+  expect(saved).toBe(true);
+  expect(result.body.switches).toBeUndefined();
+  expect(result.body.isVerifyChangeAccount).toBeUndefined();
+  expect(result.body.funcOn).toEqual(sfs.array());
+  expect(result.body.pushSetting!.value as Value[]).toHaveLength(20);
 });
