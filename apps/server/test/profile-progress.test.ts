@@ -17,6 +17,7 @@ function fixture() {
     office: undefined,
     taverns: [{ level: 4 }],
     generals: [],
+    skills: [],
     equipment: [{ uuid: "synthetic-equip", itemId: 5001, on: 1, strengthLevel: 2 }],
     honors: [{ id: "synthetic-medal", level: 3 }],
     completedAchievements: 2,
