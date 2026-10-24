@@ -48,7 +48,14 @@
     "./world-monster-detail": "./src/world-monster-detail.ts",
     "./world-barbarian-detail": "./src/world-barbarian-detail.ts",
     "./java-hash-map-order": "./src/java-hash-map-order.ts",
-    "./world-resource-effects": "./src/world-resource-effects.ts"
+    "./world-resource-effects": "./src/world-resource-effects.ts",
+    "./new-general-skills": "./src/new-general-skills.ts",
+    "./java-float": "./src/java-float.ts",
+    "./new-general-status": "./src/new-general-status.ts",
+    "./new-general-building": "./src/new-general-building.ts",
+    "./new-general-effects": "./src/new-general-effects.ts",
+    "./new-general-equipment": "./src/new-general-equipment.ts",
+    "./new-general-prestige": "./src/new-general-prestige.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
