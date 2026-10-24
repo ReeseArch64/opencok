@@ -56,6 +56,10 @@ function store(state: LoginConfigurationState): GameStore {
     publicProfile: unused,
     playerSummaries: unused,
     power: unused,
+    initializeWorldNewsPreference: async (uid, instant) => {
+      expect(uid).toBe("synthetic");
+      expect(instant).toBe(now);
+    },
     configuration: async (uid) => {
       expect(uid).toBe("synthetic");
       return state;
@@ -643,4 +647,146 @@ test("required snapshot and later announcement failures remain outside the optio
     laterFailure.execute("synthetic", "login.other", { config: sfs.int(1) }),
   ).rejects.toThrow("announcement failure");
   expect(reads).toBe(1);
+});
+
+test("world-news preference initialization is conditioned on the original saved list", async () => {
+  const state = configuration();
+  const initialized: string[] = [];
+  const game = new Game(
+    {
+      ...store(state),
+      initializeWorldNewsPreference: async (uid, instant) => {
+        expect(instant).toBe(now);
+        initialized.push(uid);
+      },
+    },
+    rules(),
+    { kingdomId: 2 },
+    () => now,
+  );
+  for (const saved of [[], [{ type: 3, status: 0, audio: 0 }]]) {
+    state.pushSettings = saved;
+    const result = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
+    const news = (result.body.pushSetting!.value as Value[])
+      .map(fields)
+      .find((item) => item.type?.value === 15)!;
+    expect(news).toEqual({ type: sfs.int(15), status: sfs.int(0) });
+    expect(state.pushSettings).toEqual(saved);
+  }
+  expect(initialized).toEqual(["synthetic", "synthetic"]);
+  state.pushSettings = [{ type: 15, status: 1, audio: 0 }];
+  const existing = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
+  expect(fields((existing.body.pushSetting!.value as Value[])[0])).toEqual({
+    type: sfs.int(15),
+    status: sfs.int(1),
+    audio: sfs.int(0),
+  });
+  state.pushSettings = Array.from({ length: 20 }, (_, index) => ({
+    type: index + 20,
+    status: 0,
+    audio: 0,
+  }));
+  const full = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
+  expect(full.body.pushSetting!.value as Value[]).toHaveLength(20);
+  expect(initialized).toHaveLength(2);
+});
+
+test("initial preference persistence precedes switches and survives later announcement failure", async () => {
+  const state = configuration();
+  const catalog = rules();
+  catalog.features.set("worldboss", { id: "worldboss", ...base });
+  const calls: string[] = [];
+  let saved = false;
+  const db = {
+    ...store(state),
+    configuration: async () => {
+      calls.push("snapshot");
+      return { ...state, pushSettings: saved ? [{ type: 15, status: 0, audio: 1 }] : [] };
+    },
+    initializeWorldNewsPreference: async () => {
+      calls.push("initialize");
+      saved = true;
+    },
+    configurationSwitches: async () => {
+      calls.push("switches");
+      return [];
+    },
+  };
+  const game = new Game(db, catalog, { kingdomId: 2 }, () => now, {
+    featureAvailability: () => {
+      calls.push("announcements");
+      throw new Error("later failure");
+    },
+  });
+  await expect(game.execute("synthetic", "login.other", { config: sfs.int(1) })).rejects.toThrow(
+    "later failure",
+  );
+  expect(saved).toBe(true);
+  expect(calls).toEqual(["snapshot", "initialize", "switches", "announcements"]);
+  catalog.features.clear();
+  calls.length = 0;
+  const retry = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
+  expect(fields((retry.body.pushSetting!.value as Value[])[0])).toEqual({
+    type: sfs.int(15),
+    status: sfs.int(0),
+    audio: sfs.int(1),
+  });
+  expect(calls).toEqual(["snapshot", "switches"]);
+});
+
+test("failed or unavailable preference initialization rejects before optional switches and announcements", async () => {
+  const state = configuration();
+  const catalog = rules();
+  let switches = 0;
+  const db = {
+    ...store(state),
+    configurationSwitches: async () => {
+      switches++;
+      return [];
+    },
+    initializeWorldNewsPreference: unused,
+  };
+  const game = new Game(db, catalog, { kingdomId: 2 }, () => now);
+  await expect(game.execute("synthetic", "login.other", { config: sfs.int(1) })).rejects.toThrow(
+    "Unexpected dependency call",
+  );
+  expect(switches).toBe(0);
+  const missing = new Game(
+    { ...db, initializeWorldNewsPreference: undefined },
+    catalog,
+    { kingdomId: 2 },
+    () => now,
+  );
+  await expect(
+    missing.execute("synthetic", "login.other", { config: sfs.int(1) }),
+  ).rejects.toThrow();
+  expect(switches).toBe(0);
+  state.profile!.banFlag = 1;
+  await expect(game.execute("synthetic", "login.other", { config: sfs.int(1) })).rejects.toThrow();
+  expect(switches).toBe(0);
+});
+
+test("a switch-provider exception after preference initialization omits its fields and keeps the saved default", async () => {
+  const state = configuration();
+  let saved = false;
+  const db = {
+    ...store(state),
+    initializeWorldNewsPreference: async () => {
+      saved = true;
+    },
+    configurationSwitches: async () => {
+      expect(saved).toBe(true);
+      throw new Error("optional query failure");
+    },
+  };
+  const result = await new Game(db, rules(), { kingdomId: 2 }, () => now).execute(
+    "synthetic",
+    "login.other",
+    { config: sfs.int(1) },
+  );
+  expect(saved).toBe(true);
+  expect(result.body.switches).toBeUndefined();
+  expect(result.body.isVerifyChangeAccount).toBeUndefined();
+  expect(result.body.funcOn).toEqual(sfs.array());
+  expect(result.body.pushSetting!.value as Value[]).toHaveLength(20);
 });

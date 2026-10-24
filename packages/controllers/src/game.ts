@@ -82,7 +82,12 @@ import { dragonAttackEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
-import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
+import {
+  errors,
+  MOBILE_CLIENT_VERSION,
+  PUSH_SETTING_COUNT,
+  WORLD_NEWS_PUSH_TYPE,
+} from "@opencok/constants/game";
 import {
   accountVerificationEnabled,
   accountVerificationRequired,
@@ -957,9 +962,20 @@ export class Game {
     const profile = this.checkProfile(state.profile);
     const context = this.featureContext(profile);
     const result = loginConfigurationPreferences(this.rules, state);
-    if (state.switches !== undefined) {
-      try {
-        Object.assign(result, loginSwitches(state.switches));
+    if (
+      state.pushSettings.length < PUSH_SETTING_COUNT &&
+      !state.pushSettings.some((row) => num(row, "type") === WORLD_NEWS_PUSH_TYPE)
+    ) {
+      if (!this.db.initializeWorldNewsPreference)
+        throw new GameError(errors.unsupported, "config_record");
+      await this.db.initializeWorldNewsPreference(uid, context.now);
+    }
+    try {
+      const switchRows = this.db.configurationSwitches
+        ? await this.db.configurationSwitches()
+        : state.switches;
+      if (switchRows !== undefined) {
+        Object.assign(result, loginSwitches(switchRows));
         let count: string | null = null;
         if (accountVerificationEnabled(this.rules, context)) {
           if (!this.services.changeAccountCount)
@@ -969,8 +985,8 @@ export class Game {
         result.isVerifyChangeAccount = sfs.bool(
           accountVerificationRequired(this.rules, context, count),
         );
-      } catch {}
-    }
+      }
+    } catch {}
     Object.assign(result, featureConfig(this.rules, context));
     return result;
   }

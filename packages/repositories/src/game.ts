@@ -49,6 +49,8 @@ import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { user_mine } from "@opencok/drizzle/schema/opencok_kingdom/user_mine";
 import { switches } from "@opencok/drizzle/schema/opencok_kingdom/switches";
 import { parse_info } from "@opencok/drizzle/schema/opencok_kingdom/parse_info";
+import { WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
+import { DependencyError } from "@opencok/errors/dependency";
 import {
   and,
   asc,
@@ -231,6 +233,12 @@ export class Database implements GameStore, FriendshipMineStore {
   configuration(uid: string): Promise<LoginConfigurationState> {
     return readLoginConfiguration(this.kingdom.db, uid);
   }
+  configurationSwitches(): Promise<Row[] | undefined> {
+    return readLoginSwitches(this.kingdom.db);
+  }
+  initializeWorldNewsPreference(uid: string, now: number): Promise<void> {
+    return initializeWorldNewsPreference(this.kingdom.db, uid, this.config.kingdomId, now);
+  }
   power(uid: string, now: number) {
     return readPowerState(this.kingdom.db, uid, now);
   }
@@ -323,25 +331,69 @@ export function readLoginConfiguration(
         .from(parse_info)
         .where(eq(parse_info.uid, uid))
         .orderBy(asc(parse_info.type));
-      let flags: Row[] | undefined;
-      await tx.execute(sql`savepoint login_configuration_switches`);
-      try {
-        flags = await tx.select().from(switches).orderBy(asc(switches.name));
-      } catch (error) {
-        await tx.execute(sql`rollback to savepoint login_configuration_switches`);
-        const cause = error instanceof DrizzleQueryError ? error.cause : error;
-        if (
-          cause &&
-          typeof cause === "object" &&
-          "code" in cause &&
-          typeof cause.code === "string" &&
-          /^[0-9A-Z]{5}$/.test(cause.code)
-        )
-          flags = [];
-      }
-      await tx.execute(sql`release savepoint login_configuration_switches`);
-      return { profile, switches: flags, pushSettings };
+      return { profile, switches: undefined, pushSettings };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },
+  );
+}
+
+export async function readLoginSwitches(db: Database["kingdom"]["db"]): Promise<Row[] | undefined> {
+  try {
+    return await db.select().from(switches).orderBy(asc(switches.name));
+  } catch (error) {
+    const cause = error instanceof DrizzleQueryError ? error.cause : error;
+    if (
+      cause &&
+      typeof cause === "object" &&
+      "code" in cause &&
+      typeof cause.code === "string" &&
+      /^[0-9A-Z]{5}$/.test(cause.code)
+    )
+      return [];
+    return undefined;
+  }
+}
+
+export async function initializeWorldNewsPreference(
+  db: Database["kingdom"]["db"],
+  uid: string,
+  kingdomId: number,
+  now: number,
+): Promise<void> {
+  if (
+    !uid ||
+    uid.length > 40 ||
+    !Number.isSafeInteger(now) ||
+    now < 0 ||
+    !Number.isInteger(kingdomId) ||
+    kingdomId < 1
+  )
+    throw new DependencyError("configuration preference input");
+  await db.transaction(
+    async (tx) => {
+      const profile = (
+        await tx
+          .select({
+            uid: userprofile.uid,
+            serverId: userprofile.serverId,
+            banFlag: userprofile.banFlag,
+            banTime: userprofile.banTime,
+          })
+          .from(userprofile)
+          .where(eq(userprofile.uid, uid))
+          .limit(1)
+          .for("update")
+      )[0];
+      if (
+        !profile ||
+        profile.uid !== uid ||
+        profile.serverId !== kingdomId ||
+        (profile.banFlag ?? 0) !== 0 ||
+        (profile.banTime ?? 0n) > BigInt(now)
+      )
+        throw new DependencyError("configuration preference owner");
+      await tx.insert(parse_info).values({ uid, type: WORLD_NEWS_PUSH_TYPE, status: 0, audio: 1 });
+    },
+    { isolationLevel: "read committed", accessMode: "read write" },
   );
 }
