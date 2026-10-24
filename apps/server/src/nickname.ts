@@ -5,10 +5,10 @@ import {
 } from "@opencok/resources/nickname-words";
 
 export async function loadNicknameServices(
-  resources: string,
   readForbidden?: NicknameForbiddenReader,
+  wordsFile?: string | URL,
 ): Promise<Pick<GameServices, "nicknameBadWords" | "nicknameReservedPatterns" | "filterBadWords">> {
-  const filter = await loadNicknameWordFilter(resources, readForbidden);
+  const filter = await loadNicknameWordFilter(wordsFile, readForbidden);
   return {
     nicknameBadWords: (name) => filter.contains(name),
     nicknameReservedPatterns: () => filter.reservedNamePatterns(),

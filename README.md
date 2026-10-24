@@ -113,8 +113,10 @@ Before starting, supply these authorized local inputs:
 | Input                    | Required location                                                             |
 | ------------------------ | ----------------------------------------------------------------------------- |
 | Realm XML/rule resources | `data/reference/server/runtime/base/resource`                                 |
-| Nickname word list       | `data/reference/server/runtime/base/gameconfig/badwords.txt`                  |
 | CDN host trees           | `data/cdn/data/cok.eleximg.com/cok` and `data/cdn/data/asset.cok.chat/100001` |
+
+The nickname filter is included as `packages/resources/data/badwords.json`; it
+requires no external TXT or bind mount. Rebuild the server after changing that list.
 
 The runtime mounts originals read-only and fails when required inputs are absent.
 Do not force-add these files, keys, player records or prepared APKs to Git.

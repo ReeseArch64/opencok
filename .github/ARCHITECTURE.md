@@ -84,8 +84,13 @@ are local references, never required private artifacts committed as dependencies
 | `contracts`, `messages`, `dtos`, `enums`, `validations`, `mappings` | Versioned ports, wire types, DTOs, runtime validation and serialization.                                   |
 | `services`                                                          | Application workflows and orchestration of rules, contracts and persistence ports.                         |
 | `rules`, domain packages including `combat`                         | Pure rule evaluation; no sockets, ORM or broker imports.                                                   |
-| `resources`                                                         | Validated, versioned XML and rule catalogs.                                                                |
+| `resources`                                                         | Validated, versioned XML/JSON and rule catalogs.                                                           |
 | `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                       |
+
+The nickname/description word list is versioned in
+`packages/resources/data/badwords.json` and included in the server artifact.
+It does not depend on the ignored reference tree or a Compose bind mount.
+Realm XML catalogs retain their existing external resource boundary.
 
 Realm composition injects `GameService` and `WorldService` into `GameController`
 and `WorldController`. Controllers delegate commands; Services coordinate use

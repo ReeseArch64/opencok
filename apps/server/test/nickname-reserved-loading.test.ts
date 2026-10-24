@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { Cache } from "@opencok/storage/session";
@@ -90,7 +90,7 @@ test("reserved-name reload reads all five lists only after appending the file en
   filter = new NicknameWordFilter(
     async () => {
       calls.push("file");
-      return "blocked";
+      return ["blocked"];
     },
     async (key) => {
       calls.push(key);
@@ -112,7 +112,7 @@ test("a failed word-file read never reaches Redis or clears previously loaded pa
   const filter = new NicknameWordFilter(
     async () => {
       if (failed) throw new Error("Synthetic file failure");
-      return "blocked";
+      return ["blocked"];
     },
     async () => {
       calls++;
@@ -130,7 +130,7 @@ test("a failed word-file read never reaches Redis or clears previously loaded pa
 
 test("a reached reader failure keeps prior name patterns while preserving already-appended word entries", async () => {
   for (const failureAt of keys) {
-    let content = "old";
+    let content = ["old"];
     let failure = false;
     const calls: string[] = [];
     const filter = new NicknameWordFilter(
@@ -143,7 +143,7 @@ test("a reached reader failure keeps prior name patterns while preserving alread
     );
     await filter.reload();
     failure = true;
-    content = "new";
+    content = ["new"];
     calls.length = 0;
     await filter.reload();
     expect(calls).toEqual(keys.slice(0, keys.indexOf(failureAt) + 1));
@@ -158,7 +158,7 @@ test("successful empty list results replace previous patterns including a swallo
   const cache = new FakeCache();
   cache.replies.set(keys[4]!, ["old pattern"]);
   const filter = new NicknameWordFilter(
-    async () => "blocked",
+    async () => ["blocked"],
     (key) => cache.nicknameForbiddenWords(key),
   );
   await filter.reload();
@@ -178,7 +178,7 @@ test("the old pattern snapshot remains available until the last list read finish
     entered = resolve;
   });
   const filter = new NicknameWordFilter(
-    async () => "blocked",
+    async () => ["blocked"],
     async (key) => {
       if (key === keys[4] && pending)
         return new Promise<string[]>((resolve) => {
@@ -207,18 +207,19 @@ test("the old pattern snapshot remains available until the last list read finish
 test("realm composition reads the real word file before Redis and exposes reserved patterns separately", async () => {
   const root = await mkdtemp(join(tmpdir(), "opencok-reserved-patterns-"));
   try {
-    const resources = join(root, "resources");
+    const wordsFile = join(root, "badwords.json");
     const cache = new FakeCache();
     cache.replies.set(keys[4]!, ["^reserved$", "["]);
-    const absent = await loadNicknameServices(resources, (key) =>
-      cache.nicknameForbiddenWords(key),
+    const absent = await loadNicknameServices(
+      (key) => cache.nicknameForbiddenWords(key),
+      wordsFile,
     );
     expect(absent.nicknameReservedPatterns!()).toEqual([]);
     expect(cache.calls).toEqual([]);
-    await mkdir(join(root, "gameconfig"));
-    await writeFile(join(root, "gameconfig", "badwords.txt"), "blocked");
-    const services = await loadNicknameServices(resources, (key) =>
-      cache.nicknameForbiddenWords(key),
+    await writeFile(wordsFile, JSON.stringify(["blocked"]));
+    const services = await loadNicknameServices(
+      (key) => cache.nicknameForbiddenWords(key),
+      wordsFile,
     );
     expect(cache.calls).toEqual(keys.map((key) => ["LRANGE", key, "0", "-1"]));
     expect(services.nicknameReservedPatterns!()).toEqual(["^reserved$", "["]);

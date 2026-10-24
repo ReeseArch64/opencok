@@ -76,13 +76,16 @@ test("unescaped anchors and alternatives keep their generated-pattern semantics"
   expect(containsNicknameBadWords("a$", ["a$"])).toBe(false);
 });
 
-test("entry loading preserves commas line endings length order duplicate entries and single removals", () => {
+test("entry loading preserves length order duplicate entries and single removals", () => {
   const previous = ["old", "v", " "];
-  const result = nicknameBadWordEntries("ab,cd,,\r\nlongest,v, ,v, \rA\nB\u2028C,", previous);
+  const result = nicknameBadWordEntries(
+    ["ab", "cd", "", "longest", "v", " ", "v", " ", "A", "B\u2028C"],
+    previous,
+  );
   expect(result).toEqual(["old", "longest", "B\u2028C", "ab", "cd", "v", " ", "v", " ", "A"]);
   expect(previous).toEqual(["old", "v", " "]);
-  expect(nicknameBadWordEntries("😀,ab,中", [])).toEqual(["😀", "ab", "中"]);
-  expect(nicknameBadWordEntries("v,v, , ,V")).toEqual(["v", " ", "V"]);
+  expect(nicknameBadWordEntries(["😀", "ab", "中"], [])).toEqual(["😀", "ab", "中"]);
+  expect(nicknameBadWordEntries(["v", "v", " ", " ", "V"])).toEqual(["v", " ", "V"]);
 });
 
 test("locking wins over entries and matching failures stop the remaining list", () => {

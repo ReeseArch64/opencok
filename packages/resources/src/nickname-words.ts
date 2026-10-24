@@ -1,5 +1,4 @@
 import { readFile, stat } from "node:fs/promises";
-import { join } from "node:path";
 import {
   containsNicknameBadWords,
   filterNicknameBadWords,
@@ -13,7 +12,7 @@ export class NicknameWordFilter {
   private reserved: readonly string[] = [];
   private loading = false;
   constructor(
-    private readonly read: () => Promise<string>,
+    private readonly read: () => Promise<readonly string[]>,
     private readonly readForbidden?: NicknameForbiddenReader,
   ) {}
 
@@ -46,14 +45,16 @@ export class NicknameWordFilter {
 }
 
 export async function loadNicknameWordFilter(
-  resources: string,
+  path: string | URL = new URL("../data/badwords.json", import.meta.url),
   readForbidden?: NicknameForbiddenReader,
 ): Promise<NicknameWordFilter> {
-  const path = join(resources, "..", "gameconfig", "badwords.txt");
   const filter = new NicknameWordFilter(async () => {
     if ((await stat(path)).size > 16 * 1024 * 1024)
       throw new Error("Oversized nickname filter resource");
-    return readFile(path, "utf8");
+    const entries: unknown = JSON.parse(await readFile(path, "utf8"));
+    if (!Array.isArray(entries) || entries.some((entry) => typeof entry !== "string"))
+      throw new Error("Invalid nickname filter resource");
+    return entries as string[];
   }, readForbidden);
   await filter.reload();
   return filter;
