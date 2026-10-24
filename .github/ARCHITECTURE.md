@@ -586,6 +586,25 @@ values skip writes except the speed flag; banner bigint storage retains Int prot
 limits. Public-profile reads already consume the visibility columns. No cache delivery
 or notification is introduced. The server guide records command-specific no-op and
 failure behavior, with synthetic unit validation only.
+Nickname text rules remain pure: Java trim/blank behavior, weighted GBK length and
+character eligibility feed an ordered filter/availability evaluation. The GBK width
+table is derived from an independently authored Java 8 standard-library probe and has
+exhaustive code-unit checksum coverage; runtime and unit tests require no Java process.
+The bad-word resource adapter now reads the adjacent UTF-8 gameconfig list and preserves
+append, ordering, single-removal, reload-lock and failure-retention behavior. Its matcher
+uses Java 8 Unicode boundary data and the restricted generated-pattern grammar, validated
+against independent standard-library fixtures. Providers are explicit; the nickname-check
+command remains disabled until the global name-mapping/account adapter and runtime resource
+composition are connected. The source mount is also pending. This foundation neither
+reserves names nor changes profiles, balances or items.
+Global nickname comparison now has a separate pure `utf8_unicode_ci` equality-key
+primitive. It preserves the reference DDL's UCA 4 primary weights and PAD SPACE
+semantics, with versioned Unicode data and its license in the rules package. It
+accepts only the legacy three-byte UTF-8 character domain and performs no SQL or
+modern Unicode normalization. Exhaustive valid-BMP evidence comes from public MySQL
+weight data, without starting a database. The global mapping/account adapter must
+apply these semantics to both name matching and account UID matching before the
+nickname command can be enabled; PostgreSQL text equality is not equivalent.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab

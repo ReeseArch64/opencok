@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { dataConfigXml } from "../test/fixtures/data-config";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -148,7 +149,10 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         '<ItemSpec id="400001" level="1" time="30"/><ItemSpec id="400002" level="2" time="40"/>',
       role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
       position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
-      item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/>',
+      item: dataConfigXml({
+        player_max: { k3: "30" },
+        resources_basics: { k7: "100", k8: "300" },
+      }),
       arms: '<ItemSpec id="100001" attack="12" attack_add="3" defence="10" defence_add="2" upkeep="24" power="0.5"/><ItemSpec id="100002"/>',
       goods: '<ItemSpec id="200001" para1="50"/><ItemSpec id="200002" para1="60"/>',
     };
