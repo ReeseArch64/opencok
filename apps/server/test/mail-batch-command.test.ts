@@ -12,7 +12,15 @@ import type {
 import { Game } from "@opencok/controllers/game";
 import { Rules } from "@opencok/rules/game";
 import { mailBatchQuery, mailBatchIsChat } from "@opencok/rules/mail";
-import { decode, encode, fields, sfs, type Fields, type Value } from "@opencok/messages/sfs";
+import {
+  decode,
+  encode,
+  extension,
+  fields,
+  sfs,
+  type Fields,
+  type Value,
+} from "@opencok/messages/sfs";
 import { mailListEntry, mailCategoryNow as now } from "./fixtures/mail-category.ts";
 const unused = async (): Promise<never> => {
   throw new Error("Unexpected dependency");
@@ -371,4 +379,123 @@ test("batch dependency, snapshot and projection failures never return a successf
   const f = fixture();
   f.db.mailBatch = unused;
   await expect(f.game.execute("self", "mread.batch", params(2))).rejects.toThrow();
+});
+
+test("mread.chat defaults only an absent type to personal conversation and preserves ownership and correlation", async () => {
+  const f = fixture();
+  f.entries.push(mailListEntry({ type: 22 }));
+  const result = await f.game.execute("self", "mread.chat", {
+    num: sfs.int(-9),
+    offset: sfs.int(7),
+    fromUser: sfs.string("sender"),
+    toUser: sfs.string("foreign"),
+    serverId: sfs.int(2),
+    _cok_: sfs.string("chat-correlation"),
+    cmdBaseTime: sfs.long(123),
+  });
+  expect(f.calls).toEqual([
+    { uid: "self", query: { kind: "personal", begin: 0, limit: 7, fromUser: "sender", now } },
+  ]);
+  expect(f.clocks()).toBe(1);
+  expect(message(result.body).uid).toEqual(sfs.string("mail"));
+  expect(message(result.body).type).toEqual(sfs.int(1));
+  expect(message(result.body).status).toBeUndefined();
+  expect(result.body._cok_).toEqual(sfs.string("chat-correlation"));
+  expect(result.body.cmdBaseTime).toEqual(sfs.long(123));
+  expect(result.pushes).toEqual([]);
+  expect(f.plans).toEqual([[]]);
+  const missing = fixture();
+  await expect(
+    missing.game.execute("self", "mread.chat", { num: sfs.int(0), offset: sfs.int(1) }),
+  ).rejects.toMatchObject({ code: "E000000" });
+  expect(missing.calls).toEqual([]);
+  for (const type of [sfs.null(), sfs.string("4"), sfs.long(4), sfs.byte(4)]) {
+    const invalid = fixture();
+    await expect(
+      invalid.game.execute("self", "mread.chat", {
+        ...params(4),
+        type,
+        fromUser: sfs.string("sender"),
+      }),
+    ).rejects.toThrow();
+    expect(invalid.calls).toEqual([]);
+  }
+  const missingFields: Fields[] = [
+    { offset: sfs.int(1), fromUser: sfs.string("sender") },
+    { num: sfs.int(0), fromUser: sfs.string("sender") },
+    { num: sfs.int(0), offset: sfs.int(1), fromUser: sfs.null() },
+  ];
+  for (const input of missingFields) {
+    const invalid = fixture();
+    await expect(invalid.game.execute("self", "mread.chat", input)).rejects.toThrow();
+    expect(invalid.calls).toEqual([]);
+  }
+});
+
+test("explicit mread.chat message selectors preserve batch queries, envelopes and failure semantics", async () => {
+  for (const [selector, type] of [
+    [2, 14],
+    [3, 13],
+    [4, 22],
+    [5, 5],
+    [6, 7],
+    [7, 18],
+    [8, 10],
+    [9, 24],
+    [11, 32],
+    [0, null],
+    [1, null],
+    [-1, null],
+    [2147483647, null],
+  ]) {
+    const batch = fixture();
+    const chat = fixture();
+    if (type !== null)
+      for (const f of [batch, chat])
+        f.entries.push(mailListEntry({ type, contents: Buffer.from("{n:1}") }));
+    const input = { ...params(selector!), fromUser: sfs.string("sender"), _cok_: sfs.int(7) };
+    expect(await chat.game.execute("self", "mread.chat", input)).toEqual(
+      await batch.game.execute("self", "mread.batch", input),
+    );
+    expect(chat.calls).toEqual(batch.calls);
+    expect(chat.requestedSenders).toEqual(batch.requestedSenders);
+    expect(chat.plans).toEqual(batch.plans);
+  }
+  const unknown = fixture();
+  expect(
+    (
+      await unknown.game.execute("self", "mread.chat", {
+        ...params(-1),
+        num: sfs.int(-9),
+        offset: sfs.int(-1),
+      })
+    ).body,
+  ).toEqual({ result: sfs.array() });
+  const failed = fixture();
+  failed.db.mailBatch = unused;
+  await expect(
+    failed.game.execute("self", "mread.chat", { ...params(4), fromUser: sfs.string("sender") }),
+  ).rejects.toThrow();
+  expect(failed.plans).toEqual([]);
+});
+
+test("mread.chat validates its own full response envelope before returning primary cleanup", async () => {
+  const f = fixture();
+  f.entries.push(mailListEntry({ type: 32, contents: Buffer.from("broken") }));
+  const values = Array.from({ length: 127 }, () => sfs.string("x".repeat(32767)));
+  values.push(sfs.string(""));
+  const echo = sfs.array(values);
+  const base = { result: sfs.array(), _cok_: echo };
+  const padding = 4 * 1024 * 1024 - encode(extension("mread.chat", base)).length;
+  expect(padding).toBeGreaterThan(0);
+  expect(padding).toBeLessThanOrEqual(32767);
+  values[127] = sfs.string("x".repeat(padding));
+  const result = await f.game.execute("self", "mread.chat", { ...params(11), _cok_: echo });
+  expect(encode(extension("mread.chat", result.body))).toHaveLength(4 * 1024 * 1024);
+  expect(f.plans).toEqual([["mail"]]);
+  f.plans.length = 0;
+  await expect(
+    f.game.execute("self", "mread.batch", { ...params(11), _cok_: echo }),
+  ).rejects.toThrow();
+  expect(f.plans).toEqual([]);
 });

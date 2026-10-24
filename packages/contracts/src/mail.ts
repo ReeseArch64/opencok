@@ -1,5 +1,7 @@
 import type { Row } from "./rows.ts";
 
+export type MailListCommand = "mread.batch" | "mread.chat";
+
 export interface MailGroupQuery {
   moderation: boolean;
   begin: number;
