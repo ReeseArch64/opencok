@@ -1,4 +1,7 @@
 import type {
+  MailDeleteQuery,
+  MailDeletePlanner,
+  MailDeleteSnapshot,
   MailReadQuery,
   MailReadSnapshot,
   MailSaveQuery,
@@ -29,6 +32,11 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  mailDelete(
+    uid: string,
+    query: MailDeleteQuery,
+    plan: MailDeletePlanner,
+  ): Promise<MailDeleteSnapshot>;
   mailRead(uid: string, query: MailReadQuery): Promise<MailReadSnapshot>;
   mailSave(uid: string, query: MailSaveQuery): Promise<MailSaveSnapshot>;
   mailStatus(uid: string, query: MailStatusQuery): Promise<MailStatusSnapshot>;

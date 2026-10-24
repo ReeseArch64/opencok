@@ -1287,7 +1287,7 @@ Mailbox save/cancel commands use a separate recipient-scoped write interface. A 
 owner profile authorizes each realm transaction; conditional saved-flag updates and
 durable `mail_update` markers commit together. Marker timestamps never decrease and
 only matched owned messages receive markers. The additive kingdom migration supplies
-the marker table; synchronization consumers, cleanup, deletion and
+the marker table; synchronization consumers, cleanup, category/conversation deletion and
 redemption remain separate work. This follows ADR-0002/0005 without dual writes to
 Redis. Absolute flag assignments preserve repeat-request state absent intervening
 changes; correlation fields do not provide durable command receipts. The server guide
@@ -1303,6 +1303,16 @@ failure. Missing global log rows are acknowledged without creation. The relay re
 after five seconds and drains before database disposal; pending events never depend
 on Redis availability. This implements recoverable logging, not cross-database atomicity
 or attachment grants. The additive migration and runtime are unit-verified only.
+
+Ordinary `mail.delete` transactions enforce recipient, exact saved-flag and reward-status
+predicates before removing rows. Returned IDs authorize auxiliary-content cleanup and
+durable synchronization tombstones. A controller-supplied policy interprets invitation
+JSON and group rules while the repository owns the transaction and enforces recipient
+predicates on every associated write. Group pointers refresh from remaining messages;
+valid move-invitation invalidation stays within the selected realm. All effects roll
+back together. Protected messages retain their contents and groups, correcting an
+inconsistency in the legacy helper. No new schema is needed; the server guide records
+legacy comparator quirks, extra-content import requirements and unit-only evidence.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
