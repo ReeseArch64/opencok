@@ -22,7 +22,7 @@ export async function finishAvatar(
   owner: string,
   receipt: string,
   now: number,
-  mailTemplate?: Rule,
+  mailTemplate: Rule | undefined = rules.mail.get("10111"),
 ): Promise<AvatarFinishSnapshot> {
   const query = avatarFinishQuery(receipt, now);
   if (!/^[0-9]{1,20}$/.test(owner)) throw new GameError(errors.invalid, "avatar_rule");

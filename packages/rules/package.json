@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./avatar-mail": "./src/avatar-mail.ts",
     "./game": "./src/game.ts",
     "./availability": "./src/availability.ts",
     "./features": "./src/features.ts",

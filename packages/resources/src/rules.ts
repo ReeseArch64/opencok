@@ -52,6 +52,7 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     "dragon_skill",
     "activity_panel",
     "reward",
+    "mail",
   ].includes(name);
   for (const record of records) {
     const item = record;
@@ -171,7 +172,11 @@ export async function loadRules(directory: string, kingdomId = 1) {
     ].map(optional),
   );
   const [militaryRanks, servers] = await Promise.all([optional("wr_rank"), optional("servers")]);
-  const [treasures, rewards] = await Promise.all([optional("treasure"), optional("reward")]);
+  const [treasures, rewards, mail] = await Promise.all([
+    optional("treasure"),
+    optional("reward"),
+    optional("mail"),
+  ]);
   const achievementCount = (await exists(join(directory, "achievement.xml")))
     ? parseRecords(await read("achievement"), "achievement").length
     : 0;
@@ -221,6 +226,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     },
     { achievementCount, militaryRanks, servers },
     { treasures, rewards },
+    mail,
   );
 }
 

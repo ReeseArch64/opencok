@@ -69,3 +69,34 @@ export interface AvatarFinishStore {
     inspect: AvatarFinishInspector,
   ): Promise<AvatarFinishSnapshot>;
 }
+
+export interface AvatarCompletionRecord {
+  ownerUid: string;
+  sequence: number;
+  hash: string;
+  picVer: number;
+  committedAt: bigint;
+  effects: string;
+  pendingEffects: number;
+}
+export interface AvatarSystemMail {
+  uid: string;
+  owner: string;
+  fromName: string;
+  title: string;
+  type: 2 | 15;
+  contents: Uint8Array;
+  extra: Uint8Array | null;
+  rewardId: string | null;
+  rewardStatus: 0 | 1;
+  reply: number;
+  createTime: bigint;
+}
+export type AvatarMailPlanner = (
+  completion: AvatarCompletionRecord,
+  stem: string,
+) => AvatarSystemMail;
+export interface AvatarMailDelivery {
+  profile: Row | undefined;
+  mail?: AvatarSystemMail;
+}

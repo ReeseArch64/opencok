@@ -492,3 +492,13 @@ test("maximum sequences, absent mail templates and immutable metadata preserve c
     expect(malformed.state.completions).toEqual([]);
   }
 });
+
+test("completion captures the authorized mail catalog when no template override is supplied", async () => {
+  const f = fixture();
+  const config = rules();
+  config.mail.set("10111", { ...template });
+  await finishAvatar(f.store, f.files, config, "1001", `5:${hash}`, now);
+  expect(JSON.parse(f.state.completions[0]![5] as string).mail).toEqual(template);
+  config.mail.get("10111")!.message = "changed after commit";
+  expect(JSON.parse(f.state.completions[0]![5] as string).mail.message).toBe(template.message);
+});

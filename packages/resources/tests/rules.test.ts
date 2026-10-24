@@ -244,3 +244,29 @@ test("VIP resources select only the named group and retain threshold declaration
     parseRules('<database><Group id="other"><ItemSpec id="7000"/></Group></database>', "vip"),
   ).toThrow("Missing gameplay resource records");
 });
+
+test("mail catalogs preserve template strings and final duplicate definitions", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-mail-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).mail.size).toBe(0);
+    await writeFile(
+      join(directory, "mail.xml"),
+      '<database><ItemSpec id="10111" message="old"/><Group id="final"><ItemSpec id="10111" type="2" title=" synthetic title " sender="synthetic" message="one\\ntwo"/></Group></database>',
+    );
+    const catalog = (await loadRules(directory)).mail;
+    expect(catalog.size).toBe(1);
+    expect(catalog.get("10111")).toEqual({
+      id: "10111",
+      type: "2",
+      title: " synthetic title ",
+      sender: "synthetic",
+      message: "one\\ntwo",
+    });
+    await writeFile(join(directory, "mail.xml"), "<!DOCTYPE database><database/>");
+    await expect(loadRules(directory)).rejects.toThrow();
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
