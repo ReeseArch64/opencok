@@ -1,4 +1,7 @@
 export const errors = {
+  avatarLevel: "105775",
+  avatarCooldown: "105769",
+  avatarReported: "105770",
   invalid: "E000000",
   unsupported: "102192",
   missing: "E100169",

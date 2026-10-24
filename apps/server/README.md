@@ -42,7 +42,7 @@ docker compose --profile dev up --build -d --wait
 ```
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the
-private `GAME_LOGIN_SECRET` exception. Optional chat integration settings also come
+private `GAME_LOGIN_SECRET` exception. Optional chat and avatar integration settings also come
 from the environment. Other development values are direct
 Compose settings, still validated by the shared Zod schemas through `@opencok/env/effect`. Authorized XML comes from the complete local reference
 copy at `data/reference/server/runtime/base/resource`; the runtime does not
@@ -57,6 +57,8 @@ service/resource settings through its process environment.
 | `GLOBAL_DATABASE_NAME`           | Defaults to `opencok_global`.                                                                                                        |
 | `GAME_CHAT_SESSION_URL`          | Optional internal HTTP(S) endpoint ending in `/external/session`; unset disables chat session issuance.                              |
 | `CHAT_SIGNING_SECRET`            | Required when the session URL is configured; must match the maintained chat service.                                                 |
+| `GAME_FILES_URL`                 | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                        |
+| `FILES_SIGNING_KEY_FILE`         | Required explicit key-file path when the files origin is configured; same protected key as the files service.                        |
 | `GAME_LOGIN_SECRET`              | Required private secret matching the legacy mobile login issuer.                                                                     |
 | `GAME_RESOURCES`                 | Required directory of authorized, extracted 12.06.0 XML rules.                                                                       |
 | `GAME_REDIS_URL`                 | Defaults to `redis://127.0.0.1:6379/0`.                                                                                              |
@@ -899,6 +901,58 @@ conversations and transaction failures. Real PostgreSQL execution, concurrency a
 native-client behavior remain unverified. `chatMail.read`, conversation deletion,
 content edge cases and synchronization flows remain pending.
 
+## Realm avatar grants
+
+`user.avatar.grant`, tracked in [issue #76](https://github.com/ReeseArch64/opencok/issues/76),
+returns `owner` (String), `sequence` (Int), `grant` (String) and `pendingHash` (String).
+It requires an authenticated numeric owner and, when supplied, an exactly matching
+String `gameuid`. Request version, sequence and endpoint fields cannot override stored
+state. Correlation is retained; grant issuance changes no profile, upload record or
+mail and emits no push. `user.avatar.finish` and direct `user.update.picVer` remain
+unsupported: the complete avatar-change workflow is not yet available.
+
+The repository locks the owner's durable profile in a repeatable-read transaction and
+rejects missing, foreign, misplaced or banned profiles before eligibility or files reads.
+The nonnegative signed-32-bit encoded picture version supplies its last six digits;
+the next sequence must remain within 1–999999. Only `function_on5.k2` exactly equal to
+`0` bypasses eligibility. Otherwise the raw stronghold level must meet `hero.k9`, then
+an existing upload record applies the `hero.k7` seconds cooldown followed by its report
+ban. Missing castles have level zero. Missing upload records skip cooldown configuration
+parsing. Rules preserve Java signed parsing, 64-bit arithmetic wrapping, inclusive
+eligibility deadlines and the level/cooldown/ban error precedence (`105775`, `105769`,
+`105770`). Castle and record reads are lazy, owner-bound and limited to the required fields.
+
+Configure `GAME_FILES_URL` as the internal HTTP(S) origin reachable from the realm and
+`FILES_SIGNING_KEY_FILE` as an explicit path to the protected 32-byte key used by the files
+service. The file contains 64 lowercase hex characters with an optional final newline.
+No key is generated, replaced or logged. The origin accepts no path, embedded credentials,
+query or fragment. An absent origin keeps issuance unsupported; invalid configuration,
+an unreadable key or an unavailable upload-record table fails configured startup.
+Development Compose does not forward these settings or mount the key automatically;
+an operator override must provide both settings and a read-only key mount. The files
+service itself is also provisioned separately.
+
+The realm reads `/_internal/avatars/{owner}/{sequence}` using a separate 30-second
+confirmation signature. `DEPENDENCY_TIMEOUT_MS` bounds the whole exchange, including
+streamed response consumption while the profile lock is held. Redirects reject, receipts
+are limited to 128 bytes, and owner, canonical sequence and SHA-256 must match. An empty
+404 means no pending upload. Other failed or malformed responses prevent a grant, with
+sanitized errors and no automatic retry. The resulting upload grant has a fresh random
+nonce and a 120-second lifetime. An existing valid receipt supplies `pendingHash`, allowing
+a caller to recognize an upload already stored for that sequence.
+
+The maintained files service verifies immutable S3 receipts and actual object bytes. It
+has no historical filesystem `completed` marker; the durable profile version is the
+sequence authority. This slice does not establish equivalence for independently restored
+profile/object state or reset versions. Completion must still validate receipts, atomically
+update profile/upload state and restore required mail, synchronization and push effects.
+
+Socket-free unit tests compose the realm command with the maintained files handler and
+synthetic storage, and inspect generated SQL through a synthetic database client. They
+cover ownership, eligibility, expiry, pending receipts, fresh retries, exact wire types,
+rollback, bounded responses and timeouts. No real database, object store, listener, client
+or ADB execution is used. Real concurrency and deployment behavior remain unverified.
+
 ## Realm chat sessions
 
 `chat.session.create`, tracked in [issue #74](https://github.com/ReeseArch64/opencok/issues/74),
@@ -1374,7 +1428,7 @@ use these descriptions before the reconnect task component is complete.
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
-| 7. Avatar integration                     | Standalone files service                                                                                                                                                                                                                                                            | Realm grants, confirmation and profile updates.                                                                                                           |
+| 7. Avatar integration                     | Standalone files service; authenticated realm grants, eligibility, private pending-receipt lookup and synthetic units                                                                                                                                                               | Completion, atomic profile/upload-record updates, mail/synchronization/push effects and restored-state semantics.                                         |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.

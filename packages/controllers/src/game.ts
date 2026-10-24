@@ -1,3 +1,9 @@
+import {
+  avatarSequence,
+  avatarMinimumLevel,
+  checkAvatarLevel,
+  checkAvatarRecord,
+} from "@opencok/rules/avatar";
 import { realmChatSessionRequest, realmChatSessionResponse } from "./realm-chat-session.ts";
 import { mailDeleted, mailSave, mailStatus } from "@opencok/dtos/mail";
 import { mailCategoryProjection } from "./mail-category.ts";
@@ -161,6 +167,9 @@ export class Game {
   async execute(uid: string, command: string, params: Fields): Promise<Result> {
     let body: Fields;
     switch (command) {
+      case "user.avatar.grant":
+        body = await this.avatarGrant(uid, params);
+        break;
       case "chat.session.create":
         body = await this.chatSession(uid);
         break;
@@ -245,6 +254,58 @@ export class Game {
     if (params._cok_) body._cok_ = params._cok_;
     if (params.cmdBaseTime) body.cmdBaseTime = params.cmdBaseTime;
     return { body, pushes: [] };
+  }
+  private async avatarGrant(uid: string, params: Fields): Promise<Fields> {
+    const service = this.services.avatar;
+    if (!service) throw new GameError(errors.unsupported);
+    if (
+      !/^[0-9]{1,20}$/.test(uid) ||
+      (params.gameuid !== undefined &&
+        (params.gameuid.type !== Type.String || params.gameuid.value !== uid))
+    )
+      throw new GameError(errors.invalid);
+    const now = this.now();
+    const state = await service.read(uid, now, async (profile, readers) => {
+      this.checkProfile(profile, now);
+      if (profile.uid !== uid || profile.serverId !== this.config.kingdomId)
+        throw new GameError(errors.invalid);
+      const sequence = avatarSequence(profile.picVer);
+      const minimum = avatarMinimumLevel(this.rules);
+      if (minimum !== undefined) {
+        checkAvatarLevel(await readers.castleLevel(), minimum);
+        const record = await readers.uploadRecord();
+        if (record && record.uid !== uid) throw new GameError(errors.invalid);
+        checkAvatarRecord(this.rules, record, now);
+      }
+      const receipt = await service.find(uid, sequence);
+      if (
+        receipt &&
+        (receipt.owner !== uid ||
+          receipt.sequence !== String(sequence) ||
+          !/^[a-f0-9]{64}$/.test(receipt.hash))
+      )
+        throw new GameError(errors.invalid);
+      return {
+        owner: uid,
+        sequence,
+        grant: service.issue(uid, sequence),
+        pendingHash: receipt?.hash ?? "",
+      };
+    });
+    const profile = this.checkProfile(state.profile, now);
+    if (
+      profile.uid !== uid ||
+      profile.serverId !== this.config.kingdomId ||
+      !state.grant ||
+      state.grant.owner !== uid
+    )
+      throw new GameError(errors.invalid);
+    return {
+      owner: sfs.string(state.grant.owner),
+      sequence: sfs.int(state.grant.sequence),
+      grant: sfs.string(state.grant.grant),
+      pendingHash: sfs.string(state.grant.pendingHash),
+    };
   }
   private async chatSession(uid: string): Promise<Fields> {
     if (!this.services.chatSession) throw new GameError(errors.unsupported);

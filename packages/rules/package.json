@@ -36,6 +36,7 @@
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./mail": "./src/mail.ts",
     "./mail-groups": "./src/mail-groups.ts",
+    "./avatar": "./src/avatar.ts",
     "./mail-conversation-read": "./src/mail-conversation-read.ts"
   },
   "dependencies": {

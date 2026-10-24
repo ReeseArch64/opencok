@@ -91,3 +91,27 @@ test("realm chat session issuance is opt-in and requires a valid internal endpoi
       }),
     ).toThrow("GAME_CHAT_SESSION_URL");
 });
+
+test("realm avatar integration is optional and requires an explicit files origin and key path", () => {
+  expect(parseServerEnvironment(base).GAME_FILES_URL).toBeUndefined();
+  const configured = {
+    ...base,
+    GAME_FILES_URL: "http://files.internal:8084",
+    FILES_SIGNING_KEY_FILE: "/synthetic/key",
+  };
+  expect(parseServerEnvironment(configured).GAME_FILES_URL).toBe("http://files.internal:8084");
+  expect(() =>
+    parseServerEnvironment({ ...base, GAME_FILES_URL: configured.GAME_FILES_URL }),
+  ).toThrow("FILES_SIGNING_KEY_FILE");
+  for (const url of [
+    "invalid",
+    "file:///private",
+    "http://u:p@files.internal/",
+    "http://files.internal/path",
+    "http://files.internal/?private=x",
+    "http://files.internal/#x",
+  ])
+    expect(() => parseServerEnvironment({ ...configured, GAME_FILES_URL: url })).toThrow(
+      "GAME_FILES_URL",
+    );
+});

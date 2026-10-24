@@ -1,3 +1,5 @@
+import { loadAvatarFiles } from "@opencok/connection/avatar-files";
+import { readAvatarGrant, checkAvatarGrantStore } from "@opencok/repositories/avatar-grant";
 import { Context, Effect, Layer, ManagedRuntime } from "effect";
 import { RealmConfig, type Config } from "./config.ts";
 import { acquireResource, fromPromise } from "@opencok/core/resource";
@@ -28,6 +30,12 @@ export const RealmDependenciesLive = Layer.effect(
       async () => new Database(config),
       (db) => db.close(),
     );
+    const avatarFiles = config.avatarFiles
+      ? yield* fromPromise("realm.avatar-files", async () => {
+          await checkAvatarGrantStore(db.kingdom.db);
+          return loadAvatarFiles({ ...config.avatarFiles!, timeoutMs: config.timeoutMs });
+        })
+      : undefined;
     const cache = new Cache(config);
     const coordination = yield* acquireResource(
       "realm.coordination",
@@ -57,6 +65,13 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        avatar: avatarFiles
+          ? {
+              ...avatarFiles,
+              read: (uid, now, inspect) =>
+                readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect),
+            }
+          : undefined,
         chatSession: config.chatSession
           ? createRealmChatSessionIssuer({
               ...config.chatSession,
