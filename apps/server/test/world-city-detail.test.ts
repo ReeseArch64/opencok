@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { worldCityDetail } from "@opencok/rules/world-point-detail";
-import { worldCityFields } from "@opencok/dtos/world-point-detail";
+import { worldCityFields } from "@opencok/mappings/world-point-detail";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 import vectors from "./fixtures/world-city-vectors.json";
 

@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
 import { readReconnectBase } from "@opencok/repositories/reconnect";
-import { reconnectArmies, reconnectBalances } from "@opencok/dtos/reconnect";
+import { reconnectArmies, reconnectBalances } from "@opencok/mappings/reconnect";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 
 function database(

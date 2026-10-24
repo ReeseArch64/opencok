@@ -43,10 +43,10 @@
   "dependencies": {
     "@opencok/constants": "workspace:*",
     "@opencok/contracts": "workspace:*",
-    "@opencok/dtos": "workspace:*",
     "@opencok/errors": "workspace:*",
     "@opencok/messages": "workspace:*",
     "@opencok/rules": "workspace:*",
-    "@opencok/identity": "workspace:*"
+    "@opencok/identity": "workspace:*",
+    "@opencok/mappings": "workspace:*"
   }
 }

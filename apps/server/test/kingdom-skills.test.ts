@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { javaListSort } from "@opencok/rules/java-list-sort";
 import { restoredKingdomSkills } from "@opencok/rules/kingdom-skills";
 import { Rules, type Rule } from "@opencok/rules/game";
-import { dataConfig } from "@opencok/dtos/bootstrap";
+import { dataConfig } from "@opencok/mappings/bootstrap";
 import { decode, encode, fields } from "@opencok/messages/sfs";
 import { dataConfigItems } from "./fixtures/data-config.ts";
 import { kingdomSkill } from "./fixtures/kingdom-skill.ts";

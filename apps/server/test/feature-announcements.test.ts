@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { featureConfig } from "@opencok/dtos/bootstrap";
+import { featureConfig } from "@opencok/mappings/bootstrap";
 import { fields, sfs, type Value } from "@opencok/messages/sfs";
 import { featureAnnouncementEnabled, type FeatureContext } from "@opencok/rules/features";
 import { Rules, type Rule } from "@opencok/rules/game";

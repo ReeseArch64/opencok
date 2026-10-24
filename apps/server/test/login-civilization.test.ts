@@ -6,7 +6,7 @@ import { Database } from "@opencok/repositories/game";
 import { Game } from "@opencok/controllers/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { CityState, GameStore } from "@opencok/contracts/game";
-import { user } from "@opencok/dtos/city";
+import { user } from "@opencok/mappings/city";
 import { Rules } from "@opencok/rules/game";
 import { decode, encode, fields, sfs } from "@opencok/messages/sfs";
 

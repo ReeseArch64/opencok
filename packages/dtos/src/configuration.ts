@@ -1,526 +1,233 @@
-import { z } from "zod";
-import { createZodDto, wire, wireRecord } from "./dto.ts";
-
-import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
-import { GameError } from "@opencok/errors/game";
-import { sfs, type Fields } from "@opencok/messages/sfs";
-import {
-  switchRealmEnabled,
-  featureRealmEnabled,
-  worldActivityRealmEnabled,
-  ruleAvailable,
-  versionAtLeast,
-} from "@opencok/rules/availability";
-import { javaDecimal } from "@opencok/rules/java-integer";
-import { javaCalendarDate } from "@opencok/rules/java-calendar-date";
-import type { Rule, Rules } from "@opencok/rules/game";
-import { restoredKingdomSkills, type KingdomSkill } from "@opencok/rules/kingdom-skills";
-import { javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
-import { javaListSort } from "@opencok/rules/java-list-sort";
-
-const objectKeys = [
-  "player_max",
-  "hero_up",
-  "affairs",
-  "fight_position",
-  "fight_number",
-  "physical_bug",
-  "physical",
-  "mail",
-  "building_base",
-  "cd_time",
-  "cd_cost",
-  "cd_gold",
-  "vip2sviptime",
-  "world_distance",
-  "world_marchtime",
-  "world_detect",
-  "world_fire1",
-  "world_fire2",
-  "world_rally",
-  "world_alliancewar",
-  "worldmap_map",
-  "resource_cost",
-  "resource_num1",
-  "resource_num2",
-  "resource_num3",
-  "showstarskill",
-  "tavern_base",
-  "alliance_territory",
-  "hero_soulstone",
-  "function_on",
-  "function_on2",
-  "function_on3",
-  "function_on4",
-  "function_on5",
-  "function_on6",
-  "function_on7",
-  "function_on8",
-  "function_on9",
-  "shake",
-  "notice",
-  "equip",
-  "worldmap_pvenum",
-  "hero_number",
-  "hero_ability",
-  "ability_lv",
-  "ability_cost",
-  "hero_skillpoint",
-  "worldmap_time",
-  "march",
-  "alliance_cost",
-  "alliance_science",
-  "alliance_gift",
-  "goldmine_fb",
-  "resources_weight",
-  "online_reward",
-  "account",
-  "simplemode",
-  "recharge_event",
-  "bingying_star_on",
-  "building_sync",
-  "princess_quest",
-  "dragonglass",
-  "flowers",
-  "general_official",
-  "civilization_fortress",
-  "leader_monster",
-  "wk_info_new",
-  "trade_type",
-  "45skill",
-  "scoutmark_time",
-  "invite_cost",
-  "lottery_cost",
-  "lottery_cost2",
-  "alliance_territory1",
-  "wb_info",
-  "wb_condition",
-  "wb_score",
-  "wb_timing",
-  "wb_fire",
-  "wb_switch",
-  "wa_matchreport",
-  "wa_info",
-  "wa_time",
-  "wap_battle",
-  "chat_switch",
-  "chat",
-  "chat_standalone",
-  "chat_bubble",
-  "chat_voice",
-  "nearby_like",
-  "pop_rate",
-  "activityconfig",
-  "dragonglass_control",
-  "wl_res_tile",
-  "talktips_time",
-  "trade_time",
-  "on_kpi",
-  "on_war",
-  "on_event",
-  "on_function",
-  "on_trumpet",
-  "on_other",
-  "smithy_history",
-  "world_despoil",
-  "wk_info",
-  "wonder",
-  "science-test",
-  "knight_title",
-  "activity_name",
-  "train",
-  "mudi_md5",
-  "alliance_war",
-  "superarmy",
-  "dragon_words",
-  "alliance_building_donate",
-  "alliance_connon",
-  "wk_info_new1",
-  "dragon",
-  "dragon_new",
-  "dragon_notice",
-  "dragon_tower",
-  "dragon_tower_config",
-  "speedup_overflow",
-  "alliance_trap",
-  "equipment_refine",
-  "equipment_combine",
-  "subcity_reward",
-  "hero_challenge",
-  "saga_tower",
-  "foreigen_sciences",
-  "kingdom_fight_miracle",
-  "cn_bind",
-  "magic_mirror",
-  "phone_bind",
-  "mail_bind",
-  "bind_reward_disable",
-  "kingdom_neutralServer",
-  "merge_server",
-  "bank_info",
-  "power_info",
-  "golden_opentime",
-  "wk_kingdom_aegis",
-  "17_wk",
-  "general_random_effect",
-  "fight_arena",
-  "new_resource_battle_base",
-  "p6_arms",
-  "week_info",
-  "p6_health",
-  "dailytasks_info",
-  "wb_subsection",
-  "golden_egg",
-  "civilization",
-  "alliance_boss",
-  "red_envelopes",
-  "overlord_random",
-] as const;
-
-export interface DataConfigContext {
-  now?: number;
-  version?: string;
-  profileLevel?: number;
-  testServer?: boolean;
-  worldCup?: boolean;
-  crossOpen?: boolean;
-  chatInterval?: number;
-  feedMaxCount?: number;
-}
-
-function requiredRecord(rule: Rule | undefined): Rule {
-  if (!rule) throw new GameError(errors.unsupported, "config_record");
-  return rule;
-}
-
-function requiredString(rule: Rule | undefined, key: string): string {
-  const value = requiredRecord(rule)[key];
-  if (typeof value !== "string") throw new GameError(errors.unsupported, "config_string");
-  return value;
-}
-
-function integer(value: string): number {
-  try {
-    return Number(javaDecimal(value, 32));
-  } catch {
-    throw new GameError(errors.unsupported, "config_integer");
-  }
-}
-
-function signedLong(value: string): bigint {
-  try {
-    return javaDecimal(value, 64);
-  } catch {
-    throw new GameError(errors.unsupported, "config_long");
-  }
-}
-
-function strings(rule: Rule | undefined, projection?: Record<string, string>): Fields {
-  const result: Fields = {};
-  if (rule)
-    for (const [target, source] of Object.entries(
-      projection ??
-        Object.fromEntries(
-          Object.keys(rule)
-            .filter((key) => key !== "id")
-            .map((key) => [key, key]),
-        ),
-    )) {
-      if (rule[source] !== undefined) result[target] = sfs.string(rule[source]);
-    }
-  return result;
-}
-
-function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fields {
-  const items = rules.configuration.dataConfig ?? rules.items;
-  if (!items.size) throw new GameError(errors.unsupported);
-  const result: Fields = {};
-  const version = context.version ?? MOBILE_CLIENT_VERSION;
-  const now = context.now ?? Date.now();
-  const available = (key: string) =>
-    ruleAvailable(rules.features.get(key), {
-      kingdomId: rules.kingdomId,
-      version,
-      now,
-      testServer: context.testServer,
-    });
-  const enabled = (selector: string | undefined) => switchRealmEnabled(selector, rules.kingdomId);
-  const object = (target: string, rule: Rule | undefined, projection?: Record<string, string>) => {
-    result[target] = sfs.object(strings(requiredRecord(rule), projection));
+export class DataConfigDto {
+  readonly dataConfig!: {
+    readonly "69008": { readonly [key: string]: string };
+    readonly player_max: { readonly [key: string]: string };
+    readonly hero_up: { readonly [key: string]: string };
+    readonly affairs: { readonly [key: string]: string };
+    readonly fight_position: { readonly [key: string]: string };
+    readonly fight_number: { readonly [key: string]: string };
+    readonly physical_bug: { readonly [key: string]: string };
+    readonly physical: { readonly [key: string]: string };
+    readonly mail: { readonly [key: string]: string };
+    readonly building_base: { readonly [key: string]: string };
+    readonly cd_time: { readonly [key: string]: string };
+    readonly cd_cost: { readonly [key: string]: string };
+    readonly cd_gold: { readonly [key: string]: string };
+    readonly vip2sviptime: { readonly [key: string]: string };
+    readonly world_distance: { readonly [key: string]: string };
+    readonly world_marchtime: { readonly [key: string]: string };
+    readonly world_detect: { readonly [key: string]: string };
+    readonly world_fire1: { readonly [key: string]: string };
+    readonly world_fire2: { readonly [key: string]: string };
+    readonly world_rally: { readonly [key: string]: string };
+    readonly world_alliancewar: { readonly [key: string]: string };
+    readonly worldmap_map: { readonly [key: string]: string };
+    readonly resource_cost: { readonly [key: string]: string };
+    readonly resource_num1: { readonly [key: string]: string };
+    readonly resource_num2: { readonly [key: string]: string };
+    readonly resource_num3: { readonly [key: string]: string };
+    readonly showstarskill: { readonly [key: string]: string };
+    readonly tavern_base: { readonly [key: string]: string };
+    readonly alliance_territory: { readonly [key: string]: string };
+    readonly hero_soulstone: { readonly [key: string]: string };
+    readonly function_on: { readonly [key: string]: string };
+    readonly function_on2: { readonly [key: string]: string };
+    readonly function_on3: { readonly [key: string]: string };
+    readonly function_on4: { readonly [key: string]: string };
+    readonly function_on5: { readonly [key: string]: string };
+    readonly function_on6: { readonly [key: string]: string };
+    readonly function_on7: { readonly [key: string]: string };
+    readonly function_on8: { readonly [key: string]: string };
+    readonly function_on9: { readonly [key: string]: string };
+    readonly shake: { readonly [key: string]: string };
+    readonly notice: { readonly [key: string]: string };
+    readonly equip: { readonly [key: string]: string };
+    readonly worldmap_pvenum: { readonly [key: string]: string };
+    readonly hero_number: { readonly [key: string]: string };
+    readonly hero_ability: { readonly [key: string]: string };
+    readonly ability_lv: { readonly [key: string]: string };
+    readonly ability_cost: { readonly [key: string]: string };
+    readonly hero_skillpoint: { readonly [key: string]: string };
+    readonly worldmap_time: { readonly [key: string]: string };
+    readonly march: { readonly [key: string]: string };
+    readonly alliance_cost: { readonly [key: string]: string };
+    readonly alliance_science: { readonly [key: string]: string };
+    readonly alliance_gift: { readonly [key: string]: string };
+    readonly goldmine_fb: { readonly [key: string]: string };
+    readonly resources_weight: { readonly [key: string]: string };
+    readonly online_reward: { readonly [key: string]: string };
+    readonly account: { readonly [key: string]: string };
+    readonly simplemode: { readonly [key: string]: string };
+    readonly recharge_event: { readonly [key: string]: string };
+    readonly bingying_star_on: { readonly [key: string]: string };
+    readonly building_sync: { readonly [key: string]: string };
+    readonly princess_quest: { readonly [key: string]: string };
+    readonly dragonglass: { readonly [key: string]: string };
+    readonly flowers: { readonly [key: string]: string };
+    readonly general_official: { readonly [key: string]: string };
+    readonly civilization_fortress: { readonly [key: string]: string };
+    readonly leader_monster: { readonly [key: string]: string };
+    readonly wk_info_new: { readonly [key: string]: string };
+    readonly trade_type: { readonly [key: string]: string };
+    readonly "45skill": { readonly [key: string]: string };
+    readonly scoutmark_time: { readonly [key: string]: string };
+    readonly invite_cost: { readonly [key: string]: string };
+    readonly lottery_cost: { readonly [key: string]: string };
+    readonly lottery_cost2: { readonly [key: string]: string };
+    readonly alliance_territory1: { readonly [key: string]: string };
+    readonly wb_info: { readonly [key: string]: string };
+    readonly wb_condition: { readonly [key: string]: string };
+    readonly wb_score: { readonly [key: string]: string };
+    readonly wb_timing: { readonly [key: string]: string };
+    readonly wb_fire: { readonly [key: string]: string };
+    readonly wb_switch: { readonly [key: string]: string };
+    readonly wa_matchreport: { readonly [key: string]: string };
+    readonly wa_info: { readonly [key: string]: string };
+    readonly wa_time: { readonly [key: string]: string };
+    readonly wap_battle: { readonly [key: string]: string };
+    readonly chat_switch: { readonly [key: string]: string };
+    readonly chat: { readonly [key: string]: string };
+    readonly chat_standalone: { readonly [key: string]: string };
+    readonly chat_bubble: { readonly [key: string]: string };
+    readonly chat_voice: { readonly [key: string]: string };
+    readonly nearby_like: { readonly [key: string]: string };
+    readonly pop_rate: { readonly [key: string]: string };
+    readonly activityconfig: { readonly [key: string]: string };
+    readonly dragonglass_control: { readonly [key: string]: string };
+    readonly wl_res_tile: { readonly [key: string]: string };
+    readonly talktips_time: { readonly [key: string]: string };
+    readonly trade_time: { readonly [key: string]: string };
+    readonly on_kpi: { readonly [key: string]: string };
+    readonly on_war: { readonly [key: string]: string };
+    readonly on_event: { readonly [key: string]: string };
+    readonly on_function: { readonly [key: string]: string };
+    readonly on_trumpet: { readonly [key: string]: string };
+    readonly on_other: { readonly [key: string]: string };
+    readonly smithy_history: { readonly [key: string]: string };
+    readonly world_despoil: { readonly [key: string]: string };
+    readonly wk_info: { readonly [key: string]: string };
+    readonly wonder: { readonly [key: string]: string };
+    readonly "science-test": { readonly [key: string]: string };
+    readonly knight_title: { readonly [key: string]: string };
+    readonly activity_name: { readonly [key: string]: string };
+    readonly train: { readonly [key: string]: string };
+    readonly mudi_md5: { readonly [key: string]: string };
+    readonly alliance_war: { readonly [key: string]: string };
+    readonly superarmy: { readonly [key: string]: string };
+    readonly dragon_words: { readonly [key: string]: string };
+    readonly alliance_building_donate: { readonly [key: string]: string };
+    readonly alliance_connon: { readonly [key: string]: string };
+    readonly wk_info_new1: { readonly [key: string]: string };
+    readonly dragon: { readonly [key: string]: string };
+    readonly dragon_new: { readonly [key: string]: string };
+    readonly dragon_notice: { readonly [key: string]: string };
+    readonly dragon_tower: { readonly [key: string]: string };
+    readonly dragon_tower_config: { readonly [key: string]: string };
+    readonly speedup_overflow: { readonly [key: string]: string };
+    readonly alliance_trap: { readonly [key: string]: string };
+    readonly equipment_refine: { readonly [key: string]: string };
+    readonly equipment_combine: { readonly [key: string]: string };
+    readonly subcity_reward: { readonly [key: string]: string };
+    readonly hero_challenge: { readonly [key: string]: string };
+    readonly saga_tower: { readonly [key: string]: string };
+    readonly foreigen_sciences: { readonly [key: string]: string };
+    readonly kingdom_fight_miracle: { readonly [key: string]: string };
+    readonly cn_bind: { readonly [key: string]: string };
+    readonly magic_mirror: { readonly [key: string]: string };
+    readonly phone_bind: { readonly [key: string]: string };
+    readonly mail_bind: { readonly [key: string]: string };
+    readonly bind_reward_disable: { readonly [key: string]: string };
+    readonly kingdom_neutralServer: { readonly [key: string]: string };
+    readonly merge_server: { readonly [key: string]: string };
+    readonly bank_info: { readonly [key: string]: string };
+    readonly power_info: { readonly [key: string]: string };
+    readonly golden_opentime: { readonly [key: string]: string };
+    readonly wk_kingdom_aegis: { readonly [key: string]: string };
+    readonly "17_wk": { readonly [key: string]: string };
+    readonly general_random_effect: { readonly [key: string]: string };
+    readonly fight_arena: { readonly [key: string]: string };
+    readonly new_resource_battle_base: { readonly [key: string]: string };
+    readonly p6_arms: { readonly [key: string]: string };
+    readonly week_info: { readonly [key: string]: string };
+    readonly p6_health: { readonly [key: string]: string };
+    readonly dailytasks_info: { readonly [key: string]: string };
+    readonly wb_subsection: { readonly [key: string]: string };
+    readonly golden_egg: { readonly [key: string]: string };
+    readonly civilization: { readonly [key: string]: string };
+    readonly alliance_boss: { readonly [key: string]: string };
+    readonly red_envelopes: { readonly [key: string]: string };
+    readonly overlord_random: { readonly [key: string]: string };
+    readonly hero: { readonly [key: string]: string };
+    readonly hero_yutao: { readonly [key: string]: string };
+    readonly w_thedoor: { readonly [key: string]: string };
+    readonly worldmap_pve: { readonly [key: string]: string };
+    readonly facebook_gift: { readonly [key: string]: string };
+    readonly wa_army: { readonly [key: string]: string };
+    readonly wa_switch: { readonly [key: string]: string };
+    readonly graveyard: { readonly [key: string]: string };
+    readonly activityconfig2: { readonly [key: string]: string };
+    readonly icon: { readonly [key: string]: string };
+    readonly general_buy: { readonly [key: string]: string };
+    readonly kingdomskill: { readonly [key: string]: string };
+    readonly followFB?: { readonly [key: string]: string };
+    readonly lordtips_time?: { readonly [key: string]: string };
+    readonly ranking?: { readonly [key: string]: string };
+    readonly freeSpdT: number;
+    readonly resources_basics: number;
+    readonly cityDefInterval: number;
+    readonly monster_count: number;
+    readonly monster_decr: number;
+    readonly beginner_move: number;
+    readonly resKey: number;
+    readonly shield_base_2: number;
+    readonly activityOn: number;
+    readonly territory_switch: number;
+    readonly territory_resource_switch: number;
+    readonly ckf_world_row: number;
+    readonly neutral_row: number;
+    readonly neutral_CD_time: number;
+    readonly alliance_quest_tab: number;
+    readonly alliance_quest_push: number;
+    readonly on_trumpet_k2: number;
+    readonly dragon_world_row: number;
+    readonly alliance_quest_init_level?: number;
+    readonly quickEndBattle: string;
+    readonly chatShieldMax: string;
+    readonly monster_interval: string;
+    readonly monster_power_limit: string;
+    readonly boss_decr: string;
+    readonly overlord_open_type: string;
+    readonly boss_max_member: string;
+    readonly alliance_quest: string;
+    readonly alliance_quest_chat: string;
+    readonly alliance_mission: string;
+    readonly loading_show_type?: string;
+    readonly scoutmark_on?: string;
+    readonly serviceTerms_on?: string;
+    readonly cross_open: boolean;
+    readonly dbf_maxScoreView: bigint;
+    readonly serverConfig: { readonly chat_interval: number; readonly feed_maxCount: number };
+    readonly worldboss: { readonly [key: string]: string };
+    readonly worldboss_10_19: { readonly [key: string]: string };
+    readonly worldboss_10_19_other: { readonly [key: string]: string };
+    readonly worldboss_20_29: { readonly [key: string]: string };
+    readonly worldboss_20_29_other: { readonly [key: string]: string };
+    readonly worldboss_30_40: { readonly [key: string]: string };
+    readonly worldboss_30_40_other: { readonly [key: string]: string };
+    readonly worldboss_elite: { readonly [key: string]: string };
+    readonly worldboss_elite_10_19: { readonly [key: string]: string };
+    readonly worldboss_elite_10_19_other: { readonly [key: string]: string };
+    readonly worldboss_elite_20_29: { readonly [key: string]: string };
+    readonly worldboss_elite_20_29_other: { readonly [key: string]: string };
+    readonly worldboss_elite_30_40: { readonly [key: string]: string };
+    readonly worldboss_elite_30_40_other: { readonly [key: string]: string };
+    readonly worldboss_special: { readonly [key: string]: string };
+    readonly worldboss_special_10_19: { readonly [key: string]: string };
+    readonly worldboss_special_10_19_other: { readonly [key: string]: string };
+    readonly worldboss_special_20_29: { readonly [key: string]: string };
+    readonly worldboss_special_20_29_other: { readonly [key: string]: string };
+    readonly worldboss_special_30_40: { readonly [key: string]: string };
+    readonly worldboss_special_30_40_other: { readonly [key: string]: string };
+    readonly worldboss_npc: { readonly [key: string]: string };
   };
-  for (const key of objectKeys) object(key, items.get(key));
-  for (const [target, source] of [
-    ["hero", "hero_soul"],
-    ["hero_yutao", "hero"],
-  ])
-    object(target!, items.get(source!));
-  for (const [target, source] of [
-    ["followFB", "FB_follow"],
-    ["lordtips_time", "lordtips_time"],
-  ] as const) {
-    const rule = items.get(source);
-    if (rule && Object.keys(rule).length) object(target, rule);
-  }
-  object("w_thedoor", rules.features.get("w_thedoor") ?? {});
-  object("69008", rules.configuration.payControl?.get("69008") ?? {});
-  const pve = requiredRecord(items.get("worldmap_pve"));
-  result.worldmap_pve = sfs.object(
-    Object.fromEntries(
-      [pve.k5, pve.k6]
-        .filter((value) => value !== undefined)
-        .map((value, index) => [`k${index + 1}`, sfs.string(value)]),
-    ),
-  );
-  object("facebook_gift", items.get("facebook_gift"), { k7: "k7" });
-  const ranking = requiredRecord(items.get("ranking"));
-  if (ranking.k3 !== undefined) object("ranking", ranking, { k3: "k3" });
-
-  for (const [target, id, key] of [
-    ["freeSpdT", "resources_basics", "k8"],
-    ["resources_basics", "resources_basics", "k7"],
-    ["cityDefInterval", "world_fire1", "k2"],
-    ["monster_count", "monster", "k3"],
-    ["monster_decr", "monster", "k6"],
-    ["beginner_move", "beginner_move", "k1"],
-    ["resKey", "worldmap_city", "k4"],
-    ["shield_base_2", "shield_base", "k2"],
-    ["activityOn", "chrisms", "k12"],
-    ["territory_switch", "function_on2", "k8"],
-    ["territory_resource_switch", "function_on3", "k2"],
-    ["ckf_world_row", "wb_info", "k8"],
-    ["neutral_row", "kingdom_neutralServer", "k4"],
-    ["neutral_CD_time", "kingdom_neutralServer_time", "k7"],
-  ] as const) {
-    result[target] = sfs.int(integer(requiredString(items.get(id), key)));
-  }
-  for (const [target, id, key] of [
-    ["quickEndBattle", "resources_basics", "k5"],
-    ["chatShieldMax", "resources_basics", "k6"],
-    ["monster_interval", "monster", "k4"],
-    ["monster_power_limit", "monster", "k8"],
-    ["boss_decr", "monster", "k10"],
-  ] as const) {
-    result[target] = sfs.string(requiredString(items.get(id), key));
-  }
-  result.overlord_open_type = sfs.string(requiredString(rules.items.get("overlord"), "k1"));
-  const loading = items.get("loading_show_type");
-  if (loading && Object.keys(loading).length)
-    result.loading_show_type = sfs.string(requiredString(loading, "k1"));
-  const questLevel = items.get("alliance_quest")?.k10;
-  if (questLevel !== undefined) result.alliance_quest_init_level = sfs.int(integer(questLevel));
-  if (context.profileLevel !== undefined && available("stamina_limit")) {
-    const stamina = rules.role(context.profileLevel).stamina;
-    if (stamina === undefined) throw new GameError(errors.unsupported, "stamina_rule");
-    result.monster_count = sfs.int(integer(stamina));
-  }
-  const bossMembers = requiredString(items.get("monster"), "k11").split(";").filter(Boolean)[1];
-  if (bossMembers === undefined) throw new GameError(errors.unsupported, "boss_members_rule");
-  result.boss_max_member = sfs.string(bossMembers);
-  result.cross_open = sfs.bool(!!context.crossOpen && versionAtLeast(version, "1.0.59"));
-  const scout = items.get("scoutmark_on");
-  if (scout && enabled(scout.k1)) result.scoutmark_on = sfs.string(requiredString(scout, "k2"));
-  const terms = requiredRecord(items.get("serviceterms_on"));
-  if (requiredString(terms, "k1") === "1" && enabled(terms.k3))
-    result.serviceTerms_on = sfs.string(requiredString(terms, "k2"));
-
-  const questSwitch = requiredRecord(items.get("function_on8"));
-  const quests = enabled(questSwitch.k2);
-  const questChat = items.get("alliance_quest_chat");
-  result.alliance_quest = sfs.string(
-    quests ? requiredString(items.get("alliance_quest"), "k12") : "0",
-  );
-  result.alliance_quest_chat = sfs.string(
-    quests && requiredString(questChat, "k1") === "1" ? requiredString(questChat, "k2") : "0",
-  );
-  result.alliance_quest_tab = sfs.int(
-    quests && questChat?.k4 !== undefined && enabled(questChat.k4) ? 1 : 0,
-  );
-  result.alliance_quest_push = sfs.int(
-    quests && questChat?.k5 !== undefined && enabled(questChat.k5) ? 1 : 0,
-  );
-  const trumpet = requiredRecord(items.get("on_trumpet"));
-  result.on_trumpet_k2 = sfs.int(enabled(trumpet.k2) ? 1 : 0);
-  result.alliance_mission = sfs.string(available("alliance_mission") ? "on" : "off");
-
-  const prefix = context.worldCup ? "wag" : "wa";
-  object("wa_army", items.get(`${prefix}_army`));
-  result.dbf_maxScoreView = sfs.long(
-    signedLong(requiredString(items.get(`${prefix}_score`), "k10")),
-  );
-  result.dragon_world_row = sfs.int(integer(requiredString(items.get(`${prefix}_scene`), "k1")));
-  for (const [key, switchKey] of [
-    ["wa_switch", "k1"],
-    ["graveyard", "k3"],
-  ] as const) {
-    const rule = requiredRecord(items.get(key));
-    const value = strings(rule);
-    if (key === "graveyard" || rule[switchKey] !== undefined) {
-      const open =
-        key === "wa_switch"
-          ? worldActivityRealmEnabled(rule[switchKey], rules.kingdomId)
-          : enabled(rule[switchKey]);
-      value[switchKey] = sfs.string(open ? "1" : "0");
-    }
-    result[key] = sfs.object(value);
-  }
-  const activityFields = strings(requiredRecord(items.get("activityconfig2")));
-  if (version === "1.1.10") activityFields.k12 = sfs.string("0");
-  result.activityconfig2 = sfs.object(activityFields);
-  const icon = requiredRecord(items.get("icon"));
-  const iconFields = strings(icon);
-  for (const key of ["k4", "k5"]) {
-    if (icon[key] === undefined) continue;
-    const date = javaCalendarDate(icon[key], 3) ?? 0n;
-    iconFields[key] = sfs.string(String(date));
-  }
-  result.icon = sfs.object(iconFields);
-  const boss = (key: string) => {
-    const rule = requiredRecord(items.get(key));
-    result[key] = sfs.object({
-      physicalcost: sfs.string(requiredString(rule, "k10")),
-      citylevel: sfs.string(requiredString(rule, "k1")),
-    });
-  };
-  for (const family of ["worldboss", "worldboss_elite", "worldboss_special"]) {
-    boss(family);
-    for (const range of ["10_19", "20_29", "30_40"]) {
-      const key = `${family}_${range}`;
-      boss(key);
-      object(`${key}_other`, items.get(`${key}_other`));
-    }
-  }
-  boss("worldboss_npc");
-  const generalSales = rules.configuration.generalSaleRecords ?? [
-    ...(rules.configuration.generalSales?.values() ?? []),
-  ];
-  result.general_buy = sfs.object(
-    Object.fromEntries(
-      generalSales.map((rule) => {
-        if (typeof rule.id !== "string" || rule.id.length > 255 || typeof rule.limit !== "string")
-          throw new GameError(errors.unsupported, "general_sale_rule");
-        return [rule.id, sfs.string(rule.limit)];
-      }),
-    ),
-  );
-  const skillFields = strings(requiredRecord(items.get("kingdomskill")));
-  const tabs = new Map<number, KingdomSkill[]>();
-  const records = rules.configuration.kingdomSkillRecords ?? [
-    ...(rules.configuration.kingdomSkills?.values() ?? []),
-  ];
-  for (const skill of restoredKingdomSkills(records)) {
-    const tab = skill.showTab;
-    const list = tabs.get(tab) ?? [];
-    list.push(skill);
-    tabs.set(tab, list);
-  }
-  for (const tab of javaIntHashMapOrder(tabs.keys())) {
-    const skills = tabs.get(tab)!;
-    skillFields[`k${tab}`] = sfs.string(
-      javaListSort(skills, (a, b) => (a.id === b.id ? 0 : (a.tabIndex - b.tabIndex) | 0))
-        .map((skill, index) => {
-          if (skill.tabIndex === -1) return "";
-          const selector = context.testServer ? skill.test : skill.online;
-          const enabled = selector !== undefined && featureRealmEnabled(selector, rules.kingdomId);
-          return `${skill.id}_${enabled ? "1" : "0"}${index === skills.length - 1 ? "" : ";"}`;
-        })
-        .join(""),
-    );
-  }
-  result.kingdomskill = sfs.object(skillFields);
-  result.serverConfig = sfs.object({
-    chat_interval: sfs.int(integer(String(context.chatInterval ?? 1))),
-    feed_maxCount: sfs.int(integer(String(context.feedMaxCount ?? 3))),
-  });
-  return { dataConfig: sfs.object(result) };
-}
-
-const configStrings = wire.object(wireRecord(z.string(), wire.string));
-
-export class DataConfigDto extends createZodDto(
-  z.strictObject({
-    dataConfig: wire.object(
-      z.strictObject({
-        ...Object.fromEntries(objectKeys.map((key) => [key, configStrings])),
-        hero: configStrings,
-        hero_yutao: configStrings,
-        w_thedoor: configStrings,
-        "69008": configStrings,
-        worldmap_pve: configStrings,
-        facebook_gift: configStrings,
-        wa_army: configStrings,
-        wa_switch: configStrings,
-        graveyard: configStrings,
-        activityconfig2: configStrings,
-        icon: configStrings,
-        general_buy: configStrings,
-        kingdomskill: configStrings,
-        followFB: configStrings.optional(),
-        lordtips_time: configStrings.optional(),
-        ranking: configStrings.optional(),
-        freeSpdT: wire.int,
-        resources_basics: wire.int,
-        cityDefInterval: wire.int,
-        monster_count: wire.int,
-        monster_decr: wire.int,
-        beginner_move: wire.int,
-        resKey: wire.int,
-        shield_base_2: wire.int,
-        activityOn: wire.int,
-        territory_switch: wire.int,
-        territory_resource_switch: wire.int,
-        ckf_world_row: wire.int,
-        neutral_row: wire.int,
-        neutral_CD_time: wire.int,
-        alliance_quest_tab: wire.int,
-        alliance_quest_push: wire.int,
-        on_trumpet_k2: wire.int,
-        dragon_world_row: wire.int,
-        alliance_quest_init_level: wire.int.optional(),
-        quickEndBattle: wire.string,
-        chatShieldMax: wire.string,
-        monster_interval: wire.string,
-        monster_power_limit: wire.string,
-        boss_decr: wire.string,
-        overlord_open_type: wire.string,
-        boss_max_member: wire.string,
-        alliance_quest: wire.string,
-        alliance_quest_chat: wire.string,
-        alliance_mission: wire.string,
-        loading_show_type: wire.string.optional(),
-        scoutmark_on: wire.string.optional(),
-        serviceTerms_on: wire.string.optional(),
-        cross_open: wire.bool,
-        dbf_maxScoreView: wire.long,
-        serverConfig: wire.object(
-          z.strictObject({ chat_interval: wire.int, feed_maxCount: wire.int }),
-        ),
-        worldboss: configStrings,
-        worldboss_10_19: configStrings,
-        worldboss_10_19_other: configStrings,
-        worldboss_20_29: configStrings,
-        worldboss_20_29_other: configStrings,
-        worldboss_30_40: configStrings,
-        worldboss_30_40_other: configStrings,
-        worldboss_elite: configStrings,
-        worldboss_elite_10_19: configStrings,
-        worldboss_elite_10_19_other: configStrings,
-        worldboss_elite_20_29: configStrings,
-        worldboss_elite_20_29_other: configStrings,
-        worldboss_elite_30_40: configStrings,
-        worldboss_elite_30_40_other: configStrings,
-        worldboss_special: configStrings,
-        worldboss_special_10_19: configStrings,
-        worldboss_special_10_19_other: configStrings,
-        worldboss_special_20_29: configStrings,
-        worldboss_special_20_29_other: configStrings,
-        worldboss_special_30_40: configStrings,
-        worldboss_special_30_40_other: configStrings,
-        worldboss_npc: configStrings,
-      }),
-    ),
-  }),
-) {}
-
-export function dataConfig(...args: Parameters<typeof serializeDataConfig>): Fields {
-  return new DataConfigDto(serializeDataConfig(...args));
 }

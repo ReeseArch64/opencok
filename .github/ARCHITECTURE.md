@@ -867,7 +867,7 @@ incomplete. The realm runbook records configuration, schema and retry boundaries
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | Domains                     | `account`, `player`, `building`, `city`, `hero`, `troops`, `combat`, `alliance`, `kvk`, `campaigns`, `npc`, `rules`, `ledger` | Pure rules and use cases; they must not import sockets, controllers, an ORM, or a broker. |
 | Contracts                   | `contracts`, `api-contracts`, `dtos`, `messages`, `events`, `enums`, `validations`                                            | Versioned schemas and envelopes, with compatibility tests.                                |
-| Entry and application       | `api`, `api-client`, `command`, `connection`, `controllers`, `middlewares`, `guard`, `identity`, `policy`                     | Validate and authorize; call the use cases. They do not duplicate economic rules.         |
+| Entry and application       | `api`, `api-client`, `command`, `connection`, `controllers`, `mappings`, `middlewares`, `guard`, `identity`, `policy`         | Validate and authorize; call the use cases. They do not duplicate economic rules.         |
 | Persistence and integration | `repositories`, `drizzle`, `mongoose`, `storage`, `queues`, `webhooks`, `notifications`, `email`                              | Implement use case interfaces. Writes respect domain ownership.                           |
 | Setup and support           | `config`, `env`, `errors`, `resources`, `i18n`, `constants`, `scripts`, `generators`                                          | Small and explicit dependencies, with environment and resource validation.                |
 
@@ -904,7 +904,9 @@ import applications. Their source exports and direct workspace dependencies are 
 | `controllers`         | Read-only city/bootstrap, public player summary and world command orchestration against persistence ports.              |
 | `identity`            | Mobile signature, device, account, ban and realm authentication.                                                        |
 | `messages`, `enums`   | SFS codec, frames and wire type tags.                                                                                   |
-| `dtos`                | City, inventory, army, public player summaries, feature and clock serialization for the mobile client.                  |
+| `dtos`                | Plain readonly data classes for mobile responses, without validation or serialization logic.                            |
+| `validations`         | Independent Zod schemas for DTO data, SFS transport values and image inputs.                                            |
+| `mappings`            | Mobile snapshot projections and SFS serialization, with explicit boundary validation.                                   |
 | `contracts`           | Account readers, game snapshots, row values and realm configuration types.                                              |
 | `rules`               | In-memory gameplay rule evaluation, without files, transport or ORM imports.                                            |
 | `resources`           | Validated XML loading and construction of the rule catalog.                                                             |
@@ -912,14 +914,16 @@ import applications. Their source exports and direct workspace dependencies are 
 | `storage`             | Redis leases/readiness, ZooKeeper registration, dependency timeouts and validated server-directory files.               |
 | `constants`, `errors` | Named connection limits, session TTL, mobile compatibility values and error types/codes.                                |
 
-`dtos` exposes concrete classes with Zod field schemas in the NestJS class-based
-DTO convention, without adding a NestJS runtime dependency. Existing serializer
-functions project snapshots and construct validated class instances while retaining
-their public `Fields`/`Value` signatures. Strict schemas preserve public field
-allowlists and SFS widths; dynamic maps validate each entry. Construction preserves
-source field order recursively for byte compatibility. The
-[DTO package guide](../packages/dtos/README.md) records validation boundaries,
-mutable response composition and compatibility checks.
+`dtos` contains standalone data classes with explicit readonly properties in the
+NestJS DTO style, without decorators, inheritance, constructors or schemas.
+`validations` owns independent Zod schemas for plain DTO data and imports DTO
+classes only as types. Schema outputs are checked against the class declarations.
+`mappings` owns mobile response projection and SFS serialization; controllers and
+compatibility tests consume its public subpaths. It applies transport and DTO
+validation before returning the original `Fields`/`Value`, retaining type tags,
+numeric widths, field order and mutable response composition. The
+[DTO](../packages/dtos/README.md), [validation](../packages/validations/README.md)
+and [mapping](../packages/mappings/README.md) guides describe these boundaries.
 
 Repository data operations follow the [repository method conventions](../packages/repositories/README.md):
 entity stores use CRUD verbs, while aggregate reads name their resource and lookup key.

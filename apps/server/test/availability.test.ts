@@ -6,7 +6,7 @@ import {
   versionAtLeast,
 } from "@opencok/rules/availability";
 import { Rules } from "@opencok/rules/game";
-import { building } from "@opencok/dtos/city";
+import { building } from "@opencok/mappings/city";
 
 const now = Date.UTC(2026, 9, 23, 12);
 const context = { kingdomId: 2, version: "12.06.0", now };

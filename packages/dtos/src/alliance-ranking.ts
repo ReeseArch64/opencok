@@ -1,106 +1,25 @@
-import { z } from "zod";
-import { createZodDto, wire } from "./dto.ts";
-import { AllianceVideoDto } from "./profile-alliance.ts";
-import type {
-  AllianceRankingKind,
-  AllianceRankingResult,
-} from "@opencok/contracts/alliance-ranking";
-import { text } from "@opencok/contracts/rows";
-import { sfs, type Fields, type Value } from "@opencok/messages/sfs";
-import { GameError } from "@opencok/errors/game";
-import { errors } from "@opencok/constants/game";
-import { allianceVideo } from "./profile-alliance.ts";
-
-function invalid(): never {
-  throw new GameError(errors.unsupported, "ranking");
-}
-function modelText(value: string): string {
-  let start = 0;
-  let end = value.length;
-  while (start < end && value.charCodeAt(start) <= 32) start++;
-  while (end > start && value.charCodeAt(end - 1) <= 32) end--;
-  return value.slice(start, end);
-}
-function integer(value: unknown): bigint {
-  if (typeof value === "number" && !Number.isSafeInteger(value)) return invalid();
-  if (!/^[+-]?\d+$/.test(String(value))) return invalid();
-  return BigInt(String(value));
-}
-function int(value: unknown): Value {
-  const number = integer(value);
-  if (BigInt.asIntN(32, number) !== number) return invalid();
-  return sfs.int(Number(number));
-}
-function count(value: unknown): Value {
-  const number = integer(value);
-  if (BigInt.asIntN(64, number) !== number) return invalid();
-  return BigInt.asIntN(32, number) === number ? sfs.int(Number(number)) : sfs.long(number);
-}
-function aggregate(value: unknown): Value {
-  const number = Number(integer(value));
-  if (!Number.isFinite(number)) return invalid();
-  return Math.abs(number) < 10000000 ? sfs.int(number) : sfs.double(number);
-}
-
-function serializeAllianceRanking(
-  kind: AllianceRankingKind,
-  ranking: AllianceRankingResult,
-): Fields {
-  const fields: Fields = {
-    allianceRanking: sfs.array(
-      ranking.rows.map(({ alliance, maxMember, video }) => {
-        const row: Fields = {
-          uid: sfs.string(text(alliance, "uid")),
-          alliancename: sfs.string(modelText(text(alliance, "alliancename"))),
-          abbr: sfs.string(modelText(text(alliance, "abbr"))),
-          curMember: int(alliance.curMember ?? 0),
-          maxMember: int(maxMember),
-          nums: count(alliance.nums),
-        };
-        if (alliance.leader !== null && alliance.leader !== undefined)
-          row.leader = sfs.string(text(alliance, "leader"));
-        if (text(alliance, "icon").trim()) row.icon = sfs.string(modelText(text(alliance, "icon")));
-        const metric = kind === "power" ? "fightpower" : "armyKill";
-        if (alliance[metric] !== null && alliance[metric] !== undefined)
-          row[metric] = aggregate(alliance[metric]);
-        if (video) {
-          if (video.allianceId !== alliance.uid) return invalid();
-          row.allianceVideo = sfs.object(allianceVideo(video));
-        }
-        return sfs.object(row);
-      }),
-    ),
-  };
-  if (ranking.selfRanking !== 0) fields.selfRanking = int(ranking.selfRanking);
-  return fields;
-}
-
-export class AllianceRankingDto extends createZodDto(
-  z.strictObject({
-    selfRanking: wire.int.optional(),
-    allianceRanking: wire.array(
-      wire.object(
-        z
-          .strictObject({
-            uid: wire.string,
-            alliancename: wire.string,
-            abbr: wire.string,
-            leader: wire.string.optional(),
-            icon: wire.string.optional(),
-            curMember: wire.int,
-            maxMember: wire.int,
-          })
-          .extend({
-            nums: z.union([wire.int, wire.long]),
-            fightpower: z.union([wire.int, wire.double]).optional(),
-            armyKill: z.union([wire.int, wire.double]).optional(),
-            allianceVideo: wire.object(AllianceVideoDto.schema).optional(),
-          }),
-      ),
-    ),
-  }),
-) {}
-
-export function allianceRanking(...args: Parameters<typeof serializeAllianceRanking>): Fields {
-  return new AllianceRankingDto(serializeAllianceRanking(...args));
+export class AllianceRankingDto {
+  readonly selfRanking?: number;
+  readonly allianceRanking!: {
+    readonly uid: string;
+    readonly alliancename: string;
+    readonly abbr: string;
+    readonly leader?: string;
+    readonly icon?: string;
+    readonly curMember: number;
+    readonly maxMember: number;
+    readonly nums: number | bigint;
+    readonly fightpower?: number;
+    readonly armyKill?: number;
+    readonly allianceVideo?: {
+      readonly allianceid: string;
+      readonly videoURL: string;
+      readonly thumbnailURL: string;
+      readonly videoH: number;
+      readonly videoW: number;
+      readonly videoSize: number;
+      readonly videoLength: number;
+      readonly checksign: number;
+    };
+  }[];
 }

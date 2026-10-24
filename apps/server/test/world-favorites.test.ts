@@ -12,7 +12,7 @@ import { Game } from "@opencok/controllers/game";
 import type { Row } from "@opencok/contracts/rows";
 import type { GameStore } from "@opencok/contracts/game";
 import { sfs, fields, encode, decode, Type, type Fields } from "@opencok/messages/sfs";
-import { worldFavorites } from "@opencok/dtos/world-favorites";
+import { worldFavorites } from "@opencok/mappings/world-favorites";
 import oracle from "./fixtures/world-favorite-names.json";
 
 const now = 1792756800123;

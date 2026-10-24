@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { playerRankingQuery, selectPlayerRanking } from "@opencok/rules/ranking";
-import { playerRanking } from "@opencok/dtos/ranking";
+import { playerRanking } from "@opencok/mappings/ranking";
 import { Rules } from "@opencok/rules/game";
 import type { PlayerRankingSnapshot, PlayerRankingKind } from "@opencok/contracts/ranking";
 import type { Row } from "@opencok/contracts/rows";

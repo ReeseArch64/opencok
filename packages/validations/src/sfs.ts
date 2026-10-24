@@ -1,49 +1,5 @@
 import { z } from "zod";
-import { Type, type Value, type Fields } from "@opencok/messages/sfs";
-
-function preserveOrder(source: unknown, parsed: unknown): unknown {
-  if (Array.isArray(source) && Array.isArray(parsed))
-    return parsed.map((value, index) => preserveOrder(source[index], value));
-  if (
-    source === null ||
-    parsed === null ||
-    typeof source !== "object" ||
-    typeof parsed !== "object" ||
-    Buffer.isBuffer(parsed)
-  )
-    return parsed;
-  const original = source as Record<string, unknown>;
-  const validated = parsed as Record<string, unknown>;
-  const keys = new Set([...Object.keys(original), ...Object.keys(validated)]);
-  return Object.fromEntries(
-    [...keys]
-      .filter((key) => Object.hasOwn(validated, key))
-      .map((key) => [key, preserveOrder(original[key], validated[key])]),
-  );
-}
-
-export function createZodDto<S extends z.ZodType<object>>(schema: S) {
-  class Dto {
-    static readonly schema = schema;
-
-    constructor(data: unknown) {
-      const parsed = preserveOrder(data, schema.parse(data)) as z.output<S>;
-      for (const [key, value] of Object.entries(parsed))
-        Object.defineProperty(this, key, {
-          value,
-          enumerable: true,
-          writable: true,
-          configurable: true,
-        });
-    }
-  }
-  return Dto as {
-    readonly schema: S;
-    new (
-      data: unknown,
-    ): Pick<z.output<S>, keyof z.output<S>> & (z.output<S> extends Value ? object : Fields);
-  };
-}
+import { Type, type Value } from "@opencok/messages/sfs";
 
 function tagged<T extends Type, S extends z.ZodType>(type: T, value: S) {
   return z.strictObject({ type: z.literal(type), value });

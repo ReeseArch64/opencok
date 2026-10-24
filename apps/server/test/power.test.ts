@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { PowerContext, PowerSnapshot } from "@opencok/contracts/power";
 import { calculatePlayerPower } from "@opencok/rules/power";
 import { Rules, type PowerCatalogs, type Rule } from "@opencok/rules/game";
-import { playerStatistics, powerInfo } from "@opencok/dtos/power";
+import { playerStatistics, powerInfo } from "@opencok/mappings/power";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 
 const now = 1792756800000;

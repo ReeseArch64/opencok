@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { mailStatusQuery, calculateMailStatus } from "@opencok/rules/mail";
-import { mailStatus } from "@opencok/dtos/mail";
+import { mailStatus } from "@opencok/mappings/mail";
 import type { MailStatusCount } from "@opencok/contracts/mail";
 import { decode, encode, sfs } from "@opencok/messages/sfs";
 

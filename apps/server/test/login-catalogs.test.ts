@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { featureConfig, loginConfiguration, settingConfig } from "@opencok/dtos/bootstrap";
+import { featureConfig, loginConfiguration, settingConfig } from "@opencok/mappings/bootstrap";
 import { decode, encode, fields, sfs, type Fields, type Value } from "@opencok/messages/sfs";
 import { loadRules } from "@opencok/resources/rules";
 import { Rules, type Rule } from "@opencok/rules/game";
