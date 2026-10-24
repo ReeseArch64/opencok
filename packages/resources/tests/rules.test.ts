@@ -7,6 +7,47 @@ import { loadRules, parseRules } from "../src/rules.ts";
 const records =
   '<database><ItemSpec id="100100" level="0"/><ItemSpec id="100101" level="1"/></database>';
 
+test("profile catalogs count every achievement record and keep military/server lookups optional", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-profile-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const missing = (await loadRules(directory)).profile;
+    expect(missing.achievementCount).toBe(0);
+    expect(missing.militaryRanks?.size).toBe(0);
+    expect(missing.servers?.size).toBe(0);
+    await writeFile(
+      join(directory, "achievement.xml"),
+      '<database><ItemSpec id="1"/><Group id="a"><ItemSpec id="1"/><Group id="b"><ItemSpec id="2"/></Group></Group></database>',
+    );
+    await writeFile(
+      join(directory, "wr_rank.xml"),
+      '<database><ItemSpec id="501" level="8"/></database>',
+    );
+    await writeFile(
+      join(directory, "servers.xml"),
+      '<database><ItemSpec id="2" name="Synthetic Kingdom"/></database>',
+    );
+    const profile = (await loadRules(directory)).profile;
+    expect(profile.achievementCount).toBe(3);
+    expect(profile.militaryRanks?.get("501")?.level).toBe("8");
+    expect(profile.servers?.get("2")?.name).toBe("Synthetic Kingdom");
+    await writeFile(join(directory, "achievement.xml"), "<database/>");
+    expect((await loadRules(directory)).profile.achievementCount).toBe(0);
+    for (const invalid of [
+      "<wrong/>",
+      "<database>",
+      "<!DOCTYPE database><database/>",
+      '<database><ItemSpec id="1"><value><nested/></value></ItemSpec></database>',
+    ]) {
+      await writeFile(join(directory, "achievement.xml"), invalid);
+      await expect(loadRules(directory)).rejects.toThrow();
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("resource loading preserves optional files, duplicate policy and realm-specific rules", async () => {
   const directory = await mkdtemp(join(tmpdir(), "opencok-rules-"));
   try {
