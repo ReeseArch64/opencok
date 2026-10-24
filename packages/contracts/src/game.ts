@@ -4,6 +4,7 @@ import type { WorldFavoriteStore } from "./world-favorites.ts";
 import type { WorldSearchStore } from "./world-search.ts";
 import type { PlayerSearchStore } from "./player-search.ts";
 import type { AvatarFinishService } from "./files.ts";
+import type { AvatarVersionService } from "./avatar-version.ts";
 import type { AvatarGrantService } from "./files.ts";
 import type { ChatSessionIssuer } from "./chat.ts";
 import type {
@@ -178,6 +179,7 @@ export interface GameServices {
   worldFavorites?: WorldFavoriteStore;
   avatar?: AvatarGrantService;
   avatarFinish?: AvatarFinishService;
+  avatarVersion?: AvatarVersionService;
   chatSession?: ChatSessionIssuer;
   expeditionRanking?(limit: number): Promise<readonly ExpeditionRankingEntry[] | undefined>;
   expeditionStage?(kingdomId: number): Promise<number | undefined>;

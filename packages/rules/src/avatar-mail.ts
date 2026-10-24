@@ -54,8 +54,23 @@ export function avatarSystemMail(
     return invalid();
   }
   const template = snapshot?.mail;
+  if (snapshot?.version !== 1) return invalid();
+  return avatarMailFromTemplate(entry.ownerUid, entry.committedAt, template, stem, resolveReward);
+}
+
+export function avatarMailFromTemplate(
+  owner: string,
+  committedAt: bigint,
+  template: unknown,
+  stem: string,
+  resolveReward?: (rewardId: string, owner: string) => string | null,
+): AvatarSystemMail {
   if (
-    snapshot?.version !== 1 ||
+    !/^[0-9]{1,20}$/.test(owner) ||
+    typeof committedAt !== "bigint" ||
+    committedAt < 0n ||
+    committedAt > BigInt(Number.MAX_SAFE_INTEGER) ||
+    !/^[a-f0-9]{32}$/.test(stem) ||
     !template ||
     typeof template !== "object" ||
     Array.isArray(template) ||
@@ -73,29 +88,30 @@ export function avatarSystemMail(
     )
   )
     return invalid();
-  const type = mailBlank(template.type) || template.type === "0" ? 15 : 2;
+  const fields = template as Record<string, string>;
+  const type = mailBlank(fields.type) || fields.type === "0" ? 15 : 2;
   const category =
-    !mailBlank(template.category) && template.category.length === 2 ? template.category : "00";
-  const title = javaMailTrim(template.title ?? "");
-  const fromName = mailBlank(template.sender) ? "" : javaMailTrim(template.sender);
+    !mailBlank(fields.category) && fields.category!.length === 2 ? fields.category! : "00";
+  const title = javaMailTrim(fields.title ?? "");
+  const fromName = mailBlank(fields.sender) ? "" : javaMailTrim(fields.sender!);
   if (title.length > 255 || fromName.length > 100) return invalid();
-  let reward = template.reward as string | undefined | null;
+  let reward = fields.reward as string | undefined | null;
   if (!mailBlank(reward) && !reward!.includes(",")) {
     if (!resolveReward) return invalid();
-    reward = resolveReward(reward!, entry.ownerUid);
+    reward = resolveReward(reward!, owner);
     if (reward !== null && typeof reward !== "string") return invalid();
   }
   const rewardBytes = javaMailBytes(reward ?? undefined);
   const rewardId = rewardBytes
     ? new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(rewardBytes)
     : null;
-  const contents = javaMailBytes(template.message);
+  const contents = javaMailBytes(fields.message);
   if (!contents) return invalid();
-  const extra = contents.length > 40000 || template.message === "MAILTEST" ? contents : null;
-  const reply = template.share === undefined ? 0 : Number(javaDecimal(template.share, 32)) << 1;
+  const extra = contents.length > 40000 || fields.message === "MAILTEST" ? contents : null;
+  const reply = fields.share === undefined ? 0 : Number(javaDecimal(fields.share, 32)) << 1;
   return {
     uid: javaMailTrim(stem + category),
-    owner: entry.ownerUid,
+    owner,
     fromName,
     title,
     type,
@@ -104,6 +120,6 @@ export function avatarSystemMail(
     rewardId,
     rewardStatus: rewardBytes ? 0 : 1,
     reply,
-    createTime: entry.committedAt,
+    createTime: committedAt,
   };
 }
