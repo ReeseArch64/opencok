@@ -1618,8 +1618,9 @@ remain separate unfinished portions of topic 4.
 
 ## Category and type mailbox deletion
 
-`mail.delete.batch` now accepts category-only requests: `uids` must be absent, null,
-Java-blank or contain only commas. Optional String `types` uses comma-separated Java
+`mail.delete.batch` accepts explicit IDs and category requests. Optional String `uids`
+uses comma-separated IDs; absent, null, Java-blank and comma-only values select no IDs.
+Optional String `types` uses comma-separated Java
 Int labels, preserving raw spellings as response keys. Labels 0–5 select respectively
 personal/system (stored type below 13 or above 16), saved-category types 14–16, studio
 13, fight types 6/7/8/9/30, moderator types 23/24 and boss reward 32. Other signed labels
@@ -1634,10 +1635,10 @@ and therefore counts as unread. These counters ignore saved flags and are not a 
 of deleted mail.
 Unclaimed saved messages count; already-claimed saved messages do not. The bounded raw
 request permits at most 1,000 labels; at most seven distinct SQL selectors are read.
-No mailbox contents are loaded and matching mailbox size is not truncated.
+Category selection loads no mailbox contents and does not truncate matching mailbox size.
 
 The owner profile is locked and its realm/ban state revalidated. The complete correlated
-response must encode before any deletion. Matching owned auxiliary content is deleted
+response must encode before committing any deletion. Matching owned auxiliary content is deleted
 for every selected primary mail, including primary messages retained because their
 saved flag or reward status prevents deletion; this unusual distinction follows the
 reference category path. Explicitly foreign auxiliary ownership is preserved. Primary
@@ -1654,12 +1655,36 @@ or 300 respectively, even if unclaimed messages remain. This path leaves auxilia
 content, markers and invitation state unchanged, and returns the correlated success
 acknowledgment without pushes. The transaction and reply are validated before commit.
 
-Nonempty explicit IDs in `mail.delete.batch`, sender-selected `chatMail.delete` and
-`chatMail.delete.batch` remain unsupported before writes. Explicit-ID batches have
-different whole-group, invitation and chat effects; they must not be routed through
-ordinary deletion as an approximation. Sender deletion requires the still-missing
-private-chat deletion consumer. These implementations advance the original mailbox
-scope but do not complete the deletion family or topic 4.
+Explicit-ID processing precedes category counting and deletion in the same owned
+transaction. It preserves at most 1,000 nonempty request tokens, deduplicates IDs and
+limits each to 40 UTF-16 units. Missing IDs do not select primary mail. Selected primary
+rows obey `saveFlag = 0` and `rewardStatus != 0`, while selected owned auxiliary content
+is removed even when the primary is retained. Every requested ID receives an owned
+durable synchronization marker, including missing IDs. Foreign primary and auxiliary
+rows cannot be changed.
+
+Selected resource, trade and monster messages with nonzero reward status expand deletion
+to every owned message of the same type whose reward status is nonzero, including saved
+messages. Auxiliary content for unselected expanded rows is retained. The reference's
+type/UID group-pointer deletions are preserved; this branch does not substitute ordinary
+deletion's newest-message repair or scalar deletion's aggregate-group removal.
+Selected invitation messages with nonzero reward status are decoded before writes;
+valid owned invitations remove their invitation relationship and set `deal = 1` on a
+surviving primary row. Deleted primary rows are not reinserted. Malformed invitation
+JSON retains the reference's best-effort behavior, while unavailable extra content,
+decoder bounds and oversized replacement payloads reject the transaction. The shared
+legacy decoder's documented key limitations still apply. Re-serialization preserves
+exact integer values and valid JSON semantics, not byte-identical Java JSON formatting.
+Metadata bounds invitation payloads to 8 MiB per request before loading them. Explicit
+IDs, expanded groups, invitation changes, markers and categories commit or roll back
+together; this strengthens the reference's multiple independent commits.
+
+Selected personal/moderator text, media or express messages with nonzero reward status
+still require private-chat deletion. Such requests reject before any writes, including
+mixed system/chat selections. Reward-pending chat rows have no chat effect and retain
+the source's primary-retention and auxiliary-removal rules. Sender-selected
+`chatMail.delete` and `chatMail.delete.batch` also remain unsupported. These missing chat
+effects prevent declaring the deletion family or topic 4 complete.
 
 Nine synthetic units cover parser/selector boundaries, exact response keys, owner
 scoping, SQL predicates, no-op and error behavior, statement order, type groups and
@@ -1667,7 +1692,11 @@ pre-write rejection of unsupported scopes. The focused deletion/conversation-rea
 selection passed 14 units and 169 assertions before the final SQL-null status predicate
 correction. That final predicate/assertion edit was reviewed but not rerun; affected
 types, lint and formatting passed before it. Broad regression remains deferred under
-the maintainer's request to prioritize implementation. No new schema, dependency, configuration, live service or client test.
+the maintainer's request to prioritize implementation. The explicit-ID extension was
+reviewed with type, lint and formatting checks only; no tests were generated or executed
+for it. Earlier parser tests describing all explicit IDs as unsupported are historical
+and need updating when test work resumes. No new schema, dependency, configuration,
+live service or client test.
 
 ## Conversation and type mailbox saving
 

@@ -16,9 +16,20 @@ export interface MailConversationReadSnapshot {
 }
 
 export interface MailCategoryDeleteQuery {
+  ids?: readonly string[];
   labels: readonly { raw: string; category: number }[];
   now: number;
 }
+
+export interface MailBatchInvitationUpdate {
+  uid: string;
+  inviter: string;
+  contents: Buffer;
+}
+
+export type MailBatchInvitationPlanner = (
+  entries: readonly MailDeleteEntry[],
+) => readonly MailBatchInvitationUpdate[];
 
 export interface MailCategoryDeleteCount {
   raw: string;
