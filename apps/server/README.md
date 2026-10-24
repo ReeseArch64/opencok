@@ -9,7 +9,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
 `login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
-`mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch` (message and group selectors),
+`mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
@@ -754,7 +754,7 @@ order. No new library or external service is required.
 Synthetic unit tests cover wire types, result strings, ownership predicates, profile
 locks, flag conditions, repeat requests and rollback on update/marker/commit failure.
 They do not prove PostgreSQL concurrency or native-client behavior. Remaining content
-edge cases, category/conversation deletion, chat-mail read variants and synchronization
+edge cases, category/conversation deletion, `chatMail.read` and synchronization
 remain pending; reward redemption is outside this wave.
 
 ## Mailbox read status and gift opening
@@ -893,8 +893,84 @@ is added. Absolute flag assignments retain the existing arrival-order retry sema
 Synthetic unit tests cover wire validation, selector precedence, all type mappings,
 raw flag extremes, unauthorized profiles, recipient isolation, 1,500-message
 conversations and transaction failures. Real PostgreSQL execution, concurrency and
-native-client behavior remain unverified. Conversation read/delete commands,
+native-client behavior remain unverified. `chatMail.read`, conversation deletion,
 content edge cases and synchronization flows remain pending.
+
+## Conversation read persistence
+
+[Issue #73](https://github.com/ReeseArch64/opencok/issues/73) tracks `chatMail.read`.
+Its complete wire parser and ordered effect planner now have synthetic unit coverage.
+An independent repository adapter now persists owned mailbox assignments and chat
+intents atomically. The command still returns unsupported: enabling it requires durable
+chat intent delivery and a maintained private-conversation read-state consumer. The
+current chat room history implementation does not supply that consumer. The parser and
+planner remain pure; the adapter is not connected to command dispatch.
+
+| Selection                                   | Mailbox assignment                                                   | Chat intent                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `fromUser`, `mod = 1`                       | Exact sender, types 23/24, status exactly 0 to 1                     | Same raw peer string, chat type `2`                                      |
+| `fromUser`, other mod, `driftingBottle = 1` | Exact sender, types 43/44, all statuses to 1                         | Same raw peer string, chat type `3`                                      |
+| `fromUser`, other modes                     | Exact sender, types 20/21/22, status exactly 0 to 1                  | Same raw peer string, chat types `1,20`                                  |
+| No sender, `type`                           | Exact mapped type across senders, status exactly 0 to 1              | None                                                                     |
+| Additional `types` list                     | One mapped-type assignment per nonempty token, status exactly 0 to 1 | Exact raw `0,1,20` additionally emits empty peers with chat types `1,20` |
+
+Sender presence takes precedence over scalar type; moderator mode takes precedence over
+the bottle flag. `mod` defaults to zero and is always validated. Scalar type is not
+read when sender is present, and the bottle flag is not read without sender or in
+moderator mode. The `types` string is independent and always consumed when present.
+Duplicate list entries and effect order are retained, including targeted chat intent
+before list assignments and the optional final all-peer intent. An empty request or
+empty/comma-only type list has no effects.
+
+The shared inverse type mapping is `0→21`, `1→22`, `4→7`, `10→14`, `14→12`, `21→10`;
+other signed integers remain unchanged. List parsing follows Java 8 signed decimal
+rules, including supported BMP digit families, leading zeros and ASCII signs. It does
+not trim whitespace or interpret hexadecimal, octal or exponents. Empty comma tokens
+are discarded. Equivalent numeric spellings, reordered entries or added commas do not
+activate the exact raw-string chat trigger.
+
+Empty, blank and comma-containing sender strings retain their bytes. A present null
+sender remains null in the mailbox predicate, while the chat intent preserves the
+source string-builder result `null`. The empty peer string used by an all-peer intent
+is distinct from that literal. These raw intent values are retained for the future
+consumer; this stage does not invent private-chat room IDs or silently drop events
+when mailbox assignments match no rows.
+
+Consumed sender strings are bounded to 40 UTF-16 units and reject NUL/invalid Unicode.
+The raw type list is bounded to 65,535 UTF-8 bytes and 1,000 nonempty tokens; extra commas
+do not count as operations. The whole request is validated before any plan returns,
+preventing the reference's earlier partial writes before a malformed trailing token.
+No mailbox synchronization marker, reward, saved flag, group or auxiliary cleanup
+belongs to this plan.
+The adapter retains SQL status-exactness: personal/moderator/type updates do not
+reinterpret null status as zero, while bottle assignments include null status. A present
+null sender uses SQL equality with null, matching no rows; its chat event still persists.
+
+Persistence locks the owner profile in a kingdom-local read-committed transaction and
+checks recipient, realm and ban state before writing. It copies and validates the plan
+before asynchronous work. Mail assignments compile to a single owner-scoped union
+update, with no body reads or truncation of affected messages. The same transaction
+inserts immutable `mail_chat_read_intent` records even when no mail row changes. Each
+invocation has a fresh UUID; original effect positions distinguish its chat events and
+retain their order. These identities support future delivery retries, not deduplication
+of separate command invocations. Repeating a request can enqueue another event.
+
+Owner-serialized admission allows at most 1,000 pending chat intents per player; an
+overflow rejects before mail updates. Type-only and empty plans need no backlog query.
+Chat intent insertion failure rolls back mailbox changes. The additive kingdom migration
+`0005_mail_chat_read_intents.sql` has been generated, not applied. Preserve pending rows
+across application rollback. Future delivery must define peer interpretation, ordering,
+idempotency and acknowledgment before enabling this command. Public chat history cannot
+substitute for private conversation read state.
+
+Tests cover precedence, ignored/invalid wire fields, null and empty sender behavior,
+integer boundaries, raw-list triggers and limits. Frozen synthetic vectors generated
+with an isolated Java 8 integer probe verify 410 parsing cases; maintained tests need
+no Java runtime, private source or server process. SQL driver fakes verify exact
+predicates, owner/realm isolation, large selections, bounded backlog, durable intent
+identity, captured plans and rollback. These units do not prove real database concurrency
+or resolve commit acknowledgment loss. Delivery, cross-database recovery and chat
+read-state integration remain pending.
 
 ## Mailbox content reads
 
@@ -964,7 +1040,7 @@ Synthetic units cover all 50 stored type ordinals, precise integer boundaries,
 permissive decoding, report repairs, chunks, malformed-message removal, ownership,
 extra-content rules, capacity and transaction failures. No real database, concurrent
 writer, socket, native client or ADB was exercised. Group list queries are documented
-below; chat read/delete and synchronization consumers remain pending work.
+below; `chatMail.read`, conversation deletion and synchronization consumers remain pending work.
 
 ## Category mailbox listing
 
@@ -1047,9 +1123,14 @@ command does not complete topic 4.
 
 ## Paginated mailbox and conversation reads
 
-`mread.batch`, tracked in [issue #71](https://github.com/ReeseArch64/opencok/issues/71),
-now serves the message-list selectors below. It requires integer `type`, `num` (start)
-and `offset` (page size). `fromUser` may be absent/null for selectors that do not use it;
+`mread.batch` and `mread.chat`, tracked in
+[issue #71](https://github.com/ReeseArch64/opencok/issues/71), share the selectors below.
+Both require integer `num` (start) and `offset` (page size). `mread.batch` also requires
+integer `type`; `mread.chat` defaults an absent `type` to selector `4` for personal
+conversations. A present type must be an integer: null, strings and
+other wire widths do not activate its default. Explicit types can select ordinary
+messages, other conversations, either group family or the unknown-selector empty result.
+`fromUser` may be absent/null for selectors that do not use it;
 a supplied non-null value must be a string. Personal and moderator lists require a
 nonblank sender, preserving the reference `E000000` invalid-operation response when
 missing. Consumed sender IDs retain whitespace, must fit 40 UTF-16 units and reject NUL
@@ -1100,13 +1181,17 @@ Synthetic units exercise all selectors, paging, field differences, sender/transl
 behavior, owned SQL predicates, capacity, invalid removal plans, commit failures and the
 production command/repository path using an injected SQL client. Category-list regression
 coverage remains in place after extracting the shared boundary. No ADB, native client,
-real database/service/socket, integration/E2E or remote CI was run. The `mread.batch`
-group-selector coverage is documented below. Topic 4 remains incomplete.
+real database/service/socket, integration/E2E or remote CI was run. The group-selector
+coverage is documented below. Both command names reach the same owned storage paths;
+the actual requested name is used for full response encoding before cleanup, including
+transport-size boundaries and correlation fields. `mread.chat` fetches content without
+marking conversations read. The separate `chatMail.read` status/chat-service operation
+remains pending. Topic 4 remains incomplete.
 
 ## Group mailbox listing
 
-`mread.batch` now serves ordinary groups with selector `1000` and moderator groups
-with selector `10`, tracked in [issue #72](https://github.com/ReeseArch64/opencok/issues/72).
+`mread.batch` and explicit `mread.chat` types serve ordinary groups with selector `1000`
+and moderator groups with selector `10`, tracked in [issue #72](https://github.com/ReeseArch64/opencok/issues/72).
 The command, pure projection and repository transaction are connected and verified
 with synthetic unit doubles. The authenticated recipient and configured realm select
 the mailbox; request-supplied owner/realm fields grant no access. Optional `fromUser`
@@ -1233,16 +1318,16 @@ uses the existing bounded Java hash traversal helper, with its documented except
 limits. Task visibility, discovery, completion writes and their pushes still need to
 use these descriptions before the reconnect task component is complete.
 
-| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                | Remaining work                                                                                                                                    |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests                                                                                          | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable.  |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.            |
-| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                        |
-| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, chat-mail reading and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                   |
-| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                         |
-| 7. Avatar integration                     | Standalone files service                                                                                                                                                                                                                                                            | Realm grants, confirmation and profile updates.                                                                                                   |
-| 8. Basic chat integration                 | Standalone chat service                                                                                                                                                                                                                                                             | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                       |
+| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                | Remaining work                                                                                                                                            |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests                                                                                          | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable.          |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
+| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
+| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
+| 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
+| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
+| 7. Avatar integration                     | Standalone files service                                                                                                                                                                                                                                                            | Realm grants, confirmation and profile updates.                                                                                                           |
+| 8. Basic chat integration                 | Standalone chat service                                                                                                                                                                                                                                                             | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                               |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog

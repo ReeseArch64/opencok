@@ -177,3 +177,16 @@ test("chatMail.save rejects unauthorized snapshots and transaction failures", as
     game.execute("self", "chatMail.save", { type: sfs.int(1), flag: sfs.int(1) }),
   ).rejects.toThrow("Synthetic conversation failure");
 });
+
+test("conversation read planning does not prematurely enable a mailbox-only mutation", async () => {
+  const f = fixture();
+  await expect(
+    f.game.execute("self", "chatMail.read", {
+      fromUser: sfs.string("sender"),
+      mod: sfs.int(1),
+      types: sfs.string("0,1,20"),
+    }),
+  ).rejects.toMatchObject({ code: "102192" });
+  expect(f.calls).toEqual([]);
+  expect(f.clocks()).toBe(0);
+});

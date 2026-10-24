@@ -397,3 +397,39 @@ test("direct batch readers reject invalid normalized scopes and unbounded identi
     expect(() => readMailBatch(f.databases, realm, "self", query(2), inspect)).toThrow();
   expect(f.calls).toEqual([]);
 });
+
+test("mread.chat reaches the production message reader with default and explicit selectors and preserves read state", async () => {
+  for (const selector of [undefined, 2, 3, 4, 5, 6, 7, 8, 9, 11, 0]) {
+    const f = fixture();
+    const before = f.rows().map((row) => ({ ...row }));
+    const result = await f.game.execute("self", "mread.chat", {
+      ...(selector === undefined ? {} : { type: sfs.int(selector) }),
+      num: sfs.int(1),
+      offset: sfs.int(1),
+      fromUser: sfs.string("sender"),
+      _cok_: sfs.int(9),
+    });
+    const batch = fixture();
+    expect(result).toEqual(
+      await batch.game.execute("self", "mread.batch", {
+        type: sfs.int(selector ?? 4),
+        num: sfs.int(1),
+        offset: sfs.int(1),
+        fromUser: sfs.string("sender"),
+        _cok_: sfs.int(9),
+      }),
+    );
+    expect(f.calls).toEqual(batch.calls);
+    expect(f.rows()).toEqual(before);
+    expect(f.calls.some((call) => /^(update|insert|delete) /.test(call.text))).toBe(false);
+  }
+  const bad = fixture();
+  bad.rows().find((row) => row.uid === "t32")!.contents = Buffer.from("broken");
+  await bad.game.execute("self", "mread.chat", {
+    type: sfs.int(11),
+    num: sfs.int(0),
+    offset: sfs.int(1),
+  });
+  expect(bad.rows().some((row) => row.uid === "t32")).toBe(false);
+  expect(bad.calls.find((call) => call.text.startsWith("delete"))!.params).toEqual(["self", "t32"]);
+});
