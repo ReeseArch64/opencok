@@ -235,6 +235,41 @@ test("account verification thresholds honor realm/version gates without losing c
   expect(() => accountVerificationRequired(catalog, context, 3n)).toThrow();
 });
 
+test("account verification parses item selectors after blank metadata and version gates", () => {
+  const catalog = rules();
+  const rule = { id: "function_on7", k5: "12.6.0", k6: "+２;bad", k7: "3" };
+  catalog.items.set(rule.id, rule);
+  expect(accountVerificationEnabled(catalog, context)).toBe(true);
+  rule.k6 = "bad;2";
+  expect(() => accountVerificationEnabled(catalog, context)).toThrow();
+  expect(accountVerificationEnabled(catalog, { ...context, version: "1.0.0" })).toBe(false);
+  rule.k6 = "\u2000";
+  expect(accountVerificationEnabled(catalog, context)).toBe(false);
+  rule.k6 = "bad";
+  rule.k5 = "\u2000";
+  expect(accountVerificationEnabled(catalog, context)).toBe(false);
+});
+
+test("account selector failure skips counter reads while an early realm match permits the enabled read", async () => {
+  const catalog = rules();
+  const state = configuration();
+  const rule = { id: "function_on7", k5: "12.6.0", k6: "bad;2", k7: "3" };
+  catalog.items.set(rule.id, rule);
+  let reads = 0;
+  const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    changeAccountCount: async () => {
+      reads++;
+      return 3n;
+    },
+  });
+  await expect(game.execute("synthetic", "login.other", { config: sfs.int(0) })).rejects.toThrow();
+  expect(reads).toBe(0);
+  rule.k6 = "2;bad";
+  const result = await game.execute("synthetic", "login.other", { config: sfs.int(0) });
+  expect(result.body.isVerifyChangeAccount).toEqual(sfs.bool(true));
+  expect(reads).toBe(1);
+});
+
 test("login.other config preserves correlation, reads counts only when enabled and fails on dependency errors", async () => {
   const catalog = rules();
   const state = configuration();
@@ -355,4 +390,28 @@ test("feature services receive the persisted player and server time rather than 
   persisted.profile!.pf = "Google";
   const unavailable = await game.execute("synthetic", "login.other", input);
   expect(fields((unavailable.body.funcOn!.value as Value[])[0]).onOff?.value).toBe(false);
+});
+
+test("account version failures precede counter reads and noncanonical required versions reach the provider", async () => {
+  const catalog = rules();
+  const rule = { id: "function_on7", k5: "11.bad", k6: "2", k7: "3" };
+  catalog.items.set(rule.id, rule);
+  let reads = 0;
+  const game = new Game(store(configuration()), catalog, { kingdomId: 2 }, () => now, {
+    changeAccountCount: async () => {
+      reads++;
+      return 3n;
+    },
+  });
+  for (const version of ["11.bad", "12.6", "12.6.0.bad"]) {
+    rule.k5 = version;
+    await expect(
+      game.execute("synthetic", "login.other", { config: sfs.int(0) }),
+    ).rejects.toThrow();
+    expect(reads).toBe(0);
+  }
+  rule.k5 = ".１２..+6.-0.99";
+  const result = await game.execute("synthetic", "login.other", { config: sfs.int(0) });
+  expect(result.body.isVerifyChangeAccount).toEqual(sfs.bool(true));
+  expect(reads).toBe(1);
 });

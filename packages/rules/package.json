@@ -55,7 +55,9 @@
     "./new-general-building": "./src/new-general-building.ts",
     "./new-general-effects": "./src/new-general-effects.ts",
     "./new-general-equipment": "./src/new-general-equipment.ts",
-    "./new-general-prestige": "./src/new-general-prestige.ts"
+    "./new-general-prestige": "./src/new-general-prestige.ts",
+    "./kingdom-skills": "./src/kingdom-skills.ts",
+    "./java-list-sort": "./src/java-list-sort.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

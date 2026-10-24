@@ -1,5 +1,6 @@
 import { publishPlayerUpdate } from "./player-update.ts";
 import { loadExpeditionRanking } from "./expedition-ranking.ts";
+import { loadExpeditionStage } from "./expedition-stage.ts";
 import { SESSION_TTL_SECONDS } from "@opencok/constants/connection";
 import { RedisClient } from "bun";
 import { DependencyError } from "@opencok/errors/dependency";
@@ -40,6 +41,9 @@ export class Cache {
       this.config.kingdomId,
       limit,
     );
+  }
+  expeditionStage(kingdomId = this.config.kingdomId): Promise<number | undefined> {
+    return loadExpeditionStage((command, ...args) => this.command(command, ...args), kingdomId);
   }
   async claim(uid: string, token: string): Promise<boolean> {
     return (

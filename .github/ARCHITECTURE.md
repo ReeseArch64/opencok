@@ -456,9 +456,14 @@ are traversed structurally and discarded. The point repository reads a nonblank
 resource owner's saved march pointer by UUID in the same point snapshot. It retains
 identity and collection metadata, bounded army/plunder payloads and exact nullable
 Long fields, normalizing real speed to Float32. Missing marches remain absent;
-inconsistent owners reject without ownership repair. Decoder composition, decoded
-owner validation, effect resolution and runtime maximum-collection-time restoration remain dependencies
-of occupied-resource command composition. Root stored JSON arrays share the existing
+inconsistent owners reject without ownership repair. The raw-load controller accepts
+the decoded army, requires its root owner to match the march and resolves current
+owner effects for each applicable troop in sequence. A positive saved load returns
+before troop/effect access only when explicit residency is false. Missing load fields
+skip effects; missing required resident-owner data rejects. Unused soldier owner fields
+do not redirect effect reads. The controller does not update the saved load or infer
+residency from database presence. Command wiring and runtime maximum-collection-time
+restoration remain dependencies. Root stored JSON arrays share the existing
 bounded legacy parser; controller restoration preserves the single-item typed
 plunder access rules. Pure collection restoration applies nullable primitive defaults
 and checks the reference model's Int range before narrowing the saved count. No
@@ -466,8 +471,8 @@ march scheduling or cache write is performed by these projections. Resource load
 resolves ordinary effects 78/2196 with the shared player-effect engine and general
 133 from general skills alone. Conditional expedition effect 895 has its own
 feature, merge, stage and effective-home-realm gate, preserving its zero-on-exception
-boundary. Authoritative expedition context and new-general stronghold/official
-contributions still need to be connected; explicit callbacks are not runtime parity.
+boundary. Persisted owner, stronghold/official and expedition projections are connected
+below; the occupied-resource command still requires runtime-state composition.
 
 The separate `rules/new-general-skills` projection restores passive base-skill and
 talent effect maps from bounded saved level strings and optional `general_base` /
@@ -495,13 +500,35 @@ generals to building composition. Stronghold level/star addition wraps as Int; p
 level, prestige and office projections are consumed only when eligibility needs them.
 Prestige scans ordered catalog records, including duplicate IDs, independently of the
 civilization-effect feature gate. Feature checks use the saved owner version and the
-execution realm; blank owner versions skip version comparison. The resource-owner
+execution realm; blank owner versions skip version comparison. Function-on realm
+selection uses ordered Java Integer parsing and ASCII range matching, including
+early success and deferred upper-bound parsing. Required metadata follows Java blank
+semantics. Parse failures propagate to the consuming module's existing failure
+boundary. Item switches, event controls and world-activity switches now use separate
+selector functions matching their reference methods. Deferred-login configuration,
+account verification and lucky-day effects select the appropriate parser; kingdom
+skill availability uses the function-on parser. Shared version comparison now parses
+all nonempty Java Integer components before short-circuit comparison of three positions;
+malformed extra components throw and missing positions fail only when reached.
+Function-on contexts share the Java-blank player bypass, while account switches,
+cross-open configuration and lucky-day eligibility use direct comparison. Ordinary
+announcement metadata and server-only gates retain their lack of client comparison.
+The login composition still selects the supported process version. Lenient dates
+still require compatibility work. Kingdom-skill presentation now consumes
+ordered catalog declarations separately from the final ID index, restores each row
+with its constructor validation/failure boundary, and uses fresh Integer-map tab
+traversal. A bounded Java 8 list sort preserves the comparator's ID equality, signed
+subtraction, merge order and contract failures. Hidden entries retain the reference
+separator behavior without evaluating availability. This projection neither executes
+skills nor changes catalog records. The resource-owner
 effect controller now decodes current saved abilities, reads execution-realm world
 effects and conditional emperor state, and connects ordinary load, general-only 133
 and new-general equipment modifiers. It preserves separate general and expedition
-failure boundaries; ordinary dependency failures propagate. Expedition context is
-still supplied explicitly, and endpoint integration remains required; callback-based
-units do not establish runtime parity.
+failure boundaries; ordinary dependency failures propagate. The expedition adapter
+reads the execution realm's persisted phase from the existing global pairing record,
+applies the configured merge list and uses the owner's cross-fight origin unless it
+is exactly -1. Missing phase data remains unavailable; failures clear only effect 895. This read does not reconstruct Java's minute-synchronized in-memory phase or
+thread-local overrides. Event writers and endpoint integration remain required.
 
 The point repository now accepts an internal `resourceEffects` request to read the
 saved march owner's ordinary effects, buildings and new-general records in the same
@@ -516,7 +543,7 @@ The owner-context projection supplies building traversal and official eligibilit
 World/emperor cache ports accept an explicit destination realm while retaining local
 defaults for existing callers. Runtime wiring forwards that realm. These cache reads
 occur after the database snapshot and are not an atomic cross-store snapshot. Runtime
-residency, authoritative expedition context and endpoint composition remain separate
+residency, expedition phase synchronization and endpoint composition remain separate
 work. Invalid or unavailable requested state fails rather than fabricating effects.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
@@ -1524,7 +1551,9 @@ pairing and returns a consistent bounded board; one retry handles a rematch. The
 controller authenticates the local owner, decodes integer-preserving metadata and
 projects only public fields. Importing authoritative event state and maintaining
 pairings/scores remain separate from the reader; namespace and verification details
-are in the server guide.
+are in the server guide. Resource-load queries independently consume the pairing
+record's optional canonical `status` enum and never infer a phase from dates or a
+match ID. Older pairing records remain valid for ranking, but supply no known phase.
 
 Mailbox category status reads the authenticated recipient's grouped counts with the
 owner profile in a read-only repeatable-read snapshot. Contents and reward payloads

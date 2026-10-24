@@ -34,7 +34,9 @@
     "./world-resource-detail": "./src/world-resource-detail.ts",
     "./world-resource-generals": "./src/world-resource-generals.ts",
     "./world-resource-owner-context": "./src/world-resource-owner-context.ts",
-    "./world-resource-owner-effects": "./src/world-resource-owner-effects.ts"
+    "./world-resource-owner-effects": "./src/world-resource-owner-effects.ts",
+    "./world-resource-expedition": "./src/world-resource-expedition.ts",
+    "./world-resource-army-load": "./src/world-resource-army-load.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
