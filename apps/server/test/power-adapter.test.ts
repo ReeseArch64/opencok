@@ -23,7 +23,19 @@ function database(
         return {
           rows: options.missing
             ? []
-            : [["synthetic", 5, "0", 0, "market_global", options.allianceId ?? "", 1, "9001;0;0"]],
+            : [
+                [
+                  "synthetic",
+                  5,
+                  "0",
+                  0,
+                  "market_global",
+                  options.allianceId ?? "",
+                  1,
+                  "9001;0;0",
+                  2,
+                ],
+              ],
         };
       if (table === "user_army") return { rows: [["107001", 1, 2, 3, 4]] };
       if (table === "user_general") return { rows: [["1001", 5, Buffer.from('[{"600001":2}]')]] };
@@ -31,6 +43,9 @@ function database(
       if (table === "user_wall") return { rows: [["108001", 5]] };
       if (table === "user_state") return { rows: [[510001, "9007199254740993", 487, 25]] };
       if (table === "user_vip") return { rows: [[250, "9007199254740993", 2]] };
+      if (table === "user_civilization_prestige") return { rows: [[2, "9007199254740993"]] };
+      if (table === "user_military_rank") return { rows: [["1001|1002"]] };
+      if (table === "user_miracle_buff_active") return { rows: [[4]] };
       if (table === "alliance_science") {
         if (options.allianceFailure) throw new Error("Synthetic alliance read failure");
         return {
@@ -83,7 +98,11 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const selects = queries.filter((query) => query.text.startsWith("select"));
-  expect(selects).toHaveLength(17);
+  expect(selects).toHaveLength(20);
+  expect(snapshot.profile?.civilizationType).toBe(2);
+  expect(snapshot.prestige).toEqual([{ civilizationType: 2, prestigeValue: 9007199254740993n }]);
+  expect(snapshot.military).toEqual({ skill: "1001|1002" });
+  expect(snapshot.miracle).toEqual({ level: 4 });
   expect(snapshot.vip).toEqual({ score: 250, vipEndTime: 9007199254740993n, sLevel: 2 });
   expect(snapshot.allianceSciences).toEqual([]);
   expect(snapshot.states).toEqual([
@@ -156,7 +175,7 @@ test("power readiness checks each required table without reading records or writ
   };
   await checkPowerStore(drizzle(client as unknown as NodePgClient, { schema }));
   const tables = queries.map((query) => query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1]);
-  expect(new Set(tables).size).toBe(18);
+  expect(new Set(tables).size).toBe(21);
   for (const table of [
     "userprofile",
     "playerinfo",
@@ -176,6 +195,9 @@ test("power readiness checks each required table without reading records or writ
     "user_state",
     "user_vip",
     "alliance_science",
+    "user_civilization_prestige",
+    "user_military_rank",
+    "user_miracle_buff_active",
   ])
     expect(tables).toContain(table);
   for (const query of queries) {

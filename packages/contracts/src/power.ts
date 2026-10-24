@@ -23,6 +23,9 @@ export interface PowerSnapshot {
   states: readonly Row[];
   vip: Row | undefined;
   allianceSciences: readonly Row[];
+  prestige: readonly Row[];
+  military: Row | undefined;
+  miracle: Row | undefined;
 }
 
 export interface PowerState extends Omit<PowerSnapshot, "profile"> {
