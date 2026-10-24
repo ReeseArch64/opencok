@@ -2,7 +2,7 @@ import type { Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
-import type { OwnGeneralSnapshot } from "@opencok/contracts/reconnect";
+import type { OwnGeneralSnapshot, FriendshipMineView } from "@opencok/contracts/reconnect";
 import { generalInfo } from "./profile.ts";
 
 function invalid(): never {
@@ -76,5 +76,20 @@ export function reconnectGenerals(generals: readonly OwnGeneralSnapshot[]): Fiel
         }),
       ),
     ),
+  };
+}
+
+export function reconnectMine(mine: FriendshipMineView): Fields {
+  return {
+    mine: sfs.object({
+      itemId: sfs.int(mine.itemId),
+      level: sfs.int(mine.level),
+      exp: sfs.int(mine.exp),
+      miner: sfs.int(mine.miner),
+      mineTime: sfs.long(mine.mineTime),
+      call: sfs.int(mine.call),
+      xml_exp: sfs.int(mine.requiredExp),
+      xml_miner: sfs.int(mine.maxMiners),
+    }),
   };
 }

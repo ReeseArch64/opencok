@@ -7,6 +7,30 @@ import { loadRules, parseRules } from "../src/rules.ts";
 const records =
   '<database><ItemSpec id="100100" level="0"/><ItemSpec id="100101" level="1"/></database>';
 
+test("reconnect treasure catalogs preserve declaration order and exact level strings", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-reconnect-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).reconnect.treasures?.size).toBe(0);
+    await writeFile(
+      join(directory, "treasure.xml"),
+      '<database><ItemSpec id="9000" lv="1" exp="03" helper="2"/><Group id="later"><ItemSpec id="8000" lv="01" exp="4" helper="3"/></Group></database>',
+    );
+    const catalog = (await loadRules(directory)).reconnect.treasures!;
+    expect([...catalog.keys()]).toEqual(["9000", "8000"]);
+    expect(catalog.get("9000")?.exp).toBe("03");
+    expect(catalog.get("8000")?.lv).toBe("01");
+    await writeFile(
+      join(directory, "treasure.xml"),
+      '<database><ItemSpec id="9000"/><ItemSpec id="9000"/></database>',
+    );
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test("profile catalogs count every achievement record and keep military/server lookups optional", async () => {
   const directory = await mkdtemp(join(tmpdir(), "opencok-profile-rules-"));
   try {
