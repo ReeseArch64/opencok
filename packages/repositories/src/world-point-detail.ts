@@ -101,6 +101,32 @@ async function readExploration(
     throw new Error("Invalid exploration report");
   return { march: { ...selected, exploreReport: report.exploreReport } };
 }
+async function readNeutralResource(db: Reader, point: Row) {
+  const march = single(
+    await db
+      .select({
+        uuid: world_march.uuid,
+        targetId: world_march.targetId,
+        worldId: world_march.worldId,
+        state: world_march.state,
+        occupyResourceEndTime: world_march.occupyResourceEndTime,
+      })
+      .from(world_march)
+      .where(and(eq(world_march.targetId, point.id as number), eq(world_march.state, 1)))
+      .orderBy(asc(world_march.uuid))
+      .limit(1),
+  );
+  if (
+    march &&
+    (!validText(march.uuid, 40) ||
+      !march.uuid ||
+      march.targetId !== point.id ||
+      march.state !== 1 ||
+      !integer(march.worldId))
+  )
+    throw new Error("Invalid neutral resource march");
+  return { march };
+}
 function integer(value: unknown): value is number {
   return (
     typeof value === "number" &&
@@ -281,7 +307,16 @@ export function createWorldPointDetailStore(
             detail.point?.pointType === 6 && selectExploration
               ? await readExploration(tx, observer, detail.point, selectExploration)
               : undefined;
-          return { ...result, ...detail, ...(exploration ? { exploration } : {}) };
+          const neutralResource =
+            detail.point?.pointType === 60 && !blank(detail.point.pointItem)
+              ? await readNeutralResource(tx, detail.point)
+              : undefined;
+          return {
+            ...result,
+            ...detail,
+            ...(exploration ? { exploration } : {}),
+            ...(neutralResource ? { neutralResource } : {}),
+          };
         }, options);
         if (
           !authorized(local.profile, observer, kingdomId, query.now) ||
@@ -303,7 +338,11 @@ export function createWorldPointDetailStore(
 }
 export async function checkWorldPointDetailStore(db: Db): Promise<void> {
   await db
-    .select({ ...marchColumns, exploreReport: world_march.exploreReport })
+    .select({
+      ...marchColumns,
+      exploreReport: world_march.exploreReport,
+      occupyResourceEndTime: world_march.occupyResourceEndTime,
+    })
     .from(world_march)
     .limit(0);
   await db

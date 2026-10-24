@@ -473,6 +473,18 @@ process map or its capacity/insertion/deletion history. The reference has no per
 map order. No march object restoration, scheduling or queue advancement occurs. The
 complete command remains pending; implemented local cases are documented in the runbook.
 
+Local neutral-resource type 60 now reads one occupying destination march in the same
+point snapshot and projects its end time minus the configured gathering duration.
+The ordinary-realm reference destination index is keyed by point ID alone, so this
+reader does not add owner or world filters. Its SQL chooses UUID ascending as a
+stable persisted-state order. The legacy set keys march object identities; their
+process-specific traversal order is not recoverable from saved rows and is not
+claimed equivalent. The optional `sp_resources` catalog retains final duplicate
+definitions. Rules preserve signed integer duration parsing, widening before
+millisecond multiplication and signed-long subtraction; no catalog is required
+when the item is blank or no occupying march exists. Only timing metadata is read,
+without march deserialization, scheduling or writes.
+
 ### Migrated files implementation
 
 `apps/files` composes `api/files`, `identity/avatar`, `validations/image` and

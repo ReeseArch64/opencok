@@ -1,3 +1,4 @@
+import type { Row } from "@opencok/contracts/rows";
 import type {
   WorldResourceLoad,
   WorldResourceCollection,
@@ -144,4 +145,30 @@ export function resourceGroupDetail(
     remaining: (remaining - collected) | 0,
     sampledAt: Number(long(clock())),
   };
+}
+
+export function neutralResourceStart(
+  point: Row,
+  march: Row | undefined,
+  rules: Rules,
+): bigint | undefined {
+  if (point.pointType !== 60 || point.pointItem == null) return undefined;
+  if (
+    typeof point.pointItem !== "string" ||
+    point.pointItem.length > 255 ||
+    !point.pointItem.isWellFormed() ||
+    point.pointItem.includes("\0")
+  )
+    return invalid();
+  if (mailBlank(point.pointItem) || !march) return undefined;
+  integer(point.id as number);
+  if (march.targetId !== point.id || march.state !== 1) return invalid();
+  const end = long((march.occupyResourceEndTime ?? 0n) as bigint);
+  let seconds: bigint;
+  try {
+    seconds = javaDecimal(rules.world.neutralResources?.get(point.pointItem)?.gather_time, 32);
+  } catch {
+    return invalid();
+  }
+  return BigInt.asIntN(64, end - seconds * 1000n);
 }
