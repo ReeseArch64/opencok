@@ -183,7 +183,9 @@ types 1 and 5 share the power list. The cache adapter selects only the bounded r
 range, then the existing legacy JSON decoder reconstructs ordered `rankMap` objects.
 Missing lists remain empty, while cache failures and malformed/oversized data reject.
 These public derived boards grant no score-write authority and add no lifecycle or TTL.
-The server guide records keys, bounds, metadata fallback and deferred validation.
+Command/cache/repository units and disposable PostgreSQL/Redis tests cover category
+windows, aliases, fresh realm metadata, exact wire values and dependency failures.
+The server guide records keys, bounds, metadata fallback and verification limits.
 Dragon Battle ranking queries read the existing global published team list and reverse
 sorted-set rank through the runtime cache adapter. The controller supplies the verified
 local profile's alliance ID; request parameters select ranges only. Pure rules preserve
