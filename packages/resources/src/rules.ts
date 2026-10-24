@@ -3,14 +3,15 @@ import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { join } from "node:path";
 import { Rules, type Rule } from "@opencok/rules/game";
 
-function parseRecords(xml: string, name: string): Rule[] {
+function parseDocument(xml: string, preserveOrder = false) {
   if (
     Buffer.byteLength(xml) > 16 * 1024 * 1024 ||
     /<!DOCTYPE|<!ENTITY/i.test(xml) ||
     XMLValidator.validate(xml) !== true
   )
     throw new Error("Invalid gameplay resource XML");
-  const parsed = new XMLParser({
+  return new XMLParser({
+    preserveOrder,
     ignoreAttributes: false,
     attributeNamePrefix: "",
     parseAttributeValue: false,
@@ -19,6 +20,10 @@ function parseRecords(xml: string, name: string): Rule[] {
     removeNSPrefix: true,
     isArray: (tag) => tag === "Group" || tag === "ItemSpec",
   }).parse(xml);
+}
+
+function parseRecords(xml: string, name: string): Rule[] {
+  const parsed = parseDocument(xml);
   if (!Object.hasOwn(parsed, "database")) throw new Error("Invalid gameplay resource root");
   const records: unknown[] = [];
   const collect = (node: unknown) => {
@@ -39,14 +44,50 @@ function parseRecords(xml: string, name: string): Rule[] {
   return records as Rule[];
 }
 
+function parseDeclaredCatalog(xml: string): {
+  items: Map<string, Rule>;
+  groups: Map<string, Rule[]>;
+  records: Rule[];
+} {
+  type Element = Record<string, unknown> & { ":@"?: Rule };
+  const parsed = parseDocument(xml, true) as Element[];
+  const root = parsed.find((element) => Object.hasOwn(element, "database"));
+  if (!root || !Array.isArray(root.database)) throw new Error("Invalid gameplay resource root");
+  const elements = (nodes: Element[]) =>
+    nodes.filter((node) =>
+      Object.keys(node).some((key) => key !== ":@" && !key.startsWith("#") && !key.startsWith("?")),
+    );
+  const children = elements(root.database as Element[]);
+  const groups = children.filter((node) => Object.hasOwn(node, "Group"));
+  const items = new Map<string, Rule>();
+  const groupsById = new Map<string, Rule[]>();
+  const declarations: Rule[] = [];
+  const records = (nodes: Element[]): Rule[] =>
+    elements(nodes).map((node) => {
+      const record = { ...node[":@"] };
+      if (Object.values(record).some((value) => typeof value !== "string"))
+        throw new Error("Invalid gameplay resource record");
+      items.set(record.id ?? "null", record);
+      declarations.push(record);
+      return record;
+    });
+  if (!groups.length) records(children);
+  else
+    for (const group of groups) {
+      const id = group[":@"]?.id;
+      if (typeof id !== "string" || !Array.isArray(group.Group))
+        throw new Error("Invalid gameplay resource group");
+      const values = records(group.Group as Element[]);
+      groupsById.set(id, values);
+    }
+  return { items, groups: groupsById, records: declarations };
+}
+
 function indexRules(records: Rule[], name: string): Map<string, Rule> {
-  if (name === "kingdomskill")
-    return new Map(records.map((record) => [record.id ?? "null", record]));
   if (!records.length) throw new Error("Missing gameplay resource records");
   const map = new Map<string, Rule>();
   const replaceDuplicates = [
     "goods",
-    "function_on",
     "science",
     "equipment",
     "status",
@@ -75,6 +116,19 @@ function indexRules(records: Rule[], name: string): Map<string, Rule> {
 }
 
 export function parseRules(xml: string, name: string): Map<string, Rule> {
+  if (
+    [
+      "item",
+      "general_sale",
+      "pay_servercontrol",
+      "function_on",
+      "kingdomskill",
+      "setting",
+      "fb_share",
+      "function_star",
+    ].includes(name)
+  )
+    return parseDeclaredCatalog(xml).items;
   return indexRules(parseRecords(xml, name), name);
 }
 
@@ -86,41 +140,44 @@ export async function loadRules(directory: string, kingdomId = 1) {
   };
   const load = async (name: string): Promise<Map<string, Rule>> =>
     parseRules(await read(name), name);
+  const declared = async (name: string) =>
+    (await exists(join(directory, `${name}.xml`)))
+      ? parseDeclaredCatalog(await read(name))
+      : undefined;
   const [buildings, roles, positions] = await Promise.all([
     load("building"),
     load("role"),
     load("position"),
   ]);
-  const stars = (await exists(join(directory, "function_star.xml")))
-    ? await load("function_star")
-    : new Map<string, Rule>();
-  const items = (await exists(join(directory, "item.xml")))
-    ? await load("item")
-    : new Map<string, Rule>();
+  const starCatalog = await declared("function_star");
+  const itemCatalog = (await exists(join(directory, "item.xml")))
+    ? parseDeclaredCatalog(await read("item"))
+    : undefined;
+  const items = itemCatalog?.items ?? new Map<string, Rule>();
+  const dataConfig = new Map(
+    (itemCatalog?.groups.get("data_config") ?? []).map((record) => [record.id ?? null, record]),
+  );
   const optional = async (name: string) =>
     (await exists(join(directory, `${name}.xml`))) ? load(name) : new Map<string, Rule>();
   const [
     arms,
     goods,
-    features,
-    settings,
-    generalSales,
+    featureCatalog,
+    settingCatalog,
+    generalSaleCatalog,
     payControl,
-    kingdomSkillRecords,
-    facebookShare,
+    kingdomSkillCatalog,
+    facebookShareCatalog,
     serverConfig,
   ] = await Promise.all([
     optional("arms"),
     optional("goods"),
-    optional("function_on"),
-    optional("setting"),
-    optional("general_sale"),
+    declared("function_on"),
+    declared("setting"),
+    declared("general_sale"),
     optional("pay_servercontrol"),
-    (async () =>
-      (await exists(join(directory, "kingdomskill.xml")))
-        ? parseRecords(await read("kingdomskill"), "kingdomskill")
-        : [])(),
-    optional("fb_share"),
+    declared("kingdomskill"),
+    declared("fb_share"),
     optional("servers_config"),
   ]);
   const [
@@ -219,19 +276,25 @@ export async function loadRules(directory: string, kingdomId = 1) {
     buildings,
     roles,
     positions,
-    stars,
+    starCatalog?.items ?? new Map<string, Rule>(),
     items,
     arms,
     goods,
-    features,
+    featureCatalog?.items ?? new Map<string, Rule>(),
     kingdomId,
-    settings,
+    settingCatalog?.items ?? new Map<string, Rule>(),
     {
-      generalSales,
+      settingRecords: settingCatalog?.records ?? [],
+      starRecords: starCatalog?.records ?? [],
+      featureRecords: featureCatalog?.groups.get("function_on") ?? [],
+      dataConfig,
+      generalSales: generalSaleCatalog?.items ?? new Map<string, Rule>(),
+      generalSaleRecords: generalSaleCatalog?.records ?? [],
       payControl,
-      kingdomSkills: indexRules(kingdomSkillRecords, "kingdomskill"),
-      kingdomSkillRecords,
-      facebookShare,
+      kingdomSkills: kingdomSkillCatalog?.items ?? new Map<string, Rule>(),
+      kingdomSkillRecords: kingdomSkillCatalog?.records ?? [],
+      facebookShare: facebookShareCatalog?.items ?? new Map<string, Rule>(),
+      facebookShareRecords: facebookShareCatalog?.records ?? [],
       serverConfig,
     },
     {
