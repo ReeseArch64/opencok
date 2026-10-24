@@ -1,3 +1,7 @@
+import {
+  createWorldPointDetailStore,
+  checkWorldPointDetailStore,
+} from "@opencok/repositories/world-point-detail";
 import { createWorldSearchStore, checkWorldSearchStore } from "@opencok/repositories/world-search";
 import {
   createPlayerSearchStore,
@@ -53,6 +57,8 @@ export const RealmDependenciesLive = Layer.effect(
     );
     yield* fromPromise("realm.world-search", () => checkWorldSearchStore(db.kingdom.db));
     const worldSearch = createWorldSearchStore(db.databases, config.kingdomId);
+    yield* fromPromise("realm.world-point-detail", () => checkWorldPointDetailStore(db.kingdom.db));
+    const worldPointDetail = createWorldPointDetailStore(db.databases, config.kingdomId);
     yield* fromPromise("realm.player-search", () =>
       checkPlayerSearchStore(db.databases, config.kingdomId, config.crossSearchEnabled ?? true),
     );
@@ -129,6 +135,7 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        worldPointDetail,
         playerSearch,
         worldSearch,
         worldFavorites,

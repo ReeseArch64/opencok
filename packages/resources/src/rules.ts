@@ -39,8 +39,7 @@ function parseRecords(xml: string, name: string): Rule[] {
   return records as Rule[];
 }
 
-export function parseRules(xml: string, name: string): Map<string, Rule> {
-  const records = parseRecords(xml, name);
+function indexRules(records: Rule[], name: string): Map<string, Rule> {
   if (!records.length) throw new Error("Missing gameplay resource records");
   const map = new Map<string, Rule>();
   const replaceDuplicates = [
@@ -55,6 +54,13 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     "mail",
     "field_monster",
     "army",
+    "sp_resources",
+    "barbarion",
+    "general_base",
+    "general_skill",
+    "general_official",
+    "general_random_effect",
+    "reputation_level",
   ].includes(name);
   for (const record of records) {
     const item = record;
@@ -64,6 +70,10 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     map.set(item.id, item);
   }
   return map;
+}
+
+export function parseRules(xml: string, name: string): Map<string, Rule> {
+  return indexRules(parseRecords(xml, name), name);
 }
 
 export async function loadRules(directory: string, kingdomId = 1) {
@@ -120,11 +130,14 @@ export async function loadRules(directory: string, kingdomId = 1) {
     dragonLevels,
     statuses,
     generalSkills,
+    newGeneralBases,
+    newGeneralSkills,
+    newGeneralOffices,
+    newGeneralRefinement,
     equipmentSets,
     vip,
     superVip,
     allianceSciences,
-    prestigeLevels,
     civilizationFeatures,
     militarySkills,
     miracleBuffs,
@@ -152,11 +165,14 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "dragon_new",
       "status",
       "sk",
+      "general_base",
+      "general_skill",
+      "general_official",
+      "general_random_effect",
       "suit",
       "vip",
       "svip",
       "alliancescience",
-      "reputation_level",
       "civilization_feature",
       "wr_skill",
       "miracle_buff",
@@ -173,13 +189,24 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "monarch_title_lord",
     ].map(optional),
   );
+  const prestigeLevelRecords = (await exists(join(directory, "reputation_level.xml")))
+    ? parseRecords(await read("reputation_level"), "reputation_level")
+    : undefined;
+  const prestigeLevels = prestigeLevelRecords
+    ? indexRules(prestigeLevelRecords, "reputation_level")
+    : new Map<string, Rule>();
   const [militaryRanks, servers] = await Promise.all([optional("wr_rank"), optional("servers")]);
   const [treasures, rewards, mail] = await Promise.all([
     optional("treasure"),
     optional("reward"),
     optional("mail"),
   ]);
-  const [fieldMonsters, armies] = await Promise.all([optional("field_monster"), optional("army")]);
+  const [fieldMonsters, armies, neutralResources, barbarians] = await Promise.all([
+    optional("field_monster"),
+    optional("army"),
+    optional("sp_resources"),
+    optional("barbarion"),
+  ]);
   const achievementCount = (await exists(join(directory, "achievement.xml")))
     ? parseRecords(await read("achievement"), "achievement").length
     : 0;
@@ -207,11 +234,16 @@ export async function loadRules(directory: string, kingdomId = 1) {
       dragonLevels,
       statuses,
       generalSkills,
+      newGeneralBases,
+      newGeneralSkills,
+      newGeneralOffices,
+      newGeneralRefinement,
       equipmentSets,
       vip,
       superVip,
       allianceSciences,
       prestigeLevels,
+      prestigeLevelRecords: prestigeLevelRecords ?? [],
       civilizationFeatures,
       militarySkills,
       miracleBuffs,
@@ -230,7 +262,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     { achievementCount, militaryRanks, servers },
     { treasures, rewards },
     mail,
-    { fieldMonsters, armies },
+    { fieldMonsters, armies, neutralResources, barbarians },
   );
 }
 
