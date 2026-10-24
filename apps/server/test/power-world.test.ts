@@ -48,6 +48,19 @@ test("world effects read one realm hash and retain stored JSON without issuing w
   );
 });
 
+test("explicit destination realm routes world effects without changing the cache's local realm", async () => {
+  const cache = new WorldCache(1);
+  await cache.worldEffects(2);
+  await cache.worldEffects();
+  expect(cache.calls).toEqual([
+    ["HGETALL", "opencok:kingdom:2:world-effects"],
+    ["HGETALL", "opencok:kingdom:1:world-effects"],
+  ]);
+  for (const kingdomId of [0, -1, NaN, 1.5])
+    await expect(cache.worldEffects(kingdomId)).rejects.toThrow();
+  expect(cache.calls).toHaveLength(2);
+});
+
 test("world hash validation rejects malformed responses, duplicate fields and oversized payloads", async () => {
   const cache = new WorldCache();
   for (const response of [

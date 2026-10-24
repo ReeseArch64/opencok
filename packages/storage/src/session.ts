@@ -1,4 +1,10 @@
+import { loadDragonRanking } from "./dragon-ranking.ts";
+import type { DragonRankingRange } from "@opencok/contracts/dragon-ranking";
+import { publishPlayerUpdate } from "./player-update.ts";
 import { loadExpeditionRanking } from "./expedition-ranking.ts";
+import { loadScoreActivityRanking } from "./score-activity-ranking.ts";
+import { loadGlobalCelebrityRanking } from "./global-celebrity-ranking.ts";
+import { loadExpeditionStage } from "./expedition-stage.ts";
 import { SESSION_TTL_SECONDS } from "@opencok/constants/connection";
 import { RedisClient } from "bun";
 import { DependencyError } from "@opencok/errors/dependency";
@@ -40,6 +46,29 @@ export class Cache {
       limit,
     );
   }
+  scoreActivityRanking(): Promise<readonly string[]> {
+    return loadScoreActivityRanking(
+      (command, ...args) => this.command(command, ...args),
+      this.config.kingdomId,
+    );
+  }
+  globalCelebrityRanking(rankType: number): Promise<readonly string[]> {
+    return loadGlobalCelebrityRanking(
+      (command, ...args) => this.command(command, ...args),
+      this.config.kingdomId,
+      rankType,
+    );
+  }
+  dragonRanking(ranges: readonly DragonRankingRange[], allianceId: string) {
+    return loadDragonRanking(
+      (command, ...args) => this.command(command, ...args),
+      ranges,
+      allianceId,
+    );
+  }
+  expeditionStage(kingdomId = this.config.kingdomId): Promise<number | undefined> {
+    return loadExpeditionStage((command, ...args) => this.command(command, ...args), kingdomId);
+  }
   async claim(uid: string, token: string): Promise<boolean> {
     return (
       (await this.command(
@@ -52,17 +81,44 @@ export class Cache {
       )) === "OK"
     );
   }
-  async deviceChangeCount(deviceId: string): Promise<bigint | null> {
-    if (!deviceId || deviceId.length > 255) throw new DependencyError("redis");
+  async deviceChangeCount(deviceId: string): Promise<string | null> {
+    if (deviceId.length > 255) throw new DependencyError("redis");
     const value = await this.command("GET", `opencok:global:device-account-change:${deviceId}`);
     if (value === null) return null;
+    if (typeof value !== "string" || value.length > 65535) throw new DependencyError("redis");
+    return value;
+  }
+  async nicknameForbiddenWords(key: string): Promise<readonly string[]> {
     if (
-      typeof value !== "string" ||
-      !/^\d{1,19}$/.test(value) ||
-      BigInt(value) > 9223372036854775807n
+      !["regular", "strict", "pattern", "weight", "name"].some(
+        (kind) => key === `forbidden_words_${kind}`,
+      )
     )
-      throw new DependencyError("redis");
-    return BigInt(value);
+      throw new DependencyError("nickname forbidden list");
+    let entries: unknown;
+    try {
+      entries = await this.command("LRANGE", key, "0", "-1");
+    } catch {
+      return [];
+    }
+    if (!Array.isArray(entries) || entries.length > 65536)
+      throw new DependencyError("nickname forbidden list");
+    let bytes = 0;
+    for (const entry of entries) {
+      if (typeof entry !== "string" || Buffer.byteLength(entry) > 65535)
+        throw new DependencyError("nickname forbidden list");
+      bytes += Buffer.byteLength(entry);
+      if (bytes > 16 * 1024 * 1024) throw new DependencyError("nickname forbidden list");
+    }
+    return [...entries];
+  }
+  publishPlayerUpdateTime(uid: string, updatedAt: string): Promise<void> {
+    return publishPlayerUpdate(
+      (command, ...args) => this.command(command, ...args),
+      this.config.kingdomId,
+      uid,
+      updatedAt,
+    );
   }
   async playerUpdateTimes(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>> {
     if (
@@ -91,8 +147,7 @@ export class Cache {
     }
     return updates;
   }
-  async emperorVersion(): Promise<number | null | undefined> {
-    const kingdomId = this.config.kingdomId;
+  async emperorVersion(kingdomId = this.config.kingdomId): Promise<number | null | undefined> {
     if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
     const value = await this.command("GET", `opencok:kingdom:${kingdomId}:emperor-version`);
     if (value === null) return undefined;
@@ -103,8 +158,7 @@ export class Cache {
     if (version < -2147483648 || version > 2147483647) throw new DependencyError("redis");
     return version;
   }
-  async worldEffects(): Promise<ReadonlyMap<string, string>> {
-    const kingdomId = this.config.kingdomId;
+  async worldEffects(kingdomId = this.config.kingdomId): Promise<ReadonlyMap<string, string>> {
     if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
     const values = await this.command("HGETALL", `opencok:kingdom:${kingdomId}:world-effects`);
     if (!Array.isArray(values) || values.length > 8192 || values.length % 2 !== 0)

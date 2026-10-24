@@ -24,6 +24,7 @@ import type { Config } from "../src/config.ts";
 import { fields, sfs, str, Type } from "@opencok/messages/sfs";
 import { FOREVER } from "@opencok/dtos/city";
 import { Client } from "./client.ts";
+import { dataConfigItems } from "../test/fixtures/data-config.ts";
 
 async function eventually(check: () => Promise<boolean>, timeout = 15000) {
   const end = Date.now() + timeout;
@@ -143,12 +144,25 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         .values({ uuid: "synthetic-item", ownerId: uid, itemId: "200001", count: 7 });
       await db.insert(user_lord).values({ uid, medal: "synthetic-medal" });
     }
+    const configRecords = [
+      ...dataConfigItems({
+        player_max: { k3: "30" },
+        resources_basics: { k7: "100", k8: "300" },
+      }).values(),
+    ]
+      .map(
+        (record) =>
+          `<ItemSpec ${Object.entries(record)
+            .map(([key, value]) => `${key}="${value}"`)
+            .join(" ")}/>`,
+      )
+      .join("");
     const xml: Record<string, string> = {
       building:
         '<ItemSpec id="400001" level="1" time="30"/><ItemSpec id="400002" level="2" time="40"/>',
       role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
       position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
-      item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/>',
+      item: `<Group id="data_config">${configRecords}</Group>`,
       arms: '<ItemSpec id="100001" attack="12" attack_add="3" defence="10" defence_add="2" upkeep="24" power="0.5"/><ItemSpec id="100002"/>',
       goods: '<ItemSpec id="200001" para1="50"/><ItemSpec id="200002" para1="60"/>',
     };

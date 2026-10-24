@@ -74,7 +74,7 @@ test("hero effects read contiguous parameter slots, accumulate duplicates and pr
   expect(heroEffects(heroes, rules, context).get(487)).toBe(16777216);
 });
 
-test("hero activity has inclusive calendar boundaries and a closed default without valid dates", () => {
+test("hero activity has inclusive calendar boundaries and a closed default at contemporary times", () => {
   const rules = fixture();
   const heroes = [{ heroid: 7001 }];
   rules.power.heroes!.set("7001", { id: "7001", para1: "487;5" });
@@ -201,4 +201,40 @@ test("active dragon skills reject missing rules, incomplete vectors and nonfinit
   expect(() => dragonSkillEffects(dragons, skills, rules, context)).toThrow("102192");
   rules.power.dragonSkills!.get("8001")!.base = "487;1e999";
   expect(() => dragonSkillEffects(dragons, skills, rules, context)).toThrow("102192");
+});
+
+test("hero activity date failures reset both endpoints and skip the second parse after an invalid start", () => {
+  const rules = fixture();
+  const heroes = [{ heroid: 7001 }];
+  rules.power.heroes!.set("7001", { para1: "487;5" });
+  const event = rules.power.activityEvents!.get("9005005")!;
+  event.k1 = "2026-9-53-12-00suffix";
+  expect(heroEffects(heroes, rules, context).get(487)).toBe(5);
+  event.k2 = "bad";
+  expect(heroEffects(heroes, rules, context).size).toBe(0);
+  expect(heroEffects(heroes, rules, { ...context, now: 0 }).get(487)).toBe(5);
+  event.k1 = "bad";
+  Object.defineProperty(event, "k2", {
+    get: () => {
+      throw new Error("Unused end date");
+    },
+  });
+  expect(heroEffects(heroes, rules, { ...context, now: 0 }).get(487)).toBe(5);
+  expect(heroEffects(heroes, rules, context).size).toBe(0);
+  rules.power.activityEvents!.set("9005005", { k1: "2026-10-23-12-00" });
+  expect(() => heroEffects(heroes, rules, context)).toThrow();
+  rules.power.activityEvents!.clear();
+  expect(heroEffects(heroes, rules, { ...context, now: 0 }).get(487)).toBe(5);
+});
+
+test("hero date pairs retain their reused formatter calendar across the Gregorian cutover", () => {
+  const rules = fixture();
+  const heroes = [{ heroid: 7001 }];
+  rules.power.heroes!.set("7001", { para1: "487;5" });
+  rules.power.activityEvents!.set("9005005", {
+    k1: "1000-1-1-0-0",
+    k2: "1582--138983-4230550-0-0",
+  });
+  expect(heroEffects(heroes, rules, { ...context, now: -12223958400000 }).get(487)).toBe(5);
+  expect(heroEffects(heroes, rules, { ...context, now: -12223958399999 }).size).toBe(0);
 });

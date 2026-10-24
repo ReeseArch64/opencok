@@ -24,6 +24,7 @@
     "@opencok/storage": "workspace:*",
     "@opencok/identity": "workspace:*",
     "@opencok/validations": "workspace:*",
-    "busboy": "^1.6.0"
+    "busboy": "^1.6.0",
+    "@opencok/core": "workspace:*"
   }
 }

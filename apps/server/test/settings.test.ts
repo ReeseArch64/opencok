@@ -17,6 +17,9 @@ test("setting.xml preserves IDs, string values, Unicode, and correlation through
     getAccountsByPlayerId: unused,
     getCityByPlayerId: unused,
     getWorldByPointIds: unused,
+    mailGroups: unused,
+    mailBatch: unused,
+    mailCategory: unused,
     mailContents: unused,
     mailConversationSave: unused,
     mailDelete: unused,
@@ -88,6 +91,9 @@ test("build.info uses the injected clock for buildings and queue previews withou
   };
   const store: GameStore = {
     getProfileById: unused,
+    mailGroups: unused,
+    mailBatch: unused,
+    mailCategory: unused,
     mailContents: unused,
     mailConversationSave: unused,
     mailDelete: unused,
@@ -116,5 +122,9 @@ test("build.info uses the injected clock for buildings and queue previews withou
   expect(fields(fields((expired.buildingQueue!.value as Value[])[0]).itemObj).starNum?.value).toBe(
     0,
   );
+  expect(state).toEqual(before);
+  now = Date.UTC(2026, 9, 23, 12);
+  rules.stars.get("first")!.star = "invalid";
+  await expect(game.execute("synthetic-player", "build.info", {})).rejects.toThrow();
   expect(state).toEqual(before);
 });

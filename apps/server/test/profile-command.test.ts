@@ -81,6 +81,9 @@ function fixture(remote = false) {
       calls.push(["observer", uid]);
       return observer;
     },
+    mailGroups: unused,
+    mailBatch: unused,
+    mailCategory: unused,
     mailContents: unused,
     mailConversationSave: unused,
     mailDelete: unused,
@@ -131,6 +134,16 @@ function fixture(remote = false) {
     },
   };
 }
+
+test("public profiles interpret stored visibility integers as visible only at exactly one", async () => {
+  const { state, game } = fixture();
+  for (const value of [null, 0, 1, -1, 2147483647]) {
+    state.mixed = { showEquip: value, showMedal: value, marchSoldierShow: value };
+    const result = await game.execute("1001", "get.user.info", { uid: sfs.string("2001") });
+    for (const key of ["showEquip", "showMedal", "showMarchSoldier"])
+      expect(result.body[key]).toEqual(sfs.bool(value === 1));
+  }
+});
 
 test("get.user.info composes all public providers using authenticated membership and one server clock", async () => {
   const { state, game, calls, clockCalls } = fixture();

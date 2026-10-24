@@ -1,48 +1,55 @@
 import { expect, test } from "bun:test";
-import { realmEnabled, ruleAvailable, ruleTime, versionAtLeast } from "@opencok/rules/availability";
+import {
+  switchRealmEnabled,
+  ruleAvailable,
+  ruleTime,
+  versionAtLeast,
+} from "@opencok/rules/availability";
 import { Rules } from "@opencok/rules/game";
 import { building } from "@opencok/dtos/city";
 
 const now = Date.UTC(2026, 9, 23, 12);
 const context = { kingdomId: 2, version: "12.06.0", now };
 
-test("realm switches match exact realms and inclusive ranges without prefix matching", () => {
-  for (const selector of ["all", "2", "1-2", "2-4", "7;2;11-20", ";2;"])
-    expect(realmEnabled(selector, 2), selector).toBe(true);
-  for (const selector of [undefined, "", "0", "close", "20", "3-8", "1;3-8", "2;bad", "4-2"])
-    expect(realmEnabled(selector, 2), selector).toBe(false);
-  expect(realmEnabled("9007199254740992", 2)).toBe(false);
-  for (const realm of [0, -1, 1.5, NaN, Infinity]) expect(realmEnabled("all", realm)).toBe(false);
+test("item switches retain exact realms, inclusive ranges and early matching before later invalid entries", () => {
+  for (const selector of ["all", "2", "1-2", "2-4", "7;2;11-20", ";2;", "2;bad"])
+    expect(switchRealmEnabled(selector, 2), selector).toBe(true);
+  for (const selector of ["", "0", "close", "20", "3-8", "1;3-8", "4-2"])
+    expect(switchRealmEnabled(selector, 2), selector).toBe(false);
+  for (const selector of [undefined, "bad;2", "9007199254740992"])
+    expect(() => switchRealmEnabled(selector, 2)).toThrow();
+  for (const realm of [1.5, NaN, Infinity])
+    expect(() => switchRealmEnabled("all", realm)).toThrow();
+  expect(switchRealmEnabled("all", 0)).toBe(true);
+  expect(switchRealmEnabled("0", 0)).toBe(false);
 });
 
-test("version gates compare numeric components and reject malformed versions", () => {
+test("direct version gates compare Java integer components and expose malformed versions", () => {
   expect(versionAtLeast("12.06.0", "12.6.0")).toBe(true);
   expect(versionAtLeast("12.10.0", "12.9.99")).toBe(true);
   expect(versionAtLeast("13.0.0", "12.99.99")).toBe(true);
   expect(versionAtLeast("12.6.1", "12.6.0")).toBe(true);
   expect(versionAtLeast("12.6.0", "12.6.1")).toBe(false);
   expect(versionAtLeast("9.99.99", "12.0.0")).toBe(false);
-  for (const version of ["", "12.6", "12.6.0-beta", "12.x.0", "12.6.0.1", "9007199254740992.0.0"])
-    expect(versionAtLeast(version, "12.6.0")).toBe(false);
-  expect(versionAtLeast("12.6.0", "")).toBe(false);
+  for (const version of ["", "12.6", "12.6.0-beta", "12.x.0", "9007199254740992.0.0"])
+    expect(() => versionAtLeast(version, "12.6.0")).toThrow();
+  expect(() => versionAtLeast("12.6.0", "")).toThrow();
+  expect(versionAtLeast("12.6.0.1", "12.6.0")).toBe(true);
 });
 
-test("legacy rule dates use an explicit offset and reject calendar rollover", () => {
-  expect(ruleTime("2026-10-23-12-00")).toBe(now);
-  expect(ruleTime("2026-10-23-12-00", -180)).toBe(now + 3 * 3_600_000);
-  expect(ruleTime("2026-10-23-12-00", 480)).toBe(now - 8 * 3_600_000);
-  expect(ruleTime("2024-02-29-00-00")).toBe(Date.UTC(2024, 1, 29));
-  for (const date of [
-    "",
-    "2026-02-29-00-00",
-    "2026-13-01-00-00",
-    "2026-10-23-24-00",
-    "2026-10-23-12-60",
-    "2026-10-00-00-00",
-  ])
-    expect(ruleTime(date), date).toBeUndefined();
-  expect(ruleTime("2026-10-23-12-00", 841)).toBeUndefined();
-  expect(ruleTime("2026-10-23-12-00", 0.5)).toBeUndefined();
+test("legacy rule dates use an explicit offset, normalize fields and retain parse-failure zero", () => {
+  expect(ruleTime("2026-10-23-12-00")).toBe(BigInt(now));
+  expect(ruleTime("2026-10-23-12-00", -180)).toBe(BigInt(now + 3 * 3_600_000));
+  expect(ruleTime("2026-10-23-12-00", 480)).toBe(BigInt(now - 8 * 3_600_000));
+  expect(ruleTime("2024-02-29-00-00")).toBe(BigInt(Date.UTC(2024, 1, 29)));
+  expect(ruleTime("2026-02-29-00-00")).toBe(BigInt(Date.UTC(2026, 2, 1)));
+  expect(ruleTime("2026-13-01-00-00")).toBe(BigInt(Date.UTC(2027, 0, 1)));
+  expect(ruleTime("2026-10-23-24-00")).toBe(BigInt(Date.UTC(2026, 9, 24)));
+  expect(ruleTime("2026-10-23-12-60")).toBe(BigInt(Date.UTC(2026, 9, 23, 13)));
+  expect(ruleTime("2026-10-00-00-00")).toBe(BigInt(Date.UTC(2026, 8, 30)));
+  expect(ruleTime("")).toBe(0n);
+  expect(() => ruleTime("2026-10-23-12-00", 841)).toThrow();
+  expect(() => ruleTime("2026-10-23-12-00", 0.5)).toThrow();
 });
 
 test("availability combines version, realm, test selector, and inclusive time boundaries", () => {
@@ -63,7 +70,7 @@ test("availability combines version, realm, test selector, and inclusive time bo
   expect(ruleAvailable(rule, { ...context, testServer: true, kingdomId: 9 })).toBe(true);
   expect(ruleAvailable(rule, { ...context, utcOffsetMinutes: -180 })).toBe(false);
   expect(ruleAvailable({ ...rule, start: "2026-10-25-12-00" }, context)).toBe(false);
-  expect(ruleAvailable({ ...rule, start: "invalid" }, context)).toBe(false);
+  expect(ruleAvailable({ ...rule, start: "invalid" }, context)).toBe(true);
   expect(ruleAvailable({ ...rule, end: "" }, context)).toBe(false);
   expect(ruleAvailable({ ...rule, online: "" }, context)).toBe(false);
   expect(ruleAvailable({ ...rule, version: "" }, context)).toBe(false);
@@ -108,7 +115,7 @@ test("building star availability and next-level previews use the same supplied i
     id: "bad",
     build_id: "400000",
     star: "invalid",
-    online: "all",
+    online: "close",
     version: "12.6.0",
   });
   const row = { uuid: "synthetic-building", itemId: "400000", level: 30, star: 0, progress: 0 };

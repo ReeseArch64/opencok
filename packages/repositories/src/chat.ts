@@ -1,3 +1,5 @@
+import { createChatAvatarProfileStore } from "./chat-avatar-profile.ts";
+import { chat_avatar_profile } from "@opencok/drizzle/schema/opencok_chat/chat_avatar_profile";
 import { createDatabases, type DatabaseTopology } from "@opencok/drizzle";
 import { chat_message } from "@opencok/drizzle/schema/opencok_chat/chat_message";
 import { chat_session } from "@opencok/drizzle/schema/opencok_chat/chat_session";
@@ -60,6 +62,7 @@ export function createChatRepository(config: {
   const db = databases.global.db;
   const now = () => utc(config.now?.() ?? new Date());
   const repository: ChatRepository = {
+    profiles: createChatAvatarProfileStore(db),
     sessions: {
       async create(session) {
         await db.insert(chat_session).values({
@@ -210,6 +213,7 @@ export function createChatRepository(config: {
       return { messages: messages.length, sessions: sessions.length };
     },
     async health() {
+      await db.select().from(chat_avatar_profile).limit(0);
       await db.select().from(chat_session).limit(0);
       await db.select().from(chat_message).limit(0);
       await db.select({ id: account_new.gameUid }).from(account_new).limit(0);

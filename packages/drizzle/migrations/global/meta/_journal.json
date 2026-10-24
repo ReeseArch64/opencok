@@ -15,6 +15,13 @@
       "when": 1792781235402,
       "tag": "0001_opencok_namespaces",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792827676943,
+      "tag": "0002_chat_avatar_profiles",
+      "breakpoints": false
     }
   ]
 }

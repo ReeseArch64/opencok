@@ -11,8 +11,13 @@
   },
   "type": "module",
   "exports": {
+    "./avatar-finish": "./src/avatar-finish.ts",
+    "./mail-conversation-read": "./src/mail-conversation-read.ts",
+    "./mail-groups": "./src/mail-groups.ts",
+    "./mail-category": "./src/mail-category.ts",
     "./mail-contents": "./src/mail-contents.ts",
     "./mail-delete": "./src/mail-delete.ts",
+    "./mail-updates": "./src/mail-updates.ts",
     "./game": "./src/game.ts",
     "./power": "./src/power.ts",
     "./profile": "./src/profile.ts",
@@ -24,7 +29,16 @@
     "./chat-send": "./src/chat-send.ts",
     "./chat-history": "./src/chat-history.ts",
     "./chat-rooms": "./src/chat-rooms.ts",
-    "./expedition-ranking": "./src/expedition-ranking.ts"
+    "./expedition-ranking": "./src/expedition-ranking.ts",
+    "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
+    "./avatar-completion": "./src/avatar-completion.ts",
+    "./world-resource-detail": "./src/world-resource-detail.ts",
+    "./world-resource-generals": "./src/world-resource-generals.ts",
+    "./world-resource-owner-context": "./src/world-resource-owner-context.ts",
+    "./world-resource-owner-effects": "./src/world-resource-owner-effects.ts",
+    "./world-resource-expedition": "./src/world-resource-expedition.ts",
+    "./world-resource-army-load": "./src/world-resource-army-load.ts",
+    "./avatar-version": "./src/avatar-version.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
@@ -32,6 +46,7 @@
     "@opencok/dtos": "workspace:*",
     "@opencok/errors": "workspace:*",
     "@opencok/messages": "workspace:*",
-    "@opencok/rules": "workspace:*"
+    "@opencok/rules": "workspace:*",
+    "@opencok/identity": "workspace:*"
   }
 }
