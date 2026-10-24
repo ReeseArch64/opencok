@@ -38,8 +38,8 @@ export function createChatApp({
 
   const sessionStore = repository.sessions;
   const messages = repository.messages;
-  const authorizeRoom = createRoomAuthorizer(repository.loadPlayerState);
-  const cleanup = repository.cleanup;
+  const authorizeRoom = createRoomAuthorizer(repository.getPlayerStateById);
+  const deleteExpired = repository.deleteExpired;
   let ready = false;
   const isReady = () => ready;
   const handlers = {
@@ -76,7 +76,7 @@ export function createChatApp({
   async function maintain() {
     try {
       await repository.health();
-      await cleanup();
+      await deleteExpired();
       ready = true;
       return true;
     } catch {

@@ -15,7 +15,7 @@ import { ApiDependencies, createApp } from "../src/app";
 
 const origin = "http://chat.internal:8083";
 const publicUrl = "wss://chat.example.invalid:8443/chat/ws";
-const accounts = { valid: async () => [], health: async () => {} };
+const accounts = { getAll: async () => [], health: async () => {} };
 const directory = { read: async () => new Map() };
 const redis = { health: async () => {} };
 const server = { ip: "chat.example.invalid", port: "8443", protocol: "wss" };

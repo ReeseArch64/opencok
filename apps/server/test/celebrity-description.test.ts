@@ -61,7 +61,7 @@ function fixture() {
     },
   } as unknown as Parameters<typeof readCelebrityDescription>[0];
   const store = {
-    async profile(uid: string) {
+    async getProfileById(uid: string) {
       expect(uid).toBe("owner");
       return owner;
     },

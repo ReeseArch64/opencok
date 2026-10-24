@@ -9,8 +9,8 @@ export interface Session {
 }
 
 export interface SessionStore {
-  save(session: Session): Promise<void>;
-  findByTokenHash(tokenHash: Buffer): Promise<{ uid: string } | null>;
+  create(session: Session): Promise<void>;
+  getById(tokenHash: Buffer): Promise<{ uid: string } | null>;
 }
 
 export interface PlayerState {
@@ -48,9 +48,9 @@ export interface ChatMessage {
 }
 
 export interface MessageStore {
-  send(input: MessageInput): Promise<ChatMessage & { inserted: boolean }>;
-  listRecent(roomId: string, afterMs?: number): Promise<ChatMessage[]>;
-  listRange(roomId: string, startMs: number, endMs: number): Promise<ChatMessage[]>;
+  create(input: MessageInput): Promise<ChatMessage & { inserted: boolean }>;
+  getAll(roomId: string, afterMs?: number): Promise<ChatMessage[]>;
+  getAllByRange(roomId: string, startMs: number, endMs: number): Promise<ChatMessage[]>;
 }
 
 export interface Connection {
@@ -111,8 +111,8 @@ export interface ChatRepository {
   profiles: ChatAvatarProfileStore;
   sessions: SessionStore;
   messages: MessageStore;
-  loadPlayerState: PlayerStateLoader;
-  cleanup(): Promise<{ messages: number; sessions: number }>;
+  getPlayerStateById: PlayerStateLoader;
+  deleteExpired(): Promise<{ messages: number; sessions: number }>;
   health(): Promise<void>;
 }
 

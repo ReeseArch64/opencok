@@ -140,7 +140,7 @@ export class Game {
     readonly services: GameServices = {},
   ) {}
   private async state(uid: string): Promise<ReadyCity> {
-    const state = await this.db.city(uid, this.now());
+    const state = await this.db.getCityByPlayerId(uid, this.now());
     if (!state.profile || !state.resource) throw new GameError(errors.missing);
     if (long(state.profile, "banTime") > BigInt(this.now()) || num(state.profile, "banFlag") !== 0)
       throw new GameError(errors.invalid);
@@ -634,7 +634,7 @@ export class Game {
   private async chatSession(uid: string): Promise<Fields> {
     if (!this.services.chatSession) throw new GameError(errors.unsupported);
     const now = this.now();
-    const profile = this.checkProfile(await this.db.profile(uid), now);
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
     const request = realmChatSessionRequest(profile, uid, this.config.kingdomId);
     try {
       return realmChatSessionResponse(await this.services.chatSession(request), this.now());
@@ -643,7 +643,7 @@ export class Game {
     }
   }
   private async profile(uid: string): Promise<Row> {
-    return this.checkProfile(await this.db.profile(uid));
+    return this.checkProfile(await this.db.getProfileById(uid));
   }
   private async mailStatus(uid: string, params: Fields): Promise<Fields> {
     const field = params.category;
@@ -726,7 +726,7 @@ export class Game {
   }
   private async mailUpdates(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
-    const profile = this.checkProfile(await this.db.profile(uid), now);
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     if (!Object.hasOwn(params, "time")) return {};
@@ -984,7 +984,7 @@ export class Game {
     return body;
   }
   private async dragonRanking(uid: string, params: Fields): Promise<Fields> {
-    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     const ranges = dragonRankingRanges(wireString(params, "index_limit"));
@@ -1000,7 +1000,7 @@ export class Game {
     const rankType = wireInt(params, "rankType");
     if (!Number.isInteger(rankType) || rankType < -2147483648 || rankType > 2147483647)
       throw new GameError(errors.invalid);
-    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     if (![0, 1, 2, 3, 4, 5, 6, 11].includes(rankType)) return {};
@@ -1011,7 +1011,7 @@ export class Game {
     return { rankMap: sfs.array(rows.map((row) => sfs.object(decodeLegacyJsonObject(row)))) };
   }
   private async scoreActivityRanking(uid: string): Promise<Fields> {
-    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    const profile = this.checkProfile(await this.db.getProfileById(uid), this.now());
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     if (!this.services.scoreActivityRanking) throw new GameError(errors.unsupported, "ranking");
@@ -1028,7 +1028,7 @@ export class Game {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)
       throw new GameError(errors.unsupported, "ranking");
     const now = this.now();
-    const profile = this.checkProfile(await this.db.profile(uid), now);
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     const limit = expeditionRankingLimit(this.rules);
@@ -1057,7 +1057,7 @@ export class Game {
   }
   private async publicProfile(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();
-    const observer = this.checkProfile(await this.db.profile(uid), now);
+    const observer = this.checkProfile(await this.db.getProfileById(uid), now);
     if (text(observer, "uid") !== uid) throw new GameError(errors.invalid);
     const target = params.uid;
     if (!target || target.type === Type.Null) throw new GameError(errors.missing);
@@ -1094,7 +1094,7 @@ export class Game {
   }
   private async power(uid: string): Promise<Fields> {
     const now = this.now();
-    const state = await this.db.power(uid, now);
+    const state = await this.db.getPowerByPlayerId(uid, now);
     const profile = this.checkProfile(state.profile, now);
     if (text(profile, "uid") !== uid) throw new GameError(errors.invalid);
     const ruleContext = {
@@ -1143,7 +1143,7 @@ export class Game {
       uids.push(entry.value);
     }
     if (!uids.length || uids.length > 50) return { uids: sfs.array() };
-    const summaries = await this.db.playerSummaries(
+    const summaries = await this.db.getPlayerSummariesByIds(
       uids.filter((id) => id !== "3000002"),
       "allservers" in params,
     );
@@ -1189,7 +1189,7 @@ export class Game {
     };
   }
   private async configuration(uid: string): Promise<Fields> {
-    const state = await this.db.configuration(uid);
+    const state = await this.db.getConfigurationByPlayerId(uid);
     const profile = this.checkProfile(state.profile);
     const context = this.featureContext(profile);
     const result = loginConfigurationPreferences(this.rules, state);
@@ -1250,7 +1250,7 @@ export class Game {
     };
   }
   private async getPushPreferences(uid: string): Promise<Fields> {
-    const state = await this.db.configuration(uid);
+    const state = await this.db.getConfigurationByPlayerId(uid);
     const now = this.now();
     this.checkProfile(state.profile, now);
     const pushSetting = pushPreferences(state.pushSettings);

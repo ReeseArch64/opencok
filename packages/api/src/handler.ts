@@ -58,7 +58,7 @@ export function createHandler(
     if (path === "/gameservice/api/query_userinfo_by_name.php" && methods.has(request.method)) {
       const params = await requestParameters(request);
       const account = !phpEmpty(params.name)
-        ? (await accounts.valid("name", phpUrlDecode(params.name!), false))[0]
+        ? (await accounts.getAll("name", phpUrlDecode(params.name!), false))[0]
         : undefined;
       return legacy(
         account ? { found: 1, gameUid: account.gameUid, server: account.server } : { found: 0 },

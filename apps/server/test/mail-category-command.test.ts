@@ -45,13 +45,13 @@ function fixture() {
   };
   let clocks = 0;
   const db: GameStore = {
-    profile: unused,
-    accounts: unused,
-    city: unused,
-    world: unused,
-    configuration: unused,
-    power: unused,
-    playerSummaries: unused,
+    getProfileById: unused,
+    getAccountsByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
+    getConfigurationByPlayerId: unused,
+    getPowerByPlayerId: unused,
+    getPlayerSummariesByIds: unused,
     publicProfile: unused,
     playerRanking: unused,
     allianceRanking: unused,

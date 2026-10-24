@@ -16,16 +16,16 @@ function fixture() {
     profile: { uid: "self", serverId: 2, banFlag: 0, banTime: 0n },
   };
   const db: GameStore = {
-    profile: async (uid) => {
+    getProfileById: async (uid) => {
       calls.push(uid);
       return owner.profile;
     },
-    accounts: unused,
-    city: unused,
-    world: unused,
-    configuration: unused,
-    power: unused,
-    playerSummaries: unused,
+    getAccountsByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
+    getConfigurationByPlayerId: unused,
+    getPowerByPlayerId: unused,
+    getPlayerSummariesByIds: unused,
     publicProfile: unused,
     playerRanking: unused,
     mailGroups: unused,

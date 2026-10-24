@@ -73,7 +73,7 @@ export function createSessionHandler({
       reply(response, status, correlationId, { code: 0, data: {} });
     };
 
-    if (!sessionStore || typeof sessionStore.save !== "function" || !signingSecret) {
+    if (!sessionStore || typeof sessionStore.create !== "function" || !signingSecret) {
       fail(503, "not_configured");
       return;
     }
@@ -108,7 +108,7 @@ export function createSessionHandler({
       const createdAt = new Date(now());
       const expire = Math.floor(createdAt.getTime() / 1000) + sessionSeconds;
       await saveWithinTimeout(() =>
-        sessionStore.save({
+        sessionStore.create({
           tokenHash: createHash("sha256").update(session).digest(),
           uid: form.get("uid")!,
           createdAt,

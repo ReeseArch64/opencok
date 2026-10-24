@@ -21,7 +21,7 @@ export async function profilePreference(
   params: Fields,
   now: number,
 ): Promise<Fields> {
-  const profile = await db.profile(uid);
+  const profile = await db.getProfileById(uid);
   const optional = command === "banner.set" || command === "speed.cd.open";
   if (!profile) {
     if (optional) return {};

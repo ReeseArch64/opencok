@@ -77,7 +77,7 @@ function fixture(remote = false) {
   const calls: unknown[][] = [];
   const route: RoutedPublicProfile = { state, kingdomId };
   const db: GameStore = {
-    profile: async (uid) => {
+    getProfileById: async (uid) => {
       calls.push(["observer", uid]);
       return observer;
     },
@@ -96,12 +96,12 @@ function fixture(remote = false) {
       calls.push(["target", uid, allianceId]);
       return route;
     },
-    accounts: unused,
-    city: unused,
-    world: unused,
-    playerSummaries: unused,
-    power: unused,
-    configuration: unused,
+    getAccountsByPlayerId: unused,
+    getCityByPlayerId: unused,
+    getWorldByPointIds: unused,
+    getPlayerSummariesByIds: unused,
+    getPowerByPlayerId: unused,
+    getConfigurationByPlayerId: unused,
   };
   const services: GameServices = {
     playerUpdateTimes: async (id, uids) => {

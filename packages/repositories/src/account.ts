@@ -39,7 +39,7 @@ export class AccountStore implements AccountReader {
   async health() {
     await this.guarded(() => this.database.db.execute(sql`SELECT 1`));
   }
-  async valid(type: string, value: string, bound: boolean): Promise<Account[]> {
+  async getAll(type: string, value: string, bound: boolean): Promise<Account[]> {
     return this.guarded(async () => {
       const mapping = bound ? userbindmapping : usermapping;
       const ids = this.database.db

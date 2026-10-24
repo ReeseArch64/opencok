@@ -107,7 +107,7 @@ function fixture(initial = new Map<string, Buffer | null>()) {
     typeof saveCelebrityDescription
   >[0];
   const store = {
-    async profile() {
+    async getProfileById() {
       calls.push("profile");
       return owner;
     },

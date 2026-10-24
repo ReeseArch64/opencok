@@ -51,13 +51,13 @@ test("login carries the saved civilization and exact score/prestige in init.user
     allianceRanking: unused,
     playerRanking: unused,
     publicProfile: unused,
-    power: unused,
-    profile: unused,
-    accounts: unused,
-    configuration: unused,
-    playerSummaries: unused,
-    world: unused,
-    city: async (uid) => {
+    getPowerByPlayerId: unused,
+    getProfileById: unused,
+    getAccountsByPlayerId: unused,
+    getConfigurationByPlayerId: unused,
+    getPlayerSummariesByIds: unused,
+    getWorldByPointIds: unused,
+    getCityByPlayerId: async (uid) => {
       expect(uid).toBe("synthetic");
       return state;
     },
@@ -146,7 +146,7 @@ function snapshot(
 test("city snapshot reads prestige for the owner and selected civilization in its read-only transaction", async () => {
   const { database, queries } = snapshot();
   try {
-    const state = await database.city("synthetic", 0);
+    const state = await database.getCityByPlayerId("synthetic", 0);
     expect(state.civilizationPrestige).toBe(prestige);
     const query = queries.find((query) =>
       query.text.includes('from "opencok_kingdom"."user_civilization_prestige"'),
@@ -167,7 +167,7 @@ test("missing prestige defaults to zero; unselected/missing profiles skip the pr
   for (const options of [{ missingPrestige: true }, { type: 0 }, { missingProfile: true }]) {
     const { database, queries } = snapshot(options);
     try {
-      expect((await database.city("synthetic", 0)).civilizationPrestige).toBe(0n);
+      expect((await database.getCityByPlayerId("synthetic", 0)).civilizationPrestige).toBe(0n);
       if (!options.missingPrestige)
         expect(
           queries.some((query) =>
@@ -183,7 +183,7 @@ test("missing prestige defaults to zero; unselected/missing profiles skip the pr
 test("a failed prestige read rolls back instead of reporting a false saved value", async () => {
   const { database, queries } = snapshot({ failure: true });
   try {
-    await expect(database.city("synthetic", 0)).rejects.toThrow();
+    await expect(database.getCityByPlayerId("synthetic", 0)).rejects.toThrow();
     expect(queries.at(-1)!.text).toBe("rollback");
     expect(queries.some((query) => query.text === "commit")).toBe(false);
   } finally {

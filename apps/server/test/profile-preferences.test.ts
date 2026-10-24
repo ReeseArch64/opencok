@@ -124,7 +124,7 @@ function fixture() {
   const db = drizzle(new FixturePool() as unknown as NodePgClient, { schema });
   const repository = { kingdom: { db }, config: { kingdomId: 2 } } as Database;
   const store = {
-    profile: async (uid: string) => {
+    getProfileById: async (uid: string) => {
       expect(uid).toBe("self");
       calls.push("profile");
       return profile;

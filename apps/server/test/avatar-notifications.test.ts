@@ -51,14 +51,14 @@ function fixture() {
   const dependencies = {
     notifications,
     db: {
-      profile: async () => ({
+      getProfileById: async () => ({
         uid: "1001",
         deviceUuid: "synthetic",
         pf: "Google",
         banTime: 0n,
         banFlag: 0,
       }),
-      accounts: async () => [{ server: 1, active: 0, uuid: "synthetic" }],
+      getAccountsByPlayerId: async () => [{ server: 1, active: 0, uuid: "synthetic" }],
     },
     cache: {
       claim: async () => true,

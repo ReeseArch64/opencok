@@ -29,7 +29,7 @@ export async function checkPlayerSummaryStore(db: KingdomDb) {
     await db.select().from(table).limit(0);
 }
 
-export async function readPlayerSummaries(db: KingdomDb, uids: string[]): Promise<Row[]> {
+export async function getLocalPlayerSummariesByIds(db: KingdomDb, uids: string[]): Promise<Row[]> {
   if (!uids.length) return [];
   if (uids.length > 50) throw new DependencyError("player batch");
   return db.transaction(
@@ -109,7 +109,7 @@ export async function readPlayerSummaries(db: KingdomDb, uids: string[]): Promis
   );
 }
 
-export async function loadPlayerSummaries(
+export async function getPlayerSummariesByIds(
   databases: Pick<Databases, "getKingdom" | "global" | "kingdoms">,
   kingdomId: number,
   uids: string[],
@@ -117,7 +117,9 @@ export async function loadPlayerSummaries(
 ): Promise<PlayerSummary[]> {
   if (!uids.length) return [];
   if (uids.length > 50) throw new DependencyError("player batch");
-  const local = await readPlayerSummaries(databases.getKingdom(kingdomId).db, [...new Set(uids)]);
+  const local = await getLocalPlayerSummariesByIds(databases.getKingdom(kingdomId).db, [
+    ...new Set(uids),
+  ]);
   const byUid = new Map(local.map((data) => [String(data.uid), data]));
   const result: PlayerSummary[] = uids.flatMap((uid) => {
     const data = byUid.get(uid);
@@ -144,7 +146,7 @@ export async function loadPlayerSummaries(
   }
   const remote = new Map<string, PlayerSummary>();
   for (const [id, ids] of groups) {
-    const rows = await readPlayerSummaries(databases.getKingdom(id).db, ids);
+    const rows = await getLocalPlayerSummariesByIds(databases.getKingdom(id).db, ids);
     for (const data of rows) {
       if (Number(data.profileServerId) !== id) throw new DependencyError("player realm");
       remote.set(String(data.uid), { data, kingdomId: id, remote: true });
