@@ -1491,6 +1491,45 @@ from current owner modifiers through general equipment to raw troop load. The
 existing 600 building-composition vectors also remain passing. Runtime owner reads,
 ordered bindings and occupied-resource endpoint integration are still pending.
 
+The internal `WorldPointDetailQuery.resourceEffects` flag now requests a resource-owner
+snapshot for types 3/37 with a present saved march. The wire command does not enable
+this flag yet. `repositories/world-resource-owner` reads the owner by UID in the
+point's existing read-only repeatable-read transaction, then reuses bounded ordinary
+effect reads and selects the additional general/building inputs. Remote queries use
+only the destination realm after local observer authorization. Missing marches and
+missing owner profiles skip these inputs; no fallback owner or effects are invented.
+
+| Input             | Selected scope                                                                                                                                                | Stable SQL ordering                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Owner profile     | Level, realm/cross-fight origin, ban time, app version, alliance/platform, civilization and suit selection; no credentials or account identifiers beyond UID. | Unique UID, duplicate detection.   |
+| Ordinary effects  | Existing bounded player-effect projection for the owner.                                                                                                      | Existing source-specific ordering. |
+| Buildings         | Owner UID, UUID, item ID, level and star.                                                                                                                     | UUID.                              |
+| New generals      | Owner UID, ID, state, building UUID, star, saved skill/talent/operation-time/refinement text.                                                                 | Numeric ID.                        |
+| General statuses  | Owner/general/status IDs and exact nullable start/end Longs.                                                                                                  | General ID, status ID.             |
+| General equipment | Owner UID, UUID, positive general ID, item ID and saved extras; no worn-flag filter.                                                                          | UUID.                              |
+| Offices           | Owner UID, general ID, office ID, nullable position and start Long.                                                                                           | Numeric general ID.                |
+
+Collections read at most 4,097 records and reject above 4,096. Duplicate identities,
+foreign owner rows, invalid integer/Long widths, oversized text, NULs and unpaired
+surrogates reject. Nullable values remain nullable for subsequent primitive restoration.
+Orphan status/equipment associations and malformed numeric content inside bounded
+saved strings remain present for the restoration rules; this reader neither repairs
+ownership nor parses catalogs. The reference transferred-owner marker is exactly
+`banTime = Long.MAX_VALUE`: general statuses and equipment skip loading in that case,
+while ordinary worn equipment, general rows and office rows remain separate inputs.
+An ordinary temporary ban does not become a relocation flag. Owner home realm and
+cross-fight origin are retained even when they differ from the destination database.
+
+Eight additional driver-fake unit tests cover local/remote snapshot boundaries,
+owner predicates and bounded projections, opt-in/skipped reads, moved-owner behavior,
+ordinary-source limits, nullable/orphan records, invalid data, rollback and readiness.
+Readiness now probes sixteen point-detail table projections, including six owner
+projections, without reading data. No database, listener, client or migration is run.
+SQL failures and invalid requested snapshot rows become the existing dependency
+failure; these tests do not establish real database isolation or the legacy lazy
+cache's availability behavior. General/equipment ConcurrentHashMap restoration,
+slot selection, owner residency and final endpoint composition still remain pending.
+
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries
 without a load field skip the troop. Malformed required fields reject. Snapshots
