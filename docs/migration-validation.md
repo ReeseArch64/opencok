@@ -935,3 +935,12 @@ parity. Required follow-ups and limitations remain in the linked source report.
 The nonempty evidence commit retains `[skip ci]`; workflows and required checks
 are unchanged, integration/client execution is deferred and merge readiness is
 not claimed. No migration or gameplay write is executed by publication.
+
+## Parallel lower block merge readiness
+
+The current snapshot integrates PR #143 and the already merged descendant PRs in this parallel
+block: #143.
+
+The maintainer authorized readiness and merge after all applicable CI checks pass on the final head.
+Original source-stage validation above remains historical; this record does not claim native-client,
+deployment or complete legacy parity.
