@@ -41,6 +41,11 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.picVer = variant;
     row.effects = "{}";
   }
+  if (spec.indexes.some((key) => key.name === "chat_avatar_profile_PRIMARY")) {
+    row.owner_uid = String(variant);
+    row.pic_ver = variant;
+    row.committed_at = BigInt(variant);
+  }
   return row;
 }
 

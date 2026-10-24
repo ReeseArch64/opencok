@@ -1,3 +1,4 @@
+import type { RealmNotifications } from "./notifications.ts";
 import type { GameStore } from "@opencok/contracts/game";
 import type { Game } from "@opencok/controllers/game";
 import type { World } from "@opencok/controllers/world";
@@ -9,6 +10,7 @@ export type ConnectionConfig = Pick<
 >;
 
 export interface ServerDependencies {
+  notifications?: RealmNotifications;
   db: GameStore & { start(): Promise<void>; health(): Promise<void>; close(): Promise<void> };
   cache: {
     command(command: string, ...args: string[]): Promise<unknown>;

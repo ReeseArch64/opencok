@@ -14089,3 +14089,24 @@ select "ownerUid", "sequence", "hash", "picVer", "committedAt", "effects", "pend
 update "opencok_kingdom"."avatar_completion" set "ownerUid" = $1, "sequence" = $2, "hash" = $3, "picVer" = $4, "committedAt" = $5, "effects" = $6, "pendingEffects" = $7 where "opencok_kingdom"."avatar_completion"."ownerUid" = $8
 delete from "opencok_kingdom"."avatar_completion" where "opencok_kingdom"."avatar_completion"."ownerUid" = $1"
 `;
+
+exports[`opencok_chat.chat_avatar_profile: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["owner_uid","varchar(20)",true,null,null,null]
+column ["kingdom_id","integer",true,null,null,null]
+column ["sequence","integer",true,null,null,null]
+column ["pic_ver","integer",true,null,null,null]
+column ["committed_at","bigint",true,null,null,null]
+column ["user_name","varchar(255)",true,null,null,null]
+column ["platform","varchar(255)",true,null,null,null]
+primary ["chat_avatar_profile_PRIMARY",["owner_uid","kingdom_id"]]
+check ["chat_avatar_profile_owner","\\"owner_uid\\" ~ '^[0-9]{1,20}$'"]
+check ["chat_avatar_profile_kingdom","\\"kingdom_id\\" > 0"]
+check ["chat_avatar_profile_sequence","\\"sequence\\" BETWEEN 1 AND 999999"]
+check ["chat_avatar_profile_version","\\"pic_ver\\" >= 0 AND \\"pic_ver\\" % 1000000 = \\"sequence\\""]
+check ["chat_avatar_profile_time","\\"committed_at\\" BETWEEN 0 AND 9007199254740991"]
+insert into "opencok_chat"."chat_avatar_profile" ("owner_uid", "kingdom_id", "sequence", "pic_ver", "committed_at", "user_name", "platform") values ($1, $2, $3, $4, $5, $6, $7)
+select "owner_uid", "kingdom_id", "sequence", "pic_ver", "committed_at", "user_name", "platform" from "opencok_chat"."chat_avatar_profile" where "opencok_chat"."chat_avatar_profile"."owner_uid" = $1
+update "opencok_chat"."chat_avatar_profile" set "owner_uid" = $1, "kingdom_id" = $2, "sequence" = $3, "pic_ver" = $4, "committed_at" = $5, "user_name" = $6, "platform" = $7 where "opencok_chat"."chat_avatar_profile"."owner_uid" = $8
+delete from "opencok_chat"."chat_avatar_profile" where "opencok_chat"."chat_avatar_profile"."owner_uid" = $1"
+`;
