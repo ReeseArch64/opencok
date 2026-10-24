@@ -16,6 +16,7 @@ function fixture() {
     military: { militaryRank: 501 },
     office: undefined,
     flowers: undefined,
+    alliance: undefined,
     taverns: [{ level: 4 }],
     generals: [],
     skills: [],

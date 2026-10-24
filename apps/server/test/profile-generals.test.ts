@@ -40,6 +40,7 @@ function fixture() {
     military: undefined,
     office: undefined,
     flowers: undefined,
+    alliance: undefined,
     taverns: [],
     generals: [general],
     skills: [skill("622800"), skill("622900"), skill("620700"), skill("unknown")],
