@@ -25,7 +25,8 @@
     "./power-office": "./src/power-office.ts",
     "./power-territory": "./src/power-territory.ts",
     "./power-lucky-day": "./src/power-lucky-day.ts",
-    "./power-throne": "./src/power-throne.ts"
+    "./power-throne": "./src/power-throne.ts",
+    "./power-resolver": "./src/power-resolver.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

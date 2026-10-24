@@ -6,7 +6,9 @@ import { guidePlayerSummary, playerSummary } from "@opencok/dtos/players";
 import { building, gold, queue, resource, user } from "@opencok/dtos/city";
 import { powerInfo } from "@opencok/dtos/power";
 import { calculatePlayerPower } from "@opencok/rules/power";
-import { powerContext } from "./power.ts";
+import { powerContext, decodeWorldPowerEffects, generalSkillPoints } from "./power.ts";
+import { dragonAttackEffect } from "@opencok/rules/power-resolver";
+import { worldPowerEffects } from "@opencok/rules/power-world";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
 import { errors, MOBILE_CLIENT_VERSION } from "@opencok/constants/game";
@@ -140,11 +142,35 @@ export class Game {
     const state = await this.db.power(uid, now);
     const profile = this.checkProfile(state.profile, now);
     if (text(profile, "uid") !== uid) throw new GameError(errors.invalid);
-    const context = powerContext(this.rules, state.knight, {
+    const ruleContext = {
       now,
       kingdomId: this.config.kingdomId,
       version: MOBILE_CLIENT_VERSION,
-    });
+    };
+    const context = powerContext(this.rules, state.knight, ruleContext);
+    if (
+      context.dragonLevelUp &&
+      context.dragonScience &&
+      state.dragons.some((dragon) => num(dragon, "dragonState") === 3)
+    ) {
+      if (!this.services.worldPowerEffects) throw new GameError(errors.unsupported, "power_state");
+      const world = worldPowerEffects(
+        decodeWorldPowerEffects(await this.services.worldPowerEffects()),
+        this.rules,
+        ruleContext,
+      );
+      const emperor = state.throneRewards.length
+        ? await this.services.emperorVersion?.()
+        : undefined;
+      context.dragonAttackPercent = dragonAttackEffect(
+        { ...state, profile },
+        this.rules,
+        ruleContext,
+        generalSkillPoints(state.generals),
+        world,
+        emperor,
+      );
+    }
     const power = calculatePlayerPower({ ...state, profile }, this.rules, context);
     return powerInfo(state.statistics, power, state.upload, this.rules);
   }
