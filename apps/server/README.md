@@ -6,7 +6,7 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
-`login.other`, `setting.xml`, `get.user.info.multi`, `get.power.info`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -208,8 +208,8 @@ default record's response, without inserting it. Existing null or malformed
 counters reject the response. Office presentation follows the ordinary kingdom's
 position enum, including canonical IDs, absent invalid ordinals and exclusion of
 the local ready-king entry. It is independent of the office effect suppression
-rules. These fields use the selected authoritative realm snapshot; routing and
-cross-realm presentation remain part of the pending command integration.
+rules. These fields use the selected authoritative realm snapshot, including for
+remote targets, instead of the legacy mixture of local and remote auxiliary reads.
 
 `publicProfileGenerals` reconstructs the public general preview using the stored
 ability JSON and owner-scoped `user_skill` rows from the same snapshot. General
@@ -246,11 +246,25 @@ remain exact in both paths. Null database columns are omitted; malformed permiss
 JSON or video fields reject the result. No player/account data is exposed by the
 alliance projection. No membership, permission, video or research mutation occurs.
 
-These components have synthetic unit coverage; they are not yet connected to
-`get.user.info`. Realm routing
-and command dispatch remain required before enabling that full query. The base
-projection intentionally has no placeholder general/alliance response. No schema change, player write,
-client validation or live-service test is introduced by this foundation.
+`get.user.info` now composes these providers into the full ordinary-realm public
+response. The command validates the authenticated observer, accepts one numeric UID
+of at most 40 digits, captures one server timestamp and uses the observer's persisted
+alliance for capacity visibility. Client realm, clock and alliance overrides have
+no effect. The global account directory selects the target realm before its data is
+read; an absent directory entry falls back to the local realm, as in the legacy
+directory lookup. A configured but unavailable realm, malformed route, mismatched
+profile realm or failed provider rejects the response without a local fallback or
+partial result. The existing two-realm configuration also bounds these reads.
+
+The response uses the target realm's name and update-marker namespace while server
+feature gates use the requesting process's rule context, matching the legacy
+projection. Missing update markers produce an empty string; dependency failures
+propagate. Correlation fields are preserved and the query emits no pushes. Local
+startup additionally checks the skill, honor, achievement, flower and alliance video
+tables; remote dependencies are checked on use. These paths have synthetic unit
+coverage only. Legacy repair/write differences, exceptional-state limits and special
+battle-realm behavior remain unresolved; native-client and live-service validation
+remain deferred. No schema migration or authoritative write is introduced here.
 
 The detailed-power foundation now includes `readPowerState`,
 `calculatePlayerPower` and the `powerInfo` DTO. The read adapter captures the
@@ -529,7 +543,7 @@ ADB, native-client validation, integration or end-to-end tests for this phase.
 | Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; detailed-power command with ordinary-realm modifier composition and unit tests                                                                 | Full own/public profiles and reconnect; documented compatibility edge cases and authoritative global-state import.                               |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                               | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
 | 3. Ranking queries                        | Persistence schema                                                                                                                                                                         | Lists, player positions, pagination and tie-breaking.                                                                                            |
 | 4. Basic mailbox                          | Persistence schema                                                                                                                                                                         | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                              | Point details, player search and favorites, including authorization for writes.                                                                  |

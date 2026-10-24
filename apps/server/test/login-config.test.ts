@@ -42,6 +42,7 @@ const unused = async (): Promise<never> => {
 };
 function store(state: LoginConfigurationState): GameStore {
   return {
+    publicProfile: unused,
     playerSummaries: unused,
     power: unused,
     configuration: async (uid) => {
