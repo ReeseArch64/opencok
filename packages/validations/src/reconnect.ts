@@ -48,3 +48,58 @@ export const reconnectMineSchema = z.strictObject({
     mineTime: field.long,
   }),
 }) satisfies z.ZodType<ReconnectMineDto>;
+
+import { queueSchema } from "./city.ts";
+import { rewardPreviewArraySchema } from "./rewards.ts";
+import type {
+  ReconnectQueuesDto,
+  ReconnectResourceDto,
+  ReconnectResourcesDto,
+  ReconnectTaskDto,
+  ReconnectTasksDto,
+} from "@opencok/dtos/reconnect";
+
+export const reconnectQueuesSchema = z.strictObject({
+  queue: z.array(queueSchema).max(32767),
+}) satisfies z.ZodType<ReconnectQueuesDto>;
+
+export const reconnectResourceSchema = z.strictObject({
+  wood: field.long,
+  stone: field.long,
+  iron: field.long,
+  food: field.long,
+  wood_bind: field.long.optional(),
+  stone_bind: field.long.optional(),
+  iron_bind: field.long.optional(),
+  food_bind: field.long.optional(),
+  silver: field.int,
+  chip: field.int,
+  diamond: field.int,
+  dragonFood: field.int,
+  dragonGold: field.int,
+  sandstone: field.int,
+  diamondstone: field.int,
+  marble: field.int,
+  granite: field.int,
+  limestone: field.int,
+}) satisfies z.ZodType<ReconnectResourceDto>;
+
+export const reconnectResourcesSchema = z.strictObject({
+  resource: reconnectResourceSchema,
+}) satisfies z.ZodType<ReconnectResourcesDto>;
+
+export const reconnectTaskSchema = z.strictObject({
+  id: field.string,
+  num: field.int,
+  state: field.int,
+  type: field.int,
+  currPhase: field.int.optional(),
+  maxPhase: field.int.optional(),
+  reward: rewardPreviewArraySchema.optional(),
+}) satisfies z.ZodType<ReconnectTaskDto>;
+
+export const reconnectTasksSchema = z.strictObject({
+  task: z.array(reconnectTaskSchema).max(32767),
+  ckfTask: z.array(reconnectTaskSchema).max(32767),
+  taskCompleteNum: field.int,
+}) satisfies z.ZodType<ReconnectTasksDto>;
