@@ -846,6 +846,21 @@ Only synthetic unit composition and fake connection objects have been exercised.
 Restored-state semantics, full moderation/media lifecycle, animated formats and production
 Node execution remain pending.
 
+The legacy `user.update.picVer` command is a separate version-allocation operation.
+`controllers/avatar-version` and `repositories/avatar-version` commit the authenticated
+profile and applicable moderation state with a distinct `avatar_version_update` intent
+under the same PostgreSQL authority from ADR-0002. The event kind is represented by its
+separate table/consumer; it contains a server-owned operation ID, version and captured
+effects, never a fabricated hash or upload-completion receipt. Existing files ownership,
+asset verification and `avatar_completion` invariants remain intact. Allocation alone
+cannot establish asset availability. Its independent mail/cache/chat acknowledgments
+and scoped recovery relay reuse existing transports; superseded metadata effects do
+not replace the current profile. Normal supported versions are implemented, while
+negative/restored versions and modulo wrap reject before mutation pending a separate
+legacy event-ordering or expected-previous CAS design. This command has received static
+checks only: test generation/execution is deferred by the user, and topic 7 remains
+incomplete. The realm runbook records configuration, schema and retry boundaries.
+
 ### Package groups
 
 | Group                       | Existing packages that can fulfill this role                                                                                  | Dependency rule                                                                           |
