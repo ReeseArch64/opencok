@@ -1,5 +1,9 @@
 import type { Rule, Rules } from "./game.ts";
-import { javaDecimal } from "./java-integer.ts";
+import {
+  generalContent as split,
+  generalInteger as integer,
+  generalMap,
+} from "./new-general-content.ts";
 import { javaFloat } from "./java-float.ts";
 import { javaIntHashMapOrder } from "./java-hash-map-order.ts";
 import { mailBlank } from "./mail.ts";
@@ -9,30 +13,6 @@ export interface NewGeneralSkillState {
   star: number;
   baseSkill: string | null;
   talent: string | null;
-}
-
-function split(raw: string | null | undefined, separator: string, limit = 65535): string[] {
-  if (raw != null && (typeof raw !== "string" || raw.length > limit))
-    throw new Error("Invalid new-general skill content");
-  if (mailBlank(raw)) return [];
-  const values = raw!
-    .split(separator)
-    .filter((value, i, all) => value.length > 0 || i === all.length - 1);
-  if (values.length > 4096) throw new Error("Too many new-general skill values");
-  return values;
-}
-
-function integer(raw: unknown): number {
-  return Number(javaDecimal(raw, 32));
-}
-
-function levels(raw: string | null, limit: number): Map<number, number> {
-  const result = new Map<number, number>();
-  for (const entry of split(raw, "|", limit)) {
-    const parts = split(entry, ";");
-    if (parts.length === 2) result.set(integer(parts[0]), integer(parts[1]));
-  }
-  return result;
 }
 
 function addSkill(result: Map<number, number>, skill: Rule | undefined, level: () => number) {
@@ -58,8 +38,8 @@ export function newGeneralSkillEffects(state: NewGeneralSkillState, rules: Rules
     state.star > 2147483647
   )
     throw new Error("Invalid new-general skill state");
-  const talents = levels(state.talent, 5000);
-  const saved = levels(state.baseSkill, 256);
+  const talents = generalMap(state.talent, integer, 5000);
+  const saved = generalMap(state.baseSkill, integer, 256);
   const base = rules.power.newGeneralBases?.get(String(state.id));
   const ids = split(base?.base_skill, ";");
   const stars = Object.keys(base ?? {})

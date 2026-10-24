@@ -42,11 +42,14 @@ export interface PowerCatalogs {
   generalSkills?: Map<string, Rule>;
   newGeneralBases?: Map<string, Rule>;
   newGeneralSkills?: Map<string, Rule>;
+  newGeneralOffices?: Map<string, Rule>;
+  newGeneralRefinement?: Map<string, Rule>;
   equipmentSets?: Map<string, Rule>;
   vip?: Map<string, Rule>;
   superVip?: Map<string, Rule>;
   allianceSciences?: Map<string, Rule>;
   prestigeLevels?: Map<string, Rule>;
+  prestigeLevelRecords?: readonly Rule[];
   civilizationFeatures?: Map<string, Rule>;
   militarySkills?: Map<string, Rule>;
   miracleBuffs?: Map<string, Rule>;
