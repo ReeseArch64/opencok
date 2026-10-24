@@ -41,3 +41,48 @@ authentication, correlation and failures. Native-client and real-service behavio
 remain unverified. No database migration or new dependency is needed for this
 layer. Rollback removes these handlers; it does not require changing player data
 or cache contents.
+
+## Hero self position and cross-throne boards
+
+`hero.self.rank` reads the configured origin realm when the authenticated profile
+has a cross-fight source. A read-only repeatable-read snapshot resolves the owner,
+the unique unfinished activity and its unexpired events. Ambiguous activity
+instances reject. Event order is explicit `readyTime, uuid` rather than unspecified
+SQL traversal. Event writers must persist their lifecycle before exposing it.
+The reader does not instantiate events, award rewards or refresh score boards.
+
+Each event resolves its existing `HERO_PERSON_RANK`, `HERO_ALLIANCE_RANK`,
+`KINGDOM_PERSON_RANK` or `KINGDOM_ALLIANCE_RANK` keys from realm bands, event
+version and stored cross-realm group. A read-only Redis script obtains the
+requester's position across the source's bands in one observation, preserving
+last-band overwrite and the 5,001-entry read boundary. Missing positions yield
+zero; a disabled ranking switch yields -1. The response retains an empty
+`eventList`, the last event's `ranking` and `type`, and only type 4 updates
+`rankingAlliance`. No publisher TTL or score ordering is changed. The supported
+shared Redis topology must contain the originating realm's published keys.
+
+`ctf.get.rank` accepts an optional positive `serverId` selecting the executing
+realm or its enabled odd/even partner. It resolves the highest published period
+from `fight_of_king_inf<realm>`; the local realm can fall back to its latest
+`fight_king_status` row. A peer without a publication is omitted. Closed periods
+are omitted without accessing their player rows. Open periods read only public
+`user_cross_throne` fields for that fight and positive origin server IDs. The
+read-only snapshot sorts descending kills and ascending persistent ID, providing
+stable ties where the reference's database order was unspecified. Current global
+`server_king_info` names replace the reference's process-local name cache.
+
+The displayed list deliberately retains the source's 19-entry boundary. Own
+position scans the full bounded list; an absent UID returns the list length,
+including the remote request's empty-UID fallback. Configured realm database
+routing replaces the old RPC and its shared ten-minute response cache, so remote
+reads cannot return a previous opponent's cached board. Separate realm snapshots
+are not a distributed transaction. More than 32,767 internal rows, missing
+required providers, invalid state and storage outages reject without partial
+success. No combat score or fight lifecycle update is performed.
+
+Synthetic hero/throne command, mapping, cache and SQL-adapter tests cover exact
+longs, gates, origin routing, tied ordering, self positions, limits, correlation,
+missing publications, read-only transactions and invalid state. Real Redis,
+PostgreSQL, cross-process events and native clients have not been exercised.
+These readers need no schema migration and can be rolled back without changing
+stored scores or event state.
