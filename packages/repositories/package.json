@@ -21,7 +21,8 @@
     "./reconnect-mine": "./src/reconnect-mine.ts",
     "./ranking": "./src/ranking.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
-    "./mail": "./src/mail.ts"
+    "./mail": "./src/mail.ts",
+    "./mail-save": "./src/mail-save.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",

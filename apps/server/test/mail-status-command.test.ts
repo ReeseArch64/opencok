@@ -28,6 +28,7 @@ function fixture() {
     publicProfile: unused,
     playerRanking: unused,
     allianceRanking: unused,
+    mailSave: unused,
     mailStatus: async (uid, query) => {
       calls.push({ uid, query });
       return state;
