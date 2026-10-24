@@ -18,6 +18,7 @@ function fixture() {
     equipment: [],
     heroes: [],
     dragons: [],
+    dragonSkills: [],
     knight: undefined,
     items: [],
     states: [],

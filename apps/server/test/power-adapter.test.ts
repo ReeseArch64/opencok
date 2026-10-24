@@ -56,7 +56,9 @@ function database(
         };
       }
       if (table === "user_civilization_science") return { rows: [[2000, 3]] };
-      if (table === "t_hero") return { rows: [[7001]] };
+      if (table === "t_hero") return { rows: [[7001, 5, 20]] };
+      if (table === "user_pet_dragon") return { rows: [[6001, 3, 5, 1]] };
+      if (table === "user_pet_dragon_skill") return { rows: [[6001, 1, "8001", 3, 2]] };
       if (table === "user_knight_title")
         return { rows: [[8001, 8002, Buffer.from(`{"8002":${now + 1}}`)]] };
       if (table === "user_item") return { rows: [["talisman", 1, "9007199254740993"]] };
@@ -86,7 +88,11 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(snapshot.armies).toEqual([{ armyId: "107001", free: 1, pve: 2, defence: 3, march: 4 }]);
   expect(snapshot.walls).toEqual([{ armyId: "108001", num: 5 }]);
   expect(snapshot.civilizationSciences).toEqual([{ baseItemID: 2000, level: 3 }]);
-  expect(snapshot.heroes).toEqual([{ heroid: 7001 }]);
+  expect(snapshot.heroes).toEqual([{ heroid: 7001, level: 5, exp: 20 }]);
+  expect(snapshot.dragons).toEqual([{ itemId: 6001, dragonState: 3, lv: 5, useFlag: 1 }]);
+  expect(snapshot.dragonSkills).toEqual([
+    { ownerId: 6001, index1: 1, skillId: "8001", level: 3, strengthenLevel: 2 },
+  ]);
   expect(snapshot.upload).toEqual({
     updateTime: 9007199254740993n,
     banTime: 9007199254740995n,
@@ -98,7 +104,7 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const selects = queries.filter((query) => query.text.startsWith("select"));
-  expect(selects).toHaveLength(20);
+  expect(selects).toHaveLength(21);
   expect(snapshot.profile?.civilizationType).toBe(2);
   expect(snapshot.prestige).toEqual([{ civilizationType: 2, prestigeValue: 9007199254740993n }]);
   expect(snapshot.military).toEqual({ skill: "1001|1002" });
@@ -175,7 +181,7 @@ test("power readiness checks each required table without reading records or writ
   };
   await checkPowerStore(drizzle(client as unknown as NodePgClient, { schema }));
   const tables = queries.map((query) => query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1]);
-  expect(new Set(tables).size).toBe(21);
+  expect(new Set(tables).size).toBe(22);
   for (const table of [
     "userprofile",
     "playerinfo",
@@ -189,6 +195,7 @@ test("power readiness checks each required table without reading records or writ
     "user_equip",
     "t_hero",
     "user_pet_dragon",
+    "user_pet_dragon_skill",
     "user_knight_title",
     "user_item",
     "pic_upload_record",

@@ -24,6 +24,7 @@ export interface PowerSnapshot {
   equipment: readonly Row[];
   heroes: readonly Row[];
   dragons: readonly Row[];
+  dragonSkills: readonly Row[];
   knight: Row | undefined;
   items: readonly Row[];
   states: readonly Row[];
