@@ -7,6 +7,7 @@ import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_buil
 import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { saga_tower_science } from "@opencok/drizzle/schema/opencok_kingdom/saga_tower_science";
+import { foreigen_sciences } from "@opencok/drizzle/schema/opencok_kingdom/foreigen_sciences";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { t_hero } from "@opencok/drizzle/schema/opencok_kingdom/t_hero";
 import { user_pet_dragon } from "@opencok/drizzle/schema/opencok_kingdom/user_pet_dragon";
@@ -38,6 +39,7 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     user_science,
     user_civilization_science,
     saga_tower_science,
+    foreigen_sciences,
     user_equip,
     t_hero,
     user_pet_dragon,
@@ -93,6 +95,7 @@ export function readPowerState(
         sciences: [],
         civilizationSciences: [],
         sagaSciences: [],
+        foreignSciences: [],
         equipment: [],
         heroes: [],
         dragons: [],
@@ -166,6 +169,11 @@ export function readPowerState(
         .from(saga_tower_science)
         .where(eq(saga_tower_science.uid, uid))
         .orderBy(asc(saga_tower_science.itemid));
+      const foreignSciences = await tx
+        .select({ itemid: foreigen_sciences.itemid, level: foreigen_sciences.level })
+        .from(foreigen_sciences)
+        .where(eq(foreigen_sciences.uid, uid))
+        .orderBy(asc(foreigen_sciences.itemid));
       const equipment = await tx
         .select({
           itemId: user_equip.itemId,
@@ -340,6 +348,7 @@ export function readPowerState(
         sciences,
         civilizationSciences,
         sagaSciences,
+        foreignSciences,
         equipment,
         heroes,
         dragons,

@@ -197,7 +197,9 @@ Optional power catalogs are `general.xml`, `science.xml`, `scienceRace.xml`,
 `dragon_base.xml`, `dragon_new.xml`, `status.xml`, `sk.xml`, `suit.xml`,
 `vip.xml`, `svip.xml`, `alliancescience.xml`, `reputation_level.xml`,
 `civilization_feature.xml`, `wr_skill.xml`, `miracle_buff.xml`,
-`dragon_skill.xml`, `activity_event.xml`, `office.xml` and `life_treeS.xml`.
+`dragon_skill.xml`, `activity_event.xml`, `office.xml`, `life_treeS.xml`,
+`saga_tower_science_base.xml`, `foreign_civilization_up.xml` and
+`foreign_civilization_base.xml`.
 They use the same validated XML loader.
 Only an internal `rules` → `contracts` dependency is added; no external library
 or schema migration is required. Synthetic unit tests cover calculations, wire
@@ -216,6 +218,17 @@ in the same snapshot and computes initial-item, completed-research and active-st
 contributions, including random effects and the throne override. Float addition
 order and signed status overflow are preserved. Statuses ending at the snapshot
 time are excluded, matching reconstruction of the legacy active-state map.
+
+Research bonuses include saga, foreign and civilization research after the initial
+and ordinary-science contributions, retaining float rounding between every addition.
+Saga/foreign entries use the persisted item/level plus the catalog offset, skip
+hidden base entries and pair effect/value tokens only while both lists have values.
+Stored level-zero entries can contribute. Civilization values divide the parsed
+float by 100, keep the legacy missing-value default, and traverse last-per-base
+records in Java hash order. This shares the bounded hash traversal used by tree
+effects. No query finishes research, unlocks entries or spends points. The legacy
+foreign-science table spelling is preserved in the repository; foreign modifiers
+do not introduce an additional foreign-power field in the detailed wire response.
 
 The same snapshot now retains general ability JSON, equipped extra attributes,
 strength levels and selected decomposed-set slots. `generalSkillPoints` decodes
