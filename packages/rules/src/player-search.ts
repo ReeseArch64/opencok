@@ -155,7 +155,7 @@ export function selectPlayerSearch(
   };
 }
 
-export function sharedSearchProfile(row: Row, rules: Rules, now: number): Row {
+export function sharedSearchProfile(row: Row, rules: Pick<Rules, "power">, now: number): Row {
   if (!Number.isSafeInteger(now) || now < 0) return invalid();
   const number = (key: string, fallback = 0) => {
     const value = row[key] ?? fallback;

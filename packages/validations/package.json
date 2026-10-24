@@ -44,7 +44,8 @@
     "./battle-ranking": "./src/battle-ranking.ts",
     "./nickname-change": "./src/nickname-change.ts",
     "./reconnect-marches": "./src/reconnect-marches.ts",
-    "./response": "./src/response.ts"
+    "./response": "./src/response.ts",
+    "./shared-user": "./src/shared-user.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",
