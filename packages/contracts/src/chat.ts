@@ -1,3 +1,4 @@
+import type { ChatAvatarProfileStore } from "./chat-avatar-profile.ts";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
 
 export interface Session {
@@ -107,6 +108,7 @@ export function isSafeInteger(value: unknown): value is number {
 }
 
 export interface ChatRepository {
+  profiles: ChatAvatarProfileStore;
   sessions: SessionStore;
   messages: MessageStore;
   loadPlayerState: PlayerStateLoader;
@@ -143,3 +145,16 @@ export function isChatSessionTicket(value: unknown, now: number): value is ChatS
     value.expire > Math.floor(now / 1000)
   );
 }
+
+export const chatDiscoveryPaths = [
+  "/api/v1global_config",
+  "/chat/server/links",
+  "/chat/server/all",
+] as const;
+export type ChatDiscoveryPath = (typeof chatDiscoveryPaths)[number];
+export interface ChatDiscoveryReply {
+  code: 1;
+  data: unknown;
+  message?: string;
+}
+export type ChatDiscovery = (path: ChatDiscoveryPath) => Promise<ChatDiscoveryReply>;

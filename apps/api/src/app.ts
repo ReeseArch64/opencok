@@ -1,3 +1,4 @@
+import { createChatDiscovery } from "@opencok/connection/chat-discovery";
 import { Context, Effect, Layer } from "effect";
 import { ApiConfig } from "./config.ts";
 import { acquireResource, fromPromise } from "@opencok/core/resource";
@@ -13,6 +14,7 @@ export class ApiDependencies extends Context.Service<
     accounts: Parameters<typeof createHandler>[0];
     directory: Parameters<typeof createHandler>[1];
     redis: Parameters<typeof createHandler>[2];
+    chatDiscovery?: Parameters<typeof createHandler>[3];
   }
 >()("@opencok/api/Dependencies") {}
 
@@ -30,13 +32,23 @@ export const ApiDependenciesLive = Layer.effect(
     yield* fromPromise("api.directory", () => directory.read()).pipe(Effect.uninterruptible);
     yield* fromPromise("api.accounts.start", () => accounts.start()).pipe(Effect.uninterruptible);
     yield* fromPromise("api.redis", () => redis.health()).pipe(Effect.uninterruptible);
-    return { accounts, directory, redis };
+    return {
+      accounts,
+      directory,
+      redis,
+      chatDiscovery: config.chatUrl
+        ? createChatDiscovery({
+            origin: config.chatUrl,
+            timeoutMs: config.timeoutMs,
+          })
+        : undefined,
+    };
   }),
 );
 
 export const createApp = Effect.gen(function* () {
-  const { accounts, directory, redis } = yield* ApiDependencies;
-  return createHandler(accounts, directory, redis);
+  const { accounts, directory, redis, chatDiscovery } = yield* ApiDependencies;
+  return createHandler(accounts, directory, redis, chatDiscovery);
 });
 
 export const serveApi = Effect.gen(function* () {
