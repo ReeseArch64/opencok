@@ -33,6 +33,7 @@ function fixture() {
     territoryTrees: [],
     luckyDay: undefined,
     powerServer: undefined,
+    throneRewards: [],
   };
   const rules = new Rules(
     new Map(),

@@ -84,6 +84,7 @@ function fixture() {
     territoryTrees: [],
     luckyDay: undefined,
     powerServer: undefined,
+    throneRewards: [],
   };
   return { state, rules };
 }
@@ -116,6 +117,7 @@ function empty(): PowerSnapshot {
     territoryTrees: [],
     luckyDay: undefined,
     powerServer: undefined,
+    throneRewards: [],
   };
 }
 

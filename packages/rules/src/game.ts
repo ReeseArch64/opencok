@@ -39,6 +39,7 @@ export interface PowerCatalogs {
   activityPanels?: Map<string, Rule>;
   mergeActivities?: Map<string, Rule>;
   luckyEffects?: Map<string, Rule>;
+  monarchTitles?: Map<string, Rule>;
 }
 export class Rules {
   constructor(
