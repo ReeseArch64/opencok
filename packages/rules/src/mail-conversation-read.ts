@@ -1,3 +1,4 @@
+import { javaDecimal } from "./java-integer.ts";
 import type {
   MailConversationReadEffect,
   MailConversationReadQuery,
@@ -6,29 +7,17 @@ import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { mailServerType } from "./mail.ts";
 
-const digitZeros = [
-  0x30, 0x660, 0x6f0, 0x7c0, 0x966, 0x9e6, 0xa66, 0xae6, 0xb66, 0xbe6, 0xc66, 0xce6, 0xd66, 0xe50,
-  0xed0, 0xf20, 0x1040, 0x1090, 0x17e0, 0x1810, 0x1946, 0x19d0, 0x1a80, 0x1a90, 0x1b50, 0x1bb0,
-  0x1c40, 0x1c50, 0xa620, 0xa8d0, 0xa900, 0xa9d0, 0xaa50, 0xabf0, 0xff10,
-];
 const int = (value: number) =>
   Number.isInteger(value) && value >= -2147483648 && value <= 2147483647;
 function invalid(): never {
   throw new GameError(errors.invalid, "mail");
 }
 function decimal(token: string): number {
-  const negative = token[0] === "-";
-  const start = negative || token[0] === "+" ? 1 : 0;
-  if (start === token.length) return invalid();
-  let value = 0;
-  for (let index = start; index < token.length; index++) {
-    const code = token.charCodeAt(index);
-    const zero = digitZeros.find((zero) => code >= zero && code <= zero + 9);
-    if (zero === undefined) return invalid();
-    value = value * 10 + code - zero;
-    if (value > (negative ? 2147483648 : 2147483647)) return invalid();
+  try {
+    return Number(javaDecimal(token, 32));
+  } catch {
+    return invalid();
   }
-  return value === 0 ? 0 : negative ? -value : value;
 }
 
 export function mailConversationReadQuery(

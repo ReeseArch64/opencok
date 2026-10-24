@@ -1,3 +1,4 @@
+import type { ChatAvatarProfileStore } from "./chat-avatar-profile.ts";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
 
 export interface Session {
@@ -107,6 +108,7 @@ export function isSafeInteger(value: unknown): value is number {
 }
 
 export interface ChatRepository {
+  profiles: ChatAvatarProfileStore;
   sessions: SessionStore;
   messages: MessageStore;
   loadPlayerState: PlayerStateLoader;

@@ -2,6 +2,19 @@ import { expect, test } from "bun:test";
 import { parseServerEnvironment } from "../src/server.schema";
 
 const base = { GAME_LOGIN_SECRET: "synthetic-secret", GAME_RESOURCES: "synthetic-resources" };
+test("general player search defaults to cross mode and accepts explicit true or false only", () => {
+  expect(parseServerEnvironment(base).GAME_CROSS_SEARCH).toBe(true);
+  expect(parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: "false" }).GAME_CROSS_SEARCH).toBe(
+    false,
+  );
+  expect(parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: "true" }).GAME_CROSS_SEARCH).toBe(
+    true,
+  );
+  for (const value of ["", "0", "1", "TRUE", "yes"])
+    expect(() => parseServerEnvironment({ ...base, GAME_CROSS_SEARCH: value })).toThrow(
+      "GAME_CROSS_SEARCH",
+    );
+});
 test("server settings validate realm routing and require private inputs", () => {
   expect(parseServerEnvironment(base).KINGDOM_ID).toBe(1);
   expect(parseServerEnvironment({ ...base, KINGDOM_ID: "2", GAME_PORT: "0" }).KINGDOM_ID).toBe(2);
@@ -90,4 +103,54 @@ test("realm chat session issuance is opt-in and requires a valid internal endpoi
         CHAT_SIGNING_SECRET: "synthetic",
       }),
     ).toThrow("GAME_CHAT_SESSION_URL");
+});
+
+test("realm avatar integration is optional and requires an explicit files origin and key path", () => {
+  expect(parseServerEnvironment(base).GAME_FILES_URL).toBeUndefined();
+  const configured = {
+    ...base,
+    GAME_FILES_URL: "http://files.internal:8084",
+    FILES_SIGNING_KEY_FILE: "/synthetic/key",
+  };
+  expect(parseServerEnvironment(configured).GAME_FILES_URL).toBe("http://files.internal:8084");
+  expect(() =>
+    parseServerEnvironment({ ...base, GAME_FILES_URL: configured.GAME_FILES_URL }),
+  ).toThrow("FILES_SIGNING_KEY_FILE");
+  for (const url of [
+    "invalid",
+    "file:///private",
+    "http://u:p@files.internal/",
+    "http://files.internal/path",
+    "http://files.internal/?private=x",
+    "http://files.internal/#x",
+  ])
+    expect(() => parseServerEnvironment({ ...configured, GAME_FILES_URL: url })).toThrow(
+      "GAME_FILES_URL",
+    );
+});
+
+test("avatar completion requires its own private chat endpoint, files and signing secret", () => {
+  const configured = {
+    ...base,
+    GAME_AVATAR_CHAT_URL: "http://chat.internal/_internal/avatar-profile",
+    GAME_FILES_URL: "http://files.internal",
+    FILES_SIGNING_KEY_FILE: "/synthetic/key",
+    CHAT_SIGNING_SECRET: "synthetic",
+  };
+  expect(parseServerEnvironment(base).GAME_AVATAR_CHAT_URL).toBeUndefined();
+  expect(parseServerEnvironment(configured).GAME_AVATAR_CHAT_URL).toBe(
+    configured.GAME_AVATAR_CHAT_URL,
+  );
+  for (const field of ["GAME_FILES_URL", "FILES_SIGNING_KEY_FILE", "CHAT_SIGNING_SECRET"])
+    expect(() => parseServerEnvironment({ ...configured, [field]: undefined })).toThrow(field);
+  for (const url of [
+    "http://chat.internal/external/session",
+    configured.GAME_AVATAR_CHAT_URL + "?x=1",
+    configured.GAME_AVATAR_CHAT_URL + "/",
+    "http://u:p@chat.internal/_internal/avatar-profile",
+    "https://cok.chat/_internal/avatar-profile",
+  ])
+    expect(() => parseServerEnvironment({ ...configured, GAME_AVATAR_CHAT_URL: url })).toThrow(
+      "GAME_AVATAR_CHAT_URL",
+    );
 });

@@ -10,7 +10,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
-`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -42,7 +42,7 @@ docker compose --profile dev up --build -d --wait
 ```
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the
-private `GAME_LOGIN_SECRET` exception. Optional chat integration settings also come
+private `GAME_LOGIN_SECRET` exception. Optional chat and avatar integration settings also come
 from the environment. Other development values are direct
 Compose settings, still validated by the shared Zod schemas through `@opencok/env/effect`. Authorized XML comes from the complete local reference
 copy at `data/reference/server/runtime/base/resource`; the runtime does not
@@ -57,6 +57,8 @@ service/resource settings through its process environment.
 | `GLOBAL_DATABASE_NAME`           | Defaults to `opencok_global`.                                                                                                        |
 | `GAME_CHAT_SESSION_URL`          | Optional internal HTTP(S) endpoint ending in `/external/session`; unset disables chat session issuance.                              |
 | `CHAT_SIGNING_SECRET`            | Required when the session URL is configured; must match the maintained chat service.                                                 |
+| `GAME_FILES_URL`                 | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                        |
+| `FILES_SIGNING_KEY_FILE`         | Required explicit key-file path when the files origin is configured; same protected key as the files service.                        |
 | `GAME_LOGIN_SECRET`              | Required private secret matching the legacy mobile login issuer.                                                                     |
 | `GAME_RESOURCES`                 | Required directory of authorized, extracted 12.06.0 XML rules.                                                                       |
 | `GAME_REDIS_URL`                 | Defaults to `redis://127.0.0.1:6379/0`.                                                                                              |
@@ -64,6 +66,8 @@ service/resource settings through its process environment.
 | `GAME_HOST`                      | Bind address, default `127.0.0.1`.                                                                                                   |
 | `GAME_PORT` / `GAME_HEALTH_PORT` | Defaults to `19933` / `18090`.                                                                                                       |
 | `GAME_MAP_SIZE`                  | Defaults to `1200`.                                                                                                                  |
+| `GAME_CROSS_SEARCH`              | Defaults to `true`; `false` restricts general player search to the local realm without global search reads.                          |
+| `GAME_PLAYER_KINGDOMS`           | Optional public-read routes, such as `1:opencok_kingdom_1,2:opencok_kingdom_2`; at most two realms.                                  |
 | `GAME_MAIL_TRANSLATION`          | Defaults to `true`; `false` suppresses category-chat translation IDs and stored-translation reads.                                   |
 | `DEPENDENCY_TIMEOUT_MS`          | Defaults to `5000`.                                                                                                                  |
 
@@ -85,7 +89,8 @@ read-only mobile originals must be extracted in a separate working directory.
 `setting.xml` is optional. Its command returns every configured setting with its ID
 and values encoded as strings, or an empty array when the catalog is absent. XML
 catalogs accept single records and multiple/nested groups. Duplicate IDs fail except
-for goods, features, research, equipment, statuses and dragon skills, where the last record wins
+for goods, features, research, equipment, statuses, dragon skills, activity panels,
+rewards, mail, field monsters, army formations, neutral resources and barbarians, where the last record wins
 as in the legacy cache. Values retain leading
 zeroes and whitespace; malformed records and document type declarations fail loading.
 
@@ -899,6 +904,1232 @@ conversations and transaction failures. Real PostgreSQL execution, concurrency a
 native-client behavior remain unverified. `chatMail.read`, conversation deletion,
 content edge cases and synchronization flows remain pending.
 
+## World favorites
+
+[Issue #82](https://github.com/ReeseArch64/opencok/issues/82) connects all three owned
+favorites commands through `GameServices.worldFavorites`, backed by the existing kingdom
+`world_favorite` table and read-only global `server_info` metadata. Startup checks both
+tables; no schema, migration, new package or environment setting is added. The realm
+identity needs SELECT on global server metadata and ordinary favorite-table read/write
+permissions. These commands manage bookmarks and do not load or modify map points.
+
+| Command            | Inputs                                                                        | Response                                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `world.favo.get`   | Authenticated owner                                                           | `favo`: SFS array of objects with stored non-null `point`, `type`, `name`, `server`, `createTime`, `cityType`, `resType`, plus normalized `serverType` |
+| `world.favo.add`   | Int `point`/`type`, String `name`; optional Int `server`/`cityType`/`resType` | Int `state: 1`, Int `point`, Long `createTime` sampled after persistence                                                                               |
+| `world.favo.delme` | Equal-length SFS arrays `point` and `server`, each containing Int elements    | Int `state`, plus `pointArray`/`serverArray` echoing order and duplicates                                                                              |
+
+Every operation validates the authenticated local profile and ban state. An owner lock
+serializes mutations; list uses a repeatable-read snapshot and shared profile lock. A
+favorite is identified by owner, point and server. Add replaces all mutable fields and
+persisted creation time through one atomic upsert, improving the legacy separate
+DELETE/INSERT failure boundary. Repeating an add refreshes that favorite's timestamp;
+it is not a request receipt. Supplied owner fields never override session identity.
+The persisted timestamp is captured at command start; the add response samples time
+again after the write, preserving the reference's separate clock reads.
+
+Names retain their original whitespace. Empty names are accepted; JSON-special characters,
+BMP emoji ranges, supplementary characters and unbalanced braces reject as in the
+reference. A frozen synthetic Java 8 primitive oracle covers every BMP character and
+49 additional boundary strings. PostgreSQL-incompatible NUL/unpaired surrogates and
+names longer than 255 UTF-16 units reject explicitly, including overlong whitespace that
+the legacy blank-length helper allowed to reach its database. These are documented
+storage boundaries, not silent normalization. Existing readable names are projected as
+stored; listing does not reapply add-time name validation.
+
+Omitted server uses the local realm, independently of the catalog. An explicit server
+must not exceed the largest ID in authorized `servers.xml` whose `test` value is not
+exactly `true`; IDs use the existing Java decimal parser. Empty catalogs retain the
+reference minimum-integer maximum, and malformed non-test IDs fail. Point, type and
+server fields remain signed 32-bit integers; no new coordinate or lower-bound rule is
+invented. The referenced realm need not have a configured game database because this
+operation stores bookmark metadata only.
+
+Listing orders by server ascending and creation time descending with nulls last, matching
+legacy null placement. Equal timestamps have a deterministic point tie-breaker where the
+legacy query specified no order. Nullable fields are omitted and stored longs remain
+exact. Global types normalize special/test families with the reference's server-ID cutoff;
+missing rows and unrecognized types become ordinary type zero. Fresh bounded global reads
+replace the legacy process-local type cache. A failed global query rejects the list rather
+than fabricating metadata. The kingdom and global snapshots are independent.
+
+Deletion matches complete point/server pairs under the session owner, never the Cartesian
+product of both arrays. Duplicate pairs are deduplicated only for SQL; echoed arrays keep
+them. Up to 500 unique pairs are deleted per statement within one transaction. Empty,
+missing and repeated selections succeed. A database failure after authorization rolls
+back and returns `state: 0`; a lost commit acknowledgment can return zero after deletion,
+and repeating it is safe. Failures before owner validation remain command errors. No
+push or mailbox synchronization side effect is introduced.
+
+No gameplay favorite quota is added. Reads bound allocations to the SFS array limit plus
+one sentinel row, and the complete correlated response must fit the maintained transport
+frame limit. Oversized output fails without returning a partial list or deleting rows.
+Unit tests compose actual commands, rules, DTOs and Drizzle adapters with synthetic
+clients and wire round trips, including rollback, lost replies, owner isolation, server
+metadata, pair deletion and limits. No socket, listener, live database, ADB or client was
+used; PostgreSQL concurrency, collation and live client rendering remain unvalidated.
+
+## Map player search
+
+`world.search.user` searches public player identities in the local realm or a realm
+already configured through `GAME_PLAYER_KINGDOMS`. The runtime supplies
+`GameServices.worldSearch` and checks the existing local `userprofile`, `playerinfo`
+and `alliance` columns. Remote availability does not gate local startup. No schema,
+configuration variable, external package, global account query or game-state write
+is added.
+
+| Parameter  | Type and default                  | Behavior                                                                      |
+| ---------- | --------------------------------- | ----------------------------------------------------------------------------- |
+| `name`     | Optional String, default empty    | Substring pattern; whitespace is retained. Empty searches all eligible names. |
+| `page`     | Optional Int, default 1           | Values at or below zero use page 1. Eight results per page.                   |
+| `serverId` | Optional Int, default local realm | Must identify a positive, explicitly configured public-read realm.            |
+
+The response contains only `list`, an SFS array, plus the ordinary request correlation
+fields. Each entry contains String `uid`/`name`/`abbr` and Int `pointId: 1203`.
+Non-null `pic` is a String, `picVer` is an Int and `power` is an exact signed Long;
+null optional values are omitted. Missing alliance abbreviations become the empty
+string. The fixed point identifier preserves the reference query and does not disclose
+or calculate the current castle location. No server ID, private profile columns,
+page/total envelope or push is added.
+
+The local observer must still belong to the authenticated realm and pass ban checks.
+Local searches share that read-only repeatable-read transaction. A remote search
+starts its own read-only snapshot after local observer validation; this is not an
+atomic cross-database snapshot. The selected database defines the target population,
+including any visiting profiles present there, as in the reference query. It does
+not route individual matches through the global account directory.
+
+Target `banTime` equal to either 9223372036854775807 or 9223372036854775806 is excluded.
+SQL null ban times are also excluded by the original inequality semantics. Temporary
+ban times and target ban flags do not add a filter. Player statistics and alliance
+membership use left joins, so a missing statistics row does not hide the player.
+This command does not apply the castle-level filter used by `search.player`.
+
+The bound PostgreSQL `ILIKE` pattern retains `%` and `_` wildcards and backslash pattern
+escapes. Apostrophes remain data. It does not run the legacy interpolated string
+through MySQL SQL-literal unescaping; combinations such as backslash plus `n` or
+repeated backslashes can therefore differ. Names are not trimmed or normalized.
+NUL and malformed Unicode reject because they cannot be stored or transmitted as
+valid PostgreSQL text; the search string must fit the existing 32,767-byte SFS limit.
+PostgreSQL case and accent matching follows the database collation. Synthetic tests
+prove ASCII case and wildcard query composition, not parity with a live MySQL
+collation; Unicode/accent parity remains unverified.
+
+The legacy query specifies no order. This adapter orders by UID ascending to make
+page boundaries deterministic within a snapshot; separate page requests can still
+observe intervening changes. Offset arithmetic preserves Java signed 32-bit wrapping
+for nonnegative results, including wrapped page-one offsets. Negative wrapped offsets
+reject before querying instead of triggering a database error or the local Java
+helper's empty-result fallback. Unknown realms, unavailable databases and invalid
+results also fail explicitly, without substituting local or empty success. Duplicate
+or excess rows reject, and the complete correlated extension must fit the frame limit.
+
+`test/world-search.test.ts` composes the actual command, rules, DTO and Drizzle adapters
+with synthetic database clients. It covers defaults, pages, routing, observer checks,
+ban sentinels, null joins, exact longs, bound patterns, failures and transport limits.
+No listeners, databases or client sessions are used. Live collation, query plans,
+concurrent snapshots and native rendering remain unvalidated. The separate general
+`search.player` command is documented below; implemented local point-detail branches and remaining topic-5 gaps are documented below.
+
+## General player search policy
+
+`search.player` is connected through `GameServices.playerSearch`, using the existing
+profile, building, statistics, alliance and global-directory tables. It requires
+String `key` and Int `page`; neither parameter has a default. The runtime passes
+`GAME_CROSS_SEARCH`, which defaults to true as in the reference. Explicit false uses
+only local search. Remote reads are restricted to `GAME_PLAYER_KINGDOMS`; unknown
+routes fail visibly rather than returning a fabricated local or empty result.
+Both settings are forwarded by Compose. [Issue #84](https://github.com/ReeseArch64/opencok/issues/84)
+tracks local delivery and review. No schema migration or new dependency is required.
+
+The query uses Java-compatible signed decimal parsing for `lookfor.k1` (minimum
+castle level) and `lookfor.k2` (advertised maximum), including BMP decimal digits.
+It retains the supplied prefix key and page without trimming or clamping. The local
+candidate limit is maximum plus one. Catalog maximum must be between zero and
+32,766, so candidates fit the existing collection bound; malformed or larger catalogs
+reject explicitly. The adapter validates the authenticated local observer's identity,
+realm and bans before querying candidates. The local query uses a bound prefix ILIKE
+pattern, a left alliance join and inner main-building/statistics joins; the selector
+additionally checks UID and level. Raw castle level is used without star levels.
+Target ban flags/times do not add a filter for this general command.
+
+The compatibility pipeline is intentionally asymmetric:
+
+| Mode        | Selection                                                                                                                                                                                         | Response metadata                                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Local       | Slice the bounded local candidate list using the requested page.                                                                                                                                  | Int page is always 1; Long total counts all local candidates, including the sentinel.                        |
+| Cross-realm | Slice local candidates to page 1, calculate directory budget as twice the candidate limit minus that seed, append eligible remote records, then slice the combined list using the requested page. | Int page echoes the request; Long total counts the seed plus eligible remote records before the final slice. |
+
+Both responses contain Long max and the original String key. Pages contain ten
+entries. Arrays with ten entries or fewer bypass slicing entirely, even for a
+nonpositive or out-of-range page. Longer arrays use maximum divided by ten as the
+page cap. The pure slicer preserves signed 32-bit start/end wrapping; negative
+indices that would throw in Java reject, while wrapped empty ranges remain empty.
+A null within a sliced window ends that window. SQL fetches the bounded candidate
+window before the compatibility selector applies these page rules.
+
+Directory filtering uses minimum castle level minus two with signed wrapping. The
+remote candidate budget must fit 32,767 entries. Remote inputs model insertion order
+into the legacy shared-info map, including missing/default records; duplicate map
+keys replace values without moving the original insertion position. The existing
+bounded Java hash traversal determines remote order, supporting at most 4,096 keys
+and rejecting tree-bin collision cases instead of inventing their order. A missing UID
+is skipped; a mismatched UID/key or malformed present level rejects. Only positive
+main-building levels at or above the configured threshold enter the combined list.
+Unlike the legacy per-entry catch-and-skip behavior, malformed present identities and
+castle levels fail explicitly. The adapter retains missing-profile placeholders after
+found profiles, preserving their participation in hash traversal before result filtering.
+Directory mapping rows are limited before account eligibility is checked. That window
+is not refilled after missing, local-realm or low-level accounts are excluded.
+
+Local projection emits the selected nullable identity, language, picture, power,
+alliance name/abbreviation and castle level fields, omitting null values. Zero and
+negative local power remain exact Long values. Remote projection follows the
+shared-public-profile shape: mainBuildingLevel is duplicated into level when positive;
+power, VIP expiry and offline time appear only when positive; picture/frame, GM,
+cross-fight origin, VIP/SVIP and membership-rank integers retain their defaults.
+Remote alliance ID is optional and alliance name is not added. Each entry carries
+its selected serverId. Only public fields are serialized; no private profile data or
+unsolicited push is introduced. The connected command retains ordinary correlation and
+checks the complete extension against MAX_FRAME, rejecting oversized output without
+truncating it.
+
+`test/fixtures/player-search.json` freezes 4,065 cases from an independently authored
+Java 8 primitive list/arithmetic/HashMap probe: 1,680 slicing cases and 2,385 search
+cases. Inputs use synthetic identifiers and no private game class was executed.
+Ordinary unit tests require no Java runtime. Additional tests exercise catalog syntax,
+remote budgets, sparse/default fields, long boundaries and malformed inputs, with SFS
+round trips. `test/player-search-command.test.ts` additionally composes the actual
+command/rules/DTOs/Drizzle adapters with synthetic clients, covering authentication,
+SQL predicates, routing, two-stage directory selection, sparse profiles, VIP, failures,
+batch snapshots and exact frame boundaries. All verification remains unit-only; no
+listener, database service or client was used.
+
+Local observer and candidate reads share one read-only repeatable-read snapshot.
+Cross mode then reads global `usermapping` rows of mappingType name with a bound
+prefix pattern, followed by eligible `account_new` rows in the same global snapshot.
+The second query selects only gameUid/server, excludes the local server and uses the
+wrapped minimum-level-minus-two threshold. Mapping/account active flags do not add a
+filter. Only canonical positive decimal server strings are accepted; malformed aliases,
+unknown routes and directory/profile realm mismatches fail. No account repair occurs.
+
+Each selected remote realm uses one read-only repeatable-read snapshot and batches at
+most 500 player IDs per query. Only public profile metadata and the required statistics,
+raw castle level, VIP score/expiry/SVIP level and membership rank are selected. Missing
+statistics, castle or VIP rows yield their documented empty/default presentation without
+creating rows. Ambiguous duplicate castles/profiles reject rather than choose one.
+The membership rank is looked up by UID and used only for a nonblank alliance ID,
+matching the reference accessor. Blank alliance abbreviations use an empty string.
+VIP is zero at or after expiry; while active, the last qualifying entry in catalog
+order determines level from score. Stored VIP level is not substituted for this rule.
+
+This path reads current authoritative remote metadata instead of consuming the legacy
+shared-profile Redis cache. It can therefore show a changed name, picture, VIP expiry
+or missing profile sooner than that cache, and it needs the configured remote database
+available at query time. No cache repair, cache import or derived profile write is
+performed. Restoring or depending on the legacy cache's stale/TTL behavior is not claimed.
+Local, global and remote snapshots are separate, with no cross-database atomicity claim.
+
+Local rows use UID/building-UUID order and directory rows use UID order where the
+reference SQL left order unspecified. Prefix patterns retain wildcards and backslash
+pattern escapes; PostgreSQL case/accent matching follows database collation. Unicode
+collation parity, live concurrency and query plans remain unverified. Query failures
+and malformed dependencies reject explicitly rather than emulate the local Java
+helper's empty-result fallback or drop malformed remote entries. Startup checks local
+search tables and, only when cross search is enabled, global directory columns;
+remote realm availability does not gate startup. Disabling GAME_CROSS_SEARCH removes
+this command's global/remote search reads and global search readiness probes.
+
+## Local world point detail command
+
+`world.get.detail` is connected to `GameServices.worldPointDetail` for the local
+branches listed below. It requires Int `point`, accepts optional Int `serverId`
+with omitted/`-1` meaning the local realm, and retains normal correlation fields.
+Authenticated nonpositive points return an empty object without an added success
+flag. Missing positive points return `E100169`. Supported remote queries are described
+below. Unfinished specialized branches return `102192`; they are still required work in
+[issue #85](https://github.com/ReeseArch64/opencok/issues/85), not removed scope.
+
+| Local point branch                                            | Current command behavior                                                                                                                                                          |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unoccupied resources 3/37                                     | Int point and wrapped remaining quantity; type 37 also includes current member count. Returns before territory-effect additions.                                                  |
+| Ordinary resources 3 without a nonblank owner's march pointer | Public owner fields and, when applicable, the positive territory-effect flag. A nonblank owner/march pointer requires the pending occupied-resource resolver and rejects.         |
+| Monster 6                                                     | Owner UID plus the selected existing exploration report/start/end fields, if its first destination match is occupying.                                                            |
+| Monster boss 15                                               | Current and catalog-derived maximum HP, then point ID; no owner identity fields.                                                                                                  |
+| Cities 1/2                                                    | Public base owner fields. City 1 with exact `lost_battle.k3 = "1"` and an existing target profile adds Bool `slowDown`/`targetTooStrong` and Long `targetPower`/`lastBeDuelTime`. |
+| Unoccupied world bosses 49/50                                 | Pending service/reward state; rejects. Occupied instances use the reference base owner fields.                                                                                    |
+| Territories 14/18/20/21/23/46/47, occupied new resources 37   | Pending specialized state; rejects.                                                                                                                                               |
+| Barbarian 44                                                  | Public owner fields plus Long `barbarionPower`, derived from existing saved troop counts, regeneration time and catalogs. A missing barbarian record returns zero.                |
+| Neutral resource 60                                           | Base owner fields; with a nonblank item and an occupying destination march, adds Long `occupybegintime` from the stored end time and catalog gathering duration.                  |
+| Other known types 0–69                                        | Public base owner fields and point ID, as in the reference handler. Unknown types reject.                                                                                         |
+
+Every local query validates observer identity, realm and ban state before point
+access. Full response bounds include correlation fields and the SFS extension
+envelope. The command emits no pushes and performs no game-state writes. Existing
+bootstrap/reconnect restrictions on march state remain part of the unfinished
+topic-2 work; this query does not establish complete gameplay or client compatibility.
+
+Twenty-seven command/adapter unit tests cover these branches, error behavior, owner
+isolation, bounded report selection, transaction failures and response limits.
+Fresh-map selection also reuses frozen Java 8 collision-order fixtures. Validation
+uses synthetic Drizzle clients; no live database, listener, service or client is run.
+
+## Remote world point details
+
+Positive `world.get.detail` requests for a configured remote realm authorize the
+observer locally, commit that read-only snapshot, then read the destination point
+at world zero in a separate snapshot. Missing routes fail without local fallback.
+The ordinary-realm remote service returns these branches before the local handler's
+exploration, health, city effects, barbarian power, neutral timing, territory-effect
+and world-boss reward additions. No global cache or emperor service is consulted.
+
+| Remote branch                                                                  | Response before correlation                                                                                      |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Unoccupied ordinary resource 3                                                 | Point and wrapped remaining quantity only.                                                                       |
+| Ordinary resource 3 or new resource 37 with a nonblank owner and march pointer | Pending occupied-resource restoration; rejects.                                                                  |
+| New resource 37 without that pointer                                           | Base owner fields and point; no remaining quantity or member count.                                              |
+| Territories 14/18/20/21/23/46/47                                               | Pending specialized state; rejects.                                                                              |
+| Other known types 0–69                                                         | Base owner fields and point, including remote monster, city, barbarian, neutral-resource and world-boss queries. |
+
+The remote Java service serializes its SFS object to JSON and the caller parses it
+again. `messages/legacy-json` now reproduces this conversion for the String, Int
+and Long fields emitted by the supported branches. Long values inside signed Int
+range become Int; larger signed Long values retain all bits without passing through
+a JavaScript Number. Correlation fields are appended afterward and keep their
+original types. JSON-looking strings, numeric strings and the literal string
+`null` remain strings. Default excluded properties are omitted. Function-shaped
+strings follow Java's full-string regular expression matching and reject as
+unrepresentable values without execution; trailing line breaks remain significant.
+The shared stored-mail matcher also uses these Java line-terminator semantics.
+
+Conversion is bounded to 32,767 properties and 4 MiB of JSON, followed by the normal
+complete SFS response limit. Other scalar/container types reject explicitly; their
+conversion must be implemented with the pending specialized branches. This is not
+a general replacement for the entire legacy serializer or a claim of cache parity.
+
+Eight added command/adapter units cover routing order, world zero, omitted local
+reads, integer widths, missing state, authorization, rollback and response bounds.
+Four converter units use 616 signed-decimal cases and 48 function-pattern cases
+from independently authored Java 8 primitive/regular-expression probes. Existing
+mail structure fixtures protect the shared decoder. Tests use synthetic clients
+and frozen public-value fixtures; they require no Java runtime, private classes,
+real database, service, listener or client.
+
+## Local barbarian point details
+
+For local type 44, `world.get.detail` reads `world_barbarion` by point ID in the same
+read-only snapshot as the point and public owner fields. It reads only the stored
+config ID, last attack time and remaining-army byte array. It does not read reward
+counts or HP, start combat, advance marches, regenerate saved troops or write state.
+The projection uses the barbarian record's config ID, independently of point item.
+A missing record returns Long `barbarionPower: 0`, matching an absent manager entry.
+Current persisted records replace the legacy manager's process-local cache; historical
+unpersisted changes and stale cache contents are not reproduced.
+
+`barbarion.xml` loads optionally into `Rules.world.barbarians`, with final duplicate
+IDs retained. Its `army` selects the existing formation catalog; each troop's power
+comes from `arms`. Formation parsing preserves the reference whole-separator
+behavior, including duplicate replacement and terminal empty tokens. No catalog
+lookup is needed when the barbarian record is absent. Empty formations return zero
+without decoding the unused army blob.
+
+`messages/java-int-map` reads the Java serialization format produced for the
+reference's `HashMap<String, Integer>` storage. It accepts only the standard HashMap,
+Integer and Number descriptors, strings, nulls and their references; it never loads
+or executes serialized classes. Modified UTF-8, shared value/descriptor references
+and exact signed Int values are preserved. Streams are bounded to 65,535 bytes and
+4,096 entries; truncation, foreign classes, bad handles, wrong value types and
+trailing bytes reject. Nonempty formations require a valid non-null saved map;
+missing keys and null values contribute zero remaining troops.
+
+The server samples time again for the power projection, after the database read.
+Recovery uses wrapped Long elapsed time, Double division, the reference upper rate
+cap, floor-to-Int saturation, signed Int addition and the configured troop ceiling.
+There is no added lower clamp for future attacks or negative values. A fresh Java 8
+HashMap traversal is reconstructed for both the configuration map and the recovered
+map, including collision trees and resizing, before ordered Double power summation.
+The final floor-to-Long conversion preserves Java saturation and NaN-to-zero behavior.
+Double catalog parsing supports Java whitespace, suffixes, hexadecimal floats,
+NaN and infinities; malformed required rules fail visibly.
+
+Seven codec/rule unit tests include three independently serialized Java 8 map fixtures,
+60 two-stage HashMap traversal vectors and 1,800 primitive arithmetic vectors. Four
+command/adapter tests cover the real composition with synthetic database reads,
+clock sampling, correlation, missing state and failures; a loader test covers the
+optional catalog and duplicate definitions. No private game class is executed.
+Remote conversion, occupied resources, territories and world-boss state remain
+pending parts of the command.
+
+## Local city detail extras
+
+For local player-city type 1, the exact item flag `lost_battle.k3 = "1"` enables
+`slowDown`, `targetTooStrong`, `targetPower` and `lastBeDuelTime` when the owner
+profile exists. City type 2, absent target profiles and other flag strings omit
+these additions without reading their dependencies. Client-supplied fields cannot
+override the projection.
+
+The point transaction reads the observer's persisted `playerinfo.power`, the target's
+existing statistics and `user_mixed_info.lastBeDuelTime`, plus the target's effect
+inputs. It does not recalculate power, load troop quantities or read inventory,
+construction, title or avatar-upload state. Missing statistics/duel records and
+foreign identities reject. Nullable stored primitive longs use zero.
+
+`repositories/power.readPlayerEffects` shares the existing effect queries with
+`get.power.info`; the point path keeps them inside its read-only repeatable-read
+snapshot. Collections are capped at 4,096 records, with a 4,097th sentinel row causing
+failure instead of truncated effects. Existing unique territory/activity checks
+remain separate. Standard power readiness already probes those tables; point
+readiness additionally checks the duel timestamp and required profile columns.
+
+`rules/power-resolver.playerGameEffect` composes effect 37 through the same ordinary
+realm sources and ordered float arithmetic as the existing dragon modifier 487:
+initial and research effects, VIP/status/general/alliance/office/equipment,
+territory/world/hero/lucky-day/dragon/military/prestige/miracle contributions and
+personal throne rewards. Equipment reconstruction and its effect-218 multiplier
+retain their existing order. This is persisted-state restoration: status rows ending
+at or before the captured request time are excluded, as in the reference status
+loader. It does not reproduce an already-resident profile's cache history or invoke
+status cleanup, lucky-day mutation, special-battle managers or player loading.
+
+Existing world-effect cache reads supply global contributions; emperor state is
+required only when saved personal throne rewards exist. Those reads occur after
+the database snapshot and are not atomic with it. Missing or malformed required
+cache/catalog state fails visibly. The target effect is compared strictly with zero
+for `slowDown`. `targetTooStrong` compares the target's exact persisted Long power
+against the observer's Long power multiplied by Java Long-parsed `lost_battle.k4`,
+with signed 64-bit overflow before comparison. No floating-point conversion occurs.
+
+Five command/adapter tests cover composition, gating, expiry, cache dependencies,
+identity and bounded failure paths. Three pure projection tests include 1,331 frozen
+synthetic Java 8 long-arithmetic oracle vectors and binary wire round trips; the
+shared resolver also checks all effect sources for both 37 and 487. These tests run
+without a client, live service or database. Remaining point-detail branches and the
+overall topics 1–8 migration are still incomplete.
+
+## World resource detail foundation
+
+The pure resource calculations and SFS projections for
+[issue #85](https://github.com/ReeseArch64/opencok/issues/85) are available in
+`rules/world-resource-detail` and `dtos/world-resource-detail`. `world.get.detail`
+now uses remaining-quantity arithmetic for implemented local resource reads. Occupied-resource
+collection/load composition is still pending; the pure helpers do not read or change game state.
+
+| Calculation        | Preserved behavior                                                                                                                                                                                                                                                         |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Remaining quantity | Signed 32-bit subtraction of initial and consumed quantity.                                                                                                                                                                                                                |
+| Army capacity      | Supplied raw load divided by resource weights for numeric items 0–5, using Java integer division; a single plunder value is subtracted except for point types 18/19.                                                                                                       |
+| Collected quantity | Wrapped signed-long elapsed time, direct float32 conversion, float32 seconds/rate multiplication and Java float-to-int saturation. Ordinary resources retain quantity/load caps and the one-unit remainder rule; territory type 18 uses the load cap; type 37 is uncapped. |
+| Owner projection   | Int `q`, `tq`, `collected`; Float `spd`; Long `sdt`, `changeCollectSpdTime`, `occupyEndTime`. Type 37 computes `q` from maximum collection time, truncating to whole seconds before float multiplication.                                                                  |
+| Occupying group    | Float32 speed accumulation and wrapped signed collection totals, with one clock sample per march. A separate final sample becomes Double `sdt`; `spd` and `tq` override owner fields without removing other metadata. An empty group adds no fields and samples no clock.  |
+
+Inputs require signed integer ranges, finite representable float speeds and bounded
+collections. Finite speeds can overflow the aggregate to infinity, as in Java, and
+that output retains its Float wire type. The resource item identifier must fit its
+255-character storage field and valid PostgreSQL text; missing or invalid required
+weights reject explicitly. These exceptional-input checks are not claims of matching
+every legacy failure path.
+
+`test/fixtures/world-resource-detail.json` contains 4,450 independently generated
+Java 8 primitive arithmetic cases: 1,809 direct long-to-float conversions, 81 quantity
+subtractions, 2,048 elapsed collection calculations, 384 owner quantities and 128
+group aggregates. Eight unit tests compare those results and cover weight/plunder
+rules, malformed inputs, clock sampling, immutable inputs and SFS encode/decode.
+The fixtures include cases where converting a long through a JavaScript double
+before float rounding would produce the wrong result. Normal tests require no Java
+runtime, ignored source inputs, database, listener or client.
+
+`resourceRawArmyLoad` now supplies the pure troop-load calculation that precedes
+resource-weight division and plunder subtraction. Its explicit snapshot distinguishes
+an owner already resident in the legacy process from one loaded on demand: a positive
+cached load is used only when the owner is not resident. Otherwise, each troop entry
+uses signed Int total-minus-dead and catalog-load multiplication before Float
+modifiers and saturating Float-to-Int conversion; the final sum wraps as Int. Duplicate
+entries and negative remaining counts are retained, not merged or clamped away.
+
+The modifier inputs are ordinary load (78), added load (2196), general effect 133,
+the stronghold general's load effect and conditional expedition load (895), in that
+order, followed by the troop's saved load modifier. Each Float operation rounds
+separately. The percentage has a lower bound of 20, including for negative infinity;
+NaN and positive infinity preserve Java cast behavior. Single-player siege load is
+not included because the resource query requests the ordinary calculation.
+
+`rules/world-resource-effects` now resolves ordinary load effects 78 and 2196
+through the shared player-effect composition and obtains effect 133 only from the
+restored general skills. Global, equipment, status or base effects with ID 133 are
+not substituted for that general-only contribution. The existing equipment-load
+ordering, modifier 218, per-general Float accumulation and ordinary-realm source
+boundaries also apply to these load effects. The shared resolver additionally
+supports effect 895 for the conditional expedition branch.
+
+The expedition rule uses server-side `tech_newEffect` and `17_wk` feature gates,
+rejects merged realms and the replacement `wk_switch_new` feature, requires
+collection stage 3 and checks the player's effective home realm against the current
+realm. These feature checks do not compare the client's version. Only an eligible
+request resolves effect 895. Context/effect exceptions return zero, preserving this
+specific reference boundary; ordinary load-effect failures still propagate. Inputs
+are an explicit merge/stage/home-realm snapshot callback and an effect callback.
+The effective home realm must follow the reference's cross-fight-origin rule, and
+stage must represent the applicable runtime or request-override stage. Those data
+providers are not yet wired to this point query; no stage or home realm is invented
+from the observer or destination point.
+
+Ten added units extend the complete ordinary-source matrix to 78, 895 and 2196,
+verify general-only 133 and Float ordering, compose the result with troop load and
+cover conditional feature/time/realm/stage gates, skipped effect reads and failure
+fallback. New-general stronghold/official contributions remain a separate required
+resolver; this step does not replace them with zero.
+
+`rules/new-general-skills` restores the passive base-skill and talent components
+separately from ordinary general effect 133. Optional `general_base.xml` and
+`general_skill.xml` catalogs retain exact strings and final duplicate definitions;
+they do not replace `sk.xml`. Saved `baseSkill` and `talent` strings retain final
+duplicate integer levels, Java integer digits and whole-separator parsing behavior.
+Their storage bounds are 256 and 5,000 UTF-16 units; lists/maps are bounded to 4,096
+entries. Missing required skill definitions and malformed consumed numbers reject.
+
+Base skills start at level one when no saved level exists. Star-specific skill
+lists append in numeric star order, preserve duplicates, and cannot populate an
+empty initial list. Only passive type zero contributes. Nonblank `condition_type`
+excludes a base skill from this calculation but does not exclude a talent. Short
+base/add arrays supply zero; extra malformed numeric values still reject. Level
+minus one wraps as Int before conversion to Float, and multiplication, addition
+and per-effect accumulation each round as Float. Talents traverse a fresh Java 8
+Integer HashMap reconstructed from the saved text; historical cache mutation order
+is not claimed. Returned effect maps also preserve fresh HashMap traversal.
+
+Direct decimal/hexadecimal Float parsing retains signed zero, subnormals, infinities
+and NaN, including decimal halfway cases that differ from double-then-float parsing.
+Independent synthetic Java 8 JDK probes supply 1,529 parsing cases, 80 integer-map
+orders and 400 arithmetic cases. Ten unit tests compare these fixtures and cover
+skill selection, restoration, limits and immutable inputs; an additional resource
+unit checks the catalog boundary. No private classes execute and normal tests do
+not require Java or local legacy inputs. Star lookup visits only present canonical
+catalog keys, avoiding a linear scan across missing stars and the legacy loop's
+Int overflow at maximum star. This is an explicit bounded-read difference.
+
+`rules/new-general-building` now supplies building/official eligibility. Direct
+assignment requires state two, a matching building UUID and an existing building;
+it bypasses official feature gates. Official state six additionally requires the
+owner-version/realm/time feature, main-building level including stars, a nonempty
+office with nonzero position/start time, office/position unlocks and the first
+matching effect's headcount requirement. Future nonzero start times are accepted,
+as in the reference. Headcounts include all restored rows for the same office,
+without validating their positions or start times, and office IDs keep their first
+duplicate row. Unknown unlock types pass. Position multipliers preserve Float
+parsing, including zero and nonfinite values, and resolve after the component sum.
+Missing offices remain absent; this read does not create default office rows or
+repair general state.
+
+`rules/new-general-status` restores final duplicate statuses and traverses their
+fresh Integer HashMap order. Signed Long start/end comparisons are inclusive and
+nullable primitive timestamps become zero. Inactive statuses skip effect parsing;
+missing status definitions contribute zero. Active malformed effects propagate to
+the outer failure boundary. Refinement uses the owner-version feature gate,
+final duplicate slots, the reference's mixed separator rules and effect-set
+membership without duplicate contributions. A refinement exception discards its
+whole subtotal while retaining the other general components. Its saved text is
+bounded to the 300-unit storage field. Optional `general_official` and
+`general_random_effect` catalogs retain final duplicate definitions.
+
+`rules/new-general-effects` now composes status, passive skills, talents, an explicit
+equipment result and refinement before applying the official rate and accumulating
+generals as Float. Fresh saved talent, operation-time and base-skill maps restore
+before filtering eligibility; malformed operation times retain the module failure
+behavior even though the load calculation does not consume their values. Operation
+time text is bounded to 200 UTF-16 units and signed Long values. Any snapshot,
+restoration, eligibility, status, skill, equipment or rate exception returns zero
+for the entire general contribution. The separate refinement fallback remains local.
+Status time samples once per eligible general; feature gates use the supplied rule
+context. Neither clock nor equipment is read for an ineligible general.
+
+The composition requires a snapshot callback containing authoritative general
+traversal, buildings, level/prestige and office state, plus an equipment callback.
+It does not infer ConcurrentHashMap iteration or historical cache state from SQL
+order. The concrete `equippedGeneralBuildingEffect` adapter now supplies the general's
+equipment calculation from explicit ordered equipment bindings and current owner
+modifiers. Owner relocation/loading policy, authoritative traversal and those readers
+remain pending. No current endpoint substitutes an empty provider to enable this path.
+
+Twenty-four added units cover these rules and their catalog loading, reusing the
+earlier parsing/map oracles and adding 600 independent synthetic Java 8 component-sum
+and official-rate vectors. They cover skipped reads, clock order, restoration before
+filtering, failure boundaries, signed/nonfinite arithmetic and immutable snapshots.
+They use no live database, service or client. The occupied-resource command remains
+gated until all required runtime dependencies are supplied.
+
+`rules/new-general-equipment` calculates each bound item's base and extra effects,
+rereading the owner's color/site modifiers for the extra stage as in the reference.
+Color effects 214–217 and site effects 207–213 combine before division by 100;
+modifier 218 applies separately to each item-effect entry. Every operation rounds
+as Float. Negative values remain negative, and nonfinite values retain Float
+arithmetic. An already bound general item does not require the player's worn `on`
+flag. The input is the selected equipment map's traversal, not an unfiltered SQL
+inventory. Duplicate site selection and cache history remain reader responsibilities.
+
+Ordinary equipment parameters stop at the first blank group or after group 99.
+Only canonical site string `6` selects parallel dragon values. Extra properties
+preserve the distinct pipe, comma and at-sign split rules, duplicate sums
+and ignored trailing comma fields. Saved extras are bounded to 255 UTF-16 units;
+piece/effect collections are bounded to 4,096 entries. Missing consumed definitions,
+invalid enums, malformed values and unavailable modifiers propagate to the enclosing
+general module failure boundary. A missing item definition behaves as an empty map
+inside this already-bound calculation, including any saved extras; initial binding
+validation belongs to the separate restoration controller described below.
+
+Suit counts retain present empty suit IDs and traverse a fresh String HashMap. The
+two/four/six-piece thresholds each honor exact comma-separated general exclusivity.
+Suit values use strict Float parsing and whole-separator effect lists, including
+duplicate effects. Suit bonuses apply after item effects without modifier 218,
+the ordinary player's suit feature gate, strengthening or decomposition selections.
+This is why the ordinary player's equipment accumulator is not reused here.
+
+The shared player-effect resolver now exposes 207–218, preserving the special case
+that modifier 218 does not multiply itself. Twenty-two additional units include
+1,000 independent Java 8 equipment arithmetic vectors, the complete ordinary-source
+matrix for all twelve modifiers, concrete building-composition wiring and a bridge
+from current owner modifiers through general equipment to raw troop load. The
+existing 600 building-composition vectors also remain passing. Resource-owner reads
+and ordered general bindings are described below; complete owner context and
+occupied-resource endpoint integration are still pending.
+
+The internal `WorldPointDetailQuery.resourceEffects` flag now requests a resource-owner
+snapshot for types 3/37 with a present saved march. The wire command does not enable
+this flag yet. `repositories/world-resource-owner` reads the owner by UID in the
+point's existing read-only repeatable-read transaction, then reuses bounded ordinary
+effect reads and selects the additional general/building inputs. Remote queries use
+only the destination realm after local observer authorization. Missing marches and
+missing owner profiles skip these inputs; no fallback owner or effects are invented.
+
+| Input             | Selected scope                                                                                                                                                | Stable SQL ordering                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Owner profile     | Level, realm/cross-fight origin, ban time, app version, alliance/platform, civilization and suit selection; no credentials or account identifiers beyond UID. | Unique UID, duplicate detection.   |
+| Ordinary effects  | Existing bounded player-effect projection for the owner.                                                                                                      | Existing source-specific ordering. |
+| Buildings         | Owner UID, UUID, item ID, level and star.                                                                                                                     | UUID.                              |
+| New generals      | Owner UID, ID, state, building UUID, star, saved skill/talent/operation-time/refinement text.                                                                 | Numeric ID.                        |
+| General statuses  | Owner/general/status IDs and exact nullable start/end Longs.                                                                                                  | General ID, status ID.             |
+| General equipment | Owner UID, UUID, positive general ID, item ID and saved extras; no worn-flag filter.                                                                          | UUID.                              |
+| Offices           | Owner UID, general ID, office ID, nullable position and start Long.                                                                                           | Numeric general ID.                |
+
+Collections read at most 4,097 records and reject above 4,096. Duplicate identities,
+foreign owner rows, invalid integer/Long widths, oversized text, NULs and unpaired
+surrogates reject. Nullable values remain nullable for subsequent primitive restoration.
+Orphan status/equipment associations and malformed numeric content inside bounded
+saved strings remain present for the restoration rules; this reader neither repairs
+ownership nor parses catalogs. The reference transferred-owner marker is exactly
+`banTime = Long.MAX_VALUE`: general statuses and equipment skip loading in that case,
+while ordinary worn equipment, general rows and office rows remain separate inputs.
+An ordinary temporary ban does not become a relocation flag. Owner home realm and
+cross-fight origin are retained even when they differ from the destination database.
+
+Eight additional driver-fake unit tests cover local/remote snapshot boundaries,
+owner predicates and bounded projections, opt-in/skipped reads, moved-owner behavior,
+ordinary-source limits, nullable/orphan records, invalid data, rollback and readiness.
+Readiness now probes sixteen point-detail table projections, including six owner
+projections, without reading data. No database, listener, client or migration is run.
+SQL failures and invalid requested snapshot rows become the existing dependency
+failure; these tests do not establish real database isolation or the legacy lazy
+cache's availability behavior. Owner building/context restoration is described below;
+residency and final endpoint composition still remain pending.
+
+`controllers/world-resource-generals` now converts the general portion of this raw
+snapshot into ordered general/equipment state. Saved talent, operation-time and base
+skill maps are validated before assignment filtering, including overwritten general
+rows. Nullable primitive state/star fields default to zero. State is a Java byte in
+the reference: values outside -128 through 127 reject rather than wrap, following
+the bundled JDBC driver's default read-truncation checks. Nondefault driver settings
+are not claimed equivalent. Bound strings retain their existing storage limits;
+general, status and equipment input collections are capped at 4,096 rows each.
+
+Status associations retain exact nullable Long timestamps. Orphan statuses and
+equipment are ignored without ownership repair. Transferred owners skip status and
+equipment restoration entirely. A present general's equipment catalog is looked up
+before its state is examined: a missing item definition fails restoration even for
+state 4. That state skips binding; other states require a nonnull slot, preserve its
+exact text (including empty strings), and keep the last loaded piece for that slot.
+The ordinary player's worn flag is not used for general equipment. No rows are mutated.
+
+General IDs and equipment slots traverse fresh Java 8 ConcurrentHashMaps through the
+shared messages order model. Updating an existing key deep in a collision bucket can
+trigger treeification or resizing without increasing the entry count; both insertion
+and replacement histories are retained. This differs from simply sorting IDs or
+deduplicating before map restoration, and can change Float cancellation. Ten added
+unit tests include 116 independent Java 8 Integer-map and 20 String-map fixtures,
+duplicate slot selection, relocation, malformed unused content and composition with
+the general effect failure boundary. Only JDK collections and synthetic values were
+executed to produce those fixtures; no private game classes were run.
+
+This projection defines fresh-map traversal from the repository's stable SQL ordering.
+It does not reconstruct historical resident caches or the legacy database's unspecified
+row order. Residency, authoritative owner/world modifiers, expedition state and maximum
+collection time still need composition before occupied-resource responses can be
+enabled. All current evidence is server-side unit coverage.
+
+`controllers/world-resource-owner-context` now selects the requested building by item
+ID after fresh String ConcurrentHashMap restoration of UUIDs. The default target is
+the stronghold. Multiple buildings of that type select the first map entry, not the
+highest level or first SQL row. Duplicate UUIDs retain the final loaded record. The
+main-building level adds level and star with signed Int wrapping; nullable primitive
+stars default to zero. An absent requested building returns before general content,
+equipment modifiers or status clocks are consumed.
+
+The controller connects the restored generals and building state to the concrete
+equipment/building effect composition. Player level, prestige and office getters defer
+restoration until the eligibility branch requests them. Direct assignments therefore
+do not fail because of unused official catalog or prestige data. Reached restoration
+errors retain the whole-general-module zero fallback, including sums accumulated by
+earlier generals. No office repairs, building initialization or data writes occur.
+
+Official prestige selects the owner's current civilization, including type zero,
+without applying the ordinary civilization-effect feature gate. Missing saved records
+or unmatched ranges yield level zero. The first matching range uses exact signed Long
+comparisons: one positive threshold is inclusive above, one nonpositive threshold is
+exclusive below, and two thresholds form a half-open interval. Whole-separator parsing
+retains malformed trailing values and rejects them when consumed. Level parsing occurs
+only after a match. `reputation_level` now retains all ordered XML records alongside
+its final-definition ID index; both official and ordinary prestige lookup use the
+ordered records, preserving overlapping ranges and duplicate IDs.
+
+Official and refinement features use the saved owner's app version, not an observer's
+version. Null and Java-blank owner versions skip version comparison while retaining
+the configured feature, execution-realm and time gates. The execution realm remains
+separate from saved home/cross-fight origin. Nonblank general feature versions parse
+all supplied dot-separated Java Integer components, ignoring empty segments, before
+short-circuit comparison of the first three components. Missing components fail only
+when comparison reaches them; malformed extra components still fail parsing.
+Seventeen added unit tests cover these projections, deferred failures, overflow,
+exact Long thresholds, duplicate catalog
+records, resource loading and ordinary prestige regression. This supplies the general
+owner projection; authoritative ordinary modifier resolution and complete occupied
+resource responses remain pending. The shared realm/date gates still need a separate
+compatibility audit for exceptional legacy selectors and lenient date strings.
+
+An absent fallback profile supplies no current owner modifiers; a resident profile
+requires explicit effects for troops with a load catalog entry. Catalog entries
+without a load field skip the troop. Malformed required fields reject. Snapshots
+are bounded to 4,096 troop entries and remain unchanged by calculation, including
+the cached load. Seven units include 2,400 independently authored Java 8 arithmetic
+vectors, cached/fallback paths, Unicode integer catalog parsing, overflow, float
+special values and composition with resource weight/plunder. Fixtures contain only
+synthetic primitive inputs and outputs.
+
+`messages/world-resource-army` decodes the saved troop object into an owner ID,
+cached load and ordered troop records. It validates the army and soldier stream
+class names, serial UIDs and consumed field types. Missing compatible fields retain
+Java defaults; null roots/lists remain null. It accepts the canonical Java 8
+ArrayList and LinkedList forms, preserving duplicates and shared entries as
+independent projected records. The projection also keeps each troop's saved owner
+and nullable troop ID so a later resolver can validate ownership and required data.
+
+The internal object-stream reader interprets serialization bytes as data. It handles
+default serializable class fields, superclass slots, references/cycles, enums,
+primitive/object arrays and framed custom-write data without loading classes or
+invoking constructors, read hooks, replacement hooks or methods. Unused companion,
+general and effect graphs are traversed structurally and omitted from the result;
+their class metadata is not treated as executable code or validated as gameplay
+state. Externalizable/proxy descriptors, resets, exception tokens and unframed
+custom serialization are unsupported. This is a bounded saved-data reader, not a
+general Java deserialization runtime.
+
+Limits include the existing 65,535-byte army column bound, nesting depth 32,
+16,384 handles, 256 fields per descriptor, 4,096 entries in troop lists and object
+arrays, and a 32,768 parsing-operation budget. Primitive byte arrays may use the column bound;
+other primitive arrays are capped at 4,096 entries. Nine units use independently
+authored synthetic DTOs serialized by Java 8, with compatibility class metadata
+mapped by the fixture writer. No private game classes are compiled or executed.
+Evidence includes shared/cyclic auxiliary graphs, collection forms, modified UTF-8,
+schema defaults, malformed handles/counts, every truncated fixture prefix and
+composition with the raw-load rule. Null or unwell-formed saved values are not
+silently converted into valid gameplay inputs.
+
+The point repository now reads the pointed resource march for types 3/37 when
+both owner ID and march UUID are nonblank. That read shares the point/owner snapshot,
+including the destination snapshot for remote requests. Selection uses the saved
+UUID alone, matching the reference's march index; it does not substitute a world,
+destination or occupancy-state search. The snapshot retains those metadata fields
+for subsequent resolution, even when they differ from the point. It rejects a row
+with another UUID or owner and duplicate rows, rather than expose another owner's
+saved army through an inconsistent point pointer.
+
+Only army bytes, collection speed/times, collected-before-speed-change count and
+plunder text are read alongside identity metadata. Exploration reports, combat
+payloads and unrelated march columns are omitted. Nullable columns retain null;
+Int64 values stay bigint, and PostgreSQL real values are normalized to Float32.
+Payload sizes follow existing column bounds. Missing marches remain explicitly
+absent; no ownership repair, fake zero-load army or scheduling is performed. The
+readiness probe includes these columns with limit zero. Eight additional synthetic
+adapter units cover local/remote snapshots, pointer selection, omitted reads,
+nullable/bounded payloads, Float32 normalization, precision, authorization and rollback.
+
+`messages/legacy-json` also decodes root arrays through the same bounded parser
+used for stored mailbox structures. The resource controller's plunder restoration
+maps SQL null to the model's initial empty array. A nonnull value must parse as an
+array, including when its entries will not be used for load subtraction. Only a
+single object can contribute `v`, and that value must retain its SFS Int type;
+strings, Longs, Doubles, nulls and duplicate-key arrays are not coerced. Missing `v`
+contributes nothing. Multiple entries and territory types 18/19 skip the value cast,
+matching the reference's access order. Malformed arrays and retained function/hole
+values still reject. The persisted text is limited to the column's 2,048 characters.
+
+`resourceSavedCollection` restores the saved collection fields independently of raw
+army load and runtime maximum collection time. Nullable primitive columns default
+to zero; times remain exact signed Long values, speed becomes Float32 and the
+collected-before-speed-change count becomes Int. That count is bigint in the
+TypeScript storage schema but INTEGER in the reference mapper and int in its model.
+Out-of-Int-range values reject rather than wrap, consistent with the bundled JDBC
+driver's default truncation-check setting; nondefault driver configurations are not
+claimed equivalent. Restoring these fields neither advances collection nor writes
+the saved row.
+
+Nine added units cover 459 frozen numeric-oracle outcomes, 28 frozen array-structure
+outcomes, permissive legacy syntax, typed plunder access, nullable primitives,
+signed-width boundaries and composition through resource arithmetic and SFS binary
+encoding. The JSON parser remains separate from the controller's resource-specific
+access rules and the pure collection arithmetic.
+
+The saved-data decoder and raw-load calculation are not yet composed into the
+occupied-resource command. Resolving the five modifier inputs, checking decoded
+army ownership and restoring collection state remain required before it can return
+the full resource projection. A database read is not evidence that an owner
+was resident in the reference process. The runtime-only maximum collection time is assigned by destination-march rescheduling;
+it is not a persisted march column. Restoring its read value still needs an explicit
+policy backed by that lifecycle, without scheduling work from the query. This pure
+calculation does not make occupied-resource responses available yet.
+
+The point/owner read foundation below now supplies lookup, observer authorization,
+local/remote routing and base owner fields. Specialized point projections,
+existing-march restoration and command composition remain pending.
+Raw troop load and runtime-only `maxCollectTime` must be resolved explicitly; the
+persisted march row alone does not provide both values. The read path must not
+silently schedule marches, start combat or repair ownership. This foundation does
+not establish full point-detail compatibility or complete topic 5.
+
+For local neutral-resource type 60, `sp_resources.xml` is loaded optionally into
+`Rules.world.neutralResources`, retaining the final duplicate ID definition. When
+the point item is nonblank, the reader selects one state-1 march by destination ID
+in the same read-only snapshot as the point. It selects only UUID, destination,
+world, state and resource end time; army data and report blobs are not read. Missing
+marches omit `occupybegintime` without consulting the catalog. Blank items skip
+both the march query and duration lookup. The point's owner/name occupancy flag
+does not suppress this branch.
+
+The ordinary-realm reference destination index ignores the supplied world ID and
+does not restrict march owner, so those extra filters are not introduced. Selection
+uses database UUID ascending order with limit one. The Java set contains march
+objects with identity-based hashes, and saved rows do not retain that process's
+traversal order. This deterministic selection is a documented restoration difference;
+it does not claim historical first-march equivalence or implement the per-world
+indexes of special battle/neutral server processes.
+
+`occupybegintime` is an exact SFS Long: stored `occupyResourceEndTime` minus signed
+Java Int `gather_time` widened to Long and multiplied by 1,000. Nullable end time
+defaults to zero; negative durations and signed-long wrapping are preserved.
+Missing/malformed required catalog data rejects instead of inventing a timestamp.
+The literal item string `null` is nonblank and requires its own catalog record when
+a march exists. Five added command/adapter units cover selection across owners and
+worlds, omitted fields, malformed dependencies, authorization, exact numeric
+boundaries and failure rollback; a loader unit covers optional files and duplicates.
+
+## World point and owner read foundation
+
+`repositories/world-point-detail` supplies a read-only snapshot for
+`world.get.detail`. Its port and readiness helper are composed into
+the runtime through `GameServices.worldPointDetail` for the local and remote branches listed above.
+The current ordinary-realm implementation uses existing tables and adds
+no schema or configuration. It does not start a march, repair ownership, create
+missing player/statistics rows or mutate caches.
+
+`rules/world-point-detail` normalizes omitted/`-1` server IDs to the local kingdom.
+The reader validates the observer UID, local realm and ban state before any world
+or target reads. Nonpositive signed point IDs require no world lookup. Positive IDs
+require the observer's existing `user_world` row. A local point is selected by both
+ID and that world's ID; a configured remote realm is read at world zero, after the
+local authorization transaction commits. Remote access uses the supplied public-read
+database topology without a global account-directory lookup. Unknown realms fail
+explicitly. Missing points remain absent in the snapshot rather than becoming a
+fabricated resource or empty owner; the connected command maps their absence to
+`E100169`. Supported remote branches use the separate projection and JSON conversion
+described above; pending occupied-resource and territory state still rejects.
+
+Each realm read uses a read-only repeatable-read transaction. Point and owner data
+share that transaction; local authorization and remote reads are not atomic together.
+Readiness probes select only required columns with limit zero. Invalid dependencies,
+ambiguous rows and failed transactions produce a sanitized dependency error. The
+ordinary-realm registration rule is not an implementation of cross-fight-server
+registration behavior.
+
+| Base owner field    | Selection and presentation                                                                                                                                                                                                                                                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `uid`               | Nonblank point owner ID; Java whitespace rules also determine occupancy from either owner ID or owner name. Local monster-boss type 15 returns before this field.                                                                                                                                        |
+| `registerTime`      | Long, initially the existing owner's profile time or zero if no profile exists. With a profile, the chosen registration record can raise this value: type 2 takes priority, otherwise the latest timestamp is used. Equal-time records use type order as a deterministic tie-breaker.                    |
+| `pic`               | String for cities (1/2), resources (3/37), relics (4) and towers (5). Missing profiles supply an empty string; a null picture on an existing profile rejects, matching the reference SFS non-null string requirement.                                                                                    |
+| `power`, `killArmy` | Exact Long fields for cities with an existing owner profile; missing statistics reject. Nullable stored primitive counters use zero. No statistics are invented when the owner profile is absent.                                                                                                        |
+| `afn`               | Optional abbreviation from the alliance recorded on the point, for cities and ordinary resources. Empty abbreviations are retained; missing/null abbreviations are omitted.                                                                                                                              |
+| `rank`, `vl`        | Int membership rank defaults to zero. Membership lookup uses owner UID, including the reference database fallback when point/profile alliance membership differs. Cities emit rank only with a nonblank point alliance; ordinary resources always emit rank. Both emit `vl: 0`; new resources omit both. |
+
+Local monster type 6 stops base-owner projection after UID, and local monster-boss
+type 15 has no base owner fields. The specialized exploration/HP projection foundation
+is documented below and is connected for local queries.
+Remote reads do not take these observer-specific early exits. Territory
+and other specialized additions are also pending; the base fields alone are not a
+complete response. The DTO preserves direct/local SFS field types; the remote
+command subsequently applies the bounded legacy JSON conversion described above.
+
+Current database snapshots replace the legacy process-local profile, statistics
+and alliance caches. This can expose persisted updates sooner and does not reproduce
+unpersisted in-memory changes, stale cache contents or invalidation timing. Cache
+equivalence and live database snapshot behavior are not claimed.
+
+Sixteen unit tests compose the actual Drizzle reader with synthetic query clients
+and the pure owner projection. They cover all point-kind base-field omissions,
+local/remote world selection, authorization, migration-record priority, missing
+and inconsistent rows, exact numeric wire types, failure rollback, captured query
+inputs and read-only readiness. No database, service, listener or client is started.
+
+## World monster detail foundation
+
+`rules/world-monster-detail` and `dtos/world-monster-detail` supply local monster
+detail fields for the implemented local `world.get.detail` branches. `loadRules` now loads
+optional `field_monster.xml` and `army.xml` into `Rules.world.fieldMonsters` and
+`Rules.world.armies`. The `army` formation catalog is distinct from the existing
+`arms` troop-attribute catalog. Both new catalogs retain the final definition of a
+duplicate ID, matching the reference cache loader; absent files produce empty maps.
+Used missing records or malformed required counts reject rather than invent HP.
+
+For local monster-boss type 15, `mchp` is the point's current HP and `mmhp` is the
+catalog-derived maximum, both SFS Ints. Nullable current HP defaults to the Java
+primitive zero. Blank item IDs give maximum zero. An exact `NPC="1"` uses signed
+Java integer `Gift`; other records sum army formation counts. Semicolon-separated
+army IDs and pipe-separated formations ignore empty tokens, retain repeated IDs
+and count only entries with exactly two nonempty semicolon-separated components.
+Counts retain Java decimal parsing, negative values and signed 32-bit wrapping.
+Missing formation `arm` attributes contribute no count. The maximum-HP helper also
+supports field-monster type 9, but the point-detail health projection is restricted
+to local type 15, preserving the reference's early return before owner UID fields.
+
+For local monster type 6, exploration uses the first matching destination from the
+supplied ordered owner-march snapshot, then checks for OCCUPY state 1. An earlier
+march in another state suppresses later occupying matches. The rule does not add
+world or march-type filters absent from the reference accessor. No matching march
+or a nonoccupying first match adds no exploration fields. A matching occupied march
+adds `erp` as an SFS array, `st` as its exact Long start time and `et` as arrival time
+plus exploration duration with signed 64-bit wrapping. This uses `arrivalTime`,
+not the separate `marchArrivalTime`. Nullable stored arrival/duration primitives
+default to zero. A missing report becomes an empty array; present reports decode
+from bounded root SFS-array binary data and preserve nested type tags and longs.
+
+The rule consumes an ordered march snapshot. The connected reader fetches up to
+4,096 owned metadata rows, with a 4,097th-row overflow check, in the same read-only
+snapshot as the point. The controller sorts UUIDs by UTF-16 code units and reconstructs
+a fresh Java 8 concurrent-map traversal using the existing verified map-order helper.
+Selection uses that traversal, not UUID order directly, and occurs before any
+occupancy check. Only the selected report is then read by both UUID and owner; other
+report blobs are not loaded. Foreign/duplicate metadata, a missing selected report
+row or failed reads reject rather than return an empty exploration result.
+
+This is a canonical persisted-state query order. The database does not retain the
+legacy process map's original insertion/deletion history, high-water capacity or global-to-owner
+map restoration order, so historical traversal equivalence is not claimed. Reads
+use current persisted marches and do not run the reference login's expired-return
+cleanup. No world, march-type or OCCUPY-only SQL filter replaces the reference
+destination-first selection. The reader does not create, restore, schedule or advance
+marches. Remote queries omit these observer-specific monster additions and use the
+base-field JSON conversion described above.
+
+Eleven unit tests cover the rules and projections, including a manually specified
+binary report fixture, exact boundary arithmetic, missing catalogs, owner identity,
+selection order and malformed binary payloads. A resource-loader unit test covers
+optional files, final duplicates and separation from `arms`. Root SFS array helpers
+use the existing codec's size, depth and element budgets; trailing bytes, malformed
+UTF-8, invalid tags and duplicate object keys reject rather than reproduce every
+permissive legacy decoding path. Report inputs retain the existing 65,535-byte
+storage limit and are copied before use. No private game classes, client, database
+or service are executed by these tests.
+
+## Realm avatar grants
+
+`user.avatar.grant`, tracked in [issue #76](https://github.com/ReeseArch64/opencok/issues/76),
+returns `owner` (String), `sequence` (Int), `grant` (String) and `pendingHash` (String).
+It requires an authenticated numeric owner and, when supplied, an exactly matching
+String `gameuid`. Request version, sequence and endpoint fields cannot override stored
+state. Correlation is retained; grant issuance changes no profile, upload record or
+mail and emits no push. `user.avatar.finish` is now available under the separate completion
+configuration below. Direct `user.update.picVer` remains unsupported.
+
+The repository locks the owner's durable profile in a repeatable-read transaction and
+rejects missing, foreign, misplaced or banned profiles before eligibility or files reads.
+The nonnegative signed-32-bit encoded picture version supplies its last six digits;
+the next sequence must remain within 1–999999. Only `function_on5.k2` exactly equal to
+`0` bypasses eligibility. Otherwise the raw stronghold level must meet `hero.k9`, then
+an existing upload record applies the `hero.k7` seconds cooldown followed by its report
+ban. Missing castles have level zero. Missing upload records skip cooldown configuration
+parsing. Rules preserve Java signed parsing, 64-bit arithmetic wrapping, inclusive
+eligibility deadlines and the level/cooldown/ban error precedence (`105775`, `105769`,
+`105770`). Castle and record reads are lazy, owner-bound and limited to the required fields.
+
+Configure `GAME_FILES_URL` as the internal HTTP(S) origin reachable from the realm and
+`FILES_SIGNING_KEY_FILE` as an explicit path to the protected 32-byte key used by the files
+service. The file contains 64 lowercase hex characters with an optional final newline.
+No key is generated, replaced or logged. The origin accepts no path, embedded credentials,
+query or fragment. An absent origin keeps issuance unsupported; invalid configuration,
+an unreadable key or an unavailable upload-record table fails configured startup.
+Development Compose does not forward these settings or mount the key automatically;
+an operator override must provide both settings and a read-only key mount. The files
+service itself is also provisioned separately.
+
+The realm reads `/_internal/avatars/{owner}/{sequence}` using a separate 30-second
+confirmation signature. `DEPENDENCY_TIMEOUT_MS` bounds the whole exchange, including
+streamed response consumption while the profile lock is held. Redirects reject, receipts
+are limited to 128 bytes, and owner, canonical sequence and SHA-256 must match. An empty
+404 means no pending upload. Other failed or malformed responses prevent a grant, with
+sanitized errors and no automatic retry. The resulting upload grant has a fresh random
+nonce and a 120-second lifetime. An existing valid receipt supplies `pendingHash`, allowing
+a caller to recognize an upload already stored for that sequence.
+
+The maintained files service verifies immutable S3 receipts and actual object bytes. It
+has no historical filesystem `completed` marker; the durable profile version is the
+sequence authority. This slice does not establish equivalence for independently restored
+profile/object state or reset versions. The completion path below now verifies receipts,
+commits profile/upload state and coordinates mail, metadata publication and notifications.
+
+Socket-free unit tests compose the realm command with the maintained files handler and
+synthetic storage, and inspect generated SQL through a synthetic database client. They
+cover ownership, eligibility, expiry, pending receipts, fresh retries, exact wire types,
+rollback, bounded responses and timeouts. No real database, object store, listener, client
+or ADB execution is used. Real concurrency and deployment behavior remain unverified.
+
+## Avatar completion transaction foundation
+
+[Issue #77](https://github.com/ReeseArch64/opencok/issues/77) adds the internal
+`controllers/avatar-finish` workflow and `repositories/avatar-finish` transaction.
+They are connected through the opt-in runtime composition described below.
+The migration is generated only; this work has not changed a running realm or database.
+
+Every attempt locks and authorizes the owner profile and verifies the requested
+`sequence:sha256` against the maintained files receipt, including repeated and older
+receipts. A same-sequence request returns the current durable version without applying
+eligibility or effects again. If no completion receipt exists for that current version,
+it stores an observed receipt with no pending effects, matching the legacy completion
+marker without inventing past notifications. Such receipts record their observation time,
+not an inferred original commit time, and accept any nonnegative encoded picture state. An older receipt returns the current version with
+`superseded: true`. A future sequence must be exactly next and have no prior completion
+receipt. A stored completion prevents reuse after an isolated profile version reset;
+it cannot reconstruct historical filesystem markers or recover independently restored
+object and database snapshots.
+
+An advancing request rechecks raw castle level, cooldown and report ban. Finish differs
+from grant: a missing `function_on5.k2` is invalid, and `hero.k7` is parsed after the level
+check but before reading the upload record, even if no record exists. The exact `0`
+bypass stores `2000000 + sequence` (Waiting) and leaves moderation records unchanged.
+Otherwise the record gets the new sequence, zero reports, current millisecond timestamp
+and WAITING status, preserving existing ban count/time. New records explicitly initialize
+those ban fields to zero. Java signed-long overflow and exact deadlines remain covered.
+
+The profile update, moderation upsert and immutable `avatar_completion` receipt share
+one repeatable-read transaction. The receipt contains owner/sequence, SHA-256, committed
+picture version/time, a bounded versioned JSON effect snapshot and pending-effect bits.
+Bit 1 represents system mail, bit 2 profile timestamp publication, and bit 4 chat metadata
+publication. A nonempty supplied XML mail template is copied for later delivery; missing
+or empty templates retain the legacy no-mail behavior. The snapshot retains profile name,
+platform and the commit timestamp in seconds, avoiding a later lookup of changed intent.
+Each owner may have at most 1,000 pending completions; saturation rejects before writes.
+Unlike the legacy best-effort filesystem marker, an observed receipt write must succeed
+or the request fails. This preserves database replay protection instead of silently
+acknowledging missing history.
+Delivery must clear only the successfully applied bits, never delete the receipt.
+
+Repository boundaries validate the plan and owned reads, preserve report-ban fields on
+upsert, condition the profile write on the locked version, and roll back every local
+write if any step fails. Readers cannot escape the transaction. An uncertain commit is
+resolved by a fresh verified retry: a committed version skips the mutation and retains
+one effect record. There is no automatic transaction retry. Actual PostgreSQL concurrency
+and isolation behavior have not been exercised; SQL and failure paths use synthetic
+clients only.
+
+The authorized mail catalog and internal system-mail consumer are now implemented as
+described below. The internal profile-marker and chat metadata consumers are implemented
+below, together with their command/notification/runtime composition. Persisted intents
+alone are not evidence of delivered mail or updated caches; delivery clears independent bits.
+
+## Avatar system-mail delivery
+
+[Issue #78](https://github.com/ReeseArch64/opencok/issues/78) adds the internal consumer
+for pending mail bit 1. The resource loader reads optional authorized `mail.xml`, preserving
+strings and the final duplicate definition. Completion captures template `10111` by default;
+a missing catalog/template retains the legacy no-mail outcome. Templates are copied before
+asynchronous work and serialized in the completion receipt, so subsequent XML edits do not
+change already committed mail intent.
+
+Static source inspection and read-only disassembly of the supplied compiled mail sender
+corrected an earlier assumption: the two `mail` overloads do not invoke `getCheckInfo`.
+The capacity/discard helper exists but is not called by this path. Accordingly, this
+consumer does not prune the mailbox, redeem old rewards, reuse an older message or inherit
+saved flags. It creates a new unread unsaved message. The earlier capacity/reward-retention
+prerequisite for avatar completion is withdrawn; unrelated mailbox behavior is unaffected.
+
+Projection preserves the exact blank/`0` notice-type branch, sender/title Java trimming,
+two-code-unit category suffix and signed 32-bit share shift. Normal system mail has type 2
+and a UID group; notice type 15 has no group. The reference avatar template has no reward.
+Literal comma-containing reward strings retain the legacy encoded bytes; symbolic reward
+IDs require an explicit resolver and otherwise fail without acknowledgment. This slice does
+not implement the full reward-ID resolver or grant attached rewards.
+
+Text encoding preserves Java 8's UTF-8 encoder backing-array capacity, including trailing
+zero bytes, rather than replacing it with a tightly sized byte array. The 40,000-byte
+extra-content threshold therefore applies to that encoded capacity. Exact `MAILTEST` also
+uses owned `mail_contents`; primary contents become `extra`. Blank message bodies reject
+before writes because the maintained primary contents column is non-nullable. Fifty-seven
+frozen synthetic Java 8 vectors cover ASCII, Unicode, BOM, trimming and threshold lengths;
+normal unit runs do not start Java or read the private reference inputs.
+
+`repositories/avatar-mail` locks the owning profile before the completion row, consistent
+with completion's lock order. Already committed intent can be delivered to an existing
+owner even if the account is subsequently banned; a missing or misplaced owner is skipped.
+A stable domain-separated digest of owner/sequence/hash supplies the mail ID stem. The
+message, optional extra row, UID group and clearing of bit 1 commit together. Other pending
+bits and all completion history remain unchanged. Collisions reject instead of overwriting
+existing mail. A repeat after acknowledgment does not insert again, even if the mail was
+later deleted. Failure or an uncertain commit is resolved by retry against the durable bit.
+The creation timestamp comes from the captured completion time, not the relay's wall clock.
+
+The returned message has a tested `push.mail` projection: base fields, exact SFS types,
+normal-group counts of one, and optional full fields controlled by the caller's chat-mail
+switch. The default reference sender does not include a separate `contents` field. Full
+metadata uses `contentsLocal` and expands literal backslash-n sequences. Push projection
+is now consumed by the runtime coordinator below. No listener or live service was started
+for validation; notifications are tested through simulated connections.
+
+## Avatar profile-marker publication
+
+[Issue #79](https://github.com/ReeseArch64/opencok/issues/79) adds the internal consumer
+for pending profile/cache bit 2. `rules/avatar-profile` validates captured owner, realm,
+sequence, picture version, commit time and metadata before publication. The timestamp is
+an exact epoch-second decimal string derived from the receipt's millisecond time; name
+and platform come from the captured snapshot. This does not write new progression or
+send chat metadata.
+
+`Cache.publishPlayerUpdateTime` writes the existing
+`opencok:kingdom:<realm>:player-update:<uid>` key used by profile query readers. It uses
+one Lua command with exact decimal comparison, not floating-point conversion. A newer
+marker wins over a late older publication, equal markers are idempotent, and legacy
+leading-zero values compare by their normalized numeric value. Missing or empty values
+are initialized. Malformed nonempty values, values outside signed-long range and invalid
+Redis replies fail with a sanitized dependency error. The caller supplies canonical
+nonnegative decimal timestamps; the realm is taken from cache configuration.
+
+Markers have no TTL, matching the reference. The monotonic maximum is an intentional
+reliability guarantee for reordered durable delivery; a future-valued marker is retained
+instead of being overwritten by an older event. Redis is only a query-cache marker.
+The durable picture version and delivery history stay in PostgreSQL. Cache loss does not
+reapply profile changes; existing readers return missing markers through their established
+fallbacks (including an empty `lastUpdateTime` in public profile replies). This slice does
+not add automatic replay of already acknowledged history after cache loss.
+
+`repositories/avatar-profile` takes the owner lock before the completion lock, publishes
+through a deadline-bounded port, then clears only bit 2. Missing/misplaced owners and
+already acknowledged work do not publish. Failures before acknowledgment roll back the
+bit change while retaining mail/chat bits and receipt history. An external write may
+succeed before a database failure or a timeout; retry is safe because the writer is
+idempotent and monotonic. The port receives an abort signal. A late response cannot
+acknowledge rolled-back work, although an adapter unable to cancel an in-flight Redis
+command may still complete its safe external write. Actual Redis commands retain the
+configured connection/operation timeout in the existing cache adapter.
+
+Unit evidence includes 154 frozen cases from the exact Lua script executed with an
+isolated Lua 5.1 engine and synthetic GET/SET functions. A script digest ties that oracle
+to the maintained implementation; ordinary tests need neither Lua nor Redis. Tests also
+compose publication with the existing marker reader and simulate SQL failures, uncertain
+commits, deadlines, out-of-order updates, realm isolation and malformed projections.
+No listener, Redis/PostgreSQL service, migration or client is exercised. The consumer is
+now started by the opt-in completion runtime described below, along with the chat consumer.
+
+## Avatar chat metadata publication
+
+[Issue #80](https://github.com/ReeseArch64/opencok/issues/80) implements the internal
+`publishAvatarChat` consumer for pending bit 4. It shares owner/completion locking and
+bounded publication with the profile-marker consumer, while each entry point clears only
+its own bit. `avatarChatUpdate` validates captured metadata even after bit 2 was delivered.
+Mail bits and immutable completion history survive either publication.
+
+`connection/chat-avatar-profile` signs the captured snapshot and sends it to the chat
+service's exact private `/_internal/avatar-profile` endpoint. The adapter requires a
+configured HTTP(S) URL without credentials/query/fragment, the existing shared signing
+secret and a 100–30,000 ms timeout. It bounds requests to 4 KiB and JSON responses to
+16 KiB, rejects redirects, honors the consumer abort signal through body consumption and
+accepts only a matching owner/realm/sequence acknowledgment. It does not automatically
+retry. Invalid responses and dependency errors are sanitized. The completion runtime below supplies the explicit endpoint and recovery worker.
+
+The [chat receiver contract](../chat/README.md#internal-avatar-metadata) describes durable
+sequence ordering and account routing checks. If chat commits but the response or realm
+commit fails, bit 4 remains retryable. A repeated identical snapshot is accepted without
+another write; a snapshot already overtaken by a newer avatar sequence can also clear its
+old bit. A same-sequence conflicting snapshot fails and remains pending. A response after
+the consumer deadline cannot acknowledge rolled-back work. An uncertain chat transaction
+may finish after cancellation, but its write is idempotent.
+
+Unit tests compose the actual realm consumer, HTTP adapter, receiver and chat repository
+with synthetic database clients, including SQL lock order, commit loss, ownership checks,
+clock rollback, input bounds, signatures and deadlines. No listener, service, database,
+ADB or client is started. Global migration `0002_chat_avatar_profiles` is generated only.
+The opt-in completion runtime now schedules this consumer.
+
+## Avatar completion runtime
+
+[Issue #81](https://github.com/ReeseArch64/opencok/issues/81) connects
+`user.avatar.finish` to the maintained receipt transaction, all three consumers and local
+session notifications. Enable it with `GAME_AVATAR_CHAT_URL` pointing to the chat service's
+exact private `/_internal/avatar-profile` endpoint, matching `CHAT_SIGNING_SECRET`, and
+the existing `GAME_FILES_URL`/`FILES_SIGNING_KEY_FILE` integration. The completion endpoint
+is independent of chat session issuance. Missing settings leave finish unsupported;
+configured startup checks the completion and mail tables. Previously generated kingdom
+`0006_avatar_completions` and global `0002_chat_avatar_profiles` must be provisioned
+through the deployment workflow; startup never applies migrations. Compose still needs
+an explicit operator override and read-only key mount. No new external dependency or
+schema is introduced here; the existing rules workspace becomes a server runtime dependency.
+
+The authenticated command accepts a String `receipt` containing `sequence:sha256`, and
+an optional String `gameuid` must match the session. It returns String `uid`, Int `picVer`
+and Bool `superseded`, and emits an independent copy as `push.picVer.update`. Correlation
+fields appear only in the command reply. Verified repeated/current/older receipts use
+durable state without reapplying moderation or creating duplicate mail. Direct
+`user.update.picVer` remains unsupported. A failed completion attempt gets one bounded
+recovery read through the same authorization and file verification path: recovery requires
+an existing matching completion receipt and a durable version at least as advanced, and
+cannot execute the mutation inspector or create an observed receipt. It resolves a lost
+commit reply without automatically retrying a progression write.
+
+Before a new moderated completion commits, its captured system mail must materialize
+through the maintained mail rules. Missing templates retain the no-mail behavior; invalid
+or symbolic reward templates without a resolver reject before progression is changed.
+The reference avatar notice has no reward. This preflight does not extend support to
+custom reward-ID resolution. Existing unmaterializable pending records remain pending and
+produce sanitized failure categories rather than being discarded.
+
+After a confirmed commit, mail, cache and chat delivery are attempted independently.
+Their failures leave the respective bits pending and do not turn committed progression
+into a failure response. Successful mail insertion can emit `push.mail` using the exact
+`chat_switch.k3` token `1` for full fields. Online notifications are best effort, matching
+the legacy push boundary: offline/disconnected recipients recover their durable mail
+through mailbox reads, and a lost notification never recreates a deleted or acknowledged
+message. There is no exactly-once notification guarantee.
+
+A scoped worker selects one pending owner/sequence every five seconds after its preceding
+attempt finishes. Its keyset cursor advances before delivery, passes failing entries,
+and wraps after reaching the end. Selection joins the current local profile realm; each
+consumer locks and revalidates ownership. Workers and request delivery can encounter the
+same record, but durable bit checks make acknowledged work idempotent. Each external
+publication has the configured deadline. Shutdown cancels scheduling, drains active work
+before releasing the database, and never starts a new delivery after an outstanding
+selection finishes. The cursor is ephemeral; restarting safely begins at the first key.
+This initial throughput and real multi-process SQL concurrency remain unmeasured.
+
+Local notification subscriptions are installed only after authenticated initialization.
+Delivery checks readiness, the current local session and its Redis ownership token, then
+rechecks the session after the asynchronous ownership check. Disconnect and replacement
+remove only the matching subscription. No public notification route is added. Unit tests
+use EventEmitter-based connection objects and encoded SFS frames; no real socket, listener,
+service, client or ADB is used. Full media restoration and moderation lifecycle remain
+separate migration work.
+
 ## Realm chat sessions
 
 `chat.session.create`, tracked in [issue #74](https://github.com/ReeseArch64/opencok/issues/74),
@@ -1366,16 +2597,16 @@ uses the existing bounded Java hash traversal helper, with its documented except
 limits. Task visibility, discovery, completion writes and their pushes still need to
 use these descriptions before the reconnect task component is complete.
 
-| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                | Remaining work                                                                                                                                            |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests                                                                                          | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable.          |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                        | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
-| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                     | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
-| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
-| 5. Additional map queries                 | Base viewport                                                                                                                                                                                                                                                                       | Point details, player search and favorites, including authorization for writes.                                                                           |
-| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                               | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
-| 7. Avatar integration                     | Standalone files service                                                                                                                                                                                                                                                            | Realm grants, confirmation and profile updates.                                                                                                           |
-| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                      | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
+| Topic                                     | Implemented evidence                                                                                                                                                                                                                                                                         | Remaining work                                                                                                                                            |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests                                                                                                   | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable.          |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                                                                                                                 | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.                    |
+| 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                |
+| 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave. |
+| 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.          |
+| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                                        | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                 |
+| 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.              |
+| 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                         |
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog

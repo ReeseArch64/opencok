@@ -19,9 +19,11 @@
     "@opencok/resources": "workspace:*",
     "@opencok/storage": "workspace:*",
     "effect": "catalog:",
-    "@opencok/core": "workspace:*"
+    "@opencok/core": "workspace:*",
+    "@opencok/rules": "workspace:*"
   },
   "devDependencies": {
+    "@opencok/api": "workspace:*",
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:",
@@ -29,7 +31,6 @@
     "@opencok/dtos": "workspace:*",
     "@opencok/identity": "workspace:*",
     "@opencok/messages": "workspace:*",
-    "@opencok/rules": "workspace:*",
     "drizzle-orm": "0.45.4"
   }
 }

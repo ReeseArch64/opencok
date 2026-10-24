@@ -106,6 +106,19 @@ test("prestige keeps first matching ranges and feature rows without combining la
   expect(prestigeEffects({ civilizationType: 2 }, state, rules, context).size).toBe(0);
 });
 
+test("ordinary prestige effects honor ordered duplicate catalog records instead of the final ID lookup", () => {
+  const rules = fixture();
+  const state = [{ civilizationType: 2, prestigeValue: 100n }];
+  rules.power.prestigeLevelRecords = [
+    { id: "same", reputation_point: "100", reputation_level: "3" },
+    { id: "same", reputation_point: "100", reputation_level: "2" },
+  ];
+  rules.power.prestigeLevels!.set("same", rules.power.prestigeLevelRecords[1]!);
+  expect(prestigeEffects({ civilizationType: 2 }, state, rules, context).get(487)).toBe(3.5);
+  rules.power.prestigeLevelRecords = [];
+  expect(() => prestigeEffects({ civilizationType: 2 }, state, rules, context)).toThrow();
+});
+
 test("prestige requires open client/realm gates and rejects invalid active numeric state", () => {
   const rules = fixture();
   const profile = { civilizationType: 2 };

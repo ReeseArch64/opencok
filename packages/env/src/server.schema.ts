@@ -5,6 +5,45 @@ import { port, timeout, databaseName, redisUrl, realmSettings } from "./service.
 
 export const serverSchema = z
   .object({
+    GAME_FILES_URL: z.preprocess(
+      blankToUndefined,
+      z
+        .url({ protocol: /^https?$/ })
+        .refine((value) => {
+          try {
+            const url = new URL(value);
+            return (
+              url.pathname === "/" && !url.username && !url.password && !url.search && !url.hash
+            );
+          } catch {
+            return false;
+          }
+        })
+        .optional(),
+    ),
+    FILES_SIGNING_KEY_FILE: z.preprocess(blankToUndefined, z.string().min(1).optional()),
+    GAME_AVATAR_CHAT_URL: z.preprocess(
+      blankToUndefined,
+      z
+        .url({ protocol: /^https?$/ })
+        .refine((value) => {
+          try {
+            const url = new URL(value);
+            return (
+              url.pathname === "/_internal/avatar-profile" &&
+              !url.username &&
+              !url.password &&
+              !url.search &&
+              !url.hash &&
+              url.hostname !== "cok.chat" &&
+              !url.hostname.endsWith(".cok.chat")
+            );
+          } catch {
+            return false;
+          }
+        })
+        .optional(),
+    ),
     GAME_CHAT_SESSION_URL: z.preprocess(
       blankToUndefined,
       z
@@ -32,6 +71,10 @@ export const serverSchema = z
       z.string().min(1).optional(),
     ),
     GAME_MAIL_TRANSLATION: z
+      .enum(["true", "false"])
+      .default("true")
+      .transform((value) => value === "true"),
+    GAME_CROSS_SEARCH: z
       .enum(["true", "false"])
       .default("true")
       .transform((value) => value === "true"),
@@ -76,6 +119,15 @@ export const serverSchema = z
     DEPENDENCY_TIMEOUT_MS: timeout(5000),
   })
   .refine((settings) => !settings.GAME_CHAT_SESSION_URL || !!settings.CHAT_SIGNING_SECRET, {
+    path: ["CHAT_SIGNING_SECRET"],
+  })
+  .refine((settings) => !settings.GAME_FILES_URL || !!settings.FILES_SIGNING_KEY_FILE, {
+    path: ["FILES_SIGNING_KEY_FILE"],
+  })
+  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.GAME_FILES_URL, {
+    path: ["GAME_FILES_URL"],
+  })
+  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.CHAT_SIGNING_SECRET, {
     path: ["CHAT_SIGNING_SECRET"],
   })
   .readonly();
