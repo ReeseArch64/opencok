@@ -74,22 +74,26 @@ class CounterCache extends Cache {
   }
 }
 
-test("device change counters are global, read-only, nullable and exact beyond safe integers", async () => {
+test("device change counter reads are global, nullable and preserve literal text for deferred parsing", async () => {
   const first = new CounterCache(1);
   const second = new CounterCache(2);
   expect(await first.deviceChangeCount("synthetic-device")).toBeNull();
   first.response = "9007199254740993";
-  expect(await first.deviceChangeCount("synthetic-device")).toBe(9007199254740993n);
+  expect(await first.deviceChangeCount("synthetic-device")).toBe("9007199254740993");
   second.response = "0";
-  expect(await second.deviceChangeCount("synthetic-device")).toBe(0n);
+  expect(await second.deviceChangeCount("synthetic-device")).toBe("0");
+  for (const raw of ["", "-1", "+２", "0003", "invalid", " 3", "0".repeat(65535)]) {
+    first.response = raw;
+    expect(await first.deviceChangeCount("synthetic-device")).toBe(raw);
+  }
   expect(first.calls[0]).toEqual(["GET", "opencok:global:device-account-change:synthetic-device"]);
   expect(second.calls[0]).toEqual(first.calls[0]);
   expect(first.calls.every(([command]) => command === "GET")).toBe(true);
 });
 
-test("malformed Redis counters cannot silently disable account-change verification", async () => {
+test("invalid Redis transport responses and bounded keys fail before configuration interpretation", async () => {
   const cache = new CounterCache(1);
-  for (const value of [undefined, 3, "", "-1", "3.2", "NaN", "9223372036854775808", " 3"]) {
+  for (const value of [undefined, 3, false, {}, [], "0".repeat(65536)]) {
     cache.response = value;
     await expect(cache.deviceChangeCount("synthetic-device")).rejects.toThrow();
   }

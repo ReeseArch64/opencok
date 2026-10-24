@@ -956,7 +956,7 @@ export class Game {
     const profile = this.checkProfile(state.profile);
     const context = this.featureContext(profile);
     const deviceId = text(profile, "deviceId");
-    let count: bigint | null = null;
+    let count: string | null = null;
     if (deviceId && accountVerificationEnabled(this.rules, context)) {
       if (!this.services.changeAccountCount)
         throw new GameError(errors.unsupported, "account_rule");

@@ -219,20 +219,20 @@ test("fully saved notification preferences are retained without appending duplic
   expect(preferences.every((row) => row.audio?.value === 0)).toBe(true);
 });
 
-test("account verification thresholds honor realm/version gates without losing counter precision", () => {
+test("account verification thresholds honor realm/version gates and signed Java Int limits", () => {
   const catalog = rules();
   catalog.items.set("function_on7", { id: "function_on7", k5: "12.6.0", k6: "2", k7: "3" });
   expect(accountVerificationEnabled(catalog, context)).toBe(true);
   expect(accountVerificationRequired(catalog, context, null)).toBe(false);
-  expect(accountVerificationRequired(catalog, context, 2n)).toBe(false);
-  expect(accountVerificationRequired(catalog, context, 3n)).toBe(true);
-  expect(accountVerificationRequired(catalog, context, 9007199254740993n)).toBe(true);
-  expect(accountVerificationRequired(catalog, { ...context, kingdomId: 3 }, 100n)).toBe(false);
-  expect(accountVerificationRequired(catalog, { ...context, version: "12.5.99" }, 100n)).toBe(
+  expect(accountVerificationRequired(catalog, context, "2")).toBe(false);
+  expect(accountVerificationRequired(catalog, context, "3")).toBe(true);
+  expect(() => accountVerificationRequired(catalog, context, "9007199254740993")).toThrow();
+  expect(accountVerificationRequired(catalog, { ...context, kingdomId: 3 }, "100")).toBe(false);
+  expect(accountVerificationRequired(catalog, { ...context, version: "12.5.99" }, "100")).toBe(
     false,
   );
   catalog.items.get("function_on7")!.k7 = "invalid";
-  expect(() => accountVerificationRequired(catalog, context, 3n)).toThrow();
+  expect(() => accountVerificationRequired(catalog, context, "3")).toThrow();
 });
 
 test("account verification parses item selectors after blank metadata and version gates", () => {
@@ -259,7 +259,7 @@ test("account selector failure skips counter reads while an early realm match pe
   const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
     changeAccountCount: async () => {
       reads++;
-      return 3n;
+      return "3";
     },
   });
   await expect(game.execute("synthetic", "login.other", { config: sfs.int(0) })).rejects.toThrow();
@@ -278,7 +278,7 @@ test("login.other config preserves correlation, reads counts only when enabled a
     changeAccountCount: async (deviceId: string) => {
       expect(deviceId).toBe("synthetic-device");
       reads++;
-      return 3n;
+      return "3";
     },
   };
   const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, services);
@@ -400,7 +400,7 @@ test("account version failures precede counter reads and noncanonical required v
   const game = new Game(store(configuration()), catalog, { kingdomId: 2 }, () => now, {
     changeAccountCount: async () => {
       reads++;
-      return 3n;
+      return "3";
     },
   });
   for (const version of ["11.bad", "12.6", "12.6.0.bad"]) {
@@ -414,4 +414,81 @@ test("account version failures precede counter reads and noncanonical required v
   const result = await game.execute("synthetic", "login.other", { config: sfs.int(0) });
   expect(result.body.isVerifyChangeAccount).toEqual(sfs.bool(true));
   expect(reads).toBe(1);
+});
+
+test("account counters and thresholds use signed Unicode Java Int parsing after null checks", () => {
+  const catalog = rules();
+  const rule = { id: "function_on7", k5: "12.6.0", k6: "2", k7: "3" };
+  catalog.items.set("function_on7", rule);
+  for (const [count, limit, expected] of [
+    ["+３", "003", true],
+    ["٢", "+3", false],
+    ["-1", "-2", true],
+    ["-2", "-1", false],
+    ["-2147483648", "-2147483648", true],
+    ["2147483647", "2147483647", true],
+    ["-0", "+0", true],
+    ["0".repeat(100) + "3", "3", true],
+  ] as const) {
+    rule.k7 = limit;
+    expect(accountVerificationRequired(catalog, context, count)).toBe(expected);
+  }
+  for (const malformed of [
+    "",
+    " 3",
+    "3 ",
+    "3.0",
+    "1e1",
+    "NaN",
+    "2147483648",
+    "-2147483649",
+    "😀",
+    "0".repeat(65536),
+  ]) {
+    rule.k7 = "3";
+    expect(() => accountVerificationRequired(catalog, context, malformed)).toThrow();
+    rule.k7 = malformed;
+    expect(() => accountVerificationRequired(catalog, context, "3")).toThrow();
+    expect(accountVerificationRequired(catalog, context, null)).toBe(false);
+    expect(accountVerificationRequired(catalog, { ...context, kingdomId: 3 }, malformed)).toBe(
+      false,
+    );
+  }
+  delete catalog.items.get("function_on7")!.k7;
+  expect(accountVerificationRequired(catalog, context, "invalid")).toBe(false);
+});
+
+test("deferred account verification fetches enabled state before skipping absent thresholds and rejects consumed malformed counters", async () => {
+  const catalog = rules();
+  const rule = { id: "function_on7", k5: "12.6.0", k6: "2" };
+  catalog.items.set("function_on7", rule);
+  const state = configuration();
+  const before = structuredClone(state);
+  let reads = 0;
+  let counter: string | null = "bad";
+  const game = new Game(store(state), catalog, { kingdomId: 2 }, () => now, {
+    changeAccountCount: async () => {
+      reads++;
+      return counter;
+    },
+  });
+  const request = { config: sfs.int(1) };
+  expect(
+    (await game.execute("synthetic", "login.other", request)).body.isVerifyChangeAccount,
+  ).toEqual(sfs.bool(false));
+  expect(reads).toBe(1);
+  catalog.items.get("function_on7")!.k7 = "2";
+  await expect(game.execute("synthetic", "login.other", request)).rejects.toThrow();
+  expect(reads).toBe(2);
+  counter = null;
+  catalog.items.get("function_on7")!.k7 = "bad";
+  expect(
+    (await game.execute("synthetic", "login.other", request)).body.isVerifyChangeAccount,
+  ).toEqual(sfs.bool(false));
+  counter = "+２";
+  catalog.items.get("function_on7")!.k7 = "2";
+  expect(
+    (await game.execute("synthetic", "login.other", request)).body.isVerifyChangeAccount,
+  ).toEqual(sfs.bool(true));
+  expect(state).toEqual(before);
 });

@@ -9,6 +9,7 @@ import {
   type RuleContext,
 } from "./availability.ts";
 import { mailBlank } from "./mail.ts";
+import { javaDecimal } from "./java-integer.ts";
 
 export interface FeatureContext extends RuleContext {
   uid: string;
@@ -97,12 +98,14 @@ export function accountVerificationEnabled(rules: Rules, context: RuleContext): 
 export function accountVerificationRequired(
   rules: Rules,
   context: RuleContext,
-  count: bigint | null,
+  count: string | null,
 ): boolean {
   if (!accountVerificationEnabled(rules, context) || count === null) return false;
   const limit = rules.items.get("function_on7")?.k7;
   if (limit === undefined) return false;
-  if (!/^\d+$/.test(limit) || BigInt(limit) > 2147483647n || count < 0n)
+  try {
+    return javaDecimal(count, 32) >= javaDecimal(limit, 32);
+  } catch {
     throw new GameError(errors.unsupported, "account_rule");
-  return count >= BigInt(limit);
+  }
 }

@@ -120,6 +120,6 @@ export interface GameServices {
   worldPowerEffects?(kingdomId?: number): Promise<ReadonlyMap<string, string>>;
   emperorVersion?(kingdomId?: number): Promise<number | null | undefined>;
   playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;
-  changeAccountCount?(deviceId: string): Promise<bigint | null>;
+  changeAccountCount?(deviceId: string): Promise<string | null>;
   featureAvailability?(profile: Row, now: number): Readonly<Record<string, boolean>>;
 }

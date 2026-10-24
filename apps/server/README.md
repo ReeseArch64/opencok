@@ -316,8 +316,13 @@ failure. Normal tests execute no Java or private game code. This implements conf
 presentation only; skill execution, material costs, timers and rewards remain separate.
 
 Account-change verification uses the configured version/realm threshold and the
-global Redis key `opencok:global:device-account-change:<deviceId>`. Reads preserve
-integer precision and reject malformed counters. No count is fetched when the
+global Redis key `opencok:global:device-account-change:<deviceId>`. The adapter returns
+the literal string or null, rejecting non-string responses and values longer than
+65,535 characters. After the feature gate, a missing count or missing threshold returns
+false without numeric parsing. Otherwise both values use signed Java Int parsing,
+including plus signs, leading zeroes and supported Unicode digits; malformed or
+overflowing values reject the response. Negative values remain signed comparisons.
+No count is fetched when the
 gate is closed or the profile has no device ID. This phase does not implement
 account switching or import legacy Redis keys; a future switching writer must use
 this namespace. The shared local Redis instance supplies the global counter across

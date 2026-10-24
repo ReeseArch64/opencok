@@ -57,17 +57,12 @@ export class Cache {
       )) === "OK"
     );
   }
-  async deviceChangeCount(deviceId: string): Promise<bigint | null> {
+  async deviceChangeCount(deviceId: string): Promise<string | null> {
     if (!deviceId || deviceId.length > 255) throw new DependencyError("redis");
     const value = await this.command("GET", `opencok:global:device-account-change:${deviceId}`);
     if (value === null) return null;
-    if (
-      typeof value !== "string" ||
-      !/^\d{1,19}$/.test(value) ||
-      BigInt(value) > 9223372036854775807n
-    )
-      throw new DependencyError("redis");
-    return BigInt(value);
+    if (typeof value !== "string" || value.length > 65535) throw new DependencyError("redis");
+    return value;
   }
   publishPlayerUpdateTime(uid: string, updatedAt: string): Promise<void> {
     return publishPlayerUpdate(
