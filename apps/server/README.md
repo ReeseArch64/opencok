@@ -9,7 +9,8 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when 
 `login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `user.check.nickName`,
 `equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
-`mail.read.status`, `mail.read.status.betch`, `report.picVer`, `chat.get.system.mails.v2`,
+`mail.read.status`, `mail.read.status.betch`, `report.picVer`, `user.update.picVer` (when configured),
+Current query coverage is documented in [the ranking inventory](RANKINGS.md).
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `act.score.rank`, `global.celebrities.rank`, `dragon.battle.rank`, `alliance.rank`, `kill.al.rank`, `world.favo.get`, `world.favo.add`, `world.favo.delme`, `world.search.user`, `search.player`, local `world.get.detail` branches, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
@@ -3123,7 +3124,8 @@ or invalid templates reject rather than committing an undeliverable mail intent.
 The owner-locked transaction commits profile version, applicable moderation state and
 an `avatar_version_update` outbox record together. This deliberately replaces the
 reference's sequential writes with atomic persistence under ADR-0002. The generated
-`0007_avatar_version_updates.sql` migration is additive and has not been applied. It
+`0007_avatar_version_updates.sql` migration is additive and is tested in disposable
+PostgreSQL; it has not been applied to operator/player databases. It
 contains an opaque server-generated operation ID, captured version/time/configuration
 and mail/cache/chat pending bits; it contains no image hash or asset receipt. Distinct
 requests allocate distinct versions, matching the legacy command's lack of request
@@ -3149,11 +3151,20 @@ without changing verified upload receipts. Historical media reconciliation, full
 moderation lifecycle, unavailable original assets and public-chat projection consumption
 remain pending. Topic 7 is not complete.
 
-No new tests or fixtures were generated and no tests were executed, following the
-latest user instruction. Static type checks, lint, formatting and diff review cover
-this change; they do not establish behavioral parity or PostgreSQL concurrency.
-No services, sockets, applied migrations, client/ADB or CI were exercised. Existing
-schema test snapshots were preserved and may need an authorized refresh later.
+Six focused unit tests cover persisted-version/configuration selection, captured
+mail templates, exact correlated response types, distinct requests, check precedence,
+signed-long interval wrapping, unavailable providers and independent delivery failures.
+A disposable PostgreSQL/Redis test uses the production runtime composition and signed
+chat handler with real chat persistence. It covers atomic profile/moderation/outbox
+writes, 20 concurrent allocations, successful-COMMIT reply loss, explicit recovery
+without another allocation, pending-bit retry after PostgreSQL restart, bounded
+publication timeout, idempotent mail, superseded effects and cache/chat delivery.
+A failing outbox trigger proves rollback of profile and moderation changes; unsupported
+versions and invalid realm/ban state produce no allocation. Files stubs reject any
+asset/grant access, and the verified-upload completion table remains unchanged.
+Affected types, lint, formatting and the full unit regression pass. Native clients,
+production deployment and the separately documented restored/wrap lifecycle remain
+unverified; this completes the supported query/mutation scope of issue #217.
 
 ## Avatar report submission
 

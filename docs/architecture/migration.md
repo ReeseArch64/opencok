@@ -390,3 +390,10 @@ See the [local stack guide](../../infra/compose/README.md) for profiles, configu
 private resource mounts and recovery. A disposable Compose test builds images and
 exercises PostgreSQL discovery and real SFS login through Traefik, preserving
 synthetic state and testing dependency failure without using player databases.
+
+legacy event-ordering or expected-previous CAS design. Command/rule units and a
+disposable PostgreSQL/Redis integration exercise the production allocation runtime,
+concurrent requests, atomic rollback, uncertain-commit recovery and mail/cache/chat
+retry after restart without fabricating upload receipts. Native client behavior and
+the broader topic-7 lifecycle remain unverified. The realm runbook records
+configuration, schema, retry boundaries and the supported-version limits.
