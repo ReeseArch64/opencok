@@ -1503,3 +1503,13 @@ parity. Required follow-ups and limitations remain in the linked source report.
 The nonempty evidence commit retains `[skip ci]`; workflows and required checks
 are unchanged, integration/client execution is deferred and merge readiness is
 not claimed. No migration or gameplay write is executed by publication.
+
+## Feature bridge #147 merge readiness
+
+PR #147 connects the completed feature blocks using the original dependency delta applied to the
+current feature base. Existing source fixes and validation evidence from both branches are
+preserved.
+
+Local lint, formatting, server and Drizzle types, and server unit tests passed on the composed
+snapshot. Every applicable remote CI check must pass on the final head before merge. This does not
+claim native-client or complete legacy parity.
