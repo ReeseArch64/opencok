@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./mail-delete": "./src/mail-delete.ts",
     "./game": "./src/game.ts",
     "./power": "./src/power.ts",
     "./profile": "./src/profile.ts",

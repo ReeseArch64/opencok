@@ -23,6 +23,9 @@ const dependencies: ServerDependencies = {
     profile: async () => undefined,
     accounts: async () => [],
     playerSummaries: async () => [],
+    mailDelete: async () => {
+      throw new Error("Unexpected mailbox deletion");
+    },
     mailRead: async () => {
       throw new Error("Unexpected mailbox read");
     },

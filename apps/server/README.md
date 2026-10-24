@@ -9,6 +9,7 @@ Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
 `login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`,
 `mail.read.status`, `mail.read.status.betch`,
+`mail.delete`,
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
@@ -752,7 +753,7 @@ order. No new library or external service is required.
 Synthetic unit tests cover wire types, result strings, ownership predicates, profile
 locks, flag conditions, repeat requests and rollback on update/marker/commit failure.
 They do not prove PostgreSQL concurrency or native-client behavior. List/content reads,
-deletion, chat-mail save variants and synchronization remain pending; reward redemption
+category/conversation deletion, chat-mail save variants and synchronization remain pending; reward redemption
 is outside this wave.
 
 ## Mailbox read status and gift opening
@@ -805,8 +806,63 @@ owner/realm checks, atomic rollback, full-width timestamps, global commit ambigu
 acknowledgment failures, missing logs, repeat delivery, bounded scheduling and shutdown.
 They use fake SQL clients and an injected scheduler, without sockets, real services,
 applied migrations, integration/E2E or ADB. Real PostgreSQL lock/concurrency behavior
-and client rendering remain unverified. Content/list reads, deletion, chat-mail variants
+and client rendering remain unverified. Content/list reads, category/conversation deletion, chat-mail variants
 and synchronization readers/marker cleanup still need migration.
+
+## Ordinary mailbox deletion
+
+`mail.delete`, tracked in [issue #67](https://github.com/ReeseArch64/opencok/issues/67),
+accepts string `uids` containing comma-separated message IDs. Empty segments are
+ignored and duplicate IDs collapse; whitespace inside an ID remains significant.
+The input is limited to 65,535 UTF-8 bytes, 1,000 nonempty segments and 40 UTF-16 code
+units per ID, with invalid Unicode and NUL rejected. Optional `num` must be an SFS
+integer but has no effect, matching the reference's unused argument. `types` likewise
+has no effect on this ordinary command. The response is `delete` as an SFS integer
+containing the actual removed-row count, including zero, plus correlation fields.
+
+A read-write transaction locks and authorizes the recipient profile before deleting
+only owned messages whose persisted `saveFlag` is exactly 0 and `rewardStatus` is
+nonzero. Null, positive and negative nonzero saved flags remain protected, as in the
+reference SQL; no attachment redemption occurs. Missing or foreign IDs do not affect
+the result. Related cleanup operates only on IDs returned by the deletion. Contents
+with an explicit different recipient remain untouched; empty/null auxiliary owners
+are accepted only for these already-authorized message IDs. Deleted IDs receive
+durable `mail_update` tombstones with nondecreasing timestamps. Pending gift-opening
+events remain available to the relay after their original mail is removed.
+
+The cleanup policy preserves the reference's group families. Single-message groups
+are removed by owner, type and message ID. Personal groups use types 20–22 from one
+sender; moderation deletion accepts types 23, 24, 39 and 40, but its remaining-message
+lookup uses only 23–24, matching the reference. Resource, trade and monster groups
+use types 5, 10 and 18 respectively. Existing grouped timestamps update to the latest
+remaining creation time, preserving bigint precision; exhausted groups are removed.
+Missing groups are not created. Personal media/express types do not trigger group
+cleanup in this command, following the concrete legacy comparator behavior.
+
+Deleted move-invitation messages (type 26) can invalidate the matching inviter/recipient
+pair. The controller decodes inline UTF-8 JSON or the case-insensitive `extra` sentinel
+resolved through persisted `mail_contents`. Only string inviter IDs and an invitee
+equal to the authenticated owner authorize this cleanup. Invalid/missing metadata is
+ignored, following the reference's best-effort invitation handling. Each JSON payload
+is bounded to 65,535 bytes; extra rows above this bound do not supply invitation data.
+Aggregate loaded invitation metadata above 8 MiB rejects and rolls back the command.
+Legacy Redis-only extra payloads must be imported into authoritative `mail_contents`
+before cutover; this command does not contact the legacy cache.
+
+Deletion, auxiliary cleanup, tombstones, group maintenance and valid invitation
+invalidation commit or roll back together. This intentionally corrects the legacy
+helper's removal of auxiliary contents and group state for messages retained by its
+own deletion predicate. It also adds recipient checks and preserves explicitly foreign
+auxiliary rows. The reference's result count and actual deletion protection are retained.
+SQL failures reject the command instead of leaving partial cleanup. No schema or library
+change is needed; startup checks the existing contents, group and invitation tables.
+
+Synthetic units cover protected/null/nonstandard flags, duplicate and foreign IDs,
+group/media distinctions, full-width timestamps, inline/extra invitations, request and
+metadata bounds, and rollback at each cleanup stage. They do not exercise a real
+database, concurrent writers, client or ADB. `mail.delete.batch`, category/label
+deletion, chat-conversation deletion, list/content reads and synchronization readers
+remain separate unfinished portions of topic 4.
 
 ## Gameplay migration: topics 1–8
 
@@ -861,7 +917,7 @@ use these descriptions before the reconnect task component is complete.
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests      | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                    | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                       |
-| 4. Basic mailbox                          | Category counts; saving and read marking with atomic markers; recoverable gift-opening records; synthetic unit coverage                                                                         | List/content, deletion, chat-mail variants and synchronization readers/cleanup; redemption is outside this wave.                                 |
+| 4. Basic mailbox                          | Category counts; saving/read marking; gift-opening retry; ordinary deletion with atomic related cleanup; synthetic units                                                                        | List/content, batch/category/conversation deletion, chat-mail variants and synchronization readers/cleanup; redemption is outside this wave.     |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                   | Point details, player search and favorites, including authorization for writes.                                                                  |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                           | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |
 | 7. Avatar integration                     | Standalone files service                                                                                                                                                                        | Realm grants, confirmation and profile updates.                                                                                                  |
