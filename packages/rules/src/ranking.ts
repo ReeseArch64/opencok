@@ -41,23 +41,31 @@ export function selectPlayerRanking(
   const seen = new Set<string>();
   const candidates = snapshot.candidates.filter((row) => {
     const id = text(row, "uid");
-    if (!id || seen.has(id)) return invalid();
-    seen.add(id);
-    if (row.banTime === null || row.banTime === undefined) return true;
+    const key = query.kind === "building" ? text(row, "uuid") : id;
+    if (!id || !key || seen.has(key)) return invalid();
+    seen.add(key);
+    if (row.banTime === null || row.banTime === undefined)
+      return query.kind === "building" ? invalid() : true;
     if (typeof row.banTime === "number" && !Number.isSafeInteger(row.banTime)) return invalid();
     if (!/^[+-]?\d+$/.test(String(row.banTime))) return invalid();
     const banTime = BigInt(String(row.banTime));
     if (BigInt.asIntN(64, banTime) !== banTime) return invalid();
-    return banTime <= BigInt(query.now);
+    return query.kind === "building"
+      ? banTime !== 9223372036854775807n
+      : banTime <= BigInt(query.now);
   });
-  const index = candidates.findIndex((row) => row.uid === uid);
+  const index =
+    query.kind === "building"
+      ? candidates.findLastIndex((row) => row.uid === uid)
+      : candidates.findIndex((row) => row.uid === uid);
   return {
     rows: candidates
       .slice(0, query.limit)
       .filter(
         (row) =>
-          row.profileUid === row.uid &&
-          (!text(row, "allianceId").trim() || row.allianceUid === row.allianceId),
+          query.kind === "building" ||
+          (row.profileUid === row.uid &&
+            (!text(row, "allianceId").trim() || row.allianceUid === row.allianceId)),
       ),
     selfRanking: index < 0 ? Number(BigInt.asIntN(32, snapshot.fallbackRank)) : index + 1,
   };
