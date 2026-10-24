@@ -58,6 +58,7 @@ export interface CityState {
   armies: Row[];
   items: Row[];
   lord: Row | undefined;
+  civilizationPrestige?: bigint;
 }
 export interface GameStore extends AuthenticationStore {
   normalRankingRealm?(): Promise<boolean>;

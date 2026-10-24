@@ -63,6 +63,30 @@ command, including repeated failures. `command_rejected` explains rejection;
 An unexpected application failure intentionally omits the original error text;
 use its operation, controlled reason and correlation fields to reproduce it.
 
+## Saved civilization at login
+
+The 12.06.0 login snapshot includes `civilization_type` as an SFS int and
+`civilization_score` / `civilization_prestige` as SFS longs inside `init.user`.
+The type and score map to the selected realm profile's `civilizationType` and
+legacy-spelled `civilizationSorce` columns. Prestige reads only the current
+owner/type row from `user_civilization_prestige` in the same repeatable-read,
+read-only city transaction. The adapter validates that table at startup.
+
+An omitted type previously caused an existing player with a saved civilization
+to enter the selection screen again. These wire keys follow the locally
+inspected 12.06.0 login contract; sending the database field name
+`civilizationType` does not restore that contract. The optional
+`CityState.civilizationPrestige` snapshot field defaults to zero for callers
+without a saved prestige row, preserving existing embedded adapters.
+
+No login read creates or changes a civilization or prestige row. Missing/null
+profile values serialize as zero, and an absent prestige row serializes as zero
+without inserting one. A failed prestige query rejects the snapshot. Existing
+scores and prestige remain bigint values through binary serialization.
+`civilization.change` and initial selection for genuinely unselected profiles
+remain unsupported; this correction restores the persisted-login presentation.
+Native screen progression still requires operator verification after reconnect.
+
 ## Start locally
 
 From the repository root:

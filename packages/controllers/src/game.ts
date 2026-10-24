@@ -176,7 +176,9 @@ export class Game {
       ...serverClock(this.now(), 0),
       ...featureConfig(this.rules, this.featureContext(state.profile)),
       ...this.info(state),
-      user: sfs.object(user(state.profile, this.rules, this.config.kingdomId)),
+      user: sfs.object(
+        user(state.profile, this.rules, this.config.kingdomId, state.civilizationPrestige),
+      ),
       newAccount: sfs.bool(false),
       queue: sfs.array(state.queues.map((q) => sfs.object(this.queueDto(q, state)))),
       world: sfs.object({

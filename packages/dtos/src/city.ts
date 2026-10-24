@@ -95,10 +95,18 @@ export function resource(row: Row): Fields {
 export function gold(profile: Row) {
   return long(profile, "gold") + long(profile, "paidGold") + long(profile, "paidSpecialGold");
 }
-export function user(profile: Row, rules: Rules, kingdomId: number): Fields {
+export function user(
+  profile: Row,
+  rules: Rules,
+  kingdomId: number,
+  civilizationPrestige = 0n,
+): Fields {
   const result: Fields = {
     buildcode: sfs.string(createHash("md5").update(text(profile, "uid")).digest("hex")),
     serverType: sfs.int(0),
+    civilization_type: sfs.int(num(profile, "civilizationType")),
+    civilization_score: sfs.long(long(profile, "civilizationSorce")),
+    civilization_prestige: sfs.long(civilizationPrestige),
     payTotalDollar: sfs.double(num(profile, "payTotalDollar")),
     uuid: sfs.string(text(profile, "deviceUuid")),
     gold: sfs.long(gold(profile)),
