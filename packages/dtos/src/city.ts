@@ -4,10 +4,10 @@ import { Rules } from "@opencok/rules/game";
 import { createHash } from "node:crypto";
 
 export const FOREVER = 9223372036854775807n;
-export function building(row: Row, rules: Rules, next = false): Fields {
+export function building(row: Row, rules: Rules, next = false, now = Date.now()): Fields {
   const itemId = text(row, "itemId");
   const rule = next
-    ? rules.nextBuilding(itemId, num(row, "level"), num(row, "star"), num(row, "progress"))
+    ? rules.nextBuilding(itemId, num(row, "level"), num(row, "star"), num(row, "progress"), now)
     : rules.building(itemId, num(row, "level"), num(row, "star"), num(row, "progress"));
   const level = Number(rule.level);
   const out: Fields = {
@@ -18,7 +18,7 @@ export function building(row: Row, rules: Rules, next = false): Fields {
     opType: sfs.int(num(row, "opType")),
     starNum: sfs.int(Number(rule.s)),
     starRate: sfs.int(Number(rule.p)),
-    starMax: sfs.int(rules.maxStar(itemId)),
+    starMax: sfs.int(rules.maxStar(itemId, now)),
     putId: sfs.string(text(row, "putId")),
     unlockFlag: sfs.int(next ? 0 : num(row, "unlockFlag")),
     unlock_costNum: sfs.int(num(row, "costUnlockTimes")),
@@ -46,7 +46,7 @@ export function building(row: Row, rules: Rules, next = false): Fields {
     if (rule[key] !== undefined) out[key] = sfs.int(Number(rule[key]));
   for (const key of ["item", "para1", "para2", "para3", "para4", "para5"])
     if (rule[key] !== undefined) out[key] = sfs.string(rule[key]);
-  const nextRule = rules.nextBuilding(itemId, level, Number(rule.s), Number(rule.p));
+  const nextRule = rules.nextBuilding(itemId, level, Number(rule.s), Number(rule.p), now);
   const paras = [1, 2, 3, 4, 5].map((i) => nextRule?.[`para${i}`]).filter((v) => v !== undefined);
   if (paras.length) out.nextLevelParas = sfs.string(paras.join(","));
   if (long(row, "refreshTime")) out.refreshTime = sfs.long(long(row, "refreshTime"));
