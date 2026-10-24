@@ -14044,3 +14044,24 @@ select "mailUid", "sendTime", "toUser", "openedAt" from "opencok_kingdom"."mail_
 update "opencok_kingdom"."mail_gift_opening" set "mailUid" = $1, "sendTime" = $2, "toUser" = $3, "openedAt" = $4 where "opencok_kingdom"."mail_gift_opening"."mailUid" = $5
 delete from "opencok_kingdom"."mail_gift_opening" where "opencok_kingdom"."mail_gift_opening"."mailUid" = $1"
 `;
+
+exports[`opencok_kingdom.mail_chat_read_intent: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["commandId","uuid",true,null,null,null]
+column ["effectIndex","integer",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["others","varchar(40)",true,null,null,null]
+column ["chatTypes","varchar(4)",true,null,null,null]
+column ["requestedAt","bigint",true,null,null,null]
+primary ["mail_chat_read_intent_PRIMARY",["commandId","effectIndex"]]
+index ["mail_chat_read_intent_pending",false,["requestedAt","commandId","effectIndex"]]
+index ["mail_chat_read_intent_owner",false,["ownerUid"]]
+check ["mail_chat_read_intent_effect_range","\\"effectIndex\\" >= 0 AND \\"effectIndex\\" <= 1001"]
+check ["mail_chat_read_intent_owner_nonempty","length(\\"ownerUid\\") > 0"]
+check ["mail_chat_read_intent_types","\\"chatTypes\\" IN ('1,20', '2', '3')"]
+check ["mail_chat_read_intent_time_nonnegative","\\"requestedAt\\" >= 0"]
+insert into "opencok_kingdom"."mail_chat_read_intent" ("commandId", "effectIndex", "ownerUid", "others", "chatTypes", "requestedAt") values ($1, $2, $3, $4, $5, $6)
+select "commandId", "effectIndex", "ownerUid", "others", "chatTypes", "requestedAt" from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $1
+update "opencok_kingdom"."mail_chat_read_intent" set "commandId" = $1, "effectIndex" = $2, "ownerUid" = $3, "others" = $4, "chatTypes" = $5, "requestedAt" = $6 where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $7
+delete from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."commandId" = $1"
+`;

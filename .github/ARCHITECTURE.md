@@ -1152,14 +1152,14 @@ migration execution or deployment.
 ### 15.1. PostgreSQL database package
 
 `packages/drizzle` is the application's PostgreSQL persistence package. Its maintained
-Drizzle schemas in `src/schema` are the source of truth: 774 tables and 6,323 fields,
+Drizzle schemas in `src/schema` are the source of truth: 775 tables and 6,329 fields,
 with one module per table. The package root exposes a typed PostgreSQL client, and
 `schema/global` / `schema/kingdom` provide the corresponding role-specific models.
 
 The default physical databases are `opencok_global`, `opencok_kingdom_1` and
 `opencok_kingdom_2`, with configured kingdom IDs 1 and 2. The global database contains
 `opencok_global`, `opencok_pay` and `opencok_chat` (113 tables). Both kingdom databases
-contain the same `opencok_kingdom` namespace (661 tables each). One set of kingdom
+contain the same `opencok_kingdom` namespace (662 tables each). One set of kingdom
 table modules and migrations serves every configured kingdom; there are no per-ID
 schema copies. Table/field names and values remain stable. Database names and
 credentials are configuration. Pools and local transactions belong to one physical database; there
@@ -1299,6 +1299,23 @@ text or moderation conversations; raw signed saved flags are retained. This comm
 does not emit synchronization markers or contact chat, matching its legacy behavior.
 It loads no message contents and imposes no conversation-size truncation. Wire rules,
 transaction failures and ownership are covered by synthetic units only.
+
+Conversation read marking has a pure request/effect contract that preserves ordered
+mailbox assignments and chat-service intents. It performs complete prevalidation,
+retains conditional versus unconditional status assignments, and does not drop chat
+effects when mailbox updates would match no rows. The command remains unsupported
+until a recoverable private-chat read-state consumer and delivery are wired. Public room
+history is not that consumer. An independent repository adapter locks the owner, checks
+realm/ban state, updates the union of mailbox predicates without fetching bodies and
+inserts immutable realm `mail_chat_read_intent` rows in the same transaction. Null
+mailbox status is unchanged except for bottle assignments; null sender equality matches
+no mail but still emits its raw chat intent. UUID/effect-position keys identify delivery
+retries; separate command invocations get fresh identities. Owner-serialized admission
+bounds pending events to 1,000 before any write. The additive kingdom migration is
+generated only; no runtime worker or command dispatch consumes this adapter yet. Future
+delivery must preserve peer semantics, effect ordering and idempotent acknowledgment
+without assuming a cross-database transaction. Synthetic driver units cover SQL and
+rollback; actual database execution, locking and acknowledgment ambiguity are unverified.
 
 Read-status commands share the owner-lock and atomic marker boundary. Individual
 unread gift transitions additionally insert a realm `mail_gift_opening` outbox record;
