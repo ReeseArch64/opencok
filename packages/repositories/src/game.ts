@@ -53,6 +53,8 @@ import { WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
 import { setPushPreference } from "./push-preferences.ts";
 import { updateProfilePreference } from "./profile-preferences.ts";
 import { nicknameOccupied } from "./nickname.ts";
+import { readCelebrityDescription } from "./celebrity.ts";
+import { celebrity } from "@opencok/drizzle/schema/opencok_kingdom/celebrity";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
 import { DependencyError } from "@opencok/errors/dependency";
 import {
@@ -144,6 +146,7 @@ export class Database implements GameStore, FriendshipMineStore {
       alliance_invite_move,
       switches,
       parse_info,
+      celebrity,
     ])
       await this.kingdom.db.select().from(table).limit(0);
     await this.databases.global.db.select().from(account_new).limit(0);
@@ -179,6 +182,9 @@ export class Database implements GameStore, FriendshipMineStore {
     return (
       await this.kingdom.db.select().from(userprofile).where(eq(userprofile.uid, uid)).limit(1)
     )[0];
+  }
+  celebrityDescription(uid: string, kingdomId: number): Promise<Buffer | null> {
+    return readCelebrityDescription(this.databases, uid, kingdomId);
   }
   async accounts(uid: string): Promise<Row[]> {
     return this.databases.global.db

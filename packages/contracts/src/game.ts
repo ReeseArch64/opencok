@@ -92,6 +92,7 @@ export interface GameStore extends AuthenticationStore {
   initializeWorldNewsPreference?(uid: string, now: number): Promise<void>;
   setPushPreference?(uid: string, preference: PushPreference, now: number): Promise<void>;
   nicknameOccupied?(name: string): Promise<boolean>;
+  celebrityDescription?(uid: string, kingdomId: number): Promise<Buffer | null>;
   updateProfilePreference?(
     uid: string,
     field: ProfilePreferenceField,

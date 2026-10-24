@@ -452,6 +452,29 @@ unchanged. These are SQL-contract and lifecycle simulations, not proof from a ru
 PostgreSQL instance. The guarded mutation is still not exposed and no new schema,
 configuration or dependency is added.
 
+`celebrity.desc.get` now reads a target's public celebrity description from its requested
+configured realm. The authenticated caller must be local and unbanned. A Java-blank
+`uid` returns an empty String `description` before reading `serverId`; otherwise the
+server requires the signed Int field and routes only to that realm. Unconfigured realms,
+missing targets, a target whose `gmFlag` is not 11, or missing description state return
+empty. Target bans and account activity do not add filters to this public read.
+
+The repository selects only target UID/flag, then UID/description when needed. Both
+lookups preserve legacy `utf8_unicode_ci` equality through bound generated candidates
+and exact keys. Ambiguous canonical aliases reject. It does not consult global account
+routing, mutate state or reserve names. Existing statement timeouts apply; candidate
+scans have no new index or production performance claim. Startup checks the existing
+local `celebrity` table. Reached SQL failures reject instead of masquerading as an empty
+profile. Blob decoding is strict UTF-8 followed by Java trim/blank behavior: malformed
+bytes become empty, BOM remains, and nonblank interior text is preserved. Responses use
+ordinary correlation and no pushes.
+
+Eight synthetic unit cases exercise the actual controller and Drizzle adapter together,
+including local/remote routing, lazy decoding, caller authorization, target gating,
+collation aliases, strict binary decoding and failures. They use fake query clients only.
+The focused tests pass; broad regression execution is deferred under the user's current
+parallel-work instruction. `celebrity.desc.save` and device/AVD behavior remain pending.
+
 Reserved-name configuration now participates in the word-filter reload. After the
 adjacent bad-word file has been read and appended, the server reads the global Redis
 lists `forbidden_words_regular`, `forbidden_words_strict`, `forbidden_words_pattern`,
