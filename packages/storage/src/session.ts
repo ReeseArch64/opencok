@@ -56,6 +56,33 @@ export class Cache {
       throw new DependencyError("redis");
     return BigInt(value);
   }
+  async playerUpdateTimes(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>> {
+    if (
+      !Number.isSafeInteger(kingdomId) ||
+      kingdomId < 1 ||
+      uids.length > 50 ||
+      uids.some((uid) => !uid || uid.length > 255)
+    )
+      throw new DependencyError("redis");
+    if (!uids.length) return new Map();
+    const values = await this.command(
+      "MGET",
+      ...uids.map((uid) => `opencok:kingdom:${kingdomId}:player-update:${uid}`),
+    );
+    if (!Array.isArray(values) || values.length !== uids.length) throw new DependencyError("redis");
+    const updates = new Map<string, string>();
+    for (const [index, value] of values.entries()) {
+      if (value === null || (typeof value === "string" && !value.trim())) continue;
+      if (
+        typeof value !== "string" ||
+        !/^\d{1,19}$/.test(value) ||
+        BigInt(value) > 9223372036854775807n
+      )
+        throw new DependencyError("redis");
+      updates.set(uids[index]!, value);
+    }
+    return updates;
+  }
   async refresh(uid: string, token: string): Promise<boolean> {
     return (
       Number(

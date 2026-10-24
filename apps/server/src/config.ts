@@ -14,6 +14,7 @@ export const config = Effect.gen(function* () {
     healthPort: settings.GAME_HEALTH_PORT,
     kingdomId: settings.KINGDOM_ID,
     kingdomDatabase: settings.KINGDOM_DATABASE_NAME ?? `opencok_kingdom_${settings.KINGDOM_ID}`,
+    playerKingdoms: settings.GAME_PLAYER_KINGDOMS,
     globalDatabase: settings.GLOBAL_DATABASE_NAME,
     databaseUrl: yield* databaseUrl,
     redisUrl: settings.GAME_REDIS_URL,

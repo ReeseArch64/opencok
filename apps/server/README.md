@@ -6,7 +6,7 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
-`login.other`, `setting.xml`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`login.other`, `setting.xml`, `get.user.info.multi`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -103,7 +103,7 @@ service terms and scout settings; the mission switch also checks version and tim
 Avatar calendar dates are returned as UTC epoch-millisecond strings. Malformed
 numeric fields, overflows and invalid dates produce the existing unsupported error
 instead of an invalid SFS value. These metadata reads never settle production or
-modify a player. Cross-realm access remains disabled, and the running realm uses
+modify a player. Cross-realm gameplay remains disabled, and the running realm uses
 the normal-world configuration with chat interval 1 and feed limit 3. Alternative
 world-cup projections and explicit server values have unit coverage, but are not
 enabled in the runtime composition.
@@ -135,6 +135,42 @@ account switching or import legacy Redis keys; a future switching writer must us
 this namespace. The shared local Redis instance supplies the global counter across
 the configured realms. Preference and counter adapters are unit-tested with fake
 PostgreSQL/Redis clients; no database or network service is started by these tests.
+
+`get.user.info.multi` returns public player summaries for up to 50 nonblank IDs.
+Missing, empty and oversized batches return an empty `uids` array. Malformed wire
+types and IDs longer than 255 characters are rejected. Ordinary duplicates retain
+their request order; the built-in guide is appended once, including its distinct
+legacy integer/long timestamp types. Unknown players are omitted. The observer
+must still exist and must not be banned. Responses preserve request correlation.
+
+Each realm snapshot reads only public profile, VIP, alliance membership/title,
+banner and type-103 state columns. Queries never initialize missing rows, expire
+states or mutate progress. Nullable related records produce the legacy empty/zero
+defaults. Alliance membership and titles must match the profile's alliance. If
+multiple titles, visual states or registrations exist, the first by title, state
+ID or registration type is selected deterministically. Taiwan registration hides
+the banner for both local and remote summaries; the Java remote SQL path omitted
+that restriction. The DTO never serializes raw profile/account rows.
+
+Presence of `allservers`, including `false`, enables lookup of missing numeric IDs
+after stripping `@mod`. Global account records select their authoritative physical
+realm database; unknown accounts are omitted. Configure additional readable realms
+with `GAME_PLAYER_KINGDOMS=1:opencok_kingdom_1,2:opencok_kingdom_2`. Without this
+setting only the selected realm is available. The list may include the selected
+realm only with its existing database name; at most two total realms are allowed.
+Missing configured routes, inconsistent remote ownership and database failures
+reject the whole request. Local results precede remote results, as in the legacy.
+Remote reads use separate read-only snapshots; this is not a transaction across
+realms. The current realm's summary tables are checked at startup; remote database
+availability is checked when requested and does not gate local login readiness.
+
+Profile update markers are read in batches from
+`opencok:kingdom:<id>:player-update:<uid>` in the shared Redis instance. Values remain
+exact seconds strings; missing markers use the command clock in seconds. The guide
+retains its fixed integer marker. Redis failures or malformed markers reject the
+request. No legacy Redis key import or profile writer is introduced here; topic 6
+must update this namespace after profile changes. No gameplay state is cached by
+this query. Server-native behavior has unit coverage only; the client remains untested.
 
 Use runtime credentials with SELECT access to the required global/realm tables,
 separate from the administrative setup account. Startup checks the required
@@ -188,7 +224,7 @@ ADB, native-client validation, integration or end-to-end tests for this phase.
 | Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
-| 2. Player/progression queries             | Initial player DTO                                                                                                                                                                         | Level, experience, power, own/public and multi-player query contracts.                                                                           |
+| 2. Player/progression queries             | Initial player DTO; public summary batches with local/cross-realm routing, guide identity, VIP/alliance/banner projections and synthetic adapter tests                                     | Full own/public profile, power and reconnect projections, including level and experience contracts.                                              |
 | 3. Ranking queries                        | Persistence schema                                                                                                                                                                         | Lists, player positions, pagination and tie-breaking.                                                                                            |
 | 4. Basic mailbox                          | Persistence schema                                                                                                                                                                         | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                              | Point details, player search and favorites, including authorization for writes.                                                                  |

@@ -12,7 +12,8 @@
   "type": "module",
   "exports": {
     "./bootstrap": "./src/bootstrap.ts",
-    "./city": "./src/city.ts"
+    "./city": "./src/city.ts",
+    "./players": "./src/players.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

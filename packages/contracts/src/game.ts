@@ -16,12 +16,19 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  playerSummaries(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
   configuration(uid: string): Promise<LoginConfigurationState>;
   city(uid: string, now: number): Promise<CityState>;
   world(
     uid: string,
     ids: number[],
   ): Promise<{ world: Row | undefined; points: Row[]; hasMarches: boolean }>;
+}
+
+export interface PlayerSummary {
+  data: Row;
+  kingdomId: number;
+  remote: boolean;
 }
 
 export interface LoginConfigurationState {
@@ -31,6 +38,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  playerUpdateTimes?(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>>;
   changeAccountCount?(deviceId: string): Promise<bigint | null>;
   featureAvailability?(profile: Row, now: number): Readonly<Record<string, boolean>>;
 }
