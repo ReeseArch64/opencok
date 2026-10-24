@@ -1,3 +1,4 @@
+import { world_barbarion } from "@opencok/drizzle/schema/opencok_kingdom/world_barbarion";
 import { readPlayerEffects } from "./power.ts";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
@@ -46,6 +47,30 @@ const pointColumns = {
   active: worldpoint.active,
   reserve: worldpoint.reserve,
 };
+const barbarianColumns = {
+  pointId: world_barbarion.pointId,
+  configId: world_barbarion.configId,
+  lastArmyMapByteArray: world_barbarion.lastArmyMapByteArray,
+  lastBeAttackedTime: world_barbarion.lastBeAttackedTime,
+};
+async function readBarbarian(db: Reader, point: Row) {
+  const row = single(
+    await db
+      .select(barbarianColumns)
+      .from(world_barbarion)
+      .where(eq(world_barbarion.pointId, point.id as number))
+      .limit(2),
+  );
+  if (
+    row &&
+    (row.pointId !== point.id ||
+      !validText(row.configId, 255) ||
+      (row.lastArmyMapByteArray !== null &&
+        (!Buffer.isBuffer(row.lastArmyMapByteArray) || row.lastArmyMapByteArray.length > 65535)))
+  )
+    throw new Error("Invalid barbarian state");
+  return { row };
+}
 const marchColumns = {
   uuid: world_march.uuid,
   ownerUid: world_march.ownerUid,
@@ -335,6 +360,8 @@ export function createWorldPointDetailStore(
             detail.point?.pointType === 60 && !blank(detail.point.pointItem)
               ? await readNeutralResource(tx, detail.point)
               : undefined;
+          const barbarian =
+            detail.point?.pointType === 44 ? await readBarbarian(tx, detail.point) : undefined;
           const city =
             query.cityExtras && detail.point?.pointType === 1 && detail.owner?.profile
               ? await readCity(tx, observer, detail.owner.profile, kingdomId)
@@ -345,6 +372,7 @@ export function createWorldPointDetailStore(
             ...(exploration ? { exploration } : {}),
             ...(neutralResource ? { neutralResource } : {}),
             ...(city ? { city } : {}),
+            ...(barbarian ? { barbarian } : {}),
           };
         }, options);
         if (
@@ -388,6 +416,7 @@ async function readCity(db: Reader, observer: string, profile: Row, kingdomId: n
   return { observerStatistics, mixed, effects };
 }
 export async function checkWorldPointDetailStore(db: Db): Promise<void> {
+  await db.select(barbarianColumns).from(world_barbarion).limit(0);
   await db
     .select({ uid: user_mixed_info.uid, lastBeDuelTime: user_mixed_info.lastBeDuelTime })
     .from(user_mixed_info)

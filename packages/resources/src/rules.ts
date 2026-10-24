@@ -56,6 +56,7 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     "field_monster",
     "army",
     "sp_resources",
+    "barbarion",
   ].includes(name);
   for (const record of records) {
     const item = record;
@@ -180,10 +181,11 @@ export async function loadRules(directory: string, kingdomId = 1) {
     optional("reward"),
     optional("mail"),
   ]);
-  const [fieldMonsters, armies, neutralResources] = await Promise.all([
+  const [fieldMonsters, armies, neutralResources, barbarians] = await Promise.all([
     optional("field_monster"),
     optional("army"),
     optional("sp_resources"),
+    optional("barbarion"),
   ]);
   const achievementCount = (await exists(join(directory, "achievement.xml")))
     ? parseRecords(await read("achievement"), "achievement").length
@@ -235,7 +237,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     { achievementCount, militaryRanks, servers },
     { treasures, rewards },
     mail,
-    { fieldMonsters, armies, neutralResources },
+    { fieldMonsters, armies, neutralResources, barbarians },
   );
 }
 

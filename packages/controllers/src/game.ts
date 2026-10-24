@@ -192,6 +192,7 @@ export class Game {
           this.config.kingdomId,
           this.now(),
           this.services,
+          this.now,
         );
         break;
       case "search.player":

@@ -90,7 +90,7 @@ read-only mobile originals must be extracted in a separate working directory.
 and values encoded as strings, or an empty array when the catalog is absent. XML
 catalogs accept single records and multiple/nested groups. Duplicate IDs fail except
 for goods, features, research, equipment, statuses, dragon skills, activity panels,
-rewards, mail, field monsters, army formations and neutral resources, where the last record wins
+rewards, mail, field monsters, army formations, neutral resources and barbarians, where the last record wins
 as in the legacy cache. Values retain leading
 zeroes and whitespace; malformed records and document type declarations fail loading.
 
@@ -1150,17 +1150,18 @@ flag. Missing positive local points return `E100169`. Positive remote queries an
 unfinished specialized branches return `102192`; they are still required work in
 [issue #85](https://github.com/ReeseArch64/opencok/issues/85), not removed scope.
 
-| Local point branch                                                        | Current command behavior                                                                                                                                                          |
-| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unoccupied resources 3/37                                                 | Int point and wrapped remaining quantity; type 37 also includes current member count. Returns before territory-effect additions.                                                  |
-| Ordinary resources 3 without a nonblank owner's march pointer             | Public owner fields and, when applicable, the positive territory-effect flag. A nonblank owner/march pointer requires the pending occupied-resource resolver and rejects.         |
-| Monster 6                                                                 | Owner UID plus the selected existing exploration report/start/end fields, if its first destination match is occupying.                                                            |
-| Monster boss 15                                                           | Current and catalog-derived maximum HP, then point ID; no owner identity fields.                                                                                                  |
-| Cities 1/2                                                                | Public base owner fields. City 1 with exact `lost_battle.k3 = "1"` and an existing target profile adds Bool `slowDown`/`targetTooStrong` and Long `targetPower`/`lastBeDuelTime`. |
-| Unoccupied world bosses 49/50                                             | Pending service/reward state; rejects. Occupied instances use the reference base owner fields.                                                                                    |
-| Territories 14/18/20/21/23/46/47, barbarian 44, occupied new resources 37 | Pending specialized state; rejects.                                                                                                                                               |
-| Neutral resource 60                                                       | Base owner fields; with a nonblank item and an occupying destination march, adds Long `occupybegintime` from the stored end time and catalog gathering duration.                  |
-| Other known types 0–69                                                    | Public base owner fields and point ID, as in the reference handler. Unknown types reject.                                                                                         |
+| Local point branch                                            | Current command behavior                                                                                                                                                          |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unoccupied resources 3/37                                     | Int point and wrapped remaining quantity; type 37 also includes current member count. Returns before territory-effect additions.                                                  |
+| Ordinary resources 3 without a nonblank owner's march pointer | Public owner fields and, when applicable, the positive territory-effect flag. A nonblank owner/march pointer requires the pending occupied-resource resolver and rejects.         |
+| Monster 6                                                     | Owner UID plus the selected existing exploration report/start/end fields, if its first destination match is occupying.                                                            |
+| Monster boss 15                                               | Current and catalog-derived maximum HP, then point ID; no owner identity fields.                                                                                                  |
+| Cities 1/2                                                    | Public base owner fields. City 1 with exact `lost_battle.k3 = "1"` and an existing target profile adds Bool `slowDown`/`targetTooStrong` and Long `targetPower`/`lastBeDuelTime`. |
+| Unoccupied world bosses 49/50                                 | Pending service/reward state; rejects. Occupied instances use the reference base owner fields.                                                                                    |
+| Territories 14/18/20/21/23/46/47, occupied new resources 37   | Pending specialized state; rejects.                                                                                                                                               |
+| Barbarian 44                                                  | Public owner fields plus Long `barbarionPower`, derived from existing saved troop counts, regeneration time and catalogs. A missing barbarian record returns zero.                |
+| Neutral resource 60                                           | Base owner fields; with a nonblank item and an occupying destination march, adds Long `occupybegintime` from the stored end time and catalog gathering duration.                  |
+| Other known types 0–69                                        | Public base owner fields and point ID, as in the reference handler. Unknown types reject.                                                                                         |
 
 Every local query validates observer identity, realm and ban state before point
 access. Full response bounds include correlation fields and the SFS extension
@@ -1168,10 +1169,55 @@ envelope. The command emits no pushes and performs no game-state writes. Existin
 bootstrap/reconnect restrictions on march state remain part of the unfinished
 topic-2 work; this query does not establish complete gameplay or client compatibility.
 
-Twenty-three command/adapter unit tests cover these branches, error behavior, owner
+Twenty-seven command/adapter unit tests cover these branches, error behavior, owner
 isolation, bounded report selection, transaction failures and response limits.
 Fresh-map selection also reuses frozen Java 8 collision-order fixtures. Validation
 uses synthetic Drizzle clients; no live database, listener, service or client is run.
+
+## Local barbarian point details
+
+For local type 44, `world.get.detail` reads `world_barbarion` by point ID in the same
+read-only snapshot as the point and public owner fields. It reads only the stored
+config ID, last attack time and remaining-army byte array. It does not read reward
+counts or HP, start combat, advance marches, regenerate saved troops or write state.
+The projection uses the barbarian record's config ID, independently of point item.
+A missing record returns Long `barbarionPower: 0`, matching an absent manager entry.
+Current persisted records replace the legacy manager's process-local cache; historical
+unpersisted changes and stale cache contents are not reproduced.
+
+`barbarion.xml` loads optionally into `Rules.world.barbarians`, with final duplicate
+IDs retained. Its `army` selects the existing formation catalog; each troop's power
+comes from `arms`. Formation parsing preserves the reference whole-separator
+behavior, including duplicate replacement and terminal empty tokens. No catalog
+lookup is needed when the barbarian record is absent. Empty formations return zero
+without decoding the unused army blob.
+
+`messages/java-int-map` reads the Java serialization format produced for the
+reference's `HashMap<String, Integer>` storage. It accepts only the standard HashMap,
+Integer and Number descriptors, strings, nulls and their references; it never loads
+or executes serialized classes. Modified UTF-8, shared value/descriptor references
+and exact signed Int values are preserved. Streams are bounded to 65,535 bytes and
+4,096 entries; truncation, foreign classes, bad handles, wrong value types and
+trailing bytes reject. Nonempty formations require a valid non-null saved map;
+missing keys and null values contribute zero remaining troops.
+
+The server samples time again for the power projection, after the database read.
+Recovery uses wrapped Long elapsed time, Double division, the reference upper rate
+cap, floor-to-Int saturation, signed Int addition and the configured troop ceiling.
+There is no added lower clamp for future attacks or negative values. A fresh Java 8
+HashMap traversal is reconstructed for both the configuration map and the recovered
+map, including collision trees and resizing, before ordered Double power summation.
+The final floor-to-Long conversion preserves Java saturation and NaN-to-zero behavior.
+Double catalog parsing supports Java whitespace, suffixes, hexadecimal floats,
+NaN and infinities; malformed required rules fail visibly.
+
+Seven codec/rule unit tests include three independently serialized Java 8 map fixtures,
+60 two-stage HashMap traversal vectors and 1,800 primitive arithmetic vectors. Four
+command/adapter tests cover the real composition with synthetic database reads,
+clock sampling, correlation, missing state and failures; a loader test covers the
+optional catalog and duplicate definitions. No private game class is executed.
+Remote conversion, occupied resources, territories and world-boss state remain
+pending parts of the command.
 
 ## Local city detail extras
 

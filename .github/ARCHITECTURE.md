@@ -497,6 +497,16 @@ The projection preserves Bool flags, exact Long fields and signed multiplication
 overflow. No power recalculation, status cleanup or gameplay writes occur. Details
 and remaining specialized branches are recorded in the realm runbook.
 
+Local barbarian type 44 reads only its existing point-keyed troop-state record in
+the same point snapshot. A bounded allowlist codec interprets the standard Java
+HashMap/String/Integer storage bytes without executing classes. Rules restore the
+two fresh HashMap traversals, Double regeneration/power arithmetic and final Long
+projection from optional barbarian, formation and troop catalogs. The projection
+samples its clock after the snapshot and performs no saved troop recovery or combat
+writes. Missing records produce zero; malformed required state rejects. Current
+persisted records replace the manager cache, without claiming historical cache
+identity. Unit evidence and format bounds are recorded in the realm runbook.
+
 ### Migrated files implementation
 
 `apps/files` composes `api/files`, `identity/avatar`, `validations/image` and

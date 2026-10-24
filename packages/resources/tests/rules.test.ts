@@ -325,3 +325,25 @@ test("neutral resource durations load optionally and preserve final duplicate de
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("barbarian catalogs load optionally and retain final duplicate definitions independently of formations", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-barbarian-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    expect((await loadRules(directory)).world.barbarians?.size).toBe(0);
+    await writeFile(
+      join(directory, "barbarion.xml"),
+      '<database><Group id="a"><ItemSpec id="camp" army="first" para3="1"/></Group><Group id="b"><ItemSpec id="camp" army="formation" para3=" 0x1p2D "/></Group></database>',
+    );
+    const rules = await loadRules(directory);
+    expect(rules.world.barbarians!.get("camp")).toEqual({
+      id: "camp",
+      army: "formation",
+      para3: " 0x1p2D ",
+    });
+    expect(rules.world.armies!.size).toBe(0);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
