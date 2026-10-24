@@ -162,3 +162,75 @@ test("storage failures propagate without returning a partial power result", asyn
     "Synthetic storage failure",
   );
 });
+
+function enableDragon(input: ReturnType<typeof fixture>) {
+  const { state, rules } = input;
+  for (const id of ["dragon_new", "dragon_levelup", "dragon_science"])
+    rules.features.set(id, { id, version: "99.0.0", online: "1" });
+  state.dragons = [{ itemId: 6001, dragonState: 3, lv: 2, useFlag: 0 }];
+  rules.items.set("dragon_new", { id: "dragon_new", k10: "10", k11: "2", k12: "3" });
+  rules.power.dragonBases = new Map([["6001", { id: "6001", initFight: "120" }]]);
+  rules.power.dragonLevels = new Map([
+    ["5001", { id: "5001", base_id: "6001", level: "2", attack: "100" }],
+  ]);
+}
+
+test("science-enabled dragon power resolves server effects and ignores client modifier overrides", async () => {
+  const f = fixture();
+  enableDragon(f);
+  let reads = 0;
+  f.game.services.worldPowerEffects = async () => {
+    reads++;
+    return new Map([["487", `{"value":"20","endTime":${now + 1}}`]]);
+  };
+  f.game.services.emperorVersion = unused;
+  const before = structuredClone(f.state);
+  const result = await f.game.execute("synthetic", "get.power.info", {
+    dragonAttackPercent: sfs.int(9999),
+    now: sfs.long(0),
+    uid: sfs.string("other"),
+  });
+  expect(decode(encode(result.body)).petDragonPower).toEqual(sfs.long(552));
+  expect(result.pushes).toEqual([]);
+  expect(reads).toBe(1);
+  expect(f.clockCalls()).toBe(1);
+  expect(f.calls).toEqual([{ uid: "synthetic", now }]);
+  expect(f.state).toEqual(before);
+});
+
+test("saved personal throne rewards require explicit emperor state before returning dragon power", async () => {
+  const f = fixture();
+  enableDragon(f);
+  f.state.throneRewards = [{ version: 7, rewardId: 1001 }];
+  f.rules.power.monarchTitles = new Map([["1001", { id: "1001", effect: "487", num: "10" }]]);
+  f.game.services.worldPowerEffects = async () => new Map();
+  await expect(f.game.execute("synthetic", "get.power.info", {})).rejects.toThrow("102192");
+  f.game.services.emperorVersion = async () => null;
+  expect((await f.game.execute("synthetic", "get.power.info", {})).body.petDragonPower).toEqual(
+    sfs.long(420),
+  );
+  f.game.services.emperorVersion = async () => 7;
+  expect((await f.game.execute("synthetic", "get.power.info", {})).body.petDragonPower).toEqual(
+    sfs.long(483),
+  );
+});
+
+test("world effect failures reject dependent dragon queries and unused services are never called", async () => {
+  const f = fixture();
+  f.game.services.worldPowerEffects = unused;
+  f.game.services.emperorVersion = unused;
+  expect((await f.game.execute("synthetic", "get.power.info", {})).body.petDragonPower).toEqual(
+    sfs.long(0),
+  );
+  enableDragon(f);
+  await expect(f.game.execute("synthetic", "get.power.info", {})).rejects.toThrow(
+    "Unexpected dependency call",
+  );
+  f.game.services.worldPowerEffects = async () => new Map([["487", '{"value":20}']]);
+  await expect(f.game.execute("synthetic", "get.power.info", {})).rejects.toThrow("102192");
+  f.rules.features.delete("dragon_science");
+  f.game.services.worldPowerEffects = unused;
+  expect((await f.game.execute("synthetic", "get.power.info", {})).body.petDragonPower).toEqual(
+    sfs.long(420),
+  );
+});

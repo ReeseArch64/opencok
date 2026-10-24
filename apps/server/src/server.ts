@@ -42,6 +42,8 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new Game(db, rules, config, Date.now, {
+        worldPowerEffects: () => cache.worldEffects(),
+        emperorVersion: () => cache.emperorVersion(),
         changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
         playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
       }),

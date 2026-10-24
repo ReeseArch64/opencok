@@ -304,8 +304,8 @@ read-only transaction. A second matching schedule makes the input ambiguous and
 is rejected when battle suppression must be resolved, rather than choosing Java's
 unspecified map iteration order. Queries are bounded to two matching records and
 skip schedules for players without an office. These projections do not appoint
-officials, start battles, reschedule events or change persisted state. They remain
-dependencies for the pending complete effect resolver.
+officials, start battles, reschedule events or change persisted state. These effects
+participate in the ordinary-realm power resolver.
 
 Territory effects for power queries use the alliance's placed life tree, without a
 map target. Only building/complete trees contribute. Default skins use the current
@@ -353,9 +353,9 @@ it. Missing hashes are empty, while malformed replies fail. The read limits are
 without inheriting the legacy cache's ten-minute refresh delay. Ordinary modifiers
 are independent of the `server_buff` gate; the special event-effect family honors
 that server gate, with the legacy cross-throne bypass represented explicitly.
-Records without a value are ignored; malformed active values fail. This adapter
-and projection are unit-tested dependencies for the pending complete resolver,
-not a separate grant or activation command.
+Records without a value are ignored; malformed active values fail. The power command
+uses this adapter when mature dragon power requires the effective attack modifier.
+It is not a separate grant or activation command.
 
 Personal throne rewards read only owner-targeted lord titles for throne type 2.
 Their effects apply for the explicitly supplied emperor version, retaining paired
@@ -378,12 +378,25 @@ client-supplied player ID, timestamp or attack modifier. Startup checks all powe
 tables with zero-row queries. Tests exercise the command and repository using
 synthetic state and fake database clients, without opening listeners.
 
-The command remains incomplete for mature dragons with the dragon-science gate
-enabled: authoritative attack-effect composition still requires the remaining
-gameplay providers. Those snapshots fail with `102192` instead of assuming a zero
-modifier. Snapshots without that dependency can return calculated power, including
-dragons with science disabled. Pure VIP, alliance, general, equipment, research
-and status projections are available for the pending complete effect resolver.
+Mature dragons with the dragon-science gate enabled now use the composed ordinary-
+realm attack modifier. The resolver combines initial/research/title contributions,
+VIP, statuses, general skills, alliance research, offices, equipment, territory,
+world effects, heroes, Lucky Day, active dragon skills, military, prestige and
+miracle effects. It retains the ordered float additions, the dragon double step,
+the final base contribution and equipment's global percentage multiplier.
+
+Equipment reconstruction follows login ordering: earlier equipped items can affect
+later color/position multipliers, while saga/foreign/civilization research, military,
+Lucky Day and personal throne rewards loaded later do not alter that initial item
+projection. Set/decomposed-set effects apply afterward. Those later sources do enter
+the final attack modifier and global equipment multiplier. The runtime fetches world
+effects only when needed and the emperor version only when saved rewards exist.
+
+Missing authoritative dependencies, malformed active catalogs, ambiguous stored
+state and the documented hash-order limits still fail with `102192`; they are not
+replaced with zero bonuses. Dedicated battle-realm providers and state-changing
+gameplay remain outside this ordinary-realm snapshot query. Native-client and real-
+service validation remain deferred.
 
 Use runtime credentials with SELECT access to the required global/realm tables,
 separate from the administrative setup account. Startup checks the required
@@ -437,7 +450,7 @@ ADB, native-client validation, integration or end-to-end tests for this phase.
 | Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
-| 2. Player/progression queries             | Initial player DTO; public summary batches; authenticated detailed-power command with snapshot, calculation and wire unit tests                                                            | Full own/public profiles and reconnect; effective bonus resolution for science-enabled mature dragons.                                           |
+| 2. Player/progression queries             | Initial player DTO; public summary batches; detailed-power command with ordinary-realm modifier composition and unit tests                                                                 | Full own/public profiles and reconnect; documented compatibility edge cases and authoritative global-state import.                               |
 | 3. Ranking queries                        | Persistence schema                                                                                                                                                                         | Lists, player positions, pagination and tie-breaking.                                                                                            |
 | 4. Basic mailbox                          | Persistence schema                                                                                                                                                                         | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                              | Point details, player search and favorites, including authorization for writes.                                                                  |
