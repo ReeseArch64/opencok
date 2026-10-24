@@ -63,6 +63,7 @@ function fixture() {
     mailConversationSave: unused,
     mailContents: unused,
     mailCategory: unused,
+    mailGroups: unused,
     mailBatch: async (uid, query, inspect) => {
       calls.push({ uid, query });
       plans.push(await inspect(entries, readers));
@@ -99,7 +100,7 @@ function fixture() {
   };
 }
 
-test("batch rules distinguish notice/type filters, message pagination and pending group selectors", () => {
+test("batch rules distinguish notice/type filters, message pagination and separate group selectors", () => {
   const kinds = [
     "notices",
     "studio",
@@ -276,7 +277,7 @@ test("resource, monster and trade lists retain structured chat bodies and only t
   }
 });
 
-test("unknown/empty batch selectors return arrays while malformed requests and pending groups never reach storage", async () => {
+test("unknown/empty batch selectors return arrays while malformed requests never reach storage", async () => {
   const f = fixture();
   f.services.playerUpdateTimes = unused;
   f.readers.translations = unused;
@@ -302,14 +303,6 @@ test("unknown/empty batch selectors return arrays while malformed requests and p
   await expect(f.game.execute("self", "mread.batch", params(4))).rejects.toMatchObject({
     code: "E000000",
   });
-  for (const type of [10, 1000]) {
-    const g = fixture();
-    await expect(g.game.execute("self", "mread.batch", params(type))).rejects.toMatchObject({
-      reason: "mail_groups",
-      code: "102192",
-    });
-    expect(g.calls).toEqual([]);
-  }
 });
 
 test("ordinary malformed detail allows removal but malformed structured chat rejects without cleanup as in the reference", async () => {

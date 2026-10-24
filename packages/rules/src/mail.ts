@@ -121,7 +121,7 @@ export function mailBatchQuery(
     (fromUser !== null && typeof fromUser !== "string")
   )
     throw new GameError(errors.invalid, "mail");
-  if (type === 10 || type === 1000) throw new GameError(errors.unsupported, "mail_groups");
+  if (type === 10 || type === 1000) throw new GameError(errors.invalid, "mail");
   const kinds = new Map<number, MailBatchKind>([
     [2, "notices"],
     [3, "studio"],
