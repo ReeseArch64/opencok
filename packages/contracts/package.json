@@ -27,7 +27,8 @@
     "./mail": "./src/mail.ts",
     "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
     "./world-favorites": "./src/world-favorites.ts",
-    "./world-search": "./src/world-search.ts"
+    "./world-search": "./src/world-search.ts",
+    "./player-search": "./src/player-search.ts"
   },
   "dependencies": {}
 }
