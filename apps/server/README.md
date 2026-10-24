@@ -1353,6 +1353,32 @@ separately. The percentage has a lower bound of 20, including for negative infin
 NaN and positive infinity preserve Java cast behavior. Single-player siege load is
 not included because the resource query requests the ordinary calculation.
 
+`rules/world-resource-effects` now resolves ordinary load effects 78 and 2196
+through the shared player-effect composition and obtains effect 133 only from the
+restored general skills. Global, equipment, status or base effects with ID 133 are
+not substituted for that general-only contribution. The existing equipment-load
+ordering, modifier 218, per-general Float accumulation and ordinary-realm source
+boundaries also apply to these load effects. The shared resolver additionally
+supports effect 895 for the conditional expedition branch.
+
+The expedition rule uses server-side `tech_newEffect` and `17_wk` feature gates,
+rejects merged realms and the replacement `wk_switch_new` feature, requires
+collection stage 3 and checks the player's effective home realm against the current
+realm. These feature checks do not compare the client's version. Only an eligible
+request resolves effect 895. Context/effect exceptions return zero, preserving this
+specific reference boundary; ordinary load-effect failures still propagate. Inputs
+are an explicit merge/stage/home-realm snapshot callback and an effect callback.
+The effective home realm must follow the reference's cross-fight-origin rule, and
+stage must represent the applicable runtime or request-override stage. Those data
+providers are not yet wired to this point query; no stage or home realm is invented
+from the observer or destination point.
+
+Ten added units extend the complete ordinary-source matrix to 78, 895 and 2196,
+verify general-only 133 and Float ordering, compose the result with troop load and
+cover conditional feature/time/realm/stage gates, skipped effect reads and failure
+fallback. New-general stronghold/official contributions remain a separate required
+resolver; this step does not replace them with zero.
+
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries
 without a load field skip the troop. Malformed required fields reject. Snapshots

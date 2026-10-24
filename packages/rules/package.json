@@ -47,7 +47,8 @@
     "./world-point-detail": "./src/world-point-detail.ts",
     "./world-monster-detail": "./src/world-monster-detail.ts",
     "./world-barbarian-detail": "./src/world-barbarian-detail.ts",
-    "./java-hash-map-order": "./src/java-hash-map-order.ts"
+    "./java-hash-map-order": "./src/java-hash-map-order.ts",
+    "./world-resource-effects": "./src/world-resource-effects.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

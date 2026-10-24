@@ -462,7 +462,12 @@ of occupied-resource command composition. Root stored JSON arrays share the exis
 bounded legacy parser; controller restoration preserves the single-item typed
 plunder access rules. Pure collection restoration applies nullable primitive defaults
 and checks the reference model's Int range before narrowing the saved count. No
-march scheduling or cache write is performed by these projections.
+march scheduling or cache write is performed by these projections. Resource load
+resolves ordinary effects 78/2196 with the shared player-effect engine and general
+133 from general skills alone. Conditional expedition effect 895 has its own
+feature, merge, stage and effective-home-realm gate, preserving its zero-on-exception
+boundary. Authoritative expedition context and new-general stronghold/official
+contributions still need to be connected; explicit callbacks are not runtime parity.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read
