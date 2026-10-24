@@ -2,14 +2,14 @@ import { afterAll, beforeAll, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
-import { DisposablePostgres } from "../../packages/drizzle/tests/support/postgres.ts";
-import { createChatMailboxStore } from "../../packages/repositories/src/chat-mailbox.ts";
-import { markMailConversationRead } from "../../packages/repositories/src/mail-conversation-read.ts";
-import { deleteMailConversations } from "../../packages/repositories/src/mail-conversation-delete.ts";
-import { relayMailChat } from "../../packages/repositories/src/mail-chat-intents.ts";
-import { mailConversationReadQuery } from "../../packages/rules/src/mail-conversation-read.ts";
-import type { Database } from "../../packages/repositories/src/game.ts";
-import * as schema from "../../packages/drizzle/src/schema/kingdom.ts";
+import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";
+import { createChatMailboxStore } from "../../../packages/repositories/src/chat-mailbox.ts";
+import { markMailConversationRead } from "../../../packages/repositories/src/mail-conversation-read.ts";
+import { deleteMailConversations } from "../../../packages/repositories/src/mail-conversation-delete.ts";
+import { relayMailChat } from "../../../packages/repositories/src/mail-chat-intents.ts";
+import { mailConversationReadQuery } from "../../../packages/rules/src/mail-conversation-read.ts";
+import type { Database } from "../../../packages/repositories/src/game.ts";
+import * as schema from "../../../packages/drizzle/src/schema/kingdom.ts";
 
 const postgres = new DisposablePostgres();
 let pool: Pool;
@@ -22,7 +22,7 @@ beforeAll(async () => {
   await pool.query(
     await readFile(
       new URL(
-        "../../packages/drizzle/migrations/global/0005_chat_mailbox_effects.sql",
+        "../../../packages/drizzle/migrations/global/0005_chat_mailbox_effects.sql",
         import.meta.url,
       ),
       "utf8",
@@ -31,7 +31,7 @@ beforeAll(async () => {
   await pool.query(
     await readFile(
       new URL(
-        "../../packages/drizzle/migrations/kingdom/0005_mail_chat_read_intents.sql",
+        "../../../packages/drizzle/migrations/kingdom/0005_mail_chat_read_intents.sql",
         import.meta.url,
       ),
       "utf8",
@@ -40,7 +40,7 @@ beforeAll(async () => {
   await pool.query(
     await readFile(
       new URL(
-        "../../packages/drizzle/migrations/kingdom/0011_mailbox_chat_actions.sql",
+        "../../../packages/drizzle/migrations/kingdom/0011_mailbox_chat_actions.sql",
         import.meta.url,
       ),
       "utf8",

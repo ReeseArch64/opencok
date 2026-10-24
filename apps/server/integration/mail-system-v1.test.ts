@@ -58,3 +58,12 @@ test("send counters retain Java signed wrap and fail on a Redis outage", async (
   const unavailable = new Cache({ redisUrl: "redis://127.0.0.1:1", timeoutMs: 100, kingdomId: 1 });
   await expect(unavailable.systemMailPage("self", ["a"], 1, 0n, () => {})).rejects.toThrow();
 });
+
+test("legacy sent sets ignore Java whitespace IDs but retain nonbreaking spaces", async () => {
+  await cache.command("HSET", key("spaces"), "chat_user_hassendmail", "1000:\u2000,\u00a0,");
+  let selected: readonly number[] = [];
+  await cache.systemMailPage("spaces", ["\u2000", "\u00a0", "a"], 1, 1000n, (indices) => {
+    selected = indices;
+  });
+  expect(selected).toEqual([0]);
+});

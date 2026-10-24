@@ -396,3 +396,27 @@ test("mixed chat ID deletion enqueues the source cross-product while scoping loc
   expect(deletions[1]!.params).toEqual(["self", "peer-b", 23, 24]);
   expect(app.queries.at(-1)!.text).toBe("commit");
 });
+
+test("personal media IDs trigger chat delivery without inventing text-conversation expansion", async () => {
+  const app = storage();
+  app.selected([["media", 37, 1, "peer", 0, 0]]);
+  await deleteMailCategories(
+    app.db,
+    1,
+    "self",
+    mailCategoryDeleteQuery("media", null, now),
+    () => {},
+    () => [],
+    true,
+  );
+  const deletions = app.queries.filter((query) =>
+    query.text.startsWith('delete from "opencok_kingdom"."mail"'),
+  );
+  expect(deletions).toHaveLength(1);
+  expect(deletions[0]!.params).not.toContain("peer");
+  expect(
+    app.queries.some((query) =>
+      query.text.includes('insert into "opencok_kingdom"."mail_chat_read_intent"'),
+    ),
+  ).toBe(true);
+});
