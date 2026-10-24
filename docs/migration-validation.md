@@ -1,3 +1,12 @@
+## Parallel block merge readiness
+
+The current snapshot integrates PR #173 and the already merged descendant PRs in this parallel
+block: #173, #174, #175.
+
+The maintainer authorized readiness and merge after all applicable CI checks pass on the final head.
+Original source-stage validation above remains historical; this record does not claim native-client,
+deployment or complete legacy parity.
+
 # Migration review evidence
 
 The migration is being published as dependent draft pull requests while validation
@@ -1409,6 +1418,78 @@ not claimed. No migration or gameplay write is executed by publication.
 Source implementation: `4a494bc`. Tracking: #85.
 
 [Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19162986).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 79: restore-new-general-equipment
+
+Source implementation: `f8ae39c`. Tracking: #85.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19163085).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 80: read-resource-owner-effects
+
+Source implementation: `46eb648`. Tracking: #85.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19163151).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 81: restore-resource-generals
+
+Source implementation: `81225cf`. Tracking: #85.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19163285).
+
+The publication copies the source implementation without changing its files;
+only this review-evidence document is added. Source-tree equality and diff checks
+were inspected. No tests were rerun on this publication branch, following the
+maintainer request to defer further execution. Historical results in the linked
+report are evidence for the source stage, not a fresh result for this combined HEAD.
+
+This dependent draft does not close its tracking issue or establish full-topic
+parity. Required follow-ups and limitations remain in the linked source report.
+The nonempty evidence commit retains `[skip ci]`; workflows and required checks
+are unchanged, integration/client execution is deferred and merge readiness is
+not claimed. No migration or gameplay write is executed by publication.
+
+## Review step 82: restore-resource-owner-context
+
+Source implementation: `9eae56b`. Tracking: #85.
+
+[Source-stage implementation and validation report](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19163386).
 
 The publication copies the source implementation without changing its files;
 only this review-evidence document is added. Source-tree equality and diff checks

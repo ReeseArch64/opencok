@@ -4,9 +4,10 @@ import { expect, test } from "bun:test";
 import type { PowerSnapshot, GeneralSkill } from "@opencok/contracts/power";
 import { Rules } from "@opencok/rules/game";
 import { dragonAttackEffect, playerGameEffect } from "@opencok/rules/power-resolver";
+import { newGeneralEquipmentEffects } from "@opencok/rules/new-general-equipment";
 
 const context = { now: Date.UTC(2026, 9, 23, 12), kingdomId: 1, version: "12.06.0" };
-function fixture(effect: 37 | 78 | 487 | 895 | 2196 = 487) {
+function fixture(effect: Parameters<typeof playerGameEffect>[6] = 487) {
   const state: PowerSnapshot = {
     profile: {},
     statistics: undefined,
@@ -83,7 +84,44 @@ function fixture(effect: 37 | 78 | 487 | 895 | 2196 = 487) {
   return { state, rules, abilities, world, resolve };
 }
 
-for (const effect of [37, 78, 487, 895, 2196] as const)
+test("general equipment consumes current owner equipment modifiers without feeding general pieces into player worn effects", () => {
+  const f = fixture(78);
+  f.rules.items.set("effect", { k1: "214;10|207;20|218;50" });
+  f.state.equipment = [{ itemId: 9001, on: 1 }];
+  f.rules.power.equipment!.set("9001", { para1: "214", num1: "5" });
+  f.rules.power.equipment!.set("9002", { site: "0", color: "2", para1: "78", num1: "2" });
+  const before = structuredClone(f.state);
+  const effects = newGeneralEquipmentEffects(
+    1,
+    [{ itemId: 9002, extraProperty: "78,3" }],
+    f.rules,
+    (id) => playerGameEffect(f.state, f.rules, context, f.abilities, f.world, null, id),
+  );
+  expect(effects.get(78)).toBe(10.3125);
+  expect(f.state).toEqual(before);
+  f.rules.arms.set("troop", { load: "100" });
+  expect(
+    resourceRawArmyLoad(
+      {
+        cachedLoad: 0,
+        residentOwner: true,
+        soldiers: [{ armsId: "troop", total: 1, dead: 0, loadEffect: 0 }],
+        effects: {
+          worldLoad: 0,
+          worldLoadAdd: 0,
+          general: 0,
+          newGeneral: effects.get(78)!,
+          expedition: 0,
+        },
+      },
+      f.rules,
+    ),
+  ).toBe(110);
+});
+
+for (const effect of [
+  37, 78, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 487, 895, 2196,
+] as const)
   test(`effect ${effect} combines every ordinary-realm source and the global equipment multiplier`, () => {
     const { state, rules, abilities, world, resolve } = fixture(effect);
     for (const id of [
@@ -138,7 +176,7 @@ for (const effect of [37, 78, 487, 895, 2196] as const)
     state.equipment = [{ itemId: 9001, on: 1 }];
     rules.power.equipment!.set("9001", { id: "9001", para1: `${effect}`, num1: "41" });
     world.set(effect, 43);
-    world.set(218, 100);
+    if (effect !== 218) world.set(218, 100);
     state.heroes = [{ heroid: 7001, level: 1 }];
     rules.power.heroes!.set("7001", { id: "7001", para1: `${effect};47` });
     rules.power.activityEvents!.set("9005005", {
@@ -192,8 +230,8 @@ for (const effect of [37, 78, 487, 895, 2196] as const)
     state.miracle = { level: 1 };
     rules.power.miracleBuffs!.set("1", { id: "1", order: "1", para: `${effect},71` });
     const before = structuredClone(state);
-    expect(resolve(7)).toBe(680);
-    expect(resolve(null)).toBe(667);
+    expect(resolve(7)).toBe(effect === 218 ? 639 : 680);
+    expect(resolve(null)).toBe(effect === 218 ? 626 : 667);
     expect(() => resolve()).toThrow();
     expect(state).toEqual(before);
   });

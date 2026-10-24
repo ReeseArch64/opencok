@@ -31,7 +31,9 @@
     "./expedition-ranking": "./src/expedition-ranking.ts",
     "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
     "./avatar-completion": "./src/avatar-completion.ts",
-    "./world-resource-detail": "./src/world-resource-detail.ts"
+    "./world-resource-detail": "./src/world-resource-detail.ts",
+    "./world-resource-generals": "./src/world-resource-generals.ts",
+    "./world-resource-owner-context": "./src/world-resource-owner-context.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

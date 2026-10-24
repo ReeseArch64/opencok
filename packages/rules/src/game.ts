@@ -49,6 +49,7 @@ export interface PowerCatalogs {
   superVip?: Map<string, Rule>;
   allianceSciences?: Map<string, Rule>;
   prestigeLevels?: Map<string, Rule>;
+  prestigeLevelRecords?: readonly Rule[];
   civilizationFeatures?: Map<string, Rule>;
   militarySkills?: Map<string, Rule>;
   miracleBuffs?: Map<string, Rule>;
