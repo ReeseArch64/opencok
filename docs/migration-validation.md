@@ -2183,3 +2183,10 @@ ownership, category and reward checks. Missing conversation-read adapters reject
 clock capture; supported adapters retain request parsing and chat-effect validation.
 The 19 affected mailbox tests, server types, lint and formatting pass locally. Full CI
 must pass again on the fix commit before merge.
+
+The complete catalog and nickname resource contracts also exposed outdated integration
+fixtures. Server and Compose fixtures now serialize the existing synthetic data-config
+catalog into its declared group. Compose mounts a generated temporary nickname word file,
+without reading ignored reference inputs. Production validation and mounts are unchanged.
+The two-realm server integration passes 63 assertions; all 14 disposable Compose checks
+pass 122 assertions locally, including state recovery. Full final-head CI remains required.
