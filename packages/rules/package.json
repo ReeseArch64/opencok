@@ -32,6 +32,7 @@
     "./profile": "./src/profile.ts",
     "./nickname": "./src/nickname.ts",
     "./nickname-change": "./src/nickname-change.ts",
+    "./cn1-rewards": "./src/cn1-rewards.ts",
     "./mysql-unicode": "./src/mysql-unicode.ts",
     "./nickname-words": "./src/nickname-words.ts",
     "./java-nickname-characters": "./src/java-nickname-characters.ts",
