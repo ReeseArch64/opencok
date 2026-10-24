@@ -55,9 +55,13 @@ keeps its existing prose wrapping. Lint enables correctness rules for the
 default TypeScript, Unicorn and Oxc plugins. Type checking remains separate;
 use `bun run --cwd <workspace> check-types` for each implemented workspace.
 
-Both tools exclude mobile/legacy inputs, local data, build output, coverage,
-Drizzle migrations, snapshot output and database fixture data. Maintained
-Drizzle TypeScript schemas remain included. These exclusions preserve the
+Both tools exclude private inputs under `data/`, generated Husky adapters under
+`.husky/_/`, workspace `node_modules/`, `dist/`, coverage, TypeScript build metadata,
+Drizzle migrations, snapshots and database fixture data. The former root
+`mobile/` and `legacy/` input directories are no longer part of this checkout;
+keep authorized originals in the ignored data area. Maintained application and
+package source, Drizzle TypeScript schemas, agent skills and hook setup scripts
+remain included. These exclusions preserve the
 boundaries described in [the architecture](ARCHITECTURE.md).
 
 DTOs must be standalone classes with explicitly declared `readonly` data
