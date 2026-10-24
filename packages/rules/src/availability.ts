@@ -7,64 +7,34 @@ export interface RuleContext {
   now: number;
   testServer?: boolean;
   utcOffsetMinutes?: number;
-  versionPolicy?: "legacy-player";
 }
 
 export function legacyPlayerVersionAtLeast(actual: string, required: string | undefined): boolean {
   if (mailBlank(required)) return false;
   if (mailBlank(actual)) return true;
+  return versionAtLeast(actual, required!);
+}
+
+export function versionAtLeast(actual: string, required: string): boolean {
   const parse = (raw: string): number[] => {
-    if (raw.length > 65535) throw new Error("Oversized player feature version");
+    if (raw.length > 65535) throw new Error("Oversized feature version");
     const parts = raw.split(".").filter(Boolean);
-    if (parts.length > 4096) throw new Error("Too many player feature version parts");
+    if (parts.length > 4096) throw new Error("Too many feature version parts");
     return parts.map((part) => Number(javaDecimal(part, 32)));
   };
   const current = parse(actual);
-  const minimum = parse(required!);
+  const minimum = parse(required);
   for (let index = 0; index < 3; index++) {
     const value = current[index];
     const target = minimum[index];
     if (value === undefined || target === undefined)
-      throw new Error("Missing player feature version part");
+      throw new Error("Missing feature version part");
     if (value !== target) return value > target;
   }
   return true;
 }
 
-export function versionAtLeast(actual: string, required: string): boolean {
-  const parse = (value: string) =>
-    /^\d+\.\d+\.\d+$/.test(value) ? value.split(".").map(Number) : [];
-  const current = parse(actual);
-  const minimum = parse(required);
-  if (
-    current.length !== 3 ||
-    minimum.length !== 3 ||
-    ![...current, ...minimum].every(Number.isSafeInteger)
-  )
-    return false;
-  for (let index = 0; index < 3; index++) {
-    if (current[index] !== minimum[index]) return current[index]! > minimum[index]!;
-  }
-  return true;
-}
-
-export function realmEnabled(selector: string | undefined, kingdomId: number): boolean {
-  if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) return false;
-  if (selector === "all") return true;
-  if (!selector || selector === "close" || selector === "0") return false;
-  const ranges = selector.split(";").filter(Boolean);
-  if (!ranges.length) return false;
-  let enabled = false;
-  for (const range of ranges) {
-    if (!/^\d+(?:-\d+)?$/.test(range)) return false;
-    const [start, end = start] = range.split("-").map(Number);
-    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start! > end!) return false;
-    enabled ||= kingdomId >= start! && kingdomId <= end!;
-  }
-  return enabled;
-}
-
-export function featureRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
+function realmEntries(selector: string | undefined, kingdomId: number): string[] {
   if (
     typeof selector !== "string" ||
     selector.length > 65535 ||
@@ -72,11 +42,16 @@ export function featureRealmEnabled(selector: string | undefined, kingdomId: num
     kingdomId < -2147483648 ||
     kingdomId > 2147483647
   )
-    throw new Error("Invalid feature realm selector");
+    throw new Error("Invalid realm selector");
+  const entries = selector.split(";").filter(Boolean);
+  if (entries.length > 4096) throw new Error("Too many realm selectors");
+  return entries;
+}
+
+export function featureRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
+  const entries = realmEntries(selector, kingdomId);
   if (selector === "all") return true;
   if (selector === "close") return false;
-  const entries = selector.split(";").filter(Boolean);
-  if (entries.length > 4096) throw new Error("Too many feature realm selectors");
   for (const entry of entries) {
     if (/^[0-9]+-[0-9]+/.exec(entry)?.[0] === entry) {
       const [lower, upper] = entry.split("-");
@@ -86,6 +61,43 @@ export function featureRealmEnabled(selector: string | undefined, kingdomId: num
       )
         return true;
     } else if (kingdomId === Number(javaDecimal(entry, 32))) return true;
+  }
+  return false;
+}
+
+export function switchRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
+  return featureRealmEnabled(selector === "0" ? "close" : selector, kingdomId);
+}
+
+export function eventRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
+  const entries = realmEntries(selector, kingdomId);
+  if (selector === "all") return true;
+  if (selector === "close") return false;
+  for (const entry of entries) {
+    const range = entry.split("-").filter(Boolean);
+    if (range.length === 2) {
+      if (
+        kingdomId >= Number(javaDecimal(range[0], 32)) &&
+        kingdomId <= Number(javaDecimal(range[1], 32))
+      )
+        return true;
+    } else if (kingdomId === Number(javaDecimal(entry, 32))) return true;
+  }
+  return false;
+}
+
+export function worldActivityRealmEnabled(
+  selector: string | undefined,
+  kingdomId: number,
+): boolean {
+  const entries = realmEntries(selector, kingdomId);
+  if (selector === "all") return true;
+  if (selector === "0") return false;
+  for (const entry of entries) {
+    const range = entry.split("-").filter(Boolean);
+    const lower = Number(javaDecimal(range[0], 32));
+    const upper = range.length === 2 ? Number(javaDecimal(range[1], 32)) : lower;
+    if (kingdomId >= lower && kingdomId <= upper) return true;
   }
   return false;
 }
@@ -126,9 +138,7 @@ export function ruleAvailable(
     !rule ||
     !Number.isSafeInteger(context.now) ||
     mailBlank(context.testServer ? rule.test : rule.online) ||
-    !(context.versionPolicy === "legacy-player"
-      ? legacyPlayerVersionAtLeast(context.version, rule.version)
-      : versionAtLeast(context.version, rule.version ?? "")) ||
+    !legacyPlayerVersionAtLeast(context.version, rule.version) ||
     !featureRealmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
     return false;

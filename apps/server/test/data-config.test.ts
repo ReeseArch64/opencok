@@ -5,6 +5,7 @@ import { Game } from "@opencok/controllers/game";
 import { dataConfig } from "@opencok/dtos/bootstrap";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { decode, encode, fields, sfs, Type } from "@opencok/messages/sfs";
+import { kingdomSkill } from "./fixtures/kingdom-skill.ts";
 
 const now = Date.UTC(2026, 9, 23, 12);
 function catalog(records: Record<string, Record<string, string>> = {}, kingdomId = 2) {
@@ -25,6 +26,81 @@ function catalog(records: Record<string, Record<string, string>> = {}, kingdomId
 }
 const project = (rules: Rules, context: Parameters<typeof dataConfig>[1] = {}) =>
   fields(decode(encode(dataConfig(rules, { now, ...context }))).dataConfig);
+
+test("data configuration routes item switches, world activity and kingdom skills to their distinct selector rules", () => {
+  const rules = catalog({
+    function_on8: { k2: "+２;bad" },
+    alliance_quest: { k12: "quest" },
+    alliance_quest_chat: { k4: "2;bad", k5: "3-2147483648" },
+    on_trumpet: { k2: "2;bad" },
+    scoutmark_on: { k1: "2;bad", k2: "scout" },
+    serviceterms_on: { k1: "1", k2: "terms", k3: "2;bad" },
+    wa_switch: { k1: "-2" },
+    graveyard: { k3: "-2" },
+    kingdomskill: {},
+  });
+  rules.configuration.kingdomSkills = new Map<string, Rule>([
+    [
+      "first",
+      kingdomSkill({
+        id: "first",
+        showTab: "3",
+        tabIndex: "1",
+        online: "2;bad",
+        test: "3-2147483648",
+      }),
+    ],
+    ["missing", kingdomSkill({ id: "missing", showTab: "3", tabIndex: "2" })],
+  ]);
+  const before = structuredClone([...rules.items]);
+  const result = project(rules);
+  expect(result.alliance_quest?.value).toBe("quest");
+  expect(result.alliance_quest_tab).toEqual(sfs.int(1));
+  expect(result.alliance_quest_push).toEqual(sfs.int(0));
+  expect(result.on_trumpet_k2).toEqual(sfs.int(1));
+  expect(result.scoutmark_on?.value).toBe("scout");
+  expect(result.serviceTerms_on?.value).toBe("terms");
+  expect(fields(result.wa_switch).k1?.value).toBe("1");
+  expect(fields(result.graveyard).k3?.value).toBe("0");
+  expect(fields(result.kingdomskill).k3?.value).toBe("first_1;missing_0");
+  expect(fields(project(rules, { testServer: true }).kingdomskill).k3?.value).toBe(
+    "first_0;missing_0",
+  );
+  expect([...rules.items]).toEqual(before);
+  rules.items.get("wa_switch")!.k1 = "3-2147483648";
+  expect(() => project(rules)).toThrow();
+  rules.items.get("wa_switch")!.k1 = "all";
+  rules.configuration.kingdomSkills!.get("first")!.online = "--1--2--";
+  expect(() => project(rules)).toThrow();
+});
+
+test("present required item selectors fail when absent or malformed while optional tab controls remain absent", () => {
+  const cases: [string, string, Record<string, string>][] = [
+    ["function_on8", "k2", {}],
+    ["on_trumpet", "k2", {}],
+    ["graveyard", "k3", {}],
+    ["scoutmark_on", "k1", { k2: "scout" }],
+    ["serviceterms_on", "k3", { k1: "1", k2: "terms" }],
+  ];
+  for (const [id, key, other] of cases) {
+    for (const value of [undefined, "bad;2"]) {
+      const record = value === undefined ? other : { ...other, [key]: value };
+      expect(() => project(catalog({ [id]: record }))).toThrow();
+    }
+  }
+  const rules = catalog({
+    function_on8: { k2: "2" },
+    alliance_quest_chat: {},
+    wa_switch: { k2: "keep" },
+  });
+  const result = project(rules);
+  expect(result.alliance_quest_tab).toEqual(sfs.int(0));
+  expect(result.alliance_quest_push).toEqual(sfs.int(0));
+  expect(fields(result.wa_switch)).toEqual({ k2: sfs.string("keep") });
+  rules.items.get("function_on8")!.k2 = "close";
+  rules.items.get("alliance_quest_chat")!.k4 = "bad";
+  expect(project(rules).alliance_quest_tab).toEqual(sfs.int(0));
+});
 
 test("data config exposes supported game catalogs while preserving strings and excluding unrelated items", () => {
   const rules = catalog({
@@ -217,9 +293,9 @@ test("auxiliary catalogs supply general sale limits, pay control and ordered kin
     ["other", { id: "other", k7: "hidden" }],
   ]);
   const skills: Rule[] = [
-    { id: "second", showTab: "3", tabIndex: "2", online: "2", test: "close" },
-    { id: "hidden", showTab: "3", tabIndex: "-1", online: "all", test: "all" },
-    { id: "first", showTab: "3", tabIndex: "1", online: "3", test: "all" },
+    kingdomSkill({ id: "second", showTab: "3", tabIndex: "2", online: "2", test: "close" }),
+    kingdomSkill({ id: "hidden", showTab: "3", tabIndex: "-1", online: "all", test: "all" }),
+    kingdomSkill({ id: "first", showTab: "3", tabIndex: "1", online: "3", test: "all" }),
   ];
   rules.configuration.kingdomSkills = new Map(skills.map((skill) => [skill.id!, skill]));
   rules.features.set("w_thedoor", { id: "w_thedoor", version: "12.6.0", online: "2" });
@@ -305,5 +381,22 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
       () => now,
     );
     await expect(game.execute("synthetic", "login.dataconfig", {})).rejects.toThrow();
+  }
+});
+
+test("configuration preserves function-on blank bypass and direct cross-realm version comparison", () => {
+  const rules = catalog();
+  rules.features.set("alliance_mission", { version: "12.6.0", online: "2" });
+  for (const version of ["", "\u2000", "13", ".12..6.0.1", "１２.６.０"])
+    expect(project(rules, { version }).alliance_mission?.value).toBe("on");
+  expect(project(rules, { version: "11" }).alliance_mission?.value).toBe("off");
+  expect(() => project(rules, { version: "13.bad" })).toThrow();
+  rules.features.clear();
+  for (const version of ["2", ".1..0.59.1", "１.０.５９"])
+    expect(project(rules, { version, crossOpen: true }).cross_open).toEqual(sfs.bool(true));
+  expect(project(rules, { version: "0", crossOpen: true }).cross_open).toEqual(sfs.bool(false));
+  for (const version of ["", "\u2000", "1.0", "2.bad"]) {
+    expect(() => project(rules, { version, crossOpen: true })).toThrow();
+    expect(project(rules, { version, crossOpen: false }).cross_open).toEqual(sfs.bool(false));
   }
 });
