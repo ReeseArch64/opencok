@@ -6,7 +6,7 @@ import { playerStatistics } from "./power.ts";
 import type { GeneralPreview, PublicProfileState } from "@opencok/contracts/profile";
 import type { Rules } from "@opencok/rules/game";
 import type { RuleContext } from "@opencok/rules/availability";
-import { publicProfileProgress } from "@opencok/rules/profile";
+import { publicProfileProgress, publicProfileSocial } from "@opencok/rules/profile";
 
 function signed(value: unknown, bits: 32 | 64): bigint {
   if (value === null || value === undefined) return 0n;
@@ -93,6 +93,7 @@ export function publicProfileBase(
 ): Fields {
   if (!state.profile || !state.lord) throw new GameError(errors.unsupported, "public_profile");
   const progress = publicProfileProgress(state, rules, context);
+  const social = publicProfileSocial(state, context.kingdomId);
   const fields: Fields = {
     ...publicStatistics(state.statistics),
     score: sfs.int(integer(state.vip ?? {}, "score")),
@@ -108,7 +109,9 @@ export function publicProfileBase(
     serverId: sfs.int(context.kingdomId),
     serverName: sfs.string(progress.serverName),
     lastUpdateTime: sfs.string(lastUpdateTime),
+    flowerVal: sfs.int(social.flowerVal),
   };
+  if (social.officer !== undefined) fields.officer = sfs.string(social.officer);
   for (const key of ["uid", "name", "pic"]) fields[key] = sfs.string(text(state.profile, key));
   for (const key of ["level", "exp", "picVer", "picfraId", "gmFlag"])
     fields[key] = sfs.int(integer(state.profile, key));
