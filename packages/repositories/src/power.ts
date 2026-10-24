@@ -20,6 +20,8 @@ import { alliance_science } from "@opencok/drizzle/schema/opencok_kingdom/allian
 import { user_civilization_prestige } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_prestige";
 import { user_military_rank } from "@opencok/drizzle/schema/opencok_kingdom/user_military_rank";
 import { user_miracle_buff_active } from "@opencok/drizzle/schema/opencok_kingdom/user_miracle_buff_active";
+import { kingdom_position } from "@opencok/drizzle/schema/opencok_kingdom/kingdom_position";
+import { activity } from "@opencok/drizzle/schema/opencok_kingdom/activity";
 import { and, asc, eq, gt, or } from "drizzle-orm";
 import type { PowerState } from "@opencok/contracts/power";
 import type { Database } from "./game.ts";
@@ -48,6 +50,8 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     user_civilization_prestige,
     user_military_rank,
     user_miracle_buff_active,
+    kingdom_position,
+    activity,
   ])
     await db.select().from(table).limit(0);
 }
@@ -99,6 +103,8 @@ export function readPowerState(
         prestige: [],
         military: undefined,
         miracle: undefined,
+        office: undefined,
+        kingdomFights: [],
       };
       if (!profile) return empty;
       const statistics = (
@@ -280,6 +286,26 @@ export function readPowerState(
           .where(eq(user_miracle_buff_active.uid, uid))
           .limit(1)
       )[0];
+      const office = (
+        await tx
+          .select({ positionId: kingdom_position.positionId, serverId: kingdom_position.serverId })
+          .from(kingdom_position)
+          .where(eq(kingdom_position.uid, uid))
+          .limit(1)
+      )[0];
+      const kingdomFights = office
+        ? await tx
+            .select({
+              type: activity.type,
+              openTime: activity.openTime,
+              startTime: activity.startTime,
+              endTime: activity.endTime,
+            })
+            .from(activity)
+            .where(and(eq(activity.type, 0), gt(activity.openTime, 0n)))
+            .orderBy(asc(activity.id))
+            .limit(2)
+        : [];
       return {
         profile,
         statistics,
@@ -303,6 +329,8 @@ export function readPowerState(
         prestige,
         military,
         miracle,
+        office,
+        kingdomFights,
       };
     },
     { isolationLevel: "repeatable read", accessMode: "read only" },

@@ -33,6 +33,8 @@ function fixture() {
     prestige: [],
     military: undefined,
     miracle: undefined,
+    office: undefined,
+    kingdomFights: [],
     upload: { updateTime: 9007199254740993n, banTime: 9007199254740995n, banCount: 2 },
   };
   const rules = new Rules(

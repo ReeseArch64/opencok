@@ -12,6 +12,8 @@ function database(
     failure?: boolean;
     allianceId?: string;
     allianceFailure?: boolean;
+    office?: boolean;
+    fightFailure?: boolean;
   } = {},
 ) {
   const queries: { text: string; params: unknown[] }[] = [];
@@ -46,6 +48,11 @@ function database(
       if (table === "user_civilization_prestige") return { rows: [[2, "9007199254740993"]] };
       if (table === "user_military_rank") return { rows: [["1001|1002"]] };
       if (table === "user_miracle_buff_active") return { rows: [[4]] };
+      if (table === "kingdom_position") return { rows: options.office ? [["216002", 2]] : [] };
+      if (table === "activity") {
+        if (options.fightFailure) throw new Error("Synthetic fight read failure");
+        return { rows: [[0, "1792756790000", "1792756800000", "9007199254740993"]] };
+      }
       if (table === "alliance_science") {
         if (options.allianceFailure) throw new Error("Synthetic alliance read failure");
         return {
@@ -104,7 +111,10 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const selects = queries.filter((query) => query.text.startsWith("select"));
-  expect(selects).toHaveLength(21);
+  expect(selects).toHaveLength(22);
+  expect(snapshot.office).toBeUndefined();
+  expect(snapshot.kingdomFights).toEqual([]);
+  expect(selects.some((query) => query.text.includes('"activity"'))).toBe(false);
   expect(snapshot.profile?.civilizationType).toBe(2);
   expect(snapshot.prestige).toEqual([{ civilizationType: 2, prestigeValue: 9007199254740993n }]);
   expect(snapshot.military).toEqual({ skill: "1001|1002" });
@@ -171,6 +181,31 @@ test("alliance power reads follow the persisted membership and roll back on a la
   expect(failure.queries.some((query) => query.text === "commit")).toBe(false);
 });
 
+test("office snapshots use owner membership and bounded realm fight reads in the same transaction", async () => {
+  const fixture = database({ office: true });
+  const result = await readPowerState(fixture.db, "synthetic", now);
+  expect(result.office).toEqual({ positionId: "216002", serverId: 2 });
+  expect(result.kingdomFights).toEqual([
+    { type: 0, openTime: 1792756790000n, startTime: 1792756800000n, endTime: 9007199254740993n },
+  ]);
+  const position = fixture.queries.find((query) => query.text.includes('"kingdom_position"'))!;
+  expect(position.params).toEqual(["synthetic", 1]);
+  expect(position.text).toContain('"kingdom_position"."uid" = $1');
+  expect(position.text).not.toMatch(/valid|appointedTime|preKingUid/);
+  const activity = fixture.queries.find((query) => query.text.includes('"activity"'))!;
+  expect(activity.params).toEqual([0, 0n, 2]);
+  expect(activity.text).toContain('"activity"."type" = $1');
+  expect(activity.text).toContain('"activity"."openTime" > $2');
+  expect(activity.text).toContain('order by "opencok_kingdom"."activity"."id" asc');
+  expect(fixture.queries.at(-1)?.text).toBe("commit");
+  expect(fixture.queries.every((query) => !/\b(insert|update|delete)\b/i.test(query.text))).toBe(
+    true,
+  );
+  const failure = database({ office: true, fightFailure: true });
+  await expect(readPowerState(failure.db, "synthetic", now)).rejects.toThrow();
+  expect(failure.queries.at(-1)?.text).toBe("rollback");
+});
+
 test("power readiness checks each required table without reading records or writing data", async () => {
   const queries: { text: string; params: unknown[] }[] = [];
   const client = {
@@ -181,7 +216,7 @@ test("power readiness checks each required table without reading records or writ
   };
   await checkPowerStore(drizzle(client as unknown as NodePgClient, { schema }));
   const tables = queries.map((query) => query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1]);
-  expect(new Set(tables).size).toBe(22);
+  expect(new Set(tables).size).toBe(24);
   for (const table of [
     "userprofile",
     "playerinfo",
@@ -205,6 +240,8 @@ test("power readiness checks each required table without reading records or writ
     "user_civilization_prestige",
     "user_military_rank",
     "user_miracle_buff_active",
+    "kingdom_position",
+    "activity",
   ])
     expect(tables).toContain(table);
   for (const query of queries) {

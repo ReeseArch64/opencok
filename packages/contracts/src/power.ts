@@ -33,6 +33,8 @@ export interface PowerSnapshot {
   prestige: readonly Row[];
   military: Row | undefined;
   miracle: Row | undefined;
+  office: Row | undefined;
+  kingdomFights: readonly Row[];
 }
 
 export interface PowerState extends Omit<PowerSnapshot, "profile"> {
