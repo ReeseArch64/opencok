@@ -3,7 +3,7 @@ import type { GameServices, GameStore } from "@opencok/contracts/game";
 import type { Row } from "@opencok/contracts/rows";
 import { Game } from "@opencok/controllers/game";
 import { Rules } from "@opencok/rules/game";
-import { decode, encode, sfs } from "@opencok/messages/sfs";
+import { decode, encode, sfs, type Fields } from "@opencok/messages/sfs";
 
 const now = 1792756800000;
 const unused = async (): Promise<never> => {
@@ -142,5 +142,23 @@ test("expedition rejects unauthorized owners, missing providers and malformed de
   absent.services.expeditionRanking = async () => undefined;
   expect(
     (await absent.game.execute("self", "expedition.rank", { _cok_: sfs.int(3) })).body,
-  ).toEqual({ _cok_: sfs.int(3) });
+  ).toEqual({ success: sfs.bool(true), _cok_: sfs.int(3) });
+});
+
+test("empty expedition results receive the legacy success acknowledgment with or without correlation", async () => {
+  for (const entries of [undefined, []]) {
+    const { game, services } = fixture();
+    services.expeditionRanking = async () => entries;
+    const requests: Fields[] = [
+      {},
+      { _cok_: sfs.string("request") },
+      { cmdBaseTime: sfs.long(123) },
+      { _cok_: sfs.string("request"), cmdBaseTime: sfs.long(123) },
+    ];
+    for (const params of requests) {
+      const result = await game.execute("self", "expedition.rank", params);
+      expect(decode(encode(result.body))).toEqual({ success: sfs.bool(true), ...params });
+      expect(result.pushes).toEqual([]);
+    }
+  }
 });

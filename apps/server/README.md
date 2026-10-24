@@ -641,7 +641,8 @@ accept donations, reset scores, grant rewards or advance activities.
 reads the current paired expedition through a narrow Redis service. The selected
 realm's authenticated profile must exist and match the process realm. The command
 uses `ranking.k2`, ignores client target/realm/score selectors and returns no pushes.
-Absent pairing or an empty sorted set returns an empty object, retaining correlation.
+Absent pairing or an empty sorted set produces an empty query result. The shared
+command boundary adds the legacy `success: true` acknowledgment and retains correlation.
 A populated score list with no usable metadata returns an empty `serverRanking` and
 `selfRanking=-1`. Missing metadata consumes a candidate slot; visible entries receive
 contiguous ranks, and self position exists only when the requester appears among them.
