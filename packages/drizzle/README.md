@@ -2,13 +2,13 @@
 
 `@opencok/drizzle` owns the application's PostgreSQL schemas, typed client and
 versioned Drizzle migrations. The maintained source of truth is `src/schema`,
-with **775 tables / 6,329 fields** and one module per table.
+with **776 tables / 6,336 fields** and one module per table.
 
 | Default physical database | SQL namespaces                                  | Migration role | Tables |
 | ------------------------- | ----------------------------------------------- | -------------- | -----: |
 | `opencok_global`          | `opencok_global`, `opencok_pay`, `opencok_chat` | `global`       |    113 |
-| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    662 |
-| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    662 |
+| `opencok_kingdom_1`       | `opencok_kingdom`                               | `kingdom`      |    663 |
+| `opencok_kingdom_2`       | `opencok_kingdom`                               | `kingdom`      |    663 |
 
 Kingdom IDs **1 and 2** are configured by default. There is one maintained kingdom
 schema, one set of table modules and one kingdom migration history. Both physical
@@ -188,3 +188,22 @@ rollback, migration repeatability, both default kingdoms, preserved namespace up
 Run this suite sequentially because its FK fixtures and final restart are shared.
 Missing dependencies fail the suite. CI runs the same PostgreSQL-only commands with
 Bun 1.4.2. This verifies persistence; application/gameplay flows have their own E2E.
+
+## Avatar completion receipts
+
+The generated kingdom migration `0006_avatar_completions` adds `avatar_completion`
+without rewriting existing data. Its `(ownerUid, sequence)` primary key permanently
+records the committed owner-bound image hash and encoded picture version. Constraints
+bound numeric identities, sequences, hashes, timestamps, pending-effect bits and the
+65,535-byte JSON intent snapshot. The pending index supports bounded delivery scans;
+this slice supplies no worker and applies no migration.
+
+`repositories/avatar-finish` writes the receipt together with the profile and moderation
+record. The versioned snapshot captures the optional mail template and profile/chat
+metadata. Pending bits 1/2/4 mean mail/profile timestamp/chat metadata respectively.
+Verified current-version replays without history create an observed receipt with zero
+pending effects; its timestamp records observation, not the original profile mutation.
+Consumers must acknowledge only completed effects and retain the completion row after
+all bits clear. Deleting receipt history can permit reuse after a profile reset. Back up
+receipts, profiles, moderation and object storage consistently; independent restores are
+not proven safe. The realm command remains unsupported pending effect delivery.

@@ -39,3 +39,33 @@ export interface AvatarFiles {
 export interface AvatarGrantService extends AvatarFiles {
   read(owner: string, now: number, inspect: AvatarGrantInspector): Promise<AvatarGrantSnapshot>;
 }
+
+export interface AvatarFinishQuery {
+  sequence: number;
+  hash: string;
+  now: number;
+}
+export interface AvatarFinishPlan {
+  picVer: number;
+  moderated: boolean;
+  effects: string;
+  pendingEffects: number;
+}
+export type AvatarFinishInspector = (
+  profile: Row,
+  readers: AvatarGrantReaders,
+) => Promise<AvatarFinishPlan>;
+export interface AvatarFinishSnapshot {
+  profile: Row | undefined;
+  picVer?: number;
+  superseded?: boolean;
+  applied?: boolean;
+}
+export interface AvatarFinishStore {
+  commit(
+    owner: string,
+    query: AvatarFinishQuery,
+    find: AvatarFiles["find"],
+    inspect: AvatarFinishInspector,
+  ): Promise<AvatarFinishSnapshot>;
+}

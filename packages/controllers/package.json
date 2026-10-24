@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./avatar-finish": "./src/avatar-finish.ts",
     "./mail-conversation-read": "./src/mail-conversation-read.ts",
     "./mail-groups": "./src/mail-groups.ts",
     "./mail-category": "./src/mail-category.ts",

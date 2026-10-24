@@ -43,6 +43,13 @@
       "when": 1792822441873,
       "tag": "0005_mail_chat_read_intents",
       "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792825787305,
+      "tag": "0006_avatar_completions",
+      "breakpoints": false
     }
   ]
 }
