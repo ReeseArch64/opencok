@@ -938,15 +938,9 @@ not claimed. No migration or gameplay write is executed by publication.
 
 ## Parallel lower block merge readiness
 
-The current snapshot integrates PR #143 and the already merged descendant PRs in this parallel
-block: #143.
+The current snapshot integrates PR #142 and the already merged descendant PRs in this parallel
+block: #142, #143.
 
 The maintainer authorized readiness and merge after all applicable CI checks pass on the final head.
 Original source-stage validation above remains historical; this record does not claim native-client,
 deployment or complete legacy parity.
-
-The PostgreSQL end-to-end assertions now compare applied migration counts with each role's versioned
-journal and kingdom table counts with the maintained schema catalog. Repeatability, namespace
-ownership and data-preservation checks remain intact. Local validation passed 1,443 tests with
-34,410 assertions, Drizzle types, lint and formatting. Full remote checks must pass on the updated
-head before merge.
