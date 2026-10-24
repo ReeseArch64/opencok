@@ -83,6 +83,18 @@ export class Cache {
     }
     return updates;
   }
+  async emperorVersion(): Promise<number | null | undefined> {
+    const kingdomId = this.config.kingdomId;
+    if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
+    const value = await this.command("GET", `opencok:kingdom:${kingdomId}:emperor-version`);
+    if (value === null) return undefined;
+    if (value === "none") return null;
+    if (typeof value !== "string" || !/^(?:0|-?[1-9]\d{0,9})$/.test(value))
+      throw new DependencyError("redis");
+    const version = Number(value);
+    if (version < -2147483648 || version > 2147483647) throw new DependencyError("redis");
+    return version;
+  }
   async worldEffects(): Promise<ReadonlyMap<string, string>> {
     const kingdomId = this.config.kingdomId;
     if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
