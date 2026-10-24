@@ -3,6 +3,7 @@ import type { ColumnContract, TableContract } from "./schema";
 export type Row = Record<string, unknown>;
 
 export function sampleValue(column: ColumnContract, variant: number): unknown {
+  if (column.value === "json") return [{ id: `synthetic-${variant}`, amount: variant }];
   if (column.type === "uuid") return `00000000-0000-4000-8000-${String(variant).padStart(12, "0")}`;
   if (column.calendar) {
     if (column.calendar === "date") return `2020-01-0${variant}`;
@@ -51,6 +52,10 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.owner_uid = String(variant);
     row.pic_ver = variant;
     row.committed_at = BigInt(variant);
+  }
+  if (spec.indexes.some((key) => key.name === "resource_settlement_uid_fromTime_toTime_pk")) {
+    row.toTime = (row.fromTime as bigint) + 1n;
+    row.troopChanges = [];
   }
   return row;
 }

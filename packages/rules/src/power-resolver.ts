@@ -20,12 +20,29 @@ export function playerGameEffect(
   abilities: readonly (readonly GeneralSkill[])[],
   world: ReadonlyMap<number, number>,
   emperorVersion: number | null | undefined,
-  effect: 37 | 78 | 487 | 895 | 2196 | NewGeneralEquipmentModifier,
+  effect:
+    | 37
+    | 38
+    | 50
+    | 53
+    | 64
+    | 72
+    | 78
+    | 487
+    | 895
+    | 2024
+    | 2196
+    | 2804
+    | 2805
+    | 2806
+    | 2807
+    | NewGeneralEquipmentModifier,
 ): number {
   if (
-    ![37, 78, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 487, 895, 2196].includes(
-      effect,
-    )
+    ![
+      37, 38, 50, 53, 64, 72, 78, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 487,
+      895, 2024, 2196, 2804, 2805, 2806, 2807,
+    ].includes(effect)
   )
     return invalid();
   const vip = vipEffects(state.vip, rules, context.now);

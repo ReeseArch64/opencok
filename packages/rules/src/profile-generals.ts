@@ -1,5 +1,5 @@
 import type { GeneralAbility, GeneralPreview } from "@opencok/contracts/profile";
-import type { OwnGeneralSnapshot } from "@opencok/contracts/reconnect";
+import type { OwnGeneralSnapshot, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
 import { text, type Row } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
@@ -110,6 +110,41 @@ function repairedAbilities(
   )
     return [];
   return trees;
+}
+
+export function reconnectGeneralRepairs(
+  generals: readonly Row[],
+  skills: readonly Row[],
+  abilities: ReadonlyMap<string, readonly GeneralAbility[]>,
+  uid: string,
+  rules: Rules,
+  now: number,
+): Pick<ReconnectProgressWrite, "generalResets" | "skillResets" | "skillCooldownResets"> {
+  if (!Number.isSafeInteger(now) || !uid) return invalid();
+  const generalResets: string[] = [];
+  const skillResets: string[] = [];
+  const skillCooldownResets: string[] = [];
+  if (!generals.length) return { generalResets, skillResets, skillCooldownResets };
+  const seen = new Set<string>();
+  for (const general of generals) {
+    const uuid = text(general, "uuid");
+    const trees = abilities.get(uuid);
+    if (!uuid || seen.has(uuid) || !trees) return invalid();
+    seen.add(uuid);
+    if (repairedAbilities(trees, rules) !== trees) generalResets.push(uuid);
+  }
+  seen.clear();
+  for (const skill of skills) {
+    const uuid = text(skill, "uuid");
+    if (!uuid || seen.has(uuid) || text(skill, "ownerId") !== uid) return invalid();
+    seen.add(uuid);
+    const end = long(skill.endTime);
+    if (end !== ready && end <= BigInt.asIntN(64, BigInt(now) + 5000n))
+      skillCooldownResets.push(uuid);
+    if (supportedSkills.has(text(skill, "skillId")) && integer(skill.stat ?? 0) === 2)
+      skillResets.push(uuid);
+  }
+  return { generalResets, skillResets, skillCooldownResets };
 }
 
 export function publicGeneralPreviews(

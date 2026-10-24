@@ -108,6 +108,7 @@ export function settleReconnectFood(
       : Number(BigInt.asIntN(32, positive(combined)));
     if (BigInt(consumable) < ordinary) ordinary = BigInt(consumable);
   }
+  ordinary = positive(ordinary);
   if (ordinary !== 0n) {
     const delta = floatLong(
       float(float(Number(wrap(-ordinary))) * float(options.consumptionRatio)),
@@ -138,7 +139,7 @@ export function settleReconnectFood(
     food,
     foodbind,
     lastUpdateTime: now < previous ? previous : now,
-    starvingMillis,
+    starvingMillis: starvingMillis > elapsed ? elapsed : starvingMillis,
     foodDelta: wrap(food - before.food),
     boundDelta: wrap(foodbind - before.foodbind),
   };

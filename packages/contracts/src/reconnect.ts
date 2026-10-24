@@ -1,5 +1,8 @@
 import type { Row } from "./rows.ts";
 import type { GeneralPreview } from "./profile.ts";
+import type { PlayerEffectSnapshot } from "./power.ts";
+import type { WorldResourceOwnerSnapshot } from "./world-point-detail.ts";
+import type { AvatarSystemMail } from "./files.ts";
 
 export interface ReconnectBaseState {
   profile: Row | undefined;
@@ -47,4 +50,51 @@ export interface ReconnectTaskPlan {
   inserts: readonly ReconnectTask[];
   updates: readonly ReconnectTask[];
   pushes: readonly { command: string; tasks: readonly ReconnectTask[] }[];
+}
+
+export interface ReconnectProgressState extends ReconnectBaseState {
+  profile: Row;
+  resource: Row;
+  effects: PlayerEffectSnapshot;
+  buildings: readonly Row[];
+  equipment: readonly Row[];
+  queues: readonly Row[];
+  tasks: readonly Row[];
+  playerInfo: Row | undefined;
+  registrationPlatform: string | null;
+  civilizationCastle: Row | undefined;
+  glory: Row | undefined;
+  weakness: readonly Row[];
+  walls: readonly Row[];
+  knight: Row | undefined;
+  items: readonly Row[];
+  newGenerals: WorldResourceOwnerSnapshot["newGenerals"];
+}
+
+export interface ReconnectProgressWrite {
+  mail: readonly (AvatarSystemMail & { itemIdFlag: 0 | 1 })[];
+  resource: { food: bigint; foodbind: bigint; lastUpdateTime: bigint; starvingMillis: bigint };
+  tasks: Pick<ReconnectTaskPlan, "inserts" | "updates">;
+  armies: readonly { armyId: string; free: number; defence: number }[];
+  weakness: readonly {
+    armyId: string;
+    weakness: number;
+    marchWeakness: number;
+    heal: number;
+    finishTime: bigint;
+  }[];
+  weaknessTime: bigint | undefined;
+  generalResets: readonly string[];
+  skillResets: readonly string[];
+  skillCooldownResets: readonly string[];
+  buildingRefreshes: readonly { uuid: string; refreshTime: bigint }[];
+  troopChanges: readonly {
+    armyId: string;
+    freeBefore: number;
+    freeAfter: number;
+    defenceBefore: number;
+    defenceAfter: number;
+    weakened: number;
+    dead: number;
+  }[];
 }

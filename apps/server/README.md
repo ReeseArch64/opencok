@@ -3640,9 +3640,10 @@ to PostgreSQL. Own-general serialization retains the saved ability-page index an
 pending choice strings omitted by public previews, and omits the public skill-point
 wrapper. It shares the existing attribute, cooldown and ability-repair projections
 for the current v12.06.0 process; pre-2.0 version filters are outside that process's
-supported configuration. Repairs remain projections without persistence or notification
-side effects, and the shared hash traversal retains its documented exceptional-state
-limits. The friendship-mine provider resolves the current global account binding,
+supported configuration. Public reads remain projections without persistence or
+notification side effects; the reconnect write planner separately identifies ability
+repairs, elapsed cooldowns and disabled supported skills. The shared hash traversal
+retains its documented exceptional-state limits. The friendship-mine provider resolves the current global account binding,
 returns an ephemeral level-one mine for unbound accounts, and reads or initializes
 the bound owner's persisted mine. Initialization uses the existing composite key with
 conflict handling and reads the winner after a competing insert, preserving progress
@@ -3661,7 +3662,24 @@ Resource projection preserves bound-resource field selection and per-resource wi
 The food settlement planner implements troop upkeep, protected food, bound-food policy,
 float conversion and starvation intervals. Its checkpoint never moves backward when
 the clock regresses, so a later retry cannot charge an already settled interval again.
-The planner does not itself persist changes or apply starvation losses.
+A separate weakness planner allocates calculated losses between available hospital
+capacity and deaths, retaining delayed march weakness and interval remainders.
+Two deliberate safety corrections differ from the legacy arithmetic: wrapped cellar
+protection cannot create food, and removing a calculated loss consumes only the
+required free/defending troops. The legacy branch could remove defending troops even
+when free troops already covered the loss. A per-army ledger accounts for every debit.
+Upkeep configuration includes starred building progress, paired troop reductions,
+feature gates and the strict bound-resource display boundary above version 2.0.3.
+
+The persistence adapter locks the owner and resource checkpoint, reads progress in a
+repeatable-read transaction and commits the interval receipt, resource debit, troop
+changes, weakness, task transitions, general repairs and system mail together. A
+persisted realm epoch fences stale owners; coordination readiness is checked around
+writes. Only rolled-back serialization failures and deadlocks receive bounded retries.
+Mail and its group index use the same transaction, so failed repair notifications
+roll back the repair. The additive kingdom migration is generated but has not been
+applied. Synthetic SQL-client tests verify rollback, ownership, ledger conservation
+and checkpoint reuse; they do not establish live PostgreSQL or ZooKeeper behavior.
 
 The task planner restores accepted, completed and rewarded collections, applies mobile
 and completion-count triggers, discovers eligible normal and cross-kingdom tasks, and
@@ -3675,7 +3693,7 @@ conditional loot and siege fields. Synthetic Java serialization fixtures exercis
 companion decoding and malformed saved data without using private player records.
 
 This foundation is not yet exposed as `user.lv`: full march composition, authoritative
-resource settlement, starvation effects and task persistence remain to be integrated
+resource settlement, starvation effects, task persistence and realm-epoch acquisition remain to be integrated
 with the consistent owner snapshot before enabling the handler.
 
 Task reward descriptions have a pure rules implementation and typed SFS serializer.
