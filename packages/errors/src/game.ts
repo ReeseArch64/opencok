@@ -28,6 +28,9 @@ export class GameError extends Error {
       | "world_favorite_catalog"
       | "world_search_size"
       | "player_search"
+      | "world_resource_detail"
+      | "world_point_detail"
+      | "world_monster_detail"
       | "world_favorite_size",
   ) {
     super(code);

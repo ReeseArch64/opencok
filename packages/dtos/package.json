@@ -26,7 +26,10 @@
     "./mail": "./src/mail.ts",
     "./world-favorites": "./src/world-favorites.ts",
     "./world-search": "./src/world-search.ts",
-    "./player-search": "./src/player-search.ts"
+    "./player-search": "./src/player-search.ts",
+    "./world-resource-detail": "./src/world-resource-detail.ts",
+    "./world-point-detail": "./src/world-point-detail.ts",
+    "./world-monster-detail": "./src/world-monster-detail.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

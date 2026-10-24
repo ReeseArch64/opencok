@@ -1,4 +1,4 @@
-import type { PowerSnapshot } from "@opencok/contracts/power";
+import type { PlayerEffectSnapshot } from "@opencok/contracts/power";
 import { long, text } from "@opencok/contracts/rows";
 import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
@@ -18,7 +18,12 @@ function effectValues(source: string | undefined, requested: number): number[] {
   return out;
 }
 
-export function storedPowerEffects(state: PowerSnapshot, rules: Rules, now: number, effect = 487) {
+export function storedPowerEffects(
+  state: PlayerEffectSnapshot,
+  rules: Rules,
+  now: number,
+  effect = 487,
+) {
   let initialAndScience = 0;
   for (const value of effectValues(rules.items.get("effect")?.k1, effect))
     initialAndScience = Math.fround(initialAndScience + Math.fround(value));

@@ -41,7 +41,9 @@
     "./avatar-delivery": "./src/avatar-delivery.ts",
     "./world-favorites": "./src/world-favorites.ts",
     "./world-search": "./src/world-search.ts",
-    "./player-search": "./src/player-search.ts"
+    "./player-search": "./src/player-search.ts",
+    "./world-point-detail": "./src/world-point-detail.ts",
+    "./world-resource-owner": "./src/world-resource-owner.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",
