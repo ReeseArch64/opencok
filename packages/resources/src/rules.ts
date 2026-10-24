@@ -274,7 +274,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
   const prestigeLevels = prestigeLevelRecords
     ? indexRules(prestigeLevelRecords, GameplayCatalog.ReputationLevel)
     : new Map<string, Rule>();
-  const allianceTeleport = await optional("alliance_teleport");
+  const allianceTeleport = await optional(GameplayCatalog.AllianceTeleport);
   const [militaryGroups, heroEvents] = await Promise.all([
     optional(GameplayCatalog.WrSever),
     optional(GameplayCatalog.Heroevent),
