@@ -15,6 +15,7 @@ export interface PowerSnapshot {
   dragons: readonly Row[];
   knight: Row | undefined;
   items: readonly Row[];
+  states: readonly Row[];
 }
 
 export interface PowerState extends Omit<PowerSnapshot, "profile"> {

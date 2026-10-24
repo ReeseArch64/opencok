@@ -14,7 +14,9 @@
     "./game": "./src/game.ts",
     "./availability": "./src/availability.ts",
     "./features": "./src/features.ts",
-    "./power": "./src/power.ts"
+    "./power": "./src/power.ts",
+    "./power-context": "./src/power-context.ts",
+    "./power-effects": "./src/power-effects.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
