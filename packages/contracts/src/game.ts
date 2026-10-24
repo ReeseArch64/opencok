@@ -1,3 +1,4 @@
+import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
 import type { WorldPointDetailStore } from "./world-point-detail.ts";
 import type { WorldFavoriteStore } from "./world-favorites.ts";
 import type { WorldSearchStore } from "./world-search.ts";
@@ -19,6 +20,10 @@ import type {
   MailConversationSaveSnapshot,
   MailConversationReadQuery,
   MailConversationReadSnapshot,
+  MailCategoryDeleteQuery,
+  MailCategoryDeleteInspector,
+  MailCategoryDeleteSnapshot,
+  MailTypeDeleteQuery,
   MailDeleteQuery,
   MailDeletePlanner,
   MailDeleteSnapshot,
@@ -53,6 +58,7 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  normalRankingRealm?(): Promise<boolean>;
   mailUpdates?(
     uid: string,
     query: MailUpdateQuery,
@@ -92,6 +98,12 @@ export interface GameStore extends AuthenticationStore {
     uid: string,
     query: MailConversationReadQuery,
   ): Promise<MailConversationReadSnapshot>;
+  mailCategoryDelete?(
+    uid: string,
+    query: MailCategoryDeleteQuery,
+    inspect: MailCategoryDeleteInspector,
+  ): Promise<MailCategoryDeleteSnapshot>;
+  mailTypeDelete?(uid: string, query: MailTypeDeleteQuery): Promise<MailCategoryDeleteSnapshot>;
   mailSave(uid: string, query: MailSaveQuery): Promise<MailSaveSnapshot>;
   mailStatus(uid: string, query: MailStatusQuery): Promise<MailStatusSnapshot>;
   allianceRanking(uid: string, query: AllianceRankingQuery): Promise<AllianceRankingSnapshot>;
@@ -105,6 +117,11 @@ export interface GameStore extends AuthenticationStore {
   setPushPreference?(uid: string, preference: PushPreference, now: number): Promise<void>;
   nicknameOccupied?(name: string): Promise<boolean>;
   celebrityDescription?(uid: string, kingdomId: number): Promise<Buffer | null>;
+  saveCelebrityDescription?(
+    uid: string,
+    now: number,
+    readDescription: () => Buffer | null,
+  ): Promise<void>;
   updateProfilePreference?(
     uid: string,
     field: ProfilePreferenceField,
@@ -146,8 +163,15 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  dragonRanking?(
+    ranges: readonly DragonRankingRange[],
+    allianceId: string,
+  ): Promise<readonly DragonRankingEntry[]>;
+  globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
+  scoreActivityRanking?(): Promise<readonly string[]>;
   nicknameBadWords?(name: string): boolean | Promise<boolean>;
   nicknameReservedPatterns?(): readonly string[];
+  filterBadWords?(text: string): string;
   worldPointDetail?: WorldPointDetailStore;
   playerSearch?: PlayerSearchStore;
   worldSearch?: WorldSearchStore;

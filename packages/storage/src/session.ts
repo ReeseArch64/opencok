@@ -1,5 +1,9 @@
+import { loadDragonRanking } from "./dragon-ranking.ts";
+import type { DragonRankingRange } from "@opencok/contracts/dragon-ranking";
 import { publishPlayerUpdate } from "./player-update.ts";
 import { loadExpeditionRanking } from "./expedition-ranking.ts";
+import { loadScoreActivityRanking } from "./score-activity-ranking.ts";
+import { loadGlobalCelebrityRanking } from "./global-celebrity-ranking.ts";
 import { loadExpeditionStage } from "./expedition-stage.ts";
 import { SESSION_TTL_SECONDS } from "@opencok/constants/connection";
 import { RedisClient } from "bun";
@@ -40,6 +44,26 @@ export class Cache {
       (command, ...args) => this.command(command, ...args),
       this.config.kingdomId,
       limit,
+    );
+  }
+  scoreActivityRanking(): Promise<readonly string[]> {
+    return loadScoreActivityRanking(
+      (command, ...args) => this.command(command, ...args),
+      this.config.kingdomId,
+    );
+  }
+  globalCelebrityRanking(rankType: number): Promise<readonly string[]> {
+    return loadGlobalCelebrityRanking(
+      (command, ...args) => this.command(command, ...args),
+      this.config.kingdomId,
+      rankType,
+    );
+  }
+  dragonRanking(ranges: readonly DragonRankingRange[], allianceId: string) {
+    return loadDragonRanking(
+      (command, ...args) => this.command(command, ...args),
+      ranges,
+      allianceId,
     );
   }
   expeditionStage(kingdomId = this.config.kingdomId): Promise<number | undefined> {

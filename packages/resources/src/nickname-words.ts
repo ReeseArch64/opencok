@@ -1,6 +1,10 @@
 import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { containsNicknameBadWords, nicknameBadWordEntries } from "@opencok/rules/nickname-words";
+import {
+  containsNicknameBadWords,
+  filterNicknameBadWords,
+  nicknameBadWordEntries,
+} from "@opencok/rules/nickname-words";
 
 export type NicknameForbiddenReader = (key: string) => Promise<readonly string[]>;
 
@@ -19,6 +23,10 @@ export class NicknameWordFilter {
 
   contains(name: string): boolean {
     return containsNicknameBadWords(name, this.entries, this.loading);
+  }
+
+  filter(text: string): string {
+    return filterNicknameBadWords(text, this.entries, this.loading);
   }
 
   async reload(): Promise<void> {

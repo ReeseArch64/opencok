@@ -16,6 +16,7 @@
     "./avatar-finish": "./src/avatar-finish.ts",
     "./account": "./src/account.ts",
     "./game": "./src/game.ts",
+    "./mail-batch-delete": "./src/mail-batch-delete.ts",
     "./nickname": "./src/nickname.ts",
     "./nickname-lock": "./src/nickname-lock.ts",
     "./nickname-global": "./src/nickname-global.ts",
