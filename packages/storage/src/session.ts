@@ -1,3 +1,4 @@
+import { loadMilitaryRanking } from "./military-ranking.ts";
 import { loadFlowerRanking } from "./flower-ranking.ts";
 import { loadDonationRanking } from "./donation-ranking.ts";
 import { loadThroneRankingPeriod } from "./throne-ranking.ts";
@@ -85,6 +86,9 @@ export class Cache {
       limit,
       global,
     );
+  }
+  militaryRanking(type: number, group: number) {
+    return loadMilitaryRanking((name, ...args) => this.command(name, ...args), type, group);
   }
   attributeRanking(type: number) {
     return loadAttributeRanking(

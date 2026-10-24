@@ -157,3 +157,29 @@ Flower unit tests cover publication keys and snapshot composition, missing self
 positions, profile omissions, global visibility, origin routing, refresh
 boundaries, Long sentinel arithmetic, correlation and failures. Native-client
 and real-service validation remain deferred. Rollback needs no player-data edits.
+
+## Military leaderboards
+
+`military.ranking` accepts type 0 for published military score or type 1 for
+ranking experience. `wr_switch` gates the query. `wr_sever.xml` supplies realm
+groups, retaining Java integer-hash group traversal and fallback group 0. The
+resource loader exposes this catalog independently of military reward/settlement
+rules; the same loader now retains `heroevent.xml` for event-ranking projections.
+
+One read-only script checks `<score|exp>RankingGroupKey_<group>` for completion
+value `0`, reads positions 0 through 150 from `<score|exp>RankingKey_<group>`,
+and resolves each exact member's public JSON in
+`<score|exp>RankingUserKey_<group>`. Incomplete/missing publications are empty;
+missing metadata for a published member or provider failures reject. Redis's
+reverse-score/member ordering preserves ties. The response adds one-based
+`ranking` positions and matches `selfRanking` by both UID and string server ID;
+absent self is zero. Military score/experience remain Int values and realm IDs
+remain Strings as published. No stale local-cache result survives invalidation.
+
+The legacy handler's incidental `enable` and `settle` calls are intentionally
+not invoked. The authoritative military domain must settle and publish scores;
+leaderboard reads cannot grant points, ranks or rewards. The reader adds no
+publication TTL and cannot rebuild missing score publications. Existing domain
+publishers or authorized imports must expose the three-key contract in the
+maintained shared Redis topology. Unit tests cover groups, publication barriers,
+metadata coherence, tie/order preservation, self matching, gates and correlation.

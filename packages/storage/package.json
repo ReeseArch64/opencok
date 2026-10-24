@@ -23,7 +23,8 @@
     "./hero-ranking": "./src/hero-ranking.ts",
     "./throne-ranking": "./src/throne-ranking.ts",
     "./donation-ranking": "./src/donation-ranking.ts",
-    "./flower-ranking": "./src/flower-ranking.ts"
+    "./flower-ranking": "./src/flower-ranking.ts",
+    "./military-ranking": "./src/military-ranking.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

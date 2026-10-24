@@ -1,3 +1,5 @@
+import { militaryRanking } from "@opencok/mappings/military-ranking";
+import { militaryRankingGroup } from "@opencok/rules/military-ranking";
 import { flowerRanking, flowerRankingEntries } from "@opencok/mappings/flower-ranking";
 import { flowerRankingRefresh } from "@opencok/rules/flower-ranking";
 import type { DonationRankingKind } from "@opencok/contracts/community-ranking";
@@ -395,6 +397,9 @@ export class Game {
       case "flower.ranking":
         body = await this.flowerRanking(uid);
         break;
+      case "military.ranking":
+        body = await this.militaryRanking(uid, params);
+        break;
       case "ctf.get.rank":
         body = await this.throneRanking(uid, params);
         break;
@@ -446,6 +451,7 @@ export class Game {
         "al.donate.res.rank.history",
         "cemetery.get.ranking",
         "flower.ranking",
+        "military.ranking",
         "ctf.get.rank",
         "hero.self.rank",
         "act.score.rank",
@@ -1062,6 +1068,30 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async militaryRanking(uid: string, params: Fields): Promise<Fields> {
+    const now = this.now();
+    const profile = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    if (
+      !serverFeature(this.rules, "wr_switch", {
+        kingdomId: this.config.kingdomId,
+        now,
+        version: MOBILE_CLIENT_VERSION,
+      })
+    )
+      throw new GameError(errors.unsupported, "ranking");
+    const type = wireInt(params, "type");
+    if (![0, 1].includes(type)) throw new GameError(errors.invalid);
+    if (!this.services.militaryRanking) throw new GameError(errors.unsupported, "ranking");
+    const group = militaryRankingGroup(this.rules, this.config.kingdomId);
+    return militaryRanking(
+      await this.services.militaryRanking(type, group),
+      uid,
+      this.config.kingdomId,
+      type,
+    );
   }
   private async flowerRanking(uid: string): Promise<Fields> {
     const now = this.now();

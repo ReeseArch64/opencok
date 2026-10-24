@@ -257,6 +257,10 @@ export async function loadRules(directory: string, kingdomId = 1) {
   const prestigeLevels = prestigeLevelRecords
     ? indexRules(prestigeLevelRecords, "reputation_level")
     : new Map<string, Rule>();
+  const [militaryGroups, heroEvents] = await Promise.all([
+    optional("wr_sever"),
+    optional("heroevent"),
+  ]);
   const [militaryRanks, servers] = await Promise.all([optional("wr_rank"), optional("servers")]);
   const [treasures, rewards, mail] = await Promise.all([
     optional("treasure"),
@@ -338,6 +342,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     { treasures, rewards },
     mail,
     { fieldMonsters, armies, neutralResources, barbarians },
+    { militaryGroups, heroEvents },
   );
 }
 
