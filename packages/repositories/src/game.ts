@@ -1,5 +1,6 @@
 import { reportAvatar } from "./avatar-report.ts";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
+import { readSystemMail } from "./mail-system.ts";
 import { readMailBatch } from "./mail-batch.ts";
 import { readNormalRankingRealm } from "./ranking-realm.ts";
 import { readMailUpdates } from "./mail-updates.ts";
@@ -12,6 +13,8 @@ import { translationv2 } from "@opencok/drizzle/schema/opencok_kingdom/translati
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { readMailStatus } from "./mail.ts";
 import type {
+  MailSystemQuery,
+  MailSystemInspector,
   MailBatchQuery,
   MailGroupQuery,
   MailGroupInspector,
@@ -399,6 +402,9 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   mailDelete(uid: string, query: MailDeleteQuery, plan: MailDeletePlanner) {
     return deleteMail(this.kingdom.db, this.config.kingdomId, uid, query, plan);
+  }
+  getSystemMailByPlayerId(uid: string, query: MailSystemQuery, inspect: MailSystemInspector) {
+    return readSystemMail(this.databases, this.config.kingdomId, uid, query, inspect);
   }
   mailUpdates(uid: string, query: MailUpdateQuery, inspect: MailUpdateInspector) {
     return readMailUpdates(this.kingdom.db, this.config.kingdomId, uid, query, inspect);
