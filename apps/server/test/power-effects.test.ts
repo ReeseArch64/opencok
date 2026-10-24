@@ -27,6 +27,8 @@ function fixture() {
     prestige: [],
     military: undefined,
     miracle: undefined,
+    office: undefined,
+    kingdomFights: [],
   };
   const rules = new Rules(
     new Map(),
