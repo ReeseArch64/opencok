@@ -105,6 +105,18 @@ export function featureConfig(rules: Rules): Fields {
   };
 }
 
+export function settingConfig(rules: Rules): Fields {
+  return {
+    setting: sfs.array(
+      [...rules.settings.values()].map((rule) =>
+        sfs.object(
+          Object.fromEntries(Object.entries(rule).map(([key, value]) => [key, sfs.string(value)])),
+        ),
+      ),
+    ),
+  };
+}
+
 export function armySnapshot(row: Row, rules: Rules): Fields {
   const id = text(row, "armyId");
   const rule = rules.arms.get(id);

@@ -6,7 +6,7 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
-`login.other`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`login.other`, `setting.xml`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -74,6 +74,21 @@ persisted troops/inventory. `function_star.xml` and `function_on.xml` describe
 building star rules and optional features. Files remain local authorized inputs;
 read-only mobile originals must be extracted in a separate working directory.
 
+`setting.xml` is optional. Its command returns every configured setting with its ID
+and values encoded as strings, or an empty array when the catalog is absent. XML
+catalogs accept single records and multiple/nested groups. Duplicate IDs fail except
+for the existing goods and feature replacement policies. Values retain leading
+zeroes and whitespace; malformed records and document type declarations fail loading.
+
+Building star availability evaluates numeric client versions, realm selectors and
+inclusive start/end boundaries at the command's injected time. Legacy dates use
+`yyyy-MM-dd-HH-mm`, interpreted in UTC for this server, independently of the host
+timezone. Invalid dates, versions and selectors fail closed instead of inheriting
+the Java parser's lenient date rollover or invalid-date epoch fallback. Test-realm
+selectors and explicit timezone offsets are supported by the pure availability
+evaluator; the running realm uses the online selector and UTC. This changes only
+availability/read previews; construction remains unsupported.
+
 Use runtime credentials with SELECT access to the required global/realm tables,
 separate from the administrative setup account. Startup checks the required
 projections and dependencies before opening listeners. `/healthz` and `/readyz`
@@ -111,6 +126,31 @@ query/driver errors.
 
 See [architecture](../../.github/ARCHITECTURE.md#153-first-postgresql-server-migration-slice)
 for ownership and the next migration steps.
+
+## Gameplay migration: topics 1–8
+
+The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)
+defines the full requested scope. Implementation and verification remain incremental;
+the table records gaps rather than treating package scaffolding as completed behavior.
+The current work is restricted to server implementation and unit tests. Do not run
+ADB, native-client validation, integration or end-to-end tests for this phase.
+
+| Topic                                     | Implemented evidence                                                                                 | Remaining work                                                                                                                                                                |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Configuration and feature availability | Settings command; grouped XML loading; version/realm/time evaluator; timed star previews; unit tests | Complete data-config projections and feature availability, including player-specific conditions and implemented-service gates. Feature announcements currently remain closed. |
+| 2. Player/progression queries             | Initial player DTO                                                                                   | Level, experience, power, own/public and multi-player query contracts.                                                                                                        |
+| 3. Ranking queries                        | Persistence schema                                                                                   | Lists, player positions, pagination and tie-breaking.                                                                                                                         |
+| 4. Basic mailbox                          | Persistence schema                                                                                   | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                                                          |
+| 5. Additional map queries                 | Base viewport                                                                                        | Point details, player search and favorites, including authorization for writes.                                                                                               |
+| 6. Profile/preferences                    | Initial profile reads                                                                                | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                                     |
+| 7. Avatar integration                     | Standalone files service                                                                             | Realm grants, confirmation and profile updates.                                                                                                                               |
+| 8. Basic chat integration                 | Standalone chat service                                                                              | Realm session issuance and game-facing configuration. Native-client validation remains deferred by request.                                                                   |
+
+Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
+The availability and settings tests cover protocol types, correlation, catalog
+absence, grouped records, numeric versions, realm ranges, inclusive deadlines,
+invalid calendar values and time-dependent building previews. The full wave is not
+complete until all eight server-side behaviors have corresponding unit coverage.
 
 ## Verification
 
