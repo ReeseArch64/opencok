@@ -456,9 +456,14 @@ are traversed structurally and discarded. The point repository reads a nonblank
 resource owner's saved march pointer by UUID in the same point snapshot. It retains
 identity and collection metadata, bounded army/plunder payloads and exact nullable
 Long fields, normalizing real speed to Float32. Missing marches remain absent;
-inconsistent owners reject without ownership repair. Decoder composition, decoded
-owner validation, effect resolution and runtime maximum-collection-time restoration remain dependencies
-of occupied-resource command composition. Root stored JSON arrays share the existing
+inconsistent owners reject without ownership repair. The raw-load controller accepts
+the decoded army, requires its root owner to match the march and resolves current
+owner effects for each applicable troop in sequence. A positive saved load returns
+before troop/effect access only when explicit residency is false. Missing load fields
+skip effects; missing required resident-owner data rejects. Unused soldier owner fields
+do not redirect effect reads. The controller does not update the saved load or infer
+residency from database presence. Command wiring and runtime maximum-collection-time
+restoration remain dependencies. Root stored JSON arrays share the existing
 bounded legacy parser; controller restoration preserves the single-item typed
 plunder access rules. Pure collection restoration applies nullable primitive defaults
 and checks the reference model's Int range before narrowing the saved count. No
