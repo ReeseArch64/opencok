@@ -126,6 +126,8 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "dragon_new",
       "status",
       "sk",
+      "general_base",
+      "general_skill",
       "suit",
       "svip",
       "alliancescience",
@@ -154,7 +156,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       '<database><Group id="vip"><ItemSpec id="001" power="007"/></Group></database>',
     );
     const power = (await loadRules(directory)).power;
-    expect(Object.keys(power)).toHaveLength(30);
+    expect(Object.keys(power)).toHaveLength(32);
     expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
     for (const name of [
       "general_sale",
@@ -343,6 +345,47 @@ test("barbarian catalogs load optionally and retain final duplicate definitions 
       para3: " 0x1p2D ",
     });
     expect(rules.world.armies!.size).toBe(0);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("new-general catalogs are optional, preserve final definitions and stay separate from ordinary general skills", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-new-general-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const absent = (await loadRules(directory)).power;
+    expect(absent.newGeneralBases?.size).toBe(0);
+    expect(absent.newGeneralSkills?.size).toBe(0);
+    await writeFile(
+      join(directory, "general_base.xml"),
+      '<database><ItemSpec id="1" base_skill="10" base_skill_2="11;10"/></database>',
+    );
+    await writeFile(
+      join(directory, "general_skill.xml"),
+      '<database><Group id="a"><ItemSpec id="10" type="1"/></Group><Group id="b"><ItemSpec id="10" type="0" para1="78;78" base=" 0x1p2F ;1" condition_type=" "/></Group></database>',
+    );
+    await writeFile(
+      join(directory, "sk.xml"),
+      '<database><ItemSpec id="10" effect="133;2"/></database>',
+    );
+    const rules = await loadRules(directory);
+    expect(rules.power.newGeneralBases!.get("1")).toEqual({
+      id: "1",
+      base_skill: "10",
+      base_skill_2: "11;10",
+    });
+    expect(rules.power.newGeneralSkills!.get("10")).toEqual({
+      id: "10",
+      type: "0",
+      para1: "78;78",
+      base: " 0x1p2F ;1",
+      condition_type: " ",
+    });
+    expect(rules.power.generalSkills!.get("10")).toEqual({ id: "10", effect: "133;2" });
+    await writeFile(join(directory, "general_skill.xml"), '<database><ItemSpec id=""/></database>');
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

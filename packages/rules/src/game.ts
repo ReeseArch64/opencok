@@ -40,6 +40,8 @@ export interface PowerCatalogs {
   dragonLevels?: Map<string, Rule>;
   statuses?: Map<string, Rule>;
   generalSkills?: Map<string, Rule>;
+  newGeneralBases?: Map<string, Rule>;
+  newGeneralSkills?: Map<string, Rule>;
   equipmentSets?: Map<string, Rule>;
   vip?: Map<string, Rule>;
   superVip?: Map<string, Rule>;

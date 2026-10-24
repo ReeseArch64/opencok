@@ -1379,6 +1379,41 @@ cover conditional feature/time/realm/stage gates, skipped effect reads and failu
 fallback. New-general stronghold/official contributions remain a separate required
 resolver; this step does not replace them with zero.
 
+`rules/new-general-skills` restores the passive base-skill and talent components
+separately from ordinary general effect 133. Optional `general_base.xml` and
+`general_skill.xml` catalogs retain exact strings and final duplicate definitions;
+they do not replace `sk.xml`. Saved `baseSkill` and `talent` strings retain final
+duplicate integer levels, Java integer digits and whole-separator parsing behavior.
+Their storage bounds are 256 and 5,000 UTF-16 units; lists/maps are bounded to 4,096
+entries. Missing required skill definitions and malformed consumed numbers reject.
+
+Base skills start at level one when no saved level exists. Star-specific skill
+lists append in numeric star order, preserve duplicates, and cannot populate an
+empty initial list. Only passive type zero contributes. Nonblank `condition_type`
+excludes a base skill from this calculation but does not exclude a talent. Short
+base/add arrays supply zero; extra malformed numeric values still reject. Level
+minus one wraps as Int before conversion to Float, and multiplication, addition
+and per-effect accumulation each round as Float. Talents traverse a fresh Java 8
+Integer HashMap reconstructed from the saved text; historical cache mutation order
+is not claimed. Returned effect maps also preserve fresh HashMap traversal.
+
+Direct decimal/hexadecimal Float parsing retains signed zero, subnormals, infinities
+and NaN, including decimal halfway cases that differ from double-then-float parsing.
+Independent synthetic Java 8 JDK probes supply 1,529 parsing cases, 80 integer-map
+orders and 400 arithmetic cases. Ten unit tests compare these fixtures and cover
+skill selection, restoration, limits and immutable inputs; an additional resource
+unit checks the catalog boundary. No private classes execute and normal tests do
+not require Java or local legacy inputs. Star lookup visits only present canonical
+catalog keys, avoiding a linear scan across missing stars and the legacy loop's
+Int overflow at maximum star. This is an explicit bounded-read difference.
+
+These two maps do not constitute the complete new-general load effect. Status,
+equipment and refinement contributions, building/official eligibility, general
+iteration order and authoritative owner reads still need composition. Exceptions
+remain visible to that future outer resolver, whose legacy boundary returns zero
+for the whole general contribution. The occupied-resource command remains gated
+until all required dependencies are supplied.
+
 An absent fallback profile supplies no current owner modifiers; a resident profile
 requires explicit effects for troops with a load catalog entry. Catalog entries
 without a load field skip the troop. Malformed required fields reject. Snapshots
