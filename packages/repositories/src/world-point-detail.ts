@@ -1,5 +1,6 @@
 import { world_barbarion } from "@opencok/drizzle/schema/opencok_kingdom/world_barbarion";
 import { readPlayerEffects } from "./power.ts";
+import { readWorldResourceOwner, checkWorldResourceOwnerStore } from "./world-resource-owner.ts";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import type { createDatabases } from "@opencok/drizzle";
@@ -350,6 +351,7 @@ async function readPoint(
   worldId: number,
   remote: boolean,
   cityExtras = false,
+  resourceEffects = false,
 ): Promise<
   Pick<WorldPointDetailSnapshot, "owner" | "resource"> & {
     point?: Pick<typeof worldpoint.$inferSelect, keyof typeof pointColumns>;
@@ -372,7 +374,17 @@ async function readPoint(
     !blank(point.ownerMarchUUid)
       ? await readResourceMarch(db, point)
       : undefined;
-  return { point, owner, ...(resource ? { resource } : {}) };
+  const resourceOwner =
+    resourceEffects && resource?.march
+      ? await readWorldResourceOwner(db, point.ownerId!)
+      : undefined;
+  return {
+    point,
+    owner,
+    ...(resource
+      ? { resource: { ...resource, ...(resourceOwner ? { owner: resourceOwner } : {}) } }
+      : {}),
+  };
 }
 export function createWorldPointDetailStore(
   databases: Databases,
@@ -391,7 +403,8 @@ export function createWorldPointDetailStore(
         query.kingdomId < 1 ||
         !Number.isSafeInteger(query.now) ||
         query.now < 0 ||
-        (query.cityExtras !== undefined && typeof query.cityExtras !== "boolean")
+        (query.cityExtras !== undefined && typeof query.cityExtras !== "boolean") ||
+        (query.resourceEffects !== undefined && typeof query.resourceEffects !== "boolean")
       )
         throw new Error("Invalid world detail query");
       const remote = query.kingdomId !== kingdomId;
@@ -418,7 +431,14 @@ export function createWorldPointDetailStore(
             throw new Error("Missing observer world");
           const result = { ...snapshot, world };
           if (remote) return result;
-          const detail = await readPoint(tx, query.point, world.worldId, false, query.cityExtras);
+          const detail = await readPoint(
+            tx,
+            query.point,
+            world.worldId,
+            false,
+            query.cityExtras,
+            query.resourceEffects,
+          );
           const exploration =
             detail.point?.pointType === 6 && selectExploration
               ? await readExploration(tx, observer, detail.point, selectExploration)
@@ -452,7 +472,10 @@ export function createWorldPointDetailStore(
           throw new Error("Unconfigured world detail realm");
         const detail = await databases
           .getKingdom(query.kingdomId)
-          .db.transaction((tx) => readPoint(tx, query.point, 0, true), options);
+          .db.transaction(
+            (tx) => readPoint(tx, query.point, 0, true, false, query.resourceEffects),
+            options,
+          );
         return { ...local, ...detail };
       } catch {
         throw new DependencyError("world point detail");
@@ -483,6 +506,7 @@ async function readCity(db: Reader, observer: string, profile: Row, kingdomId: n
   return { observerStatistics, mixed, effects };
 }
 export async function checkWorldPointDetailStore(db: Db): Promise<void> {
+  await checkWorldResourceOwnerStore(db);
   await db.select(barbarianColumns).from(world_barbarion).limit(0);
   await db
     .select({ uid: user_mixed_info.uid, lastBeDuelTime: user_mixed_info.lastBeDuelTime })
