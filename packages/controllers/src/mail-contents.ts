@@ -15,7 +15,7 @@ import {
 } from "@opencok/messages/sfs";
 
 const structured = new Set([5, 7, 8, 9, 10, 12, 17, 18, 25, 26, 27, 30, 31, 32, 33, 36, 42]);
-function storedText(data: Buffer | null): string {
+export function storedMailText(data: Buffer | null): string {
   if (!data) return "";
   try {
     const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(data);
@@ -73,6 +73,28 @@ function repairScout(body: Fields) {
   } catch {}
 }
 
+export function decodeMailContent(
+  entry: MailContentsEntry,
+): { body: Fields; contents: string } | undefined {
+  if (!Number.isInteger(entry.type) || entry.type < 0 || entry.type > 49) throw new ProtocolError();
+  let contents = storedMailText(entry.contents);
+  if (contents.toLowerCase() === "extra") {
+    if (entry.extra === null) throw new Error("Missing persisted mail contents");
+    contents = storedMailText(entry.extra);
+  }
+  if (!structured.has(entry.type) || (entry.type === 8 && !contents.startsWith("{")))
+    return { body: { contents: sfs.string(contents.replaceAll("\\n", "\n")) }, contents };
+  try {
+    const body = decodeLegacyJsonObject(contents);
+    if (entry.type === 7) repairFight(body);
+    if (entry.type === 8) repairScout(body);
+    return { body, contents };
+  } catch (error) {
+    if (!(error instanceof LegacyJsonError)) throw error;
+    return undefined;
+  }
+}
+
 export function mailContentsProjection(
   entries: readonly MailContentsEntry[],
   envelope: Fields = {},
@@ -83,27 +105,12 @@ export function mailContentsProjection(
   const result: Value[] = [];
   const invalidIds: string[] = [];
   for (const entry of entries) {
-    if (!Number.isInteger(entry.type) || entry.type < 0 || entry.type > 49)
-      throw new ProtocolError();
-    let contents = storedText(entry.contents);
-    if (contents.toLowerCase() === "extra") {
-      if (entry.extra === null) throw new Error("Missing persisted mail contents");
-      contents = storedText(entry.extra);
+    const decoded = decodeMailContent(entry);
+    if (!decoded) {
+      invalidIds.push(entry.uid);
+      continue;
     }
-    let body: Fields;
-    if (!structured.has(entry.type) || (entry.type === 8 && !contents.startsWith("{")))
-      body = { contents: sfs.string(contents.replaceAll("\\n", "\n")) };
-    else {
-      try {
-        body = decodeLegacyJsonObject(contents);
-        if (entry.type === 7) repairFight(body);
-        if (entry.type === 8) repairScout(body);
-      } catch (error) {
-        if (!(error instanceof LegacyJsonError)) throw error;
-        invalidIds.push(entry.uid);
-        continue;
-      }
-    }
+    const { body, contents } = decoded;
     body.createTime = sfs.long(entry.createTime);
     body.u = sfs.string(entry.uid);
     body.contentStr = sfs.string("");

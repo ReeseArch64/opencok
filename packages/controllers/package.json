@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./mail-category": "./src/mail-category.ts",
     "./mail-contents": "./src/mail-contents.ts",
     "./mail-delete": "./src/mail-delete.ts",
     "./game": "./src/game.ts",
