@@ -456,6 +456,15 @@ readiness helper are not connected to the runtime yet; complete command composit
 specialized state and remote JSON/wire conversion remain pending. Details are in the
 [realm runbook](../apps/server/README.md#world-point-and-owner-read-foundation).
 
+The monster-detail foundation adds optional `field_monster` and `army` catalogs
+under `Rules.world`, separately from the existing troop `arms` catalog. Pure rules
+derive maximum HP and exploration timestamps; DTOs preserve local boss health and
+existing exploration report fields. The messages codec supports bounded root SFS
+arrays for persisted reports. Exploration selection consumes an explicitly ordered
+owner-march snapshot, selecting the first destination match before checking its state.
+The persisted-to-runtime march-order resolver and full command remain pending; no
+repository order or march restoration behavior is fabricated by this foundation.
+
 ### Migrated files implementation
 
 `apps/files` composes `api/files`, `identity/avatar`, `validations/image` and

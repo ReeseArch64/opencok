@@ -270,3 +270,34 @@ test("mail catalogs preserve template strings and final duplicate definitions", 
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("world monster catalogs load optionally, preserve final duplicates and stay distinct from troop arms", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-world-monster-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const absent = (await loadRules(directory)).world;
+    expect(absent.fieldMonsters?.size).toBe(0);
+    expect(absent.armies?.size).toBe(0);
+    await writeFile(
+      join(directory, "field_monster.xml"),
+      '<database><Group id="first"><ItemSpec id="boss" NPC="1" Gift="03"/></Group><Group id="last"><ItemSpec id="boss" NPC="0" army="a;;b"/></Group></database>',
+    );
+    await writeFile(
+      join(directory, "army.xml"),
+      '<database><ItemSpec id="a" arm="unit;1"/><ItemSpec id="a" arm="unit;+03"/><ItemSpec id="b" arm="unit;4"/></database>',
+    );
+    await writeFile(
+      join(directory, "arms.xml"),
+      '<database><ItemSpec id="a" load="99"/></database>',
+    );
+    const loaded = await loadRules(directory);
+    expect(loaded.world.fieldMonsters!.get("boss")).toEqual({ id: "boss", NPC: "0", army: "a;;b" });
+    expect(loaded.world.armies!.get("a")).toEqual({ id: "a", arm: "unit;+03" });
+    expect(loaded.arms.get("a")).toEqual({ id: "a", load: "99" });
+    await writeFile(join(directory, "army.xml"), '<database><ItemSpec id=""/></database>');
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
