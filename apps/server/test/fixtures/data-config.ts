@@ -71,15 +71,3 @@ export function dataConfigItems(overrides: Readonly<Record<string, Rule>> = {}):
     result.set(id, { ...result.get(id), id, ...rule });
   return result;
 }
-
-export function dataConfigXml(overrides: Readonly<Record<string, Rule>> = {}): string {
-  const escape = (value: string) =>
-    value.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");
-  const records = [...dataConfigItems(overrides).values()].map(
-    (rule) =>
-      `<ItemSpec ${Object.entries(rule)
-        .map(([key, value]) => `${key}="${escape(value)}"`)
-        .join(" ")}/>`,
-  );
-  return `<Group id="data_config">${records.join("")}</Group>`;
-}

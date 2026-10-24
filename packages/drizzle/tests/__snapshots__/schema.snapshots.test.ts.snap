@@ -14110,3 +14110,26 @@ select "owner_uid", "kingdom_id", "sequence", "pic_ver", "committed_at", "user_n
 update "opencok_chat"."chat_avatar_profile" set "owner_uid" = $1, "kingdom_id" = $2, "sequence" = $3, "pic_ver" = $4, "committed_at" = $5, "user_name" = $6, "platform" = $7 where "opencok_chat"."chat_avatar_profile"."owner_uid" = $8
 delete from "opencok_chat"."chat_avatar_profile" where "opencok_chat"."chat_avatar_profile"."owner_uid" = $1"
 `;
+
+exports[`opencok_kingdom.avatar_version_update: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["operationId","varchar(32)",true,null,null,null]
+column ["ownerUid","varchar(20)",true,null,null,null]
+column ["picVer","integer",true,null,null,null]
+column ["committedAt","bigint",true,null,null,null]
+column ["nextUpdateTime","bigint",false,null,null,null]
+column ["effects","text",true,null,null,null]
+column ["pendingEffects","integer",true,null,null,null]
+primary ["avatar_version_update_PRIMARY",["operationId"]]
+index ["avatar_version_update_pending",false,["pendingEffects","ownerUid","operationId"]]
+check ["avatar_version_update_id","\\"operationId\\" ~ '^[a-f0-9]{32}$'"]
+check ["avatar_version_update_owner","\\"ownerUid\\" ~ '^[0-9]{1,20}$'"]
+check ["avatar_version_update_version","\\"picVer\\" > 0 AND \\"picVer\\" % 1000000 BETWEEN 1 AND 999999"]
+check ["avatar_version_update_time","\\"committedAt\\" >= 0"]
+check ["avatar_version_update_effects_size","octet_length(\\"effects\\") <= 65535"]
+check ["avatar_version_update_pending_range","\\"pendingEffects\\" BETWEEN 0 AND 7"]
+insert into "opencok_kingdom"."avatar_version_update" ("operationId", "ownerUid", "picVer", "committedAt", "nextUpdateTime", "effects", "pendingEffects") values ($1, $2, $3, $4, $5, $6, $7)
+select "operationId", "ownerUid", "picVer", "committedAt", "nextUpdateTime", "effects", "pendingEffects" from "opencok_kingdom"."avatar_version_update" where "opencok_kingdom"."avatar_version_update"."operationId" = $1
+update "opencok_kingdom"."avatar_version_update" set "operationId" = $1, "ownerUid" = $2, "picVer" = $3, "committedAt" = $4, "nextUpdateTime" = $5, "effects" = $6, "pendingEffects" = $7 where "opencok_kingdom"."avatar_version_update"."operationId" = $8
+delete from "opencok_kingdom"."avatar_version_update" where "opencok_kingdom"."avatar_version_update"."operationId" = $1"
+`;
