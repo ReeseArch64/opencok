@@ -495,9 +495,13 @@ generals to building composition. Stronghold level/star addition wraps as Int; p
 level, prestige and office projections are consumed only when eligibility needs them.
 Prestige scans ordered catalog records, including duplicate IDs, independently of the
 civilization-effect feature gate. Feature checks use the saved owner version and the
-execution realm; blank owner versions skip version comparison. The ordinary modifier
-provider and endpoint integration remain required; callback-based units do not
-establish runtime parity.
+execution realm; blank owner versions skip version comparison. The resource-owner
+effect controller now decodes current saved abilities, reads execution-realm world
+effects and conditional emperor state, and connects ordinary load, general-only 133
+and new-general equipment modifiers. It preserves separate general and expedition
+failure boundaries; ordinary dependency failures propagate. Expedition context is
+still supplied explicitly, and endpoint integration remains required; callback-based
+units do not establish runtime parity.
 
 The point repository now accepts an internal `resourceEffects` request to read the
 saved march owner's ordinary effects, buildings and new-general records in the same
@@ -509,9 +513,11 @@ general status/equipment loading while retaining general and office rows. SQL
 sorting provides stable insertion inputs for fresh general/equipment maps, not a
 reconstruction of historical process-cache traversal or unordered legacy SQL reads.
 The owner-context projection supplies building traversal and official eligibility.
-Runtime residency, authoritative world/expedition effects and endpoint composition
-remain separate work. Invalid or unavailable requested state fails the point snapshot
-rather than fabricating effects.
+World/emperor cache ports accept an explicit destination realm while retaining local
+defaults for existing callers. Runtime wiring forwards that realm. These cache reads
+occur after the database snapshot and are not an atomic cross-store snapshot. Runtime
+residency, authoritative expedition context and endpoint composition remain separate
+work. Invalid or unavailable requested state fails rather than fabricating effects.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read

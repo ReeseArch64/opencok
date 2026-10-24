@@ -1,9 +1,34 @@
+import { javaDecimal } from "./java-integer.ts";
+import { mailBlank } from "./mail.ts";
+
 export interface RuleContext {
   kingdomId: number;
   version: string;
   now: number;
   testServer?: boolean;
   utcOffsetMinutes?: number;
+  versionPolicy?: "legacy-player";
+}
+
+export function legacyPlayerVersionAtLeast(actual: string, required: string | undefined): boolean {
+  if (mailBlank(required)) return false;
+  if (mailBlank(actual)) return true;
+  const parse = (raw: string): number[] => {
+    if (raw.length > 65535) throw new Error("Oversized player feature version");
+    const parts = raw.split(".").filter(Boolean);
+    if (parts.length > 4096) throw new Error("Too many player feature version parts");
+    return parts.map((part) => Number(javaDecimal(part, 32)));
+  };
+  const current = parse(actual);
+  const minimum = parse(required!);
+  for (let index = 0; index < 3; index++) {
+    const value = current[index];
+    const target = minimum[index];
+    if (value === undefined || target === undefined)
+      throw new Error("Missing player feature version part");
+    if (value !== target) return value > target;
+  }
+  return true;
 }
 
 export function versionAtLeast(actual: string, required: string): boolean {
@@ -74,7 +99,11 @@ export function ruleAvailable(
   if (
     !rule ||
     !Number.isSafeInteger(context.now) ||
-    !versionAtLeast(context.version, rule.version ?? "") ||
+    (context.versionPolicy === "legacy-player" &&
+      mailBlank(context.testServer ? rule.test : rule.online)) ||
+    !(context.versionPolicy === "legacy-player"
+      ? legacyPlayerVersionAtLeast(context.version, rule.version)
+      : versionAtLeast(context.version, rule.version ?? "")) ||
     !realmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
     return false;

@@ -164,6 +164,27 @@ test("resource general effects use the owner version and execution realm instead
   expect(f.resolve({ kingdomId: 3, testServer: true })).toBe(6);
 });
 
+test("owner context creation never evaluates an observer version getter", () => {
+  const f = fixture();
+  const context = {
+    kingdomId: 2,
+    now: 1000,
+    get version(): string {
+      throw new Error("Unrelated observer version");
+    },
+  };
+  expect(
+    resourceGeneralBuildingEffect(
+      f.snapshot,
+      f.rules,
+      context,
+      78,
+      () => 0,
+      () => 1000n,
+    ),
+  ).toBe(6);
+});
+
 test("blank saved owner versions bypass only the version comparison for official and refinement features", () => {
   const f = fixture();
   f.snapshot.newGenerals.generals[0]!.refinement = "1;r_3";
