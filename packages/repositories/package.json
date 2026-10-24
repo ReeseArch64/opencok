@@ -17,6 +17,7 @@
     "./account": "./src/account.ts",
     "./game": "./src/game.ts",
     "./push-preferences": "./src/push-preferences.ts",
+    "./profile-preferences": "./src/profile-preferences.ts",
     "./chat": "./src/chat.ts",
     "./players": "./src/players.ts",
     "./power": "./src/power.ts",

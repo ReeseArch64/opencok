@@ -6,7 +6,8 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when configured), `login.dataconfig`,
-`login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
+`login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`,
+`equip.show`, `medal.show`, `march.soldier.show`, `colorblind.set`, `equip.scroll`, `banner.set`, `speed.cd.open`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
@@ -225,6 +226,41 @@ notification delivery and other profile mutation commands remain separate work.
 Unit tests exercise protocol, controller and generated SQL behavior with synthetic
 state, including a simulated owner-lock schedule. They do not establish live database
 concurrency or native-client compatibility; neither was exercised in this phase.
+
+Seven profile preference commands persist mapped fields in the existing
+`user_mixed_info` row:
+
+| Command              | Input               | Stored field       | Response                                                          |
+| -------------------- | ------------------- | ------------------ | ----------------------------------------------------------------- |
+| `equip.show`         | Int `show`          | `showEquip`        | Int `show`                                                        |
+| `medal.show`         | Int `show`          | `showMedal`        | Int `show`                                                        |
+| `march.soldier.show` | Int `show`          | `marchSoldierShow` | Int `show`                                                        |
+| `colorblind.set`     | Int `set`           | `colorblind`       | Int `show`                                                        |
+| `equip.scroll`       | Int `setting`       | `scrollEquip`      | Bool `scrollEquip` for 0/1; ordinary success for other Int values |
+| `banner.set`         | Optional Int `set`  | `showBanner`       | Int `show` when the row exists; ordinary success otherwise        |
+| `speed.cd.open`      | Optional Int `open` | `clientSaveFlag`   | Ordinary success                                                  |
+
+All fields retain signed Int values except equipment scrolling, whose effective
+updates accept only 0/1. Other scroll integers skip the mixed-state read entirely.
+Banner/speed requests skip mixed-state reads when their parameter is absent; a missing
+profile also produces their empty-result acknowledgment. Missing mixed rows are tolerated
+only for those two commands, and their values are decoded only after locating the row.
+Required settings reject missing state. These handlers never create mixed-state rows.
+
+The repository locks/revalidates the owner and locks the selected mixed row in one
+read-committed transaction, then updates only the mapped column. Unchanged primitive
+values skip the update, except speed flags, which always write. Nullable integer fields
+compare SQL null as zero. Banner storage uses bigint but compares within the signed Int
+domain and writes an exact bigint; out-of-range restored values reject. The banner setter
+preserves its literal value; country-specific public display remains a separate read rule.
+Existing public-profile projections consume the three visibility fields and show them
+only when the value equals 1. No cache, notification or unsolicited push is emitted.
+
+Input and write failures reject without a success response; rollback preserves previous
+state. A lost commit acknowledgment can leave a value saved, and retries follow the
+unchanged-value or speed-write rule. Unit coverage uses fake SQL and a simulated owner-lock
+schedule, including different-field updates preserving both values. Live concurrency,
+client behavior, nickname changes and their costs remain outside this completed slice.
 
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
@@ -2915,7 +2951,7 @@ use these descriptions before the reconnect task component is complete.
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                              |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                               |
 | 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                        |
-| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update                                                                                                                                               | Nicknames, validation, applicable costs and remaining profile flags/preferences.                                                                                                        |
+| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update; seven persisted profile visibility/client flags                                                                                              | Nicknames, validation, applicable costs and remaining profile preference commands.                                                                                                      |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                            |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                       |
 

@@ -577,6 +577,15 @@ transaction failures still reject. The controller omits both switch fields after
 unavailable query, or only verification after a later account-gate/
 counter failure. Announcements remain outside this boundary. Empty device IDs retain
 empty Redis suffixes; null/missing IDs use literal `null`, with no blank-device bypass.
+Profile visibility and client flags use the existing `user_mixed_info` schema through
+a separate narrow repository. The controller maps seven commands to explicit fields
+and preserves eager versus optional/deferred Int decoding. The repository locks and
+revalidates the owner, locks the mixed row and updates only the selected field in one
+read-committed transaction. Missing optional state is not created. Unchanged primitive
+values skip writes except the speed flag; banner bigint storage retains Int protocol
+limits. Public-profile reads already consume the visibility columns. No cache delivery
+or notification is introduced. The server guide records command-specific no-op and
+failure behavior, with synthetic unit validation only.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab

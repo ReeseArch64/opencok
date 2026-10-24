@@ -1,4 +1,5 @@
 import { worldPointDetail } from "./world-point-detail.ts";
+import { profilePreference } from "./profile-preferences.ts";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
 import { worldFavorites } from "@opencok/dtos/world-favorites";
 import { worldSearch } from "@opencok/dtos/world-search";
@@ -189,6 +190,15 @@ export class Game {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "equip.show":
+      case "medal.show":
+      case "march.soldier.show":
+      case "colorblind.set":
+      case "equip.scroll":
+      case "banner.set":
+      case "speed.cd.open":
+        body = await profilePreference(this.db, uid, command, params, this.now());
+        break;
       case "pushSetting.get":
         body = await this.getPushPreferences(uid);
         break;
