@@ -1,6 +1,10 @@
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { readMailStatus } from "./mail.ts";
-import type { MailSaveQuery, MailStatusQuery } from "@opencok/contracts/mail";
+import type { MailReadQuery, MailSaveQuery, MailStatusQuery } from "@opencok/contracts/mail";
+import { mail_gift_log } from "@opencok/drizzle/schema/opencok_global/mail_gift_log";
+import { mail_gift_opening } from "@opencok/drizzle/schema/opencok_kingdom/mail_gift_opening";
+import { markMailRead } from "./mail-read.ts";
+import { relayMailGiftOpenings } from "./mail-gift-relay.ts";
 import { mail_update } from "@opencok/drizzle/schema/opencok_kingdom/mail_update";
 import { saveMail } from "./mail-save.ts";
 import { material_cost_ranking } from "@opencok/drizzle/schema/opencok_kingdom/material_cost_ranking";
@@ -87,11 +91,22 @@ export class Database implements GameStore, FriendshipMineStore {
       material_cost_ranking,
       mail,
       mail_update,
+      mail_gift_opening,
       switches,
       parse_info,
     ])
       await this.kingdom.db.select().from(table).limit(0);
     await this.databases.global.db.select().from(account_new).limit(0);
+    await this.databases.global.db
+      .select({
+        uid: mail_gift_log.uid,
+        sendTime: mail_gift_log.sendTime,
+        toUid: mail_gift_log.toUid,
+        isOpened: mail_gift_log.isOpened,
+        receiveTime: mail_gift_log.receiveTime,
+      })
+      .from(mail_gift_log)
+      .limit(0);
     await checkPlayerSummaryStore(this.kingdom.db);
     await checkPowerStore(this.kingdom.db);
     await checkPublicProfileStore(this.kingdom.db);
@@ -192,6 +207,12 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   mailSave(uid: string, query: MailSaveQuery) {
     return saveMail(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
+  mailRead(uid: string, query: MailReadQuery) {
+    return markMailRead(this.kingdom.db, this.config.kingdomId, uid, query);
+  }
+  relayMailGifts() {
+    return relayMailGiftOpenings(this.kingdom.db, this.databases.global.db);
   }
   allianceRanking(uid: string, query: AllianceRankingQuery) {
     return readAllianceRanking(this.kingdom.db, uid, query);

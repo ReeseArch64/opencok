@@ -8,6 +8,7 @@ The runtime requires Bun 1.4.2 and the workspace layout.
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
 `login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`,
+`mail.read.status`, `mail.read.status.betch`,
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
@@ -750,9 +751,62 @@ order. No new library or external service is required.
 
 Synthetic unit tests cover wire types, result strings, ownership predicates, profile
 locks, flag conditions, repeat requests and rollback on update/marker/commit failure.
-They do not prove PostgreSQL concurrency or native-client behavior. Read marking
-(including gift-opening logs), list/content reads, deletion, chat-mail save variants
-and synchronization remain pending; reward redemption is outside this wave.
+They do not prove PostgreSQL concurrency or native-client behavior. List/content reads,
+deletion, chat-mail save variants and synchronization remain pending; reward redemption
+is outside this wave.
+
+## Mailbox read status and gift opening
+
+`mail.read.status` and the legacy-spelled `mail.read.status.betch`, tracked in
+[issue #66](https://github.com/ReeseArch64/opencok/issues/66), mark owned messages as
+read. The individual command requires string `uid` and integer `type`; the type value
+does not filter mail. Only status 0 or SQL null transitions to 1. Batch requests use
+comma-separated string `uids` and assign status 1 to every matched owned message,
+including already-read or nonstandard statuses. They share the saving commands' ID
+and input bounds. Empty batches, absent mail and unchanged individual requests return
+the common `success: true` acknowledgment with correlation fields. Reading contents
+is a separate command, and these mutations never change saved flags or redeem rewards.
+
+Both commands lock and authorize the local owner profile, then commit recipient-scoped
+status changes and durable `mail_update` markers together. Individual transitions of
+gift type 28 also insert an immutable `mail_gift_opening` record, keyed by mail ID and
+the original signed-64-bit creation time. The record contains only the recipient and
+opening time. Repeated events cannot replace its original values. Batch marking never
+produces gift-opening events, matching the reference; individually marking a gift
+already read by a batch therefore does not create an event either.
+
+The additive kingdom migration `0004_mail_gift_openings.sql` supplies this outbox and
+its oldest-first index. Apply pending migrations to every kingdom before running this
+version. Startup verifies the outbox and required global `mail_gift_log` columns.
+The migration was generated and structurally checked without execution; all existing
+table definitions and rows are preserved. No new dependency is required.
+
+After database readiness, a scoped relay processes up to 100 pending records per pass,
+using `FOR UPDATE SKIP LOCKED` in a realm transaction. A separate global transaction
+sets `isOpened = 1` and `receiveTime` to the event's opening time, matching mail ID,
+send time and recipient. It never inserts a missing global log or changes reward/thanks
+flags. Missing or foreign logs are no-ops and their pending records are acknowledged,
+matching the reference's missing-log behavior while tightening ownership checks.
+Only after global commit does the relay remove the locked realm records. There is
+no cross-database atomicity: failure or a crash before realm acknowledgment leaves
+records available for replay, which writes the same values again.
+
+Passes run immediately on startup and then five seconds after each completion or
+failure. One process never overlaps passes; other processes skip locked records.
+The existing database query timeouts bound individual operations. Failures emit only
+the `mail_gift_relay_failed` event and kingdom number, retaining pending entries for
+retry. Shutdown cancels the next timer and awaits the active pass before the database
+is closed. Gift-log delivery is asynchronous and does not gate a mailbox acknowledgment;
+this deliberately replaces the reference's synchronous best-effort update with durable
+retry. Pending records survive mail deletion, which is why no mail foreign key is added.
+
+Synthetic units cover individual/batch differences, gift/null/invalid statuses,
+owner/realm checks, atomic rollback, full-width timestamps, global commit ambiguity,
+acknowledgment failures, missing logs, repeat delivery, bounded scheduling and shutdown.
+They use fake SQL clients and an injected scheduler, without sockets, real services,
+applied migrations, integration/E2E or ADB. Real PostgreSQL lock/concurrency behavior
+and client rendering remain unverified. Content/list reads, deletion, chat-mail variants
+and synchronization readers/marker cleanup still need migration.
 
 ## Gameplay migration: topics 1–8
 
@@ -807,7 +861,7 @@ use these descriptions before the reconnect task component is complete.
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests      | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                    | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                       |
-| 4. Basic mailbox                          | Authenticated category counts; save/cancel and batch save with atomic persisted flags/update markers and synthetic units                                                                        | List/content, read marking, deletion, chat-mail variants and synchronization readers/cleanup; redemption is outside this wave.                   |
+| 4. Basic mailbox                          | Category counts; saving and read marking with atomic markers; recoverable gift-opening records; synthetic unit coverage                                                                         | List/content, deletion, chat-mail variants and synchronization readers/cleanup; redemption is outside this wave.                                 |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                   | Point details, player search and favorites, including authorization for writes.                                                                  |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                           | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |
 | 7. Avatar integration                     | Standalone files service                                                                                                                                                                        | Realm grants, confirmation and profile updates.                                                                                                  |

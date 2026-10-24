@@ -22,7 +22,9 @@
     "./ranking": "./src/ranking.ts",
     "./alliance-ranking": "./src/alliance-ranking.ts",
     "./mail": "./src/mail.ts",
-    "./mail-save": "./src/mail-save.ts"
+    "./mail-save": "./src/mail-save.ts",
+    "./mail-read": "./src/mail-read.ts",
+    "./mail-gift-relay": "./src/mail-gift-relay.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",
