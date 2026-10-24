@@ -6,6 +6,19 @@ export interface WorldPointDetailQuery {
   kingdomId: number;
   now: number;
   cityExtras?: boolean;
+  resourceEffects?: boolean;
+}
+
+export interface WorldResourceOwnerSnapshot {
+  effects: PlayerEffectSnapshot;
+  buildings: readonly Row[];
+  newGenerals: {
+    moved: boolean;
+    generals: readonly Row[];
+    statuses: readonly Row[];
+    equipment: readonly Row[];
+    offices: readonly Row[];
+  };
 }
 
 export interface WorldPointOwnerSnapshot {
@@ -31,7 +44,7 @@ export interface WorldPointDetailSnapshot {
   };
   barbarian?: { row: Row | undefined };
   neutralResource?: { march: Row | undefined };
-  resource?: { march: Row | undefined };
+  resource?: { march: Row | undefined; owner?: WorldResourceOwnerSnapshot };
 }
 
 export type WorldExplorationSelector = (point: Row, marches: readonly Row[]) => string | undefined;
