@@ -896,14 +896,15 @@ conversations and transaction failures. Real PostgreSQL execution, concurrency a
 native-client behavior remain unverified. `chatMail.read`, conversation deletion,
 content edge cases and synchronization flows remain pending.
 
-## Conversation read planning
+## Conversation read persistence
 
 [Issue #73](https://github.com/ReeseArch64/opencok/issues/73) tracks `chatMail.read`.
 Its complete wire parser and ordered effect planner now have synthetic unit coverage.
-The command still returns unsupported: enabling it requires owned mailbox persistence,
-durable chat intent delivery and a maintained private-conversation read-state consumer.
-The current chat room history implementation does not supply that consumer. This pure
-foundation performs no I/O and changes no state.
+An independent repository adapter now persists owned mailbox assignments and chat
+intents atomically. The command still returns unsupported: enabling it requires durable
+chat intent delivery and a maintained private-conversation read-state consumer. The
+current chat room history implementation does not supply that consumer. The parser and
+planner remain pure; the adapter is not connected to command dispatch.
 
 | Selection                                   | Mailbox assignment                                                   | Chat intent                                                              |
 | ------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
@@ -941,14 +942,35 @@ do not count as operations. The whole request is validated before any plan retur
 preventing the reference's earlier partial writes before a malformed trailing token.
 No mailbox synchronization marker, reward, saved flag, group or auxiliary cleanup
 belongs to this plan.
-The future adapter must retain SQL status-exactness: personal/moderator/type updates
-do not reinterpret null status as zero, while bottle assignments include null status.
+The adapter retains SQL status-exactness: personal/moderator/type updates do not
+reinterpret null status as zero, while bottle assignments include null status. A present
+null sender uses SQL equality with null, matching no rows; its chat event still persists.
+
+Persistence locks the owner profile in a kingdom-local read-committed transaction and
+checks recipient, realm and ban state before writing. It copies and validates the plan
+before asynchronous work. Mail assignments compile to a single owner-scoped union
+update, with no body reads or truncation of affected messages. The same transaction
+inserts immutable `mail_chat_read_intent` records even when no mail row changes. Each
+invocation has a fresh UUID; original effect positions distinguish its chat events and
+retain their order. These identities support future delivery retries, not deduplication
+of separate command invocations. Repeating a request can enqueue another event.
+
+Owner-serialized admission allows at most 1,000 pending chat intents per player; an
+overflow rejects before mail updates. Type-only and empty plans need no backlog query.
+Chat intent insertion failure rolls back mailbox changes. The additive kingdom migration
+`0005_mail_chat_read_intents.sql` has been generated, not applied. Preserve pending rows
+across application rollback. Future delivery must define peer interpretation, ordering,
+idempotency and acknowledgment before enabling this command. Public chat history cannot
+substitute for private conversation read state.
 
 Tests cover precedence, ignored/invalid wire fields, null and empty sender behavior,
 integer boundaries, raw-list triggers and limits. Frozen synthetic vectors generated
 with an isolated Java 8 integer probe verify 410 parsing cases; maintained tests need
-no Java runtime, private source or server process. Persistence, acknowledgment,
-cross-database recovery and chat read-state integration remain pending.
+no Java runtime, private source or server process. SQL driver fakes verify exact
+predicates, owner/realm isolation, large selections, bounded backlog, durable intent
+identity, captured plans and rollback. These units do not prove real database concurrency
+or resolve commit acknowledgment loss. Delivery, cross-database recovery and chat
+read-state integration remain pending.
 
 ## Mailbox content reads
 
