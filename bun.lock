@@ -18,6 +18,7 @@
       "dependencies": {
         "@opencok/api": "workspace:*",
         "@opencok/connection": "workspace:*",
+        "@opencok/contracts": "workspace:*",
         "@opencok/core": "workspace:*",
         "@opencok/env": "workspace:*",
         "@opencok/repositories": "workspace:*",
@@ -25,11 +26,13 @@
         "effect": "catalog:",
       },
       "devDependencies": {
+        "@aws-sdk/client-s3": "^3.0.0",
         "@opencok/config": "workspace:*",
-        "@opencok/contracts": "workspace:*",
         "@opencok/controllers": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/identity": "workspace:*",
         "@types/bun": "catalog:",
+        "sharp": "^0.34.0",
         "typescript": "catalog:",
       },
     },
@@ -52,26 +55,6 @@
         "drizzle-orm": "0.45.4",
         "typescript": "catalog:",
         "ws": "8.22.0",
-      },
-    },
-    "apps/files": {
-      "name": "@opencok/files",
-      "dependencies": {
-        "@opencok/api": "workspace:*",
-        "@opencok/contracts": "workspace:*",
-        "@opencok/core": "workspace:*",
-        "@opencok/env": "workspace:*",
-        "@opencok/storage": "workspace:*",
-        "effect": "catalog:",
-      },
-      "devDependencies": {
-        "@aws-sdk/client-s3": "^3.0.0",
-        "@opencok/config": "workspace:*",
-        "@opencok/errors": "workspace:*",
-        "@opencok/identity": "workspace:*",
-        "@types/bun": "catalog:",
-        "sharp": "^0.34.0",
-        "typescript": "catalog:",
       },
     },
     "apps/server": {
@@ -972,8 +955,6 @@
     "@opencok/errors": ["@opencok/errors@workspace:packages/errors"],
 
     "@opencok/events": ["@opencok/events@workspace:packages/events"],
-
-    "@opencok/files": ["@opencok/files@workspace:apps/files"],
 
     "@opencok/generators": ["@opencok/generators@workspace:packages/generators"],
 

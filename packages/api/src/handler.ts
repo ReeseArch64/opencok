@@ -1,3 +1,5 @@
+import { IMAGE_PATH, UPLOAD_PATH } from "@opencok/contracts/files";
+import { HttpError } from "@opencok/errors/http";
 import { logContext, logEvent, logHttpRequest } from "@opencok/core/logging";
 import {
   chatDiscoveryPaths,
@@ -26,9 +28,18 @@ export function createHandler(
   directory: Pick<ServerDirectory, "read">,
   redis: { health(): Promise<unknown> },
   chatDiscovery?: ChatDiscovery,
+  files?: (request: Request) => Promise<Response>,
 ) {
   const discovery = new Discovery(accounts, directory);
   async function route(request: Request): Promise<Response> {
+    const rawPath = new URL(request.url).pathname;
+    if (
+      files &&
+      (rawPath === UPLOAD_PATH ||
+        IMAGE_PATH.test(rawPath) ||
+        /^\/_internal\/avatars\/[0-9]{1,20}\/[1-9][0-9]{0,5}$/.test(rawPath))
+    )
+      return files(request);
     const path = new URL(request.url).pathname.replace(/\/{2,}/g, "/");
     if (
       chatDiscovery &&
@@ -73,7 +84,10 @@ export function createHandler(
       response = await route(request);
     } catch (error) {
       failure = error instanceof DependencyError ? error.dependency : "request_failed";
-      response = text("", error instanceof DependencyError ? 503 : 500);
+      response = text(
+        "",
+        error instanceof HttpError ? error.status : error instanceof DependencyError ? 503 : 500,
+      );
     }
     if (requestId) response.headers.set("X-Request-ID", String(requestId));
     if (failure) logEvent("request_failed", { reason: failure, status: response.status }, "error");

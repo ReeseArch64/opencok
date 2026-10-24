@@ -153,8 +153,8 @@ validation belong in [the architecture](.github/ARCHITECTURE.md#27-transition-cl
    player locks, preserve data across restarts, and measure representative
    login and gameplay latency.
 4. **Complete the media path.** Fix gateway routing and limits, validate and
-   persist uploads, support the required image formats, and separate media
-   processing into a focused service when the compatibility contract is known.
+   persist uploads and support the required image formats within the shared API,
+   with bounded processing that preserves discovery availability.
 5. **Make operations understandable.** Document configuration, version
    matrices, service dependencies, backups, migrations, troubleshooting, and
    deployment expectations.
