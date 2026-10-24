@@ -56,7 +56,7 @@ function end(text: string, index: number): boolean {
   return unit === 10 ? text.charCodeAt(index - 1) !== 13 : [13, 133, 0x2028, 0x2029].includes(unit);
 }
 
-function expanded(text: string, entry: string): boolean {
+function expandedPattern(entry: string): { branches: number[][]; supplementary: boolean } {
   const branches: number[][] = [[]];
   let supplementary = false;
   for (let index = 0; index < entry.length; index++) {
@@ -66,6 +66,11 @@ function expanded(text: string, entry: string): boolean {
     else branches.at(-1)!.push(unit === 94 ? -2 : unit === 36 ? -3 : unit);
     branches.at(-1)!.push(-1);
   }
+  return { branches, supplementary };
+}
+
+function expanded(text: string, entry: string): boolean {
+  const { branches, supplementary } = expandedPattern(entry);
   const initial = new Uint8Array(text.length + 1);
   for (
     let index = 0;
@@ -97,6 +102,87 @@ function expanded(text: string, entry: string): boolean {
     if (positions.some(Boolean)) return true;
   }
   return false;
+}
+
+function replaceWord(text: string, entry: string): string {
+  const name = text.replace(/[A-Z]/g, (character) => character.toLowerCase());
+  const target = entry.toLowerCase();
+  const parts: string[] = [];
+  let copied = 0;
+  for (let start = 0; start <= text.length;) {
+    const found = name.indexOf(target, start);
+    if (found < 0) break;
+    const last = found + target.length;
+    if (boundary(text, found) && boundary(text, last)) {
+      parts.push(text.slice(copied, found), "**");
+      copied = last;
+      start = Math.max(last, found + 1);
+    } else start = found + 1;
+  }
+  parts.push(text.slice(copied));
+  return parts.join("");
+}
+
+function replaceExpanded(text: string, entry: string): string {
+  const { branches, supplementary } = expandedPattern(entry);
+  const fold = (unit: number) => (unit >= 65 && unit <= 90 ? unit + 32 : unit);
+  const ends = new Int32Array(text.length + 1).fill(-1);
+  for (const branch of branches) {
+    let next = Int32Array.from({ length: text.length + 1 }, (_, index) => index);
+    for (let tokenIndex = branch.length - 1; tokenIndex >= 0; tokenIndex--) {
+      const token = branch[tokenIndex]!;
+      const current = new Int32Array(text.length + 1).fill(-1);
+      for (let index = text.length; index >= 0; index--) {
+        if (token === -1) {
+          current[index] = next[index]!;
+          if (index < text.length && space(text.charCodeAt(index)))
+            current[index] = Math.max(current[index]!, current[index + 1]!);
+        } else if ((token === -2 && index === 0) || (token === -3 && end(text, index)))
+          current[index] = next[index]!;
+        else if (
+          token >= 0 &&
+          index < text.length &&
+          fold(text.codePointAt(index)!) === fold(token)
+        )
+          current[index] = next[index + 1]!;
+      }
+      next = current;
+    }
+    for (let index = 0; index <= text.length; index++)
+      if (ends[index] === -1) ends[index] = next[index]!;
+  }
+  const parts: string[] = [];
+  let copied = 0;
+  for (let index = 0; index <= text.length;) {
+    const last = ends[index]!;
+    if (last >= 0) {
+      parts.push(text.slice(copied, index), "**");
+      copied = last;
+      index = Math.max(last, index + 1);
+    } else index += supplementary && text.codePointAt(index)! > 65535 ? 2 : 1;
+  }
+  parts.push(text.slice(copied));
+  return parts.join("");
+}
+
+export function filterNicknameBadWords(
+  text: string,
+  entries: readonly string[],
+  locked = false,
+): string {
+  if (locked) return text;
+  let filtered = text;
+  try {
+    if (typeof text !== "string" || text.length > 65535)
+      throw new Error("Invalid nickname filter input");
+    for (const entry of entries) {
+      if (typeof entry !== "string") throw new Error("Invalid nickname filter entry");
+      filtered = !/[^A-Za-z0-9_]/.test(entry)
+        ? replaceWord(filtered, entry)
+        : replaceExpanded(filtered, entry);
+    }
+  } catch {}
+  return filtered;
 }
 
 export function containsNicknameBadWords(

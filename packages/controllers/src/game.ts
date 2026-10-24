@@ -1,6 +1,6 @@
 import { worldPointDetail } from "./world-point-detail.ts";
 import { profilePreference } from "./profile-preferences.ts";
-import { celebrityDescription } from "./celebrity.ts";
+import { celebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
 import { checkNickname } from "@opencok/rules/nickname";
 import { favoriteInteger, favoriteName, favoriteServer } from "@opencok/rules/world-favorites";
 import { worldFavorites } from "@opencok/dtos/world-favorites";
@@ -194,6 +194,16 @@ export class Game {
     switch (command) {
       case "celebrity.desc.get":
         body = await celebrityDescription(this.db, uid, this.config.kingdomId, params, this.now());
+        break;
+      case "celebrity.desc.save":
+        body = await saveCelebrityDescription(
+          this.db,
+          this.services,
+          uid,
+          this.config.kingdomId,
+          params,
+          this.now(),
+        );
         break;
       case "user.check.nickName":
         body = await this.nicknameCheck(uid, params);

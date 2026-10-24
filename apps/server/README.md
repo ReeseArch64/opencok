@@ -473,7 +473,30 @@ Eight synthetic unit cases exercise the actual controller and Drizzle adapter to
 including local/remote routing, lazy decoding, caller authorization, target gating,
 collation aliases, strict binary decoding and failures. They use fake query clients only.
 The focused tests pass; broad regression execution is deferred under the user's current
-parallel-work instruction. `celebrity.desc.save` and device/AVD behavior remain pending.
+parallel-work instruction. Device/AVD behavior remains pending.
+
+`celebrity.desc.save` now saves the authenticated celebrity's description through the
+actual loaded bad-word filter. Profiles whose `gmFlag` is not 11 acknowledge before
+reading the description or reaching the filter. Eligible requests lock/revalidate their
+owner, select the existing celebrity row using legacy UID equality, then decode the
+required String. The filter performs sequential Java-style replacement with two asterisks,
+including Unicode word boundaries with ASCII-only case folding, generated alternatives,
+anchors and greedy ASCII whitespace. While the shared word list is loading, it returns
+the original text; a later filtering error retains earlier replacements.
+
+Saving updates only the existing row's description or inserts the Java-trimmed owner UID.
+It uses the existing table and no upsert. Unrelated rows remain unchanged, and same-owner
+writes serialize. Blank or malformed UTF-16 text becomes a null blob; valid text retains
+the Java UTF-8 encoder's backing-array padding. The database blob limit remains 65,535
+bytes. Success uses the ordinary correlated acknowledgment with no notification.
+
+Replacement vectors and save tests were written before the user paused test generation
+and execution. The replacement primitive matched 4,071 synthetic Java 8 standard-library
+vectors before that pause. A preliminary save run found three incorrect acknowledgment
+expectations, which were corrected to the framework's `success: true` response. That final
+save suite has not been rerun, and no broad regression or service/database execution is
+claimed. The generated replacement grammar does not implement arbitrary reserved-name
+regex matching, so this command does not complete nickname mutation.
 
 Reserved-name configuration now participates in the word-filter reload. After the
 adjacent bad-word file has been read and appended, the server reads the global Redis
