@@ -15,6 +15,7 @@ export class GameError extends Error {
       | "account_rule"
       | "player_summary"
       | "public_profile"
+      | "reconnect"
       | "power_rule"
       | "power_effect"
       | "power_state"

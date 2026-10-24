@@ -540,6 +540,16 @@ the table records gaps rather than treating package scaffolding as completed beh
 The current work is restricted to server implementation and unit tests. Do not run
 ADB, native-client validation, integration or end-to-end tests for this phase.
 
+The reconnect foundation tracked in [issue #58](https://github.com/ReeseArch64/opencok/issues/58)
+reads an owner's balance and army fields in one read-only repeatable-read transaction.
+Its serializers preserve seven currency longs, signed 64-bit overflow in the combined
+gold balance, and conditional training fields without loading static army catalogs.
+Army rows have deterministic ID ordering and oversized collections reject instead of
+truncating. Synthetic adapter tests use an in-memory SQL client; they do not connect
+to PostgreSQL. This foundation is not yet exposed as `user.lv`: actual marches,
+full own-general state, settled resources, queues, task transitions and friendship-mine
+state still need to be composed before enabling the reconnect handler.
+
 | Topic                                     | Implemented evidence                                                                                                                                                                       | Remaining work                                                                                                                                   |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |

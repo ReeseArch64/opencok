@@ -16,7 +16,8 @@
     "./chat": "./src/chat.ts",
     "./players": "./src/players.ts",
     "./power": "./src/power.ts",
-    "./profile": "./src/profile.ts"
+    "./profile": "./src/profile.ts",
+    "./reconnect": "./src/reconnect.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",
