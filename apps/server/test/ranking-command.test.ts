@@ -42,6 +42,7 @@ function fixture() {
     configuration: unused,
     city: unused,
     world: unused,
+    allianceRanking: unused,
     playerRanking: async (uid, query) => {
       calls.push({ uid, query });
       return state;

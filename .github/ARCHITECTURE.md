@@ -1260,6 +1260,11 @@ the DTO layer exposes only public ranking fields. These commands read persisted
 scores without introducing score writers or Redis ranking state. Fresh snapshots
 and deterministic final UID ordering replace the legacy cache lifecycle and
 unspecified ties; the server guide records collation and verification limitations.
+Alliance power/kill queries follow the same snapshot boundary, aggregating persisted
+member statistics and, for candidate power, alliance-science power. Batched science
+and video reads supply public presentation. The rules preserve distinct candidate
+windows and member-only fallback positions; these reads grant no alliance write
+authority and introduce no cache or schema dependency.
 
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch

@@ -53,6 +53,7 @@ function fixture() {
   const db: GameStore = {
     profile: unused,
     accounts: unused,
+    allianceRanking: unused,
     playerRanking: unused,
     publicProfile: unused,
     playerSummaries: unused,

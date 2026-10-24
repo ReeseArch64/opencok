@@ -24,6 +24,7 @@ function game(
       expect(uid).toBe("observer");
       return profile;
     },
+    allianceRanking: unused,
     playerRanking: unused,
     publicProfile: unused,
     playerSummaries: async (uids, allServers) => {
