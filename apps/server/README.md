@@ -312,6 +312,24 @@ checksum over all 1,114,112 Unicode code points: 107,270 letter/digit points and
 nonspacing marks, represented by 735 intervals. Normal unit tests use TypeScript,
 injected reads and temporary synthetic files; they do not execute private game classes.
 
+Global name comparison now has a pure `rules/mysql-unicode` equality-key primitive.
+The reference global DDL uses `utf8_unicode_ci` for both `usermapping` and `account_new`.
+The primitive preserves UCA 4 primary weights, expansions such as sharp-s to `ss`,
+primary-ignorable characters and trailing space-weight padding. Case/accent equivalence
+is character-specific: `Æ` differs from `AE`, Cyrillic short-I differs from I, and newer
+uppercase sharp-s does not acquire modern case equivalence. Hangul syllables are not
+decomposed; contractions and normalization are not introduced. The historical U+FDFA
+implicit-weight exception is retained. Surrogates and supplementary characters are
+outside the legacy three-byte UTF-8 domain and are rejected; pure text remains bounded
+to 65,535 code units. NUL is a primary ignorable in this primitive; transport and SQL
+representability remain separate concerns for the adapter.
+
+The 12,072 explicit characters are stored in 3,963 runs derived from public Unicode
+data. Six synthetic units include an exhaustive checksum for all 63,488 valid BMP
+characters against public MySQL weight tables, plus padding, expansion and historical
+exception cases. [Data provenance and license](../../packages/rules/UNICODE-NOTICE.md)
+are checked in. No database, Java classes or client are executed by these tests.
+
 `user.check.nickName` remains unsupported until the global name-mapping/account query
 and runtime providers are composed. The global mapping lookup is distinct from a local
 profile-name search. The loader/matcher has unit composition with the check rules but

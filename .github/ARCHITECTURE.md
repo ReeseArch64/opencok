@@ -597,6 +597,14 @@ against independent standard-library fixtures. Providers are explicit; the nickn
 command remains disabled until the global name-mapping/account adapter and runtime resource
 composition are connected. The source mount is also pending. This foundation neither
 reserves names nor changes profiles, balances or items.
+Global nickname comparison now has a separate pure `utf8_unicode_ci` equality-key
+primitive. It preserves the reference DDL's UCA 4 primary weights and PAD SPACE
+semantics, with versioned Unicode data and its license in the rules package. It
+accepts only the legacy three-byte UTF-8 character domain and performs no SQL or
+modern Unicode normalization. Exhaustive valid-BMP evidence comes from public MySQL
+weight data, without starting a database. The global mapping/account adapter must
+apply these semantics to both name matching and account UID matching before the
+nickname command can be enabled; PostgreSQL text equality is not equivalent.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
