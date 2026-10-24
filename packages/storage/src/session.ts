@@ -1,3 +1,4 @@
+import { publishPlayerUpdate } from "./player-update.ts";
 import { loadExpeditionRanking } from "./expedition-ranking.ts";
 import { SESSION_TTL_SECONDS } from "@opencok/constants/connection";
 import { RedisClient } from "bun";
@@ -63,6 +64,14 @@ export class Cache {
     )
       throw new DependencyError("redis");
     return BigInt(value);
+  }
+  publishPlayerUpdateTime(uid: string, updatedAt: string): Promise<void> {
+    return publishPlayerUpdate(
+      (command, ...args) => this.command(command, ...args),
+      this.config.kingdomId,
+      uid,
+      updatedAt,
+    );
   }
   async playerUpdateTimes(kingdomId: number, uids: string[]): Promise<ReadonlyMap<string, string>> {
     if (

@@ -12,6 +12,7 @@
   },
   "type": "module",
   "exports": {
+    "./player-update": "./src/player-update.ts",
     "./coordination": "./src/coordination.ts",
     "./discovery-redis": "./src/discovery-redis.ts",
     "./server-directory": "./src/server-directory.ts",

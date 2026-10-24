@@ -35,6 +35,17 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   for (const key of spec.foreignKeys) for (const name of key.columns) row[name] = 9007199254740993n;
   if (spec.indexes.some((key) => key.name === "mail_chat_read_intent_PRIMARY"))
     row.chatTypes = variant === 1 ? "1,20" : "2";
+  if (spec.indexes.some((key) => key.name === "avatar_completion_PRIMARY")) {
+    row.ownerUid = String(variant);
+    row.hash = String(variant).repeat(64);
+    row.picVer = variant;
+    row.effects = "{}";
+  }
+  if (spec.indexes.some((key) => key.name === "chat_avatar_profile_PRIMARY")) {
+    row.owner_uid = String(variant);
+    row.pic_ver = variant;
+    row.committed_at = BigInt(variant);
+  }
   return row;
 }
 

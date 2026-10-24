@@ -19,11 +19,19 @@ export class GameError extends Error {
       | "reward_preview"
       | "ranking"
       | "mail"
+      | "avatar_rule"
       | "power_rule"
       | "power_effect"
       | "power_state"
       | "queue_kind"
-      | "world_state",
+      | "world_state"
+      | "world_favorite_catalog"
+      | "world_search_size"
+      | "player_search"
+      | "world_resource_detail"
+      | "world_point_detail"
+      | "world_monster_detail"
+      | "world_favorite_size",
   ) {
     super(code);
   }

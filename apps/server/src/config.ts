@@ -9,6 +9,12 @@ export type Config = ServerConfig;
 export const config = Effect.gen(function* () {
   const settings = yield* readEnvironment(serverSchema);
   return {
+    avatarChat: settings.GAME_AVATAR_CHAT_URL
+      ? { url: settings.GAME_AVATAR_CHAT_URL, signingSecret: settings.CHAT_SIGNING_SECRET! }
+      : undefined,
+    avatarFiles: settings.GAME_FILES_URL
+      ? { origin: settings.GAME_FILES_URL, keyFile: settings.FILES_SIGNING_KEY_FILE! }
+      : undefined,
     chatSession: settings.GAME_CHAT_SESSION_URL
       ? {
           url: settings.GAME_CHAT_SESSION_URL,
@@ -17,6 +23,7 @@ export const config = Effect.gen(function* () {
       : undefined,
     host: settings.GAME_HOST,
     mailTranslationEnabled: settings.GAME_MAIL_TRANSLATION,
+    crossSearchEnabled: settings.GAME_CROSS_SEARCH,
     port: settings.GAME_PORT,
     healthPort: settings.GAME_HEALTH_PORT,
     kingdomId: settings.KINGDOM_ID,
