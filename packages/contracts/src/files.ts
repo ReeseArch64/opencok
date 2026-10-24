@@ -100,3 +100,26 @@ export interface AvatarMailDelivery {
   profile: Row | undefined;
   mail?: AvatarSystemMail;
 }
+
+export interface AvatarProfileUpdate {
+  owner: string;
+  kingdomId: number;
+  sequence: number;
+  picVer: number;
+  committedAt: bigint;
+  updatedAt: string;
+  userName: string;
+  platform: string;
+}
+export type AvatarProfileProjector = (
+  entry: AvatarCompletionRecord,
+  kingdomId: number,
+) => AvatarProfileUpdate;
+export type AvatarProfilePublisher = (
+  update: AvatarProfileUpdate,
+  signal: AbortSignal,
+) => Promise<void>;
+export interface AvatarProfileDelivery {
+  profile: Row | undefined;
+  published: boolean;
+}

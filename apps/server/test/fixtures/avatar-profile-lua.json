@@ -1,0 +1,1084 @@
+{
+  "scriptSha256": "c1a7980ccbc3722cc2f53a094efe6993fdf97d4b3f7ac5605c45eca05f3f6cc2",
+  "engine": "Lua 5.1; synthetic GET/SET functions; no Redis process",
+  "cases": [
+    {
+      "before": null,
+      "incoming": "0",
+      "result": 1,
+      "after": "0",
+      "writes": 1
+    },
+    {
+      "before": null,
+      "incoming": "1",
+      "result": 1,
+      "after": "1",
+      "writes": 1
+    },
+    {
+      "before": null,
+      "incoming": "10",
+      "result": 1,
+      "after": "10",
+      "writes": 1
+    },
+    {
+      "before": null,
+      "incoming": "1792756800",
+      "result": 1,
+      "after": "1792756800",
+      "writes": 1
+    },
+    {
+      "before": null,
+      "incoming": "1792756801",
+      "result": 1,
+      "after": "1792756801",
+      "writes": 1
+    },
+    {
+      "before": null,
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": null,
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "",
+      "incoming": "0",
+      "result": 1,
+      "after": "0",
+      "writes": 1
+    },
+    {
+      "before": "",
+      "incoming": "1",
+      "result": 1,
+      "after": "1",
+      "writes": 1
+    },
+    {
+      "before": "",
+      "incoming": "10",
+      "result": 1,
+      "after": "10",
+      "writes": 1
+    },
+    {
+      "before": "",
+      "incoming": "1792756800",
+      "result": 1,
+      "after": "1792756800",
+      "writes": 1
+    },
+    {
+      "before": "",
+      "incoming": "1792756801",
+      "result": 1,
+      "after": "1792756801",
+      "writes": 1
+    },
+    {
+      "before": "",
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": "",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "0",
+      "incoming": "0",
+      "result": 0,
+      "after": "0",
+      "writes": 0
+    },
+    {
+      "before": "0",
+      "incoming": "1",
+      "result": 1,
+      "after": "1",
+      "writes": 1
+    },
+    {
+      "before": "0",
+      "incoming": "10",
+      "result": 1,
+      "after": "10",
+      "writes": 1
+    },
+    {
+      "before": "0",
+      "incoming": "1792756800",
+      "result": 1,
+      "after": "1792756800",
+      "writes": 1
+    },
+    {
+      "before": "0",
+      "incoming": "1792756801",
+      "result": 1,
+      "after": "1792756801",
+      "writes": 1
+    },
+    {
+      "before": "0",
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": "0",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "1",
+      "incoming": "0",
+      "result": 0,
+      "after": "1",
+      "writes": 0
+    },
+    {
+      "before": "1",
+      "incoming": "1",
+      "result": 0,
+      "after": "1",
+      "writes": 0
+    },
+    {
+      "before": "1",
+      "incoming": "10",
+      "result": 1,
+      "after": "10",
+      "writes": 1
+    },
+    {
+      "before": "1",
+      "incoming": "1792756800",
+      "result": 1,
+      "after": "1792756800",
+      "writes": 1
+    },
+    {
+      "before": "1",
+      "incoming": "1792756801",
+      "result": 1,
+      "after": "1792756801",
+      "writes": 1
+    },
+    {
+      "before": "1",
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": "1",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "0001",
+      "incoming": "0",
+      "result": 0,
+      "after": "0001",
+      "writes": 0
+    },
+    {
+      "before": "0001",
+      "incoming": "1",
+      "result": 0,
+      "after": "0001",
+      "writes": 0
+    },
+    {
+      "before": "0001",
+      "incoming": "10",
+      "result": 1,
+      "after": "10",
+      "writes": 1
+    },
+    {
+      "before": "0001",
+      "incoming": "1792756800",
+      "result": 1,
+      "after": "1792756800",
+      "writes": 1
+    },
+    {
+      "before": "0001",
+      "incoming": "1792756801",
+      "result": 1,
+      "after": "1792756801",
+      "writes": 1
+    },
+    {
+      "before": "0001",
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": "0001",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "9",
+      "incoming": "0",
+      "result": 0,
+      "after": "9",
+      "writes": 0
+    },
+    {
+      "before": "9",
+      "incoming": "1",
+      "result": 0,
+      "after": "9",
+      "writes": 0
+    },
+    {
+      "before": "9",
+      "incoming": "10",
+      "result": 1,
+      "after": "10",
+      "writes": 1
+    },
+    {
+      "before": "9",
+      "incoming": "1792756800",
+      "result": 1,
+      "after": "1792756800",
+      "writes": 1
+    },
+    {
+      "before": "9",
+      "incoming": "1792756801",
+      "result": 1,
+      "after": "1792756801",
+      "writes": 1
+    },
+    {
+      "before": "9",
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": "9",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "10",
+      "incoming": "0",
+      "result": 0,
+      "after": "10",
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "1",
+      "result": 0,
+      "after": "10",
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "10",
+      "result": 0,
+      "after": "10",
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "1792756800",
+      "result": 1,
+      "after": "1792756800",
+      "writes": 1
+    },
+    {
+      "before": "10",
+      "incoming": "1792756801",
+      "result": 1,
+      "after": "1792756801",
+      "writes": 1
+    },
+    {
+      "before": "10",
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": "10",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "1792756800",
+      "incoming": "0",
+      "result": 0,
+      "after": "1792756800",
+      "writes": 0
+    },
+    {
+      "before": "1792756800",
+      "incoming": "1",
+      "result": 0,
+      "after": "1792756800",
+      "writes": 0
+    },
+    {
+      "before": "1792756800",
+      "incoming": "10",
+      "result": 0,
+      "after": "1792756800",
+      "writes": 0
+    },
+    {
+      "before": "1792756800",
+      "incoming": "1792756800",
+      "result": 0,
+      "after": "1792756800",
+      "writes": 0
+    },
+    {
+      "before": "1792756800",
+      "incoming": "1792756801",
+      "result": 1,
+      "after": "1792756801",
+      "writes": 1
+    },
+    {
+      "before": "1792756800",
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": "1792756800",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "1792756801",
+      "incoming": "0",
+      "result": 0,
+      "after": "1792756801",
+      "writes": 0
+    },
+    {
+      "before": "1792756801",
+      "incoming": "1",
+      "result": 0,
+      "after": "1792756801",
+      "writes": 0
+    },
+    {
+      "before": "1792756801",
+      "incoming": "10",
+      "result": 0,
+      "after": "1792756801",
+      "writes": 0
+    },
+    {
+      "before": "1792756801",
+      "incoming": "1792756800",
+      "result": 0,
+      "after": "1792756801",
+      "writes": 0
+    },
+    {
+      "before": "1792756801",
+      "incoming": "1792756801",
+      "result": 0,
+      "after": "1792756801",
+      "writes": 0
+    },
+    {
+      "before": "1792756801",
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": "1792756801",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "9007199254740992",
+      "incoming": "0",
+      "result": 0,
+      "after": "9007199254740992",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740992",
+      "incoming": "1",
+      "result": 0,
+      "after": "9007199254740992",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740992",
+      "incoming": "10",
+      "result": 0,
+      "after": "9007199254740992",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740992",
+      "incoming": "1792756800",
+      "result": 0,
+      "after": "9007199254740992",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740992",
+      "incoming": "1792756801",
+      "result": 0,
+      "after": "9007199254740992",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740992",
+      "incoming": "9007199254740993",
+      "result": 1,
+      "after": "9007199254740993",
+      "writes": 1
+    },
+    {
+      "before": "9007199254740992",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "9007199254740993",
+      "incoming": "0",
+      "result": 0,
+      "after": "9007199254740993",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740993",
+      "incoming": "1",
+      "result": 0,
+      "after": "9007199254740993",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740993",
+      "incoming": "10",
+      "result": 0,
+      "after": "9007199254740993",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740993",
+      "incoming": "1792756800",
+      "result": 0,
+      "after": "9007199254740993",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740993",
+      "incoming": "1792756801",
+      "result": 0,
+      "after": "9007199254740993",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740993",
+      "incoming": "9007199254740993",
+      "result": 0,
+      "after": "9007199254740993",
+      "writes": 0
+    },
+    {
+      "before": "9007199254740993",
+      "incoming": "9223372036854775807",
+      "result": 1,
+      "after": "9223372036854775807",
+      "writes": 1
+    },
+    {
+      "before": "9223372036854775807",
+      "incoming": "0",
+      "result": 0,
+      "after": "9223372036854775807",
+      "writes": 0
+    },
+    {
+      "before": "9223372036854775807",
+      "incoming": "1",
+      "result": 0,
+      "after": "9223372036854775807",
+      "writes": 0
+    },
+    {
+      "before": "9223372036854775807",
+      "incoming": "10",
+      "result": 0,
+      "after": "9223372036854775807",
+      "writes": 0
+    },
+    {
+      "before": "9223372036854775807",
+      "incoming": "1792756800",
+      "result": 0,
+      "after": "9223372036854775807",
+      "writes": 0
+    },
+    {
+      "before": "9223372036854775807",
+      "incoming": "1792756801",
+      "result": 0,
+      "after": "9223372036854775807",
+      "writes": 0
+    },
+    {
+      "before": "9223372036854775807",
+      "incoming": "9007199254740993",
+      "result": 0,
+      "after": "9223372036854775807",
+      "writes": 0
+    },
+    {
+      "before": "9223372036854775807",
+      "incoming": "9223372036854775807",
+      "result": 0,
+      "after": "9223372036854775807",
+      "writes": 0
+    },
+    {
+      "before": "18446744073709551615",
+      "incoming": "0",
+      "result": -1,
+      "after": "18446744073709551615",
+      "writes": 0
+    },
+    {
+      "before": "18446744073709551615",
+      "incoming": "1",
+      "result": -1,
+      "after": "18446744073709551615",
+      "writes": 0
+    },
+    {
+      "before": "18446744073709551615",
+      "incoming": "10",
+      "result": -1,
+      "after": "18446744073709551615",
+      "writes": 0
+    },
+    {
+      "before": "18446744073709551615",
+      "incoming": "1792756800",
+      "result": -1,
+      "after": "18446744073709551615",
+      "writes": 0
+    },
+    {
+      "before": "18446744073709551615",
+      "incoming": "1792756801",
+      "result": -1,
+      "after": "18446744073709551615",
+      "writes": 0
+    },
+    {
+      "before": "18446744073709551615",
+      "incoming": "9007199254740993",
+      "result": -1,
+      "after": "18446744073709551615",
+      "writes": 0
+    },
+    {
+      "before": "18446744073709551615",
+      "incoming": "9223372036854775807",
+      "result": -1,
+      "after": "18446744073709551615",
+      "writes": 0
+    },
+    {
+      "before": "-1",
+      "incoming": "0",
+      "result": -1,
+      "after": "-1",
+      "writes": 0
+    },
+    {
+      "before": "-1",
+      "incoming": "1",
+      "result": -1,
+      "after": "-1",
+      "writes": 0
+    },
+    {
+      "before": "-1",
+      "incoming": "10",
+      "result": -1,
+      "after": "-1",
+      "writes": 0
+    },
+    {
+      "before": "-1",
+      "incoming": "1792756800",
+      "result": -1,
+      "after": "-1",
+      "writes": 0
+    },
+    {
+      "before": "-1",
+      "incoming": "1792756801",
+      "result": -1,
+      "after": "-1",
+      "writes": 0
+    },
+    {
+      "before": "-1",
+      "incoming": "9007199254740993",
+      "result": -1,
+      "after": "-1",
+      "writes": 0
+    },
+    {
+      "before": "-1",
+      "incoming": "9223372036854775807",
+      "result": -1,
+      "after": "-1",
+      "writes": 0
+    },
+    {
+      "before": "+1",
+      "incoming": "0",
+      "result": -1,
+      "after": "+1",
+      "writes": 0
+    },
+    {
+      "before": "+1",
+      "incoming": "1",
+      "result": -1,
+      "after": "+1",
+      "writes": 0
+    },
+    {
+      "before": "+1",
+      "incoming": "10",
+      "result": -1,
+      "after": "+1",
+      "writes": 0
+    },
+    {
+      "before": "+1",
+      "incoming": "1792756800",
+      "result": -1,
+      "after": "+1",
+      "writes": 0
+    },
+    {
+      "before": "+1",
+      "incoming": "1792756801",
+      "result": -1,
+      "after": "+1",
+      "writes": 0
+    },
+    {
+      "before": "+1",
+      "incoming": "9007199254740993",
+      "result": -1,
+      "after": "+1",
+      "writes": 0
+    },
+    {
+      "before": "+1",
+      "incoming": "9223372036854775807",
+      "result": -1,
+      "after": "+1",
+      "writes": 0
+    },
+    {
+      "before": "1.0",
+      "incoming": "0",
+      "result": -1,
+      "after": "1.0",
+      "writes": 0
+    },
+    {
+      "before": "1.0",
+      "incoming": "1",
+      "result": -1,
+      "after": "1.0",
+      "writes": 0
+    },
+    {
+      "before": "1.0",
+      "incoming": "10",
+      "result": -1,
+      "after": "1.0",
+      "writes": 0
+    },
+    {
+      "before": "1.0",
+      "incoming": "1792756800",
+      "result": -1,
+      "after": "1.0",
+      "writes": 0
+    },
+    {
+      "before": "1.0",
+      "incoming": "1792756801",
+      "result": -1,
+      "after": "1.0",
+      "writes": 0
+    },
+    {
+      "before": "1.0",
+      "incoming": "9007199254740993",
+      "result": -1,
+      "after": "1.0",
+      "writes": 0
+    },
+    {
+      "before": "1.0",
+      "incoming": "9223372036854775807",
+      "result": -1,
+      "after": "1.0",
+      "writes": 0
+    },
+    {
+      "before": "1e3",
+      "incoming": "0",
+      "result": -1,
+      "after": "1e3",
+      "writes": 0
+    },
+    {
+      "before": "1e3",
+      "incoming": "1",
+      "result": -1,
+      "after": "1e3",
+      "writes": 0
+    },
+    {
+      "before": "1e3",
+      "incoming": "10",
+      "result": -1,
+      "after": "1e3",
+      "writes": 0
+    },
+    {
+      "before": "1e3",
+      "incoming": "1792756800",
+      "result": -1,
+      "after": "1e3",
+      "writes": 0
+    },
+    {
+      "before": "1e3",
+      "incoming": "1792756801",
+      "result": -1,
+      "after": "1e3",
+      "writes": 0
+    },
+    {
+      "before": "1e3",
+      "incoming": "9007199254740993",
+      "result": -1,
+      "after": "1e3",
+      "writes": 0
+    },
+    {
+      "before": "1e3",
+      "incoming": "9223372036854775807",
+      "result": -1,
+      "after": "1e3",
+      "writes": 0
+    },
+    {
+      "before": " ",
+      "incoming": "0",
+      "result": -1,
+      "after": " ",
+      "writes": 0
+    },
+    {
+      "before": " ",
+      "incoming": "1",
+      "result": -1,
+      "after": " ",
+      "writes": 0
+    },
+    {
+      "before": " ",
+      "incoming": "10",
+      "result": -1,
+      "after": " ",
+      "writes": 0
+    },
+    {
+      "before": " ",
+      "incoming": "1792756800",
+      "result": -1,
+      "after": " ",
+      "writes": 0
+    },
+    {
+      "before": " ",
+      "incoming": "1792756801",
+      "result": -1,
+      "after": " ",
+      "writes": 0
+    },
+    {
+      "before": " ",
+      "incoming": "9007199254740993",
+      "result": -1,
+      "after": " ",
+      "writes": 0
+    },
+    {
+      "before": " ",
+      "incoming": "9223372036854775807",
+      "result": -1,
+      "after": " ",
+      "writes": 0
+    },
+    {
+      "before": "00000000000000000000",
+      "incoming": "0",
+      "result": -1,
+      "after": "00000000000000000000",
+      "writes": 0
+    },
+    {
+      "before": "00000000000000000000",
+      "incoming": "1",
+      "result": -1,
+      "after": "00000000000000000000",
+      "writes": 0
+    },
+    {
+      "before": "00000000000000000000",
+      "incoming": "10",
+      "result": -1,
+      "after": "00000000000000000000",
+      "writes": 0
+    },
+    {
+      "before": "00000000000000000000",
+      "incoming": "1792756800",
+      "result": -1,
+      "after": "00000000000000000000",
+      "writes": 0
+    },
+    {
+      "before": "00000000000000000000",
+      "incoming": "1792756801",
+      "result": -1,
+      "after": "00000000000000000000",
+      "writes": 0
+    },
+    {
+      "before": "00000000000000000000",
+      "incoming": "9007199254740993",
+      "result": -1,
+      "after": "00000000000000000000",
+      "writes": 0
+    },
+    {
+      "before": "00000000000000000000",
+      "incoming": "9223372036854775807",
+      "result": -1,
+      "after": "00000000000000000000",
+      "writes": 0
+    },
+    {
+      "before": "١",
+      "incoming": "0",
+      "result": -1,
+      "after": "١",
+      "writes": 0
+    },
+    {
+      "before": "١",
+      "incoming": "1",
+      "result": -1,
+      "after": "١",
+      "writes": 0
+    },
+    {
+      "before": "١",
+      "incoming": "10",
+      "result": -1,
+      "after": "١",
+      "writes": 0
+    },
+    {
+      "before": "١",
+      "incoming": "1792756800",
+      "result": -1,
+      "after": "١",
+      "writes": 0
+    },
+    {
+      "before": "١",
+      "incoming": "1792756801",
+      "result": -1,
+      "after": "١",
+      "writes": 0
+    },
+    {
+      "before": "١",
+      "incoming": "9007199254740993",
+      "result": -1,
+      "after": "١",
+      "writes": 0
+    },
+    {
+      "before": "١",
+      "incoming": "9223372036854775807",
+      "result": -1,
+      "after": "١",
+      "writes": 0
+    },
+    {
+      "before": null,
+      "incoming": "",
+      "result": -1,
+      "after": null,
+      "writes": 0
+    },
+    {
+      "before": null,
+      "incoming": "01",
+      "result": -1,
+      "after": null,
+      "writes": 0
+    },
+    {
+      "before": null,
+      "incoming": "-1",
+      "result": -1,
+      "after": null,
+      "writes": 0
+    },
+    {
+      "before": null,
+      "incoming": "+1",
+      "result": -1,
+      "after": null,
+      "writes": 0
+    },
+    {
+      "before": null,
+      "incoming": "1.0",
+      "result": -1,
+      "after": null,
+      "writes": 0
+    },
+    {
+      "before": null,
+      "incoming": "9223372036854775808",
+      "result": -1,
+      "after": null,
+      "writes": 0
+    },
+    {
+      "before": null,
+      "incoming": "١",
+      "result": -1,
+      "after": null,
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "",
+      "result": -1,
+      "after": "10",
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "01",
+      "result": -1,
+      "after": "10",
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "-1",
+      "result": -1,
+      "after": "10",
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "+1",
+      "result": -1,
+      "after": "10",
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "1.0",
+      "result": -1,
+      "after": "10",
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "9223372036854775808",
+      "result": -1,
+      "after": "10",
+      "writes": 0
+    },
+    {
+      "before": "10",
+      "incoming": "١",
+      "result": -1,
+      "after": "10",
+      "writes": 0
+    }
+  ]
+}
