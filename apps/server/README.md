@@ -2845,10 +2845,13 @@ sessions does not complete `chatMail.read`.
 [Issue #73](https://github.com/ReeseArch64/opencok/issues/73) tracks `chatMail.read`.
 Its complete wire parser and ordered effect planner now have synthetic unit coverage.
 An independent repository adapter now persists owned mailbox assignments and chat
-intents atomically. The command still returns unsupported: enabling it requires durable
-chat intent delivery and a maintained private-conversation read-state consumer. The
-current chat room history implementation does not supply that consumer. The parser and
-planner remain pure; the adapter is not connected to command dispatch.
+intents atomically. The command now connects requests whose complete plan contains
+mailbox assignments only. Scalar `type`, ordinary `types` lists and empty requests use the existing owned
+transaction. Any plan containing a chat intent still returns unsupported before mailbox
+writes: sender-selected requests and the exact raw `types = "0,1,20"` trigger require
+durable delivery and a maintained private-conversation read-state consumer. Public room
+history does not supply that consumer. This is partial command support, not completion
+of issue #73.
 
 | Selection                                   | Mailbox assignment                                                   | Chat intent                                                              |
 | ------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
@@ -2915,6 +2918,16 @@ predicates, owner/realm isolation, large selections, bounded backlog, durable in
 identity, captured plans and rollback. These units do not prove real database concurrency
 or resolve commit acknowledgment loss. Delivery, cross-database recovery and chat
 read-state integration remain pending.
+
+The type-only command validates the complete correlated success envelope before entering
+persistence, uses the authenticated owner rather than request identity fields, and
+rechecks the returned owner/realm/ban snapshot. Runtime repository dispatch independently
+rejects plans containing chat effects, so it cannot quietly drop an intent. Missing
+adapters, malformed consumed fields and storage failures do not return success. Empty
+plans still authorize the owner. No new schema, worker, dependency or configuration is
+introduced. Five new command units are written for mapping/order, deferred chat cases,
+authorization, encoding and failures; their execution and type/lint checks are deferred
+under the maintainer's current request to prioritize implementation.
 
 ## Mailbox content reads
 
