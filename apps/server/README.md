@@ -6,7 +6,7 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `chat.session.create` (when configured), `login.dataconfig`,
-`login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
+`login.other`, `setting.xml`, `pushSetting.get`, `parse.push.set`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `mail.save`, `mail.cancel.save`, `mail.save.batch`, `chatMail.save`,
 `mail.read.status`, `mail.read.status.betch`,
 `mail.delete`, `mail.read`, `mread.batch.category`, `mread.batch`, `mread.chat` (message and group selectors),
@@ -190,7 +190,7 @@ reject before switches or announcements. A duplicate insert from a stale snapsho
 fails without overwriting the saved choice; a retry reads the current preference.
 A lost commit acknowledgment may leave the row saved despite a failed request.
 Later switch or announcement failures cannot undo an already committed default.
-Explicit preference-update commands remain topic 6 work. No schema migration or
+The explicit preference commands below share this saved state. No schema migration or
 external dependency is added; repositories reuse the existing constants workspace.
 
 The optional switches query runs independently after the required snapshot and any
@@ -200,6 +200,31 @@ verification continues. Other query exceptions omit both `switches` and
 `isVerifyChangeAccount`. An empty successful query also retains its empty array.
 Verification failures retain already projected switches and omit only the verification
 field. Feature announcements run afterward, outside that failure boundary.
+
+`pushSetting.get` returns the same `pushSetting` array and conditional world-news
+initialization independently of share metadata, switches, verification and announcements.
+Saved rows contain Int `type`, `status` and `audio`; synthesized defaults contain only
+Int `type` and `status`. A saved list of at least 20 rows suppresses defaults even when
+those rows have unknown types. Request-supplied player/realm fields do not select an owner.
+
+`parse.push.set` requires SFS Int `type` and `status`; optional SFS Int `audio` defaults
+to 1 when omitted, including when updating an existing row. All three fields retain
+the signed 32-bit domain instead of being limited to known notification types or
+boolean flags. The realm repository locks/revalidates the authenticated owner, reads
+the selected `(uid, type)` row and inserts it or updates both status and audio in one
+read-committed transaction. Other owners and types are untouched. Successful writes
+return Bool `success` with ordinary request correlation and no push payload.
+
+Owner locking serializes concurrent writes before selecting an insert/update branch.
+Repeating a committed request updates the same row to the same values. Database failures
+reject without a success response, and rollback preserves prior state; a lost commit
+acknowledgment may leave the choice saved, so a retry uses the existing-row branch.
+The initializer remains a plain insert and cannot overwrite an explicit news choice.
+No schema, configuration or dependency change is required. Device registration,
+notification delivery and other profile mutation commands remain separate work.
+Unit tests exercise protocol, controller and generated SQL behavior with synthetic
+state, including a simulated owner-lock schedule. They do not establish live database
+concurrency or native-client compatibility; neither was exercised in this phase.
 
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
@@ -2890,7 +2915,7 @@ use these descriptions before the reconnect task component is complete.
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage                                                                                              | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                                                              |
 | 4. Basic mailbox                          | Category counts; saving/read marking; conversation/type saving; category/paginated message lists and bounded content reads; gift-opening retry; ordinary deletion with atomic related cleanup; group listing with bounded previews, full counts and atomic cleanup; synthetic units          | Content edge cases, batch/category/conversation deletion, conversation read marking and synchronization readers/cleanup; redemption is outside this wave.                               |
 | 5. Additional map queries                 | Base viewport; owned world favorites; map and general player search with configured-realm routing, typed public fields and compatibility pagination; local and remote point-detail command branches, resource arithmetic, owner fields and monster detail reads with synthetic unit coverage | Remaining occupied-resource and specialized point details; search cache/collation/exceptional-state differences; live behavior remains deferred.                                        |
-| 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                                                                                                                        | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                                                               |
+| 6. Profile/preferences                    | Initial profile reads; standalone notification preference reads and writes, including conditional news defaults and owner-scoped insert/update                                                                                                                                               | Nicknames, validation, applicable costs and remaining profile flags/preferences.                                                                                                        |
 | 7. Avatar integration                     | Files service; realm grants; verified completion with atomic profile/moderation/intent state; mail/cache/chat delivery, recovery relay and typed mail/picture notifications covered by synthetic units                                                                                       | Validate restored-state semantics, moderation lifecycle and remaining legacy picture-version flows. Native-client validation stays deferred.                                            |
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway public discovery; bounded HTTP exchanges and synthetic units                                                                                                                                               | Private conversations and read-state delivery; live cross-service behavior. Native-client validation remains deferred by request.                                                       |
 

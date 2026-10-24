@@ -562,7 +562,14 @@ the synthesized type/status shape; subsequent reads include the stored audio. Th
 insert never updates an existing preference, and duplicate/write failures reject.
 Initialization precedes switches and announcements, so later failures cannot undo
 the committed row. Lost commit acknowledgments can leave it persisted despite a
-failed request. Explicit preference-update commands remain separately scoped.
+failed request. Standalone `pushSetting.get` shares the preference projection and
+initialization without evaluating other configuration providers. `parse.push.set`
+accepts signed SFS Int type/status/audio values and defaults omitted audio to 1.
+Its realm repository locks/revalidates the owner before selecting the existing row,
+then inserts or updates only that owner's selected type in a read-committed transaction.
+Repeated writes preserve a single row; status/audio are both replaced. Success uses
+the ordinary acknowledgment and correlation, with no notification delivery implied.
+The existing `parse_info` schema supplies this state; no new schema or provider is required.
 The optional switch query then runs independently: recognized PostgreSQL SQLSTATE
 errors produce empty switches, matching the legacy SQL adapter's SQLException fallback,
 while other exceptions produce unavailable switches. Required snapshot and preference

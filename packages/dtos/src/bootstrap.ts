@@ -52,15 +52,19 @@ export function loginConfigurationPreferences(
       ),
     ),
   );
-  const present = new Set(state.pushSettings.map((row) => num(row, "type")));
-  const pushSettings = state.pushSettings.map((row) =>
+  return { fbShare, pushSetting: pushPreferences(state.pushSettings) };
+}
+
+export function pushPreferences(rows: readonly Row[]) {
+  const present = new Set(rows.map((row) => num(row, "type")));
+  const pushSettings = rows.map((row) =>
     sfs.object({
       type: sfs.int(num(row, "type")),
       status: sfs.int(num(row, "status")),
       audio: sfs.int(num(row, "audio")),
     }),
   );
-  if (state.pushSettings.length < PUSH_SETTING_COUNT)
+  if (rows.length < PUSH_SETTING_COUNT)
     for (let type = 0; type < PUSH_SETTING_COUNT; type++)
       if (!present.has(type))
         pushSettings.push(
@@ -69,10 +73,7 @@ export function loginConfigurationPreferences(
             status: sfs.int(type === WORLD_NEWS_PUSH_TYPE ? 0 : 1),
           }),
         );
-  return {
-    fbShare,
-    pushSetting: sfs.array(pushSettings),
-  };
+  return sfs.array(pushSettings);
 }
 
 export function loginSwitches(rows: readonly Row[]): Fields {
