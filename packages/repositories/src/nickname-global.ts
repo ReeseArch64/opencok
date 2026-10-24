@@ -44,7 +44,7 @@ async function accountUid(tx: NicknameGlobalTransaction, owner: string): Promise
   }
 }
 
-async function writeName(
+export async function writeNicknameGlobal(
   tx: NicknameGlobalTransaction,
   owner: string,
   name: string,
@@ -125,7 +125,7 @@ export async function commitNicknameGlobal<T>(
   }
   return withAvailableNickname(db, name, async (tx) => {
     const prepared = await prepare();
-    await writeName(tx, owner, name);
+    await writeNicknameGlobal(tx, owner, name);
     return prepared;
   });
 }

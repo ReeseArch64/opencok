@@ -10,10 +10,10 @@ import { sampleRow } from "./support/rows";
 const dialect = new PgDialect();
 const db = drizzle.mock();
 
-test("application inventory contains all 778 tables and 6,350 fields", async () => {
+test("application inventory contains all 780 tables and 6,366 fields", async () => {
   expect(catalog.map((entry) => entry.id)).toEqual(Object.keys(contract).sort());
-  expect(catalog).toHaveLength(778);
-  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6350);
+  expect(catalog).toHaveLength(780);
+  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6366);
   for (const namespaces of Object.values(databaseSchemas))
     for (const namespace of namespaces) {
       expect(
@@ -25,8 +25,8 @@ test("application inventory contains all 778 tables and 6,350 fields", async () 
           .sort(),
       );
     }
-  expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(114);
-  expect(catalog.filter((entry) => entry.spec.role === "kingdom")).toHaveLength(664);
+  expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(115);
+  expect(catalog.filter((entry) => entry.spec.role === "kingdom")).toHaveLength(665);
 });
 
 test("package entrypoint exposes role-specific typed PostgreSQL queries without connecting on import", async () => {
@@ -62,10 +62,16 @@ for (const { id, namespace, table, config, spec } of catalog) {
         .filter((index) => index.kind === "primary")
         .map((index) => [index.name, index.columns.map((column) => column.name)]),
     );
-    expect(config.indexes.map(({ config: index }) => [index.name, !!index.unique])).toEqual(
+    expect(
+      config.indexes.map(({ config: index }) => [
+        index.name,
+        !!index.unique,
+        index.where ? dialect.sqlToQuery(index.where).sql : null,
+      ]),
+    ).toEqual(
       spec.indexes
         .filter((index) => index.kind !== "primary")
-        .map((index) => [index.name, index.kind === "unique"]),
+        .map((index) => [index.name, index.kind === "unique", index.where ?? null]),
     );
     expect(config.checks.map((check) => [check.name, dialect.sqlToQuery(check.value).sql])).toEqual(
       spec.checks,

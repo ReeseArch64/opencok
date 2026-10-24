@@ -57,6 +57,13 @@
       "when": 1792860421773,
       "tag": "0007_avatar_version_updates",
       "breakpoints": false
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792875563878,
+      "tag": "0008_nickname_change_journal",
+      "breakpoints": false
     }
   ]
 }

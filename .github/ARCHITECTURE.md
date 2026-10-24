@@ -687,10 +687,9 @@ This is an intentional coordination change from the legacy exact-text Redis hash
 equivalent spellings contend and coordination/read failures cannot authorize charges.
 The informational check keeps its original SQL-error fallback. All rename writers must
 use this guard; a hash collision can add contention, and external writers that bypass
-it are not serialized. The helper is not yet connected to a mutation or durable receipt.
-Authoritative payment/recovery and downstream effects remain required before enabling
-the command. Existing PostgreSQL authority under ADR-0002 is unchanged; no new service,
-Redis key, table or migration is introduced by the guard.
+it are not serialized. The owned rename store uses this guard for payment and recovery.
+Downstream effects remain required before enabling the command. Existing PostgreSQL
+authority under ADR-0002 is unchanged; the guard introduces no service or Redis key.
 The global nickname writer now composes that guard with an explicit preparation
 callback and the account/mapping transaction. Preparation runs only after confirmed
 availability, before the legacy account-existence read. Owner UID and mapping type
@@ -702,11 +701,58 @@ Unrelated mappings and account metadata remain unchanged. Confirmed missing-acco
 account SQL-read failures produce the original missing-account game error; write-stage
 failures produce the original network game error only after confirmed rollback. Lost
 commit acknowledgment or failed rollback remains an uncertain dependency failure.
-The writer returns the preparation result only after global commit. The preparation
-callback is not yet an owned payment repository, and the global transaction cannot roll
-back a committed realm charge. Durable operation receipts/recovery, local profile state
-and effects remain required. No rename handler or new persistence schema is enabled by
-this component.
+The writer returns the preparation result only after global commit. The global
+transaction cannot roll back a committed realm charge. The separate owned rename store
+coordinates that charge through durable state; this writer alone provides no
+cross-database recovery.
+
+The owned rename store adds a kingdom `nickname_change` journal and a global
+`nickname_change_receipt`. Callers supply the authenticated UID, a stable UUID operation
+identifier, the already validated name and a safe millisecond timestamp. The store is
+an internal persistence port; it does not authorize a client-supplied owner or expose a
+new command. It locks the realm profile before inventory or operation rows and rejects
+missing, banned or incorrectly routed profiles before charging. One prepared operation
+per owner is enforced in both code and a partial unique index. At most 1,000 unconsumed
+effect records per owner are admitted. Equivalent target names share the global mutex
+across configured kingdoms.
+
+Preparation selects the first owned item 200021 by UUID, consumes one and records the
+exact item identity and restoration metadata. This deterministic SQL order makes
+duplicate restored stacks explicit. Only a game error from item debit reaches gold;
+configuration, inventory SQL and transport failures cannot authorize fallback. The
+caller supplies current `goods[200021].type` and `.price`, rather than an item-catalog
+substitute. Gold charges preserve the ordinary or exact DMM pool and capture all six
+before/after buckets and the original reply total. The signed rename counter increments
+with payment, including wrap, while the display name remains unchanged until global
+confirmation. Charge, counter and prepared journal commit in one realm transaction.
+
+The protected global transaction then changes account/name mappings and inserts the
+receipt. Recovery first locks the profile while reading the journal, resolving an
+uncertain realm preparation commit. It subsequently acquires the same name mutex before
+reading the global receipt. A matching receipt authorizes the realm name and owned world
+point updates; confirmed absence authorizes refund. Lock, read or receipt-identity
+failures leave the operation prepared. A lost global commit response cannot justify a
+refund by itself. Recovery re-reads terminal state after an uncertain final realm commit,
+and completed operation retries preserve the original result without another charge.
+Restarts retain the journal and receipt, with no distributed atomic-commit claim.
+
+Refund restores the captured item stack or re-reads the current gold price, parses it
+before reaching CN1 state and credits only the selected free bucket. It keeps the
+incremented counter and original debit reply total. CN1 requires an explicit available
+session provider; an unavailable provider leaves a recoverable prepared charge. Gold
+refund metadata includes its own price, ratio, delta and before/after balances. Terminal
+journals reserve pending bits 1/2/4/8/16 for alliance, chat, throne, shared-user and
+notification delivery respectively; a refund reserves notification delivery only. These
+consumers, their ordering and acknowledgments are not implemented by this store.
+
+Disposable PostgreSQL integration covers both realms, UCA-equivalent contention,
+concurrent retries, item/gold/DMM/CN1 paths, transactional SQL failures, lost commit
+responses and restart recovery. The production composition, reserved-pattern matcher,
+CN1 session lifecycle, downstream delivery and typed command reply remain pending.
+`user.modify.nickName` stays unavailable. Retain both new tables and their migration
+history when rolling application code back; unresolved operations require reconciliation
+before destructive restoration or pruning. No private input or new dependency is added.
+
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab
