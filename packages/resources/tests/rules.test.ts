@@ -112,6 +112,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     expect(rules.configuration.payControl?.size).toBe(0);
     expect(rules.configuration.kingdomSkills?.size).toBe(0);
     expect(rules.configuration.facebookShare?.size).toBe(0);
+    expect(rules.configuration.serverConfig?.size).toBe(0);
     expect(Object.values(rules.power).every((catalog) => catalog.size === 0)).toBe(true);
     for (const name of [
       "general",
@@ -155,7 +156,13 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     const power = (await loadRules(directory)).power;
     expect(Object.keys(power)).toHaveLength(30);
     expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
-    for (const name of ["general_sale", "pay_servercontrol", "kingdomskill", "fb_share"])
+    for (const name of [
+      "general_sale",
+      "pay_servercontrol",
+      "kingdomskill",
+      "fb_share",
+      "servers_config",
+    ])
       await writeFile(
         join(directory, `${name}.xml`),
         '<database><Group id="synthetic"><ItemSpec id="001" value="007"/></Group></database>',
@@ -165,6 +172,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
     expect(catalogs.payControl?.get("001")?.value).toBe("007");
     expect(catalogs.kingdomSkills?.get("001")?.value).toBe("007");
     expect(catalogs.facebookShare?.get("001")?.value).toBe("007");
+    expect(catalogs.serverConfig?.get("001")?.value).toBe("007");
     await writeFile(
       join(directory, "setting.xml"),
       '<database><Group id="settings"><ItemSpec id="001" value="0007"/></Group></database>',

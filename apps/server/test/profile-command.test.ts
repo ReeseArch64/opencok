@@ -81,6 +81,7 @@ function fixture(remote = false) {
       calls.push(["observer", uid]);
       return observer;
     },
+    playerRanking: unused,
     publicProfile: async (uid, allianceId) => {
       calls.push(["target", uid, allianceId]);
       return route;

@@ -7,6 +7,9 @@ import { building, gold, queue, resource, user } from "@opencok/dtos/city";
 import { powerInfo } from "@opencok/dtos/power";
 import { publicProfileBase } from "@opencok/dtos/profile";
 import { publicProfileAlliance, publicProfileGenerals } from "./profile.ts";
+import { playerRanking } from "@opencok/dtos/ranking";
+import { playerRankingQuery, selectPlayerRanking } from "@opencok/rules/ranking";
+import type { PlayerRankingKind } from "@opencok/contracts/ranking";
 import { calculatePlayerPower } from "@opencok/rules/power";
 import { powerContext, decodeWorldPowerEffects, generalSkillPoints } from "./power.ts";
 import { dragonAttackEffect } from "@opencok/rules/power-resolver";
@@ -132,6 +135,14 @@ export class Game {
       case "get.power.info":
         body = await this.power(uid);
         break;
+      case "server.rank":
+      case "kill.rank":
+      case "level.rank":
+        body = await this.ranking(
+          uid,
+          command === "server.rank" ? "power" : command === "kill.rank" ? "kills" : "level",
+        );
+        break;
       default:
         throw new GameError(errors.unsupported);
     }
@@ -141,6 +152,16 @@ export class Game {
   }
   private async profile(uid: string): Promise<Row> {
     return this.checkProfile(await this.db.profile(uid));
+  }
+  private async ranking(uid: string, kind: PlayerRankingKind): Promise<Fields> {
+    if (this.rules.kingdomId !== this.config.kingdomId)
+      throw new GameError(errors.unsupported, "ranking");
+    const query = playerRankingQuery(kind, this.rules, this.now());
+    const snapshot = await this.db.playerRanking(uid, query);
+    const profile = this.checkProfile(snapshot.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return playerRanking(kind, selectPlayerRanking(uid, query, snapshot));
   }
   private async publicProfile(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();

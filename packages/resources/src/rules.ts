@@ -84,17 +84,27 @@ export async function loadRules(directory: string, kingdomId = 1) {
     : new Map<string, Rule>();
   const optional = async (name: string) =>
     (await exists(join(directory, `${name}.xml`))) ? load(name) : new Map<string, Rule>();
-  const [arms, goods, features, settings, generalSales, payControl, kingdomSkills, facebookShare] =
-    await Promise.all([
-      optional("arms"),
-      optional("goods"),
-      optional("function_on"),
-      optional("setting"),
-      optional("general_sale"),
-      optional("pay_servercontrol"),
-      optional("kingdomskill"),
-      optional("fb_share"),
-    ]);
+  const [
+    arms,
+    goods,
+    features,
+    settings,
+    generalSales,
+    payControl,
+    kingdomSkills,
+    facebookShare,
+    serverConfig,
+  ] = await Promise.all([
+    optional("arms"),
+    optional("goods"),
+    optional("function_on"),
+    optional("setting"),
+    optional("general_sale"),
+    optional("pay_servercontrol"),
+    optional("kingdomskill"),
+    optional("fb_share"),
+    optional("servers_config"),
+  ]);
   const [
     generals,
     sciences,
@@ -176,7 +186,7 @@ export async function loadRules(directory: string, kingdomId = 1) {
     features,
     kingdomId,
     settings,
-    { generalSales, payControl, kingdomSkills, facebookShare },
+    { generalSales, payControl, kingdomSkills, facebookShare, serverConfig },
     {
       generals,
       sciences,

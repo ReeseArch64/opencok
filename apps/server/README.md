@@ -6,7 +6,8 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
-`login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `build.info` and `world.get`. The SFS handshake, login rejection,
+`login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`,
+`server.rank`, `kill.rank`, `level.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
 `102192` (unsupported). Reading the city never settles queues or changes resources.
@@ -532,6 +533,41 @@ query/driver errors.
 See [architecture](../../.github/ARCHITECTURE.md#153-first-postgresql-server-migration-slice)
 for ownership and the next migration steps.
 
+## Player ranking queries
+
+`server.rank`, `kill.rank` and `level.rank` return `serverRanking` and the
+authenticated player's `selfRanking` from the selected ordinary realm. The `ranking`
+item's `k2` supplies the display limit, from 1 through 32,767; request pagination and
+target UID parameters are ignored, matching these three legacy handlers. The optional
+`servers_config.xml` record `power_limit` hides GMs from power candidates only when
+`rankingHideGm` is exactly `1`. Scores remain owned by their gameplay writers.
+
+The adapter reads the requester, candidates and fallback position in one read-only
+repeatable-read transaction. Level candidates exclude cross-realm visitors and order
+by level, experience and name, within a window of three times the display limit.
+Power candidates exclude visitors, permanent bans and optionally GMs; kill candidates
+retain visitors and orphan statistics. Both statistics windows are twice the display
+limit. Future bans are removed after window selection. The self position uses the
+whole filtered window, even beyond the displayed list. Outside that window, the
+fallback is one plus the count of strictly greater primary scores across the original
+table, without applying presentation exclusions or secondary tie criteria.
+
+Missing profile/alliance presentation removes an entry after taking the display
+window, without filling its slot or renumbering the self position. Public DTOs expose
+only the corresponding score, identity, picture and alliance fields. Cached numeric
+fields retain the legacy JSON decoding distinction between signed 32-bit integers and
+64-bit longs; SQL null scores stay omitted. Correlation fields are echoed and these
+queries produce no pushes or mutations.
+
+Each request uses a fresh snapshot instead of the Java refresh/cache lifecycle. UID
+is the final deterministic tie breaker where the reference leaves ties unspecified;
+names and UIDs use PostgreSQL `C` collation, which can differ from the legacy database
+collation. Synthetic units verify query structure, mapping, selection, numeric types,
+authentication and rollback. Real database execution, cache timing and native-client
+rendering remain unverified. Building, alliance, event and cross-realm ranking families
+are still unavailable; this implements only the three commands tracked in
+[issue #59](https://github.com/ReeseArch64/opencok/issues/59).
+
 ## Gameplay migration: topics 1–8
 
 The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)
@@ -584,7 +620,7 @@ use these descriptions before the reconnect task component is complete.
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                               | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
-| 3. Ranking queries                        | Persistence schema                                                                                                                                                                         | Lists, player positions, pagination and tie-breaking.                                                                                            |
+| 3. Ranking queries                        | Ordinary-realm power, kill and level lists and self positions; explicit tie ordering, typed DTOs and synthetic unit coverage                                                               | Building, alliance, event and cross-realm families; pagination where supported; documented cache and collation differences.                      |
 | 4. Basic mailbox                          | Persistence schema                                                                                                                                                                         | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                              | Point details, player search and favorites, including authorization for writes.                                                                  |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                      | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |

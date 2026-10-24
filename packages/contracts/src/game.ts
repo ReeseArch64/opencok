@@ -1,6 +1,7 @@
 import type { Row } from "./rows.ts";
 import type { PowerState } from "./power.ts";
 import type { RoutedPublicProfile } from "./profile.ts";
+import type { PlayerRankingQuery, PlayerRankingSnapshot } from "./ranking.ts";
 
 export interface AuthenticationStore {
   profile(uid: string): Promise<Row | undefined>;
@@ -18,6 +19,7 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  playerRanking(uid: string, query: PlayerRankingQuery): Promise<PlayerRankingSnapshot>;
   publicProfile(uid: string, observerAllianceId: string): Promise<RoutedPublicProfile | undefined>;
   power(uid: string, now: number): Promise<PowerState>;
   playerSummaries(uids: string[], allServers: boolean): Promise<PlayerSummary[]>;
