@@ -627,6 +627,16 @@ inventory nor mutate state. `user.modify.nickName` remains disabled pending real
 patterns, global name serialization, owned economic persistence and cross-database
 recovery, then world/alliance/chat/throne/shared-user effects. No atomic transaction
 across the global and kingdom databases is assumed.
+The CN1 reward-ratio evaluator consumes an explicit cached session state and the already
+loaded pay-control catalog. Known absent state and a zero exemption flag return one;
+unavailable state is not silently converted into an absent object. The evaluator checks
+the direct player version and production/test realm gates before reading saved online
+minutes. It preserves declared band order, Java tokenization and numeric parsing,
+selected-ratio laziness and the exact maximum-boundary behavior. It neither reads the
+clock nor reconstructs session minutes from a database row. Nickname refund units compose
+the real evaluator with the existing refund calculation and resource loader. Restoring
+the CN1 session lifecycle and connecting it to the authoritative refund workflow remain
+required; no external identity-verification service is invoked by this component.
 The rename repository now provides a transaction-scoped availability guard for the
 future mutation. A namespaced SHA-256 digest of the UCA 4 equality key supplies a signed
 64-bit PostgreSQL advisory-lock key in the configured global database. Equivalent

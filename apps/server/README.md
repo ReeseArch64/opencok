@@ -492,6 +492,31 @@ the adapter contract against synthetic state; actual PostgreSQL execution and ec
 recovery remain unverified. No new schema, migration, configuration or dependency is
 added, and `user.modify.nickName` remains unsupported.
 
+The pure `rules/cn1-rewards` evaluator now supplies the configured reward ratio used by
+CN1 gold refunds. It accepts the established cached session object or explicit `null`,
+reads pay-control record `69036` from the existing resource catalog and preserves the
+order of version, realm and saved-time checks. Undefined/unavailable session state and
+reached malformed Int fields reject; they do not become zero online minutes. Any nonzero
+`isAddict` value reaches the control, including restored negative values. Known absent or
+exempt state, missing/empty control and a closed event return one.
+
+Reward bands stay in declaration order. Empty separator fields are skipped, thresholds
+use Java Int parsing and only the selected ratio uses Java Float parsing. Alert-only
+fields and later bands remain unread. Equality with the greatest visited threshold keeps
+the initial ratio of one; exceeding it produces zero. Empty bands also retain this
+zero-based boundary. Ratios are not clamped or normalized: negative zero, NaN, infinities,
+hexadecimal literals and rounding feed the existing Java-style refund conversion.
+Strings are bounded to 65,535 UTF-16 units. The evaluator reads neither the clock nor
+profile/database elapsed time, and does not mutate session state.
+
+Ten units include 755 synthetic vectors from an independently authored Java 8
+standard-library probe using integer/float parsing and tokenization. They compare float
+bits and reached failures, exercise gating/laziness and compose actual refund rules with
+temporary synthetic XML through the real resource loader. Tests require no Java process,
+database, sockets or external verification API. The session restoration/accounting
+lifecycle, authoritative payment/refund operation and `user.modify.nickName` integration
+remain pending. No schema, dependency or startup behavior changes in this slice.
+
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
 separately checks version and start/end dates for stamina, star unlocks and
