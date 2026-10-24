@@ -3492,8 +3492,9 @@ still prevent declaring topic 4 complete.
 The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)
 defines the full requested scope. Implementation and verification remain incremental;
 the table records gaps rather than treating package scaffolding as completed behavior.
-The current work is restricted to server implementation and unit tests. Do not run
-ADB, native-client validation, integration or end-to-end tests for this phase.
+The current work is restricted to server implementation. New test generation and
+execution, CI repairs, ADB, native-client validation, integration and end-to-end tests
+are deferred by the user's current instruction. Existing test evidence remains recorded.
 
 The reconnect foundation tracked in [issue #58](https://github.com/ReeseArch64/opencok/issues/58)
 reads an owner's balances, armies, generals and initiative skills in one read-only
@@ -3547,22 +3548,25 @@ use these descriptions before the reconnect task component is complete.
 | 8. Basic chat integration                 | Standalone chat service; authenticated realm session issuance; shared API/gateway discovery; socket-free command units for room access, send/replay/broadcast and history                                                                                                                    | Basic send/history now has direct socket-free unit evidence. Private-chat expansion belongs to original topic 24; chat-dependent mailbox read delivery remains topic 4. Live validation is deferred.   |
 
 The 2026-10-24 [scope audit](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19166562)
-decomposes the original eight topics into 45 delivery groups. After the direct basic-chat
-command units, 32 groups have connected implementation and executed unit evidence
-(approximately 71%). Partial or unverified groups receive no completed credit. This is
-an estimate by unequal delivery groups, not effort, time remaining, merged delivery or
-complete Java parity. The denominator can grow when the final audit finds missing scope.
-New mailbox update synchronization and mailbox-only conversation-read units are written
-but not executed under the user's latest acceleration instruction, so they do not yet
-increase the completed count. The residual profile group also remains incomplete after
-adding celebrity description reads. Test execution and CI fixes are currently deferred;
-PR publication is active. The full migration objective remains incomplete.
+identified 45 delivery groups within the first eight topics, of which 32 had connected
+implementation and executed unit evidence after the basic-chat additions. The resulting
+71% is a historical measurement of that audited subset, not total migration progress.
+It must not be presented as the percentage of the full migration goal.
+
+Total progress must include all required functionality, including unaudited functionality
+as pending work. Partial implementations and unresolved compatibility gaps remain
+incomplete. A complete denominator must be reconciled with the original inventory before
+claiming an overall implementation percentage; PR counts and helper counts cannot replace
+that denominator. Implementation, verification and publication are tracked separately.
+New server implementations can be recorded while test work is deferred, without claiming
+their runtime behavior has been verified. The full migration objective remains incomplete.
 
 Unit fixtures are synthetic and do not load ignored Java inputs or player databases.
 The availability and settings tests cover protocol types, correlation, catalog
 absence, grouped records, numeric versions, realm ranges, inclusive deadlines,
-invalid calendar values and time-dependent building previews. The full wave is not
-complete until all eight server-side behaviors have corresponding unit coverage.
+invalid calendar values and time-dependent building previews. This is historical evidence;
+new test generation and execution are currently deferred. Remaining server behavior must
+still be implemented before the migration can be declared complete.
 
 ## Verification
 
