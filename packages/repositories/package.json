@@ -18,7 +18,8 @@
     "./power": "./src/power.ts",
     "./profile": "./src/profile.ts",
     "./reconnect": "./src/reconnect.ts",
-    "./reconnect-mine": "./src/reconnect-mine.ts"
+    "./reconnect-mine": "./src/reconnect-mine.ts",
+    "./ranking": "./src/ranking.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",

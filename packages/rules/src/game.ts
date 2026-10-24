@@ -13,6 +13,7 @@ export interface ProfileCatalogs {
   servers?: Map<string, Rule>;
 }
 export interface ConfigurationCatalogs {
+  serverConfig?: Map<string, Rule>;
   generalSales?: Map<string, Rule>;
   payControl?: Map<string, Rule>;
   kingdomSkills?: Map<string, Rule>;
