@@ -1,10 +1,12 @@
+import { resourceOrdinaryLoadEffects } from "@opencok/rules/world-resource-effects";
+import { resourceRawArmyLoad } from "@opencok/rules/world-resource-detail";
 import { expect, test } from "bun:test";
 import type { PowerSnapshot, GeneralSkill } from "@opencok/contracts/power";
 import { Rules } from "@opencok/rules/game";
 import { dragonAttackEffect, playerGameEffect } from "@opencok/rules/power-resolver";
 
 const context = { now: Date.UTC(2026, 9, 23, 12), kingdomId: 1, version: "12.06.0" };
-function fixture(effect: 37 | 487 = 487) {
+function fixture(effect: 37 | 78 | 487 | 895 | 2196 = 487) {
   const state: PowerSnapshot = {
     profile: {},
     statistics: undefined,
@@ -77,11 +79,11 @@ function fixture(effect: 37 | 487 = 487) {
   const resolve = (version?: number | null) =>
     effect === 487
       ? dragonAttackEffect(state, rules, context, abilities, world, version)
-      : playerGameEffect(state, rules, context, abilities, world, version, 37);
+      : playerGameEffect(state, rules, context, abilities, world, version, effect);
   return { state, rules, abilities, world, resolve };
 }
 
-for (const effect of [37, 487] as const)
+for (const effect of [37, 78, 487, 895, 2196] as const)
   test(`effect ${effect} combines every ordinary-realm source and the global equipment multiplier`, () => {
     const { state, rules, abilities, world, resolve } = fixture(effect);
     for (const id of [
@@ -266,4 +268,71 @@ test("decomposed-set bonuses enter both equipment attributes and the final globa
     ["1", { id: "1", suit_para1: "487|218", suit_num1: "5|999" }],
   ]);
   expect(resolve()).toBe(15.749999046325684);
+});
+
+test("resource ordinary load combines current effects 78 and 2196 with general-only effect 133", () => {
+  const f = fixture(78);
+  f.rules.items.set("effect", { k1: "78;2|2196;3|133;400" });
+  f.rules.power.generalSkills!.set("load", {
+    type: "0",
+    para1: "78|2196|133",
+    base: "5|7|11",
+    add: "0|0|0",
+  });
+  f.abilities.push([{ id: "load", points: 1 }]);
+  f.world.set(78, 13);
+  f.world.set(2196, 17);
+  f.world.set(133, 5000);
+  const before = structuredClone(f.state);
+  const effects = resourceOrdinaryLoadEffects(
+    f.state,
+    f.rules,
+    context,
+    f.abilities,
+    f.world,
+    undefined,
+  );
+  expect(effects).toEqual({ worldLoad: 20, worldLoadAdd: 27, general: 11 });
+  expect(f.state).toEqual(before);
+  f.rules.arms.set("troop", { load: "1" });
+  expect(
+    resourceRawArmyLoad(
+      {
+        cachedLoad: 0,
+        residentOwner: true,
+        soldiers: [{ armsId: "troop", total: 100, dead: 0, loadEffect: 0 }],
+        effects: { ...effects, newGeneral: 30, expedition: 40 },
+      },
+      f.rules,
+    ),
+  ).toBe(228);
+});
+
+test("resource general load preserves per-general accumulation and propagates missing required catalogs", () => {
+  const f = fixture(78);
+  f.rules.power.generalSkills!.set("large", {
+    type: "0",
+    para1: "133",
+    base: "16777216",
+    add: "0",
+  });
+  f.rules.power.generalSkills!.set("small", { type: "0", para1: "133", base: "1", add: "0" });
+  f.rules.power.generalSkills!.set("negative", {
+    type: "0",
+    para1: "133",
+    base: "-16777216",
+    add: "0",
+  });
+  f.abilities.push(
+    [
+      { id: "large", points: 1 },
+      { id: "small", points: 1 },
+    ],
+    [{ id: "negative", points: 1 }],
+  );
+  const resolve = () =>
+    resourceOrdinaryLoadEffects(f.state, f.rules, context, f.abilities, f.world, undefined);
+  expect(resolve()).toEqual({ worldLoad: 0, worldLoadAdd: 0, general: 0 });
+  f.rules.power.generalSkills!.delete("negative");
+  expect(resolve).toThrow();
 });

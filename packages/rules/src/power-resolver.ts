@@ -19,9 +19,9 @@ export function playerGameEffect(
   abilities: readonly (readonly GeneralSkill[])[],
   world: ReadonlyMap<number, number>,
   emperorVersion: number | null | undefined,
-  effect: 37 | 487,
+  effect: 37 | 78 | 487 | 895 | 2196,
 ): number {
-  if (effect !== 37 && effect !== 487) return invalid();
+  if (![37, 78, 487, 895, 2196].includes(effect)) return invalid();
   const vip = vipEffects(state.vip, rules, context.now);
   const general = generalSkillEffects(abilities, rules);
   const alliance = allianceScienceEffects(state.allianceSciences, rules);
