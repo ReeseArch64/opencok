@@ -383,3 +383,20 @@ test("login.dataconfig reads the authenticated profile, echoes correlation and r
     await expect(game.execute("synthetic", "login.dataconfig", {})).rejects.toThrow();
   }
 });
+
+test("configuration preserves function-on blank bypass and direct cross-realm version comparison", () => {
+  const rules = catalog();
+  rules.features.set("alliance_mission", { version: "12.6.0", online: "2" });
+  for (const version of ["", "\u2000", "13", ".12..6.0.1", "１２.６.０"])
+    expect(project(rules, { version }).alliance_mission?.value).toBe("on");
+  expect(project(rules, { version: "11" }).alliance_mission?.value).toBe("off");
+  expect(() => project(rules, { version: "13.bad" })).toThrow();
+  rules.features.clear();
+  for (const version of ["2", ".1..0.59.1", "１.０.５９"])
+    expect(project(rules, { version, crossOpen: true }).cross_open).toEqual(sfs.bool(true));
+  expect(project(rules, { version: "0", crossOpen: true }).cross_open).toEqual(sfs.bool(false));
+  for (const version of ["", "\u2000", "1.0", "2.bad"]) {
+    expect(() => project(rules, { version, crossOpen: true })).toThrow();
+    expect(project(rules, { version, crossOpen: false }).cross_open).toEqual(sfs.bool(false));
+  }
+});
