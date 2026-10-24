@@ -469,6 +469,16 @@ feature, merge, stage and effective-home-realm gate, preserving its zero-on-exce
 boundary. Authoritative expedition context and new-general stronghold/official
 contributions still need to be connected; explicit callbacks are not runtime parity.
 
+The separate `rules/new-general-skills` projection restores passive base-skill and
+talent effect maps from bounded saved level strings and optional `general_base` /
+`general_skill` catalogs. It preserves star ordering, duplicate contributions,
+conditional-base-skill exclusion, fresh Java Integer HashMap talent traversal and
+Float arithmetic. Decimal and hexadecimal Float parsing rounds directly to binary32,
+including halfway values that cannot safely pass through a JavaScript double first.
+These maps are components, not a complete stronghold modifier: assignment/official
+eligibility, status, equipment, refinement and owner snapshot composition remain
+required before connecting them to occupied-resource queries.
+
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read
 transaction. Configured remote realms use a separate transaction and world zero after

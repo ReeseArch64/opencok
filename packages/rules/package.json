@@ -48,7 +48,9 @@
     "./world-monster-detail": "./src/world-monster-detail.ts",
     "./world-barbarian-detail": "./src/world-barbarian-detail.ts",
     "./java-hash-map-order": "./src/java-hash-map-order.ts",
-    "./world-resource-effects": "./src/world-resource-effects.ts"
+    "./world-resource-effects": "./src/world-resource-effects.ts",
+    "./new-general-skills": "./src/new-general-skills.ts",
+    "./java-float": "./src/java-float.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -99,7 +99,7 @@ function treeify(bucket: Bucket) {
   bucket.tree = true;
   moveRoot(bucket, root!);
 }
-export function javaHashMapOrder(keys: Iterable<string>): string[] {
+function ordered(keys: Iterable<string>, hashKey: (key: string) => number): string[] {
   let buckets: (Bucket | undefined)[] = Array(16);
   const seen = new Set<string>();
   function resize() {
@@ -127,7 +127,7 @@ export function javaHashMapOrder(keys: Iterable<string>): string[] {
   for (const key of keys) {
     if (seen.has(key)) continue;
     if (seen.size >= 4096 || typeof key !== "string") throw new Error("Invalid hash map keys");
-    const node: Node = { key, hash: hash(key), red: false };
+    const node: Node = { key, hash: hashKey(key), red: false };
     const index = node.hash & (buckets.length - 1);
     const bucket = buckets[index];
     if (!bucket) buckets[index] = { head: node, tree: false };
@@ -173,4 +173,22 @@ export function javaHashMapOrder(keys: Iterable<string>): string[] {
   for (const bucket of buckets)
     for (let node = bucket?.head; node; node = node.next) result.push(node.key);
   return result;
+}
+
+export function javaHashMapOrder(keys: Iterable<string>): string[] {
+  return ordered(keys, hash);
+}
+
+export function javaIntHashMapOrder(keys: Iterable<number>): number[] {
+  function* strings() {
+    for (const key of keys) {
+      if (!Number.isInteger(key) || key < -2147483648 || key > 2147483647)
+        throw new Error("Invalid integer hash map key");
+      yield String(key);
+    }
+  }
+  return ordered(strings(), (key) => {
+    const value = Number(key);
+    return value ^ (value >>> 16);
+  }).map(Number);
 }

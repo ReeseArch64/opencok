@@ -57,6 +57,8 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
     "army",
     "sp_resources",
     "barbarion",
+    "general_base",
+    "general_skill",
   ].includes(name);
   for (const record of records) {
     const item = record;
@@ -122,6 +124,8 @@ export async function loadRules(directory: string, kingdomId = 1) {
     dragonLevels,
     statuses,
     generalSkills,
+    newGeneralBases,
+    newGeneralSkills,
     equipmentSets,
     vip,
     superVip,
@@ -154,6 +158,8 @@ export async function loadRules(directory: string, kingdomId = 1) {
       "dragon_new",
       "status",
       "sk",
+      "general_base",
+      "general_skill",
       "suit",
       "vip",
       "svip",
@@ -214,6 +220,8 @@ export async function loadRules(directory: string, kingdomId = 1) {
       dragonLevels,
       statuses,
       generalSkills,
+      newGeneralBases,
+      newGeneralSkills,
       equipmentSets,
       vip,
       superVip,
