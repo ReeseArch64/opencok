@@ -68,7 +68,13 @@ Keep `GET /_internal/avatars/{owner}/{sequence}` private. It requires a separate
 and actual SHA-256. A client upload grant cannot authorize confirmation.
 `/_health` is process liveness, not a bucket readiness check.
 
-The TypeScript realm does not yet issue grants or commit avatar confirmations.
+The TypeScript realm can issue grants and inspect pending receipts when explicitly
+configured with `GAME_FILES_URL` and the same protected `FILES_SIGNING_KEY_FILE`; see
+[realm avatar grants](../server/README.md#realm-avatar-grants). The private confirmation
+route must be reachable only by trusted backend services. The realm does not yet commit
+avatar changes: `user.avatar.finish` and direct picture-version updates stay unsupported.
+S3 receipts have no historical filesystem `completed` marker; restoring profile and object
+state independently or resetting versions has not been validated.
 No Android track is validated by this migration. GIF support, asynchronous processing,
 orphan collection and the full media state machine remain future work. No private Java
 adapters, client assets, historical uploads or signing keys are imported.

@@ -1,3 +1,4 @@
+import type { AvatarGrantService } from "./files.ts";
 import type { ChatSessionIssuer } from "./chat.ts";
 import type {
   MailGroupQuery,
@@ -102,6 +103,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  avatar?: AvatarGrantService;
   chatSession?: ChatSessionIssuer;
   expeditionRanking?(limit: number): Promise<readonly ExpeditionRankingEntry[] | undefined>;
   worldPowerEffects?(): Promise<ReadonlyMap<string, string>>;

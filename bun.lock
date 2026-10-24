@@ -87,6 +87,7 @@
         "effect": "catalog:",
       },
       "devDependencies": {
+        "@opencok/api": "workspace:*",
         "@opencok/config": "workspace:*",
         "@opencok/drizzle": "workspace:*",
         "@opencok/dtos": "workspace:*",

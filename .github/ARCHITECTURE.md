@@ -393,8 +393,15 @@ delivery, seven-day archival and production Node execution remain pending.
 `storage/images` through the shared scoped HTTP runtime. `contracts/files` defines
 storage ports and compatibility limits, while `env/files` validates configuration.
 The [files runbook](../apps/files/README.md) covers private S3/MinIO provisioning,
-signing keys, backup and the JPEG/PNG-only avatar contract. Full media lifecycle,
-animated formats, realm grant issuance and production Node execution remain pending.
+signing keys, backup and the JPEG/PNG-only avatar contract. Opt-in realm grant issuance
+composes `controllers/game`, pure `rules/avatar`, an owner-locking
+`repositories/avatar-grant` reader and `connection/avatar-files`. The realm signs grants
+with the protected shared key and uses separate short-lived confirmation authorization
+to inspect bounded receipts. Profile versions remain authoritative; the maintained store
+has no historical filesystem completion marker. Unit composition uses synthetic storage
+and database clients without sockets. Avatar completion, atomic profile/upload-record
+updates and associated mail/synchronization/push effects remain pending, as do restored-state
+semantics, full media lifecycle, animated formats and production Node execution.
 
 ### Package groups
 

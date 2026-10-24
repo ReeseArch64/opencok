@@ -22,6 +22,7 @@
     "@opencok/core": "workspace:*"
   },
   "devDependencies": {
+    "@opencok/api": "workspace:*",
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:",

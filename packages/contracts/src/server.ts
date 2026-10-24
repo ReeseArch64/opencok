@@ -1,4 +1,5 @@
 export interface ServerConfig {
+  avatarFiles?: { origin: string; keyFile: string };
   chatSession?: { url: string; signingSecret: string };
   mailTranslationEnabled?: boolean;
   host: string;
