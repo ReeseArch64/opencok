@@ -39,3 +39,96 @@ export interface AvatarFiles {
 export interface AvatarGrantService extends AvatarFiles {
   read(owner: string, now: number, inspect: AvatarGrantInspector): Promise<AvatarGrantSnapshot>;
 }
+
+export interface AvatarFinishQuery {
+  sequence: number;
+  hash: string;
+  now: number;
+}
+export interface AvatarFinishPlan {
+  picVer: number;
+  moderated: boolean;
+  effects: string;
+  pendingEffects: number;
+}
+export type AvatarFinishInspector = (
+  profile: Row,
+  readers: AvatarGrantReaders,
+) => Promise<AvatarFinishPlan>;
+export interface AvatarFinishSnapshot {
+  profile: Row | undefined;
+  picVer?: number;
+  superseded?: boolean;
+  applied?: boolean;
+}
+export interface AvatarFinishStore {
+  commit(
+    owner: string,
+    query: AvatarFinishQuery,
+    find: AvatarFiles["find"],
+    inspect: AvatarFinishInspector,
+  ): Promise<AvatarFinishSnapshot>;
+}
+
+export interface AvatarCompletionRecord {
+  ownerUid: string;
+  sequence: number;
+  hash: string;
+  picVer: number;
+  committedAt: bigint;
+  effects: string;
+  pendingEffects: number;
+}
+export interface AvatarSystemMail {
+  uid: string;
+  owner: string;
+  fromName: string;
+  title: string;
+  type: 2 | 15;
+  contents: Uint8Array;
+  extra: Uint8Array | null;
+  rewardId: string | null;
+  rewardStatus: 0 | 1;
+  reply: number;
+  createTime: bigint;
+}
+export type AvatarMailPlanner = (
+  completion: AvatarCompletionRecord,
+  stem: string,
+) => AvatarSystemMail;
+export interface AvatarMailDelivery {
+  profile: Row | undefined;
+  mail?: AvatarSystemMail;
+}
+
+export interface AvatarProfileUpdate {
+  owner: string;
+  kingdomId: number;
+  sequence: number;
+  picVer: number;
+  committedAt: bigint;
+  updatedAt: string;
+  userName: string;
+  platform: string;
+}
+export type AvatarProfileProjector = (
+  entry: AvatarCompletionRecord,
+  kingdomId: number,
+) => AvatarProfileUpdate;
+export type AvatarProfilePublisher = (
+  update: AvatarProfileUpdate,
+  signal: AbortSignal,
+) => Promise<void>;
+export interface AvatarProfileDelivery {
+  profile: Row | undefined;
+  published: boolean;
+}
+
+export interface AvatarFinishService {
+  finish(owner: string, receipt: string, now: number): Promise<AvatarFinishSnapshot>;
+  deliver(owner: string, sequence: number): Promise<void>;
+}
+export interface AvatarDeliveryKey {
+  owner: string;
+  sequence: number;
+}
