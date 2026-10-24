@@ -22,13 +22,15 @@ export function featureConfig(rules: Rules, context: FeatureContext): Fields {
   return {
     funcOn: sfs.array(
       [...(rules.configuration.featureRecords ?? rules.features.values())].map((rule) => {
-        if ([rule.id, rule.pf, rule.version].some((value) => typeof value !== "string"))
+        if (typeof rule.id !== "string") throw new GameError(errors.unsupported, "config_string");
+        const enabled = featureAnnouncementEnabled(rule, rules, context);
+        if (typeof rule.pf !== "string" || typeof rule.version !== "string")
           throw new GameError(errors.unsupported, "config_string");
         return sfs.object({
           funcKey: sfs.string(rule.id!),
           pf: sfs.string(rule.pf!),
           version: sfs.string(rule.version!),
-          onOff: sfs.bool(featureAnnouncementEnabled(rule, rules, context)),
+          onOff: sfs.bool(enabled),
         });
       }),
     ),
