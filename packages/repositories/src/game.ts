@@ -1,4 +1,5 @@
 import { readMailBatch } from "./mail-batch.ts";
+import { readNormalRankingRealm } from "./ranking-realm.ts";
 import { readMailUpdates } from "./mail-updates.ts";
 import type { MailUpdateInspector, MailUpdateQuery } from "@opencok/contracts/mail-updates";
 import { markMailConversationRead } from "./mail-conversation-read.ts";
@@ -61,7 +62,7 @@ import { WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
 import { setPushPreference } from "./push-preferences.ts";
 import { updateProfilePreference } from "./profile-preferences.ts";
 import { nicknameOccupied } from "./nickname.ts";
-import { readCelebrityDescription } from "./celebrity.ts";
+import { readCelebrityDescription, saveCelebrityDescription } from "./celebrity.ts";
 import { celebrity } from "@opencok/drizzle/schema/opencok_kingdom/celebrity";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
 import { DependencyError } from "@opencok/errors/dependency";
@@ -106,6 +107,9 @@ type GameRepositoryConfig = Pick<
 export class Database implements GameStore, FriendshipMineStore {
   readonly databases;
   readonly kingdom;
+  normalRankingRealm(): Promise<boolean> {
+    return readNormalRankingRealm(this.databases.global.db, this.config.kingdomId);
+  }
   constructor(readonly config: GameRepositoryConfig) {
     const kingdoms = [...(config.playerKingdoms ?? [])];
     const own = kingdoms.find((realm) => realm.id === config.kingdomId);
@@ -193,6 +197,15 @@ export class Database implements GameStore, FriendshipMineStore {
   }
   celebrityDescription(uid: string, kingdomId: number): Promise<Buffer | null> {
     return readCelebrityDescription(this.databases, uid, kingdomId);
+  }
+  saveCelebrityDescription(uid: string, now: number, readDescription: () => Buffer | null) {
+    return saveCelebrityDescription(
+      this.kingdom.db,
+      uid,
+      this.config.kingdomId,
+      now,
+      readDescription,
+    );
   }
   async accounts(uid: string): Promise<Row[]> {
     return this.databases.global.db
