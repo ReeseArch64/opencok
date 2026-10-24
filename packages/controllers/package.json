@@ -17,6 +17,7 @@
     "./mail-category": "./src/mail-category.ts",
     "./mail-contents": "./src/mail-contents.ts",
     "./mail-delete": "./src/mail-delete.ts",
+    "./mail-updates": "./src/mail-updates.ts",
     "./game": "./src/game.ts",
     "./power": "./src/power.ts",
     "./profile": "./src/profile.ts",
