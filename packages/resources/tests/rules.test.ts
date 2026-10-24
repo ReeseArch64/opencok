@@ -128,6 +128,8 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "sk",
       "general_base",
       "general_skill",
+      "general_official",
+      "general_random_effect",
       "suit",
       "svip",
       "alliancescience",
@@ -156,7 +158,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       '<database><Group id="vip"><ItemSpec id="001" power="007"/></Group></database>',
     );
     const power = (await loadRules(directory)).power;
-    expect(Object.keys(power)).toHaveLength(32);
+    expect(Object.keys(power)).toHaveLength(34);
     expect(Object.values(power).every((catalog) => catalog.get("001")?.power === "007")).toBe(true);
     for (const name of [
       "general_sale",
@@ -385,6 +387,40 @@ test("new-general catalogs are optional, preserve final definitions and stay sep
     });
     expect(rules.power.generalSkills!.get("10")).toEqual({ id: "10", effect: "133;2" });
     await writeFile(join(directory, "general_skill.xml"), '<database><ItemSpec id=""/></database>');
+    await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("new-general office and refinement catalogs load optionally with exact strings and final duplicate definitions", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-new-general-effects-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const absent = (await loadRules(directory)).power;
+    expect(absent.newGeneralOffices?.size).toBe(0);
+    expect(absent.newGeneralRefinement?.size).toBe(0);
+    await writeFile(
+      join(directory, "general_official.xml"),
+      '<database><Group id="first"><ItemSpec id="office" effect="1"/></Group><Group id="last"><ItemSpec id="office" effect="78|91" unlock_person_num="1|2" pos_unlock="1;0;0"/></Group></database>',
+    );
+    await writeFile(
+      join(directory, "general_random_effect.xml"),
+      '<database><ItemSpec id="a" effect="1"/><ItemSpec id="a" effect="78;78;91"/></database>',
+    );
+    const rules = await loadRules(directory);
+    expect(rules.power.newGeneralOffices!.get("office")).toEqual({
+      id: "office",
+      effect: "78|91",
+      unlock_person_num: "1|2",
+      pos_unlock: "1;0;0",
+    });
+    expect(rules.power.newGeneralRefinement!.get("a")).toEqual({ id: "a", effect: "78;78;91" });
+    await writeFile(
+      join(directory, "general_official.xml"),
+      '<database><ItemSpec id=""/></database>',
+    );
     await expect(loadRules(directory)).rejects.toThrow("Invalid gameplay resource ID");
   } finally {
     await rm(directory, { recursive: true, force: true });

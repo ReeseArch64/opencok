@@ -475,9 +475,15 @@ talent effect maps from bounded saved level strings and optional `general_base` 
 conditional-base-skill exclusion, fresh Java Integer HashMap talent traversal and
 Float arithmetic. Decimal and hexadecimal Float parsing rounds directly to binary32,
 including halfway values that cannot safely pass through a JavaScript double first.
-These maps are components, not a complete stronghold modifier: assignment/official
-eligibility, status, equipment, refinement and owner snapshot composition remain
-required before connecting them to occupied-resource queries.
+`rules/new-general-building` now determines direct assignment and official eligibility
+from explicit building/office state; `rules/new-general-status` supplies active status
+and gated refinement contributions. `rules/new-general-effects` composes these with
+skills/talents and an obligatory equipment resolver, preserving Float ordering,
+per-general status clocks, late official scaling, whole-module failure fallback and
+the narrower refinement failure boundary. Its snapshot callback must supply the
+authoritative general traversal and owner state. Equipment/suit calculation and
+runtime owner snapshot composition remain required before connecting this composition
+to occupied-resource queries; callback-based units do not establish runtime parity.
 
 The dependent `repositories/world-point-detail` reader authenticates the local
 observer and selects a point in the observer's world within a read-only repeatable-read
