@@ -1,5 +1,9 @@
 import type { MailContentsEntry } from "@opencok/contracts/mail";
-import { decodeLegacyJsonObject, LegacyJsonError } from "@opencok/messages/legacy-json";
+import {
+  decodeLegacyJsonObject,
+  legacyJsonEntries,
+  LegacyJsonError,
+} from "@opencok/messages/legacy-json";
 import {
   encode,
   fields,
@@ -33,7 +37,7 @@ function oldHelpers(body: Fields, name: string) {
   const value = body[name];
   if (value?.type !== Type.Object) return;
   body[name] = sfs.array(
-    Object.entries(fields(value)).map(([key, entry]) => {
+    legacyJsonEntries(fields(value)).map(([key, entry]) => {
       if (entry.type !== Type.Array) throw new LegacyJsonError();
       return sfs.object({ name: sfs.string(key), armyInfo: entry });
     }),

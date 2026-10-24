@@ -926,7 +926,12 @@ special property-exclusion behavior. Escaped isolated UTF-16 surrogates use Java
 replacement byte, while valid pairs and signed/Unicode hexadecimal escapes are retained.
 An additional 144 frozen synthetic structural vectors exercise those distinctions. Combat
 reports convert old helper maps to arrays and remove general skill/ability fields;
-scout reports filter five obsolete ability IDs. Old plain scout reports remain text.
+scout reports filter five obsolete ability IDs. Helper arrays follow the reference's
+Java 8 ConcurrentHashMap traversal after request-local JSON decoding. Parsed insertion
+history is retained even for numeric-looking keys; resize prefix reversal, collision
+resizing, tree-bin head insertion and tree/list splits are modeled without introducing
+concurrency. Frozen order fixtures and large-object digests cover this behavior through
+the existing 32,767-key decoder limit. Old plain scout reports remain text.
 Each result overrides `createTime` and `u` from storage, clears `contentStr` and carries
 the original trimmed content in 5,000 UTF-16-unit `contentsArr` chunks. A surrogate pair
 split across chunks uses the legacy UTF-8 replacement byte in each chunk.
@@ -949,10 +954,10 @@ storage, byte/depth/item limits or serialization failures roll back all changes.
 
 Complex/numeric-double object keys remain unfinished and reject the whole request
 without deleting mail. Keys that collide after UTF-8 surrogate replacement also reject
-without removal, avoiding duplicate wire keys. Helper-map output follows parsed key order rather
-than the reference's concurrent hash-map traversal. These differences remain explicit
-work under #69; this implementation is not proof of complete content parity. No new
-schema, dependency, translation provider or external service is introduced.
+without removal, avoiding duplicate wire keys. The remaining key-format gap and
+explicit rejection policies remain tracked under #69; this implementation is not proof
+of complete content parity. No new schema, dependency, translation provider or external
+service is introduced.
 
 Synthetic units cover all 50 stored type ordinals, precise integer boundaries,
 permissive decoding, report repairs, chunks, malformed-message removal, ownership,
