@@ -657,3 +657,27 @@ test("kingdom skills, feature and payment metadata share the declared-catalog lo
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("ranking resources load military groups and hero reward bands without requiring private catalogs", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-ranking-rules-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const empty = await loadRules(directory);
+    expect(empty.ranking.militaryGroups?.size).toBe(0);
+    expect(empty.ranking.heroEvents?.size).toBe(0);
+    await writeFile(
+      join(directory, "wr_sever.xml"),
+      '<database><ItemSpec id="1" sever="1-4;7"/></database>',
+    );
+    await writeFile(
+      join(directory, "heroevent.xml"),
+      '<database><ItemSpec id="event" rankreward="11;12|21;22" ranklist="1|10"/></database>',
+    );
+    const loaded = await loadRules(directory);
+    expect(loaded.ranking.militaryGroups?.get("1")?.sever).toBe("1-4;7");
+    expect(loaded.ranking.heroEvents?.get("event")?.rankreward).toBe("11;12|21;22");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
