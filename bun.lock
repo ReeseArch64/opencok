@@ -546,6 +546,7 @@
     "packages/repositories": {
       "name": "@opencok/repositories",
       "dependencies": {
+        "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/drizzle": "workspace:*",
         "@opencok/errors": "workspace:*",

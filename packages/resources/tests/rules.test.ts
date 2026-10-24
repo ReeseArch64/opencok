@@ -205,7 +205,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
   }
 });
 
-test("XML records support singleton, multiple groups, and nested groups with exact strings", () => {
+test("settings read singleton and direct grouped attributes without flattening nested elements", () => {
   expect(
     parseRules('<database><ItemSpec id="001" value="0007"/></database>', "setting").get("001"),
   ).toEqual({ id: "001", value: "0007" });
@@ -216,14 +216,15 @@ test("XML records support singleton, multiple groups, and nested groups with exa
   expect([...rules.values()]).toEqual([
     { id: "001", value: "  text  " },
     { id: "002", value: "a & b" },
-    { id: "003", value: "城" },
+    { id: "nested" },
   ]);
 });
 
 test("duplicates remain explicit across groups and malformed resource records are rejected", () => {
   const duplicate =
     '<database><Group id="one"><ItemSpec id="a" value="1"/></Group><Group id="two"><ItemSpec id="a" value="2"/></Group></database>';
-  expect(() => parseRules(duplicate, "setting")).toThrow("Invalid gameplay resource ID");
+  expect(parseRules(duplicate, "setting").get("a")?.value).toBe("2");
+  expect(() => parseRules(duplicate, "building")).toThrow("Invalid gameplay resource ID");
   expect(parseRules(duplicate, "function_on").get("a")?.value).toBe("2");
   expect(parseRules(duplicate, "goods").get("a")?.value).toBe("2");
   for (const name of ["science", "equipment", "status", "dragon_skill", "activity_panel"])
@@ -240,7 +241,7 @@ test("duplicates remain explicit across groups and malformed resource records ar
     "<database>",
     '<!DOCTYPE database [<!ENTITY secret "private">]><database><ItemSpec id="a"/></database>',
   ])
-    expect(() => parseRules(xml, "setting")).toThrow();
+    expect(() => parseRules(xml, "building")).toThrow();
 });
 
 test("VIP resources select only the named group and retain threshold declaration order", () => {
@@ -598,4 +599,61 @@ test("item declarations use direct element attributes, final duplicate IDs and l
     "<database>",
   ])
     expect(() => parseRules(invalid, "item")).toThrow();
+});
+
+test("auxiliary configuration indexes use direct declarations and preserve empty, repeated and absent IDs", () => {
+  for (const name of [
+    "general_sale",
+    "pay_servercontrol",
+    "function_on",
+    "kingdomskill",
+    "setting",
+    "fb_share",
+    "function_star",
+  ]) {
+    expect(parseRules("<database/>", name).size).toBe(0);
+    const xml =
+      '<database><ItemSpec id="ignored-root"/><Group id="a"><ItemSpec id="same" value="first"/><ItemSpec id="null" value="literal"/></Group><Group id="a"><ItemSpec id="same" value="last"/><ItemSpec value="missing"/><ItemSpec id="" value="blank"/><Group id="nested" value="direct"><ItemSpec id="ignored-descendant"/></Group></Group></database>';
+    const rules = parseRules(xml, name);
+    expect([...rules.keys()]).toEqual(["same", "null", "", "nested"]);
+    expect(rules.get("same")?.value).toBe("last");
+    expect(rules.get("null")?.value).toBe("missing");
+    expect(rules.get("")?.value).toBe("blank");
+    expect(rules.get("nested")).toEqual({ id: "nested", value: "direct" });
+    for (const malformed of [
+      "<database>",
+      "<wrong/>",
+      "<!DOCTYPE database><database/>",
+      '<database><Group><ItemSpec id="a"/></Group></database>',
+    ])
+      expect(() => parseRules(malformed, name)).toThrow();
+  }
+});
+
+test("kingdom skills, feature and payment metadata share the declared-catalog loader in resource composition", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "opencok-auxiliary-config-"));
+  try {
+    for (const name of ["building", "role", "position"])
+      await writeFile(join(directory, `${name}.xml`), records);
+    const xml =
+      '<database><ItemSpec id="ignored"/><Group id="first"><ItemSpec id="same" value="first"/></Group><Group id="second"><ItemSpec id="same" value="last"/><ItemSpec id="" value="blank"/></Group></database>';
+    for (const name of ["kingdomskill", "function_on", "pay_servercontrol"])
+      await writeFile(join(directory, `${name}.xml`), xml);
+    const rules = await loadRules(directory);
+    for (const catalog of [
+      rules.features,
+      rules.configuration.payControl!,
+      rules.configuration.kingdomSkills!,
+    ]) {
+      expect([...catalog.keys()]).toEqual(["same", ""]);
+      expect(catalog.get("same")?.value).toBe("last");
+    }
+    expect(rules.configuration.kingdomSkillRecords).toEqual([
+      { id: "same", value: "first" },
+      { id: "same", value: "last" },
+      { id: "", value: "blank" },
+    ]);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
