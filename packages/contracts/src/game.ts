@@ -1,3 +1,4 @@
+import type { MailStatusQuery, MailStatusSnapshot } from "./mail.ts";
 import type { ExpeditionRankingEntry } from "./expedition-ranking.ts";
 import type { AllianceRankingQuery, AllianceRankingSnapshot } from "./alliance-ranking.ts";
 import type { Row } from "./rows.ts";
@@ -21,6 +22,7 @@ export interface CityState {
   lord: Row | undefined;
 }
 export interface GameStore extends AuthenticationStore {
+  mailStatus(uid: string, query: MailStatusQuery): Promise<MailStatusSnapshot>;
   allianceRanking(uid: string, query: AllianceRankingQuery): Promise<AllianceRankingSnapshot>;
   playerRanking(uid: string, query: PlayerRankingQuery): Promise<PlayerRankingSnapshot>;
   publicProfile(uid: string, observerAllianceId: string): Promise<RoutedPublicProfile | undefined>;

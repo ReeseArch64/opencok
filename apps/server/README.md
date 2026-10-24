@@ -6,7 +6,7 @@ login, city bootstrap and world reads to the existing PostgreSQL Drizzle models.
 The runtime requires Bun 1.4.2 and the workspace layout.
 
 Implemented commands: `cmd.finishinit`, `cmd.ping`, `login.dataconfig`,
-`login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`,
+`login.other`, `setting.xml`, `get.user.info.multi`, `get.user.info`, `get.power.info`, `mail.category.status`,
 `server.rank`, `kill.rank`, `level.rank`, `building.rank`, `silver.contribute.rank`, `expedition.rank`, `alliance.rank`, `kill.al.rank`, `build.info` and `world.get`. The SFS handshake, login rejection,
 session replacement, fragmentation, zlib input and signed 64-bit values are
 preserved. Construction, queue completion, combat and other mutations return
@@ -674,6 +674,35 @@ new match. Synthetic units inject Redis command results and inspect the script c
 Lua execution against Redis, real service availability and client rendering remain
 unverified in this phase.
 
+## Mailbox category status
+
+`mail.category.status`, tracked in [issue #64](https://github.com/ReeseArch64/opencok/issues/64),
+returns total and unread counts for the authenticated recipient. Without `category`,
+it returns eight numbered objects with SFS integer counters. With an integer category
+from 1 through 8, it returns `total` and `unread` as SFS longs. Unknown integer categories
+produce the shared success acknowledgment; malformed wire types reject. Correlation
+fields are retained, and client UID/recipient parameters never select another mailbox.
+
+The combined view assigns system, announcements, events, messages, alliance, battle,
+moderation and bottle types to their legacy categories. Title `115429` overrides the
+combined category to alliance, even for an otherwise unmapped type. Alliance-gift
+messages appear under alliance in the combined view, while both system and alliance
+single-category queries include that type. Single-category queries do not apply the
+title override. Combined counts retain signed 32-bit wrapping; selected-category counts
+retain signed 64-bit precision. Invalid stored statuses fail the combined view when
+the message belongs to a category, but selected-category counts ignore statuses other
+than unread/read, matching the reference's distinct paths.
+
+The repository reads the requester and aggregates only that recipient's mail within
+one read-only repeatable-read transaction. It selects type, normalized status, a
+special-title flag and count; message contents, reward payloads and sender data are
+not loaded. SQL null status follows the legacy model's unread default. More than
+32,767 aggregate groups rejects with a sentinel instead of truncating. Missing/banned
+owners and unknown categories skip the mail query. Dependency failures reject instead
+of the reference's fallback to empty combined counters. The mail table is checked at
+startup. This command does not mark, save, delete or redeem messages; the remaining
+mailbox commands are still pending. Verification uses synthetic unit fixtures only.
+
 ## Gameplay migration: topics 1–8
 
 The [migration inventory](https://github.com/ReeseArch64/opencok/discussions/27#discussioncomment-19156446)
@@ -727,7 +756,7 @@ use these descriptions before the reconnect task component is complete.
 | 1. Configuration and feature availability | Settings and data-config queries; deferred-login configuration; feature announcements and account-specific eligibility; grouped XML; timed star previews; synthetic unit and adapter tests      | Native-client and real-service validation remain deferred. Services outside this wave (bosses, commerce and account switching) stay unavailable. |
 | 2. Player/progression queries             | Initial player DTO; public summary batches; full ordinary-realm public-profile read command; detailed-power command with modifier composition and unit tests                                    | Full own/reconnect behavior; documented read-versus-write differences, exceptional-state limits and authoritative global-state import.           |
 | 3. Ranking queries                        | Ordinary-realm player power, kills, level, castles and contributions; alliance power/kills and paired expedition reads; self positions, capacity/video presentation and synthetic unit coverage | Event and cross-realm families; pagination where supported; documented cache, collation and exceptional-state differences.                       |
-| 4. Basic mailbox                          | Persistence schema                                                                                                                                                                              | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
+| 4. Basic mailbox                          | Authenticated category totals/unread counts, legacy category distinctions and synthetic unit coverage                                                                                           | List, read, mark, save and delete, with ownership and atomic mutation rules; reward redemption is outside this wave.                             |
 | 5. Additional map queries                 | Base viewport                                                                                                                                                                                   | Point details, player search and favorites, including authorization for writes.                                                                  |
 | 6. Profile/preferences                    | Initial profile reads                                                                                                                                                                           | Nicknames, validation, applicable costs, flags and persisted preferences.                                                                        |
 | 7. Avatar integration                     | Standalone files service                                                                                                                                                                        | Realm grants, confirmation and profile updates.                                                                                                  |

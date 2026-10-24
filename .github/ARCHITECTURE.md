@@ -1279,6 +1279,12 @@ projects only public fields. Importing authoritative event state and maintaining
 pairings/scores remain separate from the reader; namespace and verification details
 are in the server guide.
 
+Mailbox category status reads the authenticated recipient's grouped counts with the
+owner profile in a read-only repeatable-read snapshot. Contents and reward payloads
+stay outside this read interface. Pure rules retain the combined versus selected
+category distinctions and numeric widths. Marking, saving, deletion and redemption
+require separate mutation interfaces; the status query grants none of those writes.
+
 Construction, queue settlement and combat remain unavailable. Porting them next
 requires PostgreSQL receipts/activity models, atomic resource changes, epoch
 fencing and recovery tests before enabling writes. Account provisioning,

@@ -28,6 +28,7 @@ function fixture() {
     playerSummaries: unused,
     publicProfile: unused,
     playerRanking: unused,
+    mailStatus: unused,
     allianceRanking: unused,
   };
   const services: GameServices = {
