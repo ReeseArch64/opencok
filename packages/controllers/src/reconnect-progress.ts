@@ -33,8 +33,8 @@ import {
   reconnectTasks,
   reconnectQueues,
   reconnectMine,
-} from "@opencok/dtos/reconnect";
-import { avatarMailPush } from "@opencok/dtos/avatar-mail";
+} from "@opencok/mappings/reconnect";
+import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import { encode, extension, sfs, type Fields } from "@opencok/messages/sfs";
 import { MAX_FRAME } from "@opencok/messages/frame";
 import { decodeGeneralAbilities } from "./profile.ts";

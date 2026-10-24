@@ -7,8 +7,8 @@ import {
   reconnectMarchGeneral,
   reconnectMarches,
   type ReconnectMarchView,
-} from "@opencok/dtos/reconnect-marches";
-import { worldResourceOwner } from "@opencok/dtos/world-resource-detail";
+} from "@opencok/mappings/reconnect-marches";
+import { worldResourceOwner } from "@opencok/mappings/world-resource-detail";
 import { decodeWorldMarchArmy, type SavedMarchArmy } from "@opencok/messages/world-resource-army";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";

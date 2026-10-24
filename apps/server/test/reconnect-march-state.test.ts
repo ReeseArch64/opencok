@@ -177,6 +177,10 @@ test("occupied resource marches combine saved companions, current effects, plund
   expect(row.collected).toEqual(sfs.int(7));
   expect(row.occupyEndTime).toEqual(sfs.long(2000));
   expect(row.generalList!.value as Value[]).toHaveLength(1);
+  state.rows[0]!.plunderRes = "";
+  const blank = projectReconnectMarches(state, owner, rules, context, effects);
+  state.rows[0]!.plunderRes = null;
+  expect(projectReconnectMarches(state, owner, rules, context, effects)).toEqual(blank);
   state.points = [];
   expect(() => projectReconnectMarches(state, owner, rules, context, effects)).toThrow();
 });

@@ -123,7 +123,7 @@ test("complete reconnect planner emits each owner section and leaves its immutab
   expect(state).toEqual(before);
 });
 
-test("upkeep respects expired and future bonuses and coalesces unrelated feature boundaries", async () => {
+test("upkeep respects expired and future bonuses without settling the same checkpoint twice", async () => {
   const { state, rules, run } = fixture();
   state.armies = [{ uid: "1001", armyId: "100001", free: 1, level: 1 }];
   rules.arms.set("100001", { upkeep: "86400000", new_arms: "0" });
