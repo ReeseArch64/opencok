@@ -452,6 +452,32 @@ unchanged. These are SQL-contract and lifecycle simulations, not proof from a ru
 PostgreSQL instance. The guarded mutation is still not exposed and no new schema,
 configuration or dependency is added.
 
+Reserved-name configuration now participates in the word-filter reload. After the
+adjacent bad-word file has been read and appended, the server reads the global Redis
+lists `forbidden_words_regular`, `forbidden_words_strict`, `forbidden_words_pattern`,
+`forbidden_words_weight` and `forbidden_words_name`, in that order. It preserves list
+order, duplicates, blanks and exact pattern text. A missing word file prevents all
+five reads. A thrown earlier reader error retains the prior name-pattern snapshot,
+while the already-appended bad words remain. The loading flag stays set through the
+last read, and name patterns switch only after that read succeeds.
+
+`Cache.nicknameForbiddenWords` uses `LRANGE 0 -1` against the existing shared Redis
+URL and exact global keys. As in the source command boundary, a caught command failure
+returns an empty list; this replaces a previously loaded list. Malformed replies and
+limits above 65,536 entries, 65,535 UTF-8 bytes per entry or 16 MiB total reject the
+read. The adapter neither seeds nor writes these operator-provided configuration
+lists and applies no TTL. Startup passes this reader into `loadNicknameServices`;
+`nicknameReservedPatterns` returns a copied snapshot, separate from `nicknameBadWords`.
+
+Ten new unit tests use an overridden cache command and synthetic temporary files to
+cover exact reads, ordering, reload retention, empty/error replacement, size/type
+validation, loading visibility and runtime service composition. No Redis connection
+or game service is opened. The reserved snapshot is not yet evaluated: Java 8
+lowercase/default-locale normalization and arbitrary Java Pattern matching remain
+required before the actual rename provider is complete. Invalid pattern syntax is
+preserved until that future matching stage, matching the source loader's boundary.
+No command is newly enabled by configuration loading alone.
+
 `repositories/nickname-global` now provides `commitNicknameGlobal`. It first enters the
 name guard and confirms availability, then awaits a required preparation callback before
 checking the global account. This keeps the source order in which item/gold preparation

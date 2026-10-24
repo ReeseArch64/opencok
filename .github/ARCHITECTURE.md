@@ -599,6 +599,20 @@ adjacent bad-word file read-only, with host-path creation disabled. The controll
 the local authenticated profile, preserves lazy providers and emits the four Int fields
 with request correlation and no pushes. This path neither reserves names nor changes
 profiles, balances or items.
+The same resource reload now reads the five global Redis forbidden-word lists in
+source order after appending the local file entries: regular, strict, pattern, weight
+and name. A failure before the name-list assignment preserves its previous snapshot;
+a successful empty list, including the Redis command adapter's caught-error result,
+replaces it. The original boolean bad-word loading lock covers the Redis reads too.
+The existing shared cache URL supplies these unprefixed global configuration keys;
+the server does not seed, expire or mutate them. Cache loss therefore produces empty
+lists on the next successful reload. Reply validation bounds entries and total bytes;
+malformed or oversized replies fail the reached read instead of becoming patterns.
+Realm composition exposes a copied reserved-pattern snapshot for the future rename
+workflow. This snapshot is not a matching predicate. Arbitrary Java Pattern matching
+and Java 8 default-locale lowercase normalization remain unimplemented, so the rename
+command stays disabled; informational nickname checks retain their separate bad-word
+behavior. Neither private pattern contents nor player text are logged by this adapter.
 Global nickname comparison now has a separate pure `utf8_unicode_ci` equality-key
 primitive. It preserves the reference DDL's UCA 4 primary weights and PAD SPACE
 semantics, with versioned Unicode data and its license in the rules package. It
