@@ -1,3 +1,6 @@
+import { dragonRankingRanges } from "@opencok/rules/dragon-ranking";
+import { dragonRanking } from "@opencok/dtos/dragon-ranking";
+import { decodeDragonRanking } from "./dragon-ranking.ts";
 import { worldPointDetail } from "./world-point-detail.ts";
 import { profilePreference } from "./profile-preferences.ts";
 import { celebrityDescription } from "./celebrity.ts";
@@ -325,6 +328,9 @@ export class Game {
       case "act.score.rank":
         body = await this.scoreActivityRanking(uid);
         break;
+      case "dragon.battle.rank":
+        body = await this.dragonRanking(uid, params);
+        break;
       case "global.celebrities.rank":
         body = await this.globalCelebrityRanking(uid, params);
         break;
@@ -351,7 +357,7 @@ export class Game {
     if (command === "world.get.detail" && encode(extension(command, body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "world_point_detail");
     if (
-      (command === "act.score.rank" || command === "global.celebrities.rank") &&
+      ["act.score.rank", "global.celebrities.rank", "dragon.battle.rank"].includes(command) &&
       encode(extension(command, body)).length > MAX_FRAME
     )
       throw new GameError(errors.unsupported, "ranking");
@@ -879,6 +885,16 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return body;
+  }
+  private async dragonRanking(uid: string, params: Fields): Promise<Fields> {
+    const profile = this.checkProfile(await this.db.profile(uid), this.now());
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const ranges = dragonRankingRanges(wireString(params, "index_limit"));
+    if (ranges === undefined) return {};
+    if (!this.services.dragonRanking) throw new GameError(errors.unsupported, "ranking");
+    const entries = await this.services.dragonRanking(ranges, text(profile, "allianceId"));
+    return dragonRanking(decodeDragonRanking(entries));
   }
   private async globalCelebrityRanking(uid: string, params: Fields): Promise<Fields> {
     if (this.config.kingdomId > 999999) return {};
