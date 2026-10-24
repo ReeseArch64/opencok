@@ -553,6 +553,16 @@ service-specific global rule, bypassing the announcement selector. The current r
 has no boss lifecycle provider; absent running state remains closed. Account/subscription
 metadata does not implement their mutation handlers. Missing announcement platform/version
 fields fail after availability evaluation, while missing IDs fail before service reads.
+Deferred-login configuration distinguishes unavailable switch rows from a successful
+empty result. The repository reads required profile/preferences first, then isolates
+the optional switch query with a savepoint in the same read-only snapshot. Only a
+successfully recovered statement failure can continue: recognized PostgreSQL SQLSTATE
+errors produce empty switches, matching the legacy SQL adapter's SQLException fallback,
+while other exceptions produce unavailable switches. Savepoint, rollback, release and
+commit failures still reject. The controller omits both switch fields after an
+unavailable query, or only verification after a later account-gate/
+counter failure. Announcements remain outside this boundary. Empty device IDs retain
+empty Redis suffixes; null/missing IDs use literal `null`, with no blank-device bypass.
 Kingdom-skill presentation now consumes
 ordered catalog declarations separately from the final ID index, restores each row
 with its constructor validation/failure boundary, and uses fresh Integer-map tab

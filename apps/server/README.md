@@ -179,8 +179,15 @@ string values and IDs. Profile, switches and saved notification preferences are
 read in one repeatable-read PostgreSQL transaction. Missing notification settings
 are synthesized using the legacy 20-type defaults, with world news off. Unlike
 the Java read path, this query never inserts a preference row; explicit preference
-updates belong to topic 6. Dependency failures reject the query instead of silently
-returning a partial configuration.
+updates belong to topic 6. Required profile/preference failures reject the query.
+The optional switches query runs after those reads inside a savepoint. A query failure
+must roll back to that savepoint and release it before the snapshot can commit;
+transaction-control failures still reject. Recognized PostgreSQL SQLSTATE errors become
+empty switch arrays, matching the legacy SQL adapter's SQLException fallback, and
+verification continues. Other recovered query exceptions omit both `switches` and
+`isVerifyChangeAccount`. An empty successful query also retains its empty array.
+Verification failures retain already projected switches and omit only the verification
+field. Feature announcements run afterward, outside that failure boundary.
 
 Feature announcements retain the legacy distinction between the realm selector
 (`onOff`) and the `version`/`pf` client metadata. The authoritative rule evaluator
@@ -329,9 +336,11 @@ the literal string or null, rejecting non-string responses and values longer tha
 65,535 characters. After the feature gate, a missing count or missing threshold returns
 false without numeric parsing. Otherwise both values use signed Java Int parsing,
 including plus signs, leading zeroes and supported Unicode digits; malformed or
-overflowing values reject the response. Negative values remain signed comparisons.
-No count is fetched when the
-gate is closed or the profile has no device ID. This phase does not implement
+overflowing values reach the switch projection's omission boundary. Negative values
+remain signed comparisons. No count is fetched when the gate is closed or the switches
+are unavailable after a non-SQL query exception. Empty device IDs retain an empty key suffix; null/missing IDs use the
+literal `null` suffix, as in Java string concatenation. Whitespace remains literal.
+This phase does not implement
 account switching or import legacy Redis keys; a future switching writer must use
 this namespace. The shared local Redis instance supplies the global counter across
 the configured realms. Preference and counter adapters are unit-tested with fake

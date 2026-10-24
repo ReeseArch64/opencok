@@ -95,7 +95,8 @@ import {
   inventoryItem,
   serverClock,
   settingConfig,
-  loginConfiguration,
+  loginConfigurationPreferences,
+  loginSwitches,
 } from "@opencok/dtos/bootstrap";
 
 const playerRankingKinds = {
@@ -955,19 +956,23 @@ export class Game {
     const state = await this.db.configuration(uid);
     const profile = this.checkProfile(state.profile);
     const context = this.featureContext(profile);
-    const deviceId = text(profile, "deviceId");
-    let count: string | null = null;
-    if (deviceId && accountVerificationEnabled(this.rules, context)) {
-      if (!this.services.changeAccountCount)
-        throw new GameError(errors.unsupported, "account_rule");
-      count = await this.services.changeAccountCount(deviceId);
+    const result = loginConfigurationPreferences(this.rules, state);
+    if (state.switches !== undefined) {
+      try {
+        Object.assign(result, loginSwitches(state.switches));
+        let count: string | null = null;
+        if (accountVerificationEnabled(this.rules, context)) {
+          if (!this.services.changeAccountCount)
+            throw new GameError(errors.unsupported, "account_rule");
+          count = await this.services.changeAccountCount(String(profile.deviceId ?? "null"));
+        }
+        result.isVerifyChangeAccount = sfs.bool(
+          accountVerificationRequired(this.rules, context, count),
+        );
+      } catch {}
     }
-    return loginConfiguration(
-      this.rules,
-      state,
-      context,
-      accountVerificationRequired(this.rules, context, count),
-    );
+    Object.assign(result, featureConfig(this.rules, context));
+    return result;
   }
   private async otherLogin(uid: string, params: Fields): Promise<Fields> {
     if (!params.army) {

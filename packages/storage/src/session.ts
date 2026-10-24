@@ -58,7 +58,7 @@ export class Cache {
     );
   }
   async deviceChangeCount(deviceId: string): Promise<string | null> {
-    if (!deviceId || deviceId.length > 255) throw new DependencyError("redis");
+    if (deviceId.length > 255) throw new DependencyError("redis");
     const value = await this.command("GET", `opencok:global:device-account-change:${deviceId}`);
     if (value === null) return null;
     if (typeof value !== "string" || value.length > 65535) throw new DependencyError("redis");
