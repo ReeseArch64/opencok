@@ -33,6 +33,7 @@ import {
 import { resolveMailPresentation } from "./mail-presentation.ts";
 import { mailListProjection } from "./mail-list.ts";
 import { mailContentsProjection } from "./mail-contents.ts";
+import { mailConversationReadRequest } from "./mail-conversation-read.ts";
 import { planMailDeletion } from "./mail-delete.ts";
 import {
   mailContentsQuery,
@@ -292,6 +293,9 @@ export class Game {
         break;
       case "chatMail.save":
         body = await this.mailConversationSave(uid, params);
+        break;
+      case "chatMail.read":
+        body = await this.mailConversationRead(uid, params);
         break;
       case "mail.save":
       case "mail.cancel.save":
@@ -813,6 +817,21 @@ export class Game {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return {};
+  }
+  private async mailConversationRead(uid: string, params: Fields): Promise<Fields> {
+    const query = mailConversationReadRequest(params, this.now());
+    if (!this.db.mailConversationRead || query.effects.some((effect) => effect.kind === "chat"))
+      throw new GameError(errors.unsupported, "chat_read_delivery");
+    const body: Fields = { success: sfs.bool(true) };
+    for (const key of ["_cok_", "cmdBaseTime"])
+      if (params[key] !== undefined) body[key] = params[key]!;
+    if (encode(extension("chatMail.read", body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "mail_response_size");
+    const state = await this.db.mailConversationRead(uid, query);
+    const profile = this.checkProfile(state.profile, query.now);
+    if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    return body;
   }
   private async expeditionRanking(uid: string): Promise<Fields> {
     if (this.rules.kingdomId !== this.config.kingdomId || !this.services.expeditionRanking)
