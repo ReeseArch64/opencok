@@ -1,5 +1,9 @@
-import type { MailStatusResult } from "@opencok/contracts/mail";
+import type { MailSaveResult, MailStatusResult } from "@opencok/contracts/mail";
 import { sfs, type Fields } from "@opencok/messages/sfs";
+
+export function mailSave(result: MailSaveResult): Fields {
+  return result === "unchanged" ? {} : { [result]: sfs.string("success") };
+}
 
 export function mailStatus(result: MailStatusResult): Fields {
   if (result.mode === "unknown") return {};
