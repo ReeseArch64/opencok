@@ -33,6 +33,20 @@ export interface MailGroupCleanup {
   mailIds: readonly string[];
 }
 
+export interface MailGroupSelection {
+  kind: "sender" | "type" | "uid";
+  types: readonly number[];
+}
+
+export interface MailGroupReaders extends MailCategoryReaders {
+  preview(group: MailGroupKey, selection: MailGroupSelection): Promise<MailGroupPreview>;
+}
+
+export type MailGroupInspector = (
+  groups: readonly MailGroupEntry[],
+  readers: MailGroupReaders,
+) => Promise<MailGroupCleanup>;
+
 export type MailBatchKind =
   | "notices"
   | "studio"
