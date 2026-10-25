@@ -438,6 +438,7 @@ export function planInventoryGrants(
   rules: Rules,
   grants: readonly { itemId: string; count: number }[],
   now: number,
+  costs: readonly { itemId: string; count: number }[] = [],
 ): InventoryPlan {
   const planner = new InventoryPlanner(
     state,
@@ -445,6 +446,7 @@ export function planInventoryGrants(
     { world: async () => new Map(), emperor: async () => null },
     now,
   );
+  for (const cost of costs) planner.spendItems(cost.itemId, inventoryCount(cost.count));
   for (const grant of grants) planner.add(grant.itemId, grant.count);
   return planner.result({});
 }

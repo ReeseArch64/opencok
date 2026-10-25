@@ -670,3 +670,4 @@ export { avatar_publication } from "./opencok_kingdom/avatar_publication";
 export { command_receipt } from "./opencok_kingdom/command_receipt";
 export { economy_posting } from "./opencok_kingdom/economy_posting";
 export { mutation_outbox } from "./opencok_kingdom/mutation_outbox";
+export { shop_stock } from "./opencok_kingdom/shop_stock";

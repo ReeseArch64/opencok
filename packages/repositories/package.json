@@ -71,7 +71,9 @@
     "./mutation": "./src/mutation.ts",
     "./economy-mutation": "./src/economy-mutation.ts",
     "./inventory": "./src/inventory.ts",
-    "./mail-rewards": "./src/mail-rewards.ts"
+    "./mail-rewards": "./src/mail-rewards.ts",
+    "./shops": "./src/shops.ts",
+    "./trade": "./src/trade.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

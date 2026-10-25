@@ -14348,3 +14348,16 @@ select "kingdomId", "ownerUid", "requestId", "eventId", "eventType", "payload", 
 update "opencok_kingdom"."mutation_outbox" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "eventId" = $4, "eventType" = $5, "payload" = $6, "createdAt" = $7, "publishedAt" = $8 where "opencok_kingdom"."mutation_outbox"."kingdomId" = $9
 delete from "opencok_kingdom"."mutation_outbox" where "opencok_kingdom"."mutation_outbox"."kingdomId" = $1"
 `;
+
+
+exports[`opencok_kingdom.shop_stock: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["id","varchar(40)",true,null,null,null]
+column ["purchased","bigint",true,"0",null,null]
+primary ["shop_stock_PRIMARY",["id"]]
+check ["shop_stock_nonnegative","\\"purchased\\" >= 0"]
+insert into "opencok_kingdom"."shop_stock" ("id", "purchased") values ($1, $2)
+select "id", "purchased" from "opencok_kingdom"."shop_stock" where "opencok_kingdom"."shop_stock"."id" = $1
+update "opencok_kingdom"."shop_stock" set "id" = $1, "purchased" = $2 where "opencok_kingdom"."shop_stock"."id" = $3
+delete from "opencok_kingdom"."shop_stock" where "opencok_kingdom"."shop_stock"."id" = $1"
+`;

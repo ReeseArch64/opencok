@@ -99,6 +99,13 @@
       "when": 1792881273513,
       "tag": "0013_mutation_foundation",
       "breakpoints": false
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792894241707,
+      "tag": "0014_shop_stock",
+      "breakpoints": false
     }
   ]
 }
