@@ -68,7 +68,8 @@
     "./general-assignments": "./src/general-assignments.ts",
     "./legacy-generals": "./src/legacy-generals.ts",
     "./general-recovery": "./src/general-recovery.ts",
-    "./general-combat": "./src/general-combat.ts"
+    "./general-combat": "./src/general-combat.ts",
+    "./general-draws": "./src/general-draws.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

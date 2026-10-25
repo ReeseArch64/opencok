@@ -6,6 +6,30 @@ const app = new URL("../", import.meta.url),
   directory = await mkdtemp(join(tmpdir(), "opencok-player-progression-mutations-"));
 const mutations = [
   [
+    "general talent ownership",
+    "general-abilities",
+    "rules",
+    "general-talents",
+    "skill.skill_group !== base.talent ||",
+    "false ||",
+  ],
+  [
+    "draw free allowance",
+    "general-draws",
+    "rules",
+    "general-draws",
+    "gold: BigInt(unit) * BigInt(paid)",
+    "gold: BigInt(unit) * BigInt(count)",
+  ],
+  [
+    "general battle eligibility",
+    "general-combat",
+    "services",
+    "general-combat",
+    'num(row, "state") !== 3',
+    "false",
+  ],
+  [
     "talent budget",
     "player-effects",
     "rules",

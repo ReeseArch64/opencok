@@ -178,6 +178,11 @@ atomic response receipts, credit/debit postings and outbox records. Reconnect
 settlement adopts these records; future economic domains must explicitly integrate
 the executor and define their operation identity and business rules.
 
+Hero and general mutations use the same owned city transaction, with separate
+legacy and numeric rosters. Assignment and effect changes settle production;
+combat consumes immutable general snapshots. See [general progression](../docs/architecture/general-progression.md)
+for native commands, recovery, draw catalog compatibility and acceptance limits.
+
 ## 10. Battle computation and bots
 
 TypeScript combat runs through the realm app with bounded CPU workers, queue,
