@@ -6,15 +6,20 @@ import { createGameplayCatalog, repeatCatalogElements } from "../src/catalog.ts"
 import { parseGameplayCatalog, parseRules, loadRules } from "../src/rules.ts";
 import inventory from "../src/catalogs/inventory.json";
 
-test("every XML catalog has a typed identifier and a matching readable implementation", async () => {
-  expect(Object.values(GameplayCatalog).map(String).sort()).toEqual(
-    inventory.map((entry) => entry.id).sort(),
-  );
+test("remaining transitional catalogs have typed identifiers and matching implementations", async () => {
+  expect(
+    Object.values(GameplayCatalog)
+      .filter((id) => id !== GameplayCatalog.Building)
+      .map(String)
+      .sort(),
+  ).toEqual(inventory.map((entry) => entry.id).sort());
   const verified = new Set<string>();
   for (const entry of inventory) {
     expect(typeof gameplayCatalogs[entry.id as GameplayCatalog]).toBe("function");
     if (verified.has(entry.module)) continue;
-    const document = await gameplayCatalogs[entry.id as GameplayCatalog]();
+    const factory = gameplayCatalogs[entry.id as GameplayCatalog];
+    if (!factory) throw new Error("Missing legacy catalog factory");
+    const document = await factory();
     const serialized = JSON.stringify(document);
     expect(Buffer.byteLength(serialized), entry.id).toBe(entry.documentBytes);
     expect(createHash("sha256").update(serialized).digest("hex"), entry.id).toBe(
@@ -56,7 +61,11 @@ test("bundled rules load for both realms and isolate mutable indexes", async () 
   const key = [...first.buildings.keys()][0];
   if (!key) throw new Error("Missing bundled building ID");
   const original = second.buildings.get(key);
-  first.buildings.set(key, { id: key, edited: "synthetic" });
+  if (!original) throw new Error("Missing building definition");
+  first.buildings.set(key, {
+    ...original,
+    constructionSeconds: (original.constructionSeconds ?? 0) + 1,
+  });
   expect(second.buildings.get(key)).toEqual(original);
   expect(second.buildings.get(key)).not.toEqual(first.buildings.get(key));
 });

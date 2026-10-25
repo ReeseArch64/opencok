@@ -1,3 +1,4 @@
+import { importBuildingDefinition } from "@opencok/resources/buildings/import";
 import { expect, test } from "bun:test";
 import type { ReconnectProgressState } from "@opencok/contracts/reconnect";
 import { planReconnectProgress } from "@opencok/services/reconnect-progress";
@@ -150,8 +151,14 @@ test("starvation projects final armies, accounts for weakness and deaths, and cr
   for (const key of ["p6_all", "p6_security_resources", "p6_weak"])
     rules.features.set(key, { version: "1.0.0", online: "all" });
   rules.items.set("week_info", { k1: "1", k2: "500" });
-  rules.buildings.set("439001", { level: "1", unlock_type: "1" });
-  rules.buildings.set("441001", { level: "1", para1: "4" });
+  rules.buildings.set(
+    Number("439001"),
+    importBuildingDefinition({ level: "1", unlock_type: "1" }, Number("439001")),
+  );
+  rules.buildings.set(
+    Number("441001"),
+    importBuildingDefinition({ level: "1", para1: "4" }, Number("441001")),
+  );
   state.buildings = [
     { uuid: "templar", itemId: 439000, level: 1, unlockFlag: 1 },
     { uuid: "hospital", itemId: 441000, level: 1 },
@@ -305,7 +312,10 @@ test("mobile task completion refreshes tutorial production once and a persisted 
   const { state, rules, run } = fixture();
   state.registrationPlatform = "facebook";
   state.buildings = [{ uuid: "farm", itemId: 415000, level: 1, pos: 17, refreshTime: 1000n }];
-  rules.buildings.set("415001", { level: "1", para1: "3600000", para2: "1000" });
+  rules.buildings.set(
+    Number("415001"),
+    importBuildingDefinition({ level: "1", para1: "3600000", para2: "1000" }, Number("415001")),
+  );
   rules.reconnect.quests = [
     { id: "2102501", type1: "1", type2: "34", para1: "1", para2: "1", accept1: "1", accept2: "" },
   ];

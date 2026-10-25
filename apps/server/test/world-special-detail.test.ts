@@ -1,3 +1,4 @@
+import { importBuildingDefinition } from "@opencok/resources/buildings/import";
 import { expect, test } from "bun:test";
 import type {
   WorldPointDetailSnapshot,
@@ -240,8 +241,14 @@ test("garrison capacity combines persisted school and war hall with float effect
     { uuid: "school", itemId: 427000, level: 1, star: 0 },
     { uuid: "hall", itemId: 407000, level: 1, star: 0 },
   ];
-  rules.buildings.set("427001", { level: "1", para1: "20" });
-  rules.buildings.set("407001", { level: "1", para1: "30" });
+  rules.buildings.set(
+    Number("427001"),
+    importBuildingDefinition({ level: "1", para1: "20" }, Number("427001")),
+  );
+  rules.buildings.set(
+    Number("407001"),
+    importBuildingDefinition({ level: "1", para1: "30" }, Number("407001")),
+  );
   const result = await territorySoldierCapacity(owner, rules, 1, 5000, {
     worldPowerEffects: async () => new Map(),
   });

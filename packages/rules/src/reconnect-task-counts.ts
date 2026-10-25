@@ -56,8 +56,8 @@ export function reconnectResourceOutput(
       integer(row.star),
       integer(row.progress),
     );
-    if (rule.para1 !== undefined)
-      result.set(type, ((result.get(type) ?? 0) + integer(rule.para1)) | 0);
+    if (rule.effects?.productionPerHour !== undefined)
+      result.set(type, ((result.get(type) ?? 0) + integer(rule.effects.productionPerHour)) | 0);
   }
   return result;
 }

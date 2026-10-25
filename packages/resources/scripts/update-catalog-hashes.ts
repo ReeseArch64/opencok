@@ -11,9 +11,13 @@ const inventory: {
   documentSha256: string;
 }[] = JSON.parse(await readFile(path, "utf8"));
 const requested = process.argv[2];
+if (requested === GameplayCatalog.Building)
+  throw new Error("Edit src/buildings directly; domain models do not require catalog checksums");
 const selected = inventory.find((entry) => entry.id === requested);
 if (!selected) throw new Error("Supply a catalog identifier from GameplayCatalog");
-const document = await gameplayCatalogs[selected.id]();
+const factory = gameplayCatalogs[selected.id];
+if (!factory) throw new Error("This catalog has migrated to a domain model");
+const document = await factory();
 const serialized = JSON.stringify(document);
 const checksum = createHash("sha256").update(serialized).digest("hex");
 for (const entry of inventory.filter((entry) => entry.module === selected.module)) {

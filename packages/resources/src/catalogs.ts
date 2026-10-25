@@ -1,8 +1,8 @@
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import type { GameplayCatalogDocument } from "./catalog.ts";
 
-export const gameplayCatalogs: Readonly<
-  Record<GameplayCatalog, () => Promise<GameplayCatalogDocument>>
+export const gameplayCatalogs: Partial<
+  Readonly<Record<GameplayCatalog, () => Promise<GameplayCatalogDocument>>>
 > = {
   [GameplayCatalog.Catalog3thAnniversary]: async () =>
     (await import("./catalogs/3th_anniversary.ts")).createCatalog(),
@@ -87,7 +87,6 @@ export const gameplayCatalogs: Readonly<
   [GameplayCatalog.BoxVip]: async () => (await import("./catalogs/box_vip.ts")).createCatalog(),
   [GameplayCatalog.BrResourceRefresh]: async () =>
     (await import("./catalogs/br_resource_refresh.ts")).createCatalog(),
-  [GameplayCatalog.Building]: async () => (await import("./catalogs/building.ts")).createCatalog(),
   [GameplayCatalog.BuildingStar]: async () =>
     (await import("./catalogs/building_star.ts")).createCatalog(),
   [GameplayCatalog.BuildingStarup]: async () =>

@@ -54,20 +54,24 @@ export function reconnectUpkeep(
   if (protect && cellar) {
     const rule = configuration(cellar);
     const additive = float(environment.effect(72) + environment.cellarGeneralEffect());
-    protectedFood = cast(float(float(int(rule.para4)) + additive));
+    protectedFood = cast(float(float(int(rule.effects?.protectedFood)) + additive));
     const multiplier = environment.effect(38);
     if (multiplier > 0) protectedFood = cast(protectedFood * (float(100 + multiplier) / 100));
   }
   const templar = building(439000);
+  const templarDefinition =
+    templar === undefined
+      ? undefined
+      : rules.buildings.get((int(templar.itemId) + int(templar.level) + int(templar.star)) | 0);
   const unlocked =
     templar !== undefined &&
-    (rules.buildings.get(String((int(templar.itemId) + int(templar.level) + int(templar.star)) | 0))
-      ?.unlock_type === undefined ||
+    ((templarDefinition?.unlockConditions === undefined &&
+      templarDefinition?.upgrades?.unlockConditions === undefined) ||
       int(templar.level) !== 1 ||
       int(templar.unlockFlag) !== 0);
   const weakness = unlocked && glory && enabled("p6_weak");
   const hospital = weakness ? building(441000) : undefined;
-  const capacity = hospital ? int(configuration(hospital).para1) : 0;
+  const capacity = hospital ? int(configuration(hospital).effects?.woundedKnightCapacity) : 0;
   const separateBound =
     !environment.specialServer &&
     switchRealmEnabled(rules.items.get("on_trumpet")?.k2, context.kingdomId);

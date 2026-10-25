@@ -1,3 +1,9 @@
+import {
+  buildingDisplayParameters,
+  buildingRequirements,
+  buildingItemCosts,
+  buildingUnlockValues,
+} from "./building.ts";
 import { validateFields } from "./validation.ts";
 import { buildingSchema, queueSchema, resourceSchema, userSchema } from "@opencok/validations/city";
 
@@ -12,45 +18,55 @@ function serializeBuilding(row: Row, rules: Rules, next = false, now = Date.now(
   const rule = next
     ? rules.nextBuilding(itemId, num(row, "level"), num(row, "star"), num(row, "progress"), now)
     : rules.building(itemId, num(row, "level"), num(row, "star"), num(row, "progress"));
-  const level = Number(rule.level);
+  const level = rule.level;
   const out: Fields = {
     uuid: sfs.string(text(row, "uuid")),
     itemId: sfs.string(text(row, "itemId")),
     pos: sfs.int(num(row, "pos")),
     level: sfs.int(level),
     opType: sfs.int(num(row, "opType")),
-    starNum: sfs.int(Number(rule.s)),
-    starRate: sfs.int(Number(rule.p)),
+    starNum: sfs.int(rule.starLevel),
+    starRate: sfs.int(rule.starProgress),
     starMax: sfs.int(rules.maxStar(itemId, now)),
     putId: sfs.string(text(row, "putId")),
     unlockFlag: sfs.int(next ? 0 : num(row, "unlockFlag")),
     unlock_costNum: sfs.int(num(row, "costUnlockTimes")),
   };
-  for (const key of [
-    "building",
-    "star_building",
-    "star_building_new",
-    "unlock_type",
-    "unlock_value",
-  ])
-    out[key] = sfs.string(rule[key] ?? "");
-  for (const key of ["wood", "stone", "iron", "food", "silver"])
+  const unlock = buildingUnlockValues(rule);
+  out.building = sfs.string(buildingRequirements(rule));
+  out.star_building = sfs.string(
+    rule.requiredStarBuildings?.map((value) => value.levelId).join(",") ?? "",
+  );
+  out.star_building_new = sfs.string(
+    rule.requiredStarBuildings?.map((value) => value.levelId + "," + value.quantity).join(";") ??
+      "",
+  );
+  out.unlock_type = sfs.string(unlock.types);
+  out.unlock_value = sfs.string(unlock.values);
+  for (const key of ["wood", "stone", "iron", "food", "silver"] as const)
     out[key] = sfs.long(rules.cost(rule, key));
-  for (const key of [
-    "time",
-    "exp",
-    "civilization_level",
-    "resource",
-    "ban_luckyday",
-    "destroy_time",
-  ])
-    out[key] = sfs.int(Number(rule[key] ?? 0));
-  for (const key of ["power", "unlock_costType", "unlock_costValue"])
-    if (rule[key] !== undefined) out[key] = sfs.int(Number(rule[key]));
-  for (const key of ["item", "para1", "para2", "para3", "para4", "para5"])
-    if (rule[key] !== undefined) out[key] = sfs.string(rule[key]);
-  const nextRule = rules.nextBuilding(itemId, level, Number(rule.s), Number(rule.p), now);
-  const paras = [1, 2, 3, 4, 5].map((i) => nextRule?.[`para${i}`]).filter((v) => v !== undefined);
+  out.time = sfs.int(rule.constructionSeconds ?? 0);
+  out.exp = sfs.int(rule.experience ?? 0);
+  out.civilization_level = sfs.int(rule.civilizationLevel ?? 0);
+  out.resource = sfs.int(0);
+  out.ban_luckyday = sfs.int(0);
+  out.destroy_time = sfs.int(rule.demolitionSeconds ?? 0);
+  if (rule.power !== undefined) out.power = sfs.int(rule.power);
+  if (rule.unlockPayment !== undefined) {
+    out.unlock_costType = sfs.int(rule.unlockPayment.paymentId);
+    out.unlock_costValue = sfs.int(Number(rule.unlockPayment.amount));
+  }
+  const item = buildingItemCosts(rule);
+  if (item !== undefined) out.item = sfs.string(item);
+  const parameters = buildingDisplayParameters(rule);
+  for (let index = 0; index < 5; index++) {
+    const parameter = parameters[index];
+    if (parameter !== undefined) out["para" + (index + 1)] = sfs.string(parameter);
+  }
+  const nextRule = rules.nextBuilding(itemId, level, rule.starLevel, rule.starProgress, now);
+  const paras = buildingDisplayParameters(nextRule)
+    .slice(0, 5)
+    .filter((value) => value !== undefined);
   if (paras.length) out.nextLevelParas = sfs.string(paras.join(","));
   if (long(row, "refreshTime")) out.refreshTime = sfs.long(long(row, "refreshTime"));
   if (long(row, "effectTime")) {

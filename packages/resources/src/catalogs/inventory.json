@@ -392,14 +392,6 @@
     "module": "br_resource_refresh"
   },
   {
-    "id": "building",
-    "sourceBytes": 551171,
-    "sourceSha256": "37a416f1241f5298141a3f3c0c125dcd79259b09ddd3fe7bd3917daab48d319e",
-    "documentBytes": 1219844,
-    "documentSha256": "5a72c36041794a9b7ca3d0d7a5884700be7829cadbedbb71e46db45cdf62fa9c",
-    "module": "building"
-  },
-  {
     "id": "building_star",
     "sourceBytes": 234806,
     "sourceSha256": "e7d5e1558609430e10924033b8f046c982e341bb59beb70e8932c771b63fde5f",

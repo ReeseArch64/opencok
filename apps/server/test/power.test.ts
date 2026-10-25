@@ -1,3 +1,7 @@
+import {
+  importBuildingCatalog,
+  importBuildingDefinition,
+} from "@opencok/resources/buildings/import";
 import { expect, test } from "bun:test";
 import type { PowerContext, PowerSnapshot } from "@opencok/contracts/power";
 import { calculatePlayerPower } from "@opencok/rules/power";
@@ -27,7 +31,7 @@ function fixture() {
     dragonLevels: catalog({ id: "5001", base_id: "6001", level: "2", attack: "100" }),
   };
   const rules = new Rules(
-    catalog({ id: "400001", level: "1", power: "50" }),
+    importBuildingCatalog(catalog({ id: "400001", level: "1", power: "50" })),
     catalog({ id: "100105", power: "100" }),
     new Map(),
     new Map(),
@@ -196,12 +200,18 @@ test("floating troop overflow saturates at Java long bounds and integer total wr
 
 test("building star progress uses the current power tier without completing its next step", () => {
   const { rules } = fixture();
-  rules.buildings.set("400030", {
-    id: "400030",
-    level: "30",
-    power: "50",
-    star_power: "0;60|10;70|20;80",
-  });
+  rules.buildings.set(
+    Number("400030"),
+    importBuildingDefinition(
+      {
+        id: "400030",
+        level: "30",
+        power: "50",
+        star_power: "0;60|10;70|20;80",
+      },
+      Number("400030"),
+    ),
+  );
   const state = empty();
   state.buildings = [{ itemId: 400000, level: 30, star: 0, progress: 10 }];
   expect(calculatePlayerPower(state, rules, context()).buildingPower).toBe(70);

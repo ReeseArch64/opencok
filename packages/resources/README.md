@@ -1,74 +1,83 @@
-# Gameplay catalogs
+# Gameplay resources
 
-All 381 authorized reference XML catalogs are included as readable TypeScript
-under `src/catalogs/`, including catalogs not yet consumed by the realm.
-`GameplayCatalog` in `@opencok/enums/gameplay-catalog` identifies every catalog.
-`gameplayCatalogs` loads them on demand; startup loads the catalogs used by Rules.
-The server needs no external XML directory, GAME_RESOURCES or Compose volume.
+Maintained gameplay data lives in this package. Building definitions use domain
+models; the other 380 catalogs still use transitional XML-shaped TypeScript
+objects. They are available without external XML, Base64 or Compose mounts, but
+those remaining domains have not yet been rewritten as game mechanics.
 
-## Editing data
+## Building mechanics
 
-Find the catalog in `src/catalogs.ts`, then open its referenced module. Edit the
-object fields in `createCatalog()`. Records keep their original element names;
-`":@"` contains attributes such as `id`, costs, levels and feature values. Large
-catalogs import readable `.partN.ts` files; edit the matching record there.
-Keep string values as strings, including numeric text, leading zeros, separators,
-case and spaces. Keep duplicate records and declaration order unless changing
-their gameplay behavior is intentional.
+Edit `src/buildings/<buildingId>.ts` directly. Each entry has numeric `id`,
+`buildingId`, `level` and `starLevel`, bigint resource costs, construction duration,
+prerequisites, named effects and typed star progression steps. For example,
+production uses `effects.productionPerHour` and `effects.productionCapacity`;
+food protection uses `effects.protectedFood`. Bigint literals preserve costs
+beyond JavaScript's safe integer range.
 
-Large tiled maps use numeric arrays in `.tilesN.ts` files. `catalogTiles` expands
-each numeric tile ID with its original separator. Repeated identical sequences
-use `repeatCatalogElements`; edit the sequence or repetition count directly.
-These are ordinary typed values and functions, with no encoded or compressed data.
+`getBuildingDefinition(413000)` returns building metadata with `id: 413000`,
+`levelMax: 30`, `resourceId: 0` and its levels. `createBuildingCatalog()` creates
+an isolated map indexed by numeric level-definition ID for each realm.
+`@opencok/rules/building` evaluates current and next levels without parsing XML
+attributes or delimited strings. Edit costs and effects here to change the
+mechanics consumed by the server.
 
-Identical catalog documents share a module. Check `src/catalogs/inventory.json`
-before editing a shared module: the edit affects every identifier referencing it.
-To customize one alias independently, give it its own module and registry entry.
+`clientParameters` retains display values whose game meaning is not established.
+Only mappings read these values to preserve mobile fields; server mechanics read
+named effects. Do not implement new rules by parsing client parameters. Model the
+meaning explicitly when migrating another mechanic. Feature availability and
+maximum star levels still depend on the remaining transitional catalogs.
 
-After an intentional edit, update the affected catalog checksum with:
+Validate edits with package tests, server tests, workspace type checks, lint and
+formatting. Building edits do not require checksum updates. Rebuild and recreate
+the server to deploy them; there is no administrative reload endpoint.
+
+## Remaining transitional catalogs
+
+Find a catalog in `src/catalogs.ts` and edit its module or `.partN.ts` files.
+These documents retain original element names, string attributes in `":@"`,
+duplicate records, declaration order and text. This representation is temporary;
+it is not the target interface for game rules. Large maps use numeric tile arrays
+and expansion helpers. Identical documents share modules; check
+`src/catalogs/inventory.json` before editing an alias.
+
+After an intentional transitional-catalog edit, update its integrity metadata:
 
 ```sh
-bun run --cwd packages/resources update:catalogs building
+bun run --cwd packages/resources update:catalogs building_star
 bun run test:packages
 bun run --cwd packages/resources check-types
 bun run lint
 bun run format:check
 ```
 
-The checksum command also updates aliases sharing that module. Review the data
-change alongside its inventory update. Rebuild and recreate the server to deploy
-catalog edits. No file watcher or administrative reload endpoint is introduced.
+## Import boundaries and provenance
 
-## Conversion and compatibility
+The maintainer authorized conversion of all reference XML catalogs on 2026-10-24.
+The ignored originals remain read-only inputs. The building provenance file
+records the source SHA-256 and the 1,511 imported levels across 41 building types.
+The remaining inventory records source and document checksums for 380 identifiers
+sharing 362 documents. All 381 source identifiers remain in `GameplayCatalog`.
+No private executable code, keys or player records are included.
 
-The maintainer authorized converting every XML in
-`data/reference/server/runtime/base/resource` on 2026-10-24. The originals remain
-unchanged and ignored. `src/catalogs/inventory.json` records every source name,
-byte count and SHA-256, plus the current parsed-document checksum and shared module.
-All 381 identifiers remain available, with 363 distinct parsed documents.
-Only data is included; no private executable code, keys or player records are copied.
-
-The importer verifies both ordered declarations and grouped parser projections
-against the existing XML parser. The TypeScript builder preserves those projections,
-including grouping, duplicate definitions, text, field order and exact string values.
-The maintainer approved retaining records without IDs in the complete document
-while excluding them from ordinary ID indexes. Empty required indexes and forbidden
-duplicate IDs still fail; declared singleton/null-key policies remain unchanged.
-
-The importer is a migration tool, not a runtime requirement:
+Migration tools can recreate data from an authorized source:
 
 ```sh
+bun run --cwd packages/resources import:buildings /path/to/authorized/building.xml
 bun run --cwd packages/resources import:catalogs /path/to/authorized/xml
 ```
 
-Running it replaces maintained catalog edits with that source snapshot. Normal
-editing and deployment use the maintained TypeScript directly. The explicit XML
-loader remains available for isolated synthetic fixtures and compatibility checks;
-the application environment no longer selects it. Integration tests pass their
-synthetic Rules explicitly through `startServer(config, rules)`. RealmRulesLive
-continues to load the bundled catalog by default; the injected rules must match
-the configured kingdom and retain normal dependency/resource lifecycle.
+The building importer converts XML attributes into domain models. The general
+importer excludes building.xml so it cannot restore the removed representation.
+Running either importer overwrites maintained edits for its domain; normal
+editing uses TypeScript directly and needs neither importer nor original XML.
+Format generated files before committing.
 
-No wire, database or account-state migration is introduced. Roll back the complete
-application artifact; revisions before this migration also require restoring the
-previous XML mount and GAME_RESOURCES setting.
+The explicit XML loader and `buildings/import` adapter serve migration checks and
+synthetic fixtures. Production startup loads typed building definitions directly.
+Integration tests inject synthetic Rules through `startServer(config, rules)`;
+the isolated Compose test replaces both transitional catalogs and building levels
+with test-only modules. No application environment variable selects XML loading.
+
+This migration preserves mobile field types and order, costs and progression.
+It introduces no database or saved-state migration. Roll back the application
+artifact to restore prior behavior.

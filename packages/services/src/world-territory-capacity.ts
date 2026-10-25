@@ -76,13 +76,19 @@ export async function territorySoldierCapacity(
   };
   const buildings = new Map(snapshot.buildings.map((row) => [String(row.uuid), row]));
   const ordered = legacyObjectOrder([...buildings.keys()]).map((id) => buildings.get(id)!);
-  const parameter = (row: (typeof ordered)[number]) =>
-    Number(
-      javaDecimal(
-        rules.building(String(row.itemId), ownerInteger(row.level), ownerInteger(row.star)).para1,
-        32,
-      ),
+  const parameter = (row: (typeof ordered)[number]) => {
+    const definition = rules.building(
+      String(row.itemId),
+      ownerInteger(row.level),
+      ownerInteger(row.star),
     );
+    const value =
+      row.itemId === 427000
+        ? definition.effects?.reinforcementCapacity
+        : definition.effects?.rallyCapacity;
+    if (value === undefined) throw new Error("Missing building capacity");
+    return ownerInteger(value);
+  };
   const school = ordered
     .filter((row) => row.itemId === 427000)
     .reduce((sum, row) => (sum + parameter(row)) | 0, 0);
