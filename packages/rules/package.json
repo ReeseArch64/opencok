@@ -88,7 +88,8 @@
     "./avatar-moderation": "./src/avatar-moderation.ts",
     "./inventory": "./src/inventory.ts",
     "./mail-rewards": "./src/mail-rewards.ts",
-    "./building": "./src/building.ts"
+    "./building": "./src/building.ts",
+    "./shops": "./src/shops.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

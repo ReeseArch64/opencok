@@ -104,6 +104,8 @@ export class Rules {
     readonly world: WorldCatalogs = {},
     readonly ranking: RankingCatalogs = {},
     readonly materials: Map<string, Rule> = new Map(),
+    readonly shops: Map<string, Rule> = new Map(),
+    readonly trades: Map<string, Rule> = new Map(),
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): BuildingState {
     return buildingLevel(this.buildings, itemId, level, star, progress);
