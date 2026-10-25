@@ -1,3 +1,4 @@
+import { readAbilityPages, readProgressionEffects, writePlayerEffects } from "./player-effects";
 import { readQuests, writeQuests } from "./quests";
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
 import { readResourceNewGenerals } from "./world-resource-owner";
@@ -103,6 +104,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        abilityPages: await readAbilityPages(tx, owner),
         quests: await readQuests(tx, owner, profile, now),
         statistics: statistics ?? {},
         buildingExperience: buildingExperience ?? {},
@@ -112,7 +114,11 @@ export function createCityProgressionStore(
         hospital,
         forts,
         queues,
-        effects: await readPlayerEffects(tx, profile, true),
+        effects: await readProgressionEffects(
+          tx,
+          owner,
+          await readPlayerEffects(tx, profile, true),
+        ),
         newGenerals: await readResourceNewGenerals(tx, owner, false),
         tasks,
         skills,
@@ -124,6 +130,7 @@ export function createCityProgressionStore(
     async update(write, economy) {
       validateWrite(write, owner);
       const persist = async () => {
+        await writePlayerEffects(tx, owner, write);
         if (write.quests) await writeQuests(tx, owner, write.quests);
         for (const row of write.buildings ?? []) {
           const value = {
@@ -158,7 +165,7 @@ export function createCityProgressionStore(
             });
         }
         for (const row of write.skills ?? []) {
-          if (row.ownerId !== owner || !["622800", "622900"].includes(text(row, "skillId")))
+          if (row.ownerId !== owner || !/^6[0-9]{5}$/.test(text(row, "skillId")))
             throw new Error("Invalid research skill owner");
           const value = {
             uuid: text(row, "uuid"),
@@ -309,6 +316,10 @@ export function createCityProgressionStore(
           (scienceBefore.find((before) => before.itemId === row.itemId)?.level ?? 0),
       );
       if (
+        write.vip ||
+        write.states?.length ||
+        write.deletedStates?.length ||
+        write.generals?.length ||
         write.buildings?.length ||
         changedScience ||
         write.profile ||

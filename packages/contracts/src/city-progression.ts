@@ -31,6 +31,7 @@ export interface QuestWrite {
 }
 export interface CityProgressionState {
   quests?: QuestState;
+  abilityPages?: readonly Row[];
   profile: Row;
   resource: Row;
   statistics: Row;
@@ -51,6 +52,11 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  vip?: Row;
+  states?: readonly Row[];
+  deletedStates?: readonly number[];
+  generals?: readonly Row[];
+  abilityPages?: readonly Row[];
   quests?: QuestWrite;
   buildings?: readonly Row[];
   deletedBuildings?: readonly string[];

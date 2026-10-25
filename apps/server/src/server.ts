@@ -1,3 +1,4 @@
+import { playerEffectsDomain } from "@opencok/services/player-effects";
 import { questsDomain } from "@opencok/services/quests";
 import { cityQueueCommands } from "@opencok/rules/city-command";
 import { trainingDomain } from "@opencok/services/training";
@@ -23,7 +24,7 @@ import { persistReconnectProgress } from "@opencok/repositories/reconnect-write"
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { ProductionService } from "@opencok/services/production";
 import { productionContext } from "@opencok/services/production-context";
-import { sfs, decode, str } from "@opencok/messages/sfs";
+import { sfs, encode, decode, str } from "@opencok/messages/sfs";
 import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
 import { CharacterProvisioningService } from "@opencok/services/provisioning";
 import { CharacterProvisioningController } from "@opencok/controllers/provisioning";
@@ -329,6 +330,7 @@ export const RealmDependenciesLive = Layer.effect(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary),
       [
+        playerEffectsDomain,
         questsDomain,
         constructionDomain,
         researchDomain,
@@ -450,7 +452,26 @@ export const RealmDependenciesLive = Layer.effect(
       rules,
     );
     const inventory = new InventoryService(
-      createInventoryExecutor(db.kingdom.db, authority),
+      createInventoryExecutor(db.kingdom.db, authority, Date.now, {
+        before: async (tx, owner, now) => {
+          await productionPreparation.prepare(tx, owner, now);
+        },
+        useEffect: async (tx, owner, itemId, count, now, economy) =>
+          decode(
+            Buffer.from(
+              (
+                await city.command(
+                  tx,
+                  owner,
+                  "effect.item",
+                  encode({ itemId: sfs.string(itemId), count: sfs.int(count) }),
+                  now,
+                  economy,
+                )
+              ).response,
+            ),
+          ),
+      }),
       rules,
       {
         world: async () =>

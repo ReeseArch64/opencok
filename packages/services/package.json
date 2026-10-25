@@ -61,7 +61,8 @@
     "./training": "./src/training.ts",
     "./fortifications": "./src/fortifications.ts",
     "./hospital": "./src/hospital.ts",
-    "./quests": "./src/quests.ts"
+    "./quests": "./src/quests.ts",
+    "./player-effects": "./src/player-effects.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

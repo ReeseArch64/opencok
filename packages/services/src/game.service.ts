@@ -245,12 +245,14 @@ export class GameService {
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
     await this.services.reconcileTimed?.(uid);
+    const effects = await this.services.cityProgression?.(uid, "effects.init", {});
     const quest = await this.services.cityProgression?.(uid, "quest.init", {});
     const state = await this.state(uid);
     const world = state.world;
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
       throw new GameError(errors.unsupported, "world_state");
     const body: Fields = {
+      ...effects?.body,
       ...quest?.body,
       ...serverClock(this.now(), 0),
       ...featureConfig(this.rules, this.featureContext(state.profile)),
@@ -338,6 +340,15 @@ export class GameService {
       case "fresh.signIn":
       case "daily.quest.ls":
       case "daily.quest.reward":
+      case "skill.save":
+      case "skill.clear":
+      case "skill.switch":
+      case "skill":
+      case "skill.use":
+      case "skill.del":
+      case "status.remove":
+      case "show.status.item":
+      case "collect.svip.switch":
       case "task.reward.get":
       case "quest.stage.rd":
       case "story.task.info":

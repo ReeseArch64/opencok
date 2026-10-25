@@ -10,6 +10,11 @@ export interface InventoryItem {
   vanishTime: bigint;
 }
 export interface InventoryState {
+  useEffect?(
+    itemId: string,
+    count: number,
+    economy: import("./timed-activity").ActivityEconomy,
+  ): Promise<InventoryFields>;
   profile: Row;
   resource: Row;
   items: readonly InventoryItem[];

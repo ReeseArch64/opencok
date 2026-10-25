@@ -33,3 +33,19 @@ its supported command set; never clear claim rows or receipts when restoring a
 previous binary. Replaying an operation must preserve its original response and
 must not grant a second reward. Private reference inputs remain read-only and are
 not runtime dependencies.
+
+VIP item use and temporary status items run inside the inventory transaction.
+VIP and super-VIP thresholds, duration conversion, skill prerequisite trees,
+point budgets, reset costs, and saved talent pages use maintained catalogs.
+Players can add points to a tree; reducing an allocation requires the paid reset.
+Inactive pages do not contribute to effects. Switching pages exchanges the saved
+page and the active general's tree atomically. Ownership is checked before any
+wallet change. Active status skills retain separate active and cooldown deadlines.
+
+Effect changes settle old resource production and upkeep before replacing the
+snapshot, then rebuild future rate schedules. Expiration is evaluated at the exact
+server instant, including future-start states. Production schedules contain the
+expiration boundary, so recovery does not apply today's rate to yesterday's time.
+Stored bonuses remain source data; no second materialized bonus is added to player
+attributes. Running activity deadlines remain pinned to their start calculation.
+Combat-targeted active skills continue through their owning combat systems.

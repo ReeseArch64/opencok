@@ -64,7 +64,7 @@ export function storedPowerEffects(
   );
   let status = 0n;
   for (const row of state.states) {
-    if (long(row, "endTime") <= BigInt(now)) continue;
+    if (long(row, "startTime") > BigInt(now) || long(row, "endTime") <= BigInt(now)) continue;
     const rule = rules.power.statuses?.get(text(row, "stateId"));
     if (!rule) throw new GameError(errors.unsupported, "power_effect");
     if (!rule.effect?.trim()) continue;
