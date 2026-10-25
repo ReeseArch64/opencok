@@ -181,3 +181,20 @@ commit together. A fenced recovery worker expires world activations independentl
 of whether their owner can log in, then drains eligible recipient deliveries.
 Combat damage against totems still requires the corresponding validated battle
 engine; the placement workflow does not synthesize casualties or battle results.
+
+The native lottery runtime persists the outer reward grid, chosen chest strategy,
+ordered inner prizes, selected positions, multipliers, daily strategy counts and
+chest tokens. Its start, buy, batch, chest-use and cancel commands run through
+player locks, inventory postings and operation receipts. Client counters detect
+stale selections; the server chooses and saves the prize order independently of
+client positions. Reconnect can reshuffle the presentation without rerolling the
+saved sequence. Goods responses include maintained inventory identities and
+awarded counts; equipment awards use the existing equipment planner.
+
+Lottery daily boundaries use UTC, matching the maintained local event calendar.
+Batch spins advance the lifetime and daily counters and update the free-spin
+checkpoint. This closes the reference batch path's missing counter updates,
+which otherwise repeatedly apply first-spin guarantees or the daily free spin.
+Gold top-ups cover the currency deficit and all failures roll back costs and
+prizes together. Lottery actions also advance the maintained legacy, daily and
+main quest producers with their corresponding native action types.

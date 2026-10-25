@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./lottery": "./src/lottery.ts",
     "./totem": "./src/totem.ts",
     "./game": "./src/game.service.ts",
     "./mail-updates": "./src/mail-updates.ts",

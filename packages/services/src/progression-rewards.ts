@@ -1,3 +1,4 @@
+import { newEquipment } from "./equipment";
 import { randomInt } from "node:crypto";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -7,7 +8,25 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import type { RewardPreview } from "@opencok/contracts/rewards";
 import type { CityProgressionContext } from "./city-progression";
 
-const assets = ["wood", "stone", "iron", "food", "silver", "gold", "exp"] as const;
+const assets = [
+  "wood",
+  "stone",
+  "iron",
+  "food",
+  "silver",
+  "gold",
+  "exp",
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  "chip",
+  "diamond",
+  undefined,
+  "dragon_food",
+  "dragon_gold",
+] as const;
 export function pinProgressionReward(context: CityProgressionContext, id: string) {
   if (!context.rules.reconnect.rewards?.has(id))
     throw new GameError(errors.unsupported, "city_progression");
@@ -43,14 +62,30 @@ export function grantPinnedProgressionReward(context: CityProgressionContext, ra
   const rows = progressionRewardPreview(raw);
   for (const row of rows) {
     if (row.kind === "item") {
-      if (row.type !== 7) throw new GameError(errors.unsupported, "city_progression");
-      context.economy.item(row.id, row.count);
+      if (row.type === 7) context.economy.item(row.id, row.count);
+      else {
+        const equipment = [...(context.write.equipment ?? [])];
+        for (let i = 0; i < row.count; i++) {
+          context.write.equipment = equipment;
+          equipment.push(newEquipment(context, row.id));
+        }
+        context.write.equipment = equipment;
+      }
     } else if (row.kind === "count") {
       if (row.type === 5) context.economy.gold(BigInt(row.value));
       else if (row.type === 6) context.experience(row.value);
       else
         context.economy.resource(
-          assets[row.type] as "wood" | "stone" | "iron" | "food" | "silver",
+          assets[row.type] as
+            | "wood"
+            | "stone"
+            | "iron"
+            | "food"
+            | "silver"
+            | "chip"
+            | "diamond"
+            | "dragon_food"
+            | "dragon_gold",
           BigInt(row.value),
         );
     }

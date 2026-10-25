@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./lottery": "./src/lottery.ts",
     "./bootstrap": "./src/bootstrap.ts",
     "./reconnect": "./src/reconnect.ts",
     "./mail": "./src/mail.ts",

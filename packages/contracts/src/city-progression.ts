@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  lottery?: { record?: Row; history: readonly Row[] };
   totems?: import("./totem").TotemProgressionState;
   civilizationCastle?: Row;
   civilizationCastleTarget?: { castle: Row; profile: Row };
@@ -111,6 +112,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  lottery?: { record: Row; history?: readonly Row[] };
   totems?: import("./totem").TotemProgressionWrite;
   civilizationCastle?: Row;
   worldMutation?: import("./world-march-runtime").WorldMutationWrite;

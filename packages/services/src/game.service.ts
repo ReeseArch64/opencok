@@ -280,6 +280,7 @@ export class GameService {
       "civilization.science.data.init",
       {},
     );
+    const lottery = await this.services.cityProgression?.(uid, "lottery.init", {});
     const totems = await this.services.cityProgression?.(uid, "totem.init", {});
     const alliance = await this.services.alliance?.(uid, "alliance.init", {});
     const state = await this.state(uid);
@@ -296,6 +297,7 @@ export class GameService {
       ...generals?.body,
       ...dragons?.body,
       ...totems?.body,
+      ...lottery?.body,
       ...civilization?.body,
       ...alliance?.body,
       ...effects?.body,
@@ -472,6 +474,11 @@ export class GameService {
       case "minstrel":
       case "civilizationCastle":
       case "totem":
+      case "lottery.start":
+      case "lottery.buy":
+      case "lottery.batch":
+      case "lottery.b.use":
+      case "lottery.cancel":
       case "civilization.science.data.init":
       case "race.science.research":
       case "race.science.directly":

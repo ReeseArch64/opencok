@@ -22,6 +22,7 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface AdvancedCatalogs {
+  lotteries?: Map<string, Rule>;
   civilizationFortress?: Map<string, Rule>;
   totems?: Map<string, Rule>;
   dragonTravel?: Map<string, Rule>;

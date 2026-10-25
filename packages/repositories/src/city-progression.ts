@@ -1,3 +1,4 @@
+import { readLottery, writeLottery } from "./lottery";
 import { readTotems, writeTotems } from "./totem";
 import { readCivilizationCastle, writeCivilizationCastle } from "./civilization-castle";
 import { readWorldMutationState, writeWorldMutation } from "./world-march-runtime";
@@ -121,6 +122,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        lottery: command?.startsWith("lottery.") ? await readLottery(tx, owner) : undefined,
         totems: ["totem", "totem.init"].includes(command ?? "")
           ? await readTotems(tx, owner)
           : undefined,
@@ -207,6 +209,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.lottery) await writeLottery(tx, owner, write.lottery);
         if (write.totems) await writeTotems(tx, owner, write.totems);
         if (write.civilizationCastle)
           await writeCivilizationCastle(tx, owner, write.civilizationCastle);
