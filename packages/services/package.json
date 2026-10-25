@@ -72,7 +72,8 @@
     "./general-draws": "./src/general-draws.ts",
     "./alliances": "./src/alliances.ts",
     "./alliance-publication": "./src/alliance-publication.ts",
-    "./civilization-science": "./src/civilization-science.ts"
+    "./civilization-science": "./src/civilization-science.ts",
+    "./minstrel": "./src/minstrel.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

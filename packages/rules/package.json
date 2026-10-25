@@ -108,7 +108,8 @@
     "./general-draws": "./src/general-draws.ts",
     "./alliance": "./src/alliance.ts",
     "./alliance-science": "./src/alliance-science.ts",
-    "./civilization-science": "./src/civilization-science.ts"
+    "./civilization-science": "./src/civilization-science.ts",
+    "./local-events": "./src/local-events.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
