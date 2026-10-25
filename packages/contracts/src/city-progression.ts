@@ -38,6 +38,9 @@ export interface GeneralRoster {
   statuses: readonly Row[];
 }
 export interface GeneralWrite {
+  refinementPeriod?: { count: number; time: bigint };
+  deletedStatuses?: readonly { generalId: number; stateId: number }[];
+  accelerations?: readonly { type: number; milliseconds: bigint }[];
   generals?: readonly Row[];
   purchases?: readonly Row[];
   offices?: readonly Row[];

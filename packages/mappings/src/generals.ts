@@ -1,5 +1,7 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
+import type { Rules } from "@opencok/rules/game";
+import { generalProperties, generalPropertyRule } from "@opencok/rules/general-refinement";
 import { generalPairs } from "@opencok/rules/general-progression";
 export function generalLevels(raw: string) {
   return sfs.array(
@@ -19,10 +21,9 @@ export function generalPurchase(row: Row): Fields {
 export function generalSkill(row: Row): Fields {
   return {
     skillId: sfs.string(text(row, "skillId")),
-    startTime: sfs.long(long(row, "startTime")),
     actTime: sfs.long(long(row, "actTime")),
     endTime: sfs.long(long(row, "endTime")),
-    stat: sfs.int(num(row, "stat")),
+    state: sfs.int(num(row, "stat")),
   };
 }
 export function generalOffice(row: Row): Fields {
@@ -61,10 +62,41 @@ export function newGeneral(
     robtime: sfs.long(long(row, "robtime")),
     breach: sfs.string(text(row, "breach")),
     star: sfs.int(num(row, "star")),
-    refinepropertylist: sfs.array([]),
-    growvalue: sfs.int(num(row, "refinegold")),
+
     ...(office && num(office, "position") > 0
       ? { heroOffice: sfs.object(generalOffice(office)) }
       : {}),
+  };
+}
+
+export function generalRefinement(row: Row, rules: Rules): Fields {
+  const locked = new Set(text(row, "lockproperty").split(";")),
+    current = generalProperties(text(row, "refineproperty")),
+    proposed = generalProperties(text(row, "oldrefineproperty"));
+  const view = (values: typeof current, showLock: boolean) =>
+    sfs.array(
+      [...values].map(([index, property]) =>
+        sfs.object({
+          index: sfs.int(index),
+          id: sfs.int(property.id),
+          value: sfs.string(String(property.value)),
+          maxvalue: sfs.string(generalPropertyRule(rules, property.id).max!),
+          ...(showLock && locked.has(String(index)) ? { lock: sfs.int(1) } : {}),
+        }),
+      ),
+    );
+  let growth = 0;
+  for (const [index, property] of current) {
+    const next = proposed.get(index);
+    if (next)
+      growth += Math.trunc(
+        ((next.value - property.value) / Number(generalPropertyRule(rules, property.id).max)) *
+          10000,
+      );
+  }
+  return {
+    refinepropertylist: view(current, true),
+    ...(proposed.size ? { canbackrefinepropertylist: view(proposed, false) } : {}),
+    growvalue: sfs.int(growth),
   };
 }

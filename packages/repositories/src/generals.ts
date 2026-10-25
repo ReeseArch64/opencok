@@ -1,4 +1,7 @@
-import { asc, eq } from "drizzle-orm";
+import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
+import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_activity";
+import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
+import { and, asc, eq } from "drizzle-orm";
 import { new_general } from "@opencok/drizzle/schema/opencok_kingdom/new_general";
 import { new_general_buy } from "@opencok/drizzle/schema/opencok_kingdom/new_general_buy";
 import { new_general_skill } from "@opencok/drizzle/schema/opencok_kingdom/new_general_skill";
@@ -59,7 +62,79 @@ export async function writeGeneralRoster(
   tx: MutationTransaction,
   owner: string,
   write: GeneralWrite,
+  now: bigint,
 ) {
+  if (write.refinementPeriod) {
+    const value = {
+      generalRefineCount: write.refinementPeriod.count,
+      generalRefineTime: write.refinementPeriod.time,
+    };
+    if (
+      !Number.isInteger(value.generalRefineCount) ||
+      value.generalRefineCount < 0 ||
+      value.generalRefineCount > 10000 ||
+      value.generalRefineTime !== now
+    )
+      throw new Error("Invalid refinement period");
+    await tx
+      .insert(user_mixed_info)
+      .values({ uid: owner, mdata: "", ...value })
+      .onConflictDoUpdate({ target: user_mixed_info.uid, set: value });
+  }
+  for (const status of write.deletedStatuses ?? [])
+    await tx
+      .delete(new_general_status)
+      .where(
+        and(
+          eq(new_general_status.uid, owner),
+          eq(new_general_status.newGeneralId, status.generalId),
+          eq(new_general_status.stateId, status.stateId),
+        ),
+      );
+  for (const acceleration of write.accelerations ?? []) {
+    if (
+      ![6, 11].includes(acceleration.type) ||
+      acceleration.milliseconds <= 0n ||
+      acceleration.milliseconds > 315360000000n
+    )
+      throw new Error("Invalid general queue acceleration");
+    const active = await tx
+      .select()
+      .from(timed_activity)
+      .where(
+        and(
+          eq(timed_activity.ownerId, owner),
+          eq(timed_activity.type, acceleration.type),
+          eq(timed_activity.status, 0),
+        ),
+      )
+      .limit(2);
+    if (active.length > 1) throw new Error("Ambiguous general queue acceleration");
+    if (active[0]) {
+      const activity = active[0],
+        dueAt =
+          activity.dueAt - acceleration.milliseconds > now
+            ? activity.dueAt - acceleration.milliseconds
+            : now;
+      if (activity.startedAt > now || activity.dueAt <= now)
+        throw new Error("Unreconciled general queue");
+      await tx
+        .update(timed_activity)
+        .set({ dueAt, version: activity.version + 1 })
+        .where(
+          and(
+            eq(timed_activity.id, activity.id),
+            eq(timed_activity.ownerId, owner),
+            eq(timed_activity.version, activity.version),
+            eq(timed_activity.status, 0),
+          ),
+        );
+      await tx
+        .update(queue)
+        .set({ updateTime: dueAt })
+        .where(and(eq(queue.uuid, activity.queueId), eq(queue.ownerId, owner)));
+    }
+  }
   for (const row of write.generals ?? []) {
     owned(row, owner);
     const value = {
