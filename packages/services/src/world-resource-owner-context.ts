@@ -20,6 +20,7 @@ export function restoredResourceBuilding(
   snapshot: WorldResourceOwnerSnapshot,
   rules: Rules,
   buildingItemId = 400000,
+  selectedBuildingUuid?: string,
 ): NewGeneralBuildingState {
   integer(buildingItemId);
   const keys: string[] = [];
@@ -31,7 +32,11 @@ export function restoredResourceBuilding(
     selected.set(uuid, { itemId: integer(row.itemId), level: row.level, star: row.star });
   }
   const ordered = legacyObjectOrder(keys);
-  const buildingUuid = ordered.find((uuid) => selected.get(uuid)!.itemId === buildingItemId);
+  const buildingUuid = ordered.find(
+    (uuid) =>
+      selected.get(uuid)!.itemId === buildingItemId &&
+      (selectedBuildingUuid === undefined || uuid === selectedBuildingUuid),
+  );
   const mainUuid = ordered.find((uuid) => selected.get(uuid)!.itemId === 400000);
   return {
     buildingUuid,
@@ -87,11 +92,17 @@ export function resourceGeneralBuildingEffect(
   resolve: (id: NewGeneralEquipmentModifier) => number,
   clock: () => bigint,
   buildingItemId = 400000,
+  selectedBuildingUuid?: string,
 ): number {
   const ownerContext = resourceOwnerRuleContext(snapshot, context);
   return equippedGeneralBuildingEffect(
     () => {
-      const building = restoredResourceBuilding(snapshot, rules, buildingItemId);
+      const building = restoredResourceBuilding(
+        snapshot,
+        rules,
+        buildingItemId,
+        selectedBuildingUuid,
+      );
       return {
         building,
         orderedGenerals:
