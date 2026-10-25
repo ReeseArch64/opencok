@@ -7,7 +7,12 @@ import {
   type ImageStore,
 } from "@opencok/contracts/files";
 import { HttpError } from "@opencok/errors/http";
-import { verifyConfirmation, verifyGrant } from "@opencok/identity/avatar";
+import {
+  verifyConfirmation,
+  verifyGrant,
+  issueAvatarImage,
+  verifyAvatarImage,
+} from "@opencok/identity/avatar";
 import { encodeAvatar } from "@opencok/validations/image";
 import { multipart } from "./files-multipart";
 function json(data: object, status = 200) {
@@ -67,7 +72,8 @@ export function createHandler(store: ImageStore, signingKey: Buffer, now = Date.
         });
       }
       const match = IMAGE_PATH.exec(url.pathname);
-      if (match && !url.search && ["GET", "HEAD"].includes(request.method)) {
+      if (match && ["GET", "HEAD"].includes(request.method)) {
+        verifyAvatarImage(url, signingKey, Math.floor(now() / 1000));
         const bytes = await store.get(`${match[1]}/${match[2]}.jpg`);
         if (!bytes) return new Response(null, { status: 404 });
         return new Response(request.method === "HEAD" ? null : new Uint8Array(bytes), {
@@ -75,15 +81,15 @@ export function createHandler(store: ImageStore, signingKey: Buffer, now = Date.
             "Content-Type": "image/jpeg",
             "Content-Length": String(bytes.length),
             "X-Content-Type-Options": "nosniff",
-            "Cache-Control": "public, max-age=300",
+            "Cache-Control": "private, no-store",
           },
         });
       }
-      if (url.pathname !== UPLOAD_PATH || url.search) throw new HttpError(404, "Unknown endpoint");
+      if (url.pathname !== UPLOAD_PATH) throw new HttpError(404, "Unknown endpoint");
       if (request.method !== "POST")
         return new Response(null, { status: 405, headers: { Allow: "POST" } });
       const grant = verifyGrant(
-        request.headers.get("x-upload-grant") ?? "",
+        url.searchParams.size === 1 ? (url.searchParams.get("grant") ?? "") : "",
         signingKey,
         Math.floor(now() / 1000),
       );
@@ -137,12 +143,24 @@ export function createHandler(store: ImageStore, signingKey: Buffer, now = Date.
       const name = createHash("md5").update(`${grant.owner}_${grant.seq}`).digest("hex") + ".jpg";
       const key = `${grant.owner.slice(-6)}/${name}`;
       const hash = createHash("sha256").update(encoded).digest("hex");
-      await store.put(key, encoded, grant.owner, grant.seq, hash);
+      try {
+        await store.put(key, encoded, grant.owner, grant.seq, hash);
+      } catch (error) {
+        if (!(error instanceof HttpError) || error.status !== 409) throw error;
+        const receipt = await store.find(grant.owner, grant.seq);
+        if (!receipt || receipt.hash !== hash) throw error;
+      }
+      await store.removePrevious(grant.owner, grant.seq);
       return json({
         status: 1,
         data: {
           file_name: name,
-          path: `/cok/img/${key}`,
+          path: issueAvatarImage(
+            grant.owner,
+            Number(grant.seq),
+            signingKey,
+            Math.floor(now() / 1000),
+          ),
           image_hash: hash,
           sequence: Number(grant.seq),
         },

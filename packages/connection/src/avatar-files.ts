@@ -1,5 +1,9 @@
 import { readFile } from "node:fs/promises";
-import { issueAvatarConfirmation, issueAvatarGrant } from "@opencok/identity/avatar";
+import {
+  issueAvatarConfirmation,
+  issueAvatarGrant,
+  issueAvatarImage,
+} from "@opencok/identity/avatar";
 import type { AvatarFiles } from "@opencok/contracts/files";
 
 interface Options {
@@ -51,6 +55,7 @@ export function createAvatarFiles(options: Options): AvatarFiles {
   const now = options.now ?? Date.now;
   return {
     issue: (owner, sequence) => issueAvatarGrant(owner, sequence, key, Math.floor(now() / 1000)),
+    image: (owner, sequence) => issueAvatarImage(owner, sequence, key, Math.floor(now() / 1000)),
     async find(owner, sequence) {
       const controller = new AbortController();
       let cancel: (() => Promise<void>) | undefined;

@@ -1,8 +1,8 @@
 # Avatar integration
 
 Topic 7 connects the realm's authenticated grant, verified completion and legacy version
-commands to media in the shared API. JPEG/PNG upload, immutable S3 receipts and public
-JPEG delivery retain the existing [media contract](../api/MEDIA.md). No Files listener,
+commands to media in the shared API. JPEG/PNG upload, immutable S3 receipts and API-signed
+JPEG delivery use the [media contract](../api/MEDIA.md). No Files listener,
 new storage provider or player-facing moderation endpoint is introduced.
 
 ## Versions and restored profiles
@@ -62,7 +62,7 @@ wrapping; `hero.k8` seconds and the escalating deadline use signed 64-bit wrappi
 New records initialize the rejected version, zero reports and first ban. Profile,
 moderation record, operation receipt and required delivery intents commit together.
 Report submission remains separately available as `report.picVer`. Rejection does not
-delete or rewrite the immutable image; public URL retention follows the existing API
+delete or rewrite the image; replacement deletion follows the API
 media policy, while profile consumers receive the Failed picture state.
 
 ## Durable delivery and ordering

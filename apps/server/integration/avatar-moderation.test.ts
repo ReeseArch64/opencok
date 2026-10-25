@@ -247,7 +247,7 @@ test("operator moderation is atomic, fenced, replayable and orders state changes
     const runtime = createAvatarRuntime({
       db: { kingdom: realm },
       rules: new Rules(new Map(), new Map(), new Map()),
-      files: { find: async () => null, issue: () => "unused" },
+      files: { find: async () => null, issue: () => "unused", image: () => "unused" },
       config: {
         kingdomId: 1,
         timeoutMs: 1000,

@@ -171,7 +171,7 @@ function fixture(mode = "1") {
   const runtime = createAvatarRuntime({
     db: { kingdom: { db } },
     rules,
-    files: { issue: () => "unused", find: async () => candidate },
+    files: { issue: () => "unused", image: () => "unused", find: async () => candidate },
     config: {
       kingdomId: 1,
       timeoutMs: 1000,

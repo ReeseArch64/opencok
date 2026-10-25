@@ -2829,7 +2829,13 @@ or service are executed by these tests.
 ## Realm avatar grants
 
 `user.avatar.grant`, tracked in [issue #76](https://github.com/ReeseArch64/opencok/issues/76),
-returns `owner` (String), `sequence` (Int), `grant` (String) and `pendingHash` (String).
+returns `owner` (String), `sequence` (Int), `grant` (String), `uploadPath` (String) and
+`pendingHash` (String). Post to `uploadPath` on the public API origin within 120 seconds;
+header-only authorization is rejected. `user.avatar.url` renews a five-minute signed read
+`path` for the current picture; optional `gameuid` selects another active realm profile.
+It requires an authenticated active realm requester and returns an empty path when no
+custom sequence exists. The default `hero.k7` interval is three days. See the
+[media lifecycle and coordinated rollout](../api/MEDIA.md#contracts-and-boundaries).
 It requires an authenticated numeric owner and, when supplied, an exactly matching
 String `gameuid`. Request version, sequence and endpoint fields cannot override stored
 state. Correlation is retained; grant issuance changes no profile, upload record or

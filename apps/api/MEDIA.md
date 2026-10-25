@@ -27,7 +27,7 @@ Set the following values in the root `.env` or process environment, then run
 | `AWS_SESSION_TOKEN`                          | Optional temporary-credential token                                   |
 
 Use the local credentials configured on `minio` in the development Compose file.
-External deployments should use a scoped identity with GetObject/PutObject access,
+External deployments should use a scoped identity with GetObject/PutObject/DeleteObject access,
 without bucket listing or public policies. S3 uses one attempt and a five-second deadline.
 The adapter disables connection reuse after an isolated Bun/MinIO test reproduced
 `ECONNRESET` on the read following concurrent conditional writes. This costs a fresh
@@ -65,23 +65,47 @@ and JPEG paths to the API; `/_internal/avatars/...` remains unreachable through 
 
 ## Contracts and boundaries
 
-`POST /gameservice/www/gateway/json.php` accepts the imported multipart `data` and
-single `file` contract, with an `X-Upload-Grant` binding owner/sequence for at most
-120 seconds. It decodes JPEG/PNG, checks actual part MIME and bytes, limits inputs to
+`POST /gameservice/www/gateway/json.php?grant=...` accepts the imported multipart `data` and
+single `file` contract. The API-signed URL binds owner/sequence for at most
+120 seconds. Header-only grants and additional query parameters are rejected. It decodes JPEG/PNG, checks actual part MIME and bytes, limits inputs to
 2 MiB, 4096 pixels per axis and 4194304 pixels total, and re-encodes JPEG without
 metadata. Animated formats are rejected. Total request size is 2112 KiB; the shared
 API listener accepts this cap when media is enabled; discovery POST bodies remain
 limited to 64 KiB, including streamed requests without Content-Length.
 
 Objects use `{last-six-owner-digits}/{md5(owner_sequence)}.jpg`. S3 conditional creation
-makes each sequence immutable; duplicate uploads return 409. Owner, sequence and
-SHA-256 metadata support authenticated confirmation. `GET`/`HEAD /cok/img/...jpg`
-proxies public avatar bytes from the private bucket. Missing objects return 404;
-provider failures return 503 without provider details.
+makes each sequence immutable; retries with the same encoded SHA-256 resume cleanup and
+return success, while different bytes return 409. Owner, sequence and SHA-256 metadata
+support authenticated confirmation. The response `path` is an API-signed relative URL
+valid for five minutes. `GET`/`HEAD /cok/img/...jpg?expires=...&signature=...` proxies
+avatar bytes from the private bucket after checking the signature, exact path and expiry.
+Unsigned, expired, tampered and extra-query reads return 401. Responses use
+`Cache-Control: private, no-store`. Missing objects return 404; provider failures return
+503 without provider details. These are API signatures, not S3 presigned URLs.
+
+After storing a replacement, the API archives the preceding sequence's receipt under
+`_receipts/{owner}/{sequence}` and deletes that JPEG. It never deletes before a successful
+write. Cleanup failure returns 503; resending the identical upload retries cleanup without
+replacing bytes. Archived receipts keep completion replay possible without retaining the
+old image and prevent that sequence from being uploaded again. Receipt keys must remain
+private and included in backups. This removes the immediate predecessor, not older
+historical orphans or provider versions/backups. The old profile image can be unavailable
+between upload and realm completion; finish or recover the new receipt promptly.
+
+The default `hero.k7` cooldown is 259200 seconds (three days), measured by the realm
+from its persisted upload timestamp. Existing check-disable behavior and report bans
+remain intact; deployments loading custom catalogs must update their override as well.
+`user.avatar.grant` returns `uploadPath`; clients post to it on the public API origin.
+`user.avatar.url` returns a fresh signed `path` for the current profile version, taking
+optional numeric-string `gameuid` for another profile in the same realm. It requires an
+active authenticated requester and target; it does not require upload eligibility.
+Profiles without a custom sequence return an empty path. Clients must renew expired
+read URLs with this command and stop constructing unsigned image URLs.
 
 Keep `GET /_internal/avatars/{owner}/{sequence}` private. It requires a separate
 30-second `X-Avatar-Confirmation` HMAC and checks stored owner/sequence, JPEG marker
-and actual SHA-256. A client upload grant cannot authorize confirmation.
+and actual SHA-256 for live images, or the private archived receipt for deleted predecessors.
+A client upload grant cannot authorize confirmation.
 The shared `/healthz` and `/readyz` replace the standalone `/_health` endpoint.
 Readiness checks PostgreSQL and Redis, not S3; storage failures return 503 on media
 requests while discovery remains available.
@@ -111,8 +135,14 @@ metadata integrity and persistence across container restart; local volumes are u
 
 Back up the bucket, authoritative profile database and signing key consistently.
 Restarting the service preserves objects and receipts. Roll back code/configuration
-together while keeping the same bucket/key. No schema migration or object deletion
-occurs. Reusing an existing sequence remains a conflict after rollback.
+together while keeping the same bucket/key. No schema migration is required. Deploy the
+realm, API and clients together: header-only uploads and unsigned image reads no longer
+work. Grant and image URLs contain bearer credentials; keep query strings out of proxy
+access logs and analytics. The application logs only paths. Existing links require renewal.
+Deletion is permanent for an unversioned bucket: rollback cannot restore removed JPEGs
+without a backup. Restore bucket, receipts and realm data from one consistent snapshot;
+older code cannot confirm archived-only receipts. Test restoration before reopening.
+Do not reset sequences or remove archived receipts to permit reuse.
 
 When upgrading an existing standalone Files deployment, keep the bucket and signing
 key, move its S3/key settings into the API environment and set `API_FILES_ENABLED=true`.

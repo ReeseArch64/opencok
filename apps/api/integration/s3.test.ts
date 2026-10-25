@@ -91,6 +91,20 @@ test("S3 conditional writes, metadata integrity and restart persistence use isol
     store = new S3ImageStore(await client(), bucket);
     expect(Buffer.from((await store.get(path))!)).toEqual(Buffer.from(bytes));
     expect(await store.get("missing.jpg")).toBeNull();
+    const nextName = createHash("md5").update(`${owner}_2`).digest("hex");
+    const nextPath = `${owner.slice(-6)}/${nextName}.jpg`;
+    await store.put(nextPath, bytes, owner, "2", hash);
+    await store.removePrevious(owner, "2");
+    expect(await store.get(path)).toBeNull();
+    await expect(store.put(path, bytes, owner, "1", hash)).rejects.toMatchObject({ status: 409 });
+    expect(await store.find(owner, "1")).toEqual({ owner, sequence: "1", hash });
+    expect(await store.get(nextPath)).not.toBeNull();
+    await store.removePrevious(owner, "2");
+    await docker(["restart", name]);
+    store = new S3ImageStore(await client(), bucket);
+    expect(await store.get(path)).toBeNull();
+    expect(await store.find(owner, "1")).toEqual({ owner, sequence: "1", hash });
+    expect(await store.get(nextPath)).not.toBeNull();
     await clients.at(-1)!.send(
       new PutObjectCommand({
         Bucket: bucket,

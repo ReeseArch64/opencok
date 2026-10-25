@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { createHmac, randomBytes } from "node:crypto";
+import { createHash, createHmac, randomBytes } from "node:crypto";
 import sharp from "sharp";
 import { Effect, Layer } from "effect";
 import { ApiDependencies, createApp, serveApi } from "../src/app";
@@ -19,16 +19,24 @@ import { parseFilesEnvironment } from "@opencok/env/files";
 
 const key = Buffer.alloc(32, 9);
 const owner = "1234567";
-function grant(expiry = Math.floor(Date.now() / 1000) + 60) {
-  const base = `v1.${owner}.1.${expiry}.${"a".repeat(32)}`;
+function grant(expiry = Math.floor(Date.now() / 1000) + 60, sequence = 1) {
+  const base = `v1.${owner}.${sequence}.${expiry}.${"a".repeat(32)}`;
   return `${base}.${createHmac("sha256", key).update(base).digest("hex")}`;
 }
-async function upload(token = grant(), type = "image/png", player = owner, bytes?: Uint8Array) {
+async function upload(
+  token = grant(),
+  type = "image/png",
+  player = owner,
+  bytes?: Uint8Array,
+  sequence = 1,
+) {
   const body = new FormData();
   body.set(
     "data",
     JSON.stringify({
-      data: [{ commandName: "user/UploadPhoto", params: [{ gameuid: player, photo_seq: 1 }] }],
+      data: [
+        { commandName: "user/UploadPhoto", params: [{ gameuid: player, photo_seq: sequence }] },
+      ],
     }),
   );
   const image =
@@ -37,9 +45,9 @@ async function upload(token = grant(), type = "image/png", player = owner, bytes
       .png()
       .toBuffer());
   body.set("file", new File([new Uint8Array(image)], "avatar.png", { type }));
-  return new Request(`http://localhost${UPLOAD_PATH}`, {
+  return new Request(`http://localhost${UPLOAD_PATH}?grant=${encodeURIComponent(token)}`, {
     method: "POST",
-    headers: { "X-Upload-Grant": token },
+    headers: {},
     body,
   });
 }
@@ -51,6 +59,13 @@ function storage() {
       if (objects.has(path)) throw new HttpError(409, "Image sequence already exists");
       objects.set(path, bytes);
       receipts.set(`${uid}:${sequence}`, { owner: uid, sequence, hash });
+    },
+    async removePrevious(uid, sequence) {
+      if (Number(sequence) <= 1) return;
+      const name = createHash("md5")
+        .update(`${uid}_${Number(sequence) - 1}`)
+        .digest("hex");
+      objects.delete(`${uid.slice(-6)}/${name}.jpg`);
     },
     async get(path) {
       return objects.get(path) ?? null;
@@ -74,7 +89,7 @@ test("uploads enforce signature, expiry, ownership, actual MIME, file bytes and 
   expect(
     (
       await handler(
-        new Request(`http://localhost${UPLOAD_PATH}`, {
+        new Request(`http://localhost${UPLOAD_PATH}?grant=${grant()}`, {
           method: "POST",
           headers: { "X-Upload-Grant": grant(), "content-length": String(BODY_LIMIT + 1) },
           body: "x",
@@ -84,7 +99,7 @@ test("uploads enforce signature, expiry, ownership, actual MIME, file bytes and 
   ).toBe(413);
 });
 
-test("upload, public JPEG delivery, immutable sequence and private confirmation preserve the contract", async () => {
+test("upload, signed JPEG delivery, immutable content and private confirmation preserve the contract", async () => {
   const handler = createHandler(storage(), key);
   const response = await handler(await upload());
   expect(response.status).toBe(200);
@@ -100,7 +115,13 @@ test("upload, public JPEG delivery, immutable sequence and private confirmation 
   const head = await handler(new Request(`http://localhost${data.path}`, { method: "HEAD" }));
   expect(await head.text()).toBe("");
   expect(Number(head.headers.get("content-length"))).toBeGreaterThan(0);
-  expect((await handler(await upload())).status).toBe(409);
+  expect((await handler(await upload())).status).toBe(200);
+  const different = await sharp({
+    create: { width: 4, height: 4, channels: 3, background: "blue" },
+  })
+    .png()
+    .toBuffer();
+  expect((await handler(await upload(grant(), "image/png", owner, different))).status).toBe(409);
   const confirmationUrl = `http://localhost/_internal/avatars/${owner}/1`;
   expect((await handler(new Request(confirmationUrl))).status).toBe(401);
   expect(
@@ -184,10 +205,15 @@ test("API routes media and discovery on one listener while preserving independen
             .toBuffer(),
         );
         const image = yield* Effect.promise(() => upload(grant(), "image/png", owner, bytes));
+        const headers = new Headers(image.headers);
         const body = new Uint8Array(yield* Effect.promise(() => image.arrayBuffer()));
         expect(body.byteLength).toBeGreaterThan(65536);
         const uploaded = yield* Effect.promise(() =>
-          fetch(origin + UPLOAD_PATH, { method: "POST", headers: image.headers, body }),
+          fetch(origin + new URL(image.url).pathname + new URL(image.url).search, {
+            method: "POST",
+            headers,
+            body,
+          }),
         );
         expect(uploaded.status).toBe(200);
         expect(uploaded.headers.get("X-Request-ID")).toBeTruthy();
@@ -275,4 +301,79 @@ test("gateway routes exact public avatar paths to API and keeps confirmation pri
   ])
     expect(pattern.test(path)).toBe(false);
   for (const route of Object.values(routers)) expect(route.rule).not.toContain("/_internal");
+});
+
+test("image URLs reject unsigned, expired, altered and extra-query requests before storage", async () => {
+  let time = Date.now();
+  const store = storage();
+  const handler = createHandler(store, key, () => time);
+  const response = await handler(await upload());
+  const data = ((await response.json()) as { response: { data: { path: string } }[] }).response[0]!
+    .data;
+  const url = new URL(data.path, "http://localhost");
+  expect((await handler(new Request(url.toString()))).status).toBe(200);
+  expect((await handler(new Request(url.toString()))).headers.get("cache-control")).toBe(
+    "private, no-store",
+  );
+  store.get = async () => {
+    throw new Error("Unauthorized storage access");
+  };
+  for (const path of [
+    url.pathname,
+    data.path.replace("234567", "234568"),
+    data.path + "&extra=1",
+    data.path.replace("signature=", "signature=f"),
+  ])
+    expect((await handler(new Request(new URL(path, url).toString()))).status).toBe(401);
+  time = Number(url.searchParams.get("expires")) * 1000;
+  for (const method of ["GET", "HEAD"])
+    expect((await handler(new Request(url.toString(), { method }))).status).toBe(401);
+});
+
+test("uploads require a signed URL and reject extra query parameters", async () => {
+  const handler = createHandler(storage(), key);
+  const request = await upload();
+  const body = await request.arrayBuffer();
+  for (const url of ["http://localhost" + UPLOAD_PATH, request.url + "&extra=1"])
+    expect(
+      (
+        await handler(
+          new Request(url, {
+            method: "POST",
+            headers: { ...Object.fromEntries(request.headers), "X-Upload-Grant": grant() },
+            body,
+          }),
+        )
+      ).status,
+    ).toBe(401);
+});
+
+test("replacement deletes previous bytes, preserves receipts and retries failed cleanup", async () => {
+  const store = storage();
+  const remove = store.removePrevious.bind(store);
+  const put = store.put.bind(store);
+  const handler = createHandler(store, key);
+  const first = (
+    (await (await handler(await upload())).json()) as { response: { data: { path: string } }[] }
+  ).response[0]!.data;
+  store.put = async () => {
+    throw new Error("write failed");
+  };
+  expect(
+    (await handler(await upload(grant(undefined, 2), "image/png", owner, undefined, 2))).status,
+  ).toBe(503);
+  expect(
+    (await handler(new Request(new URL(first.path, "http://localhost").toString()))).status,
+  ).toBe(200);
+  store.put = put;
+  store.removePrevious = async () => {
+    throw new Error("delete failed");
+  };
+  const send = () => upload(grant(undefined, 2), "image/png", owner, undefined, 2);
+  expect((await handler(await send())).status).toBe(503);
+  store.removePrevious = remove;
+  expect((await handler(await send())).status).toBe(200);
+  expect(
+    (await handler(new Request(new URL(first.path, "http://localhost").toString()))).status,
+  ).toBe(404);
 });
