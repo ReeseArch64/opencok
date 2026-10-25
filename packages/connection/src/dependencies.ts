@@ -10,6 +10,10 @@ export type ConnectionConfig = Pick<
 >;
 
 export interface ServerDependencies {
+  profileSessions?: {
+    open(owner: string, sessionId: string, now: number): Promise<void>;
+    close(owner: string, sessionId: string, now: number): Promise<void>;
+  };
   notifications?: RealmNotifications;
   db: GameStore & { start(): Promise<void>; health(): Promise<void>; close(): Promise<void> };
   cache: {

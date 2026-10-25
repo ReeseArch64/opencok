@@ -130,10 +130,12 @@ export function createSessionHandler(
           sessions.set(claimed, { socket, token });
           stage = "initialization";
           const details = fields(body.p);
+          await dependencies.profileSessions?.open(claimed, connectionId, Date.now());
           const initializedState = await game.initialize(claimed, details);
           const initial = initializedState.body;
           if (socket.destroyed || !ready()) {
             if (sessions.get(claimed)?.socket === socket) sessions.delete(claimed);
+            await dependencies.profileSessions?.close(claimed, connectionId, Date.now());
             await cache.release(claimed, token);
             return;
           }
@@ -203,6 +205,11 @@ export function createSessionHandler(
               : "error",
           );
           if (claimed) {
+            await dependencies.profileSessions
+              ?.close(claimed, connectionId, Date.now())
+              .catch(() =>
+                report("session_cleanup_failed", { reason: "profile_session" }, "error"),
+              );
             if (sessions.get(claimed)?.socket === socket) sessions.delete(claimed);
             await cache
               .release(claimed, token)
@@ -368,8 +375,15 @@ export function createSessionHandler(
       });
       if (uid) {
         const closingUid = uid;
-        const cleanup = cache
-          .release(uid, token)
+        const cleanup = chain
+          .catch(() => {})
+          .then(async () => {
+            try {
+              await dependencies.profileSessions?.close(closingUid, connectionId, Date.now());
+            } finally {
+              await cache.release(closingUid, token);
+            }
+          })
           .catch(() => report("session_cleanup_failed", { reason: "cache_release" }, "error"))
           .finally(() => {
             if (sessions.get(closingUid)?.socket === socket) sessions.delete(closingUid);
