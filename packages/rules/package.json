@@ -111,7 +111,8 @@
     "./chat-retention": "./src/chat-retention.ts",
     "./chat-social": "./src/chat-social.ts",
     "./civilization-science": "./src/civilization-science.ts",
-    "./local-events": "./src/local-events.ts"
+    "./local-events": "./src/local-events.ts",
+    "./world-march-lifecycle": "./src/world-march-lifecycle.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
