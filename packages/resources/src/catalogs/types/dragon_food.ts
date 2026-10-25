@@ -1,0 +1,42 @@
+export interface DragonFoodDefinition {
+  readonly "id": number;
+  readonly "name": number;
+  readonly "description": number;
+  readonly "icon": string;
+  readonly "site": number;
+  readonly "color": number;
+  readonly "sonEquipment"?: number;
+  readonly "breakDown"?: number;
+  readonly "breakUp"?: number;
+  readonly "power"?: number;
+  readonly "level": number;
+  readonly "para1"?: number | readonly number[];
+  readonly "num1"?: number | readonly number[] | string;
+  readonly "show1"?: number | readonly number[];
+  readonly "para2"?: number | readonly number[];
+  readonly "num2"?: number | string;
+  readonly "show2"?: number;
+  readonly "para3"?: number | readonly number[];
+  readonly "num3"?: number;
+  readonly "show3"?: number;
+  readonly "para4"?: number | readonly number[];
+  readonly "num4"?: number;
+  readonly "show4"?: number;
+  readonly "material1"?: readonly number[];
+  readonly "material2"?: readonly number[];
+  readonly "material3"?: readonly number[];
+  readonly "material4"?: readonly number[];
+  readonly "cost"?: number | readonly number[];
+  readonly "time"?: number;
+  readonly "show"?: string;
+  readonly "universal"?: number;
+  readonly "preLevel"?: number;
+  readonly "ran"?: number;
+  readonly "refineCost"?: number;
+  readonly "ranInitial"?: number | readonly number[];
+  readonly "numInitial"?: string;
+  readonly "dialogInitial"?: number | readonly number[];
+}
+
+import type { CatalogTable } from "../../catalog-model.ts";
+export type DragonFoodDefinitionCatalog = CatalogTable<DragonFoodDefinition>;

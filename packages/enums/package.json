@@ -13,6 +13,7 @@
   "exports": {
     "./sfs": "./src/sfs.ts",
     "./gameplay-catalog": "./src/gameplay-catalog.ts",
-    "./resource": "./src/resource.ts"
+    "./resource": "./src/resource.ts",
+    "./catalog-kind": "./src/catalog-kind.ts"
   }
 }

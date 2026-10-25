@@ -1,0 +1,3027 @@
+[
+  {
+    "id": "3th_anniversary",
+    "sourceBytes": 5045,
+    "sourceSha256": "787a1642fc96ef310264ca2a94c08e60c2caed7b92a6bbe3a5f69d0c4988a195",
+    "module": "3th_anniversary",
+    "kind": "table",
+    "records": 38
+  },
+  {
+    "id": "3th_anniversary_control",
+    "sourceBytes": 827,
+    "sourceSha256": "cef591fa28ab54da297d4705fe87cbc07a8cd89e0b6311a0ce9d2d7c5eb8f1d0",
+    "module": "3th_anniversary_control",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "ArenaMap",
+    "sourceBytes": 181390,
+    "sourceSha256": "ef9e3c594d39312ca83d18729136d9fd83f07623d68743f9fd2ffb36dd4ce8b6",
+    "module": "ArenaMap",
+    "kind": "tile-map"
+  },
+  {
+    "id": "Civilization_injury",
+    "sourceBytes": 1417,
+    "sourceSha256": "6208856163e88c997e35fc8f289eeb6a0609f28faac0ab1f4c8df7c3f98f4f42",
+    "module": "Civilization_injury",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "CrossThroneMap",
+    "sourceBytes": 1331503,
+    "sourceSha256": "b04bc285ffa7994f1f6e7128d98b957c7be11f1ad067c742a29d9b4023a1ba5a",
+    "module": "CrossThroneMap",
+    "kind": "tile-map"
+  },
+  {
+    "id": "SeaWorldmap",
+    "sourceBytes": 58400686,
+    "sourceSha256": "c5cc6b72055c860fc5fe6c71445ab0a82e3bd3d9887041d0e700d41989b78c4d",
+    "module": "SeaWorldmap",
+    "kind": "tile-map"
+  },
+  {
+    "id": "ab",
+    "sourceBytes": 1627,
+    "sourceSha256": "594fb99911a43375e4be8d9dc87c3745ff1443a68b28db78ca127858ea3918fe",
+    "module": "ab",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "ability",
+    "sourceBytes": 6460,
+    "sourceSha256": "1ecea5d843a583850d1ef55bbbdf9433fde2cac4f12071c594cef3d341472cba",
+    "module": "ability",
+    "kind": "table",
+    "records": 35
+  },
+  {
+    "id": "accumulate",
+    "sourceBytes": 662,
+    "sourceSha256": "fb7189df6017c250679632a80d85415cc8f856dbcb9f64535f115df7e72ec672",
+    "module": "accumulate",
+    "kind": "table",
+    "records": 9
+  },
+  {
+    "id": "achievement",
+    "sourceBytes": 22256,
+    "sourceSha256": "72a33c92a65e5dc4a308b46e9e0fdce54ce818815717009d1f58a447f2a90fd7",
+    "module": "achievement",
+    "kind": "table",
+    "records": 168
+  },
+  {
+    "id": "action",
+    "sourceBytes": 1421,
+    "sourceSha256": "61cf50ef0fd1f06dff7a631aaea363f272a5cdb247c1c23b3c9cded4f7e19897",
+    "module": "action",
+    "kind": "table",
+    "records": 16
+  },
+  {
+    "id": "activity",
+    "sourceBytes": 6044,
+    "sourceSha256": "dc84868fb3be6f42d6224f8b1b937fe913b157ced12834aba52fba69e48b1aa9",
+    "module": "activity",
+    "kind": "table",
+    "records": 8
+  },
+  {
+    "id": "activity_event",
+    "sourceBytes": 1902,
+    "sourceSha256": "effc561e9023f8e3738dd049bd67b44b5cf91ac33d7106999f856d2b57e69aec",
+    "module": "activity_event",
+    "kind": "table",
+    "records": 11
+  },
+  {
+    "id": "activity_page",
+    "sourceBytes": 1085,
+    "sourceSha256": "2b410852f3c63c9508a5064c2e16a6c1dff8f38137943772397aaef045c746e3",
+    "module": "activity_page",
+    "kind": "table",
+    "records": 14
+  },
+  {
+    "id": "activity_panel",
+    "sourceBytes": 71216,
+    "sourceSha256": "51e4ee04f1d14477467c368ea13d18476f5f6a5b1026e3e3ff7d248a15d2cb1f",
+    "module": "activity_panel",
+    "kind": "table",
+    "records": 263
+  },
+  {
+    "id": "add_user_equip",
+    "sourceBytes": 1054,
+    "sourceSha256": "4140ead4fbf87c86891eb7aae171a81335fe7ded4f8ec4a563c8ee7018147626",
+    "module": "add_user_equip",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "add_user_goods",
+    "sourceBytes": 855,
+    "sourceSha256": "189317908a11a6e6f2b38e0d547098e71f53a38a292e9aab037d7c4e6b44d4e9",
+    "module": "add_user_goods",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "affairs",
+    "sourceBytes": 38683,
+    "sourceSha256": "f84a38c2ed658268d5047b9372b8e032d3250cc46aea05d7a6931089b01b856d",
+    "module": "affairs",
+    "kind": "table",
+    "records": 72
+  },
+  {
+    "id": "alliance_boss",
+    "sourceBytes": 5053,
+    "sourceSha256": "c70be995e8c6bc18dcdff95ff45b02b5c4aa2ea831e09a39942b810c5769fbc1",
+    "module": "alliance_boss",
+    "kind": "table",
+    "records": 15
+  },
+  {
+    "id": "alliance_boss_control",
+    "sourceBytes": 460,
+    "sourceSha256": "ecbaf35386684ed0e48ea24daef623e122e2d673c6d59dd246e28d8306a00e9a",
+    "module": "alliance_boss_control",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "alliance_boss_reward",
+    "sourceBytes": 2005,
+    "sourceSha256": "168c4a18437afddbcdaa0a14c45dc6032db7976eb95d44f69ad873b3205ce504",
+    "module": "alliance_boss_reward",
+    "kind": "table",
+    "records": 12
+  },
+  {
+    "id": "alliance_building",
+    "sourceBytes": 11713,
+    "sourceSha256": "7fe3359b9a7670951db11dc7c4f413b77869b850fbb5c85ae47fb532c9bf70c5",
+    "module": "alliance_building",
+    "kind": "table",
+    "records": 47
+  },
+  {
+    "id": "alliance_building_skill",
+    "sourceBytes": 2723,
+    "sourceSha256": "b95ddad2a49166ffaf071713bfe8cdcc65897e14d8711ae89926ce646dce9872",
+    "module": "alliance_building_skill",
+    "kind": "table",
+    "records": 21
+  },
+  {
+    "id": "alliance_mission",
+    "sourceBytes": 7729,
+    "sourceSha256": "3d683e3569edd6e8a16b4aeb8aa24fe2ab59d95161ab8c901380134f607846b7",
+    "module": "alliance_mission",
+    "kind": "table",
+    "records": 49
+  },
+  {
+    "id": "alliance_quest",
+    "sourceBytes": 28555,
+    "sourceSha256": "f5770ca8d93847d35d5bbf70ed2c2f0b35f774800d6cfc4edafe360333303c73",
+    "module": "alliance_quest",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "alliance_quest_colorran",
+    "sourceBytes": 501,
+    "sourceSha256": "401c44cef43821ee578ec43fc877f9bdbd46442f1ff65a84068d6e49600fbfe0",
+    "module": "alliance_quest_colorran",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "alliance_teleport",
+    "sourceBytes": 1023,
+    "sourceSha256": "97b3a1b35c2d4a68f9c02b04d5d8d2c05e1c3d5728e6b3aaab764bf0d64f451b",
+    "module": "alliance_teleport",
+    "kind": "table",
+    "records": 11
+  },
+  {
+    "id": "alliancescience",
+    "sourceBytes": 127244,
+    "sourceSha256": "bd3957c437990da9ae7564ecd5733bb2b2631af57c39a6e7e787af03bc0141aa",
+    "module": "alliancescience",
+    "kind": "table",
+    "records": 503
+  },
+  {
+    "id": "allianceshop",
+    "sourceBytes": 3145,
+    "sourceSha256": "66ebd29803862ae315bd8ae99c38016d9b2ac1c785ea32c2bca6604500b18079",
+    "module": "allianceshop",
+    "kind": "table",
+    "records": 31
+  },
+  {
+    "id": "area",
+    "sourceBytes": 8733,
+    "sourceSha256": "b98d099653c38b61d0ab770e605ce808914055108cc80000a350ce33648ecc25",
+    "module": "area",
+    "kind": "table",
+    "records": 31
+  },
+  {
+    "id": "arena",
+    "sourceBytes": 8964,
+    "sourceSha256": "021607a929d8afc8e974ff7cf763d03a57ddf39ecbc62750a4a19b68f3c9065c",
+    "module": "arena",
+    "kind": "table",
+    "records": 60
+  },
+  {
+    "id": "arena_rank",
+    "sourceBytes": 532,
+    "sourceSha256": "5a30e865d1d6b8beee2ce6e80b6a893779af62f97a7db415a54a935c9a08045f",
+    "module": "arena_rank",
+    "kind": "table",
+    "records": 7
+  },
+  {
+    "id": "arms",
+    "sourceBytes": 96442,
+    "sourceSha256": "19759cb7f3bb8a3c5df8c7cb5aa4e8bb2428cd48a4c40b95e11bc26fa0d9753c",
+    "module": "arms",
+    "kind": "table",
+    "records": 126
+  },
+  {
+    "id": "army",
+    "sourceBytes": 19225,
+    "sourceSha256": "ac28c3055a64afcb51b20cba74483c0ecb37f1612efec89b5733ba40c153d8fe",
+    "module": "army",
+    "kind": "table",
+    "records": 267
+  },
+  {
+    "id": "army_up_base",
+    "sourceBytes": 2356,
+    "sourceSha256": "6815185890e22f431930600207cc0eb98b0009f6a7f610bc6ccab01d806c07bd",
+    "module": "army_up_base",
+    "kind": "table",
+    "records": 16
+  },
+  {
+    "id": "army_up_effect",
+    "sourceBytes": 5302,
+    "sourceSha256": "758a08bdef5e9ed4ee2e2f844fd4fbdd481a573e5ee9e42e0c1e3f7454ea9558",
+    "module": "army_up_effect",
+    "kind": "table",
+    "records": 70
+  },
+  {
+    "id": "army_up_whole",
+    "sourceBytes": 27694,
+    "sourceSha256": "e1834dc1d2dc8cbcd8b19992e3e855e1c4913775f90275cc6d24ea52419ec436",
+    "module": "army_up_whole",
+    "kind": "table",
+    "records": 200
+  },
+  {
+    "id": "attribute_random",
+    "sourceBytes": 3025,
+    "sourceSha256": "e544969458170e1eaebc29d92fbd5f40254384e44d7a0a195afbeca7060070b8",
+    "module": "attribute_random",
+    "kind": "table",
+    "records": 38
+  },
+  {
+    "id": "auction",
+    "sourceBytes": 3142,
+    "sourceSha256": "4341299b89d9bd22bf716e0ea65a3b77acb554b953b30b7efe28bc43f2c9103a",
+    "module": "auction",
+    "kind": "table",
+    "records": 24
+  },
+  {
+    "id": "auto_updata",
+    "sourceBytes": 565,
+    "sourceSha256": "d9fe5a3ac7279bce80c3f124b33c34a618c5c11bcfa7c76b71a324c988bcfe60",
+    "module": "auto_updata",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "bank",
+    "sourceBytes": 404,
+    "sourceSha256": "f8d16e5c7e5d109f8baf69e3d761dfc531f9059ace1d829676df269181dd722e",
+    "module": "bank",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "banlist",
+    "sourceBytes": 2825,
+    "sourceSha256": "89011be20044d1d1a6a37494a34b9fd51a53cebe5c256a202741ac13ab9de67d",
+    "module": "banlist",
+    "kind": "table",
+    "records": 34
+  },
+  {
+    "id": "barbarion",
+    "sourceBytes": 5663,
+    "sourceSha256": "b9055f13e1fdbda2353f6720bbcb8c991391006e3e347f6beef343f732d757db",
+    "module": "barbarion",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "bestow_title",
+    "sourceBytes": 506,
+    "sourceSha256": "7092c463344faf6a584f5a835454a908bce40c2248a8395c8aba03420c6646ea",
+    "module": "bestow_title",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "bet",
+    "sourceBytes": 4349,
+    "sourceSha256": "feeb9c882652e6c2fb2d2064916d0d65709df4aab12c6c7959431f6186295778",
+    "module": "bet",
+    "kind": "table",
+    "records": 22
+  },
+  {
+    "id": "bocai_dragon",
+    "sourceBytes": 302,
+    "sourceSha256": "23ffd3822ccc4bfc482aeb5eaca31d973bc77260dacc34605f006d019be75bc3",
+    "module": "bocai_dragon",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "box_ordinary",
+    "sourceBytes": 2175,
+    "sourceSha256": "492bfb1bf373fee1e8f80738e1fee67d92b79f49b9e70d40069fbd7ac1212a7e",
+    "module": "box_ordinary",
+    "kind": "table",
+    "records": 11
+  },
+  {
+    "id": "box_vip",
+    "sourceBytes": 3871,
+    "sourceSha256": "e00bd57c65c8c6f9ea8e5c7a80e6f9d6cf57a54104c4256277da08218588b7cb",
+    "module": "box_vip",
+    "kind": "table",
+    "records": 11
+  },
+  {
+    "id": "br_resource_refresh",
+    "sourceBytes": 521,
+    "sourceSha256": "7da39e694537de6ce7026f377a5312fc2bdfc610faeae9f956f545d599ec0b59",
+    "module": "br_resource_refresh",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "building_star",
+    "sourceBytes": 234806,
+    "sourceSha256": "e7d5e1558609430e10924033b8f046c982e341bb59beb70e8932c771b63fde5f",
+    "module": "building_star",
+    "kind": "table",
+    "records": 928
+  },
+  {
+    "id": "building_starup",
+    "sourceBytes": 6337,
+    "sourceSha256": "17422154e384e5fe6929f07f00d7454711bc708db103c8ee2715ce5e0be4a47a",
+    "module": "building_starup",
+    "kind": "table",
+    "records": 55
+  },
+  {
+    "id": "cargo",
+    "sourceBytes": 1918,
+    "sourceSha256": "15f46f11bffef0b43e06e3acfa1c61fb3deac59354b5181270ef07cdb72c24fa",
+    "module": "cargo",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "characters",
+    "sourceBytes": 567,
+    "sourceSha256": "d5453c7c5ba4451e2eac8153e2d9fbaa4dd2fee23e4b1e08a10dc6e5c477d2b5",
+    "module": "characters",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "chatbg_color",
+    "sourceBytes": 484,
+    "sourceSha256": "ea73412cce531afaff734da223497ee0d8346d5acabbc1bbaaeea76c5d591388",
+    "module": "chatbg_color",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "checkpoint",
+    "sourceBytes": 284,
+    "sourceSha256": "51b5812ba88d4187582e748c54614c653bdf9abce89b631cfa7ad863015ca699",
+    "module": "checkpoint",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "city",
+    "sourceBytes": 10929,
+    "sourceSha256": "1cb51c69d20c16cc7ae7661ac8941b5383c36d6d65bfe33a6ab909c18f25cdfe",
+    "module": "city",
+    "kind": "table",
+    "records": 252
+  },
+  {
+    "id": "civilization",
+    "sourceBytes": 423,
+    "sourceSha256": "a7e638b53fffa40c8385ee96a7ec5ac2c6114c0ff03be81f708e0530288bbc6b",
+    "module": "civilization",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "civilization_feature",
+    "sourceBytes": 88601,
+    "sourceSha256": "c3b718c06fa5a703d6b793efc166a6508f35bca2f62a47ef2325237fb21aceb1",
+    "module": "civilization_feature",
+    "kind": "table",
+    "records": 600
+  },
+  {
+    "id": "civilization_fortress",
+    "sourceBytes": 9221,
+    "sourceSha256": "bf5bb48d6deca1e5d63cb914a4dbaff34b7395a8b89e1a827db5c63becb4fac1",
+    "module": "civilization_fortress",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "clean",
+    "sourceBytes": 2409,
+    "sourceSha256": "8c0b72c896fe63c5c92949dc1a7ac1d087172ea37914c1407501a12f7cd24034",
+    "module": "clean",
+    "kind": "table",
+    "records": 40
+  },
+  {
+    "id": "comeback",
+    "sourceBytes": 663,
+    "sourceSha256": "897d43140fcb5468e7bccd4080c7a001ce4c9f4560154b466932df4acf95c381",
+    "module": "comeback",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "compensation",
+    "sourceBytes": 1028,
+    "sourceSha256": "d82e5881d55a206d26219d3ea01795385acbc77956d5f94644a7b4ac311c887a",
+    "module": "compensation",
+    "kind": "table",
+    "records": 9
+  },
+  {
+    "id": "continued_cost",
+    "sourceBytes": 1146,
+    "sourceSha256": "9d423ca2be0c0cc6d2db2460c78abe7c6baccd1826ebabd2e8d02ac6d82d23bc",
+    "module": "continued_cost",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "convert",
+    "sourceBytes": 316,
+    "sourceSha256": "7ee4a18ab633c0a1fcb545236548f93c388e30afb43946e8df458680f045093a",
+    "module": "convert",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "crossFightWorld",
+    "sourceBytes": 5355219,
+    "sourceSha256": "3aa947a7359bc79e06385050704505bcb22419396309021533e7eeeba6deb063",
+    "module": "crossFightWorld",
+    "kind": "tile-map"
+  },
+  {
+    "id": "crossThroneMaster",
+    "sourceBytes": 1331503,
+    "sourceSha256": "b04bc285ffa7994f1f6e7128d98b957c7be11f1ad067c742a29d9b4023a1ba5a",
+    "module": "CrossThroneMap",
+    "kind": "tile-map"
+  },
+  {
+    "id": "csmod_auto_upgrade",
+    "sourceBytes": 6406,
+    "sourceSha256": "44eacdb0b0e621c63552fe627e695bbe0b39390c2f1a739e4646d45b9fd193e2",
+    "module": "building_starup",
+    "kind": "table",
+    "records": 55
+  },
+  {
+    "id": "csmod_settings",
+    "sourceBytes": 329,
+    "sourceSha256": "3e2a5db0cbe62e9204181cf897f74c9edced4bd1b4231eab8da5f15c8158dabf",
+    "module": "csmod_settings",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "daily_login",
+    "sourceBytes": 2133,
+    "sourceSha256": "42defc703914ec18c12fc6e0192d4fcaf10ee720b8ec76b6d2676e106a4548c7",
+    "module": "daily_login",
+    "kind": "table",
+    "records": 7
+  },
+  {
+    "id": "daily_quest",
+    "sourceBytes": 3086,
+    "sourceSha256": "44108682a4ab5be4c4244b224fc1fb12f44c852a0a6e3698daeff70dba87da5e",
+    "module": "daily_quest",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "daily_recharge",
+    "sourceBytes": 187,
+    "sourceSha256": "1bed86056ffec9db4cf5438aaa2ea8e686e7b51a91e0b21ca0b2db1f69ecf745",
+    "module": "daily_recharge",
+    "kind": "table",
+    "records": 0
+  },
+  {
+    "id": "daily_reward",
+    "sourceBytes": 4106,
+    "sourceSha256": "ba7158f758eb958e2bde86171bf5a810c56bc5f12e5c0c6ab5d6fc260c3ced3f",
+    "module": "daily_reward",
+    "kind": "table",
+    "records": 8
+  },
+  {
+    "id": "daily_task_box",
+    "sourceBytes": 526,
+    "sourceSha256": "5f166bb2685c6fb1414f618419429bc8391a5bf9616580203ecc18bf4fe251bd",
+    "module": "daily_task_box",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "daily_task_reward",
+    "sourceBytes": 1775,
+    "sourceSha256": "bfc100ef9547ce31e38855d8ecdb36834d7d80b31e89364b347f744de1462f85",
+    "module": "daily_task_reward",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "deep_link",
+    "sourceBytes": 3417,
+    "sourceSha256": "8a3eec071eb183ee1e593f9d96ec217e152b130d6ac2cc0f07b7ee3e9d079072",
+    "module": "deep_link",
+    "kind": "table",
+    "records": 45
+  },
+  {
+    "id": "defeatNotice",
+    "sourceBytes": 1096,
+    "sourceSha256": "f18f8cd5c30e583f1f53d8e9b8b86e539299ecba4acb92445f319e9a546657cd",
+    "module": "defeatNotice",
+    "kind": "table",
+    "records": 15
+  },
+  {
+    "id": "defensor",
+    "sourceBytes": 1091,
+    "sourceSha256": "d46cb8c740340f957894eb4d5a3730e99c8044d95ed830dafe378ce019e024ab",
+    "module": "defensor",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "del_exchange",
+    "sourceBytes": 3863262,
+    "sourceSha256": "9e419a48ca629170be7788a3fe15bd88f485d532a88b0233992529155a9252b5",
+    "module": "del_exchange",
+    "kind": "table",
+    "records": 7114
+  },
+  {
+    "id": "dg_refinement",
+    "sourceBytes": 27932,
+    "sourceSha256": "8d59d2cc5ca86241beaefbc827267327d3c0aaec2cc44fb21bf31484524c34ae",
+    "module": "dg_refinement",
+    "kind": "table",
+    "records": 36
+  },
+  {
+    "id": "dianji_reward",
+    "sourceBytes": 1390,
+    "sourceSha256": "3ac489071cab69cfd675ddcba25146fd8f591c6d21b6495b0af5f0381f5d1e82",
+    "module": "dianji_reward",
+    "kind": "table",
+    "records": 9
+  },
+  {
+    "id": "discount_mall",
+    "sourceBytes": 5012,
+    "sourceSha256": "b1e67df02cdd9834f4a5ea5fc48428a5aa3c062e764efbd457ce20643db2a406",
+    "module": "discount_mall",
+    "kind": "table",
+    "records": 77
+  },
+  {
+    "id": "dragon",
+    "sourceBytes": 209,
+    "sourceSha256": "f9373ead7cccbdf30b1eaabd92c7b04a362939b855f6cc1396b7369fd7c52ece",
+    "module": "dragon",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "dragonBattleWorld",
+    "sourceBytes": 942615,
+    "sourceSha256": "5d4dfbdf57f7f863c202f79d7e097f11dff139cd8404af02bd5d24b1f2586a92",
+    "module": "dragonBattleWorld",
+    "kind": "tile-map"
+  },
+  {
+    "id": "dragon_base",
+    "sourceBytes": 5920,
+    "sourceSha256": "288255dd7069d944fa863d162e474c504df9e563b142d732ce0e15e56be39f04",
+    "module": "dragon_base",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "dragon_communicate",
+    "sourceBytes": 628,
+    "sourceSha256": "4438e034fd4aec97dad5928eb24241341a2fbce78bd94ec6ac0d9403a2d99bdb",
+    "module": "dragon_communicate",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "dragon_crystal_condition",
+    "sourceBytes": 7786,
+    "sourceSha256": "c832a2894825d893674d7adeccef98de5b876c02f2f1aac4c80277ea25ad061e",
+    "module": "dragon_crystal_condition",
+    "kind": "table",
+    "records": 70
+  },
+  {
+    "id": "dragon_detail",
+    "sourceBytes": 1235,
+    "sourceSha256": "afe5b9db6c013e6bb936ed76c3abce6dca84b63a500adb601cd90941f02b89ae",
+    "module": "dragon_detail",
+    "kind": "table",
+    "records": 14
+  },
+  {
+    "id": "dragon_egg",
+    "sourceBytes": 209,
+    "sourceSha256": "f9373ead7cccbdf30b1eaabd92c7b04a362939b855f6cc1396b7369fd7c52ece",
+    "module": "dragon",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "dragon_exp",
+    "sourceBytes": 209,
+    "sourceSha256": "f9373ead7cccbdf30b1eaabd92c7b04a362939b855f6cc1396b7369fd7c52ece",
+    "module": "dragon",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "dragon_food",
+    "sourceBytes": 386257,
+    "sourceSha256": "7f43f8b23e705db7519637cb070bb1f8d919c8980aaad15a602001794470ac56",
+    "module": "dragon_food",
+    "kind": "table",
+    "records": 966
+  },
+  {
+    "id": "dragon_gift",
+    "sourceBytes": 359,
+    "sourceSha256": "96d08a6dcbdae05d17fd1084952e822143c5076c6931207746f61ef1bb5d1c48",
+    "module": "dragon_gift",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "dragon_new",
+    "sourceBytes": 280883,
+    "sourceSha256": "38a88a81a12101c9a58945e63cf43c1a50ef6539bd40552addfb55f855a8c467",
+    "module": "dragon_new",
+    "kind": "table",
+    "records": 520
+  },
+  {
+    "id": "dragon_skill",
+    "sourceBytes": 261470,
+    "sourceSha256": "2c18ea3c34fb39b3be4e5155cf5daa3d5241ed813e76e0f0d9cb9188cc2a083d",
+    "module": "dragon_skill",
+    "kind": "table",
+    "records": 785
+  },
+  {
+    "id": "dragon_skill_exp",
+    "sourceBytes": 3799,
+    "sourceSha256": "c2cfa4f6b2986e3e7c3963e51d4427be59bb38cb15d85b884603ca0325197ae5",
+    "module": "dragon_skill_exp",
+    "kind": "table",
+    "records": 60
+  },
+  {
+    "id": "dragon_talent",
+    "sourceBytes": 220736,
+    "sourceSha256": "d8599caa582d752e12cf0e78e1ebaa0219bc4d0ad94102ad23dc86020fb2e304",
+    "module": "dragon_talent",
+    "kind": "table",
+    "records": 931
+  },
+  {
+    "id": "dragon_talent_exp",
+    "sourceBytes": 86243,
+    "sourceSha256": "e86db3e3b3827eb026b60b850e56d09325b8f402b247188eb79fdc0d88ba17a6",
+    "module": "dragon_talent_exp",
+    "kind": "table",
+    "records": 843
+  },
+  {
+    "id": "dragon_tower_buff",
+    "sourceBytes": 54423,
+    "sourceSha256": "7ab40792daae3e7b2b262e193db3983053d3ebde9fee03210d2180c24f0a74f8",
+    "module": "dragon_tower_buff",
+    "kind": "table",
+    "records": 391
+  },
+  {
+    "id": "dragon_tower_coord",
+    "sourceBytes": 645,
+    "sourceSha256": "5659d4c4f450878ea78c6f21001d11dea8b44aa64ca0e2c7ad1145fbc7c92c10",
+    "module": "dragon_tower_coord",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "dragon_tower_layer",
+    "sourceBytes": 35113,
+    "sourceSha256": "c9b9879af51600d3491588343e92dbe02dfaffa62390d89279273d24fd7cbe84",
+    "module": "dragon_tower_layer",
+    "kind": "table",
+    "records": 80
+  },
+  {
+    "id": "dragon_tower_monster",
+    "sourceBytes": 165739,
+    "sourceSha256": "3bea41484184c9c2e9466af3dfbe91fcef3a109923a6cfdcce19f9220c978f25",
+    "module": "dragon_tower_monster",
+    "kind": "table",
+    "records": 960
+  },
+  {
+    "id": "dragon_travel",
+    "sourceBytes": 5103,
+    "sourceSha256": "8bc43f22d6730454e3830ac13f32a5967b7ba42ec98672371eef8293ac161c0e",
+    "module": "dragon_travel",
+    "kind": "table",
+    "records": 32
+  },
+  {
+    "id": "dragon_words",
+    "sourceBytes": 32662,
+    "sourceSha256": "0f1c73dfbad2d9af7b872e86e1b8854b3ba558acc411bd5108b630a18a18178d",
+    "module": "dragon_words",
+    "kind": "table",
+    "records": 78
+  },
+  {
+    "id": "drawRandom",
+    "sourceBytes": 526,
+    "sourceSha256": "18148cb650acedbc1f211cd0c8c9f6c33c84fd58d4b009561a5474f6f847eced",
+    "module": "drawRandom",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "drconfig",
+    "sourceBytes": 4774,
+    "sourceSha256": "a3404e20a719e38d3924bf52fbb67f26e6573bec9b295269fad4fa734e9bc044",
+    "module": "drconfig",
+    "kind": "table",
+    "records": 35
+  },
+  {
+    "id": "drconfig7.26.0",
+    "sourceBytes": 352,
+    "sourceSha256": "04578f87e6bfce04b13fe72fffbedcc850d24b106809a1b1c3160ba08bca4e5f",
+    "module": "drconfig7.26.0",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "drconfig9.10.0",
+    "sourceBytes": 352,
+    "sourceSha256": "04578f87e6bfce04b13fe72fffbedcc850d24b106809a1b1c3160ba08bca4e5f",
+    "module": "drconfig7.26.0",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "drconfig9.14.0",
+    "sourceBytes": 350,
+    "sourceSha256": "2a2abc3805831a81a23b4b9365c7cd0152fa998561596fdd7bd0ec08084f53f8",
+    "module": "drconfig9.14.0",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "drconfig9.15.0",
+    "sourceBytes": 350,
+    "sourceSha256": "2a2abc3805831a81a23b4b9365c7cd0152fa998561596fdd7bd0ec08084f53f8",
+    "module": "drconfig9.14.0",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "drconfig9.16.0",
+    "sourceBytes": 350,
+    "sourceSha256": "2a2abc3805831a81a23b4b9365c7cd0152fa998561596fdd7bd0ec08084f53f8",
+    "module": "drconfig9.14.0",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "drconfig9.17.0",
+    "sourceBytes": 350,
+    "sourceSha256": "2a2abc3805831a81a23b4b9365c7cd0152fa998561596fdd7bd0ec08084f53f8",
+    "module": "drconfig9.14.0",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "drconfig9.18.0",
+    "sourceBytes": 350,
+    "sourceSha256": "2a2abc3805831a81a23b4b9365c7cd0152fa998561596fdd7bd0ec08084f53f8",
+    "module": "drconfig9.14.0",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "drconfig9.26.0",
+    "sourceBytes": 513,
+    "sourceSha256": "c2bb329e4f9da9d2c9096f41f53d50808c7177abcb9752f1d92c5fe74e36f8b2",
+    "module": "drconfig9.26.0",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "drconfig9.27.0",
+    "sourceBytes": 513,
+    "sourceSha256": "c2bb329e4f9da9d2c9096f41f53d50808c7177abcb9752f1d92c5fe74e36f8b2",
+    "module": "drconfig9.26.0",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "effect",
+    "sourceBytes": 8826,
+    "sourceSha256": "2e3390600880059eb9d76017217e7d418aef2fedf86f66f1895ed12e74d5a9e0",
+    "module": "effect",
+    "kind": "table",
+    "records": 58
+  },
+  {
+    "id": "effect_requirement",
+    "sourceBytes": 1584,
+    "sourceSha256": "1a20a98f3f3e28e3c18a71c2d2363b3f2da5fd7175a2a700be559768034f059b",
+    "module": "effect_requirement",
+    "kind": "table",
+    "records": 22
+  },
+  {
+    "id": "egg",
+    "sourceBytes": 1452,
+    "sourceSha256": "9169485832af3250f6f8cb5a544587461d6a3f8c8a715bbb86396823fcebede3",
+    "module": "egg",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "emulator",
+    "sourceBytes": 606,
+    "sourceSha256": "6eeec17b40570e0e44f0e367242ae2fd8abc6eaac7bd48e972becae4ad7d08e3",
+    "module": "emulator",
+    "kind": "table",
+    "records": 9
+  },
+  {
+    "id": "endowment",
+    "sourceBytes": 1163,
+    "sourceSha256": "f190653645bc39f88f443219128c7557677f45af0d339c185e29e7f5dd520d4a",
+    "module": "endowment",
+    "kind": "table",
+    "records": 9
+  },
+  {
+    "id": "equip_strength",
+    "sourceBytes": 13246,
+    "sourceSha256": "30b73c04a513f61ef5171216f577214c7858fb5fdbdfd43f85dff76df7bfa5e5",
+    "module": "equip_strength",
+    "kind": "table",
+    "records": 12
+  },
+  {
+    "id": "equipment",
+    "sourceBytes": 1275504,
+    "sourceSha256": "c61257b02fbdc4010866003f8cb0280ad6807ea27d9722159c27ee54e6b26b9f",
+    "module": "equipment",
+    "kind": "table",
+    "records": 2267
+  },
+  {
+    "id": "equipmentRandom",
+    "sourceBytes": 16727,
+    "sourceSha256": "a6d103e1de1ec80c72fae3543fe6221886561905a013aad17139a22811f44d70",
+    "module": "equipmentRandom",
+    "kind": "table",
+    "records": 18
+  },
+  {
+    "id": "equipmentRandomPower",
+    "sourceBytes": 7171,
+    "sourceSha256": "1c23e153882699a1c4b625dd492e926611124116bb205a99b1a50842ac2fcd8b",
+    "module": "equipmentRandomPower",
+    "kind": "table",
+    "records": 124
+  },
+  {
+    "id": "equipment_bag_suit_filter",
+    "sourceBytes": 1740,
+    "sourceSha256": "df24d2bee10f1cfcd0fedf95957e59a70cedff6ce38eb79811eafaf524f59bda",
+    "module": "equipment_bag_suit_filter",
+    "kind": "table",
+    "records": 22
+  },
+  {
+    "id": "equipment_rank",
+    "sourceBytes": 802,
+    "sourceSha256": "1898626da448bf8ed84b6f8f39523d108cf74227089638215461464b141e24ec",
+    "module": "equipment_rank",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "equipment_smelt",
+    "sourceBytes": 38714,
+    "sourceSha256": "3a1177ee4554a7884e89d088935a391c8fc6abcd67432b74a1f5b068e3e632cd",
+    "module": "equipment_smelt",
+    "kind": "table",
+    "records": 206
+  },
+  {
+    "id": "equipment_strength",
+    "sourceBytes": 465,
+    "sourceSha256": "b7f20d0cd4d19279b0e955a9bf0236a3c12bada339549c2350531801f45bce16",
+    "module": "equipment_strength",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "equipment_strengthen_move",
+    "sourceBytes": 4847,
+    "sourceSha256": "78248adeaf7b41e0e9d13c1ebca768abe5ce74a56313e046311675061f4e9440",
+    "module": "equipment_strengthen_move",
+    "kind": "table",
+    "records": 60
+  },
+  {
+    "id": "equipment_strengthen_remove",
+    "sourceBytes": 2220,
+    "sourceSha256": "edfaca46ff663c8730e9df098b967e16aa5caaea6b77d616579632fb280a44ff",
+    "module": "equipment_strengthen_remove",
+    "kind": "table",
+    "records": 36
+  },
+  {
+    "id": "equipmentstrengthRandom",
+    "sourceBytes": 13246,
+    "sourceSha256": "30b73c04a513f61ef5171216f577214c7858fb5fdbdfd43f85dff76df7bfa5e5",
+    "module": "equip_strength",
+    "kind": "table",
+    "records": 12
+  },
+  {
+    "id": "equipmentstrengthRandomPower",
+    "sourceBytes": 7171,
+    "sourceSha256": "1c23e153882699a1c4b625dd492e926611124116bb205a99b1a50842ac2fcd8b",
+    "module": "equipmentRandomPower",
+    "kind": "table",
+    "records": 124
+  },
+  {
+    "id": "event",
+    "sourceBytes": 5209,
+    "sourceSha256": "01316d1eef7bc32dd6fe14d0cb585e51417789d6dd29f63e1ab6d64175070638",
+    "module": "event",
+    "kind": "automation"
+  },
+  {
+    "id": "events",
+    "sourceBytes": 23213,
+    "sourceSha256": "63a99ba09f31cd9c245c9faa2bcfc5c3fbdfafc06bca3ea073cf12461b36c8a6",
+    "module": "events",
+    "kind": "table",
+    "records": 11
+  },
+  {
+    "id": "everyday_recharge",
+    "sourceBytes": 485,
+    "sourceSha256": "59bcaa7ba1a7c35fb28ab759dbc9608ac1b7b68251278a85c4ace5dc0ea7bb3f",
+    "module": "everyday_recharge",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "exchange",
+    "sourceBytes": 136492,
+    "sourceSha256": "967f733774b38fe8964731102f77f101685bd9ac43304564e63dbdedd2c9e1cc",
+    "module": "exchange",
+    "kind": "table",
+    "records": 351
+  },
+  {
+    "id": "exchange_cycle",
+    "sourceBytes": 3151,
+    "sourceSha256": "cd3c9eef42aeca82242e24638deb92a77724ce62876d7c96e9f265eb71f5d0e6",
+    "module": "exchange_cycle",
+    "kind": "table",
+    "records": 21
+  },
+  {
+    "id": "exchange_field_type",
+    "sourceBytes": 12054,
+    "sourceSha256": "d0b9e2a0c2566ca792c6c93670ebb13f48a24fac9fce54b6414279ccb2ecefc7",
+    "module": "exchange_field_type",
+    "kind": "table",
+    "records": 175
+  },
+  {
+    "id": "explore",
+    "sourceBytes": 11915,
+    "sourceSha256": "11b1724c809292f97832e8674fdeb05bba4f39e6bd9a8495560af2724eeef2cf",
+    "module": "explore",
+    "kind": "table",
+    "records": 129
+  },
+  {
+    "id": "fb_share",
+    "sourceBytes": 12555,
+    "sourceSha256": "3790d87a9528b4716b4ffa48fbfa57ee2400307653693b22cea811bc3ef74189",
+    "module": "fb_share",
+    "kind": "table",
+    "records": 53
+  },
+  {
+    "id": "field_monster",
+    "sourceBytes": 201182,
+    "sourceSha256": "3738416b7e966390ae9192dc737f849234a5df1c4fa3455470f16182beb49359",
+    "module": "field_monster",
+    "kind": "table",
+    "records": 952
+  },
+  {
+    "id": "foreign_civilization_base",
+    "sourceBytes": 76445,
+    "sourceSha256": "b4aac3ce77ea5a7e2d09390d74586121aaa7e5790ed019b1961a411c1fc8ca7a",
+    "module": "foreign_civilization_base",
+    "kind": "table",
+    "records": 230
+  },
+  {
+    "id": "foreign_civilization_up",
+    "sourceBytes": 950924,
+    "sourceSha256": "f9e11d01aaad34ba95dd299c3ebae5487d5e7c731beddab8a1a00b6ad2c79a30",
+    "module": "foreign_civilization_up",
+    "kind": "table",
+    "records": 3761
+  },
+  {
+    "id": "fragment",
+    "sourceBytes": 5104,
+    "sourceSha256": "cabf32123cbd484ca8b413c769cc16dbc9aaffe278a5aafebabf6115283938a7",
+    "module": "fragment",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "function_on - Copy",
+    "sourceBytes": 176047,
+    "sourceSha256": "046151dc2d82100480b842f61d725b15f94e5fdfbf8022d3b1f9dc5496f3f628",
+    "module": "function_on - Copy",
+    "kind": "table",
+    "records": 1976
+  },
+  {
+    "id": "function_on",
+    "sourceBytes": 178792,
+    "sourceSha256": "1881cf24f63aae8d205deea1b16f306351ae0f0e9c547adb83a3db6ba2dff96b",
+    "module": "function_on",
+    "kind": "table",
+    "records": 2028
+  },
+  {
+    "id": "function_on7.21.0",
+    "sourceBytes": 169282,
+    "sourceSha256": "09732de716235ece2919c0f7890cb11c48c5b7053f74d152597f0509fd36c9c1",
+    "module": "function_on7.21.0",
+    "kind": "table",
+    "records": 1906
+  },
+  {
+    "id": "function_on9.17.0",
+    "sourceBytes": 155309,
+    "sourceSha256": "15fafba6fcf82ccddf0d4b4c29d1749292f1bc7b6f5f9037b7fd57e653a234f5",
+    "module": "function_on9.17.0",
+    "kind": "table",
+    "records": 1748
+  },
+  {
+    "id": "function_on9.18.0",
+    "sourceBytes": 176046,
+    "sourceSha256": "e7dca469801f4bd1365a846c31113a7c08d67df48237437b0ad41d23cbef6c3e",
+    "module": "function_on9.18.0",
+    "kind": "table",
+    "records": 1976
+  },
+  {
+    "id": "function_on_luaUI",
+    "sourceBytes": 496,
+    "sourceSha256": "b3f0f10f5c0353a5dd2e3f3d2c7f756ef96ff4744103e626e21f5e7a55980e8f",
+    "module": "function_on_luaUI",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "function_star",
+    "sourceBytes": 18821,
+    "sourceSha256": "e9776922e77780cf09bbb4950eb1215259a33b3394830e1631a3238160b096a9",
+    "module": "function_star",
+    "kind": "table",
+    "records": 156
+  },
+  {
+    "id": "general",
+    "sourceBytes": 1911,
+    "sourceSha256": "f20221d7488660783dddbbf58a4669530c0817babf4be41ebc1ec1e1599d7c51",
+    "module": "general",
+    "kind": "table",
+    "records": 17
+  },
+  {
+    "id": "general_ab",
+    "sourceBytes": 78471,
+    "sourceSha256": "752ec47e9903ae9e4e39e965cd211aeb7aef51cd07b0d67198b33091c1d97f77",
+    "module": "general_ab",
+    "kind": "table",
+    "records": 134
+  },
+  {
+    "id": "general_awake",
+    "sourceBytes": 10473,
+    "sourceSha256": "35b945192969ad5380f52bf911c4bb81e59984de791a2f389a0fd1c8eb02f90c",
+    "module": "general_awake",
+    "kind": "table",
+    "records": 29
+  },
+  {
+    "id": "general_awaken_challenge_reward",
+    "sourceBytes": 109361,
+    "sourceSha256": "a42190f93a3f666c9bc9852dc71fb350478784c0b795a1554901cddaf8994cf5",
+    "module": "general_awaken_challenge_reward",
+    "kind": "table",
+    "records": 836
+  },
+  {
+    "id": "general_base",
+    "sourceBytes": 84636,
+    "sourceSha256": "8b938f8105d7ad5041fb47f33efbe86e2b0614c227e0446943f3e4a2c8821b9e",
+    "module": "general_base",
+    "kind": "table",
+    "records": 109
+  },
+  {
+    "id": "general_base_skill_tree",
+    "sourceBytes": 2809,
+    "sourceSha256": "5cd5940f4f6ffcfcd9b4fd8b4cd99af90b6b53712b366530c63c157f1e60aaad",
+    "module": "general_base_skill_tree",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "general_called_task",
+    "sourceBytes": 1516,
+    "sourceSha256": "65d25be85f7b76cdb2628f1a9252904ba8b8cf2a766a07672302ec12c06342aa",
+    "module": "general_called_task",
+    "kind": "table",
+    "records": 16
+  },
+  {
+    "id": "general_detail",
+    "sourceBytes": 19729,
+    "sourceSha256": "2c417a986d63a2c883eb34be5e14e26196d5fcf0c4ca267826750d309743328e",
+    "module": "general_detail",
+    "kind": "table",
+    "records": 214
+  },
+  {
+    "id": "general_draw",
+    "sourceBytes": 38616,
+    "sourceSha256": "6784ef77b1e5a43864d7d0cd6da767fb68b91a9a5e63ad19cc0937662c5406e5",
+    "module": "general_draw",
+    "kind": "table",
+    "records": 286
+  },
+  {
+    "id": "general_draw_new_main",
+    "sourceBytes": 1626,
+    "sourceSha256": "11389b90969eb78d9e2a9096114ee77bff9ea0419bee96ec78125087bbf9e5af",
+    "module": "general_draw_new_main",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "general_draw_rate",
+    "sourceBytes": 460,
+    "sourceSha256": "feb8063564f0ec8d931029662b5ae6c531c38cb09d6a146615659590e22e96c8",
+    "module": "general_draw_rate",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "general_level",
+    "sourceBytes": 19518,
+    "sourceSha256": "7722886de0e099fa24ae1cbed497bed64358652bce74efc03664871b9da8e040",
+    "module": "general_level",
+    "kind": "table",
+    "records": 200
+  },
+  {
+    "id": "general_max_num",
+    "sourceBytes": 53451,
+    "sourceSha256": "0b9c2da268b541213aa597a230f757decf23bb874d98cdcdfcde0e85d06a66d7",
+    "module": "general_max_num",
+    "kind": "table",
+    "records": 654
+  },
+  {
+    "id": "general_official",
+    "sourceBytes": 3653,
+    "sourceSha256": "46a75f5209bdc6ac7393539cfc2512ff1f7bbf7a68c9daceec6329b4659f615e",
+    "module": "general_official",
+    "kind": "table",
+    "records": 15
+  },
+  {
+    "id": "general_random_effect",
+    "sourceBytes": 335997,
+    "sourceSha256": "59982520e894b63f97cff9d481d9d4bd8c5f9b420cfe28f4d0afdaf4f1ebd993",
+    "module": "general_random_effect",
+    "kind": "table",
+    "records": 2878
+  },
+  {
+    "id": "general_random_num",
+    "sourceBytes": 1715353,
+    "sourceSha256": "4cc4cf7402ebdacc36bdd01160df4f5bd0ec7e401ebb13abb9edb223146aab0e",
+    "module": "general_random_num",
+    "kind": "table",
+    "records": 10545
+  },
+  {
+    "id": "general_rank",
+    "sourceBytes": 21187,
+    "sourceSha256": "1e5f1d192e225cc6ab0612cd2c57ae947c21ddbc3e309ff07a437a9d014e0c49",
+    "module": "general_rank",
+    "kind": "table",
+    "records": 62
+  },
+  {
+    "id": "general_repeat",
+    "sourceBytes": 52264,
+    "sourceSha256": "ae012cda268f039dec272622db709a76dbfec5fc61cc4d344a5c535f8cee0291",
+    "module": "general_repeat",
+    "kind": "table",
+    "records": 654
+  },
+  {
+    "id": "general_sale",
+    "sourceBytes": 6923,
+    "sourceSha256": "2ca34094e5d90f62e04654802a521965d77beecdb1e8dbbed1daa25773ad69b6",
+    "module": "general_sale",
+    "kind": "table",
+    "records": 21
+  },
+  {
+    "id": "general_skill",
+    "sourceBytes": 996528,
+    "sourceSha256": "ac0b3604a8ae84bc22a79e1417b464b00e98f1b52e3b815cbff8bdb84aab1ce3",
+    "module": "general_skill",
+    "kind": "table",
+    "records": 3607
+  },
+  {
+    "id": "general_station",
+    "sourceBytes": 2881,
+    "sourceSha256": "8cd94ce6d72eee1e207d6084b50e64cf75c32765164782ee88f3d07b253b577f",
+    "module": "general_station",
+    "kind": "table",
+    "records": 18
+  },
+  {
+    "id": "general_talent",
+    "sourceBytes": 17717,
+    "sourceSha256": "f7e635af69ac861c6a31910dc591066cf8af20eee63f93bd26a3e51e4b365921",
+    "module": "general_talent",
+    "kind": "table",
+    "records": 105
+  },
+  {
+    "id": "geo_treasure_task",
+    "sourceBytes": 1437,
+    "sourceSha256": "e609c80fe0968a1bb8c353e99ddfdd16ded456cd705f8a47c285875ea9e03027",
+    "module": "geo_treasure_task",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "get_general",
+    "sourceBytes": 240,
+    "sourceSha256": "0047f2e02fb1b16ea41bf17646845929fb4bcff0c4dcee29b6c1b68c12c69c33",
+    "module": "get_general",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "gift",
+    "sourceBytes": 49668,
+    "sourceSha256": "d055d6db7080d75274ef72f0a3d7f89e82eff2b3653a2d828556c62ea72374a0",
+    "module": "gift",
+    "kind": "table",
+    "records": 60
+  },
+  {
+    "id": "gold",
+    "sourceBytes": 11043,
+    "sourceSha256": "0ed6fe96ed7d1a4e07690830a1eb374c444a0fd1c522acd52d07fa5f1643e5ae",
+    "module": "gold",
+    "kind": "table",
+    "records": 65
+  },
+  {
+    "id": "gold_price",
+    "sourceBytes": 7165,
+    "sourceSha256": "f9f9d2ab53c719881a844d9ba6ee73f2070fb9c22be6bbd18c83302f0a0bfedf",
+    "module": "gold_price",
+    "kind": "table",
+    "records": 58
+  },
+  {
+    "id": "gold_reward",
+    "sourceBytes": 2021,
+    "sourceSha256": "43bd8b8a5a1438fb9c5f95700471f8786396454efd5bc9214a66ef6286844477",
+    "module": "gold_reward",
+    "kind": "table",
+    "records": 14
+  },
+  {
+    "id": "golden_egg",
+    "sourceBytes": 628,
+    "sourceSha256": "94c7c6e6d9181e26698e9517d55765b85279bbe6e9e852d961460bbc2aae9a2f",
+    "module": "golden_egg",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "golden_egg_step",
+    "sourceBytes": 346,
+    "sourceSha256": "9afd3e6318c754ef7bb764ef5a4ed7f2bac3295e1186e97966c87a5f18c7d67c",
+    "module": "golden_egg_step",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "golden_roulette",
+    "sourceBytes": 1509,
+    "sourceSha256": "7ccc8a7eb0274ae722e9451658cd087058bdf5a617df996b0f5758b2b8db3dda",
+    "module": "golden_roulette",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "goods",
+    "sourceBytes": 2713597,
+    "sourceSha256": "219136237befd0087eb44cacb815f86492bd9575f85f440774ba348ececefb9e",
+    "module": "goods",
+    "kind": "table",
+    "records": 30085
+  },
+  {
+    "id": "grade",
+    "sourceBytes": 1021,
+    "sourceSha256": "88f680107560c0f6737a194e91f477e3f6301bc2d6dc23aa0b214a05cf3e8959",
+    "module": "grade",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "growth_fund",
+    "sourceBytes": 422,
+    "sourceSha256": "09d14bc9d465a56913cc9e0c0790041de492eb25855a92096f6e340dbe87bdd6",
+    "module": "growth_fund",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "heap",
+    "sourceBytes": 3152,
+    "sourceSha256": "d00ffe8a2e5c3ab36a25d5fd391a2277d9e3159e6d713a004aeabd7c4d51656f",
+    "module": "heap",
+    "kind": "table",
+    "records": 35
+  },
+  {
+    "id": "heritage",
+    "sourceBytes": 1053,
+    "sourceSha256": "06f9b1f26ce4511bf5f9acb0dcba84020f089fceb8c2808d4e723782f8deaa15",
+    "module": "heritage",
+    "kind": "table",
+    "records": 7
+  },
+  {
+    "id": "hero",
+    "sourceBytes": 11532,
+    "sourceSha256": "59cd63f7a62a66cad08e73005f67a751b51e3981aeb58271ae92eef8d1165287",
+    "module": "hero",
+    "kind": "table",
+    "records": 45
+  },
+  {
+    "id": "hero_challenge_layer",
+    "sourceBytes": 8083,
+    "sourceSha256": "3804fff31058caa0614b41451f5429f1cccbb6c5b1906637682fad35889f5cc9",
+    "module": "hero_challenge_layer",
+    "kind": "table",
+    "records": 45
+  },
+  {
+    "id": "hero_challenge_monster",
+    "sourceBytes": 48578,
+    "sourceSha256": "f231dbf0052718528671f93ea8bd9a53bd7a961a22854317710a7bd12b1e51b6",
+    "module": "hero_challenge_monster",
+    "kind": "table",
+    "records": 220
+  },
+  {
+    "id": "hero_roulette",
+    "sourceBytes": 1617,
+    "sourceSha256": "0af2de0669683cb181ec150d13f3afe8ae5ff8cba193ce18f0e36b615136bee4",
+    "module": "hero_roulette",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "heroactivity",
+    "sourceBytes": 810,
+    "sourceSha256": "d21045e5a39459419c073a390ea4cfb89298372cccfba62e3f1d0a6230dbd4a1",
+    "module": "heroactivity",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "heroevent",
+    "sourceBytes": 69875,
+    "sourceSha256": "2416fb96a0ef903d0e63611c12c85d979304366340be08197b51ebe3ea1fcaa1",
+    "module": "heroevent",
+    "kind": "table",
+    "records": 28
+  },
+  {
+    "id": "hotgoods",
+    "sourceBytes": 954,
+    "sourceSha256": "801c1973f44dc45775828309f434adf1568dd41149d211f6248053f531989e29",
+    "module": "hotgoods",
+    "kind": "table",
+    "records": 12
+  },
+  {
+    "id": "hotstore",
+    "sourceBytes": 52841,
+    "sourceSha256": "e10ebedf98838fc81d7e0c6084db9a989cd8e79ba7e830935dda52b030e50ec8",
+    "module": "hotstore",
+    "kind": "table",
+    "records": 362
+  },
+  {
+    "id": "house",
+    "sourceBytes": 304,
+    "sourceSha256": "f6378c076e35e65c49cc93348ce899e24db38a3ebe8a50a99f922b70181c8232",
+    "module": "house",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "inspire",
+    "sourceBytes": 830,
+    "sourceSha256": "c6cad145f186af986526bc6a087016b4b15f78734b2ded747de9be0fabff2d81",
+    "module": "inspire",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "isopen_uid",
+    "sourceBytes": 226,
+    "sourceSha256": "342d2eb5215ebbcd25eb218855a97b04fd921cb74b31706af43b39947c2184e9",
+    "module": "isopen_uid",
+    "kind": "table",
+    "records": 0
+  },
+  {
+    "id": "item",
+    "sourceBytes": 103170,
+    "sourceSha256": "a4a1902837d3f518965eb143852f5b268e54f5c5e5d2073f631fc35c11a9b6eb",
+    "module": "item",
+    "kind": "table",
+    "records": 459
+  },
+  {
+    "id": "kingdom_building",
+    "sourceBytes": 1363,
+    "sourceSha256": "4d697fdccea1bfa1bb2f0298b17cd0bc288cebbce89b9b4ed7ff8757ca5583ec",
+    "module": "kingdom_building",
+    "kind": "table",
+    "records": 9
+  },
+  {
+    "id": "kingdom_building_buff",
+    "sourceBytes": 1272,
+    "sourceSha256": "6a45f78aeb36e4823896df195200f73bb1c6cfb328c02db4b6a91eeace91b854",
+    "module": "kingdom_building_buff",
+    "kind": "table",
+    "records": 7
+  },
+  {
+    "id": "kingdomshop",
+    "sourceBytes": 971,
+    "sourceSha256": "274cbe7663a579b3f0212ba70f0fd0c74545d3b7c1cc5da53ef8824bbe60fffe",
+    "module": "kingdomshop",
+    "kind": "table",
+    "records": 12
+  },
+  {
+    "id": "kingdomskill",
+    "sourceBytes": 12759,
+    "sourceSha256": "dafb4d08b5e9113713f54bcb8d25c79efb71e7f74db770eded35936ee13a4015",
+    "module": "kingdomskill",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "kingdon_1",
+    "sourceBytes": 476,
+    "sourceSha256": "5c9e1302764916849df2a67897ee257b74ac9017fced568d621db30b8d97805f",
+    "module": "kingdon_1",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "kingdon_2",
+    "sourceBytes": 465,
+    "sourceSha256": "9158abbe54506dacf9e246f9c8b2e6d9092de3b5e9d4d6610ee3c380d3416106",
+    "module": "kingdon_2",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "knight_title",
+    "sourceBytes": 5479,
+    "sourceSha256": "d35655126dc45c0cc2d3e64a0d5e28874260e8d7a7ad8f302304493ca4b50afe",
+    "module": "knight_title",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "landing",
+    "sourceBytes": 1932,
+    "sourceSha256": "61b1bf113d2ed6cf735ae87f30d98deecd2d1a679f010998b4614a1014a38c80",
+    "module": "landing",
+    "kind": "table",
+    "records": 20
+  },
+  {
+    "id": "life_treeS",
+    "sourceBytes": 499,
+    "sourceSha256": "d9843551ebfe58837ca271436498c7bf826692e0196667e5ccc51ede789a705c",
+    "module": "life_treeS",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "lordDetails",
+    "sourceBytes": 17711,
+    "sourceSha256": "8cb86c469f41c0646ddfcad2bd78716ef54867fee29a9658aed92fa2a3cb72a7",
+    "module": "lordDetails",
+    "kind": "table",
+    "records": 264
+  },
+  {
+    "id": "lord_image",
+    "sourceBytes": 2455,
+    "sourceSha256": "eaaacd68760c551f8076bb940e276758b4a3b9399c4cc40f051342dd7dff5914",
+    "module": "lord_image",
+    "kind": "table",
+    "records": 33
+  },
+  {
+    "id": "lord_image.xml",
+    "sourceBytes": 219,
+    "sourceSha256": "3e719f01a9c3778828eef7c33066b0e661f9e7580353719466175440fffddfe5",
+    "module": "lord_image.xml",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "lottery",
+    "sourceBytes": 26835,
+    "sourceSha256": "e0e89c4cb21858426894d5b7ce09186c4bcb44144ebb5e0ae9949cf63dc37e5b",
+    "module": "lottery",
+    "kind": "table",
+    "records": 123
+  },
+  {
+    "id": "luck_draw",
+    "sourceBytes": 951,
+    "sourceSha256": "9ecdc13e328e1787be90f158babeb5479542e0184f444b126555afdbd1c0c110",
+    "module": "luck_draw",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "lucky_day",
+    "sourceBytes": 1518,
+    "sourceSha256": "99b40ca84435bc019dd965dc5327bbb9063e88bd135fc313c076975ca3d59e5b",
+    "module": "lucky_day",
+    "kind": "table",
+    "records": 8
+  },
+  {
+    "id": "lucky_effect",
+    "sourceBytes": 3744,
+    "sourceSha256": "daa82bbc67dccd645e45b6256f89abcfb8e8c1984e5589b7dc21b5854d6d2c18",
+    "module": "lucky_effect",
+    "kind": "table",
+    "records": 77
+  },
+  {
+    "id": "lucky_egg",
+    "sourceBytes": 418,
+    "sourceSha256": "63c4f32e7cabb17a381c9b333a8086bab8014494aa8a8cc711223bf1dcd89bdf",
+    "module": "lucky_egg",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "lucky_return_exchange",
+    "sourceBytes": 15994,
+    "sourceSha256": "958c853ae2a6470b75a87074f39b30bc696245852f177104f49d7824932d649b",
+    "module": "lucky_return_exchange",
+    "kind": "table",
+    "records": 44
+  },
+  {
+    "id": "magic_rush",
+    "sourceBytes": 376,
+    "sourceSha256": "8e3533d82ba3518eecc6032209181bc7fd0a1af9e5ef76c0e58428d33660dd0c",
+    "module": "magic_rush",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "mail",
+    "sourceBytes": 82520,
+    "sourceSha256": "890abde5e29a3158163c9e03a13d1d5bd0045e52e4a8e28485a68a1b3f9a40b8",
+    "module": "mail",
+    "kind": "table",
+    "records": 915
+  },
+  {
+    "id": "mark",
+    "sourceBytes": 15442,
+    "sourceSha256": "e621b68170ed1c16748a7fcca7b05d384fe629e36e40f1e16876cc257e6b330f",
+    "module": "mark",
+    "kind": "table",
+    "records": 127
+  },
+  {
+    "id": "market",
+    "sourceBytes": 845,
+    "sourceSha256": "692e382918ec42567577df72c3f2dec30bd481c35b4016941951f17c0f69d43d",
+    "module": "market",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "material",
+    "sourceBytes": 1594,
+    "sourceSha256": "029a62c0f691268483ca70bde5a1a1d9e30239c56ea22681b996f496046945ab",
+    "module": "material",
+    "kind": "table",
+    "records": 17
+  },
+  {
+    "id": "merge_activity",
+    "sourceBytes": 1178,
+    "sourceSha256": "36b3f0708d11cfc5072efe0bcbf068ebdd2e30301248140fb6319d940e73fd97",
+    "module": "merge_activity",
+    "kind": "table",
+    "records": 11
+  },
+  {
+    "id": "miracle_buff",
+    "sourceBytes": 2039,
+    "sourceSha256": "323b5491c22b735c10df68b7f5f395aca385765a81bb24d0c4c7cfaa101f0d12",
+    "module": "miracle_buff",
+    "kind": "table",
+    "records": 41
+  },
+  {
+    "id": "monarch",
+    "sourceBytes": 563,
+    "sourceSha256": "b37d0b301eb4295a436f2c6ae67dc35e0b1be85724cfc9707a0c340c44a4f183",
+    "module": "monarch",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "monarch_title_kingdom",
+    "sourceBytes": 377,
+    "sourceSha256": "1f78b94c640604dae3ebc71e6367951497000cc3e6c76f9350ba4bac7e023b7b",
+    "module": "monarch_title_kingdom",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "monarch_title_lord",
+    "sourceBytes": 373,
+    "sourceSha256": "269a6deae4c7ee8ca15395c87708ba5591effbf6255bd94c570e095354cf4704",
+    "module": "monarch_title_lord",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "monster_siege",
+    "sourceBytes": 27997,
+    "sourceSha256": "47eb547789ebe66266828e7b6ecf9300905b2769c634d2b79a9c01100d80fd98",
+    "module": "monster_siege",
+    "kind": "table",
+    "records": 100
+  },
+  {
+    "id": "monster_siege_reward",
+    "sourceBytes": 3266,
+    "sourceSha256": "cb50a5eadac9c89c9f57602f479850e278c8b0c57a2c19561bbbf1fdcb4db346",
+    "module": "monster_siege_reward",
+    "kind": "table",
+    "records": 45
+  },
+  {
+    "id": "neutralServerWorld",
+    "sourceBytes": 942615,
+    "sourceSha256": "5d4dfbdf57f7f863c202f79d7e097f11dff139cd8404af02bd5d24b1f2586a92",
+    "module": "dragonBattleWorld",
+    "kind": "tile-map"
+  },
+  {
+    "id": "neutralServer_building",
+    "sourceBytes": 3069,
+    "sourceSha256": "7a85c739d56a265d4d080136dbd3d320c42c445b108ed58739335ec66a2d59ac",
+    "module": "neutralServer_building",
+    "kind": "table",
+    "records": 25
+  },
+  {
+    "id": "neutralServer_reward",
+    "sourceBytes": 4462,
+    "sourceSha256": "b7307bf2259f24d2f413cb15b1477ddcedbfeb3619b7be8e7bef4af8ddd312b3",
+    "module": "neutralServer_reward",
+    "kind": "table",
+    "records": 54
+  },
+  {
+    "id": "neutralServer_score",
+    "sourceBytes": 1736,
+    "sourceSha256": "47190c05e235d0569482e7da425f22f13ac9c1d3793b07feae1522e209c41ba7",
+    "module": "neutralServer_score",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "new_bank",
+    "sourceBytes": 1908,
+    "sourceSha256": "94dff5ad3dfff17b70147d7f0b4a1c802cf36c2fd0d140307ef5b7393df3e869",
+    "module": "new_bank",
+    "kind": "table",
+    "records": 11
+  },
+  {
+    "id": "new_continued_cost",
+    "sourceBytes": 1146,
+    "sourceSha256": "9d423ca2be0c0cc6d2db2460c78abe7c6baccd1826ebabd2e8d02ac6d82d23bc",
+    "module": "continued_cost",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "new_daily_task",
+    "sourceBytes": 20288,
+    "sourceSha256": "ba78da80068fbfaad3d84c9adc611977cffd1c6eed1dcab857b62dc06dd31eb3",
+    "module": "new_daily_task",
+    "kind": "table",
+    "records": 42
+  },
+  {
+    "id": "new_exchange",
+    "sourceBytes": 830519,
+    "sourceSha256": "47fef23f2209c74985da54466627505dd5b2662ddf4daf366de7ad27aad3247a",
+    "module": "new_exchange",
+    "kind": "table",
+    "records": 1796
+  },
+  {
+    "id": "new_recall_quest",
+    "sourceBytes": 6378,
+    "sourceSha256": "19d236c87737059d67b4440edf624602471156254551c03b8e17c4419ae266ef",
+    "module": "new_recall_quest",
+    "kind": "table",
+    "records": 45
+  },
+  {
+    "id": "new_spr_info",
+    "sourceBytes": 881,
+    "sourceSha256": "6a09317a59240cdcafd235b00595697d29be5b03ff4343525007405f8e3856a5",
+    "module": "new_spr_info",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "new_spr_round",
+    "sourceBytes": 4078,
+    "sourceSha256": "192c4f7eeacd3ff700407589ca068912adf5830ffcfd576cb43311b8dbeec791",
+    "module": "new_spr_round",
+    "kind": "table",
+    "records": 33
+  },
+  {
+    "id": "new_wk_person_reward",
+    "sourceBytes": 11272,
+    "sourceSha256": "78a0dac01bfd640ec7356c8d5c134dca157663f9716035fcc0a49af33ac8cf5e",
+    "module": "new_wk_person_reward",
+    "kind": "table",
+    "records": 90
+  },
+  {
+    "id": "new_wk_reward",
+    "sourceBytes": 2502,
+    "sourceSha256": "deebc7baebd7df02c1400a18382694daa137f323d74640f0fe945bb6b2906783",
+    "module": "new_wk_reward",
+    "kind": "table",
+    "records": 9
+  },
+  {
+    "id": "new_wk_score",
+    "sourceBytes": 9996,
+    "sourceSha256": "c9f1fcfdb0bd0b37fc75bde5977b79878a5187841516048d7dec15b94d5d462e",
+    "module": "new_wk_score",
+    "kind": "table",
+    "records": 106
+  },
+  {
+    "id": "newbee_castle_reward",
+    "sourceBytes": 1774,
+    "sourceSha256": "2033ce7f44e2757f5c3d6601df26fc9464920d65d2699c9367c8a8046dadd82d",
+    "module": "newbee_castle_reward",
+    "kind": "table",
+    "records": 29
+  },
+  {
+    "id": "newbie_items",
+    "sourceBytes": 853,
+    "sourceSha256": "16f1b0d5b63abd7d00b3095513e92a83684b042773ef5885b35cc81432b9ff3f",
+    "module": "newbie_items",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "newcomer_trevi_fountain",
+    "sourceBytes": 474,
+    "sourceSha256": "3ea82c337e1a818443ee9f911c9b9634739de419fd458aea4eaab3bfb0119c93",
+    "module": "newcomer_trevi_fountain",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "newplayer",
+    "sourceBytes": 4230,
+    "sourceSha256": "96dc66cffa015d08f7f165ec17c073f0ef7edb6db29ba211da11a25f4faea200",
+    "module": "newplayer",
+    "kind": "table",
+    "records": 33
+  },
+  {
+    "id": "news_castleLV",
+    "sourceBytes": 3343,
+    "sourceSha256": "cb4a4060fa83d655507cdccf98d02d3a7307bb9f5f1d6feb54a621ab59b90744",
+    "module": "news_castleLV",
+    "kind": "table",
+    "records": 14
+  },
+  {
+    "id": "news_heap",
+    "sourceBytes": 923,
+    "sourceSha256": "7f3ed07674bf9a07fc6d7469be17fe7cc1866a779688e39c43ec9e5aff206b27",
+    "module": "news_heap",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "noti_timezone",
+    "sourceBytes": 7049,
+    "sourceSha256": "1375e7a85aacfc0ebbbc7b932159b783d8b0a85de17f89d8f9a47d58fcd4acaa",
+    "module": "noti_timezone",
+    "kind": "table",
+    "records": 184
+  },
+  {
+    "id": "npc",
+    "sourceBytes": 4173,
+    "sourceSha256": "4141d42764a43739590af9cda116f2c8d785a756e2c0a2e8ed126d11be0ac884",
+    "module": "npc",
+    "kind": "table",
+    "records": 46
+  },
+  {
+    "id": "office",
+    "sourceBytes": 1610,
+    "sourceSha256": "8e04ffb8955d0c0cae6cd63d4244f54cbb75a5a33bec4952fa03a01262e8cf69",
+    "module": "office",
+    "kind": "table",
+    "records": 17
+  },
+  {
+    "id": "onlineReward",
+    "sourceBytes": 4798,
+    "sourceSha256": "78659f33f61b28b2d8c176601b829ef611ad9eb40a67d207742cf31462554bc4",
+    "module": "onlineReward",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "overlord",
+    "sourceBytes": 2652,
+    "sourceSha256": "1c010e7a7f2fff6e330a014e331193764d739049322424b1a7a7417709e26bf9",
+    "module": "overlord",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "p6_arms",
+    "sourceBytes": 731841,
+    "sourceSha256": "6a1a3fca2ba139da86559fa408f0d5f551e426353e82524868bc71432d41ba4c",
+    "module": "p6_arms",
+    "kind": "table",
+    "records": 7807
+  },
+  {
+    "id": "package",
+    "sourceBytes": 547,
+    "sourceSha256": "e546f7fbabc085b2a01138ca806afef59b9e49a3dbdb354f92f0ee6975300379",
+    "module": "package",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "pay_lottery",
+    "sourceBytes": 1122,
+    "sourceSha256": "8c79b9d4636d3b51d9ec192084138962555d3d9d7926b38b3c7f3087de4353ce",
+    "module": "pay_lottery",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "pay_reward",
+    "sourceBytes": 14315,
+    "sourceSha256": "f499157ef8dca7c0b3351cb732bb6bb6f324cccbcc5559bc9ca5284aea2cd96a",
+    "module": "pay_reward",
+    "kind": "table",
+    "records": 99
+  },
+  {
+    "id": "pay_servercontrol",
+    "sourceBytes": 3142,
+    "sourceSha256": "3ae921f9bcaf903599e03e4039ee789d40b3dc89c0084f1094637f7893f5ed0b",
+    "module": "pay_servercontrol",
+    "kind": "table",
+    "records": 39
+  },
+  {
+    "id": "pay_user_reward",
+    "sourceBytes": 558,
+    "sourceSha256": "aa467daf3d8f5c3128d133e000b9b83623adfeab788deba8227825dd36db3f4e",
+    "module": "pay_user_reward",
+    "kind": "table",
+    "records": 7
+  },
+  {
+    "id": "paycard",
+    "sourceBytes": 415,
+    "sourceSha256": "e4185c781f754d21c63deb4424c0fcc55e11c52ee5341dcbb3a51273953df87a",
+    "module": "paycard",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "pf_check",
+    "sourceBytes": 2373,
+    "sourceSha256": "9dec24f50595586b966313c18c0b8a3816a033a65ffe218d37e2e8beedccbf2c",
+    "module": "pf_check",
+    "kind": "table",
+    "records": 35
+  },
+  {
+    "id": "playerData",
+    "sourceBytes": 14549,
+    "sourceSha256": "f231fee8e3a95aec9dd54c9789ee89b056aa7e6a555a5b5831e8a0828939c7b8",
+    "module": "playerData",
+    "kind": "table",
+    "records": 40
+  },
+  {
+    "id": "playerName",
+    "sourceBytes": 58179,
+    "sourceSha256": "09722aa30f633aceeb50cc248e264c3feaedadec0998dba3829f1121ee06ff0c",
+    "module": "playerName",
+    "kind": "table",
+    "records": 1453
+  },
+  {
+    "id": "position",
+    "sourceBytes": 7266,
+    "sourceSha256": "bd7fc83ec1c1745406d427264090c84b4730552999b23614661b43e979c3d566",
+    "module": "position",
+    "kind": "table",
+    "records": 73
+  },
+  {
+    "id": "position_unlock",
+    "sourceBytes": 1094,
+    "sourceSha256": "3a118082e28fe15ec04e3498ac7eaeba2355f737d456b1d97e56ad9c9293a314",
+    "module": "position_unlock",
+    "kind": "table",
+    "records": 7
+  },
+  {
+    "id": "powerRandom",
+    "sourceBytes": 586,
+    "sourceSha256": "a30fb58ab800814edda5c7ee61f83afe9bc4a87ee62690683b9ce17adc1e8010",
+    "module": "powerRandom",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "princess",
+    "sourceBytes": 15029,
+    "sourceSha256": "a3b27f0ba745cf249ab7ec6e539de021e942ea5d13dc05181605713ebcb53b25",
+    "module": "princess",
+    "kind": "table",
+    "records": 80
+  },
+  {
+    "id": "princess_quest",
+    "sourceBytes": 476510,
+    "sourceSha256": "10b7770ed83c4145f123846c3ae2980c88883b40576b631c50e643ece62f20bb",
+    "module": "princess_quest",
+    "kind": "table",
+    "records": 2609
+  },
+  {
+    "id": "quest",
+    "sourceBytes": 186168,
+    "sourceSha256": "63f54d02254e8812cf2afd68525bc160c18e3e432697d6375d1b93c208100c1e",
+    "module": "quest",
+    "kind": "table",
+    "records": 1108
+  },
+  {
+    "id": "quest_mark",
+    "sourceBytes": 11565,
+    "sourceSha256": "ad57d154988cee2e5c73f2d0ae42864e12ef77e4fa1d9fea6b43e5301b9632fb",
+    "module": "quest_mark",
+    "kind": "table",
+    "records": 160
+  },
+  {
+    "id": "quest_phase",
+    "sourceBytes": 6227,
+    "sourceSha256": "982c7833ff70e31f577bcb940db63b6c1e00fd2d573dd2f981c8dbf53860a1b9",
+    "module": "quest_phase",
+    "kind": "table",
+    "records": 108
+  },
+  {
+    "id": "quick_building",
+    "sourceBytes": 631,
+    "sourceSha256": "2a26549ad287f860a709ee2fac5226ed4ae9e48d87dd899df738e7d18d009afc",
+    "module": "quick_building",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "quick_science",
+    "sourceBytes": 2160,
+    "sourceSha256": "7ed1b70cd052b6efaeccdb2f32da458cd0aa2a92020f20a9bc1260a2978ec3de",
+    "module": "quick_science",
+    "kind": "table",
+    "records": 27
+  },
+  {
+    "id": "rank",
+    "sourceBytes": 1154,
+    "sourceSha256": "c01e1edb27a2b7c42145e7b483fdfc7e06ebd70c6ee743685383700e122f5105",
+    "module": "rank",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "recall",
+    "sourceBytes": 1503,
+    "sourceSha256": "f2795e15d3ab4ec4541b0f1299a12271d9e9584aceb10b5b3df5455222fec494",
+    "module": "recall",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "recall_activity",
+    "sourceBytes": 1849,
+    "sourceSha256": "120d8afb48cea17f502ad18628fd1197ffe597a695885967d9ddb32e4ecbfef0",
+    "module": "recall_activity",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "recall_quest",
+    "sourceBytes": 3502,
+    "sourceSha256": "0f04ac1f286768a7764a20ba919944b403869f2f6ced3ed249ddf25261135ef4",
+    "module": "recall_quest",
+    "kind": "table",
+    "records": 40
+  },
+  {
+    "id": "recruit",
+    "sourceBytes": 890,
+    "sourceSha256": "7a7e2da703155613affc333f98bb2140712bd331488df9ebcafd905d735a36b3",
+    "module": "recruit",
+    "kind": "table",
+    "records": 8
+  },
+  {
+    "id": "reforgeRandom",
+    "sourceBytes": 13890,
+    "sourceSha256": "ec3891bf96e922d792d43fab47c74101170b76e52f2d27a1a294692692fad766",
+    "module": "reforgeRandom",
+    "kind": "table",
+    "records": 12
+  },
+  {
+    "id": "reputation_action",
+    "sourceBytes": 33557,
+    "sourceSha256": "5703c882b24e77e6019afb668861395927e55102909c37d6bcb83dc2fc6c8948",
+    "module": "reputation_action",
+    "kind": "table",
+    "records": 245
+  },
+  {
+    "id": "reputation_classifylimit",
+    "sourceBytes": 1223,
+    "sourceSha256": "a72b901d3b653c062cb302d28b7a587e8fa3dc2315b12fdf26ffda5565ae0914",
+    "module": "reputation_classifylimit",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "reputation_level",
+    "sourceBytes": 7285,
+    "sourceSha256": "787dc244630a357401c17cffd1e08d78c8bc6108a4339ca9cb14a5a593466b8c",
+    "module": "reputation_level",
+    "kind": "table",
+    "records": 32
+  },
+  {
+    "id": "resdential",
+    "sourceBytes": 5175,
+    "sourceSha256": "7afab1ae10e5fbeb37a0ab7579dad32f6a54c6d432d5dcc7a313cd3b847b5d9d",
+    "module": "resdential",
+    "kind": "table",
+    "records": 98
+  },
+  {
+    "id": "resouce_life",
+    "sourceBytes": 3810,
+    "sourceSha256": "ad1af42f224a248f555ab6504e7cd0f4c51bc19fe962cf2d2cf91c5a57cd48e2",
+    "module": "resouce_life",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "resource2",
+    "sourceBytes": 3810,
+    "sourceSha256": "ad1af42f224a248f555ab6504e7cd0f4c51bc19fe962cf2d2cf91c5a57cd48e2",
+    "module": "resouce_life",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "resource3",
+    "sourceBytes": 5581,
+    "sourceSha256": "25c45e58a033633b22e6ee18b9508673e6fd31dfd415803977612a0c7add6f34",
+    "module": "resource3",
+    "kind": "table",
+    "records": 42
+  },
+  {
+    "id": "resources",
+    "sourceBytes": 115247,
+    "sourceSha256": "741aa42baea6c96dbb1957c3c4708693ceee9241d5aa2a3cf0659b9890d91fe6",
+    "module": "resources",
+    "kind": "table",
+    "records": 1240
+  },
+  {
+    "id": "reward",
+    "sourceBytes": 1735590,
+    "sourceSha256": "f9361fa1dc48cce7c76a519c6738770f79d2655f20beb564964b9efc73397bb9",
+    "module": "reward",
+    "kind": "table",
+    "records": 10982
+  },
+  {
+    "id": "reward_add",
+    "sourceBytes": 323,
+    "sourceSha256": "5315dd151a655ee68e708225d7af50377c73c477f99e806a6ea08fd140de3c27",
+    "module": "reward_add",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "role",
+    "sourceBytes": 48847,
+    "sourceSha256": "97984529180efc0b7e60d5a97164188fe12911b24d5acc2d601110f67534616d",
+    "module": "role",
+    "kind": "table",
+    "records": 201
+  },
+  {
+    "id": "safe",
+    "sourceBytes": 405,
+    "sourceSha256": "5b150e26725d45afd1d992aee96dac39c22848e8bcaf7b0a2c39897697677901",
+    "module": "safe",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "saga_tower_science_base",
+    "sourceBytes": 312598,
+    "sourceSha256": "900f685234fb5ced636602ac285ad060ae2beebc16ad60427e3b63e3f59bf897",
+    "module": "saga_tower_science_base",
+    "kind": "table",
+    "records": 914
+  },
+  {
+    "id": "saga_tower_science_up",
+    "sourceBytes": 2563073,
+    "sourceSha256": "42787e3375929da3b7a2995e031385ce5fc7ffbfb5921d4a79e4c11fd251a419",
+    "module": "saga_tower_science_up",
+    "kind": "table",
+    "records": 10030
+  },
+  {
+    "id": "science",
+    "sourceBytes": 824265,
+    "sourceSha256": "897efac8756581094167348cca59290ab7212e48a46d2650c0a95567aee9ef88",
+    "module": "science",
+    "kind": "table",
+    "records": 3955
+  },
+  {
+    "id": "scienceRace",
+    "sourceBytes": 371993,
+    "sourceSha256": "d804819f0a2aae59e0383fe158726afc89d4fa2fc66f5c52879f6da2b82ddac2",
+    "module": "scienceRace",
+    "kind": "table",
+    "records": 1735
+  },
+  {
+    "id": "scienceRaceType",
+    "sourceBytes": 49070,
+    "sourceSha256": "0a04dabf7dd25655c1d3f7d9876ece92d58b522178f4dfa94a720605e853225f",
+    "module": "scienceRaceType",
+    "kind": "table",
+    "records": 200
+  },
+  {
+    "id": "scienceType",
+    "sourceBytes": 5140,
+    "sourceSha256": "22a5cf53ec48b8208d1683d5baa03de380abc1aab496b479a3ebcfe25536fb8b",
+    "module": "scienceType",
+    "kind": "table",
+    "records": 17
+  },
+  {
+    "id": "score",
+    "sourceBytes": 8896,
+    "sourceSha256": "5fae8f63a7a3266816d49f686f5a3b63078a550e798102416926d40dd3f33772",
+    "module": "score",
+    "kind": "table",
+    "records": 99
+  },
+  {
+    "id": "serverlist",
+    "sourceBytes": 449,
+    "sourceSha256": "31145e03e78c1308dc1ed9c09ca6fc1183d7daf9cecaba7edf6f424d2753c797",
+    "module": "serverlist",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "serverpos",
+    "sourceBytes": 245172,
+    "sourceSha256": "0300a0668aee2f15bbea67d3502f3c737e76be92a4eb6cb5e1ea6e5bf76c2025",
+    "module": "serverpos",
+    "kind": "table",
+    "records": 5930
+  },
+  {
+    "id": "servers",
+    "sourceBytes": 442,
+    "sourceSha256": "9c9f6b733be7fd0e98d7e710a91952a58c6bf43ce1df5188e4cc3fd0855852fb",
+    "module": "servers",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "servers_config",
+    "sourceBytes": 969,
+    "sourceSha256": "3a25e66e28ae65eb4ef57ac20f405cbea9e4d365bd1cc23c6f30f631b942fc74",
+    "module": "servers_config",
+    "kind": "table",
+    "records": 12
+  },
+  {
+    "id": "servertransfer",
+    "sourceBytes": 283,
+    "sourceSha256": "82f8fd3f0608497fa38c3071e1cb666a0ba1a50be815fa47e96d3767078f179d",
+    "module": "servertransfer",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "setting",
+    "sourceBytes": 2151,
+    "sourceSha256": "31473a100c400242ec6b629f113edabe6f983249c3967f269dcbf0da9be39f19",
+    "module": "setting",
+    "kind": "table",
+    "records": 26
+  },
+  {
+    "id": "shop_new",
+    "sourceBytes": 1684175,
+    "sourceSha256": "2aa1b30a6ac6e9b8246dae3ee85c1c68ec777f84a2df8734f5ebcfef6619037d",
+    "module": "shop_new",
+    "kind": "table",
+    "records": 3383
+  },
+  {
+    "id": "shop_new7.21.0",
+    "sourceBytes": 471669,
+    "sourceSha256": "211ab0162e0db8730094c4a379b86882686b93acad5a8c9c5c46ff6f7b399c0e",
+    "module": "shop_new7.21.0",
+    "kind": "table",
+    "records": 1013
+  },
+  {
+    "id": "shop_new_9.26",
+    "sourceBytes": 856929,
+    "sourceSha256": "823ff3aa946d6143a58fa6e2201e8c4ab030d184307fead01267f8cfcd27a008",
+    "module": "shop_new_9.26",
+    "kind": "table",
+    "records": 1810
+  },
+  {
+    "id": "sign_in",
+    "sourceBytes": 13030,
+    "sourceSha256": "8ba6dc7c6ac2c975d901b01c195ab7383e183c059884b867c080ee9870983a07",
+    "module": "sign_in",
+    "kind": "table",
+    "records": 28
+  },
+  {
+    "id": "sign_in_2",
+    "sourceBytes": 537,
+    "sourceSha256": "05dca463c4047c2c37c4926346e32c4bb768a5e395a3ee7a2877a83f39f54647",
+    "module": "sign_in_2",
+    "kind": "table",
+    "records": 7
+  },
+  {
+    "id": "single_charge",
+    "sourceBytes": 1807,
+    "sourceSha256": "231fa31eacf8a9128f58d32a517b02cb6020dbe0567ec3a78ea4875bcefe71cf",
+    "module": "single_charge",
+    "kind": "table",
+    "records": 18
+  },
+  {
+    "id": "sk",
+    "sourceBytes": 19915,
+    "sourceSha256": "026bcca260ecdadf036a29ad65f0a6da2b00b2c8d84b53c1584470aea1c9cebc",
+    "module": "sk",
+    "kind": "table",
+    "records": 129
+  },
+  {
+    "id": "skill",
+    "sourceBytes": 81131,
+    "sourceSha256": "d3a601e5cd7f90887e38e3f38b47f9192bdeefe4f370148713ac557a694e4ad4",
+    "module": "skill",
+    "kind": "table",
+    "records": 925
+  },
+  {
+    "id": "skill2",
+    "sourceBytes": 22315,
+    "sourceSha256": "60d47c926ac0adce570a1e1842d9adc2244bc63d2b58fb375250aad3607d0ddb",
+    "module": "skill2",
+    "kind": "table",
+    "records": 240
+  },
+  {
+    "id": "soldiers",
+    "sourceBytes": 8538,
+    "sourceSha256": "25d2d18a845a61625a4927b827e0ba069624a82c80b542acfffb478a74077b6c",
+    "module": "soldiers",
+    "kind": "table",
+    "records": 40
+  },
+  {
+    "id": "sp_load",
+    "sourceBytes": 1963,
+    "sourceSha256": "4620ebe817b745d6af36431c0386e850a998195c255fafd070bbbc9c92767f4e",
+    "module": "sp_load",
+    "kind": "table",
+    "records": 40
+  },
+  {
+    "id": "sp_resources",
+    "sourceBytes": 24049,
+    "sourceSha256": "1d09579dffa22c238dee24e0db082a2e39fb88d612602be578dce290217fbae9",
+    "module": "sp_resources",
+    "kind": "table",
+    "records": 161
+  },
+  {
+    "id": "sp_resources_bet",
+    "sourceBytes": 981,
+    "sourceSha256": "02585bd2574c37b079fec9244191c594c1ed723b869bbef82b5e0545b3d667c9",
+    "module": "sp_resources_bet",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "sp_resources_init",
+    "sourceBytes": 146572,
+    "sourceSha256": "78a4f1b5a47c06024530b9c3c379d759b794dd721280d28e9eca9b6c634484a2",
+    "module": "sp_resources_init",
+    "kind": "table",
+    "records": 1932
+  },
+  {
+    "id": "sp_resources_list",
+    "sourceBytes": 2239,
+    "sourceSha256": "41df4a9cfe845e6280c848a0030f42b7aa31ccf1272a240dba24e6eda0b969ba",
+    "module": "sp_resources_list",
+    "kind": "table",
+    "records": 18
+  },
+  {
+    "id": "sp_resources_round",
+    "sourceBytes": 703,
+    "sourceSha256": "4f114d15ce3c986a253135a1e5c12e38ef0713ae440fcdbccbbd36fbef1b1bc1",
+    "module": "sp_resources_round",
+    "kind": "table",
+    "records": 8
+  },
+  {
+    "id": "sp_resources_type",
+    "sourceBytes": 1046,
+    "sourceSha256": "8b9af1bd4e8732e59e533e68eb1b13b0e6dbdd2d2d9d07dde6a90a8e43477a07",
+    "module": "sp_resources_type",
+    "kind": "table",
+    "records": 12
+  },
+  {
+    "id": "special_push",
+    "sourceBytes": 411,
+    "sourceSha256": "b6800c33bc3a9f246014ae24154bcdd5dcaa18bafa84e61747ebc19f3aafded7",
+    "module": "special_push",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "status - Copy",
+    "sourceBytes": 281325,
+    "sourceSha256": "01aeacf9068eeeb9e176570a6eaf3e1e575d789dd2e73483bb5b63b7ccd8da1a",
+    "module": "status - Copy",
+    "kind": "table",
+    "records": 3004
+  },
+  {
+    "id": "status",
+    "sourceBytes": 1345135,
+    "sourceSha256": "6e03bd5b95f1cd2302e0d6e215c95fda0e0c03138dc6b335799ff53e593c18cd",
+    "module": "status",
+    "kind": "table",
+    "records": 7725
+  },
+  {
+    "id": "story_setting",
+    "sourceBytes": 5581,
+    "sourceSha256": "cba23dc1e47c01090333f5dc9586f02453f8c12e976aef6310163120bfefb632",
+    "module": "story_setting",
+    "kind": "table",
+    "records": 57
+  },
+  {
+    "id": "subcity_reward",
+    "sourceBytes": 1317,
+    "sourceSha256": "2b077e3e6da1f37de3eb84ae5fb2ff4b17f31663c9ab35e2e8bc7f508c60aa46",
+    "module": "subcity_reward",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "suit",
+    "sourceBytes": 26950,
+    "sourceSha256": "9108587bb97cde559a6746cdf8a35ea243ca840d556c7c724da1de461593e3c0",
+    "module": "suit",
+    "kind": "table",
+    "records": 116
+  },
+  {
+    "id": "suitequipment",
+    "sourceBytes": 49815,
+    "sourceSha256": "33f32d01bd0a67c5febb0706e4f0262c1453b83e8bd883d8e534e356aca85119",
+    "module": "suitequipment",
+    "kind": "table",
+    "records": 132
+  },
+  {
+    "id": "svip",
+    "sourceBytes": 4006,
+    "sourceSha256": "adf097394926977f58066a2d4e1c158bbe8efc81ff34f69597b0da134a9ff2f7",
+    "module": "svip",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "svip_shop_building",
+    "sourceBytes": 601,
+    "sourceSha256": "071169478afdae33ab8e9f05a0a97e541817d7a46c34c189879bc5e3a4da4c9e",
+    "module": "svip_shop_building",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "target_quest",
+    "sourceBytes": 16914,
+    "sourceSha256": "d6158923cff040735035e9a6e0aecdcf751e17deaaf786ffee3221d6df2514cb",
+    "module": "target_quest",
+    "kind": "table",
+    "records": 118
+  },
+  {
+    "id": "territory",
+    "sourceBytes": 642,
+    "sourceSha256": "5b7ea83170c2d803ffd23a8f668741c04d1e4bc37e44c3cd7dfc3287b8339c87",
+    "module": "territory",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "territory_effect",
+    "sourceBytes": 535,
+    "sourceSha256": "21d0b4f779cc76c419c0be4ba34879820fe0e66117fd56981657854e794f63c3",
+    "module": "territory_effect",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "time_gift",
+    "sourceBytes": 1493,
+    "sourceSha256": "86b786a1d62b936520f78d3a7921d90581d1ecdb3b3c4eed33e707124aa23d8f",
+    "module": "time_gift",
+    "kind": "table",
+    "records": 15
+  },
+  {
+    "id": "totem",
+    "sourceBytes": 4776,
+    "sourceSha256": "ca88747d80828a96e8f02d8088b5dea0bfc98392a39500ee53d064890f794840",
+    "module": "totem",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "tower",
+    "sourceBytes": 1138,
+    "sourceSha256": "7f54d0eb9e5b6ab241cf2efd5ced191253deeba30d2932187696063b81077d1c",
+    "module": "tower",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "trade",
+    "sourceBytes": 345710,
+    "sourceSha256": "dcdefee3694c49603a93bf49469ff1c7969f877038a4f4c24c0a19ae2bfb6cad",
+    "module": "trade",
+    "kind": "table",
+    "records": 1643
+  },
+  {
+    "id": "train",
+    "sourceBytes": 728,
+    "sourceSha256": "dad2d87372cfa5e8c180ce0470846c5644aea9da0a2d1ab05770ccfb3b7c6ea4",
+    "module": "train",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "treasure",
+    "sourceBytes": 15708,
+    "sourceSha256": "4585b4a4d1def5bc50343952328d37310f176bfcd6e106b7e32a558f051a6591",
+    "module": "treasure",
+    "kind": "table",
+    "records": 30
+  },
+  {
+    "id": "trial",
+    "sourceBytes": 702,
+    "sourceSha256": "bc14bec1eeb8eebf4010fde1065f7026e31175f0a9db942d60a90762d071c9e0",
+    "module": "trial",
+    "kind": "table",
+    "records": 8
+  },
+  {
+    "id": "trigger-activity",
+    "sourceBytes": 369951,
+    "sourceSha256": "c69078aa7be008144063b12cfde93fc2403ddc7ccb32e43cc5dd7863ee2aa1cc",
+    "module": "trigger-activity",
+    "kind": "automation"
+  },
+  {
+    "id": "trigger-exchange",
+    "sourceBytes": 910135,
+    "sourceSha256": "9994c938e64fb23192b203c237d482151dd0817aa50a5f9bec41b62bbbe864fa",
+    "module": "trigger-exchange",
+    "kind": "automation"
+  },
+  {
+    "id": "trigger-var",
+    "sourceBytes": 60233,
+    "sourceSha256": "f062109863952615fd9cfb353ca8d40d7c3e186fc94f6e553c3e0d07bc2ecccc",
+    "module": "trigger-var",
+    "kind": "automation"
+  },
+  {
+    "id": "trigger",
+    "sourceBytes": 228842,
+    "sourceSha256": "d96880b1c154b91a1bf1f75d857f59003a75d19ba6705f8b2e02c57eb549e45b",
+    "module": "trigger",
+    "kind": "automation"
+  },
+  {
+    "id": "upgradeReward",
+    "sourceBytes": 219,
+    "sourceSha256": "3e719f01a9c3778828eef7c33066b0e661f9e7580353719466175440fffddfe5",
+    "module": "lord_image.xml",
+    "kind": "table",
+    "records": 1
+  },
+  {
+    "id": "variable",
+    "sourceBytes": 390,
+    "sourceSha256": "4d95fb67edbb1f2d4d7b042b05aa639291774c7b5340e1fa901fd32f30304e78",
+    "module": "variable",
+    "kind": "variables"
+  },
+  {
+    "id": "vip",
+    "sourceBytes": 2084,
+    "sourceSha256": "18d7c6d2af109fe3a6449be40e6c67639abc93cc566eef543e870131ec9fd835",
+    "module": "vip",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "vote_server",
+    "sourceBytes": 3113,
+    "sourceSha256": "2f07358538b67e027d267a78073218363734dc2c6711fafff5ca1af55fbd7ced",
+    "module": "vote_server",
+    "kind": "table",
+    "records": 15
+  },
+  {
+    "id": "wa_build",
+    "sourceBytes": 2733,
+    "sourceSha256": "7ff53397a9744946c5539d86fcabca5a4f1eb84de56e9f5e202b9d4f76ae8b1a",
+    "module": "wa_build",
+    "kind": "table",
+    "records": 24
+  },
+  {
+    "id": "wa_monster",
+    "sourceBytes": 561,
+    "sourceSha256": "770e0176c5c7f8d14ed9f05d1958b330e859fe892908bf98749ed4fc33ba38f6",
+    "module": "wa_monster",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "wa_reward_s",
+    "sourceBytes": 2231,
+    "sourceSha256": "bb9c31b34ac9f1d0c6e21b7f481154c9daf45299c5787a2cca38462b3f11e02b",
+    "module": "wa_reward_s",
+    "kind": "table",
+    "records": 32
+  },
+  {
+    "id": "wag_area",
+    "sourceBytes": 2272,
+    "sourceSha256": "fd6929b44e7b4116fb70a504fa829f63b55b53232c711768bdf19b0626929779",
+    "module": "wag_area",
+    "kind": "table",
+    "records": 16
+  },
+  {
+    "id": "wag_build",
+    "sourceBytes": 2791,
+    "sourceSha256": "7db04bca91d80bb6c68d33252af8ea686696c8194e0a4e0b9f73ff1094539873",
+    "module": "wag_build",
+    "kind": "table",
+    "records": 24
+  },
+  {
+    "id": "wag_monster",
+    "sourceBytes": 491,
+    "sourceSha256": "32bb179b3a3822550453b70231acf6283eae265121ade52b2b1f93487b889328",
+    "module": "wag_monster",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "wag_re_rank",
+    "sourceBytes": 295,
+    "sourceSha256": "a2dcb6542dac152cde5033abb8fa2f3160106b40231f9d639b8a33ca14542c48",
+    "module": "wag_re_rank",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "wag_re_team",
+    "sourceBytes": 1948,
+    "sourceSha256": "4bcfd540655fab31da338e51c4cec7e022a8e2121fee1085cfeb8a8295d998db",
+    "module": "wag_re_team",
+    "kind": "table",
+    "records": 15
+  },
+  {
+    "id": "wag_role",
+    "sourceBytes": 52311,
+    "sourceSha256": "8233a4e437c9eb08aecda14080d1039dea206aaa86efd925f8d6618e222ec8ed",
+    "module": "wag_role",
+    "kind": "table",
+    "records": 686
+  },
+  {
+    "id": "wap_match",
+    "sourceBytes": 5277,
+    "sourceSha256": "931411611fc78b1aacc6d7ea4fc8c8763347afceb37275f25e3b8873c8d7ee73",
+    "module": "wap_match",
+    "kind": "table",
+    "records": 2
+  },
+  {
+    "id": "wap_re_rank",
+    "sourceBytes": 757,
+    "sourceSha256": "a3bd343270ff230027163779e1d0bf7a73e268c5a75d4063411904bfc50ed6cd",
+    "module": "wap_re_rank",
+    "kind": "table",
+    "records": 8
+  },
+  {
+    "id": "wap_re_team",
+    "sourceBytes": 1948,
+    "sourceSha256": "4bcfd540655fab31da338e51c4cec7e022a8e2121fee1085cfeb8a8295d998db",
+    "module": "wag_re_team",
+    "kind": "table",
+    "records": 15
+  },
+  {
+    "id": "wb_kill",
+    "sourceBytes": 794,
+    "sourceSha256": "8557b8104645c49bf6582627021f02f1f648a642cc8f7cc61451145a1cc2a398",
+    "module": "wb_kill",
+    "kind": "table",
+    "records": 6
+  },
+  {
+    "id": "wb_reward",
+    "sourceBytes": 3902,
+    "sourceSha256": "b3158f31ec8406ad4da41c51b220e982eee93ed5e5d3430a94ebc5e28c06d529",
+    "module": "wb_reward",
+    "kind": "table",
+    "records": 64
+  },
+  {
+    "id": "wb_skill",
+    "sourceBytes": 588,
+    "sourceSha256": "6c6536753f5f21f590fc410d11ed7286124fc97fa4eea5d13385792d27a78175",
+    "module": "wb_skill",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "web",
+    "sourceBytes": 407,
+    "sourceSha256": "b7e0ee5cfb50d5f517ec18796ee4e4e28e13c8124dda25d0fd24b9eb404f8451",
+    "module": "web",
+    "kind": "web-routing"
+  },
+  {
+    "id": "webCheck",
+    "sourceBytes": 809,
+    "sourceSha256": "8f6b6aa3263f54e2d2848b59e04dab3831c4716a0207fd9695f3730bed477f10",
+    "module": "webCheck",
+    "kind": "table",
+    "records": 9
+  },
+  {
+    "id": "wish",
+    "sourceBytes": 4558,
+    "sourceSha256": "91a861c337564b84b04d71c975154eac2a0abc6af7e05c505e786cd543577866",
+    "module": "wish",
+    "kind": "table",
+    "records": 13
+  },
+  {
+    "id": "wk_build",
+    "sourceBytes": 535,
+    "sourceSha256": "36561bc556be03dccec484b11a4eaf832837d4c0f32ca7a797397befa61d6b49",
+    "module": "wk_build",
+    "kind": "table",
+    "records": 7
+  },
+  {
+    "id": "wk_person_reward",
+    "sourceBytes": 352,
+    "sourceSha256": "95e75ccc874bd39b13a1dd8c95a527ded1e08c383e08e168c78c8d74cde035f1",
+    "module": "wk_person_reward",
+    "kind": "table",
+    "records": 3
+  },
+  {
+    "id": "wk_quest",
+    "sourceBytes": 565,
+    "sourceSha256": "6cdf0431fb90fc05ee721da2bafde9c58c20aa97dc944b59d2da97ed8d9c57af",
+    "module": "wk_quest",
+    "kind": "table",
+    "records": 5
+  },
+  {
+    "id": "wk_reward",
+    "sourceBytes": 4480,
+    "sourceSha256": "fd42df9039f85faad60e7c3e271bc08e5db3fa9113ad27c7ea81fdf0c6053beb",
+    "module": "wk_reward",
+    "kind": "table",
+    "records": 54
+  },
+  {
+    "id": "wk_score",
+    "sourceBytes": 660,
+    "sourceSha256": "f6a1aa014cab6399dbe494325a19da0b3345b2ae385f5aa90968af85199bcbf2",
+    "module": "wk_score",
+    "kind": "table",
+    "records": 10
+  },
+  {
+    "id": "wk_server",
+    "sourceBytes": 688,
+    "sourceSha256": "68b39411105a762e512c1a125c475af1ecbe6b789752cac7577b0a60e5c3f40b",
+    "module": "wk_server",
+    "kind": "table",
+    "records": 12
+  },
+  {
+    "id": "wonder",
+    "sourceBytes": 4936,
+    "sourceSha256": "ecb57a652efa996d3aa735a16efcb08355e32b8957eff5d9a9e792b86f451c1a",
+    "module": "wonder",
+    "kind": "table",
+    "records": 31
+  },
+  {
+    "id": "world",
+    "sourceBytes": 58400686,
+    "sourceSha256": "c5cc6b72055c860fc5fe6c71445ab0a82e3bd3d9887041d0e700d41989b78c4d",
+    "module": "SeaWorldmap",
+    "kind": "tile-map"
+  },
+  {
+    "id": "world_level",
+    "sourceBytes": 383,
+    "sourceSha256": "78770475142a8c3c45420cfa11b968d09e2b881e9d299bae4b08c623ddbc0b7b",
+    "module": "world_level",
+    "kind": "table",
+    "records": 4
+  },
+  {
+    "id": "worldboss",
+    "sourceBytes": 41295,
+    "sourceSha256": "704e9972888f6510adcc033160d8b5a2de8298eb571272b3f7cb691e6c5b3a0b",
+    "module": "worldboss",
+    "kind": "table",
+    "records": 110
+  },
+  {
+    "id": "wr_exp",
+    "sourceBytes": 761,
+    "sourceSha256": "00d499a7c3bb48a3a6a78e123f00230ebfe75e0512130f7f9d9eb40706529a02",
+    "module": "wr_exp",
+    "kind": "table",
+    "records": 8
+  },
+  {
+    "id": "wr_rank",
+    "sourceBytes": 5023,
+    "sourceSha256": "a6f5e918e131182f22e95275c806345de279824cf6d1db18e1626a46c6baf1b2",
+    "module": "wr_rank",
+    "kind": "table",
+    "records": 56
+  },
+  {
+    "id": "wr_sever",
+    "sourceBytes": 22510,
+    "sourceSha256": "b74c5e2a4492dc68b2eec2c5287ce13839edfcda49132546d0f310fd5f24c583",
+    "module": "wr_sever",
+    "kind": "table",
+    "records": 302
+  },
+  {
+    "id": "wr_skill",
+    "sourceBytes": 17623,
+    "sourceSha256": "58fd8a20dbd6baa01a1eb2498ae4b3d7c95ca71937732ae0699e46faf035f8c9",
+    "module": "wr_skill",
+    "kind": "table",
+    "records": 130
+  },
+  {
+    "id": "wr_troops_point",
+    "sourceBytes": 1583,
+    "sourceSha256": "4c75f3bc1d7db5b5960c00f184d055296fe32f70fb235987fa9d2ac163355641",
+    "module": "wr_troops_point",
+    "kind": "table",
+    "records": 20
+  }
+]

@@ -20,7 +20,11 @@
     "./catalogs": "./src/catalogs.ts",
     "./nickname-reserved": "./src/nickname-reserved.ts",
     "./buildings/import": "./src/buildings/import.ts",
-    "./buildings": "./src/buildings/index.ts"
+    "./buildings": "./src/buildings/index.ts",
+    "./definitions": "./src/catalog-definitions.ts",
+    "./catalog-model": "./src/catalog-model.ts",
+    "./catalog-mechanics": "./src/catalog-mechanics.ts",
+    "./catalogs/*": "./src/catalogs/types/*.ts"
   },
   "dependencies": {
     "@opencok/rules": "workspace:*",
