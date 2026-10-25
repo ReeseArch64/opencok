@@ -63,7 +63,6 @@
     "./chat-nickname": "./src/chat-nickname.ts",
     "./realm-authority": "./src/realm-authority.ts",
     "./reconnect-progress": "./src/reconnect-progress.ts",
-    "./reconnect-write": "./src/reconnect-write.ts",
     "./reconnect-marches": "./src/reconnect-marches.ts",
     "./chat-mailbox": "./src/chat-mailbox.ts",
     "./cn1-session": "./src/cn1-session.ts",
@@ -75,7 +74,8 @@
     "./shops": "./src/shops.ts",
     "./trade": "./src/trade.ts",
     "./provisioning": "./src/provisioning.ts",
-    "./character-provisioning": "./src/character-provisioning.ts"
+    "./character-provisioning": "./src/character-provisioning.ts",
+    "./timed-activity": "./src/timed-activity.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
