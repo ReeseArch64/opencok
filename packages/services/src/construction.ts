@@ -1,3 +1,5 @@
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 import { randomInt, randomUUID } from "node:crypto";
 import type { ProgressionActivityData } from "@opencok/contracts/city-progression";
 import type {
@@ -139,7 +141,7 @@ function noAssociatedActivity(context: CityProgressionContext, row: Row) {
     type !== undefined &&
     context.state.queues.some((queue) => num(queue, "type") === type && text(queue, "itemId"))
   )
-    throw new Error("Building has an active domain queue");
+    throw new GameError(errors.occupied, "city_progression");
 }
 async function prepare(
   context: CityProgressionContext,
@@ -149,21 +151,22 @@ async function prepare(
   if (command === "buildingUnlock") {
     const request = str(params, "M__REQUEST_ID__H");
     if (request !== "info" && request !== "glory")
-      throw new Error("Unknown building unlock request");
+      throw new GameError(errors.invalid, "city_progression");
     command = `buildingUnlock.${request}`;
   }
   if (command === "miracle.unlock") {
     const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
-    if (!castle || num(castle, "level") < 30) throw new Error("Castle level 30 required");
+    if (!castle || num(castle, "level") < 30)
+      throw new GameError(errors.troopBuilding, "city_progression");
     if (context.state.buildings.some((row) => num(row, "itemId") === 422000))
-      throw new Error("Miracle already unlocked");
+      throw new GameError(errors.invalid, "city_progression");
     const position = context.rules.positions.get("9955");
     if (
       !position?.building ||
       !position.position ||
       context.state.buildings.some((row) => num(row, "pos") === Number(position.position))
     )
-      throw new Error("Miracle position unavailable");
+      throw new GameError(errors.invalid, "city_progression");
     const row: Row = {
       uuid: randomUUID(),
       uid: context.owner,
@@ -185,10 +188,10 @@ async function prepare(
   if (command === "build.move") {
     const pos1 = cityInteger(int(params, "pos1")),
       pos2 = cityInteger(int(params, "pos2"));
-    if (pos1 === pos2) throw new Error("Building positions are identical");
+    if (pos1 === pos2) throw new GameError(errors.invalid, "city_progression");
     const from = context.state.buildings.find((row) => num(row, "pos") === pos1),
       to = context.state.buildings.find((row) => num(row, "pos") === pos2);
-    if (!from) throw new Error("Building position is empty");
+    if (!from) throw new GameError(errors.invalid, "city_progression");
     context.idleBuilding(from);
     checkCityPosition(context.state, context.rules, pos2, text(from, "itemId"));
     if (to) {
@@ -196,7 +199,7 @@ async function prepare(
       checkCityPosition(context.state, context.rules, pos1, text(to, "itemId"));
     }
     const payment = int(params, "gold", 0);
-    if (![0, 1].includes(payment)) throw new Error("Invalid building move payment");
+    if (![0, 1].includes(payment)) throw new GameError(errors.invalid, "city_progression");
     context.spendItem("200032", 1, payment === 1);
     context.write.buildings = [{ ...from, pos: pos2 }, ...(to ? [{ ...to, pos: pos1 }] : [])];
     return {
@@ -220,7 +223,7 @@ async function prepare(
     const rule = definition(context, row),
       conditions = rule.unlockConditions ?? [];
     if (!conditions.length || num(row, "unlockFlag") !== 0)
-      throw new Error("Building cannot be unlocked");
+      throw new GameError(errors.invalid, "city_progression");
     const allowed = conditions.every(
       (condition) =>
         cityUnlockCount(context.state, context.rules, condition.code) >=
@@ -228,7 +231,7 @@ async function prepare(
     );
     if (!allowed) {
       if (int(params, "cost", 0) !== 1 || !rule.unlockPayment)
-        throw new Error("Building unlock prerequisite not met");
+        throw new GameError(errors.resource, "city_progression");
       const payment = rule.unlockPayment;
       if (payment.paymentId <= 1)
         context.economy.gold(
@@ -251,10 +254,11 @@ async function prepare(
   }
   if (command === "building.reward") {
     const row = context.state.buildings.find((value) => num(value, "itemId") === 400000);
-    if (!row || num(row, "reward") !== 1) throw new Error("Building reward already claimed");
+    if (!row || num(row, "reward") !== 1)
+      throw new GameError(errors.rewardClaimed, "city_progression");
     const rewardId = buildingDisplayParameters(definition(context, row))[3];
     if (!rewardId || !context.rules.reconnect.rewards?.has(rewardId))
-      throw new Error("Missing building reward definition");
+      throw new GameError(errors.unsupported, "city_progression");
     const rewards = previewRewards(
       rewardId,
       context.rules,
@@ -270,7 +274,7 @@ async function prepare(
         context.experience(cityInteger(reward.value));
       else if (reward.kind === "count" && reward.type >= 0 && reward.type <= 4)
         context.economy.resource(cityAssets[reward.type]!, BigInt(cityInteger(reward.value)));
-      else throw new Error("Unsupported building reward asset");
+      else throw new GameError(errors.unsupported, "city_progression");
     }
     context.write.buildings = [{ ...row, reward: 0 }];
     return { response: encode({ reward: rewardPreviewArray(rewards) }) };
@@ -300,18 +304,18 @@ async function prepare(
   if (creating) {
     checkCityPosition(context.state, context.rules, num(row, "pos"), text(row, "itemId"));
     if (context.state.buildings.some((building) => num(building, "pos") === num(row, "pos")))
-      throw new Error("Building position occupied");
+      throw new GameError(errors.invalid, "city_progression");
     if (
       context.state.buildings.length >= 256 ||
       (current.maxInstances &&
         context.state.buildings.filter((building) => building.itemId === row.itemId).length >=
           current.maxInstances)
     )
-      throw new Error("Building instance limit reached");
+      throw new GameError(errors.invalid, "city_progression");
   } else noAssociatedActivity(context, row);
   if (command === "build.destroy") {
     if (current.maxInstances === 1 || num(row, "level") === 0)
-      throw new Error("Building cannot be destroyed");
+      throw new GameError(errors.invalid, "city_progression");
     const durationMs = BigInt(cityInteger(current.demolitionSeconds ?? 0, 1)) * 1000n;
     context.write.buildings = [{ ...row, opType: 2 }];
     return {
@@ -328,7 +332,7 @@ async function prepare(
     num(row, "star") > 0 &&
     num(row, "unlockFlag") !== 1
   )
-    throw new Error("Building glory progress locked");
+    throw new GameError(errors.locked, "city_progression");
   const next = context.rules.nextBuilding(
     text(row, "itemId"),
     num(row, "level"),
@@ -341,9 +345,9 @@ async function prepare(
     next.starLevel === num(row, "star") &&
     next.starProgress === num(row, "progress")
   )
-    throw new Error("Maximum building level reached");
+    throw new GameError(errors.buildingMax, "city_progression");
   const payment = int(params, "gold", 0);
-  if (![0, 1, 2].includes(payment)) throw new Error("Invalid building payment");
+  if (![0, 1, 2].includes(payment)) throw new GameError(errors.invalid, "city_progression");
   const reduction =
     context.effect(num(row, "level") < 19 ? 772 : num(row, "level") < 30 ? 2078 : 773) * 3600 +
     context.effect(2145);
@@ -365,6 +369,7 @@ async function prepare(
         : context.effect(({ wood: 752, food: 753, iron: 754, stone: 755 } as const)[asset]),
       context.effect(454) + context.effect(2143),
     );
+  context.checkPower(BigInt(next.power ?? 0) - BigInt(current.power ?? 0));
   context.spend(costs, payment !== 0);
   for (const item of current.requiredItems ?? [])
     context.spendItem(
@@ -399,10 +404,10 @@ async function apply(
   const row = context.ownBuilding(activity.itemId),
     data = progressionActivityData(activity.data);
   if (num(row, "opType") !== 1 && num(row, "opType") !== 2)
-    throw new Error("Building has no pending operation");
+    throw new GameError(errors.queue, "city_progression");
   if (data && data.kind !== (num(row, "opType") === 1 ? "upgrade" : "destroy"))
-    throw new Error("Building activity mismatch");
-  if (action === "start") throw new Error("Construction requires its domain command");
+    throw new GameError(errors.invalid, "city_progression");
+  if (action === "start") throw new GameError(errors.invalid, "city_progression");
   if (action === "restore" || action === "reschedule")
     return building(row, context.rules, num(row, "opType") === 1, Number(context.now));
   if (action === "cancel") {

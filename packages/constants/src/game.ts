@@ -14,6 +14,19 @@ export const errors = {
   occupied: "E100157",
   resource: "102196",
   queue: "E100159",
+  insufficientResource: "E100002",
+  buildingMax: "102103",
+  buildingLimited: "169700",
+  researchPrerequisite: "E100122",
+  researchMax: "E100124",
+  fortCapacity: "105466",
+  troopBuilding: "E100153",
+  vip: "137601",
+  prestige: "310031",
+  powerLimit: "160038",
+  rewardClaimed: "E100147",
+  locked: "E100174",
+  queuePending: "E100156",
 };
 
 export const MOBILE_CLIENT_VERSION = "12.06.0";

@@ -1,3 +1,5 @@
+import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
+import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
 import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { deleteMailConversations } from "./mail-conversation-delete.ts";
 import { relayMailChat } from "./mail-chat-intents.ts";
@@ -376,6 +378,16 @@ export class Database implements GameStore, FriendshipMineStore {
             ),
           )
           .orderBy(asc(user_item.itemId));
+        const hospital = await tx
+          .select()
+          .from(user_hospital)
+          .where(eq(user_hospital.uid, uid))
+          .orderBy(asc(user_hospital.armyId));
+        const forts = await tx
+          .select()
+          .from(user_wall)
+          .where(eq(user_wall.uid, uid))
+          .orderBy(asc(user_wall.armyId));
         const sciences = await tx
           .select()
           .from(user_science)
@@ -391,6 +403,8 @@ export class Database implements GameStore, FriendshipMineStore {
           hasMarches,
           armies,
           sciences,
+          hospital,
+          forts,
           items,
           lord,
           civilizationPrestige: prestige?.value ?? 0n,

@@ -2,6 +2,12 @@ export class GameError extends Error {
   constructor(
     readonly code: string,
     readonly reason?:
+      | "city_progression"
+      | "research_prerequisite"
+      | "research_building"
+      | "troop_quantity"
+      | "training_capacity"
+      | "fortification_capacity"
       | "building_shape"
       | "building_rule"
       | "role_rule"

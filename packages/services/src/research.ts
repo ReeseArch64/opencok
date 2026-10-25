@@ -1,3 +1,5 @@
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 import { randomUUID } from "node:crypto";
 import { sfs, str, int, encode, type Fields } from "@opencok/messages/sfs";
 import { text, num, long, type Row } from "@opencok/contracts/rows";
@@ -35,7 +37,7 @@ function current(context: CityProgressionContext, itemId: string): Row {
 }
 function complete(context: CityProgressionContext, row: Row, data?: ProgressionActivityData) {
   const level = data?.target?.level ?? num(row, "level") + 1;
-  if (level !== num(row, "level") + 1) throw new Error("Research target changed");
+  if (level !== num(row, "level") + 1) throw new GameError(errors.invalid, "city_progression");
   const before = researchDefinition(context.rules, text(row, "itemId"), num(row, "level")),
     after = researchDefinition(context.rules, text(row, "itemId"), level);
   const completed = { ...row, level, cd: idleDeadline };
@@ -45,8 +47,8 @@ function complete(context: CityProgressionContext, row: Row, data?: ProgressionA
     const id = cityInteger(after.para2),
       armyId = String(Math.trunc(id / 10) * 10),
       unlocked = after.para1 === "up" ? level : (id % 10) + 1;
-    if (!context.rules.arms.has(String(Number(armyId) + unlocked - 1)))
-      throw new Error("Missing research troop definition");
+    if (!context.rules.arms.has(armyId))
+      throw new GameError(errors.unsupported, "city_progression");
     if (after.para1 === "trap") {
       const saved = context.state.forts.find((fort) => fort.armyId === armyId);
       context.write.forts = [
@@ -81,7 +83,7 @@ function complete(context: CityProgressionContext, row: Row, data?: ProgressionA
   }
   if (after.skill) {
     if (!["622800", "622900"].includes(after.skill) || !context.state.effects.generals.length)
-      throw new Error("Research skill context unavailable");
+      throw new GameError(errors.invalid, "city_progression");
     const saved = context.state.skills.find((skill) => skill.skillId === after.skill);
     context.write.skills = [
       {
@@ -128,21 +130,21 @@ async function prepare(
     row = current(context, itemId),
     rule = researchDefinition(context.rules, itemId, num(row, "level"));
   const maximum = cityInteger(rule.max_lv, 0, 99);
-  if (num(row, "level") >= maximum) throw new Error("Maximum research level reached");
+  if (num(row, "level") >= maximum) throw new GameError(errors.researchMax, "city_progression");
   researchDefinition(context.rules, itemId, num(row, "level") + 1);
   if (
     context.state.queues.some((queue) => num(queue, "type") === 6 && queue.itemId === itemId) ||
     long(row, "cd") !== idleDeadline
   )
-    throw new Error("Research already pending");
+    throw new GameError(errors.occupied, "city_progression");
   const academy = context.state.buildings.find(
     (building) => num(building, "itemId") === 403000 && num(building, "level") > 0,
   );
-  if (!academy) throw new Error("Academy required");
+  if (!academy) throw new GameError(errors.troopBuilding, "city_progression");
   context.idleBuilding(academy);
   checkResearchRequirements(context.state, context.rules, rule);
   const payment = int(params, "gold", 0);
-  if (![0, 1].includes(payment)) throw new Error("Invalid research payment");
+  if (![0, 1].includes(payment)) throw new GameError(errors.invalid, "city_progression");
   const durationMs = cityDuration(
     cityInteger(rule.time_research ?? 0),
     context.effect(69) +
@@ -153,10 +155,14 @@ async function prepare(
     context.effect(774) * 3600 + context.effect(2148),
   );
   const direct = command === "science.directly";
+  context.checkPower(
+    cityAmount(researchDefinition(context.rules, itemId, num(row, "level") + 1).power ?? 0) -
+      cityAmount(rule.power ?? 0),
+  );
   context.spend(researchCosts(rule, context.effect), direct || payment === 1);
   for (const pair of rule.science_point?.split("|").filter(Boolean) ?? []) {
     const [id, rawCount, ...extra] = pair.split(";");
-    if (!id || extra.length) throw new Error("Invalid research item cost");
+    if (!id || extra.length) throw new GameError(errors.invalid, "city_progression");
     const count = Math.max(0, cityInteger(rawCount) - (id === "210090" ? context.effect(756) : 0));
     context.spendItem(id, cityInteger(Math.trunc(count)));
   }
@@ -202,14 +208,15 @@ async function apply(
 ) {
   const row = context.state.sciences.find((science) => science.itemId === activity.itemId),
     data = progressionActivityData(activity.data);
-  if (!row || (data && data.kind !== "research")) throw new Error("Pending research not found");
+  if (!row || (data && data.kind !== "research"))
+    throw new GameError(errors.queue, "city_progression");
   const queues = context.state.queues.filter(
     (queue) => num(queue, "type") === 6 && queue.itemId === activity.itemId,
   );
   if (queues.length !== 1 || queues[0]!.uuid !== activity.queueId)
-    throw new Error("Research queue mismatch");
+    throw new GameError(errors.invalid, "city_progression");
   researchDefinition(context.rules, activity.itemId, num(row, "level") + 1);
-  if (action === "start") throw new Error("Research requires its domain command");
+  if (action === "start") throw new GameError(errors.invalid, "city_progression");
   if (action === "restore" || action === "reschedule") {
     context.write.sciences = [{ ...row, cd: activity.dueAt }];
     return research(row, context.rules, activity.dueAt);

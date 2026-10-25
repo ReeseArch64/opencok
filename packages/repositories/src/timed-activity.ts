@@ -1,3 +1,6 @@
+import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
+import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
+import { building_production } from "@opencok/drizzle/schema/opencok_kingdom/building_production";
 import { and, asc, eq, gt, or, inArray, lte, isNull, ne } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
@@ -23,7 +26,12 @@ export type ActivityDomain = (
   economy: ActivityEconomy,
 ) => Promise<Uint8Array>;
 export interface ActivityPreparation {
-  before?(tx: MutationTransaction, owner: string, now: bigint): Promise<void>;
+  before?(
+    tx: MutationTransaction,
+    owner: string,
+    now: bigint,
+    command: import("@opencok/contracts/mutation").MutationCommand,
+  ): Promise<void | bigint>;
   command(
     tx: MutationTransaction,
     owner: string,
@@ -44,7 +52,10 @@ export function createActivityExecutor(
   return (command, plan) =>
     execute(command, async (tx) => {
       const captured = BigInt(now());
-      await preparation?.before?.(tx, command.owner, captured);
+      const preparedAt = await preparation?.before?.(tx, command.owner, captured, command);
+      const domainInstant = typeof preparedAt === "bigint" ? preparedAt : captured;
+      if (domainInstant < 0n || domainInstant > captured)
+        throw new Error("Invalid activity domain clock");
       return executeInventoryTransaction(
         tx,
         command.owner,
@@ -78,7 +89,7 @@ export function createActivityExecutor(
               const domain = domains.get(activity.type);
               if (!domain || activity.ownerId !== command.owner)
                 throw new Error("Activity domain unavailable");
-              return domain(tx, action, activity, captured, economy);
+              return domain(tx, action, activity, domainInstant, economy);
             },
           });
           if (
@@ -89,7 +100,10 @@ export function createActivityExecutor(
           )
             throw new Error("Invalid activity write set");
           if (result.guideStep !== undefined) {
-            if (command.command !== "queue.ccd" || result.guideStep.length > 255)
+            if (
+              !["queue.ccd", "army.add", "army.complete", "army.cd"].includes(command.command) ||
+              result.guideStep.length > 255
+            )
               throw new Error("Invalid activity guide step");
             await tx
               .update(userprofile)
@@ -248,4 +262,50 @@ export async function unregisteredActivities(
     )
     .orderBy(asc(queue.uuid))
     .limit(limit);
+}
+
+export async function activityTransitionInstant(
+  tx: MutationTransaction,
+  owner: string,
+  queueId: string | undefined,
+  now: bigint,
+): Promise<bigint> {
+  if (!queueId) return now;
+  const [active] = await tx
+    .select({ dueAt: timed_activity.dueAt })
+    .from(timed_activity)
+    .where(
+      and(
+        eq(timed_activity.ownerId, owner),
+        eq(timed_activity.queueId, queueId),
+        eq(timed_activity.status, 0),
+      ),
+    );
+  if (!active || active.dueAt >= now) return now;
+  const [resource] = await tx
+    .select({ at: user_resource.lastUpdateTime })
+    .from(user_resource)
+    .where(eq(user_resource.uid, owner));
+  const checkpoints = await tx
+    .select({ at: building_production.settledAt })
+    .from(building_production)
+    .where(eq(building_production.ownerId, owner))
+    .limit(257);
+  const buildings = await tx
+    .select({ at: user_building.refreshTime })
+    .from(user_building)
+    .where(
+      and(
+        eq(user_building.uid, owner),
+        inArray(user_building.itemId, [412000, 413000, 414000, 415000]),
+      ),
+    )
+    .limit(257);
+  if (checkpoints.length > 256 || buildings.length > 256)
+    throw new Error("Activity checkpoint aggregate exceeds bound");
+  let at = active.dueAt;
+  for (const row of [...checkpoints, ...buildings, { at: resource?.at ?? 0n }])
+    if ((row.at ?? 0n) > at) at = row.at!;
+  if (at > now) throw new Error("Activity clock moved backwards");
+  return at;
 }

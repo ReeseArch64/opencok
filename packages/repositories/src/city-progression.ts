@@ -294,9 +294,20 @@ export function createCityProgressionStore(
             );
         }
       };
+      const scienceBefore = write.sciences?.length
+        ? await tx
+            .select({ itemId: user_science.itemId, level: user_science.level })
+            .from(user_science)
+            .where(eq(user_science.uid, owner))
+        : [];
+      const changedScience = write.sciences?.some(
+        (row) =>
+          num(row, "level") !==
+          (scienceBefore.find((before) => before.itemId === row.itemId)?.level ?? 0),
+      );
       if (
         write.buildings?.length ||
-        write.sciences?.length ||
+        changedScience ||
         write.profile ||
         write.deletedBuildings?.length
       )

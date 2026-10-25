@@ -73,6 +73,8 @@ export interface CityState {
   hasMarches: boolean;
   armies: Row[];
   sciences?: Row[];
+  hospital?: Row[];
+  forts?: Row[];
   items: Row[];
   lord: Row | undefined;
   civilizationPrestige?: bigint;

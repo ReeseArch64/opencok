@@ -1,3 +1,4 @@
+import { woundedTroops, fortification } from "@opencok/mappings/military";
 import { researchData } from "@opencok/mappings/research";
 import { randomInt, randomUUID } from "node:crypto";
 import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
@@ -322,6 +323,12 @@ export async function planReconnectProgress(
     body: {
       ...projectReconnectMarches(state.marches, uid, rules, context, load),
       ...reconnectArmies(armies),
+      ...(state.hospital
+        ? { hospital: sfs.array(state.hospital.map((row) => sfs.object(woundedTroops(row)))) }
+        : {}),
+      ...(state.walls.length
+        ? { fort: sfs.array(state.walls.map((row) => sfs.object(fortification(row, rules)))) }
+        : {}),
       ...reconnectOwnGenerals({ ...state, generals }, rules, context.now),
       ...reconnectResources(resource, upkeepAt(now).showBound),
       ...reconnectQueues(state.queues, state.buildings, state.equipment, rules, context.now),

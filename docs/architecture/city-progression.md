@@ -1,7 +1,8 @@
 # City progression
 
-Topics 16 and 17 are tracked in [issue 344](https://github.com/ReeseArch64/opencok/issues/344)
-and [issue 345](https://github.com/ReeseArch64/opencok/issues/345).
+Topics 16–18 are tracked in [issue 344](https://github.com/ReeseArch64/opencok/issues/344),
+[issue 345](https://github.com/ReeseArch64/opencok/issues/345) and
+[issue 346](https://github.com/ReeseArch64/opencok/issues/346).
 The independently authored TypeScript domains consume maintained catalogs; the
 ignored Java reference is a development input and is never a runtime dependency.
 
@@ -21,6 +22,9 @@ and star progress are computed from authoritative catalogs inside the locked
 transaction. Position and instance constraints are validated even when the
 reference relies on the client to enforce them. A dependent building cannot
 upgrade or demolish while its training/research/healing queue remains occupied.
+Rejected player actions use the native invalid-parameter, resource, prerequisite,
+queue, level and reward codes; dependency/persistence failures remain internal
+errors.
 
 Gold modes preserve queued ordinary payment (0), immediate completion with
 resource-shortage purchase (1), and queued shortage purchase (2). Bound resources
@@ -58,12 +62,18 @@ persisted power advance in the same transaction.
 
 A domain write settles every existing producer using the old schedule, changes
 the building or research input, then installs the newly resolved schedules at the
-commit clock. Already accumulated buffers and fractional production survive.
-Demolition transfers the remaining buffer through the inventory ledger before
+authoritative transition clock. Already accumulated buffers and fractional production survive rate changes.
+Demolition transfers the remaining whole-resource buffer through the inventory ledger before
 removing its checkpoint. Assigned generals are detached from demolished buildings.
 Ordinary production is still collected explicitly; upgrading does not implicitly
-credit an uncollected buffer. Offline completions apply at the fenced command's
-clock, without retroactively rewriting an already settled interval.
+credit an uncollected buffer. Overdue completions use the saved deadline, followed by settlement of the later
+interval at the new rate and troop upkeep. Recovery processes due activities in
+deadline order before new city mutations and collection; explicit queue commands
+first recover preceding activities. Restoring a legacy queue does not settle its
+future interval. If an imported account already has a later resource/production
+checkpoint or producer refresh, completion clamps to that checkpoint instead of
+rewriting already settled history. Historical changes missing from an imported
+snapshot cannot be reconstructed.
 
 ## Delivery and recovery
 
@@ -115,3 +125,56 @@ not duplicated into a bounded activity outbox event.
 acceleration, immediate completion, cancellation, power/effect persistence and
 production schedule changes. Research units check scalar wire types, locked tree
 entries, malformed prices and pinned-level/queue conflicts.
+
+## Training, hospital and fortifications
+
+Training uses queue types 1, 8, 9, 10 and 17; fortifications use 2 and healing uses 3. Commands include `army.add`, `army.complete`, `army.cd`, `army.fire`,
+`hospital.cure`, `hospital.cure.done`, `hospital.cancel`, `hospital.cd`,
+`hospital.fire`, `fort.build`, `fort.build.done`, `fort.cancel`, `fort.cd` and
+`fort.destory`. The correctly spelled `fort.destroy` is also accepted. Legacy
+completion/cancellation aliases verify the queue type and supplied troop ID.
+
+Training capacity comes from barracks and the base catalog allowance, with active
+capacity/speed effects and assigned generals. Required buildings must be finished;
+configured saga/civilization research prerequisites must be present. Resource
+prices, fine iron item costs, deadlines, power and acceleration prices use the
+authoritative catalogs. When the realm enables its power limit, pending city,
+research and military power reserves headroom before another job is charged.
+Healthy quantity bounds include both pending training and healing.
+
+`army.cd` pays acceleration and, when the `max` field is present, resource
+shortages. Its default creates a paid, ready queue for completion; `complete=true`
+commits available soldiers immediately. `fort.cd` creates a paid, ready defense
+queue. `army.add` and `fort.build` use their Boolean `gold` field only to purchase
+resource shortages. Guide progress commits with the corresponding army command.
+
+Dismissal subtracts only owned available soldiers, preserving marching, defending,
+PVE and pending training quantities. Healing accepts the original flat troop-ID
+Int fields, reserves selected wounds, charges catalog healing costs and updates
+the shared hospital deadline. Cancellation returns all reserved troops to the
+wounded pool while refunding the configured portion of actually paid resources.
+Completion moves exactly the reserved quantity into available troops and updates
+power and the cumulative cure count. Direct healing can consume other wounds
+while preserving the same troop type's existing queued reservation. Wounded
+dismissal cannot consume units already reserved for healing.
+
+Hospital batch capacity derives from hospital buildings and flat/percentage
+effects; existing excess wounds remain stored for smaller healing batches.
+Fortification capacity includes completed and pending defenses across every type.
+Nonpositive starts, negative counters, excessive dismissal, overflow, unavailable
+buildings and conflicting queues reject atomically. Combat intake, special battle
+server capacity modifiers and battle damage remain owned by their future domains.
+
+Deferred military login includes saved counters, pending deadlines and zero-count
+ordinary troop/defense definitions from the catalogs. These virtual empty entries
+do not grant soldiers or reset existing rows. Reconnect exposes hospital and
+defense state; elapsed healing stays visible if completion could not commit.
+
+`integration/military.test.ts` covers retries, capacity and quantity failures,
+training/defense completion, healing/cancellation, direct healing during a queued
+batch, dismissal, paid-ready jobs and power reservations. Overdue construction,
+research and training tests verify deadline-based output and upkeep. The
+provisioning SFS E2E exercises live construction, training/acceleration, healing,
+dismissal, research reads and deferred military data. Critical mutations cover
+prerequisites, power, paid refunds, quantity bounds, capacities and healing
+conservation. This evidence uses synthetic players and disposable dependencies.
