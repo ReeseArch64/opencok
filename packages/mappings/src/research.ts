@@ -1,14 +1,17 @@
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
 import type { Rules } from "@opencok/rules/game";
-import { researchDefinition } from "@opencok/rules/research";
+import { cityInteger } from "@opencok/rules/city-progression";
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 import { researchSchema } from "@opencok/validations/research";
 import { validateFields } from "./validation";
 
 export function research(row: Row, rules: Rules, deadline = 0n): Fields {
   const itemId = text(row, "itemId"),
     level = num(row, "level"),
-    rule = researchDefinition(rules, itemId, level);
+    rule = rules.power.sciences?.get(String(cityInteger(itemId, 1) + cityInteger(level, 0, 99)));
+  if (!rule) throw new GameError(errors.unsupported, "city_progression");
   const result: Fields = {
     level: sfs.int(level),
     itemId: sfs.string(itemId),

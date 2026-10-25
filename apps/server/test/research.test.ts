@@ -2,11 +2,28 @@ import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
 import { researchDomain } from "@opencok/services/research";
 import { researchData } from "@opencok/mappings/research";
-import { researchCosts, checkResearchRequirements } from "@opencok/rules/research";
+import {
+  researchCosts,
+  checkResearchRequirements,
+  researchDefinition,
+} from "@opencok/rules/research";
 import { sfs, fields } from "@opencok/messages/sfs";
 import { cityFixture } from "./fixtures/city-progression";
 
 const rules = await loadRules();
+test("login projects legacy research IDs by addition while mutation selection remains strict", () => {
+  const saved = [{ itemId: "700101", level: 1 }];
+  const snapshot = researchData(saved, [], rules);
+  const records = snapshot.value as import("@opencok/messages/sfs").Value[];
+  const row = records.map(fields).find((row) => row.itemId?.value === "700101")!;
+  expect(row.itemId).toEqual(sfs.string("700101"));
+  expect(row.level).toEqual(sfs.int(1));
+  expect(row.para2).toEqual(sfs.string(rules.power.sciences!.get("700102")!.para2!));
+  expect(row.nextPara2).toEqual(sfs.string(rules.power.sciences!.get("700103")!.para2!));
+  expect(saved).toEqual([{ itemId: "700101", level: 1 }]);
+  expect(() => researchDefinition(rules, "700101", 1)).toThrow();
+});
+
 test("research rejects unmet science and building prerequisites and prices discounts without negative costs", () => {
   const { state } = cityFixture(rules);
   expect(() => checkResearchRequirements(state, rules, { science_condition: "700101" })).toThrow();
