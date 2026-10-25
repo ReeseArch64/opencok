@@ -1,3 +1,8 @@
+import { checkNicknameChangeStore } from "@opencok/repositories/nickname-change";
+import { nicknameAllianceReward } from "@opencok/rules/nickname-alliance";
+import { createCn1Sessions } from "@opencok/repositories/cn1-session";
+import { createNicknameChangeRuntime } from "./nickname-change.ts";
+import { createChatNicknamePublisher } from "@opencok/connection/chat-nickname";
 import { createChatMailboxPublisher } from "@opencok/connection/chat-mailbox";
 import { GameController } from "@opencok/controllers/game";
 import { WorldController } from "@opencok/controllers/world";
@@ -140,6 +145,50 @@ export const RealmDependenciesLive = Layer.effect(
       acquireRealmAuthority(db.kingdom.db, config.kingdomId, () => coordination.ready),
     );
     const notifications = createRealmNotifications();
+    const cn1 = createCn1Sessions(db.databases.global.db, rules, config.kingdomId);
+    const nickname = config.nicknameChat
+      ? createNicknameChangeRuntime({
+          databases: db.databases,
+          kingdomId: config.kingdomId,
+          rules,
+          notifications,
+          timeoutMs: config.timeoutMs,
+          report: () =>
+            console.warn(
+              JSON.stringify({ event: "nickname_delivery_failed", kingdom: config.kingdomId }),
+            ),
+          prepareRefund: (owner, now) => cn1.refresh(owner, now),
+          refundRatio: async (profile) => cn1.ratio(profile),
+          chat: createChatNicknamePublisher({
+            ...config.nicknameChat,
+            timeoutMs: config.timeoutMs,
+          }),
+          alliance: { rules, resolveMailReward: (id) => nicknameAllianceReward(id, rules) },
+          sharedUser: { rules, cache },
+        })
+      : undefined;
+    if (nickname) {
+      yield* fromPromise("realm.nickname-store", () =>
+        checkNicknameChangeStore(db.databases, config.kingdomId),
+      );
+      yield* fromPromise("realm.nickname-sessions", () => cn1.check());
+      yield* acquireResource(
+        "realm.nickname-relay",
+        async () =>
+          startAvatarVersionRelay(
+            nickname.next,
+            (owner, operationId) => {
+              authority.assertReady();
+              return nickname.deliver(owner, operationId, Date.now());
+            },
+            () =>
+              console.warn(
+                JSON.stringify({ event: "nickname_recovery_failed", kingdom: config.kingdomId }),
+              ),
+          ),
+        (relay) => relay.close(),
+      );
+    }
     const avatar =
       config.avatarChat && avatarFiles
         ? createAvatarRuntime({
@@ -187,6 +236,7 @@ export const RealmDependenciesLive = Layer.effect(
       );
     }
     return {
+      profileSessions: nickname ? { open: cn1.open, close: cn1.close } : undefined,
       notifications,
       db,
       cache,
@@ -206,6 +256,12 @@ export const RealmDependenciesLive = Layer.effect(
             });
           },
           ...nicknameServices,
+          nicknameChange: nickname
+            ? async (...args) => {
+                authority.assertReady();
+                return nickname.command(...args);
+              }
+            : undefined,
           worldPointDetail,
           playerSearch,
           worldSearch,

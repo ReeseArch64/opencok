@@ -45,6 +45,11 @@ export interface NicknameChangeStore {
     now: number,
     plan: NicknameAlliancePlanner,
   ): Promise<boolean>;
+  deliverThrone(owner: string, operationId: string, now: number): Promise<boolean>;
+  nextPending(after?: {
+    owner: string;
+    operationId: string;
+  }): Promise<{ owner: string; operationId: string } | undefined>;
   deliverSharedUser(
     owner: string,
     operationId: string,

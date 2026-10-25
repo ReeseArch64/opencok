@@ -137,7 +137,7 @@ function loseCommit(pool: ReturnType<typeof createDatabases>["global"]["pool"], 
                   ? first.text
                   : undefined;
             if (typeof text === "string" && text.startsWith("begin")) touched = false;
-            if (typeof text === "string" && text.startsWith(statement)) touched = true;
+            if (typeof text === "string" && text.trimStart().startsWith(statement)) touched = true;
             const result = await Reflect.apply(client.query, client, args);
             if (armed && touched && text === "commit") {
               armed = false;
@@ -1190,3 +1190,196 @@ test("global receipt survives PostgreSQL restart and completes a failed realm fi
       .where(eq(nickname_change.operationId, operationId)),
   ).toHaveLength(1);
 }, 60_000);
+
+test("throne delivery updates only current owned holders and replays a lost global commit before acknowledging", async () => {
+  const uid = await seed({ items: 2 }),
+    other = await seed({ items: 1 }),
+    operationId = randomUUID();
+  await realm().pool.query(
+    `update opencok_kingdom.userprofile set pic='g104',"picVer"=7 where uid=$1`,
+    [uid],
+  );
+  for (const pool of [databases.global.pool, realm().pool]) {
+    const schema = pool === databases.global.pool ? "opencok_global" : "opencok_kingdom";
+    await pool.query(
+      `insert into ${schema}.cross_throne_king_info (uuid,version,king_type,config_type,uid,name) values ($1,1,1,901,$2,'historical'),($3,2,1,901,$2,'current'),($4,1,2,901,$5,'foreign')`,
+      [`old-${uid}`, uid, `new-${uid}`, `foreign-${uid}`, other],
+    );
+  }
+  const runtime = store();
+  await runtime.change(uid, operationId, `King ${uid}`, now);
+  const failure = loseCommit(databases.global.pool, "update opencok_global.cross_throne_king_info");
+  try {
+    await expect(runtime.deliverThrone(uid, operationId, now)).rejects.toThrow();
+  } finally {
+    failure.restore();
+  }
+  expect(failure.fired()).toBe(true);
+  expect((await runtime.find(uid, operationId))!.pendingEffects & 4).toBe(4);
+  expect(await runtime.deliverThrone(uid, operationId, now)).toBe(true);
+  expect(await runtime.deliverThrone(uid, operationId, now)).toBe(false);
+  const rows = (
+    await databases.global.pool.query(
+      `select version,king_type,name,pic,pic_ver from opencok_global.cross_throne_king_info where config_type=901 order by king_type,version`,
+    )
+  ).rows;
+  expect(rows.map((row) => row.name)).toEqual(["historical", `King ${uid}`, "foreign"]);
+  expect(rows[1]).toMatchObject({ pic: "g104", pic_ver: 7 });
+  expect((await item(uid))!.count).toBe(1);
+  expect((await runtime.find(uid, operationId))!.pendingEffects & 4).toBe(0);
+});
+
+test("CN1 persisted sessions restore, accrue minutes, fence replaced connections and refund after restart", async () => {
+  const { createCn1Sessions } = await import("@opencok/repositories/cn1-session");
+  const { Rules } = await import("@opencok/rules/game");
+  const rules = new Rules(new Map(), new Map(), new Map());
+  rules.configuration.payControl = new Map([
+    ["69036", { k1: "1.0.0", k2: "1", k3: "60,1|180,0.5|300,0", k4: "300" }],
+  ]);
+  const uid = await seed({ pf: "cn1", gold: 200n, account: false });
+  await realm().pool.query(
+    `update opencok_kingdom.userprofile set "appVersion"='12.06.0' where uid=$1`,
+    [uid],
+  );
+  await databases.global.pool.query(
+    `insert into opencok_global.cn1_profile_session ("ownerUid","isAddict","onlineMinutes") values ($1,1,60)`,
+    [uid],
+  );
+  let sessions = createCn1Sessions(databases.global.db, rules, 1);
+  const first = randomUUID(),
+    second = randomUUID();
+  await sessions.open(uid, first, now);
+  await sessions.refresh(uid, now + 60000);
+  expect(sessions.ratio(await profile(uid))).toBe(0.5);
+  await sessions.open(uid, second, now + 120000);
+  await sessions.close(uid, first, now + 120000);
+  expect(
+    (
+      await databases.global.pool.query(
+        `select "sessionId" from opencok_global.cn1_profile_session where "ownerUid"=$1`,
+        [uid],
+      )
+    ).rows[0].sessionId,
+  ).toBe(second);
+  await sessions.close(uid, second, now + 180000);
+  expect(
+    (
+      await databases.global.pool.query(
+        'select "onlineMinutes" from opencok_global.cn1_profile_session where "ownerUid"=$1',
+        [uid],
+      )
+    ).rows[0].onlineMinutes,
+  ).toBe(63);
+  sessions = createCn1Sessions(databases.global.db, rules, 1);
+  await sessions.refresh(uid, now + 180000);
+  const runtime = createNicknameChangeRuntime({
+    databases,
+    kingdomId: 1,
+    rules: { goods: new Map([["200021", { type: "17", price: "100" }]]) },
+    prepareRefund: (owner, time) => sessions.refresh(owner, time),
+    refundRatio: async (row) => sessions.ratio(row),
+    notifications: createRealmNotifications(),
+    timeoutMs: 1000,
+    report: () => {},
+  });
+  expect(await runtime.change(uid, randomUUID(), `CN One ${uid}`, now + 180000)).toEqual({
+    gold: sfs.long(100n),
+    status: sfs.bool(false),
+  });
+  expect((await profile(uid)).gold).toBe(150n);
+  await sessions.open(uid, randomUUID(), now + 400 * 60000);
+  await sessions.refresh(uid, now + 400 * 60000);
+  expect(sessions.ratio(await profile(uid))).toBe(1);
+  const absent = await seed({ pf: "cn1" });
+  await sessions.refresh(absent, now);
+  expect(sessions.ratio(await profile(absent))).toBe(1);
+});
+
+test("authenticated rename reaches real Chat and Redis, clears all effects and retries without another debit", async () => {
+  const { DisposableRedis } = await import("./support/redis.ts");
+  const { Cache } = await import("@opencok/storage/session");
+  const { Rules } = await import("@opencok/rules/game");
+  const { GameService } = await import("@opencok/services/game");
+  const { loadNicknameServices } = await import("../src/nickname.ts");
+  const redis = new DisposableRedis();
+  const cache = new Cache({ redisUrl: await redis.start(), kingdomId: 1, timeoutMs: 1000 });
+  const repository = createChatRepository({
+    databaseUrl: `postgres://postgres:${pg.options.password}@127.0.0.1:${pg.options.port}/nickname_global`,
+    topology,
+  });
+  const app = createChatApp({
+    repository,
+    signingSecret: "synthetic-complete-profile",
+    websocketUrl: "ws://127.0.0.1/chat/ws",
+  });
+  try {
+    expect(await app.runMaintenance()).toBe(true);
+    await new Promise<void>((resolve) => app.server.listen(0, "127.0.0.1", resolve));
+    const port = (app.server.address() as AddressInfo).port;
+    const rules = new Rules(new Map(), new Map(), new Map());
+    rules.goods.set("200021", { type: "17", price: "100" });
+    rules.items.set("function_on6", { k12: "0" });
+    const notifications = createRealmNotifications();
+    const uid = await seed({ items: 2 });
+    const packets: string[] = [];
+    const unsubscribe = notifications.subscribe(uid, async (command) => {
+      packets.push(command);
+      return true;
+    });
+    const failures: string[] = [];
+    const runtime = createNicknameChangeRuntime({
+      databases,
+      kingdomId: 1,
+      rules,
+      notifications,
+      refundRatio: async () => 1,
+      timeoutMs: 1000,
+      report: () => failures.push("effect"),
+      alliance: { rules },
+      sharedUser: { rules, cache },
+      chat: createChatNicknamePublisher({
+        url: `http://127.0.0.1:${port}/_internal/nickname`,
+        signingSecret: "synthetic-complete-profile",
+        timeoutMs: 1000,
+      }),
+    });
+    const filters = await loadNicknameServices(async () => []);
+    const game = new GameService(
+      {
+        getProfileById: () => profile(uid),
+      } as unknown as import("@opencok/contracts/game").GameStore,
+      rules,
+      { kingdomId: 1 },
+      () => now,
+      { ...filters, nicknameChange: runtime.command },
+    );
+    const operationId = randomUUID();
+    const params = {
+      nickName: sfs.string(`Player ${uid}`),
+      operationId: sfs.string(operationId),
+      _cok_: sfs.long(7n),
+    };
+    expect((await game.execute(uid, "user.modify.nickName", params)).body).toEqual({
+      status: sfs.bool(true),
+      _cok_: sfs.long(7n),
+    });
+    expect((await runtime.store.find(uid, operationId))!.pendingEffects).toBe(0);
+    expect(failures).toEqual([]);
+    expect(packets).toEqual(["push.item.del"]);
+    expect((await item(uid))!.count).toBe(1);
+    expect((await profile(uid)).name).toBe(`Player ${uid}`);
+    const shared = await cache.command("HGET", "cross_user_info_global", uid);
+    expect(typeof shared).toBe("string");
+    expect(String(shared)).toContain(`Player ${uid}`);
+    expect((await game.execute(uid, "user.modify.nickName", params)).body.status).toEqual(
+      sfs.bool(true),
+    );
+    expect((await item(uid))!.count).toBe(1);
+    expect(packets).toEqual(["push.item.del"]);
+    unsubscribe();
+  } finally {
+    await new Promise<void>((resolve) => app.server.close(() => resolve()));
+    await repository.close();
+    await redis.stop();
+  }
+}, 30000);
