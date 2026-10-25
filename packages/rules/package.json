@@ -119,7 +119,8 @@
     "./dragon-progression": "./src/dragon-progression.ts",
     "./world-march-runtime": "./src/world-march-runtime.ts",
     "./new-expedition": "./src/new-expedition.ts",
-    "./dragon-tower": "./src/dragon-tower.ts"
+    "./dragon-tower": "./src/dragon-tower.ts",
+    "./local-activity-info": "./src/local-activity-info.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

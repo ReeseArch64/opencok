@@ -102,7 +102,8 @@
     "./responses/new-expedition": "./src/responses/new-expedition.ts",
     "./expedition-treasury": "./src/expedition-treasury.ts",
     "./dragon-tower": "./src/dragon-tower.ts",
-    "./responses/dragon-tower": "./src/responses/dragon-tower.ts"
+    "./responses/dragon-tower": "./src/responses/dragon-tower.ts",
+    "./responses/local-activity-info": "./src/responses/local-activity-info.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"
