@@ -1,3 +1,4 @@
+import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import type { AddressInfo } from "node:net";
 import { randomUUID } from "node:crypto";
@@ -415,6 +416,23 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     await eventually(
       async () => (await fetch(`http://127.0.0.1:${restarted.healthPort}/readyz`)).status === 200,
     );
+    const accounting = await databases
+      .getKingdom(1)
+      .pool.query(
+        `select count(*)::int as count from opencok_kingdom.resource_settlement s join opencok_kingdom.command_receipt r on r."ownerUid"=s.uid and r."requestId"='settlement:' || s."fromTime" || ':' || s."toTime" join opencok_kingdom.economy_posting p on p."ownerUid"=r."ownerUid" and p."requestId"=r."requestId" where p.asset='resource.food' and p."before"=s."foodBefore" and p."after"=s."foodAfter"`,
+      );
+    expect(accounting.rows[0].count).toBeGreaterThan(0);
+    await acquireRealmAuthority(databases.getKingdom(1).db, 1, () => true);
+    expect((await reconnected.command("equip.show", { show: sfs.int(0) })).errorCode).toBeDefined();
+    expect(
+      (
+        await databases
+          .getKingdom(1)
+          .pool.query('select "showEquip" from opencok_kingdom.user_mixed_info where uid=$1', [
+            "synthetic-player-1",
+          ])
+      ).rows[0].showEquip,
+    ).toBe(1);
   } finally {
     clients.forEach((client) => client.close());
     await Promise.allSettled(servers.map((server) => server.close()));

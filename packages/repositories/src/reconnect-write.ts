@@ -1,3 +1,4 @@
+import { appendMutationRecords } from "./mutation.ts";
 import { and, eq } from "drizzle-orm";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
@@ -104,6 +105,36 @@ export async function persistReconnectProgress(
     throw new Error("Reconnect interval already settled");
   authority.assertReady();
   if (until > from) {
+    await appendMutationRecords(
+      tx,
+      authority,
+      {
+        owner: uid,
+        requestId: `settlement:${from}:${until}`,
+        command: "resource.settle",
+        request: Buffer.from(JSON.stringify([uid, String(from), String(until)])),
+      },
+      {
+        response: Buffer.from(JSON.stringify([String(resource.food), String(resource.foodbind)])),
+        postings: [
+          {
+            account: uid,
+            asset: "resource.food",
+            before: foodBefore,
+            after: resource.food,
+            reason: "reconnect.upkeep",
+          },
+          {
+            account: uid,
+            asset: "resource.foodbind",
+            before: boundBefore,
+            after: resource.foodbind,
+            reason: "reconnect.upkeep",
+          },
+        ],
+      },
+      now,
+    );
     await tx.insert(resource_settlement).values({
       uid,
       fromTime: from,

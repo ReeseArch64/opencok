@@ -1,3 +1,5 @@
+import { checkMutationStore, createMutationExecutor } from "@opencok/repositories/mutation";
+import { createEconomyMutationExecutor } from "@opencok/repositories/economy-mutation";
 import { checkNicknameChangeStore } from "@opencok/repositories/nickname-change";
 import { nicknameAllianceReward } from "@opencok/rules/nickname-alliance";
 import { createCn1Sessions } from "@opencok/repositories/cn1-session";
@@ -41,7 +43,7 @@ import { WorldService } from "@opencok/services/world";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
 import { startMailGiftRelay } from "./mail-gift-relay.ts";
 import { loadNicknameServices } from "./nickname.ts";
-import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
+import { acquireRealmAuthority, fenceRealmDatabase } from "@opencok/repositories/realm-authority";
 import { executeReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { readFriendshipBinding } from "@opencok/repositories/reconnect-mine";
 import { initialFriendshipMine } from "@opencok/rules/reconnect-mine";
@@ -102,6 +104,15 @@ export const RealmDependenciesLive = Layer.effect(
       async (coordination) => coordination.close(),
     );
     yield* fromPromise("realm.database.start", () => db.start()).pipe(Effect.uninterruptible);
+    yield* fromPromise("realm.cache", () => cache.command("PING")).pipe(Effect.uninterruptible);
+    yield* fromPromise("realm.coordination.start", () => coordination.start()).pipe(
+      Effect.uninterruptible,
+    );
+    const authority = yield* fromPromise("realm.authority", () =>
+      acquireRealmAuthority(db.kingdom.db, config.kingdomId, () => coordination.ready),
+    );
+    yield* fromPromise("realm.mutations", () => checkMutationStore(db.kingdom.db));
+    fenceRealmDatabase(db.kingdom.db, authority);
     yield* acquireResource(
       "realm.mail-gift-relay",
       async () =>
@@ -137,13 +148,6 @@ export const RealmDependenciesLive = Layer.effect(
         (relay) => relay.close(),
       );
     }
-    yield* fromPromise("realm.cache", () => cache.command("PING")).pipe(Effect.uninterruptible);
-    yield* fromPromise("realm.coordination.start", () => coordination.start()).pipe(
-      Effect.uninterruptible,
-    );
-    const authority = yield* fromPromise("realm.authority", () =>
-      acquireRealmAuthority(db.kingdom.db, config.kingdomId, () => coordination.ready),
-    );
     const notifications = createRealmNotifications();
     const cn1 = createCn1Sessions(db.databases.global.db, rules, config.kingdomId);
     const nickname = config.nicknameChat
@@ -248,6 +252,8 @@ export const RealmDependenciesLive = Layer.effect(
       );
     }
     return {
+      mutations: createMutationExecutor(db.kingdom.db, authority),
+      economy: createEconomyMutationExecutor(db.kingdom.db, authority),
       profileSessions: nickname ? { open: cn1.open, close: cn1.close } : undefined,
       notifications,
       db,
