@@ -21,6 +21,10 @@ export interface WorldCatalogs {
   neutralResources?: Map<string, Rule>;
   barbarians?: Map<string, Rule>;
 }
+export interface AllianceCatalogs {
+  gifts?: Map<string, Rule>;
+  ranks?: Map<string, Rule>;
+}
 export interface GeneralCatalogs {
   levels?: Map<string, Rule>;
   stations?: Map<string, Rule>;
@@ -136,6 +140,7 @@ export class Rules {
     readonly trades: Map<string, Rule> = new Map(),
     readonly progression: ProgressionCatalogs = {},
     readonly general: GeneralCatalogs = {},
+    readonly alliance: AllianceCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): BuildingState {
     return buildingLevel(this.buildings, itemId, level, star, progress);

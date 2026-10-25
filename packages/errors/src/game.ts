@@ -3,6 +3,7 @@ export class GameError extends Error {
     readonly code: string,
     readonly reason?:
       | "city_progression"
+      | "alliance_gameplay"
       | "research_prerequisite"
       | "research_building"
       | "troop_quantity"

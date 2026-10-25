@@ -48,7 +48,8 @@
     "./shared-user": "./src/shared-user.ts",
     "./provisioning": "./src/provisioning.ts",
     "./research": "./src/research.ts",
-    "./military": "./src/military.ts"
+    "./military": "./src/military.ts",
+    "./alliance": "./src/alliance.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",
