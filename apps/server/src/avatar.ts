@@ -1,3 +1,4 @@
+import { sfs } from "@opencok/messages/sfs";
 import { createAvatarVersion } from "@opencok/services/avatar-version";
 import {
   commitAvatarVersion,
@@ -161,6 +162,25 @@ export function createAvatarRuntime(options: {
         owner,
         operationId,
         publish,
+        config.timeoutMs,
+      ),
+    notification: (owner, operationId) =>
+      publishAvatarVersionEffect(
+        8,
+        db.kingdom.db,
+        config.kingdomId,
+        owner,
+        operationId,
+        async (update, signal) => {
+          signal.throwIfAborted();
+          await notifications.publish(
+            owner,
+            "push.picVer.update",
+            { uid: sfs.string(owner), picVer: sfs.int(update.picVer) },
+            signal,
+          );
+          signal.throwIfAborted();
+        },
         config.timeoutMs,
       ),
     notify: async (owner, command, body) => {

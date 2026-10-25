@@ -66,7 +66,8 @@
     "./reconnect-write": "./src/reconnect-write.ts",
     "./reconnect-marches": "./src/reconnect-marches.ts",
     "./chat-mailbox": "./src/chat-mailbox.ts",
-    "./cn1-session": "./src/cn1-session.ts"
+    "./cn1-session": "./src/cn1-session.ts",
+    "./avatar-moderation": "./src/avatar-moderation.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
