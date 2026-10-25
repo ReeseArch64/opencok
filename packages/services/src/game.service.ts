@@ -299,6 +299,19 @@ export class GameService {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "trade.info":
+      case "trade.exchange":
+      case "trade.cancel":
+        if (!this.services.trade) throw new GameError(errors.unsupported);
+        ({ body, pushes } = await this.services.trade(uid, command, params));
+        break;
+      case "mall.info":
+      case "mall.info.type":
+      case "mall.data":
+      case "shoppingMall.buy":
+        if (!this.services.shop) throw new GameError(errors.unsupported);
+        ({ body, pushes } = await this.services.shop(uid, command, params));
+        break;
       case "mail.reward":
       case "mail.reward.batch":
         if (!this.services.mailReward) throw new GameError(errors.unsupported);

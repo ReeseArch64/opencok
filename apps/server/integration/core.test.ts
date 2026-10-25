@@ -263,7 +263,29 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         kingdomDatabase: topology.kingdoms[id - 1]!.database,
         zkPath: `/opencok-experiment/COK${id}`,
       };
-      const server = await startServer(settings, await loadRules(resources, id));
+      const runtimeRules = await loadRules(resources, id);
+      runtimeRules.shops.set("wire-shop", {
+        id: "wire-shop",
+        onsale: "1",
+        item_id: "200001",
+        sale_type: "10",
+        value1_type: "1",
+        value1: "0",
+        buy_times: "1",
+      });
+      runtimeRules.trades.set("wire-trade", {
+        id: "wire-trade",
+        pool_num: "1",
+        castle_level: "0",
+        recycle_item: "200001",
+        range: "1",
+        rate: "1",
+        num: "1",
+        exchange_item: "200001",
+        exchange_num: "1",
+        exchange_rate: "1",
+      });
+      const server = await startServer(settings, runtimeRules);
       servers.push(server);
       const adapter = new Database(settings);
       adapters.push(adapter);
@@ -305,6 +327,34 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         "synthetic-medal",
       );
       expect((await client.command("build.info")).building?.type).toBe(Type.Array);
+      expect((await client.command("mall.info")).shoppingMall?.type).toBe(Type.Array);
+      const shopPurchase = {
+        id: sfs.string("wire-shop"),
+        num: sfs.int(1),
+        _cok_: sfs.string("shop-wire"),
+      };
+      const bought = await client.command("shoppingMall.buy", shopPurchase);
+      expect(fields(bought.goods).count).toEqual(sfs.int(8));
+      expect(fields((await client.command("shoppingMall.buy", shopPurchase)).goods).count).toEqual(
+        sfs.int(8),
+      );
+      expect(
+        (
+          await client.command("shoppingMall.buy", {
+            ...shopPurchase,
+            _cok_: sfs.string("shop-other"),
+          })
+        ).errorCode,
+      ).toBeDefined();
+      expect(
+        (await client.command("trade.info", { _cok_: sfs.string("trade-offer") })).trade,
+      ).toEqual(sfs.string("200001;1|200001;1"));
+      const traded = await client.command("trade.exchange", { _cok_: sfs.string("trade-swap") });
+      expect(fields(traded.addItem).count).toEqual(sfs.int(8));
+      expect(fields(traded.tradeCaravan).times).toEqual(sfs.int(1));
+      expect(
+        (await client.command("trade.exchange", { _cok_: sfs.string("trade-swap") })).operationId,
+      ).toEqual(traded.operationId);
       const claimedMail = await client.command("mail.reward", {
         uid: sfs.string("synthetic-mail-reward"),
         _cok_: sfs.string("mail-claim"),
@@ -331,7 +381,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         num: sfs.int(2),
         _cok_: sfs.string("inventory-use"),
       });
-      expect(usedItem.count).toEqual(sfs.int(5));
+      expect(usedItem.count).toEqual(sfs.int(6));
       expect(usedItem._cok_).toEqual(sfs.string("inventory-use"));
       expect(
         (
@@ -367,7 +417,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
             .from(user_item)
             .where(eq(user_item.uuid, "synthetic-item"))
         )[0]?.count,
-      ).toBe(5);
+      ).toBe(6);
 
       for (const command of ["build.create", "build.upgrade", "queue.finish", "combat.attack"])
         expect((await client.command(command)).errorCode?.value).toBe("102192");
@@ -390,7 +440,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(after).toEqual({
         ...before,
         items: before.items.map((item) =>
-          item.uuid === "synthetic-item" ? { ...item, count: 5 } : item,
+          item.uuid === "synthetic-item" ? { ...item, count: 6 } : item,
         ),
         resource: { ...before.resource, wood: BigInt(id * 10000 + 5), lastUpdateTime: checkpoint },
       });
