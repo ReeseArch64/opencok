@@ -50,7 +50,8 @@
     "./inventory": "./src/inventory.ts",
     "./mail-rewards": "./src/mail-rewards.ts",
     "./shops": "./src/shops.ts",
-    "./trade": "./src/trade.ts"
+    "./trade": "./src/trade.ts",
+    "./provisioning": "./src/provisioning.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
@@ -59,6 +60,7 @@
     "@opencok/messages": "workspace:*",
     "@opencok/rules": "workspace:*",
     "@opencok/mappings": "workspace:*",
-    "@opencok/dtos": "workspace:*"
+    "@opencok/dtos": "workspace:*",
+    "@opencok/validations": "workspace:*"
   }
 }
