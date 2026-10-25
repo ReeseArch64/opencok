@@ -1,3 +1,4 @@
+import { researchData } from "@opencok/mappings/research";
 import { randomInt, randomUUID } from "node:crypto";
 import type { ReconnectProgressState, ReconnectProgressWrite } from "@opencok/contracts/reconnect";
 import type { GameServices } from "@opencok/contracts/game";
@@ -327,6 +328,9 @@ export async function planReconnectProgress(
       ...taskView.fields,
       ...reconnectMine(friendshipMineView(state.mine, rules)),
       ...reconnectBalances(state.profile),
+      ...(rules.power.sciences?.size
+        ? { science: researchData(effects.sciences, state.queues, rules) }
+        : {}),
     },
     pushes: taskView.pushes.map((push) => ({ command: push.command, body: push.fields })),
   };

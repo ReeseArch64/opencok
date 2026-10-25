@@ -15,4 +15,4 @@ export const cityQueueCommands: Readonly<
     string,
     { action: "queue.finish" | "queue.cancel"; types: readonly number[]; target?: string }
   >
-> = {};
+> = { "science.upgrade": { action: "queue.finish", types: [6], target: "itemId" } };

@@ -85,7 +85,8 @@
     "./trade": "./src/trade.ts",
     "./provisioning": "./src/provisioning.ts",
     "./timed-activity": "./src/timed-activity.ts",
-    "./city-progression": "./src/city-progression.ts"
+    "./city-progression": "./src/city-progression.ts",
+    "./responses/research": "./src/responses/research.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"

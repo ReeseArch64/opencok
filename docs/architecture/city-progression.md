@@ -1,6 +1,7 @@
 # City progression
 
-Topic 16 is tracked in [issue 344](https://github.com/ReeseArch64/opencok/issues/344).
+Topics 16 and 17 are tracked in [issue 344](https://github.com/ReeseArch64/opencok/issues/344)
+and [issue 345](https://github.com/ReeseArch64/opencok/issues/345).
 The independently authored TypeScript domains consume maintained catalogs; the
 ignored Java reference is a development input and is never a runtime dependency.
 
@@ -85,3 +86,32 @@ Event scores, alliance missions, combat, advanced civilizations and independent
 quest reward systems retain their domain ownership. The transaction emits durable
 activity events; this migration does not execute those other domains' external
 side effects or recreate their commercial services.
+
+## Basic technology research
+
+`science.data.init`, `science.research`, `science.upgrade` and `science.directly`
+use queue type 6. The current science definition supplies costs and prerequisites;
+completion advances one pinned level and updates persisted power. Building,
+science, civilization-prestige and VIP prerequisites are checked before payment.
+An upgrading academy and a pending instance of the same technology reject new
+research. Science-point items must be owned. Ordinary and gold-shortage queued
+payment share the economy port; direct research additionally pays acceleration.
+
+Generic queue commands own research acceleration, cancellation and recovery. The
+legacy `science.upgrade` alias verifies both queue ownership and technology ID,
+and retains its one-second finish tolerance. Rescheduling persists the science
+deadline, and terminal transitions restore its idle sentinel. Existing effect
+resolution reads the saved level immediately, including production rate changes.
+Catalog troop unlocks preserve existing troop quantities, while recognized basic
+research skills initialize their owned skill record once.
+
+Initialization and reconnect include the basic tree's saved levels and occupied
+deadlines. The explicit reader returns the `science` array, including level-zero
+technologies. Alliance and advanced civilization science payloads remain with
+their own domains. The large tree response stays in the command receipt and is
+not duplicated into a bounded activity outbox event.
+
+`integration/research.test.ts` verifies prerequisite failures, concurrent starts,
+acceleration, immediate completion, cancellation, power/effect persistence and
+production schedule changes. Research units check scalar wire types, locked tree
+entries, malformed prices and pinned-level/queue conflicts.

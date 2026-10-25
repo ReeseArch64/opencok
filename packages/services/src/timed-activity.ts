@@ -106,7 +106,8 @@ export class TimedActivityService {
       if (!state.prepare) throw new Error("City progression unavailable");
       const prepared = await state.prepare(command, encode(params), activityEconomy(ledger));
       const item = decode(Buffer.from(prepared.response));
-      if (prepared.type === undefined) return { queues: [], activities: [], body: item, ledger };
+      if (prepared.type === undefined)
+        return { queues: [], activities: [], body: item, ledger, event: prepared.event };
       const duration = prepared.durationMs;
       if (duration === undefined || duration <= 0n || !prepared.itemId)
         throw new Error("Invalid prepared activity");
@@ -140,14 +141,18 @@ export class TimedActivityService {
         totalTime: duration,
         isHelped: 0,
       };
-      const queue = queueView(row, item, false);
+      const queue = queueView(
+        row,
+        prepared.item ? decode(Buffer.from(prepared.item)) : item,
+        false,
+      );
       queue.activityId = sfs.string(activity.id);
       queue.version = sfs.int(1);
       const body =
         prepared.responseKind === "nested"
           ? { ...item, queue: sfs.object(queue), finish: sfs.long(dueAt) }
           : queue;
-      return { queues: [row], activities: [activity], body, ledger };
+      return { queues: [row], activities: [activity], body, ledger, event: prepared.event };
     });
   }
   async restore(owner: string, operationId: string, queueId: string) {
@@ -457,6 +462,7 @@ export class TimedActivityService {
       activities: readonly TimedActivity[];
       body: Fields;
       ledger: InventoryPlanner;
+      event?: Uint8Array | null;
     }>,
   ) {
     const request: Fields = {};
@@ -480,7 +486,9 @@ export class TimedActivityService {
           activities: result.activities,
           events: [
             ...(plan.events ?? []),
-            { id: "activity", type: command, payload: encode(result.body) },
+            ...(result.event === null
+              ? []
+              : [{ id: "activity", type: command, payload: result.event ?? encode(result.body) }]),
           ],
         };
       },

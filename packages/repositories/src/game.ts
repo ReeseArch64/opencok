@@ -1,3 +1,4 @@
+import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { deleteMailConversations } from "./mail-conversation-delete.ts";
 import { relayMailChat } from "./mail-chat-intents.ts";
 import type { ChatMailboxPublisher } from "@opencok/contracts/chat-mailbox";
@@ -375,6 +376,11 @@ export class Database implements GameStore, FriendshipMineStore {
             ),
           )
           .orderBy(asc(user_item.itemId));
+        const sciences = await tx
+          .select()
+          .from(user_science)
+          .where(eq(user_science.uid, uid))
+          .orderBy(asc(user_science.itemId));
         const lord = (await tx.select().from(user_lord).where(eq(user_lord.uid, uid)).limit(1))[0];
         return {
           profile,
@@ -384,6 +390,7 @@ export class Database implements GameStore, FriendshipMineStore {
           world,
           hasMarches,
           armies,
+          sciences,
           items,
           lord,
           civilizationPrestige: prestige?.value ?? 0n,

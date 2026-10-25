@@ -1,3 +1,4 @@
+import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
 import { readResourceNewGenerals } from "./world-resource-owner";
 import { new_general } from "@opencok/drizzle/schema/opencok_kingdom/new_general";
 import { and, asc, eq, inArray } from "drizzle-orm";
@@ -90,6 +91,7 @@ export function createCityProgressionStore(
         queues.length > 256
       )
         throw new Error("City aggregate exceeds bound");
+      const skills = await tx.select().from(user_skill).where(eq(user_skill.ownerId, owner));
       const tasks = await tx.select().from(user_task).where(eq(user_task.uid, owner));
       const achievements = await tx
         .select()
@@ -111,6 +113,7 @@ export function createCityProgressionStore(
         effects: await readPlayerEffects(tx, profile, true),
         newGenerals: await readResourceNewGenerals(tx, owner, false),
         tasks,
+        skills,
         achievements,
         equipment,
         glory: glory ?? {},
@@ -149,6 +152,34 @@ export function createCityProgressionStore(
               target: user_building.uuid,
               set: value,
               setWhere: eq(user_building.uid, owner),
+            });
+        }
+        for (const row of write.skills ?? []) {
+          if (row.ownerId !== owner || !["622800", "622900"].includes(text(row, "skillId")))
+            throw new Error("Invalid research skill owner");
+          const value = {
+            uuid: text(row, "uuid"),
+            ownerId: owner,
+            skillId: text(row, "skillId"),
+            stat: num(row, "stat"),
+            startTime: long(row, "startTime"),
+            endTime: long(row, "endTime"),
+            actTime: long(row, "actTime"),
+            param1: num(row, "param1"),
+            param2: num(row, "param2"),
+          };
+          const [existing] = await tx
+            .select({ ownerId: user_skill.ownerId })
+            .from(user_skill)
+            .where(eq(user_skill.uuid, value.uuid));
+          if (existing && existing.ownerId !== owner) throw new Error("Foreign research skill");
+          await tx
+            .insert(user_skill)
+            .values(value)
+            .onConflictDoUpdate({
+              target: user_skill.uuid,
+              set: value,
+              setWhere: eq(user_skill.ownerId, owner),
             });
         }
         for (const row of write.sciences ?? []) {

@@ -1,3 +1,4 @@
+import { researchData } from "@opencok/mappings/research";
 import { changeNickname } from "./nickname-command.ts";
 import type { CreateWorldFavoriteDto } from "@opencok/dtos/world-favorites/create-world-favorite.dto";
 import type { UpdatePushPreferenceDto } from "@opencok/dtos/profile/update-push-preference.dto";
@@ -192,6 +193,8 @@ export class GameService {
   }
   private queueFields(q: Row, state: ReadyCity, helped = true, now = this.now()): Fields {
     const target = state.buildings.find((b) => text(b, "uuid") === text(q, "itemId"));
+    if (num(q, "type") === 6 && text(q, "itemId"))
+      return queue(q, { itemId: sfs.string(text(q, "itemId")) }, helped);
     if (num(q, "type") !== 0 && text(q, "itemId"))
       throw new GameError(errors.unsupported, "queue_kind");
     return queue(q, target ? building(target, this.rules, true, now) : {}, helped);
@@ -209,6 +212,9 @@ export class GameService {
       ),
       resource: sfs.object(resource(state.resource)),
       gold: sfs.long(gold(state.profile)),
+      ...(state.sciences && this.rules.power.sciences?.size
+        ? { science: researchData(state.sciences, state.queues, this.rules) }
+        : {}),
     };
   }
   private initialWorld(world: Row): Fields {
@@ -276,6 +282,7 @@ export class GameService {
           resource: { ...progress.resource, ...planned.write.resource },
           buildings,
           queues: [...progress.queues],
+          sciences: [...progress.effects.sciences],
         }),
         ...planned.result.body,
         user: sfs.object(
@@ -318,6 +325,9 @@ export class GameService {
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
+      case "science.data.init":
+      case "science.research":
+      case "science.directly":
       case "build.create":
       case "build.upgrade":
       case "build.destroy":
@@ -330,6 +340,7 @@ export class GameService {
         if (!this.services.cityProgression) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.cityProgression(uid, command, params));
         break;
+      case "science.upgrade":
       case "queue.finish":
       case "queue.cancel":
       case "queue.ccd":
