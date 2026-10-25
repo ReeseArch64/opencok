@@ -79,7 +79,10 @@
     "./mutation": "./src/mutation.ts",
     "./inventory": "./src/inventory.ts",
     "./responses/inventory": "./src/responses/inventory.ts",
-    "./mail-rewards": "./src/mail-rewards.ts"
+    "./mail-rewards": "./src/mail-rewards.ts",
+    "./building": "./src/building.ts"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@opencok/enums": "workspace:*"
+  }
 }

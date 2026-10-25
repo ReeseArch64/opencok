@@ -246,6 +246,9 @@
     },
     "packages/contracts": {
       "name": "@opencok/contracts",
+      "dependencies": {
+        "@opencok/enums": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -563,6 +566,7 @@
     "packages/resources": {
       "name": "@opencok/resources",
       "dependencies": {
+        "@opencok/contracts": "workspace:*",
         "@opencok/enums": "workspace:*",
         "@opencok/rules": "workspace:*",
         "fast-xml-parser": "^5.0.0",
