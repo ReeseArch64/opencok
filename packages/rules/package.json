@@ -107,7 +107,9 @@
     "./general-assignments": "./src/general-assignments.ts",
     "./general-draws": "./src/general-draws.ts",
     "./alliance": "./src/alliance.ts",
-    "./alliance-science": "./src/alliance-science.ts"
+    "./alliance-science": "./src/alliance-science.ts",
+    "./chat-retention": "./src/chat-retention.ts",
+    "./chat-social": "./src/chat-social.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

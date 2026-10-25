@@ -5,6 +5,7 @@ import artifact from "../fixtures/schema.json";
 
 export interface ColumnContract {
   name: string;
+  property?: string;
   type: string;
   value: "number" | "bigint" | "string" | "buffer" | "json" | "boolean";
   notNull: boolean;
@@ -45,4 +46,7 @@ export const catalog = Object.entries(schemas)
   )
   .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 export const normalizeType = (value: string) =>
-  value.replace(/^varchar\(/, "character varying(").replaceAll(", ", ",");
+  value
+    .replace(/^varchar\(/, "character varying(")
+    .replace(/^bigserial$/, "bigint")
+    .replaceAll(", ", ",");

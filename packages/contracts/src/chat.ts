@@ -1,3 +1,10 @@
+import type {
+  ChatAccessStore,
+  ChatDeliveryStore,
+  ChatHistoryPage,
+  ChatHistoryQuery,
+} from "./chat-delivery.ts";
+import type { ChatSocialStore } from "./chat-social.ts";
 import type { ChatMailboxStore } from "./chat-mailbox.ts";
 import type { ChatAvatarProfileStore } from "./chat-avatar-profile.ts";
 import type { ChatNicknameStore } from "./chat-nickname.ts";
@@ -11,6 +18,7 @@ export interface Session {
 }
 
 export interface SessionStore {
+  revoke?(uid: string): Promise<void>;
   create(session: Session): Promise<void>;
   getById(tokenHash: Buffer): Promise<{ uid: string } | null>;
 }
@@ -21,9 +29,18 @@ export interface PlayerState {
   allianceId: string | null;
   membershipAllianceId: string | null;
   language: string;
+  allianceJoinedAt?: number;
+  gmFlag?: number;
+  moderationAllowed?: boolean;
+  name?: string | null;
+  facebookId?: string | null;
+  banned?: boolean;
+  banUntil?: number;
+  chatBanUntil?: number;
+  noticeBanUntil?: number;
 }
 
-export type RoomGroup = "original" | "country" | "alliance" | "global" | "local";
+export type RoomGroup = "original" | "country" | "alliance" | "global" | "local" | "private";
 export interface Room {
   group: RoomGroup;
   roomId: string;
@@ -38,6 +55,7 @@ export interface MessageInput {
   idempotencyKey: string;
   body: string;
   now: Date;
+  post?: number;
 }
 
 export interface ChatMessage {
@@ -47,9 +65,13 @@ export interface ChatMessage {
   idempotencyKey: string;
   body: string;
   createdAt: string;
+  post?: number;
 }
 
 export interface MessageStore {
+  durableDelivery?: boolean;
+  page?(query: ChatHistoryQuery): Promise<ChatHistoryPage>;
+  remove?(sequenceId: number, actor: string): Promise<void>;
   create(input: MessageInput): Promise<ChatMessage & { inserted: boolean }>;
   getAll(roomId: string, afterMs?: number): Promise<ChatMessage[]>;
   getAllByRange(roomId: string, startMs: number, endMs: number): Promise<ChatMessage[]>;
@@ -64,7 +86,7 @@ export interface Peer {
   uid: string;
   connection: Connection;
   sendFrame(frame: Frame): void;
-  authorizeSession?: () => Promise<boolean>;
+  authorizeSession?: (closeOnFailure?: boolean) => Promise<boolean>;
 }
 
 export interface CommandContext extends Peer {
@@ -87,6 +109,7 @@ export type TokenVerifier = (
 ) => Promise<{ uid: string } | null>;
 
 export interface WebSocketGateway {
+  peers?: Set<Peer>;
   attach(server: Server): void;
   close(): Promise<void>;
 }
@@ -94,6 +117,7 @@ export interface WebSocketGateway {
 export interface RoomHandlerOptions {
   authorizeRoom: RoomAuthorizer;
   messages: MessageStore;
+  access?: ChatAccessStore;
 }
 
 export interface IncomingFrame {
@@ -111,6 +135,29 @@ export function isSafeInteger(value: unknown): value is number {
 }
 
 export interface ChatRepository {
+  authorizeRealm?(realm: number, token: string, epoch: string): Promise<boolean>;
+  social?: ChatSocialStore;
+  access?: ChatAccessStore;
+  delivery?: ChatDeliveryStore;
+  realmEvents?(
+    owner: string,
+    realm: number,
+    command: string,
+    params: Record<string, unknown>,
+  ): Promise<Record<string, unknown>>;
+  mineCommand?(
+    owner: string,
+    realm: number,
+    command: string,
+    params: Record<string, unknown>,
+    operationId: string,
+  ): Promise<Record<string, unknown>>;
+  publishNotice?(
+    owner: string,
+    realm: number,
+    operationId: string,
+  ): Promise<Record<string, unknown>>;
+  archivePending?(): Promise<number>;
   mailbox?: ChatMailboxStore;
   profiles: ChatAvatarProfileStore;
   nicknames: ChatNicknameStore;

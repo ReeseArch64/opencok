@@ -16,6 +16,7 @@ volumes:
   pgadmin-data: ~
   pgadmin-servers: ~
   redis-data: ~
+  mongodb-data: ~
   zookeeper-data: ~
   zookeeper-datalog: ~
   zookeeper-logs: ~
@@ -348,6 +349,22 @@ services:
       start_period: 10s
       retries: 12
 
+  mongodb:
+    image: mongo:8.0.34
+    restart: unless-stopped
+    profiles: [all, dev]
+    networks: [opencok-internal-network]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-opencok}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-opencok-development}
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: [CMD, mongosh, --quiet, --eval, "quit(db.adminCommand('ping').ok ? 0 : 1)"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
   chat:
     build:
       context: .
@@ -365,6 +382,8 @@ services:
       CHAT_KINGDOM_DATABASES: 1:opencok_kingdom_1,2:opencok_kingdom_2
       CHAT_HOST: 0.0.0.0
       CHAT_PORT: 8083
+      CHAT_INSTANCE_ID: ${CHAT_INSTANCE_ID:-chat-local}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://${MONGODB_USER:-opencok}:${MONGODB_PASSWORD:-opencok-development}@mongodb:27017/opencok_chat?authSource=admin}
       CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-opencok-chat-development}
       CHAT_WEBSOCKET_URL: ${CHAT_WEBSOCKET_URL:-ws://192.168.1.104:8083/chat/ws}
     ports:

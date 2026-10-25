@@ -13981,9 +13981,14 @@ column ["sequence_id","numeric(20, 0)",true,"nextval('\\"opencok_chat\\".\\"chat
 column ["room_key","varchar(160)",true,null,null,null]
 column ["sender_uid","varchar(40)",true,null,null,null]
 column ["idempotency_key","bytea",true,null,null,null]
-column ["body","text",true,null,null,null]
+column ["body","text",false,null,null,null]
 column ["created_at","text",true,null,null,null]
 column ["expires_at","text",true,null,null,null]
+column ["body_hash","varchar(64)",false,null,null,null]
+column ["archive_at","text",false,null,null,null]
+column ["post_type","integer",true,"0",null,null]
+column ["version","integer",true,"1",null,null]
+column ["deleted_at","text",false,null,null,null]
 primary ["chat_message_PRIMARY",["sequence_id"]]
 index ["chat_message_uq_sender_room_client",true,["\\"sender_uid\\"","\\"room_key\\"","\\"idempotency_key\\""]]
 index ["chat_message_idx_room_sequence",false,["\\"room_key\\"","\\"sequence_id\\""]]
@@ -13992,9 +13997,9 @@ check ["chat_message_sequence_id_range","\\"sequence_id\\" >= 0 AND \\"sequence_
 check ["chat_message_idempotency_key_length","octet_length(\\"idempotency_key\\") <= 64"]
 check ["chat_message_created_at_temporal","(\\"created_at\\" IS NULL OR (CASE WHEN \\"created_at\\" ~ '^[0-9]{4}-(0[0-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9][.][0-9]{3}$' THEN CASE WHEN left(\\"created_at\\",4) <> '0000' AND substring(\\"created_at\\",6,2) <> '00' AND substring(\\"created_at\\",9,2) <> '00' THEN to_char(to_date(left(\\"created_at\\",10),'YYYY-MM-DD'),'YYYY-MM-DD') = left(\\"created_at\\",10) ELSE true END ELSE false END))"]
 check ["chat_message_expires_at_temporal","(\\"expires_at\\" IS NULL OR (CASE WHEN \\"expires_at\\" ~ '^[0-9]{4}-(0[0-9]|1[0-2])-(0[0-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9][.][0-9]{3}$' THEN CASE WHEN left(\\"expires_at\\",4) <> '0000' AND substring(\\"expires_at\\",6,2) <> '00' AND substring(\\"expires_at\\",9,2) <> '00' THEN to_char(to_date(left(\\"expires_at\\",10),'YYYY-MM-DD'),'YYYY-MM-DD') = left(\\"expires_at\\",10) ELSE true END ELSE false END))"]
-insert into "opencok_chat"."chat_message" ("sequence_id", "room_key", "sender_uid", "idempotency_key", "body", "created_at", "expires_at") values ($1, $2, $3, $4, $5, $6, $7)
-select "sequence_id", "room_key", "sender_uid", "idempotency_key", "body", "created_at", "expires_at" from "opencok_chat"."chat_message" where "opencok_chat"."chat_message"."sequence_id" = $1
-update "opencok_chat"."chat_message" set "sequence_id" = $1, "room_key" = $2, "sender_uid" = $3, "idempotency_key" = $4, "body" = $5, "created_at" = $6, "expires_at" = $7 where "opencok_chat"."chat_message"."sequence_id" = $8
+insert into "opencok_chat"."chat_message" ("sequence_id", "room_key", "sender_uid", "idempotency_key", "body", "created_at", "expires_at", "body_hash", "archive_at", "post_type", "version", "deleted_at") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+select "sequence_id", "room_key", "sender_uid", "idempotency_key", "body", "created_at", "expires_at", "body_hash", "archive_at", "post_type", "version", "deleted_at" from "opencok_chat"."chat_message" where "opencok_chat"."chat_message"."sequence_id" = $1
+update "opencok_chat"."chat_message" set "sequence_id" = $1, "room_key" = $2, "sender_uid" = $3, "idempotency_key" = $4, "body" = $5, "created_at" = $6, "expires_at" = $7, "body_hash" = $8, "archive_at" = $9, "post_type" = $10, "version" = $11, "deleted_at" = $12 where "opencok_chat"."chat_message"."sequence_id" = $13
 delete from "opencok_chat"."chat_message" where "opencok_chat"."chat_message"."sequence_id" = $1"
 `;
 
@@ -14235,13 +14240,15 @@ column ["chat_type","integer",true,null,null,null]
 column ["created_at","bigint",true,null,null,null]
 column ["body","text",true,null,null,null]
 column ["read","boolean",true,null,null,null]
+column ["sender_uid","varchar(40)",false,null,null,null]
+column ["expires_at","bigint",false,null,null,null]
 primary ["chat_mailbox_message_kingdom_id_owner_uid_message_id_pk",["kingdom_id","owner_uid","message_id"]]
 index ["chat_mailbox_message_conversation",false,["kingdom_id","owner_uid","peer_uid","chat_type","created_at"]]
 check ["chat_mailbox_message_type","\\"chat_type\\" IN (1, 2, 3, 20)"]
 check ["chat_mailbox_message_owner","\\"kingdom_id\\" > 0 AND length(\\"owner_uid\\") > 0 AND length(\\"message_id\\") > 0"]
-insert into "opencok_chat"."chat_mailbox_message" ("kingdom_id", "owner_uid", "message_id", "peer_uid", "chat_type", "created_at", "body", "read") values ($1, $2, $3, $4, $5, $6, $7, $8)
-select "kingdom_id", "owner_uid", "message_id", "peer_uid", "chat_type", "created_at", "body", "read" from "opencok_chat"."chat_mailbox_message" where "opencok_chat"."chat_mailbox_message"."kingdom_id" = $1
-update "opencok_chat"."chat_mailbox_message" set "kingdom_id" = $1, "owner_uid" = $2, "message_id" = $3, "peer_uid" = $4, "chat_type" = $5, "created_at" = $6, "body" = $7, "read" = $8 where "opencok_chat"."chat_mailbox_message"."kingdom_id" = $9
+insert into "opencok_chat"."chat_mailbox_message" ("kingdom_id", "owner_uid", "message_id", "peer_uid", "chat_type", "created_at", "body", "read", "sender_uid", "expires_at") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "kingdom_id", "owner_uid", "message_id", "peer_uid", "chat_type", "created_at", "body", "read", "sender_uid", "expires_at" from "opencok_chat"."chat_mailbox_message" where "opencok_chat"."chat_mailbox_message"."kingdom_id" = $1
+update "opencok_chat"."chat_mailbox_message" set "kingdom_id" = $1, "owner_uid" = $2, "message_id" = $3, "peer_uid" = $4, "chat_type" = $5, "created_at" = $6, "body" = $7, "read" = $8, "sender_uid" = $9, "expires_at" = $10 where "opencok_chat"."chat_mailbox_message"."kingdom_id" = $11
 delete from "opencok_chat"."chat_mailbox_message" where "opencok_chat"."chat_mailbox_message"."kingdom_id" = $1"
 `;
 
@@ -14299,12 +14306,14 @@ column ["request","bytea",true,null,null,null]
 column ["response","bytea",true,null,null,null]
 column ["ownerEpoch","bigint",true,null,null,null]
 column ["createdAt","bigint",true,null,null,null]
+column ["expiresAt","bigint",false,null,null,null]
 primary ["command_receipt_PRIMARY",["kingdomId","ownerUid","requestId"]]
+index ["command_receipt_expiry",false,["expiresAt"]]
 check ["command_receipt_epoch","\\"ownerEpoch\\" > 0"]
 check ["command_receipt_bounds","octet_length(\\"request\\") <= 65536 AND octet_length(\\"response\\") <= 1048576"]
-insert into "opencok_kingdom"."command_receipt" ("kingdomId", "ownerUid", "requestId", "command", "request", "response", "ownerEpoch", "createdAt") values ($1, $2, $3, $4, $5, $6, $7, $8)
-select "kingdomId", "ownerUid", "requestId", "command", "request", "response", "ownerEpoch", "createdAt" from "opencok_kingdom"."command_receipt" where "opencok_kingdom"."command_receipt"."kingdomId" = $1
-update "opencok_kingdom"."command_receipt" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "command" = $4, "request" = $5, "response" = $6, "ownerEpoch" = $7, "createdAt" = $8 where "opencok_kingdom"."command_receipt"."kingdomId" = $9
+insert into "opencok_kingdom"."command_receipt" ("kingdomId", "ownerUid", "requestId", "command", "request", "response", "ownerEpoch", "createdAt", "expiresAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "kingdomId", "ownerUid", "requestId", "command", "request", "response", "ownerEpoch", "createdAt", "expiresAt" from "opencok_kingdom"."command_receipt" where "opencok_kingdom"."command_receipt"."kingdomId" = $1
+update "opencok_kingdom"."command_receipt" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "command" = $4, "request" = $5, "response" = $6, "ownerEpoch" = $7, "createdAt" = $8, "expiresAt" = $9 where "opencok_kingdom"."command_receipt"."kingdomId" = $10
 delete from "opencok_kingdom"."command_receipt" where "opencok_kingdom"."command_receipt"."kingdomId" = $1"
 `;
 
@@ -14339,16 +14348,19 @@ column ["eventType","varchar(128)",true,null,null,null]
 column ["payload","bytea",true,null,null,null]
 column ["createdAt","bigint",true,null,null,null]
 column ["publishedAt","bigint",true,null,null,null]
+column ["expiresAt","bigint",false,null,null,null]
+column ["nextAttemptAt","bigint",true,"0",null,null]
 primary ["mutation_outbox_PRIMARY",["kingdomId","ownerUid","requestId","eventId"]]
+index ["mutation_outbox_retry",false,["kingdomId","publishedAt","nextAttemptAt","createdAt"]]
+index ["mutation_outbox_expiry",false,["expiresAt"]]
 index ["mutation_outbox_pending",false,["kingdomId","publishedAt","createdAt"]]
 check ["mutation_outbox_payload","octet_length(\\"payload\\") <= 65536"]
 check ["mutation_outbox_delivery","\\"publishedAt\\" >= 0"]
-insert into "opencok_kingdom"."mutation_outbox" ("kingdomId", "ownerUid", "requestId", "eventId", "eventType", "payload", "createdAt", "publishedAt") values ($1, $2, $3, $4, $5, $6, $7, $8)
-select "kingdomId", "ownerUid", "requestId", "eventId", "eventType", "payload", "createdAt", "publishedAt" from "opencok_kingdom"."mutation_outbox" where "opencok_kingdom"."mutation_outbox"."kingdomId" = $1
-update "opencok_kingdom"."mutation_outbox" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "eventId" = $4, "eventType" = $5, "payload" = $6, "createdAt" = $7, "publishedAt" = $8 where "opencok_kingdom"."mutation_outbox"."kingdomId" = $9
+insert into "opencok_kingdom"."mutation_outbox" ("kingdomId", "ownerUid", "requestId", "eventId", "eventType", "payload", "createdAt", "publishedAt", "expiresAt", "nextAttemptAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "kingdomId", "ownerUid", "requestId", "eventId", "eventType", "payload", "createdAt", "publishedAt", "expiresAt", "nextAttemptAt" from "opencok_kingdom"."mutation_outbox" where "opencok_kingdom"."mutation_outbox"."kingdomId" = $1
+update "opencok_kingdom"."mutation_outbox" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "eventId" = $4, "eventType" = $5, "payload" = $6, "createdAt" = $7, "publishedAt" = $8, "expiresAt" = $9, "nextAttemptAt" = $10 where "opencok_kingdom"."mutation_outbox"."kingdomId" = $11
 delete from "opencok_kingdom"."mutation_outbox" where "opencok_kingdom"."mutation_outbox"."kingdomId" = $1"
 `;
-
 
 exports[`opencok_kingdom.shop_stock: schema and CRUD SQL 1`] = `
 "schema opencok_kingdom
@@ -14436,4 +14448,223 @@ insert into "opencok_kingdom"."timed_activity" ("id", "ownerId", "queueId", "typ
 select "id", "ownerId", "queueId", "type", "itemId", "startedAt", "dueAt", "version", "status", "data" from "opencok_kingdom"."timed_activity" where "opencok_kingdom"."timed_activity"."id" = $1
 update "opencok_kingdom"."timed_activity" set "id" = $1, "ownerId" = $2, "queueId" = $3, "type" = $4, "itemId" = $5, "startedAt" = $6, "dueAt" = $7, "version" = $8, "status" = $9, "data" = $10 where "opencok_kingdom"."timed_activity"."id" = $11
 delete from "opencok_kingdom"."timed_activity" where "opencok_kingdom"."timed_activity"."id" = $1"
+`;
+
+exports[`opencok_chat.chat_consumer: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["id","varchar(100)",true,null,null,null]
+column ["cursor","bigint",true,"0",null,null]
+column ["token","varchar(40)",true,null,null,null]
+column ["lease_until","bigint",true,null,null,null]
+column ["updated_at","bigint",true,null,null,null]
+primary ["chat_consumer_pkey",["id"]]
+insert into "opencok_chat"."chat_consumer" ("id", "cursor", "token", "lease_until", "updated_at") values ($1, $2, $3, $4, $5)
+select "id", "cursor", "token", "lease_until", "updated_at" from "opencok_chat"."chat_consumer" where "opencok_chat"."chat_consumer"."id" = $1
+update "opencok_chat"."chat_consumer" set "id" = $1, "cursor" = $2, "token" = $3, "lease_until" = $4, "updated_at" = $5 where "opencok_chat"."chat_consumer"."id" = $6
+delete from "opencok_chat"."chat_consumer" where "opencok_chat"."chat_consumer"."id" = $1"
+`;
+
+exports[`opencok_chat.chat_event: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["sequence","bigserial",true,null,null,null]
+column ["id","varchar(40)",true,null,null,null]
+column ["kind","varchar(30)",true,null,null,null]
+column ["room","varchar(160)",true,"''",null,null]
+column ["owner","varchar(40)",true,null,null,null]
+column ["target","varchar(40)",false,null,null,null]
+column ["message","varchar(100)",false,null,null,null]
+column ["data","jsonb",false,null,null,null]
+column ["created_at","bigint",true,null,null,null]
+column ["expires_at","bigint",true,null,null,null]
+primary ["chat_event_pkey",["sequence"]]
+unique ["chat_event_id_unique",["id"]]
+index ["chat_event_expiry",false,["expires_at"]]
+insert into "opencok_chat"."chat_event" ("sequence", "id", "kind", "room", "owner", "target", "message", "data", "created_at", "expires_at") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "sequence", "id", "kind", "room", "owner", "target", "message", "data", "created_at", "expires_at" from "opencok_chat"."chat_event" where "opencok_chat"."chat_event"."sequence" = $1
+update "opencok_chat"."chat_event" set "sequence" = $1, "id" = $2, "kind" = $3, "room" = $4, "owner" = $5, "target" = $6, "message" = $7, "data" = $8, "created_at" = $9, "expires_at" = $10 where "opencok_chat"."chat_event"."sequence" = $11
+delete from "opencok_chat"."chat_event" where "opencok_chat"."chat_event"."sequence" = $1"
+`;
+
+exports[`opencok_chat.chat_feed: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["id","varchar(100)",true,null,null,null]
+column ["owner","varchar(40)",true,null,null,null]
+column ["realm","integer",true,null,null,null]
+column ["alliance","varchar(40)",true,"''",null,null]
+column ["parent","varchar(100)",false,null,null,null]
+column ["type","integer",true,null,null,null]
+column ["body","jsonb",true,null,null,null]
+column ["created_at","bigint",true,null,null,null]
+column ["expires_at","bigint",true,null,null,null]
+column ["deleted_at","bigint",false,null,null,null]
+primary ["chat_feed_pkey",["id"]]
+index ["chat_feed_alliance",false,["realm","alliance","created_at"]]
+index ["chat_feed_owner",false,["owner","created_at"]]
+index ["chat_feed_expiry",false,["expires_at"]]
+insert into "opencok_chat"."chat_feed" ("id", "owner", "realm", "alliance", "parent", "type", "body", "created_at", "expires_at", "deleted_at") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "id", "owner", "realm", "alliance", "parent", "type", "body", "created_at", "expires_at", "deleted_at" from "opencok_chat"."chat_feed" where "opencok_chat"."chat_feed"."id" = $1
+update "opencok_chat"."chat_feed" set "id" = $1, "owner" = $2, "realm" = $3, "alliance" = $4, "parent" = $5, "type" = $6, "body" = $7, "created_at" = $8, "expires_at" = $9, "deleted_at" = $10 where "opencok_chat"."chat_feed"."id" = $11
+delete from "opencok_chat"."chat_feed" where "opencok_chat"."chat_feed"."id" = $1"
+`;
+
+exports[`opencok_chat.chat_feed_notice: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["owner","varchar(40)",true,null,null,null]
+column ["feed","varchar(100)",true,null,null,null]
+column ["created_at","bigint",true,null,null,null]
+primary ["chat_feed_notice_owner_feed_pk",["owner","feed"]]
+insert into "opencok_chat"."chat_feed_notice" ("owner", "feed", "created_at") values ($1, $2, $3)
+select "owner", "feed", "created_at" from "opencok_chat"."chat_feed_notice" where "opencok_chat"."chat_feed_notice"."owner" = $1
+update "opencok_chat"."chat_feed_notice" set "owner" = $1, "feed" = $2, "created_at" = $3 where "opencok_chat"."chat_feed_notice"."owner" = $4
+delete from "opencok_chat"."chat_feed_notice" where "opencok_chat"."chat_feed_notice"."owner" = $1"
+`;
+
+exports[`opencok_chat.chat_mailbox_intent: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["realm","integer",true,null,null,null]
+column ["owner","varchar(40)",true,null,null,null]
+column ["operation","varchar(40)",true,null,null,null]
+column ["effect","integer",true,null,null,null]
+column ["peer","varchar(40)",true,null,null,null]
+column ["type","integer",true,null,null,null]
+column ["action","varchar(10)",true,null,null,null]
+column ["cutoff","bigint",true,null,null,null]
+primary ["chat_mailbox_intent_realm_operation_effect_type_pk",["realm","operation","effect","type"]]
+index ["chat_mailbox_intent_owner",false,["realm","owner","type","cutoff"]]
+insert into "opencok_chat"."chat_mailbox_intent" ("realm", "owner", "operation", "effect", "peer", "type", "action", "cutoff") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "realm", "owner", "operation", "effect", "peer", "type", "action", "cutoff" from "opencok_chat"."chat_mailbox_intent" where "opencok_chat"."chat_mailbox_intent"."realm" = $1
+update "opencok_chat"."chat_mailbox_intent" set "realm" = $1, "owner" = $2, "operation" = $3, "effect" = $4, "peer" = $5, "type" = $6, "action" = $7, "cutoff" = $8 where "opencok_chat"."chat_mailbox_intent"."realm" = $9
+delete from "opencok_chat"."chat_mailbox_intent" where "opencok_chat"."chat_mailbox_intent"."realm" = $1"
+`;
+
+exports[`opencok_chat.chat_moderation: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["owner","varchar(40)",true,null,null,null]
+column ["mute_until","bigint",true,"0",null,null]
+column ["notice_until","bigint",true,"0",null,null]
+column ["actor","varchar(40)",true,null,null,null]
+column ["reason","varchar(500)",true,"''",null,null]
+column ["version","integer",true,"1",null,null]
+column ["updated_at","bigint",true,null,null,null]
+primary ["chat_moderation_pkey",["owner"]]
+insert into "opencok_chat"."chat_moderation" ("owner", "mute_until", "notice_until", "actor", "reason", "version", "updated_at") values ($1, $2, $3, $4, $5, $6, $7)
+select "owner", "mute_until", "notice_until", "actor", "reason", "version", "updated_at" from "opencok_chat"."chat_moderation" where "opencok_chat"."chat_moderation"."owner" = $1
+update "opencok_chat"."chat_moderation" set "owner" = $1, "mute_until" = $2, "notice_until" = $3, "actor" = $4, "reason" = $5, "version" = $6, "updated_at" = $7 where "opencok_chat"."chat_moderation"."owner" = $8
+delete from "opencok_chat"."chat_moderation" where "opencok_chat"."chat_moderation"."owner" = $1"
+`;
+
+exports[`opencok_chat.chat_operation: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["owner","varchar(40)",true,null,null,null]
+column ["operation_id","varchar(128)",true,null,null,null]
+column ["command","varchar(80)",true,null,null,null]
+column ["hash","varchar(64)",true,null,null,null]
+column ["response","bytea",true,null,null,null]
+column ["created_at","bigint",true,null,null,null]
+primary ["chat_operation_owner_operation_id_pk",["owner","operation_id"]]
+insert into "opencok_chat"."chat_operation" ("owner", "operation_id", "command", "hash", "response", "created_at") values ($1, $2, $3, $4, $5, $6)
+select "owner", "operation_id", "command", "hash", "response", "created_at" from "opencok_chat"."chat_operation" where "opencok_chat"."chat_operation"."owner" = $1
+update "opencok_chat"."chat_operation" set "owner" = $1, "operation_id" = $2, "command" = $3, "hash" = $4, "response" = $5, "created_at" = $6 where "opencok_chat"."chat_operation"."owner" = $7
+delete from "opencok_chat"."chat_operation" where "opencok_chat"."chat_operation"."owner" = $1"
+`;
+
+exports[`opencok_chat.chat_owner_command: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["id","varchar(40)",true,null,null,null]
+column ["actor","varchar(40)",true,null,null,null]
+column ["operation","varchar(128)",true,null,null,null]
+column ["owner","varchar(40)",true,null,null,null]
+column ["realm","integer",true,null,null,null]
+column ["kind","varchar(40)",true,null,null,null]
+column ["payload","jsonb",true,null,null,null]
+column ["created_at","bigint",true,null,null,null]
+column ["expires_at","bigint",true,null,null,null]
+column ["processed_at","bigint",false,null,null,null]
+primary ["chat_owner_command_pkey",["id"]]
+index ["chat_owner_command_receipt",true,["actor","operation"]]
+index ["chat_owner_command_pending",false,["realm","processed_at","created_at"]]
+insert into "opencok_chat"."chat_owner_command" ("id", "actor", "operation", "owner", "realm", "kind", "payload", "created_at", "expires_at", "processed_at") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "id", "actor", "operation", "owner", "realm", "kind", "payload", "created_at", "expires_at", "processed_at" from "opencok_chat"."chat_owner_command" where "opencok_chat"."chat_owner_command"."id" = $1
+update "opencok_chat"."chat_owner_command" set "id" = $1, "actor" = $2, "operation" = $3, "owner" = $4, "realm" = $5, "kind" = $6, "payload" = $7, "created_at" = $8, "expires_at" = $9, "processed_at" = $10 where "opencok_chat"."chat_owner_command"."id" = $11
+delete from "opencok_chat"."chat_owner_command" where "opencok_chat"."chat_owner_command"."id" = $1"
+`;
+
+exports[`opencok_chat.chat_private_member: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["room","varchar(40)",true,null,null,null]
+column ["owner","varchar(40)",true,null,null,null]
+column ["role","integer",true,null,null,null]
+column ["joined_at","bigint",true,null,null,null]
+column ["left_at","bigint",false,null,null,null]
+column ["read_sequence","bigint",true,"0",null,null]
+primary ["chat_private_member_room_owner_pk",["room","owner"]]
+index ["chat_private_member_owner",false,["owner","left_at"]]
+insert into "opencok_chat"."chat_private_member" ("room", "owner", "role", "joined_at", "left_at", "read_sequence") values ($1, $2, $3, $4, $5, $6)
+select "room", "owner", "role", "joined_at", "left_at", "read_sequence" from "opencok_chat"."chat_private_member" where "opencok_chat"."chat_private_member"."room" = $1
+update "opencok_chat"."chat_private_member" set "room" = $1, "owner" = $2, "role" = $3, "joined_at" = $4, "left_at" = $5, "read_sequence" = $6 where "opencok_chat"."chat_private_member"."room" = $7
+delete from "opencok_chat"."chat_private_member" where "opencok_chat"."chat_private_member"."room" = $1"
+`;
+
+exports[`opencok_chat.chat_private_room: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["id","varchar(40)",true,null,null,null]
+column ["owner","varchar(40)",true,null,null,null]
+column ["name","varchar(100)",true,null,null,null]
+column ["version","integer",true,"1",null,null]
+column ["created_at","bigint",true,null,null,null]
+column ["deleted_at","bigint",false,null,null,null]
+primary ["chat_private_room_pkey",["id"]]
+insert into "opencok_chat"."chat_private_room" ("id", "owner", "name", "version", "created_at", "deleted_at") values ($1, $2, $3, $4, $5, $6)
+select "id", "owner", "name", "version", "created_at", "deleted_at" from "opencok_chat"."chat_private_room" where "opencok_chat"."chat_private_room"."id" = $1
+update "opencok_chat"."chat_private_room" set "id" = $1, "owner" = $2, "name" = $3, "version" = $4, "created_at" = $5, "deleted_at" = $6 where "opencok_chat"."chat_private_room"."id" = $7
+delete from "opencok_chat"."chat_private_room" where "opencok_chat"."chat_private_room"."id" = $1"
+`;
+
+exports[`opencok_chat.chat_relation: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["owner","varchar(40)",true,null,null,null]
+column ["other","varchar(40)",true,null,null,null]
+column ["kind","varchar(16)",true,null,null,null]
+column ["state","integer",true,"0",null,null]
+column ["description","text",true,"''",null,null]
+column ["id","varchar(40)",true,"''",null,null]
+column ["facebook_id","varchar(80)",false,null,null,null]
+column ["facebook_name","varchar(100)",false,null,null,null]
+column ["created_at","bigint",true,null,null,null]
+primary ["chat_relation_owner_other_kind_pk",["owner","other","kind"]]
+index ["chat_relation_other",false,["other","kind"]]
+check ["chat_relation_kind","\\"opencok_chat\\".\\"chat_relation\\".\\"kind\\" in ('contact','block','facebook')"]
+insert into "opencok_chat"."chat_relation" ("owner", "other", "kind", "state", "description", "id", "facebook_id", "facebook_name", "created_at") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "owner", "other", "kind", "state", "description", "id", "facebook_id", "facebook_name", "created_at" from "opencok_chat"."chat_relation" where "opencok_chat"."chat_relation"."owner" = $1
+update "opencok_chat"."chat_relation" set "owner" = $1, "other" = $2, "kind" = $3, "state" = $4, "description" = $5, "id" = $6, "facebook_id" = $7, "facebook_name" = $8, "created_at" = $9 where "opencok_chat"."chat_relation"."owner" = $10
+delete from "opencok_chat"."chat_relation" where "opencok_chat"."chat_relation"."owner" = $1"
+`;
+
+exports[`opencok_chat.chat_report: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["id","varchar(40)",true,null,null,null]
+column ["owner","varchar(40)",true,null,null,null]
+column ["target","varchar(40)",true,null,null,null]
+column ["message","varchar(100)",false,null,null,null]
+column ["reason","varchar(2000)",true,null,null,null]
+column ["created_at","bigint",true,null,null,null]
+column ["expires_at","bigint",true,null,null,null]
+primary ["chat_report_pkey",["id"]]
+index ["chat_report_expiry",false,["expires_at"]]
+insert into "opencok_chat"."chat_report" ("id", "owner", "target", "message", "reason", "created_at", "expires_at") values ($1, $2, $3, $4, $5, $6, $7)
+select "id", "owner", "target", "message", "reason", "created_at", "expires_at" from "opencok_chat"."chat_report" where "opencok_chat"."chat_report"."id" = $1
+update "opencok_chat"."chat_report" set "id" = $1, "owner" = $2, "target" = $3, "message" = $4, "reason" = $5, "created_at" = $6, "expires_at" = $7 where "opencok_chat"."chat_report"."id" = $8
+delete from "opencok_chat"."chat_report" where "opencok_chat"."chat_report"."id" = $1"
+`;
+
+exports[`opencok_chat.chat_social_import: schema and CRUD SQL 1`] = `
+"schema opencok_chat
+column ["owner","varchar(40)",true,null,null,null]
+column ["realm","integer",true,null,null,null]
+column ["created_at","bigint",true,null,null,null]
+primary ["chat_social_import_pkey",["owner"]]
+insert into "opencok_chat"."chat_social_import" ("owner", "realm", "created_at") values ($1, $2, $3)
+select "owner", "realm", "created_at" from "opencok_chat"."chat_social_import" where "opencok_chat"."chat_social_import"."owner" = $1
+update "opencok_chat"."chat_social_import" set "owner" = $1, "realm" = $2, "created_at" = $3 where "opencok_chat"."chat_social_import"."owner" = $4
+delete from "opencok_chat"."chat_social_import" where "opencok_chat"."chat_social_import"."owner" = $1"
 `;
