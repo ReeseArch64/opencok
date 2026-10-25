@@ -139,7 +139,13 @@ export class ShopService {
           ],
           stock: [{ id, purchased: counters.server + BigInt(count) }],
         };
-        body.shoppingMallItems = sfs.object(shopOffer(rule, nextState));
+        try {
+          shopLimit(rule, nextState, 1);
+          body.shoppingMallItems = sfs.object(shopOffer(rule, nextState));
+        } catch (error) {
+          if (!(error instanceof GameError)) throw error;
+          body.shoppingMallItems = sfs.object({});
+        }
         const pushes = [
           {
             command: "push.useritem",

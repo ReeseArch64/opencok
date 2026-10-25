@@ -88,7 +88,7 @@ test("shops serialize stock and account limits with debit, delivery, receipt, ro
     expect((await first.db.select().from(user_item))[0]!.count).toBe(1);
     expect((await first.db.select().from(shop_stock))[0]!.purchased).toBe(1n);
     await expect(buy("buyer", operation, "test", 2)).rejects.toThrow();
-    await buy();
+    expect((await buy()).body.shoppingMallItems).toEqual(sfs.object({}));
     await expect(buy()).rejects.toThrow();
     const raced = await Promise.allSettled([buy(), buy(), buy("other"), buy("other")]);
     expect(raced.filter((result) => result.status === "fulfilled")).toHaveLength(1);
