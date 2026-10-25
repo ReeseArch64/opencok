@@ -1,3 +1,4 @@
+import { civilizationScienceDomain } from "@opencok/services/civilization-science";
 import { createChatNoticeCostReader } from "@opencok/repositories/chat-notice-cost";
 import { cleanupSocialRealm } from "@opencok/repositories/social-cleanup";
 import type { Fields } from "@opencok/messages/sfs";
@@ -360,6 +361,7 @@ export const RealmDependenciesLive = Layer.effect(
         questsDomain,
         constructionDomain,
         researchDomain,
+        civilizationScienceDomain,
         trainingDomain,
         hospitalDomain,
         fortificationDomain,

@@ -201,9 +201,17 @@ export function progressionActivityData(value: unknown): ProgressionActivityData
   const data = value as ProgressionActivityData;
   if (
     data.schema !== 1 ||
-    !["upgrade", "destroy", "research", "train", "heal", "fort", "equipment", "material"].includes(
-      data.kind,
-    ) ||
+    ![
+      "upgrade",
+      "destroy",
+      "research",
+      "civilization",
+      "train",
+      "heal",
+      "fort",
+      "equipment",
+      "material",
+    ].includes(data.kind) ||
     !data.costs ||
     !data.items ||
     JSON.stringify(data).length > 65536

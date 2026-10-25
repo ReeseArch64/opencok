@@ -79,7 +79,8 @@
     "./chat-notice": "./src/chat-notice.ts",
     "./friendship-mine": "./src/friendship-mine.ts",
     "./realm-chat-delivery": "./src/realm-chat-delivery.ts",
-    "./realm-social": "./src/realm-social.ts"
+    "./realm-social": "./src/realm-social.ts",
+    "./civilization-science": "./src/civilization-science.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -109,7 +109,8 @@
     "./alliance": "./src/alliance.ts",
     "./alliance-science": "./src/alliance-science.ts",
     "./chat-retention": "./src/chat-retention.ts",
-    "./chat-social": "./src/chat-social.ts"
+    "./chat-social": "./src/chat-social.ts",
+    "./civilization-science": "./src/civilization-science.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

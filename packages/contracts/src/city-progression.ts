@@ -67,6 +67,7 @@ export interface GeneralWrite {
   statuses?: readonly Row[];
 }
 export interface CityProgressionState {
+  civilizationSciences?: readonly Row[];
   generalRoster?: GeneralRoster;
   quests?: QuestState;
   abilityPages?: readonly Row[];
@@ -91,6 +92,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  civilizationSciences?: readonly Row[];
   generalRoster?: GeneralWrite;
   equipment?: readonly Row[];
   deletedEquipment?: readonly string[];
@@ -125,7 +127,16 @@ export interface CityProgressionStore {
 
 export interface ProgressionActivityData {
   schema: 1;
-  kind: "upgrade" | "destroy" | "research" | "train" | "heal" | "fort" | "equipment" | "material";
+  kind:
+    | "civilization"
+    | "upgrade"
+    | "destroy"
+    | "research"
+    | "train"
+    | "heal"
+    | "fort"
+    | "equipment"
+    | "material";
   costs: Record<string, string>;
   items: Record<string, number>;
   target?: { level: number; star: number; progress: number };

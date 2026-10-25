@@ -1,3 +1,4 @@
+import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
 import { readGeneralRoster, writeGeneralRoster } from "./generals";
 import { readSuitDecompositions, writeEquipment } from "./equipment";
@@ -104,9 +105,17 @@ export function createCityProgressionStore(
         .where(eq(user_achievement.uid, owner));
       const equipment = await tx.select().from(user_equip).where(eq(user_equip.uid, owner));
       const [glory] = await tx.select().from(user_glory_info).where(eq(user_glory_info.uid, owner));
+      const civilizationSciences = await tx
+        .select()
+        .from(user_civilization_science)
+        .where(eq(user_civilization_science.userID, owner))
+        .limit(4097);
+      if (civilizationSciences.length > 4096)
+        throw new Error("Civilization science aggregate exceeds bound");
       return {
         profile,
         resource,
+        civilizationSciences,
         generalRoster: await readGeneralRoster(tx, owner, command, ranking),
         abilityPages: await readAbilityPages(tx, owner),
         suitDecompositions: await readSuitDecompositions(tx, owner),
@@ -135,6 +144,21 @@ export function createCityProgressionStore(
     async update(write, economy) {
       validateWrite(write, owner);
       const persist = async () => {
+        for (const row of write.civilizationSciences ?? []) {
+          if (row.userID !== owner) throw new Error("Foreign civilization science write");
+          const value = {
+            userID: owner,
+            baseItemID: num(row, "baseItemID"),
+            level: num(row, "level"),
+          };
+          await tx
+            .insert(user_civilization_science)
+            .values(value)
+            .onConflictDoUpdate({
+              target: [user_civilization_science.baseItemID, user_civilization_science.userID],
+              set: { level: value.level },
+            });
+        }
         await writePlayerEffects(tx, owner, write);
         if (write.generalRoster) await writeGeneralRoster(tx, owner, write.generalRoster, now);
         await writeEquipment(tx, owner, write);
@@ -339,6 +363,7 @@ export function createCityProgressionStore(
         write.generals?.length ||
         write.buildings?.length ||
         changedScience ||
+        write.civilizationSciences?.length ||
         write.profile ||
         write.deletedBuildings?.length
       )
