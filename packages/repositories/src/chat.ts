@@ -16,6 +16,7 @@ import type { ChatMessage, ChatRepository, MessageInput } from "@opencok/contrac
 
 const utc = (date: Date) => date.toISOString().slice(0, 23).replace("T", " ");
 function parseRow(row: typeof chat_message.$inferSelect): ChatMessage {
+  if (row.body === null) throw new Error("Chat message body archived");
   const sequenceId = Number(row.sequence_id);
   if (!Number.isSafeInteger(sequenceId)) throw new Error("Chat sequence exceeds wire precision");
   return {

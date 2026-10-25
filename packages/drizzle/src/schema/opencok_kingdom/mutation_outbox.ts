@@ -12,10 +12,19 @@ export const mutation_outbox = opencok_kingdom.table(
     eventId: varchar("eventId", { length: 40 }).notNull(),
     eventType: varchar("eventType", { length: 128 }).notNull(),
     payload: bytea("payload").notNull(),
+    expiresAt: bigint("expiresAt", { mode: "bigint" }),
     createdAt: bigint("createdAt", { mode: "bigint" }).notNull(),
+    nextAttemptAt: bigint("nextAttemptAt", { mode: "bigint" }).notNull().default(sql.raw("0")),
     publishedAt: bigint("publishedAt", { mode: "bigint" }).notNull(),
   },
   (table) => [
+    index("mutation_outbox_retry").on(
+      table.kingdomId,
+      table.publishedAt,
+      table.nextAttemptAt,
+      table.createdAt,
+    ),
+    index("mutation_outbox_expiry").on(table.expiresAt),
     index("mutation_outbox_pending").on(table.kingdomId, table.publishedAt, table.createdAt),
     primaryKey({
       name: "mutation_outbox_PRIMARY",

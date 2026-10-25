@@ -16,10 +16,12 @@ export const chat_mailbox_message = opencok_chat.table(
     kingdom_id: integer("kingdom_id").notNull(),
     owner_uid: varchar("owner_uid", { length: 40 }).notNull(),
     message_id: varchar("message_id", { length: 100 }).notNull(),
+    sender_uid: varchar("sender_uid", { length: 40 }),
     peer_uid: varchar("peer_uid", { length: 40 }).notNull(),
     chat_type: integer("chat_type").notNull(),
     created_at: bigint("created_at", { mode: "bigint" }).notNull(),
     body: text("body").notNull(),
+    expires_at: bigint("expires_at", { mode: "bigint" }),
     read: boolean("read").notNull().default(false),
   },
   (table) => [

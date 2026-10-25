@@ -30,6 +30,8 @@
     "@opencok/contracts": "workspace:*",
     "@opencok/messages": "workspace:*",
     "@opencok/identity": "workspace:*",
-    "@opencok/dtos": "workspace:*"
+    "@opencok/dtos": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/mappings": "workspace:*"
   }
 }
