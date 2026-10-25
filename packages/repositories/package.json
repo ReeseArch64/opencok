@@ -82,7 +82,8 @@
     "./city-production": "./src/city-production.ts",
     "./quests": "./src/quests.ts",
     "./player-effects": "./src/player-effects.ts",
-    "./equipment": "./src/equipment.ts"
+    "./equipment": "./src/equipment.ts",
+    "./alliance-gameplay": "./src/alliance-gameplay.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
