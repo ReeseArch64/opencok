@@ -85,7 +85,11 @@
     "./equipment": "./src/equipment.ts",
     "./alliance-gameplay": "./src/alliance-gameplay.ts",
     "./alliance-recovery": "./src/alliance-recovery.ts",
-    "./alliance-publication": "./src/alliance-publication.ts"
+    "./alliance-publication": "./src/alliance-publication.ts",
+    "./postbox": "./src/postbox.ts",
+    "./friendship-mine": "./src/friendship-mine.ts",
+    "./social-cleanup": "./src/social-cleanup.ts",
+    "./chat-notice-cost": "./src/chat-notice-cost.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
