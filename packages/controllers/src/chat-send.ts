@@ -46,7 +46,10 @@ export function createSendHandler({ authorizeRoom, messages }: RoomHandlerOption
       for (const peer of peers) {
         if (!peer.connection.joinedRooms.has(roomId)) continue;
         try {
-          if (await authorizeRoom(peer.uid, roomId))
+          if (
+            (!peer.authorizeSession || (await peer.authorizeSession())) &&
+            (await authorizeRoom(peer.uid, roomId))
+          )
             peer.sendFrame({ cmd: "push.chat.room", data });
         } catch {}
       }

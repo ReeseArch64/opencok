@@ -307,10 +307,16 @@ export const RealmDependenciesLive = Layer.effect(
             : undefined,
           mailChatEnabled: !!config.mailChat,
           chatSession: config.chatSession
-            ? createRealmChatSessionIssuer({
-                ...config.chatSession,
-                timeoutMs: config.timeoutMs,
-              })
+            ? (() => {
+                const issue = createRealmChatSessionIssuer({
+                  ...config.chatSession,
+                  timeoutMs: config.timeoutMs,
+                });
+                return async (request) => {
+                  authority.assertReady();
+                  return issue(request);
+                };
+              })()
             : undefined,
           expeditionRanking: (limit) => cache.expeditionRanking(limit),
           scoreActivityRanking: () => cache.scoreActivityRanking(),

@@ -74,6 +74,9 @@ test("PostgreSQL preserves concurrent receipts, expiration, realm routing and re
     const results = await Promise.all([store.messages.create(input), store.messages.create(input)]);
     expect(results.filter((result) => result.inserted)).toHaveLength(1);
     expect(results[0]!.sequenceId).toBe(results[1]!.sequenceId);
+    await expect(store.messages.create({ ...input, body: "changed" })).rejects.toThrow("conflict");
+    for (const body of ["\0", "\ud800", "x".repeat(501), ""])
+      await expect(store.messages.create({ ...input, body })).rejects.toThrow();
     expect(await store.messages.getAll("country_1")).toHaveLength(0);
     await store.close();
     store = undefined;

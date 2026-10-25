@@ -47,6 +47,7 @@ test("room joins are atomic and require current alliance membership", async () =
 test("signed sessions bind opaque tokens to identities and gate real HTTP/WebSocket readiness", async () => {
   const sessions = new Map<string, Session>();
   let available = true;
+  let sessionStorageAvailable = true;
   const repository: ChatRepository = {
     profiles: { publish: async () => "applied", find: async () => null },
     nicknames: { refresh: async () => "unchanged" },
@@ -55,6 +56,7 @@ test("signed sessions bind opaque tokens to identities and gate real HTTP/WebSoc
         sessions.set(session.tokenHash.toString("hex"), session);
       },
       async getById(hash) {
+        if (!sessionStorageAvailable) throw new Error("synthetic session outage");
         return sessions.get(hash.toString("hex")) ?? null;
       },
     },
@@ -131,6 +133,20 @@ test("signed sessions bind opaque tokens to identities and gate real HTTP/WebSoc
       });
     });
     expect(await rejection).toBe(401);
+    sessionStorageAvailable = false;
+    socket.send(JSON.stringify({ cmd: "user.init", params: {} }));
+    const [unavailable] = await once(socket, "message");
+    expect(JSON.parse(unavailable.toString()).error.code).toBe("unavailable");
+    sessionStorageAvailable = true;
+    socket.send(JSON.stringify({ cmd: "user.init", params: {} }));
+    const [recovered] = await once(socket, "message");
+    expect(JSON.parse(recovered.toString()).result.status).toBe("ok");
+    sessions.clear();
+    socket.send(JSON.stringify({ cmd: "user.init", params: {} }));
+    const [expired] = await once(socket, "message");
+    expect(JSON.parse(expired.toString()).error.code).toBe("unauthorized");
+    const [closeCode] = await once(socket, "close");
+    expect(closeCode).toBe(1008);
     available = false;
     await app.runMaintenance();
     expect((await fetch(`${base}/api/v1global_config`)).status).toBe(503);

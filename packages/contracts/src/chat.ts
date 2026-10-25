@@ -64,6 +64,7 @@ export interface Peer {
   uid: string;
   connection: Connection;
   sendFrame(frame: Frame): void;
+  authorizeSession?: () => Promise<boolean>;
 }
 
 export interface CommandContext extends Peer {

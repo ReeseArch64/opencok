@@ -65,11 +65,17 @@ export function createWebSocketGateway({
   const wss = new WebSocketServer({ noServer: true, maxPayload: 16_384, perMessageDeflate: false });
   const peers = new Set<Peer>();
 
-  wss.on("connection", (socket: WebSocket, _request: IncomingMessage, uid: string) => {
+  wss.on("connection", (socket: WebSocket, request: IncomingMessage, uid: string) => {
     const clientIdentity = { server: "local", clientid: randomUUID() };
     const connection: Connection = { joinedRooms: new Set<string>() };
     const sendFrame = (frame: Frame) => send(socket, { ...frame, ...clientIdentity });
-    const peer = { uid, connection, sendFrame };
+    const token = request.headers.session;
+    const authorizeSession = async () => {
+      if (!isReady()) return false;
+      const identity = await withinTimeout(() => verifyToken(token, uid));
+      return identity?.uid === uid;
+    };
+    const peer = { uid, connection, sendFrame, authorizeSession };
     peers.add(peer);
     const connectionId = clientIdentity.clientid;
     logEvent("connection_opened", { component: "chat.websocket", connectionId });
@@ -120,28 +126,21 @@ export function createWebSocketGateway({
         cmd: frame.cmd,
         ...(isSafeInteger(frame.sendTime) ? { sendTime: frame.sendTime } : {}),
       };
-      if (bootstrap.has(frame.cmd)) {
-        report(frame.cmd, "success");
-        sendFrame({ ...base, result: { status: "ok" } });
-        return;
-      }
-      const handler = Object.hasOwn(handlers, frame.cmd) ? handlers[frame.cmd] : null;
-      if (!handler) {
-        report("unknown", "failure", "unsupported_command");
-        sendFrame({ ...base, error: { code: "unsupported_command" } });
-        return;
-      }
       try {
-        const result = await withinTimeout(() =>
-          handler({
+        const result = await withinTimeout(async () => {
+          if (!(await authorizeSession())) throw new ChatCommandError("unauthorized");
+          if (bootstrap.has(frame.cmd)) return { status: "ok" };
+          const handler = Object.hasOwn(handlers, frame.cmd) ? handlers[frame.cmd] : null;
+          if (!handler) throw new ChatCommandError("unsupported_command");
+          return handler({
             uid,
             params: frame.params,
             sendTime: frame.sendTime,
             sendFrame,
             connection,
             peers,
-          }),
-        );
+          });
+        });
         sendFrame({ ...base, result });
         report(frame.cmd, "success");
       } catch (error) {
@@ -149,6 +148,7 @@ export function createWebSocketGateway({
         report(frame.cmd, "failure", code);
         log({ correlationId: randomUUID(), operation: frame.cmd, category: code });
         sendFrame({ ...base, error: { code } });
+        if (code === "unauthorized") socket.close(1008, "Session unavailable");
       }
     });
   });
