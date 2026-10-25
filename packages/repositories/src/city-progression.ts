@@ -135,7 +135,7 @@ export function createCityProgressionStore(
       validateWrite(write, owner);
       const persist = async () => {
         await writePlayerEffects(tx, owner, write);
-        if (write.generalRoster) await writeGeneralRoster(tx, owner, write.generalRoster);
+        if (write.generalRoster) await writeGeneralRoster(tx, owner, write.generalRoster, now);
         await writeEquipment(tx, owner, write);
         if (write.quests) await writeQuests(tx, owner, write.quests);
         for (const row of write.buildings ?? []) {

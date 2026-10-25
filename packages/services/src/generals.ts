@@ -1,3 +1,6 @@
+import { generalAbility } from "./general-skills";
+import { generalProperties, generalPropertyRule } from "@opencok/rules/general-refinement";
+import { generalFeatureAvailable } from "@opencok/rules/new-general-content";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { encode, sfs, str, int, Type, type Fields } from "@opencok/messages/sfs";
@@ -5,6 +8,7 @@ import { num, text, long, type Row } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import {
   generalBase,
+  generalBaseSkills,
   generalRecruit,
   generalPairs,
   generalExperience,
@@ -15,7 +19,7 @@ import {
 } from "@opencok/rules/general-progression";
 import { newGeneralSkillEffects } from "@opencok/rules/new-general-skills";
 import { newGeneralEquipmentEffects } from "@opencok/rules/new-general-equipment";
-import { newGeneral, generalPurchase } from "@opencok/mappings/generals";
+import { newGeneral, generalPurchase, generalRefinement } from "@opencok/mappings/generals";
 import type { CityDomain, CityProgressionContext } from "./city-progression";
 
 export function generalRoster(context: CityProgressionContext) {
@@ -50,7 +54,7 @@ export function generalEffects(context: CityProgressionContext, row: Row) {
   };
   const effects = newGeneralSkillEffects(state, context.rules);
   const equipment = context.state.equipment
-    .filter((item) => item.generalid === row.id && num(item, "on") === 2)
+    .filter((item) => item.generalid === row.id)
     .map((item) => ({ itemId: num(item, "itemId"), extraProperty: text(item, "extraProperty") }));
   const permanent = [
     effects.skills,
@@ -73,6 +77,10 @@ export function generalEffects(context: CityProgressionContext, row: Row) {
   );
   for (const status of context.write.generalRoster?.statuses ?? [])
     if (status.newGeneralId === row.id) statuses.set(num(status, "stateId"), status);
+  for (const deleted of context.write.generalRoster?.deletedStatuses ?? [])
+    if (deleted.generalId === row.id) statuses.delete(deleted.stateId);
+  for (const status of context.write.generalRoster?.statuses ?? [])
+    if (status.newGeneralId === row.id) statuses.set(num(status, "stateId"), status);
   for (const status of statuses.values()) {
     if (long(status, "startTime") > context.now || long(status, "endTime") < context.now) continue;
     for (const entry of (context.rules.power.statuses?.get(text(status, "stateId"))?.effect ?? "")
@@ -82,6 +90,19 @@ export function generalEffects(context: CityProgressionContext, row: Row) {
       if (!Number.isInteger(id) || !Number.isFinite(value)) generalFailure();
       append(id!, value!, long(status, "startTime"), long(status, "endTime"));
     }
+  }
+  if (
+    generalFeatureAvailable(context.rules, "general_random_effect", {
+      kingdomId: context.rules.kingdomId,
+      version: "12.06.0",
+      now: Number(context.now),
+    })
+  ) {
+    for (const property of generalProperties(text(row, "refineproperty")).values())
+      for (const id of (generalPropertyRule(context.rules, property.id).effect ?? "")
+        .split(";")
+        .filter(Boolean))
+        append(cityInteger(id, 1), property.value);
   }
   return buff;
 }
@@ -95,11 +116,38 @@ export function generalView(context: CityProgressionContext, row: Row) {
           ),
       ),
       ...(context.write.generalRoster?.skills ?? []),
-    ];
+    ].map((skill) => ({ ...skill }));
+  const activeIds = [
+    ...new Set([
+      ...generalBaseSkills(context.rules, row),
+      ...generalPairs(text(row, "talent")).keys(),
+    ]),
+  ].filter((id) => Number(context.rules.power.newGeneralSkills?.get(String(id))?.type ?? 0) !== 0);
+  for (const id of activeIds) {
+    const saved = skills.find(
+      (skill) => skill.newGeneralId === row.id && skill.skillId === String(id),
+    );
+    if (!saved)
+      skills.push({
+        newGeneralId: num(row, "id"),
+        skillId: String(id),
+        actTime: 0n,
+        endTime: 9223372036854775807n,
+        stat: 0,
+      });
+    else if (long(saved, "endTime") <= context.now) {
+      saved.stat = 0;
+      saved.endTime = 9223372036854775807n;
+      saved.actTime = 0n;
+    }
+  }
   const office =
     context.write.generalRoster?.offices?.find((office) => office.id === row.id) ??
     roster.offices.find((office) => office.id === row.id);
-  return newGeneral(row, generalEffects(context, row), skills, office);
+  return {
+    ...newGeneral(row, generalEffects(context, row), skills, office),
+    ...generalRefinement(row, context.rules),
+  };
 }
 export function generalChanges(context: CityProgressionContext, rows: readonly Row[]) {
   return { generallist: sfs.array(rows.map((row) => sfs.object(generalView(context, row)))) };
@@ -240,7 +288,15 @@ async function prepare(context: CityProgressionContext, command: string, params:
             generalPairs(text(result.row, "baseSkill")).get(int(params, "baseskillid"))!,
           );
         }
-      } else generalFailure();
+      } else {
+        const result = generalAbility(context, row, action, params, (id) =>
+          generalEffects(context, row)
+            .filter((effect) => effect.effectid?.value === id)
+            .reduce((sum, effect) => sum + Number(effect.effectvalue?.value ?? 0), 0),
+        );
+        writeGeneral(context, result.row);
+        body = { ...generalChanges(context, [result.row]), ...result.body };
+      }
     }
   }
   return { response: encode({ data: sfs.object(body) }), responseKind: "nested" as const };
