@@ -1,11 +1,13 @@
+import { chat_mailbox_intent } from "@opencok/drizzle/schema/opencok_chat/chat_social";
 import { createHash } from "node:crypto";
-import { and, asc, desc, eq, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, lte, or, isNull, sql } from "drizzle-orm";
 import { chat_mailbox_message } from "@opencok/drizzle/schema/opencok_chat/chat_mailbox_message";
 import { chat_mailbox_receipt } from "@opencok/drizzle/schema/opencok_chat/chat_mailbox_receipt";
 import { encodeChatMailbox, type ChatMailboxStore } from "@opencok/contracts/chat-mailbox";
 import type { Database } from "./game.ts";
 export function createChatMailboxStore(
   db: Database["databases"]["global"]["db"],
+  now = Date.now,
 ): ChatMailboxStore {
   return {
     async apply(input) {
@@ -14,6 +16,7 @@ export function createChatMailboxStore(
       const hash = createHash("sha256").update(encoded).digest("hex");
       return db.transaction(
         async (tx) => {
+          await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('chat:append',0))`);
           await tx.execute(
             sql`select pg_advisory_xact_lock(hashtextextended(${`mailbox:${update.kingdomId}:${update.owner}`}, 0))`,
           );
@@ -43,6 +46,20 @@ export function createChatMailboxStore(
           if (update.action === "read")
             await tx.update(chat_mailbox_message).set({ read: true }).where(selection);
           else await tx.delete(chat_mailbox_message).where(selection);
+          for (const type of update.types)
+            await tx
+              .insert(chat_mailbox_intent)
+              .values({
+                realm: update.kingdomId,
+                owner: update.owner,
+                operation: update.operationId,
+                effect: update.effectIndex,
+                peer: update.others,
+                type,
+                action: update.action,
+                cutoff: BigInt(update.requestedAt),
+              })
+              .onConflictDoNothing();
           await tx.insert(chat_mailbox_receipt).values({
             kingdom_id: update.kingdomId,
             operation_id: update.operationId,
@@ -73,6 +90,7 @@ export function createChatMailboxStore(
         .select({
           id: chat_mailbox_message.message_id,
           peer: chat_mailbox_message.peer_uid,
+          sender: chat_mailbox_message.sender_uid,
           type: chat_mailbox_message.chat_type,
           createdAt: chat_mailbox_message.created_at,
           body: chat_mailbox_message.body,
@@ -85,6 +103,10 @@ export function createChatMailboxStore(
             eq(chat_mailbox_message.owner_uid, owner),
             eq(chat_mailbox_message.peer_uid, peer),
             eq(chat_mailbox_message.chat_type, type),
+            or(
+              isNull(chat_mailbox_message.expires_at),
+              gt(chat_mailbox_message.expires_at, BigInt(now())),
+            ),
           ),
         )
         .orderBy(desc(chat_mailbox_message.created_at), asc(chat_mailbox_message.message_id))
