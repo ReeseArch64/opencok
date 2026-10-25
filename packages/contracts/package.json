@@ -11,6 +11,8 @@
   },
   "type": "module",
   "exports": {
+    "./responses/arena": "./src/responses/arena.ts",
+    "./arena": "./src/arena.ts",
     "./responses/anniversary": "./src/responses/anniversary.ts",
     "./local-campaign": "./src/local-campaign.ts",
     "./responses/lottery": "./src/responses/lottery.ts",

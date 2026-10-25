@@ -12,6 +12,7 @@
   },
   "type": "module",
   "exports": {
+    "./arena": "./src/arena.ts",
     "./anniversary": "./src/anniversary.ts",
     "./lottery": "./src/lottery.ts",
     "./image": "./src/image.ts",

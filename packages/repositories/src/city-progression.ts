@@ -1,3 +1,4 @@
+import { readArena, writeArena } from "./arena";
 import { readAnniversaryStatistics } from "./anniversary";
 import { readCampaignVariables, writeCampaignVariables } from "./local-campaign";
 import { readLottery, writeLottery } from "./lottery";
@@ -124,6 +125,10 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        arena:
+          command?.startsWith("arena.") || command === "show.arena.army"
+            ? await readArena(tx, owner)
+            : undefined,
         anniversaryStatistics:
           command === "1year.info" ? await readAnniversaryStatistics(tx, owner) : undefined,
         campaignVariables: await readCampaignVariables(tx, owner, Number(profile.serverId)),
@@ -214,6 +219,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.arena) await writeArena(tx, owner, write.arena);
         if (write.campaignVariables)
           await writeCampaignVariables(tx, owner, write.campaignVariables, now);
         if (write.lottery) await writeLottery(tx, owner, write.lottery);

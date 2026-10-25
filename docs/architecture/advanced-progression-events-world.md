@@ -228,3 +228,26 @@ and first-battle metadata. Resource divisors remain long values, percent fields
 retain their native double or string types, and missing records retain the source
 defaults. An absent opponent-name cache can be resolved from the owned first-attack
 history without mutating the cache or loading unrelated battle data.
+
+Arena registration and virtual army preferences use migration
+`0019_arena_runtime.sql`. Its registration table preserves millisecond timestamps,
+application identity and ratings without altering the nullable legacy arena table
+or its integer time field. An unambiguous legacy owner imports once; the original
+record remains read-only. Native info and roster queries expose the saved state.
+Selections validate catalog identities, reject ambiguous duplicate entries and
+respect the configured total capacity. They never reserve ordinary world troops.
+
+Arena applications require the feature, castle threshold, resident ownership and
+a validated battle gateway. The application and its durable enqueue event commit
+together. Match callbacks bind the saved application identity, room and version;
+public player commands cannot inject these callbacks. Result consumers require
+adapter authorization and the current assignment before updating rating and win
+or loss counters once. Native state notifications use the mutation outbox. The
+reference float-to-integer rating behavior is retained explicitly.
+
+The current realm composes no validated arena battle gateway. Enrollment and
+battle admission therefore fail before changing the registration; info and army
+preferences remain available. Admission, actor transfer and battle results belong
+to the corresponding validated realm combat integration. Synthetic adapter tests
+verify enqueue persistence, stale-assignment rejection and result-consumer
+idempotency; they are not battle-engine acceptance or native arena-play evidence.

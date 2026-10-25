@@ -134,6 +134,13 @@
       "when": 1792960864369,
       "tag": "0018_totem_runtime",
       "breakpoints": false
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792964324698,
+      "tag": "0019_arena_runtime",
+      "breakpoints": false
     }
   ]
 }

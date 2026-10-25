@@ -677,3 +677,5 @@ export { world_march_checkpoint } from "./opencok_kingdom/world_march_checkpoint
 export { world_interest } from "./opencok_kingdom/world_interest";
 export { totem_activation } from "./opencok_kingdom/totem_activation";
 export { totem_delivery } from "./opencok_kingdom/totem_delivery";
+export { arena_registration } from "./opencok_kingdom/arena_registration";
+export { user_arena_army } from "./opencok_kingdom/user_arena_army";

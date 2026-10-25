@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./arena": "./src/arena.ts",
     "./anniversary": "./src/anniversary.ts",
     "./local-campaign": "./src/local-campaign.ts",
     "./lottery": "./src/lottery.ts",

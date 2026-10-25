@@ -1,3 +1,4 @@
+import { createArenaDomain, publishArenaMutation } from "@opencok/services/arena";
 import { anniversaryDomain } from "@opencok/services/anniversary";
 import { lotteryDomain } from "@opencok/services/lottery";
 import { createTotemEffectStore, pendingTotemOwners } from "@opencok/repositories/totem";
@@ -412,6 +413,7 @@ export const RealmDependenciesLive = Layer.effect(
         minstrelDomain,
         lotteryDomain,
         anniversaryDomain,
+        createArenaDomain(),
         trainingDomain,
         hospitalDomain,
         fortificationDomain,
@@ -540,6 +542,20 @@ export const RealmDependenciesLive = Layer.effect(
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
     const recoverWorld = async () => {
+      for (const command of ["arena.matched", "arena.enter", "arena.leave", "arena.finished"])
+        for (let index = 0; index < 64; index++) {
+          const delivered = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            (event) =>
+              publishArenaMutation(event.payload, command, undefined, (owner, name, body) =>
+                notifications.publish(owner, name, body),
+              ),
+            Date.now,
+            command,
+          );
+          if (!delivered) break;
+        }
       const totemNow = BigInt(Date.now());
       await db.kingdom.db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
