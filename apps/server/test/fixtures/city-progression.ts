@@ -31,6 +31,7 @@ export function cityFixture(rules: Rules, effect: (id: number) => number = () =>
         pos: 17,
       },
     ],
+    skills: [],
     sciences: [],
     armies: [],
     hospital: [],

@@ -47,7 +47,8 @@
     "./shops": "./src/shops.ts",
     "./provisioning": "./src/provisioning.ts",
     "./production": "./src/production.ts",
-    "./building": "./src/building.ts"
+    "./building": "./src/building.ts",
+    "./research": "./src/research.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

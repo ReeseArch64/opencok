@@ -94,7 +94,8 @@
     "./character-seed": "./src/character-seed.ts",
     "./timed-activity": "./src/timed-activity.ts",
     "./city-command": "./src/city-command.ts",
-    "./city-progression": "./src/city-progression.ts"
+    "./city-progression": "./src/city-progression.ts",
+    "./research": "./src/research.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

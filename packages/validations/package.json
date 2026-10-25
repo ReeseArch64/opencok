@@ -46,7 +46,8 @@
     "./reconnect-marches": "./src/reconnect-marches.ts",
     "./response": "./src/response.ts",
     "./shared-user": "./src/shared-user.ts",
-    "./provisioning": "./src/provisioning.ts"
+    "./provisioning": "./src/provisioning.ts",
+    "./research": "./src/research.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

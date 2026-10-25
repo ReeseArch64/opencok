@@ -1,3 +1,4 @@
+import { researchDomain } from "@opencok/services/research";
 import { createHash } from "node:crypto";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
 import { createCityProductionBoundary } from "@opencok/repositories/city-production";
@@ -321,7 +322,7 @@ export const RealmDependenciesLive = Layer.effect(
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary),
-      [constructionDomain],
+      [constructionDomain, researchDomain],
       rules,
       economyEffects,
     );

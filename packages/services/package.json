@@ -56,7 +56,8 @@
     "./production": "./src/production.ts",
     "./production-context": "./src/production-context.ts",
     "./city-progression": "./src/city-progression.ts",
-    "./construction": "./src/construction.ts"
+    "./construction": "./src/construction.ts",
+    "./research": "./src/research.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -35,7 +35,7 @@ export function storedPowerEffects(
     const rule = rules.power.sciences?.get(id);
     if (!rule) throw new GameError(errors.unsupported, "power_effect");
     const ids = rule.para1;
-    if (!ids?.trim() || ids === "army" || ids === "trap") continue;
+    if (!ids?.trim() || ids === "army" || ids === "trap" || ids === "up") continue;
     for (const id of ids.split("|").filter(Boolean))
       if (integer(id) === effect)
         initialAndScience = Math.fround(

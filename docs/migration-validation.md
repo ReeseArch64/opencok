@@ -2204,3 +2204,12 @@ intentional compatibility differences, imported-queue refund limits and recovery
 `apps/server/integration/construction.test.ts` uses disposable PostgreSQL for
 concurrency, replay, stars, one-time rewards, production conservation, ownership
 and transaction rollback. Native clients and other release tracks are unverified.
+
+## Basic technology research
+
+Topic 17 registers the basic technology domain and projects its levels/deadlines
+on initialization and reconnect. `apps/server/integration/research.test.ts` covers
+prerequisites, concurrency, cancellation, direct completion, acceleration and
+production effects with disposable PostgreSQL. Units validate tree and queue
+constraints plus wire types. See the [city runbook](architecture/city-progression.md)
+for compatibility boundaries; native rendering remains unverified.

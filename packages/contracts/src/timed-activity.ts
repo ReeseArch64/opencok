@@ -19,6 +19,8 @@ export interface PreparedActivity {
   durationMs?: bigint;
   data?: unknown;
   response: Uint8Array;
+  item?: Uint8Array;
+  event?: Uint8Array | null;
   responseKind?: "queue" | "nested";
 }
 export type ActivityAction = "start" | "restore" | "finish" | "cancel" | "reschedule";

@@ -16,6 +16,7 @@ export interface CityProgressionState {
   queues: readonly Row[];
   effects: PlayerEffectSnapshot;
   newGenerals: WorldResourceOwnerSnapshot["newGenerals"];
+  skills: readonly Row[];
   tasks: readonly Row[];
   achievements: readonly Row[];
   equipment: readonly Row[];
@@ -26,6 +27,7 @@ export interface CityProgressionWrite {
   buildings?: readonly Row[];
   deletedBuildings?: readonly string[];
   sciences?: readonly Row[];
+  skills?: readonly Row[];
   armies?: readonly Row[];
   hospital?: readonly Row[];
   forts?: readonly Row[];
