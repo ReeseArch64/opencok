@@ -6,6 +6,9 @@ identity and room authorization in `identity/chat-*`, handlers in `controllers/c
 HTTP/WebSocket transport in `connection/chat-*`, PostgreSQL adapters in
 `repositories/chat`, and configuration in `env/chat`. Imports use public package exports.
 
+Current topic-8 server integration and operating evidence are recorded in the
+[game integration guide](GAME_INTEGRATION.md). APK testing is explicitly excluded.
+
 ## Development
 
 Install with `bun install --frozen-lockfile`. Run the root Compose `dev` profile to
@@ -55,12 +58,12 @@ Run `bun run --cwd apps/chat check-types`, `bun run --cwd apps/chat test` and
 containers, applies the real migrations, checks both realm lookups, concurrent writes,
 Unicode, exact expiry and persistence after restart. It does not touch local game data.
 
-Android tracks are untested. The TypeScript realm now supports `chat.session.create`
+Android tracks are untested. The TypeScript realm supports `chat.session.create`
 when `GAME_CHAT_SESSION_URL` targets this service's internal `/external/session` route and
 `CHAT_SIGNING_SECRET` matches. It binds issuance to the authenticated realm profile and
-returns the opaque token and second-based expiry. Socket-free units compose both sides
-with the existing token verifier; live cross-service and native-client behavior remain
-unverified. The shared API/gateway now exposes the three public metadata GET routes
+returns the opaque token and second-based expiry. Units compose both sides with the token verifier; actual realm TCP, Chat HTTP/WebSocket,
+API metadata and disposable database acceptance now exercise the full server flow.
+Native-client behavior remains unverified. The shared API/gateway now exposes the three public metadata GET routes
 when `API_CHAT_URL` points to this service's HTTP origin. Chat remains the source of
 configuration and readiness; the proxy forwards no caller credentials or query strings.
 The advertised `CHAT_WEBSOCKET_URL` must be directly reachable because the shared gateway
