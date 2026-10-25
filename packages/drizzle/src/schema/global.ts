@@ -118,3 +118,5 @@ export { chat_avatar_profile as opencok_chat_chat_avatar_profile } from "./openc
 
 export { chat_mailbox_message } from "./opencok_chat/chat_mailbox_message";
 export { chat_mailbox_receipt } from "./opencok_chat/chat_mailbox_receipt";
+
+export { cn1_profile_session } from "./opencok_global/cn1_profile_session";

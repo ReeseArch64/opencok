@@ -50,6 +50,13 @@
       "when": 1792883061077,
       "tag": "0006_shared_user_publication_versions",
       "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792883061078,
+      "tag": "0007_cn1_profile_sessions",
+      "breakpoints": false
     }
   ]
 }

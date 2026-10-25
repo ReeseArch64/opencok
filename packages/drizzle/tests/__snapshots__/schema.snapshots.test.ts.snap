@@ -14256,3 +14256,20 @@ select "kingdom_id", "operation_id", "effect_index", "owner_uid", "payload_hash"
 update "opencok_chat"."chat_mailbox_receipt" set "kingdom_id" = $1, "operation_id" = $2, "effect_index" = $3, "owner_uid" = $4, "payload_hash" = $5, "requested_at" = $6 where "opencok_chat"."chat_mailbox_receipt"."kingdom_id" = $7
 delete from "opencok_chat"."chat_mailbox_receipt" where "opencok_chat"."chat_mailbox_receipt"."kingdom_id" = $1"
 `;
+
+exports[`opencok_global.cn1_profile_session: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["ownerUid","varchar(255)",true,null,null,null]
+column ["isAddict","integer",true,null,null,null]
+column ["onlineMinutes","integer",true,"0",null,null]
+column ["authAt","bigint",true,"0",null,null]
+column ["sampledAt","bigint",true,"0",null,null]
+column ["offlineAt","bigint",false,null,null,null]
+column ["sessionId","uuid",false,null,null,null]
+primary ["cn1_profile_session_PRIMARY",["ownerUid"]]
+check ["cn1_profile_session_mode","\\"isAddict\\" BETWEEN 0 AND 2"]
+insert into "opencok_global"."cn1_profile_session" ("ownerUid", "isAddict", "onlineMinutes", "authAt", "sampledAt", "offlineAt", "sessionId") values ($1, $2, $3, $4, $5, $6, $7)
+select "ownerUid", "isAddict", "onlineMinutes", "authAt", "sampledAt", "offlineAt", "sessionId" from "opencok_global"."cn1_profile_session" where "opencok_global"."cn1_profile_session"."ownerUid" = $1
+update "opencok_global"."cn1_profile_session" set "ownerUid" = $1, "isAddict" = $2, "onlineMinutes" = $3, "authAt" = $4, "sampledAt" = $5, "offlineAt" = $6, "sessionId" = $7 where "opencok_global"."cn1_profile_session"."ownerUid" = $8
+delete from "opencok_global"."cn1_profile_session" where "opencok_global"."cn1_profile_session"."ownerUid" = $1"
+`;
