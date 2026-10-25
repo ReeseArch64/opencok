@@ -15,6 +15,7 @@ export interface CatalogTable<RecordType extends object = object> {
   readonly kind: CatalogKind.Table;
   readonly records: readonly RecordType[];
   readonly sections: readonly CatalogSection[];
+  readonly metadata?: Readonly<Record<string, CatalogValue>>;
 }
 
 export interface TileImage {
@@ -53,6 +54,8 @@ export interface TileLayer {
 export interface TileMapDefinition {
   readonly kind: CatalogKind.TileMap;
   readonly orientation: string;
+  readonly formatVersion?: string;
+  readonly editorVersion?: string;
   readonly renderOrder?: string;
   readonly width: number;
   readonly height: number;

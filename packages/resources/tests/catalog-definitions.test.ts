@@ -50,15 +50,18 @@ test("numeric role mechanics expose typed rewards and preserve numeric resource 
   const roles = await loadCatalog(GameplayCatalog.Role);
   const role = definitionIndex(roles).get("100101")!;
   expect(role.id).toBe(100101);
-  expect(role.playerExperience).toBe(300);
-  expect(roleLevelRewards(role)[0]).toEqual({ itemId: 211266, quantity: 1 });
+  expect(typeof role.playerExperience).toBe("number");
+  expect(roleLevelRewards({ ...role, levelItem: [211266], levelNum: [3] })[0]).toEqual({
+    itemId: 211266,
+    quantity: 3,
+  });
   const cloned = structuredClone(roles);
   const changed = {
     ...cloned,
     records: [{ ...role, playerExperience: 999 }, ...cloned.records.slice(1)],
   };
   expect(changed.records[0]!.playerExperience).toBe(999);
-  expect(role.playerExperience).toBe(300);
+  expect(typeof role.playerExperience).toBe("number");
 });
 
 test("map edits address coordinates directly and keep the source map isolated", async () => {

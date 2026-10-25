@@ -1,4 +1,3 @@
-import { parseGameplayCatalog } from "@opencok/resources/rules";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { createServer } from "node:net";
 import { randomBytes } from "node:crypto";
@@ -110,8 +109,8 @@ async function createStack() {
   isolated.services.server.volumes = [
     {
       type: "bind",
-      source: join(folder, "catalogs.ts"),
-      target: "/workspace/packages/resources/src/catalogs.ts",
+      source: join(folder, "catalog-definitions.ts"),
+      target: "/workspace/packages/resources/src/catalog-definitions.ts",
       read_only: true,
       bind: { create_host_path: false },
     },
@@ -181,23 +180,43 @@ async function createStack() {
   await Bun.write(join(folder, "cdn/cok.eleximg.com/cok/test.bin"), "cdn-cok-synthetic");
   await Bun.write(join(folder, "cdn/asset.cok.chat/100001/test.bin"), "cdn-assets-synthetic");
   await Bun.write(join(folder, "cdn/cok-cdn.zip"), "synthetic-private-archive");
-  const xml: Record<string, string> = {
-    treasure: '<ItemSpec id="1" lv="1" exp="100" helper="1"/>',
-    quest: "",
-    role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
-    position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
-    item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/><ItemSpec id="on_trumpet" k2="0"/>',
+  const definitions = {
+    treasure: {
+      kind: "table",
+      records: [{ id: 1, level: 1, experience: 100, helper: 1 }],
+      sections: [],
+    },
+    quest: { kind: "table", records: [], sections: [] },
+    role: {
+      kind: "table",
+      records: [
+        { id: 100101, playerExperience: 100000 },
+        { id: 100102, playerExperience: 200000 },
+      ],
+      sections: [],
+    },
+    position: {
+      kind: "table",
+      records: [
+        { id: 9900, position: 0 },
+        { id: 9906, position: 6 },
+      ],
+      sections: [],
+    },
+    item: {
+      kind: "table",
+      records: [
+        { id: "player_max", k3: 30 },
+        { id: "resources_basics", k7: 100, k8: 300 },
+        { id: "on_trumpet", k2: 0 },
+      ],
+      sections: [],
+    },
   };
-  const documents = Object.fromEntries(
-    Object.entries(xml).map(([name, records]) => [
-      name,
-      parseGameplayCatalog(`<database>${records}</database>`),
-    ]),
-  );
   await Bun.write(
-    join(folder, "catalogs.ts"),
-    `const documents = ${JSON.stringify(documents)};
-export const gameplayCatalogs = Object.fromEntries(Object.entries(documents).map(([name, document]) => [name, async () => structuredClone(document)]));
+    join(folder, "catalog-definitions.ts"),
+    `const definitions = ${JSON.stringify(definitions)};
+export const catalogDefinitions = Object.fromEntries(Object.entries(definitions).map(([name, definition]) => [name, async () => structuredClone(definition)]));
 `,
   );
   await Bun.write(

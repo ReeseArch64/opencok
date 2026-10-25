@@ -1,83 +1,105 @@
 # Gameplay resources
 
-Maintained gameplay data lives in this package. Building definitions use domain
-models; the other 380 catalogs still use transitional XML-shaped TypeScript
-objects. They are available without external XML, Base64 or Compose mounts, but
-those remaining domains have not yet been rewritten as game mechanics.
+All 381 authorized catalogs are maintained as typed TypeScript data. Buildings
+live in `src/buildings`; the other 380 identifiers load 362 distinct definitions
+from `src/catalogs/data`, including catalogs not yet used by the server. There are
+no XML-shaped catalog documents, encoded payloads or external resource mounts.
+
+## Editing mechanics
+
+Open the catalog's module under `src/catalogs/data`. Tables import ordinary
+`.recordsN.ts` arrays. Edit their numeric IDs, levels, quantities, prices and
+sequences directly. For example, role definitions expose `playerExperience`,
+`levelRewardId`, `stamina` and numeric reward lists; goods expose bigint `price`,
+`priceAll` and `priceHot`. Currency literals use `n` to preserve exact integers.
+
+Each table has an explicit interface under `src/catalogs/types`. Fields use
+camel case and known names such as `levelMax` and `resourceId`. Canonical numbers
+are numbers or bigints; numeric delimited sequences become arrays or matrices.
+Special textual identifiers, leading zeros, versions, dates and noncanonical
+values retain their strings. Codes such as `k1`, `para1` and unimplemented event
+parameters remain explicit where their business meaning is not established;
+do not invent interpretations or enable new actions based on their names.
+
+Use the typed registry and functions directly when implementing new mechanics:
+
+```ts
+import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
+import { loadCatalog, definitionIndex, roleLevelRewards } from "@opencok/resources/catalogs";
+
+const roles = await loadCatalog(GameplayCatalog.Role);
+const role = definitionIndex(roles).get("100101");
+const rewards = role ? roleLevelRewards(role) : [];
+```
+
+`loadCatalog` infers the definition type from the enum. Definitions are readonly;
+clone before making realm-specific changes. `definitionIndex` preserves the last
+duplicate ID and excludes blank IDs while the original declarations remain in
+`records`. `sections` describes configuration groups by record ranges and parent
+indexes. The server keeps each catalog's existing duplicate/index policy.
+
+Maps expose dimensions, tilesets, terrains and numeric tile layers. Edit
+`.layerN.tilesN.ts` arrays, inspect coordinates with `mapTile`, or produce an
+isolated edit with `withMapTile`. Arrays are split into chunks for editing; no
+XML tiles or whitespace are generated. Automation catalogs expose event,
+condition and action codes, parameter text, conditional branches and scoped
+variable defaults. `rulesForEvent` selects declarations and `initialVariables`
+returns defaults. These functions do not execute unimplemented legacy actions.
+Variables and web routing have their own models.
+
+Check `src/catalogs/provenance.json` before editing an alias: identifiers sharing
+a module share its maintained data. No checksum refresh is required for ordinary
+edits. Run the package/server tests, affected type checks, lint and formatting;
+then rebuild and recreate the server. There is no administrative reload endpoint.
 
 ## Building mechanics
 
-Edit `src/buildings/<buildingId>.ts` directly. Each entry has numeric `id`,
-`buildingId`, `level` and `starLevel`, bigint resource costs, construction duration,
-prerequisites, named effects and typed star progression steps. For example,
-production uses `effects.productionPerHour` and `effects.productionCapacity`;
-food protection uses `effects.protectedFood`. Bigint literals preserve costs
-beyond JavaScript's safe integer range.
+Edit `src/buildings/<buildingId>.ts`. All 1,511 levels across 41 types use numeric
+identities, bigint costs, prerequisites, durations, named effects and typed star
+steps. `getBuildingDefinition` exposes `id`, `levelMax`, `resourceId` and levels.
+`createBuildingCatalog` creates isolated realm maps. `rules/building` evaluates
+progression and mappings alone translate client display parameters.
 
-`getBuildingDefinition(413000)` returns building metadata with `id: 413000`,
-`levelMax: 30`, `resourceId: 0` and its levels. `createBuildingCatalog()` creates
-an isolated map indexed by numeric level-definition ID for each realm.
-`@opencok/rules/building` evaluates current and next levels without parsing XML
-attributes or delimited strings. Edit costs and effects here to change the
-mechanics consumed by the server.
+## Compatibility boundaries
 
-`clientParameters` retains display values whose game meaning is not established.
-Only mappings read these values to preserve mobile fields; server mechanics read
-named effects. Do not implement new rules by parsing client parameters. Model the
-meaning explicitly when migrating another mechanic. Feature availability and
-maximum star levels still depend on the remaining transitional catalogs.
+Normal startup loads definitions directly. `catalog-compatibility.ts` projects
+fields into flat string records for existing Rules consumers, preserving their
+current numeric parsing, wire values and ordering. This adapter constructs
+neither XML nor parser documents. `catalog-codecs.ts` contains field/sequence
+mapping metadata for this boundary. Existing string-consuming rule functions
+have not all been redesigned; new mechanics should consume typed definitions.
 
-Validate edits with package tests, server tests, workspace type checks, lint and
-formatting. Building edits do not require checksum updates. Rebuild and recreate
-the server to deploy them; there is no administrative reload endpoint.
+The full migration verifies 380 compiled models and 166,526 table declarations,
+including all values and declaration order. Complete Rules projections for both
+realms match the former loader. Definitions without usable IDs remain in the
+full tables and are omitted from ordinary indexes. Dedicated maps preserve tile
+coordinates and automation models retain their declarations and parameter text.
 
-## Remaining transitional catalogs
+The XML parser is a developer dependency. `xml-fixtures.ts` is loaded only when
+an explicit synthetic XML directory is passed to `loadRules`, and its parser
+helpers are available through `@opencok/resources/fixtures`. Integration tests
+inject synthetic Rules with `startServer(config, rules)`. The isolated Compose
+test injects typed table/building modules. No environment variable selects XML.
 
-Find a catalog in `src/catalogs.ts` and edit its module or `.partN.ts` files.
-These documents retain original element names, string attributes in `":@"`,
-duplicate records, declaration order and text. This representation is temporary;
-it is not the target interface for game rules. Large maps use numeric tile arrays
-and expansion helpers. Identical documents share modules; check
-`src/catalogs/inventory.json` before editing an alias.
+## Import and provenance
 
-After an intentional transitional-catalog edit, update its integrity metadata:
+The maintainer authorized converting all reference XMLs on 2026-10-24. Ignored
+originals remain unchanged. Catalog and building provenance files retain source
+sizes/checksums and source declaration counts. No private executable code, keys,
+player records or client binaries are included.
 
-```sh
-bun run --cwd packages/resources update:catalogs building_star
-bun run test:packages
-bun run --cwd packages/resources check-types
-bun run lint
-bun run format:check
-```
-
-## Import boundaries and provenance
-
-The maintainer authorized conversion of all reference XML catalogs on 2026-10-24.
-The ignored originals remain read-only inputs. The building provenance file
-records the source SHA-256 and the 1,511 imported levels across 41 building types.
-The remaining inventory records source and document checksums for 380 identifiers
-sharing 362 documents. All 381 source identifiers remain in `GameplayCatalog`.
-No private executable code, keys or player records are included.
-
-Migration tools can recreate data from an authorized source:
+Migration tools can recreate maintained definitions from an authorized snapshot:
 
 ```sh
-bun run --cwd packages/resources import:buildings /path/to/authorized/building.xml
 bun run --cwd packages/resources import:catalogs /path/to/authorized/xml
+bun run --cwd packages/resources import:buildings /path/to/authorized/building.xml
 ```
 
-The building importer converts XML attributes into domain models. The general
-importer excludes building.xml so it cannot restore the removed representation.
-Running either importer overwrites maintained edits for its domain; normal
-editing uses TypeScript directly and needs neither importer nor original XML.
-Format generated files before committing.
+Importing overwrites maintained edits. The general importer requires the complete
+set of catalog identifiers, excludes building.xml and emits typed definitions;
+it cannot restore XML-shaped source modules. Format generated files before
+committing. Importers and original XMLs are not deployment requirements.
 
-The explicit XML loader and `buildings/import` adapter serve migration checks and
-synthetic fixtures. Production startup loads typed building definitions directly.
-Integration tests inject synthetic Rules through `startServer(config, rules)`;
-the isolated Compose test replaces both transitional catalogs and building levels
-with test-only modules. No application environment variable selects XML loading.
-
-This migration preserves mobile field types and order, costs and progression.
-It introduces no database or saved-state migration. Roll back the application
-artifact to restore prior behavior.
+No wire, database, account, inventory or queue migration is introduced. Roll back
+the complete application artifact to restore prior behavior. Native mobile client
+validation remains separate from server compatibility checks.

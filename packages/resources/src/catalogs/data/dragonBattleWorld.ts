@@ -5,6 +5,7 @@ import { tiles as layer1tiles0 } from "./dragonBattleWorld.layer1.tiles0.ts";
 export const catalog: TileMapDefinition = {
   "kind": CatalogKind.TileMap,
   "orientation": "isometric",
+  "formatVersion": "1.0",
   "renderOrder": "right-down",
   "width": 151,
   "height": 151,

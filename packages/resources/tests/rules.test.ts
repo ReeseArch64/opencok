@@ -2,7 +2,8 @@ import { expect, test } from "bun:test";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadRules, parseRules } from "../src/rules.ts";
+import { loadRules } from "../src/rules.ts";
+import { parseRules } from "../src/xml-fixtures.ts";
 
 const records =
   '<database><ItemSpec id="100100" level="0"/><ItemSpec id="100101" level="1"/></database>';
