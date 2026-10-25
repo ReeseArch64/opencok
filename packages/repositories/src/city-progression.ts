@@ -1,3 +1,4 @@
+import { readDragonTower, writeDragonTower } from "./dragon-tower";
 import { readExpedition, writeExpedition } from "./new-expedition";
 import { readArena, writeArena } from "./arena";
 import { readAnniversaryStatistics } from "./anniversary";
@@ -126,6 +127,9 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        dragonTower: command?.startsWith("dragontower")
+          ? await readDragonTower(tx, owner, now, num(profile, "serverId"), request)
+          : undefined,
         expedition: await readExpedition(tx, profile, now, command, request),
         arena:
           command?.startsWith("arena.") || command === "show.arena.army"
@@ -221,6 +225,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.dragonTower) await writeDragonTower(tx, owner, write.dragonTower);
         if (write.expedition) await writeExpedition(tx, owner, write.expedition);
         if (write.arena) await writeArena(tx, owner, write.arena);
         if (write.campaignVariables)

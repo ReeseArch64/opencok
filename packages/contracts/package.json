@@ -100,7 +100,9 @@
     "./world-march-runtime": "./src/world-march-runtime.ts",
     "./new-expedition": "./src/new-expedition.ts",
     "./responses/new-expedition": "./src/responses/new-expedition.ts",
-    "./expedition-treasury": "./src/expedition-treasury.ts"
+    "./expedition-treasury": "./src/expedition-treasury.ts",
+    "./dragon-tower": "./src/dragon-tower.ts",
+    "./responses/dragon-tower": "./src/responses/dragon-tower.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"

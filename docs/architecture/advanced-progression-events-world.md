@@ -34,11 +34,11 @@ PostgreSQL instance. No test uses the operator's running realm or player data.
 
 ## Remaining topic boundaries
 
-| Topic | Modules still requiring implementation and acceptance                                                                       |
-| ----- | --------------------------------------------------------------------------------------------------------------------------- |
-| 25    | Dragon tower, battle skill and garrison interactions, companion bindings and native-client acceptance                       |
-| 26    | Arena, expedition and remaining local activity handlers; remaining validated score producers; full native period acceptance |
-| 27    | Companion bindings, specialized targets, restart acceptance and native interest-stream acceptance                           |
+| Topic | Modules still requiring implementation and acceptance                                                                                                  |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 25    | Validated tower battle integration, battle skills and garrison interactions; native-client acceptance                                                  |
+| 26    | Remaining local activity handlers and trusted score producers; matched-period coordination, arena battle integration and full native period acceptance |
+| 27    | Specialized target engines, process-restart acceptance and native interest-stream acceptance                                                           |
 
 Existing read projections, catalogs, rankings and schema definitions are reused,
 but do not establish that these mutations are implemented. Combat-dependent modes
@@ -294,3 +294,25 @@ general state; nearby interested players receive only the corresponding map and
 march projections. Recovery triggered by a march query also writes its durable
 notifications. The reference accepts but does not attach `heroUid` in this army
 implementation, so that field remains inert rather than inventing hero effects.
+
+Dragon tower state, layer offers, virtual troops and purchased buffs reuse the
+maintained tower tables. Native entry pins weighted monster choices once. Army
+selection validates owned free quantities and capacity without reserving ordinary
+troops. Saved roster buffs authorize replacement or reinforcement and are consumed
+once. Healing persists the selected wounded troops and completion deadline;
+reconnect or a later tower request recovers that deadline and writes the native
+army notification with the transition. Gold and item acceleration remain atomic
+with the virtual troop update.
+
+Daily and weekly resets clear temporary armies, healing, buffs, score and claim
+counters while preserving the appropriate lifetime and weekly progress. A reset
+notification replaces the triggering operation, matching the source proxy's
+retry behavior. Share rewards are awarded once per day and their persisted
+counter saturates before signed overflow can reopen the reward. Purchases accept
+only the saved offered buff and replace matching buff groups. Native rankings
+project public local-realm records, and report reads preserve stored long fields.
+
+Tower battle and sweep operations remain gated because the realm has no validated
+tower combat integration. Local tests exercise existing imported completed-floor
+and wounded-army fixtures; those fixtures are not proof of battle correctness.
+No client-submitted win, score, report or casualty map can advance a floor.

@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  dragonTower?: import("./dragon-tower").DragonTowerState;
   expedition?: import("./new-expedition").ExpeditionState;
   arena?: import("./arena").ArenaState;
   anniversaryStatistics?: { statistics: Row; alliance: Row; times: Row };
@@ -116,6 +117,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  dragonTower?: import("./dragon-tower").DragonTowerWrite;
   expedition?: readonly Row[];
   arena?: import("./arena").ArenaWrite;
   campaignVariables?: readonly Row[];

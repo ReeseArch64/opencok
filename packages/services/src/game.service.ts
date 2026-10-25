@@ -280,6 +280,7 @@ export class GameService {
       "civilization.science.data.init",
       {},
     );
+    const dragonTower = await this.services.cityProgression?.(uid, "dragontower.init", {});
     const campaign = await this.services.cityProgression?.(uid, "campaign.init", {});
     const lottery = await this.services.cityProgression?.(uid, "lottery.init", {});
     const totems = await this.services.cityProgression?.(uid, "totem.init", {});
@@ -297,6 +298,7 @@ export class GameService {
       ...equipment?.body,
       ...generals?.body,
       ...dragons?.body,
+      ...dragonTower?.body,
       ...totems?.body,
       ...lottery?.body,
       ...civilization?.body,
@@ -325,6 +327,7 @@ export class GameService {
       equipment,
       generals,
       dragons,
+      dragonTower,
       civilization,
       campaign,
       lottery,
@@ -486,6 +489,7 @@ export class GameService {
       case "fort.destory":
       case "fort.destroy":
       case "dragonskill":
+      case "dragontower":
       case "minstrel":
       case "civilizationCastle":
       case "totem":

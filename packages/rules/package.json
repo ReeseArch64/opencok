@@ -118,7 +118,8 @@
     "./world-march-lifecycle": "./src/world-march-lifecycle.ts",
     "./dragon-progression": "./src/dragon-progression.ts",
     "./world-march-runtime": "./src/world-march-runtime.ts",
-    "./new-expedition": "./src/new-expedition.ts"
+    "./new-expedition": "./src/new-expedition.ts",
+    "./dragon-tower": "./src/dragon-tower.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

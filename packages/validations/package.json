@@ -53,7 +53,8 @@
     "./research": "./src/research.ts",
     "./military": "./src/military.ts",
     "./alliance": "./src/alliance.ts",
-    "./new-expedition": "./src/new-expedition.ts"
+    "./new-expedition": "./src/new-expedition.ts",
+    "./dragon-tower": "./src/dragon-tower.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",
