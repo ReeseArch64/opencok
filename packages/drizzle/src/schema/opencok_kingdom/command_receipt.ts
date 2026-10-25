@@ -13,8 +13,8 @@ export const command_receipt = opencok_kingdom.table(
     request: bytea("request").notNull(),
     response: bytea("response").notNull(),
     ownerEpoch: bigint("ownerEpoch", { mode: "bigint" }).notNull(),
-    expiresAt: bigint("expiresAt", { mode: "bigint" }),
     createdAt: bigint("createdAt", { mode: "bigint" }).notNull(),
+    expiresAt: bigint("expiresAt", { mode: "bigint" }),
   },
   (table) => [
     index("command_receipt_expiry").on(table.expiresAt),

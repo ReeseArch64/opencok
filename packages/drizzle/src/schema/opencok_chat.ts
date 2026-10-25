@@ -5,4 +5,4 @@ export { chat_avatar_profile } from "./opencok_chat/chat_avatar_profile";
 export { chat_mailbox_message } from "./opencok_chat/chat_mailbox_message";
 export { chat_mailbox_receipt } from "./opencok_chat/chat_mailbox_receipt";
 
-export * from "./opencok_chat/chat_social";
+export * from "./chat-social";
