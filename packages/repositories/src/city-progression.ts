@@ -1,3 +1,4 @@
+import { readQuests, writeQuests } from "./quests";
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
 import { readResourceNewGenerals } from "./world-resource-owner";
 import { new_general } from "@opencok/drizzle/schema/opencok_kingdom/new_general";
@@ -102,6 +103,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        quests: await readQuests(tx, owner, profile, now),
         statistics: statistics ?? {},
         buildingExperience: buildingExperience ?? {},
         buildings,
@@ -122,6 +124,7 @@ export function createCityProgressionStore(
     async update(write, economy) {
       validateWrite(write, owner);
       const persist = async () => {
+        if (write.quests) await writeQuests(tx, owner, write.quests);
         for (const row of write.buildings ?? []) {
           const value = {
             uuid: text(row, "uuid"),

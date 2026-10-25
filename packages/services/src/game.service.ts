@@ -245,11 +245,13 @@ export class GameService {
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
     await this.services.reconcileTimed?.(uid);
+    const quest = await this.services.cityProgression?.(uid, "quest.init", {});
     const state = await this.state(uid);
     const world = state.world;
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
       throw new GameError(errors.unsupported, "world_state");
     const body: Fields = {
+      ...quest?.body,
       ...serverClock(this.now(), 0),
       ...featureConfig(this.rules, this.featureContext(state.profile)),
       ...this.info(state),
@@ -333,6 +335,18 @@ export class GameService {
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
+      case "fresh.signIn":
+      case "daily.quest.ls":
+      case "daily.quest.reward":
+      case "task.reward.get":
+      case "quest.stage.rd":
+      case "story.task.info":
+      case "story.task.reward":
+      case "daily.task.info":
+      case "daily.task.reward":
+      case "daily.task.box.reward":
+      case "signIn.info":
+      case "signIn.reward":
       case "army.add":
       case "army.cd":
       case "army.fire":

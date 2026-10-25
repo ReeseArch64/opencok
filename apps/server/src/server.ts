@@ -1,3 +1,4 @@
+import { questsDomain } from "@opencok/services/quests";
 import { cityQueueCommands } from "@opencok/rules/city-command";
 import { trainingDomain } from "@opencok/services/training";
 import { hospitalDomain } from "@opencok/services/hospital";
@@ -327,7 +328,14 @@ export const RealmDependenciesLive = Layer.effect(
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary),
-      [constructionDomain, researchDomain, trainingDomain, hospitalDomain, fortificationDomain],
+      [
+        questsDomain,
+        constructionDomain,
+        researchDomain,
+        trainingDomain,
+        hospitalDomain,
+        fortificationDomain,
+      ],
       rules,
       economyEffects,
     );

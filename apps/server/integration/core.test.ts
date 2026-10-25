@@ -438,8 +438,18 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       const checkpoint = after.resource?.lastUpdateTime;
       if (typeof checkpoint !== "bigint") throw new Error("Missing reconnect checkpoint");
       expect(checkpoint).toBeGreaterThan(BigInt(String(before.resource?.lastUpdateTime ?? 0)));
+      const dailyFlush = BigInt(String(after.lord?.dailyTaskFlushTime ?? 0)),
+        allianceFlush = BigInt(String(after.lord?.newDailyTaskFlushTime ?? 0));
+      expect(dailyFlush).toBeGreaterThan(BigInt(String(before.lord?.dailyTaskFlushTime ?? 0)));
+      expect(dailyFlush / 86400000n).toBe(checkpoint / 86400000n);
+      expect(allianceFlush + 300000n).toBe(dailyFlush);
       expect(after).toEqual({
         ...before,
+        lord: {
+          ...before.lord,
+          dailyTaskFlushTime: dailyFlush,
+          newDailyTaskFlushTime: allianceFlush,
+        },
         items: before.items.map((item) =>
           item.uuid === "synthetic-item" ? { ...item, count: 6 } : item,
         ),

@@ -21,6 +21,16 @@ export interface WorldCatalogs {
   neutralResources?: Map<string, Rule>;
   barbarians?: Map<string, Rule>;
 }
+export interface ProgressionCatalogs {
+  legacyDaily?: Map<string, Rule>;
+  legacyRewards?: Map<string, Rule>;
+  freshSignIn?: Map<string, Rule>;
+  story?: Map<string, Rule>;
+  daily?: Map<string, Rule>;
+  dailyRewards?: Map<string, Rule>;
+  questPhases?: Map<string, Rule>;
+  signIn?: Map<string, Rule>;
+}
 export interface ReconnectCatalogs {
   treasures?: Map<string, Rule>;
   rewards?: Map<string, Rule>;
@@ -108,6 +118,7 @@ export class Rules {
     readonly materials: Map<string, Rule> = new Map(),
     readonly shops: Map<string, Rule> = new Map(),
     readonly trades: Map<string, Rule> = new Map(),
+    readonly progression: ProgressionCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): BuildingState {
     return buildingLevel(this.buildings, itemId, level, star, progress);
