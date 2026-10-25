@@ -23,6 +23,7 @@ export const cityQueueCommands: Readonly<
 > = {
   "equip.q.finish": { action: "queue.finish", types: [11], queueKey: "qUUID" },
   "havest.tool": { action: "queue.finish", types: [12], queueKey: "quuid" },
+  "race.science.upgrade": { action: "queue.finish", types: [19], target: "itemId" },
   "science.upgrade": { action: "queue.finish", types: [6], target: "itemId" },
   "army.complete": { action: "queue.finish", types: [1, 8, 9, 10, 17], target: "id" },
   "hospital.cure.done": { action: "queue.finish", types: [3] },

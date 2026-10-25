@@ -432,6 +432,9 @@ export class GameService {
       case "fort.cd":
       case "fort.destory":
       case "fort.destroy":
+      case "civilization.science.data.init":
+      case "race.science.research":
+      case "race.science.directly":
       case "science.data.init":
       case "science.research":
       case "science.directly":
@@ -454,6 +457,7 @@ export class GameService {
       case "hospital.cancel":
       case "fort.build.done":
       case "fort.cancel":
+      case "race.science.upgrade":
       case "science.upgrade":
       case "queue.finish":
       case "queue.cancel":

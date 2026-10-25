@@ -1,3 +1,4 @@
+import { civilizationScienceDomain } from "@opencok/services/civilization-science";
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { createGeneralDrawDomain } from "@opencok/services/general-draws";
 import { AllianceService, allianceStableId } from "@opencok/services/alliances";
@@ -351,6 +352,7 @@ export const RealmDependenciesLive = Layer.effect(
         questsDomain,
         constructionDomain,
         researchDomain,
+        civilizationScienceDomain,
         trainingDomain,
         hospitalDomain,
         fortificationDomain,

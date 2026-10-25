@@ -54,7 +54,8 @@
     "./player-effects": "./src/player-effects.ts",
     "./equipment": "./src/equipment.ts",
     "./generals": "./src/generals.ts",
-    "./alliance": "./src/alliance.ts"
+    "./alliance": "./src/alliance.ts",
+    "./civilization-science": "./src/civilization-science.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
