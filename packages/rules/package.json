@@ -103,7 +103,8 @@
     "./general-progression": "./src/general-progression.ts",
     "./general-talents": "./src/general-talents.ts",
     "./general-refinement": "./src/general-refinement.ts",
-    "./new-general-content": "./src/new-general-content.ts"
+    "./new-general-content": "./src/new-general-content.ts",
+    "./general-assignments": "./src/general-assignments.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -1,3 +1,4 @@
+import { refreshGeneralUnlocks } from "./general-assignments";
 import { refreshQuests } from "./quests";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -60,9 +61,15 @@ export function createCityProgressionHandlers<T>(
   rules: Rules,
   effects: InventoryEffects,
 ) {
-  const context = async (tx: T, owner: string, now: bigint, economy: ActivityEconomy) => {
+  const context = async (
+    tx: T,
+    owner: string,
+    now: bigint,
+    economy: ActivityEconomy,
+    command?: string,
+  ) => {
     const repository = store(tx, owner, now),
-      state = await repository.getState();
+      state = await repository.getState(command);
     const world = await effects.world(),
       emperor = await effects.emperor();
     const abilities = generalSkillPoints(state.effects.generals),
@@ -123,6 +130,7 @@ export function createCityProgressionHandlers<T>(
         const { repository, plan } = await context(tx, activity.ownerId, now, economy);
         if (action === "finish") plan.completing = activity;
         const body = await domain.apply(plan, action, activity);
+        if (action === "finish" && activity.type === 0) refreshGeneralUnlocks(plan);
         if (action === "finish")
           refreshQuests(plan, {
             legacy: activity.type === 0 ? 3 : activity.type === 6 ? 12 : undefined,
@@ -198,7 +206,7 @@ export function createCityProgressionHandlers<T>(
     ) {
       const domain = domains.find((candidate) => candidate.commands.includes(command));
       if (!domain) throw new GameError(errors.unsupported, "city_progression");
-      const { repository, plan } = await context(tx, owner, now, economy);
+      const { repository, plan } = await context(tx, owner, now, economy, command);
       const result = await domain.prepare(plan, command, decode(Buffer.from(params)));
       if (!domain.commands.includes("task.reward.get")) refreshQuests(plan);
       await repository.update(plan.write, economy);

@@ -46,7 +46,7 @@ export function createCityProgressionStore(
   boundary: ProgressionBoundary,
 ): CityProgressionStore {
   return {
-    async getState() {
+    async getState(command) {
       const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
       const [resource] = await tx.select().from(user_resource).where(eq(user_resource.uid, owner));
       if (!profile || !resource) throw new Error("Missing city owner");
@@ -106,7 +106,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
-        generalRoster: await readGeneralRoster(tx, owner),
+        generalRoster: await readGeneralRoster(tx, owner, command === "generaltrun"),
         abilityPages: await readAbilityPages(tx, owner),
         suitDecompositions: await readSuitDecompositions(tx, owner),
         quests: await readQuests(tx, owner, profile, now),

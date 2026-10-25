@@ -296,7 +296,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       stations: await optional(GameplayCatalog.GeneralStation),
       unlocks: await optional(GameplayCatalog.GetGeneral),
       draws: await optional(GameplayCatalog.GeneralDraw),
-      wheels: await optional(GameplayCatalog.GeneralDrawNewMain),
+      wheels: await optional(GameplayCatalog.HeroRoulette),
       refinementValues: await optionalRecords(GameplayCatalog.GeneralRandomNum),
       refinementLimits: await optionalRecords(GameplayCatalog.GeneralMaxNum),
       refinementRepeats: await optionalRecords(GameplayCatalog.GeneralRepeat),

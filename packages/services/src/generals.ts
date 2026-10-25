@@ -1,3 +1,10 @@
+import { generalTurntable } from "./general-turntable";
+import {
+  assignGeneral,
+  generalOfficeCommand,
+  refreshGeneralOffices,
+  refreshGeneralUnlocks,
+} from "./general-assignments";
 import { generalAbility } from "./general-skills";
 import { generalProperties, generalPropertyRule } from "@opencok/rules/general-refinement";
 import { generalFeatureAvailable } from "@opencok/rules/new-general-content";
@@ -155,7 +162,7 @@ export function generalChanges(context: CityProgressionContext, rows: readonly R
 export function recruitGeneral(context: CityProgressionContext, id: number, fragments = true) {
   const base = generalBase(context.rules, id),
     roster = generalRoster(context);
-  const building = context.state.buildings.find(
+  const building = [...(context.write.buildings ?? []), ...context.state.buildings].find(
     (row) => row.itemId === 433000 && num(row, "level") > 0,
   );
   if (!building) throw new GameError(errors.locked, "city_progression");
@@ -184,12 +191,29 @@ export function recruitGeneral(context: CityProgressionContext, id: number, frag
 }
 async function prepare(context: CityProgressionContext, command: string, params: Fields) {
   let body: Fields;
+  let event: Uint8Array | null | undefined;
   if (command === "general.init") {
+    refreshGeneralUnlocks(context);
+    refreshGeneralOffices(context);
     body = {
-      ...generalChanges(context, generalRoster(context).generals),
+      ...generalChanges(context, [
+        ...generalRoster(context).generals.filter(
+          (row) => !context.write.generalRoster?.generals?.some((next) => next.id === row.id),
+        ),
+        ...(context.write.generalRoster?.generals ?? []),
+      ]),
       generalBuyList: sfs.array(
         generalRoster(context).purchases.map((row) => sfs.object(generalPurchase(row))),
       ),
+    };
+  } else if (command === "generaltrun") {
+    const result = generalTurntable(context, params);
+    body = result.body;
+    event = result.event;
+  } else if (command === "heroOffice") {
+    body = {
+      ...generalOfficeCommand(context, params),
+      ...generalChanges(context, context.write.generalRoster?.generals ?? []),
     };
   } else if (command === "newgeneral.buy") {
     const id = cityInteger(int(params, "generalId"), 1),
@@ -233,7 +257,10 @@ async function prepare(context: CityProgressionContext, command: string, params:
       };
     } else {
       const row = ownedGeneral(context, id);
-      if (action === "addexp") {
+      if (["garrison", "canclegarrison"].includes(action)) {
+        assignGeneral(context, row, action, params);
+        body = generalChanges(context, context.write.generalRoster?.generals ?? []);
+      } else if (action === "addexp") {
         const uuid = str(params, "goods"),
           item = context.economy.ownedItem?.(uuid),
           rule = item && context.rules.goods.get(item.itemId);
@@ -299,10 +326,10 @@ async function prepare(context: CityProgressionContext, command: string, params:
       }
     }
   }
-  return { response: encode({ data: sfs.object(body) }), responseKind: "nested" as const };
+  return { response: encode({ data: sfs.object(body) }), responseKind: "nested" as const, event };
 }
 export const generalsDomain: CityDomain = {
-  commands: ["general.init", "newgeneral", "newgeneral.buy"],
+  commands: ["general.init", "newgeneral", "newgeneral.buy", "heroOffice", "generaltrun"],
   types: [],
   prepare,
   async apply() {
