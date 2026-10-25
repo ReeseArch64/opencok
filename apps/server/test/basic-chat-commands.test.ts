@@ -485,3 +485,17 @@ test("chat commands reject stale or missing subscriptions and propagate reached 
   expect(app.writes).toEqual([]);
   expect(owner.frames).toEqual([]);
 });
+
+test("committed room sends exclude expired recipients without losing the sender receipt", async () => {
+  const app = fixture();
+  const owner = app.peer("owner", ["country_1"]);
+  const expired = app.peer("expired", ["country_1"]);
+  app.states.set("expired", state());
+  expired.context.authorizeSession = async () => false;
+  owner.context.peers = new Set([owner.context, expired.context]);
+  owner.context.params = { roomId: "country_1", msg: "Olá 世界 🌍" };
+  expect(await app.send(owner.context)).toMatchObject({ seqId: 9007199254740991 });
+  expect(app.writes).toHaveLength(1);
+  expect(owner.frames).toHaveLength(1);
+  expect(expired.frames).toEqual([]);
+});

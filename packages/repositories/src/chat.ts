@@ -36,6 +36,8 @@ function validate(input: MessageInput) {
     !input.idempotencyKey ||
     Buffer.byteLength(input.idempotencyKey) > 64 ||
     typeof input.body !== "string" ||
+    !input.body.isWellFormed() ||
+    input.body.includes("\0") ||
     [...input.body].length < 1 ||
     [...input.body].length > 500 ||
     !(input.now instanceof Date) ||
@@ -124,6 +126,7 @@ export function createChatRepository(config: {
               .limit(1)
           )[0];
         if (!row) throw new Error("Chat message unavailable after write");
+        if (row.body !== input.body) throw new TypeError("Chat receipt content conflict");
         return { ...parseRow(row), inserted };
       },
       async getAll(roomId, afterMs = 0) {
