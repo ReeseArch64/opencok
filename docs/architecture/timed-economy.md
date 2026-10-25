@@ -68,7 +68,9 @@ rate boundaries. Both item and gold boosts settle the previous interval first.
 The item path retains the uncollected buffer; the gold path collects it before
 payment, matching its existing behavior. A boost cannot extend an active boost.
 The specialized science-stone producer requires its civilization domain and is
-not treated as an ordinary four-resource building.
+not treated as an ordinary four-resource building. Seasonal harvest rewards and
+quest triggers remain owned by their event/progression domains; this common
+production layer emits committed events rather than implementing those systems.
 
 Authoritative domains changing a building, general, effect or production rate
 must call `changeProductionInTransaction` inside their fenced mutation, with the
