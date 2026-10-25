@@ -89,7 +89,8 @@
     "./responses/research": "./src/responses/research.ts",
     "./responses/military": "./src/responses/military.ts",
     "./alliance-gameplay": "./src/alliance-gameplay.ts",
-    "./responses/alliance": "./src/responses/alliance.ts"
+    "./responses/alliance": "./src/responses/alliance.ts",
+    "./world-march-lifecycle": "./src/world-march-lifecycle.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"
