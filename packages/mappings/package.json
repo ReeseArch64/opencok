@@ -65,7 +65,10 @@
     "./world-march-runtime": "./src/world-march-runtime.ts",
     "./new-expedition": "./src/new-expedition.ts",
     "./dragon-tower": "./src/dragon-tower.ts",
-    "./local-activity-info": "./src/local-activity-info.ts"
+    "./local-activity-info": "./src/local-activity-info.ts",
+    "./chat-social": "./src/chat-social.ts",
+    "./postbox": "./src/postbox.ts",
+    "./chat-native": "./src/chat-native.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

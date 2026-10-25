@@ -1,4 +1,5 @@
 export interface MutationCommand {
+  expiresAt?: bigint;
   participants?: readonly string[];
   owner: string;
   requestId: string;
@@ -15,6 +16,7 @@ export interface EconomyPosting {
 }
 
 export interface MutationEvent {
+  expiresAt?: bigint;
   id: string;
   type: string;
   payload: Uint8Array;

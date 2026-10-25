@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { lte, and, asc, eq, inArray } from "drizzle-orm";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
@@ -106,6 +106,11 @@ export function createMutationExecutor(
             ),
           );
         if (receipt) {
+          if (
+            receipt.request.length === 0 ||
+            (receipt.expiresAt !== null && receipt.expiresAt <= createdAt)
+          )
+            throw new Error("Mutation receipt expired");
           if (receipt.command !== command || !receipt.request.equals(request))
             throw new Error("Mutation receipt conflict");
           authority.assertReady();
@@ -115,7 +120,7 @@ export function createMutationExecutor(
         const response = await appendMutationRecords(
           tx,
           authority,
-          { owner, requestId, command, request },
+          { owner, requestId, command, request, expiresAt: input.expiresAt },
           result,
           createdAt,
           accounts,
@@ -143,6 +148,11 @@ export async function appendMutationRecords(
   const request = bytes(input.request, 65536);
   const key = { kingdomId: authority.kingdomId, ownerUid: owner, requestId };
   if (createdAt < 0n || createdAt > 9223372036854775807n) throw new Error("Invalid mutation clock");
+  if (
+    input.expiresAt !== undefined &&
+    (input.expiresAt <= createdAt || input.expiresAt > 9223372036854775807n)
+  )
+    throw new Error("Invalid mutation expiry");
   await fenceRealmTransaction(tx, authority);
   const response = bytes(result.response, 1048576);
   const postings = result.postings ?? [],
@@ -151,14 +161,25 @@ export async function appendMutationRecords(
     throw new Error("Mutation effect limit exceeded");
   const seen = new Set<string>();
   for (const event of events) {
+    if (
+      event.expiresAt !== undefined &&
+      (event.expiresAt <= createdAt || event.expiresAt > 9223372036854775807n)
+    )
+      throw new Error("Invalid mutation event expiry");
     identifier(event.id, 40);
     identifier(event.type, 128);
     if (seen.has(event.id)) throw new Error("Duplicate mutation event");
     seen.add(event.id);
   }
-  await tx
-    .insert(command_receipt)
-    .values({ ...key, command, request, response, ownerEpoch: authority.epoch, createdAt });
+  await tx.insert(command_receipt).values({
+    ...key,
+    command,
+    request,
+    response,
+    ownerEpoch: authority.epoch,
+    createdAt,
+    expiresAt: input.expiresAt,
+  });
   for (const [entry, posting] of postings.entries()) {
     const delta = validatePosting(posting);
     if (posting.account !== owner && !additionalAccounts.has(posting.account))
@@ -182,6 +203,7 @@ export async function appendMutationRecords(
       payload: bytes(event.payload, 65536),
       createdAt,
       publishedAt: 0n,
+      expiresAt: event.expiresAt ?? input.expiresAt,
     });
   authority.assertReady();
   return response;
@@ -200,6 +222,7 @@ export async function relayMutationEvent(
   }) => Promise<void>,
   now = Date.now,
   eventType?: string,
+  retryDelayMs = 0,
 ): Promise<boolean> {
   const [event] = await db
     .select()
@@ -209,6 +232,7 @@ export async function relayMutationEvent(
         eq(mutation_outbox.kingdomId, authority.kingdomId),
         eq(mutation_outbox.publishedAt, 0n),
         eventType ? eq(mutation_outbox.eventType, eventType) : undefined,
+        lte(mutation_outbox.nextAttemptAt, BigInt(now())),
       ),
     )
     .orderBy(
@@ -236,6 +260,24 @@ export async function relayMutationEvent(
         timer = setTimeout(() => reject(new Error("Mutation publication timeout")), 3000);
       }),
     ]);
+  } catch (error) {
+    if (retryDelayMs > 0)
+      await db.transaction(async (tx) => {
+        await fenceRealmTransaction(tx, authority);
+        await tx
+          .update(mutation_outbox)
+          .set({ nextAttemptAt: BigInt(now() + retryDelayMs) })
+          .where(
+            and(
+              eq(mutation_outbox.kingdomId, event.kingdomId),
+              eq(mutation_outbox.ownerUid, event.ownerUid),
+              eq(mutation_outbox.requestId, event.requestId),
+              eq(mutation_outbox.eventId, event.eventId),
+              eq(mutation_outbox.publishedAt, 0n),
+            ),
+          );
+      });
+    throw error;
   } finally {
     clearTimeout(timer);
   }

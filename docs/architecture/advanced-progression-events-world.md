@@ -100,7 +100,7 @@ return through the same checkpoint. Random movement requires no active marches a
 chooses a free footprint on the server. Random choices and costs replay from the
 receipt. Native inspection, march lists and map queries expose the saved state.
 
-Migration `0017_world_march_runtime.sql` adds bounded march checkpoints and map
+Migration `0018_world_march_runtime.sql` adds bounded march checkpoints and map
 interests. Background recovery scans persisted deadlines and unregistered ordinary
 resource marches in bounded batches, retaining original deadlines and avoiding a
 second reservation on import. Checkpoints use explicit versions and terminal state.
@@ -230,7 +230,7 @@ defaults. An absent opponent-name cache can be resolved from the owned first-att
 history without mutating the cache or loading unrelated battle data.
 
 Arena registration and virtual army preferences use migration
-`0019_arena_runtime.sql`. Its registration table preserves millisecond timestamps,
+`0020_arena_runtime.sql`. Its registration table preserves millisecond timestamps,
 application identity and ratings without altering the nullable legacy arena table
 or its integer time field. An unambiguous legacy owner imports once; the original
 record remains read-only. Native info and roster queries expose the saved state.
@@ -323,3 +323,10 @@ marker. `resource.client.reward.get` authenticates the player and returns the
 maintained reward preview plus the source catalog strings. It performs no claim,
 inventory mutation or counter update. Reward previews preserve their native
 array, string and correlation fields without introducing a free grant endpoint.
+
+The integrated migration sequence preserves the already published social outbox
+retention migration as `0017`. The additional world, totem, arena and expedition
+migrations follow as `0018` through `0021`. Databases that applied only the
+published develop sequence can upgrade without editing their migration history.
+Earlier draft worktree migration numbers were not a deployed release sequence;
+disposable databases built from those drafts must be recreated before validation.

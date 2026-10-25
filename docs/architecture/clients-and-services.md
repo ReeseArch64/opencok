@@ -184,6 +184,16 @@ any restore deletes expired messages before reopening the service. A requirement
 delete all backup copies within seven days needs specific backup/key design; do not
 claim this guarantee as a consequence of a `DELETE` or TTL.
 
+### Topic 24 implementation
+
+The TypeScript Chat service now persists distribution events with messages, leases
+instance cursors and bridges events to fenced native realm consumers. MongoDB archive
+writes verify content/version before PostgreSQL compaction. Direct/private channels use
+an explicit 30-day policy; other public channels retain 24 hours. Realm economic state
+continues to own postbox, friendship mine rewards and paid notice costs/refunds.
+[Implementation, deployment and validation](../social-chat-migration.md) document the
+pinned adapter, recovery semantics and limits. Redis remains optional for delivery.
+
 ## 21. File and media lifecycle
 
 The shared API media module authenticates the owner and creates an `uploadId` with size, allowed MIME,

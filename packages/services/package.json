@@ -86,7 +86,15 @@
     "./world-publication": "./src/world-publication.ts",
     "./new-expedition": "./src/new-expedition.ts",
     "./expedition-treasury": "./src/expedition-treasury.ts",
-    "./dragon-tower": "./src/dragon-tower.ts"
+    "./dragon-tower": "./src/dragon-tower.ts",
+    "./chat-delivery": "./src/chat-delivery.ts",
+    "./chat-social": "./src/chat-social.ts",
+    "./postbox": "./src/postbox.ts",
+    "./chat-native": "./src/chat-native.ts",
+    "./chat-notice": "./src/chat-notice.ts",
+    "./friendship-mine": "./src/friendship-mine.ts",
+    "./realm-chat-delivery": "./src/realm-chat-delivery.ts",
+    "./realm-social": "./src/realm-social.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
@@ -96,6 +104,7 @@
     "@opencok/rules": "workspace:*",
     "@opencok/mappings": "workspace:*",
     "@opencok/dtos": "workspace:*",
-    "@opencok/validations": "workspace:*"
+    "@opencok/validations": "workspace:*",
+    "@opencok/identity": "workspace:*"
   }
 }

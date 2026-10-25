@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import type { Pool } from "pg";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres.ts";
 import { createChatMailboxStore } from "../../../packages/repositories/src/chat-mailbox.ts";
@@ -18,16 +19,11 @@ let consumer: ReturnType<typeof createChatMailboxStore>;
 const now = 100000;
 beforeAll(async () => {
   pool = await postgres.start();
-  await pool.query("create schema opencok_chat; create schema opencok_kingdom");
-  await pool.query(
-    await readFile(
-      new URL(
-        "../../../packages/drizzle/migrations/global/0005_chat_mailbox_effects.sql",
-        import.meta.url,
-      ),
-      "utf8",
-    ),
-  );
+  await pool.query("create schema opencok_kingdom");
+  await migrate(drizzle(pool), {
+    migrationsFolder: new URL("../../../packages/drizzle/migrations/global", import.meta.url)
+      .pathname,
+  });
   await pool.query(
     await readFile(
       new URL(
@@ -61,7 +57,7 @@ afterAll(async () => {
 });
 async function seed() {
   await pool.query(
-    "truncate opencok_kingdom.mail, opencok_kingdom.mail_group, opencok_kingdom.mail_chat_read_intent, opencok_chat.chat_mailbox_message, opencok_chat.chat_mailbox_receipt",
+    "truncate opencok_kingdom.mail, opencok_kingdom.mail_group, opencok_kingdom.mail_chat_read_intent, opencok_chat.chat_mailbox_message, opencok_chat.chat_mailbox_receipt, opencok_chat.chat_mailbox_intent",
   );
   await pool.query(`insert into opencok_kingdom.mail values ('m','self','peer',20,0,1,0),('foreign','other','peer',20,0,0,1);
 insert into opencok_kingdom.mail_group values ('self',100,'peer'),('other',100,'peer');

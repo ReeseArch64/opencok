@@ -301,3 +301,37 @@ test("V1 cache detects contention, invalid metadata and poisoned selections with
   cache.command = async () => [7, null];
   await expect(cache.systemMailPage("self", ["a"], 1, 1n, () => {})).rejects.toThrow();
 });
+
+test("native mixed polling composes social rooms with realm mail without losing wire types", async () => {
+  const f = fixture();
+  f.services.social = async (_owner, command, params): Promise<Fields> => {
+    if (command === "chat.shield.list") return { list: sfs.array([]) };
+    const room = JSON.parse(str(params, "params"))[0];
+    return {
+      rooms: sfs.array([
+        sfs.object({
+          id: sfs.string(room.id),
+          type: sfs.int(room.type),
+          msg: sfs.array([]),
+          firstSeqId: sfs.string("-1"),
+          lastSeqId: sfs.string("-1"),
+        }),
+      ]),
+    };
+  };
+  const result = await f.game.execute("self", "chat.get.new", {
+    params: sfs.string(
+      JSON.stringify([
+        { id: "0", type: 4, seqid: "-1" },
+        { id: "0", type: 2, seqid: "-1" },
+        { id: "0", type: 0, seqid: "0" },
+      ]),
+    ),
+  });
+  const rooms = (result.body.rooms!.value as Value[]).map(fields);
+  expect(rooms.map((room) => room.type?.value)).toEqual([4, 2, 0]);
+  expect(ids(rooms[0]!)).toEqual(["a"]);
+  expect(ids(rooms[1]!)).toEqual([]);
+  expect(rooms[0]!.firstSeqId).toEqual(sfs.string("-1"));
+  expect(f.queries.every((query) => query.anchor === null)).toBe(true);
+});

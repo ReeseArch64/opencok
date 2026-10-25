@@ -124,29 +124,36 @@
     {
       "idx": 17,
       "version": "7",
-      "when": 1792959880253,
-      "tag": "0017_world_march_runtime",
+      "when": 1792958284625,
+      "tag": "0017_social_outbox_retention",
       "breakpoints": false
     },
     {
       "idx": 18,
       "version": "7",
-      "when": 1792960864369,
-      "tag": "0018_totem_runtime",
+      "when": 1792959880253,
+      "tag": "0018_world_march_runtime",
       "breakpoints": false
     },
     {
       "idx": 19,
       "version": "7",
-      "when": 1792964324698,
-      "tag": "0019_arena_runtime",
+      "when": 1792960864369,
+      "tag": "0019_totem_runtime",
       "breakpoints": false
     },
     {
       "idx": 20,
       "version": "7",
+      "when": 1792964324698,
+      "tag": "0020_arena_runtime",
+      "breakpoints": false
+    },
+    {
+      "idx": 21,
+      "version": "7",
       "when": 1792965705921,
-      "tag": "0020_expedition_periods",
+      "tag": "0021_expedition_periods",
       "breakpoints": false
     }
   ]
