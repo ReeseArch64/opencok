@@ -120,3 +120,6 @@ export { chat_mailbox_message } from "./opencok_chat/chat_mailbox_message";
 export { chat_mailbox_receipt } from "./opencok_chat/chat_mailbox_receipt";
 
 export { cn1_profile_session } from "./opencok_global/cn1_profile_session";
+
+export { game_identity as opencok_global_game_identity } from "./opencok_global/game_identity";
+export { character_provisioning as opencok_global_character_provisioning } from "./opencok_global/character_provisioning";

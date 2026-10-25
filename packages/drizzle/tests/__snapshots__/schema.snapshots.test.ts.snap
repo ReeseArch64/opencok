@@ -14361,3 +14361,38 @@ select "id", "purchased" from "opencok_kingdom"."shop_stock" where "opencok_king
 update "opencok_kingdom"."shop_stock" set "id" = $1, "purchased" = $2 where "opencok_kingdom"."shop_stock"."id" = $3
 delete from "opencok_kingdom"."shop_stock" where "opencok_kingdom"."shop_stock"."id" = $1"
 `;
+
+exports[`opencok_global.character_provisioning: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["identityId","varchar(40)",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["deviceUuid","varchar(100)",true,null,null,null]
+column ["gameUid","varchar(20)",true,null,null,null]
+column ["payload","varchar(4096)",true,null,null,null]
+column ["state","integer",true,"0",null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["activatedAt","bigint",true,"0",null,null]
+primary ["character_provisioning_PRIMARY",["identityId","kingdomId"]]
+index ["character_provisioning_uid",true,["gameUid"]]
+index ["character_provisioning_device",true,["kingdomId","deviceUuid"]]
+check ["character_provisioning_state","\\"state\\" IN (0, 1)"]
+insert into "opencok_global"."character_provisioning" ("identityId", "kingdomId", "deviceUuid", "gameUid", "payload", "state", "createdAt", "activatedAt") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "identityId", "kingdomId", "deviceUuid", "gameUid", "payload", "state", "createdAt", "activatedAt" from "opencok_global"."character_provisioning" where "opencok_global"."character_provisioning"."identityId" = $1
+update "opencok_global"."character_provisioning" set "identityId" = $1, "kingdomId" = $2, "deviceUuid" = $3, "gameUid" = $4, "payload" = $5, "state" = $6, "createdAt" = $7, "activatedAt" = $8 where "opencok_global"."character_provisioning"."identityId" = $9
+delete from "opencok_global"."character_provisioning" where "opencok_global"."character_provisioning"."identityId" = $1"
+`;
+
+exports[`opencok_global.game_identity: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["id","varchar(40)",true,null,null,null]
+column ["issuer","varchar(255)",true,null,null,null]
+column ["subject","varchar(128)",true,null,null,null]
+column ["disabled","integer",true,"0",null,null]
+column ["createdAt","bigint",true,null,null,null]
+primary ["game_identity_PRIMARY",["id"]]
+index ["game_identity_provider",true,["issuer","subject"]]
+insert into "opencok_global"."game_identity" ("id", "issuer", "subject", "disabled", "createdAt") values ($1, $2, $3, $4, $5)
+select "id", "issuer", "subject", "disabled", "createdAt" from "opencok_global"."game_identity" where "opencok_global"."game_identity"."id" = $1
+update "opencok_global"."game_identity" set "id" = $1, "issuer" = $2, "subject" = $3, "disabled" = $4, "createdAt" = $5 where "opencok_global"."game_identity"."id" = $6
+delete from "opencok_global"."game_identity" where "opencok_global"."game_identity"."id" = $1"
+`;

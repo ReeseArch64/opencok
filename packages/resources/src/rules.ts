@@ -376,7 +376,12 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       luckyEffects,
       monarchTitles,
     },
-    { achievementCount, militaryRanks, servers },
+    {
+      achievementCount,
+      militaryRanks,
+      servers,
+      characters: await optional(GameplayCatalog.Characters),
+    },
     { treasures, rewards, quests, positionUnlock },
     mail,
     { fieldMonsters, armies, neutralResources, barbarians, allianceBuildings },

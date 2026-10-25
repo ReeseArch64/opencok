@@ -82,7 +82,8 @@
     "./mail-rewards": "./src/mail-rewards.ts",
     "./building": "./src/building.ts",
     "./shops": "./src/shops.ts",
-    "./trade": "./src/trade.ts"
+    "./trade": "./src/trade.ts",
+    "./provisioning": "./src/provisioning.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"

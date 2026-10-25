@@ -64,6 +64,13 @@
       "when": 1792883061079,
       "tag": "0008_avatar_lifecycle",
       "breakpoints": false
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792895732400,
+      "tag": "0009_character_provisioning",
+      "breakpoints": false
     }
   ]
 }
