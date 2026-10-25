@@ -10,4 +10,5 @@ export const catalog: CatalogTable<StatusCopyDefinition> = {
   "kind": CatalogKind.Table,
   "records": [...records0, ...records1, ...records2, ...records3, ...records4],
   "sections": [],
+  "metadata": { "KSOProductBuildVer": "2052-10.1.0.6207" },
 };

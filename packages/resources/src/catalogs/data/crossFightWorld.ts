@@ -9,6 +9,7 @@ import { tiles as layer1tiles2 } from "./crossFightWorld.layer1.tiles2.ts";
 export const catalog: TileMapDefinition = {
   "kind": CatalogKind.TileMap,
   "orientation": "isometric",
+  "formatVersion": "1.0",
   "renderOrder": "right-down",
   "width": 301,
   "height": 301,

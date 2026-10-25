@@ -78,7 +78,10 @@ function decode(value: string, separators: readonly string[]): CatalogValue {
   return value.split(separators[0]!).map((part) => decode(part, separators.slice(1)));
 }
 
-function table(database: SourceElement[]): { definition: CatalogDefinition; codec: CatalogCodec } {
+function table(
+  database: SourceElement[],
+  metadata: Readonly<Record<string, string>>,
+): { definition: CatalogDefinition; codec: CatalogCodec } {
   const raw: Record<string, string>[] = [];
   const sections: CatalogSection[] = [];
   const collect = (nodes: SourceElement[], parent?: number) => {
@@ -149,7 +152,21 @@ function table(database: SourceElement[]): { definition: CatalogDefinition; code
     }
     return result;
   });
-  return { definition: { kind: CatalogKind.Table, records, sections }, codec };
+  return {
+    definition: {
+      kind: CatalogKind.Table,
+      records,
+      sections,
+      ...(Object.keys(metadata).length
+        ? {
+            metadata: Object.fromEntries(
+              Object.entries(metadata).map(([key, value]) => [fieldName(key), scalar(value)]),
+            ),
+          }
+        : {}),
+    },
+    codec,
+  };
 }
 
 function tileMap(node: SourceElement): TileMapDefinition {
@@ -157,6 +174,8 @@ function tileMap(node: SourceElement): TileMapDefinition {
   return {
     kind: CatalogKind.TileMap,
     orientation: attrs.orientation!,
+    ...(attrs.version === undefined ? {} : { formatVersion: attrs.version }),
+    ...(attrs.tiledversion === undefined ? {} : { editorVersion: attrs.tiledversion }),
     ...(attrs.renderorder === undefined ? {} : { renderOrder: attrs.renderorder }),
     width: Number(attrs.width),
     height: Number(attrs.height),
@@ -304,9 +323,10 @@ export function convertCatalog(
         };
       });
     const variables = tagged(database, "vars").flatMap((group) =>
-      Object.values(VariableScope).flatMap((scope) =>
-        tagged(children(group, "vars"), scope).map((node) => variable(node, scope)),
-      ),
+      children(group, "vars").flatMap((node) => {
+        const scope = Object.values(VariableScope).find((scope) => Object.hasOwn(node, scope));
+        return scope ? [variable(node, scope)] : [];
+      }),
     );
     return {
       definition: {
@@ -353,5 +373,5 @@ export function convertCatalog(
       codec: {},
     };
   }
-  return table(database);
+  return table(database, attributes(root));
 }

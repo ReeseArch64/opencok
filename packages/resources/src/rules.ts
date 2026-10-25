@@ -1,159 +1,28 @@
 import { createBuildingCatalog } from "./buildings/index.ts";
 import { importBuildingCatalog } from "./buildings/import.ts";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
-import { gameplayCatalogs } from "./catalogs.ts";
-import type { GameplayCatalogDocument } from "./catalog.ts";
+import { CatalogKind } from "@opencok/enums/catalog-kind";
+import { catalogDefinitions } from "./catalog-definitions.ts";
+import { catalogCodecs } from "./catalog-codecs.ts";
+import type { CatalogDefinition } from "./catalog-model.ts";
+import {
+  legacyCatalogRecords,
+  legacyDeclaredCatalog,
+  indexRules,
+} from "./catalog-compatibility.ts";
 import { readFile, stat, access } from "node:fs/promises";
-import { XMLParser, XMLValidator } from "fast-xml-parser";
 import { join } from "node:path";
 import { Rules, type Rule } from "@opencok/rules/game";
 
-function parseDocument(xml: string, preserveOrder = false) {
-  if (
-    Buffer.byteLength(xml) > 16 * 1024 * 1024 ||
-    /<!DOCTYPE|<!ENTITY/i.test(xml) ||
-    XMLValidator.validate(xml) !== true
-  )
-    throw new Error("Invalid gameplay resource XML");
-  return new XMLParser({
-    preserveOrder,
-    ignoreAttributes: false,
-    attributeNamePrefix: "",
-    parseAttributeValue: false,
-    parseTagValue: false,
-    trimValues: false,
-    removeNSPrefix: true,
-    isArray: (tag) => tag === "Group" || tag === "ItemSpec",
-  }).parse(xml);
-}
-
-function parseRecords(source: string | GameplayCatalogDocument, name: string): Rule[] {
-  const parsed = typeof source === "string" ? parseDocument(source) : source.unordered;
-  if (!Object.hasOwn(parsed, "database")) throw new Error("Invalid gameplay resource root");
-  const records: unknown[] = [];
-  const collect = (node: unknown) => {
-    if (!node || typeof node !== "object") return;
-    const group = node as { id?: string; ItemSpec?: unknown[]; Group?: unknown[] };
-    if (group.ItemSpec && (name !== "vip" || group.id === "vip")) records.push(...group.ItemSpec);
-    for (const child of group.Group ?? []) collect(child);
-  };
-  collect(parsed.database);
-  for (const record of records)
-    if (
-      !record ||
-      typeof record !== "object" ||
-      Array.isArray(record) ||
-      Object.values(record).some((value) => typeof value !== "string")
-    )
-      throw new Error("Invalid gameplay resource record");
-  return records as Rule[];
-}
-
-function parseDeclaredCatalog(source: string | GameplayCatalogDocument): {
-  items: Map<string, Rule>;
-  groups: Map<string, Rule[]>;
-  records: Rule[];
-} {
-  type Element = Record<string, unknown> & { ":@"?: Rule };
-  const parsed = (
-    typeof source === "string" ? parseDocument(source, true) : source.ordered
-  ) as Element[];
-  const root = parsed.find((element) => Object.hasOwn(element, "database"));
-  if (!root || !Array.isArray(root.database)) throw new Error("Invalid gameplay resource root");
-  const elements = (nodes: Element[]) =>
-    nodes.filter((node) =>
-      Object.keys(node).some((key) => key !== ":@" && !key.startsWith("#") && !key.startsWith("?")),
-    );
-  const children = elements(root.database as Element[]);
-  const groups = children.filter((node) => Object.hasOwn(node, "Group"));
-  const items = new Map<string, Rule>();
-  const groupsById = new Map<string, Rule[]>();
-  const declarations: Rule[] = [];
-  const records = (nodes: Element[]): Rule[] =>
-    elements(nodes).map((node) => {
-      const record = { ...node[":@"] };
-      if (Object.values(record).some((value) => typeof value !== "string"))
-        throw new Error("Invalid gameplay resource record");
-      items.set(record.id ?? "null", record);
-      declarations.push(record);
-      return record;
-    });
-  if (!groups.length) records(children);
-  else
-    for (const group of groups) {
-      const id = group[":@"]?.id;
-      if (typeof id !== "string" || !Array.isArray(group.Group))
-        throw new Error("Invalid gameplay resource group");
-      const values = records(group.Group as Element[]);
-      groupsById.set(id, values);
-    }
-  return { items, groups: groupsById, records: declarations };
-}
-
-function indexRules(records: Rule[], name: string): Map<string, Rule> {
-  if (!records.length) throw new Error("Missing gameplay resource records");
-  const map = new Map<string, Rule>();
-  const replaceDuplicates = [
-    "goods",
-    "shop_new",
-    "science",
-    "equipment",
-    "status",
-    "dragon_skill",
-    "activity_panel",
-    "reward",
-    "mail",
-    "alliance_teleport",
-    "field_monster",
-    "army",
-    "sp_resources",
-    "barbarion",
-    "general_base",
-    "general_skill",
-    "general_official",
-    "general_random_effect",
-    "reputation_level",
-  ].includes(name);
-  for (const record of records) {
-    const item = record;
-    if (!item.id?.trim()) continue;
-    if (!replaceDuplicates && map.has(item.id))
-      throw new Error(`Invalid gameplay resource ID: ${name}`);
-    map.set(item.id, item);
-  }
-  if (!map.size && name !== "goods") throw new Error(`Invalid gameplay resource ID: ${name}`);
-  return map;
-}
-
-export function parseRules(xml: string | GameplayCatalogDocument, name: string): Map<string, Rule> {
-  if (
-    [
-      "item",
-      "general_sale",
-      "pay_servercontrol",
-      "function_on",
-      "kingdomskill",
-      "setting",
-      "fb_share",
-      "function_star",
-    ].includes(name)
-  )
-    return parseDeclaredCatalog(xml).items;
-  return indexRules(parseRecords(xml, name), name);
-}
-
-export function parseGameplayCatalog(xml: string): GameplayCatalogDocument {
-  return { ordered: parseDocument(xml, true), unordered: parseDocument(xml) };
-}
-
 export async function loadRules(directory?: string, kingdomId = 1) {
+  const fixtures = directory === undefined ? undefined : await import("./xml-fixtures.ts");
   const available = async (name: GameplayCatalog): Promise<boolean> =>
     directory === undefined
-      ? Object.hasOwn(gameplayCatalogs, name)
+      ? Object.hasOwn(catalogDefinitions, name)
       : exists(join(directory, `${name}.xml`));
-  const read = async (name: GameplayCatalog): Promise<string | GameplayCatalogDocument> => {
+  const read = async (name: GameplayCatalog): Promise<string | CatalogDefinition> => {
     if (directory === undefined) {
-      const factory = gameplayCatalogs[name];
+      const factory = catalogDefinitions[name as keyof typeof catalogDefinitions];
       if (!factory) throw new Error("Missing gameplay catalog");
       return factory();
     }
@@ -161,10 +30,23 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     if ((await stat(file)).size > 16 * 1024 * 1024) throw new Error("Oversized gameplay resource");
     return readFile(file, "utf8");
   };
-  const load = async (name: GameplayCatalog): Promise<Map<string, Rule>> =>
-    parseRules(await read(name), name);
+  const records = (source: string | CatalogDefinition, name: GameplayCatalog): Rule[] =>
+    typeof source === "string"
+      ? fixtures!.parseRecords(source, name)
+      : legacyCatalogRecords(source, catalogCodecs[name] ?? {}, name);
+  const load = async (name: GameplayCatalog): Promise<Map<string, Rule>> => {
+    const source = await read(name);
+    return typeof source === "string"
+      ? fixtures!.parseRules(source, name)
+      : indexRules(records(source, name), name);
+  };
+  const parseDeclared = (source: string | CatalogDefinition, name: GameplayCatalog) => {
+    if (typeof source === "string") return fixtures!.parseDeclaredCatalog(source);
+    if (source.kind !== CatalogKind.Table) throw new Error("Expected gameplay table");
+    return legacyDeclaredCatalog(source, catalogCodecs[name] ?? {});
+  };
   const declared = async (name: GameplayCatalog) =>
-    (await available(name)) ? parseDeclaredCatalog(await read(name)) : undefined;
+    (await available(name)) ? parseDeclared(await read(name), name) : undefined;
   const buildings =
     directory === undefined
       ? createBuildingCatalog()
@@ -175,7 +57,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
   ]);
   const starCatalog = await declared(GameplayCatalog.FunctionStar);
   const itemCatalog = (await available(GameplayCatalog.Item))
-    ? parseDeclaredCatalog(await read(GameplayCatalog.Item))
+    ? parseDeclared(await read(GameplayCatalog.Item), GameplayCatalog.Item)
     : undefined;
   const items = itemCatalog?.items ?? new Map<string, Rule>();
   const dataConfig = new Map(
@@ -276,7 +158,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     ].map(optional),
   );
   const prestigeLevelRecords = (await available(GameplayCatalog.ReputationLevel))
-    ? parseRecords(await read(GameplayCatalog.ReputationLevel), GameplayCatalog.ReputationLevel)
+    ? records(await read(GameplayCatalog.ReputationLevel), GameplayCatalog.ReputationLevel)
     : undefined;
   const prestigeLevels = prestigeLevelRecords
     ? indexRules(prestigeLevelRecords, GameplayCatalog.ReputationLevel)
@@ -296,10 +178,11 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     optional(GameplayCatalog.Mail),
   ]);
   const quests = (await available(GameplayCatalog.Quest))
-    ? parseDeclaredCatalog(await read(GameplayCatalog.Quest)).records
+    ? parseDeclared(await read(GameplayCatalog.Quest), GameplayCatalog.Quest).records
     : undefined;
   const positionUnlock = (await available(GameplayCatalog.PositionUnlock))
-    ? parseDeclaredCatalog(await read(GameplayCatalog.PositionUnlock)).records
+    ? parseDeclared(await read(GameplayCatalog.PositionUnlock), GameplayCatalog.PositionUnlock)
+        .records
     : undefined;
   const [fieldMonsters, armies, neutralResources, barbarians] = await Promise.all([
     optional(GameplayCatalog.FieldMonster),
@@ -308,10 +191,11 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     optional(GameplayCatalog.Barbarion),
   ]);
   const allianceBuildings = (await available(GameplayCatalog.AllianceBuilding))
-    ? parseDeclaredCatalog(await read(GameplayCatalog.AllianceBuilding)).records
+    ? parseDeclared(await read(GameplayCatalog.AllianceBuilding), GameplayCatalog.AllianceBuilding)
+        .records
     : undefined;
   const achievementCount = (await available(GameplayCatalog.Achievement))
-    ? parseRecords(await read(GameplayCatalog.Achievement), GameplayCatalog.Achievement).length
+    ? records(await read(GameplayCatalog.Achievement), GameplayCatalog.Achievement).length
     : 0;
   return new Rules(
     buildings,

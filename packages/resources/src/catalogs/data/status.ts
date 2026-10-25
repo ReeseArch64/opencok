@@ -28,4 +28,5 @@ export const catalog: CatalogTable<StatusDefinition> = {
     ...records10,
   ],
   "sections": [],
+  "metadata": { "KSOProductBuildVer": "2052-10.1.0.6207" },
 };

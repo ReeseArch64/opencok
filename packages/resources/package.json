@@ -5,13 +5,13 @@
     "check-types": "tsc --noEmit",
     "test": "bun --no-env-file test tests",
     "import:catalogs": "bun --no-env-file scripts/import-gameplay-catalogs.ts",
-    "update:catalogs": "bun --no-env-file scripts/update-catalog-hashes.ts",
     "import:buildings": "bun --no-env-file scripts/import-building-definitions.ts"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "fast-xml-parser": "^5.0.0"
   },
   "type": "module",
   "exports": {
@@ -24,11 +24,11 @@
     "./definitions": "./src/catalog-definitions.ts",
     "./catalog-model": "./src/catalog-model.ts",
     "./catalog-mechanics": "./src/catalog-mechanics.ts",
+    "./fixtures": "./src/xml-fixtures.ts",
     "./catalogs/*": "./src/catalogs/types/*.ts"
   },
   "dependencies": {
     "@opencok/rules": "workspace:*",
-    "fast-xml-parser": "^5.0.0",
     "@opencok/enums": "workspace:*",
     "@opencok/contracts": "workspace:*"
   }

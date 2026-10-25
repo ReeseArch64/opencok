@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { importBuildingDefinition } from "../src/buildings/import.ts";
-import { parseRules } from "../src/rules.ts";
+import { parseRules } from "../src/xml-fixtures.ts";
 
 const path = process.argv[2];
 if (!path) throw new Error("Supply an authorized building.xml source");

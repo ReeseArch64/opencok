@@ -5,6 +5,8 @@ import { tiles as layer1tiles0 } from "./CrossThroneMap.layer1.tiles0.ts";
 export const catalog: TileMapDefinition = {
   "kind": CatalogKind.TileMap,
   "orientation": "isometric",
+  "formatVersion": "1.0",
+  "editorVersion": "1.0.2",
   "renderOrder": "right-down",
   "width": 181,
   "height": 181,
