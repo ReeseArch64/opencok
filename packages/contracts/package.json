@@ -83,7 +83,8 @@
     "./building": "./src/building.ts",
     "./shops": "./src/shops.ts",
     "./trade": "./src/trade.ts",
-    "./provisioning": "./src/provisioning.ts"
+    "./provisioning": "./src/provisioning.ts",
+    "./timed-activity": "./src/timed-activity.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"

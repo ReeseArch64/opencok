@@ -106,6 +106,13 @@
       "when": 1792894241707,
       "tag": "0014_shop_stock",
       "breakpoints": false
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1792897834645,
+      "tag": "0015_timed_economy",
+      "breakpoints": false
     }
   ]
 }

@@ -91,7 +91,8 @@
     "./building": "./src/building.ts",
     "./shops": "./src/shops.ts",
     "./provisioning": "./src/provisioning.ts",
-    "./character-seed": "./src/character-seed.ts"
+    "./character-seed": "./src/character-seed.ts",
+    "./timed-activity": "./src/timed-activity.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
