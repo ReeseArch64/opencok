@@ -89,7 +89,7 @@ export class TimedActivityService {
           queues: [row],
           activities: [activity],
           body: {
-            ...queueView(row, item),
+            ...queueView(row, item, false),
             activityId: sfs.string(activity.id),
             version: sfs.int(1),
           },
@@ -134,7 +134,7 @@ export class TimedActivityService {
           queues: [],
           activities: [activity],
           body: {
-            ...queueView(saved, item),
+            ...queueView(saved, item, false),
             activityId: sfs.string(activity.id),
             version: sfs.int(1),
           },
@@ -196,7 +196,7 @@ export class TimedActivityService {
               isHelped: 0,
               para: 0,
             };
-        return { queues: [row], activities: [], body: queueView(row), ledger };
+        return { queues: [row], activities: [], body: queueView(row, {}, false), ledger };
       }
       const uuid = str(
         params,
@@ -214,7 +214,11 @@ export class TimedActivityService {
           price = Number(rule?.k9);
         if (!(unit > 0) || !Number.isFinite(price) || price < 0)
           throw new Error("Missing queue rental rule");
-        debit(ledger, BigInt(Math.ceil((seconds / unit) * price)), "queue.rent");
+        debit(
+          ledger,
+          BigInt(Math.ceil(Math.fround(Math.fround(seconds / Math.fround(unit)) * price))),
+          "queue.rent",
+        );
         const row = {
           ...saved,
           endTime: activityInstant(
@@ -225,7 +229,7 @@ export class TimedActivityService {
         return {
           queues: [row],
           activities: [],
-          body: { gold: sfs.long(ledger.total()), queue: sfs.object(queueView(row)) },
+          body: { gold: sfs.long(ledger.total()), queue: sfs.object(queueView(row, {}, false)) },
           ledger,
         };
       }
@@ -353,7 +357,7 @@ export class TimedActivityService {
               isHelped: 0,
               para: 0,
             };
-      const body = queueView(row, item);
+      const body = queueView(row, item, false);
       body.activityId = sfs.string(next.id);
       body.version = sfs.int(next.version);
       if (command === "queue.ccd") {
