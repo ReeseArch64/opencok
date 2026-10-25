@@ -281,7 +281,13 @@ export function createSessionHandler(
           if (params._cok_) result._cok_ = params._cok_;
           send(extension(command, result));
         } else {
-          if (command.startsWith("item.") && !params.operationId && params._cok_) {
+          if (
+            (command.startsWith("item.") ||
+              command === "mail.reward" ||
+              command === "mail.reward.batch") &&
+            !params.operationId &&
+            params._cok_
+          ) {
             if (
               !(
                 (params._cok_.type === Type.Int && Number.isInteger(params._cok_.value)) ||

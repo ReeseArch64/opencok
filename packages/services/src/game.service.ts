@@ -299,6 +299,11 @@ export class GameService {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "mail.reward":
+      case "mail.reward.batch":
+        if (!this.services.mailReward) throw new GameError(errors.unsupported);
+        ({ body, pushes } = await this.services.mailReward(uid, command, params));
+        break;
       case "item.buy":
       case "item.use":
       case "item.buyUse":
