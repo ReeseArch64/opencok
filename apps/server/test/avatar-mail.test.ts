@@ -77,6 +77,7 @@ function fixture(entry = completion()) {
                   e.committedAt,
                   e.effects,
                   e.pendingEffects,
+                  e.revision ?? 0n,
                 ],
               ]
             : [],

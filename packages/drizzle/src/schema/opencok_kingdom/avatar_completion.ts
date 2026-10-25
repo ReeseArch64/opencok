@@ -12,6 +12,7 @@ export const avatar_completion = opencok_kingdom.table(
     committedAt: bigint("committedAt", { mode: "bigint" }).notNull(),
     effects: text("effects").notNull(),
     pendingEffects: integer("pendingEffects").notNull(),
+    revision: bigint("revision", { mode: "bigint" }).notNull().default(sql.raw("0")),
   },
   (table) => [
     primaryKey({ name: "avatar_completion_PRIMARY", columns: [table.ownerUid, table.sequence] }),

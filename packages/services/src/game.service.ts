@@ -731,7 +731,6 @@ export class GameService {
       !Number.isInteger(intent.picVer) ||
       intent.picVer < 1 ||
       intent.picVer > 2147483647 ||
-      intent.picVer % 1000000 === 0 ||
       (intent.nextUpdateTime !== null &&
         (typeof intent.nextUpdateTime !== "bigint" ||
           BigInt.asIntN(64, intent.nextUpdateTime) !== intent.nextUpdateTime))

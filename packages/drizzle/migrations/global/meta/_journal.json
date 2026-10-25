@@ -57,6 +57,13 @@
       "when": 1792883061078,
       "tag": "0007_cn1_profile_sessions",
       "breakpoints": false
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792883061079,
+      "tag": "0008_avatar_lifecycle",
+      "breakpoints": false
     }
   ]
 }

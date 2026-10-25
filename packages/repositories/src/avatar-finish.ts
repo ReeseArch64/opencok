@@ -1,3 +1,4 @@
+import { nextAvatarRevision } from "./avatar-publication.ts";
 import { avatar_completion } from "@opencok/drizzle/schema/opencok_kingdom/avatar_completion";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
@@ -77,7 +78,7 @@ export function commitAvatarFinish(
       if (
         typeof version !== "number" ||
         !Number.isInteger(version) ||
-        version < 0 ||
+        version < -2147483648 ||
         version > 2147483647
       )
         return invalid();
@@ -102,7 +103,7 @@ export function commitAvatarFinish(
         (prior.ownerUid !== owner || prior.sequence !== query.sequence || prior.hash !== query.hash)
       )
         return invalid();
-      const current = version % 1000000;
+      const current = Math.max(0, version % 1000000);
       if (recoverOnly && (!prior || query.sequence > current)) return invalid();
       if (query.sequence <= current) {
         if (query.sequence === current && !prior)
@@ -253,6 +254,7 @@ export function commitAvatarFinish(
         committedAt: BigInt(query.now),
         effects: plan.effects,
         pendingEffects: plan.pendingEffects,
+        revision: await nextAvatarRevision(tx, owner),
       });
       return {
         profile: { ...profile, picVer: plan.picVer },

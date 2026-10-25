@@ -10,8 +10,9 @@ import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
 import { avatarVersionMail, avatarVersionProfile } from "@opencok/rules/avatar-version";
-import { avatarSequence } from "@opencok/rules/avatar";
-import { and, asc, eq, gt, or } from "drizzle-orm";
+import { legacyAvatarVersion } from "@opencok/rules/avatar-version";
+import { nextAvatarRevision } from "./avatar-publication.ts";
+import { and, asc, eq, gt, or, sql } from "drizzle-orm";
 import { insertAvatarSystemMail } from "./avatar-mail.ts";
 import type { Database } from "./game.ts";
 
@@ -110,7 +111,7 @@ export async function commitAvatarVersion(
       } finally {
         active = false;
       }
-      const sequence = avatarSequence(profile.picVer);
+      const sequence = legacyAvatarVersion(profile.picVer);
       if (
         plan.picVer !== sequence + (plan.moderated ? 0 : 2000000) ||
         (plan.moderated ? !recordRead || !castleRead : recordRead || castleRead) ||
@@ -125,6 +126,7 @@ export async function commitAvatarVersion(
         nextUpdateTime: plan.nextUpdateTime,
         effects: plan.effects,
         pendingEffects: plan.pendingEffects,
+        revision: await nextAvatarRevision(tx, owner),
       };
       avatarVersionProfile(intent, kingdomId);
       if (intent.pendingEffects !== 6 && intent.pendingEffects !== 7)
@@ -207,7 +209,7 @@ export async function deliverAvatarVersionMail(
 }
 
 export async function publishAvatarVersionEffect(
-  bit: 2 | 4,
+  bit: 2 | 4 | 8,
   db: RealmDatabase,
   kingdomId: number,
   owner: string,
@@ -217,7 +219,7 @@ export async function publishAvatarVersionEffect(
 ): Promise<void> {
   validKey(owner, operationId, kingdomId);
   if (
-    (bit !== 2 && bit !== 4) ||
+    (bit !== 2 && bit !== 4 && bit !== 8) ||
     !Number.isInteger(timeoutMs) ||
     timeoutMs < 100 ||
     timeoutMs > 30000
@@ -316,4 +318,7 @@ export async function nextAvatarVersionDelivery(
 
 export async function checkAvatarVersionStore(db: RealmDatabase): Promise<void> {
   await db.select().from(avatar_version_update).limit(0);
+  await db.execute(
+    sql`select "ownerUid", revision from opencok_kingdom.avatar_publication limit 0`,
+  );
 }

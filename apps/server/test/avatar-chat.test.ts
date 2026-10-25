@@ -54,6 +54,7 @@ const values = (u: AvatarProfileUpdate) => [
   u.committedAt,
   u.userName,
   u.platform,
+  u.revision ?? 0n,
 ];
 function globalFixture() {
   let state = { route: ["1001", "1"] as unknown[] | null, row: null as unknown[] | null };
@@ -102,9 +103,9 @@ function globalFixture() {
       if (failure === "write") throw new Error("synthetic-private-detail");
       expect(text.startsWith("insert") || text.startsWith("update")).toBe(true);
       expect(text).toContain('"opencok_chat"."chat_avatar_profile"');
-      if (text.startsWith("update")) expect(params.slice(7)).toEqual(["1001", 1]);
+      if (text.startsWith("update")) expect(params.slice(8)).toEqual(["1001", 1]);
       if (failure === "empty") return { rows: [] };
-      working.row = params.slice(0, 7);
+      working.row = params.slice(0, 8);
       return { rows: [["1001"]] };
     },
   };
@@ -162,6 +163,7 @@ function realmFixture() {
                   e.committedAt,
                   e.effects,
                   e.pendingEffects,
+                  e.revision ?? 0n,
                 ],
               ]
             : [],

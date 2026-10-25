@@ -12,6 +12,7 @@ export const chat_avatar_profile = opencok_chat.table(
     committed_at: bigint("committed_at", { mode: "bigint" }).notNull(),
     user_name: varchar("user_name", { length: 255 }).notNull(),
     platform: varchar("platform", { length: 255 }).notNull(),
+    revision: bigint("revision", { mode: "bigint" }).notNull().default(sql.raw("0")),
   },
   (table) => [
     primaryKey({
@@ -20,7 +21,7 @@ export const chat_avatar_profile = opencok_chat.table(
     }),
     check("chat_avatar_profile_owner", sql.raw("\"owner_uid\" ~ '^[0-9]{1,20}$'")),
     check("chat_avatar_profile_kingdom", sql.raw('"kingdom_id" > 0')),
-    check("chat_avatar_profile_sequence", sql.raw('"sequence" BETWEEN 1 AND 999999')),
+    check("chat_avatar_profile_sequence", sql.raw('"sequence" BETWEEN 0 AND 999999')),
     check(
       "chat_avatar_profile_version",
       sql.raw('"pic_ver" >= 0 AND "pic_ver" % 1000000 = "sequence"'),

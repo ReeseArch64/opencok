@@ -1,3 +1,5 @@
+import { avatar_completion } from "@opencok/drizzle/schema/opencok_kingdom/avatar_completion";
+import { avatarSequence } from "@opencok/rules/avatar";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";
@@ -5,8 +7,9 @@ import type { AvatarGrantInspector, AvatarGrantSnapshot } from "@opencok/contrac
 import { and, eq } from "drizzle-orm";
 import type { Database } from "./game.ts";
 
-export function checkAvatarGrantStore(db: Database["kingdom"]["db"]) {
-  return db.select({ uid: pic_upload_record.uid }).from(pic_upload_record).limit(0);
+export async function checkAvatarGrantStore(db: Database["kingdom"]["db"]) {
+  await db.select({ uid: pic_upload_record.uid }).from(pic_upload_record).limit(0);
+  await db.select({ sequence: avatar_completion.sequence }).from(avatar_completion).limit(0);
 }
 export function readAvatarGrant(
   db: Database["kingdom"]["db"],
@@ -49,6 +52,7 @@ export function readAvatarGrant(
         (profile.banTime ?? 0n) > BigInt(now)
       )
         return { profile };
+      const sequence = avatarSequence(profile.picVer);
       let active = true;
       let castleRead = false;
       let recordRead = false;
@@ -82,6 +86,14 @@ export function readAvatarGrant(
             return rows[0];
           },
         });
+        const completed = await tx
+          .select({ sequence: avatar_completion.sequence })
+          .from(avatar_completion)
+          .where(
+            and(eq(avatar_completion.ownerUid, owner), eq(avatar_completion.sequence, sequence)),
+          )
+          .limit(1);
+        if (completed.length) throw new Error("Avatar sequence already committed");
         return { profile, grant };
       } finally {
         active = false;

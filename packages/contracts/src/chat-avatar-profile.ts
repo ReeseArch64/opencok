@@ -16,7 +16,12 @@ export function validAvatarProfile(value: unknown): value is AvatarProfileUpdate
     Number(value.kingdomId) > 0 &&
     Number(value.kingdomId) <= 2147483647 &&
     Number.isInteger(value.sequence) &&
-    Number(value.sequence) > 0 &&
+    Number(value.sequence) >= 0 &&
+    (Number(value.sequence) > 0 || (typeof value.revision === "bigint" && value.revision > 0n)) &&
+    (value.revision === undefined ||
+      (typeof value.revision === "bigint" &&
+        value.revision > 0n &&
+        value.revision <= 9223372036854775807n)) &&
     Number(value.sequence) <= 999999 &&
     Number.isInteger(value.picVer) &&
     Number(value.picVer) >= 0 &&
@@ -46,6 +51,7 @@ export function encodeAvatarProfile(update: AvatarProfileUpdate): string {
     updatedAt: update.updatedAt,
     userName: update.userName,
     platform: update.platform,
+    ...(update.revision === undefined ? {} : { revision: String(update.revision) }),
   });
 }
 export function decodeAvatarProfile(body: string): AvatarProfileUpdate {
@@ -62,13 +68,22 @@ export function decodeAvatarProfile(body: string): AvatarProfileUpdate {
   ];
   if (
     !isRecord(value) ||
-    Object.keys(value).length !== keys.length ||
+    Object.keys(value).length !== keys.length + (Object.hasOwn(value, "revision") ? 1 : 0) ||
     keys.some((key) => !Object.hasOwn(value, key)) ||
     typeof value.committedAt !== "string" ||
     !/^(0|[1-9][0-9]{0,15})$/.test(value.committedAt)
   )
     throw new Error("Invalid chat avatar profile");
-  const update = { ...value, committedAt: BigInt(value.committedAt) };
+  if (
+    value.revision !== undefined &&
+    (typeof value.revision !== "string" || !/^[1-9][0-9]{0,18}$/.test(value.revision))
+  )
+    throw new Error("Invalid chat avatar revision");
+  const update = {
+    ...value,
+    committedAt: BigInt(value.committedAt),
+    ...(typeof value.revision === "string" ? { revision: BigInt(value.revision) } : {}),
+  };
   if (!validAvatarProfile(update)) throw new Error("Invalid chat avatar profile");
   return update;
 }

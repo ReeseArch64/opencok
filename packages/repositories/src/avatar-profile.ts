@@ -80,6 +80,7 @@ function publishAvatarEffect(
         update.sequence !== sequence ||
         update.picVer !== entry.picVer ||
         update.committedAt !== entry.committedAt ||
+        (update.revision ?? 0n) !== (entry.revision ?? 0n) ||
         typeof update.committedAt !== "bigint" ||
         update.committedAt < 0n ||
         update.committedAt > BigInt(Number.MAX_SAFE_INTEGER) ||
