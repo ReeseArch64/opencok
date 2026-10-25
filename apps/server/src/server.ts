@@ -1,3 +1,4 @@
+import { anniversaryDomain } from "@opencok/services/anniversary";
 import { lotteryDomain } from "@opencok/services/lottery";
 import { createTotemEffectStore, pendingTotemOwners } from "@opencok/repositories/totem";
 import { createTotemDomain, expireTotems, settleTotemEffects } from "@opencok/services/totem";
@@ -410,6 +411,7 @@ export const RealmDependenciesLive = Layer.effect(
         createTotemDomain(config.mapSize),
         minstrelDomain,
         lotteryDomain,
+        anniversaryDomain,
         trainingDomain,
         hospitalDomain,
         fortificationDomain,

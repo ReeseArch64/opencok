@@ -22,6 +22,10 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface AdvancedCatalogs {
+  anniversaryWeeks?: Map<string, Rule>;
+  anniversaryTasks?: Map<string, Rule>;
+  campaignRules?: readonly import("@opencok/contracts/local-campaign").CampaignRule[];
+  campaignVariables?: Map<string, import("@opencok/contracts/local-campaign").CampaignVariable>;
   lotteries?: Map<string, Rule>;
   civilizationFortress?: Map<string, Rule>;
   totems?: Map<string, Rule>;

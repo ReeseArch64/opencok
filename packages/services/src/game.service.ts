@@ -267,7 +267,7 @@ export class GameService {
     return (await this.initialize(uid)).body;
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
-    await this.services.cityProgression?.(uid, "world.tick", {});
+    const worldRecovery = await this.services.cityProgression?.(uid, "world.tick", {});
     await this.services.reconcileAlliance?.(uid);
     await this.services.reconcileTimed?.(uid);
     const effects = await this.services.cityProgression?.(uid, "effects.init", {});
@@ -280,6 +280,7 @@ export class GameService {
       "civilization.science.data.init",
       {},
     );
+    const campaign = await this.services.cityProgression?.(uid, "campaign.init", {});
     const lottery = await this.services.cityProgression?.(uid, "lottery.init", {});
     const totems = await this.services.cityProgression?.(uid, "totem.init", {});
     const alliance = await this.services.alliance?.(uid, "alliance.init", {});
@@ -317,7 +318,20 @@ export class GameService {
       world: sfs.object(this.initialWorld(world)),
       serverTime: sfs.long(this.now()),
     };
-    if (!this.services.reconnect) return { body, pushes: [] };
+    const initialPushes = [
+      worldRecovery,
+      effects,
+      quest,
+      equipment,
+      generals,
+      dragons,
+      civilization,
+      campaign,
+      lottery,
+      totems,
+      alliance,
+    ].flatMap((result) => result?.pushes ?? []);
+    if (!this.services.reconnect) return { body, pushes: initialPushes };
     const now = this.now();
     const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
     return this.services.reconnect(uid, now, async (progress) => {
@@ -358,6 +372,7 @@ export class GameService {
           m: planned.result.body.worldMarch!,
         }),
       };
+      planned.result.pushes = [...initialPushes, ...planned.result.pushes];
       if (correlation._cok_) planned.result.body._cok_ = correlation._cok_;
       validateReconnectResult(planned.result, "init");
       return planned;
@@ -474,6 +489,10 @@ export class GameService {
       case "minstrel":
       case "civilizationCastle":
       case "totem":
+      case "1year.info":
+      case "third.anniversary":
+      case "third.anniversary.reward":
+      case "get.activity.value":
       case "lottery.start":
       case "lottery.buy":
       case "lottery.batch":

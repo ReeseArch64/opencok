@@ -11,6 +11,8 @@
   },
   "type": "module",
   "exports": {
+    "./anniversary": "./src/anniversary.ts",
+    "./local-campaign": "./src/local-campaign.ts",
     "./lottery": "./src/lottery.ts",
     "./totem": "./src/totem.ts",
     "./game": "./src/game.service.ts",

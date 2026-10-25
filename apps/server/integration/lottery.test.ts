@@ -161,6 +161,12 @@ test("lottery gold top-up covers only the deficit and the next day resets the fr
     ).toBe(99991n);
     await expect(h.command("lottery.buy", { super: sfs.string("0") })).rejects.toThrow();
     h.clock.now += 86400000;
+    h.rules.items.set("normal_lottery", {
+      id: "normal_lottery",
+      ...Object.fromEntries(
+        Array.from({ length: 9 }, (_, i) => [`k${i + 1}`, `100|${i === 8 ? 1 : 0}`]),
+      ),
+    });
     await h.start("1", "1");
     expect(
       (await h.db.db.select().from(user_resource).where(eq(user_resource.uid, "owner")))[0]!.chip,

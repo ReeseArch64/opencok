@@ -1,3 +1,4 @@
+import { recordCampaignUse } from "./local-campaign";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { newEquipment } from "./equipment";
 import { randomUUID } from "node:crypto";
@@ -195,6 +196,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
       )
     )
       unavailable();
+    if (kind === "use") recordCampaignUse(context, str(params, "itemId"), count);
     if (kind.startsWith("alliance.")) {
       refreshQuests(context, {
         main: kind === "alliance.join" ? 40 : kind === "alliance.donate" ? 42 : 41,

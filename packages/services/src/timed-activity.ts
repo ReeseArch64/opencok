@@ -568,6 +568,23 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
     return amount;
   };
   return {
+    push(command, body) {
+      ledger.pushes.push({ command, body: decode(Buffer.from(body)) });
+    },
+    takeItemGrants() {
+      const grants = new Map<string, number>();
+      for (const posting of ledger.postings.slice(ledger.campaignPostingCursor)) {
+        if (!posting.asset.startsWith("item.") || posting.after <= posting.before) continue;
+        const item = ledger.items.find((row) => `item.${row.uuid}` === posting.asset);
+        if (!item) throw new Error("Missing campaign item grant");
+        grants.set(
+          item.itemId,
+          (grants.get(item.itemId) ?? 0) + Number(posting.after - posting.before),
+        );
+      }
+      ledger.campaignPostingCursor = ledger.postings.length;
+      return [...grants].map(([itemId, count]) => ({ itemId, count }));
+    },
     balance(asset) {
       return asset === "civilizationSorce"
         ? ledger.balance(asset)

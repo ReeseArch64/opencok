@@ -34,11 +34,11 @@ PostgreSQL instance. No test uses the operator's running realm or player data.
 
 ## Remaining topic boundaries
 
-| Topic | Modules still requiring implementation and acceptance                                                                                |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| 25    | Dragon lifecycle, travel, feeding, skills and dedicated resources; civilization castle; totems; native-client progression acceptance |
-| 26    | Local schedules, enrollment, score producers, lotteries, anniversary, expedition and arena; durable reward and period acceptance     |
-| 27    | Troop reservations, march creation/movement/gathering/return, acceleration, teleport and world interest publication                  |
+| Topic | Modules still requiring implementation and acceptance                                                                       |
+| ----- | --------------------------------------------------------------------------------------------------------------------------- |
+| 25    | Dragon tower, battle skill and garrison interactions, companion bindings and native-client acceptance                       |
+| 26    | Arena, expedition and remaining local activity handlers; remaining validated score producers; full native period acceptance |
+| 27    | Companion bindings, specialized targets, restart acceptance and native interest-stream acceptance                           |
 
 Existing read projections, catalogs, rankings and schema definitions are reused,
 but do not establish that these mutations are implemented. Combat-dependent modes
@@ -65,8 +65,7 @@ these grants. Clients never submit authoritative counters, times or reward value
 No migration is required. Back up realm state before rollout and retain counters,
 mail, receipts and ledger records on rollback. PostgreSQL acceptance covers a
 closed event, four concurrent first listens, repeated shares with one mail, reward
-cooldowns and next-day reset. This module is one slice of topic 26; lotteries,
-anniversary, campaign enrollment and arena are still pending.
+cooldowns and next-day reset. See the remaining topic boundaries for the local modes still awaiting acceptance.
 
 ## March transition foundation
 
@@ -77,7 +76,7 @@ saved arrival instant, even during late recovery. Gathering completion pins carg
 and the return deadline; only completed return releases troops and credits cargo.
 An outbound recall takes an authoritative reverse-route duration. Ordinary-route
 acceleration uses Java float rounding and preserves the reference 1,500 ms minimum
-remaining outbound time. Black-land routes need their separate segment calculation.
+remaining outbound time. Black-land routes use the separate persisted route-segment calculation.
 
 Each transition requires the owning player and expected version and returns the
 version to compare before writing. Insufficient troops, overflow, duplicate troop
@@ -206,3 +205,26 @@ branch declarations. Existing scalar fields and top-level rules remain identical
 The source XML remains read-only and is not a runtime dependency. Synthetic
 conversion tests verify nested conjunctions, rewards, claim flags and both arms
 of a branch before the campaign runtime interprets them.
+
+Anniversary info, score-box claims and activity-variable reads use the maintained
+week and task catalogs plus owned `trigger_var` counters. Server-scoped limits are
+read separately; a player action cannot write another scope or another player's
+variables. Exact control and trigger windows must both permit a claim. Rewards,
+claim flags, inventory postings and the native server-action response commit
+atomically. A failed action rolls back earlier planned rewards in the same event.
+
+The anniversary event planner executes maintained nested conditions, compound
+actions, bounded long arithmetic, refresh periods, counter changes, reward grants,
+mail and variable projections. Item use emits the corresponding server event
+inside the inventory transaction. Positive item postings feed acquisition events
+once, including awards from other city domains; bounded event expansion rejects
+cycles. Clients can read their counters but cannot inject internal campaign events.
+Historical catalog dates and disabled rules remain unchanged. Actions requiring
+world actors, foreign-player status changes or their battle engines remain gated
+until those integrations are validated; they cannot synthesize scores or results.
+
+`1year.info` projects the owned historical anniversary snapshot, alliance totals
+and first-battle metadata. Resource divisors remain long values, percent fields
+retain their native double or string types, and missing records retain the source
+defaults. An absent opponent-name cache can be resolved from the owned first-attack
+history without mutating the cache or loading unrelated battle data.

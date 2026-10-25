@@ -10,10 +10,9 @@ import {
 import { chooseWeight } from "@opencok/rules/equipment";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { lotteryInfo } from "@opencok/mappings/lottery";
-import { equipment, equipmentItem } from "@opencok/mappings/equipment";
 import type { Rule } from "@opencok/rules/game";
 import {
-  grantPinnedProgressionReward,
+  grantNativeProgressionReward,
   pinProgressionReward,
   progressionRewardPreview,
 } from "./progression-rewards";
@@ -110,62 +109,7 @@ function pay(
   if (spend) context.economy.resource(asset, -spend);
 }
 function grant(context: CityProgressionContext, raw: string): Value[] {
-  const rewards = progressionRewardPreview(raw),
-    result: Value[] = [];
-  for (const reward of rewards) {
-    const before = context.write.equipment?.length ?? 0;
-    const encoded =
-      reward.kind === "item"
-        ? `${reward.type === 7 ? "goods" : "equip"},${reward.id},${reward.count}`
-        : reward.kind === "count" && resourceAssets[reward.type]
-          ? `${resourceAssets[reward.type]},0,${reward.value}`
-          : lotteryFailure();
-    grantPinnedProgressionReward(context, encoded);
-    if (reward.kind === "item") {
-      result.push(
-        sfs.object({
-          type: sfs.int(reward.type),
-          value:
-            reward.type === 7
-              ? sfs.object({
-                  ...equipmentItem(
-                    reward.id,
-                    context.economy.quantity?.(reward.id) ?? 0,
-                    context.economy.itemState?.(reward.id),
-                    context.rules,
-                  ),
-                  rewardAdd: sfs.int(reward.count),
-                })
-              : sfs.array(
-                  (context.write.equipment ?? [])
-                    .slice(before)
-                    .map((row) => sfs.object(equipment(row))),
-                ),
-        }),
-      );
-    } else if (reward.kind === "count") {
-      const asset = resourceAssets[reward.type];
-      result.push(
-        sfs.object({
-          type: sfs.int(reward.type),
-          value: sfs.int(reward.value),
-          ...(asset && asset !== "exp"
-            ? {
-                total: sfs.int(
-                  number32(
-                    context.balance(asset) +
-                      (asset === "wood" || asset === "stone" || asset === "iron" || asset === "food"
-                        ? context.balance(`${asset}bind`)
-                        : 0n),
-                  ),
-                ),
-              }
-            : {}),
-        }),
-      );
-    }
-  }
-  return result;
+  return grantNativeProgressionReward(context, raw, true);
 }
 function innerGrant(context: CityProgressionContext, id: string, count: number) {
   cityInteger(count, 1);
@@ -286,7 +230,9 @@ function outer(context: CityProgressionContext, row: Row, superMode: boolean) {
     const reward = innerGrant(context, String(type), value);
     result = { ...result, ...(reward.value as Fields) };
   } else if (id !== "100")
-    result.items = sfs.array(grant(context, pinProgressionReward(context, id)));
+    result.items = sfs.array(
+      grantNativeProgressionReward(context, pinProgressionReward(context, id)),
+    );
   return { id, result };
 }
 export const lotteryDomain: CityDomain = {

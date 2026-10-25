@@ -154,6 +154,7 @@ export class InventoryPlanner {
   readonly resources: Record<string, bigint> = {};
   readonly cooldowns = new Map<string, bigint>();
   readonly pushes: InventoryCommandResponse["pushes"] = [];
+  campaignPostingCursor = 0;
   constructor(
     readonly state: InventoryState,
     readonly rules: Rules,

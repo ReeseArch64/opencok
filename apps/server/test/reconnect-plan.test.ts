@@ -273,6 +273,18 @@ test("login with an existing march and non-building queue reaches the full recon
   } as unknown as import("@opencok/contracts/game").GameStore;
   const game = new Game(store, rules, { kingdomId: 1 }, () => context.now, {
     ...services,
+    cityProgression: async (_owner, command) => ({
+      body: {},
+      pushes:
+        command === "campaign.init"
+          ? [
+              {
+                command: "push.server.action",
+                body: { type: sfs.int(12), params: sfs.object({ reward_list: sfs.array([]) }) },
+              },
+            ]
+          : [],
+    }),
     reconnect: async (_uid, _now, plan) => (await plan(state)).result,
   });
   const initialized = await game.initialize("1001", { _cok_: sfs.int(7) });
@@ -280,6 +292,9 @@ test("login with an existing march and non-building queue reaches the full recon
   expect(fields(initialized.body.user).level).toEqual(sfs.int(1));
   expect(initialized.body._cok_).toEqual(sfs.int(7));
   expect(initialized.body.queue!.value).toHaveLength(1);
+  expect(
+    initialized.pushes.find((push) => push.command === "push.server.action")?.body.type,
+  ).toEqual(sfs.int(12));
 });
 
 test("an oversized correlated response fails inside the transaction planner", async () => {

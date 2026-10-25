@@ -41,3 +41,21 @@ test("anniversary reward gates retain claim flags and grants in the maintained c
     parameters: "$3th_anniversary_week1_box_1_flag;+;1",
   });
 });
+
+test("compound actions retain ordered counter and reward operations", () => {
+  const parser = new XMLParser({
+    preserveOrder: true,
+    ignoreAttributes: false,
+    attributeNamePrefix: "",
+    parseTagValue: false,
+    parseAttributeValue: false,
+  });
+  const { definition } = convertCatalog(
+    parser.parse(
+      '<database><trigger id="2"><events/><conditions/><actions><action type="21"><action type="9">$count;+;1</action><action type="48">10</action></action></actions></trigger></database>',
+    ),
+    "trigger-activity",
+  );
+  if (definition.kind !== CatalogKind.Automation) throw new Error("Unexpected catalog kind");
+  expect(definition.rules[0]!.actions[0]!.actions!.map((action) => action.code)).toEqual([9, 48]);
+});
