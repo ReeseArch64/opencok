@@ -1,0 +1,9 @@
+import { CatalogKind } from "@opencok/enums/catalog-kind";
+import type { DragonNewDefinition } from "../types/dragon_new.ts";
+import type { CatalogTable } from "../../catalog-model.ts";
+import { records as records0 } from "./dragon_new.records0.ts";
+export const catalog: CatalogTable<DragonNewDefinition> = {
+  "kind": CatalogKind.Table,
+  "records": [...records0],
+  "sections": [{ "id": "dragon_new", "start": 0, "count": 520 }],
+};

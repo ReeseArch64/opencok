@@ -1,0 +1,23 @@
+import type { LandingDefinition } from "../types/landing.ts";
+export const records: readonly LandingDefinition[] = [
+  { "id": 7900, "type": 1, "gold": 2n, "rate": 200, "rate3": 50, "rate7": 50 },
+  { "id": 7901, "type": 1, "gold": 4n, "rate": 500, "rate3": 50, "rate7": 50 },
+  { "id": 7902, "type": 1, "gold": 6n, "rate": 200, "rate3": 700, "rate7": 100 },
+  { "id": 7903, "type": 1, "gold": 10n, "rate": 50, "rate3": 100, "rate7": 100 },
+  { "id": 7904, "type": 1, "gold": 15n, "rate": 50, "rate3": 100, "rate7": 700 },
+  { "id": 7905, "type": 2, "silver": 1000n, "rate": 200, "rate3": 50, "rate7": 50 },
+  { "id": 7906, "type": 2, "silver": 2000n, "rate": 500, "rate3": 50, "rate7": 50 },
+  { "id": 7907, "type": 2, "silver": 5000n, "rate": 200, "rate3": 700, "rate7": 100 },
+  { "id": 7908, "type": 2, "silver": 8000n, "rate": 50, "rate3": 100, "rate7": 100 },
+  { "id": 7909, "type": 2, "silver": 10000n, "rate": 50, "rate3": 100, "rate7": 700 },
+  { "id": 7910, "type": 3, "expcard": [249000, 5, 1], "rate": 200, "rate3": 50, "rate7": 50 },
+  { "id": 7911, "type": 3, "expcard": [249000, 5, 2], "rate": 500, "rate3": 50, "rate7": 50 },
+  { "id": 7912, "type": 3, "expcard": [249000, 5, 3], "rate": 200, "rate3": 700, "rate7": 100 },
+  { "id": 7913, "type": 3, "expcard": [249000, 5, 4], "rate": 50, "rate3": 100, "rate7": 100 },
+  { "id": 7914, "type": 3, "expcard": [249000, 5, 5], "rate": 50, "rate3": 100, "rate7": 700 },
+  { "id": 7915, "type": 4, "times": 1, "rate": 200, "rate3": 50, "rate7": 50 },
+  { "id": 7916, "type": 4, "times": 2, "rate": 500, "rate3": 50, "rate7": 50 },
+  { "id": 7917, "type": 4, "times": 3, "rate": 200, "rate3": 700, "rate7": 100 },
+  { "id": 7918, "type": 4, "times": 4, "rate": 50, "rate3": 100, "rate7": 100 },
+  { "id": 7919, "type": 4, "times": 5, "rate": 50, "rate3": 100, "rate7": 700 },
+];
