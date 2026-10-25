@@ -1,3 +1,15 @@
+import {
+  createActivityExecutor,
+  dueActivities,
+  type ActivityDomain,
+} from "@opencok/repositories/timed-activity";
+import { createProductionExecutor } from "@opencok/repositories/production";
+import { readReconnectProgress } from "@opencok/repositories/reconnect-progress";
+import { persistReconnectProgress } from "@opencok/repositories/reconnect-write";
+import { TimedActivityService } from "@opencok/services/timed-activity";
+import { ProductionService } from "@opencok/services/production";
+import { productionContext } from "@opencok/services/production-context";
+import { sfs } from "@opencok/messages/sfs";
 import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
 import { CharacterProvisioningService } from "@opencok/services/provisioning";
 import { CharacterProvisioningController } from "@opencok/controllers/provisioning";
@@ -268,6 +280,76 @@ export const RealmDependenciesLive = Layer.effect(
         (relay) => relay.close(),
       );
     }
+    const activityDomains = new Map<number, ActivityDomain>();
+    const economyEffects = {
+      world: async () =>
+        worldPowerEffects(
+          decodeWorldPowerEffects(await cache.worldEffects(config.kingdomId)),
+          rules,
+          { kingdomId: config.kingdomId, version: "12.06.0", now: Date.now() },
+        ),
+      emperor: () => cache.emperorVersion(config.kingdomId),
+    };
+    const activities = new TimedActivityService(
+      createActivityExecutor(db.kingdom.db, authority, activityDomains),
+      rules,
+      economyEffects,
+    );
+    const production = new ProductionService(
+      createProductionExecutor(db.kingdom.db, authority, {
+        async prepare(tx, owner, now) {
+          const state = await readReconnectProgress(tx, owner, config.kingdomId, now);
+          const planned = await productionContext(state, rules, now, {
+            worldPowerEffects: (id) => cache.worldEffects(id),
+            emperorVersion: (id) => cache.emperorVersion(id),
+          });
+          await persistReconnectProgress(tx, state, planned.write, authority, now);
+          return planned.rates;
+        },
+      }),
+      rules,
+      economyEffects,
+    );
+    let recoveryCursor: { dueAt: bigint; id: string } | undefined;
+    const recoverActivities = async (owner?: string) => {
+      authority.assertReady();
+      const due = await dueActivities(
+        db.kingdom.db,
+        [...activityDomains.keys()],
+        BigInt(Date.now()),
+        owner ? 256 : 64,
+        owner,
+        owner ? undefined : recoveryCursor,
+      );
+      if (!owner) recoveryCursor = due.length === 64 ? due.at(-1) : undefined;
+      for (const activity of due) {
+        try {
+          await activities.command(activity.ownerId, "queue.finish", {
+            uuid: sfs.string(activity.queueId),
+            activityId: sfs.string(activity.id),
+            version: sfs.int(activity.version),
+            operationId: sfs.string(`finish:${activity.id}:${activity.version}`),
+          });
+        } catch {
+          console.warn(
+            JSON.stringify({
+              event: "activity_recovery_failed",
+              kingdom: config.kingdomId,
+              activity: activity.id,
+            }),
+          );
+        }
+      }
+    };
+    yield* Effect.tryPromise({
+      try: () => recoverActivities(),
+      catch: () => new Error("Activity recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     const trade = new TradeService(createTradeExecutor(db.kingdom.db, authority), rules);
     const shops = new ShopService(createShopRepository(db.kingdom.db, authority), rules);
     const mailRewards = new MailRewardService(
@@ -311,6 +393,12 @@ export const RealmDependenciesLive = Layer.effect(
       coordination,
       game: new GameController(
         new GameService(db, rules, config, Date.now, {
+          timed: (owner, command, params) => activities.command(owner, command, params),
+          production: (owner, command, params) => production.command(owner, command, params),
+          reconcileTimed: async (owner) => {
+            await recoverActivities(owner);
+            await production.command(owner, "production.settle", {});
+          },
           trade: (owner, command, params) => trade.command(owner, command, params),
           shop: (owner, command, params) => shops.command(owner, command, params),
           mailReward: (owner, command, params) => mailRewards.command(owner, command, params),
