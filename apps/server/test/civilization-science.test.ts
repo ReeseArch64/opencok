@@ -110,3 +110,15 @@ test("civilization cannot jump levels or bypass building requirements", async ()
   ).rejects.toThrow();
   expect(balances.get("gold")).toBe(100000n);
 });
+
+test("civilization feature gates reject new research before any debit", async () => {
+  const { context, rules, balances, items } = await fixture();
+  rules.features.delete("science_race_switch");
+  await expect(
+    civilizationScienceDomain.prepare(context, "race.science.research", {
+      itemId: sfs.string("700000"),
+    }),
+  ).rejects.toThrow();
+  expect(balances.get("wood")).toBe(1000n);
+  expect(items.get("210090")).toBe(10);
+});

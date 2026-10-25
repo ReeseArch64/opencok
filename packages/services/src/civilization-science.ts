@@ -1,3 +1,4 @@
+import { serverFeature } from "@opencok/rules/power-context";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { sfs, str, int, encode } from "@opencok/messages/sfs";
@@ -76,6 +77,14 @@ export const civilizationScienceDomain: CityDomain = {
         }),
       };
     }
+    if (
+      !serverFeature(context.rules, "science_race_switch", {
+        kingdomId: context.rules.kingdomId,
+        version: "12.06.0",
+        now: Number(context.now),
+      })
+    )
+      throw new GameError(errors.unsupported, "city_progression");
     const base = cityInteger(str(params, "itemId"), 1),
       row = current(context, base),
       level = num(row, "level");
@@ -121,6 +130,7 @@ export const civilizationScienceDomain: CityDomain = {
       type: 19,
       itemId: String(base),
       durationMs,
+      ready: durationMs === 0n,
       data,
       responseKind: "nested",
       item: encode({ itemId: sfs.string(String(base)) }),
