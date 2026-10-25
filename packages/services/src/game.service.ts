@@ -1,3 +1,8 @@
+import { friendshipMineCommands } from "./friendship-mine";
+import { noticeCommands } from "./chat-notice";
+import { nativeChatCommands } from "./chat-native";
+import { postboxCommands } from "./postbox";
+import { chatSocialCommands } from "./chat-social";
 import { UPLOAD_PATH } from "@opencok/contracts/files";
 import { equipment as equipmentFields } from "@opencok/mappings/equipment";
 import { militarySnapshot } from "@opencok/mappings/military";
@@ -352,6 +357,22 @@ export class GameService {
     if ((allianceCommands as readonly string[]).includes(command)) {
       if (!this.services.alliance) throw new GameError(errors.unsupported);
       return this.services.alliance(uid, command, params);
+    }
+    if (friendshipMineCommands.includes(command)) {
+      if (!this.services.friendshipMine) throw new GameError(errors.unsupported);
+      return this.services.friendshipMine(uid, command, params);
+    }
+    if (noticeCommands.includes(command)) {
+      if (!this.services.notice) throw new GameError(errors.unsupported);
+      return this.services.notice(uid, command, params);
+    }
+    if (postboxCommands.includes(command)) {
+      if (!this.services.postbox) throw new GameError(errors.unsupported);
+      return this.services.postbox(uid, command, params);
+    }
+    if ([...chatSocialCommands, ...nativeChatCommands].includes(command)) {
+      if (!this.services.social) throw new GameError(errors.unsupported);
+      return { body: await this.services.social(uid, command, params), pushes: [] };
     }
     await this.services.reconcileAlliance?.(uid);
     let body: Fields;
