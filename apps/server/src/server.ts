@@ -214,10 +214,16 @@ export const RealmDependenciesLive = Layer.effect(
       yield* acquireResource(
         "realm.avatar-version-relay",
         async () =>
-          startAvatarVersionRelay(avatar.nextVersion, avatar.versionService.deliver, () =>
-            console.warn(
-              JSON.stringify({ event: "avatar_version_relay_failed", kingdom: config.kingdomId }),
-            ),
+          startAvatarVersionRelay(
+            avatar.nextVersion,
+            (owner, operationId) => {
+              authority.assertReady();
+              return avatar.versionService.deliver(owner, operationId);
+            },
+            () =>
+              console.warn(
+                JSON.stringify({ event: "avatar_version_relay_failed", kingdom: config.kingdomId }),
+              ),
           ),
         (relay) => relay.close(),
       );
@@ -227,10 +233,16 @@ export const RealmDependenciesLive = Layer.effect(
       yield* acquireResource(
         "realm.avatar-relay",
         async () =>
-          startAvatarRelay(avatar.next, avatar.service.deliver, () =>
-            console.warn(
-              JSON.stringify({ event: "avatar_relay_failed", kingdom: config.kingdomId }),
-            ),
+          startAvatarRelay(
+            avatar.next,
+            (owner, sequence) => {
+              authority.assertReady();
+              return avatar.service.deliver(owner, sequence);
+            },
+            () =>
+              console.warn(
+                JSON.stringify({ event: "avatar_relay_failed", kingdom: config.kingdomId }),
+              ),
           ),
         (relay) => relay.close(),
       );
@@ -266,13 +278,31 @@ export const RealmDependenciesLive = Layer.effect(
           playerSearch,
           worldSearch,
           worldFavorites,
-          avatarFinish: avatar?.service,
-          avatarVersion: avatar?.versionService,
+          avatarFinish: avatar
+            ? {
+                ...avatar.service,
+                finish: (...args) => {
+                  authority.assertReady();
+                  return avatar.service.finish(...args);
+                },
+              }
+            : undefined,
+          avatarVersion: avatar
+            ? {
+                ...avatar.versionService,
+                update: (...args) => {
+                  authority.assertReady();
+                  return avatar.versionService.update(...args);
+                },
+              }
+            : undefined,
           avatar: avatarFiles
             ? {
                 ...avatarFiles,
-                read: (uid, now, inspect) =>
-                  readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect),
+                read: (uid, now, inspect) => {
+                  authority.assertReady();
+                  return readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect);
+                },
               }
             : undefined,
           mailChatEnabled: !!config.mailChat,

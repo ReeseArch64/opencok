@@ -31,6 +31,7 @@ export function createAvatarVersion(options: {
   profile(owner: string, operationId: string): Promise<void>;
   chat(owner: string, operationId: string): Promise<void>;
   notify(owner: string, command: string, body: Fields): Promise<void>;
+  notification?(owner: string, operationId: string): Promise<void>;
   report(effect: "mail" | "profile" | "chat" | "notification"): void;
 }): AvatarVersionService {
   const { rules, kingdomId, commit, mail, profile, chat, notify, report } = options;
@@ -82,6 +83,7 @@ export function createAvatarVersion(options: {
       for (const [effect, send] of [
         ["profile", profile],
         ["chat", chat],
+        ["notification", options.notification ?? (async () => {})],
       ] as const) {
         try {
           await send(owner, operationId);
