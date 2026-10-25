@@ -48,7 +48,13 @@ function rejectUpgrade(socket: Duplex, status: number) {
 }
 
 function send(socket: WebSocket, value: Frame) {
-  if (socket.readyState === socket.OPEN) socket.send(JSON.stringify(value));
+  if (socket.readyState !== socket.OPEN) return;
+  const encoded = JSON.stringify(value);
+  if (socket.bufferedAmount + Buffer.byteLength(encoded) > 262_144) {
+    socket.close(1013, "Reconnect and resync history");
+    return;
+  }
+  socket.send(encoded);
 }
 
 export function createWebSocketGateway({
@@ -70,10 +76,14 @@ export function createWebSocketGateway({
     const connection: Connection = { joinedRooms: new Set<string>() };
     const sendFrame = (frame: Frame) => send(socket, { ...frame, ...clientIdentity });
     const token = request.headers.session;
-    const authorizeSession = async () => {
+    const authorizeSession = async (closeOnFailure = true) => {
       if (!isReady()) return false;
       const identity = await withinTimeout(() => verifyToken(token, uid));
-      return identity?.uid === uid;
+      if (identity?.uid !== uid) {
+        if (closeOnFailure) socket.close(1008, "Session unavailable");
+        return false;
+      }
+      return true;
     };
     const peer = { uid, connection, sendFrame, authorizeSession };
     peers.add(peer);
@@ -87,73 +97,88 @@ export function createWebSocketGateway({
     socket.on("error", () => {
       log({ correlationId: randomUUID(), operation: "websocket.socket", category: "socket_error" });
     });
-    socket.on("message", async (raw, binary) => {
-      const started = performance.now();
-      const operationId = randomUUID();
-      const report = (operation: string, outcome: string, reason?: string) =>
-        logEvent(
-          "chat_command",
-          {
-            component: "chat.websocket",
-            connectionId,
-            operationId,
-            operation,
-            outcome,
-            reason,
-            durationMs: Math.round(performance.now() - started),
-          },
-          outcome === "success" ? "info" : reason === "unavailable" ? "error" : "warn",
-        );
-      let frame: IncomingFrame;
-      try {
-        if (binary) throw new Error("binary frame");
-        const parsed: unknown = JSON.parse(raw.toString());
-        if (
-          !isRecord(parsed) ||
-          typeof parsed.cmd !== "string" ||
-          !parsed.cmd ||
-          !isRecord(parsed.params)
-        )
-          throw new Error("invalid frame");
-        frame = { cmd: parsed.cmd, params: parsed.params, sendTime: parsed.sendTime };
-      } catch {
-        report("unknown", "failure", "bad_frame");
-        sendFrame({ cmd: "error", error: { code: "bad_frame" } });
+    let queued = 0;
+    let queue = Promise.resolve();
+    socket.on("message", (raw, binary) => {
+      if (++queued > 32) {
+        socket.close(1013, "Reconnect and resync history");
+        queued--;
         return;
       }
+      queue = queue
+        .then(async () => {
+          if (socket.readyState !== socket.OPEN) return;
+          const started = performance.now();
+          const operationId = randomUUID();
+          const report = (operation: string, outcome: string, reason?: string) =>
+            logEvent(
+              "chat_command",
+              {
+                component: "chat.websocket",
+                connectionId,
+                operationId,
+                operation,
+                outcome,
+                reason,
+                durationMs: Math.round(performance.now() - started),
+              },
+              outcome === "success" ? "info" : reason === "unavailable" ? "error" : "warn",
+            );
+          let frame: IncomingFrame;
+          try {
+            if (binary) throw new Error("binary frame");
+            const parsed: unknown = JSON.parse(raw.toString());
+            if (
+              !isRecord(parsed) ||
+              typeof parsed.cmd !== "string" ||
+              !parsed.cmd ||
+              !isRecord(parsed.params)
+            )
+              throw new Error("invalid frame");
+            frame = { cmd: parsed.cmd, params: parsed.params, sendTime: parsed.sendTime };
+          } catch {
+            report("unknown", "failure", "bad_frame");
+            sendFrame({ cmd: "error", error: { code: "bad_frame" } });
+            return;
+          }
 
-      const base = {
-        cmd: frame.cmd,
-        ...(isSafeInteger(frame.sendTime) ? { sendTime: frame.sendTime } : {}),
-      };
-      try {
-        const result = await withinTimeout(async () => {
-          if (!(await authorizeSession())) throw new ChatCommandError("unauthorized");
-          if (bootstrap.has(frame.cmd)) return { status: "ok" };
-          const handler = Object.hasOwn(handlers, frame.cmd) ? handlers[frame.cmd] : null;
-          if (!handler) throw new ChatCommandError("unsupported_command");
-          return handler({
-            uid,
-            params: frame.params,
-            sendTime: frame.sendTime,
-            sendFrame,
-            connection,
-            peers,
-          });
+          const base = {
+            cmd: frame.cmd,
+            ...(isSafeInteger(frame.sendTime) ? { sendTime: frame.sendTime } : {}),
+          };
+          try {
+            const result = await withinTimeout(async () => {
+              if (!(await authorizeSession(false))) throw new ChatCommandError("unauthorized");
+              if (bootstrap.has(frame.cmd)) return { status: "ok" };
+              const handler = Object.hasOwn(handlers, frame.cmd) ? handlers[frame.cmd] : null;
+              if (!handler) throw new ChatCommandError("unsupported_command");
+              return handler({
+                uid,
+                params: frame.params,
+                sendTime: frame.sendTime,
+                sendFrame,
+                connection,
+                peers,
+              });
+            });
+            sendFrame({ ...base, result });
+            report(frame.cmd, "success");
+          } catch (error) {
+            const code = error instanceof ChatCommandError ? error.code : "unavailable";
+            report(frame.cmd, "failure", code);
+            log({ correlationId: randomUUID(), operation: frame.cmd, category: code });
+            sendFrame({ ...base, error: { code } });
+            if (code === "unauthorized") socket.close(1008, "Session unavailable");
+          }
+        })
+        .finally(() => {
+          queued--;
         });
-        sendFrame({ ...base, result });
-        report(frame.cmd, "success");
-      } catch (error) {
-        const code = error instanceof ChatCommandError ? error.code : "unavailable";
-        report(frame.cmd, "failure", code);
-        log({ correlationId: randomUUID(), operation: frame.cmd, category: code });
-        sendFrame({ ...base, error: { code } });
-        if (code === "unauthorized") socket.close(1008, "Session unavailable");
-      }
     });
   });
 
   return {
+    peers,
     attach(server) {
       server.on("upgrade", async (request, socket, head) => {
         if (request.url !== "/chat/ws") {

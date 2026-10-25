@@ -108,6 +108,8 @@
     "./general-draws": "./src/general-draws.ts",
     "./alliance": "./src/alliance.ts",
     "./alliance-science": "./src/alliance-science.ts",
+    "./chat-retention": "./src/chat-retention.ts",
+    "./chat-social": "./src/chat-social.ts",
     "./civilization-science": "./src/civilization-science.ts",
     "./local-events": "./src/local-events.ts"
   },

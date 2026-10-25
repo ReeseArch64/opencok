@@ -32,8 +32,9 @@ export function sampleValue(column: ColumnContract, variant: number): unknown {
 
 export function sampleRow(spec: TableContract, variant = 1): Row {
   const row = Object.fromEntries(
-    spec.columns.map((column) => [column.name, sampleValue(column, variant)]),
+    spec.columns.map((column) => [column.property ?? column.name, sampleValue(column, variant)]),
   );
+  if (spec.checks.some(([name]) => name === "chat_relation_kind")) row.kind = "contact";
   for (const key of spec.foreignKeys) for (const name of key.columns) row[name] = 9007199254740993n;
   if (spec.indexes.some((key) => key.name === "mail_chat_read_intent_PRIMARY")) {
     row.chatTypes = variant === 1 ? "1,20" : "2";
