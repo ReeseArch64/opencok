@@ -97,7 +97,7 @@ export async function cityHarness(extra: readonly CityDomain[] = []) {
         power: power + BigInt(rules.role(1).power ?? 0),
         buildingPower: power,
       });
-      for (const type of [0, 1, 2, 3, 6, 8, 9, 10])
+      for (const type of [0, 1, 2, 3, 6, 8, 9, 10, 11, 12])
         await db.db.insert(queue).values({
           uuid: `${owner}-q${type}`,
           ownerId: owner,
@@ -153,13 +153,19 @@ export async function cityHarness(extra: readonly CityDomain[] = []) {
               cityQueueCommands[command.command]?.action === "queue.finish";
             const params = decode(Buffer.from(command.request));
             const queueId = transition
-              ? str(params, command.command === "queue.ccd" ? "qUUID" : "uuid")
+              ? str(
+                  params,
+                  cityQueueCommands[command.command]?.queueKey ??
+                    (command.command === "queue.ccd" ? "qUUID" : "uuid"),
+                )
               : undefined;
             const instant = await activityTransitionInstant(tx, owner, queueId, at);
             await preparation.prepare(tx, owner, instant);
             return instant;
           },
           command: handlers.command,
+          next: handlers.next,
+          accelerate: handlers.accelerate,
         },
       ),
       rules,

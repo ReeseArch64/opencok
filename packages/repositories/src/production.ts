@@ -16,6 +16,7 @@ import type { Database } from "./game";
 import type { RealmAuthority } from "./realm-authority";
 
 export interface ProductionPreparation {
+  recordAction?: import("./inventory").InventoryPreparation["recordAction"];
   prepare(
     tx: MutationTransaction,
     owner: string,
@@ -46,7 +47,24 @@ export function createProductionExecutor(
             .for("update");
           if (rows.length > 256) throw new Error("Production aggregate exceeds bound");
           const accounts = rows.map((row) => ({ ...row, rates: decodeProductionRates(row.rates) }));
-          const result = await plan({ ...inventory, now: captured, accounts, rates });
+          const result = await plan({
+            ...inventory,
+            now: captured,
+            accounts,
+            rates,
+            recordAction: preparation.recordAction
+              ? (kind, itemId, count, economy) =>
+                  preparation.recordAction!(
+                    tx,
+                    command.owner,
+                    kind,
+                    itemId,
+                    count,
+                    captured,
+                    economy,
+                  )
+              : undefined,
+          });
           if (
             result.accounts.length > 256 ||
             new Set(result.accounts.map((row) => row.buildingId)).size !== result.accounts.length

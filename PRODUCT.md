@@ -135,12 +135,18 @@ OpenCoK includes or coordinates the following product areas:
 ### Timed activities and city production
 
 The common queue mechanism owns persistent deadlines and lifecycle transitions.
-Construction, basic research, training, healing and fortification domains apply
-their costs and completion effects through that mechanism. Other domain-specific
+Construction, basic research, training, healing, fortifications, equipment forging
+and workshop jobs apply their costs and completion effects through that mechanism. Other domain-specific
 effects are delivered with their own systems. Unavailable domains must preserve
 pending state and reject unsupported transitions. Ordinary city production accrues into a capped
 uncollected buffer; collection credits the wallet. Rate changes preserve output
 already earned, and repeated settlement preserves fractional output.
+
+Quest and sign-in rewards are claimed from server-owned progress and persisted
+periods. Repeating an action cannot repeat its reward. VIP, talents, temporary
+states and equipment sets contribute through one effect calculation; changes
+preserve production earned before the change. Workshop completion delivers items
+and advances its waiting list atomically.
 
 ## Mobile client transition
 

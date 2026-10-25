@@ -150,6 +150,7 @@ export class InventoryPlanner {
     this.postings.push({ account: text(this.state.profile, "uid"), asset, before, after, reason });
   }
   readonly profile: Record<string, bigint> = {};
+  readonly assets: Record<string, bigint> = {};
   readonly resources: Record<string, bigint> = {};
   readonly cooldowns = new Map<string, bigint>();
   readonly pushes: InventoryCommandResponse["pushes"] = [];
@@ -373,6 +374,7 @@ export class InventoryPlanner {
       }
     } else if (effectRule.type !== "21") throw new GameError(errors.unsupported);
     this.take(item, count);
+    await this.state.recordAction?.("use", item.itemId, count, activityEconomy(this));
     return inventoryUse(item, effect);
   }
   async command(command: string, params: Fields): Promise<Fields> {
@@ -400,6 +402,7 @@ export class InventoryPlanner {
         rewards.set(id, (rewards.get(id) ?? 0) + 1);
       }
       for (const [id, amount] of rewards) this.add(id, amount);
+      await this.state.recordAction?.("compose", id, count, activityEconomy(this));
       return inventoryComposition([...this.changed.values()]);
     }
     const suite = command === "item.compose.suitequipment.store";
@@ -418,6 +421,7 @@ export class InventoryPlanner {
       else this.spendItems(cost, amount);
     }
     const item = this.add(inventoryWeighted(rewards), multiple);
+    await this.state.recordAction?.("compose", id, multiple, activityEconomy(this));
     return suite ? {} : inventoryItem({ ...item }, this.rules);
   }
   result(body: Fields): InventoryPlan {
@@ -437,6 +441,7 @@ export class InventoryPlanner {
       ],
       items: [...this.changed.values()],
       profile: this.profile,
+      assets: this.assets,
       resource: this.resources,
       cooldowns: this.cooldowns,
       response: inventoryResponse(body, this.pushes),

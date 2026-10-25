@@ -1,3 +1,7 @@
+import { javaMailBytes } from "@opencok/rules/avatar-mail";
+import { newEquipment } from "./equipment";
+import { randomUUID } from "node:crypto";
+import { idleDeadline } from "@opencok/rules/timed-activity";
 import { randomInt } from "node:crypto";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -25,9 +29,20 @@ export function grantRewards(context: CityProgressionContext, id: string | undef
     randomInt,
   );
   for (const reward of rewards) {
-    if (reward.kind === "item" && reward.type === 7) context.economy.item(reward.id, reward.count);
+    if (reward.kind === "item" && reward.type === 14) {
+      const rows = [...(context.write.equipment ?? [])];
+      for (let n = 0; n < reward.count; n++) {
+        context.write.equipment = rows;
+        rows.push(newEquipment(context, reward.id));
+      }
+      context.write.equipment = rows;
+    } else if (reward.kind === "item" && reward.type === 7)
+      context.economy.item(reward.id, reward.count);
     else if (reward.kind === "count") {
-      if (reward.type === 6) context.experience(reward.value);
+      if (reward.type === 18) {
+        if (!context.economy.winPoints) throw new GameError(errors.unsupported, "city_progression");
+        context.economy.winPoints(BigInt(reward.value));
+      } else if (reward.type === 6) context.experience(reward.value);
       else if (reward.type === 5) context.economy.gold(BigInt(reward.value));
       else {
         const asset = (["wood", "stone", "iron", "food", "silver"] as const)[reward.type];
@@ -75,13 +90,66 @@ export function refreshQuests(
     ),
     sciences: merge(context.state.sciences, write.sciences, "itemId"),
     armies: merge(context.state.armies, write.armies, "armyId"),
-    equipment: context.state.equipment,
+    equipment: merge(context.state.equipment, write.equipment, "uuid").filter(
+      (row) => !write.deletedEquipment?.includes(text(row, "uuid")),
+    ),
     statistics: { ...context.state.statistics, ...write.statistics },
   };
-  write.quests = progressQuests(state, context.rules, context.now, randomInt, action);
+  write.quests = {
+    ...progressQuests(state, context.rules, context.now, randomInt, action),
+    mail: previous?.mail ?? [],
+  };
+  if (write.quests.resetDaily)
+    for (const row of state.quests.daily)
+      if (num(row, "state") === 1) {
+        const rule = context.rules.progression.daily?.get(String(row.id)),
+          id = rewardAtLevel(
+            num(row, "type") === 1 ? rule?.special_reward : rule?.normal_reward,
+            castleLevel(state),
+          );
+        if (!id || !context.rules.reconnect.rewards?.has(id))
+          throw new GameError(errors.invalid, "city_progression");
+        const rewards = previewRewards(
+          id,
+          context.rules,
+          { kingdomId: context.rules.kingdomId, version: "12.06.0", now: Number(context.now) },
+          randomInt,
+        );
+        const reward = rewards
+          .map((entry) => {
+            if (entry.kind === "item" && entry.type === 7)
+              return `goods,${entry.id},${entry.count}`;
+            if (entry.kind === "count") {
+              const asset = ["wood", "stone", "iron", "food", "silver", "gold"][entry.type];
+              if (asset) return `${asset},0,${entry.value}`;
+            }
+            throw new GameError(errors.unsupported, "city_progression");
+          })
+          .join("|");
+        const template = context.rules.mail.get("12160");
+        const contents = javaMailBytes(template?.message);
+        if (!contents || !reward) throw new GameError(errors.invalid, "city_progression");
+        write.quests.mail = [
+          ...(write.quests.mail ?? []),
+          {
+            uid: randomUUID().replaceAll("-", "") + "00",
+            owner: context.owner,
+            fromName: template?.sender ?? "",
+            title: template?.title ?? "",
+            type: 2,
+            contents,
+            extra: null,
+            rewardId: reward,
+            rewardStatus: 0,
+            reply: 0,
+            createTime: context.now,
+          },
+        ];
+      }
 }
 const commands = [
   "quest.init",
+  "quest.action",
   "task.reward.get",
   "quest.stage.rd",
   "story.task.info",
@@ -115,7 +183,39 @@ async function prepare(context: CityProgressionContext, command: string, params:
     row.state = 2;
     return row;
   };
-  if (command === "quest.init") {
+  if (command === "quest.action") {
+    const kind = str(params, "kind"),
+      count = int(params, "count");
+    if (
+      !Number.isInteger(count) ||
+      count <= 0 ||
+      count > 2147483647 ||
+      !["use", "compose", "harvest"].includes(kind)
+    )
+      unavailable();
+    refreshQuests(context, {
+      daily: kind === "use" ? 39 : kind === "compose" ? 37 : 25,
+      legacy: kind === "use" ? 16 : kind === "compose" ? 15 : 1,
+      main: kind === "compose" ? 46 : undefined,
+      key: kind === "harvest" ? str(params, "itemId") : undefined,
+      count,
+    });
+    return { response: encode({}), event: null };
+  } else if (command === "quest.init") {
+    if (!context.state.queues.some((row) => num(row, "type") === 12))
+      context.write.queues = [
+        {
+          uuid: randomUUID(),
+          ownerId: context.owner,
+          qid: 1,
+          type: 12,
+          itemId: "",
+          startTime: idleDeadline,
+          endTime: idleDeadline,
+          updateTime: idleDeadline,
+          totalTime: 0n,
+        },
+      ];
     const section = storySection(write.story ?? [], context.rules);
     body = {
       storyTaskList: questTasks(
@@ -346,7 +446,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
         ),
         currentDay: sfs.int(same && day % 7 === 0 ? 7 : day % 7),
         isValid: sfs.int(same ? 1 : 0),
-        reward_multiple: { type: Type.Float, value: 0 },
+        reward_multiple: { type: Type.Float, value: context.effect(310) },
       };
   }
   return { response: encode(body), event: null };

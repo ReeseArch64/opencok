@@ -1,3 +1,4 @@
+import { equipment as equipmentFields } from "@opencok/mappings/equipment";
 import { militarySnapshot } from "@opencok/mappings/military";
 import { researchData } from "@opencok/mappings/research";
 import { changeNickname } from "./nickname-command.ts";
@@ -203,6 +204,24 @@ export class GameService {
       return queue(q, { itemId: sfs.string(text(q, "itemId")) }, helped);
     if (num(q, "type") === 6 && text(q, "itemId"))
       return queue(q, { itemId: sfs.string(text(q, "itemId")) }, helped);
+    if (num(q, "type") === 11 && text(q, "itemId")) {
+      const row = state.equipment?.find((row) => row.uuid === q.itemId);
+      return queue(
+        q,
+        row ? { itemId: sfs.string(text(row, "itemId")), cost: sfs.string(text(row, "cost")) } : {},
+        helped,
+      );
+    }
+    if (num(q, "type") === 12 && text(q, "itemId"))
+      return queue(
+        q,
+        {
+          itemId: sfs.string(text(q, "itemId").split(";")[0] ?? ""),
+          allId: sfs.string(text(q, "itemId")),
+          para: sfs.int(num(q, "para")),
+        },
+        helped,
+      );
     if (num(q, "type") !== 0 && text(q, "itemId"))
       throw new GameError(errors.unsupported, "queue_kind");
     return queue(q, target ? building(target, this.rules, true, now) : {}, helped);
@@ -247,11 +266,18 @@ export class GameService {
     await this.services.reconcileTimed?.(uid);
     const effects = await this.services.cityProgression?.(uid, "effects.init", {});
     const quest = await this.services.cityProgression?.(uid, "quest.init", {});
+    const equipment = await this.services.cityProgression?.(uid, "equipment.init", {});
     const state = await this.state(uid);
     const world = state.world;
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
       throw new GameError(errors.unsupported, "world_state");
     const body: Fields = {
+      equip: sfs.array(
+        (state.equipment ?? [])
+          .filter((row) => num(row, "on") !== 2)
+          .map((row) => sfs.object(equipmentFields(row))),
+      ),
+      ...equipment?.body,
       ...effects?.body,
       ...quest?.body,
       ...serverClock(this.now(), 0),
@@ -340,6 +366,23 @@ export class GameService {
       case "fresh.signIn":
       case "daily.quest.ls":
       case "daily.quest.reward":
+      case "equipment.create":
+      case "equipment.buy":
+      case "equipment.break":
+      case "equip.putOn":
+      case "equip.takeOff":
+      case "equipment.strength":
+      case "equip.reforge":
+      case "suit.create":
+      case "suit.equipment.create":
+      case "suit.decompose":
+      case "set.suit.decompose.effect":
+      case "material.create":
+      case "material.break":
+      case "create.tool":
+      case "queue.tool":
+      case "rm.tool":
+      case "tool.queue.buy":
       case "skill.save":
       case "skill.clear":
       case "skill.switch":
@@ -383,6 +426,8 @@ export class GameService {
         if (!this.services.cityProgression) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.cityProgression(uid, command, params));
         break;
+      case "equip.q.finish":
+      case "havest.tool":
       case "army.complete":
       case "hospital.cure.done":
       case "hospital.cancel":

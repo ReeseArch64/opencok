@@ -1,3 +1,4 @@
+import { insertSystemMail } from "./system-mail";
 import { user_daily_task } from "@opencok/drizzle/schema/opencok_kingdom/user_daily_task";
 import { sign_in } from "@opencok/drizzle/schema/opencok_kingdom/sign_in";
 import { and, eq, sql } from "drizzle-orm";
@@ -76,6 +77,8 @@ export async function readQuests(
   };
 }
 export async function writeQuests(tx: MutationTransaction, owner: string, write: QuestWrite) {
+  for (const message of write.mail ?? [])
+    await insertSystemMail(tx, message, owner, message.uid.slice(0, 32), message.createTime);
   for (const rows of [write.tasks, write.story, write.daily])
     for (const row of rows ?? []) {
       if (

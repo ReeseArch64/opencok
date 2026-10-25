@@ -14,9 +14,9 @@ export type CityAsset = (typeof cityAssets)[number];
 export type CityEffect = (id: number) => number;
 export const progressionEffectIds = [
   57, 66, 67, 68, 69, 73, 80, 88, 108, 113, 114, 115, 116, 121, 131, 180, 181, 301, 302, 303, 304,
-  310, 415, 453, 454, 751, 752, 753, 754, 755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 772,
-  773, 774, 852, 2078, 2143, 2144, 2145, 2146, 2147, 2148, 2149, 2150, 2151, 2152, 2153, 2154, 2155,
-  2190, 2191, 2192,
+  203, 204, 219, 248, 310, 415, 2156, 2157, 2201, 453, 454, 751, 752, 753, 754, 755, 756, 757, 758,
+  759, 760, 761, 762, 763, 764, 772, 773, 774, 852, 2078, 2143, 2144, 2145, 2146, 2147, 2148, 2149,
+  2150, 2151, 2152, 2153, 2154, 2155, 2190, 2191, 2192,
 ] as const;
 export type ProgressionEffectId = (typeof progressionEffectIds)[number];
 
@@ -201,7 +201,9 @@ export function progressionActivityData(value: unknown): ProgressionActivityData
   const data = value as ProgressionActivityData;
   if (
     data.schema !== 1 ||
-    !["upgrade", "destroy", "research", "train", "heal", "fort"].includes(data.kind) ||
+    !["upgrade", "destroy", "research", "train", "heal", "fort", "equipment", "material"].includes(
+      data.kind,
+    ) ||
     !data.costs ||
     !data.items ||
     JSON.stringify(data).length > 65536

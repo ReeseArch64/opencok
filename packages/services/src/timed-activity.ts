@@ -144,7 +144,7 @@ export class TimedActivityService {
         };
         const row: Row = {
           ...selected,
-          itemId: activity.itemId,
+          itemId: prepared.queueItemId ?? activity.itemId,
           startTime: state.now,
           updateTime: dueAt,
           totalTime: duration,
@@ -275,7 +275,8 @@ export class TimedActivityService {
       }
       const uuid = str(
         params,
-        queueCommand === "queue.ccd" || queueCommand === "queue.rent" ? "qUUID" : "uuid",
+        alias?.queueKey ??
+          (queueCommand === "queue.ccd" || queueCommand === "queue.rent" ? "qUUID" : "uuid"),
       );
       const saved = state.queues.find((row) => row.uuid === uuid);
       if (!saved) throw new GameError(errors.queue, "city_progression");
@@ -355,10 +356,18 @@ export class TimedActivityService {
         const free = alreadyDue || (active.type === 0 && remaining <= freeSeconds);
         if (free) remaining = 0;
         else if (int(params, "isGold") !== 0) {
-          if (active.type === 12)
-            throw new Error("Material acceleration requires its domain price");
+          if (active.type === 12) {
+            if (!state.accelerate) throw new GameError(errors.unsupported, "city_progression");
+            await state.accelerate(active, BigInt(remaining) * 1000n, activityEconomy(ledger));
+            remaining = 0;
+          }
           const troops = [1, 8, 9, 10, 17].includes(active.type);
-          debit(ledger, citySpeedGold(this.rules, BigInt(remaining) * 1000n, troops), "queue.ccd");
+          if (active.type !== 12)
+            debit(
+              ledger,
+              citySpeedGold(this.rules, BigInt(remaining) * 1000n, troops),
+              "queue.ccd",
+            );
           remaining = 0;
         } else {
           const item = ledger.own(str(params, "itemUUID"));
@@ -416,7 +425,7 @@ export class TimedActivityService {
           ),
         );
       }
-      const row: Row =
+      let row: Row =
         next.status === 0
           ? { ...saved, updateTime: next.dueAt }
           : {
@@ -428,9 +437,48 @@ export class TimedActivityService {
               isHelped: 0,
               para: 0,
             };
+      const writes: TimedActivity[] = [next];
+      if (finished && state.next) {
+        const continuation = await state.next(next, activityEconomy(ledger));
+        if (continuation) {
+          if (
+            continuation.type !== next.type ||
+            !continuation.itemId ||
+            continuation.durationMs === undefined ||
+            continuation.durationMs < 0n ||
+            continuation.durationMs > 315360000000n
+          )
+            throw new Error("Invalid activity continuation");
+          const startedAt = activityInstant(continuation.startedAt ?? next.dueAt),
+            dueAt = activityInstant(startedAt + continuation.durationMs);
+          if (startedAt < next.dueAt) throw new Error("Retroactive activity continuation");
+          const chained: TimedActivity = {
+            id: randomUUID(),
+            ownerId: owner,
+            queueId: next.queueId,
+            type: next.type,
+            itemId: continuation.itemId,
+            startedAt,
+            dueAt,
+            version: 1,
+            status: 0,
+            data: continuation.data,
+          };
+          writes.push(chained);
+          row = {
+            ...saved,
+            itemId: continuation.queueItemId ?? chained.itemId,
+            startTime: startedAt,
+            updateTime: dueAt,
+            totalTime: continuation.durationMs,
+            isHelped: 0,
+            para: 0,
+          };
+        }
+      }
       const body = queueView(row, item, false);
-      body.activityId = sfs.string(next.id);
-      body.version = sfs.int(next.version);
+      body.activityId = sfs.string(writes.at(-1)!.id);
+      body.version = sfs.int(writes.at(-1)!.version);
       if (queueCommand === "queue.ccd") {
         body.remainGold = sfs.long(ledger.total());
         body.finished = sfs.bool(finished);
@@ -441,7 +489,7 @@ export class TimedActivityService {
       }
       return {
         queues: [row],
-        activities: [next],
+        activities: writes,
         body: alias
           ? { ...item, queue: sfs.object(body) }
           : queueCommand === "queue.cancel"
@@ -527,10 +575,22 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
       const item = ledger.own(uuid);
       return { itemId: item.itemId, count: item.count };
     },
+    itemState(itemId) {
+      const row = ledger.items.find(
+        (item) => item.itemId === itemId && item.value === 0 && ledger.valid(item),
+      );
+      return row ? { ...row } : undefined;
+    },
     quantity(itemId) {
       return ledger.items
         .filter((item) => item.itemId === itemId && item.value === 0 && ledger.valid(item))
         .reduce((sum, item) => sum + item.count, 0);
+    },
+    winPoints(delta) {
+      const before = ledger.assets.winPoint ?? long(ledger.state.assets ?? {}, "winPoint"),
+        after = valid(before + delta);
+      ledger.assets.winPoint = after;
+      ledger.post("assets.winPoint", before, after, "activity.reward");
     },
     gold(delta) {
       if (delta < 0n) debit(ledger, -delta, "activity.cost");

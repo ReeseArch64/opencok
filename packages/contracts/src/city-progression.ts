@@ -14,6 +14,7 @@ export interface QuestState {
   alliance: Row;
 }
 export interface QuestWrite {
+  mail?: readonly import("./files").AvatarSystemMail[];
   legacy?: readonly Row[];
   resetLegacy?: boolean;
   legacyPeriod?: bigint;
@@ -32,6 +33,7 @@ export interface QuestWrite {
 export interface CityProgressionState {
   quests?: QuestState;
   abilityPages?: readonly Row[];
+  suitDecompositions?: readonly Row[];
   profile: Row;
   resource: Row;
   statistics: Row;
@@ -52,6 +54,13 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  equipment?: readonly Row[];
+  deletedEquipment?: readonly string[];
+  suitDecompositions?: readonly Row[];
+  equipmentSelection?: string;
+  materialBackup?: number;
+  materialAcceleration?: { materialCdNum: number; materialCdTime: bigint };
+  queueUpdates?: readonly Row[];
   vip?: Row;
   states?: readonly Row[];
   deletedStates?: readonly number[];
@@ -78,7 +87,7 @@ export interface CityProgressionStore {
 
 export interface ProgressionActivityData {
   schema: 1;
-  kind: "upgrade" | "destroy" | "research" | "train" | "heal" | "fort";
+  kind: "upgrade" | "destroy" | "research" | "train" | "heal" | "fort" | "equipment" | "material";
   costs: Record<string, string>;
   items: Record<string, number>;
   target?: { level: number; star: number; progress: number };

@@ -1,3 +1,4 @@
+import { equipmentDomain, workshopDomain } from "@opencok/services/equipment";
 import { playerEffectsDomain } from "@opencok/services/player-effects";
 import { questsDomain } from "@opencok/services/quests";
 import { cityQueueCommands } from "@opencok/rules/city-command";
@@ -330,6 +331,8 @@ export const RealmDependenciesLive = Layer.effect(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary),
       [
+        equipmentDomain,
+        workshopDomain,
         playerEffectsDomain,
         questsDomain,
         constructionDomain,
@@ -351,19 +354,37 @@ export const RealmDependenciesLive = Layer.effect(
             cityQueueCommands[command.command]?.action === "queue.finish";
           const params = decode(Buffer.from(command.request));
           const queueId = transition
-            ? str(params, command.command === "queue.ccd" ? "qUUID" : "uuid")
+            ? str(
+                params,
+                cityQueueCommands[command.command]?.queueKey ??
+                  (command.command === "queue.ccd" ? "qUUID" : "uuid"),
+              )
             : undefined;
           const at = await activityTransitionInstant(tx, owner, queueId, now);
           await productionPreparation.prepare(tx, owner, at);
           return at;
         },
         command: city.command,
+        next: city.next,
+        accelerate: city.accelerate,
       }),
       rules,
       economyEffects,
     );
     const production = new ProductionService(
-      createProductionExecutor(db.kingdom.db, authority, productionPreparation),
+      createProductionExecutor(db.kingdom.db, authority, {
+        ...productionPreparation,
+        recordAction: async (tx, owner, kind, itemId, count, now, economy) => {
+          await city.command(
+            tx,
+            owner,
+            "quest.action",
+            encode({ kind: sfs.string(kind), itemId: sfs.string(itemId), count: sfs.int(count) }),
+            now,
+            economy,
+          );
+        },
+      }),
       rules,
       economyEffects,
     );
@@ -455,6 +476,16 @@ export const RealmDependenciesLive = Layer.effect(
       createInventoryExecutor(db.kingdom.db, authority, Date.now, {
         before: async (tx, owner, now) => {
           await productionPreparation.prepare(tx, owner, now);
+        },
+        recordAction: async (tx, owner, kind, itemId, count, now, economy) => {
+          await city.command(
+            tx,
+            owner,
+            "quest.action",
+            encode({ kind: sfs.string(kind), itemId: sfs.string(itemId), count: sfs.int(count) }),
+            now,
+            economy,
+          );
         },
         useEffect: async (tx, owner, itemId, count, now, economy) =>
           decode(

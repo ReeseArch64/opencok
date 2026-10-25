@@ -1,3 +1,4 @@
+import { user_assets } from "@opencok/drizzle/schema/opencok_kingdom/user_assets";
 import { and, asc, eq } from "drizzle-orm";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { user_item_cd } from "@opencok/drizzle/schema/opencok_kingdom/user_item_cd";
@@ -13,6 +14,15 @@ import type { RealmAuthority } from "./realm-authority.ts";
 import type { Database } from "./game.ts";
 
 export interface InventoryPreparation {
+  recordAction?(
+    tx: MutationTransaction,
+    owner: string,
+    kind: "use" | "compose" | "harvest",
+    itemId: string,
+    count: number,
+    now: bigint,
+    economy: import("@opencok/contracts/timed-activity").ActivityEconomy,
+  ): Promise<void>;
   before?(tx: MutationTransaction, owner: string, now: bigint): Promise<void>;
   useEffect?(
     tx: MutationTransaction,
@@ -45,6 +55,10 @@ export function createInventoryExecutor(
           ? (itemId, count, economy) =>
               preparation.useEffect!(tx, command.owner, itemId, count, at, economy)
           : undefined,
+        preparation?.recordAction
+          ? (kind, itemId, count, economy) =>
+              preparation.recordAction!(tx, command.owner, kind, itemId, count, at, economy)
+          : undefined,
       );
     });
   };
@@ -56,7 +70,9 @@ export async function executeInventoryTransaction(
   plan: Parameters<InventoryExecutor>[1],
   reason: string,
   useEffect?: import("@opencok/contracts/inventory").InventoryState["useEffect"],
+  recordAction?: import("@opencok/contracts/inventory").InventoryState["recordAction"],
 ) {
+  const [assets] = await tx.select().from(user_assets).where(eq(user_assets.uid, owner));
   const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
   const [resource] = await tx
     .select()
@@ -74,6 +90,7 @@ export async function executeInventoryTransaction(
   const buildings = await tx.select().from(user_building).where(eq(user_building.uid, owner));
   const result = await plan({
     profile: Object.freeze({ ...profile }),
+    assets: assets ?? {},
     resource: Object.freeze({ ...resource }),
     items: items.map((item) =>
       Object.freeze({ ...item, value: item.value ?? 0, vanishTime: item.vanishTime ?? 0n }),
@@ -81,6 +98,7 @@ export async function executeInventoryTransaction(
     cooldowns: new Map(cooldowns.map((row) => [row.itemId, row.useTime])),
     buildings,
     useEffect,
+    recordAction,
     effects: () => readPlayerEffects(tx, profile, true),
   });
   if (result.items.length > 128 || result.cooldowns.size > 128)
@@ -151,9 +169,10 @@ export async function executeInventoryTransaction(
   for (const [kind, changes, before, allowed] of [
     ["profile", result.profile, profile, profileKeys],
     ["resource", result.resource, resource, resourceKeys],
+    ["assets", result.assets ?? {}, assets ?? {}, ["winPoint"]],
   ] as const) {
     for (const [key, value] of Object.entries(changes)) {
-      if (!allowed.includes(key) || typeof value !== "bigint")
+      if (!(allowed as readonly string[]).includes(key) || typeof value !== "bigint")
         throw new Error("Invalid inventory balance");
       if (
         kind === "resource" &&
@@ -177,6 +196,11 @@ export async function executeInventoryTransaction(
       );
     }
   }
+  if (result.assets?.winPoint !== undefined)
+    await tx
+      .insert(user_assets)
+      .values({ uid: owner, winPoint: result.assets.winPoint })
+      .onConflictDoUpdate({ target: user_assets.uid, set: { winPoint: result.assets.winPoint } });
   if (Object.keys(result.profile).length)
     await tx.update(userprofile).set(result.profile).where(eq(userprofile.uid, owner));
   if (Object.keys(result.resource).length)
