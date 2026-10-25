@@ -230,6 +230,7 @@ export class GameService {
     return (await this.initialize(uid)).body;
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
+    await this.services.reconcileTimed?.(uid);
     const state = await this.state(uid);
     const world = state.world;
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
@@ -316,6 +317,19 @@ export class GameService {
       case "mail.reward.batch":
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
+        break;
+      case "queue.finish":
+      case "queue.cancel":
+      case "queue.ccd":
+      case "queue.open":
+      case "queue.rent":
+        if (!this.services.timed) throw new GameError(errors.unsupported);
+        ({ body, pushes } = await this.services.timed(uid, command, params));
+        break;
+      case "build.collect":
+      case "building.addOutPut":
+        if (!this.services.production) throw new GameError(errors.unsupported);
+        ({ body, pushes } = await this.services.production(uid, command, params));
         break;
       case "item.buy":
       case "item.use":

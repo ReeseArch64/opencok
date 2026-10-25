@@ -188,6 +188,10 @@ between simultaneous events is part of the rules. Periodic rewards and event tim
 explicit rule timezone, without depending on the container's local zone. The persisted
 instant remains in UTC.
 
+The implemented common activity and city-production slice, transaction ports,
+compatibility limits and recovery procedure are documented in
+[timed activities and city production](timed-economy.md).
+
 ## 17. Data model and write ownership
 
 The physical model will be versioned by migrations. The logical organization below
