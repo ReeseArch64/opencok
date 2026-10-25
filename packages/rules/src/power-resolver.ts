@@ -22,6 +22,8 @@ export function playerGameEffect(
   world: ReadonlyMap<number, number>,
   emperorVersion: number | null | undefined,
   effect:
+    | 142
+    | 161
     | 158
     | 159
     | 160
@@ -68,6 +70,8 @@ export function playerGameEffect(
 ): number {
   if (
     ![
+      142,
+      161,
       158,
       159,
       160,

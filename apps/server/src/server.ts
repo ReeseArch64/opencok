@@ -1,5 +1,11 @@
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { createGeneralDrawDomain } from "@opencok/services/general-draws";
+import { AllianceService, allianceStableId } from "@opencok/services/alliances";
+import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
+import { dueAllianceResearch } from "@opencok/repositories/alliance-recovery";
+import { createAlliancePublicationReader } from "@opencok/repositories/alliance-publication";
+import { publishAllianceMutation } from "@opencok/services/alliance-publication";
+import { relayMutationEvent } from "@opencok/repositories/mutation";
 import { generalsDomain } from "@opencok/services/generals";
 import { equipmentDomain, workshopDomain } from "@opencok/services/equipment";
 import { playerEffectsDomain } from "@opencok/services/player-effects";
@@ -352,6 +358,95 @@ export const RealmDependenciesLive = Layer.effect(
       rules,
       economyEffects,
     );
+    const alliances = new AllianceService(
+      createAllianceRepository(
+        db.kingdom.db,
+        authority,
+        cityBoundary,
+        Date.now,
+        city.domains,
+        async (tx, owner, kind, count, now) => {
+          await city.command(
+            tx,
+            owner,
+            "quest.action",
+            encode({ kind: sfs.string(kind), count: sfs.int(count) }),
+            now,
+            {
+              resource() {
+                throw new Error("Unexpected alliance quest resource grant");
+              },
+              gold() {
+                throw new Error("Unexpected alliance quest gold grant");
+              },
+              item() {
+                throw new Error("Unexpected alliance quest item grant");
+              },
+            },
+          );
+        },
+      ),
+      rules,
+      economyEffects,
+      async (value) =>
+        Boolean(await nicknameServices.nicknameBadWords?.(value)) ||
+        Boolean(await nicknameServices.nicknameForbidden?.(value)),
+    );
+    let allianceCursor: string | undefined;
+    const recoverAlliances = async () => {
+      authority.assertReady();
+      const due = await dueAllianceResearch(
+        db.kingdom.db,
+        config.kingdomId,
+        BigInt(Date.now()),
+        allianceCursor,
+      );
+      allianceCursor = due.length === 64 ? due.at(-1)!.allianceId : undefined;
+      for (const saved of due) {
+        try {
+          await alliances.command(saved.owner, "alliance.tick", {
+            operationId: sfs.string(
+              "alliance-research:" +
+                allianceStableId(
+                  `${saved.allianceId}:${saved.scienceId}:${saved.startTime}:${saved.needTime}:${saved.accelerate?.toString("hex") ?? ""}`,
+                ),
+            ),
+          });
+        } catch {
+          console.warn(
+            JSON.stringify({
+              event: "alliance_research_recovery_failed",
+              kingdom: config.kingdomId,
+              alliance: saved.allianceId,
+            }),
+          );
+        }
+      }
+      for (let index = 0; index < 64; index++) {
+        const published = await relayMutationEvent(
+          db.kingdom.db,
+          authority,
+          (event) =>
+            publishAllianceMutation(
+              createAlliancePublicationReader(db.kingdom.db, authority),
+              event.payload,
+              (owner, command, body) => notifications.publish(owner, command, body),
+            ),
+          Date.now,
+          "alliance.changed",
+        );
+        if (!published) break;
+      }
+    };
+    yield* Effect.tryPromise({
+      try: recoverAlliances,
+      catch: () => new Error("Alliance recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     const activityDomains: ReadonlyMap<number, ActivityDomain> = city.domains;
     const activities = new TimedActivityService(
       createActivityExecutor(db.kingdom.db, authority, activityDomains, Date.now, {
@@ -554,6 +649,13 @@ export const RealmDependenciesLive = Layer.effect(
           production: async (owner, command, params) => {
             await recoverActivities(owner);
             return production.command(owner, command, params);
+          },
+          reconcileAlliance: async (owner) => {
+            await alliances.command(owner, "alliance.tick", {});
+          },
+          alliance: async (owner, command, params) => {
+            await recoverActivities(owner);
+            return alliances.command(owner, command, params);
           },
           cityProgression: async (owner, command, params) => {
             await recoverActivities(owner);

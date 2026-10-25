@@ -87,7 +87,9 @@
     "./timed-activity": "./src/timed-activity.ts",
     "./city-progression": "./src/city-progression.ts",
     "./responses/research": "./src/responses/research.ts",
-    "./responses/military": "./src/responses/military.ts"
+    "./responses/military": "./src/responses/military.ts",
+    "./alliance-gameplay": "./src/alliance-gameplay.ts",
+    "./responses/alliance": "./src/responses/alliance.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"

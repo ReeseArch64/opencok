@@ -2241,3 +2241,25 @@ boundaries, pinned crafts, equip/dismantle conservation, workshop chaining, lega
 quantity recovery, and acceleration limits. The player progression mutation suite
 must reject removed budget, tree, expiry, material, equipped-power, and terminal
 claim-state checks. The native 12.06.0 APK has not been exercised for these commands.
+
+## Gameplay topic 23: basic alliances
+
+The isolated worktree starts from `origin/develop`. Maintained TypeScript now owns
+realm-local creation, association, applications/invitations, governance, permissions,
+queue assistance, donations, science deadlines and shared reward entitlements.
+The [alliance architecture](architecture/basic-alliances.md) records transaction,
+production, notification, compatibility and rollback boundaries.
+
+Synthetic PostgreSQL validation exercises concurrent joins and the final capacity
+slot, atomic leadership transfer, current-rank authorization, typed native inputs,
+owned invitation mail, exact receipt replay and conflict rollback, research after
+restart, delayed production effect application, one helper per activity generation,
+first-membership mail, trusted weighted gift publication and one recipient claim.
+The live outbox scenario confirms that former members receive removal notification
+and that unrelated pending events are retained. Unit rules cover castle thresholds,
+rank capabilities, permission keys, membership restrictions and donation stages.
+
+The reference files and original mobile inputs remain untouched. No new external
+dependency or database migration is introduced. Mobile interaction and client
+tracks other than 12.06.0 are unverified; cross-kingdom membership and war systems
+remain outside this realm-local basic alliance implementation.

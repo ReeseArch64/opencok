@@ -105,7 +105,9 @@
     "./general-refinement": "./src/general-refinement.ts",
     "./new-general-content": "./src/new-general-content.ts",
     "./general-assignments": "./src/general-assignments.ts",
-    "./general-draws": "./src/general-draws.ts"
+    "./general-draws": "./src/general-draws.ts",
+    "./alliance": "./src/alliance.ts",
+    "./alliance-science": "./src/alliance-science.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

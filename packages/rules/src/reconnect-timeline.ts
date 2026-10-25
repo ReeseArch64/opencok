@@ -18,6 +18,8 @@ export function reconnectSettlementTimes(
   const add = (time: bigint) => {
     if (time > from && time < until) instants.add(time);
   };
+  for (const research of state.allianceResearch ?? [])
+    add(long(research.startTime) + long(research.needTime));
   for (const status of state.effects.states) {
     add(long(status.startTime));
     add(long(status.endTime));

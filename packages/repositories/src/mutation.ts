@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
@@ -51,6 +51,27 @@ export function createMutationExecutor(db: Realm, authority: RealmAuthority, now
         if (!Number.isSafeInteger(captured) || captured < 0)
           throw new Error("Invalid mutation clock");
         const createdAt = BigInt(captured);
+        const participants = input.participants === undefined ? undefined : [...input.participants];
+        if (participants) {
+          if (
+            !participants.includes(owner) ||
+            participants.length > 2048 ||
+            new Set(participants).size !== participants.length
+          )
+            throw new Error("Invalid mutation participants");
+          for (const id of participants) identifier(id, 40);
+          const locked = await tx
+            .select({ uid: userprofile.uid, realm: userprofile.serverId })
+            .from(userprofile)
+            .where(inArray(userprofile.uid, participants))
+            .orderBy(asc(userprofile.uid))
+            .for("update");
+          if (
+            locked.length !== participants.length ||
+            locked.some((row) => row.realm !== authority.kingdomId)
+          )
+            throw new Error("Foreign mutation participant");
+        }
         const [profile] = await tx
           .select({
             realm: userprofile.serverId,
@@ -168,12 +189,17 @@ export async function relayMutationEvent(
     payload: Buffer;
   }) => Promise<void>,
   now = Date.now,
+  eventType?: string,
 ): Promise<boolean> {
   const [event] = await db
     .select()
     .from(mutation_outbox)
     .where(
-      and(eq(mutation_outbox.kingdomId, authority.kingdomId), eq(mutation_outbox.publishedAt, 0n)),
+      and(
+        eq(mutation_outbox.kingdomId, authority.kingdomId),
+        eq(mutation_outbox.publishedAt, 0n),
+        eventType ? eq(mutation_outbox.eventType, eventType) : undefined,
+      ),
     )
     .orderBy(
       asc(mutation_outbox.createdAt),

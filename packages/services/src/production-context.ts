@@ -13,6 +13,7 @@ import { worldPowerEffects } from "@opencok/rules/power-world";
 import { serverFeature } from "@opencok/rules/power-context";
 import { productionScale } from "@opencok/rules/timed-activity";
 import { decodeWorldPowerEffects, generalSkillPoints } from "./power";
+import { allianceScienceRule } from "@opencok/rules/alliance-science";
 import { resourceGeneralBuildingEffect } from "./world-resource-owner-context";
 
 export async function productionContext(
@@ -33,6 +34,14 @@ export async function productionContext(
       snapshot = {
         ...state.effects,
         states: state.effects.states.filter((row) => long(row, "startTime") <= at),
+        allianceSciences: state.effects.allianceSciences.map((row) => {
+          const pending = state.allianceResearch?.find(
+            (queue) => num(queue, "scienceId") === num(row, "scienceId"),
+          );
+          if (!pending || at < long(pending, "startTime") + long(pending, "needTime")) return row;
+          allianceScienceRule(rules, num(row, "scienceId"), num(row, "level") + 1);
+          return { ...row, level: num(row, "level") + 1 };
+        }),
       };
     const effects = worldPowerEffects(world, rules, current);
     return (id: Parameters<typeof playerGameEffect>[6]) =>
