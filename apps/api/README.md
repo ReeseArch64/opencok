@@ -119,8 +119,9 @@ The public WebSocket remains the chat service's configured `CHAT_WEBSOCKET_URL` 
 must be directly reachable by clients. The API does not relay WebSocket traffic or
 expose the session-signing secret. The realm's `GAME_CHAT_SESSION_URL` separately
 addresses the same service's internal `/external/session` endpoint. Development Compose
-forwards `API_CHAT_URL` without starting a chat container; separately hosted chat must
-be reachable on the configured network. No database or migration changes are involved.
+starts Chat and defaults `API_CHAT_URL` to `http://chat:8083`. Override it when using
+separately hosted chat reachable on the configured network. No database or migration
+changes are involved.
 
 Socket-free units compose the API routes with the maintained chat metadata handlers,
 verify configuration/dependency injection, failures, stream/deadline limits and gateway

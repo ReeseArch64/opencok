@@ -103,6 +103,8 @@ async function createStack() {
     KINGDOM_ID: "2",
     KINGDOM_DATABASE_NAME: "opencok_kingdom_2",
     GAME_LOGIN_SECRET: "synthetic-secret",
+    GAME_CHAT_SESSION_URL: "http://chat:8083/external/session",
+    CHAT_SIGNING_SECRET: "synthetic-chat-secret",
     DEPENDENCY_TIMEOUT_MS: "1000",
   });
   expect(isolated.services.server.volumes ?? []).toEqual([]);
@@ -129,11 +131,19 @@ async function createStack() {
     API_GAME_HOST: "127.0.0.1",
     API_GAME_PORT: String(gamePort),
     API_DEPENDENCY_TIMEOUT_MS: "500",
+    API_CHAT_URL: "http://chat:8083",
     S3_PUBLIC_ENDPOINT: "http://minio:9000",
     S3_REGION: "us-east-1",
     S3_BUCKET: "opencok-uploads",
     S3_ACCESS_KEY_ID: "opencok",
     S3_SECRET_ACCESS_KEY: "opencok-secret",
+  });
+  const chatPort = publishedPort("chat");
+  const chatWebsocketUrl = `ws://127.0.0.1:${chatPort}/chat/ws`;
+  Object.assign(isolated.services.chat.environment, {
+    DATABASE_URL: databaseUrl,
+    CHAT_SIGNING_SECRET: "synthetic-chat-secret",
+    CHAT_WEBSOCKET_URL: chatWebsocketUrl,
   });
   isolated.services.gateway.ports = [
     { target: 80, published: String(httpPort), host_ip: "127.0.0.1", protocol: "tcp" },
@@ -252,7 +262,7 @@ export function createBuildingCatalog() {
   }
   try {
     const config = JSON.parse(await compose(["config", "--format", "json"]));
-    for (const excluded of ["chat", "media", "files", "gameservice", "gameserver"])
+    for (const excluded of ["media", "files", "gameservice", "gameserver"])
       expect(config.services).not.toHaveProperty(excluded);
     expect(config.services.api.environment).not.toHaveProperty("API_DB_HOST");
     expect(config.services.server.environment.DATABASE_URL).toContain(
@@ -283,6 +293,8 @@ export function createBuildingCatalog() {
       pgadminPort,
       insightPort,
       portainerPort,
+      chatPort,
+      chatWebsocketUrl,
       folder,
       baseUrl: `http://127.0.0.1:${httpPort}`,
       services: Object.keys(config.services).sort(),
@@ -312,14 +324,13 @@ async function checkService(stack: Stack, service: string) {
 
   const probe = async (container: string, script: string) =>
     compose(["exec", "-T", container, "bun", "--no-env-file", "-e", script]);
-  const http = async (url: string, tls = false) =>
+  const http = async (url: string) =>
     fetch(url, {
       signal: AbortSignal.timeout(3000),
-      ...(tls ? { tls: { rejectUnauthorized: false } } : {}),
     });
-  const toolReady = async (url: string, tls = false) => {
-    await eventually(async () => (await http(url, tls)).status === 200, 60000);
-    return http(url, tls);
+  const toolReady = async (url: string) => {
+    await eventually(async () => (await http(url)).status === 200, 60000);
+    return http(url);
   };
   switch (service) {
     case "postgres": {
@@ -366,8 +377,19 @@ async function checkService(stack: Stack, service: string) {
       expect(registration.trim()).toBe("registration-ok");
       break;
     }
-    case "redis":
+    case "redis": {
       expect((await compose(["exec", "-T", "redis", "redis-cli", "PING"])).trim()).toBe("PONG");
+      for (const [key, value] of Object.entries({
+        appendonly: "yes",
+        appendfsync: "everysec",
+        save: "900 1 300 10 60 10000",
+        maxmemory: "402653184",
+        "maxmemory-policy": "noeviction",
+        "slowlog-log-slower-than": "-1",
+      })) {
+        const result = await compose(["exec", "-T", "redis", "redis-cli", "CONFIG", "GET", key]);
+        expect(result.trim().split("\n")).toEqual([key, value]);
+      }
       expect(
         (
           await compose([
@@ -395,7 +417,19 @@ async function checkService(stack: Stack, service: string) {
       ).toBeGreaterThan(0);
       await compose(["exec", "-T", "redis", "redis-cli", "DEL", "synthetic:stack:ttl"]);
       break;
-    case "zookeeper":
+    }
+    case "zookeeper": {
+      const config = await compose(["exec", "-T", "zookeeper", "cat", "/conf/zoo.cfg"]);
+      for (const setting of [
+        "tickTime=2000",
+        "initLimit=10",
+        "syncLimit=5",
+        "autopurge.snapRetainCount=3",
+        "autopurge.purgeInterval=1",
+        "maxClientCnxns=60",
+        "4lw.commands.whitelist=ruok,srvr",
+      ])
+        expect(config.split("\n")).toContain(setting);
       expect(
         await compose([
           "exec",
@@ -407,6 +441,7 @@ async function checkService(stack: Stack, service: string) {
         ]),
       ).toContain("Mode: standalone");
       break;
+    }
     case "api":
     case "server": {
       const port = service === "api" ? 8080 : 18090;
@@ -416,6 +451,15 @@ async function checkService(stack: Stack, service: string) {
           `Promise.all(['/healthz','/readyz'].map(async path=>{const r=await fetch('http://127.0.0.1:${port}'+path);if(!r.ok)throw Error('service unavailable')})).catch(()=>process.exit(1))`,
         ),
       ).toBe("");
+      break;
+    }
+    case "chat": {
+      expect((await http(`http://127.0.0.1:${stack.chatPort}/_health`)).status).toBe(200);
+      const metadata = await http(stack.baseUrl + "/api/v1global_config");
+      expect(metadata.status).toBe(200);
+      const body = (await metadata.json()) as { data: { websocket: { urlArray: string[] } } };
+      expect(body.data.websocket.urlArray).toEqual([stack.chatWebsocketUrl]);
+      expect((await http(stack.baseUrl + "/external/session")).status).toBe(404);
       break;
     }
     case "gateway":
@@ -456,11 +500,11 @@ async function checkService(stack: Stack, service: string) {
       break;
     }
     case "portainer": {
-      const baseUrl = `https://127.0.0.1:${stack.portainerPort}`;
-      const response = await toolReady(baseUrl + "/api/status", true);
+      const baseUrl = `http://127.0.0.1:${stack.portainerPort}`;
+      const response = await toolReady(baseUrl + "/api/status");
       expect(((await response.json()) as { Version: string }).Version).toBeTruthy();
-      expect((await http(baseUrl, true)).status).toBe(200);
-      expect((await http(baseUrl + "/api/endpoints", true)).status).toBe(401);
+      expect((await http(baseUrl)).status).toBe(200);
+      expect((await http(baseUrl + "/api/endpoints")).status).toBe(401);
       break;
     }
     default:
@@ -494,6 +538,7 @@ describe("isolated Compose stack", () => {
     "zookeeper",
     "server",
     "api",
+    "chat",
     "gateway",
     "minio",
     "minio-setup",
@@ -650,7 +695,6 @@ describe("isolated Compose stack", () => {
         expect((await compose(["exec", "-T", "redis", "redis-cli", "DBSIZE"])).trim()).toBe("0");
         for (const path of [
           "/chat/ws",
-          "/api/v1global_config",
           "/gameservice/www/gateway/json.php",
           "/cok/img/1/image.jpg",
           "/cok/.hidden",

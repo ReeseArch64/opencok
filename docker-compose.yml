@@ -26,15 +26,15 @@ volumes:
 services:
   portainer:
     image: portainer/portainer-ce:lts
+    command: [--http-enabled]
     container_name: opencok-portainer
-    restart: no
     profiles: [all, dev]
     networks: [opencok-external-network]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer-data:/data
     ports:
-      - 9443:9443
+      - 9443:9000
 
   postgres:
     image: postgres:17.11-bookworm
@@ -48,8 +48,6 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
       PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - 5432:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -110,15 +108,47 @@ services:
       start_period: 30s
 
   redis:
-    build:
-      context: .
-      dockerfile: infra/compose/redis.Dockerfile
+    image: redis:6.2.24-bookworm
     container_name: opencok-redis
     restart: unless-stopped
     profiles: [all, dev]
     networks: [opencok-internal-network]
     volumes:
       - redis-data:/data
+    command:
+      [
+        redis-server,
+        --bind,
+        0.0.0.0,
+        --tcp-keepalive,
+        "60",
+        --dir,
+        /data,
+        --save,
+        "900",
+        "1",
+        --save,
+        "300",
+        "10",
+        --save,
+        "60",
+        "10000",
+        --appendonly,
+        "yes",
+        --appendfsync,
+        everysec,
+        --maxmemory,
+        384mb,
+        --maxmemory-policy,
+        noeviction,
+        --slowlog-log-slower-than,
+        "-1",
+      ]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 12
 
   redisinsight:
     image: redis/redisinsight:latest
@@ -135,10 +165,7 @@ services:
       - 5540:5540
 
   zookeeper:
-    build:
-      context: .
-      dockerfile: infra/compose/zookeeper.Dockerfile
-    image: opencok-zookeeper
+    image: zookeeper:3.4.14
     container_name: opencok-zookeeper
     restart: unless-stopped
     profiles: [all, dev]
@@ -147,6 +174,22 @@ services:
       - zookeeper-data:/data
       - zookeeper-datalog:/datalog
       - zookeeper-logs:/logs
+    environment:
+      ZOO_HEAP_SIZE: 256
+      ZOO_LOG4J_PROP: INFO,CONSOLE
+      ZOO_TICK_TIME: 2000
+      ZOO_INIT_LIMIT: 10
+      ZOO_SYNC_LIMIT: 5
+      ZOO_MAX_CLIENT_CNXNS: 60
+      ZOO_AUTOPURGE_SNAPRETAINCOUNT: 3
+      ZOO_AUTOPURGE_PURGEINTERVAL: 1
+      ZOO_CFG_EXTRA: 4lw.commands.whitelist=ruok,srvr
+    healthcheck:
+      test: [CMD-SHELL, "printf srvr | nc -w 2 127.0.0.1 2181 | grep -q 'Mode: standalone'"]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 12
 
   minio:
     image: ghcr.io/coollabsio/minio
@@ -181,20 +224,24 @@ services:
     container_name: opencok-minio-setup
     restart: no
     profiles: [all, dev]
-    stop_grace_period: 60s
-    security_opt: [no-new-privileges:true]
-    entrypoint: [sh, /usr/local/bin/opencok-cdn-init.sh]
+    entrypoint:
+      - sh
+      - -ec
+      - |
+        set -u
+        mc alias set local http://minio:9000 opencok opencok-secret >/dev/null
+        mc mb --ignore-existing local/opencok-cdn >/dev/null
+        mc mb --ignore-existing local/opencok-uploads >/dev/null
+        mc anonymous set none local/opencok-uploads >/dev/null
+        cat > /tmp/cdn-public-read.json <<'JSON'
+        {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::opencok-cdn/cok.eleximg.com/*","arn:aws:s3:::opencok-cdn/asset.cok.chat/*"]}]}
+        JSON
+        mc anonymous set-json /tmp/cdn-public-read.json local/opencok-cdn >/dev/null
+        mc mirror --overwrite --quiet /source/cok.eleximg.com/ local/opencok-cdn/cok.eleximg.com/ >/dev/null
+        mc mirror --overwrite --quiet /source/asset.cok.chat/ local/opencok-cdn/asset.cok.chat/ >/dev/null
+        printf '%s\n' 'CDN host trees synchronized; uploads and source archives are not public'
     volumes:
-      - type: bind
-        source: ./infra/storage/init-cdn.sh
-        target: /usr/local/bin/opencok-cdn-init.sh
-        read_only: true
-        bind: { create_host_path: false }
-      - type: bind
-        source: ./data/cdn/data
-        target: /source
-        read_only: true
-        bind: { create_host_path: false }
+      - ./data/cdn/data:/source:ro
     networks: [opencok-internal-network]
     depends_on:
       minio:
@@ -205,18 +252,9 @@ services:
       context: .
       dockerfile: apps/server/Dockerfile
     container_name: opencok-server
-
     restart: unless-stopped
     profiles: [all, dev]
-    init: true
-    stop_grace_period: 30s
-    read_only: true
-    cap_drop: [ALL]
-    security_opt: [no-new-privileges:true]
-    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
     networks: [opencok-internal-network]
-    mem_limit: 1g
-    cpus: "2.00"
     environment:
       NODE_ENV: development
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
@@ -235,8 +273,8 @@ services:
       GAME_FEED_MAX_COUNT: ${GAME_FEED_MAX_COUNT:-3}
       GAME_PLAYER_KINGDOMS: ${GAME_PLAYER_KINGDOMS:-}
       GAME_MAIL_CHAT_URL: ${GAME_MAIL_CHAT_URL:-}
-      GAME_CHAT_SESSION_URL: ${GAME_CHAT_SESSION_URL:-}
-      CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-}
+      GAME_CHAT_SESSION_URL: ${GAME_CHAT_SESSION_URL:-http://chat:8083/external/session}
+      CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-opencok-chat-development}
       GAME_MAP_SIZE: 1200
       DEPENDENCY_TIMEOUT_MS: 5000
     depends_on:
@@ -265,25 +303,16 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     container_name: opencok-api
-
     restart: unless-stopped
     profiles: [all, dev]
-    init: true
-    stop_grace_period: 30s
-    read_only: true
-    cap_drop: [ALL]
-    security_opt: [no-new-privileges:true]
-    tmpfs: ["/tmp:rw,noexec,nosuid,size=16m"]
     networks: [opencok-internal-network, opencok-external-network]
-    mem_limit: 256m
-    cpus: "0.50"
     environment:
       NODE_ENV: development
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
       GLOBAL_DATABASE_NAME: opencok_global
       KINGDOM_ID: 1
       API_SERVERS_FILE: ""
-      API_CHAT_URL: ${API_CHAT_URL:-}
+      API_CHAT_URL: ${API_CHAT_URL:-http://chat:8083}
       API_HOST: 0.0.0.0
       API_PORT: 8080
       S3_ENDPOINT: http://minio:9000
@@ -297,11 +326,7 @@ services:
       API_GAME_PORT: 9933
       API_DEPENDENCY_TIMEOUT_MS: 3000
     volumes:
-      - type: bind
-        source: ./apps/api/resources/servers.json
-        target: /etc/opencok/servers.json
-        read_only: true
-        bind: { create_host_path: false }
+      - ./apps/api/resources/servers.json:/etc/opencok/servers.json:ro
     depends_on:
       minio:
         condition: service_healthy
@@ -323,10 +348,47 @@ services:
       start_period: 10s
       retries: 12
 
+  chat:
+    build:
+      context: .
+      dockerfile: apps/chat/Dockerfile
+    container_name: opencok-chat
+    restart: unless-stopped
+    profiles: [all, dev]
+    init: true
+    stop_grace_period: 30s
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
+      GLOBAL_DATABASE_NAME: opencok_global
+      CHAT_KINGDOM_DATABASES: 1:opencok_kingdom_1,2:opencok_kingdom_2
+      CHAT_HOST: 0.0.0.0
+      CHAT_PORT: 8083
+      CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-opencok-chat-development}
+      CHAT_WEBSOCKET_URL: ${CHAT_WEBSOCKET_URL:-ws://192.168.1.104:8083/chat/ws}
+    ports:
+      - 8083:8083
+    depends_on:
+      postgres-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          CMD,
+          bun,
+          --no-env-file,
+          -e,
+          "fetch('http://127.0.0.1:8083/_health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 3s
+      start_period: 10s
+      retries: 12
+
   gateway:
     image: traefik:v3.7.15
     container_name: opencok-gateway
-
     restart: unless-stopped
     profiles: [all, dev]
     command: [--configFile=/etc/traefik/traefik.yml]
@@ -350,16 +412,8 @@ services:
       - 80:80
       - 9933:9933
     volumes:
-      - type: bind
-        source: ./infra/gateway/traefik.yml
-        target: /etc/traefik/traefik.yml
-        read_only: true
-        bind: { create_host_path: false }
-      - type: bind
-        source: ./infra/gateway/dynamic.yml
-        target: /etc/traefik/dynamic.yml
-        read_only: true
-        bind: { create_host_path: false }
+      - ./infra/gateway/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./infra/gateway/dynamic.yml:/etc/traefik/dynamic.yml:ro
     healthcheck:
       test: [CMD, traefik, healthcheck, --configFile=/etc/traefik/traefik.yml]
       interval: 10s

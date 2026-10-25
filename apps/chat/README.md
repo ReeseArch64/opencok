@@ -12,8 +12,12 @@ Current topic-8 server integration and operating evidence are recorded in the
 ## Development
 
 Install with `bun install --frozen-lockfile`. Run the root Compose `dev` profile to
-provision PostgreSQL and the existing global/kingdom migrations. Configure the root
-`.env` or process environment, then run `bun run --cwd apps/chat start`.
+start Chat, PostgreSQL and the existing global/kingdom migrations. The local stack
+configures API discovery and realm session issuance automatically and publishes Chat
+on port 8083. Set `CHAT_WEBSOCKET_URL` for the client-reachable address; see the
+[stack guide](../../infra/compose/README.md). To run Chat on the host instead, stop
+the Compose Chat service, configure the root `.env` or process environment, and run
+`bun run --cwd apps/chat start`.
 
 | Setting                  | Meaning                                                                          |
 | ------------------------ | -------------------------------------------------------------------------------- |

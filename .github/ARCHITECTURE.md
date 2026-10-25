@@ -58,7 +58,7 @@ flowchart LR
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `apps/api`                                            | Implemented shared discovery, optional chat metadata proxy and opt-in avatar media. Identity, Admin, push and payment endpoints remain target capabilities.         |
 | `apps/server`                                         | Implemented realm TCP/SFS composition and maintained gameplay commands. Owns progression and combat application; future calculation workers remain within this app. |
-| `apps/chat`                                           | Implemented HTTP/WebSocket chat, private session/metadata adapters and persistence; separately hosted.                                                              |
+| `apps/chat`                                           | Implemented HTTP/WebSocket chat, private session/metadata adapters and persistence; included in local Compose with independent production hosting.                  |
 | `apps/web`                                            | Implemented experimental browser scaffold; SSR deployment and full gameplay remain under evaluation.                                                                |
 | `apps/bot`                                            | Planned TypeScript authenticated simulator, with quotas and kill switch; no direct database writes.                                                                 |
 | `apps/admin`, `apps/www`, `apps/docs`, `apps/workers` | Planned deployable applications; names do not imply implementation.                                                                                                 |
@@ -272,7 +272,8 @@ for actual coverage and deferred cases. Historical details remain in the
 
 The implemented Compose stack runs Bun API/server, Traefik, PostgreSQL, Redis,
 ZooKeeper, MinIO/CDN and development tools. Both `all`/`dev` profiles select the
-same services. Media uses API S3 configuration; chat remains separately configured.
+same services, including Chat with a directly published WebSocket on port 8083.
+Media uses API S3 configuration; API metadata and realm session issuance target Chat.
 [Local stack guide](../infra/compose/README.md) and [API media](../apps/api/README.md#avatar-media)
 cover configuration, isolated verification and recovery. Local containers do not
 prove Kubernetes or production readiness.

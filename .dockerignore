@@ -9,10 +9,6 @@ data/
 assets/
 docs/
 infra/
-!infra/redis/
-!infra/redis/redis.conf
-!infra/zookeeper/
-!infra/zookeeper/zoo.cfg
 node_modules/
 
 *.tsbuildinfo
@@ -30,9 +26,6 @@ docker-compose.yml
 
 .env
 .env.example
-**/.env
-**/.env.*
-**/node_modules
 .gitignore
 .dockerignore
 .editorconfig
