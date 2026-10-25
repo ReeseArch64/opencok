@@ -167,6 +167,12 @@ replicas does not scale a realm safely; transfers require draining, checkpoint,
 routing and reconnect. Combat workers and media share their owning application's
 resource budget. [Ownership and scaling](../docs/architecture/persistence.md#9-authoritative-server-zookeeper-and-scaling).
 
+The implemented [mutation foundation](../apps/server/MUTATION_FOUNDATION.md) installs
+transaction-scoped epoch checks on current-realm repository writes and supplies
+atomic response receipts, credit/debit postings and outbox records. Reconnect
+settlement adopts these records; future economic domains must explicitly integrate
+the executor and define their operation identity and business rules.
+
 ## 10. Battle computation and bots
 
 TypeScript combat runs through the realm app with bounded CPU workers, queue,
