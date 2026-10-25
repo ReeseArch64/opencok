@@ -432,3 +432,19 @@ class InventoryPlanner {
     };
   }
 }
+
+export function planInventoryGrants(
+  state: InventoryState,
+  rules: Rules,
+  grants: readonly { itemId: string; count: number }[],
+  now: number,
+): InventoryPlan {
+  const planner = new InventoryPlanner(
+    state,
+    rules,
+    { world: async () => new Map(), emperor: async () => null },
+    now,
+  );
+  for (const grant of grants) planner.add(grant.itemId, grant.count);
+  return planner.result({});
+}
