@@ -4046,3 +4046,9 @@ activation, recovery and boundaries for future domain migrations.
 Topic 10 adds atomic purchases, consumption, internal grants and composition on the
 persistent mutation foundation. See the [inventory guide](INVENTORY.md) for supported
 commands and effects, operation identity, domain exclusions and recovery evidence.
+
+## Mail rewards and attachments
+
+Topic 11 adds durable per-message claims and atomic individual/batch redemption for
+supported inventory, currency and resource rewards. The [mail rewards guide](MAIL_REWARDS.md)
+describes retry identity, compatibility, pending reward domains and recovery.
