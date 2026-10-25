@@ -29,6 +29,22 @@ export function allianceRight(member: Row, rules: Rules, right: string) {
   if (rules.alliance.ranks?.get(`710${num(member, "rank")}`)?.[right] !== "1")
     allianceFailure(errors.locked);
 }
+export function allianceTargets(raw: string): string[] {
+  if (!raw) return [];
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    allianceFailure();
+  }
+  if (
+    !Array.isArray(value) ||
+    value.length > 32 ||
+    value.some((id) => typeof id !== "string" || !/^\d{1,10}$/.test(id))
+  )
+    allianceFailure();
+  return value;
+}
 export function alliancePermissions(raw: string) {
   const defaults: Record<string, number> = Object.fromEntries(
     [0, 1, 2].flatMap((kind) => [1, 2].map((rank) => [`${kind}_${rank}`, 1])),

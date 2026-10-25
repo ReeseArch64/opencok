@@ -15,6 +15,7 @@ import {
   allianceMember,
   allianceRight,
   alliancePermissions,
+  allianceTargets,
   changeAlliancePermissions,
   newAllianceMember,
   allianceCreationCost,
@@ -233,6 +234,12 @@ export class AllianceService {
     const requestId = params.operationId
       ? allianceText(str(params, "operationId"), 1, 128)
       : randomUUID();
+    if (
+      command !== "alliance.tick" &&
+      command !== "alliance.init" &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)
+    )
+      allianceFailure();
     const request: Fields = {};
     for (const key of Object.keys(params).sort())
       if (key !== "operationId" && key !== "_cok_") request[key] = params[key]!;
@@ -340,6 +347,7 @@ export class AllianceContext {
     return this.state.now;
   }
   member(uid = this.owner, id = this.allianceId) {
+    if (!id || text(this.profile(uid), "allianceId") !== id) allianceFailure(errors.locked);
     return allianceMember(
       [
         ...(this.write.members ?? []),
@@ -463,11 +471,12 @@ export class AllianceContext {
       nextlevel: sfs.int((Math.floor(num(alliance, "giftlevel") / 1000) + 1) * 1000),
       allianceScience: new AllianceScienceContext(this).snapshots(id),
       ...Object.fromEntries(
-        ["rankone", "ranktwo", "rankthree", "rankfour", "rankfive", "targetScience"].map((key) => [
+        ["rankone", "ranktwo", "rankthree", "rankfour", "rankfive"].map((key) => [
           key,
           sfs.string(text(alliance, key)),
         ]),
       ),
+      targetScience: sfs.string(allianceTargets(text(alliance, "targetScience")).join(";")),
     };
   }
   checkMarch(uid: string) {
@@ -614,8 +623,13 @@ export class AllianceContext {
   }
   async command(command: string, params: Fields): Promise<Fields> {
     if (command === "alliance.tick") return new AllianceScienceContext(this).complete();
-    if (command === "alliance.init")
-      return { alliance: sfs.object(this.allianceId ? this.snapshot() : {}) };
+    if (command === "alliance.init") {
+      const present =
+        this.state.alliances.some((row) => row.uid === this.allianceId) &&
+        this.list().some((row) => row.uid === this.owner) &&
+        this.list().filter((row) => num(row, "rank") === 5).length === 1;
+      return { alliance: sfs.object(present ? this.snapshot() : {}) };
+    }
     if (command === "al.create") {
       const input: CreateAllianceDto = {
         name: str(params, "name").trim(),

@@ -284,6 +284,12 @@ export interface GameServices {
     command: string,
     params: Fields,
   ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+  reconcileAlliance?(owner: string): Promise<void>;
+  alliance?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
   cityProgression?(
     owner: string,
     command: string,

@@ -86,6 +86,7 @@ export interface AllianceRepository {
 }
 
 export interface AlliancePublicationSnapshot {
+  profiles: readonly Row[];
   record?: Row;
   members: readonly Row[];
   queues: readonly Row[];
