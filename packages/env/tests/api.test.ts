@@ -54,3 +54,43 @@ test("API media is disabled by default and requires an explicit boolean flag", (
   expect(parseApiEnvironment({ API_FILES_ENABLED: "true" }).API_FILES_ENABLED).toBe(true);
   expect(() => parseApiEnvironment({ API_FILES_ENABLED: "yes" })).toThrow("API_FILES_ENABLED");
 });
+
+test("creation requires complete trusted realm configuration without exposing secrets", () => {
+  expect(parseApiEnvironment({}).API_PROVISIONING_REALMS).toBeUndefined();
+  const configured = {
+    FIREBASE_PROJECT_ID: "synthetic-project",
+    PROVISIONING_SIGNING_SECRET: "synthetic-private-key-with-enough-length",
+    API_PROVISIONING_REALMS: JSON.stringify([
+      { id: 1, url: "http://realm:18090/_internal/characters" },
+    ]),
+  };
+  expect(parseApiEnvironment(configured).API_PROVISIONING_REALMS).toHaveLength(1);
+  for (const key of Object.keys(configured)) {
+    const partial = { ...configured, [key]: "" };
+    expect(() => parseApiEnvironment(partial)).toThrow();
+  }
+  for (const url of [
+    "http://realm/wrong",
+    "http://u:secret@realm/_internal/characters",
+    "http://realm/_internal/characters?q=1",
+    "file:///tmp/characters",
+  ])
+    expect(() =>
+      parseApiEnvironment({
+        ...configured,
+        API_PROVISIONING_REALMS: JSON.stringify([{ id: 1, url }]),
+      }),
+    ).toThrow();
+  expect(() =>
+    parseApiEnvironment({ ...configured, API_PROVISIONING_REALMS: "invalid" }),
+  ).toThrow();
+  expect(() =>
+    parseApiEnvironment({
+      ...configured,
+      API_PROVISIONING_REALMS: JSON.stringify([
+        { id: 1, url: "http://realm/_internal/characters" },
+        { id: 1, url: "http://other/_internal/characters" },
+      ]),
+    }),
+  ).toThrow();
+});

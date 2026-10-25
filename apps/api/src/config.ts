@@ -9,6 +9,13 @@ export const readConfig = Effect.gen(function* () {
   url.pathname = `/${settings.GLOBAL_DATABASE_NAME}`;
   url.searchParams.delete("database");
   return {
+    provisioning: settings.FIREBASE_PROJECT_ID
+      ? {
+          projectId: settings.FIREBASE_PROJECT_ID,
+          secret: settings.PROVISIONING_SIGNING_SECRET!,
+          realms: settings.API_PROVISIONING_REALMS!,
+        }
+      : undefined,
     filesEnabled: settings.API_FILES_ENABLED,
     chatUrl: settings.API_CHAT_URL,
     kingdomId: settings.KINGDOM_ID,

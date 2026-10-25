@@ -1,3 +1,4 @@
+import { createProvisioningStore } from "./provisioning";
 import { createDatabase } from "@opencok/drizzle";
 import { account_new } from "@opencok/drizzle/schema/opencok_global/account_new";
 import { usermapping } from "@opencok/drizzle/schema/opencok_global/usermapping";
@@ -74,6 +75,9 @@ export class AccountStore implements AccountReader {
           lastTime: row.lastTime.toString(),
         }));
     });
+  }
+  provisioning() {
+    return createProvisioningStore(this.database.db);
   }
   close() {
     return this.database.close();

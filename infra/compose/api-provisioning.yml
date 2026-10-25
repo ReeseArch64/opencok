@@ -1,0 +1,18 @@
+services:
+  api:
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:?Firebase project required}
+      PROVISIONING_SIGNING_SECRET: ${PROVISIONING_SIGNING_SECRET:?Provisioning signing secret required}
+      API_PROVISIONING_REALMS: ${API_PROVISIONING_REALMS:?Trusted realm endpoints required}
+      GOOGLE_APPLICATION_CREDENTIALS: /run/opencok/firebase.json
+    volumes:
+      - type: bind
+        source: ${FIREBASE_CREDENTIALS_FILE:?Local Firebase credentials file required}
+        target: /run/opencok/firebase.json
+        read_only: true
+        bind:
+          create_host_path: false
+  server:
+    environment:
+      PROVISIONING_SIGNING_SECRET: ${PROVISIONING_SIGNING_SECRET:?Provisioning signing secret required}

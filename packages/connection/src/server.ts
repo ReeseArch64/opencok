@@ -1,3 +1,4 @@
+import { provisionPath } from "@opencok/contracts/provisioning";
 import { createServer, type Socket } from "node:net";
 import { Effect } from "effect";
 import { logEvent } from "@opencok/core/logging";
@@ -70,6 +71,10 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
 
     const health = yield* serveHttp({ host: config.host, port: config.healthPort }, (request) => {
       const path = new URL(request.url).pathname;
+      if (path === provisionPath)
+        return ready() && dependencies.provisioning
+          ? dependencies.provisioning(request)
+          : new Response(null, { status: 503 });
       if (path !== "/healthz" && path !== "/readyz")
         return new Response("Not found", { status: 404 });
       return Response.json(

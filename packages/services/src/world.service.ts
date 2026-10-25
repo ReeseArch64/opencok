@@ -19,7 +19,7 @@ export function viewport(x: number, y: number, size: number): number[] {
 }
 export function compactPoint(row: Row): string {
   if (
-    ![0, 1, 3].includes(num(row, "pointType")) ||
+    ![0, 1, 3, 8].includes(num(row, "pointType")) ||
     text(row, "allianceId") ||
     text(row, "territoryAlliance")
   )
