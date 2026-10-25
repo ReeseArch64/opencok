@@ -139,6 +139,13 @@ less than their five-minute lifetime. The prepared base/split, source, tests and
 validation evidence remain in the ignored Android patch area. The connected arm64
 device rendered the uploaded thumbnail; armv7 remains unmodified and unverified.
 
+Local patch 031 connects the initial HUD refresh to the login snapshot and waits
+for the current native player identity. It retries the existing picture-change
+notification until the matching JPEG is delivered, then refreshes the thumbnail
+and stops. Every login resets this bounded bootstrap, so opening sovereign
+information is no longer required to start image loading. Java delivery and Lua
+login/reconnect tests cover this path; the operator confirmed the installed fix.
+
 ## Evidence
 
 Synthetic unit cases cover signed allocation, upload exhaustion, approval/rejection,
