@@ -73,6 +73,7 @@ export const apiSchema = z
         })
         .optional(),
     ),
+    S3_ENDPOINT: filesSchema.shape.S3_ENDPOINT,
     S3_PUBLIC_ENDPOINT: z.preprocess(
       blankToUndefined,
       filesSchema.shape.S3_PUBLIC_ENDPOINT.optional(),

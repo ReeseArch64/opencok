@@ -1,7 +1,17 @@
 import { z } from "zod";
-import { validateEnvironment } from "./validation";
+import { blankToUndefined, validateEnvironment } from "./validation";
 
 export const filesSchema = z.object({
+  S3_ENDPOINT: z.preprocess(
+    blankToUndefined,
+    z
+      .url({ protocol: /^https?$/ })
+      .refine((value) => {
+        const url = new URL(value);
+        return !url.username && !url.password && !url.search && !url.hash && url.pathname === "/";
+      })
+      .optional(),
+  ),
   S3_PUBLIC_ENDPOINT: z.url({ protocol: /^https?$/ }).refine((value) => {
     const url = new URL(value);
     return !url.username && !url.password && !url.search && !url.hash && url.pathname === "/";

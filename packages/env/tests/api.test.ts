@@ -49,7 +49,7 @@ test("public chat discovery uses an optional HTTP origin without private URL com
     expect(() => parseApiEnvironment({ API_CHAT_URL: value })).toThrow("API_CHAT_URL");
 });
 
-test("API media requires exactly the five S3 settings and no separate flag or key file", () => {
+test("API media requires five S3 settings and supports an optional internal storage origin", () => {
   expect(parseApiEnvironment({}).S3_BUCKET).toBeUndefined();
   const media = {
     S3_PUBLIC_ENDPOINT: "http://s3.example:9000",
@@ -59,6 +59,10 @@ test("API media requires exactly the five S3 settings and no separate flag or ke
     S3_SECRET_ACCESS_KEY: "synthetic-secret",
   };
   expect(parseApiEnvironment(media).S3_BUCKET).toBe("images");
+  expect(parseApiEnvironment(media).S3_ENDPOINT).toBeUndefined();
+  expect(parseApiEnvironment({ ...media, S3_ENDPOINT: "http://minio:9000" }).S3_ENDPOINT).toBe(
+    "http://minio:9000",
+  );
   for (const field of Object.keys(media))
     expect(() => parseApiEnvironment({ ...media, [field]: undefined })).toThrow();
   expect(
@@ -73,6 +77,8 @@ test("API media requires exactly the five S3 settings and no separate flag or ke
     expect(() => parseApiEnvironment({ ...media, S3_PUBLIC_ENDPOINT: endpoint })).toThrow(
       "S3_PUBLIC_ENDPOINT",
     );
+  for (const endpoint of ["file:///private", "http://u:p@minio:9000", "http://minio/path"])
+    expect(() => parseApiEnvironment({ ...media, S3_ENDPOINT: endpoint })).toThrow("S3_ENDPOINT");
 });
 
 test("creation requires complete trusted realm configuration without exposing secrets", () => {

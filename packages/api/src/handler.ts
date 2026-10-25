@@ -46,7 +46,7 @@ export function createHandler(
       files &&
       (rawPath === UPLOAD_PATH ||
         IMAGE_PATH.test(rawPath) ||
-        /^\/_internal\/avatars\/[0-9]{1,20}\/[1-9][0-9]{0,5}$/.test(rawPath))
+        /^\/_internal\/avatars\/[0-9]{1,20}\/[1-9][0-9]{0,5}(\/url)?$/.test(rawPath))
     )
       return files(request);
     const path = new URL(request.url).pathname.replace(/\/{2,}/g, "/");

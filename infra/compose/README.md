@@ -74,7 +74,8 @@ The one-shot jobs exit with code zero after completion.
 Port mappings have no host-IP prefix. Internal connections use service DNS:
 `postgres:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933` and
 `minio:9000`. The API and game server have no directly published host ports. The API joins the
-external network for outbound access to the public S3 endpoint.
+external network for outbound access. Avatar storage operations use `S3_ENDPOINT=http://minio:9000`;
+image URLs use the client-reachable `S3_PUBLIC_ENDPOINT`.
 The local API advertises `192.168.1.104:9933`; edit that direct value if the host
 address changes. The MinIO console redirect uses the same local host address.
 

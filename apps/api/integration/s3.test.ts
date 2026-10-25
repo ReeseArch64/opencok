@@ -87,6 +87,19 @@ test("S3 conditional writes, metadata integrity and restart persistence use isol
       reason: { status: 409 },
     });
     expect(await store.find(owner, sequence)).toEqual({ owner, sequence, hash });
+    const publicClient = s3Client({
+      endpoint: "https://avatars.example.invalid",
+      region: "us-east-1",
+      forcePathStyle: true,
+      credentials: { accessKeyId: "synthetic", secretAccessKey: password },
+    });
+    clients.push(publicClient);
+    const splitStore = new S3ImageStore(s3, bucket, publicClient);
+    expect(await splitStore.find(owner, sequence)).toEqual({ owner, sequence, hash });
+    expect(await splitStore.get(path)).toEqual(new Uint8Array(bytes));
+    const splitUrl = new URL(await splitStore.image(path));
+    expect(splitUrl.origin).toBe("https://avatars.example.invalid");
+    expect(splitUrl.searchParams.get("X-Amz-Signature")).toMatch(/^[a-f0-9]{64}$/);
     const signed = await store.image(path);
     const publicUrl = new URL(signed);
     expect(publicUrl.searchParams.get("X-Amz-Expires")).toBe("300");
