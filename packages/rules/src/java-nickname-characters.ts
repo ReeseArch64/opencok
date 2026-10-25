@@ -749,3 +749,14 @@ export function javaNicknameCharacter(codePoint: number): number {
   }
   return 0;
 }
+
+export function javaNicknameCharacterPattern(kind: 1 | 2): string {
+  return `[${properties
+    .filter((entry) => entry[2] === kind)
+    .map(([start, end]) =>
+      start === end
+        ? `\\u{${start!.toString(16)}}`
+        : `\\u{${start!.toString(16)}}-\\u{${end!.toString(16)}}`,
+    )
+    .join("")}]`;
+}

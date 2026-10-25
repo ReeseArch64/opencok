@@ -259,6 +259,13 @@ export interface GameServices {
   publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
   globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
   scoreActivityRanking?(): Promise<readonly string[]>;
+  nicknameChange?(
+    owner: string,
+    operationId: string,
+    validatedName: string,
+    now: number,
+  ): Promise<import("./nickname-change.ts").NicknameChangeRecord>;
+  nicknameForbidden?(name: string): boolean | Promise<boolean>;
   nicknameBadWords?(name: string): boolean | Promise<boolean>;
   nicknameReservedPatterns?(): readonly string[];
   filterBadWords?(text: string): string;
