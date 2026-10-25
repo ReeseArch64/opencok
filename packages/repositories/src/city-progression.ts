@@ -1,3 +1,4 @@
+import { writeShippingInvestment } from "./shipping-investment";
 import { readDailyInvestment, writeDailyInvestment } from "./daily-investment";
 import { readCastleLevelEvent, writeCastleLevelEvent } from "./castle-level-event";
 import { readLuckyDay, writeLuckyDay } from "./lucky-day";
@@ -240,6 +241,8 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.shippingInvestment)
+          await writeShippingInvestment(tx, owner, write.shippingInvestment);
         if (write.dailyInvestment) await writeDailyInvestment(tx, owner, write.dailyInvestment);
         if (write.castleLevelEvent || write.castleLevelEnrollments)
           await writeCastleLevelEvent(

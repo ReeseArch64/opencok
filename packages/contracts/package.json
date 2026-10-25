@@ -115,7 +115,9 @@
     "./responses/castle-level-event": "./src/responses/castle-level-event.ts",
     "./responses/alchemist": "./src/responses/alchemist.ts",
     "./daily-investment": "./src/daily-investment.ts",
-    "./responses/daily-investment": "./src/responses/daily-investment.ts"
+    "./responses/daily-investment": "./src/responses/daily-investment.ts",
+    "./shipping-investment": "./src/shipping-investment.ts",
+    "./responses/shipping-investment": "./src/responses/shipping-investment.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

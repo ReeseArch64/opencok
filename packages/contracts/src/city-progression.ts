@@ -120,6 +120,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  shippingInvestment?: import("./shipping-investment").ShippingInvestmentWrite;
   dailyInvestment?: Row;
   castleLevelEvent?: readonly import("./castle-level-event").CastleLevelEventRow[];
   castleLevelEnrollments?: readonly number[];

@@ -1,4 +1,5 @@
-import type { Rule } from "./game";
+import type { Rule, Rules } from "./game";
+import { eventRealmEnabled, versionAtLeast, type RuleContext } from "./availability";
 
 export function eventTimestamp(value: string | undefined): bigint | undefined {
   if (!value || !/^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}$/.test(value)) return undefined;
@@ -33,4 +34,16 @@ export function localEventWindow(rule: Rule | undefined, now: bigint) {
   )
     return undefined;
   return { start, end };
+}
+
+export function localEventControlOpen(rules: Rules, id: string, context: RuleContext): boolean {
+  const control = rules.configuration.payControl?.get(id);
+  return (
+    !!control &&
+    versionAtLeast(context.version, control.k1 ?? "") &&
+    (context.testServer
+      ? eventRealmEnabled(control.k72, context.kingdomId) &&
+        eventRealmEnabled(control.k107, context.kingdomId)
+      : eventRealmEnabled(control.k2, context.kingdomId))
+  );
 }

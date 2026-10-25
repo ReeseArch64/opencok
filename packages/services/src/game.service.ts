@@ -541,6 +541,8 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "shipping.trade.invest.ui":
+      case "shipping.trade.invest.reward":
       case "invest.add":
       case "invest.open.ui":
       case "invest.receive":
