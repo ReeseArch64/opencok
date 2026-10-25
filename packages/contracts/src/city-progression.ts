@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  castleLevelEvent?: import("./castle-level-event").CastleLevelEventState;
   luckyDay?: { day?: Row; server?: Row };
   dragonTower?: import("./dragon-tower").DragonTowerState;
   expedition?: import("./new-expedition").ExpeditionState;
@@ -118,6 +119,8 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  castleLevelEvent?: readonly import("./castle-level-event").CastleLevelEventRow[];
+  castleLevelEnrollments?: readonly number[];
   luckyDay?: Row;
   dragonTower?: import("./dragon-tower").DragonTowerWrite;
   expedition?: readonly Row[];

@@ -1,3 +1,4 @@
+import { enrollCastleLevel } from "./castle-level-event";
 import { recordExpeditionScore } from "./new-expedition";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -130,6 +131,7 @@ function complete(
   };
   if (experience) context.experience(cityInteger(experience));
   context.write.buildings = [completed];
+  enrollCastleLevel(context, completed);
   makeDomainQueue(context, completed);
   return {
     ...building(completed, context.rules, false, Number(context.now)),

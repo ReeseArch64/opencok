@@ -123,7 +123,8 @@
     "./local-activity-info": "./src/local-activity-info.ts",
     "./chat-retention": "./src/chat-retention.ts",
     "./chat-social": "./src/chat-social.ts",
-    "./lucky-day": "./src/lucky-day.ts"
+    "./lucky-day": "./src/lucky-day.ts",
+    "./castle-level-event": "./src/castle-level-event.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

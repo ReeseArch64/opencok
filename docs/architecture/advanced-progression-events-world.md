@@ -345,3 +345,25 @@ later settlement cannot apply the bonus retrospectively or continue it after
 expiry. Lucky-day polling grants no items or gold; ordinary production settlement
 continues using its existing audited resource postings. Realm metadata must be
 present before the campaign can create an active effect.
+
+Castle-level event entitlements are earned only at the exact configured castle
+level, through a validated construction completion or native UI reconciliation.
+Owned rows in either historical shard remain in their original table. New
+numeric UIDs preserve the legacy prefix modulo-two placement; modern nonnumeric
+UIDs use the deterministic Java string hash parity. Duplicate owned levels across
+shards are rejected rather than ambiguously selecting a claim record.
+
+Personal and collective rewards use the maintained pay-reward catalog, with
+realm-wide achievement totals calculated across both shards. Claim markers,
+inventory changes and receipts commit together. Native UI arrays retain their
+integer-array and string-array types and expose only the owner's purchase IDs.
+Missing historical exchange definitions produce an empty preview, without
+inventing a purchasable package. Payment receipts remain the responsibility of
+the validated payment pipeline.
+
+Login recovery marks eligible unclaimed level rewards and funds one system mail
+inside the same transaction. The configured realm-age window applies to this
+automatic mail path; explicit claims preserve the reference's entitlement-based
+eligibility. Realm opening time comes from saved server metadata. Closed feature
+selectors and historical configuration remain unchanged. No migration or private
+resource input is required.

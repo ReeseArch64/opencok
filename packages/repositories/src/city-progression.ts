@@ -1,3 +1,4 @@
+import { readCastleLevelEvent, writeCastleLevelEvent } from "./castle-level-event";
 import { readLuckyDay, writeLuckyDay } from "./lucky-day";
 import { readDragonTower, writeDragonTower } from "./dragon-tower";
 import { readExpedition, writeExpedition } from "./new-expedition";
@@ -128,6 +129,9 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        castleLevelEvent: command?.startsWith("castle.")
+          ? await readCastleLevelEvent(tx, owner)
+          : undefined,
         luckyDay: command?.startsWith("luckyday.") ? await readLuckyDay(tx, owner) : undefined,
         dragonTower: command?.startsWith("dragontower")
           ? await readDragonTower(tx, owner, now, num(profile, "serverId"), request)
@@ -227,6 +231,13 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.castleLevelEvent || write.castleLevelEnrollments)
+          await writeCastleLevelEvent(
+            tx,
+            owner,
+            write.castleLevelEvent ?? [],
+            write.castleLevelEnrollments ?? [],
+          );
         if (write.luckyDay) await writeLuckyDay(tx, owner, write.luckyDay);
         if (write.dragonTower) await writeDragonTower(tx, owner, write.dragonTower);
         if (write.expedition) await writeExpedition(tx, owner, write.expedition);

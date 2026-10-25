@@ -290,6 +290,7 @@ export class GameService {
       {},
     );
     const dragonTower = await this.services.cityProgression?.(uid, "dragontower.init", {});
+    const castleLevel = await this.services.cityProgression?.(uid, "castle.event.init", {});
     const luckyDay = await this.services.cityProgression?.(uid, "luckyday.init", {});
     const campaign = await this.services.cityProgression?.(uid, "campaign.init", {});
     const lottery = await this.services.cityProgression?.(uid, "lottery.init", {});
@@ -340,6 +341,7 @@ export class GameService {
       dragons,
       dragonTower,
       luckyDay,
+      castleLevel,
       civilization,
       campaign,
       lottery,
@@ -536,6 +538,9 @@ export class GameService {
       case "dragonskill":
       case "dragontower":
       case "minstrel":
+      case "castle.ui.state":
+      case "castle.level.reward":
+      case "castle.share.reward":
       case "luckyday.effect":
       case "civilizationCastle":
       case "totem":
