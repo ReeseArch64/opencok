@@ -8,5 +8,12 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./posting": "./src/posting.ts"
+  },
+  "dependencies": {
+    "@opencok/contracts": "workspace:*"
   }
 }

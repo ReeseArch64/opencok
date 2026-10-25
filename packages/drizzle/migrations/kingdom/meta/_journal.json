@@ -92,6 +92,13 @@
       "when": 1792881273512,
       "tag": "0012_avatar_lifecycle",
       "breakpoints": false
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792881273513,
+      "tag": "0013_mutation_foundation",
+      "breakpoints": false
     }
   ]
 }

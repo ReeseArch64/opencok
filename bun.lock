@@ -80,6 +80,7 @@
         "@opencok/config": "workspace:*",
         "@opencok/drizzle": "workspace:*",
         "@opencok/identity": "workspace:*",
+        "@opencok/ledger": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@types/bun": "catalog:",
         "drizzle-orm": "0.45.4",
@@ -426,6 +427,9 @@
     },
     "packages/ledger": {
       "name": "@opencok/ledger",
+      "dependencies": {
+        "@opencok/contracts": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -546,6 +550,7 @@
         "@opencok/contracts": "workspace:*",
         "@opencok/drizzle": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/ledger": "workspace:*",
         "@opencok/rules": "workspace:*",
         "drizzle-orm": "0.45.4",
       },

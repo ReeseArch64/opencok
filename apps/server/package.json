@@ -33,6 +33,7 @@
     "@opencok/drizzle": "workspace:*",
     "@opencok/identity": "workspace:*",
     "@opencok/messages": "workspace:*",
-    "drizzle-orm": "0.45.4"
+    "drizzle-orm": "0.45.4",
+    "@opencok/ledger": "workspace:*"
   }
 }
