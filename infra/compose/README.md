@@ -71,7 +71,7 @@ The one-shot jobs exit with code zero after completion.
 | MinIO console                            | 9001           |
 | pgAdmin                                  | 5050           |
 | Redis Insight                            | 5540           |
-| Portainer (host to container)            | 9443 → 9000    |
+| Portainer HTTP (host to container)       | 9443 → 9000    |
 
 Port mappings have no host-IP prefix. Internal connections use service DNS:
 `postgres:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933`,
@@ -116,8 +116,10 @@ PostgreSQL initialization passwords do not rotate existing accounts. Keep direct
 Compose credentials aligned with the existing cluster; do not delete a volume to
 repair authentication. pgAdmin registration uses `postgres:5432` and omits the
 database password. Redis Insight and Portainer each have their own named data
-volume. Portainer maps host port 9443 to container port 9000 and its development service mounts
-the host Docker socket for local container administration.
+volume. Portainer enables its HTTP listener with `--http-enabled` and maps host
+port 9443 to container port 9000. Open `http://localhost:9443`; the published
+endpoint uses HTTP. Its development service mounts the host Docker socket for
+local container administration.
 
 ## Verification
 

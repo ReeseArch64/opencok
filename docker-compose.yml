@@ -26,6 +26,7 @@ volumes:
 services:
   portainer:
     image: portainer/portainer-ce:lts
+    command: [--http-enabled]
     container_name: opencok-portainer
     profiles: [all, dev]
     networks: [opencok-external-network]

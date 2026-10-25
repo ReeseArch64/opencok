@@ -324,14 +324,13 @@ async function checkService(stack: Stack, service: string) {
 
   const probe = async (container: string, script: string) =>
     compose(["exec", "-T", container, "bun", "--no-env-file", "-e", script]);
-  const http = async (url: string, tls = false) =>
+  const http = async (url: string) =>
     fetch(url, {
       signal: AbortSignal.timeout(3000),
-      ...(tls ? { tls: { rejectUnauthorized: false } } : {}),
     });
-  const toolReady = async (url: string, tls = false) => {
-    await eventually(async () => (await http(url, tls)).status === 200, 60000);
-    return http(url, tls);
+  const toolReady = async (url: string) => {
+    await eventually(async () => (await http(url)).status === 200, 60000);
+    return http(url);
   };
   switch (service) {
     case "postgres": {
@@ -501,11 +500,11 @@ async function checkService(stack: Stack, service: string) {
       break;
     }
     case "portainer": {
-      const baseUrl = `https://127.0.0.1:${stack.portainerPort}`;
-      const response = await toolReady(baseUrl + "/api/status", true);
+      const baseUrl = `http://127.0.0.1:${stack.portainerPort}`;
+      const response = await toolReady(baseUrl + "/api/status");
       expect(((await response.json()) as { Version: string }).Version).toBeTruthy();
-      expect((await http(baseUrl, true)).status).toBe(200);
-      expect((await http(baseUrl + "/api/endpoints", true)).status).toBe(401);
+      expect((await http(baseUrl)).status).toBe(200);
+      expect((await http(baseUrl + "/api/endpoints")).status).toBe(401);
       break;
     }
     default:
