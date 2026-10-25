@@ -123,6 +123,22 @@ that cannot maintain revisions. A committed approval/rejection requires a new ex
 operator decision, not deletion of its receipt. Monitor the existing sanitized avatar
 delivery failure events and pending bits; repair the dependency and let the relay retry.
 
+## Transitional Android image reads
+
+Uploading and committing a picture does not connect native image readers to S3.
+The legacy `/cok/img/` read route rejects unauthenticated requests; the client must
+request `user.avatar.url` through its authenticated realm session and use the
+returned temporary URL. Native and Lua profile consumers need the same adapter,
+including thumbnails and player-information views. Do not persist presigned URLs
+as permanent avatar locations.
+
+Local Android patch 030 adapts the arm64 native image readers through a loopback
+JPEG bridge and Lua SFS URL requests. It validates the requested owner and sequence
+against the signed object path, bounds downloads and caches authorized URLs for
+less than their five-minute lifetime. The prepared base/split, source, tests and
+validation evidence remain in the ignored Android patch area. The connected arm64
+device rendered the uploaded thumbnail; armv7 remains unmodified and unverified.
+
 ## Evidence
 
 Synthetic unit cases cover signed allocation, upload exhaustion, approval/rejection,
