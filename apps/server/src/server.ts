@@ -1,3 +1,4 @@
+import { generalsDomain } from "@opencok/services/generals";
 import { equipmentDomain, workshopDomain } from "@opencok/services/equipment";
 import { playerEffectsDomain } from "@opencok/services/player-effects";
 import { questsDomain } from "@opencok/services/quests";
@@ -331,6 +332,7 @@ export const RealmDependenciesLive = Layer.effect(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary),
       [
+        generalsDomain,
         equipmentDomain,
         workshopDomain,
         playerEffectsDomain,

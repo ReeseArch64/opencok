@@ -267,6 +267,7 @@ export class GameService {
     const effects = await this.services.cityProgression?.(uid, "effects.init", {});
     const quest = await this.services.cityProgression?.(uid, "quest.init", {});
     const equipment = await this.services.cityProgression?.(uid, "equipment.init", {});
+    const generals = await this.services.cityProgression?.(uid, "general.init", {});
     const state = await this.state(uid);
     const world = state.world;
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
@@ -278,6 +279,7 @@ export class GameService {
           .map((row) => sfs.object(equipmentFields(row))),
       ),
       ...equipment?.body,
+      ...generals?.body,
       ...effects?.body,
       ...quest?.body,
       ...serverClock(this.now(), 0),
@@ -363,6 +365,8 @@ export class GameService {
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
+      case "newgeneral":
+      case "newgeneral.buy":
       case "fresh.signIn":
       case "daily.quest.ls":
       case "daily.quest.reward":

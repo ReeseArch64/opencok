@@ -40,6 +40,8 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       ? fixtures!.parseRules(source, name)
       : indexRules(records(source, name), name);
   };
+  const optionalRecords = async (name: GameplayCatalog) =>
+    (await available(name)) ? records(await read(name), name) : [];
   const parseDeclared = (source: string | CatalogDefinition, name: GameplayCatalog) => {
     if (typeof source === "string") return fixtures!.parseDeclaredCatalog(source);
     if (source.kind !== CatalogKind.Table) throw new Error("Expected gameplay table");
@@ -288,6 +290,17 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       dailyRewards: await optional(GameplayCatalog.DailyTaskReward),
       questPhases: await optional(GameplayCatalog.QuestPhase),
       signIn: await optional(GameplayCatalog.SignIn),
+    },
+    {
+      levels: await optional(GameplayCatalog.GeneralLevel),
+      stations: await optional(GameplayCatalog.GeneralStation),
+      unlocks: await optional(GameplayCatalog.GetGeneral),
+      draws: await optional(GameplayCatalog.GeneralDraw),
+      wheels: await optional(GameplayCatalog.GeneralDrawNewMain),
+      refinementValues: await optionalRecords(GameplayCatalog.GeneralRandomNum),
+      refinementLimits: await optionalRecords(GameplayCatalog.GeneralMaxNum),
+      refinementRepeats: await optionalRecords(GameplayCatalog.GeneralRepeat),
+      recruits: await optional(GameplayCatalog.Recruit),
     },
   );
 }

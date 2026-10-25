@@ -1,3 +1,4 @@
+import { readGeneralRoster, writeGeneralRoster } from "./generals";
 import { readSuitDecompositions, writeEquipment } from "./equipment";
 import { readAbilityPages, readProgressionEffects, writePlayerEffects } from "./player-effects";
 import { readQuests, writeQuests } from "./quests";
@@ -105,6 +106,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        generalRoster: await readGeneralRoster(tx, owner),
         abilityPages: await readAbilityPages(tx, owner),
         suitDecompositions: await readSuitDecompositions(tx, owner),
         quests: await readQuests(tx, owner, profile, now),
@@ -133,6 +135,7 @@ export function createCityProgressionStore(
       validateWrite(write, owner);
       const persist = async () => {
         await writePlayerEffects(tx, owner, write);
+        if (write.generalRoster) await writeGeneralRoster(tx, owner, write.generalRoster);
         await writeEquipment(tx, owner, write);
         if (write.quests) await writeQuests(tx, owner, write.quests);
         for (const row of write.buildings ?? []) {
@@ -290,7 +293,7 @@ export function createCityProgressionStore(
         if (write.deletedBuildings?.length) {
           await tx
             .update(new_general)
-            .set({ buildingUuid: "", state: 0 })
+            .set({ buildingUuid: "", state: 1 })
             .where(
               and(
                 eq(new_general.uid, owner),
@@ -319,6 +322,7 @@ export function createCityProgressionStore(
           (scienceBefore.find((before) => before.itemId === row.itemId)?.level ?? 0),
       );
       if (
+        write.generalRoster ||
         write.equipment?.length ||
         write.deletedEquipment?.length ||
         write.equipmentSelection !== undefined ||
