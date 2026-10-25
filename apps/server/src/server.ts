@@ -1,3 +1,4 @@
+import { minstrelDomain } from "@opencok/services/minstrel";
 import { civilizationScienceDomain } from "@opencok/services/civilization-science";
 import { createChatNoticeCostReader } from "@opencok/repositories/chat-notice-cost";
 import { cleanupSocialRealm } from "@opencok/repositories/social-cleanup";
@@ -362,6 +363,7 @@ export const RealmDependenciesLive = Layer.effect(
         constructionDomain,
         researchDomain,
         civilizationScienceDomain,
+        minstrelDomain,
         trainingDomain,
         hospitalDomain,
         fortificationDomain,

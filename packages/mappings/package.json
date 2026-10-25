@@ -58,7 +58,8 @@
     "./chat-social": "./src/chat-social.ts",
     "./postbox": "./src/postbox.ts",
     "./chat-native": "./src/chat-native.ts",
-    "./civilization-science": "./src/civilization-science.ts"
+    "./civilization-science": "./src/civilization-science.ts",
+    "./minstrel": "./src/minstrel.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

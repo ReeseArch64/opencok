@@ -1,3 +1,4 @@
+import { activity_minstrel } from "@opencok/drizzle/schema/opencok_kingdom/activity_minstrel";
 import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
 import { readGeneralRoster, writeGeneralRoster } from "./generals";
@@ -116,6 +117,15 @@ export function createCityProgressionStore(
         profile,
         resource,
         civilizationSciences,
+        minstrel:
+          command === "minstrel"
+            ? (
+                await tx
+                  .select()
+                  .from(activity_minstrel)
+                  .where(and(eq(activity_minstrel.uid, owner), eq(activity_minstrel.type, 0)))
+              )[0]
+            : undefined,
         generalRoster: await readGeneralRoster(tx, owner, command, ranking),
         abilityPages: await readAbilityPages(tx, owner),
         suitDecompositions: await readSuitDecompositions(tx, owner),
@@ -157,6 +167,28 @@ export function createCityProgressionStore(
             .onConflictDoUpdate({
               target: [user_civilization_science.baseItemID, user_civilization_science.userID],
               set: { level: value.level },
+            });
+        }
+        if (write.minstrel) {
+          const row = write.minstrel;
+          if (row.uid !== owner || row.type !== 0) throw new Error("Foreign minstrel write");
+          const value = {
+            uid: owner,
+            type: 0,
+            listen: num(row, "listen"),
+            listentime: long(row, "listentime"),
+            share: num(row, "share"),
+            sharetime: long(row, "sharetime"),
+            reward: num(row, "reward"),
+            rewardtime: long(row, "rewardtime"),
+            resettime: long(row, "resettime"),
+          };
+          await tx
+            .insert(activity_minstrel)
+            .values(value)
+            .onConflictDoUpdate({
+              target: [activity_minstrel.uid, activity_minstrel.type],
+              set: value,
             });
         }
         await writePlayerEffects(tx, owner, write);

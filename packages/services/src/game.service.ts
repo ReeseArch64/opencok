@@ -454,6 +454,7 @@ export class GameService {
       case "fort.cd":
       case "fort.destory":
       case "fort.destroy":
+      case "minstrel":
       case "civilization.science.data.init":
       case "race.science.research":
       case "race.science.directly":
