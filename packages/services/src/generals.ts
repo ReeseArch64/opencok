@@ -1,3 +1,7 @@
+import { restoredResourceGenerals } from "./world-resource-generals";
+import { newGeneralPrestigeLevel } from "@opencok/rules/new-general-prestige";
+import { generalPrison, recoverGenerals } from "./general-recovery";
+import { legacyGeneralCommand } from "./legacy-generals";
 import { generalTurntable } from "./general-turntable";
 import {
   assignGeneral,
@@ -10,7 +14,7 @@ import { generalProperties, generalPropertyRule } from "@opencok/rules/general-r
 import { generalFeatureAvailable } from "@opencok/rules/new-general-content";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import { encode, sfs, str, int, Type, type Fields } from "@opencok/messages/sfs";
+import { encode, sfs, str, int, Type, fields, type Fields } from "@opencok/messages/sfs";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import {
@@ -60,9 +64,44 @@ export function generalEffects(context: CityProgressionContext, row: Row) {
     talent: text(row, "talent"),
   };
   const effects = newGeneralSkillEffects(state, context.rules);
-  const equipment = context.state.equipment
-    .filter((item) => item.generalid === row.id)
-    .map((item) => ({ itemId: num(item, "itemId"), extraProperty: text(item, "extraProperty") }));
+  const writtenEquipment = context.write.equipment ?? [],
+    equipmentRows = [
+      ...context.state.equipment.filter(
+        (item) => !writtenEquipment.some((next) => next.uuid === item.uuid),
+      ),
+      ...writtenEquipment,
+    ];
+  const projected = restoredResourceGenerals(
+    {
+      ...context.state.newGenerals,
+      generals: [
+        {
+          id: state.id,
+          state: num(row, "state"),
+          buildingUuid: text(row, "buildingUuid"),
+          star: state.star,
+          baseSkill: state.baseSkill,
+          talent: state.talent,
+          opTime: text(row, "optime"),
+          refinement: text(row, "refineproperty"),
+        },
+      ],
+      equipment: equipmentRows
+        .filter((item) => num(item, "generalid") > 0)
+        .sort((a, b) =>
+          text(a, "uuid") < text(b, "uuid") ? -1 : text(a, "uuid") > text(b, "uuid") ? 1 : 0,
+        )
+        .map((item) => ({
+          uid: context.owner,
+          uuid: text(item, "uuid"),
+          generalId: num(item, "generalid"),
+          itemId: num(item, "itemId"),
+          extraProperty: text(item, "extraProperty"),
+        })),
+    },
+    context.rules,
+  )[0];
+  const equipment = projected?.orderedEquipment ?? [];
   const permanent = [
     effects.skills,
     effects.talents,
@@ -76,7 +115,6 @@ export function generalEffects(context: CityProgressionContext, row: Row) {
       begintime: sfs.long(start),
       endtime: sfs.long(end),
     });
-  for (const values of permanent) for (const [id, value] of values) append(id, value);
   const statuses = new Map(
     generalRoster(context)
       .statuses.filter((status) => status.newGeneralId === row.id)
@@ -98,6 +136,7 @@ export function generalEffects(context: CityProgressionContext, row: Row) {
       append(id!, value!, long(status, "startTime"), long(status, "endTime"));
     }
   }
+  for (const values of permanent) for (const [id, value] of values) append(id, value);
   if (
     generalFeatureAvailable(context.rules, "general_random_effect", {
       kingdomId: context.rules.kingdomId,
@@ -179,8 +218,23 @@ export function recruitGeneral(context: CityProgressionContext, id: number, frag
     256,
   );
   if (ids.has(id) || ids.size >= capacity) generalFailure();
-  if (base.faction && base.faction !== "0") generalFailure();
-  if (fragments) {
+  if (base.faction && base.faction !== "0") {
+    const faction = cityInteger(base.faction, 1),
+      prestige = newGeneralPrestigeLevel(
+        num(context.state.profile, "civilizationType"),
+        context.state.effects.prestige.map((row) => ({
+          civilizationType: num(row, "civilizationType"),
+          prestigeValue: long(row, "prestigeValue"),
+        })),
+        context.rules,
+      );
+    if (
+      faction !== num(context.state.profile, "civilizationType") ||
+      prestige < cityInteger(base.reputation_level)
+    )
+      generalFailure();
+  }
+  if (fragments && (!base.faction || base.faction === "0")) {
     const costs = generalPairs(base.need_pieces);
     if (costs.size !== 1) generalFailure();
     for (const [item, count] of costs) context.spendItem(String(item), count);
@@ -192,6 +246,20 @@ export function recruitGeneral(context: CityProgressionContext, id: number, frag
 async function prepare(context: CityProgressionContext, command: string, params: Fields) {
   let body: Fields;
   let event: Uint8Array | null | undefined;
+  const feature = (key: string) =>
+    generalFeatureAvailable(context.rules, key, {
+      kingdomId: context.rules.kingdomId,
+      version: "12.06.0",
+      now: Number(context.now),
+    });
+  if (
+    (command === "newgeneral" && !feature("general")) ||
+    (command === "newgeneral.buy" && !feature("general_sale"))
+  )
+    generalFailure();
+  recoverGenerals(context, command === "general.init");
+  if (command === "general.init" && !feature("general"))
+    return { response: encode({ data: sfs.object({}) }), responseKind: "nested" as const };
   if (command === "general.init") {
     refreshGeneralUnlocks(context);
     refreshGeneralOffices(context);
@@ -206,6 +274,12 @@ async function prepare(context: CityProgressionContext, command: string, params:
         generalRoster(context).purchases.map((row) => sfs.object(generalPurchase(row))),
       ),
     };
+  } else if (
+    ["general.fire", "general.def.ch", "general.pick", "general.recruit"].includes(command)
+  ) {
+    body = legacyGeneralCommand(context, command, params);
+  } else if (command === "robgeneral") {
+    body = generalPrison(context, params);
   } else if (command === "generaltrun") {
     const result = generalTurntable(context, params);
     body = result.body;
@@ -319,17 +393,46 @@ async function prepare(context: CityProgressionContext, command: string, params:
         const result = generalAbility(context, row, action, params, (id) =>
           generalEffects(context, row)
             .filter((effect) => effect.effectid?.value === id)
-            .reduce((sum, effect) => sum + Number(effect.effectvalue?.value ?? 0), 0),
+            .reduce((sum, effect) => Math.fround(sum + Number(effect.effectvalue?.value ?? 0)), 0),
         );
         writeGeneral(context, result.row);
         body = { ...generalChanges(context, [result.row]), ...result.body };
       }
     }
   }
-  return { response: encode({ data: sfs.object(body) }), responseKind: "nested" as const, event };
+  const pushes: { command: string; body: Uint8Array }[] = [];
+  if (body.skillQueue) {
+    pushes.push({ command: "push.gemeral.useskill.equip", body: encode(fields(body.skillQueue)) });
+    delete body.skillQueue;
+  }
+  if (
+    ["heroOffice", "robgeneral"].includes(command) &&
+    context.write.generalRoster?.generals?.length
+  )
+    pushes.push({
+      command: "push.general.info",
+      body: encode(generalChanges(context, context.write.generalRoster.generals)),
+    });
+  return {
+    response: encode({ data: sfs.object(body) }),
+    responseKind: "nested" as const,
+    event,
+    pushes,
+  };
 }
 export const generalsDomain: CityDomain = {
-  commands: ["general.init", "newgeneral", "newgeneral.buy", "heroOffice", "generaltrun"],
+  commands: [
+    "general.init",
+    "newgeneral",
+    "newgeneral.buy",
+    "heroOffice",
+    "generaltrun",
+    "robgeneral",
+    "general.fire",
+    "general.def.ch",
+    "general.pick",
+    "general.recruit",
+  ],
   types: [],
   prepare,
   async apply() {

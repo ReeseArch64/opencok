@@ -99,6 +99,6 @@ export function generalTurntable(
   (context.write.generalRoster ??= {}).turntableAt = context.now;
   return {
     body: { list: sfs.array(winners), gold: sfs.long(context.balance("gold")) },
-    event: encode({ notices: sfs.array(notices.slice(-50)) }),
+    event: encode({ notices: sfs.array(notices.slice(-50).reverse()) }),
   };
 }

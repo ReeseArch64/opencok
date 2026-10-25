@@ -249,12 +249,12 @@ export function returnGeneral(context: CityProgressionContext, id: number) {
 }
 export function defenseGeneral(context: CityProgressionContext) {
   const wall = context.state.buildings.find((row) => row.itemId === 416000);
-  const office = offices(context).find(
+  const assigned = offices(context).filter(
     (row) => row.officeId === "53833" && num(row, "position") > 0,
   );
   return generalRoster(context).generals.find(
     (row) =>
       (num(row, "state") === 2 && wall && row.buildingUuid === wall.uuid) ||
-      (num(row, "state") === 6 && office?.id === row.id),
+      (num(row, "state") === 6 && assigned.some((office) => office.id === row.id)),
   );
 }

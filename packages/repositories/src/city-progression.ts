@@ -1,3 +1,4 @@
+import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
 import { readGeneralRoster, writeGeneralRoster } from "./generals";
 import { readSuitDecompositions, writeEquipment } from "./equipment";
 import { readAbilityPages, readProgressionEffects, writePlayerEffects } from "./player-effects";
@@ -46,7 +47,7 @@ export function createCityProgressionStore(
   boundary: ProgressionBoundary,
 ): CityProgressionStore {
   return {
-    async getState(command) {
+    async getState(command, ranking) {
       const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
       const [resource] = await tx.select().from(user_resource).where(eq(user_resource.uid, owner));
       if (!profile || !resource) throw new Error("Missing city owner");
@@ -106,7 +107,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
-        generalRoster: await readGeneralRoster(tx, owner, command === "generaltrun"),
+        generalRoster: await readGeneralRoster(tx, owner, command, ranking),
         abilityPages: await readAbilityPages(tx, owner),
         suitDecompositions: await readSuitDecompositions(tx, owner),
         quests: await readQuests(tx, owner, profile, now),
@@ -278,8 +279,13 @@ export function createCityProgressionStore(
               para: 0,
             });
         }
-        if (write.profile)
+        if (write.profile) {
           await tx.update(userprofile).set(write.profile).where(eq(userprofile.uid, owner));
+          await tx
+            .update(user_general)
+            .set({ level: write.profile.level })
+            .where(eq(user_general.uid, owner));
+        }
         if (write.statistics)
           await tx
             .insert(playerinfo)
@@ -297,6 +303,7 @@ export function createCityProgressionStore(
             .where(
               and(
                 eq(new_general.uid, owner),
+                eq(new_general.state, 2),
                 inArray(new_general.buildingUuid, [...write.deletedBuildings]),
               ),
             );

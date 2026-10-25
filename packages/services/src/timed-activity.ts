@@ -110,6 +110,8 @@ export class TimedActivityService {
         if (!state.prepare) throw new Error("City progression unavailable");
         const prepared = await state.prepare(command, encode(params), activityEconomy(ledger));
         const item = decode(Buffer.from(prepared.response));
+        for (const push of prepared.pushes ?? [])
+          ledger.pushes.push({ command: push.command, body: decode(Buffer.from(push.body)) });
         if (prepared.type === undefined)
           return { queues: [], activities: [], body: item, ledger, event: prepared.event };
         const duration = prepared.durationMs;

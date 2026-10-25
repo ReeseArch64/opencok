@@ -365,6 +365,10 @@ export class GameService {
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
+      case "robgeneral":
+      case "general.fire":
+      case "general.def.ch":
+      case "general.pick":
       case "generaltrun":
       case "heroOffice":
       case "newgeneral":
