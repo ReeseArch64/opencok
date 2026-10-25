@@ -1,3 +1,5 @@
+import { drizzle } from "drizzle-orm/node-postgres";
+import { cross_throne_king_info as throne } from "@opencok/drizzle/schema/opencok_kingdom/cross_throne_king_info";
 import { createHash } from "node:crypto";
 import { and, asc, eq, sql } from "drizzle-orm";
 import type { createDatabases } from "@opencok/drizzle";
@@ -227,6 +229,9 @@ async function owner(tx: Transaction, uid: string) {
       uid: userprofile.uid,
       serverId: userprofile.serverId,
       name: userprofile.name,
+      pic: userprofile.pic,
+      picVer: userprofile.picVer,
+      appVersion: userprofile.appVersion,
       pf: userprofile.pf,
       banFlag: userprofile.banFlag,
       banTime: userprofile.banTime,
@@ -717,6 +722,81 @@ export function createNicknameChangeStore(
         { isolationLevel: "read committed", accessMode: "read write" },
       );
     },
+    async nextPending(after) {
+      const rows = await db
+        .select({ owner: nickname_change.ownerUid, operationId: nickname_change.operationId })
+        .from(nickname_change)
+        .where(
+          and(
+            sql`(${nickname_change.state} = 'prepared' or ${nickname_change.pendingEffects} > 0)`,
+            after
+              ? sql`(${nickname_change.ownerUid}, ${nickname_change.operationId}) > (${after.owner}, ${after.operationId}::uuid)`
+              : undefined,
+          ),
+        )
+        .orderBy(asc(nickname_change.ownerUid), asc(nickname_change.operationId))
+        .limit(1);
+      return rows[0];
+    },
+    async deliverThrone(uid, operationId, now) {
+      key(uid, operationId);
+      time(now);
+      const connection = await databases.global.db.$client.connect();
+      try {
+        return await db.transaction(async (tx) => {
+          const profile = await owner(tx, uid);
+          if (!profile || profile.serverId !== kingdomId) return invalid();
+          const record = await operation(tx, uid, operationId);
+          if (!record || record.state !== "committed" || !(record.pendingEffects & 4)) return false;
+          const updated = await drizzle(connection).transaction(async (global) => {
+            const canonical = await nicknameAccountUid(
+              global as Parameters<typeof nicknameAccountUid>[0],
+              uid,
+            );
+            const account = await global.execute<{ name: string; server: string }>(
+              sql`select "gameUserName" as name, server from opencok_global.account_new where "gameUid"=${canonical}`,
+            );
+            if (
+              account.rows.length !== 1 ||
+              account.rows[0]!.name !== profile.name ||
+              account.rows[0]!.server !== String(kingdomId)
+            )
+              return invalid();
+            const result = await global.execute<{
+              version: number;
+              king_type: number;
+              config_type: number;
+            }>(sql`
+              update opencok_global.cross_throne_king_info k
+              set name=${profile.name}, pic=${profile.pic}, pic_ver=${profile.picVer ?? 0}
+              where k.uid=${uid} and k.king_type in (1,2)
+              and not exists (select 1 from opencok_global.cross_throne_king_info later where later.config_type=k.config_type and later.king_type=k.king_type and later.version>k.version)
+              returning version, king_type, config_type`);
+            if (result.rows.length > 1000) return invalid();
+            return result.rows;
+          });
+          for (const row of updated)
+            await tx
+              .update(throne)
+              .set({ name: profile.name, pic: profile.pic, pic_ver: profile.picVer ?? 0 })
+              .where(
+                and(
+                  eq(throne.uid, uid),
+                  eq(throne.version, row.version),
+                  eq(throne.king_type, row.king_type),
+                  eq(throne.config_type, row.config_type),
+                ),
+              );
+          await tx
+            .update(nickname_change)
+            .set({ pendingEffects: record.pendingEffects & ~4 })
+            .where(eq(nickname_change.operationId, operationId));
+          return true;
+        });
+      } finally {
+        connection.release();
+      }
+    },
     async deliverSharedUser(uid, operationId, now, project, publish, timeoutMs) {
       key(uid, operationId);
       time(now);
@@ -891,4 +971,17 @@ export function createNicknameChangeStore(
       return recover(uid, operationId, now);
     },
   };
+}
+
+export async function checkNicknameChangeStore(
+  databases: Pick<ReturnType<typeof createDatabases>, "global" | "getKingdom">,
+  kingdomId: number,
+): Promise<void> {
+  const db = databases.getKingdom(kingdomId).db;
+  await db.select().from(nickname_change).limit(0);
+  await db.select().from(throne).limit(0);
+  await databases.global.db.select().from(nickname_change_receipt).limit(0);
+  await databases.global.db.execute(
+    sql`select uuid,version,king_type,config_type,uid,name,pic,pic_ver from opencok_global.cross_throne_king_info limit 0`,
+  );
 }

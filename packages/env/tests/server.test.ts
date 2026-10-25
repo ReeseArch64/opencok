@@ -197,3 +197,30 @@ test("mailbox delivery requires an exact maintained endpoint and matching signin
       }),
     ).toThrow("GAME_MAIL_CHAT_URL");
 });
+
+test("nickname delivery requires a private endpoint and signing secret", () => {
+  const url = "http://chat:8080/_internal/nickname";
+  expect(
+    parseServerEnvironment({
+      ...base,
+      GAME_NICKNAME_CHAT_URL: url,
+      CHAT_SIGNING_SECRET: "synthetic",
+    }).GAME_NICKNAME_CHAT_URL,
+  ).toBe(url);
+  expect(() => parseServerEnvironment({ ...base, GAME_NICKNAME_CHAT_URL: url })).toThrow(
+    "CHAT_SIGNING_SECRET",
+  );
+  for (const value of [
+    "http://cok.chat/_internal/nickname",
+    "http://chat:8080/_internal/mailbox",
+    "http://user:secret@chat/_internal/nickname",
+    "http://chat/_internal/nickname?other=1",
+  ])
+    expect(() =>
+      parseServerEnvironment({
+        ...base,
+        GAME_NICKNAME_CHAT_URL: value,
+        CHAT_SIGNING_SECRET: "synthetic",
+      }),
+    ).toThrow("GAME_NICKNAME_CHAT_URL");
+});

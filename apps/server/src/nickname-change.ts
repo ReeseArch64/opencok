@@ -1,3 +1,4 @@
+import type { ChatNicknamePublisher } from "@opencok/contracts/chat-nickname";
 import { createNicknameChangeStore } from "@opencok/repositories/nickname-change";
 import { nicknameNotification, nicknameChangeReply } from "@opencok/mappings/nickname-change";
 import type { NicknameChangeConfiguration } from "@opencok/contracts/nickname-change";
@@ -17,6 +18,8 @@ export function createNicknameChangeRuntime(options: {
   notifications: RealmNotifications;
   timeoutMs: number;
   report(): void;
+  prepareRefund?(owner: string, now: number): Promise<void>;
+  chat?: ChatNicknamePublisher;
   alliance?: {
     rules: Pick<Rules, "items" | "configuration" | "mail">;
     resolveMailReward?: (rewardId: string, owner: string) => string | null;
@@ -61,12 +64,66 @@ export function createNicknameChangeRuntime(options: {
   const deliverAlliance = options.alliance
     ? createNicknameAllianceDelivery({ store, kingdomId: options.kingdomId, ...options.alliance })
     : undefined;
+  const deliver = async (owner: string, operationId: string, now: number) => {
+    await options.prepareRefund?.(owner, now);
+    const record = await store.recover(owner, operationId, now);
+    if (record.state !== "committed") return;
+    for (const effect of [
+      () => {
+        if (!deliverAlliance) throw new Error("Alliance delivery unavailable");
+        return deliverAlliance(owner, operationId, now);
+      },
+      () => {
+        if (!options.chat) throw new Error("Chat delivery unavailable");
+        return store.deliverChat(owner, operationId, options.chat, options.timeoutMs);
+      },
+      () => store.deliverThrone(owner, operationId, now),
+      () => {
+        const shared = options.sharedUser;
+        if (!shared) throw new Error("Shared user delivery unavailable");
+        return store.deliverSharedUser(
+          owner,
+          operationId,
+          now,
+          (row, realm, version, time) => sharedUserInfo(row, shared.rules, realm, version, time),
+          async (update, signal) => {
+            signal.throwIfAborted();
+            await shared.cache.publishSharedUserInfo(update, shared.layout);
+            signal.throwIfAborted();
+          },
+          options.timeoutMs,
+        );
+      },
+    ]) {
+      try {
+        await effect();
+      } catch {
+        options.report();
+      }
+    }
+  };
   return {
     store,
+    deliver,
+    next: store.nextPending,
+    async command(owner: string, operationId: string, validatedName: string, now: number) {
+      if (!deliverAlliance || !options.chat || !options.sharedUser)
+        throw new Error("Nickname runtime incomplete");
+      await options.prepareRefund?.(owner, now);
+      const record = await store.change(owner, operationId, validatedName, now);
+      try {
+        await deliver(owner, operationId, now);
+      } catch {
+        options.report();
+      }
+      return record;
+    },
     async change(owner: string, operationId: string, validatedName: string, now: number) {
+      await options.prepareRefund?.(owner, now);
       return nicknameChangeReply(await store.change(owner, operationId, validatedName, now));
     },
     async recover(owner: string, operationId: string, now: number) {
+      await options.prepareRefund?.(owner, now);
       return nicknameChangeReply(await store.recover(owner, operationId, now));
     },
     deliverNotifications: (owner: string, operationId: string) =>

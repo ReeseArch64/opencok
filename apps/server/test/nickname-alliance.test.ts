@@ -125,3 +125,21 @@ test("malformed reached rules and unrepresentable lifecycle state reject without
     { id: "46608", state: 1, num: 0n },
   ]);
 });
+
+test("the shipped alliance mail reward resolves a fixed goods attachment without redeeming it", async () => {
+  const { nicknameAllianceReward } = await import("@opencok/rules/nickname-alliance");
+  const rules = {
+    reconnect: {
+      rewards: new Map([
+        [
+          "reward",
+          { id: "reward", islink: "0", rate: "10", item: "200008", num: "1", circle: "1" },
+        ],
+      ]),
+    },
+  };
+  expect(nicknameAllianceReward("reward", rules)).toBe("goods,200008,1");
+  expect(() => nicknameAllianceReward("missing", rules)).toThrow();
+  rules.reconnect.rewards.get("reward")!.item = "200008;200009";
+  expect(() => nicknameAllianceReward("reward", rules)).toThrow();
+});

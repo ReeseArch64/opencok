@@ -1,3 +1,8 @@
+import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
+import type { AddressInfo } from "node:net";
+import { randomUUID } from "node:crypto";
+import { createChatApp } from "../../chat/src/app.ts";
+import { createChatRepository } from "@opencok/repositories/chat";
 import { expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -45,6 +50,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
   const containers: string[] = [];
   const servers: Awaited<ReturnType<typeof startServer>>[] = [];
   const clients: Client[] = [];
+  let chat: ReturnType<typeof createChatApp> | undefined;
+  let chatRepository: ReturnType<typeof createChatRepository> | undefined;
   const adapters: Database[] = [];
   let databases: ReturnType<typeof createDatabases> | undefined;
   const topology = {
@@ -101,6 +108,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         pf: "Google",
         gold: 9007199254740993n,
       });
+      await db.insert(user_mixed_info).values({ uid, mdata: "{}" });
       await db.insert(user_resource).values({
         uid,
         wood: BigInt(10000 * id),
@@ -149,6 +157,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     const configRecords = [
       ...dataConfigItems({
         player_max: { k3: "30" },
+        function_on6: { k12: "0" },
         resources_basics: { k7: "100", k8: "300" },
       }).values(),
     ]
@@ -168,7 +177,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
       item: `<Group id="data_config">${configRecords}</Group>`,
       arms: '<ItemSpec id="100001" attack="12" attack_add="3" defence="10" defence_add="2" upkeep="24" power="0.5"/><ItemSpec id="100002"/>',
-      goods: '<ItemSpec id="200001" para1="50"/><ItemSpec id="200002" para1="60"/>',
+      goods:
+        '<ItemSpec id="200001" para1="50"/><ItemSpec id="200002" para1="60"/><ItemSpec id="200021" type="17" price="100"/>',
     };
     for (const [name, records] of Object.entries(xml))
       await Bun.write(join(resources, `${name}.xml`), `<database>${records}</database>`);
@@ -191,7 +201,20 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     const url = new URL(`postgres://127.0.0.1:${pg.options.port}/postgres`);
     url.username = String(pg.options.user);
     url.password = String(pg.options.password);
+    chatRepository = createChatRepository({ databaseUrl: url.toString(), topology });
+    chat = createChatApp({
+      repository: chatRepository,
+      signingSecret: "synthetic-profile-secret",
+      websocketUrl: "ws://127.0.0.1/chat/ws",
+    });
+    expect(await chat.runMaintenance()).toBe(true);
+    await new Promise<void>((resolve) => chat!.server.listen(0, "127.0.0.1", resolve));
+    const chatPort = (chat.server.address() as AddressInfo).port;
     const base: Config = {
+      nicknameChat: {
+        url: `http://127.0.0.1:${chatPort}/_internal/nickname`,
+        signingSecret: "synthetic-profile-secret",
+      },
       host: "127.0.0.1",
       port: 0,
       healthPort: 0,
@@ -294,6 +317,35 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         resource: { ...before.resource, lastUpdateTime: checkpoint },
       });
       expect((await fetch(`http://127.0.0.1:${server.healthPort}/readyz`)).status).toBe(200);
+      const operationId = randomUUID();
+      expect(
+        (
+          await client.command("user.modify.nickName", {
+            nickName: sfs.string(`Renamed ${id}`),
+            operationId: sfs.string(operationId),
+          })
+        ).status,
+      ).toEqual(sfs.bool(true));
+      expect(
+        (
+          await client.command("user.modify.nickName", {
+            nickName: sfs.string(`Renamed ${id}`),
+            operationId: sfs.string(operationId),
+          })
+        ).status,
+      ).toEqual(sfs.bool(true));
+      expect((await client.command("equip.show", { show: sfs.int(1) })).show).toEqual(sfs.int(1));
+      await eventually(async () => {
+        const rows = await databases!
+          .getKingdom(id)
+          .pool.query(
+            'select "pendingEffects" from opencok_kingdom.nickname_change where "operationId"=$1',
+            [operationId],
+          );
+        return rows.rows[0]?.pendingEffects === 0;
+      });
+      const saved = await adapter.getProfileById(`synthetic-player-${id}`);
+      expect(saved).toMatchObject({ name: `Renamed ${id}`, gold: 9007199254740893n });
       const replacement = new Client(server.port, id);
       clients.push(replacement);
       await replacement.handshake();
@@ -302,7 +354,9 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect((await replacement.login(base.loginSecret, `synthetic-player-${id}`)).id?.type).toBe(
         Type.Int,
       );
-      await replacement.next();
+      const replacedInit = fields(fields((await replacement.next()).p).p);
+      expect(fields(replacedInit.user).name?.value).toBe(`Renamed ${id}`);
+      expect(fields(replacedInit.user).gold?.value).toBe(9007199254740893n);
 
       expect((await replacement.command("cmd.ping")).serverNowTime?.type).toBe(Type.Long);
     }
@@ -313,18 +367,45 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     expect(await otherCache.refresh("synthetic-shared-uid", "synthetic-token-2")).toBe(true);
     await otherCache.release("synthetic-shared-uid", "synthetic-token-2");
 
+    await databases
+      .getKingdom(1)
+      .pool.query(
+        'update opencok_kingdom.nickname_change set "pendingEffects"=2 where "ownerUid"=$1',
+        ["synthetic-player-1"],
+      );
     clients[0]!.close();
     await servers[0]!.close();
     servers.shift();
     const restarted = await startServer(base, await loadRules(resources, base.kingdomId));
     servers.push(restarted);
+    await eventually(
+      async () =>
+        (
+          await databases!
+            .getKingdom(1)
+            .pool.query(
+              'select "pendingEffects" from opencok_kingdom.nickname_change where "ownerUid"=$1',
+              ["synthetic-player-1"],
+            )
+        ).rows[0]?.pendingEffects === 0,
+    );
     const reconnected = new Client(restarted.port);
     clients.push(reconnected);
     await reconnected.handshake();
     expect((await reconnected.login(base.loginSecret, "synthetic-player-1")).id?.type).toBe(
       Type.Int,
     );
-    await reconnected.next();
+    const restartInit = fields(fields((await reconnected.next()).p).p);
+    expect(fields(restartInit.user).name?.value).toBe("Renamed 1");
+    expect(
+      (
+        await databases
+          .getKingdom(1)
+          .pool.query('select "showEquip" from opencok_kingdom.user_mixed_info where uid=$1', [
+            "synthetic-player-1",
+          ])
+      ).rows[0].showEquip,
+    ).toBe(1);
     expect(fields((await reconnected.command("build.info")).resource).wood?.value).toBe(10000n);
     await pg.docker(["pause", redis]);
     await eventually(
@@ -338,6 +419,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     clients.forEach((client) => client.close());
     await Promise.allSettled(servers.map((server) => server.close()));
     await Promise.allSettled(adapters.map((adapter) => adapter.close()));
+    if (chat) await new Promise<void>((resolve) => chat!.server.close(() => resolve()));
+    await chatRepository?.close();
     await databases?.close();
     for (const name of containers) await pg.docker(["rm", "--force", "--volumes", name]);
     await pg.stop();

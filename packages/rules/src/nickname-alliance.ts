@@ -71,3 +71,20 @@ export function nicknameAllianceTask(
   if (complete) updates.push({ ...init, state: 1 });
   return { updates, complete };
 }
+
+export function nicknameAllianceReward(id: string, rules: Pick<Rules, "reconnect">): string {
+  const row = rules.reconnect.rewards?.get(id);
+  if (
+    !row ||
+    row.islink !== "0" ||
+    Object.keys(row).some((key) => !["id", "islink", "rate", "item", "num", "circle"].includes(key))
+  )
+    throw new Error("Unsupported nickname alliance reward");
+  const rate = javaDecimal(row.rate, 32),
+    item = javaDecimal(row.item, 32),
+    count = javaDecimal(row.num, 32),
+    circles = javaDecimal(row.circle, 32);
+  if (rate <= 0n || item < 50n || item >= 1000000n || count < 0n || circles !== 1n)
+    throw new Error("Invalid nickname alliance reward");
+  return `goods,${item},${count}`;
+}

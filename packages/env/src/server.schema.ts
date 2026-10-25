@@ -44,6 +44,28 @@ export const serverSchema = z
         })
         .optional(),
     ),
+    GAME_NICKNAME_CHAT_URL: z.preprocess(
+      blankToUndefined,
+      z
+        .url({ protocol: /^https?$/ })
+        .refine((value) => {
+          try {
+            const url = new URL(value);
+            return (
+              url.pathname === "/_internal/nickname" &&
+              !url.username &&
+              !url.password &&
+              !url.search &&
+              !url.hash &&
+              url.hostname !== "cok.chat" &&
+              !url.hostname.endsWith(".cok.chat")
+            );
+          } catch {
+            return false;
+          }
+        })
+        .optional(),
+    ),
     GAME_MAIL_CHAT_URL: z.preprocess(
       blankToUndefined,
       z
@@ -140,6 +162,10 @@ export const serverSchema = z
     GAME_LOGIN_SECRET: z.string().min(1),
     GAME_MAP_SIZE: z.coerce.number().int().min(100).max(4000).default(1200),
     DEPENDENCY_TIMEOUT_MS: timeout(5000),
+  })
+  .refine((settings) => !settings.GAME_NICKNAME_CHAT_URL || !!settings.CHAT_SIGNING_SECRET, {
+    message: "Nickname chat signing secret required",
+    path: ["CHAT_SIGNING_SECRET"],
   })
   .refine((settings) => !settings.GAME_MAIL_CHAT_URL || !!settings.CHAT_SIGNING_SECRET, {
     message: "Mailbox chat signing secret required",
