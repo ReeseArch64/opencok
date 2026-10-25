@@ -189,12 +189,17 @@ export async function relayMutationEvent(
     payload: Buffer;
   }) => Promise<void>,
   now = Date.now,
+  eventType?: string,
 ): Promise<boolean> {
   const [event] = await db
     .select()
     .from(mutation_outbox)
     .where(
-      and(eq(mutation_outbox.kingdomId, authority.kingdomId), eq(mutation_outbox.publishedAt, 0n)),
+      and(
+        eq(mutation_outbox.kingdomId, authority.kingdomId),
+        eq(mutation_outbox.publishedAt, 0n),
+        eventType ? eq(mutation_outbox.eventType, eventType) : undefined,
+      ),
     )
     .orderBy(
       asc(mutation_outbox.createdAt),

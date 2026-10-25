@@ -1,4 +1,7 @@
+import { donate_history } from "@opencok/drizzle/schema/opencok_kingdom/donate_history";
 import { alliance_gift } from "@opencok/drizzle/schema/opencok_kingdom/alliance_gift";
+import { allianceMailData } from "@opencok/mappings/alliance";
+import { mail_group } from "@opencok/drizzle/schema/opencok_kingdom/mail_group";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { and, asc, eq, inArray, or, sql } from "drizzle-orm";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
@@ -33,6 +36,13 @@ export function createAllianceRepository(
   boundary: ProgressionBoundary,
   now = Date.now,
   domains: ReadonlyMap<number, ActivityDomain> = new Map(),
+  recordAction?: (
+    tx: MutationTransaction,
+    owner: string,
+    kind: string,
+    count: number,
+    now: bigint,
+  ) => Promise<void>,
 ): AllianceRepository {
   const execute = createMutationExecutor(db, authority, now);
   return {
@@ -44,6 +54,16 @@ export function createAllianceRepository(
       );
       if (selection.allianceId) ids.add(selection.allianceId);
       if (selection.mailId) {
+        const [message] = await db
+          .select()
+          .from(mail)
+          .where(and(eq(mail.uid, selection.mailId), eq(mail.toUser, input.owner)));
+        if (message && [17, 25].includes(message.type)) {
+          const data = allianceMailData(message.contents);
+          if (message.type === 17 && typeof data.allianceId === "string") ids.add(data.allianceId);
+          if (message.type === 25 && typeof data.applicantId === "string")
+            seed.push(data.applicantId);
+        }
         const [application] = await db
           .select()
           .from(alliance_apply)
@@ -121,10 +141,26 @@ export function createAllianceRepository(
                 .select()
                 .from(playerinfo)
                 .where(inArray(playerinfo.uid, participants)),
+              points: await tx
+                .select()
+                .from(worldpoint)
+                .where(inArray(worldpoint.ownerId, participants)),
               marches: await tx
                 .select()
                 .from(world_march)
-                .where(inArray(world_march.ownerUid, participants))
+                .where(
+                  or(
+                    inArray(world_march.ownerUid, participants),
+                    inArray(world_march.targetUid, participants),
+                    inArray(
+                      world_march.targetId,
+                      tx
+                        .select({ id: worldpoint.id })
+                        .from(worldpoint)
+                        .where(inArray(worldpoint.ownerId, participants)),
+                    ),
+                  ),
+                )
                 .limit(8193),
               sciences: groups.length
                 ? await tx
@@ -138,6 +174,10 @@ export function createAllianceRepository(
                     .from(alliance_science_upgrade)
                     .where(inArray(alliance_science_upgrade.allianceId, groups))
                 : [],
+              history: await tx
+                .select()
+                .from(donate_history)
+                .where(eq(donate_history.uid, input.owner)),
               donations: await tx
                 .select()
                 .from(alliance_donate)
@@ -181,17 +221,69 @@ export function createAllianceRepository(
                 ? await tx.select().from(mail).where(eq(mail.uid, selection.mailId))
                 : [],
               directory:
-                selection.key !== undefined
+                selection.key !== undefined && !selection.searchPlayers
                   ? await tx
                       .select()
                       .from(alliance)
                       .where(
-                        sql`position(${selection.key.toLowerCase()} in lower(${alliance.alliancename})) > 0`,
+                        input.command === "al.abbr"
+                          ? sql`lower(${alliance.abbr})=${selection.key.toLowerCase()}`
+                          : ["al.name", "al.checkname"].includes(input.command)
+                            ? sql`lower(${alliance.alliancename})=${selection.key.toLowerCase()}`
+                            : input.command === "al.create"
+                              ? sql`lower(${alliance.abbr})=${[...selection.key].slice(0, 3).join("").toLowerCase()}`
+                              : or(
+                                  sql`position(${selection.key.toLowerCase()} in lower(${alliance.alliancename})) > 0`,
+                                  sql`position(${selection.key.toLowerCase()} in lower(${alliance.abbr})) > 0`,
+                                ),
                       )
                       .orderBy(asc(alliance.uid))
-                      .limit(20)
-                      .offset((selection.page ?? 0) * 20)
+                      .limit(selection.pageSize ?? 10)
+                      .offset(((selection.page ?? 1) - 1) * (selection.pageSize ?? 10))
                   : [],
+              directoryTotal:
+                selection.key !== undefined && !selection.searchPlayers
+                  ? BigInt(
+                      (
+                        await tx
+                          .select({ total: sql<string>`count(*)::text` })
+                          .from(alliance)
+                          .where(
+                            or(
+                              sql`position(${selection.key.toLowerCase()} in lower(${alliance.alliancename})) > 0`,
+                              sql`position(${selection.key.toLowerCase()} in lower(${alliance.abbr})) > 0`,
+                            ),
+                          )
+                      )[0]!.total,
+                    )
+                  : 0n,
+              candidates: selection.searchPlayers
+                ? await tx
+                    .select({
+                      uid: userprofile.uid,
+                      name: userprofile.name,
+                      pic: userprofile.pic,
+                      picVer: userprofile.picVer,
+                      picfraId: userprofile.picfraId,
+                      lang: userprofile.lang,
+                      power: playerinfo.power,
+                      offLineTime: userprofile.offLineTime,
+                    })
+                    .from(userprofile)
+                    .innerJoin(playerinfo, eq(playerinfo.uid, userprofile.uid))
+                    .where(
+                      and(
+                        eq(userprofile.serverId, authority.kingdomId),
+                        sql`coalesce(${userprofile.allianceId},'')=''`,
+                        sql`coalesce(${userprofile.banFlag},0)=0`,
+                        sql`coalesce(${userprofile.banTime},0)<=${at}`,
+                        sql`position(${(selection.key ?? "").toLowerCase()} in lower(${userprofile.name}))>0`,
+                      ),
+                    )
+                    .orderBy(asc(userprofile.uid))
+                    .limit(10)
+                    .offset(((selection.page ?? 1) - 1) * 10)
+                : [],
               blacklist: groups.length
                 ? await tx
                     .select()
@@ -226,6 +318,10 @@ export function createAllianceRepository(
                 );
               }
               await writeAlliance(tx, input.owner, result.write, participants, groups);
+              for (const action of result.write.actions ?? []) {
+                if (!participants.includes(action.uid)) throw new Error("Foreign alliance action");
+                await recordAction?.(tx, action.uid, action.kind, action.count, at);
+              }
             };
             let change = apply;
             for (const owner of [...new Set(result.productionOwners ?? [])].sort().reverse()) {
@@ -339,7 +435,10 @@ async function writeAlliance(
   }
   for (const uid of write.firstJoin ?? []) {
     if (!participants.includes(uid)) throw new Error("Foreign first join");
-    await tx.update(user_lord).set({ firstJoinAllianceFlag: 0 }).where(eq(user_lord.uid, uid));
+    await tx
+      .insert(user_lord)
+      .values({ uid, firstJoinAllianceFlag: 0 })
+      .onConflictDoUpdate({ target: user_lord.uid, set: { firstJoinAllianceFlag: 0 } });
   }
   for (const row of write.applications ?? []) {
     check(row);
@@ -387,6 +486,15 @@ async function writeAlliance(
         write.deletedResearch.filter((id) => allowed.has(id)),
       ),
     );
+  for (const row of write.history ?? []) {
+    if (row.uid !== owner) throw new Error("Foreign donation history");
+    check(row);
+    const value = row as typeof donate_history.$inferInsert;
+    await tx
+      .insert(donate_history)
+      .values(value)
+      .onConflictDoUpdate({ target: donate_history.uid, set: value });
+  }
   for (const row of write.donations ?? []) {
     if (row.uerid !== owner) throw new Error("Foreign donation offer");
     const value = row as typeof alliance_donate.$inferInsert;
@@ -449,10 +557,29 @@ async function writeAlliance(
     await tx
       .delete(user_gift)
       .where(and(eq(user_gift.uid, owner), inArray(user_gift.uuid, [...write.deletedGifts])));
+  for (const row of write.mailUpdates ?? []) {
+    if (row.toUser !== owner || !Buffer.isBuffer(row.contents))
+      throw new Error("Foreign alliance mail update");
+    await tx
+      .update(mail)
+      .set({ contents: row.contents })
+      .where(and(eq(mail.uid, text(row, "uid")), eq(mail.toUser, owner)));
+  }
   for (const row of write.mails ?? []) {
     if (!participants.includes(text(row, "toUser"))) throw new Error("Foreign alliance mail");
     const value = row as typeof mail.$inferInsert;
-    await tx.insert(mail).values(value).onConflictDoNothing();
+    const inserted = await tx
+      .insert(mail)
+      .values(value)
+      .onConflictDoNothing()
+      .returning({ id: mail.uid });
+    if (inserted.length && value.type === 2)
+      await tx.insert(mail_group).values({
+        uid: value.toUser,
+        groupType: 2,
+        groupIndex: value.uid,
+        updateTime: value.createTime,
+      });
   }
   for (const row of write.blacklist ?? []) {
     check(row);

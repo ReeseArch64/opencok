@@ -69,7 +69,9 @@
     "./legacy-generals": "./src/legacy-generals.ts",
     "./general-recovery": "./src/general-recovery.ts",
     "./general-combat": "./src/general-combat.ts",
-    "./general-draws": "./src/general-draws.ts"
+    "./general-draws": "./src/general-draws.ts",
+    "./alliances": "./src/alliances.ts",
+    "./alliance-publication": "./src/alliance-publication.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
