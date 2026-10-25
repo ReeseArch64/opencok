@@ -68,6 +68,7 @@ export function createCityProgressionHandlers<T>(
     now: bigint,
     economy: ActivityEconomy,
     command?: string,
+    request?: Uint8Array,
   ) => {
     const repository = store(tx, owner, now),
       state = await repository.getState(
@@ -80,6 +81,7 @@ export function createCityProgressionHandlers<T>(
               gold: cityInteger(rules.items.get("golden_opentime")?.k13),
             }
           : undefined,
+        request,
       );
     const world = await effects.world(),
       emperor = await effects.emperor();
@@ -217,7 +219,7 @@ export function createCityProgressionHandlers<T>(
     ) {
       const domain = domains.find((candidate) => candidate.commands.includes(command));
       if (!domain) throw new GameError(errors.unsupported, "city_progression");
-      const { repository, plan } = await context(tx, owner, now, economy, command);
+      const { repository, plan } = await context(tx, owner, now, economy, command, params);
       const result = await domain.prepare(plan, command, decode(Buffer.from(params)));
       if (!domain.commands.includes("task.reward.get")) refreshQuests(plan);
       await repository.update(plan.write, economy);

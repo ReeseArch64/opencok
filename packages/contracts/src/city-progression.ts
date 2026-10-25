@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  worldMutation?: import("./world-march-runtime").WorldMutationState;
   dragons?: DragonProgressionState;
   minstrel?: Row;
   civilizationSciences?: readonly Row[];
@@ -107,6 +108,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  worldMutation?: import("./world-march-runtime").WorldMutationWrite;
   dragons?: DragonProgressionWrite;
   minstrel?: Row;
   civilizationSciences?: readonly Row[];
@@ -138,7 +140,11 @@ export interface CityProgressionWrite {
 }
 
 export interface CityProgressionStore {
-  getState(command?: string, ranking?: GeneralRankingWeights): Promise<CityProgressionState>;
+  getState(
+    command?: string,
+    ranking?: GeneralRankingWeights,
+    request?: Uint8Array,
+  ): Promise<CityProgressionState>;
   update(write: CityProgressionWrite, economy: ActivityEconomy): Promise<void>;
 }
 

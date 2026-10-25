@@ -39,7 +39,7 @@ function troops(values: readonly MarchTroops[]) {
 }
 function cargo(value: MarchCargo | null) {
   if (value === null) return;
-  if (!["wood", "stone", "iron", "food", "silver"].includes(value.resource)) invalid();
+  if (!["wood", "stone", "iron", "food", "silver", "gold"].includes(value.resource)) invalid();
   instant(value.amount);
 }
 function validate(state: MarchLifecycle, owner: string, version: number, now: bigint) {

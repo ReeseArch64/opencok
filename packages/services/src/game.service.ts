@@ -1,3 +1,4 @@
+import { worldMutationCommands } from "./world-march-runtime";
 import { dragonProgressionCommands } from "./dragon-progression";
 import { UPLOAD_PATH } from "@opencok/contracts/files";
 import { equipment as equipmentFields } from "@opencok/mappings/equipment";
@@ -266,6 +267,7 @@ export class GameService {
     return (await this.initialize(uid)).body;
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
+    await this.services.cityProgression?.(uid, "world.tick", {});
     await this.services.reconcileAlliance?.(uid);
     await this.services.reconcileTimed?.(uid);
     const effects = await this.services.cityProgression?.(uid, "effects.init", {});
@@ -365,6 +367,15 @@ export class GameService {
     await this.services.reconcileAlliance?.(uid);
     let body: Fields;
     let pushes: Result["pushes"] = [];
+    if (worldMutationCommands.includes(command)) {
+      if (command === "world.tick" || !this.services.cityProgression)
+        throw new GameError(errors.unsupported);
+      const result = await this.services.cityProgression(uid, command, params);
+      if (Object.keys(result.body).length === 0) result.body.success = sfs.bool(true);
+      if (params._cok_) result.body._cok_ = params._cok_;
+      if (params.cmdBaseTime) result.body.cmdBaseTime = params.cmdBaseTime;
+      return result;
+    }
     if (dragonProgressionCommands.includes(command)) {
       if (
         command === "dragon.item" ||
@@ -373,7 +384,11 @@ export class GameService {
         !this.services.cityProgression
       )
         throw new GameError(errors.unsupported);
-      return this.services.cityProgression(uid, command, params);
+      const result = await this.services.cityProgression(uid, command, params);
+      if (Object.keys(result.body).length === 0) result.body.success = sfs.bool(true);
+      if (params._cok_) result.body._cok_ = params._cok_;
+      if (params.cmdBaseTime) result.body.cmdBaseTime = params.cmdBaseTime;
+      return result;
     }
     switch (command) {
       case "trade.info":

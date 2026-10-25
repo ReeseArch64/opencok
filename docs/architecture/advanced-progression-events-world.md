@@ -86,15 +86,40 @@ Inputs remain immutable. The terminal state rejects repeated return completion.
 Synthetic tests check conservation of troop counts across the full lifecycle,
 late recovery without deadline drift, single cargo delivery and acceleration edges.
 
-These are domain rules, not an enabled world runtime. A realm transaction adapter
-must atomically compare the saved version, persist the march and troop changes,
-apply cargo through the ledger, and write the receipt and outbox before native
-commands can use them. Route duration, target availability, troop capacity and
-cargo amounts must come from authoritative catalogs and a locked world point;
-none may be accepted from a client. The point update and cargo debit must share
-the same transaction. Gathering interruption, combat losses, special routes,
-teleport, interest subscriptions and background recovery remain separate work.
-Existing world commands are not redirected to an in-memory simulation.
+The realm now composes these transitions through its fenced player transaction.
+`world.march`, `world.march.check`, `world.march.retreat`, `world.march.spd`,
+`world.user.march` and `world.get.march` operate on owned troops and catalog-backed
+resource targets. Costs, troop reservations, point ownership, cargo, checkpoint,
+receipt and outbox commit together. Map mutations lock their points and serialize
+through a transaction-scoped map lock. Competing arrivals cannot both occupy a
+resource node; an unavailable target returns the later army without inventing a
+battle. Combat targets require their validated engine.
+
+`world.mv` and `world.mv.gold` validate all four destination tiles before payment.
+Directed movement recalls existing ordinary marches; collected cargo and troops
+return through the same checkpoint. Random movement requires no active marches and
+chooses a free footprint on the server. Random choices and costs replay from the
+receipt. Native inspection, march lists and map queries expose the saved state.
+
+Migration `0017_world_march_runtime.sql` adds bounded march checkpoints and map
+interests. Background recovery scans persisted deadlines and unregistered ordinary
+resource marches in bounded batches, retaining original deadlines and avoiding a
+second reservation on import. Checkpoints use explicit versions and terminal state.
+New army snapshots have an identified maintained format; readers retain the Java
+object-stream import path. No private input is a runtime dependency.
+
+World views record bounded-lived interests. The outbox sends native march,
+acceleration, return, deletion and point-invalidation updates to interested players.
+Late delivery does not repeat economic transitions. Reconnect also recovers owned
+marches before building its snapshot.
+
+Back up the realm before applying the additive migration. Keep checkpoints,
+receipts, postings and modern army snapshots on rollback. A replacement binary
+must understand the checkpoint and army formats before enabling these commands;
+an old Java writer cannot safely resume them. Do not delete checkpoint rows or
+restore free troop counts manually to retry a march. Synthetic PostgreSQL scenarios
+cover concurrent departure, delayed full-cycle recovery, single cargo credit,
+acceleration, foreign recall, teleport ownership and interest selection.
 
 ## Dragon progression runtime
 

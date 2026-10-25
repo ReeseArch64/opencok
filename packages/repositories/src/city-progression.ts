@@ -1,3 +1,4 @@
+import { readWorldMutationState, writeWorldMutation } from "./world-march-runtime";
 import { readDragonProgression, writeDragonProgression } from "./dragon-progression";
 import { activity_minstrel } from "@opencok/drizzle/schema/opencok_kingdom/activity_minstrel";
 import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
@@ -48,9 +49,10 @@ export function createCityProgressionStore(
   owner: string,
   now: bigint,
   boundary: ProgressionBoundary,
+  mapSize = 1200,
 ): CityProgressionStore {
   return {
-    async getState(command, ranking) {
+    async getState(command, ranking, request) {
       const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
       const [resource] = await tx.select().from(user_resource).where(eq(user_resource.uid, owner));
       if (!profile || !resource) throw new Error("Missing city owner");
@@ -118,6 +120,10 @@ export function createCityProgressionStore(
         profile,
         resource,
         civilizationSciences,
+        worldMutation:
+          command?.startsWith("world.") || command === "totem" || command === "civilizationCastle"
+            ? await readWorldMutationState(tx, owner, request, mapSize, command)
+            : undefined,
         dragons: await readDragonProgression(tx, owner),
         minstrel:
           command === "minstrel"
@@ -193,6 +199,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.worldMutation) await writeWorldMutation(tx, owner, write.worldMutation);
         if (write.dragons) await writeDragonProgression(tx, owner, write.dragons);
         await writePlayerEffects(tx, owner, write);
         if (write.generalRoster) await writeGeneralRoster(tx, owner, write.generalRoster, now);

@@ -1,3 +1,10 @@
+import { publishWorldMutation } from "@opencok/services/world-publication";
+import { createWorldMarchDomain } from "@opencok/services/world-march-runtime";
+import {
+  dueWorldMarches,
+  createWorldInterest,
+  unregisteredWorldMarches,
+} from "@opencok/repositories/world-march-runtime";
 import { dragonTalentsDomain } from "@opencok/services/dragon-talents";
 import { dragonProgressionDomain } from "@opencok/services/dragon-progression";
 import { minstrelDomain } from "@opencok/services/minstrel";
@@ -345,7 +352,7 @@ export const RealmDependenciesLive = Layer.effect(
     });
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
-        createCityProgressionStore(tx, owner, now, cityBoundary),
+        createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize),
       [
         generalsDomain,
         createGeneralDrawDomain(() => cache.generalDrawRanking()),
@@ -358,6 +365,7 @@ export const RealmDependenciesLive = Layer.effect(
         civilizationScienceDomain,
         dragonProgressionDomain,
         dragonTalentsDomain,
+        createWorldMarchDomain(config.mapSize),
         minstrelDomain,
         trainingDomain,
         hospitalDomain,
@@ -482,6 +490,80 @@ export const RealmDependenciesLive = Layer.effect(
       }),
       rules,
       economyEffects,
+    );
+    const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
+    let worldCursor: { dueAt: bigint; id: string } | undefined;
+    let worldImportCursor: string | undefined;
+    const recoverWorld = async () => {
+      const imported = await unregisteredWorldMarches(db.kingdom.db, worldImportCursor);
+      worldImportCursor = imported.length === 64 ? imported.at(-1)!.id : undefined;
+      for (const entry of imported)
+        if (entry.owner) {
+          try {
+            await activities.domainCommand(entry.owner, "world.tick", {
+              operationId: sfs.string(`world-import:${entry.id}`),
+            });
+          } catch {
+            console.warn(
+              JSON.stringify({
+                event: "world_import_failed",
+                kingdom: config.kingdomId,
+                march: entry.id,
+              }),
+            );
+          }
+        }
+      const due = await dueWorldMarches(db.kingdom.db, BigInt(Date.now()), worldCursor);
+      worldCursor = due.length === 64 ? due.at(-1) : undefined;
+      for (const entry of due) {
+        try {
+          await activities.domainCommand(entry.owner, "world.tick", {
+            operationId: sfs.string(`world:${entry.id}:${entry.version}`),
+          });
+        } catch {
+          console.warn(
+            JSON.stringify({
+              event: "world_recovery_failed",
+              kingdom: config.kingdomId,
+              march: entry.id,
+            }),
+          );
+        }
+      }
+      for (const command of [
+        "world.march",
+        "world.march.retreat",
+        "world.march.spd",
+        "world.tick",
+        "world.mv",
+        "world.mv.gold",
+      ])
+        for (let index = 0; index < 64; index++) {
+          const delivered = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            (event) =>
+              publishWorldMutation(
+                event.payload,
+                command,
+                config.kingdomId,
+                worldInterest.interested,
+                (owner, eventCommand, body) => notifications.publish(owner, eventCommand, body),
+              ),
+            Date.now,
+            command,
+          );
+          if (!delivered) break;
+        }
+    };
+    yield* Effect.tryPromise({
+      try: recoverWorld,
+      catch: () => new Error("World recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
     );
     const production = new ProductionService(
       createProductionExecutor(db.kingdom.db, authority, {
@@ -769,7 +851,9 @@ export const RealmDependenciesLive = Layer.effect(
           playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
         }),
       ),
-      world: new WorldController(new WorldService(db, config.mapSize, config.kingdomId)),
+      world: new WorldController(
+        new WorldService(db, config.mapSize, config.kingdomId, { ...worldInterest, rules }),
+      ),
     };
   }),
 );

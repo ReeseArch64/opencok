@@ -86,7 +86,8 @@
     "./alliance-gameplay": "./src/alliance-gameplay.ts",
     "./alliance-recovery": "./src/alliance-recovery.ts",
     "./alliance-publication": "./src/alliance-publication.ts",
-    "./dragon-progression": "./src/dragon-progression.ts"
+    "./dragon-progression": "./src/dragon-progression.ts",
+    "./world-march-runtime": "./src/world-march-runtime.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
@@ -96,6 +97,7 @@
     "@opencok/rules": "workspace:*",
     "drizzle-orm": "0.45.4",
     "@opencok/ledger": "workspace:*",
-    "@opencok/mappings": "workspace:*"
+    "@opencok/mappings": "workspace:*",
+    "@opencok/messages": "workspace:*"
   }
 }

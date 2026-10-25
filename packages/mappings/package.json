@@ -57,7 +57,8 @@
     "./alliance": "./src/alliance.ts",
     "./civilization-science": "./src/civilization-science.ts",
     "./minstrel": "./src/minstrel.ts",
-    "./dragon-progression": "./src/dragon-progression.ts"
+    "./dragon-progression": "./src/dragon-progression.ts",
+    "./world-march-runtime": "./src/world-march-runtime.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
