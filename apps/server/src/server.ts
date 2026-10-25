@@ -1,3 +1,4 @@
+import { createGeneralDrawDomain } from "@opencok/services/general-draws";
 import { generalsDomain } from "@opencok/services/generals";
 import { equipmentDomain, workshopDomain } from "@opencok/services/equipment";
 import { playerEffectsDomain } from "@opencok/services/player-effects";
@@ -333,6 +334,7 @@ export const RealmDependenciesLive = Layer.effect(
         createCityProgressionStore(tx, owner, now, cityBoundary),
       [
         generalsDomain,
+        createGeneralDrawDomain(() => cache.generalDrawRanking()),
         equipmentDomain,
         workshopDomain,
         playerEffectsDomain,

@@ -26,7 +26,8 @@
     "./flower-ranking": "./src/flower-ranking.ts",
     "./military-ranking": "./src/military-ranking.ts",
     "./battle-ranking": "./src/battle-ranking.ts",
-    "./shared-user": "./src/shared-user.ts"
+    "./shared-user": "./src/shared-user.ts",
+    "./general-draws": "./src/general-draws.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

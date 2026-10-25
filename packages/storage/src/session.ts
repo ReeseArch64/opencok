@@ -1,3 +1,4 @@
+import { loadGeneralDrawRanking } from "./general-draws";
 import { selectSystemMailPage } from "./mail-system.ts";
 import { loadBattleFightRanking, loadPlayoffRanking } from "./battle-ranking.ts";
 import { loadMilitaryRanking } from "./military-ranking.ts";
@@ -124,6 +125,9 @@ export class Cache {
       this.config.kingdomId,
       type,
     );
+  }
+  generalDrawRanking() {
+    return loadGeneralDrawRanking((name, ...args) => this.command(name, ...args));
   }
   publishedGlobalRanking(kind: "payment" | "consumption") {
     return loadPublishedGlobalRanking((name, ...args) => this.command(name, ...args), kind);
