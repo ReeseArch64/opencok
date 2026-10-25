@@ -1,7 +1,8 @@
+import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_activity";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { new_general } from "@opencok/drizzle/schema/opencok_kingdom/new_general";
 import { new_general_buy } from "@opencok/drizzle/schema/opencok_kingdom/new_general_buy";
 import { new_general_skill } from "@opencok/drizzle/schema/opencok_kingdom/new_general_skill";
@@ -11,7 +12,7 @@ import { num, long, text, type Row } from "@opencok/contracts/rows";
 import type { GeneralWrite } from "@opencok/contracts/city-progression";
 import type { MutationTransaction } from "./mutation";
 
-export async function readGeneralRoster(tx: MutationTransaction, owner: string) {
+export async function readGeneralRoster(tx: MutationTransaction, owner: string, history = false) {
   const generals = await tx
     .select()
     .from(new_general)
@@ -42,7 +43,19 @@ export async function readGeneralRoster(tx: MutationTransaction, owner: string) 
     statuses.length > 4096
   )
     throw new Error("General aggregate exceeds bound");
-  return { generals, purchases, offices, skills, statuses };
+  const drawHistory = history
+    ? (
+        await tx
+          .select({ payload: mutation_outbox.payload })
+          .from(mutation_outbox)
+          .where(
+            and(eq(mutation_outbox.ownerUid, owner), eq(mutation_outbox.eventType, "generaltrun")),
+          )
+          .orderBy(desc(mutation_outbox.createdAt), desc(mutation_outbox.requestId))
+          .limit(50)
+      ).map((row) => row.payload)
+    : [];
+  return { generals, purchases, offices, skills, statuses, drawHistory };
 }
 function owned(row: Row, owner: string) {
   if (row.uid !== owner) throw new Error("Foreign general mutation");
@@ -64,6 +77,13 @@ export async function writeGeneralRoster(
   write: GeneralWrite,
   now: bigint,
 ) {
+  if (write.turntableAt !== undefined) {
+    if (write.turntableAt !== now) throw new Error("Invalid turntable period");
+    await tx
+      .insert(user_mixed_info)
+      .values({ uid: owner, mdata: "", generalFree: now })
+      .onConflictDoUpdate({ target: user_mixed_info.uid, set: { generalFree: now } });
+  }
   if (write.refinementPeriod) {
     const value = {
       generalRefineCount: write.refinementPeriod.count,

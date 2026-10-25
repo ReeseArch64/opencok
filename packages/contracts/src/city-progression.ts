@@ -31,6 +31,7 @@ export interface QuestWrite {
   allianceBox?: { threshold: number; period: bigint };
 }
 export interface GeneralRoster {
+  drawHistory?: readonly Buffer[];
   generals: readonly Row[];
   purchases: readonly Row[];
   offices: readonly Row[];
@@ -38,6 +39,7 @@ export interface GeneralRoster {
   statuses: readonly Row[];
 }
 export interface GeneralWrite {
+  turntableAt?: bigint;
   refinementPeriod?: { count: number; time: bigint };
   deletedStatuses?: readonly { generalId: number; stateId: number }[];
   accelerations?: readonly { type: number; milliseconds: bigint }[];
@@ -100,7 +102,7 @@ export interface CityProgressionWrite {
 }
 
 export interface CityProgressionStore {
-  getState(): Promise<CityProgressionState>;
+  getState(command?: string): Promise<CityProgressionState>;
   update(write: CityProgressionWrite, economy: ActivityEconomy): Promise<void>;
 }
 
