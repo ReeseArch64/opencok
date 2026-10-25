@@ -15,6 +15,8 @@ export async function dueAllianceResearch(
       owner: alliance_member.uid,
       scienceId: alliance_science_upgrade.scienceId,
       startTime: alliance_science_upgrade.startTime,
+      needTime: alliance_science_upgrade.needTime,
+      accelerate: alliance_science_upgrade.accelerate,
     })
     .from(alliance_science_upgrade)
     .innerJoin(alliance_member, eq(alliance_member.allianceId, alliance_science_upgrade.allianceId))

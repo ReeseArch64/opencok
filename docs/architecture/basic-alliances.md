@@ -1,0 +1,113 @@
+# Basic alliances
+
+Topic 23 implements realm-owned alliance creation, applications, invitations,
+membership, ranks, leadership, editable permissions, queue assistance, science
+contributions and shared gifts. The authenticated `GameService` routes the native
+commands to `AllianceService`; initialization restores the alliance snapshot.
+The private reference server is a read-only behavioral input, never a runtime
+resource or a maintained dependency.
+
+`createAllianceRepository` discovers the affected players and alliances, then the
+mutation executor fences the realm and locks player profiles in UID order before
+locking alliances in UID order. Membership is read again after locking. A changed
+participant set aborts the operation for retry. Capacity uses current member rows,
+including the completed expansion science effect. Profile, member, owned world
+points and marches change together. A player has one membership row, and ordinary
+rank changes cannot appoint a leader. Transfer changes both ranks atomically;
+inactive-leader replacement uses the configured absence interval and gold cost.
+
+Costs, contributions, native responses, receipts and outbox records commit in the
+same PostgreSQL transaction. Only the actor's economy receives ledger postings.
+Another member's balances cannot be credited through that ledger. First membership
+creates the catalog system mail through an owned deterministic identity. Leaving,
+expulsion or dissolution closes the first-join flag, including the donation waiting
+period exception. Rejoining cannot create another first-membership reward.
+
+Rank capabilities come from the maintained rank catalog. The six editable settings
+control the source's low-rank presentation and messaging choices; they do not grant
+invitation, research, expulsion or leadership capabilities. Applications expire
+after eight hours. Invitation and application actions validate the actual mail's
+recipient and type and consume its pending application. Imported mail identities
+can differ from application identities; their stored alliance or applicant identity
+provides the binding. Names and text use the existing runtime moderation provider.
+Realm-local directory and candidate searches use parameter-bound SQL and bounded
+pages. Cross-kingdom membership, global directory ownership, territory and war
+orchestration remain separate systems.
+
+## Queue assistance
+
+A new help request records the running timed-activity identity, start time and
+helpers. Queue IDs and client-supplied helper identities confer no authority.
+Every helper must currently belong to the sender's alliance, cannot help themself,
+and can help that generation once. Embassy parameters and composed player effects
+fix the helper capacity and reduction when the request is created. Assistance
+updates the activity version and native deadline and calls the existing domain's
+reschedule operation, preserving research and hospital mirrors. Normal timed
+completion consumes the resulting deadline. Supported activity types are building,
+research, healing and equipment; troop training and fortifications are excluded by
+the source rules.
+
+Imported comma-separated helper lists can bind only to an overlapping, still
+running queue generation. Ambiguous or stale requests cannot accelerate a reused
+queue. Leaving invalidates that player's outstanding help requests.
+
+## Research and effects
+
+Donation offers persist their costs, contribution and progress outcomes. Opening
+an existing offer does not reroll it. A successful donation consumes resources or
+gold, refreshes the offers, advances bounded progress and updates member honor,
+alliance points, daily counters and weekly donation history atomically. Weekly
+history is filtered by alliance and period; rollover does not reset unrelated
+player state. The existing quest foundation receives join, donate and help actions.
+
+Research requires an authorized rank, completed donations, a valid next catalog
+level and the single alliance research slot. Its duration and target level/power
+are persisted. Production boundaries run for every current member when research
+starts and completes. Production schedules include the future research deadline,
+so a delayed recovery applies the bonus at the original deadline. Completion does
+not compound that bonus. Membership changes also settle the old production schedule
+before rebuilding it with the new membership effects. Existing queues retain their
+pinned durations; future activities resolve the current composed effects.
+
+A bounded background scan recovers overdue research, and authenticated commands
+reconcile the actor's alliance before ordinary gameplay. Research recovery uses a
+deterministic receipt identity. Legacy research rows with an empty acceleration
+payload recover only when the stored start and current science agree.
+Client operation identities are UUIDs, keeping them separate from internal worker
+receipt keys. Recovery keys include the saved research payload and duration so a
+clock rollback cannot alias a later research generation.
+
+## Shared rewards and notifications
+
+`AllianceService.publishGift` is a trusted server producer. Its caller must already
+have verified the gameplay or purchase entitlement and supply its stable event ID.
+It snapshots current recipients and stores one weighted catalog outcome per member.
+The event identity prevents another producer, replay or restart from generating a
+second set. Membership added later does not receive an earlier gift. The client
+cannot generate an entitlement through `al.gengift`.
+
+Opening a gift checks its recipient, original alliance, validity and expiry, then
+credits the actor and consumes the entitlement in the same transaction. Alliance
+experience changes once per claim. A claimed or expired gift can be cleared.
+
+The filtered mutation outbox relay publishes alliance updates and help/research
+notifications through the existing realm notification adapter. It reads current
+membership before delivery and leaves other domains' pending events untouched.
+Publication retries do not repeat economic or progression mutations. PostgreSQL
+remains authoritative when a recipient is offline; initialization reconstructs
+membership, science and available rewards from saved state.
+
+No new external dependency, service, environment setting or schema migration is
+required. Back up the existing kingdom database before deployment. Deploy the
+complete stack together. Rollback means restoring the prior server build while
+retaining committed memberships, receipts, deadlines and reward claims; do not
+clear receipts or reset player progress to retry an operation. New help-generation
+and research payloads belong to the maintained server and should not be handed back
+to an unmodified private reference runtime.
+
+Disposable PostgreSQL scenarios cover concurrent entry, the last capacity slot,
+leadership and permission checks, owned invitation mail, economic replay, overdue
+research, production deadline schedules, helper generation reuse, recipient-bound
+shared gifts, first-membership mail and outbox recovery. Native 12.06.0 wire commands
+are exercised through server adapters; an interactive mobile playthrough and other
+client release tracks still require device validation.
