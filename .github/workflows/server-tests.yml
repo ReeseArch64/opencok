@@ -41,4 +41,5 @@ jobs:
       - run: bun run --cwd packages/env test
       - run: bun run --cwd apps/server test
       - run: bun run --cwd apps/server test:mutations
+      - run: bun run --cwd apps/server test:timed-mutations
       - run: bun run --cwd apps/server test:integration
