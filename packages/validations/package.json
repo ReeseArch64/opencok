@@ -52,7 +52,8 @@
     "./provisioning": "./src/provisioning.ts",
     "./research": "./src/research.ts",
     "./military": "./src/military.ts",
-    "./alliance": "./src/alliance.ts"
+    "./alliance": "./src/alliance.ts",
+    "./new-expedition": "./src/new-expedition.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

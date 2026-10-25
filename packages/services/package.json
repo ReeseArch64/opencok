@@ -83,7 +83,8 @@
     "./dragon-progression": "./src/dragon-progression.ts",
     "./dragon-talents": "./src/dragon-talents.ts",
     "./world-march-runtime": "./src/world-march-runtime.ts",
-    "./world-publication": "./src/world-publication.ts"
+    "./world-publication": "./src/world-publication.ts",
+    "./new-expedition": "./src/new-expedition.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

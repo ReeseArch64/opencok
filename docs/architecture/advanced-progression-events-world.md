@@ -251,3 +251,21 @@ preferences remain available. Admission, actor transfer and battle results belon
 to the corresponding validated realm combat integration. Synthetic adapter tests
 verify enqueue persistence, stale-assignment rejection and result-consumer
 idempotency; they are not battle-engine acceptance or native arena-play evidence.
+
+Expedition periods now have a PostgreSQL manifest and per-player progress keyed
+by period and stage. Authorized realm coordination installs a bounded, immutable
+schedule with its matched kingdom; player commands cannot install schedules or
+submit scores. Exact saved boundaries select the active stage after recovery.
+The realm currently has no validated cross-kingdom match coordinator, so it does
+not invent an opponent or activate a fighting period at startup.
+
+The local expedition runtime exposes activity info, individual and alliance
+threshold rewards and paginated expedition, tax and distribution history. Reward
+claims check stage, castle range, participation minimum, science prerequisites
+and claim flags inside the player's mutation. Alliance aggregates include only
+the current realm, period and stage. The optional research bonus delivers its
+second reward through native system mail. Training, construction, research and
+gathering supply scores from their validated state transitions with the source
+floating-point bonuses; arbitrary client counters cannot supply scores. Combat
+score producers and cross-kingdom projections still require their validated actor
+integration. Period identities must be issued uniquely by that coordinator.

@@ -117,7 +117,8 @@
     "./local-events": "./src/local-events.ts",
     "./world-march-lifecycle": "./src/world-march-lifecycle.ts",
     "./dragon-progression": "./src/dragon-progression.ts",
-    "./world-march-runtime": "./src/world-march-runtime.ts"
+    "./world-march-runtime": "./src/world-march-runtime.ts",
+    "./new-expedition": "./src/new-expedition.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

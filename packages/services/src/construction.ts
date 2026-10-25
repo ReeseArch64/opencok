@@ -1,3 +1,4 @@
+import { recordExpeditionScore } from "./new-expedition";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { randomInt, randomUUID } from "node:crypto";
@@ -118,6 +119,7 @@ function complete(
   const after = definition(context, completed);
   const addedPower = BigInt(after.power ?? 0) - BigInt(current.power ?? 0);
   context.power(addedPower, addedPower);
+  if (addedPower > 0n) recordExpeditionScore(context, 3, 1, cityInteger(addedPower));
   const previous = history(context),
     earned = BigInt(current.experience ?? 0),
     currentMax = previous.currentMax + earned;
@@ -183,6 +185,7 @@ async function prepare(
     context.write.buildings = [row];
     const power = BigInt(definition(context, row).power ?? 0);
     context.power(power, power);
+    if (power > 0n) recordExpeditionScore(context, 3, 1, cityInteger(power));
     return { response: encode(building(row, context.rules, false, Number(context.now))) };
   }
   if (command === "build.move") {

@@ -22,6 +22,9 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface AdvancedCatalogs {
+  expeditionStages?: Map<string, Rule>;
+  expeditionScores?: Map<string, Rule>;
+  expeditionRewards?: Map<string, Rule>;
   anniversaryWeeks?: Map<string, Rule>;
   anniversaryTasks?: Map<string, Rule>;
   campaignRules?: readonly import("@opencok/contracts/local-campaign").CampaignRule[];

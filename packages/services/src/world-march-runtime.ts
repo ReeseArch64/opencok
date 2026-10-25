@@ -1,3 +1,4 @@
+import { recordExpeditionScore } from "./new-expedition";
 import { worldMarchDetail } from "@opencok/mappings/world-march-runtime";
 import { armySnapshot } from "@opencok/mappings/bootstrap";
 import { randomUUID } from "node:crypto";
@@ -233,6 +234,7 @@ function returnState(context: CityProgressionContext, state: RuntimeMarch, now: 
         Math.trunc(Math.fround(state.collectRate * Math.fround(Number(elapsed) / 1000))),
     ),
   );
+  recordExpeditionScore(context, 1, state.targetResource, amount, now);
   if (target.ownerMarchUUid !== state.id) worldMutationFailure();
   target.resCostValue = cityInteger(num(target, "resCostValue") + amount);
   target.ownerMarchUUid = "";

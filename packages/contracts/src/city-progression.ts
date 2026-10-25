@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  expedition?: import("./new-expedition").ExpeditionState;
   arena?: import("./arena").ArenaState;
   anniversaryStatistics?: { statistics: Row; alliance: Row; times: Row };
   campaignVariables?: readonly Row[];
@@ -115,6 +116,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  expedition?: readonly Row[];
   arena?: import("./arena").ArenaWrite;
   campaignVariables?: readonly Row[];
   lottery?: { record: Row; history?: readonly Row[] };
