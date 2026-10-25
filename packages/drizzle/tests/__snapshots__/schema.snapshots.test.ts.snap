@@ -14396,3 +14396,43 @@ select "id", "issuer", "subject", "disabled", "createdAt" from "opencok_global".
 update "opencok_global"."game_identity" set "id" = $1, "issuer" = $2, "subject" = $3, "disabled" = $4, "createdAt" = $5 where "opencok_global"."game_identity"."id" = $6
 delete from "opencok_global"."game_identity" where "opencok_global"."game_identity"."id" = $1"
 `;
+
+exports[`opencok_kingdom.building_production: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["buildingId","varchar(40)",true,null,null,null]
+column ["ownerId","varchar(40)",true,null,null,null]
+column ["asset","varchar(32)",true,null,null,null]
+column ["settledAt","bigint",true,null,null,null]
+column ["amount","bigint",true,null,null,null]
+column ["remainder","bigint",true,null,null,null]
+column ["rates","varchar(32768)",true,null,null,null]
+primary ["building_production_PRIMARY",["buildingId"]]
+index ["building_production_owner",false,["ownerId"]]
+check ["building_production_bounds","\\"settledAt\\" >= 0 AND \\"amount\\" >= 0 AND \\"remainder\\" >= 0 AND \\"remainder\\" < 3600000000000"]
+insert into "opencok_kingdom"."building_production" ("buildingId", "ownerId", "asset", "settledAt", "amount", "remainder", "rates") values ($1, $2, $3, $4, $5, $6, $7)
+select "buildingId", "ownerId", "asset", "settledAt", "amount", "remainder", "rates" from "opencok_kingdom"."building_production" where "opencok_kingdom"."building_production"."buildingId" = $1
+update "opencok_kingdom"."building_production" set "buildingId" = $1, "ownerId" = $2, "asset" = $3, "settledAt" = $4, "amount" = $5, "remainder" = $6, "rates" = $7 where "opencok_kingdom"."building_production"."buildingId" = $8
+delete from "opencok_kingdom"."building_production" where "opencok_kingdom"."building_production"."buildingId" = $1"
+`;
+
+exports[`opencok_kingdom.timed_activity: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["id","varchar(40)",true,null,null,null]
+column ["ownerId","varchar(40)",true,null,null,null]
+column ["queueId","varchar(40)",true,null,null,null]
+column ["type","integer",true,null,null,null]
+column ["itemId","varchar(255)",true,null,null,null]
+column ["startedAt","bigint",true,null,null,null]
+column ["dueAt","bigint",true,null,null,null]
+column ["version","integer",true,null,null,null]
+column ["status","integer",true,null,null,null]
+primary ["timed_activity_PRIMARY",["id"]]
+index ["timed_activity_running_queue",true,["queueId"],"\\"status\\" = 0"]
+index ["timed_activity_due",false,["status","dueAt"]]
+index ["timed_activity_owner",false,["ownerId"]]
+check ["timed_activity_state","\\"status\\" IN (0, 1, 2) AND \\"version\\" >= 1 AND \\"dueAt\\" >= \\"startedAt\\""]
+insert into "opencok_kingdom"."timed_activity" ("id", "ownerId", "queueId", "type", "itemId", "startedAt", "dueAt", "version", "status") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "id", "ownerId", "queueId", "type", "itemId", "startedAt", "dueAt", "version", "status" from "opencok_kingdom"."timed_activity" where "opencok_kingdom"."timed_activity"."id" = $1
+update "opencok_kingdom"."timed_activity" set "id" = $1, "ownerId" = $2, "queueId" = $3, "type" = $4, "itemId" = $5, "startedAt" = $6, "dueAt" = $7, "version" = $8, "status" = $9 where "opencok_kingdom"."timed_activity"."id" = $10
+delete from "opencok_kingdom"."timed_activity" where "opencok_kingdom"."timed_activity"."id" = $1"
+`;

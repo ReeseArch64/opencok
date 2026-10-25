@@ -68,6 +68,9 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   }
   if (spec.indexes.some((key) => key.name === "character_provisioning_PRIMARY"))
     row.state = variant % 2;
+  if (spec.indexes.some((key) => key.name === "timed_activity_PRIMARY")) row.status = 0;
+  if (spec.indexes.some((key) => key.name === "building_production_PRIMARY"))
+    row.remainder = BigInt(variant);
   if (spec.indexes.some((key) => key.name === "economy_posting_PRIMARY"))
     row.after = (row.before as bigint) + (row.delta as bigint);
   return row;
