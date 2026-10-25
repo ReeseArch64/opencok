@@ -20,9 +20,10 @@ account directory to select each player's authoritative kingdom database.
 | Realm           | `GAME_CHAT_SESSION_URL=http://chat.internal:8083/external/session` | Trusted internal session issuer                                |
 | API             | `API_CHAT_URL=http://chat.internal:8083`                           | Origin for the three public metadata routes                    |
 
-Use deployment-owned URLs and secrets. Start one Chat instance with
-`bun run --cwd apps/chat start`, then configure the realms and API. Chat is hosted
-separately; the default Compose stack does not automatically launch it. Its
+The local Compose stack starts one Chat instance and configures the realms and API
+to reach it over service DNS. It publishes port 8083 and accepts `CHAT_WEBSOCKET_URL`
+as the advertised client address. For separate deployments, use deployment-owned
+URLs and secrets and start Chat with `bun run --cwd apps/chat start`. Its
 WebSocket endpoint must be directly reachable by the client. The public API
 proxies metadata only; it never forwards `/external/session`, internal mutation
 routes or WebSocket traffic. Restrict the Chat session/internal routes to trusted
