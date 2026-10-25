@@ -74,7 +74,8 @@
     "./alchemist": "./src/alchemist.ts",
     "./daily-investment": "./src/daily-investment.ts",
     "./shipping-investment": "./src/shipping-investment.ts",
-    "./seven-day-cycle": "./src/seven-day-cycle.ts"
+    "./seven-day-cycle": "./src/seven-day-cycle.ts",
+    "./ordinary-box": "./src/ordinary-box.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

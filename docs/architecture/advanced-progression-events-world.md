@@ -428,3 +428,25 @@ rare-result history survive reconnects; expired deadlines project zero in the
 native draw table. State, history, inventory and receipts commit together. The
 weighted selector uses nonoverlapping bands to avoid the source's inclusive-boundary
 bias. Existing cycle, draw and history tables are reused without a new migration.
+
+Ordinary box previews pin the selected pay-reward pool and special flag in the
+existing 128-word mixed-info encoding. Opening consumes the owned box through the
+inventory planner and consumes its key or explicitly enabled game-gold fee inside
+the same transaction. The saved pool is awarded once, the configured guarantee
+counter advances, any threshold reward is granted, and the next pool is pinned.
+Repeated previews do not reroll the saved pool; a request cannot turn a preview
+into an opening. An opening without a prior preview first pins its pool in the
+same transaction, so it cannot consume a box without awarding its configured pool. Maintained box items do not support bulk use.
+
+Bit-field updates preserve unrelated signed words and adjacent counters. Empty
+maintained bootstrap encodings, including an empty object, initialize to zero;
+unknown nonempty encodings reject instead of being discarded. Catalog conditions,
+VIP score, realm age and the lucky-day box effect select the eligible weighted
+pools. Native previews retain raw item/count strings and reward-preview fields.
+
+Migration `0022_ordinary_box_gold_mode.sql` adds one bounded mode field to mixed
+info. Gold mode is explicit, checked again against its feature gate on opening,
+and reset by login or a new preview. Login resets only that mode without parsing
+or rewriting unrelated mixed-info data. Back up mixed-info rows, inventory,
+receipts and ledger before deployment. Rollback must retain cached pools and
+counters; older binaries can ignore the additive mode field, whose default is zero.

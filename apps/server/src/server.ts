@@ -1,3 +1,4 @@
+import { createOrdinaryBoxDomain } from "@opencok/services/ordinary-box";
 import { createSevenDayCycleDomain } from "@opencok/services/seven-day-cycle";
 import { createShippingInvestmentDomain } from "@opencok/services/shipping-investment";
 import { dailyInvestmentDomain } from "@opencok/services/daily-investment";
@@ -439,6 +440,7 @@ export const RealmDependenciesLive = Layer.effect(
         dailyInvestmentDomain,
         createShippingInvestmentDomain(),
         createSevenDayCycleDomain(),
+        createOrdinaryBoxDomain(),
         createLuckyDayDomain(),
         castleLevelEventDomain,
         lotteryDomain,
@@ -1062,9 +1064,11 @@ export const RealmDependenciesLive = Layer.effect(
                 await city.command(
                   tx,
                   owner,
-                  ["37", "40"].includes(rules.goods.get(itemId)?.type ?? "")
-                    ? "dragon.item"
-                    : "effect.item",
+                  rules.goods.get(itemId)?.type === "36"
+                    ? "ordinary.box.open"
+                    : ["37", "40"].includes(rules.goods.get(itemId)?.type ?? "")
+                      ? "dragon.item"
+                      : "effect.item",
                   encode({ itemId: sfs.string(itemId), count: sfs.int(count) }),
                   now,
                   economy,
