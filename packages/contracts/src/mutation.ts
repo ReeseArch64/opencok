@@ -1,4 +1,5 @@
 export interface MutationCommand {
+  participants?: readonly string[];
   owner: string;
   requestId: string;
   command: string;
