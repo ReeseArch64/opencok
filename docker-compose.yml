@@ -185,16 +185,8 @@ services:
     security_opt: [no-new-privileges:true]
     entrypoint: [sh, /usr/local/bin/opencok-cdn-init.sh]
     volumes:
-      - type: bind
-        source: ./infra/storage/init-cdn.sh
-        target: /usr/local/bin/opencok-cdn-init.sh
-        read_only: true
-        bind: { create_host_path: false }
-      - type: bind
-        source: ./data/cdn/data
-        target: /source
-        read_only: true
-        bind: { create_host_path: false }
+      - ./infra/storage/init-cdn.sh:/usr/local/bin/opencok-cdn-init.sh:ro
+      - ./data/cdn/data:/source:ro
     networks: [opencok-internal-network]
     depends_on:
       minio:

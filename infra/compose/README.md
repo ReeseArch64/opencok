@@ -42,8 +42,8 @@ remain ignored and outside runtime images.
 
 The CDN source is `data/cdn/data`; see the [CDN guide](../storage/README.md) for
 its two extracted host trees. These local inputs are not supplied by the public
-repository. Missing input directories fail the mount instead of being silently
-created. Obtain the authorized inputs before starting a new checkout.
+repository. The source must contain both extracted host trees for the import to
+succeed. Obtain the authorized inputs before starting a new checkout.
 
 ```sh
 docker compose --profile dev config --quiet
