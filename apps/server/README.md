@@ -4040,3 +4040,9 @@ postings, an outbox primitive and runtime realm transaction fencing. Reconnect
 resource settlement uses the common accounting records. See the
 [foundation guide](MUTATION_FOUNDATION.md) for the Java audit, integration contract,
 activation, recovery and boundaries for future domain migrations.
+
+## Inventory and simple items
+
+Topic 10 adds atomic purchases, consumption, internal grants and composition on the
+persistent mutation foundation. See the [inventory guide](INVENTORY.md) for supported
+commands and effects, operation identity, domain exclusions and recovery evidence.
