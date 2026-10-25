@@ -76,7 +76,8 @@
     "./trade": "./src/trade.ts",
     "./provisioning": "./src/provisioning.ts",
     "./character-provisioning": "./src/character-provisioning.ts",
-    "./timed-activity": "./src/timed-activity.ts"
+    "./timed-activity": "./src/timed-activity.ts",
+    "./production": "./src/production.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
@@ -85,6 +86,7 @@
     "@opencok/errors": "workspace:*",
     "@opencok/rules": "workspace:*",
     "drizzle-orm": "0.45.4",
-    "@opencok/ledger": "workspace:*"
+    "@opencok/ledger": "workspace:*",
+    "@opencok/mappings": "workspace:*"
   }
 }

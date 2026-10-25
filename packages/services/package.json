@@ -52,7 +52,9 @@
     "./shops": "./src/shops.ts",
     "./trade": "./src/trade.ts",
     "./provisioning": "./src/provisioning.ts",
-    "./timed-activity": "./src/timed-activity.ts"
+    "./timed-activity": "./src/timed-activity.ts",
+    "./production": "./src/production.ts",
+    "./production-context": "./src/production-context.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
