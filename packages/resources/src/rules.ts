@@ -95,6 +95,7 @@ function indexRules(records: Rule[], name: string): Map<string, Rule> {
   const map = new Map<string, Rule>();
   const replaceDuplicates = [
     "goods",
+    "shop_new",
     "science",
     "equipment",
     "status",
@@ -381,6 +382,8 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     { fieldMonsters, armies, neutralResources, barbarians, allianceBuildings },
     { militaryGroups, heroEvents },
     await optional(GameplayCatalog.Material),
+    await optional(GameplayCatalog.ShopNew),
+    await optional(GameplayCatalog.Trade),
   );
 }
 

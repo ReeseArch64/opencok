@@ -43,7 +43,8 @@
     "./reconnect-marches": "./src/reconnect-marches.ts",
     "./shared-user": "./src/shared-user.ts",
     "./inventory": "./src/inventory.ts",
-    "./mail-rewards": "./src/mail-rewards.ts"
+    "./mail-rewards": "./src/mail-rewards.ts",
+    "./shops": "./src/shops.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
