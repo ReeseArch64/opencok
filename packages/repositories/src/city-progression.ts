@@ -1,3 +1,4 @@
+import { readCivilizationCastle, writeCivilizationCastle } from "./civilization-castle";
 import { readWorldMutationState, writeWorldMutation } from "./world-march-runtime";
 import { readDragonProgression, writeDragonProgression } from "./dragon-progression";
 import { activity_minstrel } from "@opencok/drizzle/schema/opencok_kingdom/activity_minstrel";
@@ -120,6 +121,9 @@ export function createCityProgressionStore(
         profile,
         resource,
         civilizationSciences,
+        ...(command === "civilizationCastle"
+          ? await readCivilizationCastle(tx, owner, request)
+          : {}),
         worldMutation:
           command?.startsWith("world.") || command === "totem" || command === "civilizationCastle"
             ? await readWorldMutationState(tx, owner, request, mapSize, command)
@@ -199,6 +203,8 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.civilizationCastle)
+          await writeCivilizationCastle(tx, owner, write.civilizationCastle);
         if (write.worldMutation) await writeWorldMutation(tx, owner, write.worldMutation);
         if (write.dragons) await writeDragonProgression(tx, owner, write.dragons);
         await writePlayerEffects(tx, owner, write);

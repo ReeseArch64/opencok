@@ -569,9 +569,11 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
   };
   return {
     balance(asset) {
-      return asset === "gold"
-        ? ledger.total()
-        : (ledger.resources[asset] ?? long(ledger.state.resource, asset));
+      return asset === "civilizationSorce"
+        ? ledger.balance(asset)
+        : asset === "gold"
+          ? ledger.total()
+          : (ledger.resources[asset] ?? long(ledger.state.resource, asset));
     },
     ownedItem(uuid) {
       const item = ledger.own(uuid);
@@ -587,6 +589,12 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
       return ledger.items
         .filter((item) => item.itemId === itemId && item.value === 0 && ledger.valid(item))
         .reduce((sum, item) => sum + item.count, 0);
+    },
+    civilizationScore(delta) {
+      const before = ledger.balance("civilizationSorce"),
+        after = valid(before + delta);
+      ledger.profile.civilizationSorce = after;
+      ledger.post("profile.civilizationSorce", before, after, "activity.civilization");
     },
     winPoints(delta) {
       const before = ledger.assets.winPoint ?? long(ledger.state.assets ?? {}, "winPoint"),

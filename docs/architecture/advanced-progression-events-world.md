@@ -152,3 +152,16 @@ hatching, repeated claims and repeated unlocks reject. No schema migration is
 needed for these dragon workflows. Retain dragon rows, receipts and ledger records
 when rolling back, and recover pending travel from its stored reward rather than
 rerolling it.
+
+The civilization castle runtime now persists the native `civilizationCastle`
+info, placement, construction acceleration, settlement, movement and removal
+commands. Placement requires the maintained civilization building, reserves four
+free map tiles and debits resources and civilization score in the same fenced
+inventory transaction. Production resumes from the saved construction deadline,
+advances by whole configured intervals and preserves the fractional interval
+across reconnects. Settlement credits the configured crystal item once per
+operation receipt and enforces its cooldown. Movement consumes the configured
+item only after validating the entire destination footprint; removal credits the
+remaining whole crystals and frees the owned tiles. Map invalidations use the
+world interest relay. Garrison and robbery require their corresponding combat
+march engine; occupied legacy garrisons are rejected before changing their state.

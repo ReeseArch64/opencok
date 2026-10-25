@@ -33,6 +33,7 @@ import type { InventoryState, InventoryPlan } from "./inventory";
 export interface ActivityEconomy {
   gold(delta: bigint): void;
   winPoints?(delta: bigint): void;
+  civilizationScore?(delta: bigint): void;
   balance?(asset: string): bigint;
   quantity?(itemId: string): number;
   itemState?(itemId: string): import("./inventory").InventoryItem | undefined;

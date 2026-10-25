@@ -80,6 +80,8 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  civilizationCastle?: Row;
+  civilizationCastleTarget?: { castle: Row; profile: Row };
   worldMutation?: import("./world-march-runtime").WorldMutationState;
   dragons?: DragonProgressionState;
   minstrel?: Row;
@@ -108,6 +110,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  civilizationCastle?: Row;
   worldMutation?: import("./world-march-runtime").WorldMutationWrite;
   dragons?: DragonProgressionWrite;
   minstrel?: Row;

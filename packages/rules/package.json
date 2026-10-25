@@ -109,6 +109,7 @@
     "./alliance": "./src/alliance.ts",
     "./alliance-science": "./src/alliance-science.ts",
     "./civilization-science": "./src/civilization-science.ts",
+    "./civilization-castle": "./src/civilization-castle.ts",
     "./local-events": "./src/local-events.ts",
     "./world-march-lifecycle": "./src/world-march-lifecycle.ts",
     "./dragon-progression": "./src/dragon-progression.ts",

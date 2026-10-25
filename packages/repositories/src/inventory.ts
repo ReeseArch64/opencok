@@ -140,6 +140,7 @@ export async function executeInventoryTransaction(
     else await tx.insert(user_item).values({ ...item, ownerId: owner });
   }
   const profileKeys = [
+    "civilizationSorce",
     "gold",
     "paidGold",
     "paidSpecialGold",

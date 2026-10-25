@@ -1,4 +1,5 @@
 import { publishWorldMutation } from "@opencok/services/world-publication";
+import { createCivilizationCastleDomain } from "@opencok/services/civilization-castle";
 import { createWorldMarchDomain } from "@opencok/services/world-march-runtime";
 import {
   dueWorldMarches,
@@ -366,6 +367,7 @@ export const RealmDependenciesLive = Layer.effect(
         dragonProgressionDomain,
         dragonTalentsDomain,
         createWorldMarchDomain(config.mapSize),
+        createCivilizationCastleDomain(config.mapSize),
         minstrelDomain,
         trainingDomain,
         hospitalDomain,
@@ -533,6 +535,7 @@ export const RealmDependenciesLive = Layer.effect(
       for (const command of [
         "world.march",
         "world.march.retreat",
+        "civilizationCastle",
         "world.march.spd",
         "world.tick",
         "world.mv",
