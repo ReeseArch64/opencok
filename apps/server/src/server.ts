@@ -431,6 +431,7 @@ export const RealmDependenciesLive = Layer.effect(
               createAlliancePublicationReader(db.kingdom.db, authority),
               event.payload,
               (owner, command, body) => notifications.publish(owner, command, body),
+              rules,
             ),
           Date.now,
           "alliance.changed",
