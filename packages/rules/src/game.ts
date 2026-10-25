@@ -97,6 +97,7 @@ export class Rules {
     readonly mail: Map<string, Rule> = new Map(),
     readonly world: WorldCatalogs = {},
     readonly ranking: RankingCatalogs = {},
+    readonly materials: Map<string, Rule> = new Map(),
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): Rule {
     if (

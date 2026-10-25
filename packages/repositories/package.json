@@ -69,7 +69,8 @@
     "./cn1-session": "./src/cn1-session.ts",
     "./avatar-moderation": "./src/avatar-moderation.ts",
     "./mutation": "./src/mutation.ts",
-    "./economy-mutation": "./src/economy-mutation.ts"
+    "./economy-mutation": "./src/economy-mutation.ts",
+    "./inventory": "./src/inventory.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

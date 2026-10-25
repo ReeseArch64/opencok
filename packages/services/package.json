@@ -46,7 +46,8 @@
     "./mail-system": "./src/mail-system.ts",
     "./battle-ranking": "./src/battle-ranking.ts",
     "./nickname-alliance": "./src/nickname-alliance.ts",
-    "./avatar-moderation": "./src/avatar-moderation.ts"
+    "./avatar-moderation": "./src/avatar-moderation.ts",
+    "./inventory": "./src/inventory.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

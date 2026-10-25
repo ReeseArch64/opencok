@@ -76,7 +76,9 @@
     "./chat-mailbox": "./src/chat-mailbox.ts",
     "./shared-user": "./src/shared-user.ts",
     "./responses/shared-user": "./src/responses/shared-user.ts",
-    "./mutation": "./src/mutation.ts"
+    "./mutation": "./src/mutation.ts",
+    "./inventory": "./src/inventory.ts",
+    "./responses/inventory": "./src/responses/inventory.ts"
   },
   "dependencies": {}
 }
