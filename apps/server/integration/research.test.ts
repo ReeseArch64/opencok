@@ -88,3 +88,32 @@ test("research enforces trees, persists effects and shares queue recovery, accel
     await h.close();
   }
 }, 120000);
+
+test("overdue research changes production at its saved deadline before later settlement", async () => {
+  const h = await cityHarness([researchDomain]);
+  try {
+    await h.command("science.research", { itemId: sfs.string("700100"), gold: sfs.int(0) });
+    const activity = await h.active(6);
+    h.clock.now = Number(activity.dueAt) + 3600000;
+    await h.finish(6);
+    const checkpoint = (
+      await h.db.db
+        .select()
+        .from(building_production)
+        .where(eq(building_production.buildingId, "owner-413000"))
+    )[0]!;
+    expect(checkpoint.settledAt).toBe(activity.dueAt);
+    expect(checkpoint.amount).toBe(4n);
+    await h.production.command("owner", "production.settle", {});
+    const after = (
+      await h.db.db
+        .select()
+        .from(building_production)
+        .where(eq(building_production.buildingId, "owner-413000"))
+    )[0]!;
+    expect(after.amount).toBe(128n);
+    expect(after.settledAt).toBe(BigInt(h.clock.now));
+  } finally {
+    await h.close();
+  }
+}, 120000);

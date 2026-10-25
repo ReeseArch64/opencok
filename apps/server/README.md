@@ -4060,9 +4060,11 @@ persistent NPC offers, shared stock migration and retry semantics. It records
 specialized currencies/effects that remain unsupported and the synthetic protocol
 validation boundary.
 
-## Construction and city progression
+## Construction, research and military progression
 
 The [city progression runbook](../../docs/architecture/city-progression.md) describes
-construction commands, cost and star rules, transactional queue completion,
+construction, research, training, hospital and fortification commands, cost/star rules, transactional queue completion,
 production boundaries, legacy import, migration 0016 and rollback requirements.
-Synthetic PostgreSQL coverage is in `integration/construction.test.ts`.
+Synthetic PostgreSQL coverage is in `integration/construction.test.ts`,
+`integration/research.test.ts` and `integration/military.test.ts`;
+`integration/provisioning.test.ts` also exercises live SFS progression commands.

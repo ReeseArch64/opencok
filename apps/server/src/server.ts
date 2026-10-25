@@ -1,3 +1,7 @@
+import { cityQueueCommands } from "@opencok/rules/city-command";
+import { trainingDomain } from "@opencok/services/training";
+import { hospitalDomain } from "@opencok/services/hospital";
+import { fortificationDomain } from "@opencok/services/fortifications";
 import { researchDomain } from "@opencok/services/research";
 import { createHash } from "node:crypto";
 import { createCityProgressionStore } from "@opencok/repositories/city-progression";
@@ -9,6 +13,7 @@ import {
   createActivityExecutor,
   dueActivities,
   unregisteredActivities,
+  activityTransitionInstant,
   type ActivityDomain,
 } from "@opencok/repositories/timed-activity";
 import { createProductionExecutor } from "@opencok/repositories/production";
@@ -17,7 +22,7 @@ import { persistReconnectProgress } from "@opencok/repositories/reconnect-write"
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { ProductionService } from "@opencok/services/production";
 import { productionContext } from "@opencok/services/production-context";
-import { sfs } from "@opencok/messages/sfs";
+import { sfs, decode, str } from "@opencok/messages/sfs";
 import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
 import { CharacterProvisioningService } from "@opencok/services/provisioning";
 import { CharacterProvisioningController } from "@opencok/controllers/provisioning";
@@ -322,15 +327,25 @@ export const RealmDependenciesLive = Layer.effect(
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary),
-      [constructionDomain, researchDomain],
+      [constructionDomain, researchDomain, trainingDomain, hospitalDomain, fortificationDomain],
       rules,
       economyEffects,
     );
     const activityDomains: ReadonlyMap<number, ActivityDomain> = city.domains;
     const activities = new TimedActivityService(
       createActivityExecutor(db.kingdom.db, authority, activityDomains, Date.now, {
-        before: async (tx, owner, now) => {
-          await productionPreparation.prepare(tx, owner, now);
+        before: async (tx, owner, now, command) => {
+          if (command.command === "activity.restore") return now;
+          const transition =
+            ["queue.finish", "queue.ccd"].includes(command.command) ||
+            cityQueueCommands[command.command]?.action === "queue.finish";
+          const params = decode(Buffer.from(command.request));
+          const queueId = transition
+            ? str(params, command.command === "queue.ccd" ? "qUUID" : "uuid")
+            : undefined;
+          const at = await activityTransitionInstant(tx, owner, queueId, now);
+          await productionPreparation.prepare(tx, owner, at);
+          return at;
         },
         command: city.command,
       }),
@@ -344,7 +359,7 @@ export const RealmDependenciesLive = Layer.effect(
     );
     let importCursor: string | undefined;
     let recoveryCursor: { dueAt: bigint; id: string } | undefined;
-    const recoverActivities = async (owner?: string) => {
+    const recoverActivities = async (owner?: string, stopQueue?: string) => {
       authority.assertReady();
       const pending = await unregisteredActivities(
         db.kingdom.db,
@@ -390,6 +405,7 @@ export const RealmDependenciesLive = Layer.effect(
       );
       if (!owner) recoveryCursor = due.length === 64 ? due.at(-1) : undefined;
       for (const activity of due) {
+        if (activity.queueId === stopQueue) break;
         try {
           await activities.command(activity.ownerId, "queue.finish", {
             uuid: sfs.string(activity.queueId),
@@ -460,10 +476,21 @@ export const RealmDependenciesLive = Layer.effect(
       coordination,
       game: new GameController(
         new GameService(db, rules, config, Date.now, {
-          timed: (owner, command, params) => activities.command(owner, command, params),
-          production: (owner, command, params) => production.command(owner, command, params),
-          cityProgression: (owner, command, params) =>
-            activities.domainCommand(owner, command, params),
+          timed: async (owner, command, params) => {
+            const target = ["queue.open", "queue.rent"].includes(command)
+              ? undefined
+              : str(params, command === "queue.ccd" ? "qUUID" : "uuid");
+            await recoverActivities(owner, target);
+            return activities.command(owner, command, params);
+          },
+          production: async (owner, command, params) => {
+            await recoverActivities(owner);
+            return production.command(owner, command, params);
+          },
+          cityProgression: async (owner, command, params) => {
+            await recoverActivities(owner);
+            return activities.domainCommand(owner, command, params);
+          },
           reconcileTimed: async (owner) => {
             await recoverActivities(owner);
             await production.command(owner, "production.settle", {});

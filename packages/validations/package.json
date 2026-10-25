@@ -47,7 +47,8 @@
     "./response": "./src/response.ts",
     "./shared-user": "./src/shared-user.ts",
     "./provisioning": "./src/provisioning.ts",
-    "./research": "./src/research.ts"
+    "./research": "./src/research.ts",
+    "./military": "./src/military.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

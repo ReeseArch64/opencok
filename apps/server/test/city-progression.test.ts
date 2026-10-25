@@ -56,3 +56,20 @@ test("cancellation refunds only half of actual paid balances after bound-resourc
   expect(balances.get("wood")).toBe(975n);
   expect(balances.get("gold")).toBe(100000n);
 });
+
+test("glory equipment prerequisites count qualifying suit pieces without admitting ordinary gold gear", async () => {
+  const { loadRules } = await import("@opencok/resources/rules");
+  const { cityFixture } = await import("./fixtures/city-progression");
+  const { cityUnlockCount } = await import("@opencok/rules/city-progression");
+  const rules = await loadRules();
+  rules.power.equipment!.set("synthetic-gold", { color: "5" });
+  rules.power.equipment!.set("synthetic-suit", { color: "5", suit_id: "1" });
+  rules.power.equipment!.set("synthetic-higher-suit", { color: "6", suit_id: "1" });
+  const { state } = cityFixture(rules);
+  state.equipment = [
+    { itemId: "synthetic-gold" },
+    { itemId: "synthetic-suit" },
+    { itemId: "synthetic-higher-suit" },
+  ];
+  expect(cityUnlockCount(state, rules, 5)).toBe(2n);
+});

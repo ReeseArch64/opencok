@@ -254,3 +254,36 @@ test("legacy occupied construction is restored without recharging and malformed 
     await h.close();
   }
 }, 120000);
+
+test("overdue construction installs the new rate at its deadline and retains the preceding output", async () => {
+  const h = await cityHarness();
+  try {
+    const started = BigInt(h.clock.now);
+    await h.command("build.upgrade", { uuid: sfs.string("owner-413000"), gold: sfs.int(0) });
+    const activity = await h.active(0);
+    h.clock.now = Number(activity.dueAt) + 3600000;
+    await h.finish(0);
+    const checkpoint = (
+      await h.db.db
+        .select()
+        .from(building_production)
+        .where(eq(building_production.buildingId, "owner-413000"))
+    )[0]!;
+    expect(checkpoint.settledAt).toBe(activity.dueAt);
+    const { decodeProductionRates } = await import("@opencok/mappings/production");
+    const next = decodeProductionRates(checkpoint.rates)[0]!;
+    const expected =
+      ((activity.dueAt - started) * 120000000n + 3600000n * next.perHour) / 3600000000000n;
+    await h.production.command("owner", "production.settle", {});
+    expect(
+      (
+        await h.db.db
+          .select()
+          .from(building_production)
+          .where(eq(building_production.buildingId, "owner-413000"))
+      )[0]!.amount,
+    ).toBe(expected);
+  } finally {
+    await h.close();
+  }
+}, 120000);

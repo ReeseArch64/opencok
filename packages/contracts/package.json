@@ -86,7 +86,8 @@
     "./provisioning": "./src/provisioning.ts",
     "./timed-activity": "./src/timed-activity.ts",
     "./city-progression": "./src/city-progression.ts",
-    "./responses/research": "./src/responses/research.ts"
+    "./responses/research": "./src/responses/research.ts",
+    "./responses/military": "./src/responses/military.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"

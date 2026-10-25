@@ -66,6 +66,7 @@ export interface ReconnectProgressState extends ReconnectBaseState {
   glory: Row | undefined;
   weakness: readonly Row[];
   walls: readonly Row[];
+  hospital?: readonly Row[];
   knight: Row | undefined;
   items: readonly Row[];
   newGenerals: WorldResourceOwnerSnapshot["newGenerals"];

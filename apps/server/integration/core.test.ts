@@ -420,7 +420,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       ).toBe(6);
 
       for (const command of ["build.create", "build.upgrade"])
-        expect((await client.command(command)).errorCode?.value).toBe("E100179");
+        expect((await client.command(command)).errorCode?.value).toBe("E000000");
       expect((await client.command("combat.attack")).errorCode?.value).toBe("102192");
       const map = await client.command("world.get", {
         x: sfs.int(10),

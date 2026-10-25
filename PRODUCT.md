@@ -135,9 +135,10 @@ OpenCoK includes or coordinates the following product areas:
 ### Timed activities and city production
 
 The common queue mechanism owns persistent deadlines and lifecycle transitions.
-Construction, research, troops and other domain-specific completion effects are
-delivered with their own systems. Unavailable domains must preserve pending state
-and reject unsupported transitions. Ordinary city production accrues into a capped
+Construction, basic research, training, healing and fortification domains apply
+their costs and completion effects through that mechanism. Other domain-specific
+effects are delivered with their own systems. Unavailable domains must preserve
+pending state and reject unsupported transitions. Ordinary city production accrues into a capped
 uncollected buffer; collection credits the wallet. Rate changes preserve output
 already earned, and repeated settlement preserves fractional output.
 

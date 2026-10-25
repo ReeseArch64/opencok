@@ -1,7 +1,9 @@
+import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
+import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { randomUUID } from "node:crypto";
 import { startServer } from "../src/server";
 import { Client } from "./client";
-import { fields, str } from "@opencok/messages/sfs";
+import { fields, str, sfs } from "@opencok/messages/sfs";
 import { expect, test } from "bun:test";
 import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
@@ -374,6 +376,72 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
     expect(fields(data.resource).wood?.value).toBe(100000n);
     expect(fields(data.resource).food?.value).toBe(100000n);
     expect((await client.command("build.info")).building?.value).toHaveLength(11);
+    const built = await client.command("build.create", {
+      itemId: sfs.string("413000"),
+      pos: sfs.int(20),
+      gold: sfs.int(1),
+      operationId: sfs.string(randomUUID()),
+    });
+    expect(built.level?.value).toBe(1);
+    const trained = await client.command("army.add", {
+      id: sfs.string("107000"),
+      num: sfs.int(1),
+      gold: sfs.bool(false),
+      operationId: sfs.string(randomUUID()),
+    });
+    const trainingQueue = fields(trained.queue);
+    await client.command("queue.ccd", {
+      qUUID: trainingQueue.uuid!,
+      activityId: trainingQueue.activityId!,
+      isGold: sfs.int(1),
+      operationId: sfs.string(randomUUID()),
+    });
+    expect(
+      (await realm.db.select().from(user_army).where(eq(user_army.uid, second.gameUid)))[0]!.free,
+    ).toBe(1);
+    await realm.db
+      .insert(user_hospital)
+      .values({ uid: second.gameUid, armyId: "107000", dead: 5, heal: 0 });
+    const cured = await client.command("hospital.cd", {
+      "107000": sfs.int(3),
+      operationId: sfs.string(randomUUID()),
+    });
+    expect(cured.cure?.value).toBe(3);
+    const dismissed = await client.command("army.fire", {
+      id: sfs.string("107000"),
+      num: sfs.int(1),
+      operationId: sfs.string(randomUUID()),
+    });
+    expect(dismissed.free?.value).toBe(3);
+    const technology = await client.command("science.data.init");
+    expect((technology.science!.value as unknown[]).length).toBeGreaterThan(100);
+    const military = await client.command("login.other", { army: sfs.int(1) });
+    expect((military.army!.value as unknown[]).length).toBeGreaterThan(10);
+    expect((military.hospital!.value as unknown[]).length).toBe(1);
+    client.close();
+    client = new Client(runtime.port);
+    await client.handshake();
+    expect(
+      (
+        await client.login(
+          "synthetic-login",
+          second.gameUid,
+          "second",
+          "12.06.0",
+          String(Date.now()),
+          "Google",
+        )
+      ).zn?.value,
+    ).toBe("COK1");
+    const reconnected = fields(fields((await client.next()).p).p);
+    expect(
+      fields((reconnected.army!.value as ReturnType<typeof sfs.object>[])[0]).free?.value,
+    ).toBe(3);
+    expect(
+      fields((reconnected.hospital!.value as ReturnType<typeof sfs.object>[])[0]).dead?.value,
+    ).toBe(2);
+    expect((await client.command("build.info")).building?.value).toHaveLength(12);
+
     client.close();
     client = undefined;
     await runtime.close();

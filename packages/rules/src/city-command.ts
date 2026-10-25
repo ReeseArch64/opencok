@@ -15,4 +15,11 @@ export const cityQueueCommands: Readonly<
     string,
     { action: "queue.finish" | "queue.cancel"; types: readonly number[]; target?: string }
   >
-> = { "science.upgrade": { action: "queue.finish", types: [6], target: "itemId" } };
+> = {
+  "science.upgrade": { action: "queue.finish", types: [6], target: "itemId" },
+  "army.complete": { action: "queue.finish", types: [1, 8, 9, 10, 17], target: "id" },
+  "hospital.cure.done": { action: "queue.finish", types: [3] },
+  "hospital.cancel": { action: "queue.cancel", types: [3] },
+  "fort.build.done": { action: "queue.finish", types: [2], target: "id" },
+  "fort.cancel": { action: "queue.cancel", types: [2], target: "id" },
+};

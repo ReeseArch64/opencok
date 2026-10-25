@@ -1,3 +1,5 @@
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 import { newGeneralPrestigeLevel } from "./new-general-prestige";
 import type {
   CityProgressionState,
@@ -11,33 +13,35 @@ export const cityAssets = ["wood", "stone", "iron", "food", "silver"] as const;
 export type CityAsset = (typeof cityAssets)[number];
 export type CityEffect = (id: number) => number;
 export const progressionEffectIds = [
-  66, 67, 68, 69, 80, 88, 108, 113, 114, 115, 116, 121, 131, 180, 181, 301, 302, 303, 304, 453, 454,
-  751, 752, 753, 754, 755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 772, 773, 774, 852, 2078,
-  2143, 2144, 2145, 2146, 2147, 2148, 2149, 2150, 2151, 2152, 2153, 2154, 2155, 2190, 2191, 2192,
+  57, 66, 67, 68, 69, 73, 80, 88, 108, 113, 114, 115, 116, 121, 131, 180, 181, 301, 302, 303, 304,
+  453, 454, 751, 752, 753, 754, 755, 756, 757, 758, 759, 760, 761, 762, 763, 764, 772, 773, 774,
+  852, 2078, 2143, 2144, 2145, 2146, 2147, 2148, 2149, 2150, 2151, 2152, 2153, 2154, 2155, 2190,
+  2191, 2192,
 ] as const;
 export type ProgressionEffectId = (typeof progressionEffectIds)[number];
 
 export function cityInteger(value: unknown, minimum = 0, maximum = 2147483647): number {
-  if (!/^[0-9]+$/.test(String(value))) throw new Error("Invalid city integer");
+  if (!/^[0-9]+$/.test(String(value))) throw new GameError(errors.invalid, "city_progression");
   const result = Number(value);
   if (!Number.isSafeInteger(result) || result < minimum || result > maximum)
-    throw new Error("City integer out of range");
+    throw new GameError(errors.invalid, "city_progression");
   return result;
 }
 export function cityAmount(value: unknown): bigint {
-  if (!/^[0-9]+$/.test(String(value))) throw new Error("Invalid city amount");
+  if (!/^[0-9]+$/.test(String(value))) throw new GameError(errors.invalid, "city_progression");
   const result = BigInt(String(value));
-  if (result > 9223372036854775807n) throw new Error("City amount overflow");
+  if (result > 9223372036854775807n) throw new GameError(errors.invalid, "city_progression");
   return result;
 }
 export function reducedCityCost(value: bigint, ...reductions: number[]): bigint {
   let result = Number(value);
-  if (!Number.isSafeInteger(result)) throw new Error("City cost exceeds calculation bound");
+  if (!Number.isSafeInteger(result)) throw new GameError(errors.invalid, "city_progression");
   for (const reduction of reductions) {
-    if (!Number.isFinite(reduction)) throw new Error("Invalid city cost effect");
+    if (!Number.isFinite(reduction)) throw new GameError(errors.invalid, "city_progression");
     result *= Math.max(0, 1 - reduction / 100);
   }
-  if (!Number.isSafeInteger(Math.trunc(result))) throw new Error("City cost overflow");
+  if (!Number.isSafeInteger(Math.trunc(result)))
+    throw new GameError(errors.invalid, "city_progression");
   return BigInt(Math.trunc(result));
 }
 export function cityDuration(seconds: number, speed: number, reductionSeconds = 0): bigint {
@@ -47,32 +51,16 @@ export function cityDuration(seconds: number, speed: number, reductionSeconds = 
     speed <= -100 ||
     reductionSeconds < 0
   )
-    throw new Error("Invalid city duration");
+    throw new GameError(errors.invalid, "city_progression");
   const millis = Math.max(
     3000,
     Math.trunc((seconds * 1000) / (1 + speed / 100) - reductionSeconds * 1000),
   );
-  if (!Number.isSafeInteger(millis)) throw new Error("City duration overflow");
+  if (!Number.isSafeInteger(millis)) throw new GameError(errors.invalid, "city_progression");
   return BigInt(millis);
 }
 export function cityLevel(row: Row) {
   return num(row, "level") + num(row, "star");
-}
-export function cityBuildingParameters(row: Row, rules: Rules): readonly number[] {
-  const rule = rules.building(
-    text(row, "itemId"),
-    num(row, "level"),
-    num(row, "star"),
-    num(row, "progress"),
-  );
-  return Array.from({ length: 6 }, (_, index) => {
-    const parameter = rule.clientParameters?.[index];
-    if (!parameter) return 0;
-    let value = parameter.value;
-    for (const step of parameter.steps ?? [])
-      if (step.progress <= num(row, "progress")) value = step.value;
-    return cityInteger(value);
-  });
 }
 export function cityPrestige(
   state: CityProgressionState,
@@ -94,7 +82,7 @@ export function checkCityBuildingRequirements(
   rule: BuildingState,
   rules: Rules,
 ) {
-  if (rule.limit === 1) throw new Error("Building upgrade disabled");
+  if (rule.limit === 1) throw new GameError(errors.buildingLimited, "city_progression");
   for (const requirement of rule.requiredBuildings ?? [])
     if (
       !state.buildings.some(
@@ -102,7 +90,7 @@ export function checkCityBuildingRequirements(
           num(row, "itemId") === requirement.buildingId && cityLevel(row) >= requirement.level,
       )
     )
-      throw new Error("Building prerequisite not met");
+      throw new GameError(errors.resource, "city_progression");
   for (const requirement of rule.requiredStarBuildings ?? []) {
     const base = Math.trunc(requirement.levelId / 100) * 100,
       star = requirement.levelId % 100;
@@ -110,10 +98,13 @@ export function checkCityBuildingRequirements(
       state.buildings.filter((row) => num(row, "itemId") === base && num(row, "star") >= star)
         .length < requirement.quantity
     )
-      throw new Error("Building star prerequisite not met");
+      throw new GameError(errors.resource, "city_progression");
   }
-  if ((rule.civilizationLevel ?? 0) > cityPrestige(state, rules))
-    throw new Error("Civilization prerequisite not met");
+  if (
+    (rule.civilizationLevel ?? 0) >
+    (num(state.profile, "civilizationType") === 0 ? 0 : cityPrestige(state, rules))
+  )
+    throw new GameError(errors.prestige, "city_progression");
 }
 export function checkCityPosition(
   state: CityProgressionState,
@@ -124,9 +115,9 @@ export function checkCityPosition(
   cityInteger(pos);
   const rule = [...rules.positions.values()].find((row) => Number(row.position) === pos);
   if (!rule || !(rule.building?.split(";") ?? []).includes(itemId))
-    throw new Error("Invalid building position");
+    throw new GameError(errors.invalid, "city_progression");
   const opened = text(state.profile, "openedPos").split(/[;|,]/).includes(String(pos));
-  if (rule.unlock !== "1" && !opened) throw new Error("Building position locked");
+  if (rule.unlock !== "1" && !opened) throw new GameError(errors.locked, "city_progression");
 }
 export function cityQueueType(itemId: number): number | undefined {
   return (
@@ -148,53 +139,65 @@ export function cityQueueType(itemId: number): number | undefined {
 export function citySpeedGold(rules: Rules, durationMs: bigint, troops = false): bigint {
   const seconds = Number(durationMs / 1000n);
   if (!Number.isSafeInteger(seconds) || seconds < 0)
-    throw new Error("Invalid acceleration duration");
+    throw new GameError(errors.invalid, "city_progression");
   if (!seconds) return 0n;
   const rule = rules.items.get("cd_gold"),
     unit = Number(troops ? rule?.k5 : rule?.k1),
     power = Number(troops ? rule?.k6 : rule?.k2);
-  if (!(unit > 0) || !Number.isFinite(power)) throw new Error("Missing acceleration price");
+  if (!(unit > 0) || !Number.isFinite(power))
+    throw new GameError(errors.unsupported, "city_progression");
   return BigInt(
     cityInteger(
       Math.max(
         1,
-        Math.trunc(seconds / (unit * Math.pow(Math.fround(seconds) / 3600, power / 100))),
+        Math.trunc(
+          seconds / (unit * Math.pow(Math.fround(Math.fround(seconds) / 3600), power / 100)),
+        ),
       ),
     ),
   );
 }
 export function cityResourceGold(rules: Rules, asset: CityAsset, amount: bigint): bigint {
   if (!amount) return 0n;
-  if (amount < 0n || amount > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error("Invalid shortage");
+  if (amount < 0n || amount > BigInt(Number.MAX_SAFE_INTEGER))
+    throw new GameError(errors.invalid, "city_progression");
   const limits = rules.items.get("resource_cost"),
     first = rules.items.get("resource_num1"),
     second = rules.items.get("resource_num2"),
     scale = rules.items.get("resource_num3");
-  if (!limits || !first || !second || !scale) throw new Error("Missing resource price");
+  if (!limits || !first || !second || !scale)
+    throw new GameError(errors.unsupported, "city_progression");
   if (asset === "silver")
-    return BigInt(cityInteger(Math.ceil(Math.fround(Number(amount)) * Number(scale.k5))));
+    return BigInt(
+      cityInteger(
+        Math.ceil(Math.fround(Math.fround(Number(amount)) * Math.fround(Number(scale.k5)))),
+      ),
+    );
   let tier = 0;
   while (tier < 4 && amount > cityAmount(limits[`k${tier + 1}`])) tier++;
   const source = tier === 4 ? second : first,
     offset = tier === 4 ? 1 : tier * 3 + 1;
-  const a = Number(source[`k${offset}`]),
-    b = Number(source[`k${offset + 1}`]),
-    c = Number(source[`k${offset + 2}`]);
-  const multiplier = Number(
-    scale[({ food: "k1", wood: "k2", stone: "k3", iron: "k4" } as const)[asset]],
+  const a = Math.fround(Number(source[`k${offset}`])),
+    b = Math.fround(Number(source[`k${offset + 1}`])),
+    c = Math.fround(Number(source[`k${offset + 2}`]));
+  const multiplier = Math.fround(
+    Number(scale[({ food: "k1", wood: "k2", stone: "k3", iron: "k4" } as const)[asset]]),
   );
   if (![a, b, c, multiplier].every(Number.isFinite) || multiplier <= 0)
-    throw new Error("Invalid resource price");
+    throw new GameError(errors.invalid, "city_progression");
   return BigInt(
     cityInteger(
-      Math.max(1, Math.trunc(a * Math.pow(Math.fround(Number(amount)) * multiplier, b) + c)),
+      Math.max(
+        1,
+        Math.trunc(a * Math.pow(Math.fround(Math.fround(Number(amount)) * multiplier), b) + c),
+      ),
     ),
   );
 }
 export function progressionActivityData(value: unknown): ProgressionActivityData | undefined {
   if (value === undefined || value === null) return undefined;
   if (typeof value !== "object" || Array.isArray(value))
-    throw new Error("Invalid activity domain data");
+    throw new GameError(errors.invalid, "city_progression");
   const data = value as ProgressionActivityData;
   if (
     data.schema !== 1 ||
@@ -203,7 +206,7 @@ export function progressionActivityData(value: unknown): ProgressionActivityData
     !data.items ||
     JSON.stringify(data).length > 65536
   )
-    throw new Error("Invalid activity domain version");
+    throw new GameError(errors.invalid, "city_progression");
   if (data.target) {
     cityInteger(data.target.level, 0, 30);
     cityInteger(data.target.star);
@@ -211,15 +214,15 @@ export function progressionActivityData(value: unknown): ProgressionActivityData
   }
   for (const [asset, cost] of Object.entries(data.costs)) {
     if (![...cityAssets, "woodbind", "stonebind", "ironbind", "foodbind"].includes(asset))
-      throw new Error("Invalid activity cost asset");
+      throw new GameError(errors.invalid, "city_progression");
     cityAmount(cost);
   }
   for (const [itemId, count] of Object.entries(data.items)) {
-    if (!/^\d+$/.test(itemId)) throw new Error("Invalid activity cost item");
+    if (!/^\d+$/.test(itemId)) throw new GameError(errors.invalid, "city_progression");
     cityInteger(count, 1);
   }
   for (const [id, count] of Object.entries(data.units ?? {})) {
-    if (!/^\d+$/.test(id)) throw new Error("Invalid activity unit");
+    if (!/^\d+$/.test(id)) throw new GameError(errors.invalid, "city_progression");
     cityInteger(count, 1);
   }
   return data;
@@ -246,9 +249,12 @@ export function cityUnlockCount(state: CityProgressionState, rules: Rules, type:
     );
   if (type === 5)
     return BigInt(
-      state.equipment.filter(
-        (row) => rules.power.equipment?.get(text(row, "itemId"))?.color === "5",
-      ).length,
+      state.equipment.filter((row) => {
+        const rule = rules.power.equipment?.get(text(row, "itemId"));
+        return (
+          rule !== undefined && cityInteger(rule.color ?? 0) >= 5 && Object.hasOwn(rule, "suit_id")
+        );
+      }).length,
     );
   if (type === 6)
     return state.armies.reduce(
@@ -268,5 +274,5 @@ export function cityUnlockCount(state: CityProgressionState, rules: Rules, type:
     return BigInt(
       Math.max(0, ...state.buildings.filter((row) => num(row, "itemId") === type).map(cityLevel)),
     );
-  throw new Error("Unknown building unlock condition");
+  throw new GameError(errors.invalid, "city_progression");
 }

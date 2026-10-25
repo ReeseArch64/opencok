@@ -95,7 +95,8 @@
     "./timed-activity": "./src/timed-activity.ts",
     "./city-command": "./src/city-command.ts",
     "./city-progression": "./src/city-progression.ts",
-    "./research": "./src/research.ts"
+    "./research": "./src/research.ts",
+    "./military": "./src/military.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

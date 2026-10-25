@@ -15,6 +15,7 @@ export interface TimedActivity {
 }
 export interface PreparedActivity {
   type?: number;
+  ready?: boolean;
   itemId?: string;
   durationMs?: bigint;
   data?: unknown;

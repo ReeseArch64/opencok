@@ -1,4 +1,8 @@
+import { ProductionService } from "@opencok/services/production";
+import { createProductionExecutor } from "@opencok/repositories/production";
 import { randomUUID } from "node:crypto";
+import { cityQueueCommands } from "@opencok/rules/city-command";
+import { activityTransitionInstant } from "@opencok/repositories/timed-activity";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -20,7 +24,7 @@ import { TimedActivityService } from "@opencok/services/timed-activity";
 import { idleDeadline } from "@opencok/rules/timed-activity";
 import { loadRules } from "@opencok/resources/rules";
 import { num, text } from "@opencok/contracts/rows";
-import { sfs, type Fields } from "@opencok/messages/sfs";
+import { sfs, str, decode, type Fields } from "@opencok/messages/sfs";
 import { eq } from "drizzle-orm";
 import { DisposablePostgres } from "../../../../packages/drizzle/tests/support/postgres";
 
@@ -142,8 +146,18 @@ export async function cityHarness(extra: readonly CityDomain[] = []) {
         handlers.domains as ReadonlyMap<number, ActivityDomain>,
         () => now,
         {
-          before: async (tx, owner, at) => {
-            await preparation.prepare(tx, owner, at);
+          before: async (tx, owner, at, command) => {
+            if (command.command === "activity.restore") return at;
+            const transition =
+              ["queue.finish", "queue.ccd"].includes(command.command) ||
+              cityQueueCommands[command.command]?.action === "queue.finish";
+            const params = decode(Buffer.from(command.request));
+            const queueId = transition
+              ? str(params, command.command === "queue.ccd" ? "qUUID" : "uuid")
+              : undefined;
+            const instant = await activityTransitionInstant(tx, owner, queueId, at);
+            await preparation.prepare(tx, owner, instant);
+            return instant;
           },
           command: handlers.command,
         },
@@ -176,6 +190,11 @@ export async function cityHarness(extra: readonly CityDomain[] = []) {
       db,
       rules,
       service,
+      production: new ProductionService(
+        createProductionExecutor(db.db, authority, preparation, () => now),
+        rules,
+        effects,
+      ),
       authority,
       command,
       active,

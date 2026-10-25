@@ -25,9 +25,9 @@ wallets behind the inventory snapshot. Domain state is written through the
 supplied transaction; network calls and separately committed writes do not belong
 inside a handler. Failure rolls the entire transition back.
 
-Construction and basic research now register their authoritative domains through the
-[city progression integration](city-progression.md). Troops, hospital,
-equipment and other effects remain owned by their corresponding domains.
+Construction, basic research, training, hospital and fortifications register their
+authoritative domains through the [city progression integration](city-progression.md).
+Equipment and other effects remain owned by their corresponding domains.
 Unavailable adapters reject transitions without freeing a queue or charging
 acceleration. Material-production acceleration rejects the generic gold formula.
 

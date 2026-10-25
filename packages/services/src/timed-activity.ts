@@ -1,3 +1,6 @@
+import { citySpeedGold } from "@opencok/rules/city-progression";
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 import { cityQueueCommands } from "@opencok/rules/city-command";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints } from "./power";
@@ -18,7 +21,7 @@ import {
   transitionActivity,
 } from "@opencok/rules/timed-activity";
 import type { Rules } from "@opencok/rules/game";
-import { encode, decode, sfs, str, int, type Fields } from "@opencok/messages/sfs";
+import { encode, decode, sfs, str, int, ProtocolError, type Fields } from "@opencok/messages/sfs";
 import { queue as queueView } from "@opencok/mappings/city";
 import { InventoryPlanner, type InventoryEffects } from "./inventory";
 
@@ -63,7 +66,7 @@ export class TimedActivityService {
               activityState(long(row, "updateTime"), state.now) === "idle",
           )
           .sort((a, b) => num(a, "qid") - num(b, "qid"))[0];
-        if (!selected) throw new Error("No available activity queue");
+        if (!selected) throw new GameError(errors.full, "city_progression");
         const activity: TimedActivity = {
           id: randomUUID(),
           ownerId: owner,
@@ -100,61 +103,72 @@ export class TimedActivityService {
     );
   }
   async domainCommand(owner: string, command: string, params: Fields) {
-    const operationId = str(params, "operationId", "") || randomUUID();
-    if (!/^[A-Za-z0-9:._-]{1,128}$/.test(operationId)) throw new Error("Invalid operationId");
-    return this.run(owner, operationId, command, params, async (state, ledger) => {
-      if (!state.prepare) throw new Error("City progression unavailable");
-      const prepared = await state.prepare(command, encode(params), activityEconomy(ledger));
-      const item = decode(Buffer.from(prepared.response));
-      if (prepared.type === undefined)
-        return { queues: [], activities: [], body: item, ledger, event: prepared.event };
-      const duration = prepared.durationMs;
-      if (duration === undefined || duration <= 0n || !prepared.itemId)
-        throw new Error("Invalid prepared activity");
-      const dueAt = activityInstant(state.now + duration);
-      const selected = state.queues
-        .filter(
-          (row) =>
-            num(row, "type") === prepared.type &&
-            long(row, "endTime") >= dueAt &&
-            long(row, "updateTime") === idleDeadline,
+    try {
+      const operationId = str(params, "operationId", "") || randomUUID();
+      if (!/^[A-Za-z0-9:._-]{1,128}$/.test(operationId)) throw new Error("Invalid operationId");
+      return await this.run(owner, operationId, command, params, async (state, ledger) => {
+        if (!state.prepare) throw new Error("City progression unavailable");
+        const prepared = await state.prepare(command, encode(params), activityEconomy(ledger));
+        const item = decode(Buffer.from(prepared.response));
+        if (prepared.type === undefined)
+          return { queues: [], activities: [], body: item, ledger, event: prepared.event };
+        const duration = prepared.durationMs;
+        if (
+          duration === undefined ||
+          duration < 0n ||
+          (duration === 0n && !prepared.ready) ||
+          !prepared.itemId
         )
-        .sort((a, b) => num(a, "qid") - num(b, "qid"))[0];
-      if (!selected) throw new Error("No available activity queue");
-      const activity: TimedActivity = {
-        id: randomUUID(),
-        ownerId: owner,
-        queueId: text(selected, "uuid"),
-        type: prepared.type,
-        itemId: prepared.itemId,
-        startedAt: state.now,
-        dueAt,
-        version: 1,
-        status: 0,
-        data: prepared.data,
-      };
-      const row: Row = {
-        ...selected,
-        itemId: activity.itemId,
-        startTime: state.now,
-        updateTime: dueAt,
-        totalTime: duration,
-        isHelped: 0,
-      };
-      const queue = queueView(
-        row,
-        prepared.item ? decode(Buffer.from(prepared.item)) : item,
-        false,
-      );
-      queue.activityId = sfs.string(activity.id);
-      queue.version = sfs.int(1);
-      const body =
-        prepared.responseKind === "nested"
-          ? { ...item, queue: sfs.object(queue), finish: sfs.long(dueAt) }
-          : queue;
-      return { queues: [row], activities: [activity], body, ledger, event: prepared.event };
-    });
+          throw new Error("Invalid prepared activity");
+        const dueAt = activityInstant(state.now + duration);
+        const selected = state.queues
+          .filter(
+            (row) =>
+              num(row, "type") === prepared.type &&
+              long(row, "endTime") >= dueAt &&
+              long(row, "updateTime") === idleDeadline,
+          )
+          .sort((a, b) => num(a, "qid") - num(b, "qid"))[0];
+        if (!selected) throw new GameError(errors.full, "city_progression");
+        const activity: TimedActivity = {
+          id: randomUUID(),
+          ownerId: owner,
+          queueId: text(selected, "uuid"),
+          type: prepared.type,
+          itemId: prepared.itemId,
+          startedAt: state.now,
+          dueAt,
+          version: 1,
+          status: 0,
+          data: prepared.data,
+        };
+        const row: Row = {
+          ...selected,
+          itemId: activity.itemId,
+          startTime: state.now,
+          updateTime: dueAt,
+          totalTime: duration,
+          isHelped: 0,
+        };
+        const queue = queueView(
+          row,
+          prepared.item ? decode(Buffer.from(prepared.item)) : item,
+          false,
+        );
+        queue.activityId = sfs.string(activity.id);
+        queue.version = sfs.int(1);
+        const body =
+          prepared.responseKind === "nested"
+            ? { ...item, queue: sfs.object(queue), finish: sfs.long(dueAt) }
+            : queue;
+        return { queues: [row], activities: [activity], body, ledger, event: prepared.event };
+      });
+    } catch (error) {
+      if (error instanceof ProtocolError) throw new GameError(errors.invalid, "city_progression");
+      throw error;
+    }
   }
+
   async restore(owner: string, operationId: string, queueId: string) {
     return this.run(
       owner,
@@ -264,15 +278,15 @@ export class TimedActivityService {
         queueCommand === "queue.ccd" || queueCommand === "queue.rent" ? "qUUID" : "uuid",
       );
       const saved = state.queues.find((row) => row.uuid === uuid);
-      if (!saved) throw new Error("Queue not found");
+      if (!saved) throw new GameError(errors.queue, "city_progression");
       if (
         alias &&
         (!alias.types.includes(num(saved, "type")) ||
           (alias.target && str(params, alias.target) !== text(saved, "itemId")))
       )
-        throw new Error("Activity target mismatch");
+        throw new GameError(errors.invalid, "city_progression");
       if (alias?.action === "queue.finish" && long(saved, "updateTime") > state.now + 1000n)
-        throw new Error("Activity is not due");
+        throw new GameError(errors.queuePending, "city_progression");
       if (queueCommand === "queue.rent") {
         if (num(saved, "qid") === 1 || num(saved, "type") !== 0)
           throw new Error("Queue cannot be rented");
@@ -343,20 +357,8 @@ export class TimedActivityService {
         else if (int(params, "isGold") !== 0) {
           if (active.type === 12)
             throw new Error("Material acceleration requires its domain price");
-          const rule = this.rules.items.get("cd_gold"),
-            troops = [1, 8, 9, 10, 17].includes(active.type);
-          const k1 = Number(troops ? rule?.k5 : rule?.k1),
-            k2 = Number(troops ? rule?.k6 : rule?.k2);
-          if (!(k1 > 0) || !Number.isFinite(k2)) throw new Error("Missing acceleration price");
-          const cost = remaining
-            ? Math.max(
-                1,
-                Math.trunc(remaining / (k1 * Math.pow(Math.fround(remaining) / 3600, k2 / 100))),
-              )
-            : 0;
-          if (!Number.isSafeInteger(cost) || cost > 2147483647)
-            throw new Error("Invalid acceleration price");
-          debit(ledger, BigInt(cost), "queue.ccd");
+          const troops = [1, 8, 9, 10, 17].includes(active.type);
+          debit(ledger, citySpeedGold(this.rules, BigInt(remaining) * 1000n, troops), "queue.ccd");
           remaining = 0;
         } else {
           const item = ledger.own(str(params, "itemUUID"));
@@ -477,7 +479,8 @@ export class TimedActivityService {
         return {
           ...plan,
           guideStep:
-            command === "queue.ccd" && params.guideStep
+            ["queue.ccd", "army.add", "army.complete", "army.cd"].includes(command) &&
+            params.guideStep
               ? str(params, "guideStep").trim()
                 ? str(params, "guideStep")
                 : ""
@@ -497,7 +500,7 @@ export class TimedActivityService {
   }
 }
 export function debit(ledger: InventoryPlanner, amount: bigint, reason: string) {
-  if (amount < 0n || amount > ledger.total()) throw new Error("Insufficient gold");
+  if (amount < 0n || amount > ledger.total()) throw new GameError(errors.gold, "city_progression");
   for (const key of ledger.pools()) {
     const before = ledger.balance(key),
       cost = before < amount ? before : amount;

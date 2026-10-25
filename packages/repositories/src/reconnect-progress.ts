@@ -1,3 +1,4 @@
+import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { and, asc, eq } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
@@ -202,6 +203,13 @@ export async function readReconnectProgress(
     .where(eq(user_weakness_building.uid, uid))
     .orderBy(asc(user_weakness_building.armyId))
     .limit(32768);
+  const hospital = await tx
+    .select()
+    .from(user_hospital)
+    .where(eq(user_hospital.uid, uid))
+    .orderBy(asc(user_hospital.armyId))
+    .limit(1025);
+  if (hospital.length > 1024) throw new Error("Hospital aggregate exceeds bound");
   const walls = await tx
     .select()
     .from(user_wall)
@@ -252,6 +260,7 @@ export async function readReconnectProgress(
     civilizationCastle,
     glory,
     weakness,
+    hospital,
     walls,
     knight,
     items,

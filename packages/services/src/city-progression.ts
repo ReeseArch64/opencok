@@ -1,3 +1,6 @@
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
+import { unitPower } from "@opencok/rules/military";
 import { resourceGeneralBuildingEffect } from "./world-resource-owner-context";
 import type {
   ActivityAction,
@@ -66,7 +69,7 @@ export function createCityProgressionHandlers<T>(
           emperor,
           id as Parameters<typeof playerGameEffect>[6],
         );
-        if (!Number.isFinite(value)) throw new Error("Invalid city progression effect");
+        if (!Number.isFinite(value)) throw new GameError(errors.invalid, "city_progression");
         cache.set(id, value);
       }
       return value;
@@ -108,6 +111,7 @@ export function createCityProgressionHandlers<T>(
       if (registry.has(type)) throw new Error("Duplicate city activity domain");
       registry.set(type, async (tx, action, activity, now, economy) => {
         const { repository, plan } = await context(tx, activity.ownerId, now, economy);
+        if (action === "finish") plan.completing = activity;
         const body = await domain.apply(plan, action, activity);
         await repository.update(plan.write, economy);
         return encode(body);
@@ -124,7 +128,7 @@ export function createCityProgressionHandlers<T>(
       economy: ActivityEconomy,
     ) {
       const domain = domains.find((candidate) => candidate.commands.includes(command));
-      if (!domain) throw new Error("Unsupported city progression command");
+      if (!domain) throw new GameError(errors.unsupported, "city_progression");
       const { repository, plan } = await context(tx, owner, now, economy);
       const result = await domain.prepare(plan, command, decode(Buffer.from(params)));
       await repository.update(plan.write, economy);
@@ -135,6 +139,7 @@ export function createCityProgressionHandlers<T>(
 
 export class CityProgressionContext {
   readonly write: CityProgressionWrite = {};
+  completing?: Pick<TimedActivity, "type" | "itemId">;
   readonly costs: Record<string, string> = {};
   readonly items: Record<string, number> = {};
   constructor(
@@ -175,7 +180,7 @@ export class CityProgressionContext {
         cost -= take;
       }
       if (cost) {
-        if (!purchase) throw new Error("Insufficient city resources");
+        if (!purchase) throw new GameError(errors.insufficientResource, "city_progression");
         this.economy.gold(-cityResourceGold(this.rules, asset, cost));
       }
     }
@@ -220,7 +225,7 @@ export class CityProgressionContext {
   }
   ownBuilding(id: string) {
     const row = this.state.buildings.find((building) => building.uuid === id);
-    if (!row) throw new Error("Owned building not found");
+    if (!row) throw new GameError(errors.missing, "city_progression");
     return row;
   }
   idleBuilding(row: Row) {
@@ -228,7 +233,78 @@ export class CityProgressionContext {
       num(row, "opType") !== 0 ||
       this.state.queues.some((q) => num(q, "type") === 0 && q.itemId === row.uuid)
     )
-      throw new Error("Building is occupied");
+      throw new GameError(errors.occupied, "city_progression");
+  }
+  checkPower(additional: bigint) {
+    const limit = this.rules.configuration.serverConfig?.get("power_limit");
+    if (limit?.enabled !== "1" || (limit.gmBypass === "1" && num(this.state.profile, "gmFlag") > 0))
+      return;
+    let reserved = 0n;
+    for (const row of this.state.armies)
+      if (
+        num(row, "train") > 0 &&
+        !(
+          [1, 8, 9, 10, 17].includes(this.completing?.type ?? -1) &&
+          this.completing?.itemId === row.armyId
+        )
+      ) {
+        const rule = this.rules.arms.get(text(row, "armyId"));
+        if (!rule) throw new GameError(errors.unsupported, "city_progression");
+        reserved += unitPower(rule, num(row, "train"));
+      }
+    for (const row of this.state.forts)
+      if (
+        num(row, "build") > 0 &&
+        !(this.completing?.type === 2 && this.completing.itemId === row.armyId)
+      ) {
+        const rule = this.rules.arms.get(text(row, "armyId"));
+        if (!rule) throw new GameError(errors.unsupported, "city_progression");
+        reserved += unitPower(rule, num(row, "build"));
+      }
+    if (this.completing?.type !== 3)
+      for (const row of this.state.hospital)
+        if (num(row, "heal") > 0) {
+          const rule = this.rules.arms.get(text(row, "armyId"));
+          if (!rule) throw new GameError(errors.unsupported, "city_progression");
+          reserved += unitPower(rule, num(row, "heal"));
+        }
+    for (const row of this.state.buildings)
+      if (
+        num(row, "opType") === 1 &&
+        !(this.completing?.type === 0 && this.completing.itemId === row.uuid)
+      ) {
+        const current = this.rules.building(
+          text(row, "itemId"),
+          num(row, "level"),
+          num(row, "star"),
+          num(row, "progress"),
+        );
+        const next = this.rules.nextBuilding(
+          text(row, "itemId"),
+          num(row, "level"),
+          num(row, "star"),
+          num(row, "progress"),
+          Number(this.now),
+        );
+        reserved += BigInt(Math.max(0, (next.power ?? 0) - (current.power ?? 0)));
+      }
+    for (const row of this.state.sciences)
+      if (
+        this.state.queues.some(
+          (queue) => num(queue, "type") === 6 && queue.itemId === row.itemId,
+        ) &&
+        !(this.completing?.type === 6 && this.completing.itemId === row.itemId)
+      ) {
+        const current = this.rules.power.sciences?.get(
+            String(num(row, "itemId") + num(row, "level")),
+          ),
+          next = this.rules.power.sciences?.get(String(num(row, "itemId") + num(row, "level") + 1));
+        if (!current || !next) throw new GameError(errors.unsupported, "city_progression");
+        reserved += cityAmount(next.power ?? 0) - cityAmount(current.power ?? 0);
+      }
+    const power = this.write.statistics?.power ?? long(this.state.statistics, "power");
+    if (power + reserved + additional > cityAmount(limit.max_power))
+      throw new GameError(errors.powerLimit, "city_progression");
   }
   power(delta: bigint, building = 0n, cured = 0) {
     const previous = this.write.statistics ?? {
@@ -236,14 +312,7 @@ export class CityProgressionContext {
       buildingPower: long(this.state.statistics, "buildingPower"),
       armyCure: num(this.state.statistics, "armyCure"),
     };
-    const limit = this.rules.configuration.serverConfig?.get("power_limit");
-    if (
-      delta > 0n &&
-      limit?.enabled === "1" &&
-      !(limit.gmBypass === "1" && num(this.state.profile, "gmFlag") > 0) &&
-      previous.power + delta > cityAmount(limit.max_power)
-    )
-      throw new Error("Player power limit exceeded");
+    if (delta > 0n) this.checkPower(delta);
     this.write.statistics = {
       power: cityAmount(previous.power + delta),
       buildingPower: cityAmount(previous.buildingPower + building),

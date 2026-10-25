@@ -1,3 +1,4 @@
+import { militarySnapshot } from "@opencok/mappings/military";
 import { researchData } from "@opencok/mappings/research";
 import { changeNickname } from "./nickname-command.ts";
 import type { CreateWorldFavoriteDto } from "@opencok/dtos/world-favorites/create-world-favorite.dto";
@@ -146,7 +147,6 @@ import {
   type FeatureContext,
 } from "@opencok/rules/features";
 import {
-  armySnapshot,
   dataConfig,
   featureConfig,
   inventoryItem,
@@ -193,6 +193,14 @@ export class GameService {
   }
   private queueFields(q: Row, state: ReadyCity, helped = true, now = this.now()): Fields {
     const target = state.buildings.find((b) => text(b, "uuid") === text(q, "itemId"));
+    if ([1, 8, 9, 10, 17].includes(num(q, "type")) && text(q, "itemId"))
+      return queue(
+        q,
+        { itemId: sfs.string(text(q, "itemId")), allId: sfs.string(text(q, "itemId")) },
+        helped,
+      );
+    if ([2, 3].includes(num(q, "type")) && text(q, "itemId"))
+      return queue(q, { itemId: sfs.string(text(q, "itemId")) }, helped);
     if (num(q, "type") === 6 && text(q, "itemId"))
       return queue(q, { itemId: sfs.string(text(q, "itemId")) }, helped);
     if (num(q, "type") !== 0 && text(q, "itemId"))
@@ -325,6 +333,16 @@ export class GameService {
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
+      case "army.add":
+      case "army.cd":
+      case "army.fire":
+      case "hospital.cure":
+      case "hospital.cd":
+      case "hospital.fire":
+      case "fort.build":
+      case "fort.cd":
+      case "fort.destory":
+      case "fort.destroy":
       case "science.data.init":
       case "science.research":
       case "science.directly":
@@ -340,6 +358,11 @@ export class GameService {
         if (!this.services.cityProgression) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.cityProgression(uid, command, params));
         break;
+      case "army.complete":
+      case "hospital.cure.done":
+      case "hospital.cancel":
+      case "fort.build.done":
+      case "fort.cancel":
       case "science.upgrade":
       case "queue.finish":
       case "queue.cancel":
@@ -2032,7 +2055,7 @@ export class GameService {
     if (params.army)
       return {
         resource: sfs.object(resource(state.resource)),
-        army: sfs.array(state.armies.map((r) => sfs.object(armySnapshot(r, this.rules)))),
+        ...militarySnapshot(state.armies, state.hospital ?? [], state.forts ?? [], this.rules),
         items: sfs.array(state.items.map((r) => sfs.object(inventoryItem(r, this.rules)))),
       };
     const lord = state.lord;

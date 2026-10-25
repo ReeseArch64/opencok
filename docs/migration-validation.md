@@ -2213,3 +2213,14 @@ prerequisites, concurrency, cancellation, direct completion, acceleration and
 production effects with disposable PostgreSQL. Units validate tree and queue
 constraints plus wire types. See the [city runbook](architecture/city-progression.md)
 for compatibility boundaries; native rendering remains unverified.
+
+## Training, hospital and fortifications
+
+Topic 18 registers the training, hospital and defense domains on the existing
+activity/economy transaction. PostgreSQL integration covers quantity transfers,
+retries, cancellation, paid-ready jobs, dismissal and future power reservations.
+Deadline tests cover overdue construction/research rate changes and troop upkeep.
+The provisioning E2E sends construction, army, hospital and research packets over
+the live SFS runtime and reads saved military state. Pure units and critical
+mutations exercise quantity/capacity bounds and healing conservation. See the
+[runbook](architecture/city-progression.md) for operational and client limits.
