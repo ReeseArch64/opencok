@@ -6,6 +6,7 @@ export const IMAGE_PATH = /^\/cok\/img\/([0-9]{1,6})\/([a-f0-9]{32})\.jpg$/;
 export interface ImageStore {
   put(key: string, bytes: Buffer, owner: string, seq: string, hash: string): Promise<void>;
   get(key: string): Promise<Uint8Array | null>;
+  removePrevious(owner: string, sequence: string): Promise<void>;
   find(owner: string, sequence: string): Promise<UploadReceipt | null>;
 }
 export interface UploadReceipt {
@@ -35,6 +36,7 @@ export interface AvatarGrantSnapshot {
 export interface AvatarFiles {
   find(owner: string, sequence: number): Promise<UploadReceipt | null>;
   issue(owner: string, sequence: number): string;
+  image(owner: string, sequence: number): string;
 }
 export interface AvatarGrantService extends AvatarFiles {
   read(owner: string, now: number, inspect: AvatarGrantInspector): Promise<AvatarGrantSnapshot>;

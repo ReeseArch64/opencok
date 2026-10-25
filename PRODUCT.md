@@ -103,7 +103,9 @@ request queues.
 ### Safe media handling
 
 Player image uploads should use a narrow authenticated route with explicit
-size, ownership, file validation, storage, and delivery rules. Static images
+size, ownership, file validation, storage, and delivery rules. Profile images use temporary API-signed upload and read URLs, with
+a default three-day replacement interval. A successful replacement removes the previous
+image while retaining its private confirmation receipt. Static images
 and animated GIFs should behave predictably. Local persistent storage is the
 baseline; an object store such as Cloudflare R2 may be offered as an optional
 adapter without becoming a requirement for local development.

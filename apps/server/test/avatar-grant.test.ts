@@ -13,6 +13,7 @@ import {
   issueAvatarConfirmation,
   verifyGrant,
   verifyConfirmation,
+  verifyAvatarImage,
 } from "@opencok/identity/avatar";
 import { createHandler } from "@opencok/api/files";
 import { sfs, decode, encode } from "@opencok/messages/sfs";
@@ -49,6 +50,7 @@ function fixture() {
   const calls: unknown[][] = [];
   const imageStore: ImageStore = {
     put: unused,
+    removePrevious: unused,
     get: unused,
     find: async (owner, sequence) => {
       calls.push(["find", owner, sequence]);
@@ -126,6 +128,9 @@ test("avatar grant binds durable version and identity to the existing files conf
     owner: "1001",
     seq: "5",
   });
+  expect(wire.uploadPath).toEqual(
+    sfs.string(`/gameservice/www/gateway/json.php?grant=${wire.grant!.value}`),
+  );
   expect(first.pushes).toEqual([]);
   expect(f.profile).toEqual(before);
   expect(f.calls).toEqual([
@@ -417,4 +422,33 @@ test("files configuration and protected key loading are optional, explicit and s
     "http://files.internal/?private=x",
   ])
     expect(() => createAvatarFiles({ origin: value, key, timeoutMs: 1000 })).toThrow();
+});
+
+test("authenticated avatar URL renewal signs current realm profiles without upload eligibility checks", async () => {
+  const f = fixture();
+  const profiles = new Map<string, Row>([
+    ["1001", f.profile],
+    ["1002", { ...f.profile, uid: "1002", picVer: 2999999 }],
+  ]);
+  const db = { getProfileById: async (uid: string) => profiles.get(uid) } as GameStore;
+  const game = new Game(db, rules(), { kingdomId: 1 }, () => now, { avatar: f.service });
+  for (const target of ["1001", "1002"]) {
+    const response = await game.execute("1001", "user.avatar.url", { gameuid: sfs.string(target) });
+    const url = new URL(response.body.path!.value as string, "http://localhost");
+    expect(() => verifyAvatarImage(url, key, seconds)).not.toThrow();
+    expect(response.body.owner).toEqual(sfs.string(target));
+    expect(url.pathname).toContain(target.slice(-6));
+    expect(url.searchParams.get("expires")).toBe(String(seconds + 300));
+  }
+  f.profile.picVer = 0;
+  expect((await game.execute("1001", "user.avatar.url", {})).body.path).toEqual(sfs.string(""));
+  for (const target of [sfs.int(1002), sfs.string("missing")])
+    await expect(game.execute("1001", "user.avatar.url", { gameuid: target })).rejects.toThrow();
+  profiles.get("1002")!.serverId = 2;
+  await expect(
+    game.execute("1001", "user.avatar.url", { gameuid: sfs.string("1002") }),
+  ).rejects.toThrow();
+  profiles.get("1001")!.banFlag = 1;
+  await expect(game.execute("1001", "user.avatar.url", {})).rejects.toThrow();
+  expect(f.calls).toEqual([]);
 });

@@ -1,7 +1,12 @@
 import { Agent as HttpAgent } from "node:http";
 import { Agent as HttpsAgent } from "node:https";
 import { createHash } from "node:crypto";
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
 import { FILE_LIMIT } from "@opencok/contracts/files";
 import { HttpError } from "@opencok/errors/http";
 import type { ImageStore, UploadReceipt } from "@opencok/contracts/files";
@@ -36,6 +41,7 @@ export class S3ImageStore implements ImageStore {
   ) {}
 
   async put(key: string, bytes: Buffer, owner: string, seq: string, hash: string) {
+    if (await this.archived(owner, seq)) throw new HttpError(409, "Image sequence already exists");
     try {
       await this.client.send(
         new PutObjectCommand({
@@ -77,10 +83,70 @@ export class S3ImageStore implements ImageStore {
     return (await this.object(key))?.bytes ?? null;
   }
 
+  private async archived(owner: string, sequence: string): Promise<UploadReceipt | null> {
+    try {
+      const object = await this.client.send(
+        new GetObjectCommand({ Bucket: this.bucket, Key: `_receipts/${owner}/${sequence}` }),
+        { abortSignal: AbortSignal.timeout(5000) },
+      );
+      if (!object.Body || !object.ContentLength || object.ContentLength > 256)
+        throw new Error("Invalid archived avatar receipt");
+      const bytes = await object.Body.transformToByteArray();
+      if (bytes.length !== object.ContentLength || bytes.length > 256)
+        throw new Error("Invalid archived avatar receipt");
+      const receipt = JSON.parse(Buffer.from(bytes).toString("utf8"));
+      if (
+        receipt.owner !== owner ||
+        receipt.sequence !== sequence ||
+        typeof receipt.hash !== "string" ||
+        !/^[a-f0-9]{64}$/.test(receipt.hash)
+      )
+        throw new Error("Invalid archived avatar receipt");
+      return { owner, sequence, hash: receipt.hash };
+    } catch (error) {
+      if (status(error) === 404) return null;
+      throw error;
+    }
+  }
+
+  async removePrevious(owner: string, sequence: string): Promise<void> {
+    if (!/^[0-9]{1,20}$/.test(owner) || !/^[1-9][0-9]{0,5}$/.test(sequence))
+      throw new Error("Invalid avatar replacement");
+    if (sequence === "1") return;
+    const previous = String(Number(sequence) - 1);
+    const receipt = await this.find(owner, previous);
+    if (!receipt) return;
+    try {
+      await this.client.send(
+        new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: `_receipts/${owner}/${previous}`,
+          Body: JSON.stringify(receipt),
+          ContentType: "application/json",
+          IfNoneMatch: "*",
+        }),
+        { abortSignal: AbortSignal.timeout(5000) },
+      );
+    } catch (error) {
+      if (![409, 412].includes(status(error) ?? 0)) throw error;
+      const archived = await this.archived(owner, previous);
+      if (!archived || archived.hash !== receipt.hash)
+        throw new Error("Archived avatar receipt mismatch");
+    }
+    const name = createHash("md5").update(`${owner}_${previous}`).digest("hex");
+    await this.client.send(
+      new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: `${owner.slice(-6)}/${name}.jpg`,
+      }),
+      { abortSignal: AbortSignal.timeout(5000) },
+    );
+  }
+
   async find(owner: string, sequence: string): Promise<UploadReceipt | null> {
     const name = createHash("md5").update(`${owner}_${sequence}`).digest("hex");
     const stored = await this.object(`${owner.slice(-6)}/${name}.jpg`);
-    if (!stored) return null;
+    if (!stored) return this.archived(owner, sequence);
     const { object, bytes } = stored;
     const hash = createHash("sha256").update(bytes).digest("hex");
     if (

@@ -334,8 +334,8 @@ test("avatar TCP lifecycle uploads through API and S3, survives restart, moderat
         new File([new Uint8Array(await media.image())], "synthetic.png", { type: "image/png" }),
       );
       const upload = await fetch(
-        `http://127.0.0.1:${filesServer!.port}/gameservice/www/gateway/json.php`,
-        { method: "POST", headers: { "x-upload-grant": String(grant.grant?.value) }, body },
+        `http://127.0.0.1:${filesServer!.port}${grant.uploadPath?.value}`,
+        { method: "POST", body },
       );
       expect(upload.status).toBe(200);
       const saved = (
@@ -347,10 +347,10 @@ test("avatar TCP lifecycle uploads through API and S3, survives restart, moderat
         (await fetch(`http://127.0.0.1:${filesServer!.port}/_internal/avatars/${uid}/1`)).status,
       ).toBe(401);
       const duplicate = await fetch(
-        `http://127.0.0.1:${filesServer!.port}/gameservice/www/gateway/json.php`,
-        { method: "POST", headers: { "x-upload-grant": String(grant.grant?.value) }, body },
+        `http://127.0.0.1:${filesServer!.port}${grant.uploadPath?.value}`,
+        { method: "POST", body },
       );
-      expect(duplicate.status).toBe(409);
+      expect(duplicate.status).toBe(200);
       mediaStore = await media.restart();
       await server.close();
       servers.splice(servers.indexOf(server), 1);

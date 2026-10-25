@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { HttpError } from "@opencok/errors/http";
 export function verifyConfirmation(
   token: string,
@@ -75,4 +75,39 @@ export function issueAvatarConfirmation(
     .update(`confirm\n${owner}\n${sequence}\n${expires}`)
     .digest("hex");
   return `v1.${expires}.${hash}`;
+}
+
+export function avatarImagePath(owner: string, sequence: number): string {
+  if (
+    !/^[0-9]{1,20}$/.test(owner) ||
+    !Number.isInteger(sequence) ||
+    sequence < 1 ||
+    sequence > 999999
+  )
+    throw new Error("Invalid avatar image input");
+  const name = createHash("md5").update(`${owner}_${sequence}`).digest("hex");
+  return `/cok/img/${owner.slice(-6)}/${name}.jpg`;
+}
+export function issueAvatarImage(
+  owner: string,
+  sequence: number,
+  key: Buffer,
+  now = Math.floor(Date.now() / 1000),
+): string {
+  const expires = signingInput(owner, sequence, key, now, 300);
+  const path = avatarImagePath(owner, sequence);
+  const signature = createHmac("sha256", key).update(`image\n${path}\n${expires}`).digest("hex");
+  return `${path}?expires=${expires}&signature=${signature}`;
+}
+export function verifyAvatarImage(
+  url: URL,
+  key: Buffer,
+  now = Math.floor(Date.now() / 1000),
+): void {
+  const match = /^\?expires=([0-9]{10})&signature=([a-f0-9]{64})$/.exec(url.search);
+  if (!match || Number(match[1]) <= now || Number(match[1]) > now + 300)
+    throw new HttpError(401, "Invalid image authorization");
+  const expected = createHmac("sha256", key).update(`image\n${url.pathname}\n${match[1]}`).digest();
+  if (!timingSafeEqual(expected, Buffer.from(match[2]!, "hex")))
+    throw new HttpError(401, "Invalid image authorization");
 }

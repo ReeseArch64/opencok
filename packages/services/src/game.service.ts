@@ -1,3 +1,4 @@
+import { UPLOAD_PATH } from "@opencok/contracts/files";
 import { equipment as equipmentFields } from "@opencok/mappings/equipment";
 import { militarySnapshot } from "@opencok/mappings/military";
 import { researchData } from "@opencok/mappings/research";
@@ -546,6 +547,9 @@ export class GameService {
       case "user.avatar.finish":
         ({ body, pushes } = await this.avatarFinish(uid, params));
         break;
+      case "user.avatar.url":
+        body = await this.avatarUrl(uid, params);
+        break;
       case "user.avatar.grant":
         body = await this.avatarGrant(uid, params);
         break;
@@ -937,6 +941,37 @@ export class GameService {
     };
     return { body, pushes: [{ command: "push.picVer.update", body: { ...body } }] };
   }
+  private async avatarUrl(uid: string, params: Fields): Promise<Fields> {
+    const service = this.services.avatar;
+    if (!service) throw new GameError(errors.unsupported);
+    const now = this.now();
+    const requester = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (requester.uid !== uid || requester.serverId !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const target = params.gameuid === undefined ? uid : params.gameuid.value;
+    if (
+      (params.gameuid !== undefined && params.gameuid.type !== Type.String) ||
+      typeof target !== "string" ||
+      !/^[0-9]{1,20}$/.test(target)
+    )
+      throw new GameError(errors.invalid);
+    const profile = this.checkProfile(await this.db.getProfileById(target), now);
+    if (profile.uid !== target || profile.serverId !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const version = profile.picVer;
+    if (
+      typeof version !== "number" ||
+      !Number.isInteger(version) ||
+      version < -2147483648 ||
+      version > 2147483647
+    )
+      throw new GameError(errors.invalid);
+    const sequence = Math.max(0, version % 1000000);
+    return {
+      owner: sfs.string(target),
+      path: sfs.string(sequence ? service.image(target, sequence) : ""),
+    };
+  }
   private async avatarGrant(uid: string, params: Fields): Promise<Fields> {
     const service = this.services.avatar;
     if (!service) throw new GameError(errors.unsupported);
@@ -986,6 +1021,7 @@ export class GameService {
       owner: sfs.string(state.grant.owner),
       sequence: sfs.int(state.grant.sequence),
       grant: sfs.string(state.grant.grant),
+      uploadPath: sfs.string(`${UPLOAD_PATH}?grant=${state.grant.grant}`),
       pendingHash: sfs.string(state.grant.pendingHash),
     };
   }

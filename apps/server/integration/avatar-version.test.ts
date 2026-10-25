@@ -107,6 +107,9 @@ test("avatar allocation commits atomically, serializes requests and recovers rea
     let cacheDown = true,
       chatDown = true;
     const files = {
+      image(): never {
+        throw new Error("Allocation must not sign an image");
+      },
       issue(): never {
         throw new Error("Allocation must not issue an upload grant");
       },

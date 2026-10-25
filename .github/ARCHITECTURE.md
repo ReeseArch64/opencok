@@ -309,7 +309,9 @@ and [implemented chat](../apps/chat/README.md).
 ## 21. File and media lifecycle
 
 API media currently accepts authenticated JPEG/PNG uploads, re-encodes JPEG,
-preserves immutable S3 sequence receipts and serves public avatars. Media uses the
+preserves immutable S3 sequence receipts and requires temporary API-signed avatar URLs.
+The default replacement interval is three days. Successful replacement archives the
+preceding receipt and deletes its JPEG; matching upload retries resume failed cleanup. Media uses the
 API port; discovery keeps a 64 KiB body limit and uploads have a 2112 KiB cap.
 Private confirmation uses a separate short-lived HMAC and no gateway route.
 Full pending/validated/ready lifecycle, GIFs, background transformations and orphan

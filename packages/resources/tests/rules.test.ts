@@ -729,3 +729,15 @@ test("territory building catalog preserves declaration order and duplicate level
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("default avatar cooldown rejects replacements before three days and accepts the exact boundary", async () => {
+  const { checkAvatarRecord, avatarFinishInterval } = await import("@opencok/rules/avatar");
+  const rules = await loadRules();
+  expect(rules.items.get("hero")?.k7).toBe("259200");
+  expect(avatarFinishInterval(rules)).toBe(259200000n);
+  const updated = 1792756800000;
+  const record = { updateTime: BigInt(updated), banTime: 0n };
+  for (const elapsed of [86400000, 259199999])
+    expect(() => checkAvatarRecord(rules, record, updated + elapsed)).toThrow();
+  expect(() => checkAvatarRecord(rules, record, updated + 259200000)).not.toThrow();
+});
