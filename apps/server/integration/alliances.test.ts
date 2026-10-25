@@ -108,6 +108,13 @@ test("applications require current authority and invitations require their recip
   await expect(
     h.allianceCommand("al.permission.modify", { rankData: sfs.string("0_1:0") }, "other"),
   ).rejects.toThrow();
+  await h.db.db.update(userprofile).set({ allianceId: "" }).where(eq(userprofile.uid, "owner"));
+  await expect(
+    h.allianceCommand("al.setrank", { playerId: sfs.string("other"), rank: sfs.int(2) }),
+  ).rejects.toThrow();
+  expect(
+    (await h.db.db.select().from(alliance_member).where(eq(alliance_member.uid, "other")))[0]!.rank,
+  ).toBe(1);
 }, 30000);
 test("capacity, realm checks and receipt conflicts roll back alliance operations", async () => {
   const h = await harness(),
@@ -356,8 +363,9 @@ test("research schedules the production effect at its deadline before delayed co
 test("outbox publication uses current members and preserves pending unrelated events", async () => {
   const h = await harness(),
     id = await h.create();
+  await h.allianceCommand("al.attr", { recruit: sfs.int(0) });
   await h.allianceCommand("al.apply", { allianceId: sfs.string(id) }, "other");
-  await h.allianceCommand("al.kick", { playerId: sfs.string("other") });
+  await h.allianceCommand("al.acceptapply", { playerId: sfs.string("other") });
   const { relayMutationEvent } = await import("@opencok/repositories/mutation");
   const { publishAllianceMutation } = await import("@opencok/services/alliance-publication");
   const { createAlliancePublicationReader } =
@@ -369,20 +377,30 @@ test("outbox publication uses current members and preserves pending unrelated ev
     notifications.push({ owner, command, body });
     return Promise.resolve();
   };
-  while (
-    await relayMutationEvent(
-      h.db.db,
-      h.authority,
-      (event) =>
-        publishAllianceMutation(
-          createAlliancePublicationReader(h.db.db, h.authority),
-          event.payload,
-          publish,
-        ),
-      () => h.clock.now,
-      "alliance.changed",
-    )
-  ) {}
+  const drain = async () => {
+    while (
+      await relayMutationEvent(
+        h.db.db,
+        h.authority,
+        (event) =>
+          publishAllianceMutation(
+            createAlliancePublicationReader(h.db.db, h.authority),
+            event.payload,
+            publish,
+            h.rules,
+          ),
+        () => h.clock.now,
+        "alliance.changed",
+      )
+    ) {}
+  };
+  await drain();
+  expect(notifications.some((row) => row.owner === "other" && row.command === "push.al.join")).toBe(
+    true,
+  );
+  notifications.length = 0;
+  await h.allianceCommand("al.kick", { playerId: sfs.string("other") });
+  await drain();
   expect(
     notifications.some((row) => row.owner === "other" && row.command === "push.al.leave"),
   ).toBe(true);
@@ -396,6 +414,28 @@ test("outbox publication uses current members and preserves pending unrelated ev
       (row) => row.eventType === "inventory.changed" && row.publishedAt === 0n,
     ).length,
   ).toBeGreaterThan(0);
+  notifications.length = 0;
+  await h.allianceCommand("al.attr", { recruit: sfs.int(1) });
+  await h.allianceCommand("al.apply", { allianceId: sfs.string(id) }, "other");
+  await h.allianceCommand("al.leave", {}, "other");
+  const next = await h.allianceCommand(
+    "al.create",
+    { name: sfs.string("Another"), intro: sfs.string("") },
+    "other",
+  );
+  const nextId = str(fields(next.body.alliance), "uid");
+  await drain();
+  expect(
+    notifications.some((row) => row.owner === "other" && row.command === "push.al.leave"),
+  ).toBe(false);
+  expect(
+    notifications.some(
+      (row) =>
+        row.owner === "other" &&
+        row.command === "push.al.update" &&
+        str(fields(row.body.alliance), "uid") === nextId,
+    ),
+  ).toBe(true);
 }, 30000);
 
 test("native name, abbreviation, lookup and first-page commands preserve their meanings", async () => {
@@ -417,6 +457,16 @@ test("native name, abbreviation, lookup and first-page commands preserve their m
   });
   expect((search.body.list!.value as unknown[]).length).toBe(1);
   expect(search.body.total?.value).toBe(1n);
+  await h.allianceCommand("al.targetscience.set", {
+    scienceId: sfs.string("250000"),
+    isuse: sfs.int(1),
+  });
+  expect(
+    str(
+      fields((await h.allianceService.command("owner", "alliance.init", {})).body.alliance),
+      "targetScience",
+    ),
+  ).toBe("250000");
   await expect(
     h.allianceCommand("al.view", { operationId: sfs.string("alliance-research:reserved") }),
   ).rejects.toThrow();

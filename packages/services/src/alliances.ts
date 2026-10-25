@@ -15,6 +15,7 @@ import {
   allianceMember,
   allianceRight,
   alliancePermissions,
+  allianceTargets,
   changeAlliancePermissions,
   newAllianceMember,
   allianceCreationCost,
@@ -346,6 +347,7 @@ export class AllianceContext {
     return this.state.now;
   }
   member(uid = this.owner, id = this.allianceId) {
+    if (!id || text(this.profile(uid), "allianceId") !== id) allianceFailure(errors.locked);
     return allianceMember(
       [
         ...(this.write.members ?? []),
@@ -469,11 +471,12 @@ export class AllianceContext {
       nextlevel: sfs.int((Math.floor(num(alliance, "giftlevel") / 1000) + 1) * 1000),
       allianceScience: new AllianceScienceContext(this).snapshots(id),
       ...Object.fromEntries(
-        ["rankone", "ranktwo", "rankthree", "rankfour", "rankfive", "targetScience"].map((key) => [
+        ["rankone", "ranktwo", "rankthree", "rankfour", "rankfive"].map((key) => [
           key,
           sfs.string(text(alliance, key)),
         ]),
       ),
+      targetScience: sfs.string(allianceTargets(text(alliance, "targetScience")).join(";")),
     };
   }
   checkMarch(uid: string) {

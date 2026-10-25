@@ -12,7 +12,7 @@ export function createAlliancePublicationReader(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
 ) {
-  return async (id: string) => {
+  return async (id: string, players: readonly string[] = []) => {
     return db.transaction(
       async (tx) => {
         await fenceRealmTransaction(tx, authority);
@@ -60,7 +60,18 @@ export function createAlliancePublicationReader(
           .select()
           .from(alliance_science_upgrade)
           .where(eq(alliance_science_upgrade.allianceId, id));
-        return { record, members, queues, helps, sciences, research };
+        const profiles = players.length
+          ? await tx
+              .select({ uid: userprofile.uid, allianceId: userprofile.allianceId })
+              .from(userprofile)
+              .where(
+                and(
+                  inArray(userprofile.uid, [...players]),
+                  eq(userprofile.serverId, authority.kingdomId),
+                ),
+              )
+          : [];
+        return { record, members, queues, helps, sciences, research, profiles };
       },
       { isolationLevel: "repeatable read" },
     );

@@ -93,6 +93,12 @@ experience changes once per claim. A claimed or expired gift can be cleared.
 The filtered mutation outbox relay publishes alliance updates and help/research
 notifications through the existing realm notification adapter. It reads current
 membership before delivery and leaves other domains' pending events untouched.
+Acceptance by another member emits the native join snapshot with initial science
+data. Removal notifications check the recipient's current profile, so a delayed
+leave cannot clear a later membership. Capacity, permissions and research targets
+use the current state and native field representation. Governance also requires the
+profile and membership rows to identify the same alliance.
+
 Publication retries do not repeat economic or progression mutations. PostgreSQL
 remains authoritative when a recipient is offline; initialization reconstructs
 membership, science and available rewards from saved state.
