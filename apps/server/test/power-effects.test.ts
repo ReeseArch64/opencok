@@ -215,7 +215,22 @@ test("research catalog IDs preserve signed addition before lookup", () => {
   expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(7);
 });
 
-test("missing active research rules and malformed paired values fail without consuming progression", () => {
+test("civilization research skips unavailable levels and preserves recognized bonuses and rows", () => {
+  const { state, rules } = fixture();
+  state.civilizationSciences = [
+    { baseItemID: 4000, level: 10 },
+    { baseItemID: 5000, level: 2 },
+    { baseItemID: 6000, level: 7 },
+  ];
+  rules.power.civilizationSciences!.set("5002", { id: "5002", para1: "487", para2: "250" });
+  const before = structuredClone(state.civilizationSciences);
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(2.5);
+  expect(state.civilizationSciences).toEqual(before);
+  rules.power.civilizationSciences!.clear();
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(0);
+});
+
+test("missing tower research rules and malformed paired values fail without consuming progression", () => {
   const { state, rules } = fixture();
   state.foreignSciences = [{ itemid: 3000, level: 0 }];
   expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
@@ -225,7 +240,7 @@ test("missing active research rules and malformed paired values fail without con
   expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
   state.foreignSciences = [];
   state.civilizationSciences = [{ baseItemID: 4000, level: 1 }];
-  expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
+  expect(storedPowerEffects(state, rules, now).initialAndScience).toBe(0);
   rules.power.civilizationSciences!.set("4001", { id: "4001", para1: "487", para2: "Infinity" });
   expect(() => storedPowerEffects(state, rules, now)).toThrow("102192");
 });

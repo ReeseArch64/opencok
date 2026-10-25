@@ -277,11 +277,22 @@ test("dragon power honors gates, mature state and required effective attack modi
   ).toBe(0n);
 });
 
+test("civilization power skips unavailable levels without changing stored research", () => {
+  const { state, rules } = fixture();
+  state.civilizationSciences = [...state.civilizationSciences, { baseItemID: 4000, level: 10 }];
+  const before = structuredClone(state.civilizationSciences);
+  expect(calculatePlayerPower(state, rules, context()).civilizationSciencePower).toBe(30);
+  expect(state.civilizationSciences).toEqual(before);
+  rules.power.civilizationSciences!.clear();
+  expect(calculatePlayerPower(state, rules, context()).civilizationSciencePower).toBe(0);
+  rules.power.civilizationSciences!.set("2003", { id: "2003", power: "invalid" });
+  expect(() => calculatePlayerPower(state, rules, context())).toThrow("102192");
+});
+
 test("a live domain cannot silently substitute missing or malformed rule values", () => {
   for (const key of [
     "generals",
     "sciences",
-    "civilizationSciences",
     "sagaSciences",
     "heroes",
     "equipment",

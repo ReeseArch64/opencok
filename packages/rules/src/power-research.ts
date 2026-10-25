@@ -57,7 +57,7 @@ export function civilizationResearchEffect(
   for (const base of hashOrder(selected.keys())) {
     const row = selected.get(base)!;
     const rule = levels?.get(addId(base, integer(row.level ?? 0)));
-    if (!rule) return invalid();
+    if (!rule) continue;
     const value = rule.para2 === undefined ? -1 : Math.fround(float(rule.para2) / 100);
     for (const raw of rule.para1?.split("|").filter(Boolean) ?? [])
       if (integer(raw) === requested) total = Math.fround(total + value);

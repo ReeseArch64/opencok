@@ -996,8 +996,11 @@ hidden base entries and pair effect/value tokens only while both lists have valu
 Stored level-zero entries can contribute. Civilization values divide the parsed
 float by 100, keep the legacy missing-value default, and traverse last-per-base
 records in Java hash order. This shares the bounded hash traversal used by tree
-effects. No query finishes research, unlocks entries or spends points. The legacy
-foreign-science table spelling is preserved in the repository; foreign modifiers
+effects. Civilization levels absent from the loaded catalog contribute no bonus or
+power, matching the legacy module's login and power calculations. Their persisted
+levels remain unchanged; recognized entries still contribute and malformed numeric
+values still fail explicitly. No query finishes research, unlocks entries or spends
+points. The legacy foreign-science table spelling is preserved in the repository; foreign modifiers
 do not introduce an additional foreign-power field in the detailed wire response.
 
 The same snapshot now retains general ability JSON, equipped extra attributes,

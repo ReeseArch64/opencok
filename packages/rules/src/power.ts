@@ -157,11 +157,11 @@ export function calculatePlayerPower(
     ),
   );
   const sciencePower = researchPower(state.sciences, rules.power.sciences, "itemId");
-  const civilizationSciencePower = researchPower(
-    state.civilizationSciences,
-    rules.power.civilizationSciences,
-    "baseItemID",
-  );
+  const civilizationSciencePower = sumInt(state.civilizationSciences, (row) => {
+    const id = String(i32(integer(row.baseItemID) + integer(row.level)));
+    const rule = rules.power.civilizationSciences?.get(id);
+    return rule ? integer(rule.power) : 0n;
+  });
   const sagatower_science = researchPower(
     state.sagaSciences,
     rules.power.sagaSciences,
