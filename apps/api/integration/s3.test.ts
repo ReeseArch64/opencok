@@ -87,6 +87,20 @@ test("S3 conditional writes, metadata integrity and restart persistence use isol
       reason: { status: 409 },
     });
     expect(await store.find(owner, sequence)).toEqual({ owner, sequence, hash });
+    const signed = await store.image(path);
+    const publicUrl = new URL(signed);
+    expect(publicUrl.searchParams.get("X-Amz-Expires")).toBe("300");
+    expect(publicUrl.searchParams.get("X-Amz-Algorithm")).toBe("AWS4-HMAC-SHA256");
+    const download = await fetch(signed);
+    expect(download.status).toBe(200);
+    expect(new Uint8Array(await download.arrayBuffer())).toEqual(new Uint8Array(bytes));
+    expect(download.headers.get("cache-control")).toBe("private, no-store");
+    const unsigned = new URL(publicUrl);
+    unsigned.search = "";
+    expect((await fetch(unsigned)).status).toBe(403);
+    publicUrl.searchParams.set("X-Amz-Signature", "0".repeat(64));
+    expect((await fetch(publicUrl)).status).toBe(403);
+
     await docker(["restart", name]);
     store = new S3ImageStore(await client(), bucket);
     expect(Buffer.from((await store.get(path))!)).toEqual(Buffer.from(bytes));

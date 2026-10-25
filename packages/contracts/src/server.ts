@@ -4,7 +4,7 @@ export interface ServerConfig {
   feedMaxCount?: number;
   crossSearchEnabled?: boolean;
   avatarChat?: { url: string; signingSecret: string };
-  avatarFiles?: { origin: string; keyFile: string };
+  avatarFiles?: { origin: string };
   nicknameChat?: { url: string; signingSecret: string };
   mailChat?: { url: string; signingSecret: string };
   chatSession?: { url: string; signingSecret: string };

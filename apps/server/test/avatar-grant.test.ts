@@ -1,20 +1,12 @@
 import { expect, test } from "bun:test";
-import { mkdtemp, writeFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { Effect } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
 import { GameService as Game } from "@opencok/services/game";
 import { Rules, type Rule } from "@opencok/rules/game";
 import { avatarSequence, avatarMinimumLevel, checkAvatarRecord } from "@opencok/rules/avatar";
-import { createAvatarFiles, loadAvatarFiles } from "@opencok/connection/avatar-files";
-import {
-  issueAvatarGrant,
-  issueAvatarConfirmation,
-  verifyGrant,
-  verifyConfirmation,
-  verifyAvatarImage,
-} from "@opencok/identity/avatar";
+import { createAvatarFiles } from "@opencok/connection/avatar-files";
+import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
+import { s3Client, S3ImageStore } from "@opencok/storage/images";
 import { createHandler } from "@opencok/api/files";
 import { sfs, decode, encode } from "@opencok/messages/sfs";
 import type { GameStore } from "@opencok/contracts/game";
@@ -23,8 +15,25 @@ import type { Row } from "@opencok/contracts/rows";
 import { config } from "../src/config";
 
 const now = 1792756800123;
-const seconds = Math.floor(now / 1000);
-const key = Buffer.alloc(32, 19);
+function ticketFixture(clock = () => now) {
+  const records = new Map<string, string>();
+  return createAvatarTickets(async (name, ...args) => {
+    if (name === "SET") {
+      records.set(args[0]!, args[1]!);
+      return "OK";
+    }
+    return records.get(args[0]!) ?? null;
+  }, clock);
+}
+const imageStore = new S3ImageStore(
+  s3Client({
+    endpoint: "http://s3.internal",
+    region: "us-east-1",
+    forcePathStyle: true,
+    credentials: { accessKeyId: "synthetic", secretAccessKey: "synthetic-secret" },
+  }),
+  "images",
+);
 const hash = "a".repeat(64);
 const origin = "http://files.internal:8084";
 const unused = async (): Promise<never> => {
@@ -48,7 +57,9 @@ function fixture() {
   let level = 10;
   let pending = false;
   const calls: unknown[][] = [];
-  const imageStore: ImageStore = {
+  const tickets = ticketFixture();
+  const store: ImageStore = {
+    image: (key) => imageStore.image(key),
     put: unused,
     removePrevious: unused,
     get: unused,
@@ -57,12 +68,11 @@ function fixture() {
       return pending ? { owner, sequence, hash } : null;
     },
   };
-  const handler = createHandler(imageStore, key, () => now);
+  const handler = createHandler(store, tickets);
   const files = createAvatarFiles({
     origin,
-    key,
+    tickets,
     timeoutMs: 1000,
-    now: () => now,
     fetch: async (url, options) => {
       calls.push(["http", url, options.method, options.redirect]);
       return handler(new Request(url, options));
@@ -92,6 +102,7 @@ function fixture() {
   return {
     game,
     service,
+    tickets,
     profile,
     calls,
     setLevel: (value: number) => {
@@ -124,7 +135,7 @@ test("avatar grant binds durable version and identity to the existing files conf
   expect(wire.pendingHash).toEqual(sfs.string(""));
   expect(wire._cok_).toEqual(params._cok_);
   expect(wire.cmdBaseTime).toEqual(params.cmdBaseTime);
-  expect(verifyGrant(wire.grant!.value as string, key, seconds)).toEqual({
+  expect(await f.tickets.verify(wire.grant!.value as string, "upload")).toEqual({
     owner: "1001",
     seq: "5",
   });
@@ -294,35 +305,34 @@ test("avatar rules retain encoded sequences, lazy config parsing and Java long a
   ).not.toThrow();
 });
 
-test("grant and confirmation domains bind owner, sequence, secret and exact expiry", () => {
-  const grant = issueAvatarGrant("001001", 999999, key, seconds);
-  expect(verifyGrant(grant, key, seconds + 119)).toEqual({ owner: "001001", seq: "999999" });
-  expect(() => verifyGrant(grant, key, seconds + 120)).toThrow();
-  expect(() => verifyGrant(grant, key, seconds - 1)).toThrow();
-  expect(() => verifyGrant(grant, Buffer.alloc(32, 3), seconds)).toThrow();
-  expect(() => verifyGrant(grant.replace(".001001.", ".001002."), key, seconds)).toThrow();
-  const confirmation = issueAvatarConfirmation("001001", 999999, key, seconds);
-  expect(() =>
-    verifyConfirmation(confirmation, "001001", "999999", key, seconds + 29),
-  ).not.toThrow();
-  for (const time of [seconds - 1, seconds + 30])
-    expect(() => verifyConfirmation(confirmation, "001001", "999999", key, time)).toThrow();
-  expect(() => verifyConfirmation(confirmation, "1001", "999999", key, seconds)).toThrow();
-  expect(() => verifyConfirmation(confirmation, "001001", "999998", key, seconds)).toThrow();
-  expect(() => verifyConfirmation(grant, "001001", "999999", key, seconds)).toThrow();
-  expect(() => verifyGrant(confirmation, key, seconds)).toThrow();
+test("Redis authorization binds purpose, owner, sequence and exact expiry without a signing key", async () => {
+  let time = now;
+  const tickets = ticketFixture(() => time);
+  const token = await tickets.issue("001001", 999999, "upload");
+  expect(token).toMatch(/^v2\.[a-f0-9]{64}$/);
+  expect(await tickets.verify(token, "upload")).toEqual({ owner: "001001", seq: "999999" });
+  await expect(tickets.verify(token, "confirm")).rejects.toThrow();
+  await expect(tickets.verify(token + "a", "upload")).rejects.toThrow();
+  const confirmation = await tickets.issue("1001", 5, "confirm");
+  time += 29999;
+  expect(await tickets.verify(confirmation, "confirm")).toEqual({ owner: "1001", seq: "5" });
+  time++;
+  await expect(tickets.verify(confirmation, "confirm")).rejects.toThrow();
+  time = now + 119999;
+  expect(await tickets.verify(token, "upload")).toEqual({ owner: "001001", seq: "999999" });
+  time++;
+  await expect(tickets.verify(token, "upload")).rejects.toThrow();
   for (const owner of ["", "abc", "1".repeat(21), "1\n"])
-    expect(() => issueAvatarGrant(owner, 1, key, seconds)).toThrow();
+    await expect(tickets.issue(owner, 1, "upload")).rejects.toThrow();
   for (const sequence of [0, 1000000, 1.5])
-    expect(() => issueAvatarGrant("1001", sequence, key, seconds)).toThrow();
-  expect(() => issueAvatarGrant("1001", 1, Buffer.alloc(31), seconds)).toThrow();
+    await expect(tickets.issue("1001", sequence, "upload")).rejects.toThrow();
 });
 
 test("private receipt exchange rejects malformed or mismatched replies and bounds streaming/deadlines", async () => {
   const client = (
     fetch: (url: string, options: RequestInit) => Promise<Response>,
     timeoutMs = 1000,
-  ) => createAvatarFiles({ origin, key, timeoutMs, now: () => now, fetch });
+  ) => createAvatarFiles({ origin, tickets: ticketFixture(), timeoutMs, fetch });
   for (const response of [
     new Response("private", { status: 503 }),
     new Response("", { status: 302 }),
@@ -333,7 +343,7 @@ test("private receipt exchange rejects malformed or mismatched replies and bound
     new Response(`v1\n1001\n5\n${hash}\n`, { headers: { "content-type": "application/json" } }),
   ])
     await expect(client(async () => response).find("1001", 5)).rejects.toThrow(
-      "Avatar confirmation unavailable",
+      "Avatar files unavailable",
     );
   let cancelled = false;
   const oversized = new ReadableStream<Uint8Array>({
@@ -372,48 +382,26 @@ test("private receipt exchange rejects malformed or mismatched replies and bound
     ).find("1001", 5),
   ).rejects.toThrow();
   expect(bodyCancelled).toBe(true);
-  const copiedKey = Buffer.from(key);
-  const stable = createAvatarFiles({ origin, key: copiedKey, timeoutMs: 1000, now: () => now });
-  copiedKey.fill(0);
-  expect(verifyGrant(stable.issue("1001", 1), key, seconds).owner).toBe("1001");
 });
 
-test("files configuration and protected key loading are optional, explicit and sanitized", async () => {
+test("files configuration needs only a private API origin and no signing-key file", async () => {
   const source = {
     DATABASE_URL: "postgres://synthetic:synthetic@invalid.example/global",
     GAME_LOGIN_SECRET: "synthetic",
-    GAME_RESOURCES: "synthetic",
   };
   expect(
     (await Effect.runPromise(config.pipe(Effect.provideService(EnvironmentSource, source))))
       .avatarFiles,
   ).toBeUndefined();
-  const folder = await mkdtemp(join(tmpdir(), "opencok-avatar-unit-"));
-  const file = join(folder, "synthetic-key");
-  try {
-    await writeFile(file, key.toString("hex") + "\n", { mode: 0o600 });
-    const loaded = await Effect.runPromise(
-      config.pipe(
-        Effect.provideService(EnvironmentSource, {
-          ...source,
-          GAME_FILES_URL: origin,
-          FILES_SIGNING_KEY_FILE: file,
-        }),
-      ),
-    );
-    expect(loaded.avatarFiles).toEqual({ origin, keyFile: file });
-    const files = await loadAvatarFiles({ origin, keyFile: file, timeoutMs: 1000 });
-    expect(verifyGrant(files.issue("1001", 1), key).owner).toBe("1001");
-    await writeFile(file, "synthetic-private-invalid");
-    await expect(loadAvatarFiles({ origin, keyFile: file, timeoutMs: 1000 })).rejects.toThrow(
-      "Avatar files unavailable",
-    );
-    await expect(
-      loadAvatarFiles({ origin, keyFile: join(folder, "missing"), timeoutMs: 1000 }),
-    ).rejects.toThrow("Avatar files unavailable");
-  } finally {
-    await rm(folder, { recursive: true, force: true });
-  }
+  expect(
+    (
+      await Effect.runPromise(
+        config.pipe(
+          Effect.provideService(EnvironmentSource, { ...source, GAME_FILES_URL: origin }),
+        ),
+      )
+    ).avatarFiles,
+  ).toEqual({ origin });
   for (const value of [
     "invalid",
     "file:///private",
@@ -421,7 +409,9 @@ test("files configuration and protected key loading are optional, explicit and s
     "http://files.internal/path",
     "http://files.internal/?private=x",
   ])
-    expect(() => createAvatarFiles({ origin: value, key, timeoutMs: 1000 })).toThrow();
+    expect(() =>
+      createAvatarFiles({ origin: value, tickets: ticketFixture(), timeoutMs: 1000 }),
+    ).toThrow();
 });
 
 test("authenticated avatar URL renewal signs current realm profiles without upload eligibility checks", async () => {
@@ -435,10 +425,10 @@ test("authenticated avatar URL renewal signs current realm profiles without uplo
   for (const target of ["1001", "1002"]) {
     const response = await game.execute("1001", "user.avatar.url", { gameuid: sfs.string(target) });
     const url = new URL(response.body.path!.value as string, "http://localhost");
-    expect(() => verifyAvatarImage(url, key, seconds)).not.toThrow();
+    expect(url.searchParams.get("X-Amz-Algorithm")).toBe("AWS4-HMAC-SHA256");
     expect(response.body.owner).toEqual(sfs.string(target));
     expect(url.pathname).toContain(target.slice(-6));
-    expect(url.searchParams.get("expires")).toBe(String(seconds + 300));
+    expect(url.searchParams.get("X-Amz-Expires")).toBe("300");
   }
   f.profile.picVer = 0;
   expect((await game.execute("1001", "user.avatar.url", {})).body.path).toEqual(sfs.string(""));
@@ -450,5 +440,5 @@ test("authenticated avatar URL renewal signs current realm profiles without uplo
   ).rejects.toThrow();
   profiles.get("1001")!.banFlag = 1;
   await expect(game.execute("1001", "user.avatar.url", {})).rejects.toThrow();
-  expect(f.calls).toEqual([]);
+  expect(f.calls.some(([name]) => ["read", "castle", "record"].includes(String(name)))).toBe(false);
 });

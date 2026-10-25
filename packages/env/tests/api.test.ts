@@ -49,10 +49,30 @@ test("public chat discovery uses an optional HTTP origin without private URL com
     expect(() => parseApiEnvironment({ API_CHAT_URL: value })).toThrow("API_CHAT_URL");
 });
 
-test("API media is disabled by default and requires an explicit boolean flag", () => {
-  expect(parseApiEnvironment({}).API_FILES_ENABLED).toBe(false);
-  expect(parseApiEnvironment({ API_FILES_ENABLED: "true" }).API_FILES_ENABLED).toBe(true);
-  expect(() => parseApiEnvironment({ API_FILES_ENABLED: "yes" })).toThrow("API_FILES_ENABLED");
+test("API media requires exactly the five S3 settings and no separate flag or key file", () => {
+  expect(parseApiEnvironment({}).S3_BUCKET).toBeUndefined();
+  const media = {
+    S3_PUBLIC_ENDPOINT: "http://s3.example:9000",
+    S3_REGION: "us-east-1",
+    S3_BUCKET: "images",
+    S3_ACCESS_KEY_ID: "synthetic",
+    S3_SECRET_ACCESS_KEY: "synthetic-secret",
+  };
+  expect(parseApiEnvironment(media).S3_BUCKET).toBe("images");
+  for (const field of Object.keys(media))
+    expect(() => parseApiEnvironment({ ...media, [field]: undefined })).toThrow();
+  expect(
+    parseApiEnvironment(Object.fromEntries(Object.keys(media).map((key) => [key, ""]))).S3_BUCKET,
+  ).toBeUndefined();
+  for (const endpoint of [
+    "file:///private",
+    "http://u:p@s3.example",
+    "http://s3.example/path",
+    "http://s3.example/?key=x",
+  ])
+    expect(() => parseApiEnvironment({ ...media, S3_PUBLIC_ENDPOINT: endpoint })).toThrow(
+      "S3_PUBLIC_ENDPOINT",
+    );
 });
 
 test("creation requires complete trusted realm configuration without exposing secrets", () => {

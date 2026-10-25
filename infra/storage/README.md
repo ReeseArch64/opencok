@@ -20,8 +20,8 @@ source mount is read-only. The existing `minio-data` volume is retained.
 
 Public bucket permissions allow object reads only beneath the two CDN host
 prefixes. Bucket listing, root archives and the `opencok-uploads` bucket remain
-private. Avatar uploads use the opt-in shared API, with their own private bucket and
-[media configuration](../../apps/api/MEDIA.md).
+private. Avatar uploads use the shared API, with their own private bucket and
+[media configuration](../../apps/api/README.md#avatar-media).
 
 The gateway serves `/cok/*` (excluding `/cok/img/*`) and `/100001/*`, preserving
 Range, ETag and HEAD behavior. Requests use the MinIO upstream Host and fixed

@@ -10,6 +10,7 @@ import {
 import { FILE_LIMIT } from "@opencok/contracts/files";
 import { HttpError } from "@opencok/errors/http";
 import type { ImageStore, UploadReceipt } from "@opencok/contracts/files";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export function s3Client(config: {
   region: string;
@@ -39,6 +40,20 @@ export class S3ImageStore implements ImageStore {
     private client: S3Client,
     private bucket: string,
   ) {}
+
+  image(key: string): Promise<string> {
+    if (!/^[0-9]{1,6}\/[a-f0-9]{32}\.jpg$/.test(key)) throw new Error("Invalid avatar object key");
+    return getSignedUrl(
+      this.client,
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        ResponseContentType: "image/jpeg",
+        ResponseCacheControl: "private, no-store",
+      }),
+      { expiresIn: 300 },
+    );
+  }
 
   async put(key: string, bytes: Buffer, owner: string, seq: string, hash: string) {
     if (await this.archived(owner, seq)) throw new HttpError(409, "Image sequence already exists");

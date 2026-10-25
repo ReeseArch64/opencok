@@ -1,8 +1,8 @@
 # Avatar integration
 
 Topic 7 connects the realm's authenticated grant, verified completion and legacy version
-commands to media in the shared API. JPEG/PNG upload, immutable S3 receipts and API-signed
-JPEG delivery use the [media contract](../api/MEDIA.md). No Files listener,
+commands to media in the shared API. JPEG/PNG upload, immutable S3 receipts and SDK-presigned S3
+JPEG delivery use the [media contract](../api/README.md#avatar-media). No Files listener,
 new storage provider or player-facing moderation endpoint is introduced.
 
 ## Versions and restored profiles
@@ -98,12 +98,16 @@ counter and default-zero revision columns, and explicitly admit the legacy zero-
 boundary and no-effect moderation receipts. Existing rows retain revision zero.
 Deploy the new Chat receiver before producing revised realm publications.
 
-Use the existing `GAME_FILES_URL`, `FILES_SIGNING_KEY_FILE`, `GAME_AVATAR_CHAT_URL`
+Use the existing `GAME_FILES_URL`, `GAME_AVATAR_CHAT_URL`
 and `CHAT_SIGNING_SECRET` configuration. The files URL targets the shared API's private
 confirmation origin; the Chat URL ends in `/_internal/avatar-profile`. The API needs
-its existing media/S3 settings and the same protected files signing key. Configured
-startup checks the completion, version, moderation and publication stores. Development
-Compose still requires an operator override for private routes and read-only key mounts.
+the five S3 settings; realm authorization uses the existing shared Redis. Configured
+startup checks the completion, version, moderation and publication stores.
+Development Compose provides the private API origin and S3 settings directly;
+production uses its own environment configuration. Completion and version allocation require media but do not require Chat.
+When Chat is unconfigured, local mail/cache/notification effects proceed and Chat
+publication bits remain pending without acknowledgment. Configuring Chat later
+allows the existing relays to deliver them.
 
 Back up realm profiles, upload records, completion/version journals and publication
 counters together, with the global Chat state and immutable object store. A restored

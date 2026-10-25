@@ -164,11 +164,10 @@ session-signing settings, `API_CHAT_URL` for public discovery and
 `GAME_CHAT_SESSION_URL` for the realm's private session endpoint. See the
 [chat guide](apps/chat/README.md) and [API discovery guide](apps/api/README.md).
 
-Avatar media is disabled by default. Enable `API_FILES_ENABLED`, provision a
-private uploads bucket and mount an existing protected signing key. The
-[media guide](apps/api/MEDIA.md) includes a local Compose overlay, upload limits,
-private confirmation, realm completion settings and rollback. There is no Files
-container or separate media port.
+Avatar media uses five S3 settings for its private bucket and SDK-presigned image
+URLs. Uploads still pass through the API with temporary realm-issued Redis tickets.
+The [API guide](apps/api/README.md#avatar-media) covers local Compose, limits and
+confirmation. There is no Files container, separate media port or signing-key file.
 
 Firebase identity/push, Stripe payments, managed production providers, Kubernetes,
 R2 client updates and a future Flutter client are target capabilities rather than

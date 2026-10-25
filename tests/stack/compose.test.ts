@@ -129,6 +129,11 @@ async function createStack() {
     API_GAME_HOST: "127.0.0.1",
     API_GAME_PORT: String(gamePort),
     API_DEPENDENCY_TIMEOUT_MS: "500",
+    S3_PUBLIC_ENDPOINT: "http://minio:9000",
+    S3_REGION: "us-east-1",
+    S3_BUCKET: "opencok-uploads",
+    S3_ACCESS_KEY_ID: "opencok",
+    S3_SECRET_ACCESS_KEY: "opencok-secret",
   });
   isolated.services.gateway.ports = [
     { target: 80, published: String(httpPort), host_ip: "127.0.0.1", protocol: "tcp" },

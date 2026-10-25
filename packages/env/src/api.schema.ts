@@ -1,3 +1,4 @@
+import { filesSchema } from "./files";
 import { z } from "zod";
 import { blankToUndefined, validateEnvironment } from "./validation";
 
@@ -72,10 +73,17 @@ export const apiSchema = z
         })
         .optional(),
     ),
-    API_FILES_ENABLED: z
-      .enum(["true", "false"])
-      .default("false")
-      .transform((value) => value === "true"),
+    S3_PUBLIC_ENDPOINT: z.preprocess(
+      blankToUndefined,
+      filesSchema.shape.S3_PUBLIC_ENDPOINT.optional(),
+    ),
+    S3_REGION: z.preprocess(blankToUndefined, filesSchema.shape.S3_REGION.optional()),
+    S3_BUCKET: z.preprocess(blankToUndefined, filesSchema.shape.S3_BUCKET.optional()),
+    S3_ACCESS_KEY_ID: z.preprocess(blankToUndefined, filesSchema.shape.S3_ACCESS_KEY_ID.optional()),
+    S3_SECRET_ACCESS_KEY: z.preprocess(
+      blankToUndefined,
+      filesSchema.shape.S3_SECRET_ACCESS_KEY.optional(),
+    ),
     API_HOST: z.string().min(1).default("127.0.0.1"),
     API_PORT: port(8082),
     API_DEPENDENCY_TIMEOUT_MS: timeout(3000),
@@ -94,6 +102,19 @@ export const apiSchema = z
       z.coerce.number().int().min(1).max(65535).optional(),
     ),
   })
+  .refine(
+    (settings) => {
+      const values = [
+        settings.S3_PUBLIC_ENDPOINT,
+        settings.S3_REGION,
+        settings.S3_BUCKET,
+        settings.S3_ACCESS_KEY_ID,
+        settings.S3_SECRET_ACCESS_KEY,
+      ];
+      return values.every((value) => value === undefined) || values.every((value) => !!value);
+    },
+    { path: ["S3_BUCKET"], message: "Configure all five S3 settings" },
+  )
   .refine(
     (settings) =>
       [

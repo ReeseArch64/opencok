@@ -115,17 +115,16 @@ test("realm chat session issuance is opt-in and requires a valid internal endpoi
     ).toThrow("GAME_CHAT_SESSION_URL");
 });
 
-test("realm avatar integration is optional and requires an explicit files origin and key path", () => {
+test("realm avatar integration needs only an explicit private API origin", () => {
   expect(parseServerEnvironment(base).GAME_FILES_URL).toBeUndefined();
   const configured = {
     ...base,
     GAME_FILES_URL: "http://files.internal:8084",
-    FILES_SIGNING_KEY_FILE: "/synthetic/key",
   };
   expect(parseServerEnvironment(configured).GAME_FILES_URL).toBe("http://files.internal:8084");
-  expect(() =>
-    parseServerEnvironment({ ...base, GAME_FILES_URL: configured.GAME_FILES_URL }),
-  ).toThrow("FILES_SIGNING_KEY_FILE");
+  expect(
+    parseServerEnvironment({ ...base, GAME_FILES_URL: configured.GAME_FILES_URL }).GAME_FILES_URL,
+  ).toBe(configured.GAME_FILES_URL);
   for (const url of [
     "invalid",
     "file:///private",
@@ -144,14 +143,13 @@ test("avatar completion requires its own private chat endpoint, files and signin
     ...base,
     GAME_AVATAR_CHAT_URL: "http://chat.internal/_internal/avatar-profile",
     GAME_FILES_URL: "http://files.internal",
-    FILES_SIGNING_KEY_FILE: "/synthetic/key",
     CHAT_SIGNING_SECRET: "synthetic",
   };
   expect(parseServerEnvironment(base).GAME_AVATAR_CHAT_URL).toBeUndefined();
   expect(parseServerEnvironment(configured).GAME_AVATAR_CHAT_URL).toBe(
     configured.GAME_AVATAR_CHAT_URL,
   );
-  for (const field of ["GAME_FILES_URL", "FILES_SIGNING_KEY_FILE", "CHAT_SIGNING_SECRET"])
+  for (const field of ["GAME_FILES_URL", "CHAT_SIGNING_SECRET"])
     expect(() => parseServerEnvironment({ ...configured, [field]: undefined })).toThrow(field);
   for (const url of [
     "http://chat.internal/external/session",

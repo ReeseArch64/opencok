@@ -131,7 +131,6 @@ requires the remaining service settings through its process environment.
 | `GAME_CHAT_SESSION_URL`          | Optional internal HTTP(S) endpoint ending in `/external/session`; unset disables chat session issuance.                              |
 | `CHAT_SIGNING_SECRET`            | Required when the session URL is configured; must match the maintained chat service.                                                 |
 | `GAME_FILES_URL`                 | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                        |
-| `FILES_SIGNING_KEY_FILE`         | Required explicit key-file path when the files origin is configured; same protected key as the files service.                        |
 | `GAME_LOGIN_SECRET`              | Required private secret matching the legacy mobile login issuer.                                                                     |
 | `GAME_REDIS_URL`                 | Defaults to `redis://127.0.0.1:6379/0`.                                                                                              |
 | `GAME_ZOOKEEPER`                 | Defaults to `127.0.0.1:2181`.                                                                                                        |
@@ -2848,7 +2847,7 @@ header-only authorization is rejected. `user.avatar.url` renews a five-minute si
 `path` for the current picture; optional `gameuid` selects another active realm profile.
 It requires an authenticated active realm requester and returns an empty path when no
 custom sequence exists. The default `hero.k7` interval is three days. See the
-[media lifecycle and coordinated rollout](../api/MEDIA.md#contracts-and-boundaries).
+[media lifecycle and coordinated rollout](../api/README.md#avatar-media).
 It requires an authenticated numeric owner and, when supplied, an exactly matching
 String `gameuid`. Request version, sequence and endpoint fields cannot override stored
 state. Correlation is retained; grant issuance changes no profile, upload record or
@@ -2867,24 +2866,28 @@ parsing. Rules preserve Java signed parsing, 64-bit arithmetic wrapping, inclusi
 eligibility deadlines and the level/cooldown/ban error precedence (`105775`, `105769`,
 `105770`). Castle and record reads are lazy, owner-bound and limited to the required fields.
 
-Configure `GAME_FILES_URL` as the internal HTTP(S) origin reachable from the realm and
-`FILES_SIGNING_KEY_FILE` as an explicit path to the protected 32-byte key used by the files
-service. The file contains 64 lowercase hex characters with an optional final newline.
-No key is generated, replaced or logged. The origin accepts no path, embedded credentials,
-query or fragment. An absent origin keeps issuance unsupported; invalid configuration,
-an unreadable key or an unavailable upload-record table fails configured startup.
-Development Compose does not forward these settings or mount the key automatically;
-an operator override must provide both settings and a read-only key mount. The files
-service itself is also provisioned separately.
+Configure `GAME_FILES_URL` as the internal HTTP(S) API origin reachable from the
+realm. API and realm share the existing Redis instance for short-lived, opaque,
+purpose-bound authorization tickets. The origin accepts no path, embedded
+credentials, query or fragment. An absent origin keeps issuance unsupported;
+invalid configuration or unavailable upload-record tables fail configured startup.
+Development Compose provides the private origin directly. Production configures it
+through its own deployment; no Compose file or signing-key mount is required.
 
 The realm reads `/_internal/avatars/{owner}/{sequence}` using a separate 30-second
-confirmation signature. `DEPENDENCY_TIMEOUT_MS` bounds the whole exchange, including
-streamed response consumption while the profile lock is held. Redirects reject, receipts
-are limited to 128 bytes, and owner, canonical sequence and SHA-256 must match. An empty
-404 means no pending upload. Other failed or malformed responses prevent a grant, with
-sanitized errors and no automatic retry. The resulting upload grant has a fresh random
-nonce and a 120-second lifetime. An existing valid receipt supplies `pendingHash`, allowing
-a caller to recognize an upload already stored for that sequence.
+confirmation ticket. `DEPENDENCY_TIMEOUT_MS` bounds the entire exchange, including
+streamed response consumption while the profile lock is held. Redirects reject,
+receipts are limited to 128 bytes, and owner, canonical sequence and SHA-256 must
+match. An empty 404 means no pending upload. Failed or malformed responses prevent
+a grant with sanitized errors. Upload tickets have 256 random bits, a 120-second
+Redis TTL and no embedded storage credential. An existing valid receipt supplies
+`pendingHash`, allowing recovery of an already stored upload.
+
+Authenticated `user.avatar.url` renewal uses a separate image-purpose ticket at
+`/_internal/avatars/{owner}/{sequence}/url`. The API returns an AWS SDK-presigned
+S3 URL, valid for five minutes. The API alone holds the five S3 settings; the realm
+never loads storage credentials or a signing-key file. Both internal routes remain
+outside the public gateway. Old API-signed image URLs are rejected.
 
 The maintained files service verifies immutable S3 receipts and actual object bytes. It
 has no historical filesystem `completed` marker; the durable profile version is the
@@ -3077,15 +3080,14 @@ The opt-in completion runtime now schedules this consumer.
 
 [Issue #81](https://github.com/ReeseArch64/opencok/issues/81) connects
 `user.avatar.finish` to the maintained receipt transaction, all three consumers and local
-session notifications. Enable it with `GAME_AVATAR_CHAT_URL` pointing to the chat service's
-exact private `/_internal/avatar-profile` endpoint, matching `CHAT_SIGNING_SECRET`, and
-the existing `GAME_FILES_URL`/`FILES_SIGNING_KEY_FILE` integration. The completion endpoint
-is independent of chat session issuance. Missing settings leave finish unsupported;
-configured startup checks the completion and mail tables. Previously generated kingdom
-`0006_avatar_completions` and global `0002_chat_avatar_profiles` must be provisioned
-through the deployment workflow; startup never applies migrations. Compose still needs
-an explicit operator override and read-only key mount. No new external dependency or
-schema is introduced here; the existing rules workspace becomes a server runtime dependency.
+session notifications. Configure `GAME_FILES_URL` and the existing shared Redis to
+enable completion. Optional `GAME_AVATAR_CHAT_URL` selects the private
+`/_internal/avatar-profile` endpoint and requires its matching `CHAT_SIGNING_SECRET`.
+Chat session issuance is independent. Without Chat, local completion proceeds and
+its Chat intent remains pending. Startup checks completion and mail tables;
+migrations continue through the normal deployment workflow. Development Compose
+supplies media configuration; production does not depend on Compose. No signing-key
+mount is required.
 
 The authenticated command accepts a String `receipt` containing `sequence:sha256`, and
 an optional String `gameuid` must match the session. It returns String `uid`, Int `picVer`

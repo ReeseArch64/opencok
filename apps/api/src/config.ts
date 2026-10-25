@@ -16,7 +16,7 @@ export const readConfig = Effect.gen(function* () {
           realms: settings.API_PROVISIONING_REALMS!,
         }
       : undefined,
-    filesEnabled: settings.API_FILES_ENABLED,
+    filesEnabled: !!settings.S3_BUCKET,
     chatUrl: settings.API_CHAT_URL,
     kingdomId: settings.KINGDOM_ID,
     host: settings.API_HOST,

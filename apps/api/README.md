@@ -36,8 +36,8 @@ point; the API has no directly published container port.
 
 Container/process settings are validated through `@opencok/env/api` and
 `@opencok/env/database`; local Compose values are direct declarations except for the
-optional chat origin forwarded from the environment. Media is opt-in; see
-[API media](MEDIA.md) for S3/key settings, gateway routes and migration from Files:
+optional integration settings. Media is enabled by the complete S3 configuration
+described in [Avatar media](#avatar-media):
 
 | Setting                     | Purpose                                                                                                                |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -146,7 +146,45 @@ validation step; previous PHP/MariaDB checks do not establish this port's compat
 
 ## Avatar media
 
-`API_FILES_ENABLED=true` composes signed avatar uploads, public JPEG delivery and
-private receipt confirmation into this API process. There is no separate Files
-application or listener. See [API media](MEDIA.md) for provisioning, limits,
-realm configuration and recovery. Discovery continues to work without media configuration.
+Avatar uploads remain on the API listener. Configure only these media settings:
+
+| Setting                | Purpose                                                                                                  |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| `S3_PUBLIC_ENDPOINT`   | S3-compatible origin reachable by both API and clients; local MinIO uses the host's published port 9000. |
+| `S3_REGION`            | Object-store signing region.                                                                             |
+| `S3_BUCKET`            | Existing private uploads bucket.                                                                         |
+| `S3_ACCESS_KEY_ID`     | Storage identity with object read/write/delete permissions.                                              |
+| `S3_SECRET_ACCESS_KEY` | Matching secret; never sent to clients.                                                                  |
+
+All five settings are required together. With none configured, discovery runs without
+media. No extra media-enable flag, signing key file, session token or endpoint setting
+is needed. AWS SDK `getSignedUrl` issues five-minute S3 `GetObject` URLs. Keep the
+bucket private and use an endpoint reachable from phones as well as the API.
+
+The root development Compose file supplies local MinIO settings and the realm's
+private `GAME_FILES_URL=http://api:8080`. It is a development environment only;
+production receives the five S3 settings directly through its own deployment.
+No Compose file or media overlay is required for production.
+
+The authenticated realm issues opaque upload tickets in the existing shared Redis
+with a 120-second TTL, bound to owner, sequence and purpose. The client sends a single
+`grant` query parameter to `POST /gameservice/www/gateway/json.php` using the existing
+multipart `data` and `file` fields. Header-only tickets are rejected. API confirmation
+and image-URL issuance use separate 30-second purpose-bound tickets and private
+`/_internal/avatars/...` routes. The gateway never exposes those routes.
+
+The API enforces 2 MiB inputs, 4096 pixels per axis and 4194304 pixels total, decodes
+JPEG/PNG and re-encodes JPEG without metadata. The HTTP body limit is 2112 KiB;
+discovery retains its 64 KiB cap. Images have immutable per-owner sequence keys and
+SHA-256 metadata. Matching retries resume replacement cleanup; different bytes for
+one sequence reject with 409. Archived receipts prevent sequence reuse after the
+preceding JPEG is deleted. Existing three-day replacement and moderation policies
+remain authoritative in the realm. Chat is optional; undelivered Chat intents remain
+pending until configured.
+
+`user.avatar.url` returns a fresh S3 URL for the authenticated realm profile. The
+upload response also returns a presigned S3 URL. Old API-signed URLs and upload HMACs
+are no longer valid. Coordinate API, realm and transitional client deployment; local
+client patch 028 uses the opaque ticket and query transport. Keep private artifacts
+outside Git. Preserve buckets, receipts, profile journals and Redis configuration
+across restarts. No database reset or schema migration is required.

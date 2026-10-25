@@ -28,7 +28,7 @@ const template = {
   message: "Synthetic message",
   type: "2",
 };
-function fixture(mode = "1") {
+function fixture(mode = "1", chatEnabled = true) {
   let state = {
     profile: ["1001", 1, "0", 0, 1000004, "Synthetic Name", "synthetic"] as unknown[] | null,
     record: null as unknown[] | null,
@@ -175,7 +175,9 @@ function fixture(mode = "1") {
     config: {
       kingdomId: 1,
       timeoutMs: 1000,
-      avatarChat: { url: "http://chat.internal/_internal/avatar-profile", signingSecret: secret },
+      avatarChat: chatEnabled
+        ? { url: "http://chat.internal/_internal/avatar-profile", signingSecret: secret }
+        : undefined,
     },
     cache: {
       publishPlayerUpdateTime: async (owner, time) => {
@@ -237,6 +239,21 @@ function fixture(mode = "1") {
       game.execute("1001", "user.avatar.finish", { receipt: sfs.string(`5:${hash}`), ...params }),
   };
 }
+
+test("finish without configured chat delivers local effects and retains pending chat publication", async () => {
+  const f = fixture("1", false);
+  const result = await f.run();
+  expect(result.body.picVer).toEqual(sfs.int(5));
+  expect(f.state.completions[0]![6]).toBe(4);
+  expect(f.markers).toHaveLength(1);
+  expect(f.state.mail).toHaveLength(1);
+  expect(f.chat).toHaveLength(0);
+  expect(f.reports).toEqual([]);
+  await f.runtime.service.deliver("1001", 5);
+  expect(f.state.completions[0]![6]).toBe(4);
+  expect(f.markers).toHaveLength(1);
+  expect(f.state.mail).toHaveLength(1);
+});
 
 test("finish command commits and delivers mail, cache and chat through production composition", async () => {
   const f = fixture();
@@ -392,13 +409,12 @@ test("readiness only inspects maintained tables and the pending selector rejects
   expect(f.queries).toHaveLength(4);
 });
 
-test("runtime configuration requires explicit avatar chat and files integration", async () => {
+test("runtime configuration loads media independently of optional avatar chat", async () => {
   const base = {
     DATABASE_URL: "postgres://synthetic:synthetic@invalid.example/global",
     GAME_LOGIN_SECRET: "synthetic",
     GAME_RESOURCES: "synthetic",
     GAME_FILES_URL: "http://files.internal",
-    FILES_SIGNING_KEY_FILE: "/synthetic/key",
     GAME_AVATAR_CHAT_URL: "http://chat.internal/_internal/avatar-profile",
     CHAT_SIGNING_SECRET: secret,
   };
@@ -408,8 +424,18 @@ test("runtime configuration requires explicit avatar chat and files integration"
   expect(result.avatarChat).toEqual({ url: base.GAME_AVATAR_CHAT_URL, signingSecret: secret });
   expect(result.avatarFiles).toEqual({
     origin: base.GAME_FILES_URL,
-    keyFile: base.FILES_SIGNING_KEY_FILE,
   });
+  const withoutChat = await Effect.runPromise(
+    config.pipe(
+      Effect.provideService(EnvironmentSource, {
+        ...base,
+        GAME_AVATAR_CHAT_URL: "",
+        CHAT_SIGNING_SECRET: "",
+      }),
+    ),
+  );
+  expect(withoutChat.avatarFiles).toEqual(result.avatarFiles);
+  expect(withoutChat.avatarChat).toBeUndefined();
 });
 
 test("uncertain completion commit recovers existing receipt without repeating mutation", async () => {

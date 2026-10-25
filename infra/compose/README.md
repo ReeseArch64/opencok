@@ -7,8 +7,9 @@ settings are substituted from the root `.env`.
 
 Every service uses both profiles `all` and `dev`; either profile starts the same
 complete set of containers, including pgAdmin, Redis Insight and Portainer.
-Chat remains separately hosted. Media runs inside the API when explicitly enabled
-with the [media overlay](../../apps/api/MEDIA.md); there is no Files container. MinIO and `minio-setup` provide the
+Chat remains separately hosted. Media runs inside the API using the five S3 settings
+and shared Redis authorization; there is no Files container or media overlay. See the
+[API guide](../../apps/api/README.md#avatar-media). MinIO and `minio-setup` provide the
 client CDN alongside the TypeScript API/server, gateway, PostgreSQL, Redis and
 ZooKeeper.
 
@@ -72,7 +73,8 @@ The one-shot jobs exit with code zero after completion.
 
 Port mappings have no host-IP prefix. Internal connections use service DNS:
 `postgres:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933` and
-`minio:9000`. The API and game server have no directly published host ports.
+`minio:9000`. The API and game server have no directly published host ports. The API joins the
+external network for outbound access to the public S3 endpoint.
 The local API advertises `192.168.1.104:9933`; edit that direct value if the host
 address changes. The MinIO console redirect uses the same local host address.
 

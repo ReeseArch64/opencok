@@ -1,3 +1,4 @@
+import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { DisposableAvatarStorage } from "../../api/integration/support/minio.ts";
 import { createHandler as createFiles } from "@opencok/api/files";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
@@ -217,16 +218,19 @@ test("avatar TCP lifecycle uploads through API and S3, survives restart, moderat
     await new Promise<void>((resolve) => chat!.server.listen(0, "127.0.0.1", resolve));
     const chatPort = (chat.server.address() as AddressInfo).port;
     mediaStore = await media.start();
-    const key = randomBytes(32);
-    const keyFile = join(resources, "synthetic-key");
-    await Bun.write(keyFile, key.toString("hex"));
+    const ticketCache = new Cache({
+      redisUrl: `redis://127.0.0.1:${await endpoint(redis, 6379)}/0`,
+      timeoutMs: 5000,
+      kingdomId: 1,
+    });
+    const tickets = createAvatarTickets((name, ...args) => ticketCache.command(name, ...args));
     filesServer = Bun.serve({
       hostname: "127.0.0.1",
       port: 0,
-      fetch: (request) => createFiles(mediaStore, key)(request),
+      fetch: (request) => createFiles(mediaStore, tickets)(request),
     });
     const base: Config = {
-      avatarFiles: { origin: `http://127.0.0.1:${filesServer.port}`, keyFile },
+      avatarFiles: { origin: `http://127.0.0.1:${filesServer.port}` },
       avatarChat: {
         url: `http://127.0.0.1:${chatPort}/_internal/avatar-profile`,
         signingSecret: "synthetic-profile-secret",
@@ -342,7 +346,7 @@ test("avatar TCP lifecycle uploads through API and S3, survives restart, moderat
         (await upload.json()) as { response: { data: { image_hash: string; path: string } }[] }
       ).response[0]!.data;
       const receipt = `1:${saved.image_hash}`;
-      expect((await fetch(`http://127.0.0.1:${filesServer!.port}${saved.path}`)).status).toBe(200);
+      expect((await fetch(saved.path)).status).toBe(200);
       expect(
         (await fetch(`http://127.0.0.1:${filesServer!.port}/_internal/avatars/${uid}/1`)).status,
       ).toBe(401);

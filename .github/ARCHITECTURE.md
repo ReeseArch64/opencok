@@ -119,7 +119,7 @@ remains proposed, while the existing runtime implementation remains checkable.
 
 Feature-by-feature migration details belong in the [realm runbook](../apps/server/README.md),
 [API guide](../apps/api/README.md), [chat guide](../apps/chat/README.md),
-[media runbook](../apps/api/MEDIA.md) and [migration evidence](../docs/migration-validation.md).
+[media runbook](../apps/api/README.md#avatar-media) and [migration evidence](../docs/migration-validation.md).
 
 ## 5. Domains, network and gateways
 
@@ -267,8 +267,8 @@ for actual coverage and deferred cases. Historical details remain in the
 
 The implemented Compose stack runs Bun API/server, Traefik, PostgreSQL, Redis,
 ZooKeeper, MinIO/CDN and development tools. Both `all`/`dev` profiles select the
-same services. Media is opt-in within API; chat remains separately configured.
-[Local stack guide](../infra/compose/README.md) and [API media](../apps/api/MEDIA.md)
+same services. Media uses API S3 configuration; chat remains separately configured.
+[Local stack guide](../infra/compose/README.md) and [API media](../apps/api/README.md#avatar-media)
 cover configuration, isolated verification and recovery. Local containers do not
 prove Kubernetes or production readiness.
 
@@ -314,13 +314,14 @@ and [implemented chat](../apps/chat/README.md).
 ## 21. File and media lifecycle
 
 API media currently accepts authenticated JPEG/PNG uploads, re-encodes JPEG,
-preserves immutable S3 sequence receipts and requires temporary API-signed avatar URLs.
+preserves immutable S3 sequence receipts and uses AWS SDK-presigned S3 image URLs.
 The default replacement interval is three days. Successful replacement archives the
 preceding receipt and deletes its JPEG; matching upload retries resume failed cleanup. Media uses the
 API port; discovery keeps a 64 KiB body limit and uploads have a 2112 KiB cap.
-Private confirmation uses a separate short-lived HMAC and no gateway route.
+Realm upload and private confirmation authorization uses purpose-bound Redis tickets;
+S3 credentials remain API-only. Confirmation has no gateway route.
 Full pending/validated/ready lifecycle, GIFs, background transformations and orphan
-collection remain planned. [API media runbook](../apps/api/MEDIA.md) defines actual
+collection remain planned. [API media runbook](../apps/api/README.md#avatar-media) defines actual
 configuration and rollback; [lifecycle design](../docs/architecture/clients-and-services.md#21-file-and-media-lifecycle)
 describes future behavior.
 
@@ -329,6 +330,8 @@ approval/rejection now use PostgreSQL journals and per-owner publication revisio
 The signed Chat consumer fences those revisions independently of clock and sequence
 wrap. Moderation runs through an explicit operator CLI with database authorization,
 expected-version checks and replay receipts; it is not a public API capability.
+Media grants and completion also work without Chat configured; publication intents
+remain pending until that optional integration is enabled.
 [Avatar integration](../apps/server/AVATAR_INTEGRATION.md) documents deployment,
 restoration boundaries and synthetic TCP/SFS acceptance.
 

@@ -8,6 +8,12 @@ export interface ImageStore {
   get(key: string): Promise<Uint8Array | null>;
   removePrevious(owner: string, sequence: string): Promise<void>;
   find(owner: string, sequence: string): Promise<UploadReceipt | null>;
+  image(key: string): Promise<string>;
+}
+export type AvatarTicketPurpose = "upload" | "confirm" | "image";
+export interface AvatarTickets {
+  issue(owner: string, sequence: number, purpose: AvatarTicketPurpose): Promise<string>;
+  verify(token: string, purpose: AvatarTicketPurpose): Promise<{ owner: string; seq: string }>;
 }
 export interface UploadReceipt {
   owner: string;
@@ -35,8 +41,8 @@ export interface AvatarGrantSnapshot {
 }
 export interface AvatarFiles {
   find(owner: string, sequence: number): Promise<UploadReceipt | null>;
-  issue(owner: string, sequence: number): string;
-  image(owner: string, sequence: number): string;
+  issue(owner: string, sequence: number): string | Promise<string>;
+  image(owner: string, sequence: number): string | Promise<string>;
 }
 export interface AvatarGrantService extends AvatarFiles {
   read(owner: string, now: number, inspect: AvatarGrantInspector): Promise<AvatarGrantSnapshot>;
