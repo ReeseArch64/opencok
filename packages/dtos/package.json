@@ -12,6 +12,7 @@
   "type": "module",
   "exports": {
     "./world-favorites/create-world-favorite.dto": "./src/world-favorites/create-world-favorite.dto.ts",
-    "./profile/update-push-preference.dto": "./src/profile/update-push-preference.dto.ts"
+    "./profile/update-push-preference.dto": "./src/profile/update-push-preference.dto.ts",
+    "./provisioning": "./src/create-character.dto.ts"
   }
 }

@@ -23,7 +23,8 @@
     "./notifications": "./src/notifications.ts",
     "./session": "./src/session.ts",
     "./chat-nickname": "./src/chat-nickname.ts",
-    "./chat-mailbox": "./src/chat-mailbox.ts"
+    "./chat-mailbox": "./src/chat-mailbox.ts",
+    "./provisioning": "./src/provisioning.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
@@ -34,6 +35,8 @@
     "@opencok/messages": "workspace:*",
     "@opencok/core": "workspace:*",
     "effect": "catalog:",
-    "ws": "8.22.0"
+    "ws": "8.22.0",
+    "@opencok/validations": "workspace:*",
+    "@opencok/mappings": "workspace:*"
   }
 }

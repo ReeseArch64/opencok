@@ -17,12 +17,15 @@
     "./avatar": "./src/avatar.ts",
     "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
     "./chat-nickname": "./src/chat-nickname.ts",
-    "./chat-mailbox": "./src/chat-mailbox.ts"
+    "./chat-mailbox": "./src/chat-mailbox.ts",
+    "./provisioning": "./src/provisioning.ts",
+    "./firebase": "./src/firebase.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
     "@opencok/contracts": "workspace:*",
+    "@opencok/errors": "workspace:*",
     "@opencok/messages": "workspace:*",
-    "@opencok/errors": "workspace:*"
+    "firebase-admin": "14.5.0"
   }
 }

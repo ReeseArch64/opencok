@@ -44,7 +44,8 @@
     "./shared-user": "./src/shared-user.ts",
     "./inventory": "./src/inventory.ts",
     "./mail-rewards": "./src/mail-rewards.ts",
-    "./shops": "./src/shops.ts"
+    "./shops": "./src/shops.ts",
+    "./provisioning": "./src/provisioning.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
