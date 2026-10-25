@@ -1,3 +1,4 @@
+import type { InventoryFields as Fields } from "./inventory.ts";
 import type { BattleRankingState, PlayoffPublication } from "./battle-ranking.ts";
 import type { FlowerRankingPublication, FlowerRankingState } from "./flower-ranking.ts";
 import type { CommunityRankingSnapshot, DonationScore } from "./community-ranking.ts";
@@ -259,6 +260,11 @@ export interface GameServices {
   publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
   globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
   scoreActivityRanking?(): Promise<readonly string[]>;
+  inventory?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
   nicknameChange?(
     owner: string,
     operationId: string,
