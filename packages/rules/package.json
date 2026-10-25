@@ -104,7 +104,8 @@
     "./general-talents": "./src/general-talents.ts",
     "./general-refinement": "./src/general-refinement.ts",
     "./new-general-content": "./src/new-general-content.ts",
-    "./general-assignments": "./src/general-assignments.ts"
+    "./general-assignments": "./src/general-assignments.ts",
+    "./general-draws": "./src/general-draws.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -37,7 +37,7 @@ test("city assignments replace occupants and settle production at the assignment
     for (const id of [53500, 53501]) {
       h.rules.power.newGeneralBases!.set(String(id), {
         ...h.rules.power.newGeneralBases!.get(String(id))!,
-        base_skill: "90000",
+        base_skill: "90000;990020",
         base_star: "1",
       });
       await h.db.db
@@ -58,6 +58,19 @@ test("city assignments replace occupants and settle production at the assignment
         buildinguuid: sfs.string(uuid),
       });
     await expect(assign(53500, "other-413000")).rejects.toThrow();
+    h.rules.power.newGeneralSkills!.set("990020", {
+      id: "990020",
+      type: "10",
+      cd_time: "10",
+      para1: "990030",
+    });
+    h.rules.power.statuses!.set("990030", {
+      id: "990030",
+      time: "60",
+      effect: "50;50",
+      overlap: "0",
+      group: "990",
+    });
     await assign(53500);
     const rates = decodeProductionRates(
       (
@@ -68,6 +81,22 @@ test("city assignments replace occupants and settle production at the assignment
       )[0]!.rates,
     );
     expect(rates[0]!.perHour).toBeGreaterThan(0n);
+    await h.command("newgeneral", {
+      id: sfs.int(53500),
+      M__REQUEST_ID__H: sfs.string("skilluse"),
+      skillId: sfs.string("990020"),
+    });
+    const boosted = decodeProductionRates(
+      (
+        await h.db.db
+          .select()
+          .from(building_production)
+          .where(eq(building_production.buildingId, "owner-413000"))
+      )[0]!.rates,
+    );
+    const expiry = boosted.findIndex((rate) => rate.at === BigInt(h.clock.now) + 60001n);
+    expect(expiry).toBeGreaterThan(0);
+    expect(boosted[expiry - 1]!.perHour).toBeGreaterThan(boosted[expiry]!.perHour);
     h.clock.now += 3600000;
     await assign(53501);
     const rows = await h.db.db.select().from(new_general);

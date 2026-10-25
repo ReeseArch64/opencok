@@ -14,6 +14,7 @@ export interface TimedActivity {
   data?: unknown;
 }
 export interface PreparedActivity {
+  pushes?: readonly { command: string; body: Uint8Array }[];
   queueItemId?: string;
   startedAt?: bigint;
   type?: number;

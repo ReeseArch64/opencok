@@ -1,3 +1,5 @@
+import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
+import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { researchDomain } from "@opencok/services/research";
 import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
 import { test, expect } from "bun:test";
@@ -93,14 +95,40 @@ test("talents, cooldowns, and refinement proposals survive replay without duplic
       pending.oldrefineproperty,
     );
     await expect(h.command("newgeneral", action("refinerollback"))).rejects.toThrow();
+    await h.db.db
+      .insert(user_item)
+      .values({ uuid: "refine-pieces", ownerId: "owner", itemId: "211128", count: 1000, value: 0 });
+    await h.db.db.insert(user_state).values({
+      uid: "owner",
+      stateId: 509047,
+      startTime: BigInt(h.clock.now),
+      endTime: BigInt(h.clock.now) + 3600000n,
+    });
+    const batch = action("refinevalue", {
+      batch: sfs.int(10),
+      operationId: sfs.string(randomUUID()),
+    });
+    await h.command("newgeneral", batch);
+    await h.command("newgeneral", batch);
+    expect(
+      (await h.db.db.select().from(user_item).where(eq(user_item.uuid, "refine-pieces")))[0]?.count,
+    ).toBe(800);
+    expect((await h.db.db.select().from(new_general))[0]?.refinecard).toBe(200);
+    await expect(
+      h.command("newgeneral", action("skilluse", { skillId: sfs.string("90002") })),
+    ).rejects.toThrow();
     await h.command("science.research", { itemId: sfs.string("700100"), gold: sfs.int(0) });
     const research = await h.active(6);
     const accelerate = action("skilluse", {
       skillId: sfs.string("90002"),
       operationId: sfs.string(randomUUID()),
     });
-    await h.command("newgeneral", accelerate);
-    await h.command("newgeneral", accelerate);
+    const accelerated = await h.command("newgeneral", accelerate);
+    expect(await h.command("newgeneral", accelerate)).toEqual(accelerated);
+    expect(
+      accelerated.pushes.find((push) => push.command === "push.gemeral.useskill.equip")?.body
+        .updateTime?.value,
+    ).toBe(BigInt(h.clock.now));
     const shortened = await h.active(6);
     expect(shortened.version).toBe(research.version + 1);
     expect(shortened.dueAt).toBe(BigInt(h.clock.now));

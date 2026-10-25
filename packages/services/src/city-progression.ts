@@ -1,3 +1,4 @@
+import { generalDrawPeriod } from "@opencok/rules/general-draws";
 import { refreshGeneralUnlocks } from "./general-assignments";
 import { refreshQuests } from "./quests";
 import { GameError } from "@opencok/errors/game";
@@ -69,7 +70,17 @@ export function createCityProgressionHandlers<T>(
     command?: string,
   ) => {
     const repository = store(tx, owner, now),
-      state = await repository.getState(command);
+      state = await repository.getState(
+        command,
+        command === "herodraw"
+          ? {
+              periodStart: generalDrawPeriod(rules, now).start,
+              normal: cityInteger(rules.items.get("golden_opentime")?.k11),
+              silver: cityInteger(rules.items.get("golden_opentime")?.k12),
+              gold: cityInteger(rules.items.get("golden_opentime")?.k13),
+            }
+          : undefined,
+      );
     const world = await effects.world(),
       emperor = await effects.emperor();
     const abilities = generalSkillPoints(state.effects.generals),
@@ -401,6 +412,7 @@ export class CityProgressionContext {
     let level = this.write.profile?.level ?? num(this.state.profile, "level"),
       exp = (this.write.profile?.exp ?? num(this.state.profile, "exp")) + cityInteger(amount);
     cityInteger(exp);
+    const oldLevel = level;
     const oldPower = cityInteger(this.rules.role(level).power ?? 0);
     const maximum = cityInteger(this.rules.items.get("player_max")?.k1 ?? 60, 1);
     while (level < maximum && this.rules.roles.has(String(100100 + level + 1))) {
@@ -411,6 +423,12 @@ export class CityProgressionContext {
     }
     this.write.profile = { level, exp };
     const delta = cityInteger(this.rules.role(level).power ?? 0) - oldPower;
-    if (delta) this.power(BigInt(delta));
+    const generals = this.state.effects.generals.reduce(
+      (sum, general) =>
+        sum + cityAmount(this.rules.power.generals?.get(text(general, "generalId"))?.power ?? 0),
+      0n,
+    );
+    const total = BigInt(delta) + generals * BigInt(level - oldLevel);
+    if (total) this.power(total);
   }
 }

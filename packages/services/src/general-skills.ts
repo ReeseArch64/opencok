@@ -1,5 +1,5 @@
 import { randomInt } from "node:crypto";
-import { sfs, int, str, type Fields } from "@opencok/messages/sfs";
+import { sfs, int, str, Type, type Fields, type Value } from "@opencok/messages/sfs";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
 import { cityInteger } from "@opencok/rules/city-progression";
 import {
@@ -88,7 +88,16 @@ export function generalAbility(
     }
     next = result.row;
   } else if (action === "refinevalue") {
-    const batch = cityInteger(int(params, "batch", 0), 0, 1) === 1;
+    const batch = cityInteger(int(params, "batch", 0)) > 1;
+    if (
+      batch &&
+      !generalFeatureAvailable(context.rules, "general_random_effect_10times", {
+        kingdomId: context.rules.kingdomId,
+        version: "12.06.0",
+        now: Number(context.now),
+      })
+    )
+      generalFailure();
     if (
       batch &&
       !context.state.effects.states.some(
@@ -183,6 +192,7 @@ function useSkill(
           Math.trunc(rule.base_effect ? effect(cityInteger(rule.base_effect, 1)) : 0),
         1,
       );
+  let body: Fields | undefined;
   let actTime = context.now,
     stat = 2;
   if (type === 10) {
@@ -245,12 +255,48 @@ function useSkill(
       };
     context.write.armies = [{ ...previous, free: cityInteger(num(previous, "free") + amount) }];
     context.power(unitPower(context.rules.arms.get(armyId)!, amount));
+  } else if (type === 16) {
+    const selected = params.points,
+      resource = cityInteger(int(params, "resType"), 0, 3),
+      definition = (rule.para1 ?? "")
+        .split("|")
+        .map((entry) => entry.split(";"))
+        .find(([type]) => Number(type) === resource);
+    if (selected?.type !== Type.Array || !definition || definition.length !== 3) generalFailure();
+    const points = selected.value as Value[];
+    if (!points.length || points.length > 16 || points.some((point) => point.type !== Type.Int))
+      generalFailure();
+    const ids = points.map((point) => cityInteger(point.value, 0, 2147483647));
+    if (new Set(ids).size !== ids.length) generalFailure();
+    (context.write.generalRoster ??= {}).worldResources = ids.map((pointId) => ({
+      pointId,
+      type: resource,
+      level: cityInteger(definition[1], 1, 100),
+      amount: cityInteger(definition[2], 1),
+    }));
   } else if (type === 17) grantRewards(context, rule.para1);
   else if (type === 18 || type === 21) {
-    const queueType = type === 18 ? 11 : 6;
+    const queueType = type === 18 ? 11 : 6,
+      queue = context.state.queues.find(
+        (queue) =>
+          queue.type === queueType &&
+          num(queue, "qid") === 1 &&
+          text(queue, "itemId") !== "" &&
+          long(queue, "updateTime") > context.now,
+      );
+    if (!queue) generalFailure();
+    const milliseconds = BigInt(cityInteger(rule.para1, 1)) * 1000n,
+      due = long(queue, "updateTime") - milliseconds;
     (context.write.generalRoster ??= {}).accelerations = [
-      { type: queueType, milliseconds: BigInt(cityInteger(rule.para1, 1)) * 1000n },
+      { type: queueType, queueId: text(queue, "uuid"), milliseconds },
     ];
+    body = {
+      skillQueue: sfs.object({
+        queueId: sfs.string(text(queue, "uuid")),
+        updateTime: sfs.long(due > context.now ? due : context.now),
+        senderId: sfs.string(context.owner),
+      }),
+    };
   } else if (type === 19) {
     if (!rule.para1) generalFailure();
     const plan = temporaryEffect(
@@ -278,5 +324,5 @@ function useSkill(
     stat,
   };
   (context.write.generalRoster ??= {}).skills = [skill];
-  return { row };
+  return { row, body };
 }

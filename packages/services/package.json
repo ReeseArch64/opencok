@@ -65,7 +65,10 @@
     "./player-effects": "./src/player-effects.ts",
     "./equipment": "./src/equipment.ts",
     "./generals": "./src/generals.ts",
-    "./general-assignments": "./src/general-assignments.ts"
+    "./general-assignments": "./src/general-assignments.ts",
+    "./legacy-generals": "./src/legacy-generals.ts",
+    "./general-recovery": "./src/general-recovery.ts",
+    "./general-combat": "./src/general-combat.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
