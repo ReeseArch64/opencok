@@ -78,7 +78,8 @@
     "./responses/shared-user": "./src/responses/shared-user.ts",
     "./mutation": "./src/mutation.ts",
     "./inventory": "./src/inventory.ts",
-    "./responses/inventory": "./src/responses/inventory.ts"
+    "./responses/inventory": "./src/responses/inventory.ts",
+    "./mail-rewards": "./src/mail-rewards.ts"
   },
   "dependencies": {}
 }

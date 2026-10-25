@@ -42,7 +42,8 @@
     "./nickname-change": "./src/nickname-change.ts",
     "./reconnect-marches": "./src/reconnect-marches.ts",
     "./shared-user": "./src/shared-user.ts",
-    "./inventory": "./src/inventory.ts"
+    "./inventory": "./src/inventory.ts",
+    "./mail-rewards": "./src/mail-rewards.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
