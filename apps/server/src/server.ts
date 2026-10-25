@@ -1,3 +1,5 @@
+import { createTotemEffectStore, pendingTotemOwners } from "@opencok/repositories/totem";
+import { createTotemDomain, expireTotems, settleTotemEffects } from "@opencok/services/totem";
 import { publishWorldMutation } from "@opencok/services/world-publication";
 import { createCivilizationCastleDomain } from "@opencok/services/civilization-castle";
 import { createWorldMarchDomain } from "@opencok/services/world-march-runtime";
@@ -109,7 +111,11 @@ import { WorldService } from "@opencok/services/world";
 import { createRealmChatSessionIssuer } from "@opencok/connection/realm-chat-session";
 import { startMailGiftRelay } from "./mail-gift-relay.ts";
 import { loadNicknameServices } from "./nickname.ts";
-import { acquireRealmAuthority, fenceRealmDatabase } from "@opencok/repositories/realm-authority";
+import {
+  acquireRealmAuthority,
+  fenceRealmDatabase,
+  fenceRealmTransaction,
+} from "@opencok/repositories/realm-authority";
 import { executeReconnectProgress } from "@opencok/repositories/reconnect-write";
 import { readFriendshipBinding } from "@opencok/repositories/reconnect-mine";
 import { initialFriendshipMine } from "@opencok/rules/reconnect-mine";
@@ -329,7 +335,7 @@ export const RealmDependenciesLive = Layer.effect(
         ),
       emperor: () => cache.emperorVersion(config.kingdomId),
     };
-    const productionPreparation = {
+    const baseProductionPreparation = {
       async prepare(tx: Parameters<typeof readReconnectProgress>[0], owner: string, now: bigint) {
         const state = await readReconnectProgress(tx, owner, config.kingdomId, now);
         const planned = await productionContext(state, rules, now, {
@@ -340,7 +346,7 @@ export const RealmDependenciesLive = Layer.effect(
         return planned.rates;
       },
     };
-    const cityBoundary = createCityProductionBoundary(productionPreparation, (row) => {
+    const baseCityBoundary = createCityProductionBoundary(baseProductionPreparation, (row) => {
       const rule = rules.building(
         text(row, "itemId"),
         num(row, "level"),
@@ -351,6 +357,38 @@ export const RealmDependenciesLive = Layer.effect(
         ? undefined
         : ["wood", "stone", "iron", "food"][rule.effects.productionResourceId ?? -1];
     });
+    const cityBoundary: typeof baseCityBoundary = async (
+      tx,
+      owner,
+      now,
+      change,
+      deleted,
+      economy,
+    ) => {
+      await settleTotemEffects(
+        createTotemEffectStore(tx, owner, now, config.mapSize, config.kingdomId, baseCityBoundary),
+        rules,
+        config.mapSize,
+      );
+      return baseCityBoundary(tx, owner, now, change, deleted, economy);
+    };
+    const productionPreparation = {
+      async prepare(tx: Parameters<typeof readReconnectProgress>[0], owner: string, now: bigint) {
+        await settleTotemEffects(
+          createTotemEffectStore(
+            tx,
+            owner,
+            now,
+            config.mapSize,
+            config.kingdomId,
+            baseCityBoundary,
+          ),
+          rules,
+          config.mapSize,
+        );
+        return baseProductionPreparation.prepare(tx, owner, now);
+      },
+    };
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize),
@@ -368,6 +406,7 @@ export const RealmDependenciesLive = Layer.effect(
         dragonTalentsDomain,
         createWorldMarchDomain(config.mapSize),
         createCivilizationCastleDomain(config.mapSize),
+        createTotemDomain(config.mapSize),
         minstrelDomain,
         trainingDomain,
         hospitalDomain,
@@ -497,11 +536,39 @@ export const RealmDependenciesLive = Layer.effect(
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
     const recoverWorld = async () => {
+      const totemNow = BigInt(Date.now());
+      await db.kingdom.db.transaction(async (tx) => {
+        await fenceRealmTransaction(tx, authority);
+        await expireTotems(
+          createTotemEffectStore(
+            tx,
+            "",
+            totemNow,
+            config.mapSize,
+            config.kingdomId,
+            baseCityBoundary,
+          ),
+          config.mapSize,
+        );
+      });
+      for (const owner of await pendingTotemOwners(db.kingdom.db, totemNow)) {
+        try {
+          await recoverActivities(owner);
+          await activities.domainCommand(owner, "totem.tick", {
+            operationId: sfs.string(`totem-tick:${Date.now()}:${owner}`),
+          });
+        } catch {
+          console.warn(
+            JSON.stringify({ event: "totem_recovery_failed", kingdom: config.kingdomId }),
+          );
+        }
+      }
       const imported = await unregisteredWorldMarches(db.kingdom.db, worldImportCursor);
       worldImportCursor = imported.length === 64 ? imported.at(-1)!.id : undefined;
       for (const entry of imported)
         if (entry.owner) {
           try {
+            await recoverActivities(entry.owner);
             await activities.domainCommand(entry.owner, "world.tick", {
               operationId: sfs.string(`world-import:${entry.id}`),
             });
@@ -519,6 +586,7 @@ export const RealmDependenciesLive = Layer.effect(
       worldCursor = due.length === 64 ? due.at(-1) : undefined;
       for (const entry of due) {
         try {
+          await recoverActivities(entry.owner);
           await activities.domainCommand(entry.owner, "world.tick", {
             operationId: sfs.string(`world:${entry.id}:${entry.version}`),
           });
@@ -536,6 +604,8 @@ export const RealmDependenciesLive = Layer.effect(
         "world.march",
         "world.march.retreat",
         "civilizationCastle",
+        "totem",
+        "totem.world",
         "world.march.spd",
         "world.tick",
         "world.mv",
@@ -560,8 +630,21 @@ export const RealmDependenciesLive = Layer.effect(
         }
     };
     yield* Effect.tryPromise({
-      try: recoverWorld,
-      catch: () => new Error("World recovery unavailable"),
+      try: async () => {
+        for (let i = 0; i < 64; i++) {
+          const delivered = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            async (event) => {
+              await notifications.publish(event.owner, "status.push", decode(event.payload));
+            },
+            Date.now,
+            "totem.status",
+          );
+          if (!delivered) break;
+        }
+      },
+      catch: () => new Error("Totem status relay unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),
@@ -652,6 +735,15 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    yield* Effect.tryPromise({
+      try: recoverWorld,
+      catch: () => new Error("World recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     yield* Effect.tryPromise({
       try: () => recoverActivities(),
       catch: () => new Error("Activity recovery unavailable"),

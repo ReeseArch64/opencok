@@ -14470,3 +14470,39 @@ select "id", "ownerUid", "version", "status", "dueAt", "payload" from "opencok_k
 update "opencok_kingdom"."world_march_checkpoint" set "id" = $1, "ownerUid" = $2, "version" = $3, "status" = $4, "dueAt" = $5, "payload" = $6 where "opencok_kingdom"."world_march_checkpoint"."id" = $7
 delete from "opencok_kingdom"."world_march_checkpoint" where "opencok_kingdom"."world_march_checkpoint"."id" = $1"
 `;
+
+exports[`opencok_kingdom.totem_activation: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["id","varchar(40)",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["pointId","integer",true,null,null,null]
+column ["totemId","integer",true,null,null,null]
+column ["allianceId","varchar(40)",true,null,null,null]
+column ["startedAt","bigint",true,null,null,null]
+column ["dueAt","bigint",true,null,null,null]
+column ["status","integer",true,null,null,null]
+column ["payload","bytea",true,null,null,null]
+primary ["totem_activation_PRIMARY",["id"]]
+index ["totem_activation_due",false,["status","dueAt","id"]]
+index ["totem_activation_owner",false,["ownerUid","status"]]
+check ["totem_activation_bounds","\\"pointId\\" > 0 AND \\"totemId\\" > 0 AND \\"startedAt\\" >= 0 AND \\"dueAt\\" >= \\"startedAt\\" AND \\"status\\" IN (0, 1, 2) AND octet_length(\\"payload\\") <= 4096"]
+insert into "opencok_kingdom"."totem_activation" ("id", "ownerUid", "pointId", "totemId", "allianceId", "startedAt", "dueAt", "status", "payload") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "id", "ownerUid", "pointId", "totemId", "allianceId", "startedAt", "dueAt", "status", "payload" from "opencok_kingdom"."totem_activation" where "opencok_kingdom"."totem_activation"."id" = $1
+update "opencok_kingdom"."totem_activation" set "id" = $1, "ownerUid" = $2, "pointId" = $3, "totemId" = $4, "allianceId" = $5, "startedAt" = $6, "dueAt" = $7, "status" = $8, "payload" = $9 where "opencok_kingdom"."totem_activation"."id" = $10
+delete from "opencok_kingdom"."totem_activation" where "opencok_kingdom"."totem_activation"."id" = $1"
+`;
+
+exports[`opencok_kingdom.totem_delivery: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["activationId","varchar(40)",true,null,null,null]
+column ["targetUid","varchar(40)",true,null,null,null]
+column ["stateId","integer",true,null,null,null]
+column ["appliedAt","bigint",true,null,null,null]
+primary ["totem_delivery_PRIMARY",["activationId","targetUid"]]
+index ["totem_delivery_pending",false,["targetUid","appliedAt","activationId"]]
+check ["totem_delivery_bounds","\\"stateId\\" > 0 AND \\"appliedAt\\" >= 0"]
+insert into "opencok_kingdom"."totem_delivery" ("activationId", "targetUid", "stateId", "appliedAt") values ($1, $2, $3, $4)
+select "activationId", "targetUid", "stateId", "appliedAt" from "opencok_kingdom"."totem_delivery" where "opencok_kingdom"."totem_delivery"."activationId" = $1
+update "opencok_kingdom"."totem_delivery" set "activationId" = $1, "targetUid" = $2, "stateId" = $3, "appliedAt" = $4 where "opencok_kingdom"."totem_delivery"."activationId" = $5
+delete from "opencok_kingdom"."totem_delivery" where "opencok_kingdom"."totem_delivery"."activationId" = $1"
+`;

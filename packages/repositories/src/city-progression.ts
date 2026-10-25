@@ -1,3 +1,4 @@
+import { readTotems, writeTotems } from "./totem";
 import { readCivilizationCastle, writeCivilizationCastle } from "./civilization-castle";
 import { readWorldMutationState, writeWorldMutation } from "./world-march-runtime";
 import { readDragonProgression, writeDragonProgression } from "./dragon-progression";
@@ -120,6 +121,9 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        totems: ["totem", "totem.init"].includes(command ?? "")
+          ? await readTotems(tx, owner)
+          : undefined,
         civilizationSciences,
         ...(command === "civilizationCastle"
           ? await readCivilizationCastle(tx, owner, request)
@@ -203,6 +207,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.totems) await writeTotems(tx, owner, write.totems);
         if (write.civilizationCastle)
           await writeCivilizationCastle(tx, owner, write.civilizationCastle);
         if (write.worldMutation) await writeWorldMutation(tx, owner, write.worldMutation);
