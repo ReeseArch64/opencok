@@ -1,3 +1,4 @@
+import { productionBoost } from "@opencok/mappings/production";
 import { randomUUID } from "node:crypto";
 import type { ProductionExecutor, ProductionAccount } from "@opencok/contracts/timed-activity";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
@@ -121,11 +122,7 @@ export class ProductionService {
               await state.rates(changed, state.now),
             );
             buildings.push(changed);
-            body = {
-              effectTime: sfs.long(effectTime),
-              refreshTime: sfs.long(long(changed, "refreshTime")),
-              ...(goods ? { goods: sfs.object(goods) } : { gold: sfs.long(ledger.total()) }),
-            };
+            body = productionBoost(effectTime, long(changed, "refreshTime"), ledger.total(), goods);
           }
           accounts.push(account);
         }

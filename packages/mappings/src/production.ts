@@ -1,3 +1,4 @@
+import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { ProductionRate } from "@opencok/contracts/timed-activity";
 import { validateProductionRate } from "@opencok/rules/timed-activity";
 
@@ -23,4 +24,17 @@ export function decodeProductionRates(value: string): readonly ProductionRate[] 
     validateProductionRate(rate);
     return rate;
   });
+}
+
+export function productionBoost(
+  effectTime: bigint,
+  refreshTime: bigint,
+  gold: bigint,
+  goods?: Fields,
+): Fields {
+  return {
+    ...(goods ? { goods: sfs.object(goods) } : { gold: sfs.long(gold) }),
+    effectTime: sfs.long(effectTime),
+    refreshTime: sfs.long(refreshTime),
+  };
 }
