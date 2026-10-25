@@ -260,6 +260,16 @@ export interface GameServices {
   publishedGlobalRanking?(kind: "payment" | "consumption"): Promise<readonly string[]>;
   globalCelebrityRanking?(rankType: number): Promise<readonly string[]>;
   scoreActivityRanking?(): Promise<readonly string[]>;
+  trade?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+  shop?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
   mailReward?(
     owner: string,
     command: string,

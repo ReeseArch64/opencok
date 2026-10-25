@@ -284,7 +284,11 @@ export function createSessionHandler(
           if (
             (command.startsWith("item.") ||
               command === "mail.reward" ||
-              command === "mail.reward.batch") &&
+              command === "mail.reward.batch" ||
+              command === "shoppingMall.buy" ||
+              command === "trade.info" ||
+              command === "trade.exchange" ||
+              command === "trade.cancel") &&
             !params.operationId &&
             params._cok_
           ) {

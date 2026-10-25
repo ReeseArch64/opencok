@@ -4052,3 +4052,10 @@ commands and effects, operation identity, domain exclusions and recovery evidenc
 Topic 11 adds durable per-message claims and atomic individual/batch redemption for
 supported inventory, currency and resource rewards. The [mail rewards guide](MAIL_REWARDS.md)
 describes retry identity, compatibility, pending reward domains and recovery.
+
+### In-game shops and NPC exchanges
+
+The [shop guide](SHOPS.md) describes catalog queries, atomic gold/item purchases,
+persistent NPC offers, shared stock migration and retry semantics. It records
+specialized currencies/effects that remain unsupported and the synthetic protocol
+validation boundary.
