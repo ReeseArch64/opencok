@@ -115,6 +115,13 @@ async function createStack() {
       read_only: true,
       bind: { create_host_path: false },
     },
+    {
+      type: "bind",
+      source: join(folder, "building-levels.ts"),
+      target: "/workspace/packages/resources/src/buildings/levels.ts",
+      read_only: true,
+      bind: { create_host_path: false },
+    },
   ];
   Object.assign(isolated.services.api.environment, {
     DATABASE_URL: databaseUrl,
@@ -177,8 +184,6 @@ async function createStack() {
   const xml: Record<string, string> = {
     treasure: '<ItemSpec id="1" lv="1" exp="100" helper="1"/>',
     quest: "",
-    building:
-      '<ItemSpec id="400001" level="1" time="30"/><ItemSpec id="400002" level="2" time="40"/>',
     role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
     position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
     item: '<ItemSpec id="player_max" k3="30"/><ItemSpec id="resources_basics" k7="100" k8="300"/><ItemSpec id="on_trumpet" k2="0"/>',
@@ -193,6 +198,18 @@ async function createStack() {
     join(folder, "catalogs.ts"),
     `const documents = ${JSON.stringify(documents)};
 export const gameplayCatalogs = Object.fromEntries(Object.entries(documents).map(([name, document]) => [name, async () => structuredClone(document)]));
+`,
+  );
+  await Bun.write(
+    join(folder, "building-levels.ts"),
+    `import type { BuildingLevelDefinition } from "@opencok/contracts/building";
+export const BUILDING_LEVELS: readonly BuildingLevelDefinition[] = [
+  { id: 400001, buildingId: 400000, level: 1, starLevel: 0, constructionSeconds: 30 },
+  { id: 400002, buildingId: 400000, level: 2, starLevel: 0, constructionSeconds: 40 },
+];
+export function createBuildingCatalog() {
+  return new Map(structuredClone(BUILDING_LEVELS).map(level => [level.id, level]));
+}
 `,
   );
   let started = false;

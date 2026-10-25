@@ -25,7 +25,9 @@ async function withCatalogs(run: (directory: string) => Promise<void>) {
     for (const name of ["building", "role", "position"])
       await writeFile(
         join(directory, `${name}.xml`),
-        '<database><ItemSpec id="synthetic"/></database>',
+        name === "building"
+          ? '<database><ItemSpec id="400001" level="1"/></database>'
+          : '<database><ItemSpec id="synthetic"/></database>',
       );
     await run(directory);
   } finally {

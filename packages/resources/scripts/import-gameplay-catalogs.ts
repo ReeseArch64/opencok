@@ -9,7 +9,9 @@ if (!source) throw new Error("Supply an authorized XML source directory");
 const root = new URL("../../../", import.meta.url).pathname;
 const destination = join(root, "packages/resources/src/catalogs");
 await mkdir(destination, { recursive: true });
-const names = (await readdir(source)).filter((name) => name.endsWith(".xml")).sort();
+const names = (await readdir(source))
+  .filter((name) => name.endsWith(".xml") && name !== "building.xml")
+  .sort();
 const sha256 = (data: string | Buffer) => createHash("sha256").update(data).digest("hex");
 const member = (name: string) =>
   name
@@ -19,7 +21,7 @@ const member = (name: string) =>
 const members = new Set<string>();
 const documents = new Map<string, string>();
 const registry: string[] = [];
-const enumMembers: string[] = [];
+const enumMembers: string[] = ['  Building = "building",'];
 const generatedParts: string[] = [];
 const inventory: {
   id: string;
@@ -200,7 +202,7 @@ await writeFile(
 );
 await writeFile(
   join(root, "packages/resources/src/catalogs.ts"),
-  `import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";\nimport type { GameplayCatalogDocument } from "./catalog.ts";\n\nexport const gameplayCatalogs: Readonly<Record<GameplayCatalog, () => Promise<GameplayCatalogDocument>>> = {\n${registry.join("\n")}\n};\n`,
+  `import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";\nimport type { GameplayCatalogDocument } from "./catalog.ts";\n\nexport const gameplayCatalogs: Partial<Readonly<Record<GameplayCatalog, () => Promise<GameplayCatalogDocument>>>> = {\n${registry.join("\n")}\n};\n`,
 );
 await writeFile(join(destination, "inventory.json"), JSON.stringify(inventory, null, 2) + "\n");
 const generated = new Set([...documents.values(), ...generatedParts].map((name) => `${name}.ts`));

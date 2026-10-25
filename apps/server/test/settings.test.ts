@@ -1,3 +1,4 @@
+import { importBuildingDefinition } from "@opencok/resources/buildings/import";
 import { expect, test } from "bun:test";
 import type { CityState, GameStore } from "@opencok/contracts/game";
 import { GameService as Game } from "@opencok/services/game";
@@ -63,8 +64,17 @@ test("an absent optional settings catalog returns the legacy empty array", () =>
 
 test("build.info uses the injected clock for buildings and queue previews without mutations", async () => {
   const rules = new Rules(new Map(), new Map(), new Map());
-  rules.buildings.set("400030", { id: "400030", level: "30", star_time: "0;10|100;20" });
-  rules.buildings.set("400031", { id: "400031", level: "30" });
+  rules.buildings.set(
+    Number("400030"),
+    importBuildingDefinition(
+      { id: "400030", level: "30", star_time: "0;10|100;20" },
+      Number("400030"),
+    ),
+  );
+  rules.buildings.set(
+    Number("400031"),
+    importBuildingDefinition({ id: "400031", level: "30" }, Number("400031")),
+  );
   rules.stars.set("first", {
     id: "first",
     build_id: "400000",

@@ -1,3 +1,4 @@
+import { importBuildingCatalog } from "@opencok/resources/buildings/import";
 import { expect, test } from "bun:test";
 import { Rules } from "@opencok/rules/game";
 import {
@@ -57,11 +58,13 @@ test("new task counts restore each progress source with legacy integer widths", 
 
 test("resource output task progress sums configured building output without granting or collecting resources", () => {
   const catalog = new Rules(
-    new Map([
-      ["413001", { level: "1", para1: "2147483647" }],
-      ["415002", { level: "2", para1: "150" }],
-      ["455001", { level: "1", para1: "7" }],
-    ]),
+    importBuildingCatalog(
+      new Map([
+        ["413001", { level: "1", para1: "2147483647" }],
+        ["415002", { level: "2", para1: "150" }],
+        ["455001", { level: "1", para1: "7" }],
+      ]),
+    ),
     new Map(),
     new Map(),
   );

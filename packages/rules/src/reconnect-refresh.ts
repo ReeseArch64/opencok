@@ -33,7 +33,7 @@ export function reconnectBuildingRefresh(
       if (int(row.itemId) !== item || position < 17 || position > 26) continue;
       if (int(row.level) < 1) throw new Error("Invalid tutorial resource building");
       const rule = rules.building(String(item), int(row.level), int(row.star), int(row.progress));
-      const rate = float(float(float(int(rule.para1)) / 3600) / 1000);
+      const rate = float(float(float(int(rule.effects?.productionPerHour)) / 3600) / 1000);
       const modified = float(
         rate * Math.max(0, float(float(100 + effect(item === 415000 ? 53 : 50)) / 100)),
       );
@@ -41,7 +41,9 @@ export function reconnectBuildingRefresh(
         long(row.refreshTime) <= 0n ? BigInt.asIntN(64, now - 5000n) : long(row.refreshTime);
       const elapsed = Number(BigInt.asIntN(32, now - refreshTime));
       const output = cast(float(float(elapsed) * modified));
-      const threshold = cast(float(float(int(rule.para2 ?? 4000)) * float(0.3)));
+      const threshold = cast(
+        float(float(int(rule.effects?.productionCapacity ?? 4000)) * float(0.3)),
+      );
       if (output < threshold) {
         refreshTime = castLong(Number(now) - threshold / modified);
         writes.push({ uuid: String(row.uuid), refreshTime });

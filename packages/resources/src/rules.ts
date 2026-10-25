@@ -1,3 +1,5 @@
+import { createBuildingCatalog } from "./buildings/index.ts";
+import { importBuildingCatalog } from "./buildings/import.ts";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { gameplayCatalogs } from "./catalogs.ts";
 import type { GameplayCatalogDocument } from "./catalog.ts";
@@ -150,8 +152,9 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       : exists(join(directory, `${name}.xml`));
   const read = async (name: GameplayCatalog): Promise<string | GameplayCatalogDocument> => {
     if (directory === undefined) {
-      if (!Object.hasOwn(gameplayCatalogs, name)) throw new Error("Missing gameplay catalog");
-      return gameplayCatalogs[name]();
+      const factory = gameplayCatalogs[name];
+      if (!factory) throw new Error("Missing gameplay catalog");
+      return factory();
     }
     const file = join(directory, `${name}.xml`);
     if ((await stat(file)).size > 16 * 1024 * 1024) throw new Error("Oversized gameplay resource");
@@ -161,8 +164,11 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     parseRules(await read(name), name);
   const declared = async (name: GameplayCatalog) =>
     (await available(name)) ? parseDeclaredCatalog(await read(name)) : undefined;
-  const [buildings, roles, positions] = await Promise.all([
-    load(GameplayCatalog.Building),
+  const buildings =
+    directory === undefined
+      ? createBuildingCatalog()
+      : importBuildingCatalog(await load(GameplayCatalog.Building));
+  const [roles, positions] = await Promise.all([
     load(GameplayCatalog.Role),
     load(GameplayCatalog.Position),
   ]);

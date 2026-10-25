@@ -1,3 +1,4 @@
+import { importBuildingDefinition } from "@opencok/resources/buildings/import";
 import { expect, test } from "bun:test";
 import {
   switchRealmEnabled,
@@ -81,13 +82,22 @@ test("availability combines version, realm, test selector, and inclusive time bo
 
 test("building star availability and next-level previews use the same supplied instant", () => {
   const rules = new Rules(new Map(), new Map(), new Map());
-  rules.buildings.set("400030", {
-    id: "400030",
-    level: "30",
-    star_time: "0;10|100;20",
-    para1: "base",
-  });
-  rules.buildings.set("400031", { id: "400031", level: "30", para1: "star" });
+  rules.buildings.set(
+    Number("400030"),
+    importBuildingDefinition(
+      {
+        id: "400030",
+        level: "30",
+        star_time: "0;10|100;20",
+        para1: "base",
+      },
+      Number("400030"),
+    ),
+  );
+  rules.buildings.set(
+    Number("400031"),
+    importBuildingDefinition({ id: "400031", level: "30", para1: "star" }, Number("400031")),
+  );
   rules.stars.set("first", {
     id: "first",
     build_id: "400000",
@@ -123,5 +133,5 @@ test("building star availability and next-level previews use the same supplied i
   expect(building(row, rules, false, now).starMax?.value).toBe(1);
   expect(building(row, rules, false, now).nextLevelParas?.value).toBe("star");
   expect(building(row, rules, false, now + 86_400_001).nextLevelParas?.value).toBe("base");
-  expect(rules.buildings.get("400030")?.para1).toBe("base");
+  expect(rules.buildings.get(400030)?.clientParameters?.[0]?.value).toBe("base");
 });

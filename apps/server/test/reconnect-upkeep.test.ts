@@ -1,3 +1,4 @@
+import { importBuildingCatalog } from "@opencok/resources/buildings/import";
 import { expect, test } from "bun:test";
 import type { Row } from "@opencok/contracts/rows";
 import { Rules, type Rule } from "@opencok/rules/game";
@@ -6,11 +7,13 @@ import { reconnectMail } from "@opencok/rules/reconnect-mail";
 
 function fixture() {
   const rules = new Rules(
-    new Map<string, Rule>([
-      ["404031", { level: "30", para4: "0;100|50;200" }],
-      ["439001", { level: "1", unlock_type: "1" }],
-      ["441001", { level: "1", para1: "40" }],
-    ]),
+    importBuildingCatalog(
+      new Map<string, Rule>([
+        ["404031", { level: "30", para4: "0;100|50;200" }],
+        ["439001", { level: "1", unlock_type: "1" }],
+        ["441001", { level: "1", para1: "40" }],
+      ]),
+    ),
     new Map(),
     new Map(),
   );

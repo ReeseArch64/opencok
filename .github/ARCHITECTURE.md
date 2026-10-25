@@ -90,10 +90,14 @@ are local references, never required private artifacts committed as dependencies
 The nickname/description word list is versioned in
 `packages/resources/data/badwords.json` and included in the server artifact.
 It does not depend on the ignored reference tree or a Compose bind mount.
-All 381 authorized gameplay XML catalogs are migrated to readable TypeScript
-under `packages/resources/src/catalogs`, with identifiers in `enums/gameplay-catalog`.
-The registry loads catalog factories on demand and preserves ordered/grouped
-views. Runtime startup needs no XML mount or GAME_RESOURCES. See the
+Building definitions now use semantic numeric models under
+`packages/resources/src/buildings`, with costs, prerequisites, effects and star
+progression expressed as typed values. `rules/building` evaluates progression;
+`mappings/building` alone translates display parameters for the mobile protocol.
+The remaining 380 authorized catalogs still use transitional TypeScript documents
+under `resources/src/catalogs`, preserving ordered/grouped XML-shaped views.
+Those domains still require semantic migration. Runtime startup needs no XML
+mount or GAME_RESOURCES. See the
 [catalog editing and provenance guide](../packages/resources/README.md).
 Explicit XML loading remains a synthetic-fixture and migration compatibility seam.
 

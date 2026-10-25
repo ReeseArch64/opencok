@@ -239,7 +239,9 @@ test("CN1 refund ratios use the existing real resource loader without transformi
     for (const name of ["building", "role", "position"])
       await writeFile(
         join(directory, `${name}.xml`),
-        '<database><ItemSpec id="synthetic"/></database>',
+        name === "building"
+          ? '<database><ItemSpec id="400001" level="1"/></database>'
+          : '<database><ItemSpec id="synthetic"/></database>',
       );
     expect(cn1RewardRatio(active(), await loadRules(directory), context)).toBe(1);
     await writeFile(
