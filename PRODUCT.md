@@ -132,6 +132,15 @@ OpenCoK includes or coordinates the following product areas:
 - documentation for installation, operation, troubleshooting, and
   contribution.
 
+### Timed activities and city production
+
+The common queue mechanism owns persistent deadlines and lifecycle transitions.
+Construction, research, troops and other domain-specific completion effects are
+delivered with their own systems. Unavailable domains must preserve pending state
+and reject unsupported transitions. Ordinary city production accrues into a capped
+uncollected buffer; collection credits the wallet. Rate changes preserve output
+already earned, and repeated settlement preserves fractional output.
+
 ## Mobile client transition
 
 Keep the validated Elex APK as the transitional mobile client while the backend

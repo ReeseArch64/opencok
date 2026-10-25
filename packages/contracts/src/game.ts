@@ -275,6 +275,17 @@ export interface GameServices {
     command: string,
     params: Fields,
   ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+  timed?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+  production?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+  reconcileTimed?(owner: string): Promise<void>;
   inventory?(
     owner: string,
     command: string,
