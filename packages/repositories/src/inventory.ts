@@ -12,16 +12,40 @@ import { readPlayerEffects } from "./power.ts";
 import type { RealmAuthority } from "./realm-authority.ts";
 import type { Database } from "./game.ts";
 
+export interface InventoryPreparation {
+  before?(tx: MutationTransaction, owner: string, now: bigint): Promise<void>;
+  useEffect?(
+    tx: MutationTransaction,
+    owner: string,
+    itemId: string,
+    count: number,
+    now: bigint,
+    economy: import("@opencok/contracts/timed-activity").ActivityEconomy,
+  ): Promise<import("@opencok/contracts/inventory").InventoryFields>;
+}
+
 export function createInventoryExecutor(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
   now = Date.now,
+  preparation?: InventoryPreparation,
 ): InventoryExecutor {
   const execute = createMutationExecutor(db, authority, now);
   return (input, plan) => {
     const command = { ...input, request: Buffer.from(input.request) };
     return execute(command, async (tx) => {
-      return executeInventoryTransaction(tx, command.owner, plan, command.command);
+      const at = BigInt(now());
+      await preparation?.before?.(tx, command.owner, at);
+      return executeInventoryTransaction(
+        tx,
+        command.owner,
+        plan,
+        command.command,
+        preparation?.useEffect
+          ? (itemId, count, economy) =>
+              preparation.useEffect!(tx, command.owner, itemId, count, at, economy)
+          : undefined,
+      );
     });
   };
 }
@@ -31,6 +55,7 @@ export async function executeInventoryTransaction(
   owner: string,
   plan: Parameters<InventoryExecutor>[1],
   reason: string,
+  useEffect?: import("@opencok/contracts/inventory").InventoryState["useEffect"],
 ) {
   const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
   const [resource] = await tx
@@ -55,6 +80,7 @@ export async function executeInventoryTransaction(
     ),
     cooldowns: new Map(cooldowns.map((row) => [row.itemId, row.useTime])),
     buildings,
+    useEffect,
     effects: () => readPlayerEffects(tx, profile, true),
   });
   if (result.items.length > 128 || result.cooldowns.size > 128)

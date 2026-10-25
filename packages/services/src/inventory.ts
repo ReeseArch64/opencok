@@ -1,3 +1,4 @@
+import { activityEconomy } from "./timed-activity";
 import type { InventoryCommandResponse } from "@opencok/contracts/responses/inventory";
 import {
   inventoryPurchase,
@@ -294,7 +295,17 @@ export class InventoryPlanner {
     let effectRule = rule;
     if (rule.type === "13") effectRule = inventoryGoods(this.rules, rule.para4 ?? "");
     const effect: Fields = {};
-    if (effectRule.type === "3") {
+    if (
+      (effectRule.type === "4" ||
+        (effectRule.type === "3" &&
+          ["70", "110", "249", "250"].includes(effectRule.para1 ?? ""))) &&
+      this.state.useEffect
+    ) {
+      Object.assign(
+        effect,
+        await this.state.useEffect(effectRule.id!, count, activityEconomy(this)),
+      );
+    } else if (effectRule.type === "3") {
       if (text(this.state.profile, "pf") === "cn1") throw new GameError(errors.unsupported);
       const id = inventoryInteger(effectRule.para1);
       if (![100, 101, 102, 103, 104, 158, 159, 160].includes(id))

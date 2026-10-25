@@ -279,6 +279,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       legacyDaily: await optional(GameplayCatalog.DailyQuest),
       legacyRewards: await optional(GameplayCatalog.DailyReward),
       freshSignIn: await optional(GameplayCatalog.SignIn2),
+      abilities: await optional(GameplayCatalog.Ab),
       story: await optional(GameplayCatalog.StorySetting),
       daily: await optional(GameplayCatalog.NewDailyTask),
       dailyRewards: await optional(GameplayCatalog.DailyTaskReward),

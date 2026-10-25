@@ -31,6 +31,7 @@ export interface ActivityEconomy {
   gold(delta: bigint): void;
   balance?(asset: string): bigint;
   quantity?(itemId: string): number;
+  ownedItem?(uuid: string): { itemId: string; count: number };
   resource(
     asset:
       | "wood"
