@@ -665,3 +665,5 @@ export { avatar_version_update } from "./opencok_kingdom/avatar_version_update";
 export { realm_authority } from "./opencok_kingdom/realm_authority";
 export { resource_settlement } from "./opencok_kingdom/resource_settlement";
 export { nickname_change } from "./opencok_kingdom/nickname_change";
+
+export { avatar_publication } from "./opencok_kingdom/avatar_publication";

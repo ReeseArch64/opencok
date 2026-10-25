@@ -15,6 +15,7 @@ export interface AvatarVersionPlan {
 }
 
 export interface AvatarVersionIntent {
+  revision?: bigint;
   operationId: string;
   ownerUid: string;
   picVer: number;

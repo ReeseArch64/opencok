@@ -198,6 +198,7 @@ test("avatar allocation commits atomically, serializes requests and recovers rea
     expect(first.pendingEffects).toBe(6);
     expect(Object.keys(first).sort()).toEqual(
       [
+        "revision",
         "operationId",
         "ownerUid",
         "picVer",
@@ -324,11 +325,22 @@ test("avatar allocation commits atomically, serializes requests and recovers rea
         true,
       ),
     ).rejects.toThrow();
-    for (const picVer of [-1, null, 999999, 2999999]) {
+    for (const picVer of [null]) {
       await realm().db.update(userprofile).set({ picVer }).where(eq(userprofile.uid, "1003"));
       await expect(live.versionService.update("1003", now)).rejects.toThrow();
       expect((await profile("1003")).picVer).toBe(picVer);
       expect(await intents("1003")).toEqual([]);
+    }
+    for (const [before, after] of [
+      [-1, 2000001],
+      [999999, 3000000],
+      [2999999, 3000000],
+    ]) {
+      await realm()
+        .db.update(userprofile)
+        .set({ picVer: before })
+        .where(eq(userprofile.uid, "1003"));
+      expect((await live.versionService.update("1003", now)).intent?.picVer).toBe(after);
     }
     expect((await live.versionService.update("1999", now)).intent).toBeUndefined();
     expect(await intents("1999")).toEqual([]);

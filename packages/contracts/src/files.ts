@@ -71,6 +71,7 @@ export interface AvatarFinishStore {
 }
 
 export interface AvatarCompletionRecord {
+  revision?: bigint;
   ownerUid: string;
   sequence: number;
   hash: string;
@@ -102,6 +103,7 @@ export interface AvatarMailDelivery {
 }
 
 export interface AvatarProfileUpdate {
+  revision?: bigint;
   owner: string;
   kingdomId: number;
   sequence: number;

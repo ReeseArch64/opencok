@@ -17,6 +17,10 @@ function projectAvatarProfile(
     !Number.isInteger(entry.sequence) ||
     entry.sequence < 1 ||
     entry.sequence > 999999 ||
+    (entry.revision !== undefined &&
+      (typeof entry.revision !== "bigint" ||
+        entry.revision < 0n ||
+        entry.revision > 9223372036854775807n)) ||
     !Number.isInteger(entry.picVer) ||
     entry.picVer < 0 ||
     entry.picVer > 2147483647 ||
@@ -66,6 +70,7 @@ function projectAvatarProfile(
     updatedAt,
     userName: profile.userName,
     platform: profile.platform,
+    ...(entry.revision ? { revision: entry.revision } : {}),
   };
 }
 

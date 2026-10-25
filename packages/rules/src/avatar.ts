@@ -9,12 +9,12 @@ export function avatarSequence(version: unknown): number {
   if (
     typeof version !== "number" ||
     !Number.isInteger(version) ||
-    version < 0 ||
+    version < -2147483648 ||
     version > 2147483647 ||
     version % 1000000 === 999999
   )
     throw new GameError(errors.invalid, "avatar_rule");
-  return (version % 1000000) + 1;
+  return Math.max(0, version % 1000000) + 1;
 }
 export function avatarMinimumLevel(rules: Rules): number | undefined {
   const settings = rules.items.get("function_on5");

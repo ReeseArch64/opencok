@@ -90,6 +90,7 @@ function fixture() {
                   e.committedAt,
                   e.effects,
                   e.pendingEffects,
+                  e.revision ?? 0n,
                 ],
               ]
             : [],

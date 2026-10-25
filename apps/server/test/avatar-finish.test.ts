@@ -52,6 +52,8 @@ function fixture() {
     query: async (statement: { text: string }, params: unknown[] = []) => {
       const text = statement.text;
       queries.push({ text, params });
+      if (text.includes("insert into opencok_kingdom.avatar_publication"))
+        return { rows: [{ revision: "1" }] };
       if (text.startsWith("begin")) {
         working = structuredClone(state);
         committed = false;

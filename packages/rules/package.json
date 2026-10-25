@@ -84,7 +84,8 @@
     "./military-ranking": "./src/military-ranking.ts",
     "./battle-ranking": "./src/battle-ranking.ts",
     "./nickname-alliance": "./src/nickname-alliance.ts",
-    "./nickname-reserved": "./src/nickname-reserved.ts"
+    "./nickname-reserved": "./src/nickname-reserved.ts",
+    "./avatar-moderation": "./src/avatar-moderation.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

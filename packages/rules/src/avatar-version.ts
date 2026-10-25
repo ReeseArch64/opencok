@@ -4,7 +4,16 @@ import type { Row } from "@opencok/contracts/rows";
 import { validAvatarProfile } from "@opencok/contracts/chat-avatar-profile";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
-import { avatarSequence } from "./avatar.ts";
+export function legacyAvatarVersion(version: unknown): number {
+  if (
+    typeof version !== "number" ||
+    !Number.isInteger(version) ||
+    version < -2147483648 ||
+    version > 2147483647
+  )
+    throw new GameError(errors.invalid, "avatar_rule");
+  return version >= 1000000 ? (version % 1000000) + 1 : version > 0 ? version + 1 : 1;
+}
 import { avatarMailFromTemplate } from "./avatar-mail.ts";
 import type { Rule } from "./game.ts";
 
@@ -16,7 +25,7 @@ export function avatarVersionPlan(
   mailTemplate: Rule | undefined,
 ): AvatarVersionPlan {
   if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid, "avatar_rule");
-  const sequence = avatarSequence(profile.picVer);
+  const sequence = legacyAvatarVersion(profile.picVer);
   if (
     [profile.name, profile.pf].some(
       (value) =>
@@ -53,10 +62,13 @@ function snapshot(entry: AvatarVersionIntent) {
   if (
     !/^[a-f0-9]{32}$/.test(entry.operationId) ||
     !/^[0-9]{1,20}$/.test(entry.ownerUid) ||
+    (entry.revision !== undefined &&
+      (typeof entry.revision !== "bigint" ||
+        entry.revision < 0n ||
+        entry.revision > 9223372036854775807n)) ||
     !Number.isInteger(entry.picVer) ||
     entry.picVer <= 0 ||
     entry.picVer > 2147483647 ||
-    entry.picVer % 1000000 === 0 ||
     typeof entry.committedAt !== "bigint" ||
     entry.committedAt < 0n ||
     entry.committedAt > BigInt(Number.MAX_SAFE_INTEGER) ||
@@ -65,7 +77,7 @@ function snapshot(entry: AvatarVersionIntent) {
         BigInt.asIntN(64, entry.nextUpdateTime) !== entry.nextUpdateTime)) ||
     !Number.isInteger(entry.pendingEffects) ||
     entry.pendingEffects < 0 ||
-    entry.pendingEffects > 7 ||
+    entry.pendingEffects > 15 ||
     typeof entry.effects !== "string" ||
     Buffer.byteLength(entry.effects) > 65535
   )
@@ -95,6 +107,7 @@ export function avatarVersionProfile(
     updatedAt: value.profile?.updatedAt,
     userName: value.profile?.userName,
     platform: value.profile?.platform,
+    ...(entry.revision ? { revision: entry.revision } : {}),
   };
   if (!validAvatarProfile(result)) throw new Error("Invalid avatar version profile");
   return result;

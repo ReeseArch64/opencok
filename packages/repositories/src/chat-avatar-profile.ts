@@ -10,6 +10,7 @@ import type { AvatarProfileUpdate } from "@opencok/contracts/files";
 import type { Database } from "./game.ts";
 
 function project(row: typeof chat_avatar_profile.$inferSelect): AvatarProfileUpdate {
+  if (row.revision < 0n) throw new Error("Invalid stored avatar revision");
   const value = {
     owner: row.owner_uid,
     kingdomId: row.kingdom_id,
@@ -19,6 +20,7 @@ function project(row: typeof chat_avatar_profile.$inferSelect): AvatarProfileUpd
     updatedAt: String(row.committed_at / 1000n),
     userName: row.user_name,
     platform: row.platform,
+    ...(row.revision > 0n ? { revision: row.revision } : {}),
   };
   if (!validAvatarProfile(value)) throw new Error("Invalid stored chat avatar profile");
   return value;
@@ -80,8 +82,11 @@ export function createChatAvatarProfileStore(
             const current = project(row);
             if (current.owner !== update.owner || current.kingdomId !== update.kingdomId)
               throw new Error("Invalid stored chat avatar profile");
-            if (current.sequence > update.sequence) return "superseded";
-            if (current.sequence === update.sequence) {
+            const revised = (current.revision ?? 0n) > 0n || (update.revision ?? 0n) > 0n;
+            const previous = revised ? (current.revision ?? 0n) : BigInt(current.sequence);
+            const incoming = revised ? (update.revision ?? 0n) : BigInt(update.sequence);
+            if (previous > incoming) return "superseded";
+            if (previous === incoming) {
               if (
                 current.picVer !== update.picVer ||
                 current.committedAt !== update.committedAt ||
@@ -100,6 +105,7 @@ export function createChatAvatarProfileStore(
             committed_at: update.committedAt,
             user_name: userName,
             platform: update.platform,
+            revision: update.revision ?? 0n,
           };
           const changed = row
             ? await tx

@@ -178,7 +178,7 @@ test("avatar level, interval, cooldown, report and unsupported-version failures 
   const reported = fixture();
   reported.record({ uid: "1001", updateTime: BigInt(now - 60000), banTime: BigInt(now + 1) });
   await expect(reported.run()).rejects.toThrow(errors.avatarReported);
-  for (const value of [-1, null, 999999, 2999999]) {
+  for (const value of [-2147483649, null, 2147483648]) {
     const f = fixture("0");
     f.profile.picVer = value;
     await expect(f.run()).rejects.toThrow();

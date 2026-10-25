@@ -212,7 +212,7 @@ test("authorization and invalid configuration cannot issue or inspect an avatar"
     { banFlag: 1 },
     { banTime: BigInt(now + 1) },
     { picVer: null },
-    { picVer: -1 },
+    { picVer: -2147483649 },
   ]) {
     const f = fixture();
     Object.assign(f.profile, patch);
@@ -252,13 +252,15 @@ test("authorization and invalid configuration cannot issue or inspect an avatar"
 test("avatar rules retain encoded sequences, lazy config parsing and Java long arithmetic", () => {
   for (const [version, next] of [
     [0, 1],
+    [-2147483648, 1],
+    [-1, 1],
     [999998, 999999],
     [1000000, 1],
     [2000042, 43],
     [2147483647, 483648],
   ])
     expect(avatarSequence(version)).toBe(next!);
-  for (const version of [-1, null, 1.5, NaN, 999999, 1999999, 2147483648])
+  for (const version of [-2147483649, null, 1.5, NaN, 999999, 1999999, 2147483648])
     expect(() => avatarSequence(version)).toThrow();
   expect(avatarMinimumLevel(rules("0", "invalid"))).toBeUndefined();
   expect(() => avatarMinimumLevel(rules("1", "＋1"))).toThrow();

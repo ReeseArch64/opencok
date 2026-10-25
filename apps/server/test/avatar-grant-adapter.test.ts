@@ -57,6 +57,7 @@ test("avatar grant reads the durable owned profile under lock and exposes only b
     "select",
     "select",
     "select",
+    "select",
     "commit",
   ]);
   expect(fixture.queries[0]!.text).toBe("begin isolation level repeatable read read write");
@@ -92,7 +93,7 @@ test("unauthorized or missing profiles cannot run the issuer or read eligibility
   }
   const bypass = database();
   await readAvatarGrant(bypass.db, 1, "1001", now, async () => grant);
-  expect(bypass.queries).toHaveLength(3);
+  expect(bypass.queries).toHaveLength(4);
   const absent = database({ castles: [] });
   await readAvatarGrant(absent.db, 1, "1001", now, async (_profile, readers) => {
     expect(await readers.castleLevel()).toBe(0);
@@ -139,7 +140,7 @@ test("ambiguous state, escaped readers and transaction failures cannot return su
   });
   await expect(escaped!.castleLevel()).rejects.toThrow();
   await expect(escaped!.uploadRecord()).rejects.toThrow();
-  expect(fixture.queries).toHaveLength(3);
+  expect(fixture.queries).toHaveLength(4);
   const failed = database();
   await expect(
     readAvatarGrant(failed.db, 1, "1001", now, async () => {

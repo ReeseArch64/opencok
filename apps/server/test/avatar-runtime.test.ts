@@ -49,6 +49,8 @@ function fixture(mode = "1") {
     query: async (query: { text: string }, params: unknown[] = []) => {
       const text = query.text;
       queries.push({ text, params });
+      if (text.includes("insert into opencok_kingdom.avatar_publication"))
+        return { rows: [{ revision: "1" }] };
       if (text.startsWith("begin")) {
         expect(transaction).toBe(false);
         working = structuredClone(state);
@@ -122,7 +124,10 @@ function fixture(mode = "1") {
         return { rows: [["1001"]] };
       }
       expect(text.startsWith("insert")).toBe(true);
-      if (text.includes('"avatar_completion"')) source.completions.push(params.slice(0, 7));
+      if (text.includes('"avatar_completion"'))
+        source.completions.push(
+          params.length >= 8 ? params.slice(0, 8) : [...params.slice(0, 7), "0"],
+        );
       else if (text.includes('"pic_upload_record"')) source.record = params.slice(0, 7);
       else if (text.includes('"mail_group"')) source.groups.push(params);
       else if (text.includes('"mail_contents"')) source.extra.push(params);

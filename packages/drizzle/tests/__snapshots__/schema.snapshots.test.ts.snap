@@ -14077,6 +14077,7 @@ column ["picVer","integer",true,null,null,null]
 column ["committedAt","bigint",true,null,null,null]
 column ["effects","text",true,null,null,null]
 column ["pendingEffects","integer",true,null,null,null]
+column ["revision","bigint",true,"0",null,null]
 primary ["avatar_completion_PRIMARY",["ownerUid","sequence"]]
 index ["avatar_completion_pending",false,["pendingEffects","committedAt","ownerUid","sequence"]]
 check ["avatar_completion_owner","\\"ownerUid\\" ~ '^[0-9]{1,20}$'"]
@@ -14086,9 +14087,9 @@ check ["avatar_completion_version","\\"picVer\\" >= 0 AND \\"picVer\\" % 1000000
 check ["avatar_completion_time","\\"committedAt\\" >= 0"]
 check ["avatar_completion_effects_size","octet_length(\\"effects\\") <= 65535"]
 check ["avatar_completion_pending_range","\\"pendingEffects\\" >= 0 AND \\"pendingEffects\\" <= 7"]
-insert into "opencok_kingdom"."avatar_completion" ("ownerUid", "sequence", "hash", "picVer", "committedAt", "effects", "pendingEffects") values ($1, $2, $3, $4, $5, $6, $7)
-select "ownerUid", "sequence", "hash", "picVer", "committedAt", "effects", "pendingEffects" from "opencok_kingdom"."avatar_completion" where "opencok_kingdom"."avatar_completion"."ownerUid" = $1
-update "opencok_kingdom"."avatar_completion" set "ownerUid" = $1, "sequence" = $2, "hash" = $3, "picVer" = $4, "committedAt" = $5, "effects" = $6, "pendingEffects" = $7 where "opencok_kingdom"."avatar_completion"."ownerUid" = $8
+insert into "opencok_kingdom"."avatar_completion" ("ownerUid", "sequence", "hash", "picVer", "committedAt", "effects", "pendingEffects", "revision") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "ownerUid", "sequence", "hash", "picVer", "committedAt", "effects", "pendingEffects", "revision" from "opencok_kingdom"."avatar_completion" where "opencok_kingdom"."avatar_completion"."ownerUid" = $1
+update "opencok_kingdom"."avatar_completion" set "ownerUid" = $1, "sequence" = $2, "hash" = $3, "picVer" = $4, "committedAt" = $5, "effects" = $6, "pendingEffects" = $7, "revision" = $8 where "opencok_kingdom"."avatar_completion"."ownerUid" = $9
 delete from "opencok_kingdom"."avatar_completion" where "opencok_kingdom"."avatar_completion"."ownerUid" = $1"
 `;
 
@@ -14101,15 +14102,16 @@ column ["pic_ver","integer",true,null,null,null]
 column ["committed_at","bigint",true,null,null,null]
 column ["user_name","varchar(255)",true,null,null,null]
 column ["platform","varchar(255)",true,null,null,null]
+column ["revision","bigint",true,"0",null,null]
 primary ["chat_avatar_profile_PRIMARY",["owner_uid","kingdom_id"]]
 check ["chat_avatar_profile_owner","\\"owner_uid\\" ~ '^[0-9]{1,20}$'"]
 check ["chat_avatar_profile_kingdom","\\"kingdom_id\\" > 0"]
-check ["chat_avatar_profile_sequence","\\"sequence\\" BETWEEN 1 AND 999999"]
+check ["chat_avatar_profile_sequence","\\"sequence\\" BETWEEN 0 AND 999999"]
 check ["chat_avatar_profile_version","\\"pic_ver\\" >= 0 AND \\"pic_ver\\" % 1000000 = \\"sequence\\""]
 check ["chat_avatar_profile_time","\\"committed_at\\" BETWEEN 0 AND 9007199254740991"]
-insert into "opencok_chat"."chat_avatar_profile" ("owner_uid", "kingdom_id", "sequence", "pic_ver", "committed_at", "user_name", "platform") values ($1, $2, $3, $4, $5, $6, $7)
-select "owner_uid", "kingdom_id", "sequence", "pic_ver", "committed_at", "user_name", "platform" from "opencok_chat"."chat_avatar_profile" where "opencok_chat"."chat_avatar_profile"."owner_uid" = $1
-update "opencok_chat"."chat_avatar_profile" set "owner_uid" = $1, "kingdom_id" = $2, "sequence" = $3, "pic_ver" = $4, "committed_at" = $5, "user_name" = $6, "platform" = $7 where "opencok_chat"."chat_avatar_profile"."owner_uid" = $8
+insert into "opencok_chat"."chat_avatar_profile" ("owner_uid", "kingdom_id", "sequence", "pic_ver", "committed_at", "user_name", "platform", "revision") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "owner_uid", "kingdom_id", "sequence", "pic_ver", "committed_at", "user_name", "platform", "revision" from "opencok_chat"."chat_avatar_profile" where "opencok_chat"."chat_avatar_profile"."owner_uid" = $1
+update "opencok_chat"."chat_avatar_profile" set "owner_uid" = $1, "kingdom_id" = $2, "sequence" = $3, "pic_ver" = $4, "committed_at" = $5, "user_name" = $6, "platform" = $7, "revision" = $8 where "opencok_chat"."chat_avatar_profile"."owner_uid" = $9
 delete from "opencok_chat"."chat_avatar_profile" where "opencok_chat"."chat_avatar_profile"."owner_uid" = $1"
 `;
 
@@ -14122,17 +14124,18 @@ column ["committedAt","bigint",true,null,null,null]
 column ["nextUpdateTime","bigint",false,null,null,null]
 column ["effects","text",true,null,null,null]
 column ["pendingEffects","integer",true,null,null,null]
+column ["revision","bigint",true,"0",null,null]
 primary ["avatar_version_update_PRIMARY",["operationId"]]
 index ["avatar_version_update_pending",false,["pendingEffects","ownerUid","operationId"]]
 check ["avatar_version_update_id","\\"operationId\\" ~ '^[a-f0-9]{32}$'"]
 check ["avatar_version_update_owner","\\"ownerUid\\" ~ '^[0-9]{1,20}$'"]
-check ["avatar_version_update_version","\\"picVer\\" > 0 AND \\"picVer\\" % 1000000 BETWEEN 1 AND 999999"]
+check ["avatar_version_update_version","\\"picVer\\" >= 0 OR \\"pendingEffects\\" = 0"]
 check ["avatar_version_update_time","\\"committedAt\\" >= 0"]
 check ["avatar_version_update_effects_size","octet_length(\\"effects\\") <= 65535"]
-check ["avatar_version_update_pending_range","\\"pendingEffects\\" BETWEEN 0 AND 7"]
-insert into "opencok_kingdom"."avatar_version_update" ("operationId", "ownerUid", "picVer", "committedAt", "nextUpdateTime", "effects", "pendingEffects") values ($1, $2, $3, $4, $5, $6, $7)
-select "operationId", "ownerUid", "picVer", "committedAt", "nextUpdateTime", "effects", "pendingEffects" from "opencok_kingdom"."avatar_version_update" where "opencok_kingdom"."avatar_version_update"."operationId" = $1
-update "opencok_kingdom"."avatar_version_update" set "operationId" = $1, "ownerUid" = $2, "picVer" = $3, "committedAt" = $4, "nextUpdateTime" = $5, "effects" = $6, "pendingEffects" = $7 where "opencok_kingdom"."avatar_version_update"."operationId" = $8
+check ["avatar_version_update_pending_range","\\"pendingEffects\\" BETWEEN 0 AND 15"]
+insert into "opencok_kingdom"."avatar_version_update" ("operationId", "ownerUid", "picVer", "committedAt", "nextUpdateTime", "effects", "pendingEffects", "revision") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "operationId", "ownerUid", "picVer", "committedAt", "nextUpdateTime", "effects", "pendingEffects", "revision" from "opencok_kingdom"."avatar_version_update" where "opencok_kingdom"."avatar_version_update"."operationId" = $1
+update "opencok_kingdom"."avatar_version_update" set "operationId" = $1, "ownerUid" = $2, "picVer" = $3, "committedAt" = $4, "nextUpdateTime" = $5, "effects" = $6, "pendingEffects" = $7, "revision" = $8 where "opencok_kingdom"."avatar_version_update"."operationId" = $9
 delete from "opencok_kingdom"."avatar_version_update" where "opencok_kingdom"."avatar_version_update"."operationId" = $1"
 `;
 
@@ -14272,4 +14275,16 @@ insert into "opencok_global"."cn1_profile_session" ("ownerUid", "isAddict", "onl
 select "ownerUid", "isAddict", "onlineMinutes", "authAt", "sampledAt", "offlineAt", "sessionId" from "opencok_global"."cn1_profile_session" where "opencok_global"."cn1_profile_session"."ownerUid" = $1
 update "opencok_global"."cn1_profile_session" set "ownerUid" = $1, "isAddict" = $2, "onlineMinutes" = $3, "authAt" = $4, "sampledAt" = $5, "offlineAt" = $6, "sessionId" = $7 where "opencok_global"."cn1_profile_session"."ownerUid" = $8
 delete from "opencok_global"."cn1_profile_session" where "opencok_global"."cn1_profile_session"."ownerUid" = $1"
+`;
+
+exports[`opencok_kingdom.avatar_publication: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["ownerUid","varchar(20)",true,null,null,null]
+column ["revision","bigint",true,null,null,null]
+primary ["avatar_publication_PRIMARY",["ownerUid"]]
+check ["avatar_publication_revision","\\"revision\\" > 0"]
+insert into "opencok_kingdom"."avatar_publication" ("ownerUid", "revision") values ($1, $2)
+select "ownerUid", "revision" from "opencok_kingdom"."avatar_publication" where "opencok_kingdom"."avatar_publication"."ownerUid" = $1
+update "opencok_kingdom"."avatar_publication" set "ownerUid" = $1, "revision" = $2 where "opencok_kingdom"."avatar_publication"."ownerUid" = $3
+delete from "opencok_kingdom"."avatar_publication" where "opencok_kingdom"."avatar_publication"."ownerUid" = $1"
 `;
