@@ -107,6 +107,7 @@ import type {
 import { expeditionRanking } from "@opencok/mappings/expedition-ranking";
 import { expeditionRankingLimit, selectExpeditionRanking } from "@opencok/rules/expedition-ranking";
 import { decodeExpeditionRanking } from "./expedition-ranking.ts";
+import { allianceCommands } from "./alliances";
 import { allianceRanking } from "@opencok/mappings/alliance-ranking";
 import { allianceRankingQuery, selectAllianceRanking } from "@opencok/rules/alliance-ranking";
 import type { AllianceRankingKind } from "@opencok/contracts/alliance-ranking";
@@ -264,11 +265,13 @@ export class GameService {
     return (await this.initialize(uid)).body;
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
+    await this.services.reconcileAlliance?.(uid);
     await this.services.reconcileTimed?.(uid);
     const effects = await this.services.cityProgression?.(uid, "effects.init", {});
     const quest = await this.services.cityProgression?.(uid, "quest.init", {});
     const equipment = await this.services.cityProgression?.(uid, "equipment.init", {});
     const generals = await this.services.cityProgression?.(uid, "general.init", {});
+    const alliance = await this.services.alliance?.(uid, "alliance.init", {});
     const state = await this.state(uid);
     const world = state.world;
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
@@ -281,6 +284,7 @@ export class GameService {
       ),
       ...equipment?.body,
       ...generals?.body,
+      ...alliance?.body,
       ...effects?.body,
       ...quest?.body,
       ...serverClock(this.now(), 0),
@@ -345,6 +349,11 @@ export class GameService {
     });
   }
   async execute(uid: string, command: string, params: Fields): Promise<Result> {
+    if ((allianceCommands as readonly string[]).includes(command)) {
+      if (!this.services.alliance) throw new GameError(errors.unsupported);
+      return this.services.alliance(uid, command, params);
+    }
+    await this.services.reconcileAlliance?.(uid);
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {

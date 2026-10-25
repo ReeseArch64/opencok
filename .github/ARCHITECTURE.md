@@ -183,6 +183,11 @@ legacy and numeric rosters. Assignment and effect changes settle production;
 combat consumes immutable general snapshots. See [general progression](../docs/architecture/general-progression.md)
 for native commands, recovery, draw catalog compatibility and acceptance limits.
 
+Basic alliances use ordered participant locks before alliance locks, with current
+membership checked again inside the realm transaction. Shared research schedules
+production effects at their saved deadlines, and gifts pin recipient outcomes
+before individual claims. [Alliance mutation and recovery contract](../docs/architecture/basic-alliances.md).
+
 ## 10. Battle computation and bots
 
 TypeScript combat runs through the realm app with bounded CPU workers, queue,
