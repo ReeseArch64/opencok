@@ -12,6 +12,7 @@
   "type": "module",
   "exports": {
     "./sfs": "./src/sfs.ts",
-    "./gameplay-catalog": "./src/gameplay-catalog.ts"
+    "./gameplay-catalog": "./src/gameplay-catalog.ts",
+    "./resource": "./src/resource.ts"
   }
 }

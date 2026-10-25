@@ -87,7 +87,8 @@
     "./nickname-reserved": "./src/nickname-reserved.ts",
     "./avatar-moderation": "./src/avatar-moderation.ts",
     "./inventory": "./src/inventory.ts",
-    "./mail-rewards": "./src/mail-rewards.ts"
+    "./mail-rewards": "./src/mail-rewards.ts",
+    "./building": "./src/building.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
