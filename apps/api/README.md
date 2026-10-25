@@ -146,20 +146,24 @@ validation step; previous PHP/MariaDB checks do not establish this port's compat
 
 ## Avatar media
 
-Avatar uploads remain on the API listener. Configure only these media settings:
+Avatar uploads remain on the API listener. Required media settings:
 
-| Setting                | Purpose                                                                                                  |
-| ---------------------- | -------------------------------------------------------------------------------------------------------- |
-| `S3_PUBLIC_ENDPOINT`   | S3-compatible origin reachable by both API and clients; local MinIO uses the host's published port 9000. |
-| `S3_REGION`            | Object-store signing region.                                                                             |
-| `S3_BUCKET`            | Existing private uploads bucket.                                                                         |
-| `S3_ACCESS_KEY_ID`     | Storage identity with object read/write/delete permissions.                                              |
-| `S3_SECRET_ACCESS_KEY` | Matching secret; never sent to clients.                                                                  |
+| Setting                | Purpose                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| `S3_PUBLIC_ENDPOINT`   | S3-compatible origin reachable by clients; local MinIO uses the host's published port 9000. |
+| `S3_REGION`            | Object-store signing region.                                                                |
+| `S3_BUCKET`            | Existing private uploads bucket.                                                            |
+| `S3_ACCESS_KEY_ID`     | Storage identity with object read/write/delete permissions.                                 |
+| `S3_SECRET_ACCESS_KEY` | Matching secret; never sent to clients.                                                     |
 
 All five settings are required together. With none configured, discovery runs without
-media. No extra media-enable flag, signing key file, session token or endpoint setting
-is needed. AWS SDK `getSignedUrl` issues five-minute S3 `GetObject` URLs. Keep the
-bucket private and use an endpoint reachable from phones as well as the API.
+media. No extra media-enable flag, signing key file or session token is needed. AWS SDK `getSignedUrl` issues five-minute S3 `GetObject` URLs. Keep the
+bucket private and use a public endpoint reachable from phones.
+
+Optional `S3_ENDPOINT` selects a separate origin for API storage operations; when
+omitted, it defaults to `S3_PUBLIC_ENDPOINT`. Local Compose uses `http://minio:9000`
+for storage operations so container traffic does not depend on host-port hairpin routing.
+Presigned image URLs always use `S3_PUBLIC_ENDPOINT`.
 
 The root development Compose file supplies local MinIO settings and the realm's
 private `GAME_FILES_URL=http://api:8080`. It is a development environment only;

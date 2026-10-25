@@ -286,6 +286,7 @@ services:
       API_CHAT_URL: ${API_CHAT_URL:-}
       API_HOST: 0.0.0.0
       API_PORT: 8080
+      S3_ENDPOINT: http://minio:9000
       S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://192.168.1.104:9000}
       S3_REGION: ${S3_REGION:-us-east-1}
       S3_BUCKET: ${S3_BUCKET:-opencok-uploads}

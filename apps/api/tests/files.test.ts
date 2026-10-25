@@ -238,6 +238,21 @@ test("API routes media and discovery on one listener while preserving independen
           fetch(`${origin}/_internal/avatars/${owner}/1`),
         );
         expect(confirmation.status).toBe(401);
+        const imagePath = `/_internal/avatars/${owner}/1/url`;
+        const imageToken = yield* Effect.promise(() => tickets.issue(owner, 1, "image"));
+        const authorizedImage = yield* Effect.promise(() =>
+          fetch(origin + imagePath, { headers: { "X-Avatar-Confirmation": imageToken } }),
+        );
+        expect(authorizedImage.status).toBe(200);
+        expect(yield* Effect.promise(() => authorizedImage.text())).toBe(path);
+        for (const token of ["", imageToken, yield* Effect.promise(() => grant())]) {
+          const rejected = yield* Effect.promise(() =>
+            fetch(origin + (token === imageToken ? imagePath.replace("/1/", "/2/") : imagePath), {
+              headers: { "X-Avatar-Confirmation": token },
+            }),
+          );
+          expect(rejected.status).toBe(401);
+        }
         for (const headers of [new Headers(), new Headers({ "Content-Length": "65537" })]) {
           const oversized = yield* Effect.promise(() =>
             app.fetch(

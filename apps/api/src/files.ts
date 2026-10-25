@@ -18,10 +18,27 @@ export const createFiles = (command: (name: string, ...args: string[]) => Promis
             secretAccessKey: config.S3_SECRET_ACCESS_KEY,
           },
           region: config.S3_REGION,
+          endpoint: config.S3_ENDPOINT ?? config.S3_PUBLIC_ENDPOINT,
+          forcePathStyle: true,
+        }),
+      async (resource) => resource.destroy(),
+    );
+    const signingClient = yield* acquireResource(
+      "files.signing",
+      async () =>
+        s3Client({
+          credentials: {
+            accessKeyId: config.S3_ACCESS_KEY_ID,
+            secretAccessKey: config.S3_SECRET_ACCESS_KEY,
+          },
+          region: config.S3_REGION,
           endpoint: config.S3_PUBLIC_ENDPOINT,
           forcePathStyle: true,
         }),
       async (resource) => resource.destroy(),
     );
-    return createHandler(new S3ImageStore(client, config.S3_BUCKET), createAvatarTickets(command));
+    return createHandler(
+      new S3ImageStore(client, config.S3_BUCKET, signingClient),
+      createAvatarTickets(command),
+    );
   });

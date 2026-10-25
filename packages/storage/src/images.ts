@@ -39,12 +39,13 @@ export class S3ImageStore implements ImageStore {
   constructor(
     private client: S3Client,
     private bucket: string,
+    private signingClient: S3Client = client,
   ) {}
 
   image(key: string): Promise<string> {
     if (!/^[0-9]{1,6}\/[a-f0-9]{32}\.jpg$/.test(key)) throw new Error("Invalid avatar object key");
     return getSignedUrl(
-      this.client,
+      this.signingClient,
       new GetObjectCommand({
         Bucket: this.bucket,
         Key: key,

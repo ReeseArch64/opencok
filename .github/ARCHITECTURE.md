@@ -319,7 +319,9 @@ The default replacement interval is three days. Successful replacement archives 
 preceding receipt and deletes its JPEG; matching upload retries resume failed cleanup. Media uses the
 API port; discovery keeps a 64 KiB body limit and uploads have a 2112 KiB cap.
 Realm upload and private confirmation authorization uses purpose-bound Redis tickets;
-S3 credentials remain API-only. Confirmation has no gateway route.
+S3 credentials remain API-only. Optional `S3_ENDPOINT` separates API storage traffic
+from `S3_PUBLIC_ENDPOINT`, which signs client image URLs; local Compose uses service
+DNS for storage to avoid host-port hairpin routing. Confirmation has no gateway route.
 Full pending/validated/ready lifecycle, GIFs, background transformations and orphan
 collection remain planned. [API media runbook](../apps/api/README.md#avatar-media) defines actual
 configuration and rollback; [lifecycle design](../docs/architecture/clients-and-services.md#21-file-and-media-lifecycle)
