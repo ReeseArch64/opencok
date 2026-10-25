@@ -120,6 +120,13 @@
       "when": 1792933528569,
       "tag": "0016_city_progression",
       "breakpoints": false
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792958284625,
+      "tag": "0017_social_outbox_retention",
+      "breakpoints": false
     }
   ]
 }

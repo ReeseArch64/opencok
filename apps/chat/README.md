@@ -6,7 +6,7 @@ identity and room authorization in `identity/chat-*`, handlers in `controllers/c
 HTTP/WebSocket transport in `connection/chat-*`, PostgreSQL adapters in
 `repositories/chat`, and configuration in `env/chat`. Imports use public package exports.
 
-Current topic-8 server integration and operating evidence are recorded in the
+Server integration and operating evidence are recorded in the
 [game integration guide](GAME_INTEGRATION.md). APK testing is explicitly excluded.
 
 ## Development
@@ -19,14 +19,16 @@ on port 8083. Set `CHAT_WEBSOCKET_URL` for the client-reachable address; see the
 the Compose Chat service, configure the root `.env` or process environment, and run
 `bun run --cwd apps/chat start`.
 
-| Setting                  | Meaning                                                                          |
-| ------------------------ | -------------------------------------------------------------------------------- |
-| `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases          |
-| `CHAT_SIGNING_SECRET`    | Required shared secret for trusted backend session, avatar and nickname requests |
-| `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment       |
-| `CHAT_HOST`, `CHAT_PORT` | Listen address, default `127.0.0.1:8083`                                         |
-| `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                         |
-| `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                                |
+| Setting                  | Meaning                                                                                 |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases                 |
+| `CHAT_SIGNING_SECRET`    | Required shared secret for trusted backend session, avatar and nickname requests        |
+| `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment              |
+| `MONGODB_URI`            | Authenticated MongoDB archive URI; PostgreSQL fallback remains available during outages |
+| `CHAT_INSTANCE_ID`       | Stable unique consumer identity; defaults to a process UUID outside Compose             |
+| `CHAT_HOST`, `CHAT_PORT` | Listen address, default `127.0.0.1:8083`                                                |
+| `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                                |
+| `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                                       |
 
 Configuration uses the shared root environment loader. Legacy MariaDB variables and
 secret-file settings are replaced by these validated settings. Credentials are never
@@ -43,22 +45,25 @@ private to trusted backend callers: it exchanges the signed legacy form for a ra
 one-day token, storing only its SHA-256 digest. `/chat/ws` requires `session` and `uid`
 headers and binds the token to that identity.
 
-The imported commands cover bootstrap, global/language room discovery, atomic room
-joins, room sends, and history. Every room operation checks persisted membership;
-player lookup uses the authoritative global account's realm, never a fixed kingdom.
-An unset original realm falls back to the current realm. Messages remain 1–500 Unicode
-code points, history is capped at 100, frames/forms at 16 KiB. Concurrent duplicate sends
-share one database receipt and produce one local broadcast. Numeric wire sequences
-fail closed if PostgreSQL values exceed JavaScript's safe integer range.
+Commands cover bootstrap, public/private room discovery and lifecycle, sends, sequence
+history, contacts, blocks, moderation, reports, private mailboxes and social feeds.
+The native SFS bridge and realm delivery consumer use the same persisted authority.
+Each operation checks current identity, room membership and the authorized join interval.
+Messages remain 1–500 Unicode code points; history pages are capped at 100. WebSocket
+input is bounded at 16 KiB and output at 256 KiB. Duplicate sends share a persisted
+message identity; cross-instance consumers deliver durable events after commit.
 
-The imported retention is 24 hours for all messages and sessions. Expiry filters apply
-before cleanup, which deletes up to 500 of each every minute. Maintenance runs cannot
-overlap. Database queries have bounded deadlines. SIGTERM/SIGINT close sockets and pools.
+Global/alliance recent history closes at 24 hours and a verified MongoDB copy remains
+available until seven elapsed days. Other public channels retain 24 hours; private
+rooms/mailbox copies retain 30 days. Expiry is filtered before cleanup. Small tombstones
+and receipts prevent replay resurrection. Maintenance is bounded, and MongoDB outages
+preserve PostgreSQL bodies for archive fallback. See the complete
+[topic-24 workflow, deployment and retention guide](../../docs/social-chat-migration.md).
 
 ## Validation and limits
 
 Run `bun run --cwd apps/chat check-types`, `bun run --cwd apps/chat test` and
-`bun run --cwd apps/chat test:integration`. Integration creates disposable PostgreSQL
+`bun run --cwd apps/chat test:integration`. Integration creates disposable PostgreSQL and MongoDB
 containers, applies the real migrations, checks both realm lookups, concurrent writes,
 Unicode, exact expiry and persistence after restart. It does not touch local game data.
 
@@ -74,10 +79,9 @@ The advertised `CHAT_WEBSOCKET_URL` must be directly reachable because the share
 does not proxy `/chat/ws` or expose `/external/session`. See the
 [API discovery contract](../api/README.md#public-chat-discovery) and the
 [realm session contract](../server/README.md#realm-chat-sessions) for bounds and errors.
-Broadcast is process-local: deploy one chat instance until cross-instance
-fanout is implemented. Seven-day archives, durable replay receipts after cleanup,
-moderation and direct messages remain future work; the imported 24-hour behavior does
-not satisfy the full target architecture. Production Node execution remains pending
+Topic 24 implements durable cross-instance fanout, private workflows, moderation and the
+seven-day global/alliance archive. See the linked migration guide for operating limits.
+Production Node execution remains pending
 [ADR-0010](../../docs/decisions/0010-adopt-nodejs-for-production.md); the Dockerfile is
 for Bun development, matching the existing API/server images.
 
@@ -185,9 +189,9 @@ these same affected rows. No public room message is targeted.
 
 These tables hold the maintained representation of authorized historical private
 message copies. Existing legacy copies require an explicit owner/realm import before
-cutover; creating the table does not migrate legacy messages. Sending, direct-message
-permissions, blocking and complete private-chat retention remain topic 24. Mailbox
-mutations do not claim that broader social behavior is implemented.
+cutover; creating the table does not migrate legacy messages. Topic 24 adds sending, current permissions, blocks and explicit 30-day private retention.
+The legacy mailbox import boundary remains explicit; source reference files are not
+player-data fixtures.
 
 The realm stores outgoing intents atomically with mailbox mutations and retries
 after outages or lost acknowledgments. Apply the global migration before enabling
