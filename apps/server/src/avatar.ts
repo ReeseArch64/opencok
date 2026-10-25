@@ -25,9 +25,7 @@ export function createAvatarRuntime(options: {
   db: { kingdom: Pick<Database["kingdom"], "db"> };
   files: AvatarFiles;
   rules: Rules;
-  config: Pick<ServerConfig, "kingdomId" | "timeoutMs"> & {
-    avatarChat: NonNullable<ServerConfig["avatarChat"]>;
-  };
+  config: Pick<ServerConfig, "kingdomId" | "timeoutMs" | "avatarChat">;
   cache: Pick<Cache, "publishPlayerUpdateTime">;
   notifications: RealmNotifications;
   report(effect: "mail" | "profile" | "chat" | "notification"): void;
@@ -35,12 +33,14 @@ export function createAvatarRuntime(options: {
   now?: () => number;
 }) {
   const { db, files, rules, config, cache, notifications, report } = options;
-  const publish = createChatAvatarProfilePublisher({
-    ...config.avatarChat,
-    timeoutMs: config.timeoutMs,
-    fetch: options.fetch,
-    now: options.now,
-  });
+  const publish = config.avatarChat
+    ? createChatAvatarProfilePublisher({
+        ...config.avatarChat,
+        timeoutMs: config.timeoutMs,
+        fetch: options.fetch,
+        now: options.now,
+      })
+    : undefined;
   const service = createAvatarCompletion({
     files,
     rules,
@@ -94,15 +94,17 @@ export function createAvatarRuntime(options: {
         config.timeoutMs,
       ),
     chat: (owner, sequence) =>
-      publishAvatarChat(
-        db.kingdom.db,
-        config.kingdomId,
-        owner,
-        sequence,
-        avatarChatUpdate,
-        publish,
-        config.timeoutMs,
-      ),
+      publish
+        ? publishAvatarChat(
+            db.kingdom.db,
+            config.kingdomId,
+            owner,
+            sequence,
+            avatarChatUpdate,
+            publish,
+            config.timeoutMs,
+          )
+        : Promise.resolve({ profile: undefined, published: false }),
     notify: async (owner, command, body) => {
       await notifications.publish(owner, command, body);
     },
@@ -155,15 +157,17 @@ export function createAvatarRuntime(options: {
         config.timeoutMs,
       ),
     chat: (owner, operationId) =>
-      publishAvatarVersionEffect(
-        4,
-        db.kingdom.db,
-        config.kingdomId,
-        owner,
-        operationId,
-        publish,
-        config.timeoutMs,
-      ),
+      publish
+        ? publishAvatarVersionEffect(
+            4,
+            db.kingdom.db,
+            config.kingdomId,
+            owner,
+            operationId,
+            publish,
+            config.timeoutMs,
+          )
+        : Promise.resolve(),
     notification: (owner, operationId) =>
       publishAvatarVersionEffect(
         8,

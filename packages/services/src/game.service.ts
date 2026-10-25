@@ -980,7 +980,7 @@ export class GameService {
     const sequence = Math.max(0, version % 1000000);
     return {
       owner: sfs.string(target),
-      path: sfs.string(sequence ? service.image(target, sequence) : ""),
+      path: sfs.string(sequence ? await service.image(target, sequence) : ""),
     };
   }
   private async avatarGrant(uid: string, params: Fields): Promise<Fields> {
@@ -1016,7 +1016,7 @@ export class GameService {
       return {
         owner: uid,
         sequence,
-        grant: service.issue(uid, sequence),
+        grant: await service.issue(uid, sequence),
         pendingHash: receipt?.hash ?? "",
       };
     });

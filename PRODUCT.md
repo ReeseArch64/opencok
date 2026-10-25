@@ -103,12 +103,13 @@ request queues.
 ### Safe media handling
 
 Player image uploads should use a narrow authenticated route with explicit
-size, ownership, file validation, storage, and delivery rules. Profile images use temporary API-signed upload and read URLs, with
+size, ownership, file validation, storage, and delivery rules. Profile images use temporary realm-issued authorization for API uploads and
+SDK-presigned S3 URLs for reads, with
 a default three-day replacement interval. A successful replacement removes the previous
 image while retaining its private confirmation receipt. Static images
-and animated GIFs should behave predictably. Local persistent storage is the
-baseline; an object store such as Cloudflare R2 may be offered as an optional
-adapter without becoming a requirement for local development.
+and animated GIFs should behave predictably. Local persistent MinIO storage provides the development baseline through the
+same private S3 interface used by external storage providers. Production hosting
+and configuration remain independent of the development Compose environment.
 
 ### Observable behavior
 

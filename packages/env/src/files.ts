@@ -1,22 +1,15 @@
 import { z } from "zod";
-import { blankToUndefined, validateEnvironment } from "./validation";
-export const filesSchema = z
-  .object({
-    FILES_SIGNING_KEY_FILE: z.string().min(1).default("/run/opencok/image-upload-key"),
-    AWS_ACCESS_KEY_ID: z.string().min(1).optional(),
-    AWS_SECRET_ACCESS_KEY: z.string().min(1).optional(),
-    AWS_SESSION_TOKEN: z.string().min(1).optional(),
-    S3_BUCKET: z.string().min(3),
-    S3_REGION: z.string().min(1).default("us-east-1"),
-    S3_ENDPOINT: z.preprocess(blankToUndefined, z.url({ protocol: /^https?$/ }).optional()),
-    S3_FORCE_PATH_STYLE: z
-      .enum(["true", "false"])
-      .default("false")
-      .transform((value) => value === "true"),
-  })
-  .refine((value) => !!value.AWS_ACCESS_KEY_ID === !!value.AWS_SECRET_ACCESS_KEY, {
-    path: ["AWS_ACCESS_KEY_ID"],
-    message: "Configure both credential fields",
-  });
+import { validateEnvironment } from "./validation";
+
+export const filesSchema = z.object({
+  S3_PUBLIC_ENDPOINT: z.url({ protocol: /^https?$/ }).refine((value) => {
+    const url = new URL(value);
+    return !url.username && !url.password && !url.search && !url.hash && url.pathname === "/";
+  }),
+  S3_REGION: z.string().min(1),
+  S3_BUCKET: z.string().min(3),
+  S3_ACCESS_KEY_ID: z.string().min(1),
+  S3_SECRET_ACCESS_KEY: z.string().min(1),
+});
 export const parseFilesEnvironment = (source: Readonly<Record<string, string | undefined>>) =>
   validateEnvironment(filesSchema, source);

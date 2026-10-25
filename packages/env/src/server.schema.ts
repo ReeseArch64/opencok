@@ -22,7 +22,6 @@ export const serverSchema = z
         })
         .optional(),
     ),
-    FILES_SIGNING_KEY_FILE: z.preprocess(blankToUndefined, z.string().min(1).optional()),
     GAME_AVATAR_CHAT_URL: z.preprocess(
       blankToUndefined,
       z
@@ -174,9 +173,6 @@ export const serverSchema = z
   })
   .refine((settings) => !settings.GAME_CHAT_SESSION_URL || !!settings.CHAT_SIGNING_SECRET, {
     path: ["CHAT_SIGNING_SECRET"],
-  })
-  .refine((settings) => !settings.GAME_FILES_URL || !!settings.FILES_SIGNING_KEY_FILE, {
-    path: ["FILES_SIGNING_KEY_FILE"],
   })
   .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.GAME_FILES_URL, {
     path: ["GAME_FILES_URL"],

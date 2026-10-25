@@ -1,3 +1,4 @@
+import { Cache } from "@opencok/storage/session";
 import { firebaseIdentity } from "@opencok/identity/firebase";
 import { ProvisioningService } from "@opencok/services/provisioning";
 import { ProvisioningController } from "@opencok/controllers/provisioning";
@@ -66,7 +67,9 @@ export const ApiDependenciesLive = Layer.effect(
               ),
             )
           : undefined,
-      files: config.filesEnabled ? yield* createFiles : undefined,
+      files: config.filesEnabled
+        ? yield* createFiles((name, ...args) => new Cache(config).command(name, ...args))
+        : undefined,
       accounts,
       directory,
       redis,

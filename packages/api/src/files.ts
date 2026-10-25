@@ -5,14 +5,10 @@ import {
   IMAGE_PATH,
   UPLOAD_PATH,
   type ImageStore,
+  type AvatarTickets,
 } from "@opencok/contracts/files";
 import { HttpError } from "@opencok/errors/http";
-import {
-  verifyConfirmation,
-  verifyGrant,
-  issueAvatarImage,
-  verifyAvatarImage,
-} from "@opencok/identity/avatar";
+import { avatarImagePath } from "@opencok/identity/avatar";
 import { encodeAvatar } from "@opencok/validations/image";
 import { multipart } from "./files-multipart";
 function json(data: object, status = 200) {
@@ -47,24 +43,30 @@ async function boundedBody(request: Request) {
   }
   return Buffer.concat(chunks);
 }
-export function createHandler(store: ImageStore, signingKey: Buffer, now = Date.now) {
+export function createHandler(store: ImageStore, tickets: AvatarTickets) {
   return async (request: Request): Promise<Response> => {
     const url = new URL(request.url);
     try {
       if (url.pathname === "/_health" && request.method === "GET") return new Response("ok\n");
-      const confirmation = /^\/_internal\/avatars\/([0-9]{1,20})\/([1-9][0-9]{0,5})$/.exec(
+      const confirmation = /^\/_internal\/avatars\/([0-9]{1,20})\/([1-9][0-9]{0,5})(\/url)?$/.exec(
         url.pathname,
       );
       if (confirmation && !url.search && request.method === "GET") {
         const owner = confirmation[1]!,
           sequence = confirmation[2]!;
-        verifyConfirmation(
+        const purpose = confirmation[3] ? "image" : "confirm";
+        const authorization = await tickets.verify(
           request.headers.get("x-avatar-confirmation") ?? "",
-          owner,
-          sequence,
-          signingKey,
-          Math.floor(now() / 1000),
+          purpose,
         );
+        if (authorization.owner !== owner || authorization.seq !== sequence)
+          throw new HttpError(401, "Invalid avatar authorization");
+        if (purpose === "image") {
+          const path = avatarImagePath(owner, Number(sequence)).slice("/cok/img/".length);
+          return new Response(await store.image(path), {
+            headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+          });
+        }
         const receipt = await store.find(owner, sequence);
         if (!receipt) return new Response(null, { status: 404 });
         return new Response(`v1\n${receipt.owner}\n${receipt.sequence}\n${receipt.hash}\n`, {
@@ -73,25 +75,14 @@ export function createHandler(store: ImageStore, signingKey: Buffer, now = Date.
       }
       const match = IMAGE_PATH.exec(url.pathname);
       if (match && ["GET", "HEAD"].includes(request.method)) {
-        verifyAvatarImage(url, signingKey, Math.floor(now() / 1000));
-        const bytes = await store.get(`${match[1]}/${match[2]}.jpg`);
-        if (!bytes) return new Response(null, { status: 404 });
-        return new Response(request.method === "HEAD" ? null : new Uint8Array(bytes), {
-          headers: {
-            "Content-Type": "image/jpeg",
-            "Content-Length": String(bytes.length),
-            "X-Content-Type-Options": "nosniff",
-            "Cache-Control": "private, no-store",
-          },
-        });
+        throw new HttpError(401, "Use an authorized S3 image URL");
       }
       if (url.pathname !== UPLOAD_PATH) throw new HttpError(404, "Unknown endpoint");
       if (request.method !== "POST")
         return new Response(null, { status: 405, headers: { Allow: "POST" } });
-      const grant = verifyGrant(
+      const grant = await tickets.verify(
         url.searchParams.size === 1 ? (url.searchParams.get("grant") ?? "") : "",
-        signingKey,
-        Math.floor(now() / 1000),
+        "upload",
       );
       const body = await boundedBody(request);
       let form: FormData;
@@ -155,12 +146,7 @@ export function createHandler(store: ImageStore, signingKey: Buffer, now = Date.
         status: 1,
         data: {
           file_name: name,
-          path: issueAvatarImage(
-            grant.owner,
-            Number(grant.seq),
-            signingKey,
-            Math.floor(now() / 1000),
-          ),
+          path: await store.image(key),
           image_hash: hash,
           sequence: Number(grant.seq),
         },

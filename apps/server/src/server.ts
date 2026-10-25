@@ -1,3 +1,4 @@
+import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { createGeneralDrawDomain } from "@opencok/services/general-draws";
 import { generalsDomain } from "@opencok/services/generals";
 import { equipmentDomain, workshopDomain } from "@opencok/services/equipment";
@@ -73,7 +74,7 @@ import { checkAvatarVersionStore } from "@opencok/repositories/avatar-version";
 import { startAvatarRelay, startAvatarVersionRelay } from "./avatar-relay.ts";
 import { checkAvatarCompletionStore } from "@opencok/repositories/avatar-delivery";
 import { createRealmNotifications } from "@opencok/connection/notifications";
-import { loadAvatarFiles } from "@opencok/connection/avatar-files";
+import { createAvatarFiles } from "@opencok/connection/avatar-files";
 import { readAvatarGrant, checkAvatarGrantStore } from "@opencok/repositories/avatar-grant";
 import { Context, Effect, Layer, ManagedRuntime } from "effect";
 import { RealmConfig, type Config } from "./config.ts";
@@ -135,13 +136,17 @@ export const RealmDependenciesLive = Layer.effect(
       checkPlayerSearchStore(db.databases, config.kingdomId, config.crossSearchEnabled ?? true),
     );
     const playerSearch = createPlayerSearchStore(db.databases, config.kingdomId);
+    const cache = new Cache(config);
     const avatarFiles = config.avatarFiles
       ? yield* fromPromise("realm.avatar-files", async () => {
           await checkAvatarGrantStore(db.kingdom.db);
-          return loadAvatarFiles({ ...config.avatarFiles!, timeoutMs: config.timeoutMs });
+          return createAvatarFiles({
+            ...config.avatarFiles!,
+            timeoutMs: config.timeoutMs,
+            tickets: createAvatarTickets((name, ...args) => cache.command(name, ...args)),
+          });
         })
       : undefined;
-    const cache = new Cache(config);
     const nicknameServices = yield* fromPromise("realm.nickname-words", () =>
       loadNicknameServices((key) => cache.nicknameForbiddenWords(key)),
     );
@@ -240,25 +245,24 @@ export const RealmDependenciesLive = Layer.effect(
         (relay) => relay.close(),
       );
     }
-    const avatar =
-      config.avatarChat && avatarFiles
-        ? createAvatarRuntime({
-            db,
-            files: avatarFiles,
-            rules,
-            config: { ...config, avatarChat: config.avatarChat },
-            cache,
-            notifications,
-            report: (effect) =>
-              console.warn(
-                JSON.stringify({
-                  event: "avatar_delivery_failed",
-                  kingdom: config.kingdomId,
-                  effect,
-                }),
-              ),
-          })
-        : undefined;
+    const avatar = avatarFiles
+      ? createAvatarRuntime({
+          db,
+          files: avatarFiles,
+          rules,
+          config,
+          cache,
+          notifications,
+          report: (effect) =>
+            console.warn(
+              JSON.stringify({
+                event: "avatar_delivery_failed",
+                kingdom: config.kingdomId,
+                effect,
+              }),
+            ),
+        })
+      : undefined;
     if (config.avatarChat && !avatarFiles) throw new Error("Avatar files unavailable");
     if (avatar) {
       yield* fromPromise("realm.avatar-version", () => checkAvatarVersionStore(db.kingdom.db));

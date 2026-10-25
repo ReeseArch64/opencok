@@ -1,5 +1,6 @@
+import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { expect, test } from "bun:test";
-import { createHash, createHmac, randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import sharp from "sharp";
 import { Effect, Layer } from "effect";
 import { ApiDependencies, createApp, serveApi } from "../src/app";
@@ -17,14 +18,21 @@ import { HttpError } from "@opencok/errors/http";
 import { serveHttp } from "@opencok/core/http";
 import { parseFilesEnvironment } from "@opencok/env/files";
 
-const key = Buffer.alloc(32, 9);
+const ticketRecords = new Map<string, string>();
+const tickets = createAvatarTickets(async (name, ...args) => {
+  if (name === "SET") {
+    ticketRecords.set(args[0]!, args[1]!);
+    return "OK";
+  }
+  return ticketRecords.get(args[0]!) ?? null;
+});
 const owner = "1234567";
-function grant(expiry = Math.floor(Date.now() / 1000) + 60, sequence = 1) {
-  const base = `v1.${owner}.${sequence}.${expiry}.${"a".repeat(32)}`;
-  return `${base}.${createHmac("sha256", key).update(base).digest("hex")}`;
+async function grant(expiry = Math.floor(Date.now() / 1000) + 60, sequence = 1) {
+  if (expiry <= Math.floor(Date.now() / 1000)) return "v2." + "0".repeat(64);
+  return tickets.issue(owner, sequence, "upload");
 }
 async function upload(
-  token = grant(),
+  token: string | Promise<string> = grant(),
   type = "image/png",
   player = owner,
   bytes?: Uint8Array,
@@ -45,7 +53,7 @@ async function upload(
       .png()
       .toBuffer());
   body.set("file", new File([new Uint8Array(image)], "avatar.png", { type }));
-  return new Request(`http://localhost${UPLOAD_PATH}?grant=${encodeURIComponent(token)}`, {
+  return new Request(`http://localhost${UPLOAD_PATH}?grant=${encodeURIComponent(await token)}`, {
     method: "POST",
     headers: {},
     body,
@@ -55,6 +63,7 @@ function storage() {
   const objects = new Map<string, Uint8Array>();
   const receipts = new Map<string, UploadReceipt>();
   const store: ImageStore = {
+    image: async (key) => `https://s3.example/images/${key}?X-Amz-Signature=${"a".repeat(64)}`,
     async put(path, bytes, uid, sequence, hash) {
       if (objects.has(path)) throw new HttpError(409, "Image sequence already exists");
       objects.set(path, bytes);
@@ -77,8 +86,8 @@ function storage() {
   return store;
 }
 
-test("uploads enforce signature, expiry, ownership, actual MIME, file bytes and body limits", async () => {
-  const handler = createHandler(storage(), key);
+test("uploads enforce ticket validity, expiry, ownership, actual MIME, file bytes and body limits", async () => {
+  const handler = createHandler(storage(), tickets);
   expect((await handler(await upload("invalid"))).status).toBe(401);
   expect((await handler(await upload(grant(Math.floor(Date.now() / 1000) - 1)))).status).toBe(401);
   expect((await handler(await upload(grant(), "image/png", "999"))).status).toBe(403);
@@ -89,9 +98,9 @@ test("uploads enforce signature, expiry, ownership, actual MIME, file bytes and 
   expect(
     (
       await handler(
-        new Request(`http://localhost${UPLOAD_PATH}?grant=${grant()}`, {
+        new Request(`http://localhost${UPLOAD_PATH}?grant=${await grant()}`, {
           method: "POST",
-          headers: { "X-Upload-Grant": grant(), "content-length": String(BODY_LIMIT + 1) },
+          headers: { "X-Upload-Grant": await grant(), "content-length": String(BODY_LIMIT + 1) },
           body: "x",
         }),
       )
@@ -100,21 +109,20 @@ test("uploads enforce signature, expiry, ownership, actual MIME, file bytes and 
 });
 
 test("upload, signed JPEG delivery, immutable content and private confirmation preserve the contract", async () => {
-  const handler = createHandler(storage(), key);
+  const store = storage();
+  const handler = createHandler(store, tickets);
   const response = await handler(await upload());
   expect(response.status).toBe(200);
   const json = (await response.json()) as {
     response: { data: { path: string; image_hash: string } }[];
   };
   const data = json.response[0]!.data;
-  const image = await handler(new Request(`http://localhost${data.path}`));
-  expect(image.headers.get("Content-Type")).toBe("image/jpeg");
-  const metadata = await sharp(Buffer.from(await image.arrayBuffer())).metadata();
+  const imageUrl = new URL(data.path);
+  expect(imageUrl.origin).toBe("https://s3.example");
+  const storedKey = imageUrl.pathname.slice("/images/".length);
+  const metadata = await sharp(Buffer.from((await store.get(storedKey))!)).metadata();
   expect(metadata.format).toBe("jpeg");
   expect(metadata.exif).toBeUndefined();
-  const head = await handler(new Request(`http://localhost${data.path}`, { method: "HEAD" }));
-  expect(await head.text()).toBe("");
-  expect(Number(head.headers.get("content-length"))).toBeGreaterThan(0);
   expect((await handler(await upload())).status).toBe(200);
   const different = await sharp({
     create: { width: 4, height: 4, channels: 3, background: "blue" },
@@ -125,16 +133,16 @@ test("upload, signed JPEG delivery, immutable content and private confirmation p
   const confirmationUrl = `http://localhost/_internal/avatars/${owner}/1`;
   expect((await handler(new Request(confirmationUrl))).status).toBe(401);
   expect(
-    (await handler(new Request(confirmationUrl, { headers: { "x-avatar-confirmation": grant() } })))
-      .status,
+    (
+      await handler(
+        new Request(confirmationUrl, { headers: { "x-avatar-confirmation": await grant() } }),
+      )
+    ).status,
   ).toBe(401);
-  const expiry = Math.floor(Date.now() / 1000) + 20;
-  const signature = createHmac("sha256", key)
-    .update(`confirm\n${owner}\n1\n${expiry}`)
-    .digest("hex");
+  const confirmationToken = await tickets.issue(owner, 1, "confirm");
   const confirmation = await handler(
     new Request(confirmationUrl, {
-      headers: { "x-avatar-confirmation": `v1.${expiry}.${signature}` },
+      headers: { "x-avatar-confirmation": confirmationToken },
     }),
   );
   expect(await confirmation.text()).toBe(`v1\n${owner}\n1\n${data.image_hash}\n`);
@@ -145,11 +153,11 @@ test("storage failure returns unavailable without exposing backend details", asy
   store.put = async () => {
     throw new Error("synthetic-private-provider-detail");
   };
-  const response = await createHandler(store, key)(await upload());
+  const response = await createHandler(store, tickets)(await upload());
   expect(response.status).toBe(503);
   expect(await response.text()).not.toContain("synthetic-private-provider-detail");
   expect(() =>
-    parseFilesEnvironment({ S3_BUCKET: "images", S3_FORCE_PATH_STYLE: "yes" }),
+    parseFilesEnvironment({ S3_BUCKET: "images", S3_PUBLIC_ENDPOINT: "file:///private" }),
   ).toThrow();
 });
 
@@ -180,7 +188,7 @@ test("shared HTTP runtime accepts media bodies above the API default and enforce
 
 test("API routes media and discovery on one listener while preserving independent body limits", async () => {
   const store = storage();
-  const files = createHandler(store, key);
+  const files = createHandler(store, tickets);
   const dependencies = Layer.succeed(ApiDependencies, {
     accounts: { getAll: async () => [], health: async () => {} },
     directory: { read: async () => new Map() },
@@ -189,7 +197,11 @@ test("API routes media and discovery on one listener while preserving independen
   });
   const environment = Layer.succeed(EnvironmentSource, {
     DATABASE_URL: "postgresql://synthetic:secret@localhost/synthetic",
-    API_FILES_ENABLED: "true",
+    S3_PUBLIC_ENDPOINT: "http://s3.example",
+    S3_REGION: "us-east-1",
+    S3_BUCKET: "images",
+    S3_ACCESS_KEY_ID: "synthetic",
+    S3_SECRET_ACCESS_KEY: "synthetic",
     API_PORT: "0",
   });
   const layers = Layer.merge(dependencies, ApiConfigLive).pipe(Layer.provide(environment));
@@ -221,9 +233,7 @@ test("API routes media and discovery on one listener while preserving independen
           response: { data: { path: string } }[];
         };
         const path = payload.response[0]!.data.path;
-        const head = yield* Effect.promise(() => fetch(origin + path, { method: "HEAD" }));
-        expect(head.status).toBe(200);
-        expect(yield* Effect.promise(() => head.text())).toBe("");
+        expect(new URL(path).origin).toBe("https://s3.example");
         const confirmation = yield* Effect.promise(() =>
           fetch(`${origin}/_internal/avatars/${owner}/1`),
         );
@@ -240,10 +250,16 @@ test("API routes media and discovery on one listener while preserving independen
           );
           expect(oversized.status).toBe(413);
         }
-        store.get = async () => {
+        store.image = async () => {
           throw new Error("synthetic-provider-detail");
         };
-        const unavailable = yield* Effect.promise(() => fetch(origin + path));
+        const unavailable = yield* Effect.promise(async () =>
+          fetch(origin + UPLOAD_PATH + "?grant=" + (await grant()), {
+            method: "POST",
+            headers,
+            body,
+          }),
+        );
         expect(unavailable.status).toBe(503);
         expect(yield* Effect.promise(() => unavailable.text())).not.toContain(
           "synthetic-provider-detail",
@@ -303,35 +319,30 @@ test("gateway routes exact public avatar paths to API and keeps confirmation pri
   for (const route of Object.values(routers)) expect(route.rule).not.toContain("/_internal");
 });
 
-test("image URLs reject unsigned, expired, altered and extra-query requests before storage", async () => {
-  let time = Date.now();
+test("legacy image routes reject reads without exposing storage or signing capabilities", async () => {
   const store = storage();
-  const handler = createHandler(store, key, () => time);
-  const response = await handler(await upload());
-  const data = ((await response.json()) as { response: { data: { path: string } }[] }).response[0]!
-    .data;
-  const url = new URL(data.path, "http://localhost");
-  expect((await handler(new Request(url.toString()))).status).toBe(200);
-  expect((await handler(new Request(url.toString()))).headers.get("cache-control")).toBe(
-    "private, no-store",
-  );
   store.get = async () => {
     throw new Error("Unauthorized storage access");
   };
-  for (const path of [
-    url.pathname,
-    data.path.replace("234567", "234568"),
-    data.path + "&extra=1",
-    data.path.replace("signature=", "signature=f"),
-  ])
-    expect((await handler(new Request(new URL(path, url).toString()))).status).toBe(401);
-  time = Number(url.searchParams.get("expires")) * 1000;
-  for (const method of ["GET", "HEAD"])
-    expect((await handler(new Request(url.toString(), { method }))).status).toBe(401);
+  store.image = async () => {
+    throw new Error("Unauthorized image signing");
+  };
+  const handler = createHandler(store, tickets);
+  for (const query of ["", "?expires=1999999999&signature=" + "a".repeat(64)])
+    for (const method of ["GET", "HEAD"])
+      expect(
+        (
+          await handler(
+            new Request(`http://localhost/cok/img/234567/${"a".repeat(32)}.jpg${query}`, {
+              method,
+            }),
+          )
+        ).status,
+      ).toBe(401);
 });
 
-test("uploads require a signed URL and reject extra query parameters", async () => {
-  const handler = createHandler(storage(), key);
+test("uploads require an issued ticket in the URL and reject extra query parameters", async () => {
+  const handler = createHandler(storage(), tickets);
   const request = await upload();
   const body = await request.arrayBuffer();
   for (const url of ["http://localhost" + UPLOAD_PATH, request.url + "&extra=1"])
@@ -340,7 +351,7 @@ test("uploads require a signed URL and reject extra query parameters", async () 
         await handler(
           new Request(url, {
             method: "POST",
-            headers: { ...Object.fromEntries(request.headers), "X-Upload-Grant": grant() },
+            headers: { ...Object.fromEntries(request.headers), "X-Upload-Grant": await grant() },
             body,
           }),
         )
@@ -352,7 +363,7 @@ test("replacement deletes previous bytes, preserves receipts and retries failed 
   const store = storage();
   const remove = store.removePrevious.bind(store);
   const put = store.put.bind(store);
-  const handler = createHandler(store, key);
+  const handler = createHandler(store, tickets);
   const first = (
     (await (await handler(await upload())).json()) as { response: { data: { path: string } }[] }
   ).response[0]!.data;
@@ -362,9 +373,7 @@ test("replacement deletes previous bytes, preserves receipts and retries failed 
   expect(
     (await handler(await upload(grant(undefined, 2), "image/png", owner, undefined, 2))).status,
   ).toBe(503);
-  expect(
-    (await handler(new Request(new URL(first.path, "http://localhost").toString()))).status,
-  ).toBe(200);
+  expect(await store.get(new URL(first.path).pathname.slice("/images/".length))).not.toBeNull();
   store.put = put;
   store.removePrevious = async () => {
     throw new Error("delete failed");
@@ -373,7 +382,5 @@ test("replacement deletes previous bytes, preserves receipts and retries failed 
   expect((await handler(await send())).status).toBe(503);
   store.removePrevious = remove;
   expect((await handler(await send())).status).toBe(200);
-  expect(
-    (await handler(new Request(new URL(first.path, "http://localhost").toString()))).status,
-  ).toBe(404);
+  expect(await store.get(new URL(first.path).pathname.slice("/images/".length))).toBeNull();
 });

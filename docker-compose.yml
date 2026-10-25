@@ -226,6 +226,7 @@ services:
       GAME_HOST: 0.0.0.0
       GAME_PORT: 9933
       GAME_HEALTH_PORT: 18090
+      GAME_FILES_URL: http://api:8080
       GAME_REDIS_URL: redis://redis:6379/0
       GAME_ZOOKEEPER: zookeeper:2181
       GAME_LOGIN_SECRET: ${GAME_LOGIN_SECRET}
@@ -273,7 +274,7 @@ services:
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     tmpfs: ["/tmp:rw,noexec,nosuid,size=16m"]
-    networks: [opencok-internal-network]
+    networks: [opencok-internal-network, opencok-external-network]
     mem_limit: 256m
     cpus: "0.50"
     environment:
@@ -285,6 +286,11 @@ services:
       API_CHAT_URL: ${API_CHAT_URL:-}
       API_HOST: 0.0.0.0
       API_PORT: 8080
+      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://192.168.1.104:9000}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_BUCKET: ${S3_BUCKET:-opencok-uploads}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-opencok}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-opencok-secret}
       API_REDIS_URL: redis://redis:6379/0
       API_GAME_HOST: 192.168.1.104
       API_GAME_PORT: 9933
@@ -296,6 +302,8 @@ services:
         read_only: true
         bind: { create_host_path: false }
     depends_on:
+      minio:
+        condition: service_healthy
       postgres-setup:
         condition: service_completed_successfully
       redis:
