@@ -49,6 +49,8 @@ testing. HTTP probes emit request events; periodic realm dependency checks emit
 readiness transitions instead of repeated healthy dependency events.
 
 HTTP requests get generated `requestId` values returned in `X-Request-ID`.
+These opaque IDs use `req_` followed by UUID hex digits so automatic redaction
+cannot mistake digit-heavy UUID segments for payment card numbers.
 Nested API adapters reuse the request context and emit one HTTP completion event.
 TCP sessions get generated `connectionId` values and a fresh `operationId` per
 packet. Known command names are logged; unknown names use `unknown` and a bounded

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, expect, spyOn, test } from "bun:test";
+import * as crypto from "node:crypto";
 import { Effect } from "effect";
 import {
   initializeLogging,
@@ -65,6 +66,19 @@ test("parallel and nested HTTP logging keeps independent IDs and emits once per 
     records.every((record) => record.operation === "unknown" && record.outcome === "success"),
   ).toBe(true);
   expect(JSON.stringify(records)).not.toMatch(/private-|untrusted/);
+});
+
+test("digit-heavy request IDs survive redaction while credentials remain masked", async () => {
+  const uuid = spyOn(crypto, "randomUUID").mockReturnValue("48273837-4629-4286-a709-504965c3e4e6");
+  restore.push(() => uuid.mockRestore());
+  const response = await logHttpRequest(new Request("http://localhost/readyz"), () => {
+    logEvent("credential_check", { authorization: "Bearer private-token" });
+    return new Response("ok");
+  });
+  const requestId = "req_4827383746294286a709504965c3e4e6";
+  expect(response.headers.get("X-Request-ID")).toBe(requestId);
+  expect(records.map((record) => record.requestId)).toEqual([requestId, requestId]);
+  expect(JSON.stringify(records)).not.toContain("private-token");
 });
 
 test("HTTP failures carry status and severity without leaking thrown errors", async () => {

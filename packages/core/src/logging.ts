@@ -34,7 +34,7 @@ export async function logHttpRequest(
   fetch: (request: Request) => Promise<Response> | Response,
 ) {
   if (logContext().requestId) return fetch(request);
-  const requestId = randomUUID();
+  const requestId = `req_${randomUUID().replaceAll("-", "")}`;
   const started = performance.now();
   return withLogContext({ requestId, component: "http" }, async () => {
     let status = 500;
