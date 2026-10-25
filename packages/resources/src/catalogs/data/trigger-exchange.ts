@@ -247,7 +247,16 @@ export const catalog: AutomationCatalog = {
       "conditions": [{ "code": 32, "name": "服务器编号", "group": 1, "parameters": "8801-8803" }],
       "actions": [
         { "code": 15, "name": "推送礼包", "group": 1, "parameters": "761812" },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [{ "code": 49, "name": "触发事件类型", "group": 1, "parameters": "41" }],
+            "onMatch": [{ "code": 32, "name": "该事件触发后，通知客户端请求礼包", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -262,7 +271,16 @@ export const catalog: AutomationCatalog = {
       "conditions": [{ "code": 32, "name": "服务器编号", "group": 1, "parameters": "8801-8803" }],
       "actions": [
         { "code": 15, "name": "推送礼包", "group": 1, "parameters": "761811" },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [{ "code": 49, "name": "触发事件类型", "group": 1, "parameters": "41" }],
+            "onMatch": [{ "code": 32, "name": "该事件触发后，通知客户端请求礼包", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -277,7 +295,16 @@ export const catalog: AutomationCatalog = {
       "conditions": [],
       "actions": [
         { "code": 15, "name": "推送礼包", "group": 1, "parameters": "761663" },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [{ "code": 49, "name": "触发事件类型", "group": 1, "parameters": "41" }],
+            "onMatch": [{ "code": 32, "name": "该事件触发后，通知客户端请求礼包", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -292,7 +319,16 @@ export const catalog: AutomationCatalog = {
       "conditions": [],
       "actions": [
         { "code": 15, "name": "推送礼包", "group": 1, "parameters": "761664" },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [{ "code": 49, "name": "触发事件类型", "group": 1, "parameters": "41" }],
+            "onMatch": [{ "code": 32, "name": "该事件触发后，通知客户端请求礼包", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -307,7 +343,16 @@ export const catalog: AutomationCatalog = {
       "conditions": [],
       "actions": [
         { "code": 15, "name": "推送礼包", "group": 1, "parameters": "761665" },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [{ "code": 49, "name": "触发事件类型", "group": 1, "parameters": "41" }],
+            "onMatch": [{ "code": 32, "name": "该事件触发后，通知客户端请求礼包", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -1022,7 +1067,16 @@ export const catalog: AutomationCatalog = {
       "conditions": [],
       "actions": [
         { "code": 15, "name": "推送礼包", "group": 1, "parameters": "761664" },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [{ "code": 49, "name": "触发事件类型", "group": 1, "parameters": "41" }],
+            "onMatch": [{ "code": 32, "name": "该事件触发后，通知客户端请求礼包", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {

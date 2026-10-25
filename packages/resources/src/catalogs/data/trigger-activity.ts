@@ -39,7 +39,25 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$worldboss_icedragon_count;+;1",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$worldboss_icedragon_count;==;500",
+              },
+            ],
+            "onMatch": [
+              { "code": 60, "name": "这个BOSS是一个及其特殊的世界BOSS(3Special)", "group": 1 },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 40,
           "name": "推送怪物基数，活动期间,客户端全服玩家显示怪物计数",
@@ -61,13 +79,85 @@ export const catalog: AutomationCatalog = {
       ],
       "conditions": [
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "1-10000" },
-        { "code": 52, "name": "或 - 2", "group": 1 },
+        {
+          "code": 52,
+          "name": "或 - 2",
+          "group": 1,
+          "conditions": [
+            { "code": 86, "name": "加入联盟时间(小时)", "group": 1, "parameters": "<;1" },
+            { "code": 88, "name": "合服时间限制(天)", "group": 1, "parameters": "==;5" },
+          ],
+        },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$vip_level;==;1",
+              },
+            ],
+            "onMatch": [{ "code": 15, "name": "推送礼包", "group": 1, "parameters": "761570;360" }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$vip_level;==;6",
+              },
+            ],
+            "onMatch": [{ "code": 15, "name": "推送礼包", "group": 1, "parameters": "761571;360" }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$vip_level;==;11",
+              },
+            ],
+            "onMatch": [{ "code": 15, "name": "推送礼包", "group": 1, "parameters": "761572;360" }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$vip_level;==;16",
+              },
+            ],
+            "onMatch": [{ "code": 15, "name": "推送礼包", "group": 1, "parameters": "761573;360" }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -89,9 +179,36 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "2024-03-07 11:08:18;2024-03-08 11:08:24",
         },
-        { "code": 52, "name": "或 - 2", "group": 1 },
+        {
+          "code": 52,
+          "name": "或 - 2",
+          "group": 1,
+          "conditions": [
+            { "code": 86, "name": "加入联盟时间(小时)", "group": 1, "parameters": "<;1" },
+            { "code": 88, "name": "合服时间限制(天)", "group": 1, "parameters": "==;5" },
+          ],
+        },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_treasure_hour_count;<;$3th_anniversary_treasure_hour_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2611,
@@ -144,8 +261,44 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$use_item_server;+",
         },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$use_item_server;==;10",
+              },
+            ],
+            "onMatch": [
+              { "code": 52, "name": "这个BOSS是一个及其特殊的世界BOSS(NPC)", "group": 1 },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$use_item_server;==;50",
+              },
+            ],
+            "onMatch": [
+              { "code": 52, "name": "这个BOSS是一个及其特殊的世界BOSS(NPC)", "group": 1 },
+            ],
+            "otherwise": [],
+          },
+        },
         { "code": 21, "name": "执行多个操作 2", "group": 1 },
       ],
     },
@@ -191,8 +344,66 @@ export const catalog: AutomationCatalog = {
         { "code": 13, "name": "主城等级(值)", "group": 1, "parameters": ">=;20" },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [{ "code": 32, "name": "服务器编号", "group": 1, "parameters": "1" }],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 41, "name": "VIP等级(值)", "group": 1, "parameters": ">=;15" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 55,
+                      "name": "给全服发送离线推送",
+                      "group": 1,
+                      "parameters": "ACTIVITY;1111;LOVE_PUSH",
+                    },
+                  ],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week1_score_count;>;100",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
         {
           "code": 29,
           "name": "给客户端推送一组变量",
@@ -208,7 +419,22 @@ export const catalog: AutomationCatalog = {
       "state": 0,
       "openType": 2,
       "events": [{ "code": 8, "name": "登陆", "group": 1 }],
-      "conditions": [{ "code": 52, "name": "或 - 2", "group": 1 }],
+      "conditions": [
+        {
+          "code": 52,
+          "name": "或 - 2",
+          "group": 1,
+          "conditions": [
+            { "code": 48, "name": "天没登录", "group": 1, "parameters": ">;14" },
+            {
+              "code": 7,
+              "name": "数值的比较(变量 vs 数值)",
+              "group": 1,
+              "parameters": "$last_login_exchange;==;1",
+            },
+          ],
+        },
+      ],
       "actions": [
         { "code": 24, "name": "变量赋值", "group": 1, "parameters": "$last_login_exchange;1" },
       ],
@@ -232,7 +458,23 @@ export const catalog: AutomationCatalog = {
           "parameters":
             "---------------------------------------------------${S$long_var_test_v2}----------------------------------------------",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$key_rewardId;<;$key_trial_field_sequence",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -357,7 +599,41 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_cake_taken;==;0",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 变量)",
+                      "group": 1,
+                      "parameters": "$3th_anniversary_cake_count;<;$3th_anniversary_cake_count_max",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 42,
           "name": "打印一个行为Log",
@@ -399,7 +675,25 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "509876;3600",
         },
-        { "code": 13, "name": "If Else", "group": 1 },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "509877;50" },
+            ],
+            "onMatch": [
+              {
+                "code": 33,
+                "name": "添加状态status,持续时间不填默认读表",
+                "group": 1,
+                "parameters": "509878;3600",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
       ],
     },
     {
@@ -420,7 +714,24 @@ export const catalog: AutomationCatalog = {
       ],
       "actions": [
         { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12290" },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_avatar_cake_count;<;$3th_anniversary_avatar_cake_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
         {
           "code": 42,
           "name": "打印一个行为Log",
@@ -444,8 +755,54 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_a_count;<;$3th_avviversary_paint_a_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week1_score_count;+;7",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_a_count;<;$3th_avviversary_paint_a_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为其他变量的值",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_a_count;+;$key_itemNum",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 42,
           "name": "打印一个行为Log",
@@ -469,8 +826,54 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_b_count;<;$3th_avviversary_paint_b_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week1_score_count;+;15",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_b_count;<;$3th_avviversary_paint_b_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为其他变量的值",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_b_count;+;$key_itemNum",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 42,
           "name": "打印一个行为Log",
@@ -494,8 +897,54 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_c_count;<;$3th_avviversary_paint_c_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week1_score_count;+;30",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_c_count;<;$3th_avviversary_paint_c_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为其他变量的值",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_c_count;+;$key_itemNum",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 42,
           "name": "打印一个行为Log",
@@ -519,8 +968,54 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_d_count;<;$3th_avviversary_paint_d_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week1_score_count;+;150",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_d_count;<;$3th_avviversary_paint_d_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为其他变量的值",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_d_count;+;$key_itemNum",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 42,
           "name": "打印一个行为Log",
@@ -584,8 +1079,56 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_dragon_boss_killed_count;<;$3th_anniversary_dragon_boss_killed_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week2_score_count;+;20",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_dragon_boss_killed_count;<;$3th_anniversary_dragon_boss_killed_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_dragon_boss_killed_count;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -611,8 +1154,56 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_dragon_enemy_killed_count;<;$3th_anniversary_dragon_enemy_killed_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week2_score_count;+;3",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_dragon_enemy_killed_count;<;$3th_anniversary_dragon_enemy_killed_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_dragon_enemy_killed_count;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -630,8 +1221,56 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_dragon_item_count;<;$3th_anniversary_dragon_item_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为其他变量的值",
+                "group": 1,
+                "parameters": "$3th_week2_score_count;+;$key_itemNum",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_dragon_item_count;<;$3th_anniversary_dragon_item_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为其他变量的值",
+                "group": 1,
+                "parameters": "$3th_anniversary_dragon_item_count;+;$key_itemNum",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -649,8 +1288,56 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_dragon_exchange_count;<;$3th_anniversary_dragon_exchange_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week2_score_count;+;30",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_dragon_exchange_count;<;$3th_anniversary_dragon_exchange_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_dragon_exchange_count;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -667,7 +1354,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-09-13 00:00:00;2024-09-20 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_treasure_time_count;<;$3th_anniversary_treasure_time_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2078,
@@ -708,12 +1414,164 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$3th_anniversary_treasure_hour_var_3;0",
         },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_treasure_hour_count;<;$3th_anniversary_treasure_hour_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_1;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_explore_time;>=;14400",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_2;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_treasure_hour_var_1;==;1",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_treasure_hour_var_2;==;1",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_3;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_3;==;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week2_score_count;+;30",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_3;==;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_count;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_3;==;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 24,
+                "name": "给整数变量赋值",
+                "group": 1,
+                "parameters": "$3th_anniversary_explore_time;0",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -731,8 +1589,56 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_treasure_getitem_count;<;$3th_anniversary_treasure_getitem_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week2_score_count;+;25",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_treasure_getitem_count;<;$3th_anniversary_treasure_getitem_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为其他变量的值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_getitem_count;+;$key_itemNum",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -750,8 +1656,56 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_treasure_useitem_count;<;$3th_anniversary_treasure_useitem_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week2_score_count;+;55",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_treasure_useitem_count;<;$3th_anniversary_treasure_useitem_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_useitem_count;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -768,7 +1722,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-08-01 00:00:00;2024-09-01 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_blessingbag_open_count;<;$3th_anniversary_blessingbag_open_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2082,
@@ -784,7 +1757,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-08-01 00:00:00;2024-09-01 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_blessingbag_refresh_count;<;$3th_anniversary_blessingbag_refresh_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2083,
@@ -800,7 +1792,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-08-01 00:00:00;2024-09-01 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_blessingbag_goldopen_count;<;$3th_anniversary_blessingbag_goldopen_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2084,
@@ -829,7 +1840,26 @@ export const catalog: AutomationCatalog = {
             "$3th_anniversary_fire_buy_time_count;<;$3th_anniversary_fire_buy_time_count_max",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_fire_buy_time_count;<;$3th_anniversary_fire_buy_time_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2085,
@@ -924,7 +1954,40 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$3th_anniversary_shop_fixed_count_1;-;$3th_anniversary_get_fire_count",
         },
-        { "code": 13, "name": "If Else", "group": 1 },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_shop_fixed_count;>=;$3th_anniversary_shop_fixed_count_1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为其他变量的值",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_shop_fixed_count_2;+;$3th_anniversary_shop_fixed_count_1",
+              },
+            ],
+            "otherwise": [
+              {
+                "code": 9,
+                "name": "修改变量为其他变量的值",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_shop_fixed_count_2;+;$3th_anniversary_shop_fixed_count",
+              },
+            ],
+          },
+        },
         {
           "code": 9,
           "name": "修改变量为其他变量的值",
@@ -953,7 +2016,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-08-01 00:00:00;2024-09-01 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_shadow_kill_candle_count;<;$3th_anniversary_shadow_kill_candle_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2092,
@@ -973,7 +2055,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-08-01 00:00:00;2024-09-01 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_shadow_kill_boss_count;<;$3th_anniversary_shadow_kill_boss_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2093,
@@ -1341,12 +2442,165 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$3th_anniversary_treasure_hour_var_3;0",
         },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_treasure_hour_count;<;$3th_anniversary_treasure_hour_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_1;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_explore_time;>=;$3th_anniversary_explore_request_time",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_2;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_treasure_hour_var_1;==;1",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_treasure_hour_var_2;==;1",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_3;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_3;==;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_count;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_3;==;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week2_score_count;+;30",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_treasure_hour_var_3;==;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 24,
+                "name": "给整数变量赋值",
+                "group": 1,
+                "parameters": "$3th_anniversary_explore_time;0",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         { "code": 45, "name": "世界滚屏公告(无参)", "group": 1, "parameters": "123456" },
       ],
     },
@@ -1365,8 +2619,82 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters":
+                      "$3th_anniversary_mail_recived_count;<;$3th_anniversary_mail_recived_count_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_mail_send_count;==;1",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week1_score_count;+;150",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters":
+                      "$3th_anniversary_mail_recived_count;<;$3th_anniversary_mail_recived_count_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_mail_send_count;==;1",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_mail_recived_count;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -1402,16 +2730,83 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "509876;3600",
         },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "509877;50" },
+            ],
+            "onMatch": [
+              {
+                "code": 33,
+                "name": "添加状态status,持续时间不填默认读表",
+                "group": 1,
+                "parameters": "509878;3600",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_use_cake_count;<;$3th_anniversary_use_cake_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
         {
           "code": 9,
           "name": "修改变量为具体值",
           "group": 1,
           "parameters": "$3th_anniversary_use_cake_total_count;+;1",
         },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_use_cake_total_count;==;30",
+              },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "12288" }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_use_cake_total_count;==;100",
+              },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "12289" }],
+            "otherwise": [],
+          },
+        },
         {
           "code": 42,
           "name": "打印一个行为Log",
@@ -1501,11 +2896,156 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week1_score_count;>=;100",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week1_score_count;>=;300",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week1_score_count;>=;600",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week1_score_count;>=;1100",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week1_score_count;>=;1900",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -1523,11 +3063,156 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week2_score_count;>=;100",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week2_score_count;>=;300",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week2_score_count;>=;600",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week2_score_count;>=;1100",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week2_score_count;>=;1900",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -1545,11 +3230,156 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week3_score_count;>=;100",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week3_score_count;>=;300",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week3_score_count;>=;600",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week3_score_count;>=;1100",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week3_score_count;>=;1900",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -1567,11 +3397,156 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week4_score_count;>=;100",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week4_score_count;>=;300",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week4_score_count;>=;600",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week4_score_count;>=;1100",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_week4_score_count;>=;1900",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -1616,7 +3591,25 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-09-26 00:00:00;2024-10-04 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$3th_anniversary_ajatar_killed;<;$3th_anniversary_ajatar_killed_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2392,
@@ -1632,7 +3625,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-09-13 00:00:00;2024-10-01 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_ajatar_get_mail;<;$3th_anniversary_ajatar_get_mail_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2393,
@@ -1654,7 +3666,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-09-26 00:00:00;2024-10-04 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_avviversary_get_dragon_face;<;$3th_avviversary_get_dragon_face_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2394,
@@ -1670,7 +3701,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-09-26 00:00:00;2024-10-04 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_avviversary_get_30day_dragon_face;<;$3th_avviversary_get_30day_dragon_face_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2148,
@@ -1687,8 +3737,56 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_mail_recived_count;<;$3th_anniversary_mail_recived_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week1_score_count;+;150",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_mail_recived_count;<;$3th_anniversary_mail_recived_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_mail_recived_count;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 42,
           "name": "打印一个行为Log",
@@ -1718,16 +3816,351 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250080",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250080" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250080",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week1_box_1_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250081",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250081" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250081",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week1_box_2_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250082",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250082" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250082",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week1_box_3_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250083",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250083" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250083",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week1_box_4_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250084",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250084" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250084",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week1_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week1_box_5_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         { "code": 42, "name": "打印一个行为Log", "group": 1, "parameters": "${$key_rewardId}" },
       ],
     },
@@ -1752,16 +4185,351 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250085",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250085" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250085",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week2_box_1_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250086",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250086" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250086",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week2_box_2_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250087",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250087" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250087",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week2_box_3_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250088",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250088" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250088",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week2_box_4_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250089",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250089" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250089",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week2_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week2_box_5_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         { "code": 42, "name": "打印一个行为Log", "group": 1, "parameters": "${$key_rewardId}" },
       ],
     },
@@ -1786,16 +4554,351 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250090",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250090" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250090",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week3_box_1_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250091",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250091" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250091",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week3_box_2_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250092",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250092" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250092",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week3_box_3_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250093",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250093" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250093",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week3_box_4_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250094",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250094" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250094",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week3_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_anniversary_week3_box_5_flag;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         { "code": 42, "name": "打印一个行为Log", "group": 1, "parameters": "${$key_rewardId}" },
       ],
     },
@@ -1820,11 +4923,156 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250095",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_1_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250096",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_2_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250097",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_3_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250098",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_4_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 2",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_rewardId;==;250099",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$3th_anniversary_week4_box_5_flag;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
         {
           "code": 30,
           "name": "打印一个Log 带参数",
@@ -1859,8 +5107,56 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "212025,1|212026,1|212027,1|212028,1;2;250151",
         },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_avviversary_paint_abcd_count;<;$3th_avviversary_paint_abcd_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_week1_score_count;+;550",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_avviversary_paint_abcd_count;<;$3th_avviversary_paint_abcd_count_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 9,
+                "name": "修改变量为具体值",
+                "group": 1,
+                "parameters": "$3th_avviversary_paint_abcd_count;+;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 42,
           "name": "打印一个行为Log",
@@ -1913,7 +5209,23 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$3th_anniversary_cake_boss_count;+;1",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$3th_anniversary_cake_boss_count;==;800",
+              },
+            ],
+            "onMatch": [{ "code": 38, "name": "这个BOSS是一个及其特殊的世界BOSS", "group": 1 }],
+            "otherwise": [],
+          },
+        },
         {
           "code": 40,
           "name": "推送怪物基数，活动期间,客户端全服玩家显示怪物计数",
@@ -1936,7 +5248,26 @@ export const catalog: AutomationCatalog = {
           "parameters": "2024-09-26 00:00:00;2024-10-04 00:00:00",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_redpacket_buy_time_count;<;$3th_anniversary_redpacket_buy_time_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2247,
@@ -1953,7 +5284,26 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 81, "name": "验证领取红包的大小", "group": 1, "parameters": "true;>=;500" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_redpacket_get_more_money_number;<;$3th_anniversary_redpacket_get_more_money_number_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2248,
@@ -1970,7 +5320,26 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 81, "name": "验证领取红包的大小", "group": 1, "parameters": "true;>=;1" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters":
+                  "$3th_anniversary_redpacket_get_money_count;<;$3th_anniversary_redpacket_get_money_count_max",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 2", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2249,
@@ -2127,7 +5496,25 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$worldboss_icedragon_count;+;100",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$worldboss_icedragon_count;==;500",
+              },
+            ],
+            "onMatch": [
+              { "code": 60, "name": "这个BOSS是一个及其特殊的世界BOSS(3Special)", "group": 1 },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 40,
           "name": "推送怪物基数，活动期间,客户端全服玩家显示怪物计数",
@@ -2180,7 +5567,23 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$worldboss_icedragon_count;+;1",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$worldboss_icedragon_count;==;1",
+              },
+            ],
+            "onMatch": [{ "code": 38, "name": "这个BOSS是一个及其特殊的世界BOSS", "group": 1 }],
+            "otherwise": [],
+          },
+        },
         {
           "code": 40,
           "name": "推送怪物基数，活动期间,客户端全服玩家显示怪物计数",
@@ -2995,7 +6398,48 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$activity_troops_count;500;false;1",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$activity_troops_count;==;500",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 9,
+                      "name": "时间区间",
+                      "group": 1,
+                      "parameters": "2024-07-19 00:00:00;2024-07-19 23:59:59",
+                    },
+                  ],
+                  "onMatch": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+                  "otherwise": [
+                    {
+                      "code": 58,
+                      "name": "添加作用于整个服的作用号(持续到当天24点)",
+                      "group": 1,
+                      "parameters": "TRIGGER_WHOLE_WORLD_RESOURCE_MAX;100",
+                    },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -3402,13 +6846,118 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "505601;3600",
         },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505589;10" },
+            ],
+            "onMatch": [
+              {
+                "code": 39,
+                "name": "离线推送",
+                "group": 1,
+                "parameters": "ACTIVITY;151460;SNOWMAN_PUSH",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505589;30" },
+            ],
+            "onMatch": [
+              {
+                "code": 39,
+                "name": "离线推送",
+                "group": 1,
+                "parameters": "ACTIVITY;151461;SNOWMAN_PUSH",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505589;60" },
+            ],
+            "onMatch": [
+              {
+                "code": 39,
+                "name": "离线推送",
+                "group": 1,
+                "parameters": "ACTIVITY;151462;SNOWMAN_PUSH",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505589;60" },
+            ],
+            "onMatch": [
+              {
+                "code": 33,
+                "name": "添加状态status,持续时间不填默认读表",
+                "group": 1,
+                "parameters": "505607;3600",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505589;10" },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11895" }],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505589;30" },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11894" }],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505589;60" },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11893" }],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
       ],
     },
     {
@@ -3459,7 +7008,23 @@ export const catalog: AutomationCatalog = {
       ],
       "actions": [
         { "code": 9, "name": "修改变量为具体值", "group": 1, "parameters": "$kill_monster;+;1" },
-        { "code": 13, "name": "If Else", "group": 1 },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$kill_monster;==;1",
+              },
+            ],
+            "onMatch": [{ "code": 38, "name": "这个BOSS是一个及其特殊的世界BOSS", "group": 1 }],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
         {
           "code": 40,
           "name": "推送怪物基数，活动期间,客户端全服玩家显示怪物计数",
@@ -3616,21 +7181,426 @@ export const catalog: AutomationCatalog = {
       ],
       "actions": [
         { "code": 57, "name": "修改变量为使用物品的数量", "group": 1, "parameters": "$flower;+" },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower1;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11982" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;1",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower1;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;10",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower10;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11983" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;10",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower10;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;50",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower50;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11984" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;50",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower50;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;100",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower100;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11985" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;100",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower100;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;200",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower200;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11986" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;200",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower200;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;350",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower350;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11987" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;350",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower350;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;500",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$bleed_max;==;0",
+                    },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 24,
+                      "name": "给整数变量赋值",
+                      "group": 1,
+                      "parameters": "$flower_max;1",
+                    },
+                  ],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;500",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_bleed;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11989" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;500",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower_bleed;1" },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -3650,21 +7620,426 @@ export const catalog: AutomationCatalog = {
       ],
       "actions": [
         { "code": 57, "name": "修改变量为使用物品的数量", "group": 1, "parameters": "$bleed;+" },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$bleed1;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11974" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;1",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$bleed1;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;10",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$bleed10;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11975" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;10",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$bleed10;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;50",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$bleed50;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11976" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;50",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$bleed50;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;100",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$bleed100;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11977" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;100",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$bleed100;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;200",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$bleed200;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11978" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;200",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$bleed200;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;350",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$bleed350;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11979" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;350",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$bleed350;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;500",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_max;==;0",
+                    },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 24,
+                      "name": "给整数变量赋值",
+                      "group": 1,
+                      "parameters": "$bleed_max;1",
+                    },
+                  ],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;500",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_bleed;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11981" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;500",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower_bleed;1" },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -3691,10 +8066,114 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;500",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_bleed;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11989" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower;>=;500",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower_bleed;1" },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;500",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_bleed;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11981" }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$bleed;>=;500",
+              },
+            ],
+            "onMatch": [
+              { "code": 24, "name": "给整数变量赋值", "group": 1, "parameters": "$flower_bleed;1" },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -3763,12 +8242,216 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$blood_count;+",
         },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$blood_count;>=;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$blood_rank;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$blood_count;>=;10",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$blood_rank;==;1",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$blood_count;>=;50",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$blood_rank;==;2",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$blood_count;>=;100",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$blood_rank;==;3",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$blood_count;>=;200",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$blood_rank;==;4",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$blood_count;>=;350",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$blood_rank;==;5",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -3798,12 +8481,216 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$flower_count;+",
         },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower_count;>=;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_rank;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower_count;>=;10",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_rank;==;1",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower_count;>=;50",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_rank;==;2",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower_count;>=;100",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_rank;==;3",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower_count;>=;200",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_rank;==;4",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower_count;>=;350",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_rank;==;5",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -3830,8 +8717,76 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$flower_count;>=;500",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_blood;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$blood_count;>=;500",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 41,
+                "name": "if (",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    {
+                      "code": 7,
+                      "name": "数值的比较(变量 vs 数值)",
+                      "group": 1,
+                      "parameters": "$flower_blood;==;0",
+                    },
+                  ],
+                  "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+                  "otherwise": [],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -3918,7 +8873,20 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 13, "name": "主城等级(值)", "group": 1, "parameters": "==;30" },
+            ],
+            "onMatch": [
+              { "code": 48, "name": "触发reward奖励", "group": 1, "parameters": "250580" },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 9,
           "name": "修改变量为具体值",
@@ -4132,17 +9100,188 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "505678;3600",
         },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 13, "name": "If Else", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505679;10" },
+            ],
+            "onMatch": [
+              {
+                "code": 39,
+                "name": "离线推送",
+                "group": 1,
+                "parameters": "ACTIVITY;152097;LOVE_PUSH",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505679;30" },
+            ],
+            "onMatch": [
+              {
+                "code": 39,
+                "name": "离线推送",
+                "group": 1,
+                "parameters": "ACTIVITY;152098;LOVE_PUSH",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505679;50" },
+            ],
+            "onMatch": [
+              {
+                "code": 39,
+                "name": "离线推送",
+                "group": 1,
+                "parameters": "ACTIVITY;152099;LOVE_PUSH",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505679;50" },
+            ],
+            "onMatch": [
+              {
+                "code": 33,
+                "name": "添加状态status,持续时间不填默认读表",
+                "group": 1,
+                "parameters": "500527;3600",
+              },
+            ],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505679;50" },
+            ],
+            "onMatch": [
+              {
+                "code": 45,
+                "name": "世界滚屏公告(2个参)",
+                "group": 1,
+                "parameters": "152110;NOTICE_TYPE_USER;0;NOTICE_TYPE_TARGET_USER;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505679;10" },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11955" }],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505679;30" },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11956" }],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 13,
+          "name": "If Else",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 72, "name": "验证status叠加层数", "group": 1, "parameters": "505679;50" },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11957" }],
+            "otherwise": [{ "code": 27, "name": "Do Nothing", "group": 1 }],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$use_item211427;==;50",
+              },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11958" }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$use_item211427;==;100",
+              },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11959" }],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$use_item211427;==;200",
+              },
+            ],
+            "onMatch": [{ "code": 4, "name": "发送邮件", "group": 1, "parameters": "11960" }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -4166,7 +9305,23 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$activity_ramadan_count;+;1",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$activity_ramadan_count;>;2",
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作", "group": 1 }],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -4313,7 +9468,44 @@ export const catalog: AutomationCatalog = {
           "parameters": "$newbie_got_finial_reward;==;0",
         },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180000",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180000_process;>=;$newbie_180000_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180000_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2577,
@@ -5279,7 +10471,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180000",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180000_process;>=;$newbie_180000_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180000_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2629,
@@ -5298,7 +10527,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180001",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180001_process;>=;$newbie_180001_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180001_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2630,
@@ -5317,7 +10583,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180002",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180002_process;>=;$newbie_180002_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180002_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2631,
@@ -5336,7 +10639,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180003",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180003_process;>=;$newbie_180003_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180003_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2632,
@@ -5355,7 +10695,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180004",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180004_process;>=;$newbie_180004_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180004_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2633,
@@ -5374,7 +10751,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180005",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180005_process;>=;$newbie_180005_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180005_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2634,
@@ -5393,7 +10807,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180006",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180006_process;>=;$newbie_180006_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180006_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2635,
@@ -5412,7 +10863,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180007",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180007_process;>=;$newbie_180007_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180007_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2636,
@@ -5431,7 +10919,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180008",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180008_process;>=;$newbie_180008_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180008_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2637,
@@ -5450,7 +10975,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180009",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180009_process;>=;$newbie_180009_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180009_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2638,
@@ -5469,7 +11031,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180010",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180010_process;>=;$newbie_180010_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180010_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2639,
@@ -5488,7 +11087,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180011",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180011_process;>=;$newbie_180011_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180011_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2640,
@@ -5507,7 +11143,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180012",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180012_process;>=;$newbie_180012_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180012_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2641,
@@ -5526,7 +11199,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180013",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180013_process;>=;$newbie_180013_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180013_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2642,
@@ -5545,7 +11255,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180014",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180014_process;>=;$newbie_180014_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180014_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2643,
@@ -5564,7 +11311,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180015",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180015_process;>=;$newbie_180015_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180015_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2644,
@@ -5583,7 +11367,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180016",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180016_process;>=;$newbie_180016_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180016_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2645,
@@ -5602,7 +11423,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180017",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180017_process;>=;$newbie_180017_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180017_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2646,
@@ -5621,7 +11479,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180018",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180018_process;>=;$newbie_180018_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180018_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2647,
@@ -5640,7 +11535,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180019",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180019_process;>=;$newbie_180019_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180019_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2648,
@@ -5659,7 +11591,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180020",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180020_process;>=;$newbie_180020_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180020_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2649,
@@ -5678,7 +11647,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180021",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180021_process;>=;$newbie_180021_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180021_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2650,
@@ -5697,7 +11703,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180022",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180022_process;>=;$newbie_180022_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180022_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2651,
@@ -5716,7 +11759,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180023",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180023_process;>=;$newbie_180023_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180023_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2652,
@@ -5735,7 +11815,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180024",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180024_process;>=;$newbie_180024_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180024_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2653,
@@ -5754,7 +11871,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180025",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180025_process;>=;$newbie_180025_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180025_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2654,
@@ -5773,7 +11927,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180026",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180026_process;>=;$newbie_180026_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180026_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2655,
@@ -5792,7 +11983,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180027",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180027_process;>=;$newbie_180027_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180027_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2656,
@@ -5811,7 +12039,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180028",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180028_process;>=;$newbie_180028_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180028_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2657,
@@ -5830,7 +12095,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180029",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180029_process;>=;$newbie_180029_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180029_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2658,
@@ -5849,7 +12151,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180030",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180030_process;>=;$newbie_180030_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180030_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2659,
@@ -5868,7 +12207,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180031",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180031_process;>=;$newbie_180031_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180031_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2660,
@@ -5887,7 +12263,44 @@ export const catalog: AutomationCatalog = {
         },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
-      "actions": [{ "code": 41, "name": "if (", "group": 1 }],
+      "actions": [
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 51,
+                "name": "与 - 3",
+                "group": 1,
+                "conditions": [
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$key_client_event_var1;==;180032",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 变量)",
+                    "group": 1,
+                    "parameters": "$newbie_180032_process;>=;$newbie_180032_max",
+                  },
+                  {
+                    "code": 7,
+                    "name": "数值的比较(变量 vs 数值)",
+                    "group": 1,
+                    "parameters": "$newbie_180032_reward;==;0",
+                  },
+                ],
+              },
+            ],
+            "onMatch": [{ "code": 21, "name": "执行多个操作 3", "group": 1 }],
+            "otherwise": [],
+          },
+        },
+      ],
     },
     {
       "id": 2663,
@@ -5909,44 +12322,1310 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$newbie_register_starttime;>;0",
         },
-        { "code": 53, "name": "非", "group": 1 },
+        {
+          "code": 53,
+          "name": "非",
+          "group": 1,
+          "conditions": [
+            {
+              "code": 110,
+              "name": "变量最后一次刷新时间到现在是否在区间内",
+              "group": 1,
+              "parameters": "$newbie_register_starttime;7;1",
+            },
+          ],
+        },
         { "code": 32, "name": "服务器编号", "group": 1, "parameters": "ALL" },
       ],
       "actions": [
         { "code": 24, "name": "变量赋值", "group": 1, "parameters": "$newbie_got_finial_reward;1" },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180000_process;>=;$newbie_180000_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180001_process;>=;$newbie_180001_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180002_process;>=;$newbie_180002_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180003_process;>=;$newbie_180003_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180004_process;>=;$newbie_180004_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180005_process;>=;$newbie_180005_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180006_process;>=;$newbie_180006_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180007_process;>=;$newbie_180007_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180008_process;>=;$newbie_180008_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180009_process;>=;$newbie_180009_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180010_process;>=;$newbie_180010_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180011_process;>=;$newbie_180011_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180012_process;>=;$newbie_180012_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180013_process;>=;$newbie_180013_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180014_process;>=;$newbie_180014_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180015_process;>=;$newbie_180015_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180016_process;>=;$newbie_180016_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180017_process;>=;$newbie_180017_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180018_process;>=;$newbie_180018_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180019_process;>=;$newbie_180019_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180020_process;>=;$newbie_180020_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180021_process;>=;$newbie_180021_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180022_process;>=;$newbie_180022_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180023_process;>=;$newbie_180023_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180024_process;>=;$newbie_180024_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180025_process;>=;$newbie_180025_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180026_process;>=;$newbie_180026_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180027_process;>=;$newbie_180027_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180028_process;>=;$newbie_180028_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180029_process;>=;$newbie_180029_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180030_process;>=;$newbie_180030_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180031_process;>=;$newbie_180031_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 变量)",
+                "group": 1,
+                "parameters": "$newbie_180032_process;>=;$newbie_180032_max",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 13,
+                "name": "If Else",
+                "group": 1,
+                "branch": {
+                  "conditions": [
+                    { "code": 45, "name": "总付费金币", "group": 1, "parameters": ">;1" },
+                  ],
+                  "onMatch": [
+                    {
+                      "code": 14,
+                      "name": "重复执行",
+                      "group": 1,
+                      "parameters": "3\n            \n          ",
+                    },
+                  ],
+                  "otherwise": [
+                    { "code": 4, "name": "发送邮件", "group": 1, "parameters": "12352" },
+                  ],
+                },
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -6054,7 +13733,25 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$use_item_server;+",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$use_item_server;>=;350",
+              },
+            ],
+            "onMatch": [
+              { "code": 52, "name": "这个BOSS是一个及其特殊的世界BOSS(NPC)", "group": 1 },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 40,
           "name": "推送怪物基数，活动期间,客户端全服玩家显示怪物计数",
@@ -6375,7 +14072,25 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "$use_item_server;+",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$use_item_server;>=;500",
+              },
+            ],
+            "onMatch": [
+              { "code": 52, "name": "这个BOSS是一个及其特殊的世界BOSS(NPC)", "group": 1 },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 40,
           "name": "推送怪物基数，活动期间,客户端全服玩家显示怪物计数",
@@ -6582,14 +14297,60 @@ export const catalog: AutomationCatalog = {
         },
       ],
       "actions": [
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$gacha_refresh;<;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 50,
+                "name": "砸金蛋刷新",
+                "group": 1,
+                "parameters": "6900101,6900102,6900103|2000,500,100;6",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
         {
           "code": 51,
           "name": "砸金蛋盘面发送客户端",
           "group": 1,
           "parameters": "$gacha_day;$gacha_day;6;50",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              {
+                "code": 7,
+                "name": "数值的比较(变量 vs 数值)",
+                "group": 1,
+                "parameters": "$gacha_refresh;<;1",
+              },
+            ],
+            "onMatch": [
+              {
+                "code": 24,
+                "name": "给整数变量赋值",
+                "group": 1,
+                "parameters": "$gacha_refresh;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
@@ -6715,7 +14476,25 @@ export const catalog: AutomationCatalog = {
           "group": 1,
           "parameters": "true;1000,1000,500,500,100;900680,900681,900682,900683,900684;60;2;100",
         },
-        { "code": 41, "name": "if (", "group": 1 },
+        {
+          "code": 41,
+          "name": "if (",
+          "group": 1,
+          "branch": {
+            "conditions": [
+              { "code": 84, "name": "验证创建的怪物是谁", "group": 1, "parameters": "900684" },
+            ],
+            "onMatch": [
+              {
+                "code": 45,
+                "name": "世界滚屏公告(2个参)",
+                "group": 1,
+                "parameters": "151755;NOTICE_TYPE_USER;0;COMMON_TYPE_POS;1",
+              },
+            ],
+            "otherwise": [],
+          },
+        },
       ],
     },
     {
