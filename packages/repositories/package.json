@@ -90,7 +90,8 @@
     "./alliance-publication": "./src/alliance-publication.ts",
     "./dragon-progression": "./src/dragon-progression.ts",
     "./world-march-runtime": "./src/world-march-runtime.ts",
-    "./new-expedition": "./src/new-expedition.ts"
+    "./new-expedition": "./src/new-expedition.ts",
+    "./expedition-treasury": "./src/expedition-treasury.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

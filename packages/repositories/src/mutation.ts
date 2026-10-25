@@ -32,7 +32,14 @@ export async function checkMutationStore(db: Realm) {
     await db.select().from(table).limit(0);
 }
 
-export function createMutationExecutor(db: Realm, authority: RealmAuthority, now = Date.now) {
+export function createMutationExecutor(
+  db: Realm,
+  authority: RealmAuthority,
+  now = Date.now,
+  additionalAccounts: ReadonlySet<string> = new Set(),
+) {
+  const accounts = new Set(additionalAccounts);
+  for (const account of accounts) identifier(account, 40);
   return async (
     input: MutationCommand,
     apply: (tx: MutationTransaction) => Promise<MutationResult>,
@@ -111,6 +118,7 @@ export function createMutationExecutor(db: Realm, authority: RealmAuthority, now
           { owner, requestId, command, request },
           result,
           createdAt,
+          accounts,
         );
         authority.assertReady();
         return response;
@@ -126,6 +134,7 @@ export async function appendMutationRecords(
   input: MutationCommand,
   result: MutationResult,
   createdAt: bigint,
+  additionalAccounts: ReadonlySet<string> = new Set(),
 ): Promise<Buffer> {
   const { owner, requestId, command } = input;
   identifier(owner, 40);
@@ -152,7 +161,8 @@ export async function appendMutationRecords(
     .values({ ...key, command, request, response, ownerEpoch: authority.epoch, createdAt });
   for (const [entry, posting] of postings.entries()) {
     const delta = validatePosting(posting);
-    if (posting.account !== owner) throw new Error("Mutation posting owner mismatch");
+    if (posting.account !== owner && !additionalAccounts.has(posting.account))
+      throw new Error("Mutation posting owner mismatch");
     await tx.insert(economy_posting).values({
       ...key,
       entry,
