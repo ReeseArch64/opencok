@@ -1,3 +1,4 @@
+import { readDailyInvestment, writeDailyInvestment } from "./daily-investment";
 import { readCastleLevelEvent, writeCastleLevelEvent } from "./castle-level-event";
 import { readLuckyDay, writeLuckyDay } from "./lucky-day";
 import { readDragonTower, writeDragonTower } from "./dragon-tower";
@@ -129,6 +130,9 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        dailyInvestment: command?.startsWith("invest.")
+          ? await readDailyInvestment(tx, owner)
+          : undefined,
         castleLevelEvent: command?.startsWith("castle.")
           ? await readCastleLevelEvent(tx, owner)
           : undefined,
@@ -236,6 +240,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.dailyInvestment) await writeDailyInvestment(tx, owner, write.dailyInvestment);
         if (write.castleLevelEvent || write.castleLevelEnrollments)
           await writeCastleLevelEvent(
             tx,

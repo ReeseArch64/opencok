@@ -374,3 +374,18 @@ while retaining action timestamps. Receipt replay pins rewards once, and a faile
 transaction rolls back inventory and counters together. A premature request returns
 the source's empty response without awarding a reward. Type-zero minstrel records
 remain independent. No migration or feature enabling is introduced.
+
+Daily investment uses maintained bank plans and the existing owned investment
+row. Enrollment validates castle, VIP and realm-age conditions, debits the configured
+game gold once and stores its installment flags and start time. Installments become
+eligible at UTC calendar-day boundaries, including slot zero on enrollment day.
+The persisted `0`/`1` flag is authoritative: a fresh request cannot recredit a
+received slot. Bounds, future installments, unfinished-plan replacement and
+insufficient funds reject before a partial mutation can commit.
+
+A saved unfinished plan remains visible if its sale ends. Login sends one reminder
+per UTC day while a due unclaimed installment exists; enrollment and completion
+mail use only configured template keys. The legacy catalog's `end_mai` spelling
+does not silently become an `end_mail` template. Notifications, claim flags, game
+gold and receipts share the player transaction. This workflow handles game currency
+only and introduces no payment provider, schema migration or dependency.

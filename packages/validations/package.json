@@ -59,7 +59,8 @@
     "./chat-social": "./src/chat-social.ts",
     "./lucky-day": "./src/lucky-day.ts",
     "./castle-level-event": "./src/castle-level-event.ts",
-    "./alchemist": "./src/alchemist.ts"
+    "./alchemist": "./src/alchemist.ts",
+    "./daily-investment": "./src/daily-investment.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",
