@@ -60,6 +60,13 @@ kingdom databases. API/server/Chat wait for setup and their dependencies. MinIO 
 imports the CDN; the gateway waits for API/server health and successful CDN setup.
 The one-shot jobs exit with code zero after completion.
 
+After an abrupt restart, ZooKeeper can retain the previous realm's ephemeral
+ownership record until its 15-second session expires. The realm waits up to two
+session periods plus `DEPENDENCY_TIMEOUT_MS` for that record to disappear before
+failing startup. It never deletes or overwrites another owner's record, and stays
+unready until it acquires ownership. A live competing owner keeps startup from
+succeeding.
+
 ## Direct development values
 
 | Endpoint                                 | Published port |

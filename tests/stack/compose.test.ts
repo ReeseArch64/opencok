@@ -749,4 +749,27 @@ describe("isolated Compose stack", () => {
     }),
     120000,
   );
+
+  test(
+    "realm restart waits for the previous ZooKeeper session without crashing",
+    checked(async () => {
+      await stack.compose(["kill", "--signal", "SIGKILL", "server"]);
+      await stack.compose(["restart", "zookeeper"]);
+      await stack.compose(["up", "-d", "--wait", "zookeeper"]);
+      await stack.compose(["up", "-d", "--no-deps", "--force-recreate", "--wait", "server"]);
+      const id = (await stack.compose(["ps", "-q", "server"])).trim();
+      const inspect = Bun.spawn(["docker", "inspect", "--format", "{{.RestartCount}}", id], {
+        stdout: "pipe",
+        stderr: "pipe",
+      });
+      const [count, code] = await Promise.all([
+        new Response(inspect.stdout).text(),
+        inspect.exited,
+      ]);
+      expect(code).toBe(0);
+      expect(count.trim()).toBe("0");
+      await eventually(async () => (await fetch(stack.baseUrl + "/readyz")).status === 200);
+    }),
+    90000,
+  );
 });

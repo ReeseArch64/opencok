@@ -1,3 +1,4 @@
+import { setTimeout } from "node:timers/promises";
 import zk, { type Client } from "node-zookeeper-client";
 import { DependencyError } from "@opencok/errors/dependency";
 import { bounded } from "./timeout.ts";
@@ -8,13 +9,15 @@ export interface CoordinationConfig {
   zkPath: string;
   kingdomId: number;
 }
+const sessionTimeoutMs = 15000;
+
 export class Coordination {
   private readonly client: Client;
   private registered = false;
   private expired = false;
   constructor(readonly config: CoordinationConfig) {
     this.client = zk.createClient(config.zookeeper, {
-      sessionTimeout: 15000,
+      sessionTimeout: sessionTimeoutMs,
       spinDelay: 1000,
       retries: 0,
     });
@@ -51,18 +54,33 @@ export class Coordination {
         this.config.timeoutMs,
         "zookeeper",
       );
-      await bounded(
-        new Promise<void>((resolve, reject) => {
-          this.client.create(
-            this.config.zkPath,
-            Buffer.from(JSON.stringify({ runtime: "bun", kingdom: this.config.kingdomId })),
-            zk.CreateMode.EPHEMERAL,
-            (error) => (error ? reject(new DependencyError("zookeeper ownership")) : resolve()),
-          );
-        }),
-        this.config.timeoutMs,
-        "zookeeper",
-      );
+      const deadline = Date.now() + sessionTimeoutMs * 2 + this.config.timeoutMs;
+      while (true) {
+        const created = await bounded(
+          new Promise<boolean>((resolve, reject) => {
+            this.client.create(
+              this.config.zkPath,
+              Buffer.from(JSON.stringify({ runtime: "bun", kingdom: this.config.kingdomId })),
+              zk.CreateMode.EPHEMERAL,
+              (error) => {
+                if (!error) resolve(true);
+                else if (
+                  error instanceof zk.Exception &&
+                  error.getCode() === zk.Exception.NODE_EXISTS
+                )
+                  resolve(false);
+                else reject(new DependencyError("zookeeper ownership"));
+              },
+            );
+          }),
+          Math.min(this.config.timeoutMs, Math.max(1, deadline - Date.now())),
+          "zookeeper ownership",
+        );
+        if (created) break;
+        const remaining = deadline - Date.now();
+        if (remaining <= 0) throw new DependencyError("zookeeper ownership");
+        await setTimeout(Math.min(250, remaining));
+      }
       this.registered = true;
     } catch {
       this.client.close();
