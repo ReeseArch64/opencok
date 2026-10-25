@@ -157,15 +157,19 @@ export function createCityProgressionStore(
             ? await readWorldMutationState(tx, owner, request, mapSize, command)
             : undefined,
         dragons: await readDragonProgression(tx, owner),
-        minstrel:
-          command === "minstrel"
-            ? (
-                await tx
-                  .select()
-                  .from(activity_minstrel)
-                  .where(and(eq(activity_minstrel.uid, owner), eq(activity_minstrel.type, 0)))
-              )[0]
-            : undefined,
+        minstrel: ["minstrel", "alchemist"].includes(command ?? "")
+          ? (
+              await tx
+                .select()
+                .from(activity_minstrel)
+                .where(
+                  and(
+                    eq(activity_minstrel.uid, owner),
+                    eq(activity_minstrel.type, command === "alchemist" ? 1 : 0),
+                  ),
+                )
+            )[0]
+          : undefined,
         generalRoster: await readGeneralRoster(tx, owner, command, ranking),
         abilityPages: await readAbilityPages(tx, owner),
         suitDecompositions: await readSuitDecompositions(tx, owner),
@@ -211,10 +215,11 @@ export function createCityProgressionStore(
         }
         if (write.minstrel) {
           const row = write.minstrel;
-          if (row.uid !== owner || row.type !== 0) throw new Error("Foreign minstrel write");
+          if (row.uid !== owner || ![0, 1].includes(num(row, "type")))
+            throw new Error("Foreign minstrel write");
           const value = {
             uid: owner,
-            type: 0,
+            type: num(row, "type"),
             listen: num(row, "listen"),
             listentime: long(row, "listentime"),
             share: num(row, "share"),

@@ -70,7 +70,8 @@
     "./postbox": "./src/postbox.ts",
     "./chat-native": "./src/chat-native.ts",
     "./lucky-day": "./src/lucky-day.ts",
-    "./castle-level-event": "./src/castle-level-event.ts"
+    "./castle-level-event": "./src/castle-level-event.ts",
+    "./alchemist": "./src/alchemist.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
