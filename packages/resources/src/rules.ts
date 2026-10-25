@@ -374,6 +374,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     mail,
     { fieldMonsters, armies, neutralResources, barbarians, allianceBuildings },
     { militaryGroups, heroEvents },
+    await optional(GameplayCatalog.Material),
   );
 }
 
