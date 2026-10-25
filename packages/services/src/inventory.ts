@@ -141,7 +141,7 @@ export class InventoryService {
   }
 }
 
-class InventoryPlanner {
+export class InventoryPlanner {
   readonly items: InventoryItem[];
   readonly changed = new Map<string, InventoryItem>();
   readonly postings: EconomyPosting[] = [];
