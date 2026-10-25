@@ -1,9 +1,6 @@
 import type { CommandHandlers, RoomAuthorizer } from "@opencok/contracts/chat";
-export class ChatCommandError extends Error {
-  constructor(public readonly code: string) {
-    super(code);
-  }
-}
+import { ChatCommandError } from "@opencok/errors/chat";
+export { ChatCommandError } from "@opencok/errors/chat";
 
 export function createRoomDiscovery(authorizeRoom: RoomAuthorizer): CommandHandlers {
   return {

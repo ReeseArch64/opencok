@@ -2,7 +2,11 @@ import type { CommandHandler, RoomHandlerOptions } from "@opencok/contracts/chat
 import { isSafeInteger } from "@opencok/contracts/chat";
 import { ChatCommandError } from "@opencok/controllers/chat-rooms";
 
-export function createSendHandler({ authorizeRoom, messages }: RoomHandlerOptions): CommandHandler {
+export function createSendHandler({
+  authorizeRoom,
+  messages,
+  access,
+}: RoomHandlerOptions): CommandHandler {
   return async ({ uid, params, sendTime, connection, peers }) => {
     const roomId = params.roomId;
     if (typeof roomId !== "string" || !connection.joinedRooms.has(roomId))
@@ -18,6 +22,7 @@ export function createSendHandler({ authorizeRoom, messages }: RoomHandlerOption
       throw new ChatCommandError("invalid_message");
     }
 
+    if (access && !(await access.canSend(uid))) throw new ChatCommandError("chat_muted");
     let saved;
     try {
       saved = await messages.create({
@@ -32,7 +37,7 @@ export function createSendHandler({ authorizeRoom, messages }: RoomHandlerOption
       throw error;
     }
 
-    if (saved.inserted) {
+    if (saved.inserted && !messages.durableDelivery) {
       const data = {
         sender: uid,
         msg: saved.body,
