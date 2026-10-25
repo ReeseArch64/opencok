@@ -4024,3 +4024,11 @@ Command tests verify correlation, exact Long timestamps and rejection before cac
 writes. This introduces no dependency or schema change. Rollback leaves compatible
 cache fields that older V2-only binaries ignore; operator Redis and native clients
 were not used for this validation.
+
+## Basic chat integration acceptance
+
+Topic 8 now has actual TCP/API/WebSocket acceptance across two disposable realms,
+including persisted history after Chat restart, current room membership, session
+expiry and bounded outage behavior. See the [Chat integration guide](../chat/GAME_INTEGRATION.md).
+APK testing is excluded by request; this evidence does not certify native rendering
+or the full social/chat command inventory.
