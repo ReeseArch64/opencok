@@ -1,3 +1,4 @@
+import { progressionEffectIds, type ProgressionEffectId } from "./city-progression";
 import type { GeneralSkill, PlayerEffectSnapshot } from "@opencok/contracts/power";
 import type { RuleContext } from "./availability.ts";
 import type { Rules } from "./game.ts";
@@ -62,13 +63,65 @@ export function playerGameEffect(
     | 2805
     | 2806
     | 2807
-    | NewGeneralEquipmentModifier,
+    | NewGeneralEquipmentModifier
+    | ProgressionEffectId,
 ): number {
   if (
     ![
-      158, 159, 160, 100, 101, 102, 103, 104, 8, 56, 144, 171, 882, 909, 910, 911, 912, 913, 2439,
-      2440, 2441, 2442, 2600, 37, 38, 50, 51, 52, 53, 64, 72, 78, 207, 208, 209, 210, 211, 212, 213,
-      214, 215, 216, 217, 218, 487, 895, 899, 2024, 2196, 2804, 2805, 2806, 2807,
+      158,
+      159,
+      160,
+      100,
+      101,
+      102,
+      103,
+      104,
+      8,
+      56,
+      144,
+      171,
+      882,
+      909,
+      910,
+      911,
+      912,
+      913,
+      2439,
+      2440,
+      2441,
+      2442,
+      2600,
+      37,
+      38,
+      50,
+      51,
+      52,
+      53,
+      64,
+      72,
+      78,
+      207,
+      208,
+      209,
+      210,
+      211,
+      212,
+      213,
+      ...progressionEffectIds,
+      214,
+      215,
+      216,
+      217,
+      218,
+      487,
+      895,
+      899,
+      2024,
+      2196,
+      2804,
+      2805,
+      2806,
+      2807,
     ].includes(effect)
   )
     return invalid();

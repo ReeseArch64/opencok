@@ -2195,3 +2195,12 @@ parity. Required follow-ups and limitations remain in the linked source report.
 The nonempty evidence commit retains `[skip ci]`; workflows and required checks
 are unchanged, integration/client execution is deferred and merge readiness is
 not claimed. No migration or gameplay write is executed by publication.
+
+## Construction and city progression
+
+Topic 16 implements owned city mutations on the existing persistent queue and
+economy boundary. See the [runbook](architecture/city-progression.md) for commands,
+intentional compatibility differences, imported-queue refund limits and recovery.
+`apps/server/integration/construction.test.ts` uses disposable PostgreSQL for
+concurrency, replay, stars, one-time rewards, production conservation, ownership
+and transaction rollback. Native clients and other release tracks are unverified.

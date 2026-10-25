@@ -30,6 +30,7 @@ export interface ReconnectCatalogs {
 export interface ProfileCatalogs {
   characters?: Map<string, Rule>;
   achievementCount?: number;
+  achievements?: readonly Rule[];
   militaryRanks?: Map<string, Rule>;
   servers?: Map<string, Rule>;
 }

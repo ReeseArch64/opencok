@@ -11,19 +11,47 @@ export interface TimedActivity {
   dueAt: bigint;
   version: number;
   status: number;
+  data?: unknown;
+}
+export interface PreparedActivity {
+  type?: number;
+  itemId?: string;
+  durationMs?: bigint;
+  data?: unknown;
+  response: Uint8Array;
+  responseKind?: "queue" | "nested";
 }
 export type ActivityAction = "start" | "restore" | "finish" | "cancel" | "reschedule";
 import type { InventoryState, InventoryPlan } from "./inventory";
 
 export interface ActivityEconomy {
   gold(delta: bigint): void;
-  resource(asset: "wood" | "stone" | "iron" | "food" | "silver", delta: bigint): void;
+  balance?(asset: string): bigint;
+  quantity?(itemId: string): number;
+  resource(
+    asset:
+      | "wood"
+      | "stone"
+      | "iron"
+      | "food"
+      | "silver"
+      | "woodbind"
+      | "stonebind"
+      | "ironbind"
+      | "foodbind",
+    delta: bigint,
+  ): void;
   item(itemId: string, delta: number): void;
 }
 export interface ActivityState extends InventoryState {
   now: bigint;
   queues: readonly Row[];
   activities: readonly TimedActivity[];
+  prepare?(
+    command: string,
+    params: Uint8Array,
+    economy: ActivityEconomy,
+  ): Promise<PreparedActivity>;
   apply(
     action: ActivityAction,
     activity: TimedActivity,

@@ -92,7 +92,9 @@
     "./shops": "./src/shops.ts",
     "./provisioning": "./src/provisioning.ts",
     "./character-seed": "./src/character-seed.ts",
-    "./timed-activity": "./src/timed-activity.ts"
+    "./timed-activity": "./src/timed-activity.ts",
+    "./city-command": "./src/city-command.ts",
+    "./city-progression": "./src/city-progression.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

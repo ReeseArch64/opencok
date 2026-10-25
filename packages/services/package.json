@@ -54,7 +54,9 @@
     "./provisioning": "./src/provisioning.ts",
     "./timed-activity": "./src/timed-activity.ts",
     "./production": "./src/production.ts",
-    "./production-context": "./src/production-context.ts"
+    "./production-context": "./src/production-context.ts",
+    "./city-progression": "./src/city-progression.ts",
+    "./construction": "./src/construction.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -4059,3 +4059,10 @@ The [shop guide](SHOPS.md) describes catalog queries, atomic gold/item purchases
 persistent NPC offers, shared stock migration and retry semantics. It records
 specialized currencies/effects that remain unsupported and the synthetic protocol
 validation boundary.
+
+## Construction and city progression
+
+The [city progression runbook](../../docs/architecture/city-progression.md) describes
+construction commands, cost and star rules, transactional queue completion,
+production boundaries, legacy import, migration 0016 and rollback requirements.
+Synthetic PostgreSQL coverage is in `integration/construction.test.ts`.
