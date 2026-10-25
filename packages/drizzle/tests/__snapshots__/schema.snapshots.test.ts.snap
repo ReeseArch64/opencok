@@ -14288,3 +14288,63 @@ select "ownerUid", "revision" from "opencok_kingdom"."avatar_publication" where 
 update "opencok_kingdom"."avatar_publication" set "ownerUid" = $1, "revision" = $2 where "opencok_kingdom"."avatar_publication"."ownerUid" = $3
 delete from "opencok_kingdom"."avatar_publication" where "opencok_kingdom"."avatar_publication"."ownerUid" = $1"
 `;
+
+exports[`opencok_kingdom.command_receipt: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["kingdomId","integer",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["requestId","varchar(128)",true,null,null,null]
+column ["command","varchar(128)",true,null,null,null]
+column ["request","bytea",true,null,null,null]
+column ["response","bytea",true,null,null,null]
+column ["ownerEpoch","bigint",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+primary ["command_receipt_PRIMARY",["kingdomId","ownerUid","requestId"]]
+check ["command_receipt_epoch","\\"ownerEpoch\\" > 0"]
+check ["command_receipt_bounds","octet_length(\\"request\\") <= 65536 AND octet_length(\\"response\\") <= 1048576"]
+insert into "opencok_kingdom"."command_receipt" ("kingdomId", "ownerUid", "requestId", "command", "request", "response", "ownerEpoch", "createdAt") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "kingdomId", "ownerUid", "requestId", "command", "request", "response", "ownerEpoch", "createdAt" from "opencok_kingdom"."command_receipt" where "opencok_kingdom"."command_receipt"."kingdomId" = $1
+update "opencok_kingdom"."command_receipt" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "command" = $4, "request" = $5, "response" = $6, "ownerEpoch" = $7, "createdAt" = $8 where "opencok_kingdom"."command_receipt"."kingdomId" = $9
+delete from "opencok_kingdom"."command_receipt" where "opencok_kingdom"."command_receipt"."kingdomId" = $1"
+`;
+
+exports[`opencok_kingdom.economy_posting: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["kingdomId","integer",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["requestId","varchar(128)",true,null,null,null]
+column ["entry","integer",true,null,null,null]
+column ["accountUid","varchar(40)",true,null,null,null]
+column ["asset","varchar(64)",true,null,null,null]
+column ["delta","bigint",true,null,null,null]
+column ["before","bigint",true,null,null,null]
+column ["after","bigint",true,null,null,null]
+column ["reason","varchar(128)",true,null,null,null]
+primary ["economy_posting_PRIMARY",["kingdomId","ownerUid","requestId","entry"]]
+check ["economy_posting_balance","\\"before\\" >= 0 AND \\"after\\" >= 0 AND \\"after\\"::numeric - \\"before\\"::numeric = \\"delta\\"::numeric"]
+check ["economy_posting_entry","\\"entry\\" >= 0"]
+insert into "opencok_kingdom"."economy_posting" ("kingdomId", "ownerUid", "requestId", "entry", "accountUid", "asset", "delta", "before", "after", "reason") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "kingdomId", "ownerUid", "requestId", "entry", "accountUid", "asset", "delta", "before", "after", "reason" from "opencok_kingdom"."economy_posting" where "opencok_kingdom"."economy_posting"."kingdomId" = $1
+update "opencok_kingdom"."economy_posting" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "entry" = $4, "accountUid" = $5, "asset" = $6, "delta" = $7, "before" = $8, "after" = $9, "reason" = $10 where "opencok_kingdom"."economy_posting"."kingdomId" = $11
+delete from "opencok_kingdom"."economy_posting" where "opencok_kingdom"."economy_posting"."kingdomId" = $1"
+`;
+
+exports[`opencok_kingdom.mutation_outbox: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["kingdomId","integer",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["requestId","varchar(128)",true,null,null,null]
+column ["eventId","varchar(40)",true,null,null,null]
+column ["eventType","varchar(128)",true,null,null,null]
+column ["payload","bytea",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["publishedAt","bigint",true,null,null,null]
+primary ["mutation_outbox_PRIMARY",["kingdomId","ownerUid","requestId","eventId"]]
+index ["mutation_outbox_pending",false,["kingdomId","publishedAt","createdAt"]]
+check ["mutation_outbox_payload","octet_length(\\"payload\\") <= 65536"]
+check ["mutation_outbox_delivery","\\"publishedAt\\" >= 0"]
+insert into "opencok_kingdom"."mutation_outbox" ("kingdomId", "ownerUid", "requestId", "eventId", "eventType", "payload", "createdAt", "publishedAt") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "kingdomId", "ownerUid", "requestId", "eventId", "eventType", "payload", "createdAt", "publishedAt" from "opencok_kingdom"."mutation_outbox" where "opencok_kingdom"."mutation_outbox"."kingdomId" = $1
+update "opencok_kingdom"."mutation_outbox" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "eventId" = $4, "eventType" = $5, "payload" = $6, "createdAt" = $7, "publishedAt" = $8 where "opencok_kingdom"."mutation_outbox"."kingdomId" = $9
+delete from "opencok_kingdom"."mutation_outbox" where "opencok_kingdom"."mutation_outbox"."kingdomId" = $1"
+`;

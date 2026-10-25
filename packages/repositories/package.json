@@ -67,7 +67,9 @@
     "./reconnect-marches": "./src/reconnect-marches.ts",
     "./chat-mailbox": "./src/chat-mailbox.ts",
     "./cn1-session": "./src/cn1-session.ts",
-    "./avatar-moderation": "./src/avatar-moderation.ts"
+    "./avatar-moderation": "./src/avatar-moderation.ts",
+    "./mutation": "./src/mutation.ts",
+    "./economy-mutation": "./src/economy-mutation.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
@@ -75,6 +77,7 @@
     "@opencok/drizzle": "workspace:*",
     "@opencok/errors": "workspace:*",
     "@opencok/rules": "workspace:*",
-    "drizzle-orm": "0.45.4"
+    "drizzle-orm": "0.45.4",
+    "@opencok/ledger": "workspace:*"
   }
 }

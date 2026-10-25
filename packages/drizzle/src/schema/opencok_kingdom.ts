@@ -667,3 +667,6 @@ export { resource_settlement } from "./opencok_kingdom/resource_settlement";
 export { nickname_change } from "./opencok_kingdom/nickname_change";
 
 export { avatar_publication } from "./opencok_kingdom/avatar_publication";
+export { command_receipt } from "./opencok_kingdom/command_receipt";
+export { economy_posting } from "./opencok_kingdom/economy_posting";
+export { mutation_outbox } from "./opencok_kingdom/mutation_outbox";
