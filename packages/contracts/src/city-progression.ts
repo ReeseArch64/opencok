@@ -30,7 +30,22 @@ export interface QuestWrite {
   allianceTasks?: number;
   allianceBox?: { threshold: number; period: bigint };
 }
+export interface GeneralRoster {
+  generals: readonly Row[];
+  purchases: readonly Row[];
+  offices: readonly Row[];
+  skills: readonly Row[];
+  statuses: readonly Row[];
+}
+export interface GeneralWrite {
+  generals?: readonly Row[];
+  purchases?: readonly Row[];
+  offices?: readonly Row[];
+  skills?: readonly Row[];
+  statuses?: readonly Row[];
+}
 export interface CityProgressionState {
+  generalRoster?: GeneralRoster;
   quests?: QuestState;
   abilityPages?: readonly Row[];
   suitDecompositions?: readonly Row[];
@@ -54,6 +69,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  generalRoster?: GeneralWrite;
   equipment?: readonly Row[];
   deletedEquipment?: readonly string[];
   suitDecompositions?: readonly Row[];

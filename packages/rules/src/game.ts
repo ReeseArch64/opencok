@@ -21,6 +21,18 @@ export interface WorldCatalogs {
   neutralResources?: Map<string, Rule>;
   barbarians?: Map<string, Rule>;
 }
+export interface GeneralCatalogs {
+  levels?: Map<string, Rule>;
+  stations?: Map<string, Rule>;
+  unlocks?: Map<string, Rule>;
+  draws?: Map<string, Rule>;
+  wheels?: Map<string, Rule>;
+  refinementValues?: readonly Rule[];
+  refinementLimits?: readonly Rule[];
+  refinementRepeats?: readonly Rule[];
+  recruits?: Map<string, Rule>;
+  tavernRewards?: Map<string, Rule>;
+}
 export interface ProgressionCatalogs {
   equipmentRandom?: Map<string, Rule>;
   forgeRandom?: Map<string, Rule>;
@@ -123,6 +135,7 @@ export class Rules {
     readonly shops: Map<string, Rule> = new Map(),
     readonly trades: Map<string, Rule> = new Map(),
     readonly progression: ProgressionCatalogs = {},
+    readonly general: GeneralCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): BuildingState {
     return buildingLevel(this.buildings, itemId, level, star, progress);
