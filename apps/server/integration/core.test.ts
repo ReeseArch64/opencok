@@ -1,3 +1,4 @@
+import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { eq } from "drizzle-orm";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
@@ -109,6 +110,14 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         deviceUuid: "synthetic-device",
         pf: "Google",
         gold: 9007199254740993n,
+      });
+      await db.insert(mail).values({
+        uid: "synthetic-mail-reward",
+        toUser: uid,
+        type: 2,
+        rewardId: "wood,0,5",
+        contents: Buffer.from("synthetic"),
+        createTime: 1000n,
       });
       await db.insert(user_mixed_info).values({ uid, mdata: "{}" });
       await db.insert(user_resource).values({
@@ -296,6 +305,27 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         "synthetic-medal",
       );
       expect((await client.command("build.info")).building?.type).toBe(Type.Array);
+      const claimedMail = await client.command("mail.reward", {
+        uid: sfs.string("synthetic-mail-reward"),
+        _cok_: sfs.string("mail-claim"),
+      });
+      expect(claimedMail.wood).toEqual(sfs.long(id * 10000 + 5));
+      const replayedMail = await client.command("mail.reward", {
+        uid: sfs.string("synthetic-mail-reward"),
+        _cok_: sfs.string("different-mail-claim"),
+      });
+      expect(replayedMail.wood).toEqual(sfs.long(id * 10000 + 5));
+      expect(
+        (
+          await client.command("mail.reward.batch", {
+            uids: sfs.string("synthetic-mail-reward,synthetic-mail-reward"),
+          })
+        ).successUids,
+      ).toEqual(sfs.string(""));
+      expect(
+        (await client.command("mail.reward", { uid: sfs.string("foreign-mail") })).errorCode,
+      ).toBeDefined();
+
       const usedItem = await client.command("item.use", {
         uuid: sfs.string("synthetic-item"),
         num: sfs.int(2),
@@ -362,7 +392,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         items: before.items.map((item) =>
           item.uuid === "synthetic-item" ? { ...item, count: 5 } : item,
         ),
-        resource: { ...before.resource, lastUpdateTime: checkpoint },
+        resource: { ...before.resource, wood: BigInt(id * 10000 + 5), lastUpdateTime: checkpoint },
       });
       expect((await fetch(`http://127.0.0.1:${server.healthPort}/readyz`)).status).toBe(200);
       const operationId = randomUUID();
@@ -454,7 +484,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
           ])
       ).rows[0].showEquip,
     ).toBe(1);
-    expect(fields((await reconnected.command("build.info")).resource).wood?.value).toBe(10000n);
+    expect(fields((await reconnected.command("build.info")).resource).wood?.value).toBe(10005n);
     await pg.docker(["pause", redis]);
     await eventually(
       async () => (await fetch(`http://127.0.0.1:${restarted.healthPort}/readyz`)).status === 503,

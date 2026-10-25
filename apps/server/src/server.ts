@@ -1,3 +1,8 @@
+import {
+  createMailRewardExecutor,
+  mailRewardRealmAllowed,
+} from "@opencok/repositories/mail-rewards";
+import { MailRewardService } from "@opencok/services/mail-rewards";
 import { createInventoryExecutor } from "@opencok/repositories/inventory";
 import { InventoryService } from "@opencok/services/inventory";
 import { decodeWorldPowerEffects } from "@opencok/services/power";
@@ -255,6 +260,12 @@ export const RealmDependenciesLive = Layer.effect(
         (relay) => relay.close(),
       );
     }
+    const mailRewards = new MailRewardService(
+      createMailRewardExecutor(db.kingdom.db, authority, Date.now, () =>
+        mailRewardRealmAllowed(db.databases.global.db, config.kingdomId),
+      ),
+      rules,
+    );
     const inventory = new InventoryService(
       createInventoryExecutor(db.kingdom.db, authority),
       rules,
@@ -279,6 +290,7 @@ export const RealmDependenciesLive = Layer.effect(
       coordination,
       game: new GameController(
         new GameService(db, rules, config, Date.now, {
+          mailReward: (owner, command, params) => mailRewards.command(owner, command, params),
           inventory: (owner, command, params) => inventory.command(owner, command, params),
           reconnect: async (uid, now, plan) => {
             authority.assertReady();
