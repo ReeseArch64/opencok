@@ -36,3 +36,24 @@ test("dependency failures retain 503 responses without exposing underlying detai
   expect(response.status).toBe(503);
   expect(await response.text()).toBe("");
 });
+
+test("character provisioning routes only the exact path and is unavailable when disabled", async () => {
+  const disabled = createHandler(accounts, directory, redis);
+  const response = await disabled.fetch(
+    new Request("http://api/api/v1/characters", { method: "POST" }),
+  );
+  expect(response.status).toBe(503);
+  expect(response.headers.get("Cache-Control")).toBe("no-store");
+  let calls = 0;
+  const enabled = createHandler(accounts, directory, redis, undefined, undefined, async () => {
+    calls++;
+    return Response.json({ state: "ready" });
+  });
+  expect(
+    (await enabled.fetch(new Request("http://api/api/v1/characters", { method: "POST" }))).status,
+  ).toBe(200);
+  expect(
+    (await enabled.fetch(new Request("http://api/api//v1/characters", { method: "POST" }))).status,
+  ).toBe(404);
+  expect(calls).toBe(1);
+});

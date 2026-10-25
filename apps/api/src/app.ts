@@ -1,3 +1,7 @@
+import { firebaseIdentity } from "@opencok/identity/firebase";
+import { ProvisioningService } from "@opencok/services/provisioning";
+import { ProvisioningController } from "@opencok/controllers/provisioning";
+import { provisioningHandler, realmProvisioner } from "@opencok/connection/provisioning";
 import { BODY_LIMIT } from "@opencok/contracts/files";
 import { createFiles } from "./files.ts";
 import { createChatDiscovery } from "@opencok/connection/chat-discovery";
@@ -19,6 +23,7 @@ export class ApiDependencies extends Context.Service<
     redis: Parameters<typeof createHandler>[2];
     chatDiscovery?: Parameters<typeof createHandler>[3];
     files?: Parameters<typeof createHandler>[4];
+    provisioning?: Parameters<typeof createHandler>[5];
   }
 >()("@opencok/api/Dependencies") {}
 
@@ -36,7 +41,31 @@ export const ApiDependenciesLive = Layer.effect(
     yield* fromPromise("api.directory", () => directory.read()).pipe(Effect.uninterruptible);
     yield* fromPromise("api.accounts.start", () => accounts.start()).pipe(Effect.uninterruptible);
     yield* fromPromise("api.redis", () => redis.health()).pipe(Effect.uninterruptible);
+    const identity = config.provisioning
+      ? yield* acquireResource(
+          "api.identity",
+          async () => firebaseIdentity(config.provisioning!.projectId),
+          (value) => value.close(),
+        )
+      : undefined;
     return {
+      provisioning:
+        identity && config.provisioning
+          ? provisioningHandler(
+              new ProvisioningController(
+                new ProvisioningService(
+                  identity,
+                  accounts.provisioning(),
+                  new Map(
+                    config.provisioning.realms.map((realm) => [
+                      realm.id,
+                      realmProvisioner(realm.url, config.provisioning!.secret, config.timeoutMs),
+                    ]),
+                  ),
+                ),
+              ),
+            )
+          : undefined,
       files: config.filesEnabled ? yield* createFiles : undefined,
       accounts,
       directory,
@@ -52,8 +81,8 @@ export const ApiDependenciesLive = Layer.effect(
 );
 
 export const createApp = Effect.gen(function* () {
-  const { accounts, directory, redis, chatDiscovery, files } = yield* ApiDependencies;
-  return createHandler(accounts, directory, redis, chatDiscovery, files);
+  const { accounts, directory, redis, chatDiscovery, files, provisioning } = yield* ApiDependencies;
+  return createHandler(accounts, directory, redis, chatDiscovery, files, provisioning);
 });
 
 export const serveApi = Effect.gen(function* () {

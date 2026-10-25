@@ -405,3 +405,6 @@ E2E proves installation and reopening on device/emulator. Apply the five layers 
 testing in section 22 to the relevant project-authored code, including mutations in
 version, signature, hash, and compatibility validators. None of this is evidence that an
 APK has already been patched or published.
+
+Account creation and its global/realm recovery contract are documented in
+[Account and initial-city provisioning](account-provisioning.md).

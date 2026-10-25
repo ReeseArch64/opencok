@@ -1,3 +1,7 @@
+import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
+import { CharacterProvisioningService } from "@opencok/services/provisioning";
+import { CharacterProvisioningController } from "@opencok/controllers/provisioning";
+import { characterProvisioningHandler } from "@opencok/connection/provisioning";
 import {
   createMailRewardExecutor,
   mailRewardRealmAllowed,
@@ -286,6 +290,17 @@ export const RealmDependenciesLive = Layer.effect(
       },
     );
     return {
+      provisioning: config.provisioningSecret
+        ? characterProvisioningHandler(
+            new CharacterProvisioningController(
+              new CharacterProvisioningService(
+                createCharacterCreator(db.kingdom.db, authority, config.mapSize),
+                rules,
+              ),
+            ),
+            config.provisioningSecret,
+          )
+        : undefined,
       inventory,
       mutations: createMutationExecutor(db.kingdom.db, authority),
       economy: createEconomyMutationExecutor(db.kingdom.db, authority),

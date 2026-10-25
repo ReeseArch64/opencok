@@ -10,6 +10,7 @@ export type ConnectionConfig = Pick<
 >;
 
 export interface ServerDependencies {
+  provisioning?: (request: Request) => Promise<Response>;
   profileSessions?: {
     open(owner: string, sessionId: string, now: number): Promise<void>;
     close(owner: string, sessionId: string, now: number): Promise<void>;

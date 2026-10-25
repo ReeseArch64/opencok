@@ -1,3 +1,4 @@
+import { characterPath } from "@opencok/contracts/provisioning";
 import { IMAGE_PATH, UPLOAD_PATH } from "@opencok/contracts/files";
 import { HttpError } from "@opencok/errors/http";
 import { logContext, logEvent, logHttpRequest } from "@opencok/core/logging";
@@ -29,10 +30,18 @@ export function createHandler(
   redis: { health(): Promise<unknown> },
   chatDiscovery?: ChatDiscovery,
   files?: (request: Request) => Promise<Response>,
+  provisioning?: (request: Request) => Promise<Response>,
 ) {
   const discovery = new Discovery(accounts, directory);
   async function route(request: Request): Promise<Response> {
     const rawPath = new URL(request.url).pathname;
+    if (rawPath === characterPath)
+      return provisioning
+        ? provisioning(request)
+        : Response.json(
+            { state: "unavailable" },
+            { status: 503, headers: { "Cache-Control": "no-store" } },
+          );
     if (
       files &&
       (rawPath === UPLOAD_PATH ||

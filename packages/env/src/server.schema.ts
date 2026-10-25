@@ -5,6 +5,7 @@ import { port, timeout, databaseName, redisUrl, realmSettings } from "./service.
 
 export const serverSchema = z
   .object({
+    PROVISIONING_SIGNING_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
     GAME_FILES_URL: z.preprocess(
       blankToUndefined,
       z

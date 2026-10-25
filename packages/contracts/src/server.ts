@@ -1,4 +1,5 @@
 export interface ServerConfig {
+  provisioningSecret?: string;
   chatInterval?: number;
   feedMaxCount?: number;
   crossSearchEnabled?: boolean;
