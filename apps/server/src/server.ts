@@ -1,4 +1,13 @@
 import { civilizationScienceDomain } from "@opencok/services/civilization-science";
+import { createChatNoticeCostReader } from "@opencok/repositories/chat-notice-cost";
+import { cleanupSocialRealm } from "@opencok/repositories/social-cleanup";
+import type { Fields } from "@opencok/messages/sfs";
+import { FriendshipMineService } from "@opencok/services/friendship-mine";
+import { createFriendshipMineExecutor } from "@opencok/repositories/friendship-mine";
+import { ChatNoticeService } from "@opencok/services/chat-notice";
+import { PostboxService } from "@opencok/services/postbox";
+import { createPostboxExecutor } from "@opencok/repositories/postbox";
+import { createRealmSocialExecutor } from "@opencok/connection/realm-social";
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
 import { createGeneralDrawDomain } from "@opencok/services/general-draws";
 import { AllianceService, allianceStableId } from "@opencok/services/alliances";
@@ -424,6 +433,69 @@ export const RealmDependenciesLive = Layer.effect(
           );
         }
       }
+      if (config.chatSession)
+        for (let index = 0; index < 64; index++) {
+          const published = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            async (event) => {
+              const execute = createRealmSocialExecutor({
+                ...config.chatSession!,
+                authority,
+                realm: config.kingdomId,
+                timeoutMs: config.timeoutMs,
+              });
+              await execute(event.owner, "mine.call.publish", {
+                operationId: sfs.string(event.requestId),
+              });
+            },
+            Date.now,
+            "social.mine.call",
+            5000,
+          );
+          if (!published) break;
+        }
+      if (config.chatSession)
+        for (let index = 0; index < 64; index++) {
+          const published = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            async (event) => {
+              const execute = createRealmSocialExecutor({
+                authority,
+                ...config.chatSession!,
+                realm: config.kingdomId,
+                timeoutMs: config.timeoutMs,
+              });
+              const result = await execute(event.owner, "chat.notice.commit", {
+                operationId: sfs.string(event.requestId),
+              });
+              if (result.expired?.value === true && result.delivered?.value !== true)
+                await notices.refund(event.owner, event.requestId);
+            },
+            Date.now,
+            "social.notice",
+            5000,
+          );
+          if (!published) break;
+        }
+      for (let index = 0; index < 64; index++) {
+        const published = await relayMutationEvent(
+          db.kingdom.db,
+          authority,
+          async (event) => {
+            const data = decode(event.payload);
+            if (BigInt((data.expiresAt?.value as bigint) ?? 0) > BigInt(Date.now()))
+              await notifications.publish(str(data, "recipient"), "push.lua.postMail", {
+                message: data.message!,
+                chat: data.chat!,
+              });
+          },
+          Date.now,
+          "social.post",
+        );
+        if (!published) break;
+      }
       for (let index = 0; index < 64; index++) {
         const published = await relayMutationEvent(
           db.kingdom.db,
@@ -578,6 +650,137 @@ export const RealmDependenciesLive = Layer.effect(
       ),
       rules,
     );
+    yield* Effect.tryPromise({
+      try: async () => {
+        const removed = await cleanupSocialRealm(db.kingdom.db, authority);
+        if (removed >= 500)
+          console.warn(
+            JSON.stringify({ event: "social_retention_backlog", kingdom: config.kingdomId }),
+          );
+        return removed;
+      },
+      catch: () => new Error("Social retention cleanup unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(60_000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    const socialRemote = config.chatSession
+      ? createRealmSocialExecutor({
+          authority,
+          ...config.chatSession,
+          realm: config.kingdomId,
+          timeoutMs: config.timeoutMs,
+        })
+      : undefined;
+    const friendshipMine = new FriendshipMineService(
+      createFriendshipMineExecutor(db, authority, () => initialFriendshipMine(rules), Date.now, {
+        before: async (tx, owner, now) => {
+          await productionPreparation.prepare(tx, owner, now);
+        },
+      }),
+      rules,
+      economyEffects,
+      socialRemote,
+    );
+    const notices = new ChatNoticeService(
+      createInventoryExecutor(db.kingdom.db, authority, Date.now, {
+        before: async (tx, owner, now) => {
+          await productionPreparation.prepare(tx, owner, now);
+        },
+      }),
+      rules,
+      economyEffects,
+      Date.now,
+      async (owner) => {
+        if (!socialRemote) throw new Error("Chat unavailable");
+        await socialRemote(owner, "chat.notice.authorize", {});
+      },
+      createChatNoticeCostReader(db.kingdom.db, config.kingdomId),
+    );
+    const postbox = new PostboxService(
+      createPostboxExecutor(db.kingdom.db, authority, Date.now, {
+        before: async (tx, owner, now) => {
+          await productionPreparation.prepare(tx, owner, now);
+        },
+      }),
+      rules,
+      economyEffects,
+    );
+    if (socialRemote)
+      yield* Effect.tryPromise({
+        try: async () => {
+          authority.assertReady();
+          const batch = await socialRemote(`realm-${config.kingdomId}`, "mine.inbox.poll", {});
+          const commands = batch.commands?.value as { type: number; value: Fields }[] | undefined;
+          for (const entry of commands ?? []) {
+            const data = entry.value,
+              owner = str(data, "owner"),
+              id = str(data, "id");
+            await friendshipMine.command(
+              owner,
+              "mine.receive.help",
+              {
+                operationId: sfs.string(id),
+                actor: data.actor!,
+                generation: data.generation!,
+                name: data.name!,
+              },
+              true,
+            );
+            await socialRemote(owner, "mine.inbox.ack", { id: sfs.string(id) });
+          }
+        },
+        catch: () => new Error("Friendship help recovery unavailable"),
+      }).pipe(
+        Effect.catch(() => Effect.void),
+        Effect.andThen(Effect.sleep(1000)),
+        Effect.forever,
+        Effect.forkScoped,
+      );
+    if (socialRemote)
+      yield* Effect.tryPromise({
+        try: async () => {
+          authority.assertReady();
+          const owners = notifications.owners();
+          let cursor = "";
+          for (let index = 0; index < Math.max(1, owners.length); index += 4) {
+            const batch = await socialRemote(`realm-${config.kingdomId}`, "realm.events.poll", {
+              token: sfs.string(authority.instance),
+              epoch: sfs.string(String(authority.epoch)),
+              owners: sfs.array(owners.slice(index, index + 4).map((owner) => sfs.string(owner))),
+              ...(cursor ? { end: sfs.string(cursor) } : {}),
+            });
+            if (index === 0) cursor = str(batch, "cursor", "");
+            const deliveries = batch.deliveries?.value as
+              | { type: number; value: Fields }[]
+              | undefined;
+            for (const entry of deliveries ?? []) {
+              const data = entry.value;
+              await notifications.publish(str(data, "owner"), str(data, "cmd"), {
+                ...(data.data?.value as Fields),
+                eventId: data.id!,
+              });
+            }
+            if (batch.resync?.value === true)
+              for (const owner of owners.slice(index, index + 4))
+                await notifications.publish(owner, "push.chat.resync", {});
+          }
+          if (cursor)
+            await socialRemote(`realm-${config.kingdomId}`, "realm.events.ack", {
+              token: sfs.string(authority.instance),
+              epoch: sfs.string(String(authority.epoch)),
+              cursor: sfs.string(cursor),
+            });
+        },
+        catch: () => new Error("Social event delivery unavailable"),
+      }).pipe(
+        Effect.catch(() => Effect.void),
+        Effect.andThen(Effect.sleep(250)),
+        Effect.forever,
+        Effect.forkScoped,
+      );
     const inventory = new InventoryService(
       createInventoryExecutor(db.kingdom.db, authority, Date.now, {
         before: async (tx, owner, now) => {
@@ -671,6 +874,10 @@ export const RealmDependenciesLive = Layer.effect(
           trade: (owner, command, params) => trade.command(owner, command, params),
           shop: (owner, command, params) => shops.command(owner, command, params),
           mailReward: (owner, command, params) => mailRewards.command(owner, command, params),
+          friendshipMine: (owner, command, params) =>
+            friendshipMine.command(owner, command, params),
+          notice: (owner, command, params) => notices.command(owner, command, params),
+          postbox: (owner, command, params) => postbox.command(owner, command, params),
           inventory: (owner, command, params) => inventory.command(owner, command, params),
           reconnect: async (uid, now, plan) => {
             authority.assertReady();
@@ -721,6 +928,20 @@ export const RealmDependenciesLive = Layer.effect(
                   return readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect);
                 },
               }
+            : undefined,
+          social: config.chatSession
+            ? (() => {
+                const execute = createRealmSocialExecutor({
+                  authority,
+                  ...config.chatSession,
+                  realm: config.kingdomId,
+                  timeoutMs: config.timeoutMs,
+                });
+                return async (owner, command, params) => {
+                  authority.assertReady();
+                  return execute(owner, command, params);
+                };
+              })()
             : undefined,
           mailChatEnabled: !!config.mailChat,
           chatSession: config.chatSession
