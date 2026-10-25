@@ -16,7 +16,8 @@
   "exports": {
     "./rules": "./src/rules.ts",
     "./nickname-words": "./src/nickname-words.ts",
-    "./catalogs": "./src/catalogs.ts"
+    "./catalogs": "./src/catalogs.ts",
+    "./nickname-reserved": "./src/nickname-reserved.ts"
   },
   "dependencies": {
     "@opencok/rules": "workspace:*",

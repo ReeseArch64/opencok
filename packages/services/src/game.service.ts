@@ -1,3 +1,4 @@
+import { changeNickname } from "./nickname-command.ts";
 import type { CreateWorldFavoriteDto } from "@opencok/dtos/world-favorites/create-world-favorite.dto";
 import type { UpdatePushPreferenceDto } from "@opencok/dtos/profile/update-push-preference.dto";
 import { decodeFightRanking, decodePlayoffTeams } from "./battle-ranking.ts";
@@ -319,6 +320,16 @@ export class GameService {
         break;
       case "celebrity.desc.save":
         body = await saveCelebrityDescription(
+          this.db,
+          this.services,
+          uid,
+          this.config.kingdomId,
+          params,
+          this.now(),
+        );
+        break;
+      case "user.modify.nickName":
+        body = await changeNickname(
           this.db,
           this.services,
           uid,

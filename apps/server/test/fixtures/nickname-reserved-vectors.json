@@ -1,0 +1,1702 @@
+[
+  {
+    "pattern": "^admin$",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "^admin$",
+    "text": "admin\n",
+    "expected": true
+  },
+  {
+    "pattern": "^admin$",
+    "text": "admin\r\n",
+    "expected": true
+  },
+  {
+    "pattern": "^admin$",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "^admin$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "^admin$",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "admin\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "admin\r\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)^ADMIN$",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "admin\n",
+    "expected": true
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "admin\r\n",
+    "expected": true
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": " admin!",
+    "expected": true
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "\nadmin\n",
+    "expected": true
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "́admin",
+    "expected": true
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "\\badmin\\b",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "admin\n",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "admin\r\n",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "éadmin",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "adminé",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": " admin!",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "\nadmin\n",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "áadmin",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "́admin",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "admiń",
+    "expected": true
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "\\Bmin",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "admin\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "admin\r\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "literal.+",
+    "expected": true
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "\\Qliteral.+\\E",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "admin\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "admin\r\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "\\Aadmin\\z",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "admin\n",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "admin\r\n",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "admin\\s+user",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": ".+",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "admin\n",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "admin\r\n",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "éadmin",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "adminé",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": " admin!",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "literal.+",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "\nadmin\n",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "áadmin",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "́admin",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "admiń",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "😀",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": ".+",
+    "text": "a",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "ſ",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "k",
+    "expected": true
+  },
+  {
+    "pattern": ".+",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "admin\n",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "admin\r\n",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "😀",
+    "expected": true
+  },
+  {
+    "pattern": "^.$",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "^.$",
+    "text": "a",
+    "expected": true
+  },
+  {
+    "pattern": "^.$",
+    "text": "ſ",
+    "expected": true
+  },
+  {
+    "pattern": "^.$",
+    "text": "k",
+    "expected": true
+  },
+  {
+    "pattern": "^.$",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "admin\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "admin\r\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "😀",
+    "expected": true
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "",
+    "expected": true
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "a",
+    "expected": true
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "ſ",
+    "expected": true
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "k",
+    "expected": true
+  },
+  {
+    "pattern": "(?s)^.$",
+    "text": "\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "admin\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "admin\r\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "\nadmin\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "(?m)^admin$",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "admin\n",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "admin\r\n",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "admin(?= user)",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "admin\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "admin\r\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "admin user",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "(?<!a)dmin",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "admin\n",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "admin\r\n",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "éadmin",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "adminé",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": " admin!",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "literal.+",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "\nadmin\n",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "áadmin",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "́admin",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "admiń",
+    "expected": true
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "[a-z]{2,4}",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "admin\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "admin\r\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "éadmin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "adminé",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": " admin!",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "literal.+",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "\nadmin\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "áadmin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "́admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "admiń",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "a",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)\\u0041",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "admin\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "admin\r\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "éadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "adminé",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": " admin!",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "literal.+",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "\nadmin\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "áadmin",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "́admin",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "admiń",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "a",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "k",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)S",
+    "text": "\n",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "admin\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "admin\r\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "admin user",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "éadmin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "adminé",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": " admin!",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "literal.+",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "\nadmin\n",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "áadmin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "́admin",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "admiń",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "😀",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "a",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "ſ",
+    "expected": false
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "k",
+    "expected": true
+  },
+  {
+    "pattern": "(?i)[A-Z]",
+    "text": "\n",
+    "expected": false
+  }
+]
