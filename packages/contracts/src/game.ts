@@ -280,6 +280,11 @@ export interface GameServices {
     command: string,
     params: Fields,
   ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+  cityProgression?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
   production?(
     owner: string,
     command: string,

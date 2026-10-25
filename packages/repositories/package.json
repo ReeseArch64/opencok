@@ -77,7 +77,9 @@
     "./provisioning": "./src/provisioning.ts",
     "./character-provisioning": "./src/character-provisioning.ts",
     "./timed-activity": "./src/timed-activity.ts",
-    "./production": "./src/production.ts"
+    "./production": "./src/production.ts",
+    "./city-progression": "./src/city-progression.ts",
+    "./city-production": "./src/city-production.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

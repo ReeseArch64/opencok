@@ -1,3 +1,4 @@
+import { cityQueueCommands } from "@opencok/rules/city-command";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { generalSkillPoints } from "./power";
 import { inventoryReplay } from "@opencok/mappings/inventory";
@@ -98,6 +99,57 @@ export class TimedActivityService {
       },
     );
   }
+  async domainCommand(owner: string, command: string, params: Fields) {
+    const operationId = str(params, "operationId", "") || randomUUID();
+    if (!/^[A-Za-z0-9:._-]{1,128}$/.test(operationId)) throw new Error("Invalid operationId");
+    return this.run(owner, operationId, command, params, async (state, ledger) => {
+      if (!state.prepare) throw new Error("City progression unavailable");
+      const prepared = await state.prepare(command, encode(params), activityEconomy(ledger));
+      const item = decode(Buffer.from(prepared.response));
+      if (prepared.type === undefined) return { queues: [], activities: [], body: item, ledger };
+      const duration = prepared.durationMs;
+      if (duration === undefined || duration <= 0n || !prepared.itemId)
+        throw new Error("Invalid prepared activity");
+      const dueAt = activityInstant(state.now + duration);
+      const selected = state.queues
+        .filter(
+          (row) =>
+            num(row, "type") === prepared.type &&
+            long(row, "endTime") >= dueAt &&
+            long(row, "updateTime") === idleDeadline,
+        )
+        .sort((a, b) => num(a, "qid") - num(b, "qid"))[0];
+      if (!selected) throw new Error("No available activity queue");
+      const activity: TimedActivity = {
+        id: randomUUID(),
+        ownerId: owner,
+        queueId: text(selected, "uuid"),
+        type: prepared.type,
+        itemId: prepared.itemId,
+        startedAt: state.now,
+        dueAt,
+        version: 1,
+        status: 0,
+        data: prepared.data,
+      };
+      const row: Row = {
+        ...selected,
+        itemId: activity.itemId,
+        startTime: state.now,
+        updateTime: dueAt,
+        totalTime: duration,
+        isHelped: 0,
+      };
+      const queue = queueView(row, item, false);
+      queue.activityId = sfs.string(activity.id);
+      queue.version = sfs.int(1);
+      const body =
+        prepared.responseKind === "nested"
+          ? { ...item, queue: sfs.object(queue), finish: sfs.long(dueAt) }
+          : queue;
+      return { queues: [row], activities: [activity], body, ledger };
+    });
+  }
   async restore(owner: string, operationId: string, queueId: string) {
     return this.run(
       owner,
@@ -144,8 +196,12 @@ export class TimedActivityService {
     );
   }
   async command(owner: string, command: string, params: Fields) {
+    const alias = cityQueueCommands[command];
+    const queueCommand = alias?.action ?? command;
     if (
-      !["queue.finish", "queue.cancel", "queue.ccd", "queue.open", "queue.rent"].includes(command)
+      !["queue.finish", "queue.cancel", "queue.ccd", "queue.open", "queue.rent"].includes(
+        queueCommand,
+      )
     )
       throw new Error("Unsupported activity command");
     const operationId = str(params, "operationId", "") || randomUUID();
@@ -154,7 +210,7 @@ export class TimedActivityService {
     if (params.guideStep && str(params, "guideStep").length > 255)
       throw new Error("Invalid activity guide step");
     return this.run(owner, operationId, command, params, async (state, ledger) => {
-      if (command === "queue.open") {
+      if (queueCommand === "queue.open") {
         const item = ledger.own(str(params, "uuid"));
         const rule = this.rules.goods.get(item.itemId);
         const qid = Number(rule?.para1),
@@ -200,11 +256,19 @@ export class TimedActivityService {
       }
       const uuid = str(
         params,
-        command === "queue.ccd" || command === "queue.rent" ? "qUUID" : "uuid",
+        queueCommand === "queue.ccd" || queueCommand === "queue.rent" ? "qUUID" : "uuid",
       );
       const saved = state.queues.find((row) => row.uuid === uuid);
       if (!saved) throw new Error("Queue not found");
-      if (command === "queue.rent") {
+      if (
+        alias &&
+        (!alias.types.includes(num(saved, "type")) ||
+          (alias.target && str(params, alias.target) !== text(saved, "itemId")))
+      )
+        throw new Error("Activity target mismatch");
+      if (alias?.action === "queue.finish" && long(saved, "updateTime") > state.now + 1000n)
+        throw new Error("Activity is not due");
+      if (queueCommand === "queue.rent") {
         if (num(saved, "qid") === 1 || num(saved, "type") !== 0)
           throw new Error("Queue cannot be rented");
         const seconds = int(params, "rentTime");
@@ -243,7 +307,7 @@ export class TimedActivityService {
       let next: TimedActivity,
         item: Fields,
         finished = false;
-      if (command === "queue.ccd") {
+      if (queueCommand === "queue.ccd") {
         let remaining = Number((active.dueAt - state.now) / 1000n);
         if (!Number.isSafeInteger(remaining))
           throw new Error("Activity duration exceeds acceleration bound");
@@ -330,7 +394,7 @@ export class TimedActivityService {
       } else {
         next = transitionActivity(
           active,
-          command === "queue.finish" ? "finish" : "cancel",
+          queueCommand === "queue.finish" ? "finish" : "cancel",
           state.now,
           version,
         );
@@ -338,7 +402,7 @@ export class TimedActivityService {
         item = decode(
           Buffer.from(
             await state.apply(
-              command === "queue.finish" ? "finish" : "cancel",
+              queueCommand === "queue.finish" ? "finish" : "cancel",
               next,
               activityEconomy(ledger),
             ),
@@ -360,7 +424,7 @@ export class TimedActivityService {
       const body = queueView(row, item, false);
       body.activityId = sfs.string(next.id);
       body.version = sfs.int(next.version);
-      if (command === "queue.ccd") {
+      if (queueCommand === "queue.ccd") {
         body.remainGold = sfs.long(ledger.total());
         body.finished = sfs.bool(finished);
         if (consumed) {
@@ -371,7 +435,11 @@ export class TimedActivityService {
       return {
         queues: [row],
         activities: [next],
-        body: command === "queue.cancel" ? { ...item, queue: sfs.object(body) } : body,
+        body: alias
+          ? { ...item, queue: sfs.object(body) }
+          : queueCommand === "queue.cancel"
+            ? { ...item, queue: sfs.object(body) }
+            : body,
         ledger,
       };
     });
@@ -439,6 +507,16 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
     return amount;
   };
   return {
+    balance(asset) {
+      return asset === "gold"
+        ? ledger.total()
+        : (ledger.resources[asset] ?? long(ledger.state.resource, asset));
+    },
+    quantity(itemId) {
+      return ledger.items
+        .filter((item) => item.itemId === itemId && item.value === 0 && ledger.valid(item))
+        .reduce((sum, item) => sum + item.count, 0);
+    },
     gold(delta) {
       if (delta < 0n) debit(ledger, -delta, "activity.cost");
       else if (delta > 0n) {
@@ -451,7 +529,19 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
       }
     },
     resource(asset, delta) {
-      if (!["wood", "stone", "iron", "food", "silver"].includes(asset))
+      if (
+        ![
+          "wood",
+          "stone",
+          "iron",
+          "food",
+          "silver",
+          "woodbind",
+          "stonebind",
+          "ironbind",
+          "foodbind",
+        ].includes(asset)
+      )
         throw new Error("Invalid activity resource");
       const before = ledger.resources[asset] ?? long(ledger.state.resource, asset),
         after = valid(before + delta);

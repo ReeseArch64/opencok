@@ -1,6 +1,13 @@
+import { createHash } from "node:crypto";
+import { createCityProgressionStore } from "@opencok/repositories/city-progression";
+import { createCityProductionBoundary } from "@opencok/repositories/city-production";
+import { createCityProgressionHandlers } from "@opencok/services/city-progression";
+import { constructionDomain } from "@opencok/services/construction";
+import { num, text } from "@opencok/contracts/rows";
 import {
   createActivityExecutor,
   dueActivities,
+  unregisteredActivities,
   type ActivityDomain,
 } from "@opencok/repositories/timed-activity";
 import { createProductionExecutor } from "@opencok/repositories/production";
@@ -280,7 +287,6 @@ export const RealmDependenciesLive = Layer.effect(
         (relay) => relay.close(),
       );
     }
-    const activityDomains = new Map<number, ActivityDomain>();
     const economyEffects = {
       world: async () =>
         worldPowerEffects(
@@ -290,29 +296,89 @@ export const RealmDependenciesLive = Layer.effect(
         ),
       emperor: () => cache.emperorVersion(config.kingdomId),
     };
-    const activities = new TimedActivityService(
-      createActivityExecutor(db.kingdom.db, authority, activityDomains),
+    const productionPreparation = {
+      async prepare(tx: Parameters<typeof readReconnectProgress>[0], owner: string, now: bigint) {
+        const state = await readReconnectProgress(tx, owner, config.kingdomId, now);
+        const planned = await productionContext(state, rules, now, {
+          worldPowerEffects: (id) => cache.worldEffects(id),
+          emperorVersion: (id) => cache.emperorVersion(id),
+        });
+        await persistReconnectProgress(tx, state, planned.write, authority, now);
+        return planned.rates;
+      },
+    };
+    const cityBoundary = createCityProductionBoundary(productionPreparation, (row) => {
+      const rule = rules.building(
+        text(row, "itemId"),
+        num(row, "level"),
+        num(row, "star"),
+        num(row, "progress"),
+      );
+      return rule.effects?.productionPerHour === undefined
+        ? undefined
+        : ["wood", "stone", "iron", "food"][rule.effects.productionResourceId ?? -1];
+    });
+    const city = createCityProgressionHandlers(
+      (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
+        createCityProgressionStore(tx, owner, now, cityBoundary),
+      [constructionDomain],
       rules,
       economyEffects,
     );
-    const production = new ProductionService(
-      createProductionExecutor(db.kingdom.db, authority, {
-        async prepare(tx, owner, now) {
-          const state = await readReconnectProgress(tx, owner, config.kingdomId, now);
-          const planned = await productionContext(state, rules, now, {
-            worldPowerEffects: (id) => cache.worldEffects(id),
-            emperorVersion: (id) => cache.emperorVersion(id),
-          });
-          await persistReconnectProgress(tx, state, planned.write, authority, now);
-          return planned.rates;
+    const activityDomains: ReadonlyMap<number, ActivityDomain> = city.domains;
+    const activities = new TimedActivityService(
+      createActivityExecutor(db.kingdom.db, authority, activityDomains, Date.now, {
+        before: async (tx, owner, now) => {
+          await productionPreparation.prepare(tx, owner, now);
         },
+        command: city.command,
       }),
       rules,
       economyEffects,
     );
+    const production = new ProductionService(
+      createProductionExecutor(db.kingdom.db, authority, productionPreparation),
+      rules,
+      economyEffects,
+    );
+    let importCursor: string | undefined;
     let recoveryCursor: { dueAt: bigint; id: string } | undefined;
     const recoverActivities = async (owner?: string) => {
       authority.assertReady();
+      const pending = await unregisteredActivities(
+        db.kingdom.db,
+        [...activityDomains.keys()],
+        owner ? 256 : 64,
+        owner,
+        owner ? undefined : importCursor,
+      );
+      if (!owner) importCursor = pending.length === 64 ? pending.at(-1)!.uuid : undefined;
+      for (const saved of pending) {
+        const operationId =
+          "restore:" +
+          createHash("sha256")
+            .update(
+              [
+                saved.uuid,
+                saved.ownerId,
+                saved.itemId,
+                String(saved.startTime),
+                String(saved.updateTime),
+              ].join(":"),
+            )
+            .digest("hex");
+        try {
+          await activities.restore(saved.ownerId, operationId, saved.uuid);
+        } catch {
+          console.warn(
+            JSON.stringify({
+              event: "activity_import_failed",
+              kingdom: config.kingdomId,
+              queue: saved.uuid,
+            }),
+          );
+        }
+      }
       const due = await dueActivities(
         db.kingdom.db,
         [...activityDomains.keys()],
@@ -395,6 +461,8 @@ export const RealmDependenciesLive = Layer.effect(
         new GameService(db, rules, config, Date.now, {
           timed: (owner, command, params) => activities.command(owner, command, params),
           production: (owner, command, params) => production.command(owner, command, params),
+          cityProgression: (owner, command, params) =>
+            activities.domainCommand(owner, command, params),
           reconcileTimed: async (owner) => {
             await recoverActivities(owner);
             await production.command(owner, "production.settle", {});

@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, or, inArray, lte } from "drizzle-orm";
+import { and, asc, eq, gt, or, inArray, lte, isNull, ne } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
 import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_activity";
@@ -7,6 +7,7 @@ import type {
   ActivityEconomy,
   ActivityExecutor,
   TimedActivity,
+  PreparedActivity,
 } from "@opencok/contracts/timed-activity";
 import { long, num, text } from "@opencok/contracts/rows";
 import { createMutationExecutor, type MutationTransaction } from "./mutation";
@@ -21,20 +22,33 @@ export type ActivityDomain = (
   now: bigint,
   economy: ActivityEconomy,
 ) => Promise<Uint8Array>;
+export interface ActivityPreparation {
+  before?(tx: MutationTransaction, owner: string, now: bigint): Promise<void>;
+  command(
+    tx: MutationTransaction,
+    owner: string,
+    command: string,
+    params: Uint8Array,
+    now: bigint,
+    economy: ActivityEconomy,
+  ): Promise<PreparedActivity>;
+}
 export function createActivityExecutor(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
   domains: ReadonlyMap<number, ActivityDomain>,
   now = Date.now,
+  preparation?: ActivityPreparation,
 ): ActivityExecutor {
   const execute = createMutationExecutor(db, authority, now);
   return (command, plan) =>
-    execute(command, async (tx) =>
-      executeInventoryTransaction(
+    execute(command, async (tx) => {
+      const captured = BigInt(now());
+      await preparation?.before?.(tx, command.owner, captured);
+      return executeInventoryTransaction(
         tx,
         command.owner,
         async (inventory) => {
-          const captured = BigInt(now());
           const queues = await tx
             .select()
             .from(queue)
@@ -56,6 +70,10 @@ export function createActivityExecutor(
             now: captured,
             queues,
             activities,
+            prepare: preparation
+              ? (name, params, economy) =>
+                  preparation.command(tx, command.owner, name, params, captured, economy)
+              : undefined,
             apply: async (action, activity, economy) => {
               const domain = domains.get(activity.type);
               if (!domain || activity.ownerId !== command.owner)
@@ -89,6 +107,7 @@ export function createActivityExecutor(
               if (
                 before.queueId !== activity.queueId ||
                 before.itemId !== activity.itemId ||
+                JSON.stringify(before.data ?? null) !== JSON.stringify(activity.data ?? null) ||
                 activity.version !== before.version + 1
               )
                 throw new Error("Invalid activity transition");
@@ -159,8 +178,8 @@ export function createActivityExecutor(
           return result;
         },
         command.command,
-      ),
-    );
+      );
+    });
 }
 export async function dueActivities(
   db: Database["kingdom"]["db"],
@@ -191,5 +210,42 @@ export async function dueActivities(
       ),
     )
     .orderBy(asc(timed_activity.dueAt), asc(timed_activity.id))
+    .limit(limit);
+}
+
+export async function unregisteredActivities(
+  db: Database["kingdom"]["db"],
+  types: readonly number[],
+  limit = 64,
+  owner?: string,
+  after?: string,
+) {
+  if (!Number.isInteger(limit) || limit < 1 || limit > 256)
+    throw new Error("Invalid activity import limit");
+  if (!types.length) return [];
+  return db
+    .select({
+      uuid: queue.uuid,
+      ownerId: queue.ownerId,
+      itemId: queue.itemId,
+      startTime: queue.startTime,
+      updateTime: queue.updateTime,
+    })
+    .from(queue)
+    .leftJoin(
+      timed_activity,
+      and(eq(timed_activity.queueId, queue.uuid), eq(timed_activity.status, 0)),
+    )
+    .where(
+      and(
+        inArray(queue.type, [...types]),
+        owner ? eq(queue.ownerId, owner) : undefined,
+        after ? gt(queue.uuid, after) : undefined,
+        isNull(timed_activity.id),
+        ne(queue.updateTime, 9223372036854775807n),
+        ne(queue.itemId, ""),
+      ),
+    )
+    .orderBy(asc(queue.uuid))
     .limit(limit);
 }

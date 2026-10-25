@@ -10,7 +10,8 @@
     "test:integration": "bun --no-env-file test integration",
     "test:mutations": "bun --no-env-file scripts/mutate-auth.ts",
     "avatar:moderate": "bun --no-env-file scripts/moderate-avatar.ts",
-    "test:timed-mutations": "bun --no-env-file scripts/mutate-timed-economy.ts"
+    "test:timed-mutations": "bun --no-env-file scripts/mutate-timed-economy.ts",
+    "test:city-mutations": "bun --no-env-file scripts/mutate-city-progression.ts"
   },
   "dependencies": {
     "@opencok/connection": "workspace:*",

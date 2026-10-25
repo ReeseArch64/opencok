@@ -194,9 +194,10 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     ? parseDeclared(await read(GameplayCatalog.AllianceBuilding), GameplayCatalog.AllianceBuilding)
         .records
     : undefined;
-  const achievementCount = (await available(GameplayCatalog.Achievement))
-    ? records(await read(GameplayCatalog.Achievement), GameplayCatalog.Achievement).length
-    : 0;
+  const achievementRecords = (await available(GameplayCatalog.Achievement))
+    ? records(await read(GameplayCatalog.Achievement), GameplayCatalog.Achievement)
+    : [];
+  const achievementCount = achievementRecords.length;
   return new Rules(
     buildings,
     roles,
@@ -262,6 +263,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     {
       achievementCount,
+      achievements: achievementRecords,
       militaryRanks,
       servers,
       characters: await optional(GameplayCatalog.Characters),

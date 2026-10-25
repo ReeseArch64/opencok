@@ -4,6 +4,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   primaryKey,
   uniqueIndex,
   varchar,
@@ -22,6 +23,7 @@ export const timed_activity = opencok_kingdom.table(
     dueAt: bigint("dueAt", { mode: "bigint" }).notNull(),
     version: integer("version").notNull(),
     status: integer("status").notNull(),
+    data: jsonb("data"),
   },
   (table) => [
     primaryKey({ name: "timed_activity_PRIMARY", columns: [table.id] }),

@@ -318,6 +318,18 @@ export class GameService {
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
+      case "build.create":
+      case "build.upgrade":
+      case "build.destroy":
+      case "build.move":
+      case "buildingUnlock":
+      case "miracle.unlock":
+      case "buildingUnlock.info":
+      case "buildingUnlock.glory":
+      case "building.reward":
+        if (!this.services.cityProgression) throw new GameError(errors.unsupported);
+        ({ body, pushes } = await this.services.cityProgression(uid, command, params));
+        break;
       case "queue.finish":
       case "queue.cancel":
       case "queue.ccd":

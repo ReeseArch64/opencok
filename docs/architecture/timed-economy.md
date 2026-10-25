@@ -25,13 +25,11 @@ wallets behind the inventory snapshot. Domain state is written through the
 supplied transaction; network calls and separately committed writes do not belong
 inside a handler. Failure rolls the entire transition back.
 
-Construction, research, troops, hospital, equipment and other unmigrated effects
-remain in their own topics, as explicitly selected for this delivery. The runtime
-registry starts empty because those authoritative domains are not implemented.
-An unavailable domain rejects the transition without freeing the queue or
-charging acceleration. Domain adapters must implement start, restore, reschedule,
-finish and cancel semantics, including domain-specific pricing or restrictions.
-Material-production acceleration currently rejects the generic gold formula.
+Construction now registers its authoritative domain through the
+[city progression integration](city-progression.md). Research, troops, hospital,
+equipment and other effects remain owned by their corresponding domains.
+Unavailable adapters reject transitions without freeing a queue or charging
+acceleration. Material-production acceleration rejects the generic gold formula.
 
 `restore` imports an occupied legacy queue only after its registered domain
 validates the saved target. It preserves the original deadline and creates a new

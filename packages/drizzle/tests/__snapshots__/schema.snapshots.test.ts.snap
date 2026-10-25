@@ -14426,13 +14426,14 @@ column ["startedAt","bigint",true,null,null,null]
 column ["dueAt","bigint",true,null,null,null]
 column ["version","integer",true,null,null,null]
 column ["status","integer",true,null,null,null]
+column ["data","jsonb",false,null,null,null]
 primary ["timed_activity_PRIMARY",["id"]]
 index ["timed_activity_running_queue",true,["queueId"],"\\"status\\" = 0"]
 index ["timed_activity_due",false,["status","dueAt"]]
 index ["timed_activity_owner",false,["ownerId"]]
 check ["timed_activity_state","\\"status\\" IN (0, 1, 2) AND \\"version\\" >= 1 AND \\"dueAt\\" >= \\"startedAt\\""]
-insert into "opencok_kingdom"."timed_activity" ("id", "ownerId", "queueId", "type", "itemId", "startedAt", "dueAt", "version", "status") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-select "id", "ownerId", "queueId", "type", "itemId", "startedAt", "dueAt", "version", "status" from "opencok_kingdom"."timed_activity" where "opencok_kingdom"."timed_activity"."id" = $1
-update "opencok_kingdom"."timed_activity" set "id" = $1, "ownerId" = $2, "queueId" = $3, "type" = $4, "itemId" = $5, "startedAt" = $6, "dueAt" = $7, "version" = $8, "status" = $9 where "opencok_kingdom"."timed_activity"."id" = $10
+insert into "opencok_kingdom"."timed_activity" ("id", "ownerId", "queueId", "type", "itemId", "startedAt", "dueAt", "version", "status", "data") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "id", "ownerId", "queueId", "type", "itemId", "startedAt", "dueAt", "version", "status", "data" from "opencok_kingdom"."timed_activity" where "opencok_kingdom"."timed_activity"."id" = $1
+update "opencok_kingdom"."timed_activity" set "id" = $1, "ownerId" = $2, "queueId" = $3, "type" = $4, "itemId" = $5, "startedAt" = $6, "dueAt" = $7, "version" = $8, "status" = $9, "data" = $10 where "opencok_kingdom"."timed_activity"."id" = $11
 delete from "opencok_kingdom"."timed_activity" where "opencok_kingdom"."timed_activity"."id" = $1"
 `;
