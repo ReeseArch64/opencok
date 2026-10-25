@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import type { AddressInfo } from "node:net";
@@ -179,7 +180,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       item: `<Group id="data_config">${configRecords}</Group>`,
       arms: '<ItemSpec id="100001" attack="12" attack_add="3" defence="10" defence_add="2" upkeep="24" power="0.5"/><ItemSpec id="100002"/>',
       goods:
-        '<ItemSpec id="200001" para1="50"/><ItemSpec id="200002" para1="60"/><ItemSpec id="200021" type="17" price="100"/>',
+        '<ItemSpec id="200001" type="21" useall="1" para1="50"/><ItemSpec id="200002" para1="60"/><ItemSpec id="200021" type="17" price="100"/>',
     };
     for (const [name, records] of Object.entries(xml))
       await Bun.write(join(resources, `${name}.xml`), `<database>${records}</database>`);
@@ -295,6 +296,49 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         "synthetic-medal",
       );
       expect((await client.command("build.info")).building?.type).toBe(Type.Array);
+      const usedItem = await client.command("item.use", {
+        uuid: sfs.string("synthetic-item"),
+        num: sfs.int(2),
+        _cok_: sfs.string("inventory-use"),
+      });
+      expect(usedItem.count).toEqual(sfs.int(5));
+      expect(usedItem._cok_).toEqual(sfs.string("inventory-use"));
+      expect(
+        (
+          await client.command("item.use", {
+            uuid: sfs.string("synthetic-item"),
+            num: sfs.int(2),
+            _cok_: sfs.string("inventory-use"),
+          })
+        ).operationId,
+      ).toEqual(usedItem.operationId);
+      expect(
+        (
+          await client.command("item.use", {
+            uuid: sfs.string("synthetic-item"),
+            num: sfs.int(3),
+            _cok_: sfs.string("inventory-use"),
+          })
+        ).errorCode,
+      ).toBeDefined();
+      expect(
+        (
+          await client.command("inventory.grant", {
+            itemId: sfs.string("200001"),
+            num: sfs.int(100),
+          })
+        ).errorCode,
+      ).toBeDefined();
+      expect(
+        (
+          await databases.kingdoms
+            .get(id)!
+            .db.select()
+            .from(user_item)
+            .where(eq(user_item.uuid, "synthetic-item"))
+        )[0]?.count,
+      ).toBe(5);
+
       for (const command of ["build.create", "build.upgrade", "queue.finish", "combat.attack"])
         expect((await client.command(command)).errorCode?.value).toBe("102192");
       const map = await client.command("world.get", {
@@ -315,6 +359,9 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(checkpoint).toBeGreaterThan(BigInt(String(before.resource?.lastUpdateTime ?? 0)));
       expect(after).toEqual({
         ...before,
+        items: before.items.map((item) =>
+          item.uuid === "synthetic-item" ? { ...item, count: 5 } : item,
+        ),
         resource: { ...before.resource, lastUpdateTime: checkpoint },
       });
       expect((await fetch(`http://127.0.0.1:${server.healthPort}/readyz`)).status).toBe(200);

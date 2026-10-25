@@ -13,6 +13,7 @@ import { GameError } from "@opencok/errors/game";
 import { FrameReader, frame, MAX_FRAME } from "@opencok/messages/frame";
 import {
   envelope,
+  encode,
   extension,
   fields,
   ProtocolError,
@@ -280,6 +281,25 @@ export function createSessionHandler(
           if (params._cok_) result._cok_ = params._cok_;
           send(extension(command, result));
         } else {
+          if (command.startsWith("item.") && !params.operationId && params._cok_) {
+            if (
+              !(
+                (params._cok_.type === Type.Int && Number.isInteger(params._cok_.value)) ||
+                (params._cok_.type === Type.String &&
+                  typeof params._cok_.value === "string" &&
+                  params._cok_.value.length <= 128)
+              )
+            )
+              throw new ProtocolError();
+            const identity = createHash("sha256")
+              .update(connectionId)
+              .update(command)
+              .update(encode({ _cok_: params._cok_ }))
+              .digest("hex");
+            params.operationId = sfs.string(
+              `${identity.slice(0, 8)}-${identity.slice(8, 12)}-4${identity.slice(13, 16)}-8${identity.slice(17, 20)}-${identity.slice(20, 32)}`,
+            );
+          }
           const result = await game.execute(uid, command, params);
           for (const push of result.pushes) send(extension(push.command, push.body));
           send(extension(command, result.body));

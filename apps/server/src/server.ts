@@ -1,3 +1,7 @@
+import { createInventoryExecutor } from "@opencok/repositories/inventory";
+import { InventoryService } from "@opencok/services/inventory";
+import { decodeWorldPowerEffects } from "@opencok/services/power";
+import { worldPowerEffects } from "@opencok/rules/power-world";
 import { checkMutationStore, createMutationExecutor } from "@opencok/repositories/mutation";
 import { createEconomyMutationExecutor } from "@opencok/repositories/economy-mutation";
 import { checkNicknameChangeStore } from "@opencok/repositories/nickname-change";
@@ -251,7 +255,21 @@ export const RealmDependenciesLive = Layer.effect(
         (relay) => relay.close(),
       );
     }
+    const inventory = new InventoryService(
+      createInventoryExecutor(db.kingdom.db, authority),
+      rules,
+      {
+        world: async () =>
+          worldPowerEffects(
+            decodeWorldPowerEffects(await cache.worldEffects(config.kingdomId)),
+            rules,
+            { kingdomId: config.kingdomId, version: "12.06.0", now: Date.now() },
+          ),
+        emperor: () => cache.emperorVersion(config.kingdomId),
+      },
+    );
     return {
+      inventory,
       mutations: createMutationExecutor(db.kingdom.db, authority),
       economy: createEconomyMutationExecutor(db.kingdom.db, authority),
       profileSessions: nickname ? { open: cn1.open, close: cn1.close } : undefined,
@@ -261,6 +279,7 @@ export const RealmDependenciesLive = Layer.effect(
       coordination,
       game: new GameController(
         new GameService(db, rules, config, Date.now, {
+          inventory: (owner, command, params) => inventory.command(owner, command, params),
           reconnect: async (uid, now, plan) => {
             authority.assertReady();
             const binding = await readFriendshipBinding(

@@ -299,6 +299,15 @@ export class GameService {
     let body: Fields;
     let pushes: Result["pushes"] = [];
     switch (command) {
+      case "item.buy":
+      case "item.use":
+      case "item.buyUse":
+      case "item.compose":
+      case "item.compose2":
+      case "item.compose.suitequipment.store":
+        if (!this.services.inventory) throw new GameError(errors.unsupported);
+        ({ body, pushes } = await this.services.inventory(uid, command, params));
+        break;
       case "user.lv": {
         if (!this.services.reconnect) throw new GameError(errors.unsupported, "reconnect");
         const now = this.now();
