@@ -1,3 +1,4 @@
+import { alliance_science_upgrade } from "@opencok/drizzle/schema/opencok_kingdom/alliance_science_upgrade";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { and, asc, eq } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
@@ -242,6 +243,12 @@ export async function readReconnectProgress(
   )
     throw new GameError(errors.unsupported, "reconnect");
   return {
+    allianceResearch: profile.allianceId
+      ? await tx
+          .select()
+          .from(alliance_science_upgrade)
+          .where(eq(alliance_science_upgrade.allianceId, profile.allianceId))
+      : [],
     profile,
     world,
     newGenerals,

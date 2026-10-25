@@ -190,9 +190,21 @@ async function prepare(context: CityProgressionContext, command: string, params:
       !Number.isInteger(count) ||
       count <= 0 ||
       count > 2147483647 ||
-      !["use", "compose", "harvest"].includes(kind)
+      !["use", "compose", "harvest", "alliance.join", "alliance.donate", "alliance.help"].includes(
+        kind,
+      )
     )
       unavailable();
+    if (kind.startsWith("alliance.")) {
+      refreshQuests(context, {
+        main: kind === "alliance.join" ? 40 : kind === "alliance.donate" ? 42 : 41,
+        daily: kind === "alliance.donate" ? 28 : kind === "alliance.help" ? 30 : undefined,
+        legacy: kind === "alliance.donate" ? 4 : kind === "alliance.help" ? 5 : undefined,
+        story: kind === "alliance.join" ? 8 : kind === "alliance.donate" ? 9 : undefined,
+        count,
+      });
+      return { response: encode({}), event: null };
+    }
     refreshQuests(context, {
       daily: kind === "use" ? 39 : kind === "compose" ? 37 : 25,
       legacy: kind === "use" ? 16 : kind === "compose" ? 15 : 1,
