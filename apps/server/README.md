@@ -71,6 +71,11 @@ command, including repeated failures. `command_rejected` explains rejection;
 An unexpected application failure intentionally omits the original error text;
 use its operation, controlled reason and correlation fields to reproduce it.
 
+The `general.init` mutation event records its captured timestamp instead of copying
+the login roster. The full roster remains in the command receipt and client response;
+large general or purchase lists therefore do not exceed the outbox's 64 KiB event
+limit. General recovery, unlocks and office refreshes retain the same transaction.
+
 ## Saved civilization at login
 
 The 12.06.0 login snapshot includes `civilization_type` as an SFS int and
