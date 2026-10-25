@@ -274,6 +274,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
         generalRoster(context).purchases.map((row) => sfs.object(generalPurchase(row))),
       ),
     };
+    event = encode({ at: sfs.long(context.now) });
   } else if (
     ["general.fire", "general.def.ch", "general.pick", "general.recruit"].includes(command)
   ) {
