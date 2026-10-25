@@ -67,3 +67,31 @@ mail, receipts and ledger records on rollback. PostgreSQL acceptance covers a
 closed event, four concurrent first listens, repeated shares with one mail, reward
 cooldowns and next-day reset. This module is one slice of topic 26; lotteries,
 anniversary, campaign enrollment and arena are still pending.
+
+## March transition foundation
+
+`contracts/world-march-lifecycle` and `rules/world-march-lifecycle` define the
+noncombat lifecycle independently of transport and storage. Departure transfers
+selected free troops into the march reservation. Arrival starts gathering at the
+saved arrival instant, even during late recovery. Gathering completion pins cargo
+and the return deadline; only completed return releases troops and credits cargo.
+An outbound recall takes an authoritative reverse-route duration. Ordinary-route
+acceleration uses Java float rounding and preserves the reference 1,500 ms minimum
+remaining outbound time. Black-land routes need their separate segment calculation.
+
+Each transition requires the owning player and expected version and returns the
+version to compare before writing. Insufficient troops, overflow, duplicate troop
+selections, premature transitions, foreign ownership and stale versions reject.
+Inputs remain immutable. The terminal state rejects repeated return completion.
+Synthetic tests check conservation of troop counts across the full lifecycle,
+late recovery without deadline drift, single cargo delivery and acceleration edges.
+
+These are domain rules, not an enabled world runtime. A realm transaction adapter
+must atomically compare the saved version, persist the march and troop changes,
+apply cargo through the ledger, and write the receipt and outbox before native
+commands can use them. Route duration, target availability, troop capacity and
+cargo amounts must come from authoritative catalogs and a locked world point;
+none may be accepted from a client. The point update and cargo debit must share
+the same transaction. Gathering interruption, combat losses, special routes,
+teleport, interest subscriptions and background recovery remain separate work.
+Existing world commands are not redirected to an in-memory simulation.
