@@ -1,3 +1,4 @@
+import { refreshQuests } from "./quests";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { unitPower } from "@opencok/rules/military";
@@ -113,6 +114,44 @@ export function createCityProgressionHandlers<T>(
         const { repository, plan } = await context(tx, activity.ownerId, now, economy);
         if (action === "finish") plan.completing = activity;
         const body = await domain.apply(plan, action, activity);
+        if (action === "finish")
+          refreshQuests(plan, {
+            legacy: activity.type === 0 ? 3 : activity.type === 6 ? 12 : undefined,
+            daily: activity.type === 0 ? 26 : activity.type === 6 ? 27 : undefined,
+            main: activity.type === 0 ? 31 : undefined,
+            count: 1,
+          });
+        if (action === "finish" && [1, 8, 9, 10, 17, 2, 3].includes(activity.type)) {
+          const rows =
+            activity.type === 2
+              ? plan.write.forts
+              : activity.type === 3
+                ? plan.write.hospital
+                : plan.write.armies;
+          const quantity = (rows ?? []).reduce((sum, row) => {
+            if (activity.type === 3)
+              return (
+                sum +
+                Math.max(
+                  0,
+                  num(
+                    plan.state.hospital.find((prior) => prior.armyId === row.armyId) ?? {},
+                    "heal",
+                  ) - num(row, "heal"),
+                )
+              );
+            const prior = (activity.type === 2 ? plan.state.forts : plan.state.armies).find(
+              (prior) => prior.armyId === row.armyId,
+            );
+            const key = activity.type === 2 ? "num" : "free";
+            return sum + Math.max(0, num(row, key) - num(prior ?? {}, key));
+          }, 0);
+          refreshQuests(plan, {
+            main: activity.type === 2 ? 22 : activity.type === 3 ? 44 : 2,
+            count: quantity,
+            key: activity.itemId,
+          });
+        }
         await repository.update(plan.write, economy);
         return encode(body);
       });
@@ -131,6 +170,7 @@ export function createCityProgressionHandlers<T>(
       if (!domain) throw new GameError(errors.unsupported, "city_progression");
       const { repository, plan } = await context(tx, owner, now, economy);
       const result = await domain.prepare(plan, command, decode(Buffer.from(params)));
+      if (!domain.commands.includes("task.reward.get")) refreshQuests(plan);
       await repository.update(plan.write, economy);
       return result;
     },

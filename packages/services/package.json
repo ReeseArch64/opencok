@@ -60,7 +60,8 @@
     "./research": "./src/research.ts",
     "./training": "./src/training.ts",
     "./fortifications": "./src/fortifications.ts",
-    "./hospital": "./src/hospital.ts"
+    "./hospital": "./src/hospital.ts",
+    "./quests": "./src/quests.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

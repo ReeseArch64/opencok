@@ -96,7 +96,8 @@
     "./city-command": "./src/city-command.ts",
     "./city-progression": "./src/city-progression.ts",
     "./research": "./src/research.ts",
-    "./military": "./src/military.ts"
+    "./military": "./src/military.ts",
+    "./quests": "./src/quests.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

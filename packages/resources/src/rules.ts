@@ -275,6 +275,16 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     await optional(GameplayCatalog.Material),
     await optional(GameplayCatalog.ShopNew),
     await optional(GameplayCatalog.Trade),
+    {
+      legacyDaily: await optional(GameplayCatalog.DailyQuest),
+      legacyRewards: await optional(GameplayCatalog.DailyReward),
+      freshSignIn: await optional(GameplayCatalog.SignIn2),
+      story: await optional(GameplayCatalog.StorySetting),
+      daily: await optional(GameplayCatalog.NewDailyTask),
+      dailyRewards: await optional(GameplayCatalog.DailyTaskReward),
+      questPhases: await optional(GameplayCatalog.QuestPhase),
+      signIn: await optional(GameplayCatalog.SignIn),
+    },
   );
 }
 

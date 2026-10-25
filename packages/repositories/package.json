@@ -79,7 +79,8 @@
     "./timed-activity": "./src/timed-activity.ts",
     "./production": "./src/production.ts",
     "./city-progression": "./src/city-progression.ts",
-    "./city-production": "./src/city-production.ts"
+    "./city-production": "./src/city-production.ts",
+    "./quests": "./src/quests.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
