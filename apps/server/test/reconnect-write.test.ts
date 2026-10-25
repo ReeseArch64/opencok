@@ -79,7 +79,13 @@ test("reconnect commits the resource checkpoint and immutable interval ledger to
   await fixture.db.transaction((tx) =>
     persistReconnectProgress(tx, state, write(), fixture.authority, 20n),
   );
-  expect(fixture.committed).toEqual(["resource_settlement", "user_resource"]);
+  expect(fixture.committed).toEqual([
+    "command_receipt",
+    "economy_posting",
+    "economy_posting",
+    "resource_settlement",
+    "user_resource",
+  ]);
   const update = fixture.queries.find((query) => query.text.startsWith("update"))!;
   expect(update.text).toContain('"lastUpdateTime" =');
   expect(update.params).toContain("owner");
@@ -95,7 +101,13 @@ test("reconnect commits the resource checkpoint and immutable interval ledger to
       20n,
     ),
   );
-  expect(fixture.committed).toEqual(["resource_settlement", "user_resource"]);
+  expect(fixture.committed).toEqual([
+    "command_receipt",
+    "economy_posting",
+    "economy_posting",
+    "resource_settlement",
+    "user_resource",
+  ]);
 });
 
 test("resource write failure and coordination loss roll back the interval receipt", async () => {
@@ -206,6 +218,9 @@ test("skill repair, cooldown reset and notification share one commit and roll ba
     persistReconnectProgress(tx, current, plan, fixture.authority, 20n),
   );
   expect(fixture.committed).toEqual([
+    "command_receipt",
+    "economy_posting",
+    "economy_posting",
     "resource_settlement",
     "user_resource",
     "user_general",
