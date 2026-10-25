@@ -100,7 +100,8 @@
     "./lucky-day": "./src/lucky-day.ts",
     "./castle-level-event": "./src/castle-level-event.ts",
     "./daily-investment": "./src/daily-investment.ts",
-    "./shipping-investment": "./src/shipping-investment.ts"
+    "./shipping-investment": "./src/shipping-investment.ts",
+    "./seven-day-cycle": "./src/seven-day-cycle.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

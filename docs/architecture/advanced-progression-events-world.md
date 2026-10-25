@@ -404,3 +404,27 @@ loop that could keep selecting the first band, and prevents clients from skippin
 straight to a later tier. Closed realm controls and absent mixed-info rows return
 the native empty response without a grant. No schema migration, payment provider
 or additional dependency is introduced.
+
+Seven-day cycles persist three independent page stages, claim lists, purchase
+wait times and reset deadlines. Native offer selection uses configured castle
+level bands, native numeric price fields and catalog strings. Expired cycles
+recover their stage and reset deadline on access. Reward previews do not grant
+anything; claims validate the selected page and level band and use exact saved
+claim tokens before granting once.
+
+The internal purchase consumer requires a validated payment gateway and the
+canonical operation ID derived from its owner and accepted external event ID.
+This makes replay of the same accepted event stable across days, while another
+operation ID or changed purchase payload rejects. The next stage and one-purchase
+per-UTC-day rule are authoritative. Draw credits are produced by accepted
+purchases only, and login never invents credits. The default realm composition
+has no payment gateway, so it cannot accept paid progression until the validated
+payment pipeline is connected. Public clients cannot invoke this producer.
+
+Draws consume saved credits, pin configured weighted results, and can grant
+rewards, temporary statuses or replacement draw credits. Statuses use the existing
+production boundary and native status notification. Saved status deadlines and
+rare-result history survive reconnects; expired deadlines project zero in the
+native draw table. State, history, inventory and receipts commit together. The
+weighted selector uses nonoverlapping bands to avoid the source's inclusive-boundary
+bias. Existing cycle, draw and history tables are reused without a new migration.
