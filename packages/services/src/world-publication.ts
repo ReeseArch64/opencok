@@ -1,4 +1,4 @@
-import { decode, str, int, sfs, type Fields } from "@opencok/messages/sfs";
+import { decode, str, int, sfs, fields, type Fields } from "@opencok/messages/sfs";
 export async function publishWorldMutation(
   payload: Buffer,
   command: string,
@@ -21,6 +21,12 @@ export async function publishWorldMutation(
     ...marches.flatMap((row) => [int(row.value, "sp"), int(row.value, "dp")]),
     ...points.map((row) => int(row.value, "id")),
   ].filter((id) => id > 0);
+  for (const push of (body.ownerPushes?.value ?? []) as { value: Fields }[]) {
+    const name = str(push.value, "command");
+    if (!["push.petdragon.march", "push.general.info"].includes(name))
+      throw new Error("Invalid world owner notification");
+    await publish(owner, name, fields(push.value.body));
+  }
   const recipients = await interested(pointIds, owner, "");
   for (const recipient of recipients) {
     for (const totem of (body.totems?.value ?? []) as { value: Fields }[])

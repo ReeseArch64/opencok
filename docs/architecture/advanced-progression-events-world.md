@@ -279,3 +279,18 @@ the attachment through the existing mail reward workflow; retries cannot create
 another mail or debit the treasury twice. Cross-realm recipients are rejected.
 The dedicated executor registers only its own kingdom treasury as an additional
 ledger account; ordinary player mutation executors retain their owner restriction.
+
+Ordinary gathering marches bind eligible owned pet dragons and new generals in
+the saved army snapshot. Preflight validates the same level, feature, castle and
+idle-state requirements without reserving a companion. Departure persists the
+general's marching state together with the troop reservation. Existing army
+snapshots prevent a second assignment even if a legacy general row incorrectly
+claims to be idle; a traveling dragon cannot depart. Return releases companions
+inside the same transaction that returns troops and credits cargo.
+
+Native march responses and reconnect projections include the saved companion
+identities. Durable owner-only notifications update dragon march flags and
+general state; nearby interested players receive only the corresponding map and
+march projections. Recovery triggered by a march query also writes its durable
+notifications. The reference accepts but does not attach `heroUid` in this army
+implementation, so that field remains inert rather than inventing hero effects.

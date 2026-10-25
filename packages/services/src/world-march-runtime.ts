@@ -1,3 +1,10 @@
+import {
+  selectMarchCompanions,
+  attachMarchCompanions,
+  releaseMarchCompanions,
+  marchCompanionFields,
+  marchCompanionPushes,
+} from "./world-march-companions";
 import { recordExpeditionScore } from "./new-expedition";
 import { worldMarchDetail } from "@opencok/mappings/world-march-runtime";
 import { armySnapshot } from "@opencok/mappings/bootstrap";
@@ -176,6 +183,7 @@ function saveMarch(context: CityProgressionContext, state: RuntimeMarch, origina
   };
   write.checkpoints = [...(write.checkpoints ?? []).filter((row) => row.id !== state.id), record];
   if (state.phase === "completed") {
+    releaseMarchCompanions(context, original);
     write.deletedMarches = [...(write.deletedMarches ?? []), state.id];
     write.marches = (write.marches ?? []).filter((row) => row.uuid !== state.id);
     return;
@@ -200,13 +208,16 @@ function saveMarch(context: CityProgressionContext, state: RuntimeMarch, origina
 }
 export function runtimeMarchView(context: CityProgressionContext, row: Row) {
   const army = row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null;
-  return reconnectMarchBase(row, army, context.rules, {
-    serverId: context.rules.kingdomId,
-    miracle: false,
-    miracleState: undefined,
-    resourceBattle: false,
-    siege: false,
-  });
+  return {
+    ...reconnectMarchBase(row, army, context.rules, {
+      serverId: context.rules.kingdomId,
+      miracle: false,
+      miracleState: undefined,
+      resourceBattle: false,
+      siege: false,
+    }),
+    ...marchCompanionFields(context, army),
+  };
 }
 function returnState(context: CityProgressionContext, state: RuntimeMarch, now: bigint) {
   if (state.phase === "outbound") {
@@ -440,6 +451,14 @@ export function createWorldMarchDomain(size: number): CityDomain {
         worldMutationFailure();
       recover(context);
       const push = (): Fields => ({
+        ownerPushes: sfs.array(
+          marchCompanionPushes(context).map((push) =>
+            sfs.object({
+              command: sfs.string(push.command),
+              body: sfs.object(decode(Buffer.from(push.body))),
+            }),
+          ),
+        ),
         owner: sfs.string(context.owner),
         origin: sfs.int(num(context.state.worldMutation!.world, "pointId")),
         marches: sfs.array(
@@ -464,7 +483,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
       });
       const reply = (body: Fields, event = true) => ({
         response: encode(body),
-        event: event ? encode(push()) : null,
+        event: event || Boolean(context.write.worldMutation) ? encode(push()) : null,
       });
       if (command === "world.tick") return reply({}, Boolean(context.write.worldMutation));
       if (command === "world.user.march")
@@ -508,8 +527,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
           num(target, "resInitValue") <= num(target, "resCostValue")
         )
           worldMutationFailure();
-        for (const key of ["heroUid", "generalId", "petDragonUid"])
-          if (str(params, key, "")) worldMutationFailure();
+        const companions = selectMarchCompanions(context, params, marchRows(context));
         if (marchRows(context).length >= Math.max(1, Math.trunc(1 + context.effect(55))))
           worldMutationFailure();
         const soldiers = fields(params.soldiers),
@@ -623,6 +641,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
             },
             false,
           );
+        attachMarchCompanions(context, army, companions);
         const state: RuntimeMarch = {
           ...reserved.march,
           capacity,
