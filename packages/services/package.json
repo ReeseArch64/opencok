@@ -80,7 +80,8 @@
     "./friendship-mine": "./src/friendship-mine.ts",
     "./realm-chat-delivery": "./src/realm-chat-delivery.ts",
     "./realm-social": "./src/realm-social.ts",
-    "./civilization-science": "./src/civilization-science.ts"
+    "./civilization-science": "./src/civilization-science.ts",
+    "./minstrel": "./src/minstrel.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

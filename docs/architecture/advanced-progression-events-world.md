@@ -44,3 +44,26 @@ Existing read projections, catalogs, rankings and schema definitions are reused,
 but do not establish that these mutations are implemented. Combat-dependent modes
 must use their corresponding validated engine before being enabled. No generic
 victory or empty success response substitutes for combat acceptance.
+
+## Local event timing and minstrel
+
+The native `minstrel` multihandler supports `info`, `listen`, `share` and `reward`.
+Its `activity_panel` gate must be enabled and within the configured inclusive start
+and end timestamps. Dates and daily periods use UTC, consistent with maintained
+quest periods; the host timezone cannot change claim eligibility. Malformed or
+reversed dates fail closed. This change does not enable the currently disabled
+catalog event or rewrite its historical dates.
+
+`activity_minstrel` persists daily counters and cooldown instants. A daily reset
+clears counters while preserving action timestamps, matching the reference. The
+first listen awards its configured reward; the first share creates reward mail;
+periodic rewards enforce both the cooldown and daily cap. The existing inventory
+transaction pins random rewards with the receipt and counters. Share mail and its
+claimable reward commit with the share counter. Concurrent retries cannot repeat
+these grants. Clients never submit authoritative counters, times or reward values.
+
+No migration is required. Back up realm state before rollout and retain counters,
+mail, receipts and ledger records on rollback. PostgreSQL acceptance covers a
+closed event, four concurrent first listens, repeated shares with one mail, reward
+cooldowns and next-day reset. This module is one slice of topic 26; lotteries,
+anniversary, campaign enrollment and arena are still pending.

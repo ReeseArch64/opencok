@@ -67,6 +67,7 @@ export interface GeneralWrite {
   statuses?: readonly Row[];
 }
 export interface CityProgressionState {
+  minstrel?: Row;
   civilizationSciences?: readonly Row[];
   generalRoster?: GeneralRoster;
   quests?: QuestState;
@@ -92,6 +93,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  minstrel?: Row;
   civilizationSciences?: readonly Row[];
   generalRoster?: GeneralWrite;
   equipment?: readonly Row[];
