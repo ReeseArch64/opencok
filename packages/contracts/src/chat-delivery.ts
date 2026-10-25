@@ -43,6 +43,7 @@ export interface ChatDeliveryStore {
   release(instance: string, token: string): Promise<void>;
 }
 export interface ChatAccessStore {
+  roomInfo?(uid: string, roomId: string): Promise<ChatPrivateRoomInfo | null>;
   filter?(uid: string, messages: ChatMessage[]): Promise<ChatMessage[]>;
   canSend(uid: string, notice?: boolean): Promise<boolean>;
   canReceive(uid: string, sender: string): Promise<boolean>;
@@ -54,3 +55,20 @@ export interface ChatNoticeCost {
   postings: { asset: string; before: bigint; after: bigint }[];
 }
 export type ChatNoticeCostReader = (owner: string, requestId: string) => Promise<ChatNoticeCost>;
+
+export interface ChatPrivateRoomInfo {
+  id: string;
+  name: string;
+  founder: string;
+  isNotDefaultName: number;
+  members: {
+    uid: string;
+    name: string;
+    role: number;
+    jt: number;
+    pic?: string | null;
+    picVer?: number | null;
+    picfraId?: number | null;
+  }[];
+  lastMessage?: ChatMessage;
+}

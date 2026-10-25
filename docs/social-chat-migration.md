@@ -154,7 +154,7 @@ Automated acceptance uses disposable PostgreSQL and MongoDB containers and synth
 players in two realms. It exercises concurrent receipts, restart recovery, contact and
 block state, private copies, private room revocation, moderation expiry, original archive
 deadlines, MongoDB copy verification, real WebSocket delivery across two separate Bun processes and history recovery after a consumer process restart,
-signed SFS calls, native realm delivery, cross-realm helper processing, session revocation
+signed SFS calls, native room/message envelopes and control history, distinct legacy/sequence channel values, mixed chat/mail polling, native realm delivery, cross-realm helper processing, session revocation
 and stale realm rejection. Realm integration also verifies postbox costs/seals/daily limits,
 notice compensation, mine helper conservation, random reward replay and economic fencing.
 

@@ -93,6 +93,69 @@ export function createChatSocialStore(
       isNull(chat_private_member.leftAt),
     );
   const access: ChatAccessStore = {
+    async roomInfo(uid, roomId) {
+      if (!/^private_[a-f0-9-]{36}$/.test(roomId)) return null;
+      const id = roomId.slice(8);
+      const [member] = await db.select().from(chat_private_member).where(activeMember(uid, id));
+      if (!member) return null;
+      const [room] = await db
+        .select()
+        .from(chat_private_room)
+        .where(and(eq(chat_private_room.id, id), isNull(chat_private_room.deletedAt)));
+      if (!room) return null;
+      const members = await db
+        .select()
+        .from(chat_private_member)
+        .where(and(eq(chat_private_member.room, id), isNull(chat_private_member.leftAt)))
+        .orderBy(
+          desc(chat_private_member.role),
+          asc(chat_private_member.joinedAt),
+          asc(chat_private_member.owner),
+        )
+        .limit(50);
+      const presentation = await Promise.all(
+        members.map(async (value) => {
+          const state = await load(value.owner);
+          return {
+            uid: value.owner,
+            name: state?.name ?? value.owner,
+            role: value.role === 2 ? 0 : 1,
+            jt: Number(value.joinedAt),
+            pic: state?.pic,
+            picVer: state?.picVer,
+            picfraId: state?.picfraId,
+          };
+        }),
+      );
+      const [last] = await db
+        .select()
+        .from(chat_message)
+        .where(
+          and(
+            eq(chat_message.room_key, roomId),
+            isNull(chat_message.deleted_at),
+            gt(chat_message.expires_at, chatUtc(clock())),
+            sql`${chat_message.created_at} >= ${chatUtc(new Date(Number(member.joinedAt)))}`,
+          ),
+        )
+        .orderBy(desc(chat_message.sequence_id))
+        .limit(1);
+      return {
+        id: roomId,
+        name:
+          room.name ||
+          presentation
+            .map((member) => member.name)
+            .join(", ")
+            .slice(0, 100),
+        founder: room.owner,
+        isNotDefaultName: room.name ? 1 : 0,
+        members: presentation,
+        ...(last?.body !== null && last && (await access.canRead(uid, chatMessage(last)))
+          ? { lastMessage: chatMessage(last) }
+          : {}),
+      };
+    },
     async filter(uid, messages) {
       if (!messages.length) return [];
       const state = await load(uid);
@@ -135,7 +198,11 @@ export function createChatSocialStore(
         memberships.map((row) => [`private_${row.room}`, Number(row.joinedAt)]),
       );
       return messages.filter((message) => {
-        if (blocked.has(message.senderUid)) return false;
+        if (
+          blocked.has(message.senderUid) &&
+          ![100, 101, 102, 103, 105].includes(message.post ?? 0)
+        )
+          return false;
         if (message.roomId.startsWith("private_"))
           return (
             joined.has(message.roomId) &&
@@ -190,7 +257,11 @@ export function createChatSocialStore(
       return !!member;
     },
     async canRead(uid, message) {
-      if (!(await access.canReceive(uid, message.senderUid))) return false;
+      if (
+        ![100, 101, 102, 103, 105].includes(message.post ?? 0) &&
+        !(await access.canReceive(uid, message.senderUid))
+      )
+        return false;
       if (message.roomId.startsWith("alliance_")) {
         const state = await load(uid);
         if (
@@ -469,7 +540,7 @@ export function createChatSocialStore(
                 },
               });
           },
-          async append(room, owner, key, body) {
+          async append(room, owner, key, body, post = 0) {
             const [saved] = await tx
               .insert(chat_message)
               .values({
@@ -477,8 +548,9 @@ export function createChatSocialStore(
                 sender_uid: owner,
                 idempotency_key: Buffer.from(createHash("sha256").update(key).digest("hex")),
                 body,
+                post_type: post,
                 body_hash: createHash("sha256").update(body).digest("hex"),
-                created_at: chatUtc(clock()),
+                created_at: chatUtc(new Date(Number(now))),
                 expires_at: chatUtc(new Date(Number(now) + 30 * 86_400_000)),
               })
               .returning();

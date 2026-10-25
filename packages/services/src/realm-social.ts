@@ -1,3 +1,5 @@
+import { nativePrivateMessage, nativePrivateRoom } from "@opencok/mappings/chat-native";
+import type { ChatMessage } from "@opencok/contracts/chat";
 import type { ChatRepository } from "@opencok/contracts/chat";
 import type { ChatSocialCommand } from "@opencok/contracts/chat-social";
 import type { RealmSocialCommandService } from "@opencok/contracts/realm-social";
@@ -56,6 +58,50 @@ export class RealmSocialService implements RealmSocialCommandService {
       return this.native.execute(owner, command, params, operationId);
     if (!(chatSocialCommands as readonly string[]).includes(command) || !this.social)
       throw new ChatCommandError("unsupported_command");
-    return this.social.execute(owner, command as ChatSocialCommand, params, operationId);
+    const normalize = (id: unknown) =>
+      typeof id === "string" && /^[a-f0-9-]{36}$/.test(id) ? `private_${id}` : id;
+    const normalized =
+      command.startsWith("chat.room.") || command === "chat.set.status"
+        ? {
+            ...params,
+            ...(params.id !== undefined ? { id: normalize(params.id) } : {}),
+            ...(params.roomId !== undefined ? { roomId: normalize(params.roomId) } : {}),
+            ...(Array.isArray(params.roomids) ? { roomids: params.roomids.map(normalize) } : {}),
+          }
+        : params;
+    const result = await this.social.execute(
+      owner,
+      command as ChatSocialCommand,
+      normalized,
+      operationId,
+    );
+    if (command === "chat.room.invitee") return { invitee: result.members ?? [] };
+    if (command === "chat.room.user.rooms") {
+      const rooms = [];
+      for (const row of result.rooms as { roomId: string }[]) {
+        const room = await this.repository.access?.roomInfo?.(owner, row.roomId);
+        if (room) rooms.push(nativePrivateRoom(room));
+      }
+      return { rooms };
+    }
+    if (["chat.room.mk", "chat.room.members", "chat.room.msg"].includes(command)) {
+      const id = String(result.roomId ?? normalized.roomId ?? normalized.id ?? "");
+      const room = await this.repository.access?.roomInfo?.(owner, id);
+      if (!room) throw new ChatCommandError("invalid_room");
+      if (command !== "chat.room.msg") return { ...nativePrivateRoom(room), invalid: [] };
+      const messages = [];
+      for (const message of result.msg as ChatMessage[])
+        messages.push(
+          nativePrivateMessage(
+            message,
+            room,
+            await this.repository.getPlayerStateById(message.senderUid),
+          ),
+        );
+      return { id: room.id.replace(/^private_/, ""), msg: messages };
+    }
+    if (["chat.room.member.invite", "chat.room.member.kick"].includes(command))
+      return { ...result, invalid: [] };
+    return result;
   }
 }

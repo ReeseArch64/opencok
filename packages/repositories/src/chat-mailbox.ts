@@ -101,7 +101,7 @@ export function createChatMailboxStore(
           and(
             eq(chat_mailbox_message.kingdom_id, kingdomId),
             eq(chat_mailbox_message.owner_uid, owner),
-            eq(chat_mailbox_message.peer_uid, peer),
+            peer ? eq(chat_mailbox_message.peer_uid, peer) : undefined,
             eq(chat_mailbox_message.chat_type, type),
             or(
               isNull(chat_mailbox_message.expires_at),

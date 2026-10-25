@@ -43,6 +43,16 @@ export async function planChatSocial(
     facebookName: null,
     createdAt: now,
   });
+  const roomControl = (roomId: string, type: number, members: readonly string[] | string) =>
+    tx.append(
+      roomId,
+      input.owner,
+      `${input.operationId}:control:${roomId}`,
+      typeof members === "string"
+        ? members
+        : JSON.stringify(members.map((uid) => ({ uid, name: tx.players.get(uid)?.name ?? uid }))),
+      100 + type,
+    );
   const feedAccess = (row: SocialFeed) =>
     row.owner === input.owner ||
     (row.realm === actor.serverId &&
@@ -294,7 +304,14 @@ export async function planChatSocial(
     const id = randomUUID(),
       name = input.name || members.join(", ").slice(0, 100),
       roomId = `private_${id}`;
-    await tx.putRoom({ id, owner: input.owner, name, version: 1, createdAt: now, deletedAt: null });
+    await tx.putRoom({
+      id,
+      owner: input.owner,
+      name: input.name,
+      version: 1,
+      createdAt: now,
+      deletedAt: null,
+    });
     for (const owner of members)
       await tx.putMember({
         room: id,
@@ -305,6 +322,7 @@ export async function planChatSocial(
         readSequence: 0n,
       });
     const result = { id: roomId, roomId, name, members };
+    await roomControl(roomId, 0, members);
     for (const uid of members) await event("push.chat.room.invite", result, uid);
     if (input.body) await tx.append(roomId, input.owner, input.operationId, input.body);
     return result;
@@ -337,6 +355,7 @@ export async function planChatSocial(
       requireRoomRole(member.role, 2);
       if (!input.name) throw new ChatCommandError("invalid_name");
       await tx.putRoom({ ...room, name: input.name, version: room.version + 1 });
+      await roomControl(roomId, 5, input.name);
       await event("push.chat.room.name", { roomId, name: input.name }, null, roomId);
     } else if (input.command === "chat.room.member.invite") {
       requireRoomRole(member.role, 2);
@@ -356,6 +375,7 @@ export async function planChatSocial(
         });
         await event("push.chat.room.invite", { roomId, name: room.name }, uid);
       }
+      if (additions.length) await roomControl(roomId, 1, additions);
     } else if (
       ["chat.room.member.kick", "chat.room.member.quit", "chat.room.member.quitmult"].includes(
         input.command,
@@ -375,6 +395,7 @@ export async function planChatSocial(
           await tx.putRoom({ ...room, owner: successor.owner, version: room.version + 1 });
         } else await tx.putRoom({ ...room, deletedAt: now, version: room.version + 1 });
       }
+      await roomControl(roomId, input.command === "chat.room.member.kick" ? 2 : 3, leaving);
       for (const uid of leaving) await event("push.chat.room.quit", { roomId, uid }, uid);
     } else if (input.command === "chat.room.send") {
       if (!input.body) throw new ChatCommandError("invalid_message");
@@ -383,7 +404,10 @@ export async function planChatSocial(
     } else if (input.command === "chat.room.msg") {
       const messages = [];
       for (const item of await tx.history(roomId, member.joinedAt, input.sequence, input.limit))
-        if (!(await tx.blocked(input.owner, item.senderUid)))
+        if (
+          [100, 101, 102, 103, 105].includes(item.post ?? 0) ||
+          !(await tx.blocked(input.owner, item.senderUid))
+        )
           messages.push({
             ...item,
             msg: item.body,

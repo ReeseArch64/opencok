@@ -32,7 +32,39 @@ export class FriendshipMineService {
   async command(owner: string, command: string, params: Fields, internal = false) {
     if (["mine.friend", "mine.help"].includes(command)) {
       if (!this.remote) throw new GameError(errors.unsupported);
-      return { body: await this.remote(owner, command, params), pushes: [] };
+      const body = await this.remote(owner, command, params);
+      if (command === "mine.friend") {
+        const friends = (body.friendList?.value ?? []) as import("@opencok/messages/sfs").Value[];
+        const projected = friends.map((value) => {
+          const entry = fields(value);
+          const view = friendshipMineView(
+            {
+              itemId: Number(entry.itemId?.value),
+              level: Number(entry.level?.value),
+              exp: Number(entry.exp?.value),
+              miner: Number(entry.miner?.value),
+              mineTime: String(entry.mineTime?.value ?? "0"),
+              call: Number(entry.call?.value),
+            },
+            this.rules,
+          );
+          const { helped, ...visible } = entry;
+          return sfs.object({
+            ...visible,
+            help: sfs.int(
+              view.call === 1 &&
+                view.mineTime <= BigInt(this.now()) &&
+                view.miner < view.maxMiners &&
+                helped?.value !== true
+                ? 1
+                : 0,
+            ),
+          });
+        });
+        body.friendList = sfs.array(projected);
+        body.friends = sfs.array(projected);
+      }
+      return { body, pushes: [] };
     }
     if (!friendshipMineCommands.includes(command) && !(command === "mine.receive.help" && internal))
       throw new GameError(errors.unsupported);
