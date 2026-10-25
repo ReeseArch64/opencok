@@ -1,3 +1,4 @@
+import { readRechargeActivity, writeRechargeActivity } from "./recharge-activity";
 import { readOrdinaryBoxServer, writeOrdinaryBox } from "./ordinary-box";
 import { readSevenDayCycle, writeSevenDayCycle } from "./seven-day-cycle";
 import { writeShippingInvestment } from "./shipping-investment";
@@ -133,6 +134,9 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        rechargeActivity: command?.startsWith("new.sercum.")
+          ? await readRechargeActivity(tx, owner)
+          : undefined,
         ordinaryBoxServer:
           command === "get.table.value" || command?.startsWith("ordinary.box.")
             ? await readOrdinaryBoxServer(tx)
@@ -250,6 +254,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.rechargeActivity) await writeRechargeActivity(tx, owner, write.rechargeActivity);
         if (write.ordinaryBox) await writeOrdinaryBox(tx, owner, write.ordinaryBox);
         if (write.sevenDayCycle) await writeSevenDayCycle(tx, owner, write.sevenDayCycle);
         if (write.shippingInvestment)

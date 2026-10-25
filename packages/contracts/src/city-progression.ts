@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  rechargeActivity?: import("./recharge-activity").RechargeActivityState;
   ordinaryBoxServer?: { openedAt: bigint };
   sevenDayCycle?: import("./seven-day-cycle").SevenDayCycleState;
   dailyInvestment?: import("./daily-investment").DailyInvestmentState;
@@ -122,6 +123,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  rechargeActivity?: import("./recharge-activity").RechargeActivityWrite;
   ordinaryBox?: import("./ordinary-box").OrdinaryBoxWrite;
   sevenDayCycle?: import("./seven-day-cycle").SevenDayCycleWrite;
   shippingInvestment?: import("./shipping-investment").ShippingInvestmentWrite;

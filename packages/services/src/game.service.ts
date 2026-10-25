@@ -290,6 +290,7 @@ export class GameService {
       {},
     );
     const dragonTower = await this.services.cityProgression?.(uid, "dragontower.init", {});
+    const recharge = await this.services.cityProgression?.(uid, "new.sercum.init", {});
     const boxes = await this.services.cityProgression?.(uid, "ordinary.box.init", {});
     const cycle = await this.services.cityProgression?.(uid, "sevenday.init", {});
     const investment = await this.services.cityProgression?.(uid, "invest.init", {});
@@ -314,6 +315,7 @@ export class GameService {
       ...dragons?.body,
       ...dragonTower?.body,
       ...luckyDay?.body,
+      ...recharge?.body,
       ...totems?.body,
       ...lottery?.body,
       ...civilization?.body,
@@ -348,6 +350,7 @@ export class GameService {
       investment,
       cycle,
       boxes,
+      recharge,
       civilization,
       campaign,
       lottery,
@@ -545,6 +548,8 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "new.sercum.ui":
+      case "new.sercum.reward":
       case "get.table.value":
       case "sevenday.info":
       case "sevenday.look.reward":
