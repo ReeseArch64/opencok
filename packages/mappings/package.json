@@ -51,7 +51,8 @@
     "./research": "./src/research.ts",
     "./military": "./src/military.ts",
     "./quests": "./src/quests.ts",
-    "./player-effects": "./src/player-effects.ts"
+    "./player-effects": "./src/player-effects.ts",
+    "./equipment": "./src/equipment.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

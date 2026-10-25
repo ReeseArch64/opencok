@@ -4068,3 +4068,16 @@ production boundaries, legacy import, migration 0016 and rollback requirements.
 Synthetic PostgreSQL coverage is in `integration/construction.test.ts`,
 `integration/research.test.ts` and `integration/military.test.ts`;
 `integration/provisioning.test.ts` also exercises live SFS progression commands.
+
+## Quests, effects, equipment, and workshop
+
+The [player progression runbook](../../docs/architecture/player-progression.md)
+describes topics 19–21 and their server acceptance boundaries. Quest claims and
+sign-in rewards, VIP/status item use, talent allocation and pages, equipment
+crafting/wearing/upgrades/dismantling, set extraction, and workshop jobs use the
+existing player transaction and durable operation receipts. Workshop continuation
+and material acceleration have domain hooks in the timed activity service.
+
+Run `bun run test:player-progression-mutations` alongside the normal server tests.
+The corresponding synthetic integration suites use disposable PostgreSQL and
+maintained catalogs; they do not distribute or execute private reference inputs.

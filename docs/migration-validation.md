@@ -2224,3 +2224,20 @@ The provisioning E2E sends construction, army, hospital and research packets ove
 the live SFS runtime and reads saved military state. Pure units and critical
 mutations exercise quantity/capacity bounds and healing conservation. See the
 [runbook](architecture/city-progression.md) for operational and client limits.
+
+## Quests, effects, and equipment progression
+
+Topics 19–21 use the merged construction, research, military, wallet, receipt, and
+production boundaries. See the [player progression runbook](architecture/player-progression.md)
+for commands, period semantics, equipment ownership, workshop recovery, and native
+client limitations. The maintained catalogs provide quest phases, story and daily
+rules, sign-in schedules, talent trees, forge randomness, and reforge libraries.
+There are no new runtime dependencies or database migrations.
+
+Synthetic unit and PostgreSQL integration coverage verifies duplicate and concurrent
+claims, next-day continuation, beginner equipment rewards, quest asset postings,
+point budgets and prerequisites, VIP thresholds, status expiry and production-rate
+boundaries, pinned crafts, equip/dismantle conservation, workshop chaining, legacy
+quantity recovery, and acceleration limits. The player progression mutation suite
+must reject removed budget, tree, expiry, material, equipped-power, and terminal
+claim-state checks. The native 12.06.0 APK has not been exercised for these commands.

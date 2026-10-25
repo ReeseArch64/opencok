@@ -1,3 +1,4 @@
+import { activityEconomy } from "./timed-activity";
 import { productionBoost } from "@opencok/mappings/production";
 import { randomUUID } from "node:crypto";
 import type { ProductionExecutor, ProductionAccount } from "@opencok/contracts/timed-activity";
@@ -67,7 +68,9 @@ export class ProductionService {
             rates: await state.rates(building, from),
           };
           account = settleProduction(account, state.now);
+          let collected = 0n;
           const collect = () => {
+            collected += account.amount;
             const before = ledger.resources[asset] ?? long(state.resource, asset),
               after = before + account.amount;
             if (after > 9223372036854775807n) throw new Error("Production balance overflow");
@@ -124,6 +127,13 @@ export class ProductionService {
             buildings.push(changed);
             body = productionBoost(effectTime, long(changed, "refreshTime"), ledger.total(), goods);
           }
+          if (collected > 0n)
+            await state.recordAction?.(
+              "harvest",
+              String(kind),
+              Number(collected > 2147483647n ? 2147483647n : collected),
+              activityEconomy(ledger),
+            );
           accounts.push(account);
         }
         const result = ledger.result(body);

@@ -14,6 +14,8 @@ export interface TimedActivity {
   data?: unknown;
 }
 export interface PreparedActivity {
+  queueItemId?: string;
+  startedAt?: bigint;
   type?: number;
   ready?: boolean;
   itemId?: string;
@@ -29,8 +31,10 @@ import type { InventoryState, InventoryPlan } from "./inventory";
 
 export interface ActivityEconomy {
   gold(delta: bigint): void;
+  winPoints?(delta: bigint): void;
   balance?(asset: string): bigint;
   quantity?(itemId: string): number;
+  itemState?(itemId: string): import("./inventory").InventoryItem | undefined;
   ownedItem?(uuid: string): { itemId: string; count: number };
   resource(
     asset:
@@ -48,9 +52,11 @@ export interface ActivityEconomy {
   item(itemId: string, delta: number): void;
 }
 export interface ActivityState extends InventoryState {
+  accelerate?(activity: TimedActivity, remaining: bigint, economy: ActivityEconomy): Promise<void>;
   now: bigint;
   queues: readonly Row[];
   activities: readonly TimedActivity[];
+  next?(activity: TimedActivity, economy: ActivityEconomy): Promise<PreparedActivity | undefined>;
   prepare?(
     command: string,
     params: Uint8Array,

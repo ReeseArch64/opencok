@@ -45,3 +45,59 @@ test("quest claims are durable, concurrent, replayable, and isolated by owner", 
     await h.close();
   }
 }, 60000);
+
+test("beginner rewards grant equipment atomically and quest assets have receipt protection", async () => {
+  const h = await cityHarness([questsDomain]);
+  try {
+    const { user_equip } = await import("@opencok/drizzle/schema/opencok_kingdom/user_equip");
+    const { sign_in } = await import("@opencok/drizzle/schema/opencok_kingdom/sign_in");
+    const { user_assets } = await import("@opencok/drizzle/schema/opencok_kingdom/user_assets");
+    const request = { operationId: sfs.string(randomUUID()) };
+    await h.command("fresh.signIn", request);
+    await h.command("fresh.signIn", request);
+    expect(await h.db.db.select().from(user_equip).where(eq(user_equip.uid, "owner"))).toHaveLength(
+      1,
+    );
+    expect((await h.db.db.select().from(sign_in).where(eq(sign_in.uid, "owner")))[0]?.day).toBe(1);
+    const task = h.rules.reconnect.quests!.find(
+      (rule) => h.rules.reconnect.rewards?.get(rule.reward ?? "")?.wbskill,
+    )!;
+    await h.db.db
+      .insert(user_task)
+      .values({ uid: "owner", id: task.id!, type: 3, num: Number(task.para2), state: 1 });
+    const claim = { id: sfs.string(task.id!), operationId: sfs.string(randomUUID()) };
+    await h.command("task.reward.get", claim);
+    await h.command("task.reward.get", claim);
+    expect(
+      (await h.db.db.select().from(user_assets).where(eq(user_assets.uid, "owner")))[0]?.winPoint,
+    ).toBe(BigInt(h.rules.reconnect.rewards!.get(task.reward!)!.wbskill!));
+    await expect(h.command("task.reward.get", { id: sfs.string(task.id!) })).rejects.toThrow();
+  } finally {
+    await h.close();
+  }
+}, 60000);
+
+test("daily rollover preserves unclaimed rewards in mail exactly once", async () => {
+  const h = await cityHarness([questsDomain]);
+  try {
+    const { user_new_daily_task } =
+      await import("@opencok/drizzle/schema/opencok_kingdom/user_new_daily_task");
+    const { user_lord } = await import("@opencok/drizzle/schema/opencok_kingdom/user_lord");
+    const { mail } = await import("@opencok/drizzle/schema/opencok_kingdom/mail");
+    const rule = [...h.rules.progression.daily!.values()][0]!;
+    await h.db.db
+      .insert(user_new_daily_task)
+      .values({ uid: "owner", id: Number(rule.id), type: 0, num: 1, state: 1 });
+    await h.db.db.insert(user_lord).values({ uid: "owner", newDailyTaskFlushTime: 86400000n });
+    h.clock.now = 172800000 + 300000;
+    await h.command("quest.init", {});
+    const first = await h.db.db.select().from(mail).where(eq(mail.toUser, "owner"));
+    expect(first).toHaveLength(1);
+    expect(first[0]?.rewardStatus).toBe(0);
+    expect(first[0]?.rewardId).toBeTruthy();
+    await h.command("quest.init", {});
+    expect(await h.db.db.select().from(mail).where(eq(mail.toUser, "owner"))).toHaveLength(1);
+  } finally {
+    await h.close();
+  }
+}, 60000);

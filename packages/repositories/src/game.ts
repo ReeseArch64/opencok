@@ -1,3 +1,4 @@
+import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
 import { user_science } from "@opencok/drizzle/schema/opencok_kingdom/user_science";
@@ -388,6 +389,13 @@ export class Database implements GameStore, FriendshipMineStore {
           .from(user_wall)
           .where(eq(user_wall.uid, uid))
           .orderBy(asc(user_wall.armyId));
+        const equipment = await tx
+          .select()
+          .from(user_equip)
+          .where(eq(user_equip.uid, uid))
+          .orderBy(asc(user_equip.uuid))
+          .limit(1001);
+        if (equipment.length > 1000) throw new Error("Oversized equipment inventory");
         const sciences = await tx
           .select()
           .from(user_science)
@@ -403,6 +411,7 @@ export class Database implements GameStore, FriendshipMineStore {
           hasMarches,
           armies,
           sciences,
+          equipment,
           hospital,
           forts,
           items,

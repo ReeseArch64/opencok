@@ -1,3 +1,4 @@
+import { readSuitDecompositions, writeEquipment } from "./equipment";
 import { readAbilityPages, readProgressionEffects, writePlayerEffects } from "./player-effects";
 import { readQuests, writeQuests } from "./quests";
 import { user_skill } from "@opencok/drizzle/schema/opencok_kingdom/user_skill";
@@ -105,6 +106,7 @@ export function createCityProgressionStore(
         profile,
         resource,
         abilityPages: await readAbilityPages(tx, owner),
+        suitDecompositions: await readSuitDecompositions(tx, owner),
         quests: await readQuests(tx, owner, profile, now),
         statistics: statistics ?? {},
         buildingExperience: buildingExperience ?? {},
@@ -131,6 +133,7 @@ export function createCityProgressionStore(
       validateWrite(write, owner);
       const persist = async () => {
         await writePlayerEffects(tx, owner, write);
+        await writeEquipment(tx, owner, write);
         if (write.quests) await writeQuests(tx, owner, write.quests);
         for (const row of write.buildings ?? []) {
           const value = {
@@ -316,6 +319,9 @@ export function createCityProgressionStore(
           (scienceBefore.find((before) => before.itemId === row.itemId)?.level ?? 0),
       );
       if (
+        write.equipment?.length ||
+        write.deletedEquipment?.length ||
+        write.equipmentSelection !== undefined ||
         write.vip ||
         write.states?.length ||
         write.deletedStates?.length ||

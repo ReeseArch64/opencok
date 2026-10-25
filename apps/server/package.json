@@ -12,7 +12,8 @@
     "avatar:moderate": "bun --no-env-file scripts/moderate-avatar.ts",
     "test:timed-mutations": "bun --no-env-file scripts/mutate-timed-economy.ts",
     "test:city-mutations": "bun --no-env-file scripts/mutate-city-progression.ts",
-    "test:progression-mutations": "bun --no-env-file scripts/mutate-progression-domains.ts"
+    "test:progression-mutations": "bun --no-env-file scripts/mutate-progression-domains.ts",
+    "test:player-progression-mutations": "bun --no-env-file scripts/mutate-player-progression.ts"
   },
   "dependencies": {
     "@opencok/connection": "workspace:*",

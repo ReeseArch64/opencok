@@ -32,6 +32,11 @@ import { generalSkillPoints } from "./power";
 import type { InventoryEffects } from "./inventory";
 
 export interface CityDomain {
+  accelerate?(
+    context: CityProgressionContext,
+    activity: TimedActivity,
+    remaining: bigint,
+  ): Promise<void>;
   commands: readonly string[];
   types: readonly number[];
   prepare(
@@ -39,6 +44,10 @@ export interface CityDomain {
     command: string,
     params: Fields,
   ): Promise<PreparedActivity>;
+  next?(
+    context: CityProgressionContext,
+    activity: TimedActivity,
+  ): Promise<PreparedActivity | undefined>;
   apply(
     context: CityProgressionContext,
     action: ActivityAction,
@@ -158,6 +167,27 @@ export function createCityProgressionHandlers<T>(
     }
   return {
     domains: registry,
+    async accelerate(
+      tx: T,
+      activity: TimedActivity,
+      remaining: bigint,
+      now: bigint,
+      economy: ActivityEconomy,
+    ) {
+      const domain = domains.find((domain) => domain.types.includes(activity.type));
+      if (!domain?.accelerate) throw new GameError(errors.unsupported, "city_progression");
+      const { repository, plan } = await context(tx, activity.ownerId, now, economy);
+      await domain.accelerate(plan, activity, remaining);
+      await repository.update(plan.write, economy);
+    },
+    async next(tx: T, activity: TimedActivity, now: bigint, economy: ActivityEconomy) {
+      const domain = domains.find((domain) => domain.types.includes(activity.type));
+      if (!domain?.next) return undefined;
+      const { repository, plan } = await context(tx, activity.ownerId, now, economy);
+      const result = await domain.next(plan, activity);
+      await repository.update(plan.write, economy);
+      return result;
+    },
     async command(
       tx: T,
       owner: string,

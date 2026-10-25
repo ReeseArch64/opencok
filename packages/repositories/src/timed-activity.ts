@@ -26,6 +26,19 @@ export type ActivityDomain = (
   economy: ActivityEconomy,
 ) => Promise<Uint8Array>;
 export interface ActivityPreparation {
+  accelerate?(
+    tx: MutationTransaction,
+    activity: TimedActivity,
+    remaining: bigint,
+    now: bigint,
+    economy: ActivityEconomy,
+  ): Promise<void>;
+  next?(
+    tx: MutationTransaction,
+    activity: TimedActivity,
+    now: bigint,
+    economy: ActivityEconomy,
+  ): Promise<PreparedActivity | undefined>;
   before?(
     tx: MutationTransaction,
     owner: string,
@@ -81,6 +94,13 @@ export function createActivityExecutor(
             now: captured,
             queues,
             activities,
+            accelerate: preparation?.accelerate
+              ? (activity, remaining, economy) =>
+                  preparation.accelerate!(tx, activity, remaining, domainInstant, economy)
+              : undefined,
+            next: preparation?.next
+              ? (activity, economy) => preparation.next!(tx, activity, domainInstant, economy)
+              : undefined,
             prepare: preparation
               ? (name, params, economy) =>
                   preparation.command(tx, command.owner, name, params, captured, economy)

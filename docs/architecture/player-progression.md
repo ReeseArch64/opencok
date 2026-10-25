@@ -48,4 +48,35 @@ server instant, including future-start states. Production schedules contain the
 expiration boundary, so recovery does not apply today's rate to yesterday's time.
 Stored bonuses remain source data; no second materialized bonus is added to player
 attributes. Running activity deadlines remain pinned to their start calculation.
-Combat-targeted active skills continue through their owning combat systems.
+Harvest talent rewards use the economy port and their persisted cooldown.
+Targeted combat, world-resource placement and dragon-specific active skills remain
+with their owning systems and reject when that execution path is unavailable.
+
+Equipment and workshop commands use the same player receipt and inventory ledger.
+Crafting consumes catalog materials and any required parent equipment before
+pinning the result, its random properties, and its finish time. Replaying the
+operation or recovering the queue keeps that result. Equipment ownership,
+character/general level, general state, and slot exclusivity are checked before
+wearing or removing a piece. Equipped pieces and unfinished crafts cannot be
+consumed by dismantling. Strengthening and reforging pay their catalog costs even
+when a probabilistic upgrade fails. Set extraction requires owned, unused pieces
+from distinct slots; selecting a permanent bonus requires the corresponding two,
+four, or six consumed pieces.
+
+Workshop jobs retain their ordered waiting list in the maintained material queue.
+Completion credits the item and creates the next activity in one transaction.
+Recovery processes overdue jobs in order. Existing completed, unharvested queue
+positions are credited during import without consuming materials again. Material
+acceleration uses its catalog price and persisted daily limit. The native harvest
+command remains accepted; the authoritative worker can deliver finished items
+before that command arrives, as it does for the other migrated queue domains.
+
+Main quests, production collection, inventory use/composition, building/research
+completion, military completion, and equipment/workshop actions feed server-owned
+progress. Old completions cannot increment a newer daily period. Completed alliance
+daily tasks still awaiting collection produce reward mail in the same transaction
+that replaces the old list. Reward amounts are pinned in the mail; the existing
+mail-claim transaction protects subsequent collection against duplicates. No client-supplied
+counter, random outcome, or drawing-time bonus is authoritative. Target-specific
+combat active skills, event availability producers, and a native APK playthrough
+remain outside this server acceptance evidence.

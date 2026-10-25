@@ -10,6 +10,13 @@ export interface InventoryItem {
   vanishTime: bigint;
 }
 export interface InventoryState {
+  assets?: Row;
+  recordAction?(
+    kind: "use" | "compose" | "harvest",
+    itemId: string,
+    count: number,
+    economy: import("./timed-activity").ActivityEconomy,
+  ): Promise<void>;
   useEffect?(
     itemId: string,
     count: number,
@@ -23,6 +30,7 @@ export interface InventoryState {
   effects(): Promise<PlayerEffectSnapshot>;
 }
 export interface InventoryPlan extends MutationResult {
+  assets?: Readonly<Record<string, bigint>>;
   postings: readonly EconomyPosting[];
   items: readonly InventoryItem[];
   profile: Readonly<Record<string, bigint>>;

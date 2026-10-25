@@ -22,6 +22,9 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface ProgressionCatalogs {
+  equipmentRandom?: Map<string, Rule>;
+  forgeRandom?: Map<string, Rule>;
+  reforgeRandom?: Map<string, Rule>;
   abilities?: Map<string, Rule>;
   legacyDaily?: Map<string, Rule>;
   legacyRewards?: Map<string, Rule>;

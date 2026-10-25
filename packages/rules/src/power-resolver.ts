@@ -189,7 +189,7 @@ export function playerGameEffect(
   const equipment = equipmentEffects(state.equipment, rules, (id, loaded) =>
     resolve(id, loaded, true),
   );
-  const selection = state.profile.decomposeSuitEffect;
+  const selection = state.profile.decomposeSuitEffect ?? state.profile.decomposesuiteffect;
   if (selection !== undefined && selection !== null && typeof selection !== "string")
     return invalid();
   const complete = equipmentSetEffects(state.equipment, selection, rules, context, equipment);

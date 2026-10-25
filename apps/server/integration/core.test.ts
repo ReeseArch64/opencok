@@ -443,6 +443,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(dailyFlush).toBeGreaterThan(BigInt(String(before.lord?.dailyTaskFlushTime ?? 0)));
       expect(dailyFlush / 86400000n).toBe(checkpoint / 86400000n);
       expect(allianceFlush + 300000n).toBe(dailyFlush);
+      expect(after.queues).toHaveLength(before.queues.length + 1);
       expect(after).toEqual({
         ...before,
         lord: {
@@ -450,6 +451,23 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
           dailyTaskFlushTime: dailyFlush,
           newDailyTaskFlushTime: allianceFlush,
         },
+        queues: expect.arrayContaining([
+          ...before.queues,
+          {
+            uuid: expect.stringMatching(/^[0-9a-f-]{36}$/),
+            ownerId: `synthetic-player-${id}`,
+            qid: 1,
+            type: 12,
+            itemId: "",
+            startTime: FOREVER,
+            endTime: FOREVER,
+            updateTime: FOREVER,
+            totalTime: 0n,
+            isHelped: 0,
+            para: 0,
+            exchgType: 0,
+          },
+        ]),
         items: before.items.map((item) =>
           item.uuid === "synthetic-item" ? { ...item, count: 6 } : item,
         ),
