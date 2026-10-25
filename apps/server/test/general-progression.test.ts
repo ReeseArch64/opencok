@@ -9,7 +9,9 @@ import {
   generalPairs,
 } from "@opencok/rules/general-progression";
 import { generalPurchase } from "@opencok/mappings/generals";
-import { Type } from "@opencok/messages/sfs";
+import { decode, fields, Type } from "@opencok/messages/sfs";
+import { generalsDomain } from "@opencok/services/generals";
+import { cityFixture } from "./fixtures/city-progression";
 const rules = await loadRules();
 const base = {
   id: "53500",
@@ -39,6 +41,35 @@ function fixture() {
   return { r, row: generalRecruit(r, 53500, "owner", 1234n) };
 }
 describe("general progression", () => {
+  test("large login purchase rosters keep the full response and a bounded initialization event", async () => {
+    const { r } = fixture();
+    Object.defineProperty(r, "features", {
+      value: new Map([["general", { version: "1.0.0", online: "all" }]]),
+    });
+    const { state, context } = cityFixture(r);
+    state.generalRoster = {
+      generals: [],
+      purchases: Array.from({ length: 1000 }, (_, index) => ({
+        generalId: 53500 + index,
+        countType1: index,
+      })),
+      skills: [],
+      statuses: [],
+      offices: [],
+    };
+    const result = await generalsDomain.prepare(context, "general.init", {});
+    expect(result.response.byteLength).toBeGreaterThan(65536);
+    const body = fields(decode(Buffer.from(result.response)).data);
+    expect(body.generalBuyList?.type).toBe(Type.Array);
+    expect(body.generalBuyList?.value).toHaveLength(1000);
+    expect(result.event).toBeInstanceOf(Uint8Array);
+    expect(result.event!.byteLength).toBeLessThanOrEqual(65536);
+    expect(decode(Buffer.from(result.event!))).toEqual({
+      at: { type: Type.Long, value: context.now },
+    });
+    expect(state.generalRoster.purchases).toHaveLength(1000);
+  });
+
   test("starts at catalog values without granting player levels", () => {
     const { row } = fixture();
     expect(row).toMatchObject({

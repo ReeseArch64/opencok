@@ -71,6 +71,16 @@ command, including repeated failures. `command_rejected` explains rejection;
 An unexpected application failure intentionally omits the original error text;
 use its operation, controlled reason and correlation fields to reproduce it.
 
+The `general.init` mutation event records its captured timestamp instead of copying
+the login roster. The full roster remains in the command receipt and client response;
+large general or purchase lists therefore do not exceed the outbox's 64 KiB event
+limit. General recovery, unlocks and office refreshes retain the same transaction.
+
+Ordinary research login serialization resolves the saved item ID plus its level,
+as the legacy model does, including imported IDs that do not end in `00`. It keeps
+the saved ID and level in the response. Research mutations retain their stricter
+base-ID and catalog-level checks; login projection does not repair saved rows.
+
 ## Saved civilization at login
 
 The 12.06.0 login snapshot includes `civilization_type` as an SFS int and
