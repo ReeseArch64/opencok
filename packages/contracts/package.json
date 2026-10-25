@@ -80,7 +80,9 @@
     "./inventory": "./src/inventory.ts",
     "./responses/inventory": "./src/responses/inventory.ts",
     "./mail-rewards": "./src/mail-rewards.ts",
-    "./building": "./src/building.ts"
+    "./building": "./src/building.ts",
+    "./shops": "./src/shops.ts",
+    "./trade": "./src/trade.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*"
