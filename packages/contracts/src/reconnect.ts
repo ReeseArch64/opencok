@@ -53,6 +53,7 @@ export interface ReconnectTaskPlan {
 }
 
 export interface ReconnectProgressState extends ReconnectBaseState {
+  allianceResearch?: readonly Row[];
   profile: Row;
   resource: Row;
   effects: PlayerEffectSnapshot;

@@ -1,4 +1,5 @@
-import { and, asc, desc, eq, gt } from "drizzle-orm";
+import { rankingCalendar } from "@opencok/rules/community-ranking";
+import { and, asc, desc, eq, gt, gte } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { alliance_member } from "@opencok/drizzle/schema/opencok_kingdom/alliance_member";
@@ -64,7 +65,14 @@ export async function readDonationRanking(
         .from(alliance_member)
         .leftJoin(userprofile, eq(userprofile.uid, alliance_member.uid))
         .leftJoin(playerinfo, eq(playerinfo.uid, alliance_member.uid))
-        .leftJoin(donate_history, eq(donate_history.uid, alliance_member.uid))
+        .leftJoin(
+          donate_history,
+          and(
+            eq(donate_history.uid, alliance_member.uid),
+            eq(donate_history.allianceId, alliance_member.allianceId),
+            gte(donate_history.donateTime, rankingCalendar(now).nextMonday - 604800000n),
+          ),
+        )
         .where(eq(alliance_member.allianceId, profile.allianceId))
         .orderBy(asc(alliance_member.uid))
         .limit(32768);
