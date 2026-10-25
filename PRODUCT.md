@@ -85,6 +85,13 @@ shortcuts must not silently become player defaults. Fixes must preserve valid
 player progress and avoid broad database resets when a targeted migration or
 compatibility correction is possible.
 
+The normal account preset starts at player level 1 with a basic level-1 city,
+100,000 wood, 100,000 food and 1,000 gold. Stone, iron, silver and crystals
+start at zero. Accelerated catalog settings do not grant max-level buildings,
+research, heroes or currency. Character creation is authenticated and grants
+this package once per identity and realm, with at most two realm characters.
+Existing progression is never reset by retrying account creation.
+
 ### Reliable local operation
 
 Essential gameplay must not stall because an optional external dependency is

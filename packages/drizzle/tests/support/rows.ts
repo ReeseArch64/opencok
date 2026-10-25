@@ -66,6 +66,8 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.pendingEffects = 0;
     row.payment = "{}";
   }
+  if (spec.indexes.some((key) => key.name === "character_provisioning_PRIMARY"))
+    row.state = variant % 2;
   if (spec.indexes.some((key) => key.name === "economy_posting_PRIMARY"))
     row.after = (row.before as bigint) + (row.delta as bigint);
   return row;

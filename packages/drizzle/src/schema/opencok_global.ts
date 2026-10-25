@@ -91,3 +91,5 @@ export { worldcup_team } from "./opencok_global/worldcup_team";
 export { nickname_change_receipt } from "./opencok_global/nickname_change_receipt";
 
 export { cn1_profile_session } from "./opencok_global/cn1_profile_session";
+export { game_identity } from "./opencok_global/game_identity";
+export { character_provisioning } from "./opencok_global/character_provisioning";

@@ -28,6 +28,7 @@ export interface ReconnectCatalogs {
   positionUnlock?: readonly Rule[];
 }
 export interface ProfileCatalogs {
+  characters?: Map<string, Rule>;
   achievementCount?: number;
   militaryRanks?: Map<string, Rule>;
   servers?: Map<string, Rule>;
