@@ -162,6 +162,70 @@ export async function verifySocialTransports(
       false,
     );
 
+    const nativeRoom = await realm1("alice", "chat.room.mk", {
+      name: sfs.string("Native friends"),
+      members: sfs.array([sfs.string("bob")]),
+    });
+    const nativeId = str(nativeRoom, "id");
+    expect(nativeId).toMatch(/^[a-f0-9-]{36}$/);
+    expect(str(nativeRoom, "founder")).toBe("alice");
+    expect(
+      (nativeRoom.members!.value as Value[]).map((value) => str(fields(value), "uid")),
+    ).toContain("bob");
+    await realm1("alice", "chat.room.send", {
+      id: sfs.string(nativeId),
+      msg: sfs.string("Native private body"),
+      operationId: sfs.string(randomUUID()),
+    });
+    const nativeHistory = await realm2("bob", "chat.get.by.seq", {
+      id: sfs.string(nativeId),
+      type: sfs.int(3),
+      start: sfs.string("0"),
+      end: sfs.string("0"),
+    });
+    const nativeMessages = (nativeHistory.msg!.value as Value[]).map(fields);
+    const nativeMessage = nativeMessages.find(
+      (value) => str(fields(value.body), "msg") === "Native private body",
+    )!;
+    expect(nativeMessage).toBeDefined();
+    expect(fields(nativeMessage.body).type).toEqual(sfs.int(4));
+    expect(nativeMessage.time?.type).toBe(sfs.string("").type);
+    expect(nativeMessages.some((value) => fields(value.body).type?.value === 0)).toBe(true);
+    const nativeRooms = await realm2("bob", "chat.room.user.rooms", {});
+    const listed = (nativeRooms.rooms!.value as Value[])
+      .map(fields)
+      .find((value) => str(value, "id") === nativeId)!;
+    expect(str(listed, "founder")).toBe("alice");
+    expect(JSON.parse(str(listed, "msg")).body.msg).toBe("Native private body");
+    await realm2("bob", "chat.lock", { uid: sfs.string("alice") });
+    await realm1("alice", "chat.room.name", {
+      id: sfs.string(nativeId),
+      name: sfs.string("Renamed natively"),
+    });
+    const news = await realm2("bob", "chat.get.new", {
+      params: sfs.string(
+        JSON.stringify([{ id: nativeId, type: 3, seqid: str(nativeMessage, "seqId") }]),
+      ),
+    });
+    const newRoom = fields((news.rooms!.value as Value[])[0]);
+    const updates = (newRoom.msg!.value as Value[]).map(fields);
+    expect(updates).toHaveLength(1);
+    expect(fields(updates[0]!.body)).toMatchObject({
+      type: sfs.int(5),
+      msg: sfs.string("Renamed natively"),
+    });
+    expect(newRoom.firstSeqId?.type).toBe(sfs.string("").type);
+    const unchangedNews = await realm2("bob", "chat.get.new", {
+      params: sfs.string(
+        JSON.stringify([{ id: nativeId, type: 3, seqid: str(newRoom, "lastSeqId") }]),
+      ),
+    });
+    const unchangedRoom = fields((unchangedNews.rooms!.value as Value[])[0]);
+    expect(unchangedRoom.msg).toEqual(sfs.array([]));
+    expect(unchangedRoom.lastSeqId).toEqual(newRoom.lastSeqId);
+    await realm2("bob", "chat.unlock", { uuid: sfs.string("alice") });
+    const oldPrivate = await realm2("bob", "chat.get", { type: sfs.int(1) });
+    expect(Array.isArray(oldPrivate.msg?.value)).toBe(true);
     const dm = await realm1("alice", "chat.private", {
       uid: sfs.string("bob"),
       msg: sfs.string("Native delivery"),
@@ -173,12 +237,21 @@ export async function verifySocialTransports(
       epoch: sfs.string(String(authority.epoch)),
     };
     let found = false;
+    let foundNativeRoom = false;
     for (let attempt = 0; attempt < 10; attempt++) {
       const batch = await realm2("realm-2", "realm.events.poll", {
         ...identity,
         owners: sfs.array([sfs.string("bob")]),
       });
       const deliveries = batch.deliveries?.value as Value[];
+      foundNativeRoom ||= deliveries.some((entry) => {
+        const envelope = fields(entry);
+        const data = fields(envelope.data);
+        return (
+          str(envelope, "cmd") === "push.chat.room.msg" &&
+          fields(data.body).msg?.value === "Native private body"
+        );
+      });
       found ||= deliveries.some((entry) => {
         const data = fields(entry);
         return fields(data.data).msg?.value === "Native delivery";
@@ -186,9 +259,10 @@ export async function verifySocialTransports(
       const cursor = str(batch, "cursor");
       if (cursor)
         await realm2("realm-2", "realm.events.ack", { ...identity, cursor: sfs.string(cursor) });
-      if (found) break;
+      if (found && foundNativeRoom) break;
     }
     expect(found).toBe(true);
+    expect(foundNativeRoom).toBe(true);
     for (const uid of ["alice", "bob"])
       await databases.global.db
         .update(account_new)
@@ -241,6 +315,12 @@ export async function verifySocialTransports(
       rules,
       { world: async () => new Map(), emperor: async () => null },
     );
+    const mineBrowser = new FriendshipMineService(mine.execute, rules, mine.effects, realm1);
+    const friendParams = { ids: sfs.array([sfs.string("facebook-bob")]) };
+    const beforeHelp = await mineBrowser.command("alice", "mine.friend", friendParams);
+    const friendBefore = fields((beforeHelp.body.friendList!.value as Value[])[0]);
+    expect(friendBefore.help).toEqual(sfs.int(1));
+    expect(friendBefore.helped).toBeUndefined();
     const incoming: Fields = {
       actor: data.actor!,
       generation: data.generation!,
@@ -250,6 +330,8 @@ export async function verifySocialTransports(
     expect(
       (await mine.command("bob", "mine.receive.help", incoming, true)).body.result?.value,
     ).toBe(1);
+    const afterHelp = await mineBrowser.command("alice", "mine.friend", friendParams);
+    expect(fields((afterHelp.body.friendList!.value as Value[])[0]).help).toEqual(sfs.int(0));
     await realm2("bob", "mine.inbox.ack", { id: data.id! });
     expect((await realm2("realm-2", "mine.inbox.poll", {})).commands?.value).toEqual([]);
     expect(

@@ -1,3 +1,4 @@
+import { isRecord } from "@opencok/contracts/chat";
 import { and, asc, eq, gt, lte, sql } from "drizzle-orm";
 import { chat_consumer, chat_event } from "@opencok/drizzle/schema/opencok_chat/chat_social";
 import { chat_mailbox_message } from "@opencok/drizzle/schema/opencok_chat/chat_mailbox_message";
@@ -113,6 +114,10 @@ export function createChatDeliveryStore(
                     data: {
                       id: direct.message_id,
                       senderUid: row.owner,
+                      senderName:
+                        isRecord(row.data) && typeof row.data.senderName === "string"
+                          ? row.data.senderName
+                          : row.owner,
                       type: 1,
                       msg: direct.body,
                       timeLong: Number(direct.created_at),

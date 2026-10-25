@@ -1,3 +1,4 @@
+import { nativePrivateMessage } from "@opencok/mappings/chat-native";
 import type { ChatRepository, ChatMessage, PlayerState } from "@opencok/contracts/chat";
 import { ChatCommandError } from "@opencok/errors/chat";
 import { createRoomAuthorizer } from "@opencok/identity/chat-rooms";
@@ -69,8 +70,10 @@ export class ChatNativeService {
         sendLocalTime: params.sendLocalTime ?? "",
       };
     }
-    const frame = (item: ChatMessage) => ({
+    const frame = async (item: ChatMessage) => ({
       senderUid: item.senderUid,
+      senderName:
+        (await this.repository.getPlayerStateById(item.senderUid))?.name ?? item.senderUid,
       msg: item.body,
       type: item.roomId.startsWith("alliance_") ? 2 : 0,
       post: item.post ?? 0,
@@ -93,67 +96,124 @@ export class ChatNativeService {
         if (!room || typeof room !== "object" || Array.isArray(room))
           throw new ChatCommandError("invalid_room");
         results.push(
-          await this.execute(
-            owner,
-            "chat.get.by.seq",
-            room as Record<string, unknown>,
-            operationId,
-          ),
+          await this.history(owner, state, room as Record<string, unknown>, true, frame),
         );
       }
       return { rooms: results };
     }
     if (command !== "chat.get" && command !== "chat.get.by.seq")
       throw new ChatCommandError("unsupported_command");
+    if (command === "chat.get.by.seq") return this.history(owner, state, params, false, frame);
     const type = Number(params.type ?? 0);
-    if (type === 1) {
-      if (typeof params.id !== "string" || !params.id || !this.repository.mailbox)
-        throw new ChatCommandError("invalid_target");
-      if (this.repository.access && !(await this.repository.access.canReceive(owner, params.id)))
-        return { msg: [] };
-      const rows = await this.repository.mailbox.list(owner, state.serverId, params.id, 3, 100);
-      return {
-        msg: rows.map((row) => ({
-          uid: row.id,
-          senderUid: row.sender ?? row.peer,
-          msg: row.body,
-          timeLong: Number(row.createdAt),
-          type: 1,
-        })),
-      };
-    }
+    if (type === 1) return this.direct(owner, state, params);
     const roomId = this.room(state, type);
     if (!(await authorize(owner, roomId))) throw new ChatCommandError("invalid_room");
-    const integer = (value: unknown, fallback: number) => {
-      if (value === undefined || value === "") return fallback;
-      const number = Number(value);
-      if (!Number.isSafeInteger(number) || number < 0) throw new ChatCommandError("invalid_cursor");
-      return number;
-    };
-    let rows: ChatMessage[];
-    if (command === "chat.get.by.seq") {
-      if (!this.repository.messages.page) throw new ChatCommandError("unavailable");
-      const before = integer(params.end, 0);
-      rows = (
-        await this.repository.messages.page({
-          roomId,
-          before,
-          limit: 100,
-          archive: params.archive === true,
-        })
-      ).messages;
-      const after = integer(params.start, 0);
-      rows = rows.filter((row) => row.sequenceId >= after);
-    } else
-      rows = await this.repository.messages.getAllByRange(
-        roomId,
-        integer(params.start, 0),
-        integer(params.end, this.now() + 1),
-      );
+    const rows = await this.repository.messages.getAllByRange(
+      roomId,
+      this.integer(params.start, 0),
+      this.integer(params.end, this.now() + 1),
+    );
     const visible = [];
     for (const row of rows)
       if (!this.repository.access || (await this.repository.access.canRead(owner, row)))
-        visible.push(frame(row));
+        visible.push(await frame(row));
     return { msg: visible };
+  }
+  integer(value: unknown, fallback: number) {
+    if (value === undefined || value === "") return fallback;
+    const number = Number(value);
+    if (!Number.isSafeInteger(number) || number < 0) throw new ChatCommandError("invalid_cursor");
+    return number;
+  }
+  async direct(owner: string, state: PlayerState, params: Record<string, unknown>) {
+    const peer = params.id ?? "";
+    if (typeof peer !== "string" || !this.repository.mailbox)
+      throw new ChatCommandError("invalid_target");
+    const rows = await this.repository.mailbox.list(owner, state.serverId, peer, 3, 100);
+    const messages = [];
+    for (const row of rows) {
+      if (this.repository.access && !(await this.repository.access.canReceive(owner, row.peer)))
+        continue;
+      const senderUid = row.sender ?? row.peer;
+      const sender = await this.repository.getPlayerStateById(senderUid);
+      messages.push({
+        uid: row.id,
+        senderUid,
+        senderName: sender?.name ?? senderUid,
+        msg: row.body,
+        timeLong: Number(row.createdAt),
+        type: 1,
+      });
+    }
+    return { msg: messages };
+  }
+  async history(
+    owner: string,
+    state: PlayerState,
+    params: Record<string, unknown>,
+    latest: boolean,
+    frame: (item: ChatMessage) => Promise<Record<string, unknown>>,
+  ): Promise<Record<string, unknown>> {
+    const type = Number(params.type ?? 3);
+    if (!Number.isInteger(type) || type < 0 || type === 4)
+      throw new ChatCommandError("invalid_room");
+    if (type === 2)
+      return {
+        id: params.id ?? "",
+        type,
+        firstSeqId: "-1",
+        lastSeqId: "-1",
+        ...(await this.direct(owner, state, params)),
+      };
+    let roomId: string;
+    if (type === 0 || type === 1) roomId = this.room(state, type === 1 ? 2 : 0);
+    else {
+      if (typeof params.id !== "string") throw new ChatCommandError("invalid_room");
+      roomId = params.id.startsWith("private_") ? params.id : `private_${params.id}`;
+    }
+    const room = type >= 3 ? await this.repository.access?.roomInfo?.(owner, roomId) : undefined;
+    if (
+      type >= 3
+        ? !room
+        : !(await createRoomAuthorizer(this.repository.getPlayerStateById)(owner, roomId))
+    )
+      throw new ChatCommandError("invalid_room");
+    if (!this.repository.messages.page) throw new ChatCommandError("unavailable");
+    const end = latest ? 0 : this.integer(params.end, 0);
+    const rows = (
+      await this.repository.messages.page({
+        roomId,
+        before: end ? end + 1 : 0,
+        limit: 100,
+        archive: params.archive === true,
+      })
+    ).messages;
+    const start = latest
+      ? (params.seqid === "-1" ? 0 : this.integer(params.seqid, 0)) + 1
+      : this.integer(params.start, 0);
+    const visible = [];
+    const sequences: number[] = [];
+    for (const row of rows) {
+      if (this.repository.access && !(await this.repository.access.canRead(owner, row))) continue;
+      sequences.push(row.sequenceId);
+      if (row.sequenceId < start) continue;
+      visible.push(
+        room
+          ? nativePrivateMessage(row, room, await this.repository.getPlayerStateById(row.senderUid))
+          : await frame(row),
+      );
+    }
+    return {
+      id: room ? room.id.replace(/^private_/, "") : String(params.id ?? "0"),
+      type,
+      ...(room ? { founder: room.founder, roomName: room.name } : {}),
+      ...(latest
+        ? {
+            firstSeqId: sequences.length ? String(Math.min(...sequences)) : "-1",
+            lastSeqId: sequences.length ? String(Math.max(...sequences)) : "-1",
+          }
+        : {}),
+      msg: visible,
+    };
   }
 }

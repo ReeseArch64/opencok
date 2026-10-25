@@ -370,6 +370,7 @@ export class GameService {
       if (!this.services.postbox) throw new GameError(errors.unsupported);
       return this.services.postbox(uid, command, params);
     }
+    if (command === "chat.get.new") return { body: await this.chatNews(uid, params), pushes: [] };
     if ([...chatSocialCommands, ...nativeChatCommands].includes(command)) {
       if (!this.services.social) throw new GameError(errors.unsupported);
       return { body: await this.services.social(uid, command, params), pushes: [] };
@@ -1158,6 +1159,100 @@ export class GameService {
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
     return mailDeleted(state.deleted);
+  }
+  private async chatNews(uid: string, params: Fields): Promise<Fields> {
+    if (!this.services.social) throw new GameError(errors.unsupported);
+    let rooms: unknown;
+    try {
+      rooms = JSON.parse(wireString(params, "params"));
+    } catch {
+      throw new GameError(errors.invalid);
+    }
+    if (!Array.isArray(rooms) || rooms.length > 16) throw new GameError(errors.invalid);
+    const results: Value[] = [];
+    for (const room of rooms) {
+      if (
+        !room ||
+        typeof room !== "object" ||
+        Array.isArray(room) ||
+        !Number.isInteger(room.type) ||
+        typeof room.id !== "string" ||
+        typeof room.seqid !== "string"
+      )
+        throw new GameError(errors.invalid);
+      if (room.type !== 4 && room.type !== 2) {
+        const response = await this.services.social(uid, "chat.get.new", {
+          params: sfs.string(JSON.stringify([room])),
+        });
+        const values = response.rooms?.value;
+        if (!Array.isArray(values) || values.length !== 1) throw new GameError(errors.invalid);
+        results.push((values as Value[])[0]!);
+        continue;
+      }
+      if (!this.db.getSystemMailByPlayerId) throw new GameError(errors.unsupported);
+      const now = this.now();
+      const anchor = ["-1", "0", ""].includes(room.seqid) ? null : room.seqid;
+      let body: Fields | undefined;
+      const state = await this.db.getSystemMailByPlayerId(
+        uid,
+        { anchor, time: 0n, now },
+        async (entries, readers) => {
+          if (room.type === 4)
+            body = await systemMailProjection(uid, entries, readers, 100, 0n, {});
+          else {
+            const privateTypes = new Set([20, 21, 22, 23, 24, 37, 38, 39, 40, 43, 44, 45, 46]);
+            const shield = await this.services.social!(uid, "chat.shield.list", {});
+            const blocks = new Set(
+              ((shield.list?.value ?? []) as Value[]).map((value) =>
+                wireString((value.value ?? {}) as Fields, "other"),
+              ),
+            );
+            const selected = entries
+              .filter(
+                (entry) =>
+                  privateTypes.has(entry.type) && (!entry.fromUser || !blocks.has(entry.fromUser)),
+              )
+              .slice(0, 100);
+            const presentation = await resolveMailPresentation(
+              selected,
+              readers,
+              true,
+              this.config.mailTranslationEnabled ?? true,
+              async () => "",
+            );
+            const projection = mailListProjection(
+              uid,
+              selected,
+              presentation,
+              "conversation",
+              "chat.get.new",
+            );
+            const response = await this.services.social!(uid, "chat.get.new", {
+              params: sfs.string(JSON.stringify([{ ...room, id: "" }])),
+            });
+            const remoteRooms = response.rooms?.value as Value[];
+            const remote = remoteRooms?.[0]?.value as Fields | undefined;
+            const copies = (remote?.msg?.value ?? []) as Value[];
+            body = {
+              msg: sfs.array([...((projection.body.result?.value ?? []) as Value[]), ...copies]),
+            };
+          }
+        },
+      );
+      const profile = this.checkProfile(state.profile, now);
+      if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId || !body)
+        throw new GameError(errors.invalid);
+      results.push(
+        sfs.object({
+          ...body,
+          id: sfs.string(room.id),
+          type: sfs.int(room.type),
+          firstSeqId: sfs.string("-1"),
+          lastSeqId: sfs.string("-1"),
+        }),
+      );
+    }
+    return { rooms: sfs.array(results) };
   }
   private async mailSystem(uid: string, params: Fields, legacy = false): Promise<Fields> {
     if (legacy && !this.services.systemMailPage) throw new GameError(errors.unsupported);

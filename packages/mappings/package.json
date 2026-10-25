@@ -56,7 +56,8 @@
     "./generals": "./src/generals.ts",
     "./alliance": "./src/alliance.ts",
     "./chat-social": "./src/chat-social.ts",
-    "./postbox": "./src/postbox.ts"
+    "./postbox": "./src/postbox.ts",
+    "./chat-native": "./src/chat-native.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

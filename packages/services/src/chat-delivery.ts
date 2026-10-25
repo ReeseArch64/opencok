@@ -36,19 +36,33 @@ export function createChatDeliveryService(options: {
               return;
             }
             const control =
-              event.frame &&
-              [
-                "push.chat.delete",
-                "push.chat.ban",
-                "push.chat.room.quit",
-                "push.chat.room.kick",
-              ].includes(String(event.frame.cmd));
+              [100, 101, 102, 103, 105].includes(event.message?.post ?? 0) ||
+              (event.frame &&
+                [
+                  "push.chat.delete",
+                  "push.chat.ban",
+                  "push.chat.room.quit",
+                  "push.chat.room.kick",
+                ].includes(String(event.frame.cmd)));
             if (access && !control && !(await access.canReceive(peer.uid, event.owner))) return;
             if (event.message) {
               if (access && !(await access.canRead(peer.uid, event.message!))) return;
               const item = event.message;
               const room = await authorizeRoom(peer.uid, item.roomId);
               if (!room) return;
+              if ((item.post ?? 0) >= 100) {
+                peer.sendFrame({
+                  cmd: "push.chat.room.control",
+                  eventId: event.id,
+                  data: {
+                    roomId: item.roomId,
+                    seqId: item.sequenceId,
+                    type: item.post! - 100,
+                    msg: item.post === 105 ? item.body : JSON.parse(item.body),
+                  },
+                });
+                return;
+              }
               peer.sendFrame({
                 cmd: "push.chat.room",
                 eventId: event.id,

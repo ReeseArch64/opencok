@@ -169,8 +169,23 @@ export function createChatMineCommands(
           .from(user_mine)
           .where(and(eq(user_mine.uid, account.uid), eq(user_mine.fId, account.facebook)))
           .limit(1);
-        if (mine)
+        if (mine) {
+          const helpers: unknown = mine.helpInfo?.length
+            ? JSON.parse(mine.helpInfo.toString("utf8"))
+            : [];
+          if (
+            !Array.isArray(helpers) ||
+            helpers.length > 50 ||
+            helpers.some(
+              (value) =>
+                !value || typeof value.gUid !== "string" || !Number.isSafeInteger(value.time),
+            )
+          )
+            throw new ChatCommandError("invalid_mine");
           friends.push({
+            helped: helpers.some(
+              (value) => value.gUid === owner && BigInt(value.time) >= (mine.mineTime ?? 0n),
+            ),
             gUid: account.uid,
             fId: account.facebook,
             server: Number(account.realm),
@@ -181,6 +196,7 @@ export function createChatMineCommands(
             mineTime: Number(mine.mineTime ?? 0),
             call: mine.call,
           });
+        }
       }
       return { friendList: friends, friends };
     }

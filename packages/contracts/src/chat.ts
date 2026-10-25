@@ -33,6 +33,9 @@ export interface PlayerState {
   gmFlag?: number;
   moderationAllowed?: boolean;
   name?: string | null;
+  pic?: string | null;
+  picVer?: number | null;
+  picfraId?: number | null;
   facebookId?: string | null;
   banned?: boolean;
   banUntil?: number;

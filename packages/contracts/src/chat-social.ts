@@ -133,6 +133,7 @@ export interface ChatSocialTransaction {
     owner: string,
     key: string,
     body: string,
+    post?: number,
   ): Promise<import("./chat.ts").ChatMessage>;
   history(
     room: string,
