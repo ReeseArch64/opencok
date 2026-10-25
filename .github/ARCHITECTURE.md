@@ -306,6 +306,14 @@ collection remain planned. [API media runbook](../apps/api/MEDIA.md) defines act
 configuration and rollback; [lifecycle design](../docs/architecture/clients-and-services.md#21-file-and-media-lifecycle)
 describes future behavior.
 
+Realm avatar grants, verified completion, signed legacy allocation and operator
+approval/rejection now use PostgreSQL journals and per-owner publication revisions.
+The signed Chat consumer fences those revisions independently of clock and sequence
+wrap. Moderation runs through an explicit operator CLI with database authorization,
+expected-version checks and replay receipts; it is not a public API capability.
+[Avatar integration](../apps/server/AVATAR_INTEGRATION.md) documents deployment,
+restoration boundaries and synthetic TCP/SFS acceptance.
+
 ## 22. Mandatory testing strategy
 
 Relevant changes require unit, disposable integration, contract/snapshot, E2E and
