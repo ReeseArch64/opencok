@@ -4032,3 +4032,11 @@ including persisted history after Chat restart, current room membership, session
 expiry and bounded outage behavior. See the [Chat integration guide](../chat/GAME_INTEGRATION.md).
 APK testing is excluded by request; this evidence does not certify native rendering
 or the full social/chat command inventory.
+
+## Persistent mutation foundation
+
+Topic 9 now provides content-bound durable command receipts, exact credit/debit
+postings, an outbox primitive and runtime realm transaction fencing. Reconnect
+resource settlement uses the common accounting records. See the
+[foundation guide](MUTATION_FOUNDATION.md) for the Java audit, integration contract,
+activation, recovery and boundaries for future domain migrations.
