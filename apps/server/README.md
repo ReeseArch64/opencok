@@ -76,6 +76,11 @@ the login roster. The full roster remains in the command receipt and client resp
 large general or purchase lists therefore do not exceed the outbox's 64 KiB event
 limit. General recovery, unlocks and office refreshes retain the same transaction.
 
+Ordinary research login serialization resolves the saved item ID plus its level,
+as the legacy model does, including imported IDs that do not end in `00`. It keeps
+the saved ID and level in the response. Research mutations retain their stricter
+base-ID and catalog-level checks; login projection does not repair saved rows.
+
 ## Saved civilization at login
 
 The 12.06.0 login snapshot includes `civilization_type` as an SFS int and
