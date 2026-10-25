@@ -122,7 +122,8 @@
     "./dragon-tower": "./src/dragon-tower.ts",
     "./local-activity-info": "./src/local-activity-info.ts",
     "./chat-retention": "./src/chat-retention.ts",
-    "./chat-social": "./src/chat-social.ts"
+    "./chat-social": "./src/chat-social.ts",
+    "./lucky-day": "./src/lucky-day.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

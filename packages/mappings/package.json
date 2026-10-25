@@ -68,7 +68,8 @@
     "./local-activity-info": "./src/local-activity-info.ts",
     "./chat-social": "./src/chat-social.ts",
     "./postbox": "./src/postbox.ts",
-    "./chat-native": "./src/chat-native.ts"
+    "./chat-native": "./src/chat-native.ts",
+    "./lucky-day": "./src/lucky-day.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -56,7 +56,8 @@
     "./new-expedition": "./src/new-expedition.ts",
     "./dragon-tower": "./src/dragon-tower.ts",
     "./local-activity-info": "./src/local-activity-info.ts",
-    "./chat-social": "./src/chat-social.ts"
+    "./chat-social": "./src/chat-social.ts",
+    "./lucky-day": "./src/lucky-day.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

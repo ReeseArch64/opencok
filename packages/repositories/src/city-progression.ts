@@ -1,3 +1,4 @@
+import { readLuckyDay, writeLuckyDay } from "./lucky-day";
 import { readDragonTower, writeDragonTower } from "./dragon-tower";
 import { readExpedition, writeExpedition } from "./new-expedition";
 import { readArena, writeArena } from "./arena";
@@ -127,6 +128,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        luckyDay: command?.startsWith("luckyday.") ? await readLuckyDay(tx, owner) : undefined,
         dragonTower: command?.startsWith("dragontower")
           ? await readDragonTower(tx, owner, now, num(profile, "serverId"), request)
           : undefined,
@@ -225,6 +227,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.luckyDay) await writeLuckyDay(tx, owner, write.luckyDay);
         if (write.dragonTower) await writeDragonTower(tx, owner, write.dragonTower);
         if (write.expedition) await writeExpedition(tx, owner, write.expedition);
         if (write.arena) await writeArena(tx, owner, write.arena);
@@ -430,6 +433,7 @@ export function createCityProgressionStore(
           (scienceBefore.find((before) => before.itemId === row.itemId)?.level ?? 0),
       );
       if (
+        write.luckyDay ||
         write.generalRoster ||
         write.equipment?.length ||
         write.deletedEquipment?.length ||
