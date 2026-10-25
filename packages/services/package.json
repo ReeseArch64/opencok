@@ -73,7 +73,9 @@
     "./alliances": "./src/alliances.ts",
     "./alliance-publication": "./src/alliance-publication.ts",
     "./civilization-science": "./src/civilization-science.ts",
-    "./minstrel": "./src/minstrel.ts"
+    "./minstrel": "./src/minstrel.ts",
+    "./dragon-progression": "./src/dragon-progression.ts",
+    "./dragon-talents": "./src/dragon-talents.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -85,7 +85,8 @@
     "./equipment": "./src/equipment.ts",
     "./alliance-gameplay": "./src/alliance-gameplay.ts",
     "./alliance-recovery": "./src/alliance-recovery.ts",
-    "./alliance-publication": "./src/alliance-publication.ts"
+    "./alliance-publication": "./src/alliance-publication.ts",
+    "./dragon-progression": "./src/dragon-progression.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

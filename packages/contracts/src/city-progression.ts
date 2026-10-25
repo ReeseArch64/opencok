@@ -66,7 +66,21 @@ export interface GeneralWrite {
   skills?: readonly Row[];
   statuses?: readonly Row[];
 }
+export interface DragonProgressionState {
+  talents: readonly Row[];
+  dragons: readonly Row[];
+  skills: readonly Row[];
+  marches: readonly Row[];
+  switchedAt: bigint;
+}
+export interface DragonProgressionWrite {
+  talents?: readonly Row[];
+  dragons?: readonly Row[];
+  skills?: readonly Row[];
+  deletedSkills?: readonly string[];
+}
 export interface CityProgressionState {
+  dragons?: DragonProgressionState;
   minstrel?: Row;
   civilizationSciences?: readonly Row[];
   generalRoster?: GeneralRoster;
@@ -93,6 +107,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  dragons?: DragonProgressionWrite;
   minstrel?: Row;
   civilizationSciences?: readonly Row[];
   generalRoster?: GeneralWrite;

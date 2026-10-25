@@ -1,3 +1,4 @@
+import nicknameWords from "../data/badwords.json";
 import { createBuildingCatalog } from "./buildings/index.ts";
 import { importBuildingCatalog } from "./buildings/import.ts";
 import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
@@ -264,6 +265,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       monarchTitles,
     },
     {
+      nicknameWords,
       achievementCount,
       achievements: achievementRecords,
       militaryRanks,
@@ -303,6 +305,13 @@ export async function loadRules(directory?: string, kingdomId = 1) {
       recruits: await optional(GameplayCatalog.Recruit),
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
+    {
+      dragonTravel: await optional(GameplayCatalog.DragonTravel),
+      dragonSkillExp: await optional(GameplayCatalog.DragonSkillExp),
+      dragonTalent: await optional(GameplayCatalog.DragonTalent),
+      dragonTalentExp: await optional(GameplayCatalog.DragonTalentExp),
+      dragonTower: await optional(GameplayCatalog.DragonTowerLayer),
+    },
   );
 }
 

@@ -95,6 +95,7 @@ export function dragonSkillEffects(
   skills: readonly Row[],
   rules: Rules,
   context: RuleContext,
+  talents: readonly Row[] = [],
 ): ReadonlyMap<number, number> {
   const effects = new Map<number, number>();
   if (!powerFeatureContext(rules, context).dragonLevelUp) return effects;
@@ -113,6 +114,32 @@ export function dragonSkillEffects(
       skillEffects(skill, rule, contribution);
     }
     for (const [id, value] of contribution) effects.set(id, double((effects.get(id) ?? 0) + value));
+  }
+  for (const talent of talents) {
+    if (
+      Number(talent.startTime ?? 0) > context.now ||
+      Number(talent.actTime ?? 0) < context.now ||
+      Number(talent.actTime ?? 0) === 0 ||
+      integer(talent.stat) !== 2
+    )
+      continue;
+    if (
+      !dragons.some(
+        (dragon) =>
+          integer(dragon.itemId) === integer(talent.dragonId) && integer(dragon.dragonState) === 3,
+      )
+    )
+      continue;
+    const rule = rules.power.dragonSkills?.get(text(talent, "skillId"));
+    if (!rule || rule.type !== "12") continue;
+    const pairs = (rule.base ?? "").split("|").filter(Boolean),
+      increments = (rule.base_add ?? "").split("|");
+    for (const [index, pair] of pairs.entries()) {
+      const [id, raw] = pair.split(";");
+      const value = Number(raw) + (integer(talent.level) - 1) * Number(increments[index] ?? 0);
+      if (!Number.isFinite(value)) return invalid();
+      effects.set(integer(id), double((effects.get(integer(id)) ?? 0) + value));
+    }
   }
   return effects;
 }

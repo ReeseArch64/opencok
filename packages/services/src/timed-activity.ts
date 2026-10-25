@@ -617,6 +617,10 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
           "stonebind",
           "ironbind",
           "foodbind",
+          "chip",
+          "diamond",
+          "dragon_food",
+          "dragon_gold",
         ].includes(asset)
       )
         throw new Error("Invalid activity resource");

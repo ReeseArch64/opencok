@@ -165,6 +165,8 @@ export async function executeInventoryTransaction(
     "silver",
     "chip",
     "diamond",
+    "dragon_food",
+    "dragon_gold",
   ];
   for (const [kind, changes, before, allowed] of [
     ["profile", result.profile, profile, profileKeys],
@@ -180,6 +182,8 @@ export async function executeInventoryTransaction(
           "silver",
           "chip",
           "diamond",
+          "dragon_food",
+          "dragon_gold",
           "sandstone",
           "diamondstone",
           "marble",

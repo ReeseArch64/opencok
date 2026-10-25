@@ -95,3 +95,35 @@ none may be accepted from a client. The point update and cargo debit must share
 the same transaction. Gathering interruption, combat losses, special routes,
 teleport, interest subscriptions and background recovery remain separate work.
 Existing world commands are not redirected to an in-memory simulation.
+
+## Dragon progression runtime
+
+Dragon ownership, incubation checkpoints, friendship, level and experience,
+communication timestamps, travel outcomes, skill inventory and talent cooldowns
+use the maintained dragon tables inside the player mutation transaction. The
+12.06.0 petdragon commands now execute these workflows. Reconnect reconstructs
+saved timers, advances expired incubation/travel state, and returns the dragon and
+skill lists. Empty rosters receive the catalog's initial egg once; existing levels,
+eggs, skills and balances are preserved.
+
+Travel completion pins its selected reward in the dragon row; cancellation uses
+the catalog's elapsed-time reward band. Claiming transfers that saved outcome and
+clears the pending reward in the same transaction. Feeding outcomes are generated
+on the server and pinned by the operation receipt. Skill learning enforces slot
+quality, allowed dragon types, unlock level and ownership. Skill materials cannot
+be equipped, innate, repeated in the selection, or the target skill itself.
+
+Egg and skill-book inventory items enter these workflows through the existing
+item-use transaction. Friendship, active-skill and passive-skill effects remain
+source data for the common effect calculation. Production is settled before any
+change to those effects. Talent start and expiration times join the production
+schedule. Status and continuous talents are supported; a battle-triggered talent
+requires the validated battle integration before activation.
+
+Synthetic PostgreSQL acceptance traverses incubation, feeding, upgrading,
+renaming, travelling, reward recovery and claim, skill consumption, talent unlock
+and cooldown. Concurrent retries debit or grant once; foreign ownership, early
+hatching, repeated claims and repeated unlocks reject. No schema migration is
+needed for these dragon workflows. Retain dragon rows, receipts and ledger records
+when rolling back, and recover pending travel from its stored reward rather than
+rerolling it.

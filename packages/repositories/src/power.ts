@@ -1,3 +1,4 @@
+import { dragon_talent_skill } from "@opencok/drizzle/schema/opencok_kingdom/dragon_talent_skill";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { playerinfo } from "@opencok/drizzle/schema/opencok_kingdom/playerinfo";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
@@ -312,6 +313,10 @@ export async function readPlayerEffects(
       .orderBy(asc(user_pet_dragon_skill.uuid)),
     bounded,
   );
+  const dragonTalents = await bound(
+    tx.select().from(dragon_talent_skill).where(eq(dragon_talent_skill.uid, uid)),
+    bounded,
+  );
   const states = await bound(
     tx
       .select({
@@ -463,6 +468,7 @@ export async function readPlayerEffects(
       heroes,
       dragons,
       dragonSkills,
+      dragonTalents,
       states,
       allianceSciences,
       prestige,
@@ -481,6 +487,7 @@ export async function readPlayerEffects(
     heroes,
     dragons,
     dragonSkills,
+    dragonTalents,
     states,
     vip,
     allianceSciences,

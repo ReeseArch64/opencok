@@ -56,7 +56,8 @@
     "./generals": "./src/generals.ts",
     "./alliance": "./src/alliance.ts",
     "./civilization-science": "./src/civilization-science.ts",
-    "./minstrel": "./src/minstrel.ts"
+    "./minstrel": "./src/minstrel.ts",
+    "./dragon-progression": "./src/dragon-progression.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
