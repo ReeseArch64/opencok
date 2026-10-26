@@ -1,12 +1,19 @@
+import { realmChatDeliveries } from "@opencok/services/realm-chat-delivery";
 import { initializeLogging, logEvent } from "@opencok/core/logging";
 import { loadChatEnvironment } from "@opencok/env/chat";
 import { createChatRepository } from "@opencok/repositories/chat";
 import { createChatApp } from "./app";
 
+import { createChatArchiveStore } from "@opencok/mongoose/chat-archive";
+
 initializeLogging("chat");
 logEvent("starting", { service: "chat" });
 const config = loadChatEnvironment();
-const repository = createChatRepository({
+const archive = config.MONGODB_URI ? createChatArchiveStore(config.MONGODB_URI) : undefined;
+const repository: ReturnType<typeof createChatRepository> = createChatRepository({
+  renderRealmEvents: (realm, owners, events) =>
+    realmChatDeliveries(repository, realm, owners, events),
+  archive,
   databaseUrl: config.DATABASE_URL!,
   topology: {
     globalDatabase: config.GLOBAL_DATABASE_NAME,
@@ -17,6 +24,7 @@ let app: ReturnType<typeof createChatApp> | undefined;
 try {
   app = createChatApp({
     repository,
+    instanceId: config.CHAT_INSTANCE_ID,
     signingSecret: config.CHAT_SIGNING_SECRET,
     websocketUrl: config.CHAT_WEBSOCKET_URL,
     log: (event) =>
@@ -40,6 +48,7 @@ try {
   logEvent("service_failed", { service: "chat", outcome: "failure" }, "error");
   await app?.close();
   await repository.close();
+  await archive?.close();
   throw new Error("Chat startup failed");
 }
 let stopping = false;
@@ -50,6 +59,7 @@ async function stop() {
     await app?.close();
   } finally {
     await repository.close();
+    await archive?.close();
     logEvent("stopped", { service: "chat", outcome: "success" });
   }
 }

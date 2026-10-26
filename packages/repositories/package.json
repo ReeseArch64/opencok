@@ -92,7 +92,11 @@
     "./world-march-runtime": "./src/world-march-runtime.ts",
     "./new-expedition": "./src/new-expedition.ts",
     "./expedition-treasury": "./src/expedition-treasury.ts",
-    "./dragon-tower": "./src/dragon-tower.ts"
+    "./dragon-tower": "./src/dragon-tower.ts",
+    "./postbox": "./src/postbox.ts",
+    "./friendship-mine": "./src/friendship-mine.ts",
+    "./social-cleanup": "./src/social-cleanup.ts",
+    "./chat-notice-cost": "./src/chat-notice-cost.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

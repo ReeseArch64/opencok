@@ -3,6 +3,7 @@ export async function fetchChatJson(
   options: RequestInit,
   timeoutMs: number,
   request: (url: string, options: RequestInit) => Promise<Response>,
+  maxBytes = 16384,
 ): Promise<unknown> {
   const controller = new AbortController();
   const signal = options.signal
@@ -31,7 +32,7 @@ export async function fetchChatJson(
     const reader = response.body.getReader();
     cancel = () => reader.cancel();
     const length = response.headers.get("content-length");
-    if (length !== null && (!/^\d+$/.test(length) || Number(length) > 16384))
+    if (length !== null && (!/^\d+$/.test(length) || Number(length) > maxBytes))
       throw new Error("Invalid chat response");
     const chunks: Uint8Array[] = [];
     let size = 0;
@@ -39,7 +40,7 @@ export async function fetchChatJson(
       const chunk = await reader.read();
       if (chunk.done) break;
       size += chunk.value.byteLength;
-      if (size > 16384) throw new Error("Invalid chat response");
+      if (size > maxBytes) throw new Error("Invalid chat response");
       chunks.push(chunk.value);
     }
     return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks)));

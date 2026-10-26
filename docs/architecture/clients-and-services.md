@@ -184,6 +184,16 @@ any restore deletes expired messages before reopening the service. A requirement
 delete all backup copies within seven days needs specific backup/key design; do not
 claim this guarantee as a consequence of a `DELETE` or TTL.
 
+### Topic 24 implementation
+
+The TypeScript Chat service now persists distribution events with messages, leases
+instance cursors and bridges events to fenced native realm consumers. MongoDB archive
+writes verify content/version before PostgreSQL compaction. Direct/private channels use
+an explicit 30-day policy; other public channels retain 24 hours. Realm economic state
+continues to own postbox, friendship mine rewards and paid notice costs/refunds.
+[Implementation, deployment and validation](../social-chat-migration.md) document the
+pinned adapter, recovery semantics and limits. Redis remains optional for delivery.
+
 ## 21. File and media lifecycle
 
 The shared API media module authenticates the owner and creates an `uploadId` with size, allowed MIME,
@@ -283,6 +293,15 @@ APK**, installed by Android. Script change does not replace an application updat
 the required native capability does not exist. The client continues sending commands;
 economy and combat results remain authoritative on the Server even when local scripts
 are updated.
+
+The Android 12.06.0 native login response (`controller=0`, `action=1`, payload `p`)
+announces the legacy hero resource bundle before the `init` extension through
+the string fields `newHeroVersion` (`1.0.91`) and `newHeroMd5Android`
+(`391e30cc9943d451b52c5137c83978f3`). The native loader uses this metadata for
+`/cok/lua/dr_newHero1.0.91_android.zip`; operators must supply the matching authorized
+archive through the CDN gateway. Bundling its textures alone does not initialize the
+native resource check used by the Hero Palace. These fields preserve the legacy
+download protocol and are separate from the signed release updater described below.
 
 ### 27.2. Manifest, delivery and publishing on Cloudflare R2
 
