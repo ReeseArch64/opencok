@@ -300,6 +300,8 @@ export const lotteryDomain: CityDomain = {
   ],
   types: [],
   async prepare(context, command, params) {
+    if (command === "lottery.init" && !context.rules.advanced.lotteries?.size)
+      return { response: encode({}), event: null };
     if (!context.state.lottery || !context.rules.advanced.lotteries?.size) lotteryFailure();
     const row: Row = {
       uid: context.owner,
