@@ -1,3 +1,5 @@
+import { createGroupBuyDomain, groupBuyOperation } from "@opencok/services/groupbuy";
+import { pendingGroupBuys } from "@opencok/repositories/groupbuy";
 import { createSpecialEventStock } from "@opencok/repositories/special-event";
 import { createSpecialEventDomain, specialEventOperation } from "@opencok/services/special-event";
 import { confirmedNicknameCost } from "@opencok/services/continued-cost-spending";
@@ -486,6 +488,7 @@ export const RealmDependenciesLive = Layer.effect(
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
         createPrayerDomain(),
         troubleDomain,
+        createGroupBuyDomain(),
         continuedCostDomain,
         createSpecialEventDomain(specialEventStock),
         recallTaskDomain,
@@ -695,6 +698,27 @@ export const RealmDependenciesLive = Layer.effect(
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
+    let groupBuyCursor: { id: string; round: number; owner: string } | undefined;
+    const recoverGroupBuys = async () => {
+      const pending = await pendingGroupBuys(db.kingdom.db, groupBuyCursor);
+      if (!pending.length) groupBuyCursor = undefined;
+      for (const record of pending) {
+        groupBuyCursor = record;
+        try {
+          await activities.domainCommand(record.owner, "groupbuys.settle", {
+            activityId: sfs.string(record.id),
+            round: sfs.int(record.round),
+            operationId: sfs.string(
+              groupBuyOperation("settle", `${record.owner}:${record.id}:${record.round}`),
+            ),
+          });
+        } catch {
+          console.warn(
+            JSON.stringify({ event: "group_buy_settlement_failed", kingdom: config.kingdomId }),
+          );
+        }
+      }
+    };
     const recoverSpecialPurchases = async () => {
       const at = BigInt(Date.now());
       for (const record of await specialEventStock.pending(config.kingdomId, at)) {
@@ -1108,6 +1132,15 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    yield* Effect.tryPromise({
+      try: recoverGroupBuys,
+      catch: () => new Error("Group-buy settlement unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     yield* Effect.tryPromise({
       try: recoverSpecialPurchases,
       catch: () => new Error("Special event recovery unavailable"),
