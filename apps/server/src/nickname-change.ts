@@ -19,6 +19,7 @@ export function createNicknameChangeRuntime(options: {
   timeoutMs: number;
   report(): void;
   prepareRefund?(owner: string, now: number): Promise<void>;
+  confirmedSpending?: NicknameChangeConfiguration["confirmedSpending"];
   chat?: ChatNicknamePublisher;
   alliance?: {
     rules: Pick<Rules, "items" | "configuration" | "mail">;
@@ -55,6 +56,7 @@ export function createNicknameChangeRuntime(options: {
     options.databases,
     options.kingdomId,
     {
+      confirmedSpending: options.confirmedSpending,
       itemType: () => goods().type,
       price: () => goods().price,
       refundRatio: options.refundRatio,

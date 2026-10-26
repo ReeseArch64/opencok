@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { bigint, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
 
@@ -12,8 +13,12 @@ export const activity_cost = opencok_kingdom.table(
     "lv": integer("lv"),
     "updateTime": bigint("updateTime", { mode: "bigint" }),
     "getLv": varchar("getLv", { length: 40 }),
+    periodStart: bigint("periodStart", { mode: "bigint" }).notNull().default(sql.raw("0")),
   },
   (table) => [
-    primaryKey({ name: "activity_cost_PRIMARY", columns: [table["uid"], table["type"]] }),
+    primaryKey({
+      name: "activity_cost_PRIMARY",
+      columns: [table["uid"], table["type"], table.periodStart],
+    }),
   ],
 );

@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  continuedCost?: import("./continued-cost").ContinuedCostReader;
   trouble?: import("./trouble").TroubleState;
   cosmeticTarget?: import("./city-cosmetics").CosmeticTargetState;
   prayer?: import("./prayer").PrayerState;
@@ -134,6 +135,8 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  continuedCostHide?: number;
+  continuedCost?: { row: Row; logs: readonly number[] };
   troubleHistory?: import("./trouble").TroubleHistoryWrite;
   cosmeticTarget?: import("./city-cosmetics").CosmeticTargetWrite;
   cosmeticChanges?: readonly import("./city-cosmetics").CosmeticStatusChange[];

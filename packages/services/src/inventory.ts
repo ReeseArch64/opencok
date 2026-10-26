@@ -1,3 +1,4 @@
+import { confirmedContinuedCost } from "./continued-cost-spending";
 import { activityEconomy } from "./timed-activity";
 import type { InventoryCommandResponse } from "@opencok/contracts/responses/inventory";
 import {
@@ -434,6 +435,7 @@ export class InventoryPlanner {
         body: inventoryChanges([...this.changed.values()], this.rules),
       });
     return {
+      confirmedSpending: confirmedContinuedCost(this.state, this.rules, this.now, this.items),
       postings: this.postings,
       events: [
         {

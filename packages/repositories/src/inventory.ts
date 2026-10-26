@@ -237,5 +237,10 @@ export async function executeInventoryTransaction(
   }
   for (const [asset, entry] of expected)
     if (current.get(asset) !== entry.after) throw new Error("Inventory posting balance mismatch");
-  return { response: result.response, events: result.events, postings: result.postings };
+  const spending = result.confirmedSpending?.(result.postings);
+  return {
+    response: result.response,
+    events: [...(result.events ?? []), ...(spending ? [spending] : [])],
+    postings: result.postings,
+  };
 }

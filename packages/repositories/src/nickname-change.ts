@@ -1,3 +1,5 @@
+import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
+import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { cross_throne_king_info as throne } from "@opencok/drizzle/schema/opencok_kingdom/cross_throne_king_info";
 import { createHash } from "node:crypto";
@@ -56,6 +58,7 @@ type ItemPayment = {
   refund?: { before: number | null; after: number };
 };
 type GoldPayment = {
+  pendingEvent?: { id: string; type: string; payload: string };
   version: 1;
   kind: "gold";
   platform: string | null;
@@ -169,6 +172,19 @@ export function nicknameChangePayment(record: NicknameChangeRecord): Payment {
     typeof value.price !== "string"
   )
     return invalid();
+  if (value.pendingEvent !== undefined) {
+    const event = value.pendingEvent as GoldPayment["pendingEvent"];
+    if (
+      !event ||
+      typeof event !== "object" ||
+      !identifier(event.id, 40) ||
+      !identifier(event.type, 128) ||
+      typeof event.payload !== "string" ||
+      event.payload.length > 6000 ||
+      Buffer.from(event.payload, "base64").toString("base64") !== event.payload
+    )
+      return invalid();
+  }
   const before = restoredBalances(value.before),
     after = restoredBalances(value.after);
   const expected = nicknameGoldDebit(before, value.platform as string | null, value.price);
@@ -497,6 +513,36 @@ export function createNicknameChangeStore(
           .where(eq(userprofile.uid, uid))
           .returning({ uid: userprofile.uid });
         if (updated.length !== 1 || updated[0]!.uid !== uid) return invalid();
+        if (payment!.kind === "gold" && configuration.confirmedSpending) {
+          const paid = payment! as GoldPayment;
+          const buildings = await tx
+            .select()
+            .from(user_building)
+            .where(eq(user_building.uid, uid))
+            .limit(257);
+          if (buildings.length > 256) return invalid();
+          const postings = balanceKeys
+            .filter((key) => paid.before[key] !== paid.after[key])
+            .map((key) => ({
+              account: uid,
+              asset: `profile.${key}`,
+              before: BigInt(paid.before[key]),
+              after: BigInt(paid.after[key]),
+              reason: "user.modify.nickName",
+            }));
+          const event = configuration.confirmedSpending(
+            profile,
+            buildings,
+            postings,
+            Number(requestedAt),
+          );
+          if (event)
+            paid.pendingEvent = {
+              id: event.id,
+              type: event.type,
+              payload: Buffer.from(event.payload).toString("base64"),
+            };
+        }
         const record: NicknameChangeRecord = {
           operationId,
           ownerUid: uid,
@@ -611,6 +657,19 @@ export function createNicknameChangeStore(
           .returning();
         if (!updated) return invalid();
         validateRecord(updated, uid, operationId);
+        if (committed && payment.kind === "gold" && payment.pendingEvent) {
+          const event = payment.pendingEvent;
+          await tx.insert(mutation_outbox).values({
+            kingdomId,
+            ownerUid: uid,
+            requestId: `nickname:${operationId}`,
+            eventId: event.id,
+            eventType: event.type,
+            payload: Buffer.from(event.payload, "base64"),
+            createdAt: record.createdAt,
+            publishedAt: 0n,
+          });
+        }
         return updated;
       },
       { isolationLevel: "read committed", accessMode: "read write" },
