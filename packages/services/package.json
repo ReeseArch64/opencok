@@ -111,7 +111,8 @@
     "./alliance-heart": "./src/alliance-heart.ts",
     "./regional-recall": "./src/regional-recall.ts",
     "./recall-task": "./src/recall-task.ts",
-    "./prayer": "./src/prayer.ts"
+    "./prayer": "./src/prayer.ts",
+    "./city-cosmetics": "./src/city-cosmetics.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

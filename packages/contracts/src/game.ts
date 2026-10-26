@@ -199,7 +199,12 @@ export interface GameStore extends AuthenticationStore {
   getWorldByPointIds(
     uid: string,
     ids: number[],
-  ): Promise<{ world: Row | undefined; points: Row[]; hasMarches: boolean }>;
+  ): Promise<{
+    world: Row | undefined;
+    points: Row[];
+    hasMarches: boolean;
+    cosmetics?: readonly Row[];
+  }>;
 }
 
 export interface PushPreference {

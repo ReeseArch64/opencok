@@ -738,8 +738,33 @@ The response retains the INT selector and native server-action reward pushes.
 Owned cake interactions consume one catalog item, update the configured
 cosmetic statuses and evaluate their exact-count milestone. Overlap-five status
 counters now preserve their original deadline, increment their stored count and
-reset at the configured limit. Applying these interactions to another player
-requires the following target-cosmetic module; this slice rejects that route
-before consuming an item. Current recipes retain their historical exclusive
+reset at the configured limit. The target-cosmetic module applies these interactions to another local player
+under the shared multi-account mutation boundary. Current recipes retain their historical exclusive
 calendar bounds. No migration or dependency is introduced. Preserve ingredient,
 reward, variable, status and receipt records together during backup and rollback.
+
+## Cosmetic interactions between players
+
+Cake interactions select a real player in the same kingdom and lock both profile
+rows in sorted order before charging the sender or changing the recipient. The
+selected target is retained by the repository and checked again for writes.
+The bounded campaign route changes only configured cosmetic statuses without
+economic effects; currency, inventory and economic buffs cannot be assigned to
+the recipient through a client trigger. Receipt failure rolls back sender costs,
+recipient statuses, cosmetic ownership and notification outbox together.
+
+The existing cosmetic storage controls the final reference lifetimes: cake
+counters retain fourteen days, bubbles last five seconds and the fiftieth-count
+castle appearance lasts one hour. Active permanent ownership remains permanent.
+Modern status replacement compares configured subgroups. Only changed status and
+ownership rows are written; unrelated effects and owned appearances remain intact.
+
+Committed private status and activation messages go to the recipient. Native
+bubble, overlap and city updates reach the sender, recipient and interested map
+subscribers. The map query reads cosmetics only for city owners among its selected
+points and projects signed INT seconds, overlap counts and nested bubble fields.
+Expired appearances disappear from projections without replaying the interaction.
+No schema or dependency change is required. Preserve status, cosmetic storage,
+sender inventory, receipts and pending notification records together on backup and
+rollback. Synthetic PostgreSQL checks cover opposing sends, transaction failure,
+realm boundaries, map projections, expiry and notification privacy.
