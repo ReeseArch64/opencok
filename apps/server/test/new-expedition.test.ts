@@ -71,6 +71,7 @@ test("native expedition query and claim requests retain correlation without expo
     "expedition.king.present",
     "expedition.recieve.count",
     "newexpidition.activityinfo",
+    "newexpidition.rankinfo",
     "newexpidition.takepersonreward",
     "newexpidition.takealliancereward",
     "expedition.show",
@@ -84,5 +85,6 @@ test("native expedition query and claim requests retain correlation without expo
     game.execute("owner", "expedition.score", { score: sfs.int(1000000) }),
   ).rejects.toThrow();
   await expect(game.execute("owner", "expedition.configure", {})).rejects.toThrow();
-  expect(calls).toHaveLength(9);
+  await expect(game.execute("owner", "expedition.award.deliver", {})).rejects.toThrow();
+  expect(calls).toHaveLength(10);
 });

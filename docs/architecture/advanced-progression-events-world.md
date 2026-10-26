@@ -1560,3 +1560,65 @@ contracts and snapshots passed 1,685 tests with 49,559 assertions and 838
 snapshots. Physical schemas and upgrades passed 1,535 tests with 36,971 assertions.
 Required lint, formatting, both migration consistency checks and server/nine
 package type checks passed. Device execution remains unverified.
+
+## Expedition rewards and native ranking history
+
+Finalized noncombat stages now admit funded ranking, personal target, guild
+target and winning kingdom rewards. Personal targets include their separate
+science double mail when the frozen science eligibility permits it. Tier flags
+already claimed before sealing prevent another automatic payout. Guild eligibility
+uses the sealed contribution and membership; changing guilds or sciences after
+closure cannot change the entitlement. Kingdom thresholds retain the source's
+floating-point comparison, while guild minimum contribution remains strict.
+
+Reward planning reads both completed reciprocal proofs and the immutable shared
+result. It scans eligible home profiles in C order through a saved recipient
+cursor, admits at most 64 units of mail work per refresh and pins each recipient's
+mail contents and reward outcomes in the owned database. A recipient can finish
+its bounded bundle after the work budget is reached. Accounts registered after
+sealing are excluded. Missing profiles do not invent recipients. Missing ranking
+metadata stops the native ranking prefix without discarding economic score facts
+or fabricating another player in history.
+
+One canonical owned operation delivers the saved mail bundle, updates tier flags,
+acknowledges the entitlement and enqueues native mail notifications atomically.
+The resulting mail uses the existing funded claim path, so another mail claim
+cannot grant its assets twice. Banned recipients defer for a minute while other
+recipients continue. Delivery drains saved entitlements even if new admission
+fails or shared standings are unavailable. Restart or catalog changes do not
+reroll outcomes that were already admitted.
+
+The native `newexpidition.rankinfo` query now returns up to twelve recent stage
+reports across owned results and unchanged legacy history. It retains the native
+stage, long begin-time, user-list and kingdom-list shapes. User identity, picture,
+guild abbreviation and rank are fixed by the final report; score is absent from
+the native historical user entry. Kingdom names and banners use current shared
+server metadata, with an empty object when that metadata does not exist. Malformed
+legacy reports reject instead of inventing an empty report. Queries enforce owned
+profile, realm and ban checks and retain request correlation. Client requests
+cannot invoke the private reward delivery command.
+
+Apply kingdom migration `0038_expedition_stage_awards` before this binary. It adds
+owned mail entitlements and appends the recipient cursor and native report to the
+stage closure. Existing fields and legacy histories remain unchanged. Inventory
+becomes 839 tables and 6,847 fields: 147 global and 692 kingdom tables. No dependency,
+configuration or environment variable is added. Back up entitlements, mail, tier
+flags, operation receipts, notification outbox and stage results together. Retain
+these records on binary rollback. Deleting a delivered acknowledgement or funded
+mail independently destroys payout recovery. Monster and fighting settlement
+remain gated by their corresponding validated combat engine.
+
+Eight PostgreSQL reward/history acceptance cases passed with 84 assertions,
+including manual-before-automatic claims, pinned outcomes during shared outage,
+receipt and admission rollback, ban deferral, a 72-recipient recovery tail and
+missing ranking metadata. Focused units validate every maintained expedition
+reward as funded claimable mail, fractional kingdom thresholds, native history
+field order, malformed legacy history and public/private command correlation.
+The complete server unit suite passed 1,483 tests with 245,129 assertions.
+Sixteen expedition, stage-finality and hero reward regression cases passed with
+101 assertions. Native TCP and process-kill recovery passed two tests with 243
+assertions, including the active history request and rejection of client reward
+delivery. Schema contracts and snapshots passed 1,687 tests with 49,629 assertions
+and 839 snapshots. Physical schemas and upgrades passed 1,537 tests with 37,033
+assertions. Required lint, formatting, kingdom migration consistency and
+server/nine package type checks passed. Device execution remains unverified.

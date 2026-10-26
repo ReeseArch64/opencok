@@ -267,6 +267,13 @@
       "when": 1793047597202,
       "tag": "0037_expedition_stage_finality",
       "breakpoints": false
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1793048234203,
+      "tag": "0038_expedition_stage_awards",
+      "breakpoints": false
     }
   ]
 }

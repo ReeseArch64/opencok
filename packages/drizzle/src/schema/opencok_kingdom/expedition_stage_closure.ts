@@ -7,6 +7,7 @@ import {
   integer,
   primaryKey,
   varchar,
+  text,
 } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
 export const expedition_stage_closure = opencok_kingdom.table(
@@ -26,6 +27,8 @@ export const expedition_stage_closure = opencok_kingdom.table(
     createdAt: bigint("createdAt", { mode: "bigint" }).notNull(),
     winner: integer("winner").notNull(),
     finalizedAt: bigint("finalizedAt", { mode: "bigint" }).notNull(),
+    awardCursor: varchar("awardCursor", { length: 40 }).notNull().default(sql.raw("''")),
+    history: text("history"),
   },
   (table) => [
     primaryKey({

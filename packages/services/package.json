@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./expedition-stage-rewards": "./src/expedition-stage-rewards.ts",
     "./expedition-stage-finality": "./src/expedition-stage-finality.ts",
     "./expedition-score-publication": "./src/expedition-score-publication.ts",
     "./expedition-phase": "./src/expedition-phase.ts",

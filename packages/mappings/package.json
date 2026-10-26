@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./expedition-stage-rewards": "./src/expedition-stage-rewards.ts",
     "./arena": "./src/arena.ts",
     "./anniversary": "./src/anniversary.ts",
     "./lottery": "./src/lottery.ts",
