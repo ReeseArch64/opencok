@@ -727,6 +727,8 @@ export function createWorldMarchDomain(size: number): CityDomain {
           if (row.ownerId !== context.owner) worldMutationFailure();
           Object.assign(row, {
             pointType: 0,
+            sendHeartDurationTime: 0n,
+            heartType: "",
             ownerId: "",
             ownerName: "",
             allianceId: "",
@@ -738,6 +740,8 @@ export function createWorldMarchDomain(size: number): CityDomain {
           const row = point(context, id);
           Object.assign(row, {
             pointType: id === target ? 1 : 2,
+            sendHeartDurationTime: 0n,
+            heartType: "",
             ownerId: context.owner,
             ownerName: text(context.state.profile, "name"),
             allianceId: text(context.state.profile, "allianceId"),

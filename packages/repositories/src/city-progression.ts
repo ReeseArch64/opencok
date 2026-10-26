@@ -1,3 +1,4 @@
+import { readAllianceHeart, writeAllianceHeart } from "./alliance-heart";
 import { readPlayerItemGifts, writePlayerItemGifts } from "./player-item-gifts";
 import { readSeasonalExchange, writeSeasonalExchange } from "./seasonal-exchange";
 import { readVipBox, writeVipBox } from "./vip-box";
@@ -139,6 +140,10 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        allianceHeart:
+          command === "heart.send" || command === "heart.init"
+            ? await readAllianceHeart(tx, owner, command, request)
+            : undefined,
         playerItemGifts:
           command === "item.send" || command === "gift.init"
             ? await readPlayerItemGifts(tx, owner, command, request)
@@ -272,6 +277,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.allianceHeart) await writeAllianceHeart(tx, owner, write.allianceHeart);
         if (write.playerItemGifts) await writePlayerItemGifts(tx, owner, write.playerItemGifts);
         if (write.seasonalExchange) await writeSeasonalExchange(tx, owner, write.seasonalExchange);
         if (write.vipBox) await writeVipBox(tx, owner, write.vipBox);

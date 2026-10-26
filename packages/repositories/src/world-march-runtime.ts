@@ -113,6 +113,9 @@ export async function writeWorldMutation(
       .update(worldpoint)
       .set({
         pointType: num(row, "pointType"),
+        sendHeartDurationTime:
+          row.sendHeartDurationTime == null ? undefined : long(row, "sendHeartDurationTime"),
+        heartType: row.heartType == null ? undefined : text(row, "heartType"),
         monsterCurrHP: num(row, "monsterCurrHP"),
         pointItem: row.pointItem == null ? null : text(row, "pointItem"),
         ownerId: row.ownerId == null ? null : text(row, "ownerId"),
