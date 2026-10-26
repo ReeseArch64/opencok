@@ -1,3 +1,5 @@
+import { buildingStep } from "@opencok/rules/building";
+import { troubleItem } from "@opencok/rules/trouble";
 import { recordTargetTask } from "./target-task";
 import {
   selectMarchCompanions,
@@ -39,8 +41,30 @@ import { reconnectMarchBase } from "@opencok/mappings/reconnect-marches";
 import { serverFeature } from "@opencok/rules/power-context";
 import type { CityDomain, CityProgressionContext } from "./city-progression";
 
+function troubleDetectSpeed(context: CityProgressionContext) {
+  if (
+    !serverFeature(context.rules, "honour_watchtower", {
+      kingdomId: context.rules.kingdomId,
+      version: "12.06.0",
+      now: Number(context.now),
+    })
+  )
+    return 0;
+  const tower = context.state.buildings.find((row) => num(row, "itemId") === 417000);
+  if (!tower) return 0;
+  const parameter = context.rules.building(
+    "417000",
+    num(tower, "level"),
+    num(tower, "star"),
+    num(tower, "progress"),
+  ).clientParameters?.[2];
+  return Number(buildingStep(parameter?.steps, num(tower, "progress"))?.value.split(";")[0] ?? 0);
+}
 function checkpoint(state: RuntimeMarch) {
   return encode({
+    ...(state.purpose
+      ? { purpose: sfs.string(state.purpose), troubleItem: sfs.string(state.troubleItem!) }
+      : {}),
     id: sfs.string(state.id),
     owner: sfs.string(state.owner),
     worldId: sfs.int(state.worldId),
@@ -90,7 +114,10 @@ function restore(raw: Row): RuntimeMarch {
     ]),
   );
   const cargo = data.cargo?.type === Type.Object ? fields(data.cargo) : null;
+  const purpose = str(data, "purpose", "");
+  if (purpose && purpose !== "trouble") worldMutationFailure();
   const state: RuntimeMarch = {
+    ...(purpose === "trouble" ? { purpose, troubleItem: str(data, "troubleItem") } : {}),
     id: str(data, "id"),
     owner: str(data, "owner"),
     worldId: int(data, "worldId"),
@@ -367,7 +394,36 @@ function recover(context: CityProgressionContext) {
     ) {
       if (state.phase === "outbound") {
         const target = point(context, state.target);
-        if (
+        if (state.purpose === "trouble") {
+          troubleItem(context.rules, state.troubleItem!);
+          if (num(original, "type") !== 13 || state.targetType !== 1) worldMutationFailure();
+          if (
+            num(target, "pointType") === 1 &&
+            text(target, "ownerId") &&
+            text(target, "ownerId") === text(original, "targetUid")
+          ) {
+            const write = (context.write.worldMutation ??= {});
+            write.troubleDeliveries = [
+              ...(write.troubleDeliveries ?? []),
+              {
+                march: state.id,
+                sender: context.owner,
+                username: text(context.state.profile, "name"),
+                target: text(target, "ownerId"),
+                point: state.target,
+                item: state.troubleItem!,
+                at: context.now,
+              },
+            ];
+          }
+          state = {
+            ...state,
+            phase: "returning",
+            startedAt: state.dueAt,
+            dueAt: state.dueAt + state.returnDuration,
+            version: state.version + 1,
+          };
+        } else if (
           num(target, "pointType") !== 3 ||
           text(target, "ownerMarchUUid") ||
           num(target, "resInitValue") <= num(target, "resCostValue")
@@ -453,6 +509,19 @@ export function createWorldMarchDomain(size: number): CityDomain {
         worldMutationFailure();
       recover(context);
       const push = (): Fields => ({
+        troubles: sfs.array(
+          (context.write.worldMutation?.troubleDeliveries ?? []).map((row) =>
+            sfs.object({
+              march: sfs.string(row.march),
+              sender: sfs.string(row.sender),
+              username: sfs.string(row.username),
+              target: sfs.string(row.target),
+              point: sfs.int(row.point),
+              item: sfs.string(row.item),
+              at: sfs.long(row.at),
+            }),
+          ),
+        ),
         ownerPushes: sfs.array(
           marchCompanionPushes(context).map((push) =>
             sfs.object({
@@ -519,20 +588,30 @@ export function createWorldMarchDomain(size: number): CityDomain {
       if (command === "world.march" || command === "world.march.check") {
         const targetId = cityInteger(int(params, "point"), 1, size * size),
           target = point(context, targetId),
-          world = context.state.worldMutation.world;
+          world = context.state.worldMutation.world,
+          trouble = int(params, "type") === 13,
+          selectedItem = trouble ? context.economy.ownedItem?.(str(params, "itemUuid")) : undefined;
+        if (trouble) {
+          if (!selectedItem || selectedItem.count < 1) worldMutationFailure();
+          troubleItem(context.rules, selectedItem.itemId);
+        }
         if (
-          int(params, "type") !== 0 ||
-          num(target, "pointType") !== 3 ||
           num(target, "worldId") !== 0 ||
-          text(target, "ownerMarchUUid") ||
-          text(target, "ownerId") ||
-          num(target, "resInitValue") <= num(target, "resCostValue")
+          (trouble
+            ? num(target, "pointType") !== 1 ||
+              !text(target, "ownerId") ||
+              text(target, "ownerId") === context.owner
+            : int(params, "type") !== 0 ||
+              num(target, "pointType") !== 3 ||
+              text(target, "ownerMarchUUid") ||
+              text(target, "ownerId") ||
+              num(target, "resInitValue") <= num(target, "resCostValue"))
         )
           worldMutationFailure();
         const companions = selectMarchCompanions(context, params, marchRows(context));
         if (marchRows(context).length >= Math.max(1, Math.trunc(1 + context.effect(55))))
           worldMutationFailure();
-        const soldiers = fields(params.soldiers),
+        const soldiers = params.soldiers ? fields(params.soldiers) : {},
           troops: { armyId: string; quantity: number }[] = [],
           troopIds: Record<string, string> = {},
           army: SavedMarchArmy = {
@@ -571,8 +650,9 @@ export function createWorldMarchDomain(size: number): CityDomain {
               .building("400000", num(castle, "level"))
               .clientParameters?.[0]?.value.split(";")[0] ?? 0,
           ) + context.effect(56);
-        if (!troops.length || total > max) worldMutationFailure();
-        const resource = cityInteger(target.pointItem, 0, 5);
+        if ((!troops.length && !trouble) || total > max) worldMutationFailure();
+        if (!troops.length) marchSpeed = 1;
+        const resource = trouble ? 0 : cityInteger(target.pointItem, 0, 5);
         const raw = resourceRawArmyLoad(
           {
             cachedLoad: 0,
@@ -588,10 +668,12 @@ export function createWorldMarchDomain(size: number): CityDomain {
           },
           context.rules,
         );
-        const capacity = resourceArmyLoad(
-          { rawArmyLoad: raw, pointType: 3, pointItem: String(resource), plunder: [] },
-          context.rules,
-        );
+        const capacity = trouble
+          ? 0
+          : resourceArmyLoad(
+              { rawArmyLoad: raw, pointType: 3, pointItem: String(resource), plunder: [] },
+              context.rules,
+            );
         army.cachedLoad = capacity;
         const route = ordinaryMarchRoute(
           context.rules,
@@ -599,10 +681,13 @@ export function createWorldMarchDomain(size: number): CityDomain {
           num(world, "pointId"),
           targetId,
           marchSpeed,
-          context.effect(60) + context.effect(97) + context.effect(2193),
+          trouble
+            ? context.effect(401) + troubleDetectSpeed(context)
+            : context.effect(60) + context.effect(97) + context.effect(2193),
           true,
-          false,
+          trouble,
           context.effect(402),
+          trouble,
         );
         const duration = route.duration;
         const gatherEffect =
@@ -614,14 +699,12 @@ export function createWorldMarchDomain(size: number): CityDomain {
               context.effect(308) +
               context.effect(2195) +
               context.effect([153, 156, 155, 154][resource] ?? 65);
-        const collectRate = resourceGatherRate(
-          context.rules,
-          resource,
-          num(castle, "level"),
-          gatherEffect,
-        );
+        const collectRate = trouble
+          ? 0
+          : resourceGatherRate(context.rules, resource, num(castle, "level"), gatherEffect);
         const reserved = reserveMarch(
           {
+            ...(trouble ? { purpose: "trouble" as const } : {}),
             id: randomUUID(),
             owner: context.owner,
             worldId: 0,
@@ -643,13 +726,30 @@ export function createWorldMarchDomain(size: number): CityDomain {
             },
             false,
           );
+        if (trouble) {
+          if (!context.economy.consumeItem) worldMutationFailure();
+          context.economy.consumeItem(str(params, "itemUuid"), 1);
+          const write = (context.write.worldMutation ??= {});
+          write.companionPushes = [
+            ...(write.companionPushes ?? []),
+            {
+              command: "push.item.del",
+              body: encode({
+                uuid: sfs.string(str(params, "itemUuid")),
+                itemId: sfs.string(selectedItem!.itemId),
+                count: sfs.int(selectedItem!.count - 1),
+              }),
+            },
+          ];
+        }
         attachMarchCompanions(context, army, companions);
         const state: RuntimeMarch = {
           ...reserved.march,
+          ...(trouble ? { troubleItem: selectedItem!.itemId } : {}),
           capacity,
           collectRate,
           marchSpeed,
-          targetType: 3,
+          targetType: trouble ? 1 : 3,
           targetResource: resource,
           troopIds,
           segments: route.segments,
@@ -662,9 +762,9 @@ export function createWorldMarchDomain(size: number): CityDomain {
           ownerColor: num(world, "color"),
           allianceId: text(context.state.profile, "allianceId"),
           targetId,
-          targetType: 3,
-          targetUid: "",
-          type: 0,
+          targetType: trouble ? 1 : 3,
+          targetUid: trouble ? text(target, "ownerId") : "",
+          type: trouble ? 13 : 0,
           state: 0,
           worldId: 0,
           marchStartTime: context.now,

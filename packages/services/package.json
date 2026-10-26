@@ -112,7 +112,8 @@
     "./regional-recall": "./src/regional-recall.ts",
     "./recall-task": "./src/recall-task.ts",
     "./prayer": "./src/prayer.ts",
-    "./city-cosmetics": "./src/city-cosmetics.ts"
+    "./city-cosmetics": "./src/city-cosmetics.ts",
+    "./trouble": "./src/trouble.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

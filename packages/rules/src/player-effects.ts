@@ -144,6 +144,24 @@ export function temporaryEffect(
     return { states: [{ ...prior, count: next }], deleted: [] };
   }
   const duration = BigInt(cityInteger(rule!.time ?? 0)) * 1000n * BigInt(cityInteger(count, 1));
+  if (
+    prior &&
+    ["3", "4"].includes(overlap ?? "") &&
+    ["3", "4"].includes(oldRule?.overlap ?? "") &&
+    overlap !== oldRule?.overlap &&
+    (long(prior, "endTime") === 9223372036854775807n || long(prior, "endTime") > now + duration)
+  )
+    return {
+      states: [
+        {
+          ...prior,
+          endTime: long(prior, "endTime") - duration,
+          type2: cityInteger(rule!.type2 ?? 0),
+          groupType: cityInteger(group || 0),
+        },
+      ],
+      deleted: [],
+    };
   let end =
     rule!.time === undefined
       ? 9223372036854775807n

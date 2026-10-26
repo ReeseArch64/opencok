@@ -768,3 +768,41 @@ No schema or dependency change is required. Preserve status, cosmetic storage,
 sender inventory, receipts and pending notification records together on backup and
 rollback. Synthetic PostgreSQL checks cover opposing sends, transaction failure,
 realm boundaries, map projections, expiry and notification privacy.
+
+## Trouble event marches and history
+
+Native type-13 marches carry one exact owned type-26 item to another resident
+city. The scout route uses the investigation-speed effect and watchtower honour
+steps. Empty armies are allowed only for this explicit march purpose; they cannot
+collect or carry resources. Supplied troops remain subject to ownership and march
+reservation limits. Preview does not consume inventory. Departure, item decrement,
+checkpoint and owner notification commit together, and retries retain one march.
+
+Arrival verifies that the original city still belongs to the selected recipient,
+then persists its delivery in the march transaction and starts the return. Recall
+and a changed target suppress delivery. The fenced realm relay applies the effect
+through the recipient's own mutation transaction with an operation ID derived from
+the march identity. Pending delivery survives authority replacement; replay cannot
+extend the status or duplicate history. Status duration uses the saved arrival
+processing time so delayed delivery does not extend the effect. The route performs
+no combat or resource credit. Native trouble notifications reach the recipient,
+sender and interested map subscribers through the committed notification outbox.
+
+`get.trouble.list` returns the ten newest structured entries with UTF status, name
+and item fields and LONG timestamps. `trouble.speed` quotes the reference cooldown
+formula, charges total owned gold and removes one trouble status atomically with
+its receipt. Same-variant effects extend duration; opposite variants subtract the
+incoming duration until replacement is required. Map projections prefer trouble
+over ordinary castle appearances and remove expired effects.
+
+Migration `0028_trouble_history.sql` widens existing numeric owner IDs to strings,
+retains nullable legacy owners and duplicate rows, and appends item and identity
+columns. It preserves the existing owner index and adds ordered owner lookup.
+Back up history, status, march checkpoints, inventory, balances, receipts and
+pending outbox records together. Rollback must retain the widened owner column,
+new history identities and pending deliveries; an older binary must not process
+active type-13 checkpoints. No new dependency or environment variable is needed.
+Synthetic PostgreSQL tests cover migration of legacy rows, exact-item costs,
+preview, concurrent replay, authority replacement, moved targets, recall,
+notification recipients and rollback of paid removal. Native-device acceptance
+and the remaining specialized combat engines remain separate acceptance work.
