@@ -1,3 +1,4 @@
+import { eventRealmEnabled } from "@opencok/rules/availability";
 import { cosmeticOwnership, cosmeticTargetStates } from "./city-cosmetics";
 import { randomInt, randomUUID } from "node:crypto";
 import type {
@@ -30,7 +31,7 @@ export class CampaignPlanner {
     readonly attributes: Readonly<Record<string, string | number | bigint>> = {},
   ) {}
   private variable(reference: string): CampaignVariable {
-    const match = reference.match(/^([PSCIG])?\$(?:long_)?([A-Za-z0-9_-]+)$/);
+    const match = reference.match(/^([PSCIG])?\$(?:long_)?([A-Za-z0-9_ -]+)$/);
     if (!match) campaignFailure();
     const key = `long_${match[2]}`;
     const variable = match[1]
@@ -38,7 +39,8 @@ export class CampaignPlanner {
       : [...(this.context.rules.advanced.campaignVariables?.values() ?? [])].find(
           (v) => v.id === key,
         );
-    if (!variable || !variable.id.startsWith("long_3th_")) campaignFailure();
+    if (!variable || !/^long_[A-Za-z0-9_ -]+$/.test(variable.id) || variable.id.length > 200)
+      campaignFailure();
     return variable;
   }
   private row(variable: CampaignVariable) {
@@ -64,6 +66,7 @@ export class CampaignPlanner {
     return row;
   }
   private set(variable: CampaignVariable, value: bigint) {
+    if (variable.scope === "I") return;
     if (variable.scope === "C") {
       this.ephemeral.set(variable.id, value);
       return;
@@ -173,11 +176,12 @@ export class CampaignPlanner {
           parts[0]!,
           this.value(parts[1]!),
         );
-      case 32:
+      case 32: {
+        const selector = (clause.parameters ?? "").toLowerCase();
         return (
-          (clause.parameters ?? "").toLowerCase() === "all" ||
-          (clause.parameters ?? "").split("-").includes(String(this.context.rules.kingdomId))
+          selector.includes("all") || eventRealmEnabled(selector, this.context.rules.kingdomId)
         );
+      }
       case 51:
         return nested.length > 0 && nested.every((c) => this.check(c, depth + 1));
       case 52:
