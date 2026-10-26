@@ -1,3 +1,4 @@
+import { captureCostFact } from "./continued-cost-facts";
 import { lte, and, asc, eq, inArray } from "drizzle-orm";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
 import { economy_posting } from "@opencok/drizzle/schema/opencok_kingdom/economy_posting";
@@ -205,6 +206,19 @@ export async function appendMutationRecords(
       publishedAt: 0n,
       expiresAt: event.expiresAt ?? input.expiresAt,
     });
+  for (const event of events)
+    if (event.type === "continuedcost.spend")
+      await captureCostFact(
+        tx,
+        {
+          kingdomId: authority.kingdomId,
+          ownerUid: owner,
+          requestId: key.requestId,
+          eventId: event.id,
+          payload: event.payload,
+        },
+        createdAt,
+      );
   authority.assertReady();
   return response;
 }

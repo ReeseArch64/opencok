@@ -14398,6 +14398,7 @@ column ["publishedAt","bigint",true,null,null,null]
 column ["expiresAt","bigint",false,null,null,null]
 column ["nextAttemptAt","bigint",true,"0",null,null]
 primary ["mutation_outbox_PRIMARY",["kingdomId","ownerUid","requestId","eventId"]]
+index ["mutation_outbox_event_source",false,["kingdomId","eventType","createdAt"]]
 index ["mutation_outbox_retry",false,["kingdomId","publishedAt","nextAttemptAt","createdAt"]]
 index ["mutation_outbox_expiry",false,["expiresAt"]]
 index ["mutation_outbox_pending",false,["kingdomId","publishedAt","createdAt"]]
@@ -15305,4 +15306,116 @@ insert into "opencok_kingdom"."expedition_stage_award" ("id", "periodId", "stage
 select "id", "periodId", "stage", "ownerUid", "payload", "createdAt", "deliveredAt", "nextAttemptAt" from "opencok_kingdom"."expedition_stage_award" where "opencok_kingdom"."expedition_stage_award"."id" = $1
 update "opencok_kingdom"."expedition_stage_award" set "id" = $1, "periodId" = $2, "stage" = $3, "ownerUid" = $4, "payload" = $5, "createdAt" = $6, "deliveredAt" = $7, "nextAttemptAt" = $8 where "opencok_kingdom"."expedition_stage_award"."id" = $9
 delete from "opencok_kingdom"."expedition_stage_award" where "opencok_kingdom"."expedition_stage_award"."id" = $1"
+`;
+
+exports[`opencok_global.continued_cost_rank_owner: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["kingdomId","integer",true,null,null,null]
+column ["ownerEpoch","bigint",true,null,null,null]
+column ["instanceId","varchar(40)",true,null,null,null]
+column ["sequence","bigint",true,null,null,null]
+primary ["continued_cost_rank_owner_PRIMARY",["kingdomId"]]
+check ["continued_cost_rank_owner_bounds","\\"kingdomId\\">0 AND \\"ownerEpoch\\">0 AND \\"sequence\\">=0"]
+insert into "opencok_global"."continued_cost_rank_owner" ("kingdomId", "ownerEpoch", "instanceId", "sequence") values ($1, $2, $3, $4)
+select "kingdomId", "ownerEpoch", "instanceId", "sequence" from "opencok_global"."continued_cost_rank_owner" where "opencok_global"."continued_cost_rank_owner"."kingdomId" = $1
+update "opencok_global"."continued_cost_rank_owner" set "kingdomId" = $1, "ownerEpoch" = $2, "instanceId" = $3, "sequence" = $4 where "opencok_global"."continued_cost_rank_owner"."kingdomId" = $5
+delete from "opencok_global"."continued_cost_rank_owner" where "opencok_global"."continued_cost_rank_owner"."kingdomId" = $1"
+`;
+
+exports[`opencok_global.continued_cost_rank_period: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["id","varchar(32)",true,null,null,null]
+column ["startTime","bigint",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["type","integer",true,null,null,null]
+column ["rewards","text",true,null,null,null]
+column ["expectedRealms","varchar(2048)",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["state","integer",true,"0",null,null]
+column ["finalizedAt","bigint",true,"0",null,null]
+column ["revision","bigint",true,"0",null,null]
+primary ["continued_cost_rank_period_PRIMARY",["id"]]
+index ["continued_cost_rank_period_end",false,["endTime"]]
+check ["continued_cost_rank_period_bounds","\\"startTime\\">0 AND \\"endTime\\">\\"startTime\\" AND \\"type\\" BETWEEN 1 AND 6 AND \\"createdAt\\">=0 AND \\"state\\" IN (0,1) AND \\"finalizedAt\\">=0 AND \\"revision\\">=0 AND octet_length(\\"rewards\\")<=8192"]
+insert into "opencok_global"."continued_cost_rank_period" ("id", "startTime", "endTime", "type", "rewards", "expectedRealms", "createdAt", "state", "finalizedAt", "revision") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "id", "startTime", "endTime", "type", "rewards", "expectedRealms", "createdAt", "state", "finalizedAt", "revision" from "opencok_global"."continued_cost_rank_period" where "opencok_global"."continued_cost_rank_period"."id" = $1
+update "opencok_global"."continued_cost_rank_period" set "id" = $1, "startTime" = $2, "endTime" = $3, "type" = $4, "rewards" = $5, "expectedRealms" = $6, "createdAt" = $7, "state" = $8, "finalizedAt" = $9, "revision" = $10 where "opencok_global"."continued_cost_rank_period"."id" = $11
+delete from "opencok_global"."continued_cost_rank_period" where "opencok_global"."continued_cost_rank_period"."id" = $1"
+`;
+
+exports[`opencok_global.continued_cost_rank_score: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["periodId","varchar(32)",true,null,null,null]
+column ["uid","varchar(40)",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["score","bigint",true,null,null,null]
+column ["paid","bigint",true,null,null,null]
+column ["free","bigint",true,null,null,null]
+column ["lastAt","bigint",true,null,null,null]
+column ["metadata","text",true,null,null,null]
+column ["ownerEpoch","bigint",true,null,null,null]
+column ["sequence","bigint",true,null,null,null]
+column ["observedAt","bigint",true,null,null,null]
+primary ["continued_cost_rank_score_PRIMARY",["periodId","uid"]]
+index ["continued_cost_rank_score_realm",false,["kingdomId","periodId"]]
+check ["continued_cost_rank_score_bounds","\\"kingdomId\\">0 AND \\"score\\">0 AND \\"paid\\">=0 AND \\"free\\">=0 AND \\"lastAt\\">0 AND \\"ownerEpoch\\">0 AND \\"sequence\\">0 AND \\"observedAt\\">=0 AND octet_length(\\"metadata\\")<=8192"]
+insert into "opencok_global"."continued_cost_rank_score" ("periodId", "uid", "kingdomId", "score", "paid", "free", "lastAt", "metadata", "ownerEpoch", "sequence", "observedAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+select "periodId", "uid", "kingdomId", "score", "paid", "free", "lastAt", "metadata", "ownerEpoch", "sequence", "observedAt" from "opencok_global"."continued_cost_rank_score" where "opencok_global"."continued_cost_rank_score"."periodId" = $1
+update "opencok_global"."continued_cost_rank_score" set "periodId" = $1, "uid" = $2, "kingdomId" = $3, "score" = $4, "paid" = $5, "free" = $6, "lastAt" = $7, "metadata" = $8, "ownerEpoch" = $9, "sequence" = $10, "observedAt" = $11 where "opencok_global"."continued_cost_rank_score"."periodId" = $12
+delete from "opencok_global"."continued_cost_rank_score" where "opencok_global"."continued_cost_rank_score"."periodId" = $1"
+`;
+
+exports[`opencok_kingdom.continued_cost_fact: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["requestId","varchar(128)",true,null,null,null]
+column ["eventId","varchar(40)",true,null,null,null]
+column ["periodId","varchar(32)",true,null,null,null]
+column ["at","bigint",true,null,null,null]
+column ["amount","bigint",true,null,null,null]
+column ["paid","bigint",true,null,null,null]
+column ["free","bigint",true,null,null,null]
+column ["digest","varchar(64)",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["counted","integer",true,null,null,null]
+primary ["continued_cost_fact_PRIMARY",["ownerUid","requestId","eventId"]]
+index ["continued_cost_fact_period",false,["periodId","ownerUid"]]
+check ["continued_cost_fact_bounds","\\"at\\">0 AND \\"amount\\">0 AND \\"paid\\">=0 AND \\"free\\">=0 AND \\"createdAt\\">=0 AND \\"counted\\" IN (0,1)"]
+insert into "opencok_kingdom"."continued_cost_fact" ("ownerUid", "requestId", "eventId", "periodId", "at", "amount", "paid", "free", "digest", "createdAt", "counted") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+select "ownerUid", "requestId", "eventId", "periodId", "at", "amount", "paid", "free", "digest", "createdAt", "counted" from "opencok_kingdom"."continued_cost_fact" where "opencok_kingdom"."continued_cost_fact"."ownerUid" = $1
+update "opencok_kingdom"."continued_cost_fact" set "ownerUid" = $1, "requestId" = $2, "eventId" = $3, "periodId" = $4, "at" = $5, "amount" = $6, "paid" = $7, "free" = $8, "digest" = $9, "createdAt" = $10, "counted" = $11 where "opencok_kingdom"."continued_cost_fact"."ownerUid" = $12
+delete from "opencok_kingdom"."continued_cost_fact" where "opencok_kingdom"."continued_cost_fact"."ownerUid" = $1"
+`;
+
+exports[`opencok_kingdom.continued_cost_period: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["id","varchar(32)",true,null,null,null]
+column ["startTime","bigint",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["type","integer",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["state","integer",true,"0",null,null]
+primary ["continued_cost_period_PRIMARY",["id"]]
+index ["continued_cost_period_end",false,["endTime"]]
+check ["continued_cost_period_bounds","\\"startTime\\">0 AND \\"endTime\\">\\"startTime\\" AND \\"type\\" BETWEEN 1 AND 6 AND \\"createdAt\\">=0 AND \\"state\\" IN (0,1)"]
+insert into "opencok_kingdom"."continued_cost_period" ("id", "startTime", "endTime", "type", "createdAt", "state") values ($1, $2, $3, $4, $5, $6)
+select "id", "startTime", "endTime", "type", "createdAt", "state" from "opencok_kingdom"."continued_cost_period" where "opencok_kingdom"."continued_cost_period"."id" = $1
+update "opencok_kingdom"."continued_cost_period" set "id" = $1, "startTime" = $2, "endTime" = $3, "type" = $4, "createdAt" = $5, "state" = $6 where "opencok_kingdom"."continued_cost_period"."id" = $7
+delete from "opencok_kingdom"."continued_cost_period" where "opencok_kingdom"."continued_cost_period"."id" = $1"
+`;
+
+exports[`opencok_kingdom.continued_cost_score: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["periodId","varchar(32)",true,null,null,null]
+column ["uid","varchar(40)",true,null,null,null]
+column ["total","bigint",true,null,null,null]
+column ["paid","bigint",true,null,null,null]
+column ["free","bigint",true,null,null,null]
+column ["lastAt","bigint",true,null,null,null]
+primary ["continued_cost_score_PRIMARY",["periodId","uid"]]
+check ["continued_cost_score_bounds","\\"total\\">0 AND \\"paid\\">=0 AND \\"free\\">=0 AND \\"lastAt\\">0"]
+insert into "opencok_kingdom"."continued_cost_score" ("periodId", "uid", "total", "paid", "free", "lastAt") values ($1, $2, $3, $4, $5, $6)
+select "periodId", "uid", "total", "paid", "free", "lastAt" from "opencok_kingdom"."continued_cost_score" where "opencok_kingdom"."continued_cost_score"."periodId" = $1
+update "opencok_kingdom"."continued_cost_score" set "periodId" = $1, "uid" = $2, "total" = $3, "paid" = $4, "free" = $5, "lastAt" = $6 where "opencok_kingdom"."continued_cost_score"."periodId" = $7
+delete from "opencok_kingdom"."continued_cost_score" where "opencok_kingdom"."continued_cost_score"."periodId" = $1"
 `;

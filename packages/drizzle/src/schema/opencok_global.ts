@@ -107,3 +107,6 @@ export { game_identity } from "./opencok_global/game_identity";
 export { character_provisioning } from "./opencok_global/character_provisioning";
 export * from "./opencok_global/expedition_stage_period";
 export * from "./opencok_global/expedition_stage_watermark";
+export * from "./opencok_global/continued_cost_rank_period";
+export * from "./opencok_global/continued_cost_rank_owner";
+export * from "./opencok_global/continued_cost_rank_score";

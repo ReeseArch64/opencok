@@ -274,6 +274,13 @@
       "when": 1793048234203,
       "tag": "0038_expedition_stage_awards",
       "breakpoints": false
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1793049535042,
+      "tag": "0039_continued_cost_facts",
+      "breakpoints": false
     }
   ]
 }

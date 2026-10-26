@@ -692,3 +692,6 @@ export { vip_box_history } from "./opencok_kingdom/vip_box_history";
 export * from "./opencok_kingdom/expedition_stage_closure";
 export * from "./opencok_kingdom/expedition_stage_member";
 export * from "./opencok_kingdom/expedition_stage_award";
+export * from "./opencok_kingdom/continued_cost_period";
+export * from "./opencok_kingdom/continued_cost_fact";
+export * from "./opencok_kingdom/continued_cost_score";
