@@ -635,6 +635,7 @@ export class GameService {
       case "exchequer.show":
       case "expedition.king.present":
       case "expedition.recieve.count":
+      case "newexpidition.rankinfo":
       case "newexpidition.activityinfo":
       case "newexpidition.takepersonreward":
       case "newexpidition.takealliancereward":

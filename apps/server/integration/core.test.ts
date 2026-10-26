@@ -324,6 +324,30 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect((await client.command("hero.target.deliver", {})).errorCode?.value).toBe("102192");
       expect((await client.command("hero.rank.deliver", {})).errorCode?.value).toBe("102192");
       expect((await client.command("expedition.notify", {})).errorCode?.value).toBe("102192");
+      expect((await client.command("expedition.award.deliver", {})).errorCode?.value).toBe(
+        "102192",
+      );
+      const expeditionFeature = runtimeRules.features.get("17_wk"),
+        expeditionSwitch = runtimeRules.features.get("wk_switch_new");
+      try {
+        runtimeRules.features.set("17_wk", { version: "12.06.0", online: "all", test: "all" });
+        runtimeRules.features.set("wk_switch_new", {
+          version: "12.06.0",
+          online: "close",
+          test: "close",
+        });
+        const history = await client.command("newexpidition.rankinfo", {
+          _cok_: sfs.long(9007199254740993n),
+        });
+        expect(history._cok_).toEqual(sfs.long(9007199254740993n));
+        expect(history.ranklist).toEqual(sfs.array([]));
+      } finally {
+        if (expeditionFeature) runtimeRules.features.set("17_wk", expeditionFeature);
+        else runtimeRules.features.delete("17_wk");
+        if (expeditionSwitch) runtimeRules.features.set("wk_switch_new", expeditionSwitch);
+        else runtimeRules.features.delete("wk_switch_new");
+      }
+
       for (const [command, params] of [
         ["hero.event.info.get", { activityId: sfs.string("9000000") }],
         ["hero.event.ranking.get", { actId: sfs.string("missing") }],
