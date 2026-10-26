@@ -14,6 +14,7 @@ import {
   campaignTimestamp,
   campaignRefresh,
 } from "@opencok/rules/local-campaign";
+import { cityInteger } from "@opencok/rules/city-progression";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { temporaryEffect } from "@opencok/rules/player-effects";
 import { grantNativeProgressionReward, pinProgressionReward } from "./progression-rewards";
@@ -120,6 +121,24 @@ export class CampaignPlanner {
     const parts = (clause.parameters ?? "").split(";");
     const nested = clause.conditions ?? [];
     switch (clause.code) {
+      case 72: {
+        const id = parts[0],
+          count = cityInteger(parts[1]);
+        if (!id || parts.length !== 2) campaignFailure();
+        const state = (this.context.write.states ?? this.context.state.effects.states).find(
+          (row) => String(row.stateId) === id && long(row, "endTime") > this.context.now,
+        );
+        return Boolean(state && num(state, "count") === count);
+      }
+      case 73:
+      case 82: {
+        const id = parts[0],
+          count = cityInteger(parts[1], 1);
+        if (!id || parts.length !== 2 || !this.context.rules.goods.has(id)) campaignFailure();
+        if ((this.context.economy.quantity?.(id) ?? 0) < count) return false;
+        if (clause.code === 73) this.context.economy.item(id, -count);
+        return true;
+      }
       case 7:
         if (parts.length !== 3) campaignFailure();
         return campaignCompare(this.value(parts[0]!), parts[1]!, this.value(parts[2]!));
@@ -241,6 +260,42 @@ export class CampaignPlanner {
         ];
         return;
       }
+      case 46: {
+        if (parts.length !== 3 || !["1", "2"].includes(parts[1]!)) campaignFailure();
+        const costs = parts[0]!.split("|").map((pair) => {
+          const [id, amount] = pair.split(",");
+          if (!id || !this.context.rules.goods.has(id)) campaignFailure();
+          return { id, amount: cityInteger(amount, 1) };
+        });
+        if (
+          !costs.length ||
+          costs.length > 64 ||
+          new Set(costs.map((cost) => cost.id)).size !== costs.length
+        )
+          campaignFailure();
+        const filter = this.context.rules.goods.get(costs[0]!.id)?.para1;
+        if (filter !== undefined && String(this.attributes.client_para1) !== filter)
+          campaignFailure();
+        for (const cost of costs) this.context.economy.item(cost.id, -cost.amount);
+        const rewards = [];
+        if (parts[1] === "2")
+          for (const reward of parts[2]!.split(",").filter(Boolean))
+            rewards.push(
+              ...grantNativeProgressionReward(
+                this.context,
+                pinProgressionReward(this.context, reward),
+              ),
+            );
+        else
+          for (const pair of parts[2]!.split("|")) {
+            const [id, amount] = pair.split(",");
+            if (!id || !this.context.rules.goods.has(id)) campaignFailure();
+            this.context.economy.item(id, cityInteger(amount, 1));
+          }
+        this.push(12, parts[1] === "2" ? { reward_list: sfs.array(rewards) } : {});
+        this.push(13, {});
+        return;
+      }
       case 33: {
         if (this.attributes.uid !== this.context.owner) campaignFailure();
         const id = parts[0];
@@ -255,7 +310,13 @@ export class CampaignPlanner {
           1,
           randomInt,
         );
-        if (this.windowEnd !== undefined || parts[1])
+        const rule = this.context.rules.power.statuses?.get(id);
+        const counter =
+          rule?.overlap === "5" &&
+          states.some(
+            (row) => String(row.stateId) === id && long(row, "endTime") > this.context.now,
+          );
+        if (!counter && (this.windowEnd !== undefined || parts[1]))
           for (const row of plan.states)
             row.endTime = this.windowEnd ?? this.context.now + campaignNumber(parts[1]) * 1000n;
         this.context.write.states = [

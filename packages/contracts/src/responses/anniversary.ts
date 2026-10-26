@@ -43,3 +43,7 @@ export interface AnniversaryStatisticsResponse {
   allianceAllNum: number;
   allianceNum: number;
 }
+
+export interface CampaignTriggerResponse {
+  type: number;
+}

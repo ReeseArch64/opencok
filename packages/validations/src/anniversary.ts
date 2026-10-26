@@ -1,5 +1,8 @@
 import { z } from "zod";
-import type { AnniversaryResponse } from "@opencok/contracts/responses/anniversary";
+import type {
+  AnniversaryResponse,
+  CampaignTriggerResponse,
+} from "@opencok/contracts/responses/anniversary";
 import { field } from "./response";
 export const anniversarySchema = z.strictObject({
   anniversary_array: z.array(
@@ -52,3 +55,7 @@ export const anniversaryStatisticsSchema = z.strictObject({
 }) satisfies z.ZodType<
   import("@opencok/contracts/responses/anniversary").AnniversaryStatisticsResponse
 >;
+
+export const campaignTriggerSchema = z.strictObject({
+  type: field.int,
+}) satisfies z.ZodType<CampaignTriggerResponse>;
