@@ -1,3 +1,5 @@
+export { hero_rank_watermark } from "./opencok_global/hero_rank_watermark";
+export { hero_rank_period } from "./opencok_global/hero_rank_period";
 export { hero_rank_score } from "./opencok_global/hero_rank_score";
 export { hero_rank_owner } from "./opencok_global/hero_rank_owner";
 export { hero_match_realm } from "./opencok_global/hero_match_realm";

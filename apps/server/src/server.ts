@@ -1,3 +1,8 @@
+import { HeroRankingFinalityService } from "@opencok/services/hero-ranking-finality";
+import {
+  createHeroRankFinalityRealm,
+  createHeroRankFinalityRegistry,
+} from "@opencok/repositories/hero-ranking-finality";
 import { HeroRankPublicationService } from "@opencok/services/hero-rank-publication";
 import {
   createHeroRankSource,
@@ -742,6 +747,13 @@ export const RealmDependenciesLive = Layer.effect(
       (rows) => cache.publishHeroRanking(rows),
       rules,
     );
+    const heroRankingFinality = new HeroRankingFinalityService(
+      createHeroRankFinalityRealm(db.kingdom.db, authority),
+      createHeroRankFinalityRegistry(db.databases.global.db, authority),
+      createHeroRankProjection(db.databases.global.db, authority),
+      rules,
+      [...db.databases.kingdoms.keys()],
+    );
     const heroMatching = new HeroMatchingService(
       createHeroMatchingRealmStore(db.kingdom.db, authority),
       createHeroMatchingRegistry(db.databases.global.db),
@@ -1326,6 +1338,15 @@ export const RealmDependenciesLive = Layer.effect(
     yield* Effect.tryPromise({
       try: () => heroRankPublication.refresh(),
       catch: () => new Error("Hero ranking publication unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: () => heroRankingFinality.refresh(),
+      catch: () => new Error("Hero ranking finality unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),
