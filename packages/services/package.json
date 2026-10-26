@@ -138,7 +138,9 @@
     "./campaign-notice": "./src/campaign-notice.ts",
     "./campaign-observation": "./src/campaign-observation.ts",
     "./avatar-activation": "./src/avatar-activation.ts",
-    "./fragment-exchange": "./src/fragment-exchange.ts"
+    "./fragment-exchange": "./src/fragment-exchange.ts",
+    "./monster-exchange": "./src/monster-exchange.ts",
+    "./exchange-activity": "./src/exchange-activity.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

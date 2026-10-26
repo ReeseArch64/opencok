@@ -33,7 +33,7 @@ import { Cache } from "@opencok/storage/session";
 import { Coordination } from "@opencok/storage/coordination";
 import { Database } from "@opencok/repositories/game";
 import type { Config } from "../src/config.ts";
-import { fields, sfs, str, Type } from "@opencok/messages/sfs";
+import { fields, sfs, str, Type, type Value } from "@opencok/messages/sfs";
 import { FOREVER } from "@opencok/mappings/city";
 import { Client } from "./client.ts";
 import { dataConfigItems } from "../test/fixtures/data-config.ts";
@@ -266,6 +266,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         coordination.close();
       }
     });
+    const exchangeCatalog = await loadRules();
     for (const id of [1, 2]) {
       const settings = {
         ...base,
@@ -275,6 +276,13 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       };
       const runtimeRules = await loadRules(resources, id);
       runtimeRules.advanced.campaignRules = campaignRulesCatalog.rules;
+      for (const [itemId, rule] of exchangeCatalog.goods)
+        if (!runtimeRules.goods.has(itemId)) runtimeRules.goods.set(itemId, rule);
+      runtimeRules.reconnect.rewards = exchangeCatalog.reconnect.rewards;
+      const tokenPanel = { ...exchangeCatalog.power.activityPanels!.get("57209")! };
+      delete tokenPanel.start;
+      delete tokenPanel.end;
+      (runtimeRules.power.activityPanels ??= new Map()).set("57209", tokenPanel);
       runtimeRules.advanced.campaignVariables = new Map(
         campaignVariablesCatalog.variables.map((variable) => [
           `${variable.scope}$${variable.id}`,
@@ -340,6 +348,12 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(
         await client.command("avatar.activate", { avatarId: sfs.string("509878") }),
       ).toMatchObject({ statusId: sfs.int(509878) });
+      const tokenProjection = await client.command("act.exchange", { ids: sfs.string("57209") });
+      const tokenActivity = fields(
+        fields((tokenProjection.exchange!.value as Value[])[0]).activity,
+      );
+      expect(tokenActivity.level).toEqual(sfs.int(0));
+      expect(tokenActivity.rewards!.value as Value[]).toHaveLength(5);
       const campaignLoginNotice = fields(
         fields(
           client.received.find((packet) => str(fields(packet.p), "c", "") === "push.common.notice")!
