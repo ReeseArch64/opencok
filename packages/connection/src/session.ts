@@ -9,6 +9,7 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { errorReason, logEvent, withLogContext } from "@opencok/core/logging";
 import { text } from "@opencok/contracts/rows";
 import { authenticate, LoginError } from "@opencok/identity/mobile";
+import { heroResourceConfig } from "@opencok/mappings/bootstrap";
 import { GameError } from "@opencok/errors/game";
 import { FrameReader, frame, MAX_FRAME } from "@opencok/messages/frame";
 import {
@@ -149,7 +150,7 @@ export function createSessionHandler(
               rs: sfs.short(0),
               pi: sfs.short(0),
               rl: sfs.array(),
-              p: sfs.object({ use: sfs.int(0) }),
+              p: sfs.object({ use: sfs.int(0), ...heroResourceConfig() }),
             }),
           );
           if (details._cok_) initial._cok_ = details._cok_;
