@@ -44,3 +44,18 @@ test("all native lottery commands preserve dispatch and replay correlation", asy
   expect(calls).toHaveLength(5);
   await expect(game.execute("owner", "lottery.init", {})).rejects.toThrow();
 });
+
+test("login omits an unconfigured lottery while public draws still reject", async () => {
+  const { lotteryDomain } = await import("@opencok/services/lottery");
+  const { decode } = await import("@opencok/messages/sfs");
+  const context = {
+    rules: new Rules(new Map(), new Map(), new Map()),
+    economy: {},
+    state: {},
+    write: {},
+  } as import("@opencok/services/city-progression").CityProgressionContext;
+  const initialized = await lotteryDomain.prepare(context, "lottery.init", {});
+  expect(decode(Buffer.from(initialized.response))).toEqual({});
+  expect(context.write).toEqual({});
+  await expect(lotteryDomain.prepare(context, "lottery.start", {})).rejects.toThrow();
+});
