@@ -80,6 +80,12 @@ function database(
       }
       if (table === "t_hero") return { rows: [[7001, 5, 20]] };
       if (table === "user_pet_dragon") return { rows: [[6001, 3, 5, 1]] };
+      if (table === "dragon_talent_skill")
+        return {
+          rows: [
+            ["synthetic", 6001, "talent", 0n, 9007199254740993n, 9007199254740995n, 1, 2, 3, 4],
+          ],
+        };
       if (table === "user_pet_dragon_skill") return { rows: [[6001, 1, "8001", 3, 2]] };
       if (table === "user_knight_title")
         return { rows: [[8001, 8002, Buffer.from(`{"8002":${now + 1}}`)]] };
@@ -127,7 +133,21 @@ test("power snapshot scopes every domain to the owner, retains long values and p
   expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
   expect(queries.at(-1)?.text).toBe("commit");
   const selects = queries.filter((query) => query.text.startsWith("select"));
-  expect(selects).toHaveLength(25);
+  expect(selects).toHaveLength(26);
+  expect(snapshot.dragonTalents).toEqual([
+    {
+      uid: "synthetic",
+      dragonId: 6001,
+      skillId: "talent",
+      startTime: 0n,
+      actTime: 9007199254740993n,
+      endTime: 9007199254740995n,
+      stat: 1,
+      level: 2,
+      exp: 3,
+      totalExp: 4,
+    },
+  ]);
   expect(snapshot.throneRewards).toEqual([{ version: 7, rewardId: 1001 }]);
   expect(snapshot.luckyDay).toBeUndefined();
   expect(snapshot.powerServer).toBeUndefined();

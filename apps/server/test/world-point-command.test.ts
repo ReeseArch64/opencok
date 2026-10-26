@@ -182,6 +182,7 @@ function fixture() {
           "t_hero",
           "user_pet_dragon",
           "user_pet_dragon_skill",
+          "dragon_talent_skill",
           "user_state",
           "user_vip",
           "alliance_science",
