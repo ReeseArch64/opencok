@@ -1,6 +1,6 @@
 {
-  "id": "9ccf4860-88b0-4608-bfd8-edad6ca2f838",
-  "prevId": "8023a41e-efa6-4b68-b591-ffbc6cfe9ff9",
+  "id": "8023a41e-efa6-4b68-b591-ffbc6cfe9ff9",
+  "prevId": "82c7a64f-1c49-4868-9daa-68e51d2213b8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -8904,125 +8904,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "opencok_kingdom.arena_registration": {
-      "name": "arena_registration",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "uid": {
-          "name": "uid",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "rankScore": {
-          "name": "rankScore",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "state": {
-          "name": "state",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "fightServerId": {
-          "name": "fightServerId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "worldId": {
-          "name": "worldId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "time": {
-          "name": "time",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "totalWinCount": {
-          "name": "totalWinCount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "totalLoseCount": {
-          "name": "totalLoseCount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "serialWinCount": {
-          "name": "serialWinCount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "applicationId": {
-          "name": "applicationId",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "arena_registration_pending": {
-          "name": "arena_registration_pending",
-          "columns": [
-            {
-              "expression": "state",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "time",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "uid",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "arena_registration_PRIMARY": {
-          "name": "arena_registration_PRIMARY",
-          "columns": [
-            "uid"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "arena_registration_bounds": {
-          "name": "arena_registration_bounds",
-          "value": "\"state\" IN (0, 1, 2, 3) AND \"rankScore\" >= 0 AND \"fightServerId\" >= 0 AND \"worldId\" >= 0 AND \"version\" >= 0 AND \"time\" >= 0 AND \"totalWinCount\" >= 0 AND \"totalLoseCount\" >= 0 AND \"serialWinCount\" >= 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
     "opencok_kingdom.army_skill_info": {
       "name": "army_skill_info",
       "schema": "opencok_kingdom",
@@ -11335,6 +11216,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "bigint",
@@ -11342,7 +11229,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "command_receipt_expiry": {
+          "name": "command_receipt_expiry",
+          "columns": [
+            {
+              "expression": "expiresAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "command_receipt_PRIMARY": {
@@ -30547,11 +30450,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
+        },
+        "nextAttemptAt": {
+          "name": "nextAttemptAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
         },
         "publishedAt": {
           "name": "publishedAt",
@@ -30561,6 +30477,54 @@
         }
       },
       "indexes": {
+        "mutation_outbox_retry": {
+          "name": "mutation_outbox_retry",
+          "columns": [
+            {
+              "expression": "kingdomId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "publishedAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "nextAttemptAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "mutation_outbox_expiry": {
+          "name": "mutation_outbox_expiry",
+          "columns": [
+            {
+              "expression": "expiresAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "mutation_outbox_pending": {
           "name": "mutation_outbox_pending",
           "columns": [
@@ -44859,50 +44823,6 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "opencok_kingdom.user_arena_army": {
-      "name": "user_arena_army",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "uid": {
-          "name": "uid",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "armyId": {
-          "name": "armyId",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "free": {
-          "name": "free",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "user_arena_army_PRIMARY": {
-          "name": "user_arena_army_PRIMARY",
-          "columns": [
-            "uid",
-            "armyId"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "user_arena_army_quantity": {
-          "name": "user_arena_army_quantity",
-          "value": "\"free\" >= 0"
-        }
-      },
       "isRLSEnabled": false
     },
     "opencok_kingdom.user_army": {

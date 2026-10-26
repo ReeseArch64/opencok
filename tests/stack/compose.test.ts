@@ -59,6 +59,12 @@ async function createStack() {
   if (configCode) throw new Error("Base Compose configuration is invalid");
   const isolated = JSON.parse(serialized);
   isolated.name = project;
+  isolated.services.mongodb.environment = {
+    MONGO_INITDB_ROOT_USERNAME: "synthetic",
+    MONGO_INITDB_ROOT_PASSWORD: "synthetic-mongo-secret",
+  };
+  isolated.services.chat.environment.MONGODB_URI =
+    "mongodb://synthetic:synthetic-mongo-secret@mongodb:27017/opencok_chat?authSource=admin";
   for (const [name, service] of Object.entries(isolated.services) as [string, any][]) {
     service.container_name = project + "-" + name;
     expect(new Set(service.profiles)).toEqual(new Set(["all", "dev"]));
@@ -333,6 +339,25 @@ async function checkService(stack: Stack, service: string) {
     return http(url);
   };
   switch (service) {
+    case "mongodb": {
+      const response = await compose([
+        "exec",
+        "-T",
+        "mongodb",
+        "mongosh",
+        "--quiet",
+        "--username",
+        "synthetic",
+        "--password",
+        "synthetic-mongo-secret",
+        "--authenticationDatabase",
+        "admin",
+        "--eval",
+        "db.adminCommand({ping:1}).ok",
+      ]);
+      expect(response.trim()).toBe("1");
+      break;
+    }
     case "postgres": {
       const names = await compose([
         "exec",
@@ -535,6 +560,7 @@ describe("isolated Compose stack", () => {
     "postgres-setup",
     "pgadmin",
     "redis",
+    "mongodb",
     "zookeeper",
     "server",
     "api",

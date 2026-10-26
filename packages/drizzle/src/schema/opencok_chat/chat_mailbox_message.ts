@@ -21,6 +21,8 @@ export const chat_mailbox_message = opencok_chat.table(
     created_at: bigint("created_at", { mode: "bigint" }).notNull(),
     body: text("body").notNull(),
     read: boolean("read").notNull().default(false),
+    sender_uid: varchar("sender_uid", { length: 40 }),
+    expires_at: bigint("expires_at", { mode: "bigint" }),
   },
   (table) => [
     primaryKey({

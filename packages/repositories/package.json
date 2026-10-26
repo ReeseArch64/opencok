@@ -91,7 +91,11 @@
     "./dragon-progression": "./src/dragon-progression.ts",
     "./world-march-runtime": "./src/world-march-runtime.ts",
     "./new-expedition": "./src/new-expedition.ts",
-    "./expedition-treasury": "./src/expedition-treasury.ts"
+    "./expedition-treasury": "./src/expedition-treasury.ts",
+    "./postbox": "./src/postbox.ts",
+    "./friendship-mine": "./src/friendship-mine.ts",
+    "./social-cleanup": "./src/social-cleanup.ts",
+    "./chat-notice-cost": "./src/chat-notice-cost.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
