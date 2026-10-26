@@ -1,3 +1,4 @@
+import { readMonsterExchanges, writeMonsterExchanges } from "./monster-exchange";
 import { readFragmentExchanges, writeFragmentExchanges } from "./fragment-exchange";
 import { readCampaignProfile } from "./campaign-notice";
 import { costRankAwardReader, writeCostRankAward } from "./continued-cost-rewards";
@@ -206,6 +207,10 @@ export function createCityProgressionStore(
           command === "item.send" || command === "gift.init"
             ? await readPlayerItemGifts(tx, owner, command, request)
             : undefined,
+        monsterExchange:
+          command === "act.exchange" || command?.startsWith("act.ex.")
+            ? await readMonsterExchanges(tx, owner)
+            : undefined,
         fragmentExchange:
           command === "act.exchange" || command?.startsWith("act.ex.")
             ? await readFragmentExchanges(tx, owner)
@@ -340,6 +345,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.monsterExchange) await writeMonsterExchanges(tx, owner, write.monsterExchange);
         if (write.fragmentExchange) await writeFragmentExchanges(tx, owner, write.fragmentExchange);
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);

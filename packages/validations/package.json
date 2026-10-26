@@ -80,7 +80,8 @@
     "./cup-betting": "./src/cup-betting.ts",
     "./olympic": "./src/olympic.ts",
     "./hero-event": "./src/hero-event.ts",
-    "./fragment-exchange": "./src/fragment-exchange.ts"
+    "./fragment-exchange": "./src/fragment-exchange.ts",
+    "./monster-exchange": "./src/monster-exchange.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",

@@ -151,6 +151,13 @@ states and equipment sets contribute through one effect calculation; changes
 preserve production earned before the change. Workshop completion delivers items
 and advances its waiting list atomically.
 
+Independent exchange panels own their offer lists, token bindings and daily refresh
+budgets. Adopt an older shared list only when its catalog evidence identifies one
+panel; preserve ambiguous records instead of guessing their owner. A durable UTC
+day prevents a budget from resetting repeatedly while its offer checkpoint still
+belongs to yesterday. Expired quotes must be refreshed before a new claim can
+charge the player.
+
 ### Consumption competitions
 
 Consumption rankings use confirmed debits and exact signed 64-bit amounts.

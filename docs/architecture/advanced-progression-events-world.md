@@ -2008,3 +2008,55 @@ probability, snapshot and selector units passed with 321 assertions. The server
 unit suite passed 1,496 tests with 245,896 assertions. Native TCP passed one test
 with 218 assertions in both realms. Required lint, formatting and server/nine
 package type checks passed.
+
+## Independent event-token exchange panels
+
+The native exchange dispatcher now supports both fragment recipes and event-token
+lists while retaining each form's original response. Token lists retain weighted
+quantities and colors, out-of-order one-time tier claims, completion refresh,
+graduated item refresh costs, the native ten-second manual refresh grace and
+aligned automatic deadlines. Confirmed grants precede campaign event 62 with the
+reference's logical activity category six. Combat engines still own token-earning
+combat outcomes; this module cannot report a fictitious kill or battle result.
+
+Each token panel uses its native panel identity in `user_activity_new`, with a
+reserved-field domain marker and a saved token/interval header. Several source
+panels shared category six; using that category as their common persistence key
+could mix their currencies, offers and refresh budgets. The logical wire category
+remains six, while each panel's persistent list and daily budget remain independent.
+The existing `flushDate` stores the UTC budget day so repeated requests cannot
+reset free uses merely because the offer checkpoint belongs to yesterday.
+
+An old category-six list is adopted once only when all saved reward quantities
+and colors match exactly one complete maintained panel configuration. Its existing
+claims, refresh budget and deadline are retained. A marker prevents repeat
+adoption. Ambiguous or malformed lists remain untouched, and new panel lists do
+not mint assets. Colliding slots owned by another domain reject without writes.
+
+Expired quotes cannot debit tokens until a fresh projection is requested. Token
+identity and interval remain bound to the saved list. A replacement token
+configuration waits for the original refresh boundary before admission. Automatic
+alignment skips long outages without an iteration cap. Receipts, item debits,
+actual grants, claim flags, replacement lists and campaign progress commit or
+roll back together. A selected reward with missing catalog metadata fails without
+consuming paid refresh tokens or replacing the saved list; no substitute reward
+or hidden reroll is admitted.
+
+Seven source token panel configurations are complete. Two placeholders lack offer
+configuration and another declaration lacks its declared final gears. Incomplete
+panels remain unavailable. The maintained data also contains a weighted reference
+to absent reward `24701201`; selecting it rejects admission until the catalog is
+corrected. No private input is modified to invent its intended reward.
+
+No migration, dependency, environment variable or configuration key is added.
+Inventory remains 848 tables and 6,917 fields. Back up event-token rows, legacy
+adoption markers, inventories, campaign variables, receipts and outbox together.
+An older binary does not understand the panel-keyed lists; retain the rows and
+keep token panels disabled during rollback until the compatible binary is
+restored. Device execution remains unverified.
+
+Eighteen token and fragment PostgreSQL cases passed with 135 assertions. Four
+catalog, probability, legacy-format and clock units passed with 57 assertions.
+The complete server unit suite passed 1,500 tests with 245,953 assertions. Native
+TCP passed one test with 222 assertions, including real saved token offers in
+both realms. Required lint, formatting and server/nine package type checks passed.
