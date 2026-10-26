@@ -1,3 +1,4 @@
+import { realmSocialPath } from "@opencok/contracts/realm-social";
 import { chatMailboxPath } from "@opencok/contracts/chat-mailbox";
 import { chatAvatarProfilePath } from "@opencok/contracts/chat-avatar-profile";
 import { chatNicknamePath } from "@opencok/contracts/chat-nickname";
@@ -12,6 +13,7 @@ export function createChatHttpHandler({
   profileHandler,
   nicknameHandler,
   mailboxHandler,
+  socialHandler,
   configHandler,
   serverListHandler,
 }: {
@@ -20,6 +22,7 @@ export function createChatHttpHandler({
   profileHandler?: AsyncHttpHandler;
   nicknameHandler?: AsyncHttpHandler;
   mailboxHandler?: AsyncHttpHandler;
+  socialHandler?: AsyncHttpHandler;
   configHandler?: HttpHandler;
   serverListHandler?: HttpHandler;
   websocketGateway?: WebSocketGateway;
@@ -71,6 +74,15 @@ export function createChatHttpHandler({
       else {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');
+      }
+      return;
+    }
+
+    if (request.method === "POST" && request.url === realmSocialPath) {
+      if (socialHandler) void socialHandler(request, response);
+      else {
+        response.writeHead(503);
+        response.end();
       }
       return;
     }
