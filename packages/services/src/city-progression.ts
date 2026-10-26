@@ -1,3 +1,5 @@
+import { flushHeroScore } from "./hero-score";
+import type { HeroScoreAction } from "@opencok/contracts/hero-score";
 import { refreshCampaignGrants } from "./local-campaign";
 import { generalDrawPeriod } from "@opencok/rules/general-draws";
 import { refreshGeneralUnlocks } from "./general-assignments";
@@ -184,6 +186,7 @@ export function createCityProgressionHandlers<T>(
             key: activity.itemId,
           });
         }
+        await flushHeroScore(plan);
         await repository.update(plan.write, economy);
         return encode(body);
       });
@@ -201,6 +204,7 @@ export function createCityProgressionHandlers<T>(
       if (!domain?.accelerate) throw new GameError(errors.unsupported, "city_progression");
       const { repository, plan } = await context(tx, activity.ownerId, now, economy);
       await domain.accelerate(plan, activity, remaining);
+      await flushHeroScore(plan);
       await repository.update(plan.write, economy);
     },
     async next(tx: T, activity: TimedActivity, now: bigint, economy: ActivityEconomy) {
@@ -208,6 +212,7 @@ export function createCityProgressionHandlers<T>(
       if (!domain?.next) return undefined;
       const { repository, plan } = await context(tx, activity.ownerId, now, economy);
       const result = await domain.next(plan, activity);
+      await flushHeroScore(plan);
       await repository.update(plan.write, economy);
       return result;
     },
@@ -225,6 +230,7 @@ export function createCityProgressionHandlers<T>(
       const result = await domain.prepare(plan, command, decode(Buffer.from(params)));
       refreshCampaignGrants(plan);
       if (!domain.commands.includes("task.reward.get")) refreshQuests(plan);
+      await flushHeroScore(plan);
       await repository.update(plan.write, economy);
       return result;
     },
@@ -233,6 +239,14 @@ export function createCityProgressionHandlers<T>(
 
 export class CityProgressionContext {
   readonly write: CityProgressionWrite = {};
+  readonly heroActions: HeroScoreAction[] = [];
+  recordHero(type: number, parameter: string, count: number | bigint = 1, at = this.now) {
+    const value = BigInt(count);
+    if (value === 0n) return;
+    if (at > this.now || at < 0n || parameter.length > 40 || this.heroActions.length >= 128)
+      throw new Error("Invalid confirmed hero action");
+    this.heroActions.push({ type, parameter, count: value, at });
+  }
   completing?: Pick<TimedActivity, "type" | "itemId">;
   readonly costs: Record<string, string> = {};
   readonly items: Record<string, number> = {};
@@ -407,6 +421,8 @@ export class CityProgressionContext {
       armyCure: num(this.state.statistics, "armyCure"),
     };
     if (delta > 0n) this.checkPower(delta);
+    this.recordHero(6, "0", delta);
+    this.recordHero(6, "1", building);
     this.write.statistics = {
       power: cityAmount(previous.power + delta),
       buildingPower: cityAmount(previous.buildingPower + building),

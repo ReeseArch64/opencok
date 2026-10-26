@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./hero-score": "./src/hero-score.ts",
     "./arena": "./src/arena.ts",
     "./totem": "./src/totem.ts",
     "./avatar-profile": "./src/avatar-profile.ts",

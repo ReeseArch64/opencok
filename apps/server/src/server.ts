@@ -1,3 +1,5 @@
+import { currentHeroScore } from "@opencok/repositories/hero-score";
+import { heroTargetDomain, deliverHeroTargetBatch } from "@opencok/services/hero-score";
 import { HeroCalendarService } from "@opencok/services/hero-calendar";
 import { createHeroCalendarStore } from "@opencok/repositories/hero-calendar";
 import {
@@ -130,7 +132,7 @@ import { persistReconnectProgress } from "@opencok/repositories/reconnect-write"
 import { TimedActivityService } from "@opencok/services/timed-activity";
 import { ProductionService } from "@opencok/services/production";
 import { productionContext } from "@opencok/services/production-context";
-import { sfs, encode, decode, str } from "@opencok/messages/sfs";
+import { sfs, encode, decode, str, int, fields, Type } from "@opencok/messages/sfs";
 import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
 import { CharacterProvisioningService } from "@opencok/services/provisioning";
 import { CharacterProvisioningController } from "@opencok/controllers/provisioning";
@@ -511,6 +513,7 @@ export const RealmDependenciesLive = Layer.effect(
         cupBettingDomain,
         createGroupBuyDomain(),
         continuedCostDomain,
+        heroTargetDomain,
         createSpecialEventDomain(specialEventStock),
         recallTaskDomain,
         regionalRecallDomain,
@@ -824,6 +827,58 @@ export const RealmDependenciesLive = Layer.effect(
         } catch {
           await specialEventStock.defer(eventId, BigInt(Date.now() + 60000));
         }
+      }
+    };
+    const recoverHeroScoreNotifications = async () => {
+      for (let index = 0; index < 64; index++) {
+        const delivered = await relayMutationEvent(
+          db.kingdom.db,
+          authority,
+          async (event) => {
+            const params = decode(event.payload),
+              recipients = params.recipients,
+              body = params.body;
+            if (
+              recipients?.type !== Type.StringArray ||
+              !Array.isArray(recipients.value) ||
+              recipients.value.length > 64 ||
+              body?.type !== Type.Object
+            )
+              throw new Error("Invalid hero score notification");
+            const score = fields(body);
+            if (
+              !(await currentHeroScore(
+                db.kingdom.db,
+                str(score, "actId"),
+                str(score, "aid"),
+                int(score, "score"),
+              ))
+            )
+              return;
+            for (const owner of recipients.value as string[])
+              await notifications.publish(owner, "push.act.score.obtain", score);
+          },
+          Date.now,
+          "hero.score.notify",
+          60000,
+        );
+        if (!delivered) break;
+      }
+    };
+    const recoverHeroTargets = async () => {
+      for (let index = 0; index < 64; index++) {
+        const delivered = await relayMutationEvent(
+          db.kingdom.db,
+          authority,
+          (event) =>
+            deliverHeroTargetBatch(event.payload, (owner, params) =>
+              activities.domainCommand(owner, "hero.target.deliver", params),
+            ),
+          Date.now,
+          "hero.target.earned",
+          60000,
+        );
+        if (!delivered) break;
       }
     };
     const recoverContinuedCosts = async (owner?: string) => {
@@ -1226,6 +1281,18 @@ export const RealmDependenciesLive = Layer.effect(
     yield* Effect.tryPromise({
       try: recoverHeroCalendar,
       catch: () => new Error("Hero calendar recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: async () => {
+        await recoverHeroTargets();
+        await recoverHeroScoreNotifications();
+      },
+      catch: () => new Error("Hero reward recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),

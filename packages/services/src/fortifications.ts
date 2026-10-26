@@ -40,6 +40,7 @@ function complete(context: CityProgressionContext, row: Row, count: number) {
   const [, free] = transferTroops(count, num(row, "num"), count);
   context.write.forts = [{ ...row, num: free, build: 0, finishTime: 0n }];
   recordTargetTask(context, 2, count, "5");
+  context.recordHero(4, text(row, "armyId"), count);
   context.power(unitPower(troopDefinition(context.rules, text(row, "armyId")), count));
   return { armyId: sfs.string(text(row, "armyId")), free: sfs.int(free) };
 }

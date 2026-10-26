@@ -157,6 +157,7 @@ export function createPrayerDomain(random: (maximum: number) => number = randomI
         targetCondition: "1",
         count: 1,
       });
+      context.recordHero(8, "1");
       recordExpeditionScore(context, 12);
       new CampaignPlanner(context).event(11);
       return { response: encode(prayerResult(body)), event: null };

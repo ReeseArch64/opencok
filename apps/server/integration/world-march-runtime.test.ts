@@ -1,6 +1,8 @@
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
+import { hero_event } from "@opencok/drizzle/schema/opencok_kingdom/hero_event";
+import { score_act } from "@opencok/drizzle/schema/opencok_kingdom/score_act";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import { world_march_checkpoint } from "@opencok/drizzle/schema/opencok_kingdom/world_march_checkpoint";
@@ -57,6 +59,22 @@ async function worldHarness() {
 test("marches reserve once, recover late through gathering and return, and credit cargo exactly once", async () => {
   const h = await worldHarness();
   try {
+    const original = h.rules.ranking.heroEvents!.get("9001000")!;
+    h.rules.ranking.heroEvents!.set("gather-event", {
+      ...original,
+      id: "gather-event",
+      score: "47001",
+      target: "2000000000;2147483646;2147483647",
+    });
+    await h.db.db.insert(hero_event).values({
+      uuid: "gather-stage",
+      eventId: "gather-event",
+      activityId: "gather-main",
+      type: 1,
+      rewardType: 1,
+      startTime: BigInt(h.clock.now),
+      endTime: BigInt(h.clock.now + 1800000),
+    });
     const id = sfs.string(randomUUID());
     const replies = await Promise.all(Array.from({ length: 4 }, () => h.start(id)));
     expect(new Set(replies.map((reply) => reply.body.uuid!.value)).size).toBe(1);
@@ -85,6 +103,10 @@ test("marches reserve once, recover late through gathering and return, and credi
       await h.db.db.select().from(user_resource).where(eq(user_resource.uid, "owner"))
     )[0]!;
     expect(resource.wood - before).toBe(80n);
+    expect((await h.db.db.select().from(score_act))[0]).toMatchObject({
+      actId: "gather-stage",
+      score: 80,
+    });
     await h.tick();
     expect(
       (await h.db.db.select().from(user_resource).where(eq(user_resource.uid, "owner")))[0]!.wood,
@@ -92,6 +114,7 @@ test("marches reserve once, recover late through gathering and return, and credi
     const [point] = await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 10));
     expect(point!.resCostValue).toBe(80);
     expect(point!.ownerMarchUUid).toBe("");
+    expect((await h.db.db.select().from(score_act))[0]!.score).toBe(80);
   } finally {
     await h.close();
   }
