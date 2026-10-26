@@ -49,6 +49,11 @@ export function compactPoint(row: Row): string {
   })) {
     out[output] = Number(long(row, input) / 1000n);
   }
+  if (out.t === 1) {
+    const until = long(row, "sendHeartDurationTime");
+    if (until !== 0n) out.sendHeartDurationTime = Number(BigInt.asIntN(32, until));
+    if (text(row, "heartType")) out.heartType = text(row, "heartType");
+  }
   return JSON.stringify(out);
 }
 export function pointSections(points: string[]): Fields {

@@ -133,7 +133,9 @@
     "./seasonal-exchange": "./src/seasonal-exchange.ts",
     "./responses/seasonal-exchange": "./src/responses/seasonal-exchange.ts",
     "./player-item-gifts": "./src/player-item-gifts.ts",
-    "./responses/player-item-gifts": "./src/responses/player-item-gifts.ts"
+    "./responses/player-item-gifts": "./src/responses/player-item-gifts.ts",
+    "./alliance-heart": "./src/alliance-heart.ts",
+    "./responses/alliance-heart": "./src/responses/alliance-heart.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

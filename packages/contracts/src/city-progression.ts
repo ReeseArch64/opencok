@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  allianceHeart?: import("./alliance-heart").AllianceHeartState;
   playerItemGifts?: import("./player-item-gifts").PlayerItemGiftState;
   seasonalExchange?: import("./seasonal-exchange").SeasonalExchangeState;
   vipBox?: import("./vip-box").VipBoxState;
@@ -128,6 +129,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  allianceHeart?: import("./alliance-heart").AllianceHeartWrite;
   playerItemGifts?: import("./player-item-gifts").PlayerItemGiftWrite;
   seasonalExchange?: import("./rows").Row;
   vipBox?: import("./vip-box").VipBoxWrite;

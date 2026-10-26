@@ -39,6 +39,7 @@ export interface ActivityEconomy {
   balance?(asset: string): bigint;
   quantity?(itemId: string): number;
   itemState?(itemId: string): import("./inventory").InventoryItem | undefined;
+  consumeItem?(uuid: string, count: number): void;
   ownedItem?(uuid: string): { itemId: string; count: number };
   resource(
     asset:

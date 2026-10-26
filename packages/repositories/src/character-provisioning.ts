@@ -120,6 +120,8 @@ export function createCharacterCreator(
         .update(worldpoint)
         .set({
           pointType: 1,
+          sendHeartDurationTime: 0n,
+          heartType: "",
           ownerId: uid,
           ownerName: reservation.name,
           allianceId: "",

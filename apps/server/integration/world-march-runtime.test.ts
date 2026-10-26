@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import { world_march_checkpoint } from "@opencok/drizzle/schema/opencok_kingdom/world_march_checkpoint";
@@ -130,7 +130,18 @@ test("march acceleration, recall and teleport enforce ownership, costs and occup
       itemUUid: sfs.string("teleport"),
       operationId: sfs.string(randomUUID()),
     };
+    await h.db.db
+      .update(worldpoint)
+      .set({ sendHeartDurationTime: 1060n, heartType: "1" })
+      .where(eq(worldpoint.id, 1));
     await Promise.all(Array.from({ length: 3 }, () => h.command("world.mv", move)));
+    const heartPoints = await h.db.db
+      .select()
+      .from(worldpoint)
+      .where(inArray(worldpoint.id, [1, 20]));
+    expect(
+      heartPoints.every((row) => row.sendHeartDurationTime === 0n && row.heartType === ""),
+    ).toBe(true);
     expect(
       (await h.db.db.select().from(user_world).where(eq(user_world.uid, "owner")))[0]!.pointId,
     ).toBe(20);

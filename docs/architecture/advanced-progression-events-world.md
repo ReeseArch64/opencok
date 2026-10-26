@@ -609,3 +609,28 @@ existing queue. It changes no existing rows or gift amounts. Back up pending gif
 owned inventory, receipts and outbox before rollout. Retain undelivered rows and
 committed receipts on rollback; never restore consumed rows independently of their
 inventory grants. The additive index can remain. No dependency is added.
+
+## Allied heart effects
+
+`heart.send` validates current kingdom membership, a shared nonempty alliance,
+and the exact owned type-20 item UUID before consuming one item. Both base-city
+points retain the catalog effect and its expiration in seconds. The response
+keeps the target point as UTF; map projections retain the reference signed-INT
+seconds while `push.heart.having` uses UTF milliseconds. Teleport and initial
+city placement clear cosmetics on reused ground.
+
+Offline recipients retain the existing received-heart queue. `heart.init`
+acknowledges at most 64 selected IDs and preserves the reference joined sender
+names, first effect and LONG expiration relative to login. Connected recipients
+receive a private notification; nearby map subscribers receive public effects.
+A separate bounded worker drains deliveries when a recipient connects during a
+send and relays committed notifications without delaying march recovery.
+
+Migration 0026 appends an identity and owner index to the existing queue. It
+backfills distinct IDs even for identical imported rows. Item consumption, city
+effects, pending insertion, receipt and outbox commit atomically; failed delivery
+receipts retain the selected rows. Back up these records together. Preserve
+committed acknowledgments during rollback and retain the additive identity/index.
+Synthetic PostgreSQL tests cover exact-stack consumption, concurrent retries,
+rollback, bounded queues, missing recipient cities and interested-player pushes;
+a migration test verifies imported duplicates and later arrivals survive.
