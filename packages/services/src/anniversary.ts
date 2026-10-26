@@ -75,17 +75,17 @@ export const anniversaryDomain: CityDomain = {
         event: null,
       };
     }
+    if (command === "campaign.init") {
+      new CampaignPlanner(context).event(8);
+      refreshCampaignGrants(context);
+      return { response: encode({}), event: null };
+    }
     if (
       !context.rules.advanced.anniversaryWeeks?.size ||
       !context.rules.advanced.campaignVariables?.size
     )
       campaignFailure();
     const planner = new CampaignPlanner(context);
-    if (command === "campaign.init") {
-      planner.event(8);
-      refreshCampaignGrants(context);
-      return { response: encode({}), event: null };
-    }
     if (command === "campaign.action") {
       const code = cityInteger(int(params, "event"), 1, 10000),
         selector = str(params, "selector", "");
