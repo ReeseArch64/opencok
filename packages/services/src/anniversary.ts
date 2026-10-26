@@ -64,6 +64,7 @@ export const anniversaryDomain: CityDomain = {
     "trigger.activity",
     "campaign.action",
     "campaign.record",
+    "item.askFor",
   ],
   types: [],
   async prepare(context, command, params) {
@@ -99,6 +100,12 @@ export const anniversaryDomain: CityDomain = {
         response: encode(campaignTriggerView(type)),
         event: cosmeticInteractionEvent(context),
       };
+    }
+    if (command === "item.askFor") {
+      const id = String(cityInteger(int(params, "itemId"), 1));
+      new CampaignPlanner(context, { key_itemId: id }).event(57, id);
+      refreshCampaignGrants(context);
+      return { response: encode({ success: sfs.string("1") }), event: null };
     }
     if (command === "campaign.record") {
       for (const event of readCampaignObservations(params)) {

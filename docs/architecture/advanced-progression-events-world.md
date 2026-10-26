@@ -1898,3 +1898,33 @@ The server unit suite passed 1,493 tests with 245,574 assertions. Final mail and
 private-command units passed five tests with 47 assertions; existing consumption,
 anniversary and recipe acceptance passed eighteen tests with 128 assertions.
 Required lint, formatting and server/nine package type checks passed.
+
+## Campaign item requests and mail publication
+
+The native `item.askFor` command passes only its validated integer item identity
+to the maintained request event. The campaign declaration decides whether to grant
+anything. The first cake request in its declared window grants the configured
+reward and 45 points once, with the owned cake flag and count in the same
+transaction. Unmatched identities and closed windows return native success
+without inventing an item. Personal quotas and operation receipts prevent repeat
+delivery; another player's eligibility remains independent.
+
+Campaign mail actions now enqueue a native mail publication with each saved
+message. Reward-bearing templates pin their actual contents before admission;
+informational templates retain their unclaimable reward status. Notification
+failure leaves the saved message available and retries from the existing owned
+outbox. Mail and notification identities commit with campaign variables and the
+original receipt. The existing funded claim receipt prevents a second asset
+claim even under a different outer request identity.
+
+No migration, dependency, configuration or environment variable is added.
+Inventory remains 848 tables and 6,917 fields. Back up campaign variables,
+inventories, mail, receipts and outbox together. Preserve notification rows during
+rollback; an older binary retains the saved mail but does not publish the new
+campaign mail event. Device execution remains unverified.
+
+Four PostgreSQL request and mail tests passed with 31 assertions. Eleven login
+and recipe regression tests passed with 67 assertions. The server unit suite
+passed 1,493 tests with 245,575 assertions. Native TCP passed one test with 214
+assertions, including item requests in both realms. Required lint, formatting and
+server/nine package type checks passed.

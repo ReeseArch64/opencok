@@ -1672,6 +1672,7 @@ export const RealmDependenciesLive = Layer.effect(
         for (const type of [
           "hero.rank.mail",
           "hero.target.mail",
+          "campaign.mail",
           "expedition.award.mail",
           "continuedcost.rank.mail",
         ]) {
