@@ -24,7 +24,8 @@
     "./session": "./src/session.ts",
     "./chat-nickname": "./src/chat-nickname.ts",
     "./chat-mailbox": "./src/chat-mailbox.ts",
-    "./provisioning": "./src/provisioning.ts"
+    "./provisioning": "./src/provisioning.ts",
+    "./realm-social": "./src/realm-social.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

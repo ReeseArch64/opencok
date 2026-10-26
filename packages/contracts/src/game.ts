@@ -323,7 +323,23 @@ export interface GameServices {
   avatar?: AvatarGrantService;
   avatarFinish?: AvatarFinishService;
   avatarVersion?: AvatarVersionService;
+  friendshipMine?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+  notice?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
+  postbox?(
+    owner: string,
+    command: string,
+    params: Fields,
+  ): Promise<import("./responses/inventory.ts").InventoryCommandResponse>;
   chatSession?: ChatSessionIssuer;
+  social?: import("./realm-social.ts").RealmSocialExecutor;
   expeditionRanking?(limit: number): Promise<readonly ExpeditionRankingEntry[] | undefined>;
   expeditionStage?(kingdomId: number): Promise<number | undefined>;
   worldPowerEffects?(kingdomId?: number): Promise<ReadonlyMap<string, string>>;
