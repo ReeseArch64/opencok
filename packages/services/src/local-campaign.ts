@@ -13,6 +13,7 @@ import { num, long, text } from "@opencok/contracts/rows";
 import { sfs, encode, type Fields } from "@opencok/messages/sfs";
 import {
   campaignFailure,
+  campaignEventMatches,
   campaignNumber,
   campaignMath,
   campaignCompare,
@@ -452,7 +453,7 @@ export class CampaignPlanner {
         (rule.state ?? 0) < 2 ||
         rule.openType !== 2 ||
         !rule.events.some(
-          (event) => event.code === code && (!event.parameters || event.parameters === selector),
+          (event) => event.code === code && campaignEventMatches(code, event.parameters, selector),
         )
       )
         continue;

@@ -67,3 +67,20 @@ export function campaignRefresh(at: bigint, now: bigint, type: number, interval:
   if (type === 6) return a.getUTCFullYear() !== b.getUTCFullYear();
   return campaignFailure();
 }
+
+export function campaignEventMatches(
+  code: number,
+  parameters: string | undefined,
+  selector: string,
+) {
+  if (code !== 62) return !parameters || parameters === selector;
+  const expected = (parameters ?? "").split(";"),
+    actual = selector.split(";");
+  return (
+    expected.length === 2 &&
+    actual.length === 2 &&
+    expected.every(Boolean) &&
+    actual.every(Boolean) &&
+    expected.every((value, index) => value === "-1" || value === actual[index])
+  );
+}

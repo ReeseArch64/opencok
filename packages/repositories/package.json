@@ -137,7 +137,8 @@
     "./olympic": "./src/olympic.ts",
     "./hero-event": "./src/hero-event.ts",
     "./hero-calendar": "./src/hero-calendar.ts",
-    "./campaign-notice": "./src/campaign-notice.ts"
+    "./campaign-notice": "./src/campaign-notice.ts",
+    "./fragment-exchange": "./src/fragment-exchange.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

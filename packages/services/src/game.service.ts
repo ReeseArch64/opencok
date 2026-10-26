@@ -608,6 +608,9 @@ export class GameService {
       case "region.recall.receive":
       case "heart.send":
       case "item.send":
+      case "act.exchange":
+      case "act.ex.reward":
+      case "act.ex.flush":
       case "activity.exchange.info":
       case "activity.exchange.reward":
       case "vip.box.turntable.ui":

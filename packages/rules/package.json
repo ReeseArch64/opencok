@@ -158,7 +158,8 @@
     "./cup-betting": "./src/cup-betting.ts",
     "./olympic": "./src/olympic.ts",
     "./hero-event": "./src/hero-event.ts",
-    "./hero-calendar": "./src/hero-calendar.ts"
+    "./hero-calendar": "./src/hero-calendar.ts",
+    "./fragment-exchange": "./src/fragment-exchange.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

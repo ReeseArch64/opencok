@@ -173,7 +173,9 @@
     "./hero-calendar": "./src/hero-calendar.ts",
     "./campaign-notice": "./src/campaign-notice.ts",
     "./responses/campaign-notice": "./src/responses/campaign-notice.ts",
-    "./campaign-observation": "./src/campaign-observation.ts"
+    "./campaign-observation": "./src/campaign-observation.ts",
+    "./fragment-exchange": "./src/fragment-exchange.ts",
+    "./responses/fragment-exchange": "./src/responses/fragment-exchange.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

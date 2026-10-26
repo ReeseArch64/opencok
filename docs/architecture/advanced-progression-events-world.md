@@ -1964,3 +1964,47 @@ The server unit suite passed 1,493 tests with 245,575 assertions. Native TCP
 passed one test with 216 assertions, including owned activation in both realms
 and reconnection after restart with the same declared status catalog. Required
 lint, formatting and server/nine package type checks passed.
+
+## Fragment exchange offers and confirmed campaign scoring
+
+The three native fragment commands now expose the maintained six-, four- and
+three-slot recipes. Thirteen catalog declarations retain their configured
+repetition probabilities, reward weights and multipliers. Each actor's generated
+list persists in the existing exchange table. Repeated views retain that list;
+reward admission consumes every required copy and replaces only the selected
+recipe. The configured fourteenfold reward scales the actual grant rather than
+merely changing its preview.
+
+Paid refresh uses the panel's two daily free updates and then its configured gold
+cost. Refresh budgets follow the owned saved UTC day, and receipts prevent repeat
+charges or redraws. The original native query, refresh and reward field shapes
+are preserved, including optional recipe previews and the query's activity
+identity. Client quantities, reward identities and multipliers cannot select a
+prize. The default fragment panel remains disabled until its existing declaration
+is enabled. Disabled or unavailable panels cannot charge, generate offers or grant
+prizes. Optional declared start/end windows are enforced at the server boundary.
+
+Actual item grants are observed before confirmed exchange event 62. Its two native
+selector positions independently accept the original `-1` wildcard. The maintained
+September campaign's counter starts at one and caps at five, allowing four
+30-point awards. Source-compatible defaults are retained. Preview, failed debit,
+failed receipt and replay cannot create points. All inventory, reward, replacement
+recipe, counters, financial evidence and receipt writes use the original owned
+transaction. Confirmed paid refreshes participate in consumption competitions;
+free updates and repeated receipts do not.
+
+No migration, dependency, configuration variable or environment variable is added.
+Inventory remains 848 tables and 6,917 fields. Existing UTF-8 offer blobs, including
+Java's trailing allocation padding, remain readable. Invalid saved recipes fail
+without overwriting their original bytes. Back up exchange rows, inventories,
+campaign variables, financial records, receipts and outbox together. Preserve
+committed rows during rollback; an older binary can still read the native JSON
+recipe shape. This module implements fragment exchange; the other maintained
+monster-token exchange form continues separately. Device execution remains
+unverified.
+
+Eight PostgreSQL fragment cases passed with 60 assertions. Three catalog,
+probability, snapshot and selector units passed with 321 assertions. The server
+unit suite passed 1,496 tests with 245,896 assertions. Native TCP passed one test
+with 218 assertions in both realms. Required lint, formatting and server/nine
+package type checks passed.
