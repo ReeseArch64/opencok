@@ -75,6 +75,15 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.matchServerId = variant + 1;
     row.endTime = (row.startTime as bigint) + 1n;
   }
+  if (spec.indexes.some((key) => key.name === "special_event_purchase_PRIMARY")) {
+    row.periodStart = (row.reservedAt as bigint) - 1n;
+    row.periodEnd = (row.reservedAt as bigint) + 100000n;
+    row.state = (variant - 1) % 3;
+    row.purchaseTime = row.state === 1 ? row.reservedAt : 0n;
+    row.purchaseDay = (row.reservedAt as bigint) / 86400000n;
+    row.deliveredAt = 0n;
+    row.nextAttemptAt = 0n;
+  }
   if (spec.indexes.some((key) => key.name === "world_march_checkpoint_PRIMARY"))
     row.status = (variant - 1) % 2;
   if (spec.indexes.some((key) => key.name === "timed_activity_PRIMARY")) row.status = 0;

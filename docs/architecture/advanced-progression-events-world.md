@@ -849,3 +849,49 @@ payments, spending receipts, logs, mail and pending facts together. Disable the
 cost event before binary rollback and preserve the period key and pending facts;
 restoring only balances or claim flags would break accounting. Cross-realm rank
 aggregation and final global-rank settlement remain coordinator work.
+
+## Limited daily paid offers
+
+`special.ui.state` preserves the configured minimum version, ordinary and test
+realm selectors and inclusive calendar bounds. The two native UTF arrays retain
+the same ordered counter sequence as the reference protocol. The UI selects the
+original exchange catalog; admission also accepts the corresponding maintained
+new-exchange definition. The current catalogs contain no type-500 offers and
+retain their historical closed window, so this migration creates no new products.
+
+The API payment owner can reserve one globally limited unit through
+`SpecialEventPurchaseService`. Global PostgreSQL transactions serialize each
+product's capacity across realms and enforce one active purchase per character,
+product and UTC day. Admission requires an owned realm reader and respects existing
+legacy exchange timestamps before creating a hold. A reservation becomes paid only through the injected trusted
+payment-proof gateway. Repeating an order retains its original identity; a
+cancelled hold releases capacity and a paid purchase cannot be cancelled through
+that path. Unresolved holds remain available for payment reconciliation rather
+than expiring into a possible second sale. Stock locks have a one-second wait
+limit and transactional statements have a three-second limit.
+
+The realm consumes only verified paid records for its own kingdom. Its fenced
+command receipt and existing exchange-time row commit together, then a separate
+global acknowledgment marks delivery. A lost acknowledgment replays the same
+owned receipt. Late older purchases cannot move the saved daily timestamp
+backward. A bounded worker defers failed records so other recipients can proceed.
+Package grants remain owned by the shared payment contract; these availability
+and daily-purchase hooks do not mint the package a second time. Client commands
+cannot reserve, confirm or submit a paid purchase. Provider-specific payment
+binding remains an explicit integration boundary.
+
+Global migration `0011_special_event_stock.sql` adds the purchase reservation,
+confirmation and delivery table, with daily uniqueness, stock/delivery indexes
+and consistent period, clock and state constraints. Existing global and realm rows
+remain intact. Before enabling an imported active campaign, reconcile its prior
+counter and provider records with the admitted-purchase ledger. Back up global
+purchase records, realm exchange times, receipts and the payment owner's orders
+and grants together. Preserve confirmed units and unresolved holds on rollback;
+rewinding only a displayed counter could sell the same capacity twice. No new
+dependency or environment variable is introduced.
+
+Synthetic PostgreSQL tests exercise competing realms, payment rejection,
+immutable orders, cancelled holds, UTC limits, receipt failure, acknowledgment,
+out-of-order delivery and the lock deadline. Native TCP checks retain LONG
+correlation and reject the internal payment producer. Actual provider and native
+APK/device execution are not claimed by this module.
