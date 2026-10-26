@@ -35,6 +35,8 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     spec.columns.map((column) => [column.property ?? column.name, sampleValue(column, variant)]),
   );
   if (spec.checks.some(([name]) => name === "chat_relation_kind")) row.kind = "contact";
+  if (spec.checks.some(([name]) => name === "user_mixed_info_box_gold_mode"))
+    row.ordinaryBoxGold = (variant - 1) % 2;
   for (const key of spec.foreignKeys) for (const name of key.columns) row[name] = 9007199254740993n;
   if (spec.indexes.some((key) => key.name === "mail_chat_read_intent_PRIMARY")) {
     row.chatTypes = variant === 1 ? "1,20" : "2";
@@ -69,6 +71,12 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   }
   if (spec.indexes.some((key) => key.name === "character_provisioning_PRIMARY"))
     row.state = variant % 2;
+  if (spec.indexes.some((key) => key.name === "expedition_period_PRIMARY")) {
+    row.matchServerId = variant + 1;
+    row.endTime = (row.startTime as bigint) + 1n;
+  }
+  if (spec.indexes.some((key) => key.name === "world_march_checkpoint_PRIMARY"))
+    row.status = (variant - 1) % 2;
   if (spec.indexes.some((key) => key.name === "timed_activity_PRIMARY")) row.status = 0;
   if (spec.indexes.some((key) => key.name === "building_production_PRIMARY"))
     row.remainder = BigInt(variant);
