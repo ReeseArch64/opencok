@@ -58,7 +58,6 @@ export const user_mixed_info = opencok_kingdom.table(
     "shippingTradeInvest": integer("shippingTradeInvest").notNull().default(sql.raw("0")),
     "shippingTradeInvestGold": integer("shippingTradeInvestGold").notNull().default(sql.raw("0")),
     "mdata": text("mdata").notNull(),
-    "ordinaryBoxGold": integer("ordinaryBoxGold").notNull().default(sql.raw("0")),
     "clientSaveFlag": integer("clientSaveFlag").default(sql.raw("0")),
     "plunderResource": integer("plunderResource").default(sql.raw("0")),
     "plunderTime": bigint("plunderTime", { mode: "bigint" }).default(sql.raw("0")),
@@ -88,6 +87,7 @@ export const user_mixed_info = opencok_kingdom.table(
     "expeditionSuperArmyUseTimes": integer("expeditionSuperArmyUseTimes").default(sql.raw("0")),
     "neutralSuperArmyUseTimes": integer("neutralSuperArmyUseTimes").default(sql.raw("0")),
     "ancientSuperArmyUseTimes": integer("ancientSuperArmyUseTimes").default(sql.raw("0")),
+    "ordinaryBoxGold": integer("ordinaryBoxGold").notNull().default(sql.raw("0")),
   },
   (table) => [
     check("user_mixed_info_box_gold_mode", sql.raw('"ordinaryBoxGold" IN (0, 1)')),
