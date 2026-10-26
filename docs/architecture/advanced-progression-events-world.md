@@ -1501,3 +1501,62 @@ two tests with 237 assertions. Schema contracts and snapshots passed 1,677 tests
 with 49,267 assertions; physical schemas and upgrades passed 1,529 tests with
 36,774 assertions. Lint, formatting, both migration-role consistency checks and
 server/nine package type checks passed. Device execution remains unverified.
+
+## Expedition stage finality
+
+Validated noncombat stages now close through owned snapshots and reciprocal
+shared proofs. Collection, building, science and training stages are eligible.
+Monster and fighting stages remain pending until their corresponding combat
+engine is validated. Waiting, matching and preparation do not produce a result.
+A legacy manifest without a matching shared calendar and reciprocal admission
+remains local and cannot prevent a verified later stage from closing.
+
+A five-minute recovery interval follows each saved stage deadline. Sealing takes
+the exclusive owned authority barrier and waits for authorized pending timers,
+legacy queues and gathering transitions due before that deadline. Banned,
+missing and visiting actors cannot hold the stage open. Their pending unit or
+resource work remains recoverable; a sealed stage cannot acquire later points.
+
+Timed score actions now retain their saved completion deadline even when a
+production checkpoint has already advanced farther. Immediate finishes use the
+actual earlier completion time. Deferred expedition scoring loads the archived
+manifest at that instant, preserves separate cycle keys and commits alongside
+the original action. Hero score actions use that same confirmed instant.
+
+The owned seal freezes member score, guild, claim flags, castle band, active
+science identifiers and public metadata. Its canonical proof hashes exact
+PostgreSQL float8 bytes and member identities in C order. Upload resumes from a
+persisted 64-member cursor, advances only after the shared write and checks the
+full count, digest and total before completing the proof. A mismatch discards
+only that realm's incomplete shared stage upload and retries its owned snapshot.
+Live publishers preserve sealed economic values and cannot recreate missing
+members, including after authority replacement. Public metadata may refresh.
+
+Finality requires both reciprocal realms, including a verified empty proof for a
+realm with no scores. The final result pins both totals and the ten leading
+members. Equal kingdom totals favor the higher realm identifier, matching the
+source coordinator order. Final results are immutable; an unavailable realm
+leaves the stage pending. Owned snapshots, upload proofs and final markers each
+commit atomically and recover independently after restart.
+
+Apply global migration `0018_expedition_stage_finality` and kingdom migration
+`0037_expedition_stage_finality` before this binary. They add only the four stage
+snapshot, member, pair-period and watermark tables. Inventory becomes 838 tables
+and 6,837 fields: 147 global and 691 kingdom tables. Existing progress, histories,
+periods, inventories and queues remain unchanged. Back up these new records with
+manifests, matching proofs, shared score ownership and score facts. Preserve them
+on binary rollback; deleting an individual proof or cursor destroys settlement
+recovery. No new dependency, configuration or environment variable is required.
+Automatic reward admission and native ranking history remain the next module.
+
+Seven PostgreSQL acceptance cases passed with 39 assertions, covering grace,
+reciprocal proofs, missing legacy cohorts, floating-point values, saved completion
+times, banned actors, mismatch recovery, transactional rollback and a 72-member
+upload resumed under replacement authority. Two focused units passed with eight
+assertions. Eighteen existing expedition and hero acceptance cases passed with
+116 assertions. The server unit suite passed 1,480 tests with 245,005 assertions.
+Native TCP and process-kill recovery passed two tests with 237 assertions. Schema
+contracts and snapshots passed 1,685 tests with 49,559 assertions and 838
+snapshots. Physical schemas and upgrades passed 1,535 tests with 36,971 assertions.
+Required lint, formatting, both migration consistency checks and server/nine
+package type checks passed. Device execution remains unverified.

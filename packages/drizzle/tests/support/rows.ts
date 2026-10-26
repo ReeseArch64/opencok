@@ -149,6 +149,24 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.remainder = BigInt(variant);
   if (spec.indexes.some((key) => key.name === "economy_posting_PRIMARY"))
     row.after = (row.before as bigint) + (row.delta as bigint);
+  if (spec.checks.some(([name]) => name.startsWith("expedition_stage_"))) {
+    row.stage = 3;
+    if ("startTime" in row) {
+      row.endTime = (row.startTime as bigint) + 1n;
+      row.createdAt = row.endTime;
+    }
+    if ("opponent" in row) row.opponent = 100 + variant;
+    if ("leader" in row) row.leader = variant;
+    if ("state" in row) row.state = 0;
+    if ("scoreCount" in row) row.scoreCount = 0n;
+    if ("winner" in row) row.winner = 0;
+    if ("finalizedAt" in row) row.finalizedAt = 0n;
+    if ("phase" in row) {
+      row.phase = 0;
+      row.scoreCount = 0n;
+      row.processed = 0n;
+    }
+  }
   return row;
 }
 

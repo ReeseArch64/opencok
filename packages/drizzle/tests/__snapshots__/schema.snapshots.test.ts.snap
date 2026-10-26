@@ -15201,3 +15201,87 @@ select "kingdomId", "ownerEpoch", "instanceId", "sequence" from "opencok_global"
 update "opencok_global"."expedition_score_owner" set "kingdomId" = $1, "ownerEpoch" = $2, "instanceId" = $3, "sequence" = $4 where "opencok_global"."expedition_score_owner"."kingdomId" = $5
 delete from "opencok_global"."expedition_score_owner" where "opencok_global"."expedition_score_owner"."kingdomId" = $1"
 `;
+
+exports[`opencok_global.expedition_stage_period: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["periodId","varchar(40)",true,null,null,null]
+column ["stage","integer",true,null,null,null]
+column ["leader","integer",true,null,null,null]
+column ["opponent","integer",true,null,null,null]
+column ["startTime","bigint",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["state","integer",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["finalizedAt","bigint",true,null,null,null]
+column ["winner","integer",true,null,null,null]
+column ["ranking","text",false,null,null,null]
+primary ["expedition_stage_period_PRIMARY",["periodId","stage","leader"]]
+index ["expedition_stage_period_pending",false,["state","endTime"]]
+check ["expedition_stage_period_bounds","\\"stage\\" BETWEEN 2 AND 8 AND \\"leader\\">0 AND \\"opponent\\">\\"leader\\" AND \\"startTime\\">=0 AND \\"endTime\\">\\"startTime\\" AND \\"createdAt\\">=\\"endTime\\" AND \\"state\\" IN (0,1) AND \\"finalizedAt\\">=0 AND (\\"winner\\"=0 OR \\"winner\\" IN (\\"leader\\",\\"opponent\\"))"]
+insert into "opencok_global"."expedition_stage_period" ("periodId", "stage", "leader", "opponent", "startTime", "endTime", "state", "createdAt", "finalizedAt", "winner", "ranking") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+select "periodId", "stage", "leader", "opponent", "startTime", "endTime", "state", "createdAt", "finalizedAt", "winner", "ranking" from "opencok_global"."expedition_stage_period" where "opencok_global"."expedition_stage_period"."periodId" = $1
+update "opencok_global"."expedition_stage_period" set "periodId" = $1, "stage" = $2, "leader" = $3, "opponent" = $4, "startTime" = $5, "endTime" = $6, "state" = $7, "createdAt" = $8, "finalizedAt" = $9, "winner" = $10, "ranking" = $11 where "opencok_global"."expedition_stage_period"."periodId" = $12
+delete from "opencok_global"."expedition_stage_period" where "opencok_global"."expedition_stage_period"."periodId" = $1"
+`;
+
+exports[`opencok_global.expedition_stage_watermark: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["periodId","varchar(40)",true,null,null,null]
+column ["stage","integer",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["opponent","integer",true,null,null,null]
+column ["digest","varchar(32)",true,null,null,null]
+column ["scoreCount","bigint",true,null,null,null]
+column ["total","double precision",true,null,null,null]
+column ["state","integer",true,null,null,null]
+column ["completedAt","bigint",true,null,null,null]
+primary ["expedition_stage_watermark_PRIMARY",["periodId","stage","kingdomId"]]
+check ["expedition_stage_watermark_bounds","\\"stage\\" BETWEEN 2 AND 8 AND \\"kingdomId\\">0 AND \\"opponent\\">0 AND \\"kingdomId\\"<>\\"opponent\\" AND \\"scoreCount\\">=0 AND \\"scoreCount\\"<=1000000 AND \\"total\\">=0 AND \\"total\\"<'Infinity'::double precision AND \\"state\\" IN (0,1) AND \\"completedAt\\">=0"]
+insert into "opencok_global"."expedition_stage_watermark" ("periodId", "stage", "kingdomId", "opponent", "digest", "scoreCount", "total", "state", "completedAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "periodId", "stage", "kingdomId", "opponent", "digest", "scoreCount", "total", "state", "completedAt" from "opencok_global"."expedition_stage_watermark" where "opencok_global"."expedition_stage_watermark"."periodId" = $1
+update "opencok_global"."expedition_stage_watermark" set "periodId" = $1, "stage" = $2, "kingdomId" = $3, "opponent" = $4, "digest" = $5, "scoreCount" = $6, "total" = $7, "state" = $8, "completedAt" = $9 where "opencok_global"."expedition_stage_watermark"."periodId" = $10
+delete from "opencok_global"."expedition_stage_watermark" where "opencok_global"."expedition_stage_watermark"."periodId" = $1"
+`;
+
+exports[`opencok_kingdom.expedition_stage_closure: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["periodId","varchar(40)",true,null,null,null]
+column ["stage","integer",true,null,null,null]
+column ["opponent","integer",true,null,null,null]
+column ["startTime","bigint",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["phase","integer",true,null,null,null]
+column ["cursor","varchar(40)",true,null,null,null]
+column ["processed","bigint",true,null,null,null]
+column ["scoreCount","bigint",true,null,null,null]
+column ["digest","varchar(32)",true,null,null,null]
+column ["total","double precision",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["winner","integer",true,null,null,null]
+column ["finalizedAt","bigint",true,null,null,null]
+primary ["expedition_stage_closure_PRIMARY",["periodId","stage"]]
+index ["expedition_stage_closure_pending",false,["phase","endTime"]]
+check ["expedition_stage_closure_bounds","\\"stage\\" BETWEEN 2 AND 8 AND \\"opponent\\">0 AND \\"startTime\\">=0 AND \\"endTime\\">\\"startTime\\" AND \\"createdAt\\">=\\"endTime\\" AND \\"phase\\" BETWEEN 0 AND 3 AND \\"processed\\">=0 AND \\"processed\\"<=\\"scoreCount\\" AND \\"scoreCount\\"<=1000000 AND \\"total\\">=0 AND \\"total\\"<'Infinity'::double precision AND \\"winner\\">=0 AND \\"finalizedAt\\">=0"]
+insert into "opencok_kingdom"."expedition_stage_closure" ("periodId", "stage", "opponent", "startTime", "endTime", "phase", "cursor", "processed", "scoreCount", "digest", "total", "createdAt", "winner", "finalizedAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+select "periodId", "stage", "opponent", "startTime", "endTime", "phase", "cursor", "processed", "scoreCount", "digest", "total", "createdAt", "winner", "finalizedAt" from "opencok_kingdom"."expedition_stage_closure" where "opencok_kingdom"."expedition_stage_closure"."periodId" = $1
+update "opencok_kingdom"."expedition_stage_closure" set "periodId" = $1, "stage" = $2, "opponent" = $3, "startTime" = $4, "endTime" = $5, "phase" = $6, "cursor" = $7, "processed" = $8, "scoreCount" = $9, "digest" = $10, "total" = $11, "createdAt" = $12, "winner" = $13, "finalizedAt" = $14 where "opencok_kingdom"."expedition_stage_closure"."periodId" = $15
+delete from "opencok_kingdom"."expedition_stage_closure" where "opencok_kingdom"."expedition_stage_closure"."periodId" = $1"
+`;
+
+exports[`opencok_kingdom.expedition_stage_member: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["periodId","varchar(40)",true,null,null,null]
+column ["stage","integer",true,null,null,null]
+column ["uid","varchar(40)",true,null,null,null]
+column ["score","double precision",true,null,null,null]
+column ["allianceId","varchar(40)",true,null,null,null]
+column ["takeReward","varchar(500)",true,null,null,null]
+column ["eligibility","text",true,null,null,null]
+column ["metadata","text",false,null,null,null]
+primary ["expedition_stage_member_PRIMARY",["periodId","stage","uid"]]
+check ["expedition_stage_member_bounds","\\"stage\\" BETWEEN 2 AND 8 AND \\"score\\">=0 AND \\"score\\"<'Infinity'::double precision AND octet_length(\\"eligibility\\")<=65536 AND (\\"metadata\\" IS NULL OR octet_length(\\"metadata\\")<=8192)"]
+insert into "opencok_kingdom"."expedition_stage_member" ("periodId", "stage", "uid", "score", "allianceId", "takeReward", "eligibility", "metadata") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "periodId", "stage", "uid", "score", "allianceId", "takeReward", "eligibility", "metadata" from "opencok_kingdom"."expedition_stage_member" where "opencok_kingdom"."expedition_stage_member"."periodId" = $1
+update "opencok_kingdom"."expedition_stage_member" set "periodId" = $1, "stage" = $2, "uid" = $3, "score" = $4, "allianceId" = $5, "takeReward" = $6, "eligibility" = $7, "metadata" = $8 where "opencok_kingdom"."expedition_stage_member"."periodId" = $9
+delete from "opencok_kingdom"."expedition_stage_member" where "opencok_kingdom"."expedition_stage_member"."periodId" = $1"
+`;
