@@ -54,6 +54,14 @@ test("shipping investments pin weighted returns once, preserve unrelated data an
   const h = await fixture();
   try {
     const ui = await h.command("shipping.trade.invest.ui");
+    expect(Object.keys(fields(ui.body.gold_reward))).toEqual([
+      "weight",
+      "Needgold",
+      "id",
+      "Range",
+      "vip",
+      "Seq",
+    ]);
     expect(fields(ui.body.gold_reward).Needgold).toEqual(sfs.string("100"));
     expect(ui.body.count).toEqual(sfs.int(0));
     expect(h.draws()).toBe(0);

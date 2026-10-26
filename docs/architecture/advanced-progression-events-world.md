@@ -559,3 +559,10 @@ Frozen mode preserves saved offers after the refresh interval. Existing reserve
 and auxiliary fields remain intact on updates. Back up activity rows, inventory,
 receipts and ledger before rollout, and retain the saved level and offers during
 rollback. No new migration or dependency is added.
+
+Raw catalog objects in castle-level, cumulative-recharge and shipping UI replies
+use the validated Java hash-map traversal order before native encoding. This
+preserves the reference's field order independently of the maintained catalog's
+TypeScript property order. Nested reward arrays retain their existing wire types.
+Focused PostgreSQL assertions cover the emitted field sequences as well as the
+existing economic behavior. This correction changes no saved data or migration.

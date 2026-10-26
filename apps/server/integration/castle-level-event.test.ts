@@ -109,6 +109,15 @@ test("native castle projections reconcile existing shards, realm totals and owne
     expect(state.share_reward!.value).toEqual([0, 0, 0, 0, 0, 0, 0]);
     expect(state.lvReward).toEqual(sfs.int(0));
     const table = fields((reply.body.castleLVTable!.value as Value[])[0]);
+    expect(Object.keys(table).slice(0, 7)).toEqual([
+      "exchange_id",
+      "activity_Type",
+      "Sharing_condition",
+      "castle_lv",
+      "id",
+      "lv_reward",
+      "Shared_reward",
+    ]);
     expect(table.LV_Num).toEqual(sfs.int(2));
     expect(table.castle_lv).toEqual(sfs.string("2"));
     expect(table.lv_reward_arr!.type).toBe(Type.Array);
