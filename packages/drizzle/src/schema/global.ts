@@ -142,3 +142,4 @@ export { expedition_stage_watermark as opencok_global_expedition_stage_watermark
 export { continued_cost_rank_period as opencok_global_continued_cost_rank_period } from "./opencok_global/continued_cost_rank_period";
 export { continued_cost_rank_owner as opencok_global_continued_cost_rank_owner } from "./opencok_global/continued_cost_rank_owner";
 export { continued_cost_rank_score as opencok_global_continued_cost_rank_score } from "./opencok_global/continued_cost_rank_score";
+export { continued_cost_rank_watermark as opencok_global_continued_cost_rank_watermark } from "./opencok_global/continued_cost_rank_watermark";

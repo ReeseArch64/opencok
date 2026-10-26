@@ -1,3 +1,8 @@
+import { ContinuedCostFinalityService } from "@opencok/services/continued-cost-finality";
+import {
+  createCostFinalityOwned,
+  createCostFinalityShared,
+} from "@opencok/repositories/continued-cost-finality";
 import { ContinuedCostRankingService } from "@opencok/services/continued-cost-ranking";
 import {
   createCostRankingFacts,
@@ -817,8 +822,14 @@ export const RealmDependenciesLive = Layer.effect(
       rules,
       [...db.databases.kingdoms.keys()],
     );
+    const costRankingFacts = createCostRankingFacts(db.kingdom.db, authority);
+    const continuedCostFinality = new ContinuedCostFinalityService(
+      costRankingFacts,
+      createCostFinalityOwned(db.kingdom.db, authority),
+      createCostFinalityShared(db.databases.global.db, authority),
+    );
     const continuedCostRanking = new ContinuedCostRankingService(
-      createCostRankingFacts(db.kingdom.db, authority),
+      costRankingFacts,
       createCostRankingRegistry(db.databases.global.db, authority),
       rules,
       [...db.databases.kingdoms.keys()],
@@ -1530,6 +1541,15 @@ export const RealmDependenciesLive = Layer.effect(
     yield* Effect.tryPromise({
       try: recoverExpeditionNotifications,
       catch: () => new Error("Expedition activity publication unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: () => continuedCostFinality.refresh(),
+      catch: () => new Error("Consumption ranking finality unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),
