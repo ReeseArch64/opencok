@@ -329,6 +329,9 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       await eventually(async () =>
         client.received.some((packet) => str(fields(packet.p), "c", "") === "push.common.notice"),
       );
+      expect((await client.command("item.askFor", { itemId: sfs.int(212023) })).success).toEqual(
+        sfs.string("1"),
+      );
       const campaignLoginNotice = fields(
         fields(
           client.received.find((packet) => str(fields(packet.p), "c", "") === "push.common.notice")!
