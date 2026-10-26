@@ -6,6 +6,7 @@ export function combineMailRewards(responses: readonly Buffer[], ids: readonly s
   const body: Fields = {},
     goods = new Map<string, Value>(),
     items = new Map<string, Value>();
+  const extra: { command: string; body: Fields }[] = [];
   let resource: Fields | undefined;
   for (const response of responses) {
     const envelope = decode(response),
@@ -22,6 +23,7 @@ export function combineMailRewards(responses: readonly Buffer[], ids: readonly s
         for (const item of payload.useritemlist!.value as Value[])
           items.set(str(fields(item), "uuid"), item);
       else if (str(push, "command") === "push.city.refresh") resource = payload;
+      else extra.push({ command: str(push, "command"), body: payload });
     }
   }
   if (goods.size) body.goods = sfs.array([...goods.values()]);
@@ -33,7 +35,7 @@ export function combineMailRewards(responses: readonly Buffer[], ids: readonly s
       body: { useritemlist: sfs.array([...items.values()]) },
     });
   if (resource) pushes.push({ command: "push.city.refresh", body: resource });
-  return inventoryResponse(body, pushes);
+  return inventoryResponse(body, [...pushes, ...extra]);
 }
 export function mailRewardEvent(entry: Row): Buffer {
   return encode({

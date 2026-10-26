@@ -49,6 +49,9 @@ test("anniversary public commands preserve correlation and reject internal event
   expect(commands).toHaveLength(4);
   await expect(game.execute("owner", "campaign.action", { event: sfs.int(58) })).rejects.toThrow();
   await expect(game.execute("owner", "campaign.init", {})).rejects.toThrow();
+  await expect(
+    game.execute("owner", "campaign.record", { events: sfs.array([]) }),
+  ).rejects.toThrow();
 });
 
 test("login with no configured campaign catalogs leaves state untouched and keeps anniversary queries unavailable", async () => {
