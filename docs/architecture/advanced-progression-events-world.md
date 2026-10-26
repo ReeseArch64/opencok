@@ -669,3 +669,33 @@ metadata, inventory, receipts and mail together. Preserve committed claims durin
 rollback. Synthetic PostgreSQL scenarios cover all seven gifts, concurrent
 retries, eligibility, UTC rollover, receipt failures and once-only alliance mail.
 Native APK/device execution remains unverified.
+
+## Returning-player tasks
+
+`recall.task.init` selects the maintained regional task control by saved
+registration country and castle band. The configured overall period controls
+initial enrollment; the returning-player cutoff determines the saved opening
+marker. Assignments, target quantities and completion/claim flags use the
+existing recall tables. They do not reset on reconnect.
+
+The shared confirmed-action hook advances matching recall tasks alongside weekly
+target tasks. Completed training, construction, research, returned gathering,
+item use, equipment actions, lottery and supported alliance actions supply their
+actual quantities. Clients cannot post counters. Prayer is a separate required
+producer for the maintained assignments and is tracked as an outstanding local
+dependency until its native mutation domain is integrated. Combat and paid
+producers require their corresponding validated engines.
+
+Owned task progress stops at its saved deadline; completed entitlements remain
+claimable once. The native UI retains Boolean state and receive fields, INT
+counters, nested reward arrays and the LONG opening marker. Milestone status or
+reward updates commit with the task claim and cannot repeat the same saved
+milestone. Migration 0027 appends a last-login timestamp so daily login credit
+survives reconnect independently of per-login task credit and claim timestamps.
+The initial enrollment preserves the reference behavior of creating tasks after
+that login's progress hooks.
+
+Back up assignments, notes, rewards, status rows, receipts and inventory together.
+Retain the added timestamp during rollback. Synthetic PostgreSQL scenarios cover
+maintained assignments, actual completed training, daily reconnect credit,
+concurrent claims, failed receipts and once-only milestone effects.

@@ -111,7 +111,8 @@
     "./player-item-gifts": "./src/player-item-gifts.ts",
     "./alliance-heart": "./src/alliance-heart.ts",
     "./realm-opening-clock": "./src/realm-opening-clock.ts",
-    "./regional-recall": "./src/regional-recall.ts"
+    "./regional-recall": "./src/regional-recall.ts",
+    "./recall-task": "./src/recall-task.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

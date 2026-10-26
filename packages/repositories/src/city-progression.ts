@@ -1,3 +1,4 @@
+import { readRecallTasks, writeRecallTasks } from "./recall-task";
 import { readRegionalRecall, writeRegionalRecall } from "./regional-recall";
 import { readAllianceHeart, writeAllianceHeart } from "./alliance-heart";
 import { readPlayerItemGifts, writePlayerItemGifts } from "./player-item-gifts";
@@ -141,6 +142,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        recallTask: await readRecallTasks(tx, owner, command?.startsWith("recall.task.") ?? false),
         regionalRecall: command?.startsWith("region.recall.")
           ? await readRegionalRecall(
               tx,
@@ -286,6 +288,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.recallTask) await writeRecallTasks(tx, owner, write.recallTask);
         if (write.regionalRecall) await writeRegionalRecall(tx, owner, write.regionalRecall);
         if (write.allianceHeart) await writeAllianceHeart(tx, owner, write.allianceHeart);
         if (write.playerItemGifts) await writePlayerItemGifts(tx, owner, write.playerItemGifts);
