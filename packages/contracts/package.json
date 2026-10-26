@@ -131,7 +131,9 @@
     "./vip-box": "./src/vip-box.ts",
     "./responses/vip-box": "./src/responses/vip-box.ts",
     "./seasonal-exchange": "./src/seasonal-exchange.ts",
-    "./responses/seasonal-exchange": "./src/responses/seasonal-exchange.ts"
+    "./responses/seasonal-exchange": "./src/responses/seasonal-exchange.ts",
+    "./player-item-gifts": "./src/player-item-gifts.ts",
+    "./responses/player-item-gifts": "./src/responses/player-item-gifts.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

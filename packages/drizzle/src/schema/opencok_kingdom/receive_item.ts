@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { bigint, index, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
 
 export const receive_item = opencok_kingdom.table(
@@ -14,5 +14,8 @@ export const receive_item = opencok_kingdom.table(
     "itemNum": integer("itemNum").notNull().default(sql.raw("0")),
     "createTime": bigint("createTime", { mode: "bigint" }),
   },
-  (table) => [primaryKey({ name: "receive_item_PRIMARY", columns: [table["id"]] })],
+  (table) => [
+    primaryKey({ name: "receive_item_PRIMARY", columns: [table["id"]] }),
+    index("receive_item_owner").on(table.uid, table.id),
+  ],
 );
