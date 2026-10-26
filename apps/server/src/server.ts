@@ -2,6 +2,11 @@ import {
   cosmeticInteractionParticipants,
   publishCosmeticInteractionMutation,
 } from "@opencok/services/city-cosmetics";
+import {
+  troubleDomain,
+  deliverWorldTroubles,
+  publishTroubleMutation,
+} from "@opencok/services/trouble";
 import { createPrayerDomain } from "@opencok/services/prayer";
 import { recallTaskDomain } from "@opencok/services/recall-task";
 import { regionalRecallDomain } from "@opencok/services/regional-recall";
@@ -472,6 +477,7 @@ export const RealmDependenciesLive = Layer.effect(
         createRechargeFeedbackDomain(),
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
         createPrayerDomain(),
+        troubleDomain,
         recallTaskDomain,
         regionalRecallDomain,
         playerItemGiftDomain,
@@ -680,6 +686,23 @@ export const RealmDependenciesLive = Layer.effect(
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
     const recoverCosmeticInteractions = async () => {
+      for (const command of ["trouble.deliver", "trouble.speed"])
+        for (let index = 0; index < 64; index++) {
+          const delivered = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            (event) =>
+              publishTroubleMutation(
+                event.payload,
+                command,
+                worldInterest.interested,
+                (owner, name, body) => notifications.publish(owner, name, body),
+              ),
+            Date.now,
+            command,
+          );
+          if (!delivered) break;
+        }
       for (let index = 0; index < 64; index++) {
         const delivered = await relayMutationEvent(
           db.kingdom.db,
@@ -905,14 +928,18 @@ export const RealmDependenciesLive = Layer.effect(
           const delivered = await relayMutationEvent(
             db.kingdom.db,
             authority,
-            (event) =>
-              publishWorldMutation(
+            async (event) => {
+              await deliverWorldTroubles(event.payload, (owner, params) =>
+                activities.domainCommand(owner, "trouble.deliver", params),
+              );
+              await publishWorldMutation(
                 event.payload,
                 command,
                 config.kingdomId,
                 worldInterest.interested,
                 (owner, eventCommand, body) => notifications.publish(owner, eventCommand, body),
-              ),
+              );
+            },
             Date.now,
             command,
           );

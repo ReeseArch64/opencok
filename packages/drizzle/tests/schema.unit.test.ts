@@ -13,7 +13,7 @@ const db = drizzle.mock();
 test("application inventory contains all 817 tables and 6,629 fields", async () => {
   expect(catalog.map((entry) => entry.id)).toEqual(Object.keys(contract).sort());
   expect(catalog).toHaveLength(817);
-  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6631);
+  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6633);
   for (const namespaces of Object.values(databaseSchemas))
     for (const namespace of namespaces) {
       expect(

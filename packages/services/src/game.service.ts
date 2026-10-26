@@ -568,6 +568,8 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "get.trouble.list":
+      case "trouble.speed":
       case "trigger.activity":
       case "user.pray":
       case "user.pray.info":

@@ -314,6 +314,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
           ?.value,
       ).toBe("synthetic-init");
       expect((await client.command("cmd.ping")).serverNowTime?.type).toBe(Type.Long);
+      expect((await client.command("get.trouble.list")).array).toEqual(sfs.array([]));
+      expect((await client.command("trouble.deliver", {})).errorCode?.value).toBe("102192");
       expect(
         fields(fields((await client.command("login.dataconfig")).dataConfig).player_max).k3?.value,
       ).toBe("30");

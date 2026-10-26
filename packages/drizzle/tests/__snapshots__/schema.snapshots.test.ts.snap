@@ -8729,14 +8729,18 @@ delete from "opencok_kingdom"."trigger_var" where "opencok_kingdom"."trigger_var
 
 exports[`opencok_kingdom.trouble_log: schema and CRUD SQL 1`] = `
 "schema opencok_kingdom
-column ["uid","bigint",false,null,null,null]
+column ["uid","varchar(40)",false,null,null,null]
 column ["username","varchar(255)",false,null,null,null]
 column ["usetime","bigint",false,null,null,null]
 column ["statusid","varchar(255)",false,null,null,null]
+column ["itemid","varchar(40)",true,"''",null,null]
+column ["id","integer",true,null,{"type":"byDefault","sequenceName":"trouble_log_id_seq","sequenceOptions":{"startWith":1}},null]
+primary ["trouble_log_PRIMARY",["id"]]
 index ["trouble_log_trouble_log_uid_index",false,["\\"uid\\""]]
-insert into "opencok_kingdom"."trouble_log" ("uid", "username", "usetime", "statusid") values ($1, $2, $3, $4)
-select "uid", "username", "usetime", "statusid" from "opencok_kingdom"."trouble_log" where "opencok_kingdom"."trouble_log"."uid" = $1
-update "opencok_kingdom"."trouble_log" set "uid" = $1, "username" = $2, "usetime" = $3, "statusid" = $4 where "opencok_kingdom"."trouble_log"."uid" = $5
+index ["trouble_log_owner",false,["uid","id"]]
+insert into "opencok_kingdom"."trouble_log" ("uid", "username", "usetime", "statusid", "itemid", "id") values ($1, $2, $3, $4, $5, $6)
+select "uid", "username", "usetime", "statusid", "itemid", "id" from "opencok_kingdom"."trouble_log" where "opencok_kingdom"."trouble_log"."uid" = $1
+update "opencok_kingdom"."trouble_log" set "uid" = $1, "username" = $2, "usetime" = $3, "statusid" = $4, "itemid" = $5, "id" = $6 where "opencok_kingdom"."trouble_log"."uid" = $7
 delete from "opencok_kingdom"."trouble_log" where "opencok_kingdom"."trouble_log"."uid" = $1"
 `;
 
