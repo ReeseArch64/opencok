@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
-import { sfs, str, int, encode, decode, type Fields } from "@opencok/messages/sfs";
+import { sfs, str, int, encode, decode, fields, type Fields } from "@opencok/messages/sfs";
 import { heroTargetDomain, deliverHeroTargetBatch } from "@opencok/services/hero-score";
 import { createPrayerDomain } from "@opencok/services/prayer";
 import { lotteryDomain } from "@opencok/services/lottery";
@@ -104,6 +104,22 @@ test("confirmed hero contributions serialize guild totals and fund each reached 
     expect(messages.filter((row) => row.toUser === "owner")).toHaveLength(3);
     expect(messages.filter((row) => row.toUser === "other")).toHaveLength(2);
     expect(messages.every((row) => row.rewardId && row.rewardStatus === 0)).toBe(true);
+    const publications = (await h.db.db.select().from(mutation_outbox)).filter(
+      (row) => row.eventType === "hero.target.mail",
+    );
+    expect(publications).toHaveLength(5);
+    for (const publication of publications) {
+      const payload = decode(publication.payload);
+      expect(str(payload, "owner")).toBe(publication.ownerUid);
+      expect(
+        messages.some(
+          (row) =>
+            row.uid === str(fields(payload.mail), "uid") && row.toUser === publication.ownerUid,
+        ),
+      ).toBe(true);
+      expect(payload.achievement).toBeDefined();
+    }
+
     await deliver(h);
     expect(await h.db.db.select().from(mail)).toEqual(messages);
     expect(

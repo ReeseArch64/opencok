@@ -1280,3 +1280,49 @@ local/shared rollback, coupled country totals, unmatched stages and bounded tail
 Native TCP and SIGKILL recovery retain ordinary gameplay with the coordinator
 composed into the realm. Final ranking mail remains a separate stage; native device
 execution remains unverified.
+
+## Recoverable hero ranking prizes
+
+Finalized shared hero standings now produce owned reward entitlements. Ranking is
+computed from the completed cohort proofs, separately for each saved level band,
+with score descending and member identity ascending for ties. Each realm scans its
+own eligible members in pages of 64 and persists the entitlement and member cursor
+in the same fenced transaction. Current guild members receive a guild prize only
+when their saved contribution belongs to that guild and stage. Missing profiles
+advance the cursor without creating a recipient.
+
+Every entitlement stores its selected mail template, original reward identifier
+and independently resolved reward contents. A restart or later catalog change
+cannot reroll an admitted prize. Personal standings outside a funded tier receive
+the native consolation mail only through rank 1,000; guild standings have no
+consolation mail. Informational zero rewards retain their ranking history. The
+existing personal history format with an empty alliance identity also prevents a
+duplicate payment when imported state already records the prize.
+
+A private owned command atomically acknowledges delivery, writes the ranking
+history and funded system mail, and records its native publication in the mutation
+outbox. The existing mail claim service credits the attached items once. Failed
+receipts roll back all delivery state. Banned owners retry after a delay while
+other recipients continue; a shared ranking outage does not prevent delivery of
+already persisted entitlements. Both ranking mail and target-achievement mail now
+publish through the durable outbox, including the native target notification.
+
+Apply kingdom migration `0033_hero_ranking_rewards` before this binary. It adds
+`hero_rank_award` and appends the award cursor to `hero_rank_closure`; all existing
+score, history and mailbox rows remain intact. The inventory becomes 826 tables
+and 6,733 fields: 140 global and 686 kingdom tables. Back up entitlements, closure
+cursors, ranking history, mail, command receipts and their outbox together. Retain
+these records across binary rollback; clearing acknowledgements independently can
+invalidate recovery. No new dependency, configuration or environment variable is
+required. Device execution remains unverified, and expedition coordination and
+other campaign families remain separate work in issue 385.
+
+Acceptance covers personal and guild entitlements, funded mailbox claims,
+canonical replay, receipt rollback, legacy history, deferred owners, catalog
+changes, shared outages and bounded member tails. Thirteen focused tests passed
+with 369 assertions. The server unit suite passed 1,462 tests with 244,897
+assertions. Native TCP and process-kill recovery passed two tests with 235
+assertions. Schema contracts and snapshots passed 1,661 tests with 48,815
+assertions; physical schemas and upgrades passed 1,518 tests with 36,473
+assertions. Lint, formatting, migration consistency and server/nine package type
+checks passed.

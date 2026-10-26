@@ -1,3 +1,12 @@
+import {
+  HeroRankingRewardService,
+  heroRankingRewardDomain,
+} from "@opencok/services/hero-ranking-rewards";
+import {
+  createHeroRankRewardStore,
+  createHeroRankRewardStandings,
+} from "@opencok/repositories/hero-ranking-rewards";
+import { heroRankAwardOperation } from "@opencok/rules/hero-ranking-rewards";
 import { HeroRankingFinalityService } from "@opencok/services/hero-ranking-finality";
 import {
   createHeroRankFinalityRealm,
@@ -529,6 +538,7 @@ export const RealmDependenciesLive = Layer.effect(
         createGroupBuyDomain(),
         continuedCostDomain,
         heroTargetDomain,
+        heroRankingRewardDomain,
         createSpecialEventDomain(specialEventStock),
         recallTaskDomain,
         regionalRecallDomain,
@@ -753,6 +763,16 @@ export const RealmDependenciesLive = Layer.effect(
       createHeroRankProjection(db.databases.global.db, authority),
       rules,
       [...db.databases.kingdoms.keys()],
+    );
+    const heroRankingRewards = new HeroRankingRewardService(
+      createHeroRankRewardStore(db.kingdom.db, authority),
+      createHeroRankRewardStandings(db.databases.global.db, config.kingdomId),
+      rules,
+      (owner, id) =>
+        activities.domainCommand(owner, "hero.rank.deliver", {
+          awardId: sfs.string(id),
+          operationId: sfs.string(heroRankAwardOperation(id)),
+        }),
     );
     const heroMatching = new HeroMatchingService(
       createHeroMatchingRealmStore(db.kingdom.db, authority),
@@ -1347,6 +1367,41 @@ export const RealmDependenciesLive = Layer.effect(
     yield* Effect.tryPromise({
       try: () => heroRankingFinality.refresh(),
       catch: () => new Error("Hero ranking finality unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: async () => {
+        await heroRankingRewards.refresh().catch(() => undefined);
+        for (const type of ["hero.rank.mail", "hero.target.mail"]) {
+          for (let index = 0; index < 64; index++) {
+            const delivered = await relayMutationEvent(
+              db.kingdom.db,
+              authority,
+              async (event) => {
+                const data = decode(event.payload);
+                if (str(data, "owner") !== event.owner)
+                  throw new Error("Foreign hero mail publication");
+                await notifications.publish(event.owner, "push.mail", fields(data.mail));
+                if (data.achievement)
+                  await notifications.publish(
+                    event.owner,
+                    "push.hero.target.achieved",
+                    fields(data.achievement),
+                  );
+              },
+              Date.now,
+              type,
+              60000,
+            );
+            if (!delivered) break;
+          }
+        }
+      },
+      catch: () => new Error("Hero ranking reward recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),

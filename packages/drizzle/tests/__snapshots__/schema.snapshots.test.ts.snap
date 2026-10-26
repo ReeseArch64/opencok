@@ -15017,11 +15017,39 @@ column ["scoreCount","bigint",true,null,null,null]
 column ["digest","varchar(32)",true,null,null,null]
 column ["createdAt","bigint",true,null,null,null]
 column ["kingdomRank","varchar(255)",false,null,null,null]
+column ["awardCursor","varchar(40)",true,"''",null,null]
 primary ["hero_rank_closure_PRIMARY",["periodId"]]
 index ["hero_rank_closure_pending",false,["phase","endTime"]]
 check ["hero_rank_closure_bounds","\\"type\\" BETWEEN 1 AND 4 AND \\"endTime\\" > 0 AND \\"createdAt\\" >= \\"endTime\\" AND \\"eligible\\" IN (0,1) AND \\"phase\\" BETWEEN 0 AND 3 AND \\"processed\\" >= 0 AND \\"processed\\" <= \\"scoreCount\\" AND \\"scoreCount\\" <= 1000000 AND (\\"actId\\" IS NOT NULL OR (\\"eligible\\" = 0 AND \\"scoreCount\\" = 0))"]
-insert into "opencok_kingdom"."hero_rank_closure" ("periodId", "actId", "type", "endTime", "group", "eventId", "eligible", "phase", "cursor", "processed", "scoreCount", "digest", "createdAt", "kingdomRank") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-select "periodId", "actId", "type", "endTime", "group", "eventId", "eligible", "phase", "cursor", "processed", "scoreCount", "digest", "createdAt", "kingdomRank" from "opencok_kingdom"."hero_rank_closure" where "opencok_kingdom"."hero_rank_closure"."periodId" = $1
-update "opencok_kingdom"."hero_rank_closure" set "periodId" = $1, "actId" = $2, "type" = $3, "endTime" = $4, "group" = $5, "eventId" = $6, "eligible" = $7, "phase" = $8, "cursor" = $9, "processed" = $10, "scoreCount" = $11, "digest" = $12, "createdAt" = $13, "kingdomRank" = $14 where "opencok_kingdom"."hero_rank_closure"."periodId" = $15
+insert into "opencok_kingdom"."hero_rank_closure" ("periodId", "actId", "type", "endTime", "group", "eventId", "eligible", "phase", "cursor", "processed", "scoreCount", "digest", "createdAt", "kingdomRank", "awardCursor") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+select "periodId", "actId", "type", "endTime", "group", "eventId", "eligible", "phase", "cursor", "processed", "scoreCount", "digest", "createdAt", "kingdomRank", "awardCursor" from "opencok_kingdom"."hero_rank_closure" where "opencok_kingdom"."hero_rank_closure"."periodId" = $1
+update "opencok_kingdom"."hero_rank_closure" set "periodId" = $1, "actId" = $2, "type" = $3, "endTime" = $4, "group" = $5, "eventId" = $6, "eligible" = $7, "phase" = $8, "cursor" = $9, "processed" = $10, "scoreCount" = $11, "digest" = $12, "createdAt" = $13, "kingdomRank" = $14, "awardCursor" = $15 where "opencok_kingdom"."hero_rank_closure"."periodId" = $16
 delete from "opencok_kingdom"."hero_rank_closure" where "opencok_kingdom"."hero_rank_closure"."periodId" = $1"
+`;
+
+exports[`opencok_kingdom.hero_rank_award: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["id","varchar(32)",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["periodId","varchar(32)",true,null,null,null]
+column ["actId","varchar(40)",true,null,null,null]
+column ["member","varchar(40)",true,null,null,null]
+column ["type","integer",true,null,null,null]
+column ["rank","integer",true,null,null,null]
+column ["level","integer",true,null,null,null]
+column ["rewardId","varchar(255)",false,null,null,null]
+column ["pinnedReward","text",false,null,null,null]
+column ["sender","varchar(100)",true,null,null,null]
+column ["title","varchar(255)",true,null,null,null]
+column ["contents","bytea",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["deliveredAt","bigint",true,"0",null,null]
+column ["nextAttemptAt","bigint",true,"0",null,null]
+primary ["hero_rank_award_PRIMARY",["id"]]
+index ["hero_rank_award_pending",false,["deliveredAt","nextAttemptAt","createdAt","id"]]
+check ["hero_rank_award_bounds","\\"type\\" BETWEEN 1 AND 4 AND \\"rank\\" BETWEEN 1 AND 5000 AND \\"level\\" BETWEEN 0 AND 4095 AND \\"createdAt\\" >= 0 AND (\\"deliveredAt\\" = 0 OR \\"deliveredAt\\" >= \\"createdAt\\") AND \\"nextAttemptAt\\" >= 0 AND octet_length(\\"contents\\") <= 40000 AND (\\"pinnedReward\\" IS NULL OR octet_length(\\"pinnedReward\\") <= 65535)"]
+insert into "opencok_kingdom"."hero_rank_award" ("id", "ownerUid", "periodId", "actId", "member", "type", "rank", "level", "rewardId", "pinnedReward", "sender", "title", "contents", "createdAt", "deliveredAt", "nextAttemptAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+select "id", "ownerUid", "periodId", "actId", "member", "type", "rank", "level", "rewardId", "pinnedReward", "sender", "title", "contents", "createdAt", "deliveredAt", "nextAttemptAt" from "opencok_kingdom"."hero_rank_award" where "opencok_kingdom"."hero_rank_award"."id" = $1
+update "opencok_kingdom"."hero_rank_award" set "id" = $1, "ownerUid" = $2, "periodId" = $3, "actId" = $4, "member" = $5, "type" = $6, "rank" = $7, "level" = $8, "rewardId" = $9, "pinnedReward" = $10, "sender" = $11, "title" = $12, "contents" = $13, "createdAt" = $14, "deliveredAt" = $15, "nextAttemptAt" = $16 where "opencok_kingdom"."hero_rank_award"."id" = $17
+delete from "opencok_kingdom"."hero_rank_award" where "opencok_kingdom"."hero_rank_award"."id" = $1"
 `;
