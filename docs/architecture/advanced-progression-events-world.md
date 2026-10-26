@@ -806,3 +806,46 @@ Synthetic PostgreSQL tests cover migration of legacy rows, exact-item costs,
 preview, concurrent replay, authority replacement, moved targets, recall,
 notification recipients and rollback of paid removal. Native-device acceptance
 and the remaining specialized combat engines remain separate acceptance work.
+
+## Confirmed continued-cost events
+
+`continuedcost.info` and `continuedcost.reward` use the maintained event window,
+castle minimum, feature gate and reward tiers. The fresh response retains INT zero
+for an absent cost record and LONG points for saved progress. Existing earned,
+unclaimed tiers remain claimable once. Confirmed spending automatically funds mail
+12174 for each newly reached tier and records the claim and activity log in the
+same recipient transaction. Global-prize previews and the native ranking-privacy
+toggle retain their feature gate; previews do not grant prizes.
+
+The inventory planner supplies a pure spending observer. The common repository
+invokes it only after validating the final posting chain, including shop debits
+added after item planning. It counts actual negative gold pools, speed-item
+quantities and bound or unbound wood, food, iron and stone costs. Credits, free
+previews, rejected operations and receipt retries add no points. The confirmed
+fact captures the original castle eligibility, period, reward thresholds and gold
+pool distribution in the same transaction as the spending receipt. Clients cannot
+submit or choose these facts.
+
+Nickname changes use their existing distributed commit flow. Its gold debit saves
+the original spending fact with the prepared payment. Successful finalization
+publishes it atomically with the committed realm state; refunded changes publish
+no spending fact. Recovery retains the original eligibility and does not debit or
+publish twice. Existing payment records without this optional fact remain valid.
+
+A bounded, fenced realm worker consumes committed facts with operation identities
+that include the owner, original request and event. Native cost reads first drain
+that owner's pending facts, with bounded work and a prompt failure if delivery
+remains pending. Deferred failures receive a retry deadline so another owner's
+facts can proceed. Late facts retain their original period after the event closes
+or a newer event begins. They cannot reset or contribute to a later period.
+
+Migration `0029_continued_cost_periods.sql` appends a period-start column to the
+existing activity-cost table and extends its primary key. Old rows remain in
+period zero and are imported into an applicable event once, preserving totals
+and claim flags. Other periods and types remain independently addressable. The
+existing activity log and funded system-mail tables are reused. No new dependency
+or environment variable is required. Back up cost rows, legacy rows, nickname
+payments, spending receipts, logs, mail and pending facts together. Disable the
+cost event before binary rollback and preserve the period key and pending facts;
+restoring only balances or claim flags would break accounting. Cross-realm rank
+aggregation and final global-rank settlement remain coordinator work.

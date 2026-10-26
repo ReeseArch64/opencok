@@ -753,10 +753,11 @@ column ["para2","bigint",false,null,null,null]
 column ["lv","integer",false,null,null,null]
 column ["updateTime","bigint",false,null,null,null]
 column ["getLv","varchar(40)",false,null,null,null]
-primary ["activity_cost_PRIMARY",["uid","type"]]
-insert into "opencok_kingdom"."activity_cost" ("uid", "type", "total", "para1", "para2", "lv", "updateTime", "getLv") values ($1, $2, $3, $4, $5, $6, $7, $8)
-select "uid", "type", "total", "para1", "para2", "lv", "updateTime", "getLv" from "opencok_kingdom"."activity_cost" where "opencok_kingdom"."activity_cost"."uid" = $1
-update "opencok_kingdom"."activity_cost" set "uid" = $1, "type" = $2, "total" = $3, "para1" = $4, "para2" = $5, "lv" = $6, "updateTime" = $7, "getLv" = $8 where "opencok_kingdom"."activity_cost"."uid" = $9
+column ["periodStart","bigint",true,"0",null,null]
+primary ["activity_cost_PRIMARY",["uid","type","periodStart"]]
+insert into "opencok_kingdom"."activity_cost" ("uid", "type", "total", "para1", "para2", "lv", "updateTime", "getLv", "periodStart") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "uid", "type", "total", "para1", "para2", "lv", "updateTime", "getLv", "periodStart" from "opencok_kingdom"."activity_cost" where "opencok_kingdom"."activity_cost"."uid" = $1
+update "opencok_kingdom"."activity_cost" set "uid" = $1, "type" = $2, "total" = $3, "para1" = $4, "para2" = $5, "lv" = $6, "updateTime" = $7, "getLv" = $8, "periodStart" = $9 where "opencok_kingdom"."activity_cost"."uid" = $10
 delete from "opencok_kingdom"."activity_cost" where "opencok_kingdom"."activity_cost"."uid" = $1"
 `;
 

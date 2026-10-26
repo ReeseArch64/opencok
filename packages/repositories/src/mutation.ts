@@ -223,6 +223,7 @@ export async function relayMutationEvent(
   now = Date.now,
   eventType?: string,
   retryDelayMs = 0,
+  owner?: string,
 ): Promise<boolean> {
   const [event] = await db
     .select()
@@ -232,6 +233,7 @@ export async function relayMutationEvent(
         eq(mutation_outbox.kingdomId, authority.kingdomId),
         eq(mutation_outbox.publishedAt, 0n),
         eventType ? eq(mutation_outbox.eventType, eventType) : undefined,
+        owner ? eq(mutation_outbox.ownerUid, owner) : undefined,
         lte(mutation_outbox.nextAttemptAt, BigInt(now())),
       ),
     )
