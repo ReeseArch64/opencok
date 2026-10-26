@@ -9,10 +9,14 @@ import { playerItemGiftRecipient } from "@opencok/rules/player-item-gifts";
 import type { CosmeticTargetWrite } from "@opencok/contracts/city-cosmetics";
 import type { MutationTransaction } from "./mutation";
 import { writePlayerEffects } from "./player-effects";
-export async function readCosmeticTarget(tx: MutationTransaction, request?: Uint8Array) {
+export async function readCosmeticTarget(
+  tx: MutationTransaction,
+  request?: Uint8Array,
+  actor?: string,
+) {
   const params = request ? decode(Buffer.from(request)) : {};
-  if (int(params, "type", -1) !== 45 || !str(params, "uid", "").trim()) return;
-  const uid = playerItemGiftRecipient(str(params, "uid"));
+  if (!actor && (int(params, "type", -1) !== 45 || !str(params, "uid", "").trim())) return;
+  const uid = playerItemGiftRecipient(actor ?? str(params, "uid"));
   const [profile] = await tx
     .select({ uid: userprofile.uid, realm: userprofile.serverId })
     .from(userprofile)

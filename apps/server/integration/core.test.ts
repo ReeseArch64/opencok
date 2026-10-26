@@ -1,3 +1,4 @@
+import { avatar_storage } from "@opencok/drizzle/schema/opencok_kingdom/avatar_storage";
 import { catalog as campaignRulesCatalog } from "../../../packages/resources/src/catalogs/data/trigger-activity";
 import { flower_info } from "@opencok/drizzle/schema/opencok_kingdom/flower_info";
 import { catalog as campaignVariablesCatalog } from "../../../packages/resources/src/catalogs/data/trigger-var";
@@ -115,6 +116,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         gold: 9007199254740993n,
       });
       await db.insert(flower_info).values({ uid, lastflowerRanking: 1 });
+      await db.insert(avatar_storage).values({ uid, avatarId: "509878", expirationTime: -1n });
       await db.insert(mail).values({
         uid: "synthetic-mail-reward",
         toUser: uid,
@@ -191,6 +193,9 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       role: '<ItemSpec id="100101" player_exp="100000"/><ItemSpec id="100102" player_exp="200000"/>',
       position: '<ItemSpec id="9900" position="0"/><ItemSpec id="9906" position="6"/>',
       item: `<Group id="data_config">${configRecords}</Group>`,
+      function_on: '<ItemSpec id="avatar" online="all" test="all" version="7.23.0" pf="all"/>',
+      status:
+        '<ItemSpec id="509878" type2="100" time="3600" overlap="2" group="500500" subgroup="265"/>',
       arms: '<ItemSpec id="100001" attack="12" attack_add="3" defence="10" defence_add="2" upkeep="24" power="0.5"/><ItemSpec id="100002"/>',
       goods:
         '<ItemSpec id="200001" type="21" useall="1" para1="50"/><ItemSpec id="200002" para1="60"/><ItemSpec id="200021" type="17" price="100"/>',
@@ -332,6 +337,9 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect((await client.command("item.askFor", { itemId: sfs.int(212023) })).success).toEqual(
         sfs.string("1"),
       );
+      expect(
+        await client.command("avatar.activate", { avatarId: sfs.string("509878") }),
+      ).toMatchObject({ statusId: sfs.int(509878) });
       const campaignLoginNotice = fields(
         fields(
           client.received.find((packet) => str(fields(packet.p), "c", "") === "push.common.notice")!
