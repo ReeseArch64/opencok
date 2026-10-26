@@ -1,5 +1,6 @@
 import { validateFields, validateValue } from "./validation.ts";
 import {
+  heroResourceConfigSchema,
   serverClockSchema,
   featureConfigSchema,
   pushPreferencesSchema,
@@ -14,12 +15,25 @@ import {
 import { sfs, Type, type Fields, type Value } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 import { GameError } from "@opencok/errors/game";
-import { errors, PUSH_SETTING_COUNT, WORLD_NEWS_PUSH_TYPE } from "@opencok/constants/game";
+import {
+  errors,
+  HERO_RESOURCE_VERSION,
+  HERO_RESOURCE_ANDROID_MD5,
+  PUSH_SETTING_COUNT,
+  WORLD_NEWS_PUSH_TYPE,
+} from "@opencok/constants/game";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
 import type { LoginConfigurationState } from "@opencok/contracts/game";
 import { featureAnnouncementEnabled, type FeatureContext } from "@opencok/rules/features";
 
 export { dataConfig } from "./configuration.ts";
+
+export function heroResourceConfig(): Fields {
+  return validateFields(heroResourceConfigSchema, {
+    newHeroVersion: sfs.string(HERO_RESOURCE_VERSION),
+    newHeroMd5Android: sfs.string(HERO_RESOURCE_ANDROID_MD5),
+  });
+}
 
 function serializeServerClock(now: number, offsetHours: number): Fields {
   const offset = offsetHours * 3600;
