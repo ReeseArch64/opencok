@@ -1361,3 +1361,53 @@ tests with 235 assertions. Schema contracts and snapshots passed 1,663 tests wit
 48,879 assertions; physical schemas and upgrades passed 1,519 tests with 36,503
 assertions. Lint, formatting, global migration consistency and server/nine package
 type checks passed. Native device execution remains unverified.
+
+## Confirmed expedition matching and owned admission
+
+Expedition matching now registers each realm during its saved matching window.
+The realm waits for overlapping hero or stronger-lord periods and preserves an
+existing active expedition. It takes the owned authority barrier and calendar
+lock before freezing aggregate matching statistics. A durable admission then
+blocks new hero calendars until the shared decision is applied. Global outages
+retain that original admission for retry instead of resampling the realm.
+
+Statistics use the highest five eligible guild powers, including guild science,
+the leading eligible player's power, castle-level and player-power counts, recent
+five-star military buildings and prior expedition results. They contain aggregate
+values, without player identities. Top-player double-to-long conversion, weighted
+float arithmetic and the reference's asymmetric castle comparison are retained.
+Candidates follow the configured power neighborhood and weighted top-choice
+cutoff before prior opponents are excluded. Equal priorities use realm identity;
+a persisted random seed selects among eligible candidates and survives rollback.
+
+Shared batches pin matching configuration and first registrations. Finalization
+after the matching deadline writes reciprocal pairs once; an unmatched realm has
+opponent zero. Missing or late realms cannot change a finalized batch. A reciprocal
+proof is required before each owned realm installs the same preparing-through-
+fighting schedule. Installation and its admission acknowledgement are atomic.
+A replacement authority resumes frozen state, and missing optional configuration
+does not prevent an already persisted decision from being applied. Configuration
+absence prevents new admission. Matching and period admission create no combat
+result; combat score producers retain their validated-engine gates.
+
+Global migration `0016_expedition_matching` adds the batch and realm registration
+tables. Kingdom migration `0034_expedition_admission` adds the owned admission and
+its recovery index. Inventory becomes 830 tables and 6,764 fields: 143 global and
+687 kingdom tables. Apply both migrations before this binary. Back up the shared
+calendar, batches, seeds, aggregate registrations, owned admissions, manifests and
+stage progress together. Retain these records during binary rollback; clearing a
+seed, opponent or acknowledgement independently invalidates recovery. Matching
+is bounded to 128 configured realms. No dependency, configuration or environment
+variable is added. Waiting-only client projections, cross-realm score publication,
+settlement and stage broadcasts remain subsequent integration work.
+
+Eleven focused tests passed with 61 assertions, including seven PostgreSQL cases.
+They verify reciprocal results, actual completed training points, immutable
+statistics, deadlines, rollback, missing configuration, shared outages and
+replacement authority recovery. Eight existing expedition/calendar acceptance
+cases also passed. The server unit suite passed 1,471 tests with 244,955 assertions.
+Native TCP and process-kill recovery passed two tests with 235 assertions. Schema
+contracts and snapshots passed 1,669 tests with 49,041 assertions; physical schemas
+and upgrades passed 1,523 tests with 36,611 assertions. Lint, formatting, both
+migration-role consistency checks and server/nine package type checks passed.
+Native device execution remains unverified.

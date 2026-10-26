@@ -1,3 +1,4 @@
+import { expedition_admission } from "@opencok/drizzle/schema/opencok_kingdom/expedition_admission";
 import { and, asc, desc, eq, gt, or, sql } from "drizzle-orm";
 import { hero_activity } from "@opencok/drizzle/schema/opencok_kingdom/hero_activity";
 import { hero_event } from "@opencok/drizzle/schema/opencok_kingdom/hero_event";
@@ -51,7 +52,15 @@ export function createHeroCalendarStore(
               ),
             )
             .limit(1);
+        const [admission] = await tx
+          .select({ id: expedition_admission.periodId })
+          .from(expedition_admission)
+          .where(
+            and(eq(expedition_admission.appliedAt, 0n), gt(expedition_admission.activityEnd, at)),
+          )
+          .limit(1);
         const blocked =
+          !!admission ||
           (!!lord &&
             long(lord, "startTime") < at &&
             (lord.endTime === null || long(lord, "endTime") > at)) ||

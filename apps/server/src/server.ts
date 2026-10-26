@@ -1,3 +1,8 @@
+import { ExpeditionMatchingService } from "@opencok/services/expedition-matching";
+import {
+  createExpeditionMatchingRegistry,
+  createExpeditionMatchingRealmStore,
+} from "@opencok/repositories/expedition-matching";
 import { ExpeditionCalendarService } from "@opencok/services/expedition-calendar";
 import { createExpeditionCalendarStore } from "@opencok/repositories/expedition-calendar";
 import {
@@ -771,6 +776,17 @@ export const RealmDependenciesLive = Layer.effect(
       rules,
       [...db.databases.kingdoms.keys()],
     );
+    const expeditionMatching = new ExpeditionMatchingService(
+      expeditionCalendar,
+      createExpeditionMatchingRealmStore(
+        db.kingdom.db,
+        authority,
+        Date.now,
+        rules.configuration.serverConfig?.get("power_limit")?.rankingHideGm === "1",
+      ),
+      createExpeditionMatchingRegistry(db.databases.global.db),
+      rules,
+    );
     const heroRankingRewards = new HeroRankingRewardService(
       createHeroRankRewardStore(db.kingdom.db, authority),
       createHeroRankRewardStandings(db.databases.global.db, config.kingdomId),
@@ -1363,8 +1379,8 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => expeditionCalendar.refresh(),
-      catch: () => new Error("Expedition calendar recovery unavailable"),
+      try: () => expeditionMatching.refresh(),
+      catch: () => new Error("Expedition matching recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),

@@ -34,6 +34,21 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   const row = Object.fromEntries(
     spec.columns.map((column) => [column.property ?? column.name, sampleValue(column, variant)]),
   );
+  if (spec.checks.some(([name]) => name === "expedition_match_batch_bounds")) {
+    row.admissionEnd = (row.admissionStart as bigint) + 10n;
+    row.matchedAt = 0n;
+  }
+  if (spec.checks.some(([name]) => name === "expedition_match_realm_bounds")) {
+    row.previousMatch = 0;
+    row.opponent = 0;
+    row.matchedAt = 0n;
+  }
+  if (spec.checks.some(([name]) => name === "expedition_admission_bounds")) {
+    row.endTime = (row.startTime as bigint) + 10n;
+    row.activityEnd = (row.startTime as bigint) + 20n;
+    row.previousMatch = 0;
+    row.appliedAt = 0n;
+  }
   if (spec.checks.some(([name]) => name === "expedition_calendar_bounds")) {
     row.endTime = (row.startTime as bigint) + 100n;
     row.state = (variant - 1) % 2;
