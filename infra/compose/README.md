@@ -145,3 +145,14 @@ loopback with a unique port. Portainer receives a disposable data volume and no
 host Docker socket: these tests validate its UI/API startup and authentication
 boundary, not management of the host daemon. Cleanup removes only the test project.
 Native APK rendering and unimplemented gameplay still require separate evidence.
+
+## Social chat archive
+
+Topic 24 adds authenticated `mongo:8.0.34` on the internal network with the
+`mongodb-data` volume and no host port. Chat uses `MONGODB_URI`; local initialization
+uses `MONGODB_USER` and `MONGODB_PASSWORD`. Configure a unique stable `CHAT_INSTANCE_ID`
+for every additional Chat instance. The development default identifies the single
+Compose Chat consumer. Read the [social chat deployment guide](../../docs/social-chat-migration.md)
+for migration order, archive outage behavior, original expiry, rollback and synthetic
+acceptance. Existing MongoDB volumes keep their initialized credentials when environment
+values change; do not delete the volume to rotate credentials.

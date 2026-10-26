@@ -2,10 +2,24 @@ import { z } from "zod";
 import { loadEnvironment } from "./load";
 import { postgresUrl } from "./database.schema";
 import { databaseName, port } from "./service.schema";
-import { validateEnvironment } from "./validation";
+import { blankToUndefined, validateEnvironment } from "./validation";
 
 export const chatSchema = z.object({
   DATABASE_URL: postgresUrl,
+  MONGODB_URI: z.preprocess(
+    blankToUndefined,
+    z
+      .url({ protocol: /^mongodb(?:\+srv)?$/ })
+      .refine((value) => /^\/[a-zA-Z0-9_-]{1,63}$/.test(new URL(value).pathname))
+      .optional(),
+  ),
+  CHAT_INSTANCE_ID: z.preprocess(
+    blankToUndefined,
+    z
+      .string()
+      .regex(/^[a-zA-Z0-9_-]{1,100}$/)
+      .optional(),
+  ),
   CHAT_HOST: z.string().min(1).default("127.0.0.1"),
   CHAT_PORT: port(8083),
   CHAT_SIGNING_SECRET: z.string().min(1),

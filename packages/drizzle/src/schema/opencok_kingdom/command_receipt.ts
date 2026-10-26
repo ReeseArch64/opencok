@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, check, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { bigint, check, index, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { bytea } from "../../types";
 import { opencok_kingdom } from "../namespaces";
 
@@ -14,8 +14,10 @@ export const command_receipt = opencok_kingdom.table(
     response: bytea("response").notNull(),
     ownerEpoch: bigint("ownerEpoch", { mode: "bigint" }).notNull(),
     createdAt: bigint("createdAt", { mode: "bigint" }).notNull(),
+    expiresAt: bigint("expiresAt", { mode: "bigint" }),
   },
   (table) => [
+    index("command_receipt_expiry").on(table.expiresAt),
     primaryKey({
       name: "command_receipt_PRIMARY",
       columns: [table.kingdomId, table.ownerUid, table.requestId],

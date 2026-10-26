@@ -115,7 +115,9 @@
     "./local-events": "./src/local-events.ts",
     "./world-march-lifecycle": "./src/world-march-lifecycle.ts",
     "./dragon-progression": "./src/dragon-progression.ts",
-    "./world-march-runtime": "./src/world-march-runtime.ts"
+    "./world-march-runtime": "./src/world-march-runtime.ts",
+    "./chat-retention": "./src/chat-retention.ts",
+    "./chat-social": "./src/chat-social.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
