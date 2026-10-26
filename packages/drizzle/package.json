@@ -14,6 +14,7 @@
     "./schema/opencok_pay": "./src/schema/opencok_pay.ts",
     "./schema/opencok_pay/*": "./src/schema/opencok_pay/*.ts",
     "./schema/opencok_chat": "./src/schema/opencok_chat.ts",
+    "./schema/opencok_chat/chat_social": "./src/schema/chat-social.ts",
     "./schema/opencok_chat/*": "./src/schema/opencok_chat/*.ts"
   },
   "scripts": {
