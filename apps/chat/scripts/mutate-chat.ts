@@ -7,7 +7,7 @@ const mutations = [
   [
     "expired socket command",
     "packages/connection/src/chat-websocket.ts",
-    "if (!(await authorizeSession()))",
+    "if (!(await authorizeSession(false)))",
     "if (false)",
   ],
   [
@@ -16,6 +16,12 @@ const mutations = [
     "(!peer.authorizeSession || (await peer.authorizeSession()))",
     "true",
   ],
+  [
+    "expired durable recipient",
+    "packages/services/src/chat-delivery.ts",
+    "if (peer.authorizeSession && !(await peer.authorizeSession())) return;",
+    "if (false) return;",
+  ],
 ] as const;
 const root = new URL("../../../", import.meta.url);
 async function run(path?: string, source?: string) {
@@ -23,6 +29,7 @@ async function run(path?: string, source?: string) {
     entrypoints: [
       new URL("apps/chat/tests/chat.test.ts", root).pathname,
       new URL("apps/server/test/basic-chat-commands.test.ts", root).pathname,
+      new URL("apps/server/test/chat-delivery.test.ts", root).pathname,
     ],
     outdir: directory,
     naming: "[name].[ext]",
@@ -44,7 +51,14 @@ async function run(path?: string, source?: string) {
   });
   if (!result.success) throw new Error("Chat mutation bundle failed");
   const child = Bun.spawn(
-    [process.execPath, "--no-env-file", "test", "chat.test.js", "basic-chat-commands.test.js"],
+    [
+      process.execPath,
+      "--no-env-file",
+      "test",
+      "chat.test.js",
+      "basic-chat-commands.test.js",
+      "chat-delivery.test.js",
+    ],
     {
       cwd: directory,
       stdin: "ignore",

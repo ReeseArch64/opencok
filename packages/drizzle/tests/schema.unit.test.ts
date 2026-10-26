@@ -10,10 +10,10 @@ import { sampleRow } from "./support/rows";
 const dialect = new PgDialect();
 const db = drizzle.mock();
 
-test("application inventory contains all 796 tables and 6,477 fields", async () => {
+test("application inventory contains all 809 tables and 6,577 fields", async () => {
   expect(catalog.map((entry) => entry.id)).toEqual(Object.keys(contract).sort());
-  expect(catalog).toHaveLength(796);
-  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6477);
+  expect(catalog).toHaveLength(809);
+  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6577);
   for (const namespaces of Object.values(databaseSchemas))
     for (const namespace of namespaces) {
       expect(
@@ -25,7 +25,7 @@ test("application inventory contains all 796 tables and 6,477 fields", async () 
           .sort(),
       );
     }
-  expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(120);
+  expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(133);
   expect(catalog.filter((entry) => entry.spec.role === "kingdom")).toHaveLength(676);
 });
 
@@ -55,20 +55,26 @@ for (const { id, namespace, table, config, spec } of catalog) {
     expect(config.columns.map((column) => column.name)).toEqual(
       spec.columns.map((column) => column.name),
     );
-    expect(
-      config.primaryKeys.map((key) => [key.name, key.columns.map((column) => column.name)]),
-    ).toEqual(
+    expect([
+      ...config.primaryKeys.map((key) => [key.getName(), key.columns.map((column) => column.name)]),
+      ...config.columns
+        .filter((column) => column.primary)
+        .map((column) => [`${config.name}_pkey`, [column.name]]),
+    ]).toEqual(
       spec.indexes
         .filter((index) => index.kind === "primary")
         .map((index) => [index.name, index.columns.map((column) => column.name)]),
     );
-    expect(
-      config.indexes.map(({ config: index }) => [
+    expect([
+      ...config.indexes.map(({ config: index }) => [
         index.name,
         !!index.unique,
         index.where ? dialect.sqlToQuery(index.where).sql : null,
       ]),
-    ).toEqual(
+      ...config.columns
+        .filter((column) => column.isUnique)
+        .map((column) => [column.uniqueName, true, null]),
+    ]).toEqual(
       spec.indexes
         .filter((index) => index.kind !== "primary")
         .map((index) => [index.name, index.kind === "unique", index.where ?? null]),
@@ -107,7 +113,7 @@ for (const { id, namespace, table, config, spec } of catalog) {
           expected.identity.startWith,
         );
       }
-      const value = row[column.name];
+      const value = row[expected.property ?? column.name];
       expect(column.mapFromDriverValue(column.mapToDriverValue(value))).toEqual(value);
     }
     expect(Object.values(await import(`../src/schema/${namespace}/${config.name}.ts`))).toEqual([

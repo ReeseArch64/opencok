@@ -124,8 +124,15 @@
     {
       "idx": 17,
       "version": "7",
+      "when": 1792958284625,
+      "tag": "0017_social_outbox_retention",
+      "breakpoints": false
+    },
+    {
+      "idx": 18,
+      "version": "7",
       "when": 1792959880253,
-      "tag": "0017_world_march_runtime",
+      "tag": "0018_world_march_runtime",
       "breakpoints": false
     }
   ]

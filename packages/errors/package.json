@@ -13,7 +13,8 @@
   "exports": {
     "./dependency": "./src/dependency.ts",
     "./game": "./src/game.ts",
-    "./http": "./src/http.ts"
+    "./http": "./src/http.ts",
+    "./chat": "./src/chat.ts"
   },
   "dependencies": {}
 }

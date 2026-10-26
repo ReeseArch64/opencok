@@ -59,7 +59,10 @@
     "./civilization-castle": "./src/civilization-castle.ts",
     "./minstrel": "./src/minstrel.ts",
     "./dragon-progression": "./src/dragon-progression.ts",
-    "./world-march-runtime": "./src/world-march-runtime.ts"
+    "./world-march-runtime": "./src/world-march-runtime.ts",
+    "./chat-social": "./src/chat-social.ts",
+    "./postbox": "./src/postbox.ts",
+    "./chat-native": "./src/chat-native.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

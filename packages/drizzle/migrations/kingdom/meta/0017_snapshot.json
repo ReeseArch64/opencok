@@ -1,5 +1,5 @@
 {
-  "id": "82c7a64f-1c49-4868-9daa-68e51d2213b8",
+  "id": "857b3bac-5fca-4206-b3ce-e808bebb96eb",
   "prevId": "323e697c-0495-4a08-859c-fee5f4825c36",
   "version": "7",
   "dialect": "postgresql",
@@ -11216,6 +11216,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "bigint",
@@ -11223,7 +11229,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "command_receipt_expiry": {
+          "name": "command_receipt_expiry",
+          "columns": [
+            {
+              "expression": "expiresAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "command_receipt_PRIMARY": {
@@ -30428,11 +30450,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
+        },
+        "nextAttemptAt": {
+          "name": "nextAttemptAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
         },
         "publishedAt": {
           "name": "publishedAt",
@@ -30442,6 +30477,54 @@
         }
       },
       "indexes": {
+        "mutation_outbox_retry": {
+          "name": "mutation_outbox_retry",
+          "columns": [
+            {
+              "expression": "kingdomId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "publishedAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "nextAttemptAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "mutation_outbox_expiry": {
+          "name": "mutation_outbox_expiry",
+          "columns": [
+            {
+              "expression": "expiresAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "mutation_outbox_pending": {
           "name": "mutation_outbox_pending",
           "columns": [
@@ -59222,61 +59305,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "opencok_kingdom.world_interest": {
-      "name": "world_interest",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "ownerUid": {
-          "name": "ownerUid",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "worldId": {
-          "name": "worldId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "x": {
-          "name": "x",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "y": {
-          "name": "y",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "world_interest_PRIMARY": {
-          "name": "world_interest_PRIMARY",
-          "columns": [
-            "ownerUid"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "world_interest_bounds": {
-          "name": "world_interest_bounds",
-          "value": "\"worldId\" >= 0 AND \"x\" >= 0 AND \"y\" >= 0 AND \"updatedAt\" >= 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
     "opencok_kingdom.world_march": {
       "name": "world_march",
       "schema": "opencok_kingdom",
@@ -59625,110 +59653,6 @@
         "world_march_buildingKillArmy_length": {
           "name": "world_march_buildingKillArmy_length",
           "value": "octet_length(\"buildingKillArmy\") <= 65535"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "opencok_kingdom.world_march_checkpoint": {
-      "name": "world_march_checkpoint",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ownerUid": {
-          "name": "ownerUid",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "dueAt": {
-          "name": "dueAt",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "payload": {
-          "name": "payload",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "world_march_checkpoint_due": {
-          "name": "world_march_checkpoint_due",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "dueAt",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "world_march_checkpoint_owner": {
-          "name": "world_march_checkpoint_owner",
-          "columns": [
-            {
-              "expression": "ownerUid",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "world_march_checkpoint_PRIMARY": {
-          "name": "world_march_checkpoint_PRIMARY",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "world_march_checkpoint_bounds": {
-          "name": "world_march_checkpoint_bounds",
-          "value": "\"version\" >= 1 AND \"status\" IN (0, 1) AND \"dueAt\" >= 0 AND octet_length(\"payload\") <= 65535"
         }
       },
       "isRLSEnabled": false

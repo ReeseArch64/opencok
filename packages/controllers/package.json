@@ -23,13 +23,16 @@
     "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
     "./chat-nickname": "./src/chat-nickname.ts",
     "./chat-mailbox": "./src/chat-mailbox.ts",
-    "./provisioning": "./src/provisioning.ts"
+    "./provisioning": "./src/provisioning.ts",
+    "./realm-social": "./src/realm-social.ts"
   },
   "dependencies": {
     "@opencok/services": "workspace:*",
     "@opencok/contracts": "workspace:*",
     "@opencok/messages": "workspace:*",
     "@opencok/identity": "workspace:*",
-    "@opencok/dtos": "workspace:*"
+    "@opencok/dtos": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/mappings": "workspace:*"
   }
 }
