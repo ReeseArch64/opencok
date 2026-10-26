@@ -99,9 +99,16 @@
     "./world-march-lifecycle": "./src/world-march-lifecycle.ts",
     "./world-march-runtime": "./src/world-march-runtime.ts",
     "./new-expedition": "./src/new-expedition.ts",
-    "./responses/new-expedition": "./src/responses/new-expedition.ts"
+    "./responses/new-expedition": "./src/responses/new-expedition.ts",
+    "./chat-delivery": "./src/chat-delivery.ts",
+    "./chat-social": "./src/chat-social.ts",
+    "./realm-social": "./src/realm-social.ts",
+    "./postbox": "./src/postbox.ts",
+    "./friendship-mine": "./src/friendship-mine.ts",
+    "./responses/chat-social": "./src/responses/chat-social.ts"
   },
   "dependencies": {
-    "@opencok/enums": "workspace:*"
+    "@opencok/enums": "workspace:*",
+    "@opencok/messages": "workspace:*"
   }
 }

@@ -16,7 +16,10 @@
     "@opencok/connection": "workspace:*",
     "@opencok/repositories": "workspace:*",
     "@opencok/env": "workspace:*",
-    "@opencok/core": "workspace:*"
+    "@opencok/core": "workspace:*",
+    "@opencok/services": "workspace:*",
+    "@opencok/mongoose": "workspace:*",
+    "@opencok/errors": "workspace:*"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
@@ -25,6 +28,8 @@
     "@opencok/drizzle": "workspace:*",
     "drizzle-orm": "0.45.4",
     "ws": "8.22.0",
-    "@types/ws": "^8.18.1"
+    "@types/ws": "^8.18.1",
+    "@opencok/resources": "workspace:*",
+    "@opencok/rules": "workspace:*"
   }
 }
