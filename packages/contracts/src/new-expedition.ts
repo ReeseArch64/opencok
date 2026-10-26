@@ -15,6 +15,7 @@ export interface ExpeditionState {
   clock?: Row;
   lastMergeMillis?: bigint;
   projectionOnly?: boolean;
+  closed?: boolean;
   period?: Row;
   phase?: ExpeditionPhase;
   progress: readonly Row[];
@@ -24,4 +25,14 @@ export interface ExpeditionState {
   records?: readonly Row[];
   taxRecords?: readonly Row[];
   distributions?: readonly Row[];
+}
+
+export interface ExpeditionScoreAction {
+  action: number;
+  parameter: number;
+  count: number;
+  at: bigint;
+}
+export interface ExpeditionScoreReader {
+  load(at: bigint): Promise<ExpeditionState>;
 }

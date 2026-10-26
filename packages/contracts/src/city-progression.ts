@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  expeditionScore?: import("./new-expedition").ExpeditionScoreReader;
   heroRankingAward?: import("./hero-ranking-rewards").HeroRankAwardReader;
   heroScore?: import("./hero-score").HeroScoreReader;
   olympic?: import("./olympic").OlympicState;

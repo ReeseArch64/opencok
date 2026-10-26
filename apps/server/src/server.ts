@@ -1,3 +1,8 @@
+import { ExpeditionStageFinalityService } from "@opencok/services/expedition-stage-finality";
+import {
+  createExpeditionStageRealm,
+  createExpeditionStageRegistry,
+} from "@opencok/repositories/expedition-stage-finality";
 import { expeditionOpen } from "@opencok/rules/new-expedition";
 import {
   ExpeditionScorePublicationService,
@@ -864,6 +869,10 @@ export const RealmDependenciesLive = Layer.effect(
         if (!delivered) break;
       }
     };
+    const expeditionStageFinality = new ExpeditionStageFinalityService(
+      createExpeditionStageRealm(db.kingdom.db, authority),
+      createExpeditionStageRegistry(db.databases.global.db, authority),
+    );
     const expeditionScorePublication = new ExpeditionScorePublicationService(
       createExpeditionScoreSource(db.kingdom.db, authority),
       createExpeditionScoreProjection(db.databases.global.db, authority),
@@ -1484,6 +1493,15 @@ export const RealmDependenciesLive = Layer.effect(
     yield* Effect.tryPromise({
       try: recoverExpeditionNotifications,
       catch: () => new Error("Expedition activity publication unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: () => expeditionStageFinality.refresh(),
+      catch: () => new Error("Expedition stage finality unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),

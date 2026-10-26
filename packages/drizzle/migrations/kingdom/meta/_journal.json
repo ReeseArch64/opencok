@@ -260,6 +260,13 @@
       "when": 1793044974522,
       "tag": "0036_expedition_manifests",
       "breakpoints": false
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793047597202,
+      "tag": "0037_expedition_stage_finality",
+      "breakpoints": false
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { expedition_stage_closure } from "@opencok/drizzle/schema/opencok_kingdom/expedition_stage_closure";
 import { expedition_manifest } from "@opencok/drizzle/schema/opencok_kingdom/expedition_manifest";
 import { expedition_clock } from "@opencok/drizzle/schema/opencok_kingdom/expedition_clock";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
@@ -136,6 +137,26 @@ export async function readExpedition(
     .where(eq(expedition_period.serverId, realm))
     .for("share");
   let phase = expeditionPhase(period, now);
+  if (!phase) {
+    const archives = await tx
+      .select()
+      .from(expedition_manifest)
+      .where(
+        and(
+          eq(expedition_manifest.serverId, realm),
+          sql`${expedition_manifest.startTime}<=${now} and ${expedition_manifest.endTime}>${now}`,
+        ),
+      )
+      .limit(2)
+      .for("share");
+    if (archives.length > 1) throw new Error("Ambiguous owned expedition manifest time");
+    const archive = archives[0];
+    if (archive) {
+      period = { ...archive, victoryTimes: period?.victoryTimes ?? 0, count: period?.count ?? 0 };
+      phase = expeditionPhase(period, now);
+    }
+  }
+
   const needsView = command === "newexpidition.activityinfo" || command === "expedition.notify";
   const [clock] = needsView
     ? await tx.select().from(expedition_clock).where(eq(expedition_clock.serverId, realm)).limit(1)
@@ -208,6 +229,19 @@ export async function readExpedition(
     state.lastMergeMillis = long(server ?? {}, "lastMergeMillis");
   }
   if (projectionOnly) state.projectionOnly = true;
+  if (period && phase) {
+    const [closure] = await tx
+      .select({ periodId: expedition_stage_closure.periodId })
+      .from(expedition_stage_closure)
+      .where(
+        and(
+          eq(expedition_stage_closure.periodId, period.periodId),
+          eq(expedition_stage_closure.stage, phase.stage),
+        ),
+      )
+      .limit(1);
+    if (closure) state.closed = true;
+  }
 
   if (["expedition.show", "distribution.record.show", "tax.record.show"].includes(command ?? "")) {
     const params = request ? decode(Buffer.from(request)) : {};

@@ -137,3 +137,5 @@ export { game_identity as opencok_global_game_identity } from "./opencok_global/
 export { character_provisioning as opencok_global_character_provisioning } from "./opencok_global/character_provisioning";
 
 export * from "./chat-social";
+export { expedition_stage_period as opencok_global_expedition_stage_period } from "./opencok_global/expedition_stage_period";
+export { expedition_stage_watermark as opencok_global_expedition_stage_watermark } from "./opencok_global/expedition_stage_watermark";

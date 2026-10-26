@@ -689,3 +689,5 @@ export { expedition_progress } from "./opencok_kingdom/expedition_progress";
 
 export { recharge_feedback_claim } from "./opencok_kingdom/recharge_feedback_claim";
 export { vip_box_history } from "./opencok_kingdom/vip_box_history";
+export * from "./opencok_kingdom/expedition_stage_closure";
+export * from "./opencok_kingdom/expedition_stage_member";

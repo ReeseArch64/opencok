@@ -6,7 +6,8 @@ import { expedition_clock } from "@opencok/drizzle/schema/opencok_kingdom/expedi
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
 import { expedition_score } from "@opencok/drizzle/schema/opencok_global/expedition_score";
-import { expedition_score_owner } from "@opencok/drizzle/schema/opencok_global/expedition_score_owner";
+import { expeditionScoreVersion } from "./expedition-score-version";
+import { expedition_stage_watermark } from "@opencok/drizzle/schema/opencok_global/expedition_stage_watermark";
 import { expedition_match_realm } from "@opencok/drizzle/schema/opencok_global/expedition_match_realm";
 import type {
   ExpeditionScoreSource,
@@ -129,39 +130,7 @@ export function createExpeditionScoreProjection(
         await tx.execute(sql`set local lock_timeout='1s'`);
         await tx.execute(sql`set local statement_timeout='3s'`);
         await tx.execute(sql`select pg_advisory_xact_lock(728227,${authority.kingdomId})`);
-        let [owner] = await tx
-          .select()
-          .from(expedition_score_owner)
-          .where(eq(expedition_score_owner.kingdomId, authority.kingdomId))
-          .for("update");
-        if (
-          owner &&
-          (owner.ownerEpoch > authority.epoch ||
-            (owner.ownerEpoch === authority.epoch && owner.instanceId !== authority.instance))
-        )
-          throw new Error("Stale global expedition publisher");
-        if (!owner)
-          [owner] = await tx
-            .insert(expedition_score_owner)
-            .values({
-              kingdomId: authority.kingdomId,
-              ownerEpoch: authority.epoch,
-              instanceId: authority.instance,
-              sequence: 0n,
-            })
-            .returning();
-        else if (owner.ownerEpoch < authority.epoch)
-          [owner] = await tx
-            .update(expedition_score_owner)
-            .set({ ownerEpoch: authority.epoch, instanceId: authority.instance, sequence: 0n })
-            .where(eq(expedition_score_owner.kingdomId, authority.kingdomId))
-            .returning();
-        const [version] = await tx
-          .update(expedition_score_owner)
-          .set({ sequence: sql`${expedition_score_owner.sequence}+1` })
-          .where(eq(expedition_score_owner.kingdomId, authority.kingdomId))
-          .returning();
-        if (!version) throw new Error("Missing expedition publisher version");
+        const version = await expeditionScoreVersion(tx, authority);
         const periods = [...new Set(rows.map((row) => row.periodId))],
           proofs = periods.length
             ? await tx
@@ -169,7 +138,7 @@ export function createExpeditionScoreProjection(
                 .from(expedition_match_realm)
                 .where(inArray(expedition_match_realm.periodId, periods))
             : [];
-        const accepted = rows.filter((row) =>
+        let accepted = rows.filter((row) =>
           proofs.some(
             (own) =>
               own.periodId === row.periodId &&
@@ -185,6 +154,46 @@ export function createExpeditionScoreProjection(
               ),
           ),
         );
+        const seals = periods.length
+          ? await tx
+              .select()
+              .from(expedition_stage_watermark)
+              .where(
+                and(
+                  eq(expedition_stage_watermark.kingdomId, authority.kingdomId),
+                  inArray(expedition_stage_watermark.periodId, periods),
+                ),
+              )
+          : [];
+        const sealed = accepted.filter((row) =>
+          seals.some((seal) => seal.periodId === row.periodId && seal.stage === row.stage),
+        );
+        const refresh = sealed.length
+          ? await tx
+              .select()
+              .from(expedition_score)
+              .where(
+                and(
+                  eq(expedition_score.kingdomId, authority.kingdomId),
+                  inArray(expedition_score.periodId, periods),
+                  inArray(
+                    expedition_score.member,
+                    sealed.map((row) => row.member),
+                  ),
+                ),
+              )
+          : [];
+        accepted = accepted.flatMap((row) => {
+          if (!seals.some((seal) => seal.periodId === row.periodId && seal.stage === row.stage))
+            return [row];
+          const frozen = refresh.find(
+            (saved) =>
+              saved.periodId === row.periodId &&
+              saved.stage === row.stage &&
+              saved.member === row.member,
+          );
+          return frozen ? [{ ...row, score: frozen.score, allianceId: frozen.allianceId }] : [];
+        });
         if (accepted.length) {
           const written = await tx
             .insert(expedition_score)

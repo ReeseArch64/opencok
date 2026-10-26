@@ -1,13 +1,9 @@
-import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
+import { pendingOwnedProgression } from "./progression-finality";
 import { and, asc, eq, inArray, isNull, lt, lte, or, sql } from "drizzle-orm";
 import { hero_event } from "@opencok/drizzle/schema/opencok_kingdom/hero_event";
 import { hero_activity } from "@opencok/drizzle/schema/opencok_kingdom/hero_activity";
 import { score_act } from "@opencok/drizzle/schema/opencok_kingdom/score_act";
 import { hero_rank_closure } from "@opencok/drizzle/schema/opencok_kingdom/hero_rank_closure";
-import { timed_activity } from "@opencok/drizzle/schema/opencok_kingdom/timed_activity";
-import { queue } from "@opencok/drizzle/schema/opencok_kingdom/queue";
-import { world_march_checkpoint } from "@opencok/drizzle/schema/opencok_kingdom/world_march_checkpoint";
-import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
 import { heroEmptyDigest } from "@opencok/rules/hero-ranking-finality";
 import { long, num, text } from "@opencok/contracts/rows";
 import type { HeroRankFinalityRealm } from "@opencok/contracts/hero-ranking-finality";
@@ -122,60 +118,7 @@ export function createHeroRankFinalityRealm(
         const event = events[0];
         if (event && period.type >= 3 && event.serverGroup !== period.group)
           throw new Error("Unmatched hero rank closure");
-        const authorized = sql`coalesce(${userprofile.banFlag},0)=0 and coalesce(${userprofile.banTime},0)<=${now} and ${userprofile.serverId}=${authority.kingdomId} and coalesce(${userprofile.crossFightSrcServerId},-1)<=0`;
-        const [pending] = await tx
-            .select({ id: timed_activity.id })
-            .from(timed_activity)
-            .innerJoin(userprofile, eq(userprofile.uid, timed_activity.ownerId))
-            .where(
-              and(
-                authorized,
-                eq(timed_activity.status, 0),
-                lt(timed_activity.dueAt, period.endTime),
-              ),
-            )
-            .limit(1),
-          [legacy] = await tx
-            .select({ id: queue.uuid })
-            .from(queue)
-            .innerJoin(userprofile, eq(userprofile.uid, queue.ownerId))
-            .where(
-              and(
-                authorized,
-                lt(queue.updateTime, period.endTime),
-                sql`coalesce(${queue.itemId},'')<>''`,
-              ),
-            )
-            .limit(1),
-          [march] = await tx
-            .select({ id: world_march_checkpoint.id })
-            .from(world_march_checkpoint)
-            .innerJoin(userprofile, eq(userprofile.uid, world_march_checkpoint.ownerUid))
-            .where(
-              and(
-                authorized,
-                eq(world_march_checkpoint.status, 0),
-                lt(world_march_checkpoint.dueAt, period.endTime),
-              ),
-            )
-            .limit(1),
-          [unregistered] = await tx
-            .select({ id: world_march.uuid })
-            .from(world_march)
-            .innerJoin(userprofile, eq(userprofile.uid, world_march.ownerUid))
-            .leftJoin(world_march_checkpoint, eq(world_march_checkpoint.id, world_march.uuid))
-            .where(
-              and(
-                authorized,
-                eq(world_march.worldId, 0),
-                eq(world_march.type, 0),
-                eq(world_march.targetType, 3),
-                isNull(world_march_checkpoint.id),
-                lt(world_march.marchStartTime, period.endTime),
-              ),
-            )
-            .limit(1);
-        if (pending || legacy || march || unregistered) return;
+        if (await pendingOwnedProgression(tx, authority.kingdomId, period.endTime, now)) return;
         let digest = heroEmptyDigest,
           scoreCount = 0n;
         if (event) {
