@@ -1151,3 +1151,39 @@ concurrent actors, receipt replay, cutoffs, negative power, unmatched events,
 rollback and mail recovery. Native TCP rejects the private delivery command.
 Shared kingdom matching and global rank publication/final prizes remain separate
 coordinated runtime work. Device execution remains unverified.
+
+## Shared hero kingdom matching
+
+Kingdom hero periods now register their realm's frozen power and random ordering
+value in a shared PostgreSQL cohort. The cohort identity binds the activity
+definition and UTC period start. The first registration persists a four-minute
+admission window, the period end and configured power-group/match sizes. A late
+first startup can admit a cohort only while enough period time remains. Subsequent
+configuration or power changes cannot rewrite an admitted realm or a closed cohort.
+
+At admission closure, exact integer power orders bounded cohorts, then each power
+group uses its saved random ordering value to form configured matches. Realm IDs
+break ties consistently. A final unmatched realm forms a single-realm group; no
+opponent is invented. Realms arriving after closure wait for their next period.
+The global match commits every realm's group and the closed-cohort marker together.
+Local fenced commands attach that result to the owned main period and its coupled
+personal/alliance kingdom events in one transaction. Restart recovery preserves
+the group, and ambiguous local periods or stale authorities reject the transition.
+
+Global migration `0012_hero_matching` adds `hero_match_period` and
+`hero_match_realm`. The legacy `hero_kingdom_activity` input table remains intact;
+its activity-only identity cannot store independent realm/period registrations.
+The maintained inventory now contains 820 tables and 6,666 fields: 136 global and
+684 kingdom tables. No dependency or environment variable is added. Apply the
+global migration before starting this binary, and back up cohort headers,
+registrations, local hero periods, event groups and scores together. Binary rollback
+can retain the additional tables; deleting a closed cohort would lose its immutable
+opponent assignment and is not a valid retry strategy.
+
+Synthetic PostgreSQL acceptance races two realms, closes admission, recovers the
+same groups, creates an independent next-day cohort and rejects late enrollment.
+It preserves frozen power/configuration and rolls back failures in both global and
+local attachment transactions. Pure cases cover exact power beyond binary64 integer
+precision, ties, incomplete groups and duplicate realm rejection. Global rank
+publication, final ranking prizes and expedition matching remain subsequent work.
+Native device execution remains unverified.

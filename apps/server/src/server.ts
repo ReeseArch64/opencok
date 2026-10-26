@@ -1,3 +1,8 @@
+import { HeroMatchingService } from "@opencok/services/hero-matching";
+import {
+  createHeroMatchingRealmStore,
+  createHeroMatchingRegistry,
+} from "@opencok/repositories/hero-matching";
 import { currentHeroScore } from "@opencok/repositories/hero-score";
 import { heroTargetDomain, deliverHeroTargetBatch } from "@opencok/services/hero-score";
 import { HeroCalendarService } from "@opencok/services/hero-calendar";
@@ -726,7 +731,15 @@ export const RealmDependenciesLive = Layer.effect(
       createHeroCalendarStore(db.kingdom.db, authority),
       rules,
     );
-    const recoverHeroCalendar = async () => heroCalendar.refresh();
+    const heroMatching = new HeroMatchingService(
+      createHeroMatchingRealmStore(db.kingdom.db, authority),
+      createHeroMatchingRegistry(db.databases.global.db),
+      rules,
+    );
+    const recoverHeroCalendar = async () => {
+      await heroCalendar.refresh();
+      await heroMatching.refresh();
+    };
     yield* Effect.tryPromise({
       try: recoverHeroCalendar,
       catch: () => new Error("Hero calendar recovery unavailable"),
