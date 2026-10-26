@@ -1,3 +1,4 @@
+import { avatarActivationDomain } from "@opencok/services/avatar-activation";
 import {
   campaignInventoryObservations,
   campaignObservationNeeded,
@@ -628,6 +629,7 @@ export const RealmDependenciesLive = Layer.effect(
         expeditionDomain,
         expeditionPhaseDomain,
         anniversaryDomain,
+        avatarActivationDomain,
         createArenaDomain(),
         trainingDomain,
         hospitalDomain,
@@ -1184,21 +1186,22 @@ export const RealmDependenciesLive = Layer.effect(
           );
           if (!delivered) break;
         }
-      for (let index = 0; index < 64; index++) {
-        const delivered = await relayMutationEvent(
-          db.kingdom.db,
-          authority,
-          (event) =>
-            publishCosmeticInteractionMutation(
-              event.payload,
-              worldInterest.interested,
-              (owner, command, body) => notifications.publish(owner, command, body),
-            ),
-          Date.now,
-          "trigger.activity",
-        );
-        if (!delivered) break;
-      }
+      for (const type of ["trigger.activity", "avatar.activate"])
+        for (let index = 0; index < 64; index++) {
+          const delivered = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            (event) =>
+              publishCosmeticInteractionMutation(
+                event.payload,
+                worldInterest.interested,
+                (owner, command, body) => notifications.publish(owner, command, body),
+              ),
+            Date.now,
+            type,
+          );
+          if (!delivered) break;
+        }
     };
     let heartCursor = 0;
     const recoverAllianceHearts = async () => {
