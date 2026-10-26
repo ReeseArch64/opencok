@@ -1,3 +1,8 @@
+import {
+  playerItemGiftDomain,
+  publishPlayerItemGiftMutation,
+} from "@opencok/services/player-item-gifts";
+import { pendingPlayerItemGiftOwners } from "@opencok/repositories/player-item-gifts";
 import { createSeasonalExchangeDomain } from "@opencok/services/seasonal-exchange";
 import { createVipBoxDomain } from "@opencok/services/vip-box";
 import { createTargetTaskDomain, publishTargetTaskMutation } from "@opencok/services/target-task";
@@ -449,6 +454,7 @@ export const RealmDependenciesLive = Layer.effect(
         createOrdinaryBoxDomain(),
         createRechargeActivityDomain(),
         createRechargeFeedbackDomain(),
+        playerItemGiftDomain,
         createSeasonalExchangeDomain(),
         createVipBoxDomain(),
         createTargetTaskDomain(),
@@ -652,6 +658,42 @@ export const RealmDependenciesLive = Layer.effect(
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
+    let giftCursor = 0;
+    const deliverPlayerItemGifts = async (owners: readonly string[]) => {
+      for (const owner of await pendingPlayerItemGiftOwners(db.kingdom.db, owners)) {
+        try {
+          await activities.domainCommand(owner, "gift.init", { notify: sfs.bool(true) });
+        } catch {
+          console.warn(
+            JSON.stringify({ event: "item_gift_delivery_deferred", kingdom: config.kingdomId }),
+          );
+        }
+      }
+    };
+    const recoverPlayerItemGifts = async () => {
+      const online = notifications.owners();
+      if (online.length) {
+        const selected = Array.from(
+          { length: Math.min(32, online.length) },
+          (_, index) => online[(giftCursor + index) % online.length]!,
+        );
+        giftCursor = (giftCursor + selected.length) % online.length;
+        await deliverPlayerItemGifts(selected);
+      }
+      for (let index = 0; index < 64; index++) {
+        const delivered = await relayMutationEvent(
+          db.kingdom.db,
+          authority,
+          (event) =>
+            publishPlayerItemGiftMutation(event.payload, async (owner, command, body) => {
+              await notifications.publish(owner, command, body);
+            }),
+          Date.now,
+          "gift.init",
+        );
+        if (!delivered) break;
+      }
+    };
     const recoverWorld = async () => {
       for (let index = 0; index < 64; index++) {
         const delivered = await relayMutationEvent(
@@ -910,6 +952,15 @@ export const RealmDependenciesLive = Layer.effect(
       }
     };
     yield* Effect.tryPromise({
+      try: recoverPlayerItemGifts,
+      catch: () => new Error("Item gift recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
       try: recoverWorld,
       catch: () => new Error("World recovery unavailable"),
     }).pipe(
@@ -1166,7 +1217,13 @@ export const RealmDependenciesLive = Layer.effect(
               ].includes(command)
             )
               await activities.domainCommand(owner, "world.tick", {});
-            return activities.domainCommand(owner, command, params);
+            const result = await activities.domainCommand(owner, command, params);
+            if (command === "item.send") {
+              const recipient = str(params, "uid");
+              if (notifications.owners().includes(recipient))
+                await deliverPlayerItemGifts([recipient]);
+            }
+            return result;
           },
           reconcileTimed: async (owner) => {
             await recoverActivities(owner);

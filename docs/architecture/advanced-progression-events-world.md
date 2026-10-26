@@ -587,3 +587,25 @@ epoch. After a crash, an old token cannot block a new owner generation's login o
 remove its token. The existing token comparison and TTL continue to protect
 replacement sessions within one generation. Old cache keys expire naturally;
 wallets, marches and receipts are not reset. No schema migration is introduced.
+
+Player item gifts accept only owned type-25 gift tokens and an existing recipient
+in the same kingdom. Sending consumes one token and appends one durable received-item
+row with the sender's receipt. A client quantity cannot increase the gift. Offline
+recipients retain their queue until owned login recovery; connected recipients
+also receive bounded background delivery. No public command can acknowledge or
+consume another player's pending gifts.
+
+Delivery locks and consumes only the selected owner's next sixty-four rows. Each
+row grants one mapped item, matching the reference's handling of its otherwise
+unused item-count field. Inventory, selected queue deletion and the delivery
+receipt commit together. Concurrent retries cannot grant again; new arrivals
+outside the selected batch remain queued. Login preserves paired native string
+arrays for sender names and original gift IDs. Names containing commas remain
+structured strings. Connected delivery persists private item and sender
+notifications in the outbox so publication is separate from the committed grant.
+
+Migration `0025_player_item_gift_index.sql` adds an owner and row-ID index to the
+existing queue. It changes no existing rows or gift amounts. Back up pending gifts,
+owned inventory, receipts and outbox before rollout. Retain undelivered rows and
+committed receipts on rollback; never restore consumed rows independently of their
+inventory grants. The additive index can remain. No dependency is added.

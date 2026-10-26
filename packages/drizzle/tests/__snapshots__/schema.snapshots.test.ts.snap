@@ -6786,6 +6786,7 @@ column ["itemId","varchar(50)",true,"'0'",null,null]
 column ["itemNum","integer",true,"0",null,null]
 column ["createTime","bigint",false,null,null,null]
 primary ["receive_item_PRIMARY",["id"]]
+index ["receive_item_owner",false,["uid","id"]]
 insert into "opencok_kingdom"."receive_item" ("id", "uid", "senduid", "itemId", "itemNum", "createTime") values ($1, $2, $3, $4, $5, $6)
 select "id", "uid", "senduid", "itemId", "itemNum", "createTime" from "opencok_kingdom"."receive_item" where "opencok_kingdom"."receive_item"."id" = $1
 update "opencok_kingdom"."receive_item" set "id" = $1, "uid" = $2, "senduid" = $3, "itemId" = $4, "itemNum" = $5, "createTime" = $6 where "opencok_kingdom"."receive_item"."id" = $7

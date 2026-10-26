@@ -107,7 +107,8 @@
     "./recharge-feedback": "./src/recharge-feedback.ts",
     "./target-task": "./src/target-task.ts",
     "./vip-box": "./src/vip-box.ts",
-    "./seasonal-exchange": "./src/seasonal-exchange.ts"
+    "./seasonal-exchange": "./src/seasonal-exchange.ts",
+    "./player-item-gifts": "./src/player-item-gifts.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

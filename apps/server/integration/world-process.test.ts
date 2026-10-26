@@ -9,13 +9,14 @@ import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_reso
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { world_march_checkpoint } from "@opencok/drizzle/schema/opencok_kingdom/world_march_checkpoint";
 import { world_march } from "@opencok/drizzle/schema/opencok_kingdom/world_march";
+import { receive_item } from "@opencok/drizzle/schema/opencok_kingdom/receive_item";
 import { realm_authority } from "@opencok/drizzle/schema/opencok_kingdom/realm_authority";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
 import { createCharacterCreator } from "@opencok/repositories/character-provisioning";
 import { createProvisioningStore } from "@opencok/repositories/provisioning";
 import { CharacterProvisioningService } from "@opencok/services/provisioning";
 import { loadRules } from "@opencok/resources/rules";
-import { fields, sfs, str, type Fields } from "@opencok/messages/sfs";
+import { fields, sfs, str, Type, type Fields } from "@opencok/messages/sfs";
 import type { CharacterReservation } from "@opencok/contracts/provisioning";
 import type { ServerConfig } from "@opencok/contracts/server";
 import { DisposablePostgres } from "../../../packages/drizzle/tests/support/postgres";
@@ -103,6 +104,13 @@ test("a killed realm recovers the same march and publishes native transitions on
       count: 3,
       value: 0,
     });
+    await realm.db.insert(user_item).values({
+      uuid: "synthetic-world-gift",
+      ownerId: owner,
+      itemId: "210059",
+      count: 2,
+      value: 0,
+    });
     await realm.db.insert(worldpoint).values({
       id: 10,
       worldId: 0,
@@ -185,6 +193,13 @@ test("a killed realm recovers the same march and publishes native transitions on
       return client;
     };
     let commander = await login(reservations[0]!);
+    const offlineGift = {
+      uid: sfs.string(reservations[2]!.gameUid),
+      itemId: sfs.string("210059"),
+      operationId: sfs.string(randomUUID()),
+    };
+    expect((await commander.command("item.send", offlineGift)).result).toEqual(sfs.bool(true));
+    expect(await realm.db.select().from(receive_item)).toHaveLength(1);
     const request: Fields = {
         point: sfs.int(10),
         type: sfs.int(0),
@@ -219,6 +234,41 @@ test("a killed realm recovers the same march and publishes native transitions on
     commander = await login(reservations[0]!);
     const near = await login(reservations[1]!),
       far = await login(reservations[2]!);
+    expect(pushes(far, "init")[0]!.item_allname).toEqual({
+      type: Type.StringArray,
+      value: [reservations[0]!.name],
+    });
+    expect(await realm.db.select().from(receive_item)).toHaveLength(0);
+    expect((await commander.command("item.send", offlineGift)).result).toEqual(sfs.bool(true));
+    expect(
+      (
+        await realm.db.select().from(user_item).where(eq(user_item.uuid, "synthetic-world-gift"))
+      )[0]!.count,
+    ).toBe(1);
+    expect(
+      (
+        await commander.command("item.send", {
+          uid: sfs.string(reservations[1]!.gameUid),
+          itemId: sfs.string("210059"),
+          operationId: sfs.string(randomUUID()),
+        })
+      ).result,
+    ).toEqual(sfs.bool(true));
+    await until(async () => pushes(near, "push.item.having").length > 0);
+    expect(pushes(near, "push.item.having")[0]).toEqual({
+      name: sfs.string(reservations[0]!.name),
+      itemId: sfs.string("210059"),
+    });
+    expect(
+      (
+        await realm.db
+          .select()
+          .from(user_item)
+          .where(
+            and(eq(user_item.ownerId, reservations[1]!.gameUid), eq(user_item.itemId, "210052")),
+          )
+      ).reduce((sum, row) => sum + row.count, 0),
+    ).toBe(1);
     await near.command("world.get", {
       x: sfs.int(9),
       y: sfs.int(0),
