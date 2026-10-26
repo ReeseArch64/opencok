@@ -1812,3 +1812,46 @@ all 384 declarations and independent query availability with 395 assertions. The
 complete server unit suite passed 1,491 tests with 245,563 assertions. Native TCP
 acceptance passed one test with 208 assertions in both realms. Required lint, formatting and server/nine
 package type checks passed. Device execution remains unverified.
+
+## Maintained login campaigns and native notices
+
+The campaign loader now retains all 272 maintained rules, including their original
+state and event gates; 62 rules are active declarations. Login executes the native
+castle/period-limited kingwar gift and the daily flower-ranking and alliance-leader
+notices. Eligibility reads the owned saved flower position and current matching
+alliance membership. Missing ranking facts, missing guilds and stale membership
+cannot invent an announcement. Personal quotas use the existing owned UTC refresh
+and receipt rules. The later cake campaign also runs in its own declared window
+without borrowing the earlier anniversary's counters.
+
+Alliance notices contain the sender's saved name. Realm notices contain the saved
+guild and sender names. Their native `push.common.notice` fields retain UTF message
+identity and array parameters in source order. Each action commits an owned outbox
+event together with its daily counter. Delivery selects current online eligible
+home profiles and rechecks guild membership for alliance audiences. Foreign,
+visiting and banned profiles are excluded. Selection uses pages of at most 500
+identities and publishes at most 32 notifications concurrently.
+
+A login notice waits for the actor's initialized session and retries independently
+of other pending notices. Informational login notices expire after five minutes,
+so recovery cannot display an old login indefinitely. Delivery remains best effort
+for a disconnected recipient and does not grant assets. The reference's unused
+all-server notice branch remains a no-op. Combat triggers still require their
+validated engine; payment triggers require verified provider evidence. Confirmed
+shop, mail, exchange and appearance producer bindings remain subsequent work.
+
+No schema migration, dependency, configuration or environment variable is added.
+Inventory remains 848 tables and 6,917 fields. Back up campaign variables, operation
+receipts and notification outbox together. An older binary retains the new daily
+flags and outbox rows but does not publish the new notice type. Preserve those
+records during rollback and resume only fresh announcements after recovery.
+
+Seven PostgreSQL acceptance cases passed with 34 assertions, including real login
+rules, native gift admission, daily limits, stale membership, recipient isolation,
+receipt rollback, initialized-session retries, expiry and the later cake window.
+Two catalog and mapping units passed with ten assertions. Fourteen existing
+variable, anniversary and recipe cases passed with 88 assertions. The complete
+server unit suite passed 1,493 tests with 245,573 assertions. Native TCP acceptance
+passed one test with 212 assertions, including real maintained flower login
+notices in both realms. Required lint, formatting and server/nine package type
+checks passed. Device execution remains unverified.

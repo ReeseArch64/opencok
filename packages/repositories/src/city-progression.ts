@@ -1,3 +1,4 @@
+import { readCampaignProfile } from "./campaign-notice";
 import { costRankAwardReader, writeCostRankAward } from "./continued-cost-rewards";
 import { expeditionAwardReader, writeExpeditionAward } from "./expedition-stage-rewards";
 import { heroRankAwardReader, writeHeroRankAward } from "./hero-ranking-rewards";
@@ -155,6 +156,10 @@ export function createCityProgressionStore(
         throw new Error("Civilization science aggregate exceeds bound");
       alliance = profile.allianceId ?? "";
       return {
+        campaignProfile:
+          command?.startsWith("campaign.") || command === "trigger.activity"
+            ? await readCampaignProfile(tx, owner)
+            : undefined,
         costRankAward:
           command === "continuedcost.rank.deliver" ? costRankAwardReader(tx, owner) : undefined,
         expeditionAward:
