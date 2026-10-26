@@ -294,6 +294,15 @@ the required native capability does not exist. The client continues sending comm
 economy and combat results remain authoritative on the Server even when local scripts
 are updated.
 
+The Android 12.06.0 native login response (`controller=0`, `action=1`, payload `p`)
+announces the legacy hero resource bundle before the `init` extension through
+the string fields `newHeroVersion` (`1.0.91`) and `newHeroMd5Android`
+(`391e30cc9943d451b52c5137c83978f3`). The native loader uses this metadata for
+`/cok/lua/dr_newHero1.0.91_android.zip`; operators must supply the matching authorized
+archive through the CDN gateway. Bundling its textures alone does not initialize the
+native resource check used by the Hero Palace. These fields preserve the legacy
+download protocol and are separate from the signed release updater described below.
+
 ### 27.2. Manifest, delivery and publishing on Cloudflare R2
 
 R2 is defined for APK releases and update bundles. The client queries the HTTPS manifest
