@@ -336,6 +336,7 @@ export const lotteryDomain: CityDomain = {
         boxTimes: sfs.int(num(row, "boxTimes")),
         chip: sfs.int(number32(context.balance("chip"))),
       };
+      context.recordHero(9, "1", count);
       refreshQuests(context, { legacy: 9, daily: 34, main: 38, count });
     } else if (command === "lottery.start") {
       const type = str(params, "type");
@@ -418,6 +419,7 @@ export const lotteryDomain: CityDomain = {
       body.times1 = sfs.int(num(row, "times1"));
       body.times2 = sfs.int(num(row, "times2"));
       body.updatetime = sfs.long(long(row, "updateTime"));
+      context.recordHero(9, type === "1" ? "1" : String(num(row, "step") + 1));
       refreshQuests(context, { legacy: 9, daily: 34, main: 38, count: 1 });
     } else lotteryFailure();
     return { response: encode(body) };

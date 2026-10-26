@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  heroScore?: import("./hero-score").HeroScoreReader;
   olympic?: import("./olympic").OlympicState;
   cupBetting?: import("./cup-betting").CupBettingState;
   groupBuy?: import("./groupbuy").GroupBuyState;
@@ -138,6 +139,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  heroScore?: import("./hero-score").HeroScoreWrite;
   olympic?: import("./olympic").OlympicWrite;
   cupBetting?: import("./cup-betting").CupBettingWrite;
   groupBuy?: import("./groupbuy").GroupBuyWrite;

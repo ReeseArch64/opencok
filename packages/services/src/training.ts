@@ -72,6 +72,7 @@ function complete(context: CityProgressionContext, row: Row, count: number) {
   context.write.armies = [completed];
   const power = unitPower(troopDefinition(context.rules, text(row, "armyId")), count);
   context.power(power);
+  context.recordHero(4, text(row, "armyId"), count);
   recordExpeditionScore(context, 5, cityInteger(row.armyId), count);
   const targetCondition = ({ 1: "1", 8: "2", 9: "4", 10: "6" } as Record<number, string>)[
     troopQueueType(troopDefinition(context.rules, text(row, "armyId")))

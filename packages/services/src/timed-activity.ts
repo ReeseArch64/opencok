@@ -579,6 +579,9 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
     return amount;
   };
   return {
+    event(event) {
+      ledger.domainEvents.push(event);
+    },
     push(command, body) {
       ledger.pushes.push({ command, body: decode(Buffer.from(body)) });
     },
