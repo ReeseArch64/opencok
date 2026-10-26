@@ -13420,6 +13420,34 @@ update "opencok_global"."sign_in_feed" set "uid" = $1, "type" = $2, "feed" = $3,
 delete from "opencok_global"."sign_in_feed" where "opencok_global"."sign_in_feed"."uid" = $1"
 `;
 
+exports[`opencok_global.special_event_purchase: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["eventId","varchar(128)",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["exchangeId","varchar(40)",true,null,null,null]
+column ["periodStart","bigint",true,null,null,null]
+column ["periodEnd","bigint",true,null,null,null]
+column ["reservedAt","bigint",true,null,null,null]
+column ["purchaseTime","bigint",true,"0",null,null]
+column ["purchaseDay","bigint",true,null,null,null]
+column ["state","integer",true,"0",null,null]
+column ["deliveredAt","bigint",true,"0",null,null]
+column ["nextAttemptAt","bigint",true,"0",null,null]
+primary ["special_event_purchase_PRIMARY",["eventId"]]
+index ["special_event_purchase_daily",true,["ownerUid","kingdomId","exchangeId","purchaseDay"],"\\"state\\" < 2"]
+index ["special_event_purchase_stock",false,["periodStart","exchangeId","state"]]
+index ["special_event_purchase_delivery",false,["kingdomId","state","deliveredAt","nextAttemptAt","eventId"]]
+check ["special_event_purchase_state","\\"state\\" BETWEEN 0 AND 2 AND \\"kingdomId\\" > 0"]
+check ["special_event_purchase_period","\\"periodStart\\" >= 0 AND \\"periodEnd\\" >= \\"periodStart\\" AND \\"reservedAt\\" BETWEEN \\"periodStart\\" AND \\"periodEnd\\""]
+check ["special_event_purchase_payment","(\\"state\\" = 1 AND \\"purchaseTime\\" > 0 AND \\"purchaseTime\\" BETWEEN \\"periodStart\\" AND \\"periodEnd\\" AND \\"purchaseDay\\" = \\"purchaseTime\\" / 86400000) OR (\\"state\\" IN (0, 2) AND \\"purchaseTime\\" = 0 AND \\"deliveredAt\\" = 0 AND \\"purchaseDay\\" = \\"reservedAt\\" / 86400000)"]
+check ["special_event_purchase_clock","\\"purchaseTime\\" >= 0 AND \\"purchaseDay\\" >= 0 AND \\"deliveredAt\\" >= 0 AND \\"nextAttemptAt\\" >= 0"]
+insert into "opencok_global"."special_event_purchase" ("eventId", "ownerUid", "kingdomId", "exchangeId", "periodStart", "periodEnd", "reservedAt", "purchaseTime", "purchaseDay", "state", "deliveredAt", "nextAttemptAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+select "eventId", "ownerUid", "kingdomId", "exchangeId", "periodStart", "periodEnd", "reservedAt", "purchaseTime", "purchaseDay", "state", "deliveredAt", "nextAttemptAt" from "opencok_global"."special_event_purchase" where "opencok_global"."special_event_purchase"."eventId" = $1
+update "opencok_global"."special_event_purchase" set "eventId" = $1, "ownerUid" = $2, "kingdomId" = $3, "exchangeId" = $4, "periodStart" = $5, "periodEnd" = $6, "reservedAt" = $7, "purchaseTime" = $8, "purchaseDay" = $9, "state" = $10, "deliveredAt" = $11, "nextAttemptAt" = $12 where "opencok_global"."special_event_purchase"."eventId" = $13
+delete from "opencok_global"."special_event_purchase" where "opencok_global"."special_event_purchase"."eventId" = $1"
+`;
+
 exports[`opencok_global.specialreward: schema and CRUD SQL 1`] = `
 "schema opencok_global
 column ["gameuid","varchar(100)",true,"''",null,null]

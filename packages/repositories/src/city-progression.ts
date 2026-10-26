@@ -1,3 +1,4 @@
+import { writeSpecialEventPurchase } from "./special-event";
 import { readContinuedCost, writeContinuedCost, writeContinuedCostHide } from "./continued-cost";
 import { readTrouble, writeTrouble } from "./trouble";
 import { readCosmeticTarget, writeCosmeticTarget } from "./city-cosmetics";
@@ -307,6 +308,8 @@ export function createCityProgressionStore(
         }
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
+        if (write.specialEventPurchase)
+          await writeSpecialEventPurchase(tx, owner, write.specialEventPurchase);
         if (write.continuedCostHide !== undefined)
           await writeContinuedCostHide(tx, owner, write.continuedCostHide);
         if (write.continuedCost) await writeContinuedCost(tx, owner, write.continuedCost);

@@ -116,7 +116,8 @@
     "./prayer": "./src/prayer.ts",
     "./city-cosmetics": "./src/city-cosmetics.ts",
     "./trouble": "./src/trouble.ts",
-    "./continued-cost": "./src/continued-cost.ts"
+    "./continued-cost": "./src/continued-cost.ts",
+    "./special-event": "./src/special-event.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

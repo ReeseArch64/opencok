@@ -1,3 +1,5 @@
+import { createSpecialEventStock } from "@opencok/repositories/special-event";
+import { createSpecialEventDomain, specialEventOperation } from "@opencok/services/special-event";
 import { confirmedNicknameCost } from "@opencok/services/continued-cost-spending";
 import { continuedCostDomain, continuedCostOperation } from "@opencok/services/continued-cost";
 import { readContinuedCostSpending } from "@opencok/mappings/continued-cost";
@@ -453,6 +455,7 @@ export const RealmDependenciesLive = Layer.effect(
         return baseProductionPreparation.prepare(tx, owner, now);
       },
     };
+    const specialEventStock = createSpecialEventStock(db.databases.global.db);
     const city = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
         createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize),
@@ -484,6 +487,7 @@ export const RealmDependenciesLive = Layer.effect(
         createPrayerDomain(),
         troubleDomain,
         continuedCostDomain,
+        createSpecialEventDomain(specialEventStock),
         recallTaskDomain,
         regionalRecallDomain,
         playerItemGiftDomain,
@@ -691,6 +695,22 @@ export const RealmDependenciesLive = Layer.effect(
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
+    const recoverSpecialPurchases = async () => {
+      const at = BigInt(Date.now());
+      for (const record of await specialEventStock.pending(config.kingdomId, at)) {
+        const eventId = text(record, "eventId"),
+          owner = text(record, "ownerUid");
+        try {
+          await activities.domainCommand(owner, "special.paid", {
+            eventId: sfs.string(eventId),
+            operationId: sfs.string(specialEventOperation(eventId)),
+          });
+          await specialEventStock.delivered(eventId, owner, config.kingdomId, BigInt(Date.now()));
+        } catch {
+          await specialEventStock.defer(eventId, BigInt(Date.now() + 60000));
+        }
+      }
+    };
     const recoverContinuedCosts = async (owner?: string) => {
       for (let index = 0; index < 64; index++) {
         try {
@@ -1088,6 +1108,15 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    yield* Effect.tryPromise({
+      try: recoverSpecialPurchases,
+      catch: () => new Error("Special event recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     yield* Effect.tryPromise({
       try: () => recoverContinuedCosts(),
       catch: () => new Error("Continued-cost recovery unavailable"),
