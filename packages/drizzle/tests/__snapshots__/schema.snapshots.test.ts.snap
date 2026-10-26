@@ -14921,3 +14921,41 @@ select "periodId", "kingdomId", "power", "shuffle", "registeredAt", "serverGroup
 update "opencok_global"."hero_match_realm" set "periodId" = $1, "kingdomId" = $2, "power" = $3, "shuffle" = $4, "registeredAt" = $5, "serverGroup" = $6, "matchedAt" = $7 where "opencok_global"."hero_match_realm"."periodId" = $8
 delete from "opencok_global"."hero_match_realm" where "opencok_global"."hero_match_realm"."periodId" = $1"
 `;
+
+exports[`opencok_global.hero_rank_owner: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["kingdomId","integer",true,null,null,null]
+column ["ownerEpoch","bigint",true,null,null,null]
+column ["instanceId","varchar(36)",true,null,null,null]
+column ["sequence","bigint",true,"0",null,null]
+primary ["hero_rank_owner_PRIMARY",["kingdomId"]]
+check ["hero_rank_owner_bounds","\\"kingdomId\\" > 0 AND \\"ownerEpoch\\" > 0 AND \\"sequence\\" >= 0"]
+insert into "opencok_global"."hero_rank_owner" ("kingdomId", "ownerEpoch", "instanceId", "sequence") values ($1, $2, $3, $4)
+select "kingdomId", "ownerEpoch", "instanceId", "sequence" from "opencok_global"."hero_rank_owner" where "opencok_global"."hero_rank_owner"."kingdomId" = $1
+update "opencok_global"."hero_rank_owner" set "kingdomId" = $1, "ownerEpoch" = $2, "instanceId" = $3, "sequence" = $4 where "opencok_global"."hero_rank_owner"."kingdomId" = $5
+delete from "opencok_global"."hero_rank_owner" where "opencok_global"."hero_rank_owner"."kingdomId" = $1"
+`;
+
+exports[`opencok_global.hero_rank_score: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["rankKey","varchar(400)",true,null,null,null]
+column ["member","varchar(40)",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["actId","varchar(40)",true,null,null,null]
+column ["eventId","varchar(200)",true,null,null,null]
+column ["type","integer",true,null,null,null]
+column ["level","integer",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["score","integer",true,null,null,null]
+column ["metadata","text",false,null,null,null]
+column ["ownerEpoch","bigint",true,null,null,null]
+column ["sequence","bigint",true,null,null,null]
+column ["observedAt","bigint",true,null,null,null]
+primary ["hero_rank_score_PRIMARY",["rankKey","member"]]
+index ["hero_rank_score_period",false,["endTime","kingdomId","rankKey","member"]]
+check ["hero_rank_score_bounds","\\"kingdomId\\" > 0 AND \\"type\\" BETWEEN 1 AND 4 AND \\"level\\" BETWEEN 0 AND 4095 AND \\"endTime\\" > 0 AND \\"ownerEpoch\\" > 0 AND \\"sequence\\" > 0 AND \\"observedAt\\" >= 0 AND (\\"metadata\\" IS NULL OR octet_length(\\"metadata\\") <= 8192)"]
+insert into "opencok_global"."hero_rank_score" ("rankKey", "member", "kingdomId", "actId", "eventId", "type", "level", "endTime", "score", "metadata", "ownerEpoch", "sequence", "observedAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+select "rankKey", "member", "kingdomId", "actId", "eventId", "type", "level", "endTime", "score", "metadata", "ownerEpoch", "sequence", "observedAt" from "opencok_global"."hero_rank_score" where "opencok_global"."hero_rank_score"."rankKey" = $1
+update "opencok_global"."hero_rank_score" set "rankKey" = $1, "member" = $2, "kingdomId" = $3, "actId" = $4, "eventId" = $5, "type" = $6, "level" = $7, "endTime" = $8, "score" = $9, "metadata" = $10, "ownerEpoch" = $11, "sequence" = $12, "observedAt" = $13 where "opencok_global"."hero_rank_score"."rankKey" = $14
+delete from "opencok_global"."hero_rank_score" where "opencok_global"."hero_rank_score"."rankKey" = $1"
+`;

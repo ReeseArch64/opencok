@@ -99,3 +99,93 @@ return result`,
     return { members, alliances };
   });
 }
+
+export async function publishHeroRanking(
+  command: (name: string, ...args: string[]) => Promise<unknown>,
+  kingdomId: number,
+  rows: readonly import("@opencok/contracts/hero-rank-publication").HeroRankVersionedScore[],
+): Promise<void> {
+  if (!rows.length) return;
+  if (
+    rows.length > 64 ||
+    new Set(rows.map((row) => `${row.rankKey}:${row.member}`)).size !== rows.length ||
+    rows.some(
+      (row) =>
+        row.kingdomId !== kingdomId ||
+        typeof row.ownerEpoch !== "bigint" ||
+        typeof row.sequence !== "bigint" ||
+        typeof row.endTime !== "bigint" ||
+        row.ownerEpoch <= 0n ||
+        row.ownerEpoch > 9223372036854775807n ||
+        row.sequence <= 0n ||
+        row.sequence > 9223372036854775807n ||
+        row.endTime <= 0n ||
+        row.endTime > 9223372036854775807n ||
+        !row.member ||
+        row.member.length > 40 ||
+        !Number.isInteger(row.score) ||
+        row.score < -2147483648 ||
+        row.score > 2147483647 ||
+        !/^(HERO_PERSON_RANK|HERO_ALLIANCE_RANK|KINGDOM_PERSON_RANK|KINGDOM_ALLIANCE_RANK)_\d+_[0-9|]+_-?\d+$/.test(
+          row.rankKey,
+        ) ||
+        row.rankKey.length > 400 ||
+        (row.metadata !== null && Buffer.byteLength(row.metadata) > 8192),
+    )
+  )
+    throw new DependencyError("hero rank publication input");
+  const result = await command(
+    "EVAL",
+    `local function less(a,b)
+  if string.len(a) ~= string.len(b) then return string.len(a) < string.len(b) end
+  return a < b
+end
+local function older(a,b)
+  if not a then return false end
+  local ae,as = string.match(a,'^(%d+):(%d+)$')
+  local be,bs = string.match(b,'^(%d+):(%d+)$')
+  if not ae or not be then return true end
+  if ae ~= be then return less(ae,be) end
+  return less(as,bs)
+end
+local data=cjson.decode(ARGV[1])
+for _,row in ipairs(data) do
+  local epoch=redis.call('HGET','opencok:hero:realm-version',row.realm)
+  if not epoch or not less(row.epoch,epoch) then
+    redis.call('HSET','opencok:hero:realm-version',row.realm,row.epoch)
+    local version=row.epoch..':'..row.sequence
+    local prior=redis.call('HGET',row.versions,row.member)
+    if not prior or not older(version,prior) then
+      redis.call('ZADD',row.key,-row.score,row.member)
+      redis.call('ZREMRANGEBYRANK',row.key,5000,-1)
+      redis.call('HSET',row.versions,row.member,version)
+      redis.call('EXPIREAT',row.key,row.expires)
+      redis.call('EXPIREAT',row.versions,row.expires)
+      if row.metadata then
+        local metadataVersion=redis.call('HGET','opencok:hero:alliance-version',row.member)
+        if not metadataVersion or not older(version,metadataVersion) then
+          redis.call('HSET','ALLIANCE_INFO_FOR_HERO_ACT',row.member,row.metadata)
+          redis.call('HSET','opencok:hero:alliance-version',row.member,version)
+        end
+      end
+    end
+  end
+end
+return 1`,
+    "0",
+    JSON.stringify(
+      rows.map((row) => ({
+        realm: String(row.kingdomId),
+        epoch: row.ownerEpoch.toString(),
+        sequence: row.sequence.toString(),
+        key: row.rankKey,
+        versions: `opencok:hero:versions:${row.rankKey}`,
+        member: row.member,
+        score: row.score,
+        metadata: row.metadata ?? false,
+        expires: (row.endTime / 1000n + 864000n).toString(),
+      })),
+    ),
+  );
+  if (Number(result) !== 1) throw new DependencyError("hero rank publication result");
+}

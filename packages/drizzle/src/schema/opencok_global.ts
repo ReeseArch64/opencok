@@ -1,3 +1,5 @@
+export { hero_rank_score } from "./opencok_global/hero_rank_score";
+export { hero_rank_owner } from "./opencok_global/hero_rank_owner";
 export { hero_match_realm } from "./opencok_global/hero_match_realm";
 export { hero_match_period } from "./opencok_global/hero_match_period";
 export { special_event_purchase } from "./opencok_global/special_event_purchase";

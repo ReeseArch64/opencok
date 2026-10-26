@@ -1,3 +1,8 @@
+import { HeroRankPublicationService } from "@opencok/services/hero-rank-publication";
+import {
+  createHeroRankSource,
+  createHeroRankProjection,
+} from "@opencok/repositories/hero-rank-publication";
 import { HeroMatchingService } from "@opencok/services/hero-matching";
 import {
   createHeroMatchingRealmStore,
@@ -731,6 +736,12 @@ export const RealmDependenciesLive = Layer.effect(
       createHeroCalendarStore(db.kingdom.db, authority),
       rules,
     );
+    const heroRankPublication = new HeroRankPublicationService(
+      createHeroRankSource(db.kingdom.db, authority),
+      createHeroRankProjection(db.databases.global.db, authority),
+      (rows) => cache.publishHeroRanking(rows),
+      rules,
+    );
     const heroMatching = new HeroMatchingService(
       createHeroMatchingRealmStore(db.kingdom.db, authority),
       createHeroMatchingRegistry(db.databases.global.db),
@@ -1306,6 +1317,15 @@ export const RealmDependenciesLive = Layer.effect(
         await recoverHeroScoreNotifications();
       },
       catch: () => new Error("Hero reward recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: () => heroRankPublication.refresh(),
+      catch: () => new Error("Hero ranking publication unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),
