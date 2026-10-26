@@ -24,10 +24,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: realm-server-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   server:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
