@@ -169,6 +169,13 @@
       "when": 1792972357969,
       "tag": "0023_recharge_feedback_claims",
       "breakpoints": false
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792975540747,
+      "tag": "0024_vip_box_history",
+      "breakpoints": false
     }
   ]
 }

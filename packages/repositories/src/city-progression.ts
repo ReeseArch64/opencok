@@ -1,3 +1,4 @@
+import { readVipBox, writeVipBox } from "./vip-box";
 import { readTargetTasks, writeTargetTasks } from "./target-task";
 import { rechargeFeedbackReader, writeRechargeFeedback } from "./recharge-feedback";
 import { readRechargeActivity, writeRechargeActivity } from "./recharge-activity";
@@ -136,6 +137,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        vipBox: command?.startsWith("vip.box.") ? await readVipBox(tx, owner) : undefined,
         targetTask: await readTargetTasks(tx, owner),
         rechargeFeedback:
           command === "pay.recharge.ui.state" || command === "feedback.paid"
@@ -261,6 +263,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.vipBox) await writeVipBox(tx, owner, write.vipBox);
         if (write.targetTask) await writeTargetTasks(tx, owner, write.targetTask);
         if (write.rechargeFeedback)
           await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);

@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  vipBox?: import("./vip-box").VipBoxState;
   targetTask?: import("./target-task").TargetTaskState;
   rechargeFeedback?: import("./recharge-feedback").RechargeFeedbackReader;
   rechargeActivity?: import("./recharge-activity").RechargeActivityState;
@@ -125,6 +126,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  vipBox?: import("./vip-box").VipBoxWrite;
   targetTask?: import("./target-task").TargetTaskWrite;
   rechargeFeedback?: readonly import("./recharge-feedback").RechargeFeedbackClaim[];
   rechargeActivity?: import("./recharge-activity").RechargeActivityWrite;

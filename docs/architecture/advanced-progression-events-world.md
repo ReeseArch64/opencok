@@ -522,3 +522,25 @@ and canonical event receipt; the default realm composition has no such gateway.
 Its durable private notification contains only the owner's resulting reward.
 Back up task notes, tasks, inventory and mail before deployment; preserve claim
 modes and period bounds when rolling back. No new migration or dependency is added.
+
+VIP wheels persist the selected daily table, awarded indices and paid-draw step
+in the existing owner and VIP-band rows. The first draw is free and each following
+draw consumes the configured owned token quantity. Awarded indices are excluded
+from subsequent weighted choices. Exclusive random intervals remove the source's
+boundary bias. A query may preview a higher band, but drawing always resolves the
+owner's saved VIP and super-VIP level; expired VIP activation does not erase that
+level. UTC-day rollover requires a new table selection before another draw.
+
+Native replies preserve raw catalog string fields, their Java hash-map field
+order, boolean free-state semantics and the existing item/index response. Draw
+costs, grants, wheel progress and notable-result history commit with the receipt.
+A failed transaction leaves no partial result. Login projects existing saved state
+without granting a new spin. Feature closures preserve the saved wheel.
+
+Migration `0024_vip_box_history.sql` replaces the volatile shared notable-result
+list with a durable structured history. It retains the newest fifty results,
+serializing only history writes across owners. Names remain structured strings
+rather than a comma-delimited encoding. Back up wheel rows, inventory, receipts
+and this history before deployment. Rollback must preserve awarded indices and
+the consumed-free-draw marker; the additive history table can remain in place.
+No new dependency is added.
