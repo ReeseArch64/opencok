@@ -3,6 +3,13 @@ import { validateFields } from "./validation";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { text, long, num, type Row } from "@opencok/contracts/rows";
 import type { ExpeditionState } from "@opencok/contracts/new-expedition";
+import type { Rules } from "@opencok/rules/game";
+import { expeditionPanelDefinitions } from "@opencok/rules/expedition-phase";
+import { expeditionPanelSchema } from "@opencok/validations/new-expedition";
+import { previewRewards } from "@opencok/rules/rewards";
+import { rewardPreviewArray } from "./rewards";
+import { randomInt } from "node:crypto";
+
 const scoreFormat = new Intl.NumberFormat("en-US", {
   useGrouping: false,
   maximumFractionDigits: 0,
@@ -29,7 +36,7 @@ export function expeditionInfo(state: ExpeditionState, profile: Row, realmName: 
       banner: sfs.string(""),
     }),
   ];
-  if (period && phase && phase.stage !== 0)
+  if (period && phase && phase.stage !== 0 && num(period, "matchServerId") > 0)
     kingdoms.push(
       sfs.object({ serverid: sfs.int(num(period, "matchServerId")), score: sfs.string("0") }),
     );
@@ -80,4 +87,44 @@ export function expeditionDistribution(row: Row): Fields {
     iron: sfs.long(long(row, "iron")),
     stone: sfs.long(long(row, "stone")),
   };
+}
+export function expeditionPanels(
+  state: ExpeditionState,
+  profile: Row,
+  rules: Rules,
+  now: bigint,
+): Fields[] {
+  return expeditionPanelDefinitions(rules, now, state.lastMergeMillis ?? 0n).map(
+    ({ rule, merge }) => {
+      const result: Fields = {
+        ...expeditionInfo(
+          { ...state, progress: [], allianceScore: 0, rank: 0 },
+          profile,
+          rules.profile.servers?.get(String(rules.kingdomId))?.name ?? "",
+        ),
+        ...(merge ? { merge: sfs.bool(true) } : {}),
+        id: sfs.string(rule.id!),
+      };
+      for (const key of ["activityid", "exchange", "res_andmd5", "res_iosmd5"])
+        if (rule[key] !== undefined) result[key] = sfs.string(rule[key]!);
+      if (rule.rewardid !== undefined)
+        result.reward = rewardPreviewArray(
+          previewRewards(
+            rule.rewardid,
+            rules,
+            { kingdomId: rules.kingdomId, version: "12.06.0", now: Number(now) },
+            randomInt,
+          ),
+        );
+      result.popup = sfs.string(
+        now >= (state.phase?.startTime ?? 0n) &&
+          now <= (state.phase?.endTime ?? 9223372036854775807n)
+          ? (rule.popup ?? "0")
+          : "0",
+      );
+      for (const key of ["androidmd5", "iosmd5"])
+        if (rule[key] !== undefined) result[key] = sfs.string(rule[key]!);
+      return validateFields(expeditionPanelSchema, result);
+    },
+  );
 }

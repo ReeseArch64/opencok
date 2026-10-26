@@ -285,9 +285,17 @@ test("login with an existing march and non-building queue reaches the full recon
             ]
           : [],
     }),
+    expeditionActivity: async (owner) => {
+      expect(owner).toBe("1001");
+      return { activity: sfs.array([sfs.object({ id: sfs.string("57155") })]) };
+    },
     reconnect: async (_uid, _now, plan) => (await plan(state)).result,
   });
   const initialized = await game.initialize("1001", { _cok_: sfs.int(7) });
+  expect(initialized.body.activity!.value).toHaveLength(1);
+  expect(
+    fields((initialized.body.activity!.value as import("@opencok/messages/sfs").Value[])[0]).id,
+  ).toEqual(sfs.string("57155"));
   expect(fields(initialized.body.world).m).toEqual(initialized.body.worldMarch!);
   expect(fields(initialized.body.user).level).toEqual(sfs.int(1));
   expect(initialized.body._cok_).toEqual(sfs.int(7));

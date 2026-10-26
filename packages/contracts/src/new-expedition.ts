@@ -12,6 +12,9 @@ export interface ExpeditionManifest {
   stages: readonly { stage: number; durationMs: bigint }[];
 }
 export interface ExpeditionState {
+  clock?: Row;
+  lastMergeMillis?: bigint;
+  projectionOnly?: boolean;
   period?: Row;
   phase?: ExpeditionPhase;
   progress: readonly Row[];

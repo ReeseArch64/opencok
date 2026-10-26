@@ -246,6 +246,13 @@
       "when": 1793042300395,
       "tag": "0034_expedition_admission",
       "breakpoints": false
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1793043307643,
+      "tag": "0035_expedition_clock",
+      "breakpoints": false
     }
   ]
 }

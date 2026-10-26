@@ -1,3 +1,15 @@
+import {
+  ExpeditionPhaseService,
+  ExpeditionActivityService,
+  expeditionPhaseDomain,
+  publishExpeditionPhaseNotification,
+} from "@opencok/services/expedition-phase";
+import {
+  createExpeditionPhaseStore,
+  createExpeditionActivityReader,
+  currentExpeditionClock,
+} from "@opencok/repositories/expedition-phase";
+import { expeditionPhaseOperation } from "@opencok/rules/expedition-phase";
 import { ExpeditionMatchingService } from "@opencok/services/expedition-matching";
 import {
   createExpeditionMatchingRegistry,
@@ -557,6 +569,7 @@ export const RealmDependenciesLive = Layer.effect(
         castleLevelEventDomain,
         lotteryDomain,
         expeditionDomain,
+        expeditionPhaseDomain,
         anniversaryDomain,
         createArenaDomain(),
         trainingDomain,
@@ -787,6 +800,59 @@ export const RealmDependenciesLive = Layer.effect(
       createExpeditionMatchingRegistry(db.databases.global.db),
       rules,
     );
+    const expeditionPhases = new ExpeditionPhaseService(
+      expeditionCalendar,
+      createExpeditionPhaseStore(db.kingdom.db, authority),
+    );
+    const expeditionActivity = new ExpeditionActivityService(
+      createExpeditionActivityReader(db.kingdom.db, authority),
+      rules,
+    );
+    let expeditionNoticeCursor = 0;
+    const expeditionNotified = new Map<string, bigint>();
+    const recoverExpeditionNotifications = async () => {
+      const clock = await currentExpeditionClock(db.kingdom.db, authority);
+      if (!clock) return;
+      const online = notifications.owners(),
+        active = new Set(online);
+      for (const owner of expeditionNotified.keys())
+        if (!active.has(owner)) expeditionNotified.delete(owner);
+      const selected = Array.from(
+        { length: Math.min(32, online.length) },
+        (_, index) => online[(expeditionNoticeCursor + index) % online.length]!,
+      );
+      if (online.length)
+        expeditionNoticeCursor = (expeditionNoticeCursor + selected.length) % online.length;
+      await Promise.allSettled(
+        selected.map(async (owner) => {
+          if (expeditionNotified.get(owner) === clock.revision) return;
+          await activities.domainCommand(owner, "expedition.notify", {
+            revision: sfs.string(String(clock.revision)),
+            operationId: sfs.string(expeditionPhaseOperation(clock.revision)),
+          });
+          expeditionNotified.set(owner, clock.revision);
+        }),
+      );
+      for (let index = 0; index < 64; index++) {
+        const latest = await currentExpeditionClock(db.kingdom.db, authority);
+        const delivered = await relayMutationEvent(
+          db.kingdom.db,
+          authority,
+          async (event) => {
+            await publishExpeditionPhaseNotification(
+              event.payload,
+              event.owner,
+              latest?.revision,
+              (owner, command, body) => notifications.publish(owner, command, body),
+            );
+          },
+          Date.now,
+          "expedition.phase",
+          60000,
+        );
+        if (!delivered) break;
+      }
+    };
     const heroRankingRewards = new HeroRankingRewardService(
       createHeroRankRewardStore(db.kingdom.db, authority),
       createHeroRankRewardStandings(db.databases.global.db, config.kingdomId),
@@ -1379,8 +1445,23 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => expeditionMatching.refresh(),
+      try: async () => {
+        try {
+          await expeditionMatching.refresh();
+        } finally {
+          await expeditionPhases.refresh();
+        }
+      },
       catch: () => new Error("Expedition matching recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: recoverExpeditionNotifications,
+      catch: () => new Error("Expedition activity publication unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),
@@ -1793,6 +1874,7 @@ export const RealmDependenciesLive = Layer.effect(
           notice: (owner, command, params) => notices.command(owner, command, params),
           postbox: (owner, command, params) => postbox.command(owner, command, params),
           inventory: (owner, command, params) => inventory.command(owner, command, params),
+          expeditionActivity: (owner) => expeditionActivity.activity(owner),
           reconnect: async (uid, now, plan) => {
             authority.assertReady();
             const binding = await readFriendshipBinding(
