@@ -28,6 +28,22 @@ export interface SessionConfig {
   kingdomId: number;
 }
 export class Cache {
+  private sessionOwner?: bigint;
+  bindRealmOwner(epoch: bigint) {
+    if (
+      this.sessionOwner !== undefined ||
+      typeof epoch !== "bigint" ||
+      epoch <= 0n ||
+      epoch > 9223372036854775807n
+    )
+      throw new DependencyError("redis session owner");
+    this.sessionOwner = epoch;
+  }
+  private sessionKey(uid: string) {
+    return this.sessionOwner === undefined
+      ? `opencok:kingdom:${this.config.kingdomId}:session:${uid}`
+      : `opencok:kingdom:${this.config.kingdomId}:owner:${this.sessionOwner}:session:${uid}`;
+  }
   constructor(readonly config: SessionConfig) {}
   async command(command: string, ...args: string[]): Promise<unknown> {
     const client = new RedisClient(this.config.redisUrl, {
@@ -153,7 +169,7 @@ export class Cache {
     return (
       (await this.command(
         "SET",
-        `opencok:kingdom:${this.config.kingdomId}:session:${uid}`,
+        this.sessionKey(uid),
         token,
         "NX",
         "EX",
@@ -349,7 +365,7 @@ export class Cache {
           "EVAL",
           "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('EXPIRE',KEYS[1],ARGV[2]) else return 0 end",
           "1",
-          `opencok:kingdom:${this.config.kingdomId}:session:${uid}`,
+          this.sessionKey(uid),
           token,
           String(SESSION_TTL_SECONDS),
         ),
@@ -361,7 +377,7 @@ export class Cache {
       "EVAL",
       "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('DEL',KEYS[1]) else return 0 end",
       "1",
-      `opencok:kingdom:${this.config.kingdomId}:session:${uid}`,
+      this.sessionKey(uid),
       token,
     );
   }
