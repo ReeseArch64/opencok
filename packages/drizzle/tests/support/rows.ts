@@ -69,6 +69,12 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   }
   if (spec.indexes.some((key) => key.name === "character_provisioning_PRIMARY"))
     row.state = variant % 2;
+  if (spec.indexes.some((key) => key.name === "expedition_period_PRIMARY")) {
+    row.matchServerId = variant + 1;
+    row.endTime = (row.startTime as bigint) + 1n;
+  }
+  if (spec.indexes.some((key) => key.name === "world_march_checkpoint_PRIMARY"))
+    row.status = (variant - 1) % 2;
   if (spec.indexes.some((key) => key.name === "timed_activity_PRIMARY")) row.status = 0;
   if (spec.indexes.some((key) => key.name === "building_production_PRIMARY"))
     row.remainder = BigInt(variant);
