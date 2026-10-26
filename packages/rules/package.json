@@ -136,7 +136,8 @@
     "./seasonal-exchange": "./src/seasonal-exchange.ts",
     "./player-item-gifts": "./src/player-item-gifts.ts",
     "./alliance-heart": "./src/alliance-heart.ts",
-    "./regional-recall": "./src/regional-recall.ts"
+    "./regional-recall": "./src/regional-recall.ts",
+    "./prayer": "./src/prayer.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

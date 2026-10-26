@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  prayer?: import("./prayer").PrayerState;
   recallTask?: import("./recall-task").RecallTaskState;
   regionalRecall?: import("./regional-recall").RegionalRecallState;
   allianceHeart?: import("./alliance-heart").AllianceHeartState;
@@ -131,6 +132,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  prayer?: import("./prayer").PrayerWrite;
   recallTask?: import("./recall-task").RecallTaskWrite;
   regionalRecall?: import("./regional-recall").RegionalRecallWrite;
   allianceHeart?: import("./alliance-heart").AllianceHeartWrite;

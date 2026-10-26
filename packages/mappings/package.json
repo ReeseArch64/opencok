@@ -84,7 +84,8 @@
     "./player-item-gifts": "./src/player-item-gifts.ts",
     "./alliance-heart": "./src/alliance-heart.ts",
     "./regional-recall": "./src/regional-recall.ts",
-    "./recall-task": "./src/recall-task.ts"
+    "./recall-task": "./src/recall-task.ts",
+    "./prayer": "./src/prayer.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

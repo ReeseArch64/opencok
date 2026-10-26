@@ -139,7 +139,9 @@
     "./regional-recall": "./src/regional-recall.ts",
     "./responses/regional-recall": "./src/responses/regional-recall.ts",
     "./recall-task": "./src/recall-task.ts",
-    "./responses/recall-task": "./src/responses/recall-task.ts"
+    "./responses/recall-task": "./src/responses/recall-task.ts",
+    "./prayer": "./src/prayer.ts",
+    "./responses/prayer": "./src/responses/prayer.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
