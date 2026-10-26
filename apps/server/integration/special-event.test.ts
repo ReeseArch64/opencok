@@ -37,16 +37,14 @@ async function fixture() {
       migrationsFolder: new URL("../../../packages/drizzle/migrations/kingdom", import.meta.url)
         .pathname,
     });
-    await second.db
-      .insert(userprofile)
-      .values({
-        uid: "other",
-        serverId: 2,
-        name: "Synthetic second realm",
-        level: 1,
-        exp: 0,
-        country: "BR",
-      });
+    await second.db.insert(userprofile).values({
+      uid: "other",
+      serverId: 2,
+      name: "Synthetic second realm",
+      level: 1,
+      exp: 0,
+      country: "BR",
+    });
     const buyer = createSpecialEventBuyer({
       getKingdom: (id) => {
         if (id === 1) return h.db;
