@@ -1,3 +1,4 @@
+import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import type { ShippingInvestmentResponse } from "@opencok/contracts/responses/shipping-investment";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import { shippingInvestmentSchema } from "@opencok/validations/shipping-investment";
@@ -8,7 +9,10 @@ export function shippingInvestmentView(row: ShippingInvestmentResponse): Fields 
       ? {
           gold_reward: sfs.object(
             Object.fromEntries(
-              Object.entries(row.gold_reward).map(([key, value]) => [key, sfs.string(value)]),
+              javaHashMapOrder(Object.keys(row.gold_reward)).map((key) => [
+                key,
+                sfs.string(row.gold_reward![key]!),
+              ]),
             ),
           ),
         }

@@ -77,6 +77,12 @@ test("recharge eligibility uses accepted server amounts and every threshold gran
     expect(login.body.new_sercum_little_time).toEqual(sfs.long(43200000n));
     const ui = await h.command("new.sercum.ui", {});
     expect(ui.body.new_sercum_recharge!.value as Value[]).toHaveLength(2);
+    expect(Object.keys(fields((ui.body.new_sercum_recharge!.value as Value[])[0]))).toEqual([
+      "pay_node",
+      "id",
+      "pay_reward",
+      "type",
+    ]);
     expect(fields((ui.body.new_sercum_recharge!.value as Value[])[0]).pay_node).toEqual(
       sfs.string("500"),
     );

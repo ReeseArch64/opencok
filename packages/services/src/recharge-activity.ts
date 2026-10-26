@@ -1,3 +1,4 @@
+import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import { createHash, randomInt, randomUUID } from "node:crypto";
 import { long, text } from "@opencok/contracts/rows";
 import { sfs, encode, str } from "@opencok/messages/sfs";
@@ -71,13 +72,13 @@ export function createRechargeActivityDomain(gateway?: RechargeActivityGateway):
               rules.map((rule) =>
                 sfs.object(
                   Object.fromEntries(
-                    Object.entries(rule).map(([key, value]) => [
+                    javaHashMapOrder(Object.keys(rule)).map((key) => [
                       key,
                       key === "pay_reward"
                         ? rewardPreviewArray(
-                            previewRewards(value, context.rules, ruleContext, randomInt),
+                            previewRewards(rule[key], context.rules, ruleContext, randomInt),
                           )
-                        : sfs.string(value),
+                        : sfs.string(rule[key]!),
                     ]),
                   ),
                 ),
