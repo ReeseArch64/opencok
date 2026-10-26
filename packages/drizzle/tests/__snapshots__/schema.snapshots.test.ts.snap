@@ -10780,10 +10780,11 @@ column ["beginTime","bigint",true,"0",null,null]
 column ["opendTime","bigint",true,"0",null,null]
 column ["country","varchar(40)",true,"''",null,null]
 column ["endTime","bigint",true,"0",null,null]
+column ["lastLoginTime","bigint",true,"0",null,null]
 primary ["user_recall_task_notes_PRIMARY",["uid"]]
-insert into "opencok_kingdom"."user_recall_task_notes" ("uid", "version", "receive_mode", "refreshTime", "beginTime", "opendTime", "country", "endTime") values ($1, $2, $3, $4, $5, $6, $7, $8)
-select "uid", "version", "receive_mode", "refreshTime", "beginTime", "opendTime", "country", "endTime" from "opencok_kingdom"."user_recall_task_notes" where "opencok_kingdom"."user_recall_task_notes"."uid" = $1
-update "opencok_kingdom"."user_recall_task_notes" set "uid" = $1, "version" = $2, "receive_mode" = $3, "refreshTime" = $4, "beginTime" = $5, "opendTime" = $6, "country" = $7, "endTime" = $8 where "opencok_kingdom"."user_recall_task_notes"."uid" = $9
+insert into "opencok_kingdom"."user_recall_task_notes" ("uid", "version", "receive_mode", "refreshTime", "beginTime", "opendTime", "country", "endTime", "lastLoginTime") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "uid", "version", "receive_mode", "refreshTime", "beginTime", "opendTime", "country", "endTime", "lastLoginTime" from "opencok_kingdom"."user_recall_task_notes" where "opencok_kingdom"."user_recall_task_notes"."uid" = $1
+update "opencok_kingdom"."user_recall_task_notes" set "uid" = $1, "version" = $2, "receive_mode" = $3, "refreshTime" = $4, "beginTime" = $5, "opendTime" = $6, "country" = $7, "endTime" = $8, "lastLoginTime" = $9 where "opencok_kingdom"."user_recall_task_notes"."uid" = $10
 delete from "opencok_kingdom"."user_recall_task_notes" where "opencok_kingdom"."user_recall_task_notes"."uid" = $1"
 `;
 

@@ -1,3 +1,4 @@
+import { recordRecallTask } from "./recall-task";
 import { createHash, randomInt, randomUUID } from "node:crypto";
 import { num, long, text } from "@opencok/contracts/rows";
 import {
@@ -137,6 +138,7 @@ export function recordTargetTask(
   condition = "1",
   at = context.now,
 ): void {
+  recordRecallTask(context, type, amount, condition, at);
   if (!context.state.targetTask || !open(context) || amount <= 0) return;
   const state = saved(context),
     notes = state.notes;
