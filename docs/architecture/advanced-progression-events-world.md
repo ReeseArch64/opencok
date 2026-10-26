@@ -646,3 +646,26 @@ metadata remain unknown; startup does not silently reopen their event periods.
 No migration or dependency is introduced. Back up and retain the opening metadata
 across restores. A disposable PostgreSQL scenario covers concurrent starts,
 owner replacement, stale-owner rejection and preservation of imported metadata.
+
+## Regional return gifts
+
+`region.recall.init` selects the authoritative registration country, preferring
+the reference type-2 registration. It validates the configured calendar,
+registration cutoff, minimum offline interval, castle level and reward ladder
+before creating the existing regional-recall row once. Its cosmetic deadline
+is UTC midnight after the configured number of days. Optional catalog statuses
+use that deadline and settle production through the shared boundary. Alliance
+announcement mail commits with enrollment and is not repeated on reconnect.
+
+`region.recall.open.ui` preserves nested reward arrays and the saved claim count.
+`region.recall.receive` grants the next configured reward at most once per UTC
+day, independently of client counters. The response retains the reference's
+previous receive timestamp. The seven earned gifts remain claimable after the
+cosmetic/login-banner deadline, matching the reference entitlement semantics;
+this does not create another enrollment or extend its temporary statuses.
+
+No migration or dependency is introduced. Back up regional rows, registration
+metadata, inventory, receipts and mail together. Preserve committed claims during
+rollback. Synthetic PostgreSQL scenarios cover all seven gifts, concurrent
+retries, eligibility, UTC rollover, receipt failures and once-only alliance mail.
+Native APK/device execution remains unverified.

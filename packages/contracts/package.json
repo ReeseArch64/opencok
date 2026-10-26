@@ -135,7 +135,9 @@
     "./player-item-gifts": "./src/player-item-gifts.ts",
     "./responses/player-item-gifts": "./src/responses/player-item-gifts.ts",
     "./alliance-heart": "./src/alliance-heart.ts",
-    "./responses/alliance-heart": "./src/responses/alliance-heart.ts"
+    "./responses/alliance-heart": "./src/responses/alliance-heart.ts",
+    "./regional-recall": "./src/regional-recall.ts",
+    "./responses/regional-recall": "./src/responses/regional-recall.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
