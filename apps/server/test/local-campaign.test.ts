@@ -50,3 +50,18 @@ test("anniversary public commands preserve correlation and reject internal event
   await expect(game.execute("owner", "campaign.action", { event: sfs.int(58) })).rejects.toThrow();
   await expect(game.execute("owner", "campaign.init", {})).rejects.toThrow();
 });
+
+test("login with no configured campaign catalogs leaves state untouched and keeps anniversary queries unavailable", async () => {
+  const { anniversaryDomain } = await import("@opencok/services/anniversary");
+  const { decode } = await import("@opencok/messages/sfs");
+  const context = {
+    rules: new Rules(new Map(), new Map(), new Map()),
+    economy: {},
+    state: {},
+    write: {},
+  } as import("@opencok/services/city-progression").CityProgressionContext;
+  const initialized = await anniversaryDomain.prepare(context, "campaign.init", {});
+  expect(decode(Buffer.from(initialized.response))).toEqual({});
+  expect(context.write).toEqual({});
+  await expect(anniversaryDomain.prepare(context, "third.anniversary", {})).rejects.toThrow();
+});
