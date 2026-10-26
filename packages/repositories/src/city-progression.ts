@@ -1,3 +1,4 @@
+import { readFragmentExchanges, writeFragmentExchanges } from "./fragment-exchange";
 import { readCampaignProfile } from "./campaign-notice";
 import { costRankAwardReader, writeCostRankAward } from "./continued-cost-rewards";
 import { expeditionAwardReader, writeExpeditionAward } from "./expedition-stage-rewards";
@@ -205,6 +206,10 @@ export function createCityProgressionStore(
           command === "item.send" || command === "gift.init"
             ? await readPlayerItemGifts(tx, owner, command, request)
             : undefined,
+        fragmentExchange:
+          command === "act.exchange" || command?.startsWith("act.ex.")
+            ? await readFragmentExchanges(tx, owner)
+            : undefined,
         seasonalExchange: command?.startsWith("activity.exchange.")
           ? await readSeasonalExchange(tx, owner)
           : undefined,
@@ -335,6 +340,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.fragmentExchange) await writeFragmentExchanges(tx, owner, write.fragmentExchange);
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
         if (write.costRankAward) await writeCostRankAward(tx, owner, write.costRankAward, now);

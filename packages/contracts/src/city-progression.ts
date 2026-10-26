@@ -98,6 +98,7 @@ export interface CityProgressionState {
   allianceHeart?: import("./alliance-heart").AllianceHeartState;
   playerItemGifts?: import("./player-item-gifts").PlayerItemGiftState;
   seasonalExchange?: import("./seasonal-exchange").SeasonalExchangeState;
+  fragmentExchange?: readonly Row[];
   vipBox?: import("./vip-box").VipBoxState;
   targetTask?: import("./target-task").TargetTaskState;
   rechargeFeedback?: import("./recharge-feedback").RechargeFeedbackReader;
@@ -163,6 +164,7 @@ export interface CityProgressionWrite {
   allianceHeart?: import("./alliance-heart").AllianceHeartWrite;
   playerItemGifts?: import("./player-item-gifts").PlayerItemGiftWrite;
   seasonalExchange?: import("./rows").Row;
+  fragmentExchange?: readonly Row[];
   vipBox?: import("./vip-box").VipBoxWrite;
   targetTask?: import("./target-task").TargetTaskWrite;
   rechargeFeedback?: readonly import("./recharge-feedback").RechargeFeedbackClaim[];
