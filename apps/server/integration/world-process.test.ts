@@ -5,6 +5,9 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
+import { user_pray } from "@opencok/drizzle/schema/opencok_kingdom/user_pray";
+import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
+import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_resource";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { world_march_checkpoint } from "@opencok/drizzle/schema/opencok_kingdom/world_march_checkpoint";
@@ -97,6 +100,23 @@ test("a killed realm recovers the same march and publishes native transitions on
     }
     const owner = reservations[0]!.gameUid;
     await realm.db.insert(user_army).values({ uid: owner, armyId: "107000", level: 1, free: 100 });
+    await realm.db.update(userprofile).set({ level: 3 }).where(eq(userprofile.uid, owner));
+    await realm.db.insert(user_building).values({
+      uuid: "synthetic-world-altar",
+      uid: owner,
+      itemId: 428000,
+      level: 1,
+      pos: 14,
+      opType: 0,
+      refreshTime: BigInt(Date.now()),
+    });
+    await realm.db.insert(user_item).values({
+      uuid: "synthetic-world-prayer-credit",
+      ownerId: owner,
+      itemId: "200031",
+      count: 1,
+      value: 0,
+    });
     await realm.db.insert(user_item).values({
       uuid: "synthetic-world-speed",
       ownerId: owner,
@@ -193,6 +213,35 @@ test("a killed realm recovers the same march and publishes native transitions on
       return client;
     };
     let commander = await login(reservations[0]!);
+    const prayerInfo = await commander.command("user.pray.info", {});
+    expect(prayerInfo.wood).toEqual(sfs.int(9000));
+    const prayerBefore = (
+      await realm.db.select().from(user_resource).where(eq(user_resource.uid, owner))
+    )[0]!.wood;
+    const prayerRequest = {
+      resource: sfs.int(0),
+      gold: sfs.int(0),
+      num: sfs.int(9000),
+      operationId: sfs.string(randomUUID()),
+    };
+    const prayerDraw = await commander.command("user.pray", prayerRequest);
+    expect(prayerDraw.errorCode).toBeUndefined();
+    expect([2, 5, 10]).toContain(Number(prayerDraw.hit?.value));
+    expect(prayerDraw.WOOD).toEqual(
+      sfs.long(prayerBefore + 9000n * BigInt(Number(prayerDraw.hit!.value))),
+    );
+    expect(
+      (
+        await commander.command("item.use", {
+          uuid: sfs.string("synthetic-world-prayer-credit"),
+          num: sfs.int(1),
+          operationId: sfs.string(randomUUID()),
+        })
+      ).errorCode,
+    ).toBeUndefined();
+    expect(
+      (await realm.db.select().from(user_pray).where(eq(user_pray.uid, owner)))[0]!,
+    ).toMatchObject({ prayCount: 1, freeFromItem: 1 });
     const offlineGift = {
       uid: sfs.string(reservations[2]!.gameUid),
       itemId: sfs.string("210059"),
@@ -232,6 +281,10 @@ test("a killed realm recovers the same march and publishes native transitions on
       oldEpoch,
     );
     commander = await login(reservations[0]!);
+    expect((await commander.command("user.pray", prayerRequest)).WOOD).toEqual(prayerDraw.WOOD!);
+    expect(
+      (await realm.db.select().from(user_pray).where(eq(user_pray.uid, owner)))[0]!,
+    ).toMatchObject({ prayCount: 1, freeFromItem: 1 });
     const near = await login(reservations[1]!),
       far = await login(reservations[2]!);
     expect(pushes(far, "init")[0]!.item_allname).toEqual({

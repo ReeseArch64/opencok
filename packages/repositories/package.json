@@ -112,7 +112,8 @@
     "./alliance-heart": "./src/alliance-heart.ts",
     "./realm-opening-clock": "./src/realm-opening-clock.ts",
     "./regional-recall": "./src/regional-recall.ts",
-    "./recall-task": "./src/recall-task.ts"
+    "./recall-task": "./src/recall-task.ts",
+    "./prayer": "./src/prayer.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
