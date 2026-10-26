@@ -3,6 +3,11 @@ export class GameError extends Error {
     readonly code: string,
     readonly reason?:
       | "city_progression"
+      | "social_rule"
+      | "postbox_closed"
+      | "postbox_reward"
+      | "postbox_daily_limit"
+      | "postbox_empty"
       | "alliance_gameplay"
       | "research_prerequisite"
       | "research_building"

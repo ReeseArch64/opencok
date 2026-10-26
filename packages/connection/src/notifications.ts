@@ -4,6 +4,7 @@ type Recipient = (command: string, body: Fields, signal?: AbortSignal) => Promis
 export function createRealmNotifications() {
   const recipients = new Map<string, Recipient>();
   return {
+    owners: () => [...recipients.keys()],
     subscribe(owner: string, recipient: Recipient) {
       recipients.set(owner, recipient);
       return () => {

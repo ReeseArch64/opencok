@@ -92,9 +92,16 @@
     "./alliance-gameplay": "./src/alliance-gameplay.ts",
     "./responses/alliance": "./src/responses/alliance.ts",
     "./world-march-lifecycle": "./src/world-march-lifecycle.ts",
-    "./world-march-runtime": "./src/world-march-runtime.ts"
+    "./world-march-runtime": "./src/world-march-runtime.ts",
+    "./chat-delivery": "./src/chat-delivery.ts",
+    "./chat-social": "./src/chat-social.ts",
+    "./realm-social": "./src/realm-social.ts",
+    "./postbox": "./src/postbox.ts",
+    "./friendship-mine": "./src/friendship-mine.ts",
+    "./responses/chat-social": "./src/responses/chat-social.ts"
   },
   "dependencies": {
-    "@opencok/enums": "workspace:*"
+    "@opencok/enums": "workspace:*",
+    "@opencok/messages": "workspace:*"
   }
 }
