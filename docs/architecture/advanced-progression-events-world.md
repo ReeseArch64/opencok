@@ -1778,3 +1778,37 @@ contracts and snapshots passed 1,705 tests with 50,139 assertions and 848 snapsh
 physical schema and upgrade checks passed 1,551 tests with 37,423 assertions.
 Required lint, formatting, kingdom migration consistency and server/nine package
 type checks passed.
+
+## General campaign variable declarations
+
+Campaign variable queries now expose all 384 maintained declarations, preserving
+exact scope, aliases and canonical keys, including the declared key containing
+spaces. The previous loader restricted queries and owned persistence to the
+third-anniversary prefix. Other personal campaign counters now use the same owned
+transaction, receipt and UTC refresh behavior without changing unrelated legacy
+rows. Personal and realm values remain isolated. Static declarations return their
+configured value and ignore assignment, matching the source static-variable rule.
+Server and global mutation boundaries remain unchanged. General variable queries
+and trusted internal events no longer require the anniversary calendar; anniversary
+queries retain their calendar availability checks.
+
+Campaign realm conditions now use inclusive ranges and semicolon groups. A selector
+such as `1-50` includes the interior realms, rather than only its two endpoints.
+The source ALL marker remains supported. This module expands the variable catalog;
+loading the remaining campaign rules and binding their trusted producers are
+subsequent modules. Client traffic still cannot invoke internal campaign events.
+
+No migration, dependency, configuration or environment variable is added. The
+existing `trigger_var` table retains its 200-character key bound, signed 64-bit
+values, original rows and actor/realm keys. Back up campaign variables with their
+receipts and mutation outbox; retaining these records preserves replay and daily
+refresh behavior during rollback. Inventory remains 848 tables and 6,917 fields.
+
+Four PostgreSQL acceptance cases passed with fifteen assertions, covering generic
+aliases, exact long values, personal/realm isolation, immutable static declarations,
+keys containing spaces, inclusive ranges, rollback and UTC refresh. Ten anniversary
+and recipe regression cases passed with 73 assertions. A catalog contract verified
+all 384 declarations and independent query availability with 395 assertions. The
+complete server unit suite passed 1,491 tests with 245,563 assertions. Native TCP
+acceptance passed one test with 208 assertions in both realms. Required lint, formatting and server/nine
+package type checks passed. Device execution remains unverified.
