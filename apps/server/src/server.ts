@@ -1,3 +1,5 @@
+import { ExpeditionCalendarService } from "@opencok/services/expedition-calendar";
+import { createExpeditionCalendarStore } from "@opencok/repositories/expedition-calendar";
 import {
   HeroRankingRewardService,
   heroRankingRewardDomain,
@@ -764,6 +766,11 @@ export const RealmDependenciesLive = Layer.effect(
       rules,
       [...db.databases.kingdoms.keys()],
     );
+    const expeditionCalendar = new ExpeditionCalendarService(
+      createExpeditionCalendarStore(db.databases.global.db),
+      rules,
+      [...db.databases.kingdoms.keys()],
+    );
     const heroRankingRewards = new HeroRankingRewardService(
       createHeroRankRewardStore(db.kingdom.db, authority),
       createHeroRankRewardStandings(db.databases.global.db, config.kingdomId),
@@ -1349,6 +1356,15 @@ export const RealmDependenciesLive = Layer.effect(
         await recoverHeroScoreNotifications();
       },
       catch: () => new Error("Hero reward recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: () => expeditionCalendar.refresh(),
+      catch: () => new Error("Expedition calendar recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),
