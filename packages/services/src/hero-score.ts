@@ -7,6 +7,8 @@ import { heroHistoryBand } from "@opencok/rules/hero-ranking";
 import { featureRealmEnabled, versionAtLeast } from "@opencok/rules/availability";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { mailRewardEntries } from "@opencok/rules/mail-rewards";
+import { avatarMailPush } from "@opencok/mappings/avatar-mail";
+import type { AvatarSystemMail } from "@opencok/contracts/files";
 import { heroEventEntry, heroEventInfo } from "@opencok/mappings/hero-event";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { previewRewards } from "@opencok/rules/rewards";
@@ -269,22 +271,21 @@ export const heroTargetDomain: CityDomain = {
     const contents = javaMailBytes(`${message}|${stage}`);
     if (!contents) throw new Error("Missing hero target mail");
     const quests = (context.write.quests ??= {});
-    quests.mail = [
-      ...(quests.mail ?? []),
-      {
-        uid: randomUUID().replaceAll("-", "") + "00",
-        owner: context.owner,
-        fromName: str(params, "sender", ""),
-        title: str(params, "title", ""),
-        type: 2,
-        contents,
-        extra: null,
-        rewardId: reward,
-        rewardStatus: 0,
-        reply: 0,
-        createTime: context.now,
-      },
-    ];
+    const mail: AvatarSystemMail = {
+      uid: randomUUID().replaceAll("-", "") + "00",
+      owner: context.owner,
+      fromName: str(params, "sender", ""),
+      title: str(params, "title", ""),
+      type: 2,
+      contents,
+      extra: null,
+      rewardId: reward,
+      rewardStatus: 0,
+      reply: 0,
+      createTime: context.now,
+    };
+    quests.mail = [...(quests.mail ?? []), mail];
+    let achievement: Fields | undefined;
     const snapshot = await context.state.heroScore?.load(context.now),
       event = snapshot?.events.find((row) => row.uuid === act);
     if (snapshot && event) {
@@ -329,14 +330,22 @@ export const heroTargetDomain: CityDomain = {
             );
           })
           .filter((row): row is Fields => !!row);
-      context.economy.push?.(
-        "push.hero.target.achieved",
-        encode({
-          ...heroEventInfo(entries, family, []),
-          eventType: sfs.int(eventType === 2 || eventType === 4 ? 2 : 1),
-        }),
-      );
+      achievement = {
+        ...heroEventInfo(entries, family, []),
+        eventType: sfs.int(eventType === 2 || eventType === 4 ? 2 : 1),
+      };
     }
+    if (!context.economy.event) throw new Error("Hero target mail publication unavailable");
+    const full = context.rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
+    context.economy.event({
+      id: "hero-target-mail",
+      type: "hero.target.mail",
+      payload: encode({
+        owner: sfs.string(context.owner),
+        mail: sfs.object(avatarMailPush(mail, full)),
+        ...(achievement ? { achievement: sfs.object(achievement) } : {}),
+      }),
+    });
     return { response: encode({}), event: null };
   },
   async apply() {
