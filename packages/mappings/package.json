@@ -89,7 +89,8 @@
     "./city-cosmetics": "./src/city-cosmetics.ts",
     "./trouble": "./src/trouble.ts",
     "./continued-cost": "./src/continued-cost.ts",
-    "./special-event": "./src/special-event.ts"
+    "./special-event": "./src/special-event.ts",
+    "./groupbuy": "./src/groupbuy.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -568,6 +568,7 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "groupbuys.info":
       case "special.ui.state":
       case "continuedcost.hideking":
       case "continuedcost.global.reward":

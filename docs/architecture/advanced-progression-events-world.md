@@ -895,3 +895,52 @@ immutable orders, cancelled holds, UTC limits, receipt failure, acknowledgment,
 out-of-order delivery and the lock deadline. Native TCP checks retain LONG
 correlation and reject the internal payment producer. Actual provider and native
 APK/device execution are not claimed by this module.
+
+## Realm group-buy rounds
+
+`groupbuys.info` preserves the native reward thresholds, exchange products,
+realm-wide point total, eleven-entry participant preview, personal point count,
+castle-level purchase code and LONG round/cutoff clocks. Despite its historical
+name, the reference aggregates the kingdom's participants without an alliance
+filter. Visibility requires the function gate, resident character and configured
+minimum kingdom age. The maintained calendar remains closed by default; no paid
+products or providers are activated.
+
+The payment owner must obtain a fenced `groupbuys.reserve` result before charging.
+The internal reservation retains its order hash, product, original point quantity
+and admission time in the existing participant history. Outstanding reservations
+consume the personal point limit but do not count as paid points. Only the injected
+trusted payment gateway can confirm or cancel an order. Confirmations bind the
+owner, kingdom, activity, round, product and original payment time. Replays retain
+the same canonical operation. Uncertain holds have no automatic expiry; the payment
+owner must reconcile them before releasing capacity. Package grants remain the
+shared payment contract's responsibility.
+
+Existing activity and participant tables persist schedules, paid points, order
+markers and delivered reward counts. A kingdom transaction lock serializes round
+admission, confirmation and closure, with a one-second lock wait. Stored schedules
+retain their configured thresholds. Closing a round requires a trusted reconciled
+payment watermark whose total matches the realm's committed paid points and no
+remaining uncertain orders. Closure freezes the total and selected reward mail.
+Delayed valid confirmations and closure still address their original persisted
+round after the calendar ends. Imported closed rounds can resume any unpaid mail
+points using their original activity and participant rows.
+
+A bounded, fenced worker traverses closed rounds and sends one funded system mail
+per unpaid point, committing mail, delivered count and command receipt together.
+Its cursor advances past failed recipients and wraps after the end. Receipt failure
+rolls back both mail and progress; a repeated delivery cannot grant another mail.
+Native clients can query the event but cannot reserve, confirm, cancel, close or
+settle payments. Provider-specific binding, order creation and the reconciliation
+watermark remain payment-owner integration ports.
+
+No migration, dependency, environment variable or mobile artifact is introduced.
+Back up activity schedules, participant histories and reward counts, receipts,
+funded mail and payment-owner orders together. Preserve outstanding reservations
+and confirmed points during rollback. Reconcile legacy purchases before enabling
+an imported open round; do not alter its product point mapping during payment
+reconciliation. Synthetic PostgreSQL acceptance covers competing reservations,
+proof rejection, delayed confirmation, uncertain holds, round isolation, legacy
+recovery, settlement rollback and lock deadlines. Native TCP acceptance verifies
+LONG correlation and rejection of every internal payment command. Provider and
+native-device execution are not claimed.

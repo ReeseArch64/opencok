@@ -116,7 +116,8 @@
     "./trouble": "./src/trouble.ts",
     "./continued-cost-spending": "./src/continued-cost-spending.ts",
     "./continued-cost": "./src/continued-cost.ts",
-    "./special-event": "./src/special-event.ts"
+    "./special-event": "./src/special-event.ts",
+    "./groupbuy": "./src/groupbuy.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

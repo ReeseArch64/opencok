@@ -147,7 +147,9 @@
     "./trouble": "./src/trouble.ts",
     "./continued-cost": "./src/continued-cost.ts",
     "./special-event": "./src/special-event.ts",
-    "./responses/special-event": "./src/responses/special-event.ts"
+    "./responses/special-event": "./src/responses/special-event.ts",
+    "./groupbuy": "./src/groupbuy.ts",
+    "./responses/groupbuy": "./src/responses/groupbuy.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
