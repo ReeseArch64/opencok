@@ -1,3 +1,5 @@
+import { continued_cost_rank_watermark as marks } from "@opencok/drizzle/schema/opencok_global/continued_cost_rank_watermark";
+import { costScoreDigest } from "@opencok/rules/continued-cost-finality";
 import { and, eq, inArray, notInArray, sql } from "drizzle-orm";
 import { continued_cost_rank_period as periods } from "@opencok/drizzle/schema/opencok_global/continued_cost_rank_period";
 import { continued_cost_rank_score as scores } from "@opencok/drizzle/schema/opencok_global/continued_cost_rank_score";
@@ -84,157 +86,8 @@ export function createCostRankingRegistry(
       const [saved] = await db.select().from(periods).where(eq(periods.id, id)).limit(1);
       return saved ? read(saved) : undefined;
     },
-    async write(period, rows, now) {
-      authority.assertReady();
-      validate(period);
-      cityAmount(now);
-      if (
-        !period.expectedRealms.includes(authority.kingdomId) ||
-        rows.length > 100 ||
-        new Set(rows.map((row) => row.uid)).size !== rows.length
-      )
-        throw new Error("Invalid consumption ranking snapshot");
-      for (const row of rows) {
-        if (
-          !row.uid ||
-          row.uid.length > 40 ||
-          cityAmount(row.score) <= 0n ||
-          cityAmount(row.paid) < 0n ||
-          cityAmount(row.free) < 0n ||
-          row.lastAt < period.startTime ||
-          row.lastAt >= period.endTime ||
-          Buffer.byteLength(row.metadata) > 8192
-        )
-          throw new Error("Invalid confirmed consumption score");
-        costRankingEntry({ ...row, kingdomId: authority.kingdomId, type: period.type }, 1);
-      }
-      await db.transaction(async (tx) => {
-        await tx.execute(sql`set local lock_timeout='1s'`);
-        await tx.execute(sql`set local statement_timeout='3s'`);
-        await tx.execute(sql`select pg_advisory_xact_lock(728231,${authority.kingdomId})`);
-        let [owner] = await tx
-          .select()
-          .from(owners)
-          .where(eq(owners.kingdomId, authority.kingdomId))
-          .for("update");
-        if (
-          owner &&
-          (owner.ownerEpoch > authority.epoch ||
-            (owner.ownerEpoch === authority.epoch && owner.instanceId !== authority.instance))
-        )
-          throw new Error("Stale consumption ranking publisher");
-        if (!owner)
-          [owner] = await tx
-            .insert(owners)
-            .values({
-              kingdomId: authority.kingdomId,
-              ownerEpoch: authority.epoch,
-              instanceId: authority.instance,
-              sequence: 0n,
-            })
-            .returning();
-        else if (owner.ownerEpoch < authority.epoch)
-          [owner] = await tx
-            .update(owners)
-            .set({ ownerEpoch: authority.epoch, instanceId: authority.instance, sequence: 0n })
-            .where(eq(owners.kingdomId, authority.kingdomId))
-            .returning();
-        const [version] = await tx
-          .update(owners)
-          .set({ sequence: sql`${owners.sequence}+1` })
-          .where(eq(owners.kingdomId, authority.kingdomId))
-          .returning();
-        if (!version) throw new Error("Missing consumption ranking owner");
-        const [saved] = await tx
-          .select()
-          .from(periods)
-          .where(eq(periods.id, period.id))
-          .for("update");
-        if (
-          !saved ||
-          saved.expectedRealms !== period.expectedRealms.join("|") ||
-          saved.rewards !== period.rewards
-        )
-          throw new Error("Unregistered consumption ranking snapshot");
-        const existing = await tx
-          .select()
-          .from(scores)
-          .where(and(eq(scores.periodId, period.id), eq(scores.kingdomId, authority.kingdomId)));
-        const accepted =
-          saved.state === 0
-            ? rows
-            : rows.flatMap((row) => {
-                const frozen = existing.find((value) => value.uid === row.uid);
-                return frozen
-                  ? [
-                      {
-                        ...row,
-                        score: frozen.score,
-                        paid: frozen.paid,
-                        free: frozen.free,
-                        lastAt: frozen.lastAt,
-                      },
-                    ]
-                  : [];
-              });
-        const economic =
-          saved.state === 0
-            ? accepted
-            : existing.map((row) => accepted.find((value) => value.uid === row.uid) ?? row);
-        if (fingerprint(existing) === fingerprint(economic)) {
-          authority.assertReady();
-          return;
-        }
-        if (saved.state === 0)
-          await tx.delete(scores).where(
-            and(
-              eq(scores.periodId, period.id),
-              eq(scores.kingdomId, authority.kingdomId),
-              accepted.length
-                ? notInArray(
-                    scores.uid,
-                    accepted.map((row) => row.uid),
-                  )
-                : undefined,
-            ),
-          );
-        if (accepted.length) {
-          const changed = await tx
-            .insert(scores)
-            .values(
-              accepted.map((row) => ({
-                ...row,
-                periodId: period.id,
-                kingdomId: authority.kingdomId,
-                ownerEpoch: version.ownerEpoch,
-                sequence: version.sequence,
-                observedAt: now,
-              })),
-            )
-            .onConflictDoUpdate({
-              target: [scores.periodId, scores.uid],
-              set: {
-                score: sql`excluded.score`,
-                paid: sql`excluded.paid`,
-                free: sql`excluded.free`,
-                lastAt: sql`excluded."lastAt"`,
-                metadata: sql`excluded.metadata`,
-                ownerEpoch: sql`excluded."ownerEpoch"`,
-                sequence: sql`excluded.sequence`,
-                observedAt: sql`excluded."observedAt"`,
-              },
-              setWhere: sql`${scores.kingdomId}=${authority.kingdomId} and (${scores.ownerEpoch},${scores.sequence})<(excluded."ownerEpoch",excluded.sequence)`,
-            })
-            .returning({ uid: scores.uid });
-          if (changed.length !== accepted.length)
-            throw new Error("Foreign or stale consumption ranking member");
-        }
-        await tx
-          .update(periods)
-          .set({ revision: sql`${periods.revision}+1` })
-          .where(eq(periods.id, period.id));
-        authority.assertReady();
-      });
+    write(period, rows, now) {
+      return writeCostRankingSnapshot(db, authority, period, rows, now);
     },
     board(id) {
       return db.transaction(
@@ -259,4 +112,190 @@ export function createCostRankingRegistry(
       );
     },
   };
+}
+
+export async function writeCostRankingSnapshot(
+  db: Database["databases"]["global"]["db"],
+  authority: RealmAuthority,
+  period: CostRankingPeriod,
+  rows: readonly CostRankingScore[],
+  now: bigint,
+  proof?: import("@opencok/contracts/continued-cost-finality").CostRankingProof,
+) {
+  authority.assertReady();
+  validate(period);
+  cityAmount(now);
+  if (
+    !period.expectedRealms.includes(authority.kingdomId) ||
+    rows.length > 100 ||
+    new Set(rows.map((row) => row.uid)).size !== rows.length
+  )
+    throw new Error("Invalid consumption ranking snapshot");
+  for (const row of rows) {
+    if (
+      !row.uid ||
+      row.uid.length > 40 ||
+      cityAmount(row.score) <= 0n ||
+      cityAmount(row.paid) < 0n ||
+      cityAmount(row.free) < 0n ||
+      row.lastAt < period.startTime ||
+      row.lastAt >= period.endTime ||
+      Buffer.byteLength(row.metadata) > 8192
+    )
+      throw new Error("Invalid confirmed consumption score");
+    costRankingEntry({ ...row, kingdomId: authority.kingdomId, type: period.type }, 1);
+  }
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`set local lock_timeout='1s'`);
+    await tx.execute(sql`set local statement_timeout='3s'`);
+    await tx.execute(sql`select pg_advisory_xact_lock(728231,${authority.kingdomId})`);
+    let [owner] = await tx
+      .select()
+      .from(owners)
+      .where(eq(owners.kingdomId, authority.kingdomId))
+      .for("update");
+    if (
+      owner &&
+      (owner.ownerEpoch > authority.epoch ||
+        (owner.ownerEpoch === authority.epoch && owner.instanceId !== authority.instance))
+    )
+      throw new Error("Stale consumption ranking publisher");
+    if (!owner)
+      [owner] = await tx
+        .insert(owners)
+        .values({
+          kingdomId: authority.kingdomId,
+          ownerEpoch: authority.epoch,
+          instanceId: authority.instance,
+          sequence: 0n,
+        })
+        .returning();
+    else if (owner.ownerEpoch < authority.epoch)
+      [owner] = await tx
+        .update(owners)
+        .set({ ownerEpoch: authority.epoch, instanceId: authority.instance, sequence: 0n })
+        .where(eq(owners.kingdomId, authority.kingdomId))
+        .returning();
+    const [version] = await tx
+      .update(owners)
+      .set({ sequence: sql`${owners.sequence}+1` })
+      .where(eq(owners.kingdomId, authority.kingdomId))
+      .returning();
+    if (!version) throw new Error("Missing consumption ranking owner");
+    const [saved] = await tx.select().from(periods).where(eq(periods.id, period.id)).for("update");
+    if (
+      !saved ||
+      saved.expectedRealms !== period.expectedRealms.join("|") ||
+      saved.rewards !== period.rewards
+    )
+      throw new Error("Unregistered consumption ranking snapshot");
+    const [mark] = await tx
+      .select()
+      .from(marks)
+      .where(and(eq(marks.periodId, period.id), eq(marks.kingdomId, authority.kingdomId)))
+      .limit(1);
+    const frozen = saved.state === 1 || mark !== undefined;
+    if (
+      proof &&
+      (proof.scoreCount !== rows.length ||
+        proof.digest !== costScoreDigest(rows) ||
+        (mark && (mark.digest !== proof.digest || mark.scoreCount !== proof.scoreCount)))
+    )
+      throw new Error("Conflicting consumption ranking proof");
+    if (proof && saved.state === 1 && !mark)
+      throw new Error("Missing finalized consumption ranking proof");
+    const recordProof = async () => {
+      if (proof && !mark)
+        await tx.insert(marks).values({
+          periodId: period.id,
+          kingdomId: authority.kingdomId,
+          ...proof,
+          completedAt: now,
+        });
+    };
+    const existing = await tx
+      .select()
+      .from(scores)
+      .where(and(eq(scores.periodId, period.id), eq(scores.kingdomId, authority.kingdomId)));
+    if (proof && mark) {
+      if (existing.length !== proof.scoreCount || costScoreDigest(existing) !== proof.digest)
+        throw new Error("Stored consumption proof differs from its shared economic rows");
+      authority.assertReady();
+      return;
+    }
+    const accepted = !frozen
+      ? rows
+      : rows.flatMap((row) => {
+          const frozen = existing.find((value) => value.uid === row.uid);
+          return frozen
+            ? [
+                {
+                  ...row,
+                  score: frozen.score,
+                  paid: frozen.paid,
+                  free: frozen.free,
+                  lastAt: frozen.lastAt,
+                },
+              ]
+            : [];
+        });
+    const economic = !frozen
+      ? accepted
+      : existing.map((row) => accepted.find((value) => value.uid === row.uid) ?? row);
+    if (fingerprint(existing) === fingerprint(economic)) {
+      await recordProof();
+      authority.assertReady();
+      return;
+    }
+    if (!frozen)
+      await tx.delete(scores).where(
+        and(
+          eq(scores.periodId, period.id),
+          eq(scores.kingdomId, authority.kingdomId),
+          accepted.length
+            ? notInArray(
+                scores.uid,
+                accepted.map((row) => row.uid),
+              )
+            : undefined,
+        ),
+      );
+    if (accepted.length) {
+      const changed = await tx
+        .insert(scores)
+        .values(
+          accepted.map((row) => ({
+            ...row,
+            periodId: period.id,
+            kingdomId: authority.kingdomId,
+            ownerEpoch: version.ownerEpoch,
+            sequence: version.sequence,
+            observedAt: now,
+          })),
+        )
+        .onConflictDoUpdate({
+          target: [scores.periodId, scores.uid],
+          set: {
+            score: sql`excluded.score`,
+            paid: sql`excluded.paid`,
+            free: sql`excluded.free`,
+            lastAt: sql`excluded."lastAt"`,
+            metadata: sql`excluded.metadata`,
+            ownerEpoch: sql`excluded."ownerEpoch"`,
+            sequence: sql`excluded.sequence`,
+            observedAt: sql`excluded."observedAt"`,
+          },
+          setWhere: sql`${scores.kingdomId}=${authority.kingdomId} and (${scores.ownerEpoch},${scores.sequence})<(excluded."ownerEpoch",excluded.sequence)`,
+        })
+        .returning({ uid: scores.uid });
+      if (changed.length !== accepted.length)
+        throw new Error("Foreign or stale consumption ranking member");
+    }
+    await tx
+      .update(periods)
+      .set({ revision: sql`${periods.revision}+1` })
+      .where(eq(periods.id, period.id));
+    await recordProof();
+    authority.assertReady();
+  });
 }
