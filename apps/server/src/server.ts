@@ -1,3 +1,5 @@
+import { HeroCalendarService } from "@opencok/services/hero-calendar";
+import { createHeroCalendarStore } from "@opencok/repositories/hero-calendar";
 import {
   olympicDomain,
   OlympicScheduleService,
@@ -717,6 +719,15 @@ export const RealmDependenciesLive = Layer.effect(
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
+    const heroCalendar = new HeroCalendarService(
+      createHeroCalendarStore(db.kingdom.db, authority),
+      rules,
+    );
+    const recoverHeroCalendar = async () => heroCalendar.refresh();
+    yield* Effect.tryPromise({
+      try: recoverHeroCalendar,
+      catch: () => new Error("Hero calendar recovery unavailable"),
+    }).pipe(Effect.catch(() => Effect.void));
     const olympicSchedule = new OlympicScheduleService(
       createOlympicScheduleStore(db.kingdom.db, authority),
       rules,
@@ -1212,6 +1223,15 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    yield* Effect.tryPromise({
+      try: recoverHeroCalendar,
+      catch: () => new Error("Hero calendar recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     yield* Effect.tryPromise({
       try: recoverOlympicBets,
       catch: () => new Error("Olympic settlement unavailable"),

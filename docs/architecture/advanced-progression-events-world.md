@@ -1080,3 +1080,37 @@ expired periods, missing home characters and unchanged score/rank state. Native 
 preserves LONG correlation on all three commands. Native-device execution remains
 unverified. Saved state and rollback use the existing hero activity, event, score,
 reward-record and rank-publication backups.
+
+## Persisted hero calendars
+
+The realm now admits and recovers configured personal, alliance and kingdom hero
+periods through a fenced scheduler. Sunday-first eligibility, UTC day boundaries,
+preparation/running intervals, the configured event sequence and coupled kingdom
+stages persist in the existing activity/event tables. Stable realm/definition/time
+identities and one transaction per refresh make concurrent starts and repeated
+recovery idempotent. Existing active imported identifiers remain authoritative.
+
+Recovery creates the currently applicable stage and preserves earlier stages and
+scores. Expired main periods close; missed inactive stages do not receive synthetic
+participation. Existing periods retain their saved round and running interval,
+including multi-day periods on a day without new admission. Stronger-lord and
+active expedition periods block new admission while existing hero periods continue.
+A disabled family closes its current events and preserves the saved score rows;
+re-enabling it does not reset the same day's period or claim state.
+
+The bounded scheduler checks the realm authority, serializes calendar writes and
+recovers at startup and each second. A failed child-stage write rolls back the
+parent and every coupled event. A stale authority cannot create or advance a
+period. The periodic operation reuses existing tables and adds no migration,
+dependency or environment variable. Back up hero periods, events, score/claim
+rows and existing reward records together. Preserve ended event records and
+scores during binary rollback.
+
+Synthetic PostgreSQL cases cover concurrent admission, restarts, deadline/UTC
+advancement, stronger-lord blocking, disabled-family retention, write failure and
+authority replacement. Native TCP with the complete maintained catalog reads an
+admitted period before and after SIGKILL recovery. The minimal-catalog native
+fixture retains its empty optional-calendar behavior. Shared kingdom matching,
+confirmed score ingestion and economic reward settlement remain subsequent runtime
+work; calendar admission itself grants no reward or battle result. Device execution
+remains unverified.

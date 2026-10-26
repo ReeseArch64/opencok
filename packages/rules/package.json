@@ -145,7 +145,8 @@
     "./groupbuy": "./src/groupbuy.ts",
     "./cup-betting": "./src/cup-betting.ts",
     "./olympic": "./src/olympic.ts",
-    "./hero-event": "./src/hero-event.ts"
+    "./hero-event": "./src/hero-event.ts",
+    "./hero-calendar": "./src/hero-calendar.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
