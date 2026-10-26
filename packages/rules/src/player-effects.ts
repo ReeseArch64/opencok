@@ -132,6 +132,14 @@ export function temporaryEffect(
         Math.floor((Number(group) % 100) / 10) ===
           Math.floor((Number(oldRule?.group ?? 0) % 100) / 10)) ||
       (["3", "4"].includes(overlap ?? "") && overlap === oldRule?.overlap));
+  if (prior && overlap === "5") {
+    const maximum = cityInteger(rule!.reset ?? 0),
+      previous = cityInteger(prior.count ?? 1);
+    const next = cityInteger(
+      (maximum > 0 && previous >= maximum ? 0 : previous) + cityInteger(count, 1),
+    );
+    return { states: [{ ...prior, count: next }], deleted: [] };
+  }
   const duration = BigInt(cityInteger(rule!.time ?? 0)) * 1000n * BigInt(cityInteger(count, 1));
   let end =
     rule!.time === undefined
@@ -150,7 +158,7 @@ export function temporaryEffect(
     groupType: cityInteger(group || 0),
     ranEffId: extend ? num(prior!, "ranEffId") : -1,
     ranEffValue: extend ? num(prior!, "ranEffValue") : 0,
-    count: 1,
+    count: overlap === "5" ? cityInteger(count, 1) : 1,
   };
   if (!extend && rule!.random === "1") {
     const choices = (rule!.effect ?? "").split("|").filter(Boolean);

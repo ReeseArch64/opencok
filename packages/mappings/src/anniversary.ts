@@ -1,7 +1,11 @@
 import { num, long, text } from "@opencok/contracts/rows";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { AnniversaryResponse } from "@opencok/contracts/responses/anniversary";
-import { anniversaryStatisticsSchema, anniversarySchema } from "@opencok/validations/anniversary";
+import {
+  anniversaryStatisticsSchema,
+  anniversarySchema,
+  campaignTriggerSchema,
+} from "@opencok/validations/anniversary";
 import { validateFields } from "./validation";
 export function anniversaryView(response: AnniversaryResponse): Fields {
   return validateFields(anniversarySchema, {
@@ -74,4 +78,8 @@ export function anniversaryStatisticsView(
   result.allianceAllNum = sfs.int(num(state.alliance, "allnum"));
   result.allianceNum = sfs.int(num(state.alliance, "num"));
   return validateFields(anniversaryStatisticsSchema, result);
+}
+
+export function campaignTriggerView(type: number) {
+  return validateFields(campaignTriggerSchema, { type: sfs.int(type) });
 }
