@@ -34,6 +34,7 @@ export function recordExpeditionScore(
 ) {
   const phase = context.state.expedition?.phase;
   if (
+    context.state.expedition?.projectionOnly ||
     !phase ||
     occurredAt < phase.startTime ||
     occurredAt >= phase.endTime ||

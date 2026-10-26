@@ -321,6 +321,7 @@ export class GameService {
     const world = state.world;
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
       throw new GameError(errors.unsupported, "world_state");
+    const expeditionActivity = await this.services.expeditionActivity?.(uid);
     const body: Fields = {
       equip: sfs.array(
         (state.equipment ?? [])
@@ -359,6 +360,7 @@ export class GameService {
       ),
       world: sfs.object(this.initialWorld(world)),
       serverTime: sfs.long(this.now()),
+      ...expeditionActivity,
     };
     const initialPushes = [
       prayer,

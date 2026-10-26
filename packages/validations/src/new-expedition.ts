@@ -1,6 +1,9 @@
 import { z } from "zod";
 import type { ExpeditionActivityResponse } from "@opencok/contracts/responses/new-expedition";
 import { field } from "./response";
+import type { ExpeditionPanelResponse } from "@opencok/contracts/responses/new-expedition";
+import { rewardPreviewArraySchema } from "./rewards";
+
 export const expeditionActivitySchema = z.strictObject({
   state: field.int,
   score: field.string,
@@ -21,3 +24,15 @@ export const expeditionActivitySchema = z.strictObject({
   count: field.int,
   rewardlist: z.array(field.int).max(100).optional(),
 }) satisfies z.ZodType<ExpeditionActivityResponse>;
+export const expeditionPanelSchema = expeditionActivitySchema.extend({
+  id: field.string,
+  activityid: field.string.optional(),
+  exchange: field.string.optional(),
+  res_andmd5: field.string.optional(),
+  res_iosmd5: field.string.optional(),
+  popup: field.string,
+  androidmd5: field.string.optional(),
+  iosmd5: field.string.optional(),
+  merge: field.bool.optional(),
+  reward: rewardPreviewArraySchema.optional(),
+}) satisfies z.ZodType<ExpeditionPanelResponse>;
