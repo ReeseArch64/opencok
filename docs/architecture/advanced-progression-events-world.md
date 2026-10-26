@@ -1457,3 +1457,47 @@ snapshots passed 1,671 tests with 49,099 assertions; physical schemas and upgrad
 passed 1,525 tests with 36,667 assertions. Lint, formatting, kingdom migration
 consistency and server/nine package type checks passed. Device execution remains
 unverified.
+
+## Shared expedition score publication
+
+Confirmed owned expedition progress now feeds a durable shared score projection.
+Publication writes absolute values, refreshes current guild membership and public
+ranking metadata, and advances its bounded cursor only after the canonical write.
+It does not increment points on retry. A shared ownership epoch and sequence reject
+superseded publishers; another realm's member row cannot be overwritten. Records
+without a reciprocal matching proof remain local rather than creating a cohort.
+
+Native activity queries now combine the owned personal score with the confirmed
+pair's shared ranking and kingdom totals. Equal scores use descending member
+identity, matching the native positive-score reverse ordering. Guild totals stay
+inside the current realm. Missing shared data marks rank unavailable while
+preserving owned fields, and a changed phase cannot merge an earlier response with
+another stage. The Redis discovery record publishes the owned native stage and
+opponent with exact decimal authority versions. Disabled expedition features
+publish waiting discovery. Redis loss rebuilds from owned state and does not stop
+canonical score pages.
+
+Owned manifests are now archived before replacement so old progress remains
+recoverable after a cycle rolls over. Existing manifests backfill with an unknown
+recording time of zero; their original rows and timestamps remain unchanged.
+Realm identity is part of the archive key, preserving unrelated realm rows.
+
+Apply global migration `0017_expedition_score_publication` and kingdom migration
+`0036_expedition_manifests` before this binary. They add shared score ownership,
+score facts and owned manifest history. Inventory becomes 834 tables and 6,795
+fields: 145 global and 689 kingdom tables. Back up manifests, current periods,
+progress, shared ownership versions, score facts and matching proofs together.
+Retain them during binary rollback; clearing ownership sequences or proofs
+independently invalidates publication recovery. Publication scans four pages of
+64 members per refresh and retains a ten-day recovery window after a period ends.
+No dependency, configuration or environment variable is added. Stage finality,
+ranking history production and automatic settlement remain subsequent work.
+
+Seven PostgreSQL/Redis acceptance cases passed with 37 assertions. Three focused
+unit cases passed with 17 assertions. Sixteen existing expedition, matching and
+phase acceptance cases passed with 107 assertions. The server unit suite passed
+1,478 tests with 244,997 assertions. Native TCP and process-kill recovery passed
+two tests with 237 assertions. Schema contracts and snapshots passed 1,677 tests
+with 49,267 assertions; physical schemas and upgrades passed 1,529 tests with
+36,774 assertions. Lint, formatting, both migration-role consistency checks and
+server/nine package type checks passed. Device execution remains unverified.

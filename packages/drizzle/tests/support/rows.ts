@@ -34,6 +34,13 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   const row = Object.fromEntries(
     spec.columns.map((column) => [column.property ?? column.name, sampleValue(column, variant)]),
   );
+  if (spec.checks.some(([name]) => name === "expedition_manifest_bounds")) {
+    row.matchServerId = variant + 100;
+    row.endTime = (row.startTime as bigint) + 10n;
+  }
+  if (spec.checks.some(([name]) => name === "expedition_score_bounds")) {
+    row.opponent = variant + 100;
+  }
   if (spec.checks.some(([name]) => name === "expedition_clock_bounds")) {
     row.endTime = (row.startTime as bigint) + 10n;
     row.opponent = variant + 100;
