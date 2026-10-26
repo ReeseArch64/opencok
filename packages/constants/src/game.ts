@@ -30,6 +30,8 @@ export const errors = {
 };
 
 export const MOBILE_CLIENT_VERSION = "12.06.0";
+export const HERO_RESOURCE_VERSION = "1.0.91";
+export const HERO_RESOURCE_ANDROID_MD5 = "391e30cc9943d451b52c5137c83978f3";
 export const PUSH_SETTING_COUNT = 20;
 export const WORLD_NEWS_PUSH_TYPE = 15;
 export const NICKNAME_CHANGE_ITEM = "200021";
