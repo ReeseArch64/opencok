@@ -119,7 +119,8 @@
     "./special-event": "./src/special-event.ts",
     "./groupbuy": "./src/groupbuy.ts",
     "./cup-betting": "./src/cup-betting.ts",
-    "./olympic": "./src/olympic.ts"
+    "./olympic": "./src/olympic.ts",
+    "./hero-calendar": "./src/hero-calendar.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
