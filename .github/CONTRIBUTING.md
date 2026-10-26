@@ -55,6 +55,10 @@ keeps its existing prose wrapping. Lint enables correctness rules for the
 default TypeScript, Unicorn and Oxc plugins. Type checking remains separate;
 use `bun run --cwd <workspace> check-types` for each implemented workspace.
 
+The PostgreSQL realm workflow allows 40 minutes for its complete type, unit,
+mutation and integration checks. The integration suite exceeds the former
+25-minute job budget when combined with the preceding checks.
+
 Both tools exclude private inputs under `data/`, generated Husky adapters under
 `.husky/_/`, workspace `node_modules/`, `dist/`, coverage, TypeScript build metadata,
 Drizzle migrations, snapshots and database fixture data. The former root
