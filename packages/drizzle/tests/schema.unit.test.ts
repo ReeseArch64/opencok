@@ -10,10 +10,10 @@ import { sampleRow } from "./support/rows";
 const dialect = new PgDialect();
 const db = drizzle.mock();
 
-test("application inventory contains all 826 tables and 6,733 fields", async () => {
+test("application inventory contains all 827 tables and 6,742 fields", async () => {
   expect(catalog.map((entry) => entry.id)).toEqual(Object.keys(contract).sort());
-  expect(catalog).toHaveLength(826);
-  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6733);
+  expect(catalog).toHaveLength(827);
+  expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6742);
   for (const namespaces of Object.values(databaseSchemas))
     for (const namespace of namespaces) {
       expect(
@@ -25,7 +25,7 @@ test("application inventory contains all 826 tables and 6,733 fields", async () 
           .sort(),
       );
     }
-  expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(140);
+  expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(141);
   expect(catalog.filter((entry) => entry.spec.role === "kingdom")).toHaveLength(686);
 });
 

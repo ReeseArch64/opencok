@@ -1,3 +1,4 @@
+export { expedition_calendar as opencok_global_expedition_calendar } from "./opencok_global/expedition_calendar";
 export { hero_rank_watermark as opencok_global_hero_rank_watermark } from "./opencok_global/hero_rank_watermark";
 export { hero_rank_period as opencok_global_hero_rank_period } from "./opencok_global/hero_rank_period";
 export { hero_rank_score as opencok_global_hero_rank_score } from "./opencok_global/hero_rank_score";

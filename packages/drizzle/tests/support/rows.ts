@@ -34,6 +34,10 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   const row = Object.fromEntries(
     spec.columns.map((column) => [column.property ?? column.name, sampleValue(column, variant)]),
   );
+  if (spec.checks.some(([name]) => name === "expedition_calendar_bounds")) {
+    row.endTime = (row.startTime as bigint) + 100n;
+    row.state = (variant - 1) % 2;
+  }
   if (spec.checks.some(([name]) => name === "hero_rank_period_bounds")) {
     row.state = (variant - 1) % 2;
     row.finalizedAt = row.state === 0 ? 0n : row.endTime;

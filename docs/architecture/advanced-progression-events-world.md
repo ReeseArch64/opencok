@@ -1326,3 +1326,38 @@ assertions. Schema contracts and snapshots passed 1,661 tests with 48,815
 assertions; physical schemas and upgrades passed 1,518 tests with 36,473
 assertions. Lint, formatting, migration consistency and server/nine package type
 checks passed.
+
+## Shared expedition calendar
+
+The expedition clock now persists one shared calendar, serialized independently
+of realm ownership. Initial waiting ends at the next configured UTC weekday; the
+same weekday always selects the following week. Subsequent stages follow the
+ordered nine-stage catalog with its hour durations. The admitted schedule and
+configured realm census remain fixed until that cycle ends, including across
+restarts and catalog changes. A long outage advances directly to the current
+cycle without replaying expired stages or inventing historical participation.
+
+A single unambiguous legacy global period retains its current boundary and all
+remaining configured stages. Adoption records its source identity and preserves
+the original row. Ambiguous active legacy rows and malformed saved schedules
+reject recovery instead of resetting state. Disabled feature flags preserve the
+saved clock, and a reversed wall clock cannot issue a replacement. New-cycle
+insertion and prior-cycle closure commit together under the shared advisory lock.
+The active-state unique index prevents two current cycles.
+
+Global migration `0015_expedition_calendar` adds `expedition_calendar`, bringing
+the inventory to 827 tables and 6,742 fields: 141 global and 686 kingdom tables.
+Apply it before this binary. Back up calendar rows with the legacy global and
+owned expedition periods; retain them during binary rollback. No dependency,
+configuration or environment variable is added. This foundation supplies the
+shared clock for subsequent matching and owned period admission; it does not
+select opponents, install a fighting manifest or produce a combat result.
+
+Nine focused cases passed with 62 assertions, covering shared workers, restart,
+atomic rollover, failure rollback, legacy adoption, ambiguous history, disabled
+flags, clock reversal and boundary sampling. The server unit suite passed 1,467
+tests with 244,937 assertions. Native TCP and process-kill recovery passed two
+tests with 235 assertions. Schema contracts and snapshots passed 1,663 tests with
+48,879 assertions; physical schemas and upgrades passed 1,519 tests with 36,503
+assertions. Lint, formatting, global migration consistency and server/nine package
+type checks passed. Native device execution remains unverified.
