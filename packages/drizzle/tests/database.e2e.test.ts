@@ -87,6 +87,8 @@ for (const { id, namespace, table, config, spec } of catalog) {
         )
       ).rows.map((row) => row.indexname);
       expect(indexes).toEqual(spec.indexes.map((index) => index.name).sort());
+      const property = (name: string) =>
+        spec.columns.find((column) => column.name === name)?.property ?? name;
       const original = sampleRow(spec),
         changed = sampleRow(spec, 2);
       const read = () => db.select().from(table);
@@ -100,7 +102,7 @@ for (const { id, namespace, table, config, spec } of catalog) {
       const required: Row = {};
       for (const column of spec.columns)
         if (column.notNull && !column.identity && column.default === null)
-          required[column.name] = original[column.name];
+          required[property(column.name)] = original[property(column.name)];
       const before = await now(pool);
       await db.insert(table).values(required);
       const defaults = await read();
@@ -108,35 +110,48 @@ for (const { id, namespace, table, config, spec } of catalog) {
       const actual = defaults[0]! as Row,
         after = await now(pool);
       for (const column of spec.columns) {
-        if (column.name in required) expect(actual[column.name]).toEqual(required[column.name]);
+        if (property(column.name) in required)
+          expect(actual[property(column.name)]).toEqual(required[property(column.name)]);
         else if (column.identity || column.default?.includes("nextval("))
-          expect(BigInt(actual[column.name] as bigint | string | number)).toBeGreaterThan(0n);
+          expect(BigInt(actual[property(column.name)] as bigint | string | number)).toBeGreaterThan(
+            0n,
+          );
         else if (column.default?.startsWith("to_char("))
-          assert.ok(String(actual[column.name]) >= before && String(actual[column.name]) <= after);
-        else expect(actual[column.name]).toEqual(literalDefault(column));
+          assert.ok(
+            String(actual[property(column.name)]) >= before &&
+              String(actual[property(column.name)]) <= after,
+          );
+        else expect(actual[property(column.name)]).toEqual(literalDefault(column));
       }
       await db.delete(table);
       await db.insert(table).values(original);
       const nullable = { ...original };
-      for (const column of spec.columns) if (!column.notNull) nullable[column.name] = null;
+      for (const column of spec.columns)
+        if (!column.notNull) nullable[property(column.name)] = null;
       await db.update(table).set(nullable);
       expect(await read()).toEqual([nullable]);
       await db.update(table).set(original);
       for (const column of spec.columns) {
         if (column.notNull)
-          await rejectsCode(db.update(table).set({ [column.name]: null }), "23502");
+          await rejectsCode(db.update(table).set({ [property(column.name)]: null }), "23502");
         if (column.calendar)
-          await rejectsCode(db.update(table).set({ [column.name]: "invalid-date" }), "23514");
+          await rejectsCode(
+            db.update(table).set({ [property(column.name)]: "invalid-date" }),
+            "23514",
+          );
       }
       for (const index of spec.indexes.filter((index) => index.kind !== "index")) {
         const duplicate = { ...changed };
-        for (const column of index.columns) duplicate[column.name] = original[column.name];
+        for (const column of index.columns)
+          duplicate[property(column.name)] = original[property(column.name)];
         if (id === "opencok_kingdom.avatar_completion") duplicate.picVer = original.picVer;
         await rejectsCode(db.insert(table).values(duplicate), "23505");
       }
       for (const key of spec.foreignKeys)
         await rejectsCode(
-          db.update(table).set(Object.fromEntries(key.columns.map((column) => [column, 999n]))),
+          db
+            .update(table)
+            .set(Object.fromEntries(key.columns.map((column) => [property(column), 999n]))),
           "23503",
         );
       const abort = new Error("synthetic rollback");
@@ -150,11 +165,11 @@ for (const { id, namespace, table, config, spec } of catalog) {
       for (const column of spec.columns.filter((column) => column.onUpdate)) {
         const other = spec.columns.find((candidate) => candidate.name !== column.name)!;
         const before = await now(pool);
-        await db.update(table).set({ [other.name]: changed[other.name] });
+        await db.update(table).set({ [property(other.name)]: changed[property(other.name)] });
         const [updated] = await read();
         assert.ok(
-          String((updated as Row)[column.name]) >= before &&
-            String((updated as Row)[column.name]) <= (await now(pool)),
+          String((updated as Row)[property(column.name)]) >= before &&
+            String((updated as Row)[property(column.name)]) <= (await now(pool)),
         );
         await db.update(table).set(original);
       }

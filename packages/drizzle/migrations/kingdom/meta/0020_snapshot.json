@@ -1,6 +1,6 @@
 {
-  "id": "9cfe25d9-eeff-452f-8bc5-be2fa090d71e",
-  "prevId": "9ccf4860-88b0-4608-bfd8-edad6ca2f838",
+  "id": "9ccf4860-88b0-4608-bfd8-edad6ca2f838",
+  "prevId": "8023a41e-efa6-4b68-b591-ffbc6cfe9ff9",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -11335,6 +11335,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "bigint",
@@ -11342,7 +11348,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "command_receipt_expiry": {
+          "name": "command_receipt_expiry",
+          "columns": [
+            {
+              "expression": "expiresAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "command_receipt_PRIMARY": {
@@ -15945,140 +15967,6 @@
         "expedition_mark_isSendedAward_range": {
           "name": "expedition_mark_isSendedAward_range",
           "value": "\"isSendedAward\" BETWEEN -128 AND 127"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "opencok_kingdom.expedition_period": {
-      "name": "expedition_period",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "serverId": {
-          "name": "serverId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "periodId": {
-          "name": "periodId",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "matchServerId": {
-          "name": "matchServerId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "schedule": {
-          "name": "schedule",
-          "type": "varchar(8192)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "startTime": {
-          "name": "startTime",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "endTime": {
-          "name": "endTime",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "victoryTimes": {
-          "name": "victoryTimes",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "0"
-        },
-        "count": {
-          "name": "count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "0"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "expedition_period_PRIMARY": {
-          "name": "expedition_period_PRIMARY",
-          "columns": [
-            "serverId"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "expedition_period_bounds": {
-          "name": "expedition_period_bounds",
-          "value": "\"serverId\" > 0 AND \"matchServerId\" > 0 AND \"matchServerId\" <> \"serverId\" AND \"startTime\" >= 0 AND \"endTime\" > \"startTime\" AND \"victoryTimes\" >= 0 AND \"count\" >= 0"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "opencok_kingdom.expedition_progress": {
-      "name": "expedition_progress",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "uid": {
-          "name": "uid",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "periodId": {
-          "name": "periodId",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "stage": {
-          "name": "stage",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "score": {
-          "name": "score",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "0"
-        },
-        "takeReward": {
-          "name": "takeReward",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "expedition_progress_PRIMARY": {
-          "name": "expedition_progress_PRIMARY",
-          "columns": [
-            "uid",
-            "periodId",
-            "stage"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "expedition_progress_bounds": {
-          "name": "expedition_progress_bounds",
-          "value": "\"stage\" BETWEEN 0 AND 8 AND \"score\" >= 0 AND \"score\" < 'Infinity'::float8"
         }
       },
       "isRLSEnabled": false
@@ -30681,11 +30569,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
+        },
+        "nextAttemptAt": {
+          "name": "nextAttemptAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
         },
         "publishedAt": {
           "name": "publishedAt",
@@ -30695,6 +30596,54 @@
         }
       },
       "indexes": {
+        "mutation_outbox_retry": {
+          "name": "mutation_outbox_retry",
+          "columns": [
+            {
+              "expression": "kingdomId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "publishedAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "nextAttemptAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "mutation_outbox_expiry": {
+          "name": "mutation_outbox_expiry",
+          "columns": [
+            {
+              "expression": "expiresAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "mutation_outbox_pending": {
           "name": "mutation_outbox_pending",
           "columns": [
