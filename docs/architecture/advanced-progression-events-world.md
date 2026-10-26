@@ -992,3 +992,55 @@ trusted results, receipt rollback, repeated claims, delayed outcomes and mail ba
 Native TCP preserves LONG correlation and rejects the internal settlement producer.
 Device execution and actual sporting-result ingestion outside the maintained server
 catalog remain unverified.
+
+## Olympic prediction questions
+
+The four case-sensitive native `Olympic` commands preserve question listings,
+owned betting history, integer stake inputs, remaining total gold and reward
+arrays. Questions use the maintained betting catalog and activity-panel calendar.
+The displayed pool retains the reference's ten-minute growth, integer conversion
+before multiplication and LONG representation; this display is separate from the
+actual staked resource ledger.
+
+Admission accepts positive configured resource or gold stakes within the individual
+limit and strict question cutoff. Resource stakes consume bound balances first;
+gold stakes use the existing owned gold pools. The wager, shared question total,
+debit and command receipt commit together under a fenced transaction and a
+one-second question-lock deadline. Client requests cannot set a result. Only
+trusted maintained server definitions can close a question after admission ends.
+
+Migration `0031_olympic_settlement.sql` appends nullable winning-stake, reward-pool,
+tax and zero-pool reward-limit fields to the existing question table. Closing a
+new question freezes the correctly answered stake total, losing pool or configured
+basic fallback, normalized tax and limit. Each winning wager receives its principal
+plus the reference integer share and one-unit bonus, capped at the Java integer
+maximum. Later configuration changes cannot recalculate a closed pool. The
+settlement constraint requires a complete valid snapshot or an entirely absent
+legacy snapshot. Composite owner/question and question/country indexes bound the
+owned read and shared aggregate queries.
+
+The event owner updates its question projection and aggregate SQL; owned commands
+materialize individual wager outcomes and grant economic value. Repeated or
+concurrent claims cannot credit a wager twice. Imported closed questions with no
+new settlement snapshot retain the saved legacy wager reward. Reconcile imported
+open-question totals before enabling a new admission period rather than resetting
+old wagers or inferring a replacement reward pool.
+
+After the panel ends, a bounded fenced worker processes up to 64 owned wagers per
+recipient command and sends one funded system mail per winning wager. The exact
+wager batch identifies the canonical operation. A late result and a remaining
+batch can therefore settle independently, while repeated delivery reuses its
+receipt. Losers are marked collected without economic value, and unresolved
+questions remain pending. The default historical calendar and disabled panel are
+preserved. No provider, charge, dependency, environment variable or mobile artifact
+is added.
+
+Back up question snapshots, owned wagers, receipts, economic postings, collected
+flags and funded mail together. Keep appended settlement fields and indexes during
+binary rollback; dropping only the snapshot could recalculate earned winnings.
+Preserve legacy rewards and recorded claims. Synthetic PostgreSQL acceptance covers
+concurrent stakes, resource and gold-pool debits, configured limits, display growth,
+fixed final pools, fallback rewards, failed stake and reward receipts, repeated
+claims, delayed result mail and imported rewards. Native TCP preserves LONG
+correlation and rejects result publication and internal settlement. Native-device
+execution and external sporting-result feeds remain unverified.

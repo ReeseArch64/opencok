@@ -151,7 +151,9 @@
     "./groupbuy": "./src/groupbuy.ts",
     "./responses/groupbuy": "./src/responses/groupbuy.ts",
     "./cup-betting": "./src/cup-betting.ts",
-    "./responses/cup-betting": "./src/responses/cup-betting.ts"
+    "./responses/cup-betting": "./src/responses/cup-betting.ts",
+    "./olympic": "./src/olympic.ts",
+    "./responses/olympic": "./src/responses/olympic.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

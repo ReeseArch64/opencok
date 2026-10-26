@@ -1,4 +1,4 @@
-import { integer, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { index, integer, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
 
 export const user_olympic_bet = opencok_kingdom.table(
@@ -15,5 +15,9 @@ export const user_olympic_bet = opencok_kingdom.table(
     "rewarded": integer("rewarded"),
     "reward": integer("reward"),
   },
-  (table) => [primaryKey({ name: "user_olympic_bet_PRIMARY", columns: [table["uuid"]] })],
+  (table) => [
+    primaryKey({ name: "user_olympic_bet_PRIMARY", columns: [table["uuid"]] }),
+    index("user_olympic_bet_owner_question").on(table.uid, table.questionId),
+    index("user_olympic_bet_question_country").on(table.questionId, table.betCountry),
+  ],
 );

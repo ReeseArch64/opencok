@@ -77,7 +77,8 @@
     "./city-cosmetics": "./src/city-cosmetics.ts",
     "./special-event": "./src/special-event.ts",
     "./groupbuy": "./src/groupbuy.ts",
-    "./cup-betting": "./src/cup-betting.ts"
+    "./cup-betting": "./src/cup-betting.ts",
+    "./olympic": "./src/olympic.ts"
   },
   "dependencies": {
     "@opencok/errors": "workspace:*",
