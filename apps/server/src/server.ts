@@ -1,3 +1,9 @@
+import {
+  ContinuedCostRewardService,
+  continuedCostRewardDomain,
+} from "@opencok/services/continued-cost-rewards";
+import { createCostRankAwardStore } from "@opencok/repositories/continued-cost-rewards";
+import { costRankAwardOperation } from "@opencok/rules/continued-cost-rewards";
 import { ContinuedCostFinalityService } from "@opencok/services/continued-cost-finality";
 import {
   createCostFinalityOwned,
@@ -595,6 +601,7 @@ export const RealmDependenciesLive = Layer.effect(
         continuedCostDomain,
         heroTargetDomain,
         heroRankingRewardDomain,
+        continuedCostRewardDomain,
         expeditionStageRewardDomain,
         createSpecialEventDomain(specialEventStock),
         recallTaskDomain,
@@ -903,6 +910,17 @@ export const RealmDependenciesLive = Layer.effect(
         if (!delivered) break;
       }
     };
+    const costRankRewards = new ContinuedCostRewardService(
+      createCostRankAwardStore(db.kingdom.db, authority),
+      createCostRankingRegistry(db.databases.global.db, authority),
+      createCostFinalityShared(db.databases.global.db, authority),
+      rules,
+      (owner, id) =>
+        activities.domainCommand(owner, "continuedcost.rank.deliver", {
+          awardId: sfs.string(id),
+          operationId: sfs.string(costRankAwardOperation(id)),
+        }),
+    );
     const expeditionStageRewards = new ExpeditionStageRewardService(
       createExpeditionAwardStore(db.kingdom.db, authority),
       createExpeditionAwardStandings(db.databases.global.db, config.kingdomId),
@@ -1605,7 +1623,13 @@ export const RealmDependenciesLive = Layer.effect(
       try: async () => {
         await heroRankingRewards.refresh().catch(() => undefined);
         await expeditionStageRewards.refresh().catch(() => undefined);
-        for (const type of ["hero.rank.mail", "hero.target.mail", "expedition.award.mail"]) {
+        await costRankRewards.refresh().catch(() => undefined);
+        for (const type of [
+          "hero.rank.mail",
+          "hero.target.mail",
+          "expedition.award.mail",
+          "continuedcost.rank.mail",
+        ]) {
           for (let index = 0; index < 64; index++) {
             const delivered = await relayMutationEvent(
               db.kingdom.db,

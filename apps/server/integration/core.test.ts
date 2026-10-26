@@ -328,6 +328,9 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect((await client.command("expedition.award.deliver", {})).errorCode?.value).toBe(
         "102192",
       );
+      expect((await client.command("continuedcost.rank.deliver", {})).errorCode?.value).toBe(
+        "102192",
+      );
       const expeditionFeature = runtimeRules.features.get("17_wk"),
         expeditionSwitch = runtimeRules.features.get("wk_switch_new");
       try {

@@ -124,6 +124,28 @@ export function createCostFinalityShared(
             )
           )
             throw new Error("Missing finalized consumption cohort proofs");
+          const economic = await tx
+            .select({
+              uid: scores.uid,
+              kingdomId: scores.kingdomId,
+              score: scores.score,
+              paid: scores.paid,
+              free: scores.free,
+              lastAt: scores.lastAt,
+            })
+            .from(scores)
+            .where(eq(scores.periodId, id))
+            .limit(12801);
+          if (
+            economic.length > 100 * definition.expectedRealms.length ||
+            economic.some((row) => !definition.expectedRealms.includes(row.kingdomId))
+          )
+            throw new Error("Invalid finalized consumption population");
+          for (const proof of proofs) {
+            const rows = economic.filter((row) => row.kingdomId === proof.kingdomId);
+            if (rows.length !== proof.scoreCount || costScoreDigest(rows) !== proof.digest)
+              throw new Error("Final consumption standings differ from their verified proof");
+          }
           return tx
             .select()
             .from(scores)

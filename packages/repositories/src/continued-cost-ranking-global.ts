@@ -194,7 +194,6 @@ export async function writeCostRankingSnapshot(
       .from(marks)
       .where(and(eq(marks.periodId, period.id), eq(marks.kingdomId, authority.kingdomId)))
       .limit(1);
-    const frozen = saved.state === 1 || mark !== undefined;
     if (
       proof &&
       (proof.scoreCount !== rows.length ||
@@ -218,13 +217,23 @@ export async function writeCostRankingSnapshot(
       .from(scores)
       .where(and(eq(scores.periodId, period.id), eq(scores.kingdomId, authority.kingdomId)));
     if (proof && mark) {
-      if (existing.length !== proof.scoreCount || costScoreDigest(existing) !== proof.digest)
-        throw new Error("Stored consumption proof differs from its shared economic rows");
-      authority.assertReady();
-      return;
+      const intact =
+        existing.length === proof.scoreCount && costScoreDigest(existing) === proof.digest;
+      if (intact) {
+        authority.assertReady();
+        return;
+      }
+      if (saved.state === 1)
+        throw new Error("Final consumption proof differs from its shared economic rows");
     }
+    const frozen = saved.state === 1 || (mark !== undefined && !proof);
     const accepted = !frozen
-      ? rows
+      ? proof && mark
+        ? rows.map((row) => ({
+            ...row,
+            metadata: existing.find((value) => value.uid === row.uid)?.metadata ?? row.metadata,
+          }))
+        : rows
       : rows.flatMap((row) => {
           const frozen = existing.find((value) => value.uid === row.uid);
           return frozen

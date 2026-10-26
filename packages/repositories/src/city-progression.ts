@@ -1,3 +1,4 @@
+import { costRankAwardReader, writeCostRankAward } from "./continued-cost-rewards";
 import { expeditionAwardReader, writeExpeditionAward } from "./expedition-stage-rewards";
 import { heroRankAwardReader, writeHeroRankAward } from "./hero-ranking-rewards";
 import { heroScoreReader, writeHeroScore } from "./hero-score";
@@ -154,6 +155,8 @@ export function createCityProgressionStore(
         throw new Error("Civilization science aggregate exceeds bound");
       alliance = profile.allianceId ?? "";
       return {
+        costRankAward:
+          command === "continuedcost.rank.deliver" ? costRankAwardReader(tx, owner) : undefined,
         expeditionAward:
           command === "expedition.award.deliver" ? expeditionAwardReader(tx, owner) : undefined,
         heroRankingAward:
@@ -325,6 +328,7 @@ export function createCityProgressionStore(
         }
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
+        if (write.costRankAward) await writeCostRankAward(tx, owner, write.costRankAward, now);
         if (write.expeditionAward)
           await writeExpeditionAward(tx, owner, write.expeditionAward, now);
         if (write.heroRankingAward)
