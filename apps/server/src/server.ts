@@ -1,3 +1,10 @@
+import {
+  cupBettingDomain,
+  CupScheduleService,
+  cupSettlementOperation,
+} from "@opencok/services/cup-betting";
+import { createCupScheduleStore, pendingCupSettlements } from "@opencok/repositories/cup-betting";
+import { cupCalendar } from "@opencok/rules/cup-betting";
 import { createGroupBuyDomain, groupBuyOperation } from "@opencok/services/groupbuy";
 import { pendingGroupBuys } from "@opencok/repositories/groupbuy";
 import { createSpecialEventStock } from "@opencok/repositories/special-event";
@@ -488,6 +495,7 @@ export const RealmDependenciesLive = Layer.effect(
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
         createPrayerDomain(),
         troubleDomain,
+        cupBettingDomain,
         createGroupBuyDomain(),
         continuedCostDomain,
         createSpecialEventDomain(specialEventStock),
@@ -698,6 +706,37 @@ export const RealmDependenciesLive = Layer.effect(
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
+    const cupSchedule = new CupScheduleService(
+      createCupScheduleStore(db.kingdom.db, authority),
+      rules,
+    );
+    let cupScanAt = 0n,
+      cupCursor: string | undefined;
+    const recoverCupBets = async () => {
+      const at = BigInt(Date.now()),
+        calendar = cupCalendar(rules);
+      if (!calendar) return;
+      if (at >= cupScanAt) {
+        await cupSchedule.refresh();
+        cupScanAt = at + 300000n;
+      }
+      if (at <= calendar.end) return;
+      const pending = await pendingCupSettlements(db.kingdom.db, cupCursor);
+      if (!pending.length) cupCursor = undefined;
+      for (const record of pending) {
+        if (!record.owner) continue;
+        cupCursor = record.owner;
+        try {
+          await activities.domainCommand(record.owner, "euro.cup.settle", {
+            operationId: sfs.string(cupSettlementOperation(record.owner, record.ids)),
+          });
+        } catch {
+          console.warn(
+            JSON.stringify({ event: "cup_settlement_failed", kingdom: config.kingdomId }),
+          );
+        }
+      }
+    };
     let groupBuyCursor: { id: string; round: number; owner: string } | undefined;
     const recoverGroupBuys = async () => {
       const pending = await pendingGroupBuys(db.kingdom.db, groupBuyCursor);
@@ -1132,6 +1171,15 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    yield* Effect.tryPromise({
+      try: recoverCupBets,
+      catch: () => new Error("Cup settlement unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     yield* Effect.tryPromise({
       try: recoverGroupBuys,
       catch: () => new Error("Group-buy settlement unavailable"),

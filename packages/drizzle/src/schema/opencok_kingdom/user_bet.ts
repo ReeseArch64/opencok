@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, numeric, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { index, integer, real, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
 
 export const user_bet = opencok_kingdom.table(
@@ -15,7 +15,7 @@ export const user_bet = opencok_kingdom.table(
     "winner": varchar("winner", { length: 50 }),
     "ended": integer("ended").default(sql.raw("0")),
     "rewarded": integer("rewarded").default(sql.raw("0")),
-    "odds": numeric("odds", { precision: 10, scale: 2, mode: "number" }),
+    "odds": real("odds"),
   },
   (table) => [
     primaryKey({ name: "user_bet_PRIMARY", columns: [table["uuid"]] }),
