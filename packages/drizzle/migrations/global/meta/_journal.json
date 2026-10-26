@@ -71,6 +71,13 @@
       "when": 1792895732400,
       "tag": "0009_character_provisioning",
       "breakpoints": false
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792956593660,
+      "tag": "0010_social_chat",
+      "breakpoints": false
     }
   ]
 }

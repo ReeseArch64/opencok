@@ -10,6 +10,8 @@ function positiveServerId(value: unknown): value is number {
 function roomsForState(state: PlayerState | null): Room[] {
   if (
     !state ||
+    state.banned ||
+    (state.banUntil ?? 0) > Date.now() ||
     !positiveServerId(state.serverId) ||
     !positiveServerId(state.originalServerId) ||
     typeof state.language !== "string" ||

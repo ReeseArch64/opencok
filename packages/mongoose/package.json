@@ -8,5 +8,13 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./chat-archive": "./src/chat-archive.ts"
+  },
+  "dependencies": {
+    "mongodb": "6.21.0",
+    "@opencok/contracts": "workspace:*"
   }
 }

@@ -1,6 +1,6 @@
 {
-  "id": "8023a41e-efa6-4b68-b591-ffbc6cfe9ff9",
-  "prevId": "82c7a64f-1c49-4868-9daa-68e51d2213b8",
+  "id": "82c7a64f-1c49-4868-9daa-68e51d2213b8",
+  "prevId": "857b3bac-5fca-4206-b3ce-e808bebb96eb",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -11216,6 +11216,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "bigint",
@@ -11223,7 +11229,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "command_receipt_expiry": {
+          "name": "command_receipt_expiry",
+          "columns": [
+            {
+              "expression": "expiresAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "command_receipt_PRIMARY": {
@@ -30428,11 +30450,24 @@
           "primaryKey": false,
           "notNull": true
         },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
+        },
+        "nextAttemptAt": {
+          "name": "nextAttemptAt",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "0"
         },
         "publishedAt": {
           "name": "publishedAt",
@@ -30442,6 +30477,54 @@
         }
       },
       "indexes": {
+        "mutation_outbox_retry": {
+          "name": "mutation_outbox_retry",
+          "columns": [
+            {
+              "expression": "kingdomId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "publishedAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "nextAttemptAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "mutation_outbox_expiry": {
+          "name": "mutation_outbox_expiry",
+          "columns": [
+            {
+              "expression": "expiresAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "mutation_outbox_pending": {
           "name": "mutation_outbox_pending",
           "columns": [
@@ -42726,212 +42809,6 @@
         "timed_activity_state": {
           "name": "timed_activity_state",
           "value": "\"status\" IN (0, 1, 2) AND \"version\" >= 1 AND \"dueAt\" >= \"startedAt\""
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "opencok_kingdom.totem_activation": {
-      "name": "totem_activation",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ownerUid": {
-          "name": "ownerUid",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "pointId": {
-          "name": "pointId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "totemId": {
-          "name": "totemId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "allianceId": {
-          "name": "allianceId",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "startedAt": {
-          "name": "startedAt",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "dueAt": {
-          "name": "dueAt",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "payload": {
-          "name": "payload",
-          "type": "bytea",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "totem_activation_due": {
-          "name": "totem_activation_due",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "dueAt",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "totem_activation_owner": {
-          "name": "totem_activation_owner",
-          "columns": [
-            {
-              "expression": "ownerUid",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "totem_activation_PRIMARY": {
-          "name": "totem_activation_PRIMARY",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "totem_activation_bounds": {
-          "name": "totem_activation_bounds",
-          "value": "\"pointId\" > 0 AND \"totemId\" > 0 AND \"startedAt\" >= 0 AND \"dueAt\" >= \"startedAt\" AND \"status\" IN (0, 1, 2) AND octet_length(\"payload\") <= 4096"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "opencok_kingdom.totem_delivery": {
-      "name": "totem_delivery",
-      "schema": "opencok_kingdom",
-      "columns": {
-        "activationId": {
-          "name": "activationId",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "targetUid": {
-          "name": "targetUid",
-          "type": "varchar(40)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "stateId": {
-          "name": "stateId",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "appliedAt": {
-          "name": "appliedAt",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "totem_delivery_pending": {
-          "name": "totem_delivery_pending",
-          "columns": [
-            {
-              "expression": "targetUid",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "appliedAt",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "activationId",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "totem_delivery_PRIMARY": {
-          "name": "totem_delivery_PRIMARY",
-          "columns": [
-            "activationId",
-            "targetUid"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {
-        "totem_delivery_bounds": {
-          "name": "totem_delivery_bounds",
-          "value": "\"stateId\" > 0 AND \"appliedAt\" >= 0"
         }
       },
       "isRLSEnabled": false

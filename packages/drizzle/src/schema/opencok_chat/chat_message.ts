@@ -1,5 +1,14 @@
 import { sql } from "drizzle-orm";
-import { check, index, numeric, primaryKey, text, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import {
+  check,
+  index,
+  integer,
+  numeric,
+  primaryKey,
+  text,
+  uniqueIndex,
+  varchar,
+} from "drizzle-orm/pg-core";
 import { bytea } from "../../types";
 import { opencok_chat } from "../namespaces";
 
@@ -16,9 +25,14 @@ export const chat_message = opencok_chat.table(
     "room_key": varchar("room_key", { length: 160 }).notNull(),
     "sender_uid": varchar("sender_uid", { length: 40 }).notNull(),
     "idempotency_key": bytea("idempotency_key").notNull(),
-    "body": text("body").notNull(),
+    "body": text("body"),
     "created_at": text("created_at").notNull(),
     "expires_at": text("expires_at").notNull(),
+    "body_hash": varchar("body_hash", { length: 64 }),
+    "archive_at": text("archive_at"),
+    "post_type": integer("post_type").notNull().default(sql.raw("0")),
+    "version": integer("version").notNull().default(sql.raw("1")),
+    "deleted_at": text("deleted_at"),
   },
   (table) => [
     primaryKey({ name: "chat_message_PRIMARY", columns: [table["sequence_id"]] }),
