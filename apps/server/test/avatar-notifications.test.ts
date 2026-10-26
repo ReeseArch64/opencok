@@ -132,6 +132,30 @@ function fixture() {
   };
 }
 
+test("native login receives hero bundle metadata before the init extension", async () => {
+  const f = fixture();
+  const socket = f.connect();
+  await f.login(socket);
+  expect(socket.packets[1]).toEqual(
+    envelope(0, 1, {
+      id: sfs.int(1),
+      zn: sfs.string("COK1"),
+      un: sfs.string("1001"),
+      rs: sfs.short(0),
+      pi: sfs.short(0),
+      rl: sfs.array(),
+      p: sfs.object({
+        use: sfs.int(0),
+        newHeroVersion: sfs.string("1.0.91"),
+        newHeroMd5Android: sfs.string("391e30cc9943d451b52c5137c83978f3"),
+      }),
+    }),
+  );
+  expect(socket.packets[2]).toEqual(extension("init", {}));
+  socket.destroy();
+  await f.drain();
+});
+
 test("mail notifications require initialization, current session ownership and readiness without sockets", async () => {
   const f = fixture(),
     socket = f.connect(),
