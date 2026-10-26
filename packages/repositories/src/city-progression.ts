@@ -1,3 +1,4 @@
+import { readRegionalRecall, writeRegionalRecall } from "./regional-recall";
 import { readAllianceHeart, writeAllianceHeart } from "./alliance-heart";
 import { readPlayerItemGifts, writePlayerItemGifts } from "./player-item-gifts";
 import { readSeasonalExchange, writeSeasonalExchange } from "./seasonal-exchange";
@@ -140,6 +141,14 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        regionalRecall: command?.startsWith("region.recall.")
+          ? await readRegionalRecall(
+              tx,
+              owner,
+              num(profile, "serverId"),
+              command === "region.recall.init",
+            )
+          : undefined,
         allianceHeart:
           command === "heart.send" || command === "heart.init"
             ? await readAllianceHeart(tx, owner, command, request)
@@ -277,6 +286,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.regionalRecall) await writeRegionalRecall(tx, owner, write.regionalRecall);
         if (write.allianceHeart) await writeAllianceHeart(tx, owner, write.allianceHeart);
         if (write.playerItemGifts) await writePlayerItemGifts(tx, owner, write.playerItemGifts);
         if (write.seasonalExchange) await writeSeasonalExchange(tx, owner, write.seasonalExchange);

@@ -135,7 +135,8 @@
     "./vip-box": "./src/vip-box.ts",
     "./seasonal-exchange": "./src/seasonal-exchange.ts",
     "./player-item-gifts": "./src/player-item-gifts.ts",
-    "./alliance-heart": "./src/alliance-heart.ts"
+    "./alliance-heart": "./src/alliance-heart.ts",
+    "./regional-recall": "./src/regional-recall.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
