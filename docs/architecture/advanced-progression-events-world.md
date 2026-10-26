@@ -331,7 +331,6 @@ published develop sequence can upgrade without editing their migration history.
 Earlier draft worktree migration numbers were not a deployed release sequence;
 disposable databases built from those drafts must be recreated before validation.
 
-
 Lucky-day polling persists the chosen effect, expiry, daily success count and
 unsuccessful-attempt count. A repeated operation replays its saved result, active
 bonuses cannot be rerolled, and failed attempts retain the configured cooldown and
