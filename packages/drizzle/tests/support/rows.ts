@@ -34,6 +34,18 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   const row = Object.fromEntries(
     spec.columns.map((column) => [column.property ?? column.name, sampleValue(column, variant)]),
   );
+  if (spec.checks.some(([name]) => name === "hero_match_realm_bounds")) {
+    row.serverGroup = null;
+    row.matchedAt = 0n;
+  }
+  if (spec.checks.some(([name]) => name === "hero_match_period_bounds")) {
+    row.createdAt = row.startTime;
+    row.admissionEnd = (row.startTime as bigint) + 1n;
+    row.endTime = (row.startTime as bigint) + 2n;
+    row.matchedAt = 0n;
+    row.groupSize = 30;
+    row.matchSize = 2;
+  }
   if (spec.checks.some(([name]) => name === "question_match_settlement")) row.ended = 1;
   if (spec.checks.some(([name]) => name === "chat_relation_kind")) row.kind = "contact";
   if (spec.checks.some(([name]) => name === "user_mixed_info_box_gold_mode"))

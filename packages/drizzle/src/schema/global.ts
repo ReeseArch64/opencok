@@ -1,3 +1,5 @@
+export { hero_match_realm as opencok_global_hero_match_realm } from "./opencok_global/hero_match_realm";
+export { hero_match_period as opencok_global_hero_match_period } from "./opencok_global/hero_match_period";
 export { special_event_purchase as opencok_global_special_event_purchase } from "./opencok_global/special_event_purchase";
 export { opencok_global, opencok_pay, opencok_chat } from "./namespaces";
 export { nickname_change_receipt as opencok_global_nickname_change_receipt } from "./opencok_global/nickname_change_receipt";

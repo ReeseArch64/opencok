@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./hero-matching": "./src/hero-matching.ts",
     "./hero-score": "./src/hero-score.ts",
     "./arena": "./src/arena.ts",
     "./anniversary": "./src/anniversary.ts",
