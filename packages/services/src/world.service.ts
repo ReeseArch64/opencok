@@ -1,3 +1,4 @@
+import { cityCosmeticProjection } from "@opencok/rules/city-cosmetics";
 import { reconnectMarchBase } from "@opencok/mappings/reconnect-marches";
 import { decodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
 import type { Rules } from "@opencok/rules/game";
@@ -20,13 +21,18 @@ export function viewport(x: number, y: number, size: number): number[] {
   ids.add(1 + x + y * size);
   return [...ids];
 }
-export function compactPoint(row: Row): string {
+export function compactPoint(
+  row: Row,
+  cosmetics: readonly Row[] = [],
+  rules?: Rules,
+  now = BigInt(Date.now()),
+): string {
   if (
     ![0, 1, 2, 3, 8, 64, 65, 68, 69].includes(num(row, "pointType")) ||
     text(row, "territoryAlliance")
   )
     throw new GameError(errors.unsupported);
-  const out: Record<string, string | number> = {
+  const out: Record<string, unknown> = {
     i: num(row, "id"),
     t: num(row, "pointType"),
     l: num(row, "resLevel"),
@@ -54,6 +60,7 @@ export function compactPoint(row: Row): string {
     if (until !== 0n) out.sendHeartDurationTime = Number(BigInt.asIntN(32, until));
     if (text(row, "heartType")) out.heartType = text(row, "heartType");
   }
+  if (out.t === 1) Object.assign(out, cityCosmeticProjection(cosmetics, rules, now));
   return JSON.stringify(out);
 }
 export function pointSections(points: string[]): Fields {
@@ -78,6 +85,7 @@ export class WorldService {
     readonly kingdomId: number,
     readonly live?: {
       rules: Rules;
+      now?: () => number;
       subscribe(owner: string, x: number, y: number): Promise<void>;
       marches(ids: readonly number[]): Promise<readonly Row[]>;
     },
@@ -95,11 +103,20 @@ export class WorldService {
     )
       throw new GameError(errors.unsupported);
     const ids = mode ? [1 + x + y * this.size] : viewport(x, y, this.size);
-    const { world, points, hasMarches } = await this.db.getWorldByPointIds(uid, ids);
+    const { world, points, hasMarches, cosmetics } = await this.db.getWorldByPointIds(uid, ids);
     if (!world || num(world, "worldId") !== 0 || (hasMarches && !this.live))
       throw new GameError(errors.unsupported);
     const byId = new Map(points.map((row) => [num(row, "id"), row]));
-    const compact = ids.filter((id) => byId.has(id)).map((id) => compactPoint(byId.get(id)!));
+    const compact = ids
+      .filter((id) => byId.has(id))
+      .map((id) =>
+        compactPoint(
+          byId.get(id)!,
+          cosmetics?.filter((row) => row.uid === byId.get(id)!.ownerId),
+          this.live?.rules,
+          BigInt(this.live?.now?.() ?? Date.now()),
+        ),
+      );
     await this.live?.subscribe(uid, x, y);
     const marches = this.live ? await this.live.marches(ids) : [];
     if (marches.length > 1024) throw new GameError(errors.unsupported);

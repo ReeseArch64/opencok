@@ -1,3 +1,7 @@
+import {
+  cosmeticInteractionParticipants,
+  publishCosmeticInteractionMutation,
+} from "@opencok/services/city-cosmetics";
 import { createPrayerDomain } from "@opencok/services/prayer";
 import { recallTaskDomain } from "@opencok/services/recall-task";
 import { regionalRecallDomain } from "@opencok/services/regional-recall";
@@ -666,6 +670,7 @@ export const RealmDependenciesLive = Layer.effect(
       }),
       rules,
       economyEffects,
+      cosmeticInteractionParticipants,
     );
     const expeditionTreasury = new ExpeditionTreasuryService(
       createExpeditionTreasuryExecutor(db.kingdom.db, authority),
@@ -674,6 +679,23 @@ export const RealmDependenciesLive = Layer.effect(
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
+    const recoverCosmeticInteractions = async () => {
+      for (let index = 0; index < 64; index++) {
+        const delivered = await relayMutationEvent(
+          db.kingdom.db,
+          authority,
+          (event) =>
+            publishCosmeticInteractionMutation(
+              event.payload,
+              worldInterest.interested,
+              (owner, command, body) => notifications.publish(owner, command, body),
+            ),
+          Date.now,
+          "trigger.activity",
+        );
+        if (!delivered) break;
+      }
+    };
     let heartCursor = 0;
     const recoverAllianceHearts = async () => {
       const online = notifications.owners();
@@ -1003,6 +1025,15 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    yield* Effect.tryPromise({
+      try: recoverCosmeticInteractions,
+      catch: () => new Error("Cosmetic interaction recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     yield* Effect.tryPromise({
       try: recoverAllianceHearts,
       catch: () => new Error("Heart recovery unavailable"),

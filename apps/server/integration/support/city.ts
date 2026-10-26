@@ -30,7 +30,11 @@ import { sfs, str, decode, type Fields } from "@opencok/messages/sfs";
 import { eq } from "drizzle-orm";
 import { DisposablePostgres } from "../../../../packages/drizzle/tests/support/postgres";
 
-export async function cityHarness(extra: readonly CityDomain[] = [], totems = false) {
+export async function cityHarness(
+  extra: readonly CityDomain[] = [],
+  totems = false,
+  participants?: ConstructorParameters<typeof TimedActivityService>[3],
+) {
   const pg = new DisposablePostgres();
   const admin = await pg.start();
   await admin.query('CREATE DATABASE "city"');
@@ -198,6 +202,7 @@ export async function cityHarness(extra: readonly CityDomain[] = [], totems = fa
       ),
       rules,
       effects,
+      participants,
     );
     const command = (name: string, params: Fields, owner = "owner") =>
       service.domainCommand(owner, name, {
@@ -222,6 +227,7 @@ export async function cityHarness(extra: readonly CityDomain[] = [], totems = fa
       (await db.db.select().from(user_building).where(eq(user_building.uuid, id)))[0];
     return {
       db,
+      connection: { ...pg.options, database: "city" },
       rules,
       service,
       production: new ProductionService(

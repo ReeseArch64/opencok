@@ -1,3 +1,4 @@
+import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { user_wall } from "@opencok/drizzle/schema/opencok_kingdom/user_wall";
@@ -558,7 +559,23 @@ export class Database implements GameStore, FriendshipMineStore {
               .from(worldpoint)
               .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, ids)))
           : [];
-        return { world, hasMarches, points };
+        const owners = [
+          ...new Set(
+            points.filter((row) => row.pointType === 1 && row.ownerId).map((row) => row.ownerId!),
+          ),
+        ];
+        const cosmetics = owners.length
+          ? await tx
+              .select()
+              .from(user_state)
+              .where(
+                and(inArray(user_state.uid, owners), inArray(user_state.type2, [100, 105, 200])),
+              )
+              .orderBy(user_state.uid, user_state.stateId)
+              .limit(8193)
+          : [];
+        if (cosmetics.length > 8192) throw new Error("World cosmetic projection exceeds bound");
+        return { world, hasMarches, points, cosmetics };
       },
       { isolationLevel: "repeatable read", accessMode: "read only" },
     );

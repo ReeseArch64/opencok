@@ -137,7 +137,8 @@
     "./player-item-gifts": "./src/player-item-gifts.ts",
     "./alliance-heart": "./src/alliance-heart.ts",
     "./regional-recall": "./src/regional-recall.ts",
-    "./prayer": "./src/prayer.ts"
+    "./prayer": "./src/prayer.ts",
+    "./city-cosmetics": "./src/city-cosmetics.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

@@ -116,7 +116,7 @@ test("owned cake interaction persists overlap counters and installs the exact-co
     const states = await h.db.db.select().from(user_state);
     expect(states.find((row) => row.stateId === 509877)).toMatchObject({
       count: 1,
-      endTime: BigInt(Date.UTC(2024, 8, 13)),
+      endTime: BigInt(Date.UTC(2024, 8, 19, 12)),
     });
     await h.db.db.update(user_state).set({ count: 49 }).where(eq(user_state.stateId, 509877));
     await h.command("trigger.activity", { type: sfs.int(45), uid: sfs.string("owner") });

@@ -1,3 +1,4 @@
+import { readCosmeticTarget, writeCosmeticTarget } from "./city-cosmetics";
 import { readPrayer, writePrayer } from "./prayer";
 import { readRecallTasks, writeRecallTasks } from "./recall-task";
 import { readRegionalRecall, writeRegionalRecall } from "./regional-recall";
@@ -75,6 +76,7 @@ export function createCityProgressionStore(
   boundary: ProgressionBoundary,
   mapSize = 1200,
 ): CityProgressionStore {
+  let cosmeticTarget: Awaited<ReturnType<typeof readCosmeticTarget>>;
   return {
     async getState(command, ranking, request) {
       const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
@@ -143,6 +145,10 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        cosmeticTarget:
+          command === "trigger.activity"
+            ? (cosmeticTarget = await readCosmeticTarget(tx, request))
+            : undefined,
         prayer: await readPrayer(tx, owner),
         recallTask: await readRecallTasks(tx, owner, command?.startsWith("recall.task.") ?? false),
         regionalRecall: command?.startsWith("region.recall.")
@@ -290,6 +296,8 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.cosmeticTarget)
+          await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
         if (write.prayer) await writePrayer(tx, owner, write.prayer);
         if (write.recallTask) await writeRecallTasks(tx, owner, write.recallTask);
         if (write.regionalRecall) await writeRegionalRecall(tx, owner, write.regionalRecall);
