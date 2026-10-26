@@ -99,6 +99,13 @@
       "when": 1793036488934,
       "tag": "0013_hero_rank_publication",
       "breakpoints": false
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793038492772,
+      "tag": "0014_hero_ranking_finality",
+      "breakpoints": false
     }
   ]
 }

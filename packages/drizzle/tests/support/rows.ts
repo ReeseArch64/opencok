@@ -34,6 +34,21 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   const row = Object.fromEntries(
     spec.columns.map((column) => [column.property ?? column.name, sampleValue(column, variant)]),
   );
+  if (spec.checks.some(([name]) => name === "hero_rank_period_bounds")) {
+    row.state = (variant - 1) % 2;
+    row.finalizedAt = row.state === 0 ? 0n : row.endTime;
+  }
+  if (spec.checks.some(([name]) => name === "hero_rank_watermark_bounds")) {
+    row.state = (variant - 1) % 2;
+    row.eligible = 0;
+    row.scoreCount = 0n;
+    row.total = 0n;
+  }
+  if (spec.checks.some(([name]) => name === "hero_rank_closure_bounds")) {
+    row.eligible = 0;
+    row.processed = 0n;
+    row.scoreCount = 0n;
+  }
   if (spec.checks.some(([name]) => name === "hero_match_realm_bounds")) {
     row.serverGroup = null;
     row.matchedAt = 0n;

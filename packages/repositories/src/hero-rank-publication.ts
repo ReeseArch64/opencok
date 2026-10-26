@@ -1,3 +1,4 @@
+import { hero_rank_watermark } from "@opencok/drizzle/schema/opencok_global/hero_rank_watermark";
 import { and, asc, eq, gte, inArray, lte, or, gt, sql } from "drizzle-orm";
 import { score_act } from "@opencok/drizzle/schema/opencok_kingdom/score_act";
 import { hero_event } from "@opencok/drizzle/schema/opencok_kingdom/hero_event";
@@ -139,7 +140,47 @@ export function createHeroRankProjection(
           .where(eq(hero_rank_owner.kingdomId, authority.kingdomId))
           .returning();
         if (!version) throw new Error("Missing hero rank publication version");
-        const values = rows
+        const seals = await tx
+          .select({ actId: hero_rank_watermark.actId })
+          .from(hero_rank_watermark)
+          .where(
+            and(
+              eq(hero_rank_watermark.kingdomId, authority.kingdomId),
+              eq(hero_rank_watermark.state, 1),
+              inArray(
+                hero_rank_watermark.actId,
+                rows.map((row) => row.actId),
+              ),
+            ),
+          );
+        const closed = new Set(seals.map((row) => row.actId)),
+          sealed = rows.filter((row) => closed.has(row.actId)),
+          open = rows.filter((row) => !closed.has(row.actId));
+        const existing = sealed.length
+          ? await tx
+              .select()
+              .from(hero_rank_score)
+              .where(
+                or(
+                  ...sealed.map((row) =>
+                    and(
+                      eq(hero_rank_score.rankKey, row.rankKey),
+                      eq(hero_rank_score.member, row.member),
+                    ),
+                  ),
+                ),
+              )
+          : [];
+        if (existing.some((row) => row.kingdomId !== authority.kingdomId))
+          throw new Error("Foreign sealed hero ranking member");
+        const preserved = existing.map((row) => ({
+          ...row,
+          metadata:
+            sealed.find(
+              (request) => request.rankKey === row.rankKey && request.member === row.member,
+            )?.metadata ?? row.metadata,
+        }));
+        const values = [...open, ...preserved]
           .toSorted(
             (a, b) => a.rankKey.localeCompare(b.rankKey) || a.member.localeCompare(b.member),
           )
@@ -149,6 +190,7 @@ export function createHeroRankProjection(
             sequence: version.sequence,
             observedAt,
           }));
+        if (!values.length) return [];
         const result = await tx
           .insert(hero_rank_score)
           .values(values)
@@ -169,7 +211,7 @@ export function createHeroRankProjection(
             setWhere: eq(hero_rank_score.kingdomId, authority.kingdomId),
           })
           .returning();
-        if (result.length !== rows.length) throw new Error("Foreign hero rank member ownership");
+        if (result.length !== values.length) throw new Error("Foreign hero rank member ownership");
         authority.assertReady();
         return result;
       });
