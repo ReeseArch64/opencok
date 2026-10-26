@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type {
+  HeroResourceConfigResponse,
   ServerClockResponse,
   FeatureConfigResponse,
   PushPreferenceResponse,
@@ -11,6 +12,11 @@ import type {
   InventoryItemResponse,
 } from "@opencok/contracts/responses/bootstrap";
 import { field, responseRecord } from "./response.ts";
+
+export const heroResourceConfigSchema = z.strictObject({
+  newHeroVersion: field.string,
+  newHeroMd5Android: field.string,
+}) satisfies z.ZodType<HeroResourceConfigResponse>;
 
 export const serverClockSchema = z.strictObject({
   db_utc_timestamp: field.int,
