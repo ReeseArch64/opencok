@@ -1,3 +1,4 @@
+import { readCupBetting, writeCupBetting } from "./cup-betting";
 import { readGroupBuy, writeGroupBuy } from "./groupbuy";
 import { writeSpecialEventPurchase } from "./special-event";
 import { readContinuedCost, writeContinuedCost, writeContinuedCostHide } from "./continued-cost";
@@ -157,6 +158,7 @@ export function createCityProgressionStore(
           command === "get.trouble.list" || command?.startsWith("trouble.")
             ? await readTrouble(tx, owner, command === "get.trouble.list")
             : undefined,
+        cupBetting: command?.startsWith("euro.cup.") ? await readCupBetting(tx, owner) : undefined,
         groupBuy: command?.startsWith("groupbuys.") ? await readGroupBuy(tx, owner) : undefined,
         continuedCost: command?.startsWith("continuedcost.")
           ? readContinuedCost(tx, owner)
@@ -310,6 +312,7 @@ export function createCityProgressionStore(
         }
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
+        if (write.cupBetting) await writeCupBetting(tx, owner, write.cupBetting);
         if (write.groupBuy) await writeGroupBuy(tx, owner, write.groupBuy);
         if (write.specialEventPurchase)
           await writeSpecialEventPurchase(tx, owner, write.specialEventPurchase);

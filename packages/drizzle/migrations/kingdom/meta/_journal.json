@@ -211,6 +211,13 @@
       "when": 1793024232106,
       "tag": "0029_continued_cost_periods",
       "breakpoints": false
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1793029148851,
+      "tag": "0030_cup_odds_precision",
+      "breakpoints": false
     }
   ]
 }

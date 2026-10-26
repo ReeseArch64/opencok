@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, index, integer, numeric, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { bigint, index, integer, real, primaryKey, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
 
 export const soccer_match = opencok_kingdom.table(
@@ -14,8 +14,8 @@ export const soccer_match = opencok_kingdom.table(
     "ended": integer("ended"),
     "betNumA": bigint("betNumA", { mode: "bigint" }),
     "betNumB": bigint("betNumB", { mode: "bigint" }),
-    "oddsA": numeric("oddsA", { precision: 20, scale: 2, mode: "number" }),
-    "oddsB": numeric("oddsB", { precision: 20, scale: 2, mode: "number" }),
+    "oddsA": real("oddsA"),
+    "oddsB": real("oddsB"),
   },
   (table) => [
     primaryKey({ name: "soccer_match_PRIMARY", columns: [table["id"]] }),

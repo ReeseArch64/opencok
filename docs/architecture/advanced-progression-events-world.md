@@ -944,3 +944,51 @@ proof rejection, delayed confirmation, uncertain holds, round isolation, legacy
 recovery, settlement rollback and lock deadlines. Native TCP acceptance verifies
 LONG correlation and rejection of every internal payment command. Provider and
 native-device execution are not claimed.
+
+## Cup predictions and persisted sporting results
+
+The five native `euro.cup` commands now expose match listings, owned betting
+history, placement and reward collection. The maintained server catalog defines
+countries, admission and match clocks, original odds, allowed resources, aggregate
+stake caps, per-match bet counts, participation rewards and final results.
+Client requests cannot publish a result. Country selectors resolve to the stored
+canonical side, and zero or negative stakes reject before any economic write.
+
+A fenced kingdom schedule service persists stable country/time match identities
+and only applies configured results after betting has closed. Resolved results
+remain immutable. Match totals are serialized with owned wager admission; the
+resource debit, actual participation grant, wager, pool update and command receipt
+commit together. Stakes consume bound resources first. Each wager retains the
+float odds quoted at admission, and later pool changes cannot change its payout.
+A one-sided pool retains its configured opposite-side price until both sides have
+stakes, avoiding an infinite quote for a new purchase. Existing positive infinite
+legacy receipt odds retain the reference's capped Java integer payout.
+
+Migration `0030_cup_odds_precision.sql` changes the two match prices and owned wager
+price from two-decimal numeric values to PostgreSQL real values. This preserves
+Java float quotes and dynamic pool prices. Already rounded imported prices remain
+at their saved value; the migration cannot recover discarded historical precision.
+Native listings use the shortest matching float representation, and owned receipts
+retain the SFS FLOAT tag. Direct resource winnings credit bound balances in the
+reference's resource order. Large legacy totals retain their complete economic
+value through bounded native integer reward entries rather than integer wraparound.
+
+Native claims mark winning and losing resolved wagers as collected in the same
+transaction as the winning credits. After the event ends, a bounded worker sends
+one funded system mail per winning wager, up to 64 wagers per recipient command.
+Its canonical operation identifies the exact owned wager batch. A later match
+result or a second batch receives its own operation, while an acknowledgment retry
+reuses the committed receipt. The cursor advances past failed recipients and wraps
+after exhaustion. Unresolved results remain pending and cannot manufacture a win.
+
+The existing closed calendar remains unchanged. No provider, charge, dependency,
+environment variable or client artifact is introduced. Back up match rows, owned
+wagers, receipts, inventory grants, resource postings and funded mail together.
+Retain saved float prices during rollback; converting them back to a two-decimal
+column loses precision and requires a deliberate data rollback. Keep already
+collected flags and paid mail consistent with balances. Synthetic acceptance covers
+concurrent wagers, mixed and bound resources, stake/count caps, cutoff, fixed odds,
+trusted results, receipt rollback, repeated claims, delayed outcomes and mail batches.
+Native TCP preserves LONG correlation and rejects the internal settlement producer.
+Device execution and actual sporting-result ingestion outside the maintained server
+catalog remain unverified.
