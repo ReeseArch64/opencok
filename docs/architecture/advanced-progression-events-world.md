@@ -38,7 +38,7 @@ PostgreSQL instance. No test uses the operator's running realm or player data.
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 25    | Validated tower battle integration, battle skills and garrison interactions; native-client acceptance                                                  |
 | 26    | Remaining local activity handlers and trusted score producers; matched-period coordination, arena battle integration and full native period acceptance |
-| 27    | Specialized target engines, process-restart acceptance and native interest-stream acceptance                                                           |
+| 27    | Specialized target engines and native-device acceptance                                                                                                |
 
 Existing read projections, catalogs, rankings and schema definitions are reused,
 but do not establish that these mutations are implemented. Combat-dependent modes
@@ -566,3 +566,24 @@ preserves the reference's field order independently of the maintained catalog's
 TypeScript property order. Nested reward arrays retain their existing wire types.
 Focused PostgreSQL assertions cover the emitted field sequences as well as the
 existing economic behavior. This correction changes no saved data or migration.
+
+Process acceptance starts the actual realm server in a separate Bun process with
+synthetic PostgreSQL, Redis and ZooKeeper services. A native TCP departure reserves
+troops, then SIGKILL interrupts the process while its march is outbound. A fresh
+process acquires the same kingdom with a higher persisted authority epoch and
+reconstructs the saved march. Replaying the departure receipt reserves nothing
+again. Native acceleration, gathering and return restore all troops and deliver
+exactly the target's five resources once. A nearby subscribed native client sees
+march, point and deletion notifications; a distant client sees none.
+
+The test uses synthetic catalog travel and gathering rates to bound its duration;
+maintained route arithmetic has separate rule and repository acceptance. It waits
+for the real ZooKeeper ownership lease to expire instead of clearing shared state.
+Its processes, clients and disposable services are cleaned up after success or
+failure. This verifies the native wire transport, rather than APK execution.
+
+Realm login sessions now bind their Redis key to the acquired database authority
+epoch. After a crash, an old token cannot block a new owner generation's login or
+remove its token. The existing token comparison and TTL continue to protect
+replacement sessions within one generation. Old cache keys expire naturally;
+wallets, marches and receipts are not reset. No schema migration is introduced.
