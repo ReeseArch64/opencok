@@ -1,3 +1,4 @@
+import { initializeRealmOpeningClock } from "@opencok/repositories/realm-opening-clock";
 import {
   createAllianceHeartDomain,
   publishAllianceHeartMutation,
@@ -232,6 +233,9 @@ export const RealmDependenciesLive = Layer.effect(
     cache.bindRealmOwner(authority.epoch);
     yield* fromPromise("realm.mutations", () => checkMutationStore(db.kingdom.db));
     fenceRealmDatabase(db.kingdom.db, authority);
+    yield* fromPromise("realm.opening-clock", () =>
+      initializeRealmOpeningClock(db.kingdom.db, authority),
+    );
     yield* acquireResource(
       "realm.mail-gift-relay",
       async () =>
