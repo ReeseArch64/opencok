@@ -1,3 +1,5 @@
+import { publishExpeditionDiscovery } from "./expedition-discovery";
+import type { ExpeditionDiscoveryPublication } from "@opencok/contracts/expedition-score-publication";
 import { loadGeneralDrawRanking } from "./general-draws";
 import { selectSystemMailPage } from "./mail-system.ts";
 import { loadBattleFightRanking, loadPlayoffRanking } from "./battle-ranking.ts";
@@ -78,6 +80,9 @@ export class Cache {
     } finally {
       client.close();
     }
+  }
+  publishExpeditionDiscovery(value: ExpeditionDiscoveryPublication) {
+    return publishExpeditionDiscovery((command, ...args) => this.command(command, ...args), value);
   }
   expeditionRanking(limit: number) {
     return loadExpeditionRanking(

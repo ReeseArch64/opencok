@@ -1,3 +1,5 @@
+export { expedition_score as opencok_global_expedition_score } from "./opencok_global/expedition_score";
+export { expedition_score_owner as opencok_global_expedition_score_owner } from "./opencok_global/expedition_score_owner";
 export { expedition_match_realm as opencok_global_expedition_match_realm } from "./opencok_global/expedition_match_realm";
 export { expedition_match_batch as opencok_global_expedition_match_batch } from "./opencok_global/expedition_match_batch";
 export { expedition_calendar as opencok_global_expedition_calendar } from "./opencok_global/expedition_calendar";

@@ -1,3 +1,14 @@
+import { expeditionOpen } from "@opencok/rules/new-expedition";
+import {
+  ExpeditionScorePublicationService,
+  ExpeditionLiveViewService,
+} from "@opencok/services/expedition-score-publication";
+import {
+  createExpeditionScoreSource,
+  createExpeditionScoreProjection,
+  createExpeditionLiveSource,
+} from "@opencok/repositories/expedition-score-publication";
+import { expeditionDiscovery } from "@opencok/rules/expedition-score-publication";
 import {
   ExpeditionPhaseService,
   ExpeditionActivityService,
@@ -853,6 +864,17 @@ export const RealmDependenciesLive = Layer.effect(
         if (!delivered) break;
       }
     };
+    const expeditionScorePublication = new ExpeditionScorePublicationService(
+      createExpeditionScoreSource(db.kingdom.db, authority),
+      createExpeditionScoreProjection(db.databases.global.db, authority),
+      (clock, version, now) =>
+        cache.publishExpeditionDiscovery(
+          expeditionDiscovery(clock, version, now, expeditionOpen(rules, now)),
+        ),
+    );
+    const expeditionLiveView = new ExpeditionLiveViewService(
+      createExpeditionLiveSource(db.kingdom.db, db.databases.global.db, authority),
+    );
     const heroRankingRewards = new HeroRankingRewardService(
       createHeroRankRewardStore(db.kingdom.db, authority),
       createHeroRankRewardStandings(db.databases.global.db, config.kingdomId),
@@ -1469,6 +1491,15 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
+      try: () => expeditionScorePublication.refresh(),
+      catch: () => new Error("Expedition score publication unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
       try: () => heroRankPublication.refresh(),
       catch: () => new Error("Hero ranking publication unavailable"),
     }).pipe(
@@ -1860,6 +1891,8 @@ export const RealmDependenciesLive = Layer.effect(
               if (notifications.owners().includes(recipient))
                 await deliverPlayerItemGifts([recipient]);
             }
+            if (command === "newexpidition.activityinfo")
+              return { ...result, body: await expeditionLiveView.enrich(owner, result.body) };
             return result;
           },
           reconcileTimed: async (owner) => {
