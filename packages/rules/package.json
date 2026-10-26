@@ -111,7 +111,9 @@
     "./civilization-science": "./src/civilization-science.ts",
     "./local-events": "./src/local-events.ts",
     "./world-march-lifecycle": "./src/world-march-lifecycle.ts",
-    "./dragon-progression": "./src/dragon-progression.ts"
+    "./dragon-progression": "./src/dragon-progression.ts",
+    "./chat-retention": "./src/chat-retention.ts",
+    "./chat-social": "./src/chat-social.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

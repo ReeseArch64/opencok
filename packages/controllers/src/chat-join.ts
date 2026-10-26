@@ -2,7 +2,7 @@ import type { CommandHandler, Room, RoomAuthorizer } from "@opencok/contracts/ch
 import { isRecord } from "@opencok/contracts/chat";
 import { ChatCommandError } from "@opencok/controllers/chat-rooms";
 
-const supportedGroups = new Set(["original", "country", "alliance", "global", "local"]);
+const supportedGroups = new Set(["original", "country", "alliance", "global", "local", "private"]);
 
 export function createJoinHandler(authorizeRoom: RoomAuthorizer): CommandHandler {
   return async ({ uid, params, connection }) => {

@@ -14,6 +14,7 @@ export type ChatMailboxResult = "applied" | "unchanged";
 export interface ChatMailboxMessage {
   id: string;
   peer: string;
+  sender?: string | null;
   type: number;
   createdAt: bigint;
   body: string;

@@ -51,7 +51,7 @@ is reachable from a device.
    `room.joinMulti` validate persisted realm/language/alliance membership. A failed
    join does not partially subscribe the connection.
 4. `chat.room` persists a 1–500 Unicode-code-point text message before acknowledgment
-   and local broadcast. NUL and malformed Unicode are rejected. A retry with the
+   and durable distribution. NUL and malformed Unicode are rejected. A retry with the
    same sender, room and `sendTime` returns the existing sequence only if its body
    matches. Changed content returns `invalid_message` and leaves history intact.
 5. `history.roomsv2` and `history.roomv2` require both a socket subscription and
@@ -74,25 +74,16 @@ accepted send survives receiver disconnection or process restart.
 
 ## Recovery and boundaries
 
-Messages and sessions retain the existing 24-hour lifetime. Expired rows are
-filtered before bounded cleanup; cleanup removes at most 500 of each per minute.
-Once a receipt has been deleted, this implementation does not provide perpetual
-replay protection. Time-based legacy history parameters are not a complete
-sequence-cursor/archive protocol. Clients reconcile the bounded recent window;
-no extended archive is introduced here.
+Topic 24 replaces local fanout with a durable PostgreSQL event log, leased consumers,
+a native realm delivery bridge and explicit sequence/archive history. It adds contacts,
+blocks, direct mailboxes, private rooms, moderation, feeds, realm postbox/mines and paid
+notice reconciliation. Authorization is checked again before delivery and on history;
+logout revokes established tokens. Global/alliance retention is 24 hours recent plus an
+archive until seven days; other channel policies are explicit.
 
-Broadcast remains local to one process. A failed broadcast never rolls back an
-accepted message, and history is the recovery mechanism. Multi-instance fanout,
-direct messages, blocking, translation, attachments, moderation UI and extended
-retention belong to separate work, including topic 24.
-
-Restart Chat without deleting its database. Existing unexpired sessions and
-messages survive. Back up global and kingdom databases consistently; restore and
-run expiry cleanup before serving players. Keep session signing configuration
-coordinated across services. Secret rotation does not revoke already-issued
-opaque tokens; explicit session deletion or expiration does. Rollback restores
-previous application images/configuration without a schema rollback, but older
-code loses the new expiry and mismatched-receipt protections.
+Read the [topic-24 migration guide](../../docs/social-chat-migration.md) before deployment
+or rollback. It documents both migrations, MongoDB configuration, original expiry
+preservation, tombstones, replay recovery, bounded cleanup and compatibility limits.
 
 ## Verification
 
