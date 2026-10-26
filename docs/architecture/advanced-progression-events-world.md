@@ -1044,3 +1044,39 @@ fixed final pools, fallback rewards, failed stake and reward receipts, repeated
 claims, delayed result mail and imported rewards. Native TCP preserves LONG
 correlation and rejects result publication and internal settlement. Native-device
 execution and external sporting-result feeds remain unverified.
+
+## Hero event detail projections
+
+`hero.event.info.get`, `hero.event.ranking.get` and `hero.cross.info` read the
+persisted main periods, event definitions and owned personal/alliance scores.
+Detail responses retain native field order, reward-preview arrays, target strings,
+persisted bands, completion flags and integer-set claim ordering. Personal fallback
+bands retain the reference's castle-level cap; alliance fallback bands use the
+current alliance power. Rank positions use the existing shared Redis publication
+and gate rules. Kingdom event views retain the configured kingdom order and hydrate
+available public names and banners.
+
+The reader uses a repeatable read transaction, rejects ambiguous active periods and
+bounds events and owned aggregate rows. It selects the authenticated character and
+its current alliance aggregate. Querying a preview preserves saved scores, claims,
+rank keys and expiration. The packet budget applies before returning the response.
+Cross requests resolve the home kingdom recorded on the authenticated profile,
+validate the home character and use only configured realm connections. Missing,
+banned or unavailable home characters return the reference's empty cross response.
+Client-supplied realm selectors do not route these reads.
+
+Cross-panel projections combine saved main periods with the maintained Sunday-first
+upcoming calendar. Existing stronger-lord activity suppresses upcoming fallback
+periods. Configured panel dates, merge windows, popup conditions and public resource
+hashes retain their native representations. The configured kingdoms use the common
+maintained gameplay catalog. No schema migration, dependency or environment variable
+is added. Main-period creation, confirmed score producers and automatic hero-rank
+settlement remain subsequent coordinator work; queries do not create those states.
+
+Synthetic acceptance uses two disposable kingdom databases, shared public kingdom
+metadata and actual Redis ranks. It verifies owned score filtering, saved completion
+flags, personal/alliance bands, reward previews, kingdom order, cross-home routing,
+expired periods, missing home characters and unchanged score/rank state. Native TCP
+preserves LONG correlation on all three commands. Native-device execution remains
+unverified. Saved state and rollback use the existing hero activity, event, score,
+reward-record and rank-publication backups.

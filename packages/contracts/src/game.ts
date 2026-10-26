@@ -1,3 +1,4 @@
+import type { HeroEventSelection, HeroEventSnapshot } from "./hero-event";
 import type { InventoryFields as Fields } from "./inventory.ts";
 import type { BattleRankingState, PlayoffPublication } from "./battle-ranking.ts";
 import type { FlowerRankingPublication, FlowerRankingState } from "./flower-ranking.ts";
@@ -81,6 +82,12 @@ export interface CityState {
   civilizationPrestige?: bigint;
 }
 export interface GameStore extends AuthenticationStore {
+  heroEvents?(
+    uid: string,
+    kingdomId: number,
+    selection: HeroEventSelection,
+    now: number,
+  ): Promise<HeroEventSnapshot>;
   rankingPrivacy?(uid: string, kind: "payment" | "consumption"): Promise<number>;
   battleRankingState?(uid: string, now: number): Promise<BattleRankingState>;
   heroHistory?(

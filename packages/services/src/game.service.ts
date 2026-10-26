@@ -1,3 +1,13 @@
+import { rewardPreviewArray } from "@opencok/mappings/rewards";
+import { heroEventBand, heroEventRewards, nextHeroPanel } from "@opencok/rules/hero-event";
+import {
+  heroEventEntry,
+  heroEventInfo,
+  heroEventReward,
+  heroPanelView,
+} from "@opencok/mappings/hero-event";
+import { eventTimestamp } from "@opencok/rules/local-events";
+import { cityInteger } from "@opencok/rules/city-progression";
 import { randomInt } from "node:crypto";
 import { closedActivityPanels, catalogReward } from "@opencok/rules/local-activity-info";
 import { closedActivities, catalogRewardView } from "@opencok/mappings/local-activity-info";
@@ -912,6 +922,11 @@ export class GameService {
       case "dragon.playoff.rank.info":
         body = await this.battleRanking(uid, command);
         break;
+      case "hero.event.info.get":
+      case "hero.event.ranking.get":
+      case "hero.cross.info":
+        body = await this.heroEventDetails(uid, command, params);
+        break;
       case "hero.event.ranking.his.get":
         body = await this.heroHistory(uid, params);
         break;
@@ -968,6 +983,9 @@ export class GameService {
         "flower.ranking",
         "military.ranking",
         "ctf.get.rank",
+        "hero.event.info.get",
+        "hero.event.ranking.get",
+        "hero.cross.info",
         "hero.self.rank",
         "hero.al.inside.ranking",
         "hero.event.ranking.his.get",
@@ -2002,6 +2020,143 @@ export class GameService {
     if (!teamId) throw new GameError(errors.invalid);
     if (!this.services.battleFightPublication) throw new GameError(errors.unsupported, "ranking");
     return fightRanking(decodeFightRanking(await this.services.battleFightPublication(), teamId));
+  }
+  private async heroEventDetails(uid: string, command: string, params: Fields): Promise<Fields> {
+    const now = this.now(),
+      at = BigInt(now),
+      current = this.checkProfile(await this.db.getProfileById(uid), now);
+    if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
+      throw new GameError(errors.invalid);
+    const source = current.crossFightSrcServerId,
+      realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source),
+      cross = command === "hero.cross.info";
+    if (cross && realm === this.config.kingdomId) return {};
+    if (!this.db.heroEvents) throw new GameError(errors.unsupported, "ranking");
+    const selection = cross
+      ? { panels: true }
+      : command === "hero.event.info.get"
+        ? { activityId: wireString(params, "activityId") }
+        : { eventId: wireString(params, "actId") };
+    try {
+      const state = await this.db.heroEvents(uid, realm, selection, now),
+        profile = this.checkProfile(state.profile, now);
+      if (profile.uid !== uid || num(profile, "serverId") !== realm)
+        throw new GameError(errors.invalid);
+      const preview = (id: string) =>
+        id === "0"
+          ? sfs.array([])
+          : rewardPreviewArray(
+              previewRewards(
+                id,
+                this.rules,
+                { kingdomId: realm, version: MOBILE_CLIENT_VERSION, now },
+                randomInt,
+              ),
+            );
+      if (cross) {
+        const panels: Fields[] = [];
+        for (const panel of this.rules.power.activityPanels?.values() ?? []) {
+          const type =
+            panel.type === "10" ? 1 : panel.type === "12" ? 2 : panel.type === "14" ? 3 : 0;
+          if (!type || panel.function_on === "0") continue;
+          const merge = [...(this.rules.power.mergeActivities?.values() ?? [])].some(
+            (row) =>
+              row.activityId === panel.id &&
+              state.lastMergeMillis > 0n &&
+              at - state.lastMergeMillis >= BigInt(cityInteger(row.merge_start)) * 60000n &&
+              at - state.lastMergeMillis < BigInt(cityInteger(row.merge_end)) * 60000n,
+          );
+          if (!merge && panel.start !== undefined && panel.end !== undefined) {
+            const start = eventTimestamp(panel.start),
+              end = eventTimestamp(panel.end);
+            if (start === undefined || end === undefined || at <= start || at >= end) continue;
+          }
+          let activity = state.activities.find((row) => num(row, "activityType") === type);
+          if (!activity && !state.scoreManagerRunning)
+            activity = nextHeroPanel(this.rules, type, realm, at);
+          if (!activity || (type === 1 && long(activity, "startTime") - at > 86400000n)) continue;
+          panels.push(
+            heroPanelView(
+              activity,
+              panel,
+              at,
+              panel.rewardid ? preview(panel.rewardid) : undefined,
+              merge,
+            ),
+          );
+        }
+        if (panels.length > 256) throw new GameError(errors.invalid);
+        return { activity: sfs.array(panels.map(sfs.object)) };
+      }
+      const activity = state.activities[0];
+      if (!activity) return {};
+      if (command === "hero.event.ranking.get") {
+        const event = state.events[0];
+        if (!event) return {};
+        const { level } = heroEventBand(event, state, this.rules);
+        if (level < 0) return heroEventReward([]);
+        const view = heroEventRewards(event, level, this.rules);
+        return heroEventReward(view.ranking.map(preview), view.ranking, view.rankLevels);
+      }
+      const entries: Fields[] = [],
+        ranked: { type: number; ranking: number; countries: Row[] }[] = [];
+      for (const event of state.events) {
+        const { level, score } = heroEventBand(event, state, this.rules);
+        if (level < 0) continue;
+        const view = heroEventRewards(event, level, this.rules),
+          query = heroRankingLookup(
+            event,
+            uid,
+            text(profile, "allianceId"),
+            this.rules,
+            realm,
+            MOBILE_CLIENT_VERSION,
+          );
+        let position: number;
+        if (typeof query === "number") position = query;
+        else {
+          if (!this.services.heroRankingPosition)
+            throw new GameError(errors.unsupported, "ranking");
+          position = await this.services.heroRankingPosition(query);
+        }
+        const type = cityInteger(event.type, 1, 4),
+          ids =
+            type >= 3
+              ? text(event, "serverGroup")
+                  .split("|")
+                  .filter(Boolean)
+                  .map((value) => cityInteger(value, 1))
+              : [];
+        if (ids.length > 64 || new Set(ids).size !== ids.length)
+          throw new GameError(errors.invalid);
+        let details: readonly Row[] = [];
+        if (ids.length) {
+          if (!this.db.heroHistoryPresentation) throw new GameError(errors.unsupported, "ranking");
+          details = (await this.db.heroHistoryPresentation([], ids)).realms;
+        }
+        const countries = ids.map((id, index) => {
+          const row = details.find((row) => num(row, "id") === id);
+          return {
+            id,
+            rank: index + 1,
+            ...(row ? { name: text(row, "name"), banner: text(row, "banner") } : {}),
+          };
+        });
+        ranked.push({ type, ranking: position, countries });
+        entries.push(
+          heroEventEntry(
+            event,
+            { score: view.rule.score ?? "", value: view.value, targets: view.targets },
+            view.rewards.map(preview),
+            score,
+          ),
+        );
+      }
+      return heroEventInfo(entries, cityInteger(activity.activityType, 1, 3), ranked);
+    } catch (error) {
+      if (realm !== this.config.kingdomId) return {};
+      throw error;
+    }
   }
   private async heroHistory(uid: string, params: Fields): Promise<Fields> {
     const now = this.now();

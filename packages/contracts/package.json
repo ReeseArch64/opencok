@@ -153,7 +153,9 @@
     "./cup-betting": "./src/cup-betting.ts",
     "./responses/cup-betting": "./src/responses/cup-betting.ts",
     "./olympic": "./src/olympic.ts",
-    "./responses/olympic": "./src/responses/olympic.ts"
+    "./responses/olympic": "./src/responses/olympic.ts",
+    "./hero-event": "./src/hero-event.ts",
+    "./responses/hero-event": "./src/responses/hero-event.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
