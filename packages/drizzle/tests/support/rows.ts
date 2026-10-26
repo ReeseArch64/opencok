@@ -171,6 +171,17 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
       row.processed = 0n;
     }
   }
+  if (
+    spec.checks.some(
+      ([name]) =>
+        name === "continued_cost_period_bounds" || name === "continued_cost_rank_period_bounds",
+    )
+  ) {
+    row.endTime = (row.startTime as bigint) + 1n;
+    row.state = (variant - 1) % 2;
+  }
+  if (spec.checks.some(([name]) => name === "continued_cost_fact_bounds"))
+    row.counted = (variant - 1) % 2;
   return row;
 }
 

@@ -231,6 +231,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       healthPort: 0,
       kingdomId: 1,
       kingdomDatabase: topology.kingdoms[0]!.database,
+      playerKingdoms: topology.kingdoms,
       globalDatabase: topology.globalDatabase,
       databaseUrl: url.toString(),
       redisUrl: `redis://127.0.0.1:${await endpoint(redis, 6379)}/0`,
@@ -551,22 +552,82 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       });
       expect((await fetch(`http://127.0.0.1:${server.healthPort}/readyz`)).status).toBe(200);
       const operationId = randomUUID();
-      expect(
-        (
-          await client.command("user.modify.nickName", {
-            nickName: sfs.string(`Renamed ${id}`),
-            operationId: sfs.string(operationId),
-          })
-        ).status,
-      ).toEqual(sfs.bool(true));
-      expect(
-        (
-          await client.command("user.modify.nickName", {
-            nickName: sfs.string(`Renamed ${id}`),
-            operationId: sfs.string(operationId),
-          })
-        ).status,
-      ).toEqual(sfs.bool(true));
+      const previousCostFeature = runtimeRules.features.get("continued_cost"),
+        previousRankFeature = runtimeRules.features.get("new_rank_cost"),
+        previousCostItem = runtimeRules.items.get("continued_cost"),
+        previousCostPanels = runtimeRules.power.activityPanels,
+        previousCostTiers = runtimeRules.advanced.continuedCosts;
+      try {
+        for (const key of ["continued_cost", "new_rank_cost"])
+          runtimeRules.features.set(key, { online: "all", test: "all", version: "1.0.0" });
+        runtimeRules.items.set("continued_cost", {
+          id: "continued_cost",
+          k1: "1",
+          k2: "1",
+          k5: "1;100;236039",
+        });
+        runtimeRules.power.activityPanels = new Map(previousCostPanels ?? []);
+        const today = new Date().toISOString().slice(0, 10),
+          tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+        runtimeRules.power.activityPanels.set("57159", {
+          id: "57159",
+          start: today + "-00-00",
+          end: tomorrow + "-00-00",
+        });
+        runtimeRules.advanced.continuedCosts = new Map([
+          [
+            "synthetic",
+            { id: "synthetic", type: "1", level: "1", point: "100000000", item: "236039" },
+          ],
+        ]);
+        expect(
+          (
+            await client.command("user.modify.nickName", {
+              nickName: sfs.string(`Renamed ${id}`),
+              operationId: sfs.string(operationId),
+            })
+          ).status,
+        ).toEqual(sfs.bool(true));
+        expect(
+          (
+            await client.command("user.modify.nickName", {
+              nickName: sfs.string(`Renamed ${id}`),
+              operationId: sfs.string(operationId),
+            })
+          ).status,
+        ).toEqual(sfs.bool(true));
+        await eventually(async () => {
+          const result = await client.command("continuedcost.ranking", {
+            _cok_: sfs.string("cost-wire"),
+          });
+          return (
+            (result.rankList?.value as import("@opencok/messages/sfs").Value[] | undefined)?.some(
+              (entry) => str(fields(entry), "uid") === `synthetic-player-${id}`,
+            ) ?? false
+          );
+        });
+        const costBoard = await client.command("continuedcost.ranking", {
+          _cok_: sfs.string("cost-wire"),
+        });
+        const costMember = (costBoard.rankList!.value as import("@opencok/messages/sfs").Value[])
+          .map(fields)
+          .find((row) => str(row, "uid") === `synthetic-player-${id}`)!;
+        expect(costBoard._cok_).toEqual(sfs.string("cost-wire"));
+        expect(costMember.val).toEqual(sfs.int(100));
+        expect(costBoard.myRank).toEqual(sfs.int(id));
+      } finally {
+        for (const [key, previous] of [
+          ["continued_cost", previousCostFeature],
+          ["new_rank_cost", previousRankFeature],
+        ] as const) {
+          if (previous) runtimeRules.features.set(key, previous);
+          else runtimeRules.features.delete(key);
+        }
+        if (previousCostItem) runtimeRules.items.set("continued_cost", previousCostItem);
+        else runtimeRules.items.delete("continued_cost");
+        runtimeRules.power.activityPanels = previousCostPanels;
+        runtimeRules.advanced.continuedCosts = previousCostTiers;
+      }
       expect((await client.command("equip.show", { show: sfs.int(1) })).show).toEqual(sfs.int(1));
       await eventually(async () => {
         const rows = await databases!

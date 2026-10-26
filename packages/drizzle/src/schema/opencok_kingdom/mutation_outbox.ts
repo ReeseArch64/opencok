@@ -18,6 +18,7 @@ export const mutation_outbox = opencok_kingdom.table(
     nextAttemptAt: bigint("nextAttemptAt", { mode: "bigint" }).notNull().default(sql.raw("0")),
   },
   (table) => [
+    index("mutation_outbox_event_source").on(table.kingdomId, table.eventType, table.createdAt),
     index("mutation_outbox_retry").on(
       table.kingdomId,
       table.publishedAt,

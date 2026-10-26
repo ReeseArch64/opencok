@@ -1,3 +1,4 @@
+import { captureCostFact } from "./continued-cost-facts";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -669,6 +670,26 @@ export function createNicknameChangeStore(
             createdAt: record.createdAt,
             publishedAt: 0n,
           });
+          if (event.type === "continuedcost.spend")
+            await captureCostFact(
+              tx,
+              {
+                kingdomId,
+                ownerUid: uid,
+                requestId: `nickname:${operationId}`,
+                eventId: event.id,
+                payload: Buffer.from(event.payload, "base64"),
+              },
+              record.createdAt,
+              balanceKeys
+                .filter((key) => payment.before[key] !== payment.after[key])
+                .map((key) => ({
+                  accountUid: uid,
+                  asset: `profile.${key}`,
+                  before: BigInt(payment.before[key]),
+                  after: BigInt(payment.after[key]),
+                })),
+            );
         }
         return updated;
       },

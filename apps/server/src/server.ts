@@ -1,3 +1,8 @@
+import { ContinuedCostRankingService } from "@opencok/services/continued-cost-ranking";
+import {
+  createCostRankingFacts,
+  createCostRankingRegistry,
+} from "@opencok/repositories/continued-cost-ranking";
 import {
   ExpeditionStageRewardService,
   expeditionStageRewardDomain,
@@ -812,6 +817,12 @@ export const RealmDependenciesLive = Layer.effect(
       rules,
       [...db.databases.kingdoms.keys()],
     );
+    const continuedCostRanking = new ContinuedCostRankingService(
+      createCostRankingFacts(db.kingdom.db, authority),
+      createCostRankingRegistry(db.databases.global.db, authority),
+      rules,
+      [...db.databases.kingdoms.keys()],
+    );
     const expeditionCalendar = new ExpeditionCalendarService(
       createExpeditionCalendarStore(db.databases.global.db),
       rules,
@@ -1526,6 +1537,15 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
+      try: () => continuedCostRanking.refresh(),
+      catch: () => new Error("Consumption ranking publication unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
       try: () => expeditionStageFinality.refresh(),
       catch: () => new Error("Expedition stage finality unavailable"),
     }).pipe(
@@ -2044,7 +2064,10 @@ export const RealmDependenciesLive = Layer.effect(
             cache.flowerRankingPublication(realm, uid, limit, global),
           militaryRanking: (type, group) => cache.militaryRanking(type, group),
           attributeRanking: (type) => cache.attributeRanking(type),
-          publishedGlobalRanking: (kind) => cache.publishedGlobalRanking(kind),
+          publishedGlobalRanking: (kind) =>
+            kind === "consumption"
+              ? continuedCostRanking.board(() => cache.publishedGlobalRanking(kind))
+              : cache.publishedGlobalRanking(kind),
           globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
           dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
           expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
