@@ -1724,3 +1724,57 @@ snapshots passed 1,703 tests with 50,069 assertions and 847 snapshots; physical
 schema and upgrade checks passed 1,549 tests with 37,357 assertions. Required
 lint, formatting, both migration consistency checks and server/nine package type
 checks passed.
+
+## Funded consumption ranking prizes
+
+Final consumption standings now fund the source ranking mail and its registered
+reward bands. Each realm scans the shared hundred-member result through an owned
+rank cursor and admits prizes only for its own existing home profiles. Profiles
+registered after sealing cannot acquire an old entitlement. Missing or visiting
+profiles do not invent recipients. An empty result completes without mail.
+Admission verifies every finalized financial count and digest before selecting
+positions, so inconsistent shared economic rows cannot fund another ranking.
+
+One refresh scans at most 64 ranks. Admission pins the native mail template,
+rank parameter and actual reward outcomes in an owned entitlement and advances
+the cursor in the same transaction. A private canonical operation commits funded
+mail, delivery acknowledgement and native notification outbox together. Repeating
+that operation cannot create another mail; the existing funded mail claim path
+cannot grant the assets twice. A recipient unique key complements the stable
+period/member entitlement identity.
+
+Banned recipients defer for a minute while eligible prizes continue. Stored
+entitlements drain even when new shared admission fails or reward catalogs are
+removed. A restarted service resumes its saved rank cursor and pinned outcomes.
+Client traffic cannot invoke the internal delivery operation. The native public
+reward endpoint remains a preview and cannot submit spending or claim a global
+ranking position.
+
+Pending shared proofs can now restore their own economic rows from the exact
+owned snapshot after an older binary or damaged projection changes them. Repair
+requires the matching immutable watermark and current publisher fence, replaces
+only that realm's pending rows and preserves current public metadata. A finalized
+result rejects economic repair and requires consistent restored data before any
+new prize admission. Financial results cannot be rewritten to accommodate a
+changed catalog, census or late debit.
+
+Apply kingdom migration `0041_continued_cost_awards` before this binary. It adds
+owned ranking entitlements and appends the award cursor and completion time to
+the closure. Inventory becomes 848 tables and 6,917 fields: 151 global and 697
+kingdom tables. Existing inventories, queues and legacy consumption totals remain
+unchanged. No dependency, configuration or environment variable is added. Back up
+entitlements, funded mail, operation receipts, notification outbox, cursors and
+financial proofs together and preserve them during binary rollback. Deleting a
+mail or its delivery acknowledgement independently invalidates payout recovery.
+Device execution remains unverified.
+
+Eleven reward and finality acceptance cases passed with 78 assertions. Two units
+verified all maintained consumption reward bands and stable identities. Twenty-five
+consumption, publication and expedition reward regression cases passed with
+200 assertions. The server unit suite passed 1,490 tests with 245,168 assertions.
+Native TCP and process-kill recovery passed two cases with 251 assertions,
+including rejection of the private delivery command in both realms. Schema
+contracts and snapshots passed 1,705 tests with 50,139 assertions and 848 snapshots;
+physical schema and upgrade checks passed 1,551 tests with 37,423 assertions.
+Required lint, formatting, kingdom migration consistency and server/nine package
+type checks passed.

@@ -50,8 +50,8 @@ function configure(rules: Rules) {
     total_times: "100",
   });
 }
-export async function costRankingFixture() {
-  const h = await cityHarness([continuedCostDomain, spender]),
+export async function costRankingFixture(extra: readonly CityDomain[] = []) {
+  const h = await cityHarness([continuedCostDomain, spender, ...extra]),
     closers = [h.close];
   try {
     h.clock.now = Date.UTC(2030, 0, 2);

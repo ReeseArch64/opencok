@@ -288,6 +288,13 @@
       "when": 1793052189870,
       "tag": "0040_continued_cost_finality",
       "breakpoints": false
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1793052712409,
+      "tag": "0041_continued_cost_awards",
+      "breakpoints": false
     }
   ]
 }

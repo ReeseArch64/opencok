@@ -276,9 +276,14 @@ test("corrupt consumption proofs or shared economic rows cannot finalize a cohor
     await h.global.db.update(scores).set({ score: 11n }).where(eq(scores.uid, "owner"));
     await expect(h.finality2.refresh()).rejects.toThrow();
     expect((await h.global.db.select().from(periods))[0]?.state).toBe(0);
-    await h.global.db.update(scores).set({ score: 10n }).where(eq(scores.uid, "owner"));
     await h.finality.refresh();
+    expect((await h.global.db.select().from(scores).where(eq(scores.uid, "owner")))[0]?.score).toBe(
+      10n,
+    );
     expect((await h.global.db.select().from(periods))[0]?.state).toBe(1);
+    await h.global.db.update(scores).set({ score: 11n }).where(eq(scores.uid, "owner"));
+    await expect(h.shared.prove(h.plan, seal, BigInt(h.clock.now))).rejects.toThrow();
+    await expect(h.shared.standings(h.plan.id)).rejects.toThrow();
   } finally {
     await h.close();
   }
