@@ -1,3 +1,4 @@
+import { mergeInventoryConfirmation } from "./inventory-confirmation";
 import { user_assets } from "@opencok/drizzle/schema/opencok_kingdom/user_assets";
 import { and, asc, eq } from "drizzle-orm";
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
@@ -71,6 +72,9 @@ export async function executeInventoryTransaction(
   reason: string,
   useEffect?: import("@opencok/contracts/inventory").InventoryState["useEffect"],
   recordAction?: import("@opencok/contracts/inventory").InventoryState["recordAction"],
+  confirmed?: (
+    plan: import("@opencok/contracts/inventory").InventoryPlan,
+  ) => Promise<import("@opencok/contracts/mutation").MutationResult | undefined>,
 ) {
   const [assets] = await tx.select().from(user_assets).where(eq(user_assets.uid, owner));
   const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
@@ -238,9 +242,11 @@ export async function executeInventoryTransaction(
   for (const [asset, entry] of expected)
     if (current.get(asset) !== entry.after) throw new Error("Inventory posting balance mismatch");
   const spending = result.confirmedSpending?.(result.postings);
-  return {
-    response: result.response,
-    events: [...(result.events ?? []), ...(spending ? [spending] : [])],
-    postings: result.postings,
-  };
+  const base = {
+      response: result.response,
+      events: [...(result.events ?? []), ...(spending ? [spending] : [])],
+      postings: result.postings,
+    },
+    observed = await confirmed?.(result);
+  return observed ? mergeInventoryConfirmation(base, observed) : base;
 }

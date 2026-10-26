@@ -96,7 +96,8 @@
     "./cup-betting": "./src/cup-betting.ts",
     "./olympic": "./src/olympic.ts",
     "./hero-event": "./src/hero-event.ts",
-    "./campaign-notice": "./src/campaign-notice.ts"
+    "./campaign-notice": "./src/campaign-notice.ts",
+    "./campaign-observation": "./src/campaign-observation.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

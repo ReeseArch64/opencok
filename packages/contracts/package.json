@@ -172,7 +172,8 @@
     "./responses/hero-event": "./src/responses/hero-event.ts",
     "./hero-calendar": "./src/hero-calendar.ts",
     "./campaign-notice": "./src/campaign-notice.ts",
-    "./responses/campaign-notice": "./src/responses/campaign-notice.ts"
+    "./responses/campaign-notice": "./src/responses/campaign-notice.ts",
+    "./campaign-observation": "./src/campaign-observation.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

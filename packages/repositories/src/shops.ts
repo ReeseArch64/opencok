@@ -1,3 +1,7 @@
+import type { InventoryPlan } from "@opencok/contracts/inventory";
+import type { MutationResult } from "@opencok/contracts/mutation";
+import type { ShopPurchase } from "@opencok/contracts/shops";
+import type { MutationTransaction } from "./mutation";
 import { and, eq } from "drizzle-orm";
 import { shopping_mall } from "@opencok/drizzle/schema/opencok_kingdom/shopping_mall";
 import { shop_stock } from "@opencok/drizzle/schema/opencok_kingdom/shop_stock";
@@ -13,6 +17,13 @@ export function createShopRepository(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
   now = Date.now,
+  confirmed?: (
+    tx: MutationTransaction,
+    owner: string,
+    purchase: ShopPurchase,
+    inventory: InventoryPlan,
+    now: number,
+  ) => Promise<MutationResult | undefined>,
 ): ShopRepository {
   const execute = createMutationExecutor(db, authority, now);
   return {
@@ -59,6 +70,7 @@ export function createShopRepository(
           .where(and(eq(shopping_mall.uid, input.owner), eq(shopping_mall.id, offer)))
           .for("update");
         const timestamp = now();
+        let savedPurchase: ShopPurchase | undefined;
         return executeInventoryTransaction(
           tx,
           input.owner,
@@ -66,6 +78,7 @@ export function createShopRepository(
             const result = await plan({ inventory, purchases, stock, now: timestamp });
             if (result.purchase) {
               const purchase = result.purchase;
+              savedPurchase = purchase;
               if (
                 purchase.id !== offer ||
                 !Number.isInteger(purchase.count) ||
@@ -91,6 +104,12 @@ export function createShopRepository(
             return result.inventory;
           },
           input.command,
+          undefined,
+          undefined,
+          (inventory) =>
+            savedPurchase && confirmed
+              ? confirmed(tx, input.owner, savedPurchase, inventory, timestamp)
+              : Promise.resolve(undefined),
         );
       });
     },

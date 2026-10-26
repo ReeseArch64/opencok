@@ -167,6 +167,7 @@ export class ShopService {
           },
           purchase: {
             id,
+            saleType: rule.sale_type,
             count,
             daily: counters.daily + count,
             total: counters.total + count,

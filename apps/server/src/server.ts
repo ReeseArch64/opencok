@@ -1,3 +1,10 @@
+import {
+  campaignInventoryObservations,
+  campaignObservationNeeded,
+  planCampaignObservation,
+} from "@opencok/services/campaign-observation";
+import type { CampaignObservation } from "@opencok/contracts/campaign-observation";
+import type { MutationTransaction } from "@opencok/repositories/mutation";
 import { createCampaignAudience } from "@opencok/repositories/campaign-notice";
 import { publishCampaignNotice } from "@opencok/services/campaign-notice";
 import {
@@ -234,7 +241,10 @@ import { createTradeExecutor } from "@opencok/repositories/trade";
 import { TradeService } from "@opencok/services/trade";
 import { ShopService } from "@opencok/services/shops";
 import { MailRewardService } from "@opencok/services/mail-rewards";
-import { createInventoryExecutor } from "@opencok/repositories/inventory";
+import {
+  createInventoryExecutor,
+  executeInventoryTransaction,
+} from "@opencok/repositories/inventory";
 import { InventoryService } from "@opencok/services/inventory";
 import { decodeWorldPowerEffects } from "@opencok/services/power";
 import { worldPowerEffects } from "@opencok/rules/power-world";
@@ -1787,10 +1797,68 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     const trade = new TradeService(createTradeExecutor(db.kingdom.db, authority), rules);
-    const shops = new ShopService(createShopRepository(db.kingdom.db, authority), rules);
+    const confirmCampaignInventory = async (
+      tx: MutationTransaction,
+      owner: string,
+      events: readonly CampaignObservation[],
+      now: number,
+    ) => {
+      if (!campaignObservationNeeded(rules, events, now)) return undefined;
+      return executeInventoryTransaction(
+        tx,
+        owner,
+        (state) =>
+          planCampaignObservation(state, rules, economyEffects, now, events, (request, economy) =>
+            city.command(tx, owner, "campaign.record", request, BigInt(now), economy),
+          ),
+        "campaign.record",
+      );
+    };
+    const shops = new ShopService(
+      createShopRepository(
+        db.kingdom.db,
+        authority,
+        Date.now,
+        (tx, owner, purchase, inventory, now) =>
+          confirmCampaignInventory(
+            tx,
+            owner,
+            campaignInventoryObservations(
+              inventory,
+              /^\d+$/.test(purchase.id) && purchase.saleType
+                ? {
+                    code: 68,
+                    selector: purchase.saleType,
+                    attributes: {
+                      key_shopId: purchase.id,
+                      key_shopBuyNum: purchase.count,
+                      key_shopSaleType: purchase.saleType,
+                    },
+                  }
+                : undefined,
+            ),
+            now,
+          ),
+      ),
+      rules,
+    );
     const mailRewards = new MailRewardService(
-      createMailRewardExecutor(db.kingdom.db, authority, Date.now, () =>
-        mailRewardRealmAllowed(db.databases.global.db, config.kingdomId),
+      createMailRewardExecutor(
+        db.kingdom.db,
+        authority,
+        Date.now,
+        () => mailRewardRealmAllowed(db.databases.global.db, config.kingdomId),
+        (tx, owner, entry, inventory, now) =>
+          confirmCampaignInventory(
+            tx,
+            owner,
+            campaignInventoryObservations(inventory, {
+              code: 61,
+              selector: text(entry, "title"),
+              attributes: { key_mailTitle: text(entry, "title") },
+            }),
+            now,
+          ),
       ),
       rules,
     );

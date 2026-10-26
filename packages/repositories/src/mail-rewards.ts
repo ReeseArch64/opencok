@@ -1,3 +1,7 @@
+import type { InventoryPlan } from "@opencok/contracts/inventory";
+import type { MutationResult } from "@opencok/contracts/mutation";
+import type { Row } from "@opencok/contracts/rows";
+import type { MutationTransaction } from "./mutation";
 import { server_info } from "@opencok/drizzle/schema/opencok_global/server_info";
 import { and, asc, eq, inArray, lt, gt, or, sql } from "drizzle-orm";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
@@ -37,6 +41,13 @@ export function createMailRewardExecutor(
   authority: RealmAuthority,
   now = Date.now,
   allowed: () => Promise<boolean> = async () => true,
+  confirmed?: (
+    tx: MutationTransaction,
+    owner: string,
+    entry: Row,
+    inventory: InventoryPlan,
+    now: number,
+  ) => Promise<MutationResult | undefined>,
 ): MailRewardExecutor {
   const execute = createMutationExecutor(db, authority, now);
   return async (input, selection, grant, combine) => {
@@ -124,6 +135,10 @@ export function createMailRewardExecutor(
           owner,
           (state) => grant(state, entry, captured),
           "mail.reward",
+          undefined,
+          undefined,
+          (inventory) =>
+            confirmed?.(tx, owner, entry, inventory, captured) ?? Promise.resolve(undefined),
         );
         await tx
           .update(mail)
