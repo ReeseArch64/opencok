@@ -6735,10 +6735,15 @@ column ["startBetTime","bigint",false,null,null,null]
 column ["startTime","bigint",false,null,null,null]
 column ["ended","integer",false,null,null,null]
 column ["betNum","bigint",false,null,null,null]
+column ["winningBetNum","bigint",false,null,null,null]
+column ["rewardPool","bigint",false,null,null,null]
+column ["tax","integer",false,null,null,null]
+column ["rewardLimit","integer",false,null,null,null]
 primary ["question_match_PRIMARY",["id"]]
-insert into "opencok_kingdom"."question_match" ("id", "result", "startBetTime", "startTime", "ended", "betNum") values ($1, $2, $3, $4, $5, $6)
-select "id", "result", "startBetTime", "startTime", "ended", "betNum" from "opencok_kingdom"."question_match" where "opencok_kingdom"."question_match"."id" = $1
-update "opencok_kingdom"."question_match" set "id" = $1, "result" = $2, "startBetTime" = $3, "startTime" = $4, "ended" = $5, "betNum" = $6 where "opencok_kingdom"."question_match"."id" = $7
+check ["question_match_settlement","(\\"winningBetNum\\" IS NULL AND \\"rewardPool\\" IS NULL AND \\"tax\\" IS NULL AND \\"rewardLimit\\" IS NULL) OR (\\"winningBetNum\\" IS NOT NULL AND \\"winningBetNum\\" >= 0 AND \\"rewardPool\\" IS NOT NULL AND \\"rewardPool\\" >= 0 AND \\"tax\\" IS NOT NULL AND \\"tax\\" BETWEEN 0 AND 50 AND \\"rewardLimit\\" IS NOT NULL AND \\"rewardLimit\\" >= 0 AND coalesce(\\"ended\\",0) = 1 AND length(coalesce(\\"result\\",'')) > 0)"]
+insert into "opencok_kingdom"."question_match" ("id", "result", "startBetTime", "startTime", "ended", "betNum", "winningBetNum", "rewardPool", "tax", "rewardLimit") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "id", "result", "startBetTime", "startTime", "ended", "betNum", "winningBetNum", "rewardPool", "tax", "rewardLimit" from "opencok_kingdom"."question_match" where "opencok_kingdom"."question_match"."id" = $1
+update "opencok_kingdom"."question_match" set "id" = $1, "result" = $2, "startBetTime" = $3, "startTime" = $4, "ended" = $5, "betNum" = $6, "winningBetNum" = $7, "rewardPool" = $8, "tax" = $9, "rewardLimit" = $10 where "opencok_kingdom"."question_match"."id" = $11
 delete from "opencok_kingdom"."question_match" where "opencok_kingdom"."question_match"."id" = $1"
 `;
 
@@ -10551,6 +10556,8 @@ column ["ended","integer",false,null,null,null]
 column ["rewarded","integer",false,null,null,null]
 column ["reward","integer",false,null,null,null]
 primary ["user_olympic_bet_PRIMARY",["uuid"]]
+index ["user_olympic_bet_owner_question",false,["uid","questionId"]]
+index ["user_olympic_bet_question_country",false,["questionId","betCountry"]]
 insert into "opencok_kingdom"."user_olympic_bet" ("uuid", "uid", "questionId", "resourceType", "betNum", "betCountry", "result", "ended", "rewarded", "reward") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 select "uuid", "uid", "questionId", "resourceType", "betNum", "betCountry", "result", "ended", "rewarded", "reward" from "opencok_kingdom"."user_olympic_bet" where "opencok_kingdom"."user_olympic_bet"."uuid" = $1
 update "opencok_kingdom"."user_olympic_bet" set "uuid" = $1, "uid" = $2, "questionId" = $3, "resourceType" = $4, "betNum" = $5, "betCountry" = $6, "result" = $7, "ended" = $8, "rewarded" = $9, "reward" = $10 where "opencok_kingdom"."user_olympic_bet"."uuid" = $11

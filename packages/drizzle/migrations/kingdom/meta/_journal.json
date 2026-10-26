@@ -218,6 +218,13 @@
       "when": 1793029148851,
       "tag": "0030_cup_odds_precision",
       "breakpoints": false
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793030152424,
+      "tag": "0031_olympic_settlement",
+      "breakpoints": false
     }
   ]
 }

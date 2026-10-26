@@ -91,7 +91,8 @@
     "./continued-cost": "./src/continued-cost.ts",
     "./special-event": "./src/special-event.ts",
     "./groupbuy": "./src/groupbuy.ts",
-    "./cup-betting": "./src/cup-betting.ts"
+    "./cup-betting": "./src/cup-betting.ts",
+    "./olympic": "./src/olympic.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

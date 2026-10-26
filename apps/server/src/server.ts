@@ -1,4 +1,14 @@
 import {
+  olympicDomain,
+  OlympicScheduleService,
+  olympicSettlementOperation,
+} from "@opencok/services/olympic";
+import {
+  createOlympicScheduleStore,
+  pendingOlympicSettlements,
+} from "@opencok/repositories/olympic";
+import { olympicPeriod } from "@opencok/rules/olympic";
+import {
   cupBettingDomain,
   CupScheduleService,
   cupSettlementOperation,
@@ -495,6 +505,7 @@ export const RealmDependenciesLive = Layer.effect(
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
         createPrayerDomain(),
         troubleDomain,
+        olympicDomain,
         cupBettingDomain,
         createGroupBuyDomain(),
         continuedCostDomain,
@@ -706,6 +717,36 @@ export const RealmDependenciesLive = Layer.effect(
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
+    const olympicSchedule = new OlympicScheduleService(
+      createOlympicScheduleStore(db.kingdom.db, authority),
+      rules,
+    );
+    let olympicScanAt = 0n,
+      olympicCursor: string | undefined;
+    const recoverOlympicBets = async () => {
+      const at = BigInt(Date.now()),
+        period = olympicPeriod(rules);
+      if (!period) return;
+      if (at >= olympicScanAt) {
+        await olympicSchedule.refresh();
+        olympicScanAt = at + 300000n;
+      }
+      if (at <= period.end) return;
+      const pending = await pendingOlympicSettlements(db.kingdom.db, olympicCursor);
+      if (!pending.length) olympicCursor = undefined;
+      for (const record of pending) {
+        olympicCursor = record.owner;
+        try {
+          await activities.domainCommand(record.owner, "Olympic.settle", {
+            operationId: sfs.string(olympicSettlementOperation(record.owner, record.ids)),
+          });
+        } catch {
+          console.warn(
+            JSON.stringify({ event: "olympic_settlement_failed", kingdom: config.kingdomId }),
+          );
+        }
+      }
+    };
     const cupSchedule = new CupScheduleService(
       createCupScheduleStore(db.kingdom.db, authority),
       rules,
@@ -1171,6 +1212,15 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    yield* Effect.tryPromise({
+      try: recoverOlympicBets,
+      catch: () => new Error("Olympic settlement unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     yield* Effect.tryPromise({
       try: recoverCupBets,
       catch: () => new Error("Cup settlement unavailable"),
