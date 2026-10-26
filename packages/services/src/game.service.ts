@@ -290,6 +290,7 @@ export class GameService {
       {},
     );
     const dragonTower = await this.services.cityProgression?.(uid, "dragontower.init", {});
+    const targets = await this.services.cityProgression?.(uid, "target.init", {});
     const recharge = await this.services.cityProgression?.(uid, "new.sercum.init", {});
     const boxes = await this.services.cityProgression?.(uid, "ordinary.box.init", {});
     const cycle = await this.services.cityProgression?.(uid, "sevenday.init", {});
@@ -351,6 +352,7 @@ export class GameService {
       cycle,
       boxes,
       recharge,
+      targets,
       civilization,
       campaign,
       lottery,
@@ -548,6 +550,9 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "target.task.ui":
+      case "target.task.receive":
+      case "target.task.item":
       case "pay.recharge.ui.state":
       case "new.sercum.ui":
       case "new.sercum.reward":

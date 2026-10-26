@@ -1,3 +1,4 @@
+import { recordTargetTask } from "./target-task";
 import { recordExpeditionScore } from "./new-expedition";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -43,6 +44,7 @@ function complete(context: CityProgressionContext, row: Row, data?: ProgressionA
     after = researchDefinition(context.rules, text(row, "itemId"), level);
   const completed = { ...row, level, cd: idleDeadline };
   context.write.sciences = [completed];
+  if (!context.completing) recordTargetTask(context, 12, 1);
   const delta = cityAmount(after.power ?? 0) - cityAmount(before.power ?? 0);
   context.power(delta);
   if (delta > 0n) recordExpeditionScore(context, 3, 2, cityInteger(delta));

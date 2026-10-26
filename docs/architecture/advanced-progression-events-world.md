@@ -493,3 +493,32 @@ Back up mail and delivery records before deployment, and retain these markers
 during rollback. Existing historical deliveries have no equivalent marker;
 operators must seed their delivered thresholds before replaying old callbacks, or
 begin with a fresh event period. No payment provider or new dependency is added.
+
+Target tasks reuse the owned task and period-note tables. A stable UTC weekly
+window selects distinct, castle-eligible weighted tasks and persists their IDs,
+quantities, progress, completion and reward multiplier. Only the matching day and
+trusted server action advance a task. Training, healing, defenses, construction,
+research, collection returns, quest producers and item-use hooks update progress
+inside their original mutation, so retries and failed receipts cannot create
+additional progress. Target queries recover owned world transitions first so a
+finished collection contributes before the period's mail recovery.
+
+New assignments include only task types with a maintained trusted producer.
+Imported unsupported tasks remain readable; combat, cross-realm and payment task
+producers require their corresponding validated engine or payment integration.
+The public transport does not accept arbitrary progress or purchase events.
+Completion items preserve the saved counter and doubling consumes the requested
+owned quantity while incrementing the multiplier once, matching the reference.
+Items cannot be consumed after a period expires or its rewards are claimed.
+
+Both ordinary and validated premium claims grant the configured full reward:
+the reference's ordinary-claim fraction is not applied to its actual grant.
+Empty claims reject instead of forfeiting an uncompleted period. Claims, item
+costs, markers, ledger and receipts commit together. An expired unclaimed period
+funds one mail per completed task, aggregating its repeated reward quantities
+instead of creating hundreds of identical mails. Mail recovery precedes any new
+period replacement. Premium claims require an accepted immutable payment proof
+and canonical event receipt; the default realm composition has no such gateway.
+Its durable private notification contains only the owner's resulting reward.
+Back up task notes, tasks, inventory and mail before deployment; preserve claim
+modes and period bounds when rolling back. No new migration or dependency is added.

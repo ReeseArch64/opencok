@@ -329,6 +329,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
     {
+      targetTasks: await optional(GameplayCatalog.TargetQuest),
       rechargeFeedback: rechargeFeedbackRecords.length
         ? indexRules(rechargeFeedbackRecords, GameplayCatalog.DailyRecharge)
         : new Map<string, Rule>(),

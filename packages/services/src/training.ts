@@ -1,3 +1,4 @@
+import { recordTargetTask } from "./target-task";
 import { recordExpeditionScore } from "./new-expedition";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -72,6 +73,10 @@ function complete(context: CityProgressionContext, row: Row, count: number) {
   const power = unitPower(troopDefinition(context.rules, text(row, "armyId")), count);
   context.power(power);
   recordExpeditionScore(context, 5, cityInteger(row.armyId), count);
+  const targetCondition = ({ 1: "1", 8: "2", 9: "4", 10: "6" } as Record<number, string>)[
+    troopQueueType(troopDefinition(context.rules, text(row, "armyId")))
+  ];
+  if (targetCondition) recordTargetTask(context, 2, count, targetCondition);
   if (power > 0n) recordExpeditionScore(context, 3, 3, cityInteger(power));
   return {
     id: sfs.string(text(row, "armyId")),

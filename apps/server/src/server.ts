@@ -1,3 +1,4 @@
+import { createTargetTaskDomain, publishTargetTaskMutation } from "@opencok/services/target-task";
 import { createRechargeFeedbackDomain } from "@opencok/services/recharge-feedback";
 import { createRechargeActivityDomain } from "@opencok/services/recharge-activity";
 import { createOrdinaryBoxDomain } from "@opencok/services/ordinary-box";
@@ -445,6 +446,7 @@ export const RealmDependenciesLive = Layer.effect(
         createOrdinaryBoxDomain(),
         createRechargeActivityDomain(),
         createRechargeFeedbackDomain(),
+        createTargetTaskDomain(),
         createLuckyDayDomain(),
         castleLevelEventDomain,
         lotteryDomain,
@@ -646,6 +648,19 @@ export const RealmDependenciesLive = Layer.effect(
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
     const recoverWorld = async () => {
+      for (let index = 0; index < 64; index++) {
+        const delivered = await relayMutationEvent(
+          db.kingdom.db,
+          authority,
+          (event) =>
+            publishTargetTaskMutation(event.payload, async (owner, command, body) => {
+              await notifications.publish(owner, command, body);
+            }),
+          Date.now,
+          "target.paid",
+        );
+        if (!delivered) break;
+      }
       for (const command of ["dragontower", "dragontower.init", "dragontower.tick"])
         for (let index = 0; index < 64; index++) {
           const delivered = await relayMutationEvent(
@@ -1136,6 +1151,16 @@ export const RealmDependenciesLive = Layer.effect(
             if ((expeditionTreasuryCommands as readonly string[]).includes(command))
               return expeditionTreasury.command(owner, command, params);
             await recoverActivities(owner);
+            if (
+              [
+                "target.init",
+                "target.task.ui",
+                "target.task.item",
+                "target.task.receive",
+                "target.paid",
+              ].includes(command)
+            )
+              await activities.domainCommand(owner, "world.tick", {});
             return activities.domainCommand(owner, command, params);
           },
           reconcileTimed: async (owner) => {

@@ -125,7 +125,9 @@
     "./recharge-activity": "./src/recharge-activity.ts",
     "./responses/recharge-activity": "./src/responses/recharge-activity.ts",
     "./recharge-feedback": "./src/recharge-feedback.ts",
-    "./responses/recharge-feedback": "./src/responses/recharge-feedback.ts"
+    "./responses/recharge-feedback": "./src/responses/recharge-feedback.ts",
+    "./target-task": "./src/target-task.ts",
+    "./responses/target-task": "./src/responses/target-task.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

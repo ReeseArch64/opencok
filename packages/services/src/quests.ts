@@ -1,3 +1,4 @@
+import { recordTargetTask } from "./target-task";
 import { recordCampaignUse } from "./local-campaign";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { newEquipment } from "./equipment";
@@ -58,6 +59,13 @@ export function refreshQuests(
   context: CityProgressionContext,
   action?: Parameters<typeof progressQuests>[4],
 ) {
+  if (action?.legacy)
+    recordTargetTask(
+      context,
+      action.legacy,
+      action.count,
+      action.targetCondition ?? action.key ?? "1",
+    );
   if (!context.state.quests) return;
   const merge = (original: readonly Row[], written: readonly Row[] | undefined, key: string) => [
     ...original.filter((row) => !written?.some((next) => String(next[key]) === String(row[key]))),
@@ -212,6 +220,16 @@ async function prepare(context: CityProgressionContext, command: string, params:
       legacy: kind === "use" ? 16 : kind === "compose" ? 15 : 1,
       main: kind === "compose" ? 46 : undefined,
       key: kind === "harvest" ? str(params, "itemId") : undefined,
+      targetCondition:
+        kind === "use"
+          ? (context.rules.goods.get(str(params, "itemId"))?.para1 ?? "1")
+          : kind === "harvest"
+            ? String(
+                ({ wood: 0, stone: 1, iron: 2, food: 3, silver: 4 } as Record<string, number>)[
+                  str(params, "itemId")
+                ] ?? "",
+              )
+            : undefined,
       count,
     });
     return { response: encode({}), event: null };
@@ -430,6 +448,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
         day: sfs.int((day % 7) + 1),
       };
       write.signIn = { day: day + 1, lastRewardTime: now, reward };
+      recordTargetTask(context, 17, 1);
       const progressed = progressQuests(
         { ...context.state, quests: { ...q, daily: write.daily ?? [] } },
         context.rules,

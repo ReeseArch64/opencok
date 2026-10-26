@@ -46,6 +46,10 @@ export async function cityHarness(extra: readonly CityDomain[] = [], totems = fa
         .pathname,
     });
     const rules = await loadRules();
+    if (!extra.some((domain) => domain.commands.includes("target.task.ui"))) {
+      const target = rules.features.get("target_quest");
+      if (target) rules.features.set("target_quest", { ...target, online: "close", test: "close" });
+    }
     let now = 1000000;
     const effects = { world: async () => new Map<number, number>(), emperor: async () => null };
     const authority = await acquireRealmAuthority(db.db, 1, () => true);

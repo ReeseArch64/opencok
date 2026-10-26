@@ -1,3 +1,4 @@
+import { readTargetTasks, writeTargetTasks } from "./target-task";
 import { rechargeFeedbackReader, writeRechargeFeedback } from "./recharge-feedback";
 import { readRechargeActivity, writeRechargeActivity } from "./recharge-activity";
 import { readOrdinaryBoxServer, writeOrdinaryBox } from "./ordinary-box";
@@ -135,6 +136,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        targetTask: await readTargetTasks(tx, owner),
         rechargeFeedback:
           command === "pay.recharge.ui.state" || command === "feedback.paid"
             ? rechargeFeedbackReader(tx, owner)
@@ -259,6 +261,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.targetTask) await writeTargetTasks(tx, owner, write.targetTask);
         if (write.rechargeFeedback)
           await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);
         if (write.rechargeActivity) await writeRechargeActivity(tx, owner, write.rechargeActivity);
