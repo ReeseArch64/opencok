@@ -1,3 +1,4 @@
+import { rechargeFeedbackReader, writeRechargeFeedback } from "./recharge-feedback";
 import { readRechargeActivity, writeRechargeActivity } from "./recharge-activity";
 import { readOrdinaryBoxServer, writeOrdinaryBox } from "./ordinary-box";
 import { readSevenDayCycle, writeSevenDayCycle } from "./seven-day-cycle";
@@ -134,6 +135,10 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        rechargeFeedback:
+          command === "pay.recharge.ui.state" || command === "feedback.paid"
+            ? rechargeFeedbackReader(tx, owner)
+            : undefined,
         rechargeActivity: command?.startsWith("new.sercum.")
           ? await readRechargeActivity(tx, owner)
           : undefined,
@@ -254,6 +259,8 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.rechargeFeedback)
+          await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);
         if (write.rechargeActivity) await writeRechargeActivity(tx, owner, write.rechargeActivity);
         if (write.ordinaryBox) await writeOrdinaryBox(tx, owner, write.ordinaryBox);
         if (write.sevenDayCycle) await writeSevenDayCycle(tx, owner, write.sevenDayCycle);

@@ -471,3 +471,25 @@ funded system mail and records the same claim marker atomically. Reconnect and
 receipt replay cannot duplicate mail or direct claims, and failed receipts roll
 back totals, markers and mail together. Existing saved totals and other lord
 fields are preserved. No new migration, provider connection or dependency is added.
+
+Recharge feedback previews compare only the owner's in-window nominal-price
+counts and keep the native array of boolean elements aligned with the catalog
+rows. Nominal cents are derived from consistent maintained product prices; missing
+or conflicting prices do not qualify a reward. Payment-log reads return aggregate
+counts or the minimal selected order fields, rather than exposing payment details.
+The maintained empty feedback catalog is valid and preserves the currently closed
+historical configuration.
+
+The internal feedback consumer requires a validated gateway and its owned saved
+payment. Event IDs have canonical receipt identities, and qualifying thresholds
+have durable owner, catalog-ID and period markers. Processing confirmations out
+of order recovers all reached thresholds and cannot duplicate an already funded
+mail. Late confirmations use the saved occurrence time. Mail, threshold markers
+and the mutation receipt commit together; no purchased currency is granted here.
+The default composition has no payment gateway and the consumer is not public.
+
+Migration `0023_recharge_feedback_claims.sql` adds period-specific delivery markers.
+Back up mail and delivery records before deployment, and retain these markers
+during rollback. Existing historical deliveries have no equivalent marker;
+operators must seed their delivered thresholds before replaying old callbacks, or
+begin with a fresh event period. No payment provider or new dependency is added.

@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  rechargeFeedback?: import("./recharge-feedback").RechargeFeedbackReader;
   rechargeActivity?: import("./recharge-activity").RechargeActivityState;
   ordinaryBoxServer?: { openedAt: bigint };
   sevenDayCycle?: import("./seven-day-cycle").SevenDayCycleState;
@@ -123,6 +124,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  rechargeFeedback?: readonly import("./recharge-feedback").RechargeFeedbackClaim[];
   rechargeActivity?: import("./recharge-activity").RechargeActivityWrite;
   ordinaryBox?: import("./ordinary-box").OrdinaryBoxWrite;
   sevenDayCycle?: import("./seven-day-cycle").SevenDayCycleWrite;

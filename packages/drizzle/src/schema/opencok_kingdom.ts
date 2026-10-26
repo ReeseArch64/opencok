@@ -681,3 +681,5 @@ export { arena_registration } from "./opencok_kingdom/arena_registration";
 export { user_arena_army } from "./opencok_kingdom/user_arena_army";
 export { expedition_period } from "./opencok_kingdom/expedition_period";
 export { expedition_progress } from "./opencok_kingdom/expedition_progress";
+
+export { recharge_feedback_claim } from "./opencok_kingdom/recharge_feedback_claim";

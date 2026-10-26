@@ -1,3 +1,4 @@
+import { createRechargeFeedbackDomain } from "@opencok/services/recharge-feedback";
 import { createRechargeActivityDomain } from "@opencok/services/recharge-activity";
 import { createOrdinaryBoxDomain } from "@opencok/services/ordinary-box";
 import { createSevenDayCycleDomain } from "@opencok/services/seven-day-cycle";
@@ -443,6 +444,7 @@ export const RealmDependenciesLive = Layer.effect(
         createSevenDayCycleDomain(),
         createOrdinaryBoxDomain(),
         createRechargeActivityDomain(),
+        createRechargeFeedbackDomain(),
         createLuckyDayDomain(),
         castleLevelEventDomain,
         lotteryDomain,

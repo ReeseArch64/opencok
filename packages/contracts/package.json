@@ -123,7 +123,9 @@
     "./ordinary-box": "./src/ordinary-box.ts",
     "./responses/ordinary-box": "./src/responses/ordinary-box.ts",
     "./recharge-activity": "./src/recharge-activity.ts",
-    "./responses/recharge-activity": "./src/responses/recharge-activity.ts"
+    "./responses/recharge-activity": "./src/responses/recharge-activity.ts",
+    "./recharge-feedback": "./src/recharge-feedback.ts",
+    "./responses/recharge-feedback": "./src/responses/recharge-feedback.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
