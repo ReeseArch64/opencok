@@ -8,6 +8,7 @@ const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://synthetic:secret@localhost/wrong?database=wrong&sslmode=require",
   GLOBAL_DATABASE_NAME: "synthetic_global",
   KINGDOM_ID: "2",
+  GAME_PUBLIC_HOST: "game.synthetic.invalid",
 });
 
 test.each([
@@ -50,6 +51,7 @@ test("Effect API config selects the global database from the injected environmen
   expect(url.searchParams.has("database")).toBe(false);
   expect(url.searchParams.get("sslmode")).toBe("require");
   expect(config.kingdomId).toBe(2);
+  expect(config.gameHost).toBe("game.synthetic.invalid");
   expect(config.host).toBe("0.0.0.0");
   expect(config.port).toBe(8080);
   expect(config.gamePort).toBe(9933);

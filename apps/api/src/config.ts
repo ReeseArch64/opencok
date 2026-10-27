@@ -28,7 +28,7 @@ export const readConfig = Effect.gen(function* () {
     serversFile: settings.API_SERVERS_FILE
       ? resolve(workspaceRoot, settings.API_SERVERS_FILE)
       : undefined,
-    gameHost: settings.API_GAME_HOST,
+    gameHost: settings.GAME_PUBLIC_HOST,
     gamePort: 9933,
   };
 });

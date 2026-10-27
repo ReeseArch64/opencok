@@ -69,7 +69,7 @@ export const apiSchema = z
     ),
     REDIS_URL: redisUrl,
     API_SERVERS_FILE: optionalPath,
-    API_GAME_HOST: z.preprocess(
+    GAME_PUBLIC_HOST: z.preprocess(
       blankToUndefined,
       z
         .string()

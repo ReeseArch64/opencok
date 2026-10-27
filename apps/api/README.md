@@ -46,7 +46,7 @@ described in [Avatar media](#avatar-media):
 | `GLOBAL_DATABASE_NAME` | Global physical database, default `opencok_global`.                                                                                  |
 | `REDIS_URL`            | Shared Redis URL for health and media authorization; set `redis://redis:6379/0` for local Compose or an external URL for production. |
 | `API_SERVERS_FILE`     | Optional JSON directory, relative to the workspace root; defaults to an in-memory directory derived from `KINGDOM_ID`.               |
-| `API_GAME_HOST`        | Optional advertised client-reachable TCP host. A bind wildcard is rejected.                                                          |
+| `GAME_PUBLIC_HOST`     | Optional advertised client-reachable TCP host. A bind wildcard is rejected.                                                          |
 | `CHAT_URL`             | Optional HTTP(S) origin of the maintained chat service; no path, embedded credentials, query or fragment.                            |
 
 The API binds to `0.0.0.0:8080`, advertises game port `9933` and uses a 3000 ms
@@ -84,7 +84,11 @@ zone; internal configuration fields are not returned.
 
 The default directory derives its ID, name and zone from `KINGDOM_ID` (default
 realm 1 / `COK1`). `resources/servers.json` is an optional public JSON template;
-Compose mounts a configured `API_SERVERS_FILE` read-only when selected. The PostgreSQL topology still
+Compose generates the directory from `KINGDOM_ID` and the required
+`GAME_PUBLIC_HOST` environment value; it does not mount this optional file. Set
+`API_SERVERS_FILE` and provide the file explicitly when using a custom deployment.
+`GAME_PUBLIC_HOST` must be the IP or hostname reachable by the game client, such as
+`192.168.1.104` locally or a public game hostname in production. The PostgreSQL topology still
 prepares both realm databases. To add another active server, configure its own
 process, TCP entry point and directory entry; a second empty database does not
 establish client/account readiness. The default runtime advertises a single realm
