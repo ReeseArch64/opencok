@@ -4,6 +4,7 @@ import type { RuntimeMarch } from "@opencok/contracts/world-march-runtime";
 import type { WorldScoutTarget } from "@opencok/contracts/world-scout-report";
 import type { CityProgressionContext } from "./city-progression";
 import { cityInteger } from "@opencok/rules/city-progression";
+import { legacyPlayerVersionAtLeast } from "@opencok/rules/availability";
 import { scoutCost, barbarianCurrentHP } from "@opencok/rules/world-scout";
 import { scoutTowerSelectors } from "@opencok/rules/world-scout-report";
 import { serverFeature } from "@opencok/rules/power-context";
@@ -25,7 +26,7 @@ export function scoutWatchtower(context: CityProgressionContext) {
     tower,
     ...scoutWatchtowerValues(context.rules, tower, {
       kingdomId: context.rules.kingdomId,
-      version: "12.06.0",
+      version: text(context.state.profile ?? {}, "appVersion"),
       now: Number(context.now),
     }),
   };
@@ -97,9 +98,13 @@ export function scoutDeparture(context: CityProgressionContext, id: number) {
     shield &&
     serverFeature(context.rules, "glory_watchtower", {
       kingdomId: context.rules.kingdomId,
-      version: "12.06.0",
+      version: text(context.state.profile, "appVersion"),
       now: Number(context.now),
     }) &&
+    legacyPlayerVersionAtLeast(
+      text(context.state.profile, "appVersion"),
+      context.rules.features.get("glory_watchtower")?.version,
+    ) &&
     !watch.ready
   )
     worldMutationFailure();

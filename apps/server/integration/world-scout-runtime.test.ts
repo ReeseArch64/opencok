@@ -650,3 +650,52 @@ test("returning scouts restore their reservations independently of newly unproje
     await h.close();
   }
 }, 120000);
+
+test("older callers do not enter the honour watchtower shield admission or speed branch", async () => {
+  const h = await scoutHarness();
+  try {
+    h.clock.now = 200000000;
+    h.rules.features.set("glory_watchtower", {
+      id: "glory_watchtower",
+      online: "all",
+      test: "all",
+      version: "12.06.0",
+    });
+    h.rules.power.statuses!.set("990001", { id: "990001", effect: "61;1" });
+    await h.db.db.insert(user_state).values({
+      uid: "other",
+      stateId: 990001,
+      startTime: 0n,
+      endTime: BigInt(h.clock.now + 10000000),
+    });
+    await h.db.db
+      .update(user_building)
+      .set({ level: 30, star: 5, progress: 0, effectTime: BigInt(h.clock.now - 1) })
+      .where(eq(user_building.uuid, "owner-watchtower"));
+    await h.db.db
+      .update(userprofile)
+      .set({ appVersion: "1.0.0" })
+      .where(eq(userprofile.uid, "owner"));
+    await h.scout();
+    expect((await h.db.db.select().from(world_march))[0]!.honourWatchtower).toBe(0);
+    expect((await h.building("owner-watchtower"))!.effectTime).toBe(199999999n);
+    h.clock.now = Number((await checkpoint(h)).dueAt);
+    await h.tick();
+    expect((await h.db.db.select().from(mail).where(eq(mail.type, 8))).length).toBe(0);
+    expect((await h.db.db.select().from(mail))[0]).toMatchObject({
+      toUser: "owner",
+      type: 6,
+      title: "114163",
+    });
+    h.clock.now = Number((await checkpoint(h)).dueAt);
+    await h.tick();
+    await h.db.db
+      .update(userprofile)
+      .set({ appVersion: "12.06.0" })
+      .where(eq(userprofile.uid, "owner"));
+    await expect(h.scout()).rejects.toThrow();
+    expect((await h.db.db.select().from(world_march)).length).toBe(0);
+  } finally {
+    await h.close();
+  }
+}, 120000);
