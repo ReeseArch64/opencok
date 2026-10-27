@@ -135,7 +135,10 @@ test("local boss health precedes owner identity and preserves zero/default and n
       ...worldPointOwner(worldPointOwnerBase(p, {}, false)),
       ...healthFields(worldMonsterHealth(p, false, r)),
     };
-    expect(fields).toEqual({ mchp: sfs.int(current ?? 0), mmhp: sfs.int(12) });
+    expect(fields).toEqual({
+      mchp: sfs.int(current != null && current > 0 ? current : 12),
+      mmhp: sfs.int(12),
+    });
     expect(decode(encode(fields))).toEqual(fields);
   }
   expect(
