@@ -146,8 +146,8 @@ test("native login receives hero bundle metadata before the init extension", asy
       rl: sfs.array(),
       p: sfs.object({
         use: sfs.int(0),
-        newHeroVersion: sfs.string("1.0.91"),
-        newHeroMd5Android: sfs.string("391e30cc9943d451b52c5137c83978f3"),
+        newHeroVersion: sfs.string("1.0.93"),
+        newHeroMd5Android: sfs.string("99d126feeb3c80e98abbc691eec3230b"),
       }),
     }),
   );

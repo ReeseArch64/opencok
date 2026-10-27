@@ -75,3 +75,47 @@ No new dependency or schema migration is required. Keep the original reference
 inputs read-only. Back up realm state before rollout, retain receipts together
 with inventory postings, and never clear cooldowns, claims or draw state to retry
 an operation after rollback of application code.
+
+## Hua Mulan infantry content
+
+Hua Mulan occupies the previously incomplete general 53571; 53572 and 53573 remain
+reserved. The maintained `general_base`, `general_skill` and `general_ab` catalogs
+define her existing fragment 213293, five star skills 54228–54232 and 60 talents
+53571100–53571159. Recruitment requires 3,000 fragments. Existing star costs and
+skill-book 211453 consumption remain authoritative; no account receives a hero.
+
+Her base skills unlock at stars one through five. Formation grants infantry
+health and attack (10% at level one, 38% at level fifteen). Basic attack grants
+1–4.5 points, damage grants 2–9%, striking distance grants one at its single
+level, and basic puncture grants 1–4.5 points. These are initial balance values.
+Effects target infantry variants: 1051/1052, 1011/1012, 1321/1322, 1061/1062,
+406/407 and 6631, consumed through the existing combat snapshot pipeline.
+
+Three talent trees, abilities 41020011, 53571201 and 53571202, contain 20 nodes
+each. Vanguard emphasizes health/basic attack; Offensive emphasizes attack/damage;
+Spear emphasizes basic puncture and two single-level striking-distance nodes.
+The other 58 nodes each accept 100 points. Their combined capacity is 5,802,
+covering the existing level-99 budget of 5,640 without increasing earned points.
+Each path requires completion of the preceding node and unlocks nodes through
+level 96. Per-point increments are 0.1% health/attack, 0.02% damage, and 0.005
+basic attack/puncture. The general level cap is 99. Learning remains optional;
+previews of an unlearned talent correctly show zero current contribution.
+
+The private Android patch `data/android/patches/033-hua-mulan` changes only this
+hero's definitions, fragment presentation, new localized strings and supporting
+rendering. It rebuilds and verifies all 807 database SPD byte ranges. Both main
+and Green locale INIs receive the strings; the Lua language adapter resolves the
+new hero's keys even when an older native language cache remains active. The
+hero's talent popup parses fractional scalar bonuses without truncating them.
+Original APKs, artwork, signing identity and other reserved heroes stay unchanged.
+
+The versioned CDN bundle `dr_newHero1.0.93_android.zip` retains original resources
+and extends the shared head atlas with hero_head_72, card_72 and hero_body_72.
+The body deliberately uses the already loaded `newHero_head` resource, since the
+native loader did not install a newly named body atlas during device verification.
+The RGBA PNG and Cocos2d plist format-2 atlas preserve the established 640×1136
+body and 104×124 portrait sizes. Verify its MD5 against
+`HERO_RESOURCE_ANDROID_MD5` before recreating the server. Install the matching
+split with the existing base APK and signing identity without clearing app data.
+Rollback restores the prior server artifact and retained before-split; retain
+versioned CDN archives. Full combat balance requires gameplay evidence.
