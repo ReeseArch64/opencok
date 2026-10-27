@@ -11,9 +11,15 @@ export const continued_cost_closure = opencok_kingdom.table(
     createdAt: bigint("createdAt", { mode: "bigint" }).notNull(),
     phase: integer("phase").notNull().default(sql.raw("0")),
     finalizedAt: bigint("finalizedAt", { mode: "bigint" }).notNull().default(sql.raw("0")),
+    awardCursor: integer("awardCursor").notNull().default(sql.raw("0")),
+    awardedAt: bigint("awardedAt", { mode: "bigint" }).notNull().default(sql.raw("0")),
   },
   (table) => [
     primaryKey({ name: "continued_cost_closure_PRIMARY", columns: [table.periodId] }),
+    check(
+      "continued_cost_closure_awards",
+      sql.raw('"awardCursor" BETWEEN 0 AND 100 AND "awardedAt">=0'),
+    ),
     check(
       "continued_cost_closure_bounds",
       sql.raw(

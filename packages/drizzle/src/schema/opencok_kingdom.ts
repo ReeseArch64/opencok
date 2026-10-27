@@ -696,3 +696,4 @@ export * from "./opencok_kingdom/continued_cost_period";
 export * from "./opencok_kingdom/continued_cost_fact";
 export * from "./opencok_kingdom/continued_cost_score";
 export { continued_cost_closure } from "./opencok_kingdom/continued_cost_closure";
+export { continued_cost_rank_award } from "./opencok_kingdom/continued_cost_rank_award";

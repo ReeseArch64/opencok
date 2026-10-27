@@ -49,7 +49,9 @@ export function readCostScoreSnapshot(raw: string): readonly CostRankingScore[] 
     throw new Error("Duplicate frozen consumption identity");
   return rows;
 }
-export function costScoreDigest(rows: readonly CostRankingScore[]) {
+export function costScoreDigest(
+  rows: readonly (Omit<CostRankingScore, "metadata"> & { metadata?: string })[],
+) {
   return createHash("sha256")
     .update(
       JSON.stringify(

@@ -15444,10 +15444,33 @@ column ["scoreCount","integer",true,null,null,null]
 column ["createdAt","bigint",true,null,null,null]
 column ["phase","integer",true,"0",null,null]
 column ["finalizedAt","bigint",true,"0",null,null]
+column ["awardCursor","integer",true,"0",null,null]
+column ["awardedAt","bigint",true,"0",null,null]
 primary ["continued_cost_closure_PRIMARY",["periodId"]]
+check ["continued_cost_closure_awards","\\"awardCursor\\" BETWEEN 0 AND 100 AND \\"awardedAt\\">=0"]
 check ["continued_cost_closure_bounds","\\"scoreCount\\" BETWEEN 0 AND 100 AND \\"createdAt\\">=0 AND \\"phase\\" BETWEEN 0 AND 2 AND \\"finalizedAt\\">=0 AND octet_length(\\"snapshot\\")<=1048576"]
-insert into "opencok_kingdom"."continued_cost_closure" ("periodId", "snapshot", "digest", "scoreCount", "createdAt", "phase", "finalizedAt") values ($1, $2, $3, $4, $5, $6, $7)
-select "periodId", "snapshot", "digest", "scoreCount", "createdAt", "phase", "finalizedAt" from "opencok_kingdom"."continued_cost_closure" where "opencok_kingdom"."continued_cost_closure"."periodId" = $1
-update "opencok_kingdom"."continued_cost_closure" set "periodId" = $1, "snapshot" = $2, "digest" = $3, "scoreCount" = $4, "createdAt" = $5, "phase" = $6, "finalizedAt" = $7 where "opencok_kingdom"."continued_cost_closure"."periodId" = $8
+insert into "opencok_kingdom"."continued_cost_closure" ("periodId", "snapshot", "digest", "scoreCount", "createdAt", "phase", "finalizedAt", "awardCursor", "awardedAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "periodId", "snapshot", "digest", "scoreCount", "createdAt", "phase", "finalizedAt", "awardCursor", "awardedAt" from "opencok_kingdom"."continued_cost_closure" where "opencok_kingdom"."continued_cost_closure"."periodId" = $1
+update "opencok_kingdom"."continued_cost_closure" set "periodId" = $1, "snapshot" = $2, "digest" = $3, "scoreCount" = $4, "createdAt" = $5, "phase" = $6, "finalizedAt" = $7, "awardCursor" = $8, "awardedAt" = $9 where "opencok_kingdom"."continued_cost_closure"."periodId" = $10
 delete from "opencok_kingdom"."continued_cost_closure" where "opencok_kingdom"."continued_cost_closure"."periodId" = $1"
+`;
+
+exports[`opencok_kingdom.continued_cost_rank_award: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["id","varchar(32)",true,null,null,null]
+column ["periodId","varchar(32)",true,null,null,null]
+column ["ownerUid","varchar(40)",true,null,null,null]
+column ["rank","integer",true,null,null,null]
+column ["payload","text",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["deliveredAt","bigint",true,"0",null,null]
+column ["nextAttemptAt","bigint",true,"0",null,null]
+primary ["continued_cost_rank_award_PRIMARY",["id"]]
+index ["continued_cost_rank_award_recipient",true,["periodId","ownerUid"]]
+index ["continued_cost_rank_award_pending",false,["deliveredAt","nextAttemptAt","createdAt"]]
+check ["continued_cost_rank_award_bounds","\\"rank\\" BETWEEN 1 AND 100 AND \\"createdAt\\">=0 AND \\"deliveredAt\\">=0 AND \\"nextAttemptAt\\">=0 AND octet_length(\\"payload\\") BETWEEN 1 AND 65536"]
+insert into "opencok_kingdom"."continued_cost_rank_award" ("id", "periodId", "ownerUid", "rank", "payload", "createdAt", "deliveredAt", "nextAttemptAt") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "id", "periodId", "ownerUid", "rank", "payload", "createdAt", "deliveredAt", "nextAttemptAt" from "opencok_kingdom"."continued_cost_rank_award" where "opencok_kingdom"."continued_cost_rank_award"."id" = $1
+update "opencok_kingdom"."continued_cost_rank_award" set "id" = $1, "periodId" = $2, "ownerUid" = $3, "rank" = $4, "payload" = $5, "createdAt" = $6, "deliveredAt" = $7, "nextAttemptAt" = $8 where "opencok_kingdom"."continued_cost_rank_award"."id" = $9
+delete from "opencok_kingdom"."continued_cost_rank_award" where "opencok_kingdom"."continued_cost_rank_award"."id" = $1"
 `;
