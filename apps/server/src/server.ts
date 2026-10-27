@@ -1,4 +1,9 @@
 import {
+  createAllianceHeartDomain,
+  publishAllianceHeartMutation,
+} from "@opencok/services/alliance-heart";
+import { pendingAllianceHeartOwners } from "@opencok/repositories/alliance-heart";
+import {
   playerItemGiftDomain,
   publishPlayerItemGiftMutation,
 } from "@opencok/services/player-item-gifts";
@@ -454,6 +459,7 @@ export const RealmDependenciesLive = Layer.effect(
         createOrdinaryBoxDomain(),
         createRechargeActivityDomain(),
         createRechargeFeedbackDomain(),
+        createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
         playerItemGiftDomain,
         createSeasonalExchangeDomain(),
         createVipBoxDomain(),
@@ -658,6 +664,42 @@ export const RealmDependenciesLive = Layer.effect(
     const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
+    let heartCursor = 0;
+    const recoverAllianceHearts = async () => {
+      const online = notifications.owners();
+      if (online.length) {
+        const selected = Array.from(
+          { length: Math.min(32, online.length) },
+          (_, index) => online[(heartCursor + index) % online.length]!,
+        );
+        heartCursor = (heartCursor + selected.length) % online.length;
+        for (const owner of await pendingAllianceHeartOwners(db.kingdom.db, selected)) {
+          try {
+            await activities.domainCommand(owner, "heart.init", { notify: sfs.bool(true) });
+          } catch {
+            console.warn(
+              JSON.stringify({ event: "heart_delivery_deferred", kingdom: config.kingdomId }),
+            );
+          }
+        }
+      }
+      for (const command of ["heart.send", "heart.init"])
+        for (let index = 0; index < 64; index++) {
+          const delivered = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            (event) =>
+              publishAllianceHeartMutation(
+                event.payload,
+                worldInterest.interested,
+                (owner, name, body) => notifications.publish(owner, name, body),
+              ),
+            Date.now,
+            command,
+          );
+          if (!delivered) break;
+        }
+    };
     let giftCursor = 0;
     const deliverPlayerItemGifts = async (owners: readonly string[]) => {
       for (const owner of await pendingPlayerItemGiftOwners(db.kingdom.db, owners)) {
@@ -951,6 +993,15 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
     };
+    yield* Effect.tryPromise({
+      try: recoverAllianceHearts,
+      catch: () => new Error("Heart recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
     yield* Effect.tryPromise({
       try: recoverPlayerItemGifts,
       catch: () => new Error("Item gift recovery unavailable"),

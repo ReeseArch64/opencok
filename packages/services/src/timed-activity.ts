@@ -592,6 +592,9 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
           ? ledger.total()
           : (ledger.resources[asset] ?? long(ledger.state.resource, asset));
     },
+    consumeItem(uuid, count) {
+      ledger.take(ledger.own(uuid), count);
+    },
     ownedItem(uuid) {
       const item = ledger.own(uuid);
       return { itemId: item.itemId, count: item.count };

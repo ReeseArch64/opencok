@@ -276,6 +276,7 @@ export class GameService {
     return (await this.initialize(uid)).body;
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
+    const hearts = await this.services.cityProgression?.(uid, "heart.init", {});
     const gifts = await this.services.cityProgression?.(uid, "gift.init", {});
     const worldRecovery = await this.services.cityProgression?.(uid, "world.tick", {});
     await this.services.reconcileAlliance?.(uid);
@@ -313,6 +314,7 @@ export class GameService {
           .filter((row) => num(row, "on") !== 2)
           .map((row) => sfs.object(equipmentFields(row))),
       ),
+      ...hearts?.body,
       ...gifts?.body,
       ...equipment?.body,
       ...generals?.body,
@@ -343,6 +345,7 @@ export class GameService {
       serverTime: sfs.long(this.now()),
     };
     const initialPushes = [
+      hearts,
       gifts,
       worldRecovery,
       effects,
@@ -556,6 +559,7 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "heart.send":
       case "item.send":
       case "activity.exchange.info":
       case "activity.exchange.reward":

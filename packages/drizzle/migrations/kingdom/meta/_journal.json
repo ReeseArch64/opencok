@@ -183,6 +183,13 @@
       "when": 1792978778191,
       "tag": "0025_player_item_gift_index",
       "breakpoints": false
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792982639840,
+      "tag": "0026_alliance_heart_delivery",
+      "breakpoints": false
     }
   ]
 }
