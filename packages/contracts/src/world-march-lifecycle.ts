@@ -9,7 +9,7 @@ export interface MarchTroopBalance {
   march: number;
 }
 export interface MarchCargo {
-  resource: "wood" | "stone" | "iron" | "food" | "silver";
+  resource: "wood" | "stone" | "iron" | "food" | "silver" | "gold";
   amount: bigint;
 }
 export interface MarchLifecycle {

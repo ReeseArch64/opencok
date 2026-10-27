@@ -91,6 +91,7 @@
     "./alliance-gameplay": "./src/alliance-gameplay.ts",
     "./responses/alliance": "./src/responses/alliance.ts",
     "./world-march-lifecycle": "./src/world-march-lifecycle.ts",
+    "./world-march-runtime": "./src/world-march-runtime.ts",
     "./chat-delivery": "./src/chat-delivery.ts",
     "./chat-social": "./src/chat-social.ts",
     "./realm-social": "./src/realm-social.ts",

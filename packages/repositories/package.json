@@ -87,6 +87,7 @@
     "./alliance-recovery": "./src/alliance-recovery.ts",
     "./alliance-publication": "./src/alliance-publication.ts",
     "./dragon-progression": "./src/dragon-progression.ts",
+    "./world-march-runtime": "./src/world-march-runtime.ts",
     "./postbox": "./src/postbox.ts",
     "./friendship-mine": "./src/friendship-mine.ts",
     "./social-cleanup": "./src/social-cleanup.ts",

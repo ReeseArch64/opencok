@@ -56,6 +56,14 @@ function list(value: JavaValue): JavaValue[] | null {
   return slot.custom.slice(1);
 }
 export function decodeWorldResourceArmy(data: Buffer): SavedResourceArmy | null {
+  if (isMaintainedMarchArmy(data)) {
+    const army = readMaintainedMarchArmy(data);
+    return {
+      owner: army.owner,
+      cachedLoad: army.cachedLoad,
+      soldiers: army.soldiers?.map(({ basicArm: _basicArm, ...soldier }) => soldier) ?? null,
+    };
+  }
   const decoded = decodeJavaObjectStream(data);
   if (decoded === null) return null;
   const root = checked(decoded, armyName, 1740992047662150684n, 2);
@@ -88,6 +96,7 @@ export interface SavedMarchArmy extends Omit<SavedResourceArmy, "soldiers"> {
 }
 
 export function decodeWorldMarchArmy(data: Buffer): SavedMarchArmy | null {
+  if (isMaintainedMarchArmy(data)) return readMaintainedMarchArmy(data);
   const decoded = decodeJavaObjectStream(data);
   if (decoded === null) return null;
   const root = checked(decoded, armyName, 1740992047662150684n, 2);
@@ -146,4 +155,69 @@ export function decodeWorldMarchArmy(data: Buffer): SavedMarchArmy | null {
             level: field(general, "level", "I") as number,
           },
   };
+}
+
+const maintainedMarchPrefix = Buffer.from("OCMA1\0");
+function isMaintainedMarchArmy(data: Buffer) {
+  return (
+    Buffer.isBuffer(data) &&
+    data.subarray(0, maintainedMarchPrefix.length).equals(maintainedMarchPrefix)
+  );
+}
+function readMaintainedMarchArmy(data: Buffer): SavedMarchArmy {
+  if (!Buffer.isBuffer(data) || data.length > 65535) return invalid();
+  const army = JSON.parse(
+    new TextDecoder("utf-8", { fatal: true }).decode(data.subarray(maintainedMarchPrefix.length)),
+  ) as SavedMarchArmy;
+  const integer = (value: unknown, minimum = -2147483648) =>
+    typeof value === "number" && Number.isInteger(value) && value >= minimum && value <= 2147483647;
+  if (
+    !army ||
+    typeof army !== "object" ||
+    typeof army.owner !== "string" ||
+    !army.owner ||
+    army.owner.length > 40 ||
+    !army.owner.isWellFormed() ||
+    !integer(army.cachedLoad, 0) ||
+    !Array.isArray(army.soldiers) ||
+    army.soldiers.length > 256 ||
+    !Array.isArray(army.dragons) ||
+    army.dragons.length > 8
+  )
+    return invalid();
+  for (const soldier of army.soldiers)
+    if (
+      soldier.owner !== army.owner ||
+      typeof soldier.armsId !== "string" ||
+      !/^\d{1,12}$/.test(soldier.armsId) ||
+      !integer(soldier.total, 1) ||
+      !integer(soldier.dead, 0) ||
+      soldier.dead > soldier.total ||
+      !integer(soldier.loadEffect) ||
+      !(soldier.basicArm === null || integer(soldier.basicArm, 0))
+    )
+      return invalid();
+  for (const dragon of army.dragons)
+    if (
+      dragon.owner !== army.owner ||
+      typeof dragon.uuid !== "string" ||
+      !dragon.uuid ||
+      dragon.uuid.length > 40 ||
+      !integer(dragon.itemId, 1) ||
+      !integer(dragon.level, 1)
+    )
+      return invalid();
+  if (
+    army.general !== null &&
+    (army.general.owner !== army.owner ||
+      !integer(army.general.id, 1) ||
+      !integer(army.general.level, 1))
+  )
+    return invalid();
+  return army;
+}
+export function encodeWorldMarchArmy(army: SavedMarchArmy): Buffer {
+  const data = Buffer.concat([maintainedMarchPrefix, Buffer.from(JSON.stringify(army), "utf8")]);
+  readMaintainedMarchArmy(data);
+  return data;
 }
