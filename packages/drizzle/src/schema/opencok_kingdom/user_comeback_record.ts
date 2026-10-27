@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, check, integer, primaryKey, smallint, varchar } from "drizzle-orm/pg-core";
+import { bigint, check, index, integer, primaryKey, smallint, varchar } from "drizzle-orm/pg-core";
 import { opencok_kingdom } from "../namespaces";
 
 export const user_comeback_record = opencok_kingdom.table(
@@ -16,6 +16,7 @@ export const user_comeback_record = opencok_kingdom.table(
     "payTotal": bigint("payTotal", { mode: "bigint" }).notNull().default(sql.raw("0")),
   },
   (table) => [
+    index("user_comeback_record_device_backtime").on(table.deviceId, table.backTime),
     primaryKey({
       name: "user_comeback_record_PRIMARY",
       columns: [table["uid"], table["configId"]],

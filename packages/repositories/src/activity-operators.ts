@@ -1,10 +1,11 @@
-import { asc, eq, gte, sql } from "drizzle-orm";
+import { asc, desc, eq, gte, sql } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { user_target_task_notes } from "@opencok/drizzle/schema/opencok_kingdom/user_target_task_notes";
 import { user_recall_task_notes } from "@opencok/drizzle/schema/opencok_kingdom/user_recall_task_notes";
 import { activity_group_buys } from "@opencok/drizzle/schema/opencok_kingdom/activity_group_buys";
+import { user_comeback_record } from "@opencok/drizzle/schema/opencok_kingdom/user_comeback_record";
 import { stat_reg } from "@opencok/drizzle/schema/opencok_kingdom/stat_reg";
 import type { ActivityOperatorsSnapshot } from "@opencok/contracts/activity-operators";
 import type { Database } from "./game";
@@ -61,6 +62,16 @@ export async function readActivityOperators(
         })
         .from(user_recall_task_notes)
         .where(eq(user_recall_task_notes.uid, owner));
+      const [comeback] = await tx
+        .select({
+          uid: user_comeback_record.uid,
+          configId: user_comeback_record.configId,
+          backTime: user_comeback_record.backTime,
+        })
+        .from(user_comeback_record)
+        .where(eq(user_comeback_record.uid, owner))
+        .orderBy(desc(user_comeback_record.backTime), asc(user_comeback_record.configId))
+        .limit(1);
       const [registration] = await tx
         .select({ country: stat_reg.country })
         .from(stat_reg)
@@ -91,6 +102,7 @@ export async function readActivityOperators(
         buildings,
         target,
         recall,
+        comeback,
         country: registration?.country ?? "",
         groupBuys,
       };

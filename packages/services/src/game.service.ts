@@ -296,6 +296,7 @@ export class GameService {
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
     const businessMan = await this.services.hotItemBusinessMan?.();
+    const comeback = await this.services.cityProgression?.(uid, "comeback.init", {});
     const prayer = await this.services.cityProgression?.(uid, "prayer.init", {});
     const recallTasks = await this.services.cityProgression?.(uid, "recall.task.init", {});
     const regionalRecall = await this.services.cityProgression?.(uid, "region.recall.init", {});
@@ -342,6 +343,7 @@ export class GameService {
           .map((row) => sfs.object(equipmentFields(row))),
       ),
       ...(businessMan ? { businessMan: sfs.object(businessMan) } : {}),
+      ...comeback?.body,
       ...prayer?.body,
       ...recallTasks?.body,
       ...regionalRecall?.body,
@@ -564,6 +566,8 @@ export class GameService {
         break;
       }
       case "activity.accept.reward":
+      case "comeback.info":
+      case "comeback.reward":
       case "hot.item.v2.get":
       case "hot.item.refresh":
       case "hot.item.refreshV3":

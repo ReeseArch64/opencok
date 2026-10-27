@@ -2673,9 +2673,88 @@ fields remain intact, and saved long clocks do not pass through JavaScript numbe
 conversion before the Source division by 1000.
 
 This projection does not substitute regional recall for the separate legacy
-`comeback` engine. Normal accumulated recharge (type 20), legacy comeback (21),
-today-sale (24) and overseas trade (26) remain outside this first projection until
+`comeback` engine. Normal accumulated recharge (type 20), today-sale (24) and overseas trade (26)
+remain outside this first projection until
 their Source backends and accepted-payment/reward paths are implemented. Combat
 resource battles (38) remain gated. Those remaining engines and native-device
 rendering are separate completion work; this section does not declare topics
 25–27 complete. No migration, dependency or environment variable is added.
+
+## Ordinary resource supply and dragon skill acceptance
+
+The source audit identified an absent ordinary world resource producer, despite
+existing gathering, return and search handlers. The maintained lifecycle and its
+precise remaining boundaries are recorded in
+[ordinary world resource creation and recovery](ordinary-world-resources.md).
+
+The audit also checked the source `PetDragonSkillService` material workflow.
+`petdragon.upgrade.skill` now validates the whole material selection and processes
+strengthening materials before ordinary experience materials, independent of
+client order. It retains unused ordinary materials when boosters already reach
+the cap and rejects an already capped target before consumption. Experience
+discarded at the final cap no longer inflates the skill's transferable total.
+Concurrent retries and reversed input order produce the same persisted result.
+
+The inspected public handler families include petdragon incubation, info,
+friendship, gifts, civilization unlock, active selection, feeding, level upgrades,
+travel, names and skills; dragon talents; civilization science; civilization
+castle placement, settlement, speed-up, movement and removal; and totem placement,
+recycling and status delivery. Existing tests establish those maintained slices,
+not full native acceptance. Tower battle outcomes, civilization garrison and
+robbery, battle-triggered talents and totem damage still require their validated
+combat integrations. Ordinary world refresh is a server-owned producer and adds
+no client command or alternate wire representation.
+
+## Legacy comeback enrollment and explicit claims
+
+The separate Source comeback engine now serves `comeback.info` and
+`comeback.reward`, with an internal login initializer. Its maintained `comeback`
+catalog controls weighted configurations, global opening, inactivity thresholds,
+return classes, character/castle/payment bands, realm/country/language/platform
+selectors and welcome/daily/paid channels. The catalog's current configuration
+opens indefinitely and enables welcome plus seven daily rewards. Channel three
+requires an explicitly configured payment node and the authoritative
+`userprofile.payTotal` increase since enrollment; a client counter cannot qualify.
+Regional recall and recall tasks retain their own eligibility and records.
+
+Authenticated session open, observed traffic at most once per minute and close
+persist monotonic player activity clocks under realm fencing. Before advancing
+`lastOnlineTime`, open saves the prior character and device observations in a
+bounded, versioned private `trigger_var` snapshot. The snapshot freezes the
+absence at session opening; remaining online cannot grow an initially ineligible
+absence into a comeback. A socket identifier prevents an old connection from
+closing its replacement. An owner profile lock followed by a hashed device
+advisory lock serializes same-device enrollment without exposing device identity
+in receipts, notifications or logs.
+
+Untouched imported profiles can use their preserved legacy clock. A character
+with prior TypeScript mutation receipts and no persisted presence snapshot starts
+observation at adoption, because its stale imported timestamp cannot prove that
+it was absent. The same conservative rule applies to device peers with unknown
+activity. Missing, zero and future clocks do not create inactivity. Device
+aggregation reads at most 256 actors, and a device return of class one can qualify
+another character only from that character's own prior absence. Trusted stored
+return flags retain Source classes three/four and clear only on committed
+enrollment. Existing globally open configurations do not reenroll an expired
+personal period.
+
+Session capture, actual enrollment, baseline payment counter, flag clearing,
+welcome mail and command receipt commit together. Enrollment sends no economic
+reward. Each explicit claim checks the configured channel, reached day or
+payment node, stored ownership, deadline and unclaimed flag before the normal
+inventory transaction grants the pinned pay reward. Claim flags, inventory,
+economy postings, outbox and receipt share rollback and concurrency protection.
+Future daily claims, unknown payment nodes and unconfigured channels are rejected.
+Login and recovery never claim missed daily or paid rewards. The Source calendar
+view and actual elapsed claim deadline remain distinct, preserving its inclusive
+claim tail.
+
+Native info retains INT counts/days/states, BOOL welcome state, LONG deadlines in
+seconds and payment deltas, UTF payment nodes and reward arrays. Viewed-today
+state persists privately and suppresses the native `login_popup` 57083. Operator
+REGRESS21 reads only owned configuration/time facts and the real 57083 panel end;
+it neither enrolls nor replaces historical panel dates. Migration0043 adds the
+`user_comeback_record(deviceId, backTime)` lookup index, with matching Drizzle
+metadata, schema inventory, SQL snapshot and physical PostgreSQL verification.
+No external dependency or environment setting is added. This module does not
+establish native-device rendering or completion of topics25–27.

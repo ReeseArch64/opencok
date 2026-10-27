@@ -149,7 +149,8 @@
     "./city-defense": "./src/city-defense.ts",
     "./treasure-map": "./src/treasure-map.ts",
     "./military-rank-awards": "./src/military-rank-awards.ts",
-    "./activity-reward": "./src/activity-reward.ts"
+    "./activity-reward": "./src/activity-reward.ts",
+    "./comeback": "./src/comeback.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
