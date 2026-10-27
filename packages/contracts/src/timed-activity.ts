@@ -35,6 +35,7 @@ export interface ActivityEconomy {
   takeItemGrants?(): readonly { itemId: string; count: number }[];
   push?(command: string, body: Uint8Array): void;
   gold(delta: bigint): void;
+  crystal?(delta: bigint): void;
   winPoints?(delta: bigint): void;
   civilizationScore?(delta: bigint): void;
   balance?(asset: string): bigint;
@@ -56,7 +57,12 @@ export interface ActivityEconomy {
       | "chip"
       | "diamond"
       | "dragon_food"
-      | "dragon_gold",
+      | "dragon_gold"
+      | "sandstone"
+      | "diamondstone"
+      | "marble"
+      | "granite"
+      | "limestone",
     delta: bigint,
   ): void;
   item(itemId: string, delta: number): void;
