@@ -1,3 +1,4 @@
+import { recordExpeditionScore } from "./new-expedition";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { Type, sfs, str, int, encode, type Fields } from "@opencok/messages/sfs";
@@ -68,7 +69,10 @@ function complete(context: CityProgressionContext, row: Row, count: number) {
   const [, free] = transferTroops(count, num(row, "free"), count);
   const completed = { ...row, free, train: 0, finishTime: 0n, foodCostTime: context.now };
   context.write.armies = [completed];
-  context.power(unitPower(troopDefinition(context.rules, text(row, "armyId")), count));
+  const power = unitPower(troopDefinition(context.rules, text(row, "armyId")), count);
+  context.power(power);
+  recordExpeditionScore(context, 5, cityInteger(row.armyId), count);
+  if (power > 0n) recordExpeditionScore(context, 3, 3, cityInteger(power));
   return {
     id: sfs.string(text(row, "armyId")),
     free: sfs.int(cityInteger(free + num(row, "defence"))),

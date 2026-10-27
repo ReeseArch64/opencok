@@ -1,3 +1,4 @@
+import { readExpedition, writeExpedition } from "./new-expedition";
 import { readArena, writeArena } from "./arena";
 import { readAnniversaryStatistics } from "./anniversary";
 import { readCampaignVariables, writeCampaignVariables } from "./local-campaign";
@@ -125,6 +126,7 @@ export function createCityProgressionStore(
       return {
         profile,
         resource,
+        expedition: await readExpedition(tx, profile, now, command, request),
         arena:
           command?.startsWith("arena.") || command === "show.arena.army"
             ? await readArena(tx, owner)
@@ -219,6 +221,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.expedition) await writeExpedition(tx, owner, write.expedition);
         if (write.arena) await writeArena(tx, owner, write.arena);
         if (write.campaignVariables)
           await writeCampaignVariables(tx, owner, write.campaignVariables, now);

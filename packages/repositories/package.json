@@ -90,6 +90,7 @@
     "./alliance-publication": "./src/alliance-publication.ts",
     "./dragon-progression": "./src/dragon-progression.ts",
     "./world-march-runtime": "./src/world-march-runtime.ts",
+    "./new-expedition": "./src/new-expedition.ts",
     "./postbox": "./src/postbox.ts",
     "./friendship-mine": "./src/friendship-mine.ts",
     "./social-cleanup": "./src/social-cleanup.ts",

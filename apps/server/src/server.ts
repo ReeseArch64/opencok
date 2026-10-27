@@ -1,3 +1,4 @@
+import { expeditionDomain } from "@opencok/services/new-expedition";
 import { createArenaDomain, publishArenaMutation } from "@opencok/services/arena";
 import { anniversaryDomain } from "@opencok/services/anniversary";
 import { lotteryDomain } from "@opencok/services/lottery";
@@ -421,6 +422,7 @@ export const RealmDependenciesLive = Layer.effect(
         createTotemDomain(config.mapSize),
         minstrelDomain,
         lotteryDomain,
+        expeditionDomain,
         anniversaryDomain,
         createArenaDomain(),
         trainingDomain,

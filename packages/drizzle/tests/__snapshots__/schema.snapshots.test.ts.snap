@@ -14554,6 +14554,39 @@ update "opencok_kingdom"."user_arena_army" set "uid" = $1, "armyId" = $2, "free"
 delete from "opencok_kingdom"."user_arena_army" where "opencok_kingdom"."user_arena_army"."uid" = $1"
 `;
 
+exports[`opencok_kingdom.expedition_period: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["serverId","integer",true,null,null,null]
+column ["periodId","varchar(40)",true,null,null,null]
+column ["matchServerId","integer",true,null,null,null]
+column ["schedule","varchar(8192)",true,null,null,null]
+column ["startTime","bigint",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["victoryTimes","integer",true,"0",null,null]
+column ["count","integer",true,"0",null,null]
+primary ["expedition_period_PRIMARY",["serverId"]]
+check ["expedition_period_bounds","\\"serverId\\" > 0 AND \\"matchServerId\\" > 0 AND \\"matchServerId\\" <> \\"serverId\\" AND \\"startTime\\" >= 0 AND \\"endTime\\" > \\"startTime\\" AND \\"victoryTimes\\" >= 0 AND \\"count\\" >= 0"]
+insert into "opencok_kingdom"."expedition_period" ("serverId", "periodId", "matchServerId", "schedule", "startTime", "endTime", "victoryTimes", "count") values ($1, $2, $3, $4, $5, $6, $7, $8)
+select "serverId", "periodId", "matchServerId", "schedule", "startTime", "endTime", "victoryTimes", "count" from "opencok_kingdom"."expedition_period" where "opencok_kingdom"."expedition_period"."serverId" = $1
+update "opencok_kingdom"."expedition_period" set "serverId" = $1, "periodId" = $2, "matchServerId" = $3, "schedule" = $4, "startTime" = $5, "endTime" = $6, "victoryTimes" = $7, "count" = $8 where "opencok_kingdom"."expedition_period"."serverId" = $9
+delete from "opencok_kingdom"."expedition_period" where "opencok_kingdom"."expedition_period"."serverId" = $1"
+`;
+
+exports[`opencok_kingdom.expedition_progress: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["uid","varchar(40)",true,null,null,null]
+column ["periodId","varchar(40)",true,null,null,null]
+column ["stage","integer",true,null,null,null]
+column ["score","double precision",true,"0",null,null]
+column ["takeReward","varchar(500)",true,"''",null,null]
+primary ["expedition_progress_PRIMARY",["uid","periodId","stage"]]
+check ["expedition_progress_bounds","\\"stage\\" BETWEEN 0 AND 8 AND \\"score\\" >= 0 AND \\"score\\" < 'Infinity'::float8"]
+insert into "opencok_kingdom"."expedition_progress" ("uid", "periodId", "stage", "score", "takeReward") values ($1, $2, $3, $4, $5)
+select "uid", "periodId", "stage", "score", "takeReward" from "opencok_kingdom"."expedition_progress" where "opencok_kingdom"."expedition_progress"."uid" = $1
+update "opencok_kingdom"."expedition_progress" set "uid" = $1, "periodId" = $2, "stage" = $3, "score" = $4, "takeReward" = $5 where "opencok_kingdom"."expedition_progress"."uid" = $6
+delete from "opencok_kingdom"."expedition_progress" where "opencok_kingdom"."expedition_progress"."uid" = $1"
+`;
+
 exports[`opencok_chat.chat_consumer: schema and CRUD SQL 1`] = `
 "schema opencok_chat
 column ["id","varchar(100)",true,null,null,null]

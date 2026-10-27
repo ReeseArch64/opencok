@@ -511,6 +511,12 @@ export class GameService {
       case "minstrel":
       case "civilizationCastle":
       case "totem":
+      case "newexpidition.activityinfo":
+      case "newexpidition.takepersonreward":
+      case "newexpidition.takealliancereward":
+      case "expedition.show":
+      case "distribution.record.show":
+      case "tax.record.show":
       case "arena.info":
       case "arena.apply":
       case "arena.army":

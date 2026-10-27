@@ -1,3 +1,4 @@
+import { recordExpeditionScore } from "./new-expedition";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { randomUUID } from "node:crypto";
@@ -42,7 +43,9 @@ function complete(context: CityProgressionContext, row: Row, data?: ProgressionA
     after = researchDefinition(context.rules, text(row, "itemId"), level);
   const completed = { ...row, level, cd: idleDeadline };
   context.write.sciences = [completed];
-  context.power(cityAmount(after.power ?? 0) - cityAmount(before.power ?? 0));
+  const delta = cityAmount(after.power ?? 0) - cityAmount(before.power ?? 0);
+  context.power(delta);
+  if (delta > 0n) recordExpeditionScore(context, 3, 2, cityInteger(delta));
   if (["army", "trap", "up"].includes(after.para1 ?? "")) {
     const id = cityInteger(after.para2),
       armyId = String(Math.trunc(id / 10) * 10),

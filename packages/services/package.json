@@ -84,6 +84,7 @@
     "./dragon-talents": "./src/dragon-talents.ts",
     "./world-march-runtime": "./src/world-march-runtime.ts",
     "./world-publication": "./src/world-publication.ts",
+    "./new-expedition": "./src/new-expedition.ts",
     "./chat-delivery": "./src/chat-delivery.ts",
     "./chat-social": "./src/chat-social.ts",
     "./postbox": "./src/postbox.ts",
