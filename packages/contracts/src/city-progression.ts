@@ -83,6 +83,7 @@ export interface CityProgressionState {
   activityReward?: import("./activity-reward").ActivityRewardReader;
   comeback?: import("./comeback").ComebackState;
   hotItem?: import("./hot-item").HotItemState;
+  worldMonsters?: import("./world-monsters").WorldMonsterReader;
   campaignProfile?: Row;
   costRankAward?: import("./continued-cost-rewards").CostRankAwardReader;
   expeditionAward?: import("./expedition-stage-rewards").ExpeditionAwardReader;

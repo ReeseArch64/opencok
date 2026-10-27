@@ -6,6 +6,7 @@ import { readComeback, writeComeback } from "./comeback";
 import { readHotItems, writeHotItems } from "./hot-item";
 import { allocateWorldBirth } from "./world-birth";
 import type { RealmAuthority } from "./realm-authority";
+import { worldMonsterReader } from "./world-monsters";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { readMonsterExchanges, writeMonsterExchanges } from "./monster-exchange";
 import { readFragmentExchanges, writeFragmentExchanges } from "./fragment-exchange";
@@ -202,6 +203,7 @@ export function createCityProgressionStore(
       alliance = profile.allianceId ?? "";
       const worldMutation =
         command?.startsWith("world.") ||
+        command === "get.act.boss.point" ||
         command?.startsWith("treasuremap.") ||
         command === "buy.citydef" ||
         command === "resource.new.detail" ||
@@ -218,6 +220,9 @@ export function createCityProgressionStore(
           command?.startsWith("redPackets.") || command === "campaign.paid.gift"
             ? redPacketReader(tx, owner)
             : undefined,
+        worldMonsters: ["world.get.monster", "get.act.boss.point"].includes(command ?? "")
+          ? worldMonsterReader(tx, mapSize)
+          : undefined,
         campaignProfile:
           command?.startsWith("normal.recharge.") ||
           command?.startsWith("campaign.") ||
