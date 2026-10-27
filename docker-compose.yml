@@ -278,11 +278,9 @@ services:
       GAME_FILES_URL: http://api:8080
       REDIS_URL: ${REDIS_URL:?Set REDIS_URL for API and server}
       GAME_ZOOKEEPER: zookeeper:2181
-      GAME_LOGIN_SECRET: ${GAME_LOGIN_SECRET}
+      GAME_SECRET: ${GAME_SECRET}
       CHAT_URL: ${CHAT_URL:-http://chat:8083}
-      CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-opencok-chat-development}
-      GAME_MAP_SIZE: 1201
-      DEPENDENCY_TIMEOUT_MS: 5000
+      CHAT_SECRET: ${CHAT_SECRET:-opencok-chat-development}
     depends_on:
       zookeeper:
         condition: service_healthy
@@ -388,7 +386,7 @@ services:
       CHAT_PORT: 8083
       CHAT_INSTANCE_ID: ${CHAT_INSTANCE_ID:-chat-local}
       MONGODB_URI: ${MONGODB_URI:-mongodb://${MONGODB_USER:-opencok}:${MONGODB_PASSWORD:-opencok-development}@mongodb:27017/opencok_chat?authSource=admin}
-      CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-opencok-chat-development}
+      CHAT_SECRET: ${CHAT_SECRET:-opencok-chat-development}
       CHAT_WEBSOCKET_URL: ${CHAT_WEBSOCKET_URL:-ws://192.168.1.104:8083/chat/ws}
     ports:
       - 8083:8083

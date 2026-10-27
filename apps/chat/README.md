@@ -22,7 +22,7 @@ the Compose Chat service, configure the root `.env` or process environment, and 
 | Setting                  | Meaning                                                                                 |
 | ------------------------ | --------------------------------------------------------------------------------------- |
 | `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases                 |
-| `CHAT_SIGNING_SECRET`    | Required shared secret for trusted backend session, avatar and nickname requests        |
+| `CHAT_SECRET`            | Required shared secret for trusted backend session, avatar and nickname requests        |
 | `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment              |
 | `MONGODB_URI`            | Authenticated MongoDB archive URI; PostgreSQL fallback remains available during outages |
 | `CHAT_INSTANCE_ID`       | Stable unique consumer identity; defaults to a process UUID outside Compose             |
@@ -69,7 +69,7 @@ Unicode, exact expiry and persistence after restart. It does not touch local gam
 
 Android tracks are untested. The TypeScript realm supports `chat.session.create`
 when `CHAT_URL` selects this service's HTTP origin and
-`CHAT_SIGNING_SECRET` matches. It binds issuance to the authenticated realm profile and
+`CHAT_SECRET` matches. It binds issuance to the authenticated realm profile and
 returns the opaque token and second-based expiry. Units compose both sides with the token verifier; actual realm TCP, Chat HTTP/WebSocket,
 API metadata and disposable database acceptance now exercise the full server flow.
 Native-client behavior remains unverified. The shared API/gateway now exposes the three public metadata GET routes
@@ -97,7 +97,7 @@ restarts; rotate only with coordinated backend configuration.
 [Issue #80](https://github.com/ReeseArch64/opencok/issues/80) adds exact
 `POST /_internal/avatar-profile`, private to trusted backends and excluded from the
 public discovery gateway. This maintained service protocol is not the legacy external
-chat API. `CHAT_SIGNING_SECRET` authenticates it with HMAC-SHA256 over the protocol domain,
+chat API. `CHAT_SECRET` authenticates it with HMAC-SHA256 over the protocol domain,
 method, path, timestamp and complete UTF-8 JSON body. `x-opencok-timestamp` carries canonical
 milliseconds and must be within 30 seconds of the receiver clock; `x-opencok-signature`
 carries lowercase hexadecimal HMAC. Session MD5 compatibility remains separate. Use a
@@ -135,7 +135,7 @@ integration remains unvalidated.
 ## Internal nickname updates
 
 Exact `POST /_internal/nickname` is private to trusted backends. The public gateway does
-not forward it. It uses the existing `CHAT_SIGNING_SECRET` and timestamp/signature
+not forward it. It uses the existing `CHAT_SECRET` and timestamp/signature
 headers with a distinct `opencok-chat-nickname-v1` HMAC domain, method, path and complete
 UTF-8 body. The 4 KiB body and three-second receiver deadline match the avatar endpoint.
 Keep this endpoint on a trusted private network or TLS and rotate both service secrets

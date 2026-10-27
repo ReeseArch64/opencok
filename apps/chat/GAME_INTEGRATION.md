@@ -16,7 +16,7 @@ account directory to select each player's authoritative kingdom database.
 | --------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
 | Chat            | `DATABASE_URL`, `CHAT_KINGDOM_DATABASES`, `GLOBAL_DATABASE_NAME` | Persistent sessions/messages and authoritative room membership   |
 | Chat            | `CHAT_HOST`, `CHAT_PORT`, `CHAT_WEBSOCKET_URL`                   | Listener and client-reachable `ws(s)://host/chat/ws` endpoint    |
-| Chat and realms | `CHAT_SIGNING_SECRET`                                            | Matching backend session signing secret                          |
+| Chat and realms | `CHAT_SECRET`                                                    | Matching backend session signing secret                          |
 | Realm           | `CHAT_URL=http://chat.internal:8083`                             | Origin for trusted internal session, nickname and mailbox routes |
 | API             | `CHAT_URL=http://chat.internal:8083`                             | Origin for the three public metadata routes                      |
 

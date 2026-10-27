@@ -22,7 +22,7 @@ export const chatSchema = z.object({
   ),
   CHAT_HOST: z.string().min(1).default("127.0.0.1"),
   CHAT_PORT: port(8083),
-  CHAT_SIGNING_SECRET: z.string().min(1),
+  CHAT_SECRET: z.string().min(1),
   CHAT_WEBSOCKET_URL: z.url({ protocol: /^wss?$/ }),
   GLOBAL_DATABASE_NAME: databaseName.default("opencok_global"),
   CHAT_KINGDOM_DATABASES: z

@@ -11,25 +11,25 @@ export const config = Effect.gen(function* () {
   return {
     provisioningSecret: settings.PROVISIONING_SIGNING_SECRET,
     avatarChat: settings.GAME_AVATAR_CHAT_URL
-      ? { url: settings.GAME_AVATAR_CHAT_URL, signingSecret: settings.CHAT_SIGNING_SECRET! }
+      ? { url: settings.GAME_AVATAR_CHAT_URL, signingSecret: settings.CHAT_SECRET! }
       : undefined,
     avatarFiles: settings.GAME_FILES_URL ? { origin: settings.GAME_FILES_URL } : undefined,
     nicknameChat: settings.CHAT_URL
       ? {
           url: new URL("/_internal/nickname", settings.CHAT_URL).href,
-          signingSecret: settings.CHAT_SIGNING_SECRET!,
+          signingSecret: settings.CHAT_SECRET!,
         }
       : undefined,
     mailChat: settings.CHAT_URL
       ? {
           url: new URL("/_internal/mailbox", settings.CHAT_URL).href,
-          signingSecret: settings.CHAT_SIGNING_SECRET!,
+          signingSecret: settings.CHAT_SECRET!,
         }
       : undefined,
     chatSession: settings.CHAT_URL
       ? {
           url: new URL("/external/session", settings.CHAT_URL).href,
-          signingSecret: settings.CHAT_SIGNING_SECRET!,
+          signingSecret: settings.CHAT_SECRET!,
         }
       : undefined,
     host: "0.0.0.0",
@@ -47,9 +47,9 @@ export const config = Effect.gen(function* () {
     redisUrl: settings.REDIS_URL,
     zookeeper: settings.GAME_ZOOKEEPER,
     zkPath: `/opencok-experiment/COK${settings.KINGDOM_ID}`,
-    loginSecret: settings.GAME_LOGIN_SECRET,
-    mapSize: settings.GAME_MAP_SIZE,
-    timeoutMs: settings.DEPENDENCY_TIMEOUT_MS,
+    loginSecret: settings.GAME_SECRET,
+    mapSize: 1201,
+    timeoutMs: 5000,
   } satisfies Config;
 });
 

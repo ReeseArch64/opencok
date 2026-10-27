@@ -9,7 +9,7 @@ import type { ServerDependencies } from "@opencok/connection/dependencies";
 
 const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://synthetic:secret@localhost/postgres",
-  GAME_LOGIN_SECRET: "synthetic",
+  GAME_SECRET: "synthetic",
   KINGDOM_ID: "2",
 });
 
@@ -98,7 +98,7 @@ test.each([
     config.pipe(
       Effect.provideService(EnvironmentSource, {
         DATABASE_URL: "postgres://synthetic:secret@localhost/global",
-        GAME_LOGIN_SECRET: "synthetic",
+        GAME_SECRET: "synthetic",
         REDIS_URL,
       }),
     ),
@@ -112,7 +112,7 @@ test("realm rejects invalid shared Redis URLs without disclosing credentials", a
     config.pipe(
       Effect.provideService(EnvironmentSource, {
         DATABASE_URL: "postgres://synthetic:secret@localhost/global",
-        GAME_LOGIN_SECRET: "synthetic",
+        GAME_SECRET: "synthetic",
         REDIS_URL: "https://synthetic:private-redis-secret@cache.invalid/4",
       }),
     ),
@@ -136,6 +136,8 @@ test("realm configuration derives database and ownership from the shared snapsho
   expect(settings.feedMaxCount).toBe(3);
   expect(settings.crossSearchEnabled).toBe(true);
   expect(settings.playerKingdoms).toBeUndefined();
+  expect(settings.mapSize).toBe(1201);
+  expect(settings.timeoutMs).toBe(5000);
   expect(settings).not.toHaveProperty("resources");
 });
 

@@ -31,7 +31,7 @@ try {
   app = new ChatApplication({
     repository,
     instanceId: config.CHAT_INSTANCE_ID,
-    signingSecret: config.CHAT_SIGNING_SECRET,
+    signingSecret: config.CHAT_SECRET,
     websocketUrl: config.CHAT_WEBSOCKET_URL,
     log: (event) =>
       logEvent(

@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
 import { parseServerEnvironment } from "../src/server.schema";
 
-const base = { GAME_LOGIN_SECRET: "synthetic-secret" };
+const base = { GAME_SECRET: "synthetic-secret" };
 test("server settings validate realm routing and require a login secret", () => {
   expect(parseServerEnvironment(base).KINGDOM_ID).toBe(1);
   expect(parseServerEnvironment({ ...base, KINGDOM_ID: "2" }).KINGDOM_ID).toBe(2);
-  expect(() => parseServerEnvironment({})).toThrow("GAME_LOGIN_SECRET");
+  expect(() => parseServerEnvironment({})).toThrow("GAME_SECRET");
   for (const value of ["0", "-1", "1.5", "invalid"])
     expect(() => parseServerEnvironment({ ...base, KINGDOM_ID: value })).toThrow("KINGDOM_ID");
   expect(() => parseServerEnvironment({ ...base, KINGDOM_DATABASE_NAME: "db;drop" })).toThrow(
@@ -32,21 +32,19 @@ test("mail translation defaults enabled and accepts explicit true or false only"
 
 test("realm Chat integration requires an optional HTTP origin and shared signing secret", () => {
   expect(parseServerEnvironment(base).CHAT_URL).toBeUndefined();
+  expect(parseServerEnvironment({ ...base, CHAT_SECRET: "synthetic" }).CHAT_URL).toBeUndefined();
   expect(
-    parseServerEnvironment({ ...base, CHAT_SIGNING_SECRET: "synthetic" }).CHAT_URL,
-  ).toBeUndefined();
-  expect(
-    parseServerEnvironment({ ...base, CHAT_URL: "", CHAT_SIGNING_SECRET: "" }).CHAT_URL,
+    parseServerEnvironment({ ...base, CHAT_URL: "", CHAT_SECRET: "" }).CHAT_URL,
   ).toBeUndefined();
   for (const CHAT_URL of [
     "http://chat.internal:8083",
     "https://chat.internal:8083/",
     "http://[::1]:8083",
   ]) {
-    expect(
-      parseServerEnvironment({ ...base, CHAT_URL, CHAT_SIGNING_SECRET: "synthetic" }).CHAT_URL,
-    ).toBe(CHAT_URL);
-    expect(() => parseServerEnvironment({ ...base, CHAT_URL })).toThrow("CHAT_SIGNING_SECRET");
+    expect(parseServerEnvironment({ ...base, CHAT_URL, CHAT_SECRET: "synthetic" }).CHAT_URL).toBe(
+      CHAT_URL,
+    );
+    expect(() => parseServerEnvironment({ ...base, CHAT_URL })).toThrow("CHAT_SECRET");
   }
   for (const CHAT_URL of [
     "invalid",
@@ -60,9 +58,9 @@ test("realm Chat integration requires an optional HTTP origin and shared signing
     "https://cok.chat",
     "https://x.cok.chat",
   ]) {
-    expect(() =>
-      parseServerEnvironment({ ...base, CHAT_URL, CHAT_SIGNING_SECRET: "synthetic" }),
-    ).toThrow("CHAT_URL");
+    expect(() => parseServerEnvironment({ ...base, CHAT_URL, CHAT_SECRET: "synthetic" })).toThrow(
+      "CHAT_URL",
+    );
   }
 });
 
@@ -94,13 +92,13 @@ test("avatar completion requires its own private chat endpoint, files and signin
     ...base,
     GAME_AVATAR_CHAT_URL: "http://chat.internal/_internal/avatar-profile",
     GAME_FILES_URL: "http://files.internal",
-    CHAT_SIGNING_SECRET: "synthetic",
+    CHAT_SECRET: "synthetic",
   };
   expect(parseServerEnvironment(base).GAME_AVATAR_CHAT_URL).toBeUndefined();
   expect(parseServerEnvironment(configured).GAME_AVATAR_CHAT_URL).toBe(
     configured.GAME_AVATAR_CHAT_URL,
   );
-  for (const field of ["GAME_FILES_URL", "CHAT_SIGNING_SECRET"])
+  for (const field of ["GAME_FILES_URL", "CHAT_SECRET"])
     expect(() => parseServerEnvironment({ ...configured, [field]: undefined })).toThrow(field);
   for (const url of [
     "http://chat.internal/external/session",

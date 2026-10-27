@@ -90,7 +90,7 @@ eligibility import are not implemented here. Active/restored snapshots are bound
 Apply all global and kingdom migrations with the maintained Drizzle migration runner
 before starting the new server. Back up both databases first. Set
 `CHAT_URL` to the private Chat HTTP(S) origin; the server appends `/_internal/nickname`.
-Configure the same `CHAT_SIGNING_SECRET` on realm and Chat. The private URL must
+Configure the same `CHAT_SECRET` on realm and Chat. The private URL must
 not contain credentials, query parameters or fragments. The existing goods, item,
 mail, reward, alliance-task and VIP catalogs must be available. Redis and PostgreSQL
 remain authoritative dependencies. Startup verifies the required journal, receipt,

@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { parseChatEnvironment } from "@opencok/env/chat";
 const base = {
   DATABASE_URL: "postgres://synthetic:synthetic@127.0.0.1/global",
-  CHAT_SIGNING_SECRET: "synthetic-secret",
+  CHAT_SECRET: "synthetic-secret",
   CHAT_WEBSOCKET_URL: "ws://127.0.0.1/chat/ws",
 };
 test("blank optional archive settings keep PostgreSQL fallback available", () => {

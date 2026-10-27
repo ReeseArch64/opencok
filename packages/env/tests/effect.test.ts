@@ -7,9 +7,9 @@ import { serverSchema } from "../src/server.schema";
 const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://example:secret@localhost/global",
   KINGDOM_ID: "2",
-  GAME_LOGIN_SECRET: "synthetic",
+  GAME_SECRET: "synthetic",
   CHAT_URL: "https://chat.internal:8083/",
-  CHAT_SIGNING_SECRET: "synthetic-chat-secret",
+  CHAT_SECRET: "synthetic-chat-secret",
 });
 
 test("API and realm read the same injected snapshot with independent service defaults", async () => {
@@ -32,6 +32,8 @@ test("API and realm read the same injected snapshot with independent service def
     "GAME_CHAT_INTERVAL",
     "GAME_FEED_MAX_COUNT",
     "GAME_PLAYER_KINGDOMS",
+    "GAME_MAP_SIZE",
+    "DEPENDENCY_TIMEOUT_MS",
   ]) {
     expect(result[1]).not.toHaveProperty(name);
   }
@@ -44,7 +46,7 @@ test.each([
 ])("API and realm schemas preserve the same shared Redis URL %s", async (REDIS_URL) => {
   const [api, realm] = await Effect.runPromise(
     Effect.all([readEnvironment(apiSchema), readEnvironment(serverSchema)]).pipe(
-      Effect.provideService(EnvironmentSource, { GAME_LOGIN_SECRET: "synthetic", REDIS_URL }),
+      Effect.provideService(EnvironmentSource, { GAME_SECRET: "synthetic", REDIS_URL }),
     ),
   );
 

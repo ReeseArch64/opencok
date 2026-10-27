@@ -123,7 +123,7 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up 
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL`, shared
 `REDIS_URL=redis://redis:6379/0` for local containers and the
-private `GAME_LOGIN_SECRET` exception. Optional chat and avatar integration settings also come
+private `GAME_SECRET` exception. Optional chat and avatar integration settings also come
 from the environment. Other development values are direct
 Compose settings, still validated by the shared Zod schemas through `@opencok/env/effect`.
 Gameplay catalogs are included as readable TypeScript with enum identifiers; the
@@ -138,17 +138,16 @@ requires the remaining service settings through its process environment.
 | `KINGDOM_DATABASE_NAME` | Defaults to `opencok_kingdom_<KINGDOM_ID>`.                                                                                            |
 | `GLOBAL_DATABASE_NAME`  | Defaults to `opencok_global`.                                                                                                          |
 | `CHAT_URL`              | Optional shared Chat HTTP(S) origin; enables session issuance, nickname delivery and mailbox effects.                                  |
-| `CHAT_SIGNING_SECRET`   | Required when the session URL is configured; must match the maintained chat service.                                                   |
+| `CHAT_SECRET`           | Required when the session URL is configured; must match the maintained chat service.                                                   |
 | `GAME_FILES_URL`        | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                          |
-| `GAME_LOGIN_SECRET`     | Required private secret matching the legacy mobile login issuer.                                                                       |
+| `GAME_SECRET`           | Required private secret matching the legacy mobile login issuer.                                                                       |
 | `REDIS_URL`             | Shared API/realm URL; defaults to `redis://127.0.0.1:6379/0` outside Compose. Set the local Compose URL or an external production URL. |
 | `GAME_ZOOKEEPER`        | Defaults to `127.0.0.1:2181`.                                                                                                          |
-| `GAME_MAP_SIZE`         | Defaults to `1200`.                                                                                                                    |
 | `GAME_MAIL_TRANSLATION` | Defaults to `true`; `false` suppresses category-chat translation IDs and stored-translation reads.                                     |
-| `DEPENDENCY_TIMEOUT_MS` | Defaults to `5000`.                                                                                                                    |
 
 The server binds TCP to `0.0.0.0:9933` and health HTTP to `0.0.0.0:18090`.
-These listener values are fixed in code and are not environment settings.
+These listener values are fixed in code and are not environment settings. The map
+size is also fixed at 1201 and dependency exchanges use a 5000 ms timeout.
 
 The root [Compose stack](../../infra/compose/README.md) starts this server, the
 shared discovery API, gateway, PostgreSQL, Redis, ZooKeeper and MinIO CDN. It mounts the XML
@@ -2883,7 +2882,7 @@ Development Compose provides the private origin directly. Production configures 
 through its own deployment; no Compose file or signing-key mount is required.
 
 The realm reads `/_internal/avatars/{owner}/{sequence}` using a separate 30-second
-confirmation ticket. `DEPENDENCY_TIMEOUT_MS` bounds the entire exchange, including
+confirmation ticket. The fixed 5000 ms dependency timeout bounds the entire exchange, including
 streamed response consumption while the profile lock is held. Redirects reject,
 receipts are limited to 128 bytes, and owner, canonical sequence and SHA-256 must
 match. An empty 404 means no pending upload. Failed or malformed responses prevent
@@ -3090,7 +3089,7 @@ The opt-in completion runtime now schedules this consumer.
 `user.avatar.finish` to the maintained receipt transaction, all three consumers and local
 session notifications. Configure `GAME_FILES_URL` and the existing shared Redis to
 enable completion. Optional `GAME_AVATAR_CHAT_URL` selects the private
-`/_internal/avatar-profile` endpoint and requires its matching `CHAT_SIGNING_SECRET`.
+`/_internal/avatar-profile` endpoint and requires its matching `CHAT_SECRET`.
 Chat session issuance is independent. Without Chat, local completion proceeds and
 its Chat intent remains pending. Startup checks completion and mail tables;
 migrations continue through the normal deployment workflow. Development Compose
@@ -3267,7 +3266,7 @@ A null phone device becomes empty. Other null metadata rejects, preserving the J
 string-field behavior instead of inventing profile defaults.
 
 Configure `CHAT_URL` with the Chat HTTP(S) origin reachable from the realm and API,
-and set `CHAT_SIGNING_SECRET` to the Chat service's configured value. The server
+and set `CHAT_SECRET` to the Chat service's configured value. The server
 appends `/external/session`, `/_internal/nickname` and `/_internal/mailbox` in code;
 setting this origin enables all three private integrations. The API uses the same
 origin for public metadata. Outside Compose, an absent URL disables these integrations.
@@ -3279,7 +3278,7 @@ The connection adapter signs the legacy form with application ID `100001` and a 
 86,400 seconds. The current chat service stores only a SHA-256 token digest. Signature
 input includes the unencoded JSON string and sorted form keys; Unicode and reserved form
 characters survive encoding. Both the encoded request and streamed response are bounded
-to 16 KiB. `DEPENDENCY_TIMEOUT_MS` bounds the exchange including response consumption;
+to 16 KiB. The fixed 5000 ms dependency timeout bounds the exchange including response consumption;
 redirects reject. The adapter makes one attempt, leaving retries to a later command rather
 than silently minting additional tokens after an uncertain response. A lost response can
 leave a valid stored session until expiry; this is not an idempotent issuance operation.

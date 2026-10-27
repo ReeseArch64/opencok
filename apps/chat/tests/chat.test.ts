@@ -13,7 +13,7 @@ test("chat configuration requires credentials and validates kingdom mapping", ()
   expect(() =>
     parseChatEnvironment({
       DATABASE_URL: "mysql://invalid/db",
-      CHAT_SIGNING_SECRET: "synthetic",
+      CHAT_SECRET: "synthetic",
       CHAT_WEBSOCKET_URL: "ws://localhost/chat/ws",
     }),
   ).toThrow();

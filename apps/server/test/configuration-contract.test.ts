@@ -82,7 +82,7 @@ test("complete configuration wire contract survives XML loading, realm compositi
     for (const kingdomId of [1, 2]) {
       const source = Layer.succeed(EnvironmentSource, {
         DATABASE_URL: "postgresql://unused.invalid/global",
-        GAME_LOGIN_SECRET: "synthetic",
+        GAME_SECRET: "synthetic",
         KINGDOM_ID: String(kingdomId),
       });
       let previous: Buffer | undefined;

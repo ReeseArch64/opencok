@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { blankToUndefined, validateEnvironment } from "./validation";
 
-import { timeout, databaseName, redisUrl, realmSettings, chatUrl } from "./service.schema";
+import { databaseName, redisUrl, realmSettings, chatUrl } from "./service.schema";
 
 export const serverSchema = z
   .object({
@@ -47,7 +47,7 @@ export const serverSchema = z
         .optional(),
     ),
     CHAT_URL: chatUrl,
-    CHAT_SIGNING_SECRET: z.preprocess(
+    CHAT_SECRET: z.preprocess(
       (value) => (value === "" ? undefined : value),
       z.string().min(1).optional(),
     ),
@@ -59,19 +59,17 @@ export const serverSchema = z
     KINGDOM_DATABASE_NAME: z.preprocess(blankToUndefined, databaseName.optional()),
     REDIS_URL: redisUrl,
     GAME_ZOOKEEPER: z.string().min(1).default("127.0.0.1:2181"),
-    GAME_LOGIN_SECRET: z.string().min(1),
-    GAME_MAP_SIZE: z.coerce.number().int().min(100).max(4000).default(1200),
-    DEPENDENCY_TIMEOUT_MS: timeout(5000),
+    GAME_SECRET: z.string().min(1),
   })
-  .refine((settings) => !settings.CHAT_URL || !!settings.CHAT_SIGNING_SECRET, {
+  .refine((settings) => !settings.CHAT_URL || !!settings.CHAT_SECRET, {
     message: "Chat signing secret required",
-    path: ["CHAT_SIGNING_SECRET"],
+    path: ["CHAT_SECRET"],
   })
   .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.GAME_FILES_URL, {
     path: ["GAME_FILES_URL"],
   })
-  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.CHAT_SIGNING_SECRET, {
-    path: ["CHAT_SIGNING_SECRET"],
+  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.CHAT_SECRET, {
+    path: ["CHAT_SECRET"],
   })
   .readonly();
 

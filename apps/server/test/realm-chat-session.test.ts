@@ -206,7 +206,7 @@ test("authenticated realm command issues a usable chat token through the maintai
 
 test("one Chat origin configures private routes and remains optional", async () => {
   const base = {
-    GAME_LOGIN_SECRET: "synthetic-login",
+    GAME_SECRET: "synthetic-login",
     GAME_RESOURCES: "synthetic-resources",
     DATABASE_URL: "postgres://synthetic:synthetic@invalid.example/global",
   };
@@ -226,7 +226,7 @@ test("one Chat origin configures private routes and remains optional", async () 
         Effect.provideService(EnvironmentSource, {
           ...base,
           CHAT_URL,
-          CHAT_SIGNING_SECRET: secret,
+          CHAT_SECRET: secret,
         }),
       ),
     );

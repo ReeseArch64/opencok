@@ -30,10 +30,10 @@ filter into `dist/data`. Rebuild images after source or resource changes.
 ## Local inputs and start
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the private
-`GAME_LOGIN_SECRET` exception, plus `REDIS_URL=redis://redis:6379/0` for local
+`GAME_SECRET` exception, plus `REDIS_URL=redis://redis:6379/0` for local
 containers. Chat defaults to `chat:8083`: the realm uses
 `/external/session` for sessions, `/_internal/nickname` for player renames and
-`/_internal/mailbox` for mailbox effects; the API proxies public metadata. `CHAT_SIGNING_SECRET`
+`/_internal/mailbox` for mailbox effects; the API proxies public metadata. `CHAT_SECRET`
 overrides the shared development signing value on both Chat and the realm. Optional
 `CHAT_URL` selects the shared HTTP(S) origin for API and realm; paths are fixed in
 code. Setting it enables all three private realm integrations, including mailbox.
@@ -44,7 +44,7 @@ existing values. No app-local env files are needed. The example database URL use
 Compose service DNS; PostgreSQL has no published host port. Run database tools
 through `docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T postgres` or the internal network.
 
-After changing `GAME_LOGIN_SECRET`, recreate the server to apply it:
+After changing `GAME_SECRET`, recreate the server to apply it:
 
 ```sh
 docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up -d --no-deps --wait server
@@ -112,11 +112,11 @@ state in `opencok_global`. The second kingdom database keeps the same schema.
 Changing the active realm requires matching server database/ID and API directory
 configuration.
 
-The resident map uses `GAME_MAP_SIZE=1201`, matching the saved native terrain and
+The resident map size is fixed at 1201 in the server configuration, matching the saved native terrain and
 the one-based identity `id = 1 + x + y * 1201`. A worker configured with 1200 can
 answer `world.get` successfully while selecting cells outside the requested view.
-Keep this setting aligned with the actual realm database; changing the setting
-does not convert terrain or move existing cities.
+Keep this constant aligned with the actual realm database; changing it does not
+convert terrain or move existing cities.
 
 When correcting a realm previously started with 1200, stop its worker and back up
 its database first. Inspect private `opencok.world.monsters.*.v1` records under
