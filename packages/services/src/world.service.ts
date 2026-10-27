@@ -1,3 +1,4 @@
+import { worldMapMonsterFields } from "@opencok/rules/world-map-point";
 import { cityCosmeticProjection } from "@opencok/rules/city-cosmetics";
 import { reconnectMarchBase } from "@opencok/mappings/reconnect-marches";
 import { decodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
@@ -28,7 +29,9 @@ export function compactPoint(
   now = BigInt(Date.now()),
 ): string {
   if (
-    ![0, 1, 2, 3, 8, 64, 65, 68, 69].includes(num(row, "pointType")) ||
+    ![0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 15, 17, 44, 45, 48, 64, 65, 68, 69].includes(
+      num(row, "pointType"),
+    ) ||
     text(row, "territoryAlliance")
   )
     throw new GameError(errors.unsupported);
@@ -53,7 +56,7 @@ export function compactPoint(
     rt: "flushTime",
     st: "startTime",
   })) {
-    out[output] = Number(long(row, input) / 1000n);
+    out[output] = Number(BigInt.asIntN(32, long(row, input) / 1000n));
   }
   if (out.t === 1) {
     const until = long(row, "sendHeartDurationTime");
@@ -61,6 +64,7 @@ export function compactPoint(
     if (text(row, "heartType")) out.heartType = text(row, "heartType");
   }
   if (out.t === 1) Object.assign(out, cityCosmeticProjection(cosmetics, rules, now));
+  Object.assign(out, worldMapMonsterFields(row, rules));
   return JSON.stringify(out);
 }
 export function pointSections(points: string[]): Fields {
