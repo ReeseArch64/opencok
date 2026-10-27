@@ -1,21 +1,8 @@
 name: Local TypeScript stack
 
 on:
-  pull_request:
-    paths:
-      - "apps/api/**"
-      - "apps/server/**"
-      - "packages/**"
-      - "infra/**"
-      - "tests/stack/**"
-      - "docker-compose.yml"
-      - ".dockerignore"
-      - ".env.example"
-      - "package.json"
-      - "bun.lock"
-      - ".github/workflows/stack-tests.yml"
   push:
-    branches: [develop]
+    branches: [main]
     paths:
       - "apps/api/**"
       - "apps/server/**"

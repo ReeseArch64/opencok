@@ -1,18 +1,8 @@
 name: PostgreSQL database
 
 on:
-  pull_request:
-    paths:
-      - "packages/drizzle/**"
-      - "packages/env/**"
-      - ".env.example"
-      - "bunfig.toml"
-      - "packages/config/**"
-      - "package.json"
-      - "bun.lock"
-      - ".github/workflows/postgresql-tests.yml"
   push:
-    branches: [develop]
+    branches: [main]
     paths:
       - "packages/drizzle/**"
       - "packages/env/**"
