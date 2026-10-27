@@ -57,9 +57,7 @@ services:
     profiles: [all, devops]
     networks: [opencok-external-network]
     volumes:
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
       - portainer-data:/data
     ports:
       - 9443:9000
@@ -69,10 +67,8 @@ services:
     container_name: opencok-postgres
     restart: unless-stopped
     profiles: [all, dev, devops, database]
-    networks: [opencok-internal-network, opencok-external-network]
+    networks: [opencok-internal-network]
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
       PGDATA: /var/lib/postgresql/data/pgdata
@@ -255,35 +251,35 @@ services:
         condition: service_healthy
 
   server:
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: "5"
     build:
       context: .
       dockerfile: apps/server/Dockerfile
     container_name: opencok-server
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, prod]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
-      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for API, server and Chat}
+      DATABASE_URL: ${DATABASE_URL}
       KINGDOM_ID: 1
       KINGDOM_DATABASE_NAME: opencok_kingdom_1
       GLOBAL_DATABASE_NAME: opencok_global
       API_URL: http://api:8080
-      REDIS_URL: ${REDIS_URL:?Set REDIS_URL for API and server}
+      REDIS_URL: ${REDIS_URL}
       GAME_ZOOKEEPER: zookeeper:2181
       GAME_SECRET: ${GAME_SECRET}
-      CHAT_URL: ${CHAT_URL:-http://chat:8083}
-      CHAT_SECRET: ${CHAT_SECRET:-opencok-chat-development}
+      CHAT_URL: ${CHAT_URL}
+      CHAT_SECRET: ${CHAT_SECRET}
     depends_on:
       zookeeper:
         condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
     healthcheck:
       test:
         [
@@ -299,11 +295,6 @@ services:
       retries: 12
 
   api:
-    logging:
-      driver: json-file
-      options:
-        max-size: 20m
-        max-file: "5"
     build:
       context: .
       dockerfile: apps/api/Dockerfile
@@ -312,21 +303,26 @@ services:
     profiles: [all, dev, prod]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
-      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for API, server and Chat}
+      DATABASE_URL: ${DATABASE_URL}
       GLOBAL_DATABASE_NAME: opencok_global
       KINGDOM_ID: 1
-      CHAT_URL: ${CHAT_URL:-http://chat:8083}
+      CHAT_URL: ${CHAT_URL}
       S3_ENDPOINT: ${S3_ENDPOINT}
       S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT}
       S3_REGION: ${S3_REGION}
       S3_BUCKET: ${S3_BUCKET}
       S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
       S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
-      REDIS_URL: ${REDIS_URL:?Set REDIS_URL for API and server}
-      GAME_PUBLIC_HOST: ${GAME_PUBLIC_HOST:?Set GAME_PUBLIC_HOST for client connections}
+      REDIS_URL: ${REDIS_URL}
+      GAME_PUBLIC_HOST: ${GAME_PUBLIC_HOST}
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
     healthcheck:
       test:
         [
@@ -380,19 +376,19 @@ services:
       dockerfile: apps/chat/Dockerfile
     container_name: opencok-chat
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, prod]
     init: true
     stop_grace_period: 30s
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
       MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
-      NODE_ENV: development
-      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for API, server and Chat}
+      NODE_ENV: ${NODE_ENV}
+      DATABASE_URL: ${DATABASE_URL}
       GLOBAL_DATABASE_NAME: opencok_global
       CHAT_KINGDOM_DATABASES: 1:opencok_kingdom_1,2:opencok_kingdom_2
       MONGO_URI: ${MONGO_URI}
-      CHAT_SECRET: ${CHAT_SECRET:-opencok-chat-development}
+      CHAT_SECRET: ${CHAT_SECRET}
     ports:
       - 8083:8083
     healthcheck:
@@ -445,18 +441,10 @@ services:
       - --metrics.otlp.addrouterslabels=true
       - --metrics.otlp.http.endpoint=http://maple:4318/v1/metrics
       - --metrics.otlp.http.headers.Authorization=Bearer ${MAPLE_LOCAL_INGEST_KEY}
-    stop_grace_period: 15s
-    read_only: true
-    cap_drop: [ALL]
-    cap_add: [NET_BIND_SERVICE]
-    security_opt: [no-new-privileges:true]
-    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
     networks: [opencok-internal-network, opencok-external-network]
-    mem_limit: 256m
-    cpus: "0.50"
     environment:
       OTEL_RESOURCE_ATTRIBUTES: service.namespace=opencok,deployment.environment.name=${NODE_ENV:-development}
-      CDN_URL: ${CDN_URL:?Set CDN_URL for gateway asset storage}
+      CDN_URL: ${CDN_URL}
     depends_on:
       api:
         condition: service_healthy
