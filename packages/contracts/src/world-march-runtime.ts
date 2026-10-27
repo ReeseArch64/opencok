@@ -12,6 +12,7 @@ export interface RuntimeMarch extends MarchLifecycle {
   troopIds: Readonly<Record<string, string>>;
 }
 export interface WorldMutationState {
+  targetMarchCount?: number;
   treasures?: readonly Row[];
   cityBosses?: readonly Row[];
   randomDestination?: number;

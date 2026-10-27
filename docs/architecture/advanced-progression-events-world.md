@@ -2171,3 +2171,20 @@ This checkpoint establishes generation, login and destruction. Excavation,
 acceleration, completion mail and march recovery require their corresponding
 owned noncombat march lifecycle; takeover of an occupied enemy camp additionally
 requires its validated battle engine. These dependencies are distinct.
+
+## Native march preflight
+
+The `MarchWorldPointCheck` audit corrected `world.march.check` to the native
+Boolean `needBreakShield` response. It accepts a point without a soldier
+selection and checks saved outbound/occupied march counts for `wantToFight`.
+Changed resource and target conditions retain source errors `108896` and `103730`.
+A shielded resident can inspect an occupied target without authorizing its attack.
+The corresponding battle-dependent march admission remains unavailable.
+
+Preflight runs before march recovery and cannot reserve troops, consume an item,
+settle an overdue march or rewrite a world cell. The existing cosmetic type-13
+preview remains a no-cost owned-item validation and never requires breaking a
+shield. Previously returned travel, load and collection forecasts were not the
+source preflight contract and are no longer substituted for it. PostgreSQL
+acceptance covers a minimal native request, target-count changes, shield state,
+overdue checkpoint preservation and troop conservation.

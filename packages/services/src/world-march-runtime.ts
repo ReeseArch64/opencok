@@ -1,3 +1,5 @@
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 import { buildingStep } from "@opencok/rules/building";
 import { troubleItem } from "@opencok/rules/trouble";
 import { recordTargetTask } from "./target-task";
@@ -9,7 +11,7 @@ import {
   marchCompanionPushes,
 } from "./world-march-companions";
 import { recordExpeditionScore } from "./new-expedition";
-import { worldMarchDetail } from "@opencok/mappings/world-march-runtime";
+import { worldMarchDetail, worldMarchCheck } from "@opencok/mappings/world-march-runtime";
 import { armySnapshot } from "@opencok/mappings/bootstrap";
 import { randomUUID } from "node:crypto";
 import { encode, decode, sfs, str, int, fields, Type, type Fields } from "@opencok/messages/sfs";
@@ -509,6 +511,52 @@ export function createWorldMarchDomain(size: number): CityDomain {
         })
       )
         worldMutationFailure();
+      if (command === "world.march.check") {
+        const state = context.state.worldMutation,
+          targetId = cityInteger(int(params, "point"), 1, size * size),
+          target = state.points.find((row) => num(row, "id") === targetId),
+          trouble = int(params, "type", 0) === 13;
+        if (!target) worldMutationFailure();
+        if (trouble) {
+          const item = context.economy.ownedItem?.(str(params, "itemUuid"));
+          if (
+            !item ||
+            item.count < 1 ||
+            num(target, "pointType") !== 1 ||
+            !text(target, "ownerId") ||
+            text(target, "ownerId") === context.owner
+          )
+            worldMutationFailure();
+          troubleItem(context.rules, item.itemId);
+        } else if (![0, 2, 3, 37, 60, 63].includes(num(target, "pointType")))
+          worldMutationFailure();
+        const want = int(params, "wantToFight", -1),
+          count = state.targetMarchCount ?? 0;
+        if ((want === 0 && count > 0) || ((want === 1 || want === 2) && count <= 0))
+          throw new GameError(
+            int(params, "cityType", 0) === 3
+              ? errors.worldResourceChanged
+              : errors.worldTargetChanged,
+            "world_state",
+          );
+        const origin = state.points.find((row) => num(row, "id") === num(state.world, "pointId"));
+        const occupied = Boolean(text(target, "ownerId") || text(target, "ownerName"));
+        return {
+          response: encode(
+            worldMarchCheck({
+              needBreakShield: Boolean(
+                !trouble &&
+                Boolean(origin) &&
+                long(origin!, "shieldTime") > context.now &&
+                occupied &&
+                target.ownerId != null &&
+                target.ownerId !== context.owner,
+              ),
+            }),
+          ),
+          event: null,
+        };
+      }
       recover(context);
       const push = (): Fields => ({
         troubles: sfs.array(
@@ -587,7 +635,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
           false,
         );
       }
-      if (command === "world.march" || command === "world.march.check") {
+      if (command === "world.march") {
         const targetId = cityInteger(int(params, "point"), 1, size * size),
           target = point(context, targetId),
           world = context.state.worldMutation.world,
@@ -719,15 +767,6 @@ export function createWorldMarchDomain(size: number): CityDomain {
           },
           balances(context),
         );
-        if (command === "world.march.check")
-          return reply(
-            {
-              marchTime: sfs.int(Number(duration)),
-              armyLoad: sfs.int(capacity),
-              collectSpd: sfs.double(collectRate),
-            },
-            false,
-          );
         if (trouble) {
           if (!context.economy.consumeItem) worldMutationFailure();
           context.economy.consumeItem(str(params, "itemUuid"), 1);
