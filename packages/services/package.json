@@ -146,7 +146,8 @@
     "./world-resource-refresh": "./src/world-resource-refresh.ts",
     "./red-packets": "./src/red-packets.ts",
     "./hot-item": "./src/hot-item.ts",
-    "./world-utility": "./src/world-utility.ts"
+    "./world-utility": "./src/world-utility.ts",
+    "./city-defense": "./src/city-defense.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

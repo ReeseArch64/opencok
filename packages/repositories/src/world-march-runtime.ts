@@ -1,3 +1,4 @@
+import { t_worldboss } from "@opencok/drizzle/schema/opencok_kingdom/t_worldboss";
 import { and, asc, eq, inArray, lte, sql, or, isNull } from "drizzle-orm";
 import { totem_activation } from "@opencok/drizzle/schema/opencok_kingdom/totem_activation";
 import { totemFootprint, restoreTotemConfiguration } from "@opencok/rules/totem";
@@ -90,7 +91,27 @@ export async function readWorldMutationState(
     .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, [...ids])))
     .orderBy(asc(worldpoint.id))
     .for("update");
-  return { world, points, marches, checkpoints, randomDestination };
+  const cityBosses =
+    command === "buy.citydef" || command === "world.user.rcd"
+      ? await tx
+          .select({
+            x: worldpoint.x,
+            y: worldpoint.y,
+            firerange: t_worldboss.firerange,
+            firespeed: t_worldboss.firespeed,
+            status: t_worldboss.status,
+          })
+          .from(t_worldboss)
+          .innerJoin(
+            worldpoint,
+            and(eq(worldpoint.id, t_worldboss.point), eq(worldpoint.worldId, 0)),
+          )
+          .where(eq(t_worldboss.status, 1))
+          .limit(1025)
+      : undefined;
+  if (cityBosses && cityBosses.length > 1024)
+    throw new Error("City fire source aggregate exceeds bound");
+  return { world, points, marches, checkpoints, randomDestination, cityBosses };
 }
 export async function writeWorldMutation(
   tx: MutationTransaction,
@@ -104,6 +125,7 @@ export async function writeWorldMutation(
       .set({
         pointId: num(write.world, "pointId"),
         lastMoveCityTime: long(write.world, "lastMoveCityTime"),
+        lastCityDefTime: long(write.world, "lastCityDefTime"),
       })
       .where(eq(user_world.uid, owner));
   }
