@@ -1,3 +1,4 @@
+import { readNormalRecharge, writeNormalRecharge } from "./normal-recharge";
 import { readComeback, writeComeback } from "./comeback";
 import { readHotItems, writeHotItems } from "./hot-item";
 import { redPacketReader, writeRedPackets } from "./red-packets";
@@ -166,6 +167,7 @@ export function createCityProgressionStore(
             ? redPacketReader(tx, owner)
             : undefined,
         campaignProfile:
+          command?.startsWith("normal.recharge.") ||
           command?.startsWith("campaign.") ||
           command?.startsWith("redPackets.") ||
           command?.startsWith("hot.item.") ||
@@ -238,6 +240,9 @@ export function createCityProgressionStore(
           command === "pay.recharge.ui.state" || command === "feedback.paid"
             ? rechargeFeedbackReader(tx, owner)
             : undefined,
+        normalRecharge: command?.startsWith("normal.recharge.")
+          ? await readNormalRecharge(tx, owner, now, true)
+          : undefined,
         rechargeActivity: command?.startsWith("new.sercum.")
           ? await readRechargeActivity(tx, owner)
           : undefined,
@@ -391,6 +396,7 @@ export function createCityProgressionStore(
         if (write.redPackets) await writeRedPackets(tx, owner, write.redPackets);
         if (write.rechargeFeedback)
           await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);
+        if (write.normalRecharge) await writeNormalRecharge(tx, owner, write.normalRecharge, now);
         if (write.rechargeActivity) await writeRechargeActivity(tx, owner, write.rechargeActivity);
         if (write.ordinaryBox) await writeOrdinaryBox(tx, owner, write.ordinaryBox);
         if (write.sevenDayCycle) await writeSevenDayCycle(tx, owner, write.sevenDayCycle);

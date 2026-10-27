@@ -1,3 +1,4 @@
+import { normalRechargePeriod } from "./normal-recharge";
 import type { ActivityOperatorsSnapshot } from "@opencok/contracts/activity-operators";
 import type { ActivityOperatorResponse } from "@opencok/contracts/responses/activity-operators";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
@@ -57,6 +58,8 @@ function endTime(
     opened = long(state.server, "activityTime"),
     openingValid = opened > 0n && opened <= now;
   switch (type) {
+    case 20:
+      return normalRechargePeriod(rules, state.server, now)?.end;
     case 21: {
       if (!feature(rules, "comeback", context) || !state.comeback) return;
       const config = rules.advanced.comebacks?.get(text(state.comeback, "configId")),

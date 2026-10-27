@@ -146,7 +146,8 @@
     "./activity-operators": "./src/activity-operators.ts",
     "./comeback": "./src/comeback.ts",
     "./comeback-session": "./src/comeback-session.ts",
-    "./red-packets": "./src/red-packets.ts"
+    "./red-packets": "./src/red-packets.ts",
+    "./normal-recharge": "./src/normal-recharge.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
