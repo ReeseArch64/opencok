@@ -98,3 +98,10 @@ clock does not cause a full terrain scan every worker tick. Native deadlines and
 outbox invalidations remain atomic with node changes. PostgreSQL checks cover
 missing, zero and future openings, occupied nodes, interval suppression, bounded
 catch-up and rollback without retaining an uncommitted scheduling deadline.
+
+Ordinary resource area counts preserve `WorldCreatorV2.getMaxAreaCount` and
+`getPointsByAreaId`. A size divisible by the configured area width uses the
+regular square regions. A remainder uses one additional area containing the
+last row and column together. The canonical 1201-cell source map therefore has
+576 regular resource regions and border area 577, rather than 625 independently
+rounded rectangles. Existing stored area IDs and tiles are never rewritten.
