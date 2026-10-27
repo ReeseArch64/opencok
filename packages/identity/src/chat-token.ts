@@ -1,8 +1,10 @@
 import type { SessionStore, TokenVerifier } from "@opencok/contracts/chat";
 import { createHash } from "node:crypto";
 
-export function createTokenVerifier(sessionStore: SessionStore): TokenVerifier {
-  return async (token, claimedUid) => {
+export class ChatTokenVerifier {
+  public constructor(private readonly sessionStore: SessionStore) {}
+
+  public readonly verify: TokenVerifier = async (token, claimedUid) => {
     if (typeof token !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
     if (
       claimedUid !== undefined &&
@@ -13,8 +15,12 @@ export function createTokenVerifier(sessionStore: SessionStore): TokenVerifier {
     if (decoded.length !== 32 || decoded.toString("base64url") !== token) return null;
 
     const tokenHash = createHash("sha256").update(token).digest();
-    const session = await sessionStore.getById(tokenHash);
+    const session = await this.sessionStore.getById(tokenHash);
     if (!session?.uid) return null;
     return claimedUid === undefined || session.uid === claimedUid ? { uid: session.uid } : null;
   };
+}
+
+export function createTokenVerifier(sessionStore: SessionStore): TokenVerifier {
+  return new ChatTokenVerifier(sessionStore).verify;
 }

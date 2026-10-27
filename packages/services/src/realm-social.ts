@@ -5,7 +5,7 @@ import type { ChatSocialCommand } from "@opencok/contracts/chat-social";
 import type { RealmSocialCommandService } from "@opencok/contracts/realm-social";
 import { ChatCommandError } from "@opencok/errors/chat";
 import { ChatNativeService, nativeChatCommands } from "./chat-native.ts";
-import { createChatSocialService, chatSocialCommands } from "./chat-social.ts";
+import { ChatSocialService, chatSocialCommands } from "./chat-social.ts";
 export class RealmSocialService implements RealmSocialCommandService {
   readonly social;
   readonly native;
@@ -13,7 +13,7 @@ export class RealmSocialService implements RealmSocialCommandService {
     readonly repository: ChatRepository,
     readonly isReady: () => boolean,
   ) {
-    this.social = repository.social ? createChatSocialService(repository.social) : undefined;
+    this.social = repository.social ? new ChatSocialService(repository.social) : undefined;
     this.native = new ChatNativeService(repository);
   }
   async execute(

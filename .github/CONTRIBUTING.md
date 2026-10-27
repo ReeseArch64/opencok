@@ -77,6 +77,20 @@ use cases and coordinate rules and persistence through contracts. Compose the
 instances in `apps/`; packages must not import applications. Keep transport
 handling in Controllers and adapters and application workflows in Services.
 
+Keep each implementation file focused on one responsibility and one class with
+behavior. Use abstract classes for shared workflows, lifecycle ownership and
+invariants, with concrete classes implementing the domain-specific steps. Inject
+collaborators through constructors. Keep wire serialization in Mapper classes,
+boundary checks in validations and structural ports and response shapes in contracts.
+Use enums for finite named alternatives, including command names and protocol groups;
+keep limits and durations as configuration values. Compatibility entrypoints may
+delegate to concrete classes while callers migrate.
+
+Separate imports from declarations, adjacent top-level declarations and class methods
+with a blank line. Separate control-flow blocks and final returns from preceding
+statements. Keep related field and local variable declarations together. Oxfmt
+preserves these blank lines; do not compress source to imitate the minified build.
+
 Reserve DTO classes for create and update inputs, named `Create<Resource>Dto`
 and `Update<Resource>Dto`, such as `CreateCityDto`. Declare explicit
 `declare public readonly` data properties without decorators, constructors,

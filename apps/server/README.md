@@ -31,12 +31,18 @@ preserved. Construction, queue completion, combat and other mutations return
 `src/index.ts` composes Effect Layers and runs the shared process runtime;
 `src/config.ts` provides the RealmConfig service from the shared environment Layer. The composition root wires the shared packages described
 in the [architecture package map](../../.github/ARCHITECTURE.md#implemented-api-and-realm-package-boundaries).
-`src/server.ts` loads the rule catalog and connects `@opencok/connection/server`
+`src/realm-composition.ts` loads the rule catalog and connects `@opencok/connection/server`
 to repositories, Redis/ZooKeeper adapters and application Services injected into command Controllers. The dependency
 Layer owns pools and coordination; the connection Layer owns TCP/health listeners
 and a scoped readiness fiber. Shutdown waits for health checks, stops accepting
 connections and drains session work before releasing dependencies. API and realm
 share `@opencok/core/http` and `@opencok/core/runtime`.
+
+`src/realm-application.ts` owns the Promise-compatible runtime and its shutdown;
+`src/server.ts` preserves the existing imports and `startServer` entrypoint. Context
+service classes live in separate `realm-dependencies.ts`, `realm-rules.ts` and
+`realm-server.ts` modules. Avatar, avatar-version and mail-gift relay classes use
+the shared abstract polling and cursor workers in `packages/core`.
 
 `startServer(config)` remains a Promise boundary for embedded/integration callers,
 backed by a ManagedRuntime whose `close()` disposes the service scopes. It cleans

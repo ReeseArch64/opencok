@@ -23,6 +23,8 @@
     "@opencok/identity": "workspace:*",
     "@opencok/dtos": "workspace:*",
     "@opencok/errors": "workspace:*",
-    "@opencok/mappings": "workspace:*"
+    "@opencok/mappings": "workspace:*",
+    "@opencok/enums": "workspace:*",
+    "@opencok/validations": "workspace:*"
   }
 }

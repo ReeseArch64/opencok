@@ -1,13 +1,18 @@
-import type { CommandHandler, RoomHandlerOptions } from "@opencok/contracts/chat";
+import type { CommandContext, CommandHandler, RoomHandlerOptions } from "@opencok/contracts/chat";
 import { isSafeInteger } from "@opencok/contracts/chat";
-import { ChatCommandError } from "@opencok/controllers/chat-rooms";
+import { ChatCommand } from "@opencok/enums/chat-command";
+import { ChatCommandError } from "@opencok/errors/chat";
+import { ChatRoomController } from "./chat-room.controller.ts";
 
-export function createSendHandler({
-  authorizeRoom,
-  messages,
-  access,
-}: RoomHandlerOptions): CommandHandler {
-  return async ({ uid, params, sendTime, connection, peers }) => {
+export class ChatSendController extends ChatRoomController {
+  public readonly command = ChatCommand.SendRoomMessage;
+
+  public constructor(options: RoomHandlerOptions) {
+    super(options);
+  }
+
+  public async execute({ uid, params, sendTime, connection, peers }: CommandContext) {
+    const { authorizeRoom, messages, access } = this.options;
     const roomId = params.roomId;
     if (typeof roomId !== "string" || !connection.joinedRooms.has(roomId))
       throw new ChatCommandError("invalid_room");
@@ -65,5 +70,9 @@ export function createSendHandler({
       serverTime: Date.parse(saved.createdAt),
       seqId: saved.sequenceId,
     };
-  };
+  }
+}
+
+export function createSendHandler(options: RoomHandlerOptions): CommandHandler {
+  return new ChatSendController(options).handle;
 }

@@ -117,6 +117,21 @@ public exports; do not turn helpers into a cross-domain rules container.
 composition uses Effect; [ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md)
 remains proposed, while the existing runtime implementation remains checkable.
 
+Chat composition lives in `ChatApplication`; retention and archive work belongs to
+`ChatMaintenanceService` and peer distribution to `ChatDeliveryService`. Each room
+and history command has a Controller implementing `ChatCommandController`; room
+authorization and history visibility have shared abstract bases. Signed internal
+chat Controllers share `SignedChatController`, while domain-separated HMAC signing
+belongs to `SignedChatRequest` implementations in identity. `ChatMessageMapper`
+and discovery Mappers own their wire projections. HTTP routing, request logging,
+WebSocket upgrades and individual connection queues have separate transport classes.
+The API composes `ApiRouter` and `ApiRequestHandler` through the same package boundaries.
+
+The realm keeps its Effect composition in `realm-composition.ts`; `RealmApplication`
+owns the Promise-compatible runtime lifetime. Relay classes specialize the shared
+`PollingWorker` and `CursorWorker` lifecycle implementations in core. These classes
+preserve the existing Effect ownership model and protocol execution order.
+
 Feature-by-feature migration details belong in the [realm runbook](../apps/server/README.md),
 [API guide](../apps/api/README.md), [chat guide](../apps/chat/README.md),
 [media runbook](../apps/api/README.md#avatar-media) and [migration evidence](../docs/migration-validation.md).

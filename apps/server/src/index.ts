@@ -3,7 +3,8 @@ import { logEvent } from "@opencok/core/logging";
 import { runService } from "@opencok/core/runtime";
 import { EnvironmentLive } from "@opencok/env/effect";
 import { RealmConfig, RealmConfigLive } from "./config.ts";
-import { RealmLive, RealmServer } from "./server.ts";
+import { RealmLive } from "./realm-composition.ts";
+import { RealmServer } from "./realm-server.ts";
 
 const services = RealmLive.pipe(
   Layer.provideMerge(RealmConfigLive),

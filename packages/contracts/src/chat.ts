@@ -1,3 +1,4 @@
+import type { ChatRoomGroup } from "@opencok/enums/chat-room-group";
 import type {
   ChatAccessStore,
   ChatDeliveryStore,
@@ -43,7 +44,7 @@ export interface PlayerState {
   noticeBanUntil?: number;
 }
 
-export type RoomGroup = "original" | "country" | "alliance" | "global" | "local" | "private";
+export type RoomGroup = `${ChatRoomGroup}`;
 export interface Room {
   group: RoomGroup;
   roomId: string;
