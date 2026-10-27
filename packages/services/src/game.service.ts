@@ -389,6 +389,11 @@ export class GameService {
       totems,
       alliance,
     ].flatMap((result) => result?.pushes ?? []);
+    if (this.services.worldEffectBoard)
+      initialPushes.push({
+        command: "world.effect.push",
+        body: await this.services.worldEffectBoard(),
+      });
     if (!this.services.reconnect) return { body, pushes: initialPushes };
     const now = this.now();
     const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
