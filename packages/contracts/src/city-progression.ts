@@ -105,6 +105,7 @@ export interface CityProgressionState {
   vipBox?: import("./vip-box").VipBoxState;
   targetTask?: import("./target-task").TargetTaskState;
   redPackets?: import("./paid-gifts").RedPacketReader;
+  militaryAward?: import("./military-rank-awards").MilitaryRankAwardReader;
   rechargeFeedback?: import("./recharge-feedback").RechargeFeedbackReader;
   rechargeActivity?: import("./recharge-activity").RechargeActivityState;
   ordinaryBoxServer?: { openedAt: bigint };
@@ -175,6 +176,7 @@ export interface CityProgressionWrite {
   vipBox?: import("./vip-box").VipBoxWrite;
   targetTask?: import("./target-task").TargetTaskWrite;
   redPackets?: import("./paid-gifts").RedPacketWrite;
+  militaryAward?: import("./military-rank-awards").MilitaryRankAwardWrite;
   rechargeFeedback?: readonly import("./recharge-feedback").RechargeFeedbackClaim[];
   rechargeActivity?: import("./recharge-activity").RechargeActivityWrite;
   ordinaryBox?: import("./ordinary-box").OrdinaryBoxWrite;

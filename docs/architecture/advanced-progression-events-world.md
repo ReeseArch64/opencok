@@ -2520,3 +2520,50 @@ Taking over another player's occupied camp remains unavailable until its battle
 engine validates the defender, casualties and outcome. Cross-battle treasure
 transfer is a separate realm-transfer dependency. Neither is needed for owned
 free-point excavation; device execution remains unverified.
+
+### Trusted activity military awards
+
+Configured activity entitlements can plan `military` and `milhonor` grants through
+`applyMilitaryRankAward`. The helper accepts a server-owned entitlement identity
+and configured positive integer amounts. It exposes requested and credited amounts
+separately: the native reward description retains the requested amount, while
+weekly honor limits and float32 rounding can reduce the persisted credit. It does
+not expose a native command or accept battle results from clients. A closed
+`wr_switch` retains the reference reward manager's skip behavior.
+
+The reader locks the existing `server_info.lastClearMilitaryMailSendTime` clock
+and the owned `user_military_rank` row. An absent, zero, future or expired clock
+leaves the entitlement available; a reward cannot initialize or advance the
+military period. The expiry bound uses the saved marker plus `wr_info.k2` days and
+the reference clock's one-day offset. A missing player row receives the reference
+login defaults. Existing ranking experience, rank, awards, skills, status, reset
+markers and active effects remain unchanged. These configured grants do not
+perform global ranking settlement, promotion, combat scoring or period resets.
+
+Score and honor retain the reference float32 operations before PostgreSQL's
+numeric balance rounding. Honor uses the configured `wr_info.k13` ceiling for the
+saved configured rank level. A missing or rank-zero row can receive score, but
+honor remains unavailable until a factual configured rank is present; the
+reference honor grant directly looks up the persisted rank and has no rank-zero
+ceiling. The grant does not replace that missing metadata with a visible level.
+Overflow and invalid amounts fail the entire claim. The writer checks the locked
+clock and full row against the plan, repeats the counter calculations, and writes
+only the affected counters. It records score, honor and weekly honor in integer
+cents under the canonical `activity-military:{entitlementId}` journal namespace,
+including zero-credit grants. Journal uniqueness fences a reused entitlement even
+if another caller incorrectly resets its claim status.
+
+The activity consumer must compose this writer with its owned entitlement status,
+other reward effects and final command receipt in the same fenced mutation
+transaction. A stale clock, counter, authority, ledger failure or receipt failure
+rolls back every effect. No migration, dependency or environment setting is added;
+back up military rows, the authoritative clock, entitlements, journals and receipts
+together. Restoring only one of those records can invalidate award evidence.
+
+Seven PostgreSQL cases passed with 61 assertions, covering owned claims, missing
+rank metadata, replay, float32 balances, weekly limits under concurrency,
+authoritative clock rejection, preserved rank effects, canonical entitlement
+fencing, realm authority and atomic ledger or receipt failure. Five rule and
+service cases passed with 34 assertions; package boundaries, required lint and
+formatting, and 25 workspace type checks passed. The activity command composition
+requires its consumer's integration verification.
