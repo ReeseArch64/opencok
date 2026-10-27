@@ -12,18 +12,19 @@ Apply the existing global and kingdom migrations before starting Chat. No new
 migration is introduced by this integration. Chat uses the configured global
 account directory to select each player's authoritative kingdom database.
 
-| Process         | Configuration                                                      | Purpose                                                        |
-| --------------- | ------------------------------------------------------------------ | -------------------------------------------------------------- |
-| Chat            | `DATABASE_URL`, `CHAT_KINGDOM_DATABASES`, `GLOBAL_DATABASE_NAME`   | Persistent sessions/messages and authoritative room membership |
-| Chat            | `CHAT_HOST`, `CHAT_PORT`, `CHAT_WEBSOCKET_URL`                     | Listener and client-reachable `ws(s)://host/chat/ws` endpoint  |
-| Chat and realms | `CHAT_SIGNING_SECRET`                                              | Matching backend session signing secret                        |
-| Realm           | `GAME_CHAT_SESSION_URL=http://chat.internal:8083/external/session` | Trusted internal session issuer                                |
-| API             | `API_CHAT_URL=http://chat.internal:8083`                           | Origin for the three public metadata routes                    |
+| Process         | Configuration                                                    | Purpose                                                          |
+| --------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Chat            | `DATABASE_URL`, `CHAT_KINGDOM_DATABASES`, `GLOBAL_DATABASE_NAME` | Persistent sessions/messages and authoritative room membership   |
+| Chat and realms | `CHAT_SECRET`                                                    | Matching backend session signing secret                          |
+| Realm           | `CHAT_URL=http://chat.internal:8083`                             | Origin for trusted internal session, nickname and mailbox routes |
+| API             | `CHAT_URL=http://chat.internal:8083`                             | Origin for the three public metadata routes                      |
 
 The local Compose stack starts one Chat instance and configures the realms and API
-to reach it over service DNS. It publishes port 8083 and accepts `CHAT_WEBSOCKET_URL`
-as the advertised client address. For separate deployments, use deployment-owned
-URLs and secrets and start Chat with `bun run --cwd apps/chat start`. Its
+to reach it over service DNS. The entrypoint binds to `0.0.0.0:8083`, advertises
+`ws://192.168.1.104:8083/chat/ws` and uses consumer ID `chat-local`, all fixed in code.
+Separate deployments must adjust the advertised URL in code to their reachable
+endpoint and configure their secrets before building. Start Chat with
+`bun run --cwd apps/chat start`. Its
 WebSocket endpoint must be directly reachable by the client. The public API
 proxies metadata only; it never forwards `/external/session`, internal mutation
 routes or WebSocket traffic. Restrict the Chat session/internal routes to trusted

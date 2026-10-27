@@ -125,12 +125,23 @@ Set the advertised game host/port in `docker-compose.yml` to an address the clie
 can reach; the committed LAN address is a local development value.
 
 ```sh
-docker compose --profile dev config --quiet
-docker compose --profile dev up --build -d --wait
-docker compose --profile dev ps -a
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev config --quiet
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev ps -a
 ```
 
-Profiles `dev` and `all` select the same local services. The setup jobs apply
+Use both files for local development; the dev override adds local Redis readiness
+and PostgreSQL setup dependencies. Set `REDIS_URL=redis://redis:6379/0` and
+`DATABASE_URL=postgres://postgres:postgres@postgres:5432/opencok_global` in the
+development env. API/server/Chat share `DATABASE_URL`.
+Profile `dev` starts the application stack; `all` also includes pgAdmin, Redis Insight
+and Portainer. Profile `devops` selects those tools and their dependencies; `redis`
+selects Redis with Redis Insight, `database` selects PostgreSQL/setup with pgAdmin,
+and `observability` selects only Maple from the base file. Production supplies an
+external `REDIS_URL` and `DATABASE_URL` without the dev override, with database
+provisioning and migrations handled separately. Redis remains pinned to the existing 6.2.24 Bookworm baseline pending
+compatibility validation before any upgrade; see the
+[stack guide](infra/compose/README.md#external-redis-and-deployment-separation). The setup jobs apply
 PostgreSQL migrations and import the CDN; API/server and gateway wait for their
 prerequisites. Development credentials and exposed inspection ports are for a
 controlled local environment, not a public production deployment.
@@ -146,8 +157,8 @@ controlled local environment, not a public production deployment.
 Follow logs and stop without deleting persistent volumes:
 
 ```sh
-docker compose logs --follow --tail=100 api server gateway
-docker compose --profile dev down
+docker compose -f docker-compose.yml -f docker-compose.dev.yml logs --follow --tail=100 api server gateway
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev down
 ```
 
 Named volumes preserve databases, objects and tool state across service recreation.
@@ -160,8 +171,8 @@ host/container settings.
 ## Optional services and integrations
 
 Chat runs separately. Configure its advertised WebSocket endpoint and trusted
-session-signing settings, `API_CHAT_URL` for public discovery and
-`GAME_CHAT_SESSION_URL` for the realm's private session endpoint. See the
+session-signing settings and a shared `CHAT_URL` HTTP origin for API discovery and
+the realm's private session, nickname and mailbox endpoints. See the
 [chat guide](apps/chat/README.md) and [API discovery guide](apps/api/README.md).
 
 Avatar media uses five S3 settings for its private bucket and SDK-presigned image
@@ -196,7 +207,6 @@ workspace commands above. Isolated integration commands require Docker:
 
 ```sh
 bun run --cwd apps/api test:media
-bun run test:stack
 ```
 
 These create disposable resources and synthetic accounts/assets rather than

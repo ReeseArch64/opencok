@@ -65,7 +65,7 @@ and [session management](https://firebase.google.com/docs/auth/admin/manage-sess
 documentation. The SDK is pinned in the identity package and lockfile.
 
 For Docker Compose, opt in with
-`docker compose -f docker-compose.yml -f infra/compose/api-provisioning.yml --profile dev up -d`.
+`docker compose -f docker-compose.yml -f docker-compose.dev.yml -f infra/compose/api-provisioning.yml --profile dev up -d`.
 Set the three variables above plus `FIREBASE_CREDENTIALS_FILE`, an absolute path
 to the local ADC JSON file. The overlay mounts it read-only and gives the API
 outbound connectivity for Firebase verification. The base stack does not need

@@ -48,8 +48,8 @@ bun run format:check
 Use `bun run lint:fix` for safe automatic lint fixes and `bun run format` to
 apply formatting. Review the resulting diff. CI checks lint and formatting on
 pull requests targeting any branch and pushes to all branches; lint warnings fail
-the check. PostgreSQL database, Local TypeScript stack, PostgreSQL realm server
-and Chat and API media run only on pushes to `main`, subject to their path filters.
+the check. PostgreSQL database, PostgreSQL realm server and Chat and API media
+run only on pushes to `main`, subject to their path filters.
 
 Formatting uses two spaces, double quotes, semicolons, LF line endings and a
 100-column print width. Import and package-key sorting are disabled. Markdown

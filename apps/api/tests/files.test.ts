@@ -4,7 +4,7 @@ import { createHash, randomBytes } from "node:crypto";
 import sharp from "sharp";
 import { Effect, Layer } from "effect";
 import { ApiDependencies, createApp, serveApi } from "../src/app";
-import { ApiConfigLive } from "../src/config";
+import { ApiConfig, readConfig } from "../src/config";
 import { EnvironmentSource } from "@opencok/env/effect";
 import { createHandler as createApiHandler } from "@opencok/api/handler";
 import { createHandler } from "@opencok/api/files";
@@ -202,9 +202,14 @@ test("API routes media and discovery on one listener while preserving independen
     S3_BUCKET: "images",
     S3_ACCESS_KEY_ID: "synthetic",
     S3_SECRET_ACCESS_KEY: "synthetic",
-    API_PORT: "0",
   });
-  const layers = Layer.merge(dependencies, ApiConfigLive).pipe(Layer.provide(environment));
+  const layers = Layer.merge(
+    dependencies,
+    Layer.effect(
+      ApiConfig,
+      readConfig.pipe(Effect.map((config) => ({ ...config, host: "127.0.0.1", port: 0 }))),
+    ),
+  ).pipe(Layer.provide(environment));
   await Effect.runPromise(
     Effect.scoped(
       Effect.gen(function* () {

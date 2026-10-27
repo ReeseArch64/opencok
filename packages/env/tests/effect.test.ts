@@ -7,7 +7,9 @@ import { serverSchema } from "../src/server.schema";
 const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://example:secret@localhost/global",
   KINGDOM_ID: "2",
-  GAME_LOGIN_SECRET: "synthetic",
+  GAME_SECRET: "synthetic",
+  CHAT_URL: "https://chat.internal:8083/",
+  CHAT_SECRET: "synthetic-chat-secret",
 });
 
 test("API and realm read the same injected snapshot with independent service defaults", async () => {
@@ -19,9 +21,36 @@ test("API and realm read the same injected snapshot with independent service def
   expect(result[0].KINGDOM_ID).toBe(2);
   expect(result[1].KINGDOM_ID).toBe(2);
   expect(result[0].GLOBAL_DATABASE_NAME).toBe(result[1].GLOBAL_DATABASE_NAME);
-  expect(result[0].API_PORT).toBe(8082);
-  expect(result[1].GAME_PORT).toBe(19933);
+  expect(result[0].CHAT_URL).toBe("https://chat.internal:8083/");
+  expect(result[1].CHAT_URL).toBe(result[0].CHAT_URL);
+  for (const name of [
+    "GAME_HOST",
+    "GAME_PORT",
+    "GAME_HEALTH_PORT",
+    "GAME_CROSS_SEARCH",
+    "GAME_CHAT_INTERVAL",
+    "GAME_FEED_MAX_COUNT",
+    "GAME_PLAYER_KINGDOMS",
+    "GAME_MAP_SIZE",
+    "DEPENDENCY_TIMEOUT_MS",
+  ]) {
+    expect(result[1]).not.toHaveProperty(name);
+  }
   expect(result[2]).toBe("postgresql://example:secret@localhost/global");
+});
+
+test.each([
+  "redis://synthetic:synthetic-secret@cache.internal:6380/4",
+  "rediss://synthetic:synthetic-secret@cache.internal:6381/5",
+])("API and realm schemas preserve the same shared Redis URL %s", async (REDIS_URL) => {
+  const [api, realm] = await Effect.runPromise(
+    Effect.all([readEnvironment(apiSchema), readEnvironment(serverSchema)]).pipe(
+      Effect.provideService(EnvironmentSource, { GAME_SECRET: "synthetic", REDIS_URL }),
+    ),
+  );
+
+  expect(api.REDIS_URL).toBe(REDIS_URL);
+  expect(realm.REDIS_URL).toBe(REDIS_URL);
 });
 
 test("configuration fails inside the Effect without leaking supplied secrets", async () => {

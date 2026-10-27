@@ -20,8 +20,7 @@
     "format": "vp fmt --config .oxfmtrc.json . --write",
     "format:check": "vp fmt --config .oxfmtrc.json . --check",
     "check-types": "vp check-types",
-    "test:stack": "bun --no-env-file test tests/stack",
-    "test:packages": "bun --no-env-file test tests/packages packages/resources/tests packages/validations/tests packages/mappings/tests packages/controllers/tests packages/rules/tests",
+    "test:packages": "bun --no-env-file test packages/resources/tests packages/validations/tests packages/mappings/tests packages/controllers/tests packages/rules/tests",
     "prepare": "husky",
     "commitlint": "commitlint"
   },

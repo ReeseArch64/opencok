@@ -124,8 +124,8 @@ it into `GameService`, whose constructor preserves a default for existing caller
 
 Packages never import applications. Declare direct workspace dependencies and
 public exports; do not turn helpers into a cross-domain rules container.
-`bun run test:packages` checks declared package APIs and cycles between
-responsibilities, including the corresponding directories inside `hero`. Follow
+`bun run test:packages` runs resource, validation, mapping, controller and rule tests
+within their packages. Follow
 [repository conventions](../packages/repositories/README.md). Current service
 composition uses Effect; [ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md)
 remains proposed, while the existing runtime implementation remains checkable.
@@ -265,11 +265,14 @@ compatibility and cannot silently rewrite in-flight calculations.
 
 ## 12. Observability, Evelog and search
 
-Current server/API services use Evlog through [shared logging](../packages/core/README.md#operational-logging)
+Current server/API/Chat services use Evlog through [shared logging](../packages/core/README.md#operational-logging)
 and export filtered logs, traces, controlled exceptions and duration/process metrics to
 Maple Local in Compose. [ADR-0013](../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
 records the authorized implementation and suspends Grafana, Loki, Prometheus, Axiom and
-Sentry for these signals while Maple passes verification. Production capacity remains open.
+Sentry for these signals while Maple passes verification. The gateway exports filtered
+access logs and HTTP metrics through native Traefik OTLP exporters under `gateway`;
+native ingress tracing stays disabled to exclude request URLs and client addresses.
+Maple is not a startup dependency. Production capacity remains open.
 Operational events cover composed service/adapter calls, HTTP/TCP, PostgreSQL statements,
 workers, generated media/frames and confirmed transaction effects. Bodies, SQL, credentials,
 player identities and raw exception messages/stacks are excluded. Maple is an operational
@@ -328,8 +331,23 @@ for actual coverage and deferred cases. Historical details remain in the
 ### 15.4. Local TypeScript stack
 
 The implemented Compose stack runs Bun API/server, Traefik, PostgreSQL, Redis,
-ZooKeeper, MinIO/CDN and development tools. Both `all`/`dev` profiles select the
-same services, including Chat with a directly published WebSocket on port 8083.
+ZooKeeper, MinIO/CDN and development tools. The `dev` profile includes Chat with a
+directly published WebSocket on port 8083; `all` also includes pgAdmin, Redis Insight
+and Portainer. The `devops` profile selects those tools and their dependencies.
+Use base Compose plus `docker-compose.dev.yml` for local Redis and PostgreSQL
+startup ordering, including local MinIO readiness for API. Base API has no local
+MinIO dependency and uses the configured S3 endpoints. The gateway uses `CDN_URL`
+for its CDN origin with fixed storage prefixes; only the development override waits
+for local MinIO CDN setup. Base API/server accept shared `REDIS_URL`; API/server/Chat accept
+shared `DATABASE_URL` without dependencies on local PostgreSQL/setup. The development
+override makes API/server/Chat and pgAdmin wait for PostgreSQL setup. The local
+PostgreSQL/setup services remain defined in the base file and selected by their
+existing profiles; omitting the override removes application startup ordering,
+not those service definitions.
+The `redis` profile selects Redis and Redis Insight; `database` selects PostgreSQL,
+PostgreSQL setup and pgAdmin. The realm joins the outbound network for
+external PostgreSQL/Redis access; production URL/provider and image compatibility remain
+subject to runtime verification, not established by this configuration.
 Media uses API S3 configuration; API metadata and realm session issuance target Chat.
 [Local stack guide](../infra/compose/README.md) and [API media](../apps/api/README.md#avatar-media)
 cover configuration, isolated verification and recovery. Local containers do not

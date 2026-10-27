@@ -25,41 +25,36 @@ volumes:
   portainer-data: ~
   maple-data: ~
 
-x-operational-logging: &operational-logging
-  driver: json-file
-  options:
-    max-size: 20m
-    max-file: "5"
-
 services:
   maple:
-    image: ghcr.io/mapletechlabs/maple:v0.3.0
-    restart: on-failure:5
-    profiles: [all, dev]
-    networks: [opencok-internal-network]
+    image: opencok-maple:v0.3.0-csp1
+    build:
+      context: ./infra/observability/maple
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    profiles: [all, dev, prod, observability]
+    networks: [opencok-internal-network, opencok-external-network]
     environment:
-      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-only}
-      MAPLE_LOCAL_ACCESS_TOKEN: ${MAPLE_LOCAL_ACCESS_TOKEN:-opencok-development-dashboard-only}
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
+      MAPLE_LOCAL_ACCESS_TOKEN: ${MAPLE_LOCAL_ACCESS_TOKEN}
       MAPLE_TELEMETRY: "off"
-      MAPLE_NO_UPDATE_CHECK: "1"
+      MAPLE_NO_UPDATE_CHECK: 1
     ports:
-      - 127.0.0.1:${MAPLE_PORT:-4318}:4318
+      - 4318:4318
     volumes:
       - maple-data:/data
     stop_grace_period: 45s
-    logging: *operational-logging
-    healthcheck:
-      test: [CMD, maple, services, --local, --limit, "1"]
-      interval: 15s
-      timeout: 10s
-      start_period: 60s
-      retries: 8
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
 
   portainer:
     image: portainer/portainer-ce:lts
     command: [--http-enabled]
     container_name: opencok-portainer
-    profiles: [all, dev]
+    profiles: [all, devops]
     networks: [opencok-external-network]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -71,11 +66,9 @@ services:
     image: postgres:17.11-bookworm
     container_name: opencok-postgres
     restart: unless-stopped
-    profiles: [all, dev]
-    networks: [opencok-internal-network, opencok-external-network]
+    profiles: [all, dev, devops, database]
+    networks: [opencok-internal-network]
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
       PGDATA: /var/lib/postgresql/data/pgdata
@@ -94,7 +87,7 @@ services:
       dockerfile: infra/compose/postgres.Dockerfile
     container_name: opencok-postgres-setup
     restart: no
-    profiles: [all, dev]
+    profiles: [all, dev, devops, database]
     networks: [opencok-internal-network]
     environment:
       POSTGRES_USER: postgres
@@ -109,7 +102,7 @@ services:
     image: dpage/pgadmin4:9.18
     container_name: opencok-pgadmin
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, devops, database]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@opencok.com
@@ -118,31 +111,15 @@ services:
       PGADMIN_SERVER_JSON_FILE: /configuration/servers.json
     ports:
       - 5050:8080
-    depends_on:
-      postgres-setup:
-        condition: service_completed_successfully
     volumes:
       - pgadmin-data:/var/lib/pgadmin
       - pgadmin-servers:/configuration:ro
-
-    healthcheck:
-      test:
-        [
-          CMD,
-          /venv/bin/python3,
-          -c,
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/misc/ping', timeout=3)",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
 
   redis:
     image: redis:6.2.24-bookworm
     container_name: opencok-redis
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, devops, redis]
     networks: [opencok-internal-network]
     volumes:
       - redis-data:/data
@@ -185,7 +162,7 @@ services:
     image: redis/redisinsight:latest
     container_name: opencok-redisinsight
     restart: no
-    profiles: [all, dev]
+    profiles: [all, devops, redis]
     depends_on:
       redis:
         condition: service_healthy
@@ -199,20 +176,15 @@ services:
     image: zookeeper:3.4.14
     container_name: opencok-zookeeper
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, prod]
     networks: [opencok-internal-network]
     volumes:
       - zookeeper-data:/data
       - zookeeper-datalog:/datalog
       - zookeeper-logs:/logs
     environment:
-      ZOO_HEAP_SIZE: 256
-      ZOO_LOG4J_PROP: INFO,CONSOLE
-      ZOO_TICK_TIME: 2000
       ZOO_INIT_LIMIT: 10
       ZOO_SYNC_LIMIT: 5
-      ZOO_MAX_CLIENT_CNXNS: 60
-      ZOO_AUTOPURGE_SNAPRETAINCOUNT: 3
       ZOO_AUTOPURGE_PURGEINTERVAL: 1
       ZOO_CFG_EXTRA: 4lw.commands.whitelist=ruok,srvr
     healthcheck:
@@ -279,47 +251,35 @@ services:
         condition: service_healthy
 
   server:
-    logging: *operational-logging
     build:
       context: .
       dockerfile: apps/server/Dockerfile
     container_name: opencok-server
     restart: unless-stopped
-    profiles: [all, dev]
-    networks: [opencok-internal-network]
+    profiles: [all, dev, prod]
+    networks: [opencok-internal-network, opencok-external-network]
     environment:
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
-      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-only}
-      OTEL_EXPORT_INTERVAL_MS: 1000
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
+      DATABASE_URL: ${DATABASE_URL}
       KINGDOM_ID: 1
       KINGDOM_DATABASE_NAME: opencok_kingdom_1
       GLOBAL_DATABASE_NAME: opencok_global
-      GAME_HOST: 0.0.0.0
-      GAME_PORT: 9933
-      GAME_HEALTH_PORT: 18090
-      GAME_FILES_URL: http://api:8080
-      GAME_REDIS_URL: redis://redis:6379/0
+      API_URL: http://api:8080
+      REDIS_URL: ${REDIS_URL}
       GAME_ZOOKEEPER: zookeeper:2181
-      GAME_LOGIN_SECRET: ${GAME_LOGIN_SECRET}
-      GAME_CROSS_SEARCH: ${GAME_CROSS_SEARCH:-true}
-      GAME_CHAT_INTERVAL: ${GAME_CHAT_INTERVAL:-1}
-      GAME_FEED_MAX_COUNT: ${GAME_FEED_MAX_COUNT:-3}
-      GAME_PLAYER_KINGDOMS: ${GAME_PLAYER_KINGDOMS:-}
-      GAME_MAIL_CHAT_URL: ${GAME_MAIL_CHAT_URL:-}
-      GAME_NICKNAME_CHAT_URL: ${GAME_NICKNAME_CHAT_URL:-http://chat:8083/_internal/nickname}
-      GAME_CHAT_SESSION_URL: ${GAME_CHAT_SESSION_URL:-http://chat:8083/external/session}
-      CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-opencok-chat-development}
-      GAME_MAP_SIZE: 1201
-      DEPENDENCY_TIMEOUT_MS: 5000
+      GAME_SECRET: ${GAME_SECRET}
+      CHAT_URL: ${CHAT_URL}
+      CHAT_SECRET: ${CHAT_SECRET}
     depends_on:
-      postgres-setup:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
       zookeeper:
         condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
     healthcheck:
       test:
         [
@@ -335,45 +295,34 @@ services:
       retries: 12
 
   api:
-    logging: *operational-logging
     build:
       context: .
       dockerfile: apps/api/Dockerfile
     container_name: opencok-api
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, prod]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
-      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-only}
-      OTEL_EXPORT_INTERVAL_MS: 1000
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
+      DATABASE_URL: ${DATABASE_URL}
       GLOBAL_DATABASE_NAME: opencok_global
       KINGDOM_ID: 1
-      API_SERVERS_FILE: ""
-      API_CHAT_URL: ${API_CHAT_URL:-http://chat:8083}
-      API_HOST: 0.0.0.0
-      API_PORT: 8080
-      S3_ENDPOINT: http://minio:9000
-      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://192.168.1.104:9000}
-      S3_REGION: ${S3_REGION:-us-east-1}
-      S3_BUCKET: ${S3_BUCKET:-opencok-uploads}
-      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-opencok}
-      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-opencok-secret}
-      API_REDIS_URL: redis://redis:6379/0
-      API_GAME_HOST: 192.168.1.104
-      API_GAME_PORT: 9933
-      API_DEPENDENCY_TIMEOUT_MS: 3000
-    volumes:
-      - ./apps/api/resources/servers.json:/etc/opencok/servers.json:ro
-    depends_on:
-      minio:
-        condition: service_healthy
-      postgres-setup:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
+      CHAT_URL: ${CHAT_URL}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT}
+      S3_REGION: ${S3_REGION}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+      REDIS_URL: ${REDIS_URL}
+      GAME_PUBLIC_HOST: ${GAME_PUBLIC_HOST}
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
     healthcheck:
       test:
         [
@@ -391,11 +340,11 @@ services:
   mongodb:
     image: mongo:8.0.34
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, database]
     networks: [opencok-internal-network]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-opencok}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-opencok-development}
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
     volumes:
       - mongodb-data:/data/db
     healthcheck:
@@ -404,32 +353,44 @@ services:
       timeout: 3s
       retries: 12
 
+  mongo-express:
+    image: mongo-express:1.0.2
+    restart: unless-stopped
+    profiles: [all, dev, database]
+    networks: [opencok-internal-network, opencok-external-network]
+    environment:
+      ME_CONFIG_MONGODB_URL: ${MONGO_URI:?Set MONGO_URI for Mongo Express}
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "false"
+      ME_CONFIG_BASICAUTH: "true"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - 8081:8081
+
   chat:
     build:
       context: .
       dockerfile: apps/chat/Dockerfile
     container_name: opencok-chat
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, prod]
     init: true
     stop_grace_period: 30s
     networks: [opencok-internal-network, opencok-external-network]
     environment:
-      NODE_ENV: development
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
+      NODE_ENV: ${NODE_ENV}
+      DATABASE_URL: ${DATABASE_URL}
       GLOBAL_DATABASE_NAME: opencok_global
       CHAT_KINGDOM_DATABASES: 1:opencok_kingdom_1,2:opencok_kingdom_2
-      CHAT_HOST: 0.0.0.0
-      CHAT_PORT: 8083
-      CHAT_INSTANCE_ID: ${CHAT_INSTANCE_ID:-chat-local}
-      MONGODB_URI: ${MONGODB_URI:-mongodb://${MONGODB_USER:-opencok}:${MONGODB_PASSWORD:-opencok-development}@mongodb:27017/opencok_chat?authSource=admin}
-      CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-opencok-chat-development}
-      CHAT_WEBSOCKET_URL: ${CHAT_WEBSOCKET_URL:-ws://192.168.1.104:8083/chat/ws}
+      MONGO_URI: ${MONGO_URI}
+      CHAT_SECRET: ${CHAT_SECRET}
     ports:
       - 8083:8083
-    depends_on:
-      postgres-setup:
-        condition: service_completed_successfully
     healthcheck:
       test:
         [
@@ -448,20 +409,43 @@ services:
     image: traefik:v3.7.15
     container_name: opencok-gateway
     restart: unless-stopped
-    profiles: [all, dev]
-    command: [--configFile=/etc/traefik/traefik.yml]
-    stop_grace_period: 15s
-    read_only: true
-    cap_drop: [ALL]
-    cap_add: [NET_BIND_SERVICE]
-    security_opt: [no-new-privileges:true]
-    tmpfs: ["/tmp:rw,noexec,nosuid,size=32m"]
+    profiles: [all, dev, prod]
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.forwardedheaders.insecure=false
+      - --entrypoints.web.http.aliasheadersstrategy=delete
+      - --entrypoints.game.address=:9933
+      - --entrypoints.health.address=:8082
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --providers.file.watch=true
+      - --ping.entrypoint=health
+      - --api.dashboard=false
+      - --api.insecure=false
+      - --log.level=WARN
+      - --accesslog.format=json
+      - --accesslog.fields.defaultmode=drop
+      - --accesslog.fields.names.StartUTC=keep
+      - --accesslog.fields.names.RequestMethod=keep
+      - --accesslog.fields.names.RouterName=keep
+      - --accesslog.fields.names.OriginStatus=keep
+      - --accesslog.fields.names.DownstreamStatus=keep
+      - --accesslog.fields.names.Duration=keep
+      - --accesslog.fields.headers.defaultmode=drop
+      - --accesslog.fields.queryparameters.defaultmode=drop
+      - --experimental.otlplogs=true
+      - --accesslog.otlp.servicename=gateway
+      - --accesslog.otlp.http.endpoint=http://maple:4318/v1/logs
+      - --accesslog.otlp.http.headers.Authorization=Bearer ${MAPLE_LOCAL_INGEST_KEY}
+      - --metrics.otlp.servicename=gateway
+      - --metrics.otlp.pushinterval=1s
+      - --metrics.otlp.addrouterslabels=true
+      - --metrics.otlp.http.endpoint=http://maple:4318/v1/metrics
+      - --metrics.otlp.http.headers.Authorization=Bearer ${MAPLE_LOCAL_INGEST_KEY}
     networks: [opencok-internal-network, opencok-external-network]
-    mem_limit: 256m
-    cpus: "0.50"
+    environment:
+      OTEL_RESOURCE_ATTRIBUTES: service.namespace=opencok,deployment.environment.name=${NODE_ENV:-development}
+      CDN_URL: ${CDN_URL}
     depends_on:
-      minio-setup:
-        condition: service_completed_successfully
       api:
         condition: service_healthy
       server:
@@ -470,10 +454,10 @@ services:
       - 80:80
       - 9933:9933
     volumes:
-      - ./infra/gateway/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./infra/gateway/dynamic.yml:/etc/traefik/dynamic.yml:ro
     healthcheck:
-      test: [CMD, traefik, healthcheck, --configFile=/etc/traefik/traefik.yml]
+      test:
+        [CMD, traefik, healthcheck, --ping.entrypoint=health, --entrypoints.health.address=:8082]
       interval: 10s
       timeout: 3s
       start_period: 5s

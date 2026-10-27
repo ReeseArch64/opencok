@@ -18,18 +18,18 @@ export const readConfig = Effect.gen(function* () {
         }
       : undefined,
     filesEnabled: !!settings.S3_BUCKET,
-    chatUrl: settings.API_CHAT_URL,
+    chatUrl: settings.CHAT_URL,
     kingdomId: settings.KINGDOM_ID,
-    host: settings.API_HOST,
-    port: settings.API_PORT,
+    host: "0.0.0.0",
+    port: 8080,
     databaseUrl: url.href,
-    redisUrl: settings.API_REDIS_URL,
-    timeoutMs: settings.API_DEPENDENCY_TIMEOUT_MS,
+    redisUrl: settings.REDIS_URL,
+    timeoutMs: 3000,
     serversFile: settings.API_SERVERS_FILE
       ? resolve(workspaceRoot, settings.API_SERVERS_FILE)
       : undefined,
-    gameHost: settings.API_GAME_HOST,
-    gamePort: settings.API_GAME_PORT,
+    gameHost: settings.GAME_PUBLIC_HOST,
+    gamePort: 9933,
   };
 });
 

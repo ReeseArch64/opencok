@@ -387,7 +387,7 @@ test("private receipt exchange rejects malformed or mismatched replies and bound
 test("files configuration needs only a private API origin and no signing-key file", async () => {
   const source = {
     DATABASE_URL: "postgres://synthetic:synthetic@invalid.example/global",
-    GAME_LOGIN_SECRET: "synthetic",
+    GAME_SECRET: "synthetic",
   };
   expect(
     (await Effect.runPromise(config.pipe(Effect.provideService(EnvironmentSource, source))))
@@ -396,9 +396,7 @@ test("files configuration needs only a private API origin and no signing-key fil
   expect(
     (
       await Effect.runPromise(
-        config.pipe(
-          Effect.provideService(EnvironmentSource, { ...source, GAME_FILES_URL: origin }),
-        ),
+        config.pipe(Effect.provideService(EnvironmentSource, { ...source, API_URL: origin })),
       )
     ).avatarFiles,
   ).toEqual({ origin });

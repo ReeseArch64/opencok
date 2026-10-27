@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { blankToUndefined, validateEnvironment } from "./validation";
 
-import { port, timeout, databaseName, redisUrl, realmSettings } from "./service.schema";
+import { databaseName, redisUrl, realmSettings, chatUrl } from "./service.schema";
 
 export const serverSchema = z
   .object({
     PROVISIONING_SIGNING_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
-    GAME_FILES_URL: z.preprocess(
+    API_URL: z.preprocess(
       blankToUndefined,
       z
         .url({ protocol: /^https?$/ })
@@ -46,76 +46,8 @@ export const serverSchema = z
         })
         .optional(),
     ),
-    GAME_NICKNAME_CHAT_URL: z.preprocess(
-      blankToUndefined,
-      z
-        .url({ protocol: /^https?$/ })
-        .refine((value) => {
-          try {
-            const url = new URL(value);
-
-            return (
-              url.pathname === "/_internal/nickname" &&
-              !url.username &&
-              !url.password &&
-              !url.search &&
-              !url.hash &&
-              url.hostname !== "cok.chat" &&
-              !url.hostname.endsWith(".cok.chat")
-            );
-          } catch {
-            return false;
-          }
-        })
-        .optional(),
-    ),
-    GAME_MAIL_CHAT_URL: z.preprocess(
-      blankToUndefined,
-      z
-        .url({ protocol: /^https?$/ })
-        .refine((value) => {
-          try {
-            const url = new URL(value);
-
-            return (
-              url.pathname === "/_internal/mailbox" &&
-              !url.username &&
-              !url.password &&
-              !url.search &&
-              !url.hash &&
-              url.hostname !== "cok.chat" &&
-              !url.hostname.endsWith(".cok.chat")
-            );
-          } catch {
-            return false;
-          }
-        })
-        .optional(),
-    ),
-    GAME_CHAT_SESSION_URL: z.preprocess(
-      blankToUndefined,
-      z
-        .url({ protocol: /^https?$/ })
-        .refine((value) => {
-          try {
-            const url = new URL(value);
-
-            return (
-              url.pathname === "/external/session" &&
-              !url.username &&
-              !url.password &&
-              !url.search &&
-              !url.hash &&
-              url.hostname !== "cok.chat" &&
-              !url.hostname.endsWith(".cok.chat")
-            );
-          } catch {
-            return false;
-          }
-        })
-        .optional(),
-    ),
-    CHAT_SIGNING_SECRET: z.preprocess(
+    CHAT_URL: chatUrl,
+    CHAT_SECRET: z.preprocess(
       (value) => (value === "" ? undefined : value),
       z.string().min(1).optional(),
     ),
@@ -123,68 +55,21 @@ export const serverSchema = z
       .enum(["true", "false"])
       .default("true")
       .transform((value) => value === "true"),
-    GAME_CROSS_SEARCH: z
-      .enum(["true", "false"])
-      .default("true")
-      .transform((value) => value === "true"),
-    GAME_HOST: z.string().min(1).default("127.0.0.1"),
-    GAME_CHAT_INTERVAL: z.coerce.number().int().min(0).max(2147483647).default(1),
-    GAME_FEED_MAX_COUNT: z.coerce.number().int().min(0).max(2147483647).default(3),
-    GAME_PORT: port(19933),
-    GAME_HEALTH_PORT: port(18090),
     ...realmSettings,
     KINGDOM_DATABASE_NAME: z.preprocess(blankToUndefined, databaseName.optional()),
-    GAME_PLAYER_KINGDOMS: z.preprocess(
-      blankToUndefined,
-      z
-        .string()
-        .transform((value) =>
-          value.split(",").map((entry) => {
-            const parts = entry.split(":");
-
-            return { id: Number(parts[0]), database: parts.length === 2 ? parts[1] : undefined };
-          }),
-        )
-        .pipe(
-          z
-            .array(
-              z.object({
-                id: z.number().int().positive().max(2147483647),
-                database: databaseName,
-              }),
-            )
-            .min(1)
-            .max(2)
-            .refine(
-              (realms) =>
-                new Set(realms.map((realm) => realm.id)).size === realms.length &&
-                new Set(realms.map((realm) => realm.database)).size === realms.length,
-            ),
-        )
-        .optional(),
-    ),
-    GAME_REDIS_URL: redisUrl,
+    REDIS_URL: redisUrl,
     GAME_ZOOKEEPER: z.string().min(1).default("127.0.0.1:2181"),
-    GAME_LOGIN_SECRET: z.string().min(1),
-    GAME_MAP_SIZE: z.coerce.number().int().min(100).max(4000).default(1200),
-    DEPENDENCY_TIMEOUT_MS: timeout(5000),
+    GAME_SECRET: z.string().min(1),
   })
-  .refine((settings) => !settings.GAME_NICKNAME_CHAT_URL || !!settings.CHAT_SIGNING_SECRET, {
-    message: "Nickname chat signing secret required",
-    path: ["CHAT_SIGNING_SECRET"],
+  .refine((settings) => !settings.CHAT_URL || !!settings.CHAT_SECRET, {
+    message: "Chat signing secret required",
+    path: ["CHAT_SECRET"],
   })
-  .refine((settings) => !settings.GAME_MAIL_CHAT_URL || !!settings.CHAT_SIGNING_SECRET, {
-    message: "Mailbox chat signing secret required",
-    path: ["CHAT_SIGNING_SECRET"],
+  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.API_URL, {
+    path: ["API_URL"],
   })
-  .refine((settings) => !settings.GAME_CHAT_SESSION_URL || !!settings.CHAT_SIGNING_SECRET, {
-    path: ["CHAT_SIGNING_SECRET"],
-  })
-  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.GAME_FILES_URL, {
-    path: ["GAME_FILES_URL"],
-  })
-  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.CHAT_SIGNING_SECRET, {
-    path: ["CHAT_SIGNING_SECRET"],
+  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.CHAT_SECRET, {
+    path: ["CHAT_SECRET"],
   })
   .readonly();
 

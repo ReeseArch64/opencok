@@ -212,8 +212,8 @@ replace automated E2E.
 ### Organization, tools and environments
 
 Unit tests live close to their modules; integration tests live alongside the adapter/app
-under test. `tests/` focuses on common synthetic contracts and fixtures and E2E
-journeys. TypeScript is the initial engine and uses a runner validated for Bun, including the planned TypeScript Bot application. Rust/Go will have their own suites if they are adopted,
+under test. Test suites and their fixtures stay within `apps/` and `packages/`;
+there is no shared root test suite. TypeScript is the initial engine and uses a runner validated for Bun, including the planned TypeScript Bot application. Rust/Go will have their own suites if they are adopted,
 maintaining the same contract and replay tests. No suites use production credentials or
 create players in the real realm.
 
@@ -302,11 +302,10 @@ files and mobile artifacts. The
 credential changes and recovery. This single-instance local environment does not
 implement the production replica/managed-service topology.
 
-The current development Compose uses `dev` and `all` on every service; both
-profiles select the same complete stack. Redis Insight and Portainer have their
-own persistent volumes. The isolated stack suite covers every declared service,
-including the two one-shot setup jobs; its Portainer instance omits the host
-Docker socket. Additional profile subdivisions remain a future proposal.
+The development Compose uses `dev` for applications and `all` to include
+administration tools. The `devops` profile selects administration tools and their
+dependencies; `redis` and `database` select their respective inspection groups.
+Redis Insight and Portainer have their own persistent volumes.
 Administrative interfaces are developer tools and not game startup dependencies. Application CI does not need to start these interfaces to test the core.
 Declarative configuration of the gateway remains versioned.
 

@@ -9,7 +9,6 @@ WORKDIR /workspace
 COPY --from=dependencies --chown=bun:bun /workspace /workspace
 ENV TZ=UTC
 USER bun
-ENV CHAT_HOST=0.0.0.0
 EXPOSE 8083
 STOPSIGNAL SIGTERM
 CMD ["bun", "--no-env-file", "apps/chat/dist/src/index.js"]

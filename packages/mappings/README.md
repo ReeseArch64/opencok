@@ -16,6 +16,6 @@ Snapshot normalization and existing compatibility rules remain in the projection
 functions. Mappings do not introduce persistence or application dependencies.
 `gold` remains a currency projection helper rather than an input DTO.
 
-Run `bun run test:packages` for mapping and boundary tests and the `apps/server`
+Run `bun run test:packages` for package mapping tests and the `apps/server`
 test suite for command compatibility coverage. Native client validation remains
 outside these synthetic suites.

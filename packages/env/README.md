@@ -70,9 +70,10 @@ process precedence, missing files, required keys, validation and secret redactio
 
 The realm server loads its dedicated settings with `loadServerEnvironment()` from
 `@opencok/env/server`; the pure validator is `@opencok/env/server/schema`.
-This validates `GAME_*`, `KINGDOM_ID`, the database routing names and
-`DEPENDENCY_TIMEOUT_MS` only when requested, so offline/database tools do not
-require a game secret or XML directory. The [server guide](../../apps/server/README.md)
+This validates game credentials, Chat integration, `KINGDOM_ID` and the database
+routing names only when requested, so offline/database tools do not require a game
+secret or XML directory. The server fixes its map size at 1201 and dependency timeout
+at 5000 ms in code. The [server guide](../../apps/server/README.md)
 documents all keys.
 
 The shared discovery service uses `loadApiEnvironment()` from `@opencok/env/api`,
@@ -83,8 +84,9 @@ Compose declares each application's internal `DATABASE_URL` directly, while
 host tools retain the host-facing root value; container builds exclude `.env`.
 
 For the current local Compose workflow, the root file is limited to `NODE_ENV`,
-`DATABASE_ROLE`, `DATABASE_URL` and the `GAME_LOGIN_SECRET` exception. Other local
-service values are hardcoded in Compose and are still validated by the relevant
+`DATABASE_ROLE`, `DATABASE_URL`, shared `REDIS_URL` and the `GAME_SECRET`
+exception, with optional endpoint/telemetry overrides. Other local service values
+are declared in Compose and are still validated by the relevant
 runtime schema. Production deployment is separate. Gameplay catalogs ship as
 maintained TypeScript; GAME_RESOURCES and external XML inputs are no longer
 application settings.
@@ -101,5 +103,10 @@ validate that snapshot inside Effect and report only invalid/missing key names.
 App-specific configuration services map these validated settings to adapter
 contracts. API and realm schemas share realm identity, database naming, Redis URL,
 port and timeout validators, retaining their different defaults and required keys.
+Both Redis-consuming apps use `REDIS_URL`, defaulting to `redis://127.0.0.1:6379/0`
+outside Compose. Custom `redis://` and TLS `rediss://` URLs retain their credentials,
+port and database path. Compose requires the shared root/process value; use
+`redis://redis:6379/0` with the explicit dev override for local containers and a
+separate external URL/secret environment for production. Do not log URL values.
 Zod remains the single validation definition; no parallel Effect Config schema is
 maintained. Existing synchronous subpaths remain for database/offline tools.

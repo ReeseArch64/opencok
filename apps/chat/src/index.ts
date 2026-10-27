@@ -1,6 +1,9 @@
 import { realmChatDeliveries } from "@opencok/services/realm-chat-delivery";
-import { initializeLogging, logEvent } from "@opencok/core/logging";
+import { initializeLogging, initializeTelemetry, logEvent } from "@opencok/core/logging";
 import { loadChatEnvironment } from "@opencok/env/chat";
+import { loadEnvironment } from "@opencok/env/load";
+import { telemetrySchema } from "@opencok/env/telemetry";
+import { validateEnvironment } from "@opencok/env/validation";
 import { createChatRepository } from "@opencok/repositories/chat";
 import { ChatApplication } from "./chat-application.ts";
 
@@ -8,31 +11,48 @@ import { createChatArchiveStore } from "@opencok/mongoose/chat-archive";
 
 initializeLogging("chat");
 
-logEvent("starting", { service: "chat" });
-
 const config = loadChatEnvironment();
 
-const archive = config.MONGODB_URI ? createChatArchiveStore(config.MONGODB_URI) : undefined;
+const activeTelemetry = initializeTelemetry(
+  "chat",
+  validateEnvironment(telemetrySchema, loadEnvironment(process.env)),
+);
 
-const repository: ReturnType<typeof createChatRepository> = createChatRepository({
-  renderRealmEvents: (realm, owners, events) =>
-    realmChatDeliveries(repository, realm, owners, events),
-  archive,
-  databaseUrl: config.DATABASE_URL!,
-  topology: {
-    globalDatabase: config.GLOBAL_DATABASE_NAME,
-    kingdoms: config.CHAT_KINGDOM_DATABASES,
-  },
-});
-
+let archive: ReturnType<typeof createChatArchiveStore> | undefined;
+let repository: ReturnType<typeof createChatRepository> | undefined;
 let app: ChatApplication | undefined;
 
+async function closeResources() {
+  try {
+    await app?.close();
+  } finally {
+    try {
+      await repository?.close();
+    } finally {
+      await archive?.close();
+    }
+  }
+}
+
 try {
+  logEvent("starting", { service: "chat" });
+  archive = config.MONGO_URI ? createChatArchiveStore(config.MONGO_URI) : undefined;
+  repository = createChatRepository({
+    renderRealmEvents: (realm, owners, events) =>
+      realmChatDeliveries(repository!, realm, owners, events),
+    archive,
+    databaseUrl: config.DATABASE_URL!,
+    topology: {
+      globalDatabase: config.GLOBAL_DATABASE_NAME,
+      kingdoms: config.CHAT_KINGDOM_DATABASES,
+    },
+  });
+
   app = new ChatApplication({
     repository,
-    instanceId: config.CHAT_INSTANCE_ID,
-    signingSecret: config.CHAT_SIGNING_SECRET,
-    websocketUrl: config.CHAT_WEBSOCKET_URL,
+    instanceId: "chat-local",
+    signingSecret: config.CHAT_SECRET,
+    websocketUrl: "ws://192.168.1.104:8083/chat/ws",
     log: (event) =>
       logEvent(
         "chat_operation",
@@ -47,14 +67,16 @@ try {
   await app.runMaintenance();
   await new Promise<void>((resolve, reject) => {
     app!.server.once("error", reject);
-    app!.server.listen(config.CHAT_PORT, config.CHAT_HOST, resolve);
+    app!.server.listen(8083, "0.0.0.0", resolve);
   });
-  logEvent("listening", { port: config.CHAT_PORT, outcome: "success" });
+  logEvent("listening", { port: 8083, outcome: "success" });
 } catch {
   logEvent("service_failed", { service: "chat", outcome: "failure" }, "error");
-  await app?.close();
-  await repository.close();
-  await archive?.close();
+  try {
+    await closeResources();
+  } finally {
+    await activeTelemetry?.close();
+  }
 
   throw new Error("Chat startup failed");
 }
@@ -67,18 +89,19 @@ async function stop() {
   stopping = true;
 
   try {
-    await app?.close();
-  } finally {
-    await repository.close();
-    await archive?.close();
+    await closeResources();
     logEvent("stopped", { service: "chat", outcome: "success" });
+  } catch {
+    logEvent("shutdown_failed", { service: "chat", outcome: "failure" }, "error");
+    process.exitCode = 1;
+  } finally {
+    await activeTelemetry?.close();
   }
 }
 
 for (const signal of ["SIGTERM", "SIGINT"] as const)
   process.once(signal, () => {
     void stop().catch(() => {
-      logEvent("shutdown_failed", { service: "chat", outcome: "failure" }, "error");
       process.exitCode = 1;
     });
   });

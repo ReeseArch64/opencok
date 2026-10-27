@@ -2,11 +2,19 @@
 
 Compose is the local development environment. Production uses a separate deployment
 and does not depend on this Compose configuration. Development settings are written
-directly in `docker-compose.yml`; the game login secret and optional endpoint
-overrides are substituted from the root `.env`.
+in `docker-compose.yml`; `docker-compose.dev.yml` adds local Redis readiness for
+API/server, MinIO readiness for API, and PostgreSQL setup ordering for API/server/Chat and pgAdmin. The game
+login secret, shared `REDIS_URL` and `DATABASE_URL`, and optional endpoint overrides
+are substituted from the root `.env`.
 
-Every service uses both profiles `all` and `dev`; either profile starts the same
-complete set of containers, including pgAdmin, Redis Insight and Portainer.
+Use both files for local development. The `dev` profile starts the application stack
+and Mongo Express; `all` also includes pgAdmin, Redis Insight and Portainer. The `devops` profile selects
+these three administration tools together with PostgreSQL, PostgreSQL setup and Redis.
+The `redis` profile selects Redis and Redis Insight; `database` selects PostgreSQL,
+PostgreSQL setup, pgAdmin, MongoDB and Mongo Express. The `observability` profile selects only Maple, without
+application startup dependencies. The `prod` profile omits database inspection tools.
+Combine `--profile dev --profile devops` to start
+the development stack with administration tools.
 Chat runs as its own service. Media runs inside the API using the five S3 settings
 and shared Redis authorization; there is no Files container or media overlay. See the
 [API guide](../../apps/api/README.md#avatar-media). MinIO and `minio-setup` provide the
@@ -22,21 +30,24 @@ filter into `dist/data`. Rebuild images after source or resource changes.
 ## Local inputs and start
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the private
-`GAME_LOGIN_SECRET` exception. Chat defaults to `chat:8083`: the realm uses
-`/external/session` for sessions and `/_internal/nickname` for player renames,
-and the API proxies public metadata. `CHAT_SIGNING_SECRET`
+`GAME_SECRET` exception, plus `REDIS_URL=redis://redis:6379/0` for local
+containers. Chat defaults to `chat:8083`: the realm uses
+`/external/session` for sessions, `/_internal/nickname` for player renames and
+`/_internal/mailbox` for mailbox effects; the API proxies public metadata. `CHAT_SECRET`
 overrides the shared development signing value on both Chat and the realm. Optional
-`GAME_CHAT_SESSION_URL`, `GAME_NICKNAME_CHAT_URL` and `API_CHAT_URL` select another host. Set
-`CHAT_WEBSOCKET_URL` when clients need a different address than
-`ws://192.168.1.104:8083/chat/ws`. Use `.env.example` as the reference and preserve
+`CHAT_URL` selects the shared HTTP(S) origin for API and realm; paths are fixed in
+code. Setting it enables all three private realm integrations, including mailbox.
+Use a bare origin without credentials, path, query or fragment. The Chat entrypoint
+advertises `ws://192.168.1.104:8083/chat/ws` as a fixed value; changing the client-facing
+address requires a code change and rebuild. Use `.env.example` as the reference and preserve
 existing values. No app-local env files are needed. The example database URL uses
 Compose service DNS; PostgreSQL has no published host port. Run database tools
-through `docker compose --profile dev exec -T postgres` or the internal network.
+through `docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T postgres` or the internal network.
 
-After changing `GAME_LOGIN_SECRET`, recreate the server to apply it:
+After changing `GAME_SECRET`, recreate the server to apply it:
 
 ```sh
-docker compose --profile dev up -d --no-deps --wait server
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up -d --no-deps --wait server
 ```
 
 A container restart retains its previous environment. A stale login secret causes
@@ -62,16 +73,19 @@ Compose. These local inputs are not supplied by the public repository. The sourc
 must contain both extracted host trees for the import to succeed. Obtain the authorized inputs before starting a new checkout.
 
 ```sh
-docker compose --profile dev config --quiet
-docker compose --profile dev up --build -d --wait
-docker compose --profile dev ps -a
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev config --quiet
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev ps -a
 
-docker compose --profile all up --build -d --wait
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile all up --build -d --wait
 ```
 
 PostgreSQL setup applies pending Drizzle migrations to the global database and both
 kingdom databases. API/server/Chat wait for setup and their dependencies. MinIO setup
-imports the CDN; the gateway waits for API/server health and successful CDN setup.
+imports the CDN; the development override makes the gateway wait for successful
+CDN setup in addition to API/server health. The base gateway uses `CDN_URL` from
+the root `.env` and has no MinIO dependency. Set an external HTTP(S) origin for
+production, preserving the storage path layout in the [gateway guide](../gateway/README.md).
 The one-shot jobs exit with code zero after completion.
 
 ## Direct development values
@@ -84,13 +98,15 @@ The one-shot jobs exit with code zero after completion.
 | MinIO object endpoint                    | 9000           |
 | MinIO console                            | 9001           |
 | pgAdmin                                  | 5050           |
+| Mongo Express                            | 8081           |
 | Redis Insight                            | 5540           |
 | Portainer HTTP (host to container)       | 9443 → 9000    |
 
-Maple binds its host port to loopback; the other development port mappings have no host-IP prefix. Internal connections use service DNS:
+Development port mappings have no host-IP prefix. Internal connections use service DNS:
 `postgres:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933`,
 `minio:9000` and `chat:8083`. The API and game server have no directly published host
-ports. The API joins the external network for outbound access. Avatar storage operations use `S3_ENDPOINT=http://minio:9000`;
+ports. API and server join the external network for outbound access, including
+external Redis. Avatar storage operations use `S3_ENDPOINT=http://minio:9000`;
 image URLs use the client-reachable `S3_PUBLIC_ENDPOINT`.
 The local API advertises `192.168.1.104:9933`; edit that direct value if the host
 address changes. The MinIO console redirect uses the same local host address.
@@ -98,13 +114,13 @@ address changes. The MinIO console redirect uses the same local host address.
 The realm is explicitly configured as ID 1 / `opencok_kingdom_1`, with shared global
 state in `opencok_global`. The second kingdom database keeps the same schema.
 Changing the active realm requires matching server database/ID and API directory
-configuration; the disposable test exercises COK2 through explicit overrides.
+configuration.
 
-The resident map uses `GAME_MAP_SIZE=1201`, matching the saved native terrain and
+The resident map size is fixed at 1201 in the server configuration, matching the saved native terrain and
 the one-based identity `id = 1 + x + y * 1201`. A worker configured with 1200 can
 answer `world.get` successfully while selecting cells outside the requested view.
-Keep this setting aligned with the actual realm database; changing the setting
-does not convert terrain or move existing cities.
+Keep this constant aligned with the actual realm database; changing it does not
+convert terrain or move existing cities.
 
 When correcting a realm previously started with 1200, stop its worker and back up
 its database first. Inspect private `opencok.world.monsters.*.v1` records under
@@ -113,7 +129,7 @@ quota, remaining and pool values can retain its point-ID cursor while its size
 metadata is corrected to the verified terrain width. Other producer snapshots
 need separate reconciliation because their area numbering depends on map size.
 Do not delete producer snapshots or regenerate occupied terrain automatically.
-Recreate the server with `docker compose --profile dev up -d --no-deps server`
+Recreate the server with `docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up -d --no-deps server`
 and confirm its health and absence of world recovery failures.
 
 Future `server_info.activityTime`, `shuaguaiActStart` or `daoliangStart` values
@@ -127,25 +143,107 @@ container values directly; host-side tools use the root database URL. Database a
 MinIO credentials in Compose are local development values. The prepared client's
 existing login secret remains in the ignored root env file rather than source.
 
+## External PostgreSQL and development ordering
+
+API, realm/server and Chat receive the same `DATABASE_URL` from the root environment.
+Use `postgres://postgres:postgres@postgres:5432/opencok_global` for the local stack.
+The base API also has no MinIO startup dependency. The development override adds
+MinIO readiness ordering; configure external S3 endpoints for production through
+the existing S3 environment settings.
+
+The base file has no application or pgAdmin dependency on `postgres` or
+`postgres-setup`; the development override adds the setup dependency, and the local
+setup job waits for PostgreSQL health before applying migrations and generating
+pgAdmin registration. Both local services remain defined in the base file with
+their existing profiles. Omitting the override removes startup ordering; profiles
+such as `all` still select the local PostgreSQL and setup services.
+
+For an external database, supply its `DATABASE_URL` through environment configuration,
+omit the development override and select the intended services. Preserve the provider's
+connection options, including TLS. Provision the global and kingdom databases and
+apply migrations separately before starting applications; removing Compose ordering
+does not provision the external database. The existing administrative setup entrypoint
+is `bun run --cwd packages/drizzle db:setup`; `POSTGRES_ADMIN_URL` selects an
+administrative connection when application credentials cannot create databases or
+apply migrations. Run it deliberately against the intended environment. The local
+`postgres-setup` service remains configured for local PostgreSQL only. Configure an
+external server manually in pgAdmin when not using local setup registrations.
+
+Base Compose requires `DATABASE_URL` during interpolation even for service subsets.
+The example URL is for local development; existing volumes and their `PGDATA` path
+are preserved. This configuration does not establish external database connectivity,
+provider compatibility or migration success.
+
+## External Redis and deployment separation
+
+Both Redis consumers (API, including media tickets, and realm/server sessions) use
+`REDIS_URL`. Chat and the remaining services do not consume Redis. The same root
+value reaches both containers; `redis://` and `rediss://` URLs with credentials,
+custom ports and database paths pass through unchanged. Outside Compose, both
+schemas default to `redis://127.0.0.1:6379/0`. For host-side development, set a
+host-reachable URL; the local Redis service deliberately publishes no host port.
+
+The base file has no API/server `depends_on: redis`; profiles alone cannot remove
+a dependency. Production must supply an external `REDIS_URL` through its own
+secret/environment configuration and must not include `docker-compose.dev.yml`.
+Use TLS and provider-required credentials/network controls. Do not use the local
+Redis service DNS name in a production environment. Keep production and development
+env files and deployment projects separate, never reuse production credentials in
+the local stack or Redis Insight, and do not print resolved Compose config with
+real credentials. Base Compose requires `REDIS_URL` even when inspecting a subset
+of services because interpolation covers the full file.
+
+For local Redis with Redis Insight using nonsecret example settings:
+
+```sh
+docker compose --env-file .env.example -f docker-compose.yml --profile redis up -d --wait
+```
+
+Use a separate checkout/environment for concurrent stacks: project names alone
+cannot isolate the existing fixed container/network names and published ports;
+those also need isolated overrides. This is not a production Compose conversion:
+ZooKeeper/MinIO setup dependencies, development credentials, tool
+exposure and other production hardening remain separate work. The external network
+permits outbound routing but does not prove DNS, firewall, TLS or provider access.
+Application readiness checks still require Redis at runtime; removing Compose
+ordering does not make Redis optional. Validate readiness, session claim/TTL,
+compare-token renewal/release, media tickets, persistence and outage/recovery with
+synthetic data before any deployment. No Redis/container runtime validation was
+performed for this update.
+
 ## Persistence and recovery
 
 The existing PostgreSQL, Redis, ZooKeeper and MinIO named volumes are preserved.
 The service names are `postgres`, `postgres-setup` and `minio`; update local
 overrides that previously targeted `database`, `database-setup` or `storage`.
-Redis 6.2.24 and ZooKeeper 3.4.14 use pinned upstream images with configuration
-in Compose. Redis command arguments retain RDB/AOF persistence, a 384 MiB limit,
-`noeviction` and disabled command slowlogs. ZooKeeper environment variables retain
-session timing, client limits, hourly snapshot cleanup, the 256 MiB heap and
-`ruok`/`srvr` health commands. Both services remain private on the internal network.
+Redis 6.2.24 Bookworm and ZooKeeper 3.4.14 use pinned upstream images with
+configuration in Compose. Redis remains on the existing baseline; an upgrade requires
+client, command, persistence and recovery compatibility validation first.
+See [ADR-0005](../../docs/decisions/0005-adopt-redis-for-cache.md).
+Redis command arguments retain RDB/AOF persistence, a 384 MiB limit,
+`noeviction` and disabled command slowlogs. ZooKeeper retains session timing,
+client limits, hourly snapshot cleanup and `ruok`/`srvr` health commands.
+Both services remain private on the internal network.
+ZooKeeper relies on the pinned image defaults for its 2000 ms tick, 60 client
+connections per IP, retention of three snapshots and console logging at INFO.
+The Compose overrides retain `initLimit=10`, `syncLimit=5` and hourly cleanup;
+the image defaults for these differ. These settings follow the
+[official image configuration](https://hub.docker.com/_/zookeeper) and were checked
+against the local `3.4.14` image. This image's startup scripts do not consume
+`ZOO_HEAP_SIZE`; removing that unused variable leaves the JVM command unchanged.
+Keep the existing volumes and healthcheck.
 Recreate the affected service after configuration changes; no image rebuild is needed.
 The MariaDB volume is never mounted by this stack. Startup does not reseed players,
 reactivate accounts, flush Redis or remove objects/volumes. PostgreSQL remains the
 authority for player progress. Back up databases and local inputs before changes;
-an image rollback does not reverse SQL migrations.
+an image rollback does not reverse SQL migrations. Before any future Redis upgrade,
+back up the existing Redis volume and test compatibility on a disposable copy.
+Newer persistence files may not be readable by older Redis versions; rollback
+requires a compatible pre-upgrade backup, not merely changing the image tag.
 
 ```sh
-docker compose --profile dev run --rm postgres-setup
-docker compose --profile dev down
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev run --rm postgres-setup
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev down
 ```
 
 PostgreSQL initialization passwords do not rotate existing accounts. Keep direct
@@ -163,32 +261,25 @@ local container administration.
 bun run --cwd apps/api check-types
 bun run --cwd apps/server check-types
 bun run --cwd packages/env test
-bun run test:stack
 ```
 
-The integration test creates an isolated Compose configuration with synthetic
-accounts, a compiled synthetic catalog registry and CDN files, unique ports/networks and disposable volumes. It
-checks that `dev` and `all` select the same complete service set and runs a named
-lifecycle/functional test for each of the 13 services. Long-running containers must
-be running; `postgres-setup` and `minio-setup` must exit successfully. Checks cover
-PostgreSQL databases, setup registrations, pgAdmin ping/login page, Redis TTLs,
-ZooKeeper status, API/server readiness, gateway routing, MinIO health/CDN policy,
-Redis Insight health/API and Portainer HTTPS/authentication boundaries.
+Validate Compose interpolation and dependencies without starting containers:
 
-The existing discovery, SFS login, CDN reads/Range/ETag, private-path, player-state
-and Redis failure/recovery checks remain. Every published test port binds to
-loopback with a unique port. Portainer receives a disposable data volume and no
-host Docker socket: these tests validate its UI/API startup and authentication
-boundary, not management of the host daemon. Cleanup removes only the test project.
-Native APK rendering and unimplemented gameplay still require separate evidence.
+```sh
+docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.dev.yml --profile dev config --quiet
+docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.dev.yml --profile all config --quiet
+```
+
+These checks do not establish runtime health, gateway behavior or client compatibility.
+Application and package suites remain alongside their respective implementations.
 
 ## Social chat archive
 
 Topic 24 adds authenticated `mongo:8.0.34` on the internal network with the
-`mongodb-data` volume and no host port. Chat uses `MONGODB_URI`; local initialization
-uses `MONGODB_USER` and `MONGODB_PASSWORD`. Configure a unique stable `CHAT_INSTANCE_ID`
-for every additional Chat instance. The development default identifies the single
-Compose Chat consumer. Read the [social chat deployment guide](../../docs/social-chat-migration.md)
+`mongodb-data` volume and no host port. Chat uses `MONGO_URI`; local initialization
+uses the local MongoDB development credentials. The Chat entrypoint uses the fixed
+consumer ID `chat-local` for the single Compose instance; additional instances need
+distinct IDs supplied through application composition. Read the [social chat deployment guide](../../docs/social-chat-migration.md)
 for migration order, archive outage behavior, original expiry, rollback and synthetic
 acceptance. Existing MongoDB volumes keep their initialized credentials when environment
 values change; do not delete the volume to rotate credentials.
@@ -198,40 +289,61 @@ values change; do not delete the volume to rotate credentials.
 [ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
 selects Maple Local for server/API logs, traces, controlled errors and duration/process
 metrics. Grafana, Loki, Prometheus, Axiom and Sentry adoption is suspended for these
-signals while Maple passes the required checks. The official `v0.3.0` image contains
+signals while Maple passes the required checks. A derived `v0.3.0` image contains
 OTLP HTTP ingest, the query API, embedded ClickHouse and the bundled offline dashboard.
+It applies the guarded [WebAssembly CSP workaround](../observability/maple/README.md)
+to the versioned official image with an executable checksum guard; currently only the
+verified Linux amd64 build is supported.
 It uses `maple-data:/data`; no second database or hosted Maple account is required.
-Its own outgoing telemetry/update checks are disabled.
+Its own outgoing telemetry/update checks are disabled. Start only observability with:
+
+```sh
+docker compose --profile observability up --build -d
+```
+
+Maple has no periodic Compose healthcheck: no service waits for its health, and the
+former CLI probe queried the embedded store without validating the dashboard. Check
+its HTTP endpoint and authenticated dashboard explicitly when diagnosing it. Keep
+`stop_grace_period: 45s` for request draining/store shutdown and bounded `json-file`
+logs (20 MiB per file, five files) to avoid unbounded Docker disk usage. pgAdmin's
+redundant periodic probe is also removed. Database checks used by `service_healthy`
+and application/ingress readiness checks remain, including Chat and MongoDB, so
+operators retain runtime diagnostics and meaningful `up --wait` behavior. A running
+Maple or pgAdmin container alone does not establish readiness.
 
 Start the services after rebuilding the applications:
 
 ```sh
-docker compose --profile dev up --build -d --wait maple server api
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait maple server api chat gateway
 ```
 
 Compose's PostgreSQL setup applies migration `0044_mutation_trace_context.sql` before
 server/API start. This adds nullable outbox trace context without resetting existing
-state. Rebuild server/API when updating this integration. Maple is not a gameplay
+state. Rebuild server/API/Chat when updating this integration. Maple is not a gameplay
 readiness dependency: a telemetry outage does not prevent application startup.
 
-Open `http://127.0.0.1:4318`. The dashboard token defaults to
-`opencok-development-dashboard-only`; this is a public development value. The separate
-ingest key defaults to `opencok-development-ingest-only`. Set independently generated
+Open `http://127.0.0.1:4318`. Set independently generated
 `MAPLE_LOCAL_ACCESS_TOKEN` and `MAPLE_LOCAL_INGEST_KEY` values in the ignored root `.env`
-before sharing access, then recreate Maple, server and API together. Generate each
+before starting the services; Compose supplies no default credentials. Maple, server,
+API, Chat and gateway must use the same ingest key. After changing credentials,
+recreate all five services together. Generate each
 value with `openssl rand -hex 32`; keep them out of source and command output captured
 for reports. The dashboard token can read/query telemetry; the ingest key only writes.
-Maple's port is published on loopback only, unlike the existing development tools.
-`MAPLE_PORT` changes the host port without changing the internal ingest address.
+Maple's port 4318 is published on all host interfaces. Restrict access with host
+network controls when the development machine is reachable by other devices.
 
-Both services send OTLP to `http://maple:4318`. For applications run outside Compose,
+Server, API and Chat send OTLP to `http://maple:4318`. Chat initializes its exporter
+before opening application resources and flushes after closing them on shutdown or
+startup failure. The gateway sends filtered access logs and HTTP metrics through
+Traefik's native OTLP exporters; see the [gateway guide](../gateway/README.md).
+For applications run outside Compose,
 set `OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318` and the same ingest key.
-`OTEL_EXPORT_INTERVAL_MS` defaults to 1000 and accepts 1000–60000 ms;
-`OTEL_SLOW_OPERATION_MS` defaults to 1000 and accepts 100–60000 ms. Configure these
-values on the applications when overriding Compose defaults. Leaving the endpoint
+The telemetry export interval is fixed at 1000 ms in code.
+`OTEL_SLOW_OPERATION_MS` defaults to 1000 and accepts 100–60000 ms; configure it
+on the applications when changing the slow-operation threshold. Leaving the endpoint
 unset keeps JSON logs without network export.
 
-In the dashboard, select `server` or `api`, filter by operation/outcome/level and open
+In the dashboard, select `server`, `api`, `chat` or `gateway`, filter by operation/outcome/level and open
 a log's trace to inspect its child spans. Use request/connection/job IDs or the opaque
 mutation reference for a specific operation. Inspect Errors for controlled exception
 groups and Metrics for `opencok.operation.duration`, `opencok.operations.active`,
@@ -244,10 +356,10 @@ Useful local queries require no token arguments because the container environmen
 already supplies its access token:
 
 ```sh
-docker compose --profile dev exec -T maple maple services --local
-docker compose --profile dev exec -T maple maple logs --service server --since 15m --local
-docker compose --profile dev exec -T maple maple errors --since 15m --local
-docker compose --profile dev exec -T maple maple metrics --local
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T maple maple services --local
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T maple maple logs --service server --since 15m --local
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T maple maple errors --since 15m --local
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T maple maple metrics --local
 ```
 
 Maple Local does not schedule automatic alerts. Keep the dashboard open for interactive
@@ -268,10 +380,23 @@ Verification commands use synthetic inputs and disposable infrastructure:
 
 ```sh
 bun run --cwd packages/core test:maple
-bun run test:stack
 ```
 
-The first checks every required signal, trace/log correlation, private-field filtering,
-query authentication and clean-restart persistence against the real Maple image. The
-second exercises the actual API/server containers and queries their stored telemetry.
+This checks application signals for server/API/Chat, gateway access logs and HTTP
+metrics, trace/log correlation, private-field filtering,
+query authentication and clean-restart persistence against the real Maple image.
 Production capacity and representative load remain separate admission work.
+
+## Mongo Express
+
+Mongo Express `1.0.2` is available in `all`, `dev` and `database`, after MongoDB is
+healthy. Open `http://localhost:8081` and use the local development login
+`admin` / `admin`. Port 8081 is published without a host-IP restriction, following
+the other local inspection services. These are development credentials.
+
+The UI and Chat both receive `MONGO_URI` from the root `.env`; the URI selects the
+database and authentication settings. The example selects local `opencok_chat`
+with `authSource=admin`. Admin-wide database browsing is disabled. Inspect `chat_archive` for archived messages; UI changes are
+local diagnostic actions and must not replace versioned repair or migration scripts.
+The service has no application dependents or gateway route and is omitted from `prod`.
+See [ADR-0003](../../docs/decisions/0003-adopt-mongo-express-for-development.md).

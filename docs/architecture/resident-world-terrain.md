@@ -67,9 +67,9 @@ command after the old owner has released its session.
 The runtime must call `assertWorldTerrain(db, authority, config.mapSize)` after
 fencing and before workers, traffic or character availability. A partial import,
 foreign realm, shape mismatch or configured size mismatch prevents opening. An
-absent manifest keeps existing legacy realms unchanged. Native fresh realms must
-explicitly use `GAME_MAP_SIZE=1201`; the legacy default remains 1200. The import
-size must also match the maintained `worldmap_city.k3` catalog value.
+absent manifest keeps existing legacy realms unchanged. The server configuration
+fixes the runtime map size at 1201, matching native fresh realms. The import size
+must also match the maintained `worldmap_city.k3` catalog value.
 
 No migration, dependency, public command or automatic terrain rewrite is added.
 This extends PostgreSQL authority under [ADR-0002](../decisions/0002-adopt-postgresql-for-authoritative-state.md)

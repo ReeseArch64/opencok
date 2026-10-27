@@ -98,8 +98,8 @@ counter and default-zero revision columns, and explicitly admit the legacy zero-
 boundary and no-effect moderation receipts. Existing rows retain revision zero.
 Deploy the new Chat receiver before producing revised realm publications.
 
-Use the existing `GAME_FILES_URL`, `GAME_AVATAR_CHAT_URL`
-and `CHAT_SIGNING_SECRET` configuration. The files URL targets the shared API's private
+Use the existing `API_URL`, `GAME_AVATAR_CHAT_URL`
+and `CHAT_SECRET` configuration. The files URL targets the shared API's private
 confirmation origin; the Chat URL ends in `/_internal/avatar-profile`. The API needs
 the five S3 settings; realm authorization uses the existing shared Redis. Configured
 startup checks the completion, version, moderation and publication stores.

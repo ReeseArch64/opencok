@@ -1,14 +1,47 @@
 import { expect, test } from "bun:test";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Exit } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
-import { ApiConfig, ApiConfigLive, readConfig } from "../src/config.ts";
+import { ApiConfig, readConfig } from "../src/config.ts";
 import { ApiDependencies, serveApi } from "../src/app.ts";
 
 const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://synthetic:secret@localhost/wrong?database=wrong&sslmode=require",
   GLOBAL_DATABASE_NAME: "synthetic_global",
-  API_PORT: "0",
   KINGDOM_ID: "2",
+  GAME_PUBLIC_HOST: "game.synthetic.invalid",
+});
+
+test.each([
+  undefined,
+  "redis://synthetic:synthetic-secret@cache.internal:6380/4",
+  "rediss://synthetic:synthetic-secret@cache.internal:6381/5",
+])("API configuration uses shared REDIS_URL %s", async (REDIS_URL) => {
+  const settings = await Effect.runPromise(
+    readConfig.pipe(
+      Effect.provideService(EnvironmentSource, {
+        DATABASE_URL: "postgres://synthetic:secret@localhost/global",
+        REDIS_URL,
+      }),
+    ),
+  );
+
+  expect(settings.redisUrl).toBe(REDIS_URL ?? "redis://127.0.0.1:6379/0");
+});
+
+test("API rejects invalid shared Redis URLs without disclosing credentials", async () => {
+  const result = await Effect.runPromiseExit(
+    readConfig.pipe(
+      Effect.provideService(EnvironmentSource, {
+        DATABASE_URL: "postgres://synthetic:secret@localhost/global",
+        REDIS_URL: "https://synthetic:private-redis-secret@cache.invalid/4",
+      }),
+    ),
+  );
+
+  expect(Exit.isFailure(result)).toBe(true);
+  expect(JSON.stringify(result)).toContain("REDIS_URL");
+  expect(JSON.stringify(result)).not.toContain("private-redis-secret");
+  expect(JSON.stringify(result)).not.toContain("cache.invalid");
 });
 
 test("Effect API config selects the global database from the injected environment", async () => {
@@ -18,6 +51,11 @@ test("Effect API config selects the global database from the injected environmen
   expect(url.searchParams.has("database")).toBe(false);
   expect(url.searchParams.get("sslmode")).toBe("require");
   expect(config.kingdomId).toBe(2);
+  expect(config.gameHost).toBe("game.synthetic.invalid");
+  expect(config.host).toBe("0.0.0.0");
+  expect(config.port).toBe(8080);
+  expect(config.gamePort).toBe(9933);
+  expect(config.timeoutMs).toBe(3000);
 });
 
 test("API Effect scope serves discovery and closes HTTP before dependencies", async () => {
@@ -38,7 +76,13 @@ test("API Effect scope serves discovery and closes HTTP before dependencies", as
         }),
     ),
   );
-  const layers = Layer.merge(dependencies, ApiConfigLive).pipe(Layer.provide(source));
+  const layers = Layer.merge(
+    dependencies,
+    Layer.effect(
+      ApiConfig,
+      readConfig.pipe(Effect.map((config) => ({ ...config, host: "127.0.0.1", port: 0 }))),
+    ),
+  ).pipe(Layer.provide(source));
   await Effect.runPromise(
     Effect.scoped(
       Effect.gen(function* () {

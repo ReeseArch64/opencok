@@ -1,17 +1,15 @@
 import { expect, test } from "bun:test";
 import { createConnection, createServer } from "node:net";
-import { Effect, Layer, ManagedRuntime } from "effect";
+import { Effect, Layer, ManagedRuntime, Exit } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
-import { RealmConfig, RealmConfigLive, config } from "../src/config.ts";
+import { RealmConfig, config } from "../src/config.ts";
 import { RealmDependencies, RealmServer, RealmServerLive, startServer } from "../src/server.ts";
 import { Rules } from "@opencok/rules/game";
 import type { ServerDependencies } from "@opencok/connection/dependencies";
 
 const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://synthetic:secret@localhost/postgres",
-  GAME_LOGIN_SECRET: "synthetic",
-  GAME_PORT: "0",
-  GAME_HEALTH_PORT: "0",
+  GAME_SECRET: "synthetic",
   KINGDOM_ID: "2",
 });
 
@@ -84,13 +82,62 @@ const dependencies: ServerDependencies = {
   world: { get: async () => ({}) },
 };
 
-const configured = RealmConfigLive.pipe(Layer.provide(source));
+const configured = Layer.effect(
+  RealmConfig,
+  config.pipe(
+    Effect.map((settings) => ({ ...settings, host: "127.0.0.1", port: 0, healthPort: 0 })),
+  ),
+).pipe(Layer.provide(source));
+
+test.each([
+  undefined,
+  "redis://synthetic:synthetic-secret@cache.internal:6380/4",
+  "rediss://synthetic:synthetic-secret@cache.internal:6381/5",
+])("realm configuration uses shared REDIS_URL %s", async (REDIS_URL) => {
+  const settings = await Effect.runPromise(
+    config.pipe(
+      Effect.provideService(EnvironmentSource, {
+        DATABASE_URL: "postgres://synthetic:secret@localhost/global",
+        GAME_SECRET: "synthetic",
+        REDIS_URL,
+      }),
+    ),
+  );
+
+  expect(settings.redisUrl).toBe(REDIS_URL ?? "redis://127.0.0.1:6379/0");
+});
+
+test("realm rejects invalid shared Redis URLs without disclosing credentials", async () => {
+  const result = await Effect.runPromiseExit(
+    config.pipe(
+      Effect.provideService(EnvironmentSource, {
+        DATABASE_URL: "postgres://synthetic:secret@localhost/global",
+        GAME_SECRET: "synthetic",
+        REDIS_URL: "https://synthetic:private-redis-secret@cache.invalid/4",
+      }),
+    ),
+  );
+
+  expect(Exit.isFailure(result)).toBe(true);
+  expect(JSON.stringify(result)).toContain("REDIS_URL");
+  expect(JSON.stringify(result)).not.toContain("private-redis-secret");
+  expect(JSON.stringify(result)).not.toContain("cache.invalid");
+});
 
 test("realm configuration derives database and ownership from the shared snapshot", async () => {
   const settings = await Effect.runPromise(config.pipe(Effect.provide(source)));
   expect(settings.kingdomId).toBe(2);
   expect(settings.kingdomDatabase).toBe("opencok_kingdom_2");
   expect(settings.zkPath).toBe("/opencok-experiment/COK2");
+  expect(settings.host).toBe("0.0.0.0");
+  expect(settings.port).toBe(9933);
+  expect(settings.healthPort).toBe(18090);
+  expect(settings.chatInterval).toBe(1);
+  expect(settings.feedMaxCount).toBe(3);
+  expect(settings.crossSearchEnabled).toBe(true);
+  expect(settings.playerKingdoms).toBeUndefined();
+  expect(settings.mapSize).toBe(1201);
+  expect(settings.timeoutMs).toBe(5000);
   expect(settings).not.toHaveProperty("resources");
 });
 

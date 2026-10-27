@@ -14,7 +14,8 @@ Server integration and operating evidence are recorded in the
 Install with `bun install --frozen-lockfile`. Run the root Compose `dev` profile to
 start Chat, PostgreSQL and the existing global/kingdom migrations. The local stack
 configures API discovery and realm session issuance automatically and publishes Chat
-on port 8083. Set `CHAT_WEBSOCKET_URL` for the client-reachable address; see the
+on port 8083. The advertised WebSocket URL is fixed at
+`ws://192.168.1.104:8083/chat/ws` in code; see the
 [stack guide](../../infra/compose/README.md). To run Chat on the host instead, stop
 the Compose Chat service, configure the root `.env` or process environment, and run
 `bun run --cwd apps/chat start`.
@@ -22,13 +23,15 @@ the Compose Chat service, configure the root `.env` or process environment, and 
 | Setting                  | Meaning                                                                                 |
 | ------------------------ | --------------------------------------------------------------------------------------- |
 | `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases                 |
-| `CHAT_SIGNING_SECRET`    | Required shared secret for trusted backend session, avatar and nickname requests        |
-| `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment              |
-| `MONGODB_URI`            | Authenticated MongoDB archive URI; PostgreSQL fallback remains available during outages |
-| `CHAT_INSTANCE_ID`       | Stable unique consumer identity; defaults to a process UUID outside Compose             |
-| `CHAT_HOST`, `CHAT_PORT` | Listen address, default `127.0.0.1:8083`                                                |
+| `CHAT_SECRET`            | Required shared secret for trusted backend session, avatar and nickname requests        |
+| `MONGO_URI`              | Authenticated MongoDB archive URI; PostgreSQL fallback remains available during outages |
 | `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                                |
 | `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                                       |
+
+The entrypoint binds to `0.0.0.0:8083` with consumer ID `chat-local`; these values
+are fixed in code. This entrypoint runs one Chat consumer per deployment. Additional
+instances require distinct IDs supplied through application composition so each
+consumer retains its own lease and cursor.
 
 Configuration uses the shared root environment loader. Legacy MariaDB variables and
 secret-file settings are replaced by these validated settings. Credentials are never
@@ -60,6 +63,18 @@ and receipts prevent replay resurrection. Maintenance is bounded, and MongoDB ou
 preserve PostgreSQL bodies for archive fallback. See the complete
 [topic-24 workflow, deployment and retention guide](../../docs/social-chat-migration.md).
 
+## Operational telemetry
+
+Compose supplies `OTEL_EXPORTER_OTLP_ENDPOINT=http://maple:4318` and the shared
+`MAPLE_LOCAL_INGEST_KEY`. Chat uses the same validated telemetry settings and Evlog
+exporter as server/API, under service name `chat`. HTTP/WebSocket operational logs,
+HTTP latency and process metrics, and controlled error spans are exported without
+message bodies, player identities or credentials. Existing shared database
+instrumentation contributes dependency spans. The exporter starts before application
+resources and flushes after resource cleanup, including startup failure. Maple
+availability does not gate Chat readiness. Without an OTLP endpoint, console logging
+continues. See the [local Maple guide](../../infra/compose/README.md#observability).
+
 ## Validation and limits
 
 Run `bun run --cwd apps/chat check-types`, `bun run --cwd apps/chat test` and
@@ -68,14 +83,14 @@ containers, applies the real migrations, checks both realm lookups, concurrent w
 Unicode, exact expiry and persistence after restart. It does not touch local game data.
 
 Android tracks are untested. The TypeScript realm supports `chat.session.create`
-when `GAME_CHAT_SESSION_URL` targets this service's internal `/external/session` route and
-`CHAT_SIGNING_SECRET` matches. It binds issuance to the authenticated realm profile and
+when `CHAT_URL` selects this service's HTTP origin and
+`CHAT_SECRET` matches. It binds issuance to the authenticated realm profile and
 returns the opaque token and second-based expiry. Units compose both sides with the token verifier; actual realm TCP, Chat HTTP/WebSocket,
 API metadata and disposable database acceptance now exercise the full server flow.
 Native-client behavior remains unverified. The shared API/gateway now exposes the three public metadata GET routes
-when `API_CHAT_URL` points to this service's HTTP origin. Chat remains the source of
+when `CHAT_URL` points to this service's HTTP origin. Chat remains the source of
 configuration and readiness; the proxy forwards no caller credentials or query strings.
-The advertised `CHAT_WEBSOCKET_URL` must be directly reachable because the shared gateway
+The advertised WebSocket URL fixed in the entrypoint must be directly reachable because the shared gateway
 does not proxy `/chat/ws` or expose `/external/session`. See the
 [API discovery contract](../api/README.md#public-chat-discovery) and the
 [realm session contract](../server/README.md#realm-chat-sessions) for bounds and errors.
@@ -97,7 +112,7 @@ restarts; rotate only with coordinated backend configuration.
 [Issue #80](https://github.com/ReeseArch64/opencok/issues/80) adds exact
 `POST /_internal/avatar-profile`, private to trusted backends and excluded from the
 public discovery gateway. This maintained service protocol is not the legacy external
-chat API. `CHAT_SIGNING_SECRET` authenticates it with HMAC-SHA256 over the protocol domain,
+chat API. `CHAT_SECRET` authenticates it with HMAC-SHA256 over the protocol domain,
 method, path, timestamp and complete UTF-8 JSON body. `x-opencok-timestamp` carries canonical
 milliseconds and must be within 30 seconds of the receiver clock; `x-opencok-signature`
 carries lowercase hexadecimal HMAC. Session MD5 compatibility remains separate. Use a
@@ -135,7 +150,7 @@ integration remains unvalidated.
 ## Internal nickname updates
 
 Exact `POST /_internal/nickname` is private to trusted backends. The public gateway does
-not forward it. It uses the existing `CHAT_SIGNING_SECRET` and timestamp/signature
+not forward it. It uses the existing `CHAT_SECRET` and timestamp/signature
 headers with a distinct `opencok-chat-nickname-v1` HMAC domain, method, path and complete
 UTF-8 body. The 4 KiB body and three-second receiver deadline match the avatar endpoint.
 Keep this endpoint on a trusted private network or TLS and rotate both service secrets

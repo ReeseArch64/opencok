@@ -22,7 +22,7 @@ under ADR-0009, and shared runtime composition follows the proposed ADR-0012.
 
 ## Decision
 
-Use the official `ghcr.io/mapletechlabs/maple:v0.3.0` container for local server/API
+Use the official `ghcr.io/mapletechlabs/maple:v0.3.0` container as the base for local server/API
 operational logs, OpenTelemetry traces, exception groups, operation counters and
 response/processing duration histograms. Retain `evlog@2.33.1` behind the shared
 logging adapter. Send only redacted emitted events to the OpenTelemetry Protocol
@@ -180,3 +180,19 @@ integration, all 17 isolated Compose scenarios, affected workspace/stack type ch
 lint, formatting and frozen installation. The isolated stack now injects synthetic
 catalogs before bundling; runtime source mounts cannot override the compiled server.
 The scenario retains its original cache, rejection-code, balance and idempotency checks.
+
+### Dashboard CSP compatibility workaround
+
+The v0.3.0 dashboard requires WebAssembly but its `script-src 'self'` policy blocks
+compilation. A version-specific derived image adds only `'wasm-unsafe-eval'` to that
+directive. It retains all other policies, the official entrypoint and storage layout;
+JavaScript string evaluation remains prohibited. An amd64 executable checksum guard,
+exact policy matching and equal-length replacement prevent accidental
+patching of a different binary. Unsupported architectures fail closed. This avoids a
+new proxy service or exposing telemetry through the gameplay gateway.
+
+The [workaround guide](../../infra/observability/maple/README.md) records validation,
+activation and removal criteria. A disposable host process rendered the authenticated
+dashboard in Chromium and allowed WebAssembly while still blocking JavaScript string
+evaluation. Docker build/activation and the updated container integration remain
+unverified; the earlier container evidence above does not validate this derived image.
