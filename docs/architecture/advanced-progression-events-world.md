@@ -34,16 +34,15 @@ PostgreSQL instance. No test uses the operator's running realm or player data.
 
 ## Implemented scope and acceptance boundaries
 
-The integrated baseline for this delivery is `e5ea8974`. Topics25–27 cover the
-families below. Their detailed sections retain the original catalog gates,
+Topics 25–27 cover the server families below. Their detailed sections retain the original catalog gates,
 transaction rules and acceptance evidence; enabled configuration alone never
 proves an economic transition or combat outcome.
 
-| Topic | Implemented noncombat families                                                                                                                                                                                                                                                                                                                                                 | Explicit acceptance boundary                                                                                                                                                                                                                                          |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 25    | Civilization science and castle placement, construction, movement and settlement; petdragon incubation, friendship, feeding, experience, travel, skills and owned companions; continuous/status dragon talents; totem placement, recycling and durable status delivery; dragon-tower offers, virtual armies, healing, resets, buffs and owned imported entitlements.           | Tower battle/sweep outcomes, battle-triggered talents, civilization garrison/robbery and totem damage require their validated combat integrations. The independent lord title/talisman equipment subsystem is outside these listed families.                          |
-| 26    | The [local activity inventory](#topic26-local-noncombat-inventory) includes minigames, owned progress and reward claims, exchanges, operators, local gifts, verified delivered-payment observers, authoritative hero/expedition/consumption periods and their ranking settlement, GoldEggs, legacy eggs and trusted campaign producers.                                        | Arena and matched combat outcomes, battle resource modes and boss actors require their respective engines. Commercial primary delivery and card claims retain their own provider boundary. Historical dates and closed controls remain effective.                     |
-| 27    | Resident terrain admission and static reservations; known-phase birth allocation and legacy adoption; native city geometry, relocation and recreation; ordinary/black-land resource supply and expiry; shared37/38 supply, owned parties and pinned return rewards; ordinary gathering, treasure hints/excavation, map queries, monster props and temporary monster discovery. | Specialized territory, neutral, expedition and boss actors retain their own rules. Reserved map projections do not activate their interactions. Natural field/exploration/barbarian replenishment and the read-only extensions below are tracked as integration work. |
+| Topic | Implemented noncombat families                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Explicit acceptance boundary                                                                                                                                                                                                                                                             |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 25    | Civilization science and castle placement, construction, movement and settlement; petdragon incubation, friendship, feeding, experience, travel, skills and owned companions; continuous/status dragon talents; totem placement, recycling and durable status delivery; dragon-tower offers, virtual armies, healing, resets, buffs and owned imported entitlements.                                                                                                                   | Tower battle/sweep outcomes, battle-triggered talents, civilization garrison/robbery and totem damage require their validated combat integrations. The independent lord title/talisman equipment subsystem is outside these listed families.                                             |
+| 26    | The [local activity inventory](#topic26-local-noncombat-inventory) includes minigames, owned progress and reward claims, exchanges, operators, local gifts, verified delivered-payment observers, authoritative hero/expedition/consumption periods and their ranking settlement, GoldEggs, legacy eggs and trusted campaign producers.                                                                                                                                                | Arena and matched combat outcomes, battle resource modes and specialized boss combat outcomes require their respective engines. Commercial primary delivery and card claims retain their own provider boundary. Historical dates and closed controls remain effective.                   |
+| 27    | Resident terrain admission and static reservations; known-phase birth allocation and legacy adoption; native city geometry, relocation and recreation; ordinary/black-land resource supply and expiry; shared37/38 supply, owned parties and pinned return rewards; ordinary gathering, treasure hints/excavation, map queries, monster props and temporary discovery, field/exploration/barbarian replenishment, read-only march inspection, scouting and alliance bulletin archives. | Specialized territory, neutral, expedition and boss actors retain their own rules. Reserved map projections do not activate their interactions. The [50-handler inventory](world-handler-coverage.md) identifies the exact ordinary paths and specialized target/admission dependencies. |
 
 The compatibility target remains the 12.06.0 server protocol. Native TCP fixtures
 and killed-process recovery establish the tested server paths. Native APK
@@ -51,25 +50,32 @@ execution and the other recognized client tracks remain unverified. No generic
 victory, arbitrary hit points, empty success response or client-submitted score
 substitutes for a validated engine.
 
-### Modules in integration
+### Resident world behavior
 
-Read-only allied and observer march inspection is prepared in `a428df20`.
-`world.get.march` with another owner validates the observer and applies the
-appropriate alliance and visibility projection without recovering that owner's
-marches or changing economic state. Its combined acceptance belongs to the
-integrated branch after composition.
+Both owned and authorized allied `world.get.march` queries read actual saved
+parties without settling them. `world.user.march` and the background worker retain
+owned deadline recovery. Banned or foreign principals cannot use an observer row
+to bypass the current resident realm. Correlation fields and long command-base
+values survive quotation, inspection and archive responses; their complete native
+frames are bounded before publication. Alliance bulletins read the real scoped
+Redis archive and distinguish an empty archive from an unavailable adapter.
 
-Scout preflight cost/timing quotation is the next read-only extension under
-integration. Its quotation must preserve Source admission and saved actor facts;
-a quote cannot reserve troops, debit inventory, settle a march or authorize an
-unsupported battle. No completion evidence is asserted here for that pending
-module.
+`world.scout.detail` quotes actual geometry, travel and resource price without
+creating a march, charging the caller or producing a report. Source ordinary
+scouting is a separate noncombat march path: actual FOOD or the configured
+barbarian resource fee, optional real troop reservations, visibility and protection
+rules, persisted intel mail and return. It does not require a damage calculation
+or fabricate a battle result. Special territory and team targets still need their
+actual actors and visibility capabilities. The shared watchtower calculation uses
+`glory_watchtower`, actual caller compatibility, exact progress and the Source
+underscore-separated speed/cooldown values.
 
-Natural ordinary field, exploration and barbarian production is also under
-integration, separate from the implemented owned monster props and
-`world.get.monster` temporary producer. It must supply and expire actual catalog
-actors under the realm owner without manufacturing battle results or rewards.
-Its final producer proof will be recorded after integration.
+Ordinary field, exploration, black-land and barbarian producers use bounded
+realm-fenced pages, configured quotas, ages and lifetimes, actual actor health and
+formations, and durable waiting tickets. Temporary discovery and owned item props
+remain distinct recipes. DEFAULT `create.boss` is a type-16 ordinary item producer;
+its Defensor variant retains its separate actor and cost dependency. No producer
+simulates a fight or grants its future combat rewards.
 
 ### Reported validation checkpoints
 
@@ -88,8 +94,7 @@ append its exact command, branch and result without rewriting earlier evidence.
 | Ordinary monster actor acceptance                     | 5     | 35         | Owned props and factual temporary actor/discovery paths.            |
 | Integrated legacy egg and shared-resource regression  | 12    | 152        | Integrated regression checkpoint for egg and shared behavior.       |
 
-Final integrated-suite evidence and the pending modules' acceptance will be
-recorded after their composition. Documentation consolidation is checked with
+Final integrated-suite evidence is recorded after the remaining composition checks. Documentation consolidation is checked with
 the required lint and formatting commands.
 
 ## Local event timing and minstrel

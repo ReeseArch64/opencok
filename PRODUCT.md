@@ -193,6 +193,17 @@ return credits them once. Retrying a request cannot reroll a reward, reserve the
 same troops twice or repeat cargo. Existing historical closures, dormant quotas
 and disabled catalog controls remain effective after their backend is migrated.
 
+### Ordinary scouting
+
+Scouting is an intelligence action. Its quotation does not charge or reserve an
+army. Actual departure consumes the configured resources and reserves only the
+troops and companions supplied by the player. Arrival records factual information
+at the allowed visibility level, respects protection, creates owned report mail
+and returns the party without inventing a victory, casualties or loot. Reports,
+notifications, costs and return checkpoints remain consistent through replay and
+restart. A special target requires its actual mode actor before intelligence can
+be produced; an unavailable actor cannot become an empty success report.
+
 ### Consumption competitions
 
 Consumption rankings use confirmed debits and exact signed 64-bit amounts.
