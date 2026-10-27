@@ -159,7 +159,8 @@
     "./olympic": "./src/olympic.ts",
     "./hero-event": "./src/hero-event.ts",
     "./hero-calendar": "./src/hero-calendar.ts",
-    "./fragment-exchange": "./src/fragment-exchange.ts"
+    "./fragment-exchange": "./src/fragment-exchange.ts",
+    "./monster-exchange": "./src/monster-exchange.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
