@@ -23,6 +23,7 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface AdvancedCatalogs {
+  comebacks?: Map<string, Rule>;
   activityPages?: Map<string, Rule>;
   hotItems?: Map<string, Rule>;
   fragments?: Map<string, Rule>;

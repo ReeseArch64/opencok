@@ -44,6 +44,7 @@ export function createSessionHandler(
   return (socket: Socket) => {
     const connectionId = randomUUID();
     const connected = performance.now();
+    let lastProfileObservation = Date.now();
     let closeReason = "peer_closed";
     const report = (
       event: string,
@@ -234,6 +235,12 @@ export function createSessionHandler(
         socket.destroy();
         return;
       }
+      const observed = Date.now();
+      if (dependencies.profileSessions?.observe && observed - lastProfileObservation >= 60000) {
+        await dependencies.profileSessions.observe(uid, connectionId, observed);
+        lastProfileObservation = observed;
+      }
+
       if (controller === 0 && action === 29) {
         send(envelope(0, 29, {}));
         return;
@@ -285,6 +292,7 @@ export function createSessionHandler(
           if (
             (command.startsWith("item.") ||
               command.startsWith("hot.item.") ||
+              command.startsWith("comeback.") ||
               command === "mail.reward" ||
               command === "mail.reward.batch" ||
               command === "shoppingMall.buy" ||

@@ -10,6 +10,7 @@ import { continuedCostPeriod } from "./continued-cost";
 import { targetSchedule } from "./target-task";
 import { cityInteger } from "./city-progression";
 import { groupBuyPeriod, groupBuyRounds } from "./groupbuy";
+import { comebackActiveChannels } from "./comeback";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 function invalid(): never {
@@ -56,6 +57,19 @@ function endTime(
     opened = long(state.server, "activityTime"),
     openingValid = opened > 0n && opened <= now;
   switch (type) {
+    case 21: {
+      if (!feature(rules, "comeback", context) || !state.comeback) return;
+      const config = rules.advanced.comebacks?.get(text(state.comeback, "configId")),
+        end = eventTimestamp(rules.power.activityPanels?.get("57083")?.end);
+      if (
+        !config ||
+        end === undefined ||
+        end <= now ||
+        !comebackActiveChannels(config, state.comeback, now).length
+      )
+        return;
+      return end;
+    }
     case 22: {
       if (rules.configuration.payControl?.get("69023")?.k5 === "1" && !openingValid) return;
       const period = rechargeActivityWindow(rules, opened, context);
@@ -168,7 +182,8 @@ export function activityOperators(
     invalid();
   if (
     (state.target && state.target.uid !== state.profile.uid) ||
-    (state.recall && state.recall.uid !== state.profile.uid)
+    (state.recall && state.recall.uid !== state.profile.uid) ||
+    (state.comeback && state.comeback.uid !== state.profile.uid)
   )
     invalid();
   if (num(state.profile, "crossFightSrcServerId") > 0) return [];

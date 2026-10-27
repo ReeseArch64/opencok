@@ -1,3 +1,5 @@
+import { createComebackSessions } from "@opencok/repositories/comeback-session";
+import { comebackDomain, planComebackLogin } from "@opencok/services/comeback";
 import {
   createHotItemDomain,
   createHotBusinessMan,
@@ -661,6 +663,7 @@ export const RealmDependenciesLive = Layer.effect(
         playerItemGiftDomain,
         createSeasonalExchangeDomain(),
         createExchangeActivityDomain(),
+        comebackDomain,
         createHotItemDomain(),
         createVipBoxDomain(),
         createTargetTaskDomain(),
@@ -2162,6 +2165,17 @@ export const RealmDependenciesLive = Layer.effect(
         emperor: () => cache.emperorVersion(config.kingdomId),
       },
     );
+    const comebackSessions = createComebackSessions(db.kingdom.db, authority, (tx, owner, now) =>
+      executeInventoryTransaction(
+        tx,
+        owner,
+        (state) =>
+          planComebackLogin(state, rules, economyEffects, now, (economy) =>
+            city.command(tx, owner, "comeback.init", encode({}), now, economy),
+          ),
+        "comeback.init",
+      ),
+    );
     return {
       provisioning: config.provisioningSecret
         ? characterProvisioningHandler(
@@ -2177,7 +2191,20 @@ export const RealmDependenciesLive = Layer.effect(
       inventory,
       mutations: createMutationExecutor(db.kingdom.db, authority),
       economy: createEconomyMutationExecutor(db.kingdom.db, authority),
-      profileSessions: nickname ? { open: cn1.open, close: cn1.close } : undefined,
+      profileSessions: {
+        async open(owner, id, now) {
+          if (nickname) await cn1.open(owner, id, now);
+          await comebackSessions.open(owner, id, now);
+        },
+        async close(owner, id, now) {
+          try {
+            await comebackSessions.close(owner, id, now);
+          } finally {
+            if (nickname) await cn1.close(owner, id, now);
+          }
+        },
+        observe: comebackSessions.observe,
+      },
       notifications,
       db,
       cache,

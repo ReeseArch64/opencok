@@ -9528,6 +9528,7 @@ column ["dailyReward","varchar(30)",false,null,null,null]
 column ["payReward","varchar(100)",false,null,null,null]
 column ["payTotal","bigint",true,"0",null,null]
 primary ["user_comeback_record_PRIMARY",["uid","configId"]]
+index ["user_comeback_record_device_backtime",false,["deviceId","backTime"]]
 check ["user_comeback_record_backReward_range","\\"backReward\\" BETWEEN -128 AND 127"]
 insert into "opencok_kingdom"."user_comeback_record" ("uid", "deviceId", "configId", "backType", "backTime", "backReward", "dailyReward", "payReward", "payTotal") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 select "uid", "deviceId", "configId", "backType", "backTime", "backReward", "dailyReward", "payReward", "payTotal" from "opencok_kingdom"."user_comeback_record" where "opencok_kingdom"."user_comeback_record"."uid" = $1

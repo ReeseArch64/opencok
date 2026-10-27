@@ -181,7 +181,8 @@
     "./world-resource-refresh": "./src/world-resource-refresh.ts",
     "./hot-item": "./src/hot-item.ts",
     "./activity-operators": "./src/activity-operators.ts",
-    "./responses/activity-operators": "./src/responses/activity-operators.ts"
+    "./responses/activity-operators": "./src/responses/activity-operators.ts",
+    "./comeback": "./src/comeback.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

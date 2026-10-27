@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  comeback?: import("./comeback").ComebackState;
   hotItem?: import("./hot-item").HotItemState;
   campaignProfile?: Row;
   costRankAward?: import("./continued-cost-rewards").CostRankAwardReader;
@@ -147,6 +148,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  comeback?: import("./comeback").ComebackWrite;
   hotItem?: import("./hot-item").HotItemWrite;
   costRankAward?: string;
   expeditionAward?: string;
