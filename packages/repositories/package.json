@@ -142,7 +142,8 @@
     "./monster-exchange": "./src/monster-exchange.ts",
     "./world-resource-refresh": "./src/world-resource-refresh.ts",
     "./world-utility": "./src/world-utility.ts",
-    "./world-city-geometry": "./src/world-city-geometry.ts"
+    "./world-city-geometry": "./src/world-city-geometry.ts",
+    "./world-birth": "./src/world-birth.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
