@@ -1,5 +1,6 @@
 import { activityDirectory } from "@opencok/mappings/activity-directory";
 import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
+import { legacyIntegerOrder } from "@opencok/messages/legacy-object-order";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { heroEventBand, heroEventRewards, nextHeroPanel } from "@opencok/rules/hero-event";
 import {
@@ -2050,7 +2051,9 @@ export class GameService {
       profile = this.checkProfile(state.profile, now);
     if (profile.uid !== uid || num(profile, "serverId") !== this.config.kingdomId)
       throw new GameError(errors.invalid);
-    const body = activityDirectory(activityDirectoryEntries(state.activities, now));
+    const body = activityDirectory(
+      activityDirectoryEntries(state.activities, now, legacyIntegerOrder),
+    );
     if (encode(extension("act.ls", body)).length > MAX_FRAME)
       throw new GameError(errors.unsupported, "activity_directory");
     return body;
