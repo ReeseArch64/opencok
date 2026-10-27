@@ -42,6 +42,7 @@ export interface WorldMutationWrite {
     dueAt: bigint;
     payload: Uint8Array;
   }[];
+  barbarianActors?: import("./world-monsters").WorldBarbarianActorWrite;
   treasures?: readonly Row[];
   deletedTreasures?: readonly string[];
   troubleDeliveries?: readonly import("./trouble").TroubleDelivery[];

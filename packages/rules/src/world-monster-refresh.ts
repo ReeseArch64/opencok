@@ -155,13 +155,18 @@ export function worldBarbarianChoice(
     );
   if (!choices.length) return undefined;
   const rule =
-      choices[
-        chooseWeight(
-          choices.map((row) => cityInteger(row.ratio)),
-          random,
-        )
-      ]!,
-    duration = Math.trunc(Number(rule.life_time) * 60 * 60 * 1000);
+    choices[
+      chooseWeight(
+        choices.map((row) => cityInteger(row.ratio)),
+        random,
+      )
+    ]!;
+  return worldBarbarianActor(rules, rule.id!);
+}
+export function worldBarbarianActor(rules: Rules, id: string) {
+  const rule = rules.world.barbarians?.get(id);
+  if (!rule) worldMutationFailure();
+  const duration = Math.trunc(Number(rule.life_time) * 60 * 60 * 1000);
   if (!Number.isSafeInteger(duration) || duration <= 0) worldMutationFailure();
   const parse = (raw: string | undefined) => {
     const values = new Map<string, number>();
