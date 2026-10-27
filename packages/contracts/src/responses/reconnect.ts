@@ -1,5 +1,3 @@
-import type { GeneralInfoResponse } from "./profile.ts";
-
 export interface ReconnectBalancesResponse {
   readonly gold: bigint;
   readonly dmmGold: bigint;
@@ -21,10 +19,6 @@ export interface ReconnectArmyResponse {
 
 export interface ReconnectArmiesResponse {
   readonly army: ReconnectArmyResponse[];
-}
-
-export interface ReconnectGeneralsResponse {
-  readonly userGenerals: (GeneralInfoResponse & { readonly abilityIndex: number })[];
 }
 
 export interface ReconnectMineResponse {

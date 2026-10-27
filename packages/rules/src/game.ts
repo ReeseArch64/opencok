@@ -1,3 +1,4 @@
+import type { GeneralCatalogs } from "@opencok/hero/rules/general-catalogs";
 import type {
   BuildingLevelDefinition,
   BuildingResource,
@@ -81,19 +82,6 @@ export interface AllianceCatalogs {
   buildingSkills?: Map<string, Rule>;
   gifts?: Map<string, Rule>;
   ranks?: Map<string, Rule>;
-}
-
-export interface GeneralCatalogs {
-  levels?: Map<string, Rule>;
-  stations?: Map<string, Rule>;
-  unlocks?: Map<string, Rule>;
-  draws?: Map<string, Rule>;
-  wheels?: Map<string, Rule>;
-  refinementValues?: readonly Rule[];
-  refinementLimits?: readonly Rule[];
-  refinementRepeats?: readonly Rule[];
-  recruits?: Map<string, Rule>;
-  tavernRewards?: Map<string, Rule>;
 }
 
 export interface ProgressionCatalogs {

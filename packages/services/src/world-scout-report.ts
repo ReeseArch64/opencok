@@ -26,8 +26,8 @@ import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
 import { serverFeature } from "@opencok/rules/power-context";
 import { decodeWorldMarchArmy, type SavedMarchArmy } from "@opencok/messages/world-resource-army";
 import { decodeLegacyJsonArray } from "@opencok/messages/legacy-json";
-import { resourceGeneralBuildingEffect } from "./world-resource-owner-context";
-import { generalSkillPoints } from "./power";
+import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
 import { encodeScoutReport, scoutMailPush } from "@opencok/mappings/world-scout-report";
 
 const cast = (value: number) =>

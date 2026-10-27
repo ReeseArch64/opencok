@@ -5,7 +5,7 @@ import { Rules } from "@opencok/rules/game";
 import {
   resourceGeneralBuildingEffect,
   restoredResourceBuilding,
-} from "@opencok/services/world-resource-owner-context";
+} from "@opencok/hero/services/general-building-effects";
 
 function fixture() {
   const rules = new Rules(new Map(), new Map(), new Map());

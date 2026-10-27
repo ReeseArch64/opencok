@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { field } from "./response";
 import { inventoryItemSchema } from "./bootstrap";
-import { publicEquipmentSchema, generalInfoSchema } from "./profile";
+import { publicEquipmentSchema } from "./profile";
+import { generalInfoSchema } from "@opencok/hero/validations/profile-generals";
 import type { ActivityRewardResponse } from "@opencok/contracts/responses/activity-reward";
 
 export const activityRewardSchema = z.strictObject({

@@ -3,11 +3,9 @@ import type {
   ReconnectBalancesResponse,
   ReconnectArmyResponse,
   ReconnectArmiesResponse,
-  ReconnectGeneralsResponse,
   ReconnectMineResponse,
 } from "@opencok/contracts/responses/reconnect";
 import { field } from "./response.ts";
-import { generalInfoSchema } from "./profile.ts";
 
 export const reconnectBalancesSchema = z.strictObject({
   gold: field.long,
@@ -31,10 +29,6 @@ export const reconnectArmySchema = z.strictObject({
 export const reconnectArmiesSchema = z.strictObject({
   army: z.array(reconnectArmySchema).max(32767),
 }) satisfies z.ZodType<ReconnectArmiesResponse>;
-
-export const reconnectGeneralsSchema = z.strictObject({
-  userGenerals: z.array(generalInfoSchema.extend({ abilityIndex: field.int })).max(32767),
-}) satisfies z.ZodType<ReconnectGeneralsResponse>;
 
 export const reconnectMineSchema = z.strictObject({
   mine: z.strictObject({

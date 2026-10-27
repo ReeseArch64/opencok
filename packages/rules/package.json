@@ -17,6 +17,7 @@
     "@opencok/constants": "workspace:*",
     "@opencok/contracts": "workspace:*",
     "@opencok/errors": "workspace:*",
-    "@opencok/enums": "workspace:*"
+    "@opencok/enums": "workspace:*",
+    "@opencok/hero": "workspace:*"
   }
 }

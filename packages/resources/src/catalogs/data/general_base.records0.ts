@@ -1,4 +1,4 @@
-import type { GeneralBaseDefinition } from "../types/general_base.ts";
+import type { GeneralBaseDefinition } from "@opencok/hero/resources/catalogs/types/general_base";
 
 export const records: readonly GeneralBaseDefinition[] = [
   {

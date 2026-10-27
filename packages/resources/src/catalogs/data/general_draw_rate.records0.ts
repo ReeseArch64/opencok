@@ -1,4 +1,4 @@
-import type { GeneralDrawRateDefinition } from "../types/general_draw_rate.ts";
+import type { GeneralDrawRateDefinition } from "@opencok/hero/resources/catalogs/types/general_draw_rate";
 
 export const records: readonly GeneralDrawRateDefinition[] = [
   {

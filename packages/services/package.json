@@ -25,6 +25,7 @@
     "@opencok/dtos": "workspace:*",
     "@opencok/validations": "workspace:*",
     "@opencok/identity": "workspace:*",
-    "@opencok/enums": "workspace:*"
+    "@opencok/enums": "workspace:*",
+    "@opencok/hero": "workspace:*"
   }
 }

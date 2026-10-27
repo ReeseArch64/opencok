@@ -7,8 +7,8 @@ import {
   type NewGeneralEquipment,
   type NewGeneralEquippedState,
   type NewGeneralEquipmentModifier,
-} from "@opencok/rules/new-general-equipment";
-import type { NewGeneralBuildingState } from "@opencok/rules/new-general-building";
+} from "@opencok/hero/rules/new-general-equipment";
+import type { NewGeneralBuildingState } from "@opencok/hero/rules/new-general-building";
 import vectors from "./fixtures/new-general-equipment-vectors.json";
 
 function fixture() {

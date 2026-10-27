@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { sfs } from "@opencok/messages/sfs";
-import { generalsDomain } from "@opencok/services/generals";
+import { generalsDomain } from "@opencok/hero/services/generals";
 import { new_general } from "@opencok/drizzle/schema/opencok_kingdom/new_general";
 import { new_general_buy } from "@opencok/drizzle/schema/opencok_kingdom/new_general_buy";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";

@@ -8,5 +8,24 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "dependencies": {
+    "@opencok/constants": "workspace:*",
+    "@opencok/contracts": "workspace:*",
+    "@opencok/drizzle": "workspace:*",
+    "@opencok/errors": "workspace:*",
+    "@opencok/mappings": "workspace:*",
+    "@opencok/messages": "workspace:*",
+    "@opencok/repositories": "workspace:*",
+    "@opencok/resources": "workspace:*",
+    "@opencok/rules": "workspace:*",
+    "@opencok/services": "workspace:*",
+    "@opencok/validations": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "zod": "catalog:"
   }
 }

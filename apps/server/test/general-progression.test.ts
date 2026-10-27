@@ -7,10 +7,10 @@ import {
   generalStar,
   generalBaseSkillUpgrade,
   generalPairs,
-} from "@opencok/rules/general-progression";
-import { generalPurchase } from "@opencok/mappings/generals";
+} from "@opencok/hero/rules/general-progression";
+import { generalPurchase } from "@opencok/hero/mappings/generals";
 import { decode, fields, Type } from "@opencok/messages/sfs";
-import { generalsDomain } from "@opencok/services/generals";
+import { generalsDomain } from "@opencok/hero/services/generals";
 import { cityFixture } from "./fixtures/city-progression";
 const rules = await loadRules();
 const base = {

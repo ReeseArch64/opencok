@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { Rules } from "@opencok/rules/game";
-import { newGeneralPrestigeLevel } from "@opencok/rules/new-general-prestige";
+import { newGeneralPrestigeLevel } from "@opencok/hero/rules/new-general-prestige";
 
 function fixture() {
   const rules = new Rules(new Map(), new Map(), new Map());

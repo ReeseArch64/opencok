@@ -3,7 +3,7 @@ import { Rules } from "@opencok/rules/game";
 import {
   newGeneralBuildingRate,
   type NewGeneralBuildingState,
-} from "@opencok/rules/new-general-building";
+} from "@opencok/hero/rules/new-general-building";
 
 const context = { kingdomId: 1, version: "12.6.0", now: Date.UTC(2026, 9, 24, 12) };
 function fixture() {

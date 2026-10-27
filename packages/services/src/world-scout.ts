@@ -11,7 +11,8 @@ import { ordinaryMarchRoute, worldFootprint } from "@opencok/rules/world-march-r
 import { resolveWorldCityGeometry } from "@opencok/rules/world-city-geometry";
 import { worldPowerEffects } from "@opencok/rules/power-world";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
-import { generalSkillPoints, decodeWorldPowerEffects } from "./power";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
+import { decodeWorldPowerEffects } from "./power";
 import { resourceOwnerRuleContext } from "./world-resource-owner-context";
 
 function invalid(): never {

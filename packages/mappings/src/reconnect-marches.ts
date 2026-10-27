@@ -1,7 +1,9 @@
+import { string } from "@opencok/mappings/reconnect-march-values";
+import { long } from "@opencok/mappings/reconnect-march-values";
+import { integer } from "@opencok/mappings/reconnect-march-values";
 import { validateFields, validateValue } from "./validation.ts";
 import {
   reconnectMarchDragonSchema,
-  reconnectMarchGeneralSchema,
   reconnectMarchArmySchema,
   reconnectMarchSchema,
   reconnectMarchesSchema,
@@ -11,24 +13,9 @@ import type { SavedMarchArmy } from "@opencok/messages/world-resource-army";
 import { decodeLegacyJsonArray } from "@opencok/messages/legacy-json";
 import { sfs, Type, fields as objectFields, type Fields, type Value } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
-import { javaDecimal } from "@opencok/rules/java-integer";
+
 import { mailBlank } from "@opencok/rules/mail";
-import { javaHashMapOrder, javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
-
-const integer = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
-
-const long = (value: unknown) => {
-  if (typeof value === "number" && !Number.isSafeInteger(value))
-    throw new Error("Invalid march time");
-
-  return javaDecimal(String(value ?? 0), 64);
-};
-
-const string = (value: unknown) => {
-  if (typeof value !== "string") throw new Error("Invalid march identity");
-
-  return value;
-};
+import { javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
 
 function serializereconnectMarchDragon(row: Row | undefined, rules: Rules): Fields {
   if (!row) return { uuid: sfs.string(""), itemId: sfs.string(""), friendShip: sfs.int(0) };
@@ -49,32 +36,6 @@ function serializereconnectMarchDragon(row: Row | undefined, rules: Rules): Fiel
 
   if (row.nickName !== null && row.nickName !== undefined)
     result.nickName = sfs.string(string(row.nickName));
-
-  return result;
-}
-
-function serializereconnectMarchGeneral(
-  general: NonNullable<SavedMarchArmy["general"]>,
-  skills: readonly Row[],
-  now: bigint,
-): Fields {
-  const result: Fields = {
-    userId: sfs.string(string(general.owner)),
-    generalId: sfs.string(String(integer(general.id))),
-    level: sfs.int(integer(general.level)),
-  };
-  const index = new Map(
-    skills
-      .filter((row) => row.uid === general.owner && integer(row.newGeneralId) === general.id)
-      .map((row) => [string(row.skillId), row]),
-  );
-  const active = javaHashMapOrder(index.keys()).filter((id) => {
-    const row = index.get(id)!;
-
-    return integer(row.stat) === 3 && now <= long(row.actTime);
-  });
-
-  if (active.length) result.skillList = { type: Type.StringArray, value: active };
 
   return result;
 }
@@ -375,12 +336,6 @@ export function reconnectMarchDragon(
   ...args: Parameters<typeof serializereconnectMarchDragon>
 ): Fields {
   return validateFields(reconnectMarchDragonSchema, serializereconnectMarchDragon(...args));
-}
-
-export function reconnectMarchGeneral(
-  ...args: Parameters<typeof serializereconnectMarchGeneral>
-): Fields {
-  return validateFields(reconnectMarchGeneralSchema, serializereconnectMarchGeneral(...args));
 }
 
 export function reconnectMarchBase(

@@ -3,15 +3,15 @@ import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
 import { loadRules } from "@opencok/resources/rules";
-import { HeroCalendarService } from "@opencok/services/hero-calendar";
-import { HeroMatchingService } from "@opencok/services/hero-matching";
-import { createHeroCalendarStore } from "@opencok/repositories/hero-calendar";
+import { HeroCalendarService } from "@opencok/hero/services/hero-calendar";
+import { HeroMatchingService } from "@opencok/hero/services/hero-matching";
+import { createHeroCalendarStore } from "@opencok/hero/repositories/hero-calendar";
 import {
   createHeroMatchingRegistry,
   createHeroMatchingRealmStore,
-} from "@opencok/repositories/hero-matching";
+} from "@opencok/hero/repositories/hero-matching";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { heroMatchIdentity } from "@opencok/rules/hero-matching";
+import { heroMatchIdentity } from "@opencok/hero/rules/hero-matching";
 import { hero_activity } from "@opencok/drizzle/schema/opencok_kingdom/hero_activity";
 import { hero_event } from "@opencok/drizzle/schema/opencok_kingdom/hero_event";
 import { hero_match_period } from "@opencok/drizzle/schema/opencok_global/hero_match_period";

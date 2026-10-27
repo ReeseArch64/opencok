@@ -1,9 +1,9 @@
+import { integer } from "@opencok/mappings/profile-values";
+import { signed } from "@opencok/mappings/profile-values";
 import { validateFields } from "./validation.ts";
 import {
   publicStatisticsSchema,
   publicMedalSchema,
-  generalInfoSchema,
-  publicGeneralsSchema,
   publicEquipmentSchema,
   publicProfileBaseSchema,
 } from "@opencok/validations/profile";
@@ -12,30 +12,10 @@ import { errors } from "@opencok/constants/game";
 import { GameError } from "@opencok/errors/game";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
 import { playerStatistics } from "./power.ts";
-import type { GeneralPreview, PublicProfileState } from "@opencok/contracts/profile";
+import type { PublicProfileState } from "@opencok/contracts/profile";
 import type { Rules } from "@opencok/rules/game";
 import type { RuleContext } from "@opencok/rules/availability";
 import { publicProfileProgress, publicProfileSocial } from "@opencok/rules/profile";
-
-function signed(value: unknown, bits: 32 | 64): bigint {
-  if (value === null || value === undefined) return 0n;
-
-  if (typeof value === "number" && !Number.isSafeInteger(value))
-    throw new GameError(errors.unsupported, "public_profile");
-
-  if (!/^[+-]?\d+$/.test(String(value))) throw new GameError(errors.unsupported, "public_profile");
-
-  const parsed = BigInt(String(value));
-
-  if (BigInt.asIntN(bits, parsed) !== parsed)
-    throw new GameError(errors.unsupported, "public_profile");
-
-  return parsed;
-}
-
-function integer(row: Row, key: string) {
-  return Number(signed(row[key], 32));
-}
 
 function serializePublicStatistics(statistics: Row | undefined): Fields {
   if (!statistics) return {};
@@ -48,57 +28,6 @@ function serializePublicStatistics(statistics: Row | undefined): Fields {
 
 function serializePublicMedal(row: Row): Fields {
   return { id: sfs.string(text(row, "id")), level: sfs.int(integer(row, "level")) };
-}
-
-function serializePublicGenerals(generals: readonly GeneralPreview[]): Fields {
-  if (!generals.length) throw new GameError(errors.unsupported, "public_profile");
-
-  return {
-    skillPoint: sfs.int(generals[0]!.plusSkillPoint),
-    userGenerals: sfs.array(generals.map((general) => sfs.object(generalInfo(general)))),
-  };
-}
-
-function serializeGeneralInfo(general: Omit<GeneralPreview, "plusSkillPoint">): Fields {
-  return {
-    uuid: sfs.string(general.uuid),
-    generalId: sfs.string(general.generalId),
-    level: sfs.int(general.level),
-    status: sfs.int(general.status),
-    att: sfs.int(general.attack),
-    defence: sfs.int(general.defence),
-    ability: sfs.array(
-      general.ability.map((tree) =>
-        sfs.object(
-          Object.fromEntries(
-            Object.entries(tree).map(([key, value]) => [
-              key,
-              value === null
-                ? sfs.null()
-                : typeof value === "string"
-                  ? sfs.string(value)
-                  : sfs.int(value),
-            ]),
-          ),
-        ),
-      ),
-    ),
-    skill: sfs.array(
-      general.skills.map((row) =>
-        sfs.object({
-          uuid: sfs.string(text(row, "uuid")),
-          ownerId: sfs.string(text(row, "ownerId")),
-          skillId: sfs.string(text(row, "skillId")),
-          startTime: sfs.long(signed(row.startTime, 64)),
-          endTime: sfs.long(signed(row.endTime, 64)),
-          actTime: sfs.long(signed(row.actTime, 64)),
-          stat: sfs.int(integer(row, "stat")),
-          param1: sfs.int(integer(row, "param1")),
-          param2: sfs.int(integer(row, "param2")),
-        }),
-      ),
-    ),
-  };
 }
 
 function serializePublicProfileBase(
@@ -194,14 +123,6 @@ export function publicStatistics(...args: Parameters<typeof serializePublicStati
 
 export function publicMedal(...args: Parameters<typeof serializePublicMedal>): Fields {
   return validateFields(publicMedalSchema, serializePublicMedal(...args));
-}
-
-export function publicGenerals(...args: Parameters<typeof serializePublicGenerals>): Fields {
-  return validateFields(publicGeneralsSchema, serializePublicGenerals(...args));
-}
-
-export function generalInfo(...args: Parameters<typeof serializeGeneralInfo>): Fields {
-  return validateFields(generalInfoSchema, serializeGeneralInfo(...args));
 }
 
 export function publicProfileBase(...args: Parameters<typeof serializePublicProfileBase>): Fields {

@@ -46,6 +46,7 @@
         "@opencok/contracts": "workspace:*",
         "@opencok/controllers": "workspace:*",
         "@opencok/core": "workspace:*",
+        "@opencok/enums": "workspace:*",
         "@opencok/env": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/identity": "workspace:*",
@@ -73,6 +74,7 @@
         "@opencok/controllers": "workspace:*",
         "@opencok/core": "workspace:*",
         "@opencok/env": "workspace:*",
+        "@opencok/hero": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/repositories": "workspace:*",
         "@opencok/resources": "workspace:*",
@@ -95,6 +97,11 @@
     },
     "apps/web": {
       "name": "@opencok/web",
+      "dependencies": {
+        "@opencok/contracts": "workspace:*",
+        "@opencok/enums": "workspace:*",
+        "@opencok/validations": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -256,6 +263,7 @@
       "name": "@opencok/contracts",
       "dependencies": {
         "@opencok/enums": "workspace:*",
+        "@opencok/hero": "workspace:*",
         "@opencok/messages": "workspace:*",
       },
       "devDependencies": {
@@ -269,11 +277,13 @@
       "dependencies": {
         "@opencok/contracts": "workspace:*",
         "@opencok/dtos": "workspace:*",
+        "@opencok/enums": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/identity": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/services": "workspace:*",
+        "@opencok/validations": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -404,6 +414,21 @@
     },
     "packages/hero": {
       "name": "@opencok/hero",
+      "dependencies": {
+        "@opencok/constants": "workspace:*",
+        "@opencok/contracts": "workspace:*",
+        "@opencok/drizzle": "workspace:*",
+        "@opencok/errors": "workspace:*",
+        "@opencok/mappings": "workspace:*",
+        "@opencok/messages": "workspace:*",
+        "@opencok/repositories": "workspace:*",
+        "@opencok/resources": "workspace:*",
+        "@opencok/rules": "workspace:*",
+        "@opencok/services": "workspace:*",
+        "@opencok/validations": "workspace:*",
+        "drizzle-orm": "0.45.4",
+        "zod": "catalog:",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -423,6 +448,7 @@
       "dependencies": {
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
+        "@opencok/enums": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/messages": "workspace:*",
         "firebase-admin": "14.5.0",
@@ -458,6 +484,7 @@
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/hero": "workspace:*",
         "@opencok/messages": "workspace:*",
         "@opencok/rules": "workspace:*",
         "@opencok/validations": "workspace:*",
@@ -570,6 +597,7 @@
         "@opencok/contracts": "workspace:*",
         "@opencok/drizzle": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/hero": "workspace:*",
         "@opencok/ledger": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
@@ -587,6 +615,7 @@
       "dependencies": {
         "@opencok/contracts": "workspace:*",
         "@opencok/enums": "workspace:*",
+        "@opencok/hero": "workspace:*",
         "@opencok/rules": "workspace:*",
       },
       "devDependencies": {
@@ -609,7 +638,9 @@
       "dependencies": {
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
+        "@opencok/enums": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/hero": "workspace:*",
       },
       "devDependencies": {
         "@opencok/config": "workspace:*",
@@ -631,7 +662,9 @@
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/dtos": "workspace:*",
+        "@opencok/enums": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/hero": "workspace:*",
         "@opencok/identity": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
@@ -668,6 +701,7 @@
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/hero": "workspace:*",
         "node-zookeeper-client": "1.1.3",
       },
       "devDependencies": {
@@ -714,6 +748,7 @@
       "dependencies": {
         "@opencok/contracts": "workspace:*",
         "@opencok/errors": "workspace:*",
+        "@opencok/hero": "workspace:*",
         "@opencok/messages": "workspace:*",
         "sharp": "^0.34.0",
         "zod": "catalog:",

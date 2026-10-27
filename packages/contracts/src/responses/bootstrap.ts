@@ -1,8 +1,4 @@
-export interface HeroResourceConfigResponse {
-  readonly newHeroVersion: string;
-  readonly newHeroMd5Android: string;
-}
-
+import type { HeroResourceConfigResponse } from "@opencok/hero/contracts/responses/resource-config";
 export interface DynamicResourceConfigResponse extends HeroResourceConfigResponse {
   readonly [key: string]: string;
 }

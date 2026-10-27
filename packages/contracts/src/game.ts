@@ -1,4 +1,4 @@
-import type { HeroEventSelection, HeroEventSnapshot } from "./hero-event";
+import type { HeroEventSelection, HeroEventSnapshot } from "@opencok/hero/contracts/hero-event";
 import type { InventoryFields as Fields } from "./inventory.ts";
 import type { BattleRankingState, PlayoffPublication } from "./battle-ranking.ts";
 import type { FlowerRankingPublication, FlowerRankingState } from "./flower-ranking.ts";
@@ -10,7 +10,7 @@ import type {
   HeroInsideRankingSnapshot,
   HeroHistorySnapshot,
   HeroHistoryPublication,
-} from "./hero-ranking.ts";
+} from "@opencok/hero/contracts/hero-ranking";
 import type { DragonRankingEntry, DragonRankingRange } from "./dragon-ranking.ts";
 import type { WorldPointDetailStore } from "./world-point-detail.ts";
 import type { WorldFavoriteStore } from "./world-favorites.ts";

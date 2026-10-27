@@ -8,10 +8,10 @@ import {
   generalRecruit,
   generalLevel,
   generalStar,
-} from "@opencok/rules/general-progression";
-import { activateGeneralTalent } from "@opencok/rules/general-talents";
-import { newGeneralSkillEffects } from "@opencok/rules/new-general-skills";
-import { generalCombatSnapshot } from "@opencok/services/general-combat";
+} from "@opencok/hero/rules/general-progression";
+import { activateGeneralTalent } from "@opencok/hero/rules/general-talents";
+import { newGeneralSkillEffects } from "@opencok/hero/rules/new-general-skills";
+import { generalCombatSnapshot } from "@opencok/hero/services/general-combat";
 import { cityFixture } from "./fixtures/city-progression";
 
 const rules = await loadRules();

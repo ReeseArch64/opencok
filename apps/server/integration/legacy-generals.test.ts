@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { eq } from "drizzle-orm";
 import { sfs } from "@opencok/messages/sfs";
-import { generalsDomain } from "@opencok/services/generals";
+import { generalsDomain } from "@opencok/hero/services/generals";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
 import { tavern } from "@opencok/drizzle/schema/opencok_kingdom/tavern";
 import { cityHarness } from "./support/city";

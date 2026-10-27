@@ -4,9 +4,9 @@ import {
   heroCountryOrder,
   heroFinalityPeriod,
   heroFinalRankKey,
-} from "@opencok/rules/hero-ranking-finality";
-import { HeroCalendarService } from "@opencok/services/hero-calendar";
-import type { HeroCalendarPlan } from "@opencok/contracts/hero-calendar";
+} from "@opencok/hero/rules/hero-ranking-finality";
+import { HeroCalendarService } from "@opencok/hero/services/hero-calendar";
+import type { HeroCalendarPlan } from "@opencok/hero/contracts/hero-calendar";
 test("hero finality uses real realm cohorts and exact totals while equal country scores retain opponent order", async () => {
   const rules = await loadRules(),
     endTime = BigInt(Date.UTC(2040, 0, 1)),

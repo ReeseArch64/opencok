@@ -77,15 +77,16 @@ are local references, never required private artifacts committed as dependencies
 
 ### Implemented API and realm package boundaries
 
-| Packages                                                            | Boundary                                                                                                   |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `env`, `config`, `core`                                             | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging. |
-| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and thin command Controllers.                                               |
-| `contracts`, `messages`, `dtos`, `enums`, `validations`, `mappings` | Versioned ports, wire types, DTOs, runtime validation and serialization.                                   |
-| `services`                                                          | Application workflows and orchestration of rules, contracts and persistence ports.                         |
-| `rules`, domain packages including `combat`                         | Pure rule evaluation; no sockets, ORM or broker imports.                                                   |
-| `resources`                                                         | Versioned typed gameplay catalogs and JSON nickname filtering.                                             |
-| `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                       |
+| Packages                                                            | Boundary                                                                                                                                  |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`, `config`, `core`                                             | Validated root environment, strict compiler settings, scoped runtime/resources, HTTP and filtered logging.                                |
+| `api`, `connection`, `controllers`, `identity`                      | HTTP/SFS entry, authentication and thin command Controllers.                                                                              |
+| `contracts`, `messages`, `dtos`, `enums`, `validations`, `mappings` | Versioned ports, wire types, DTOs, runtime validation and serialization.                                                                  |
+| `services`                                                          | Application workflows and orchestration of rules, contracts and persistence ports.                                                        |
+| `rules`, domain rule modules including `hero/rules` and `combat`    | Pure rule evaluation; no sockets, ORM or broker imports.                                                                                  |
+| `hero`                                                              | Hero and general contracts, rules, workflows, mappings, validations, catalog types and persistence adapters, separated by responsibility. |
+| `resources`                                                         | Versioned typed gameplay catalogs and JSON nickname filtering.                                                                            |
+| `repositories`, `drizzle`, `storage`                                | Owned transactional state, schemas, Redis/ZooKeeper and S3 adapters.                                                                      |
 
 The nickname/description word list is versioned in
 `packages/resources/data/badwords.json` and included in the server artifact.
@@ -110,9 +111,21 @@ Create/update inputs use DTO classes; reads, deletion selections and mobile
 responses use contracts. Response interfaces live in `contracts/responses/*`,
 while validation and wire serialization remain in their existing packages.
 
+Hero and general implementations live in `packages/hero/src`, with `contracts`,
+`rules`, `services`, `mappings`, `validations`, `repositories`, `storage` and
+`resources` directories preserving those responsibilities inside the domain.
+Other packages import these modules through `@opencok/hero/<responsibility>/*`.
+Constants, enums and Controllers remain in their existing packages; database schema
+constants and catalog records remain in `drizzle` and `resources`. Catalog import
+tooling writes hero and general type definitions into the hero domain. Shared
+profile, power and city workflows delegate their hero operations to this package.
+`HeroEventService` owns hero event views and rankings; realm composition injects
+it into `GameService`, whose constructor preserves a default for existing callers.
+
 Packages never import applications. Declare direct workspace dependencies and
 public exports; do not turn helpers into a cross-domain rules container.
-`bun run test:packages` checks boundaries and cycles. Follow
+`bun run test:packages` checks declared package APIs and cycles between
+responsibilities, including the corresponding directories inside `hero`. Follow
 [repository conventions](../packages/repositories/README.md). Current service
 composition uses Effect; [ADR-0012](../docs/decisions/0012-adopt-effect-for-service-composition.md)
 remains proposed, while the existing runtime implementation remains checkable.

@@ -1,9 +1,12 @@
 import { expect, test } from "bun:test";
 import type { PublicProfileState } from "@opencok/contracts/profile";
 import type { Row } from "@opencok/contracts/rows";
-import { decodeGeneralAbilities, publicProfileGenerals } from "@opencok/services/profile";
+import {
+  decodeGeneralAbilities,
+  publicProfileGenerals,
+} from "@opencok/hero/services/profile-generals";
 import { Rules } from "@opencok/rules/game";
-import { publicGeneralPreviews } from "@opencok/rules/profile-generals";
+import { publicGeneralPreviews } from "@opencok/hero/rules/profile-generals";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 
 const now = 1792756800000;

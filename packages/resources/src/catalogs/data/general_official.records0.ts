@@ -1,4 +1,4 @@
-import type { GeneralOfficialDefinition } from "../types/general_official.ts";
+import type { GeneralOfficialDefinition } from "@opencok/hero/resources/catalogs/types/general_official";
 
 export const records: readonly GeneralOfficialDefinition[] = [
   {

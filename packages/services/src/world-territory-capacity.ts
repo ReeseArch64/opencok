@@ -9,11 +9,10 @@ import {
 } from "@opencok/rules/world-resource-effects";
 import { javaDecimal } from "@opencok/rules/java-integer";
 import { legacyObjectOrder } from "@opencok/messages/legacy-object-order";
-import { decodeWorldPowerEffects, generalSkillPoints } from "./power.ts";
-import {
-  resourceGeneralBuildingEffect,
-  resourceOwnerRuleContext,
-} from "./world-resource-owner-context.ts";
+import { decodeWorldPowerEffects } from "./power.ts";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
+import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
+import { resourceOwnerRuleContext } from "./world-resource-owner-context.ts";
 import { ownerInteger } from "./world-resource-owner-values.ts";
 
 export async function territorySoldierCapacity(

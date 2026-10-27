@@ -37,7 +37,7 @@ import {
 } from "@opencok/rules/inventory";
 import { serverFeature } from "@opencok/rules/power-context";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
-import { generalSkillPoints } from "./power.ts";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
 
 export interface InventoryEffects {
   world(): Promise<ReadonlyMap<number, number>>;

@@ -1,4 +1,4 @@
-import type { GeneralCalledTaskDefinition } from "../types/general_called_task.ts";
+import type { GeneralCalledTaskDefinition } from "@opencok/hero/resources/catalogs/types/general_called_task";
 
 export const records: readonly GeneralCalledTaskDefinition[] = [
   { "id": 42803000, "desc": 154181, "goType": 1, "goItemId": 433000, "tab": 1 },

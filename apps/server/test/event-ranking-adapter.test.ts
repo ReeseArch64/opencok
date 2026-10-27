@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { drizzle, type NodePgClient } from "drizzle-orm/node-postgres";
 import * as schema from "@opencok/drizzle/schema/kingdom";
-import { readHeroRanking } from "@opencok/repositories/hero-ranking";
+import { readHeroRanking } from "@opencok/hero/repositories/hero-ranking";
 import { readThroneRanking } from "@opencok/repositories/throne-ranking";
 
 function database(tableRows: Record<string, unknown[][]>) {
@@ -66,7 +66,7 @@ test("throne adapter scopes the current fight, stabilizes kill ties and reads on
 });
 
 test("inside event adapter isolates the owner's alliance, scores and public metadata without settlement", async () => {
-  const { readHeroInsideRanking } = await import("@opencok/repositories/hero-ranking");
+  const { readHeroInsideRanking } = await import("@opencok/hero/repositories/hero-ranking");
   const { db, queries } = database({
     userprofile: [["self", "own-alliance", 1, 0, "0"]],
     hero_event: [[2]],
@@ -87,7 +87,7 @@ test("inside event adapter isolates the owner's alliance, scores and public meta
 });
 
 test("hero history requires an active event and rejects invalid types without lifecycle writes", async () => {
-  const { readHeroHistory } = await import("@opencok/repositories/hero-ranking");
+  const { readHeroHistory } = await import("@opencok/hero/repositories/hero-ranking");
   const { db, queries } = database({
     userprofile: [["self", "alliance", 1, 0, "0"]],
     hero_event: [],
@@ -158,7 +158,7 @@ test("battle adapter reads only the authenticated observer and unexpired ticket 
 });
 
 test("completed hero history queries retain exact power and select only rewarded events in descending time", async () => {
-  const { readHeroHistory } = await import("@opencok/repositories/hero-ranking");
+  const { readHeroHistory } = await import("@opencok/hero/repositories/hero-ranking");
   const queries: { text: string; params: unknown[] }[] = [];
   const client = {
     query: async (query: { text: string }, params: unknown[] = []) => {

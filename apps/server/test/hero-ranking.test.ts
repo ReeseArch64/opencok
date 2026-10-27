@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { heroRankingLookup, heroSelfRanking } from "@opencok/rules/hero-ranking";
-import { loadHeroRankingPosition } from "@opencok/storage/hero-ranking";
-import { heroSelfRanking as mapResult } from "@opencok/mappings/hero-ranking";
+import { heroRankingLookup, heroSelfRanking } from "@opencok/hero/rules/hero-ranking";
+import { loadHeroRankingPosition } from "@opencok/hero/storage/hero-ranking";
+import { heroSelfRanking as mapResult } from "@opencok/hero/mappings/hero-ranking";
 import { Rules } from "@opencok/rules/game";
 import { GameService as Game } from "@opencok/services/game";
 import type { GameStore } from "@opencok/contracts/game";
@@ -258,7 +258,7 @@ test("hero history reads completed publications with rank rewards, deduplication
 });
 
 test("history cache retains ascending rank order and missing alliance metadata without writes", async () => {
-  const { loadHeroHistoryPublication } = await import("@opencok/storage/hero-ranking");
+  const { loadHeroHistoryPublication } = await import("@opencok/hero/storage/hero-ranking");
   const keys = ["HERO_ALLIANCE_RANK_0_0_1"];
   const result = await loadHeroHistoryPublication(
     async (name, script, count, key, mode) => {
@@ -292,7 +292,7 @@ test("history cache retains ascending rank order and missing alliance metadata w
 });
 
 test("history power bands retain integer division and reward thresholds", async () => {
-  const { heroHistoryBand, heroHistoryRewards } = await import("@opencok/rules/hero-ranking");
+  const { heroHistoryBand, heroHistoryRewards } = await import("@opencok/hero/rules/hero-ranking");
   const catalog = rules();
   catalog.ranking.heroEvents = new Map([["rule", { rankreward: "1;2|3", ranklist: "1|10" }]]);
   expect(heroHistoryBand(2, 0, 0n, catalog)).toBe(-1);

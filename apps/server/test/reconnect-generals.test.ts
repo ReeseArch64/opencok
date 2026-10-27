@@ -1,9 +1,12 @@
 import { expect, test } from "bun:test";
 import type { ReconnectBaseState } from "@opencok/contracts/reconnect";
-import { reconnectOwnGenerals } from "@opencok/services/reconnect";
-import { decodeGeneralAbilities } from "@opencok/services/profile";
+import { reconnectOwnGenerals } from "@opencok/hero/services/reconnect-generals";
+import { decodeGeneralAbilities } from "@opencok/hero/services/profile-generals";
 import { Rules } from "@opencok/rules/game";
-import { publicGeneralPreviews, reconnectGeneralRepairs } from "@opencok/rules/profile-generals";
+import {
+  publicGeneralPreviews,
+  reconnectGeneralRepairs,
+} from "@opencok/hero/rules/profile-generals";
 import { decode, encode, fields, sfs, type Value } from "@opencok/messages/sfs";
 
 const now = 1792756800000;
@@ -170,9 +173,10 @@ test("empty own generals remain an empty collection and required profile or cata
 
 test("reconnect persists only invalid ability trees, disabled supported skills and elapsed cooldowns", () => {
   const { general, skill, rules } = fixture();
-  const abilities = new Map<string, readonly import("@opencok/contracts/profile").GeneralAbility[]>(
-    [[general.uuid, [{ id: "50000", "602700": 1, "601300": 19 }]]],
-  );
+  const abilities = new Map<
+    string,
+    readonly import("@opencok/hero/contracts/profile-generals").GeneralAbility[]
+  >([[general.uuid, [{ id: "50000", "602700": 1, "601300": 19 }]]]);
   const skills = [
     skill,
     { ...skill, uuid: "unknown", skillId: "unknown", endTime: BigInt(now) },

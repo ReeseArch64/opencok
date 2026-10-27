@@ -1,4 +1,4 @@
-import type { GeneralSkillDefinition } from "../types/general_skill.ts";
+import type { GeneralSkillDefinition } from "@opencok/hero/resources/catalogs/types/general_skill";
 
 export const records: readonly GeneralSkillDefinition[] = [
   {

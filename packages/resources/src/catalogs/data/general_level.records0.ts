@@ -1,4 +1,4 @@
-import type { GeneralLevelDefinition } from "../types/general_level.ts";
+import type { GeneralLevelDefinition } from "@opencok/hero/resources/catalogs/types/general_level";
 
 export const records: readonly GeneralLevelDefinition[] = [
   { "id": 53701, "level": 1, "experience": 300, "point": 3, "exp1": 300, "point1": 3 },

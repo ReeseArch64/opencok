@@ -1,4 +1,4 @@
-import type { GeneralDrawNewMainDefinition } from "../types/general_draw_new_main.ts";
+import type { GeneralDrawNewMainDefinition } from "@opencok/hero/resources/catalogs/types/general_draw_new_main";
 
 export const records: readonly GeneralDrawNewMainDefinition[] = [
   {

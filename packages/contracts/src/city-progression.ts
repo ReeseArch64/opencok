@@ -1,3 +1,6 @@
+import type { GeneralWrite } from "@opencok/hero/contracts/generals";
+import type { GeneralRoster } from "@opencok/hero/contracts/generals";
+import type { GeneralRankingWeights } from "@opencok/hero/contracts/generals";
 import type { WorldResourceOwnerSnapshot } from "./world-point-detail";
 import type { Row } from "./rows";
 import type { PlayerEffectSnapshot } from "./power";
@@ -32,45 +35,6 @@ export interface QuestWrite {
   allianceBox?: { threshold: number; period: bigint };
 }
 
-export interface GeneralRankingWeights {
-  normal: number;
-  silver: number;
-  gold: number;
-  periodStart?: bigint;
-}
-
-export interface GeneralRoster {
-  wheel?: Row;
-  wheelRanks?: readonly Row[];
-  tavern?: Row;
-  prisoners?: readonly Row[];
-  marches?: readonly Row[];
-  drawHistory?: readonly Buffer[];
-  generals: readonly Row[];
-  purchases: readonly Row[];
-  offices: readonly Row[];
-  skills: readonly Row[];
-  statuses: readonly Row[];
-}
-
-export interface GeneralWrite {
-  wheel?: Row;
-  tavern?: Row;
-  legacy?: readonly Row[];
-  deletedLegacy?: readonly string[];
-  prisoners?: readonly Row[];
-  worldResources?: readonly { pointId: number; type: number; level: number; amount: number }[];
-  turntableAt?: bigint;
-  refinementPeriod?: { count: number; time: bigint };
-  deletedStatuses?: readonly { generalId: number; stateId: number }[];
-  accelerations?: readonly { type: number; queueId: string; milliseconds: bigint }[];
-  generals?: readonly Row[];
-  purchases?: readonly Row[];
-  offices?: readonly Row[];
-  skills?: readonly Row[];
-  statuses?: readonly Row[];
-}
-
 export interface DragonProgressionState {
   talents: readonly Row[];
   dragons: readonly Row[];
@@ -96,8 +60,8 @@ export interface CityProgressionState {
   costRankAward?: import("./continued-cost-rewards").CostRankAwardReader;
   expeditionAward?: import("./expedition-stage-rewards").ExpeditionAwardReader;
   expeditionScore?: import("./new-expedition").ExpeditionScoreReader;
-  heroRankingAward?: import("./hero-ranking-rewards").HeroRankAwardReader;
-  heroScore?: import("./hero-score").HeroScoreReader;
+  heroRankingAward?: import("@opencok/hero/contracts/hero-ranking-rewards").HeroRankAwardReader;
+  heroScore?: import("@opencok/hero/contracts/hero-score").HeroScoreReader;
   olympic?: import("./olympic").OlympicState;
   cupBetting?: import("./cup-betting").CupBettingState;
   groupBuy?: import("./groupbuy").GroupBuyState;
@@ -170,8 +134,8 @@ export interface CityProgressionWrite {
   hotItem?: import("./hot-item").HotItemWrite;
   costRankAward?: string;
   expeditionAward?: string;
-  heroRankingAward?: import("./hero-ranking-rewards").HeroRankAwardWrite;
-  heroScore?: import("./hero-score").HeroScoreWrite;
+  heroRankingAward?: import("@opencok/hero/contracts/hero-ranking-rewards").HeroRankAwardWrite;
+  heroScore?: import("@opencok/hero/contracts/hero-score").HeroScoreWrite;
   olympic?: import("./olympic").OlympicWrite;
   cupBetting?: import("./cup-betting").CupBettingWrite;
   groupBuy?: import("./groupbuy").GroupBuyWrite;

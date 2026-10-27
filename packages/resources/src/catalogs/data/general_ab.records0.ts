@@ -1,4 +1,4 @@
-import type { GeneralAbDefinition } from "../types/general_ab.ts";
+import type { GeneralAbDefinition } from "@opencok/hero/resources/catalogs/types/general_ab";
 
 export const records: readonly GeneralAbDefinition[] = [
   {

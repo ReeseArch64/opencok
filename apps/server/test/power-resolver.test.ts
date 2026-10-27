@@ -1,10 +1,11 @@
 import { resourceOrdinaryLoadEffects } from "@opencok/rules/world-resource-effects";
 import { resourceRawArmyLoad } from "@opencok/rules/world-resource-detail";
 import { expect, test } from "bun:test";
-import type { PowerSnapshot, GeneralSkill } from "@opencok/contracts/power";
+import type { PowerSnapshot } from "@opencok/contracts/power";
+import type { GeneralSkill } from "@opencok/hero/contracts/generals";
 import { Rules } from "@opencok/rules/game";
 import { dragonAttackEffect, playerGameEffect } from "@opencok/rules/power-resolver";
-import { newGeneralEquipmentEffects } from "@opencok/rules/new-general-equipment";
+import { newGeneralEquipmentEffects } from "@opencok/hero/rules/new-general-equipment";
 
 const context = { now: Date.UTC(2026, 9, 23, 12), kingdomId: 1, version: "12.06.0" };
 function fixture(effect: Parameters<typeof playerGameEffect>[6] = 487) {

@@ -1,19 +1,43 @@
 import { expect, test } from "bun:test";
 import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, posix } from "node:path";
 
 const root = new URL("../../packages/", import.meta.url).pathname;
 
-test("workspace source imports use declared package APIs without application dependencies or cycles", async () => {
-  const graph = new Map<string, string[]>();
+function responsibility(name: string, file: string): string {
+  if (name !== "@opencok/hero") return name;
+
+  const layer = file.split("/")[0]!;
+  expect([
+    "contracts",
+    "rules",
+    "services",
+    "repositories",
+    "mappings",
+    "validations",
+    "storage",
+    "resources",
+  ]).toContain(layer);
+
+  return `@opencok/${layer}`;
+}
+
+test("workspace imports use declared APIs and preserve acyclic responsibilities across domains", async () => {
+  const graph = new Map<string, Set<string>>();
   for (const name of await readdir(root)) {
     const directory = join(root, name);
     const manifest = JSON.parse(await readFile(join(directory, "package.json"), "utf8"));
     const dependencies = Object.keys(manifest.dependencies ?? {});
-    graph.set(
-      manifest.name,
-      dependencies.filter((dependency) => dependency.startsWith("@opencok/")),
-    );
+    if (manifest.name !== "@opencok/hero")
+      graph.set(
+        manifest.name,
+        new Set([
+          ...(graph.get(manifest.name) ?? []),
+          ...dependencies.filter(
+            (dependency) => dependency.startsWith("@opencok/") && dependency !== "@opencok/hero",
+          ),
+        ]),
+      );
     let files: string[];
     try {
       files = await readdir(join(directory, "src"), { recursive: true });
@@ -23,10 +47,28 @@ test("workspace source imports use declared package APIs without application dep
     }
     for (const file of files.filter((file) => file.endsWith(".ts"))) {
       const source = await readFile(join(directory, "src", file), "utf8");
+      const owner = responsibility(manifest.name, file);
+      const edges = graph.get(owner) ?? new Set<string>();
+      graph.set(owner, edges);
       expect(source, `${name}/${file}`).not.toMatch(/from\s+["'][^"']*apps\//);
-      for (const match of source.matchAll(/(?:from\s+|import\s*\()["'](@opencok\/[^"']+)["']/g)) {
+      for (const match of source.matchAll(/(?:from\s+|import\s*\()["']([^"']+)["']/g)) {
         const specifier = match[1]!;
+        if (specifier.startsWith(".")) {
+          const target = responsibility(
+            manifest.name,
+            posix.normalize(posix.join(posix.dirname(file), specifier)),
+          );
+          if (target !== owner) edges.add(target);
+
+          continue;
+        }
+
+        if (!specifier.startsWith("@opencok/")) continue;
+
         const dependency = specifier.split("/").slice(0, 2).join("/");
+        const targetOwner = responsibility(dependency, specifier.split("/").slice(2).join("/"));
+        if (targetOwner !== owner) edges.add(targetOwner);
+
         if (dependency !== manifest.name)
           expect(dependencies, `${name}: ${specifier}`).toContain(dependency);
         const target = JSON.parse(

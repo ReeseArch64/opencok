@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { heroCalendarPlan, heroCalendarIdentity } from "@opencok/rules/hero-calendar";
+import { heroCalendarPlan, heroCalendarIdentity } from "@opencok/hero/rules/hero-calendar";
 test("hero stage identities remain stable within a period and change at the next UTC stage", async () => {
   const rules = await loadRules(),
     state = { activities: [], events: [], blocked: false },

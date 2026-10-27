@@ -2,7 +2,7 @@ import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { sfs, str, int, encode, decode, fields, type Fields } from "@opencok/messages/sfs";
-import { heroTargetDomain, deliverHeroTargetBatch } from "@opencok/services/hero-score";
+import { heroTargetDomain, deliverHeroTargetBatch } from "@opencok/hero/services/hero-score";
 import { createPrayerDomain } from "@opencok/services/prayer";
 import { lotteryDomain } from "@opencok/services/lottery";
 import { trainingDomain } from "@opencok/services/training";

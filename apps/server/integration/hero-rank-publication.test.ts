@@ -3,13 +3,13 @@ import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "@opencok/drizzle";
 import { loadRules } from "@opencok/resources/rules";
-import { HeroRankPublicationService } from "@opencok/services/hero-rank-publication";
+import { HeroRankPublicationService } from "@opencok/hero/services/hero-rank-publication";
 import {
   createHeroRankSource,
   createHeroRankProjection,
-} from "@opencok/repositories/hero-rank-publication";
+} from "@opencok/hero/repositories/hero-rank-publication";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
-import { heroRankingLookup } from "@opencok/rules/hero-ranking";
+import { heroRankingLookup } from "@opencok/hero/rules/hero-ranking";
 import { Cache } from "@opencok/storage/session";
 import { score_act } from "@opencok/drizzle/schema/opencok_kingdom/score_act";
 import { hero_event } from "@opencok/drizzle/schema/opencok_kingdom/hero_event";

@@ -3,8 +3,8 @@ import { Rules } from "@opencok/rules/game";
 import {
   newGeneralStatusEffect,
   newGeneralRefinementEffect,
-} from "@opencok/rules/new-general-status";
-import { newGeneralSkillEffects } from "@opencok/rules/new-general-skills";
+} from "@opencok/hero/rules/new-general-status";
+import { newGeneralSkillEffects } from "@opencok/hero/rules/new-general-skills";
 import { javaFloat } from "@opencok/rules/java-float";
 import vectors from "./fixtures/new-general-skill-vectors.json";
 

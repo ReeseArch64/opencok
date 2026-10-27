@@ -1,5 +1,5 @@
 import { CatalogKind } from "@opencok/enums/catalog-kind";
-import type { GeneralRandomEffectDefinition } from "../types/general_random_effect.ts";
+import type { GeneralRandomEffectDefinition } from "@opencok/hero/resources/catalogs/types/general_random_effect";
 import type { CatalogTable } from "../../catalog-model.ts";
 import { records as records0 } from "./general_random_effect.records0.ts";
 import { records as records1 } from "./general_random_effect.records1.ts";

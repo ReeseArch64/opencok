@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import type { Row } from "@opencok/contracts/rows";
-import { heroEffects, dragonSkillEffects, selectHeroes } from "@opencok/rules/power-companions";
+import { heroEffects, selectHeroes } from "@opencok/hero/rules/hero-effects";
+import { dragonSkillEffects } from "@opencok/rules/power-companions";
 import { Rules } from "@opencok/rules/game";
 
 const context = { kingdomId: 1, version: "12.06.0", now: Date.UTC(2026, 9, 23, 12) };

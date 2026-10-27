@@ -1,3 +1,4 @@
+import type { GeneralWorldSnapshot } from "@opencok/hero/contracts/general-world";
 import type { PlayerEffectSnapshot } from "./power.ts";
 import type { Row } from "./rows.ts";
 
@@ -12,13 +13,7 @@ export interface WorldPointDetailQuery {
 export interface WorldResourceOwnerSnapshot {
   effects: PlayerEffectSnapshot;
   buildings: readonly Row[];
-  newGenerals: {
-    moved: boolean;
-    generals: readonly Row[];
-    statuses: readonly Row[];
-    equipment: readonly Row[];
-    offices: readonly Row[];
-  };
+  newGenerals: GeneralWorldSnapshot;
 }
 
 export interface WorldPointOwnerSnapshot {

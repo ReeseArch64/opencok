@@ -1,7 +1,7 @@
 import { loadWorldFightBulletins } from "./world-bulletins";
 import { publishExpeditionDiscovery } from "./expedition-discovery";
 import type { ExpeditionDiscoveryPublication } from "@opencok/contracts/expedition-score-publication";
-import { loadGeneralDrawRanking } from "./general-draws";
+import { loadGeneralDrawRanking } from "@opencok/hero/storage/general-draws";
 import { selectSystemMailPage } from "./mail-system.ts";
 import { loadBattleFightRanking, loadPlayoffRanking } from "./battle-ranking.ts";
 import { loadMilitaryRanking } from "./military-ranking.ts";
@@ -12,8 +12,8 @@ import {
   publishHeroRanking,
   loadHeroRankingPosition,
   loadHeroHistoryPublication,
-} from "./hero-ranking.ts";
-import type { HeroRankingLookup } from "@opencok/contracts/hero-ranking";
+} from "@opencok/hero/storage/hero-ranking";
+import type { HeroRankingLookup } from "@opencok/hero/contracts/hero-ranking";
 import { loadAttributeRanking, loadPublishedGlobalRanking } from "./published-ranking.ts";
 import { loadDragonRanking } from "./dragon-ranking.ts";
 import type { DragonRankingRange } from "@opencok/contracts/dragon-ranking";
@@ -131,7 +131,7 @@ export class Cache {
   }
 
   publishHeroRanking(
-    rows: readonly import("@opencok/contracts/hero-rank-publication").HeroRankVersionedScore[],
+    rows: readonly import("@opencok/hero/contracts/hero-rank-publication").HeroRankVersionedScore[],
   ) {
     return publishHeroRanking(
       (name, ...args) => this.command(name, ...args),

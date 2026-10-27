@@ -5,7 +5,7 @@ import { javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import {
   newGeneralSkillEffects,
   type NewGeneralSkillState,
-} from "@opencok/rules/new-general-skills";
+} from "@opencok/hero/rules/new-general-skills";
 import vectors from "./fixtures/new-general-skill-vectors.json";
 
 function bits(value: number) {

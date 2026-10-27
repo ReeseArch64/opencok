@@ -1,4 +1,4 @@
-import type { GeneralAwakenChallengeRewardDefinition } from "../types/general_awaken_challenge_reward.ts";
+import type { GeneralAwakenChallengeRewardDefinition } from "@opencok/hero/resources/catalogs/types/general_awaken_challenge_reward";
 
 export const records: readonly GeneralAwakenChallengeRewardDefinition[] = [
   {

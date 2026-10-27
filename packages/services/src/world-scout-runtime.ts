@@ -14,8 +14,8 @@ import { scoutDetectReport, scoutBarbarianReport, planScoutMail } from "./world-
 import { scoutWatchtowerValues } from "@opencok/rules/world-scout-watchtower";
 import { refreshQuests } from "./quests";
 import { CampaignPlanner } from "./local-campaign";
-import { generalSkillPoints } from "./power";
-import { generalSkillEffects } from "@opencok/rules/power-attributes";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
+import { generalSkillEffects } from "@opencok/hero/rules/general-skill-effects";
 import { expeditionOpen } from "@opencok/rules/new-expedition";
 import { territoryTreeEffects } from "@opencok/rules/power-territory";
 import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";

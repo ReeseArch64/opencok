@@ -1,7 +1,7 @@
 import { readActivityDirectory } from "./activity-directory";
 import { readActivityOperators } from "./activity-operators";
-import { readHeroEvents } from "./hero-event";
-import type { HeroEventSelection } from "@opencok/contracts/hero-event";
+import { readHeroEvents } from "@opencok/hero/repositories/hero-event";
+import type { HeroEventSelection } from "@opencok/hero/contracts/hero-event";
 import { user_state } from "@opencok/drizzle/schema/opencok_kingdom/user_state";
 import { user_equip } from "@opencok/drizzle/schema/opencok_kingdom/user_equip";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
@@ -20,7 +20,7 @@ import {
   readHeroInsideRanking,
   readHeroHistory,
   readHeroHistoryPresentation,
-} from "./hero-ranking.ts";
+} from "@opencok/hero/repositories/hero-ranking";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { reportAvatar } from "./avatar-report.ts";
 import { pic_upload_record } from "@opencok/drizzle/schema/opencok_kingdom/pic_upload_record";

@@ -1,4 +1,4 @@
-import type { GeneralInfoResponse } from "./profile";
+import type { GeneralInfoResponse } from "@opencok/hero/contracts/responses/profile-generals";
 import type { InventoryItemResponse } from "./bootstrap";
 import type { PublicEquipmentResponse } from "./profile";
 

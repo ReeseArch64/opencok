@@ -82,6 +82,8 @@ behavior. Use abstract classes for shared workflows, lifecycle ownership and
 invariants, with concrete classes implementing the domain-specific steps. Inject
 collaborators through constructors. Keep wire serialization in Mapper classes,
 boundary checks in validations and structural ports and response shapes in contracts.
+Hero and general code follows these same responsibilities inside `packages/hero/src`;
+its constants, enums and Controllers stay in their existing packages.
 Use enums for finite named alternatives, including command names and protocol groups;
 keep limits and durations as configuration values. Compatibility entrypoints may
 delegate to concrete classes while callers migrate.

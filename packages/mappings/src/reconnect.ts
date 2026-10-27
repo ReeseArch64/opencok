@@ -1,3 +1,5 @@
+import { signed } from "@opencok/mappings/reconnect-values";
+import { invalid } from "@opencok/mappings/reconnect-values";
 import {
   reconnectQueuesSchema,
   reconnectResourcesSchema,
@@ -20,33 +22,12 @@ import {
   reconnectBalancesSchema,
   reconnectArmySchema,
   reconnectArmiesSchema,
-  reconnectGeneralsSchema,
   reconnectMineSchema,
 } from "@opencok/validations/reconnect";
 import type { Row } from "@opencok/contracts/rows";
-import { errors } from "@opencok/constants/game";
-import { GameError } from "@opencok/errors/game";
+
 import { sfs, type Fields } from "@opencok/messages/sfs";
-import type { OwnGeneralSnapshot, FriendshipMineView } from "@opencok/contracts/reconnect";
-import { generalInfo } from "./profile.ts";
-
-function invalid(): never {
-  throw new GameError(errors.unsupported, "reconnect");
-}
-
-function signed(value: unknown, bits: 32 | 64): bigint {
-  if (value === null || value === undefined) return 0n;
-
-  if (typeof value === "number" && !Number.isSafeInteger(value)) return invalid();
-
-  if (!/^[+-]?\d+$/.test(String(value))) return invalid();
-
-  const parsed = BigInt(String(value));
-
-  if (BigInt.asIntN(bits, parsed) !== parsed) return invalid();
-
-  return parsed;
-}
+import type { FriendshipMineView } from "@opencok/contracts/reconnect";
 
 function serializeReconnectBalances(profile: Row): Fields {
   const free = signed(profile.gold, 64);
@@ -104,21 +85,6 @@ function serializeReconnectArmies(rows: readonly Row[]): Fields {
   };
 }
 
-function serializeReconnectGenerals(generals: readonly OwnGeneralSnapshot[]): Fields {
-  if (generals.length > 32767) return invalid();
-
-  return {
-    userGenerals: sfs.array(
-      generals.map((general) =>
-        sfs.object({
-          ...generalInfo(general),
-          abilityIndex: sfs.int(general.abilityIndex),
-        }),
-      ),
-    ),
-  };
-}
-
 function serializeReconnectMine(mine: FriendshipMineView): Fields {
   return {
     mine: sfs.object({
@@ -144,10 +110,6 @@ export function reconnectArmy(...args: Parameters<typeof serializeReconnectArmy>
 
 export function reconnectArmies(...args: Parameters<typeof serializeReconnectArmies>): Fields {
   return validateFields(reconnectArmiesSchema, serializeReconnectArmies(...args));
-}
-
-export function reconnectGenerals(...args: Parameters<typeof serializeReconnectGenerals>): Fields {
-  return validateFields(reconnectGeneralsSchema, serializeReconnectGenerals(...args));
 }
 
 export function reconnectMine(...args: Parameters<typeof serializeReconnectMine>): Fields {

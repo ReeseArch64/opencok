@@ -1,4 +1,4 @@
-import type { GeneralRandomNumDefinition } from "../types/general_random_num.ts";
+import type { GeneralRandomNumDefinition } from "@opencok/hero/resources/catalogs/types/general_random_num";
 
 export const records: readonly GeneralRandomNumDefinition[] = [
   {

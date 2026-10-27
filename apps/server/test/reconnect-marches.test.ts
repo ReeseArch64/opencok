@@ -3,10 +3,10 @@ import {
   reconnectMarchArmy,
   reconnectMarchBase,
   reconnectMarchDragon,
-  reconnectMarchGeneral,
   reconnectMarches,
   type ReconnectMarchView,
 } from "@opencok/mappings/reconnect-marches";
+import { reconnectMarchGeneral } from "@opencok/hero/mappings/reconnect-march-general";
 import { decodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
 import { sfs, decode, encode, Type } from "@opencok/messages/sfs";
 import { Rules } from "@opencok/rules/game";

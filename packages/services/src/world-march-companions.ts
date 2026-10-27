@@ -7,11 +7,12 @@ import {
   dragonJson,
   emptyDragonTravel,
 } from "@opencok/rules/dragon-progression";
-import { generalMarch, generalMarchReturn } from "@opencok/rules/general-assignments";
+import { generalMarch, generalMarchReturn } from "@opencok/hero/rules/general-assignments";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
-import { reconnectMarchDragon, reconnectMarchGeneral } from "@opencok/mappings/reconnect-marches";
-import { ownedGeneral, writeGeneral, generalChanges } from "./generals";
+import { reconnectMarchDragon } from "@opencok/mappings/reconnect-marches";
+import { reconnectMarchGeneral } from "@opencok/hero/mappings/reconnect-march-general";
+import { ownedGeneral, writeGeneral, generalChanges } from "@opencok/hero/services/generals";
 import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function dragonChange(context: CityProgressionContext, uuid: string, marching: boolean) {

@@ -4,8 +4,8 @@ import { javaFloat } from "@opencok/rules/java-float";
 import {
   newGeneralBuildingEffect,
   type NewGeneralEffectState,
-} from "@opencok/rules/new-general-effects";
-import type { NewGeneralBuildingState } from "@opencok/rules/new-general-building";
+} from "@opencok/hero/rules/new-general-effects";
+import type { NewGeneralBuildingState } from "@opencok/hero/rules/new-general-building";
 import vectors from "./fixtures/new-general-effect-vectors.json";
 
 const context = { kingdomId: 1, version: "12.6.0", now: 1000 };

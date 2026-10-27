@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { heroRankPrize, heroRankAwardIdentity } from "@opencok/rules/hero-ranking-rewards";
+import { heroRankPrize, heroRankAwardIdentity } from "@opencok/hero/rules/hero-ranking-rewards";
 import { pinProgressionReward } from "../../../packages/services/src/progression-rewards";
 import { mailRewardEntries } from "@opencok/rules/mail-rewards";
 test("hero ranking boundaries select funded tiers or the native personal consolation message", async () => {

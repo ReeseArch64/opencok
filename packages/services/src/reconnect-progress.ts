@@ -7,7 +7,7 @@ import type { Row } from "@opencok/contracts/rows";
 import type { RewardRandom } from "@opencok/contracts/rewards";
 import type { Rules } from "@opencok/rules/game";
 import type { RuleContext } from "@opencok/rules/availability";
-import { reconnectGeneralRepairs } from "@opencok/rules/profile-generals";
+import { reconnectGeneralRepairs } from "@opencok/hero/rules/profile-generals";
 import { reconnectUpkeep } from "@opencok/rules/reconnect-upkeep";
 import { settleReconnectFood } from "@opencok/rules/reconnect-resources";
 import { reconnectWeaknessPlan } from "@opencok/rules/reconnect-weakness";
@@ -21,7 +21,7 @@ import {
 import { reconnectBuildingRefresh } from "@opencok/rules/reconnect-refresh";
 import { reconnectMail } from "@opencok/rules/reconnect-mail";
 import { friendshipMineView } from "@opencok/rules/reconnect-mine";
-import { newGeneralPrestigeLevel } from "@opencok/rules/new-general-prestige";
+import { newGeneralPrestigeLevel } from "@opencok/hero/rules/new-general-prestige";
 import { calculatePlayerPower } from "@opencok/rules/power";
 import { playerGameEffect } from "@opencok/rules/power-resolver";
 import { worldPowerEffects } from "@opencok/rules/power-world";
@@ -39,11 +39,12 @@ import {
 import { avatarMailPush } from "@opencok/mappings/avatar-mail";
 import { encode, extension, sfs, type Fields } from "@opencok/messages/sfs";
 import { MAX_FRAME } from "@opencok/messages/frame";
-import { decodeGeneralAbilities } from "./profile.ts";
-import { decodeWorldPowerEffects, generalSkillPoints, powerContext } from "./power.ts";
-import { resourceGeneralBuildingEffect } from "./world-resource-owner-context.ts";
+import { decodeGeneralAbilities } from "@opencok/hero/services/profile-generals";
+import { decodeWorldPowerEffects, powerContext } from "./power.ts";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
+import { resourceGeneralBuildingEffect } from "@opencok/hero/services/general-building-effects";
 import { readResourceOwnerLoadEffects } from "./world-resource-owner-effects.ts";
-import { reconnectOwnGenerals } from "./reconnect.ts";
+import { reconnectOwnGenerals } from "@opencok/hero/services/reconnect-generals";
 import { projectReconnectMarches } from "./reconnect-marches.ts";
 
 const int = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));

@@ -1,11 +1,12 @@
-import type { GeneralSkill, PlayerEffectSnapshot } from "@opencok/contracts/power";
+import type { GeneralSkill } from "@opencok/hero/contracts/generals";
+import type { PlayerEffectSnapshot } from "@opencok/contracts/power";
 import type { WorldResourceLoadEffects } from "@opencok/contracts/world-resource-detail";
 import type { RuleContext } from "./availability.ts";
 import type { Rules } from "./game.ts";
-import { generalSkillEffects } from "./power-attributes.ts";
+import { generalSkillEffects } from "@opencok/hero/rules/general-skill-effects";
 import { serverFeature } from "./power-context.ts";
 import { playerGameEffect } from "./power-resolver.ts";
-import { generalContent, generalInteger } from "./new-general-content.ts";
+import { generalContent, generalInteger } from "@opencok/hero/rules/new-general-content";
 
 export function resourceExpeditionConfigured(
   rules: Rules,

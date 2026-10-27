@@ -4,10 +4,10 @@ import type { WorldResourceLoadEffects } from "@opencok/contracts/world-resource
 import {
   reconnectMarchBase,
   reconnectMarchDragon,
-  reconnectMarchGeneral,
   reconnectMarches,
   type ReconnectMarchView,
 } from "@opencok/mappings/reconnect-marches";
+import { reconnectMarchGeneral } from "@opencok/hero/mappings/reconnect-march-general";
 import { worldResourceOwner } from "@opencok/mappings/world-resource-detail";
 import { decodeWorldMarchArmy, type SavedMarchArmy } from "@opencok/messages/world-resource-army";
 import { sfs, type Fields } from "@opencok/messages/sfs";

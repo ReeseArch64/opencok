@@ -1,11 +1,11 @@
 import { test, expect } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
-import { generalRecruit } from "@opencok/rules/general-progression";
+import { generalRecruit } from "@opencok/hero/rules/general-progression";
 import {
   generalMarch,
   generalMarchReturn,
   generalOfficeExperience,
-} from "@opencok/rules/general-assignments";
+} from "@opencok/hero/rules/general-assignments";
 const rules = await loadRules();
 test("march assignment excludes occupied heroes and return restores eligibility", () => {
   const row = generalRecruit(rules, 53500, "owner", 1n),

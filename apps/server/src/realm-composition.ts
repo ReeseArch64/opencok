@@ -1,3 +1,4 @@
+import { HeroEventService } from "@opencok/hero/services/hero-event";
 import { ActivityRewardDomain } from "@opencok/services/activity-reward";
 import { createWorldMarchInspectionStore } from "@opencok/repositories/world-march-inspection";
 import { createWorldScoutStore } from "@opencok/repositories/world-scout";
@@ -119,31 +120,31 @@ import { createExpeditionCalendarStore } from "@opencok/repositories/expedition-
 import {
   HeroRankingRewardService,
   HeroRankingRewardDomain,
-} from "@opencok/services/hero-ranking-rewards";
+} from "@opencok/hero/services/hero-ranking-rewards";
 import {
   createHeroRankRewardStore,
   createHeroRankRewardStandings,
-} from "@opencok/repositories/hero-ranking-rewards";
-import { heroRankAwardOperation } from "@opencok/rules/hero-ranking-rewards";
-import { HeroRankingFinalityService } from "@opencok/services/hero-ranking-finality";
+} from "@opencok/hero/repositories/hero-ranking-rewards";
+import { heroRankAwardOperation } from "@opencok/hero/rules/hero-ranking-rewards";
+import { HeroRankingFinalityService } from "@opencok/hero/services/hero-ranking-finality";
 import {
   createHeroRankFinalityRealm,
   createHeroRankFinalityRegistry,
-} from "@opencok/repositories/hero-ranking-finality";
-import { HeroRankPublicationService } from "@opencok/services/hero-rank-publication";
+} from "@opencok/hero/repositories/hero-ranking-finality";
+import { HeroRankPublicationService } from "@opencok/hero/services/hero-rank-publication";
 import {
   createHeroRankSource,
   createHeroRankProjection,
-} from "@opencok/repositories/hero-rank-publication";
-import { HeroMatchingService } from "@opencok/services/hero-matching";
+} from "@opencok/hero/repositories/hero-rank-publication";
+import { HeroMatchingService } from "@opencok/hero/services/hero-matching";
 import {
   createHeroMatchingRealmStore,
   createHeroMatchingRegistry,
-} from "@opencok/repositories/hero-matching";
-import { currentHeroScore } from "@opencok/repositories/hero-score";
-import { HeroTargetDomain, deliverHeroTargetBatch } from "@opencok/services/hero-score";
-import { HeroCalendarService } from "@opencok/services/hero-calendar";
-import { createHeroCalendarStore } from "@opencok/repositories/hero-calendar";
+} from "@opencok/hero/repositories/hero-matching";
+import { currentHeroScore } from "@opencok/hero/repositories/hero-score";
+import { HeroTargetDomain, deliverHeroTargetBatch } from "@opencok/hero/services/hero-score";
+import { HeroCalendarService } from "@opencok/hero/services/hero-calendar";
+import { createHeroCalendarStore } from "@opencok/hero/repositories/hero-calendar";
 import {
   OlympicDomain,
   OlympicScheduleService,
@@ -239,14 +240,14 @@ import { PostboxService } from "@opencok/services/postbox";
 import { createPostboxExecutor } from "@opencok/repositories/postbox";
 import { createRealmSocialExecutor } from "@opencok/connection/realm-social";
 import { createAvatarTickets } from "@opencok/storage/avatar-tickets";
-import { GeneralDrawDomain } from "@opencok/services/general-draws";
+import { GeneralDrawDomain } from "@opencok/hero/services/general-draws";
 import { AllianceService, allianceStableId } from "@opencok/services/alliances";
 import { createAllianceRepository } from "@opencok/repositories/alliance-gameplay";
 import { dueAllianceResearch } from "@opencok/repositories/alliance-recovery";
 import { createAlliancePublicationReader } from "@opencok/repositories/alliance-publication";
 import { publishAllianceMutation } from "@opencok/services/alliance-publication";
 import { relayMutationEvent } from "@opencok/repositories/mutation";
-import { GeneralsDomain } from "@opencok/services/generals";
+import { GeneralsDomain } from "@opencok/hero/services/generals";
 import { EquipmentDomain, WorkshopDomain } from "@opencok/services/equipment";
 import { PlayerEffectsDomain } from "@opencok/services/player-effects";
 import { QuestsDomain } from "@opencok/services/quests";
@@ -2495,205 +2496,219 @@ export const RealmDependenciesLive = Layer.effect(
       cache,
       coordination,
       game: new GameController(
-        new GameService(db, rules, config, Date.now, {
-          timed: async (owner, command, params) => {
-            const target = ["queue.open", "queue.rent"].includes(command)
-              ? undefined
-              : str(params, command === "queue.ccd" ? "qUUID" : "uuid");
-            await recoverActivities(owner, target);
+        new GameService(
+          db,
+          rules,
+          config,
+          Date.now,
+          {
+            timed: async (owner, command, params) => {
+              const target = ["queue.open", "queue.rent"].includes(command)
+                ? undefined
+                : str(params, command === "queue.ccd" ? "qUUID" : "uuid");
+              await recoverActivities(owner, target);
 
-            return activities.command(owner, command, params);
-          },
-          production: async (owner, command, params) => {
-            await recoverActivities(owner);
+              return activities.command(owner, command, params);
+            },
+            production: async (owner, command, params) => {
+              await recoverActivities(owner);
 
-            return production.command(owner, command, params);
-          },
-          reconcileAlliance: async (owner) => {
-            await alliances.command(owner, "alliance.tick", {});
-          },
-          alliance: async (owner, command, params) => {
-            await recoverActivities(owner);
+              return production.command(owner, command, params);
+            },
+            reconcileAlliance: async (owner) => {
+              await alliances.command(owner, "alliance.tick", {});
+            },
+            alliance: async (owner, command, params) => {
+              await recoverActivities(owner);
 
-            return alliances.command(owner, command, params);
-          },
-          cityProgression: async (owner, command, params) => {
-            if (command === "newexpidition.rankinfo")
-              return { body: await expeditionHistory.read(owner), pushes: [] };
+              return alliances.command(owner, command, params);
+            },
+            cityProgression: async (owner, command, params) => {
+              if (command === "newexpidition.rankinfo")
+                return { body: await expeditionHistory.read(owner), pushes: [] };
 
-            if ((expeditionTreasuryCommands as readonly string[]).includes(command))
-              return expeditionTreasury.command(owner, command, params);
+              if ((expeditionTreasuryCommands as readonly string[]).includes(command))
+                return expeditionTreasury.command(owner, command, params);
 
-            await recoverActivities(owner);
+              await recoverActivities(owner);
 
-            if (
-              [
-                "target.init",
-                "target.task.ui",
-                "target.task.item",
-                "target.task.receive",
-                "target.paid",
-              ].includes(command)
-            )
-              await activities.domainCommand(owner, "world.tick", {});
+              if (
+                [
+                  "target.init",
+                  "target.task.ui",
+                  "target.task.item",
+                  "target.task.receive",
+                  "target.paid",
+                ].includes(command)
+              )
+                await activities.domainCommand(owner, "world.tick", {});
 
-            if (command === "continuedcost.info" || command === "continuedcost.reward")
-              await recoverContinuedCosts(owner);
+              if (command === "continuedcost.info" || command === "continuedcost.reward")
+                await recoverContinuedCosts(owner);
 
-            const result = await activities.domainCommand(owner, command, params);
+              const result = await activities.domainCommand(owner, command, params);
 
-            if (command === "item.send") {
-              const recipient = str(params, "uid");
+              if (command === "item.send") {
+                const recipient = str(params, "uid");
 
-              if (notifications.owners().includes(recipient))
-                await deliverPlayerItemGifts([recipient]);
-            }
-
-            if (command === "newexpidition.activityinfo")
-              return { ...result, body: await expeditionLiveView.enrich(owner, result.body) };
-
-            return result;
-          },
-          reconcileTimed: async (owner) => {
-            await recoverActivities(owner);
-            await production.command(owner, "production.settle", {});
-          },
-          trade: (owner, command, params) => trade.command(owner, command, params),
-          shop: (owner, command, params) => shops.command(owner, command, params),
-          mailReward: (owner, command, params) => mailRewards.command(owner, command, params),
-          friendshipMine: (owner, command, params) =>
-            friendshipMine.command(owner, command, params),
-          notice: (owner, command, params) => notices.command(owner, command, params),
-          postbox: (owner, command, params) => postbox.command(owner, command, params),
-          inventory: (owner, command, params) => inventory.command(owner, command, params),
-          expeditionActivity: (owner) => expeditionActivity.activity(owner),
-          reconnect: async (uid, now, plan) => {
-            authority.assertReady();
-            const binding = await readFriendshipBinding(
-              db.databases.global.db,
-              config.kingdomId,
-              uid,
-            );
-
-            return executeReconnectProgress(db.kingdom.db, authority, uid, BigInt(now), plan, {
-              binding,
-              initial: () => initialFriendshipMine(rules),
-            });
-          },
-          ...nicknameServices,
-          nicknameChange: nickname
-            ? async (...args) => {
-                authority.assertReady();
-
-                return nickname.command(...args);
+                if (notifications.owners().includes(recipient))
+                  await deliverPlayerItemGifts([recipient]);
               }
-            : undefined,
-          worldPointDetail,
-          worldMarchInspection: createWorldMarchInspectionStore(db.kingdom.db),
-          worldScout: createWorldScoutStore(db.kingdom.db, config.mapSize),
-          worldFightBulletins: {
-            store: createWorldBulletinStore(db.kingdom.db),
-            page: (...args) => cache.worldFightBulletins(...args),
+
+              if (command === "newexpidition.activityinfo")
+                return { ...result, body: await expeditionLiveView.enrich(owner, result.body) };
+
+              return result;
+            },
+            reconcileTimed: async (owner) => {
+              await recoverActivities(owner);
+              await production.command(owner, "production.settle", {});
+            },
+            trade: (owner, command, params) => trade.command(owner, command, params),
+            shop: (owner, command, params) => shops.command(owner, command, params),
+            mailReward: (owner, command, params) => mailRewards.command(owner, command, params),
+            friendshipMine: (owner, command, params) =>
+              friendshipMine.command(owner, command, params),
+            notice: (owner, command, params) => notices.command(owner, command, params),
+            postbox: (owner, command, params) => postbox.command(owner, command, params),
+            inventory: (owner, command, params) => inventory.command(owner, command, params),
+            expeditionActivity: (owner) => expeditionActivity.activity(owner),
+            reconnect: async (uid, now, plan) => {
+              authority.assertReady();
+              const binding = await readFriendshipBinding(
+                db.databases.global.db,
+                config.kingdomId,
+                uid,
+              );
+
+              return executeReconnectProgress(db.kingdom.db, authority, uid, BigInt(now), plan, {
+                binding,
+                initial: () => initialFriendshipMine(rules),
+              });
+            },
+            ...nicknameServices,
+            nicknameChange: nickname
+              ? async (...args) => {
+                  authority.assertReady();
+
+                  return nickname.command(...args);
+                }
+              : undefined,
+            worldPointDetail,
+            worldMarchInspection: createWorldMarchInspectionStore(db.kingdom.db),
+            worldScout: createWorldScoutStore(db.kingdom.db, config.mapSize),
+            worldFightBulletins: {
+              store: createWorldBulletinStore(db.kingdom.db),
+              page: (...args) => cache.worldFightBulletins(...args),
+            },
+            playerSearch,
+            worldSearch,
+            worldUtility: createWorldUtilityStore(db.kingdom.db, authority, config.mapSize),
+            worldFavorites,
+            avatarFinish: avatar
+              ? {
+                  ...avatar.service,
+                  finish: (...args) => {
+                    authority.assertReady();
+
+                    return avatar.service.finish(...args);
+                  },
+                }
+              : undefined,
+            avatarVersion: avatar
+              ? {
+                  ...avatar.versionService,
+                  update: (...args) => {
+                    authority.assertReady();
+
+                    return avatar.versionService.update(...args);
+                  },
+                }
+              : undefined,
+            avatar: avatarFiles
+              ? {
+                  ...avatarFiles,
+                  read: (uid, now, inspect) => {
+                    authority.assertReady();
+
+                    return readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect);
+                  },
+                }
+              : undefined,
+            social: config.chatSession
+              ? (() => {
+                  const execute = createRealmSocialExecutor({
+                    authority,
+                    ...config.chatSession,
+                    realm: config.kingdomId,
+                    timeoutMs: config.timeoutMs,
+                  });
+
+                  return async (owner, command, params) => {
+                    authority.assertReady();
+
+                    return execute(owner, command, params);
+                  };
+                })()
+              : undefined,
+            mailChatEnabled: !!config.mailChat,
+            chatSession: config.chatSession
+              ? (() => {
+                  const issue = createRealmChatSessionIssuer({
+                    ...config.chatSession,
+                    timeoutMs: config.timeoutMs,
+                  });
+
+                  return async (request) => {
+                    authority.assertReady();
+
+                    return issue(request);
+                  };
+                })()
+              : undefined,
+            expeditionRanking: (limit) => cache.expeditionRanking(limit),
+            scoreActivityRanking: () => cache.scoreActivityRanking(),
+            battleFightPublication: () => cache.battleFightPublication(),
+            playoffPublication: () => cache.playoffPublication(),
+            heroHistoryPublication: (keys, alliance) =>
+              cache.heroHistoryPublication(keys, alliance),
+            heroRankingPosition: (query) => cache.heroRankingPosition(query),
+            throneRankingPeriod: (realm) => cache.throneRankingPeriod(realm),
+            donationScores: (allianceId, kind, date) =>
+              cache.donationScores(allianceId, kind, date),
+            flowerRankingPublication: (realm, uid, limit, global) =>
+              cache.flowerRankingPublication(realm, uid, limit, global),
+            militaryRanking: (type, group) => cache.militaryRanking(type, group),
+            attributeRanking: (type) => cache.attributeRanking(type),
+            publishedGlobalRanking: (kind) =>
+              kind === "consumption"
+                ? continuedCostRanking.board(() => cache.publishedGlobalRanking(kind))
+                : cache.publishedGlobalRanking(kind),
+            globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
+            dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
+            expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
+            worldPowerEffects: (kingdomId) => worldEffects(kingdomId),
+            worldEffectBoard: currentMergeBoard,
+            hotItemBusinessMan: async () => {
+              authority.assertReady();
+
+              return hotBusinessMan.current()?.body;
+            },
+            worldTurretKills: (kingdomId, territory) =>
+              cache.worldTurretKills(kingdomId, territory),
+            emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
+            changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
+            lastSystemMail: (uid) => cache.lastSystemMail(uid),
+            systemMailPage: (uid, ids, count, time, inspect) =>
+              cache.systemMailPage(uid, ids, count, time, inspect),
+            playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
           },
-          playerSearch,
-          worldSearch,
-          worldUtility: createWorldUtilityStore(db.kingdom.db, authority, config.mapSize),
-          worldFavorites,
-          avatarFinish: avatar
-            ? {
-                ...avatar.service,
-                finish: (...args) => {
-                  authority.assertReady();
-
-                  return avatar.service.finish(...args);
-                },
-              }
-            : undefined,
-          avatarVersion: avatar
-            ? {
-                ...avatar.versionService,
-                update: (...args) => {
-                  authority.assertReady();
-
-                  return avatar.versionService.update(...args);
-                },
-              }
-            : undefined,
-          avatar: avatarFiles
-            ? {
-                ...avatarFiles,
-                read: (uid, now, inspect) => {
-                  authority.assertReady();
-
-                  return readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect);
-                },
-              }
-            : undefined,
-          social: config.chatSession
-            ? (() => {
-                const execute = createRealmSocialExecutor({
-                  authority,
-                  ...config.chatSession,
-                  realm: config.kingdomId,
-                  timeoutMs: config.timeoutMs,
-                });
-
-                return async (owner, command, params) => {
-                  authority.assertReady();
-
-                  return execute(owner, command, params);
-                };
-              })()
-            : undefined,
-          mailChatEnabled: !!config.mailChat,
-          chatSession: config.chatSession
-            ? (() => {
-                const issue = createRealmChatSessionIssuer({
-                  ...config.chatSession,
-                  timeoutMs: config.timeoutMs,
-                });
-
-                return async (request) => {
-                  authority.assertReady();
-
-                  return issue(request);
-                };
-              })()
-            : undefined,
-          expeditionRanking: (limit) => cache.expeditionRanking(limit),
-          scoreActivityRanking: () => cache.scoreActivityRanking(),
-          battleFightPublication: () => cache.battleFightPublication(),
-          playoffPublication: () => cache.playoffPublication(),
-          heroHistoryPublication: (keys, alliance) => cache.heroHistoryPublication(keys, alliance),
-          heroRankingPosition: (query) => cache.heroRankingPosition(query),
-          throneRankingPeriod: (realm) => cache.throneRankingPeriod(realm),
-          donationScores: (allianceId, kind, date) => cache.donationScores(allianceId, kind, date),
-          flowerRankingPublication: (realm, uid, limit, global) =>
-            cache.flowerRankingPublication(realm, uid, limit, global),
-          militaryRanking: (type, group) => cache.militaryRanking(type, group),
-          attributeRanking: (type) => cache.attributeRanking(type),
-          publishedGlobalRanking: (kind) =>
-            kind === "consumption"
-              ? continuedCostRanking.board(() => cache.publishedGlobalRanking(kind))
-              : cache.publishedGlobalRanking(kind),
-          globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
-          dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
-          expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
-          worldPowerEffects: (kingdomId) => worldEffects(kingdomId),
-          worldEffectBoard: currentMergeBoard,
-          hotItemBusinessMan: async () => {
-            authority.assertReady();
-
-            return hotBusinessMan.current()?.body;
-          },
-          worldTurretKills: (kingdomId, territory) => cache.worldTurretKills(kingdomId, territory),
-          emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
-          changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
-          lastSystemMail: (uid) => cache.lastSystemMail(uid),
-          systemMailPage: (uid, ids, count, time, inspect) =>
-            cache.systemMailPage(uid, ids, count, time, inspect),
-          playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
-        }),
+          new HeroEventService(db, rules, config, Date.now, {
+            heroHistoryPublication: (keys, alliance) =>
+              cache.heroHistoryPublication(keys, alliance),
+            heroRankingPosition: (query) => cache.heroRankingPosition(query),
+          }),
+        ),
       ),
       world: new WorldController(
         new WorldService(db, config.mapSize, config.kingdomId, { ...worldInterest, rules }),

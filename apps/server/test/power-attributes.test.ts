@@ -1,11 +1,8 @@
 import { expect, test } from "bun:test";
 import type { Row } from "@opencok/contracts/rows";
-import { generalSkillPoints } from "@opencok/services/power";
-import {
-  generalSkillEffects,
-  equipmentEffects,
-  equipmentSetEffects,
-} from "@opencok/rules/power-attributes";
+import { generalSkillPoints } from "@opencok/hero/services/general-power";
+import { generalSkillEffects } from "@opencok/hero/rules/general-skill-effects";
+import { equipmentEffects, equipmentSetEffects } from "@opencok/rules/power-attributes";
 import { Rules } from "@opencok/rules/game";
 
 function fixture() {

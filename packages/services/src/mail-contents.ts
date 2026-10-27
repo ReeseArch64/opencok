@@ -1,3 +1,4 @@
+import { removeGeneralSkills } from "@opencok/hero/services/mail-general";
 import type { MailContentsEntry } from "@opencok/contracts/mail";
 import {
   decodeLegacyJsonObject,
@@ -58,16 +59,6 @@ function oldHelpers(body: Fields, name: string) {
       return sfs.object({ name: sfs.string(key), armyInfo: entry });
     }),
   );
-}
-
-function removeGeneralSkills(value: Value | undefined, skipNull = true) {
-  for (const general of array(value) ?? []) {
-    if (general.type === Type.Null && skipNull) continue;
-
-    const object = fields(general);
-    delete object.skill;
-    delete object.ability;
-  }
 }
 
 function repairFight(body: Fields) {
