@@ -29,7 +29,7 @@ export function compactPoint(
   now = BigInt(Date.now()),
 ): string {
   if (
-    ![0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 15, 17, 44, 45, 48, 64, 65, 68, 69].includes(
+    ![0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 15, 17, 37, 38, 44, 45, 48, 64, 65, 68, 69].includes(
       num(row, "pointType"),
     ) ||
     text(row, "territoryAlliance")

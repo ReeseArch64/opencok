@@ -117,7 +117,10 @@ function occupiedExtras(
     resourceOwnerDetail(type, resourceRemaining(int(point.resInitValue), int(point.resCostValue)), {
       ...resourceSavedCollection(row),
       armyLoad,
-      maxCollectTime: 0n,
+      maxCollectTime:
+        type === 37 && long(row.occupyResourceEndTime) >= long(row.marchArrivalTime)
+          ? long(row.occupyResourceEndTime) - long(row.marchArrivalTime)
+          : 0n,
     }),
   );
 }
