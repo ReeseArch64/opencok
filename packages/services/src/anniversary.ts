@@ -1,3 +1,4 @@
+import { cosmeticInteractionEvent } from "./city-cosmetics";
 import { campaignTriggerView } from "@opencok/mappings/anniversary";
 import { encode, sfs, str, int } from "@opencok/messages/sfs";
 import { eventTimestamp } from "@opencok/rules/local-events";
@@ -81,13 +82,21 @@ export const anniversaryDomain: CityDomain = {
       const type = cityInteger(int(params, "type"));
       const target = str(params, "uid", "");
       if (type === 45 && !target.trim()) return { response: encode({}), event: null };
-      if (type === 45 && target !== context.owner) campaignFailure();
+      if (
+        type === 45 &&
+        (context.state.cosmeticTarget?.uid !== target ||
+          context.state.cosmeticTarget.realm !== context.rules.kingdomId)
+      )
+        campaignFailure();
       new CampaignPlanner(context, {
-        uid: context.owner,
+        uid: type === 45 ? target : context.owner,
         client_para1: int(params, "para1", -1),
       }).event(type === 47 ? 47 : 51, type === 47 ? "" : String(type));
       refreshCampaignGrants(context);
-      return { response: encode(campaignTriggerView(type)), event: null };
+      return {
+        response: encode(campaignTriggerView(type)),
+        event: cosmeticInteractionEvent(context),
+      };
     }
     if (command === "campaign.init") {
       new CampaignPlanner(context).event(8);

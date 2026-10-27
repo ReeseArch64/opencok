@@ -1,3 +1,4 @@
+import { cosmeticOwnership, cosmeticTargetStates } from "./city-cosmetics";
 import { randomInt, randomUUID } from "node:crypto";
 import type {
   CampaignAction,
@@ -116,6 +117,13 @@ export class CampaignPlanner {
   write(reference: string, value: bigint) {
     this.set(this.variable(reference), value);
   }
+  private statusRows() {
+    const uid = String(this.attributes.uid ?? this.context.owner);
+    if (uid === this.context.owner)
+      return this.context.write.states ?? this.context.state.effects.states;
+    if (this.context.state.cosmeticTarget?.uid !== uid) campaignFailure();
+    return cosmeticTargetStates(this.context);
+  }
   private check(clause: CampaignClause, depth = 0): boolean {
     if (depth > 32 || ++this.operations > 8192) campaignFailure();
     const parts = (clause.parameters ?? "").split(";");
@@ -125,7 +133,7 @@ export class CampaignPlanner {
         const id = parts[0],
           count = cityInteger(parts[1]);
         if (!id || parts.length !== 2) campaignFailure();
-        const state = (this.context.write.states ?? this.context.state.effects.states).find(
+        const state = this.statusRows().find(
           (row) => String(row.stateId) === id && long(row, "endTime") > this.context.now,
         );
         return Boolean(state && num(state, "count") === count);
@@ -297,14 +305,22 @@ export class CampaignPlanner {
         return;
       }
       case 33: {
-        if (this.attributes.uid !== this.context.owner) campaignFailure();
+        const uid = String(this.attributes.uid ?? this.context.owner);
         const id = parts[0];
         if (!id) campaignFailure();
-        const states = this.context.write.states ?? this.context.state.effects.states;
+        const declaration = this.context.rules.power.statuses?.get(id);
+        if (
+          uid !== this.context.owner &&
+          (!declaration ||
+            !["100", "105", "200"].includes(declaration.type2 ?? "") ||
+            Boolean(declaration.effect))
+        )
+          campaignFailure();
+        const states = this.statusRows();
         const plan = temporaryEffect(
           states,
           this.context.rules,
-          this.context.owner,
+          uid,
           id,
           this.context.now,
           1,
@@ -319,7 +335,8 @@ export class CampaignPlanner {
         if (!counter && (this.windowEnd !== undefined || parts[1]))
           for (const row of plan.states)
             row.endTime = this.windowEnd ?? this.context.now + campaignNumber(parts[1]) * 1000n;
-        this.context.write.states = [
+        const avatars = cosmeticOwnership(this.context, uid, id, states, plan.states);
+        const updatedStates = [
           ...states.filter(
             (row) =>
               !plan.deleted.includes(num(row, "stateId")) &&
@@ -327,10 +344,37 @@ export class CampaignPlanner {
           ),
           ...plan.states,
         ];
-        this.context.write.deletedStates = [
-          ...(this.context.write.deletedStates ?? []),
-          ...plan.deleted,
-        ];
+        if (uid === this.context.owner) {
+          this.context.write.states = updatedStates;
+          this.context.write.deletedStates = [
+            ...(this.context.write.deletedStates ?? []),
+            ...plan.deleted,
+          ];
+        }
+        if (uid !== this.context.owner || this.context.state.cosmeticTarget?.uid === uid)
+          this.context.write.cosmeticTarget = {
+            ...this.context.write.cosmeticTarget,
+            uid,
+            states: [
+              ...(this.context.write.cosmeticTarget?.states ?? []).filter(
+                (row) =>
+                  !plan.deleted.includes(num(row, "stateId")) &&
+                  !plan.states.some((next) => next.stateId === row.stateId),
+              ),
+              ...plan.states,
+            ],
+            deleted: [...(this.context.write.cosmeticTarget?.deleted ?? []), ...plan.deleted],
+            ...(avatars ? { avatars } : {}),
+          };
+        if (this.context.state.cosmeticTarget)
+          this.context.write.cosmeticChanges = [
+            ...(this.context.write.cosmeticChanges ?? []),
+            ...plan.states.map((row) => ({
+              uid,
+              id: num(row, "stateId"),
+              previous: plan.deleted[0],
+            })),
+          ];
         return;
       }
       case 29: {

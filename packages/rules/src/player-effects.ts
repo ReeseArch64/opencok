@@ -124,13 +124,16 @@ export function temporaryEffect(
   if (prior && overlap === "5" && String(prior.stateId) !== id) invalid();
   if (prior && Number(group) % 100 < Number(oldRule?.group ?? 0) % 100 && overlap === "0")
     invalid();
+  const sameSubgroup =
+    rule!.subgroup !== undefined || oldRule?.subgroup !== undefined
+      ? rule!.subgroup === oldRule?.subgroup
+      : Math.floor((Number(group) % 100) / 10) ===
+        Math.floor((Number(oldRule?.group ?? 0) % 100) / 10);
   const extend =
     prior &&
     (overlap === "1" ||
       overlap === "5" ||
-      (overlap === "2" &&
-        Math.floor((Number(group) % 100) / 10) ===
-          Math.floor((Number(oldRule?.group ?? 0) % 100) / 10)) ||
+      (overlap === "2" && sameSubgroup) ||
       (["3", "4"].includes(overlap ?? "") && overlap === oldRule?.overlap));
   if (prior && overlap === "5") {
     const maximum = cityInteger(rule!.reset ?? 0),

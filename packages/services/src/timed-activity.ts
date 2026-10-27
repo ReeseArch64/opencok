@@ -30,6 +30,11 @@ export class TimedActivityService {
     readonly execute: ActivityExecutor,
     readonly rules: Rules,
     readonly effects: InventoryEffects,
+    readonly participants?: (
+      owner: string,
+      command: string,
+      params: Fields,
+    ) => readonly string[] | undefined,
   ) {}
   async start(
     owner: string,
@@ -521,7 +526,13 @@ export class TimedActivityService {
     for (const key of Object.keys(params).sort())
       if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) request[key] = params[key]!;
     const response = await this.execute(
-      { owner, requestId: operationId, command, request: encode(request) },
+      {
+        owner,
+        requestId: operationId,
+        command,
+        request: encode(request),
+        participants: this.participants?.(owner, command, params),
+      },
       async (state) => {
         const ledger = new InventoryPlanner(state, this.rules, this.effects, Number(state.now));
         const result = await apply(state, ledger);
