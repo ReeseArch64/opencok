@@ -169,7 +169,8 @@
     "./world-city-geometry": "./src/world-city-geometry.ts",
     "./world-birth": "./src/world-birth.ts",
     "./world-monsters": "./src/world-monsters.ts",
-    "./world-monster-refresh": "./src/world-monster-refresh.ts"
+    "./world-monster-refresh": "./src/world-monster-refresh.ts",
+    "./world-scout": "./src/world-scout.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
