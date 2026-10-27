@@ -12,11 +12,7 @@
   },
   "type": "module",
   "exports": {
-    "./compat": "./src/compat.ts",
-    "./discovery": "./src/discovery.ts",
-    "./handler": "./src/handler.ts",
-    "./files": "./src/files.ts",
-    "./files-multipart": "./src/files-multipart.ts"
+    "./*": "./src/*.ts"
   },
   "dependencies": {
     "@opencok/contracts": "workspace:*",

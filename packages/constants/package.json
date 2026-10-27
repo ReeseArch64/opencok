@@ -11,8 +11,6 @@
   },
   "type": "module",
   "exports": {
-    "./connection": "./src/connection.ts",
-    "./game": "./src/game.ts",
-    "./android-resources": "./src/android-resources.ts"
+    "./*": "./src/*.ts"
   }
 }

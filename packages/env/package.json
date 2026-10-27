@@ -4,16 +4,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema.ts",
-    "./database": "./src/database.ts",
     "./database/schema": "./src/database.schema.ts",
-    "./server": "./src/server.ts",
     "./server/schema": "./src/server.schema.ts",
-    "./api": "./src/api.ts",
     "./api/schema": "./src/api.schema.ts",
-    "./effect": "./src/effect.ts",
-    "./chat": "./src/chat.ts",
-    "./files": "./src/files.ts"
+    "./*": "./src/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",

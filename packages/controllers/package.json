@@ -14,17 +14,7 @@
   "exports": {
     "./game": "./src/game.controller.ts",
     "./world": "./src/world.controller.ts",
-    "./chat-session": "./src/chat-session.ts",
-    "./chat-config": "./src/chat-config.ts",
-    "./chat-join": "./src/chat-join.ts",
-    "./chat-send": "./src/chat-send.ts",
-    "./chat-history": "./src/chat-history.ts",
-    "./chat-rooms": "./src/chat-rooms.ts",
-    "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
-    "./chat-nickname": "./src/chat-nickname.ts",
-    "./chat-mailbox": "./src/chat-mailbox.ts",
-    "./provisioning": "./src/provisioning.ts",
-    "./realm-social": "./src/realm-social.ts"
+    "./*": "./src/*.ts"
   },
   "dependencies": {
     "@opencok/services": "workspace:*",

@@ -66,6 +66,11 @@ package source, Drizzle TypeScript schemas, agent skills and hook configuration
 remain included. These exclusions preserve the
 boundaries described in [the architecture](ARCHITECTURE.md).
 
+Implemented TypeScript packages expose source modules with `"./*": "./src/*.ts"`
+in their package export maps, including nested source paths. Preserve root entries,
+non-source assets and compatibility aliases when updating these maps. New source
+modules should not require individual export entries.
+
 Controllers receive Services through constructor injection and delegate application
 operations to them, following the NestJS Controller/Service pattern. Services own
 use cases and coordinate rules and persistence through contracts. Compose the

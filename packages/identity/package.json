@@ -11,16 +11,7 @@
   },
   "type": "module",
   "exports": {
-    "./mobile": "./src/mobile.ts",
-    "./chat-token": "./src/chat-token.ts",
-    "./chat-rooms": "./src/chat-rooms.ts",
-    "./avatar": "./src/avatar.ts",
-    "./chat-avatar-profile": "./src/chat-avatar-profile.ts",
-    "./chat-nickname": "./src/chat-nickname.ts",
-    "./chat-mailbox": "./src/chat-mailbox.ts",
-    "./provisioning": "./src/provisioning.ts",
-    "./firebase": "./src/firebase.ts",
-    "./realm-social": "./src/realm-social.ts"
+    "./*": "./src/*.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
