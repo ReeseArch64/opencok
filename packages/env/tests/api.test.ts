@@ -6,11 +6,11 @@ test("API settings are independent of legacy database and upload configuration",
     API_DB_HOST: "legacy",
     API_UPLOAD_KEY_FILE: "unused",
     API_GAME_HOST: "127.0.0.1",
-    API_GAME_PORT: "9933",
   });
-  expect(env.API_PORT).toBe(8082);
   expect(env.GLOBAL_DATABASE_NAME).toBe("opencok_global");
-  expect(env.API_GAME_PORT).toBe(9933);
+  for (const key of ["API_HOST", "API_PORT", "API_GAME_PORT", "API_DEPENDENCY_TIMEOUT_MS"]) {
+    expect(env).not.toHaveProperty(key);
+  }
   expect(env).not.toHaveProperty("API_DB_HOST");
   expect(env).not.toHaveProperty("API_UPLOAD_KEY_FILE");
 });
@@ -19,7 +19,6 @@ test("invalid API endpoints and private values report only variable names", () =
   for (const API_GAME_HOST of ["0.0.0.0", "::", "http://localhost", "synthetic secret"]) {
     expect(() => parseApiEnvironment({ API_GAME_HOST })).toThrow("API_GAME_HOST");
   }
-  expect(() => parseApiEnvironment({ API_GAME_PORT: "0" })).toThrow("API_GAME_PORT");
   expect(() =>
     parseApiEnvironment({ REDIS_URL: "https://synthetic-secret@example.invalid" }),
   ).toThrow("REDIS_URL");

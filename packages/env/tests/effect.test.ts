@@ -21,7 +21,6 @@ test("API and realm read the same injected snapshot with independent service def
   expect(result[0].KINGDOM_ID).toBe(2);
   expect(result[1].KINGDOM_ID).toBe(2);
   expect(result[0].GLOBAL_DATABASE_NAME).toBe(result[1].GLOBAL_DATABASE_NAME);
-  expect(result[0].API_PORT).toBe(8082);
   expect(result[0].CHAT_URL).toBe("https://chat.internal:8083/");
   expect(result[1].CHAT_URL).toBe(result[0].CHAT_URL);
   for (const name of [

@@ -1,13 +1,12 @@
 import { expect, test } from "bun:test";
 import { Effect, Layer, Exit } from "effect";
 import { EnvironmentSource } from "@opencok/env/effect";
-import { ApiConfig, ApiConfigLive, readConfig } from "../src/config.ts";
+import { ApiConfig, readConfig } from "../src/config.ts";
 import { ApiDependencies, serveApi } from "../src/app.ts";
 
 const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://synthetic:secret@localhost/wrong?database=wrong&sslmode=require",
   GLOBAL_DATABASE_NAME: "synthetic_global",
-  API_PORT: "0",
   KINGDOM_ID: "2",
 });
 
@@ -51,6 +50,10 @@ test("Effect API config selects the global database from the injected environmen
   expect(url.searchParams.has("database")).toBe(false);
   expect(url.searchParams.get("sslmode")).toBe("require");
   expect(config.kingdomId).toBe(2);
+  expect(config.host).toBe("0.0.0.0");
+  expect(config.port).toBe(8080);
+  expect(config.gamePort).toBe(9933);
+  expect(config.timeoutMs).toBe(3000);
 });
 
 test("API Effect scope serves discovery and closes HTTP before dependencies", async () => {
@@ -71,7 +74,13 @@ test("API Effect scope serves discovery and closes HTTP before dependencies", as
         }),
     ),
   );
-  const layers = Layer.merge(dependencies, ApiConfigLive).pipe(Layer.provide(source));
+  const layers = Layer.merge(
+    dependencies,
+    Layer.effect(
+      ApiConfig,
+      readConfig.pipe(Effect.map((config) => ({ ...config, host: "127.0.0.1", port: 0 }))),
+    ),
+  ).pipe(Layer.provide(source));
   await Effect.runPromise(
     Effect.scoped(
       Effect.gen(function* () {

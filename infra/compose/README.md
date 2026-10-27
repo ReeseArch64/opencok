@@ -3,7 +3,7 @@
 Compose is the local development environment. Production uses a separate deployment
 and does not depend on this Compose configuration. Development settings are written
 in `docker-compose.yml`; `docker-compose.dev.yml` adds local Redis readiness for
-API/server and PostgreSQL setup ordering for API/server/Chat and pgAdmin. The game
+API/server, MinIO readiness for API, and PostgreSQL setup ordering for API/server/Chat and pgAdmin. The game
 login secret, shared `REDIS_URL` and `DATABASE_URL`, and optional endpoint overrides
 are substituted from the root `.env`.
 
@@ -143,6 +143,10 @@ existing login secret remains in the ignored root env file rather than source.
 
 API, realm/server and Chat receive the same `DATABASE_URL` from the root environment.
 Use `postgres://postgres:postgres@postgres:5432/opencok_global` for the local stack.
+The base API also has no MinIO startup dependency. The development override adds
+MinIO readiness ordering; configure external S3 endpoints for production through
+the existing S3 environment settings.
+
 The base file has no application or pgAdmin dependency on `postgres` or
 `postgres-setup`; the development override adds the setup dependency, and the local
 setup job waits for PostgreSQL health before applying migrations and generating

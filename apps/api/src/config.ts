@@ -20,16 +20,16 @@ export const readConfig = Effect.gen(function* () {
     filesEnabled: !!settings.S3_BUCKET,
     chatUrl: settings.CHAT_URL,
     kingdomId: settings.KINGDOM_ID,
-    host: settings.API_HOST,
-    port: settings.API_PORT,
+    host: "0.0.0.0",
+    port: 8080,
     databaseUrl: url.href,
     redisUrl: settings.REDIS_URL,
-    timeoutMs: settings.API_DEPENDENCY_TIMEOUT_MS,
+    timeoutMs: 3000,
     serversFile: settings.API_SERVERS_FILE
       ? resolve(workspaceRoot, settings.API_SERVERS_FILE)
       : undefined,
     gameHost: settings.API_GAME_HOST,
-    gamePort: settings.API_GAME_PORT,
+    gamePort: 9933,
   };
 });
 

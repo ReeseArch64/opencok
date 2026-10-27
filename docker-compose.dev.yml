@@ -8,6 +8,8 @@ services:
 
   api:
     depends_on:
+      minio:
+        condition: service_healthy
       postgres-setup:
         condition: service_completed_successfully
       redis:
