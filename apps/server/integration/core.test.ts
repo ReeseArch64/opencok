@@ -334,11 +334,18 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(fields(data.user).gold?.value).toBe(9007199254740993n);
       expect(fields(data.user).serverId?.value).toBe(id);
       expect(fields(data.resource).wood?.value).toBe(BigInt(10000 * id));
+      const loginPower = fields(data.playerInfo);
+      expect(loginPower.playerPower?.type).toBe(Type.Int);
+      expect(loginPower.armyPower?.type).toBe(Type.Long);
+      expect(loginPower.battleWin?.type).toBe(Type.Int);
       expect(
         (await client.command("cmd.finishinit", { _cok_: sfs.string("synthetic-init") }))._cok_
           ?.value,
       ).toBe("synthetic-init");
       expect((await client.command("cmd.ping")).serverNowTime?.type).toBe(Type.Long);
+      const power = await client.command("get.power.info");
+      expect(loginPower.playerPower).toEqual(power.playerPower);
+      expect(loginPower.armyPower).toEqual(power.armyPower);
       await eventually(async () =>
         client.received.some((packet) => str(fields(packet.p), "c", "") === "push.common.notice"),
       );

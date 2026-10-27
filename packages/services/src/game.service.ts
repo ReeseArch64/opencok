@@ -326,7 +326,9 @@ export class GameService {
     if (!world || num(world, "worldId") !== 0 || (state.hasMarches && !this.services.reconnect))
       throw new GameError(errors.unsupported, "world_state");
     const expeditionActivity = await this.services.expeditionActivity?.(uid);
+    const playerInfo = await this.power(uid, true);
     const body: Fields = {
+      playerInfo: sfs.object(playerInfo),
       equip: sfs.array(
         (state.equipment ?? [])
           .filter((row) => num(row, "on") !== 2)
@@ -2499,7 +2501,7 @@ export class GameService {
     body.lastUpdateTime = sfs.string(updates?.get(target.value) ?? "");
     return body;
   }
-  private async power(uid: string): Promise<Fields> {
+  private async power(uid: string, login = false): Promise<Fields> {
     const now = this.now();
     const state = await this.db.getPowerByPlayerId(uid, now);
     const profile = this.checkProfile(state.profile, now);
@@ -2534,7 +2536,15 @@ export class GameService {
       );
     }
     const power = calculatePlayerPower({ ...state, profile }, this.rules, context);
-    return powerInfo(state.statistics, power, state.upload, this.rules);
+    const result = powerInfo(state.statistics, power, login ? undefined : state.upload, this.rules);
+    if (login) {
+      delete result.nextUpdateTime;
+      delete result.banTime;
+      delete result.banCount;
+      result.skillPoint = sfs.int(num(state.generals[0] ?? {}, "plusSkillPoint"));
+      result.isPayFlag = sfs.bool(long(profile, "payTotal") > 0n);
+    }
+    return result;
   }
   private async playerSummaries(params: Fields): Promise<Fields> {
     const value = params.uids;

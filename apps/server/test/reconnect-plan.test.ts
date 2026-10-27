@@ -264,6 +264,10 @@ test("login with an existing march and non-building queue reaches the full recon
   ];
   state.marches.profiles = [{ uid: "1001", serverId: 1, crossFightSrcServerId: -1 }];
   const store = {
+    getPowerByPlayerId: async () => {
+      const { emptyPowerState } = await import("./fixtures/power-state");
+      return emptyPowerState(state.profile);
+    },
     getCityByPlayerId: async () => ({
       ...state,
       hasMarches: true,
