@@ -50,6 +50,13 @@ map size and authorized XML path:
 bun run --cwd apps/server world:import 900501 1201 /authorized/world.xml
 ```
 
+The optional `--catalogs /authorized/catalogs` selects an explicit external
+catalog directory through the existing catalog loader. XML dimensions must still
+match its `worldmap_city.k3`; the default remains the maintained catalogs.
+`--page-size` bounds each transaction to 1 through 1000 cells, and `--pages` can
+return durable partial progress for a later identical invocation. Unknown or
+repeated options are rejected. Errors report only the failing stage.
+
 The input is validated before database access. The command acquires the same
 ZooKeeper ephemeral realm node as the live server and cannot take its ownership
 while that server owns it. A read-only target check rejects an occupied legacy or
@@ -78,5 +85,10 @@ passed five cases with 60 assertions, including XML safety and native static
 reservations; combined birth rules passed eight cases and 83 assertions. Required
 lint, formatting, package boundaries and 25 workspace type checks passed. The CLI
 rejected missing explicit operator configuration before accessing dependencies.
+A real CLI subprocess test passed with 16 assertions against disposable PostgreSQL
+and ZooKeeper: an active owner refused admission without changing its epoch,
+bounded partial progress resumed to completion, process exit released ownership
+and connections, a new owner admitted the completed map, and size mismatch
+preserved all cells.
 The authorized full XML was parsed and checked locally without publishing its
 content; full authored-map database ingestion and device execution were not run.
