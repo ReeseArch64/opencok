@@ -411,7 +411,7 @@ services:
     image: traefik:v3.7.15
     container_name: opencok-gateway
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, prod]
     command: [--configFile=/etc/traefik/traefik.yml]
     stop_grace_period: 15s
     read_only: true
@@ -422,9 +422,9 @@ services:
     networks: [opencok-internal-network, opencok-external-network]
     mem_limit: 256m
     cpus: "0.50"
+    environment:
+      CDN_URL: ${CDN_URL:?Set CDN_URL for gateway asset storage}
     depends_on:
-      minio-setup:
-        condition: service_completed_successfully
       api:
         condition: service_healthy
       server:

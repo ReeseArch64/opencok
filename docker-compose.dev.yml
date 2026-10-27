@@ -24,3 +24,8 @@ services:
     depends_on:
       postgres-setup:
         condition: service_completed_successfully
+
+  gateway:
+    depends_on:
+      minio-setup:
+        condition: service_completed_successfully

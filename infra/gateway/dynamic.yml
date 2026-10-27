@@ -51,7 +51,7 @@ http:
         passHostHeader: false
         serversTransport: cdn-transport
         servers:
-          - url: http://minio:9000
+          - url: '{{ env "CDN_URL" }}'
     api:
       loadBalancer:
         serversTransport: api-transport

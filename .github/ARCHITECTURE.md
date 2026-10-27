@@ -333,7 +333,9 @@ directly published WebSocket on port 8083; `all` also includes pgAdmin, Redis In
 and Portainer. The `devops` profile selects those tools and their dependencies.
 Use base Compose plus `docker-compose.dev.yml` for local Redis and PostgreSQL
 startup ordering, including local MinIO readiness for API. Base API has no local
-MinIO dependency and uses the configured S3 endpoints. Base API/server accept shared `REDIS_URL`; API/server/Chat accept
+MinIO dependency and uses the configured S3 endpoints. The gateway uses `CDN_URL`
+for its CDN origin with fixed storage prefixes; only the development override waits
+for local MinIO CDN setup. Base API/server accept shared `REDIS_URL`; API/server/Chat accept
 shared `DATABASE_URL` without dependencies on local PostgreSQL/setup. The development
 override makes API/server/Chat and pgAdmin wait for PostgreSQL setup. The local
 PostgreSQL/setup services remain defined in the base file and selected by their

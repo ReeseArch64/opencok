@@ -82,7 +82,10 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile all up 
 
 PostgreSQL setup applies pending Drizzle migrations to the global database and both
 kingdom databases. API/server/Chat wait for setup and their dependencies. MinIO setup
-imports the CDN; the gateway waits for API/server health and successful CDN setup.
+imports the CDN; the development override makes the gateway wait for successful
+CDN setup in addition to API/server health. The base gateway uses `CDN_URL` from
+the root `.env` and has no MinIO dependency. Set an external HTTP(S) origin for
+production, preserving the storage path layout in the [gateway guide](../gateway/README.md).
 The one-shot jobs exit with code zero after completion.
 
 ## Direct development values
