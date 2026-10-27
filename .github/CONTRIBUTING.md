@@ -153,7 +153,14 @@ The hook runs `bunx commitlint --edit "$1"` with the root
 `bunx` resolves the local CLI. It validates
 the message file supplied by Git, including paths containing spaces. It does not
 rewrite messages or stage files. CI continues validating committed messages
-independently of local hooks.
+independently of local hooks. CI validates the event's new commit range.
+For a branch's first push or rewritten history, it compares against the merge
+base with the repository's default branch rather than replaying inherited
+history. Pull requests use their target's merge base when the target has advanced.
+A run with no distinct range, including a manual run on the default branch,
+validates the tip commit. The same Conventional Commit rules apply in every case.
+Run `bun --no-env-file test ./.github/tests/commitlint.test.ts` to exercise these
+boundaries with real commitlint validation in isolated Git repositories.
 
 Use `HUSKY=0` when hook setup should be disabled, or install with
 `--ignore-scripts`. Existing container builds use `--ignore-scripts`, including
