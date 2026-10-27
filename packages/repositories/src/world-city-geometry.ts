@@ -156,7 +156,7 @@ export async function normalizeWorldCityGeometry(
           num(march, "ownerId") !== anchor ||
           !march.armyInfo ||
           !(
-            (num(march, "type") === 0 && num(march, "targetType") === 3) ||
+            (num(march, "type") === 0 && [3, 37].includes(num(march, "targetType"))) ||
             (num(march, "type") === 13 && num(march, "targetType") === 1) ||
             (num(march, "type") === 0 && num(march, "targetType") === 2)
           )
