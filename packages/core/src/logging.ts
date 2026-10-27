@@ -135,7 +135,7 @@ export function httpOperation(path: string) {
   return "unknown";
 }
 
-export function errorReason(error: unknown): string {
+function classifiedErrorReason(error: unknown): string {
   if (!(error instanceof Error)) return "unexpected_failure";
 
   const code = "code" in error ? error.code : undefined;
@@ -155,12 +155,32 @@ export function errorReason(error: unknown): string {
     "53300": "database_connection_limit",
     "40001": "database_serialization",
     "40P01": "database_deadlock",
+    "57014": "database_query_cancelled",
+    "55P03": "database_lock_unavailable",
+    "25P02": "database_transaction_aborted",
+    "08006": "database_connection_failure",
+    "57P01": "database_shutdown",
   };
 
   if (typeof code === "string" && Object.hasOwn(reasons, code)) return reasons[code]!;
   if (typeof code === "string" && /^(?:E[0-9]{6}|[0-9]{6})$/.test(code)) return code;
 
   if (error.name === "TimeoutError" || error.name === "AbortError") return "dependency_timeout";
+
+  return "unexpected_failure";
+}
+
+export function errorReason(error: unknown): string {
+  const seen = new Set<unknown>();
+
+  for (let depth = 0; depth < 8 && error instanceof Error && !seen.has(error); depth++) {
+    seen.add(error);
+    const reason = classifiedErrorReason(error);
+
+    if (reason !== "unexpected_failure") return reason;
+
+    error = error.cause;
+  }
 
   return "unexpected_failure";
 }

@@ -45,6 +45,8 @@ export function createSessionHandler(
   const sessions = new Map<string, { socket: Socket; token: string }>();
 
   return (socket: Socket) => {
+    const initialization = new AbortController();
+    socket.once("close", () => initialization.abort());
     const connectionId = randomUUID();
     const connected = performance.now();
     let lastProfileObservation = Date.now();
@@ -158,10 +160,10 @@ export function createSessionHandler(
           stage = "initialization";
           const details = fields(body.p);
           await dependencies.profileSessions?.open(claimed, connectionId, Date.now());
-          const initializedState = await game.initialize(claimed, details);
+          const initializedState = await game.initialize(claimed, details, initialization.signal);
           const initial = initializedState.body;
 
-          if (socket.destroyed || !ready()) {
+          if (socket.destroyed || !ready() || sessions.get(claimed)?.socket !== socket) {
             if (sessions.get(claimed)?.socket === socket) sessions.delete(claimed);
 
             await dependencies.profileSessions?.close(claimed, connectionId, Date.now());

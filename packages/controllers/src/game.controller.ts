@@ -12,8 +12,8 @@ export class GameController {
     return this.gameService.initial(uid);
   }
 
-  initialize(uid: string, correlation: Fields = {}): Promise<Result> {
-    return this.gameService.initialize(uid, correlation);
+  initialize(uid: string, correlation: Fields = {}, signal?: AbortSignal): Promise<Result> {
+    return this.gameService.initialize(uid, correlation, signal);
   }
 
   execute(uid: string, command: string, params: Fields): Promise<Result> {

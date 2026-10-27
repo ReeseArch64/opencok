@@ -191,3 +191,20 @@ test("a failed prestige read rolls back instead of reporting a false saved value
     await database.close();
   }
 });
+
+test("abandoned login stops before the next initialization stage", async () => {
+  const controller = new AbortController();
+  const calls: string[] = [];
+  const game = new Game({} as GameStore, rules(), { kingdomId: 1 }, () => 0, {
+    cityProgression: async (_owner, command) => {
+      calls.push(command);
+      controller.abort();
+
+      return { body: {}, pushes: [] };
+    },
+  });
+  await expect(game.initialize("synthetic", {}, controller.signal)).rejects.toThrow();
+  expect(calls).toEqual(["egg.activity.init"]);
+  await expect(game.initialize("synthetic", {}, controller.signal)).rejects.toThrow();
+  expect(calls).toHaveLength(1);
+});
