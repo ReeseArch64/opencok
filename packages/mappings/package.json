@@ -100,7 +100,8 @@
     "./campaign-observation": "./src/campaign-observation.ts",
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
-    "./merge-campaign": "./src/merge-campaign.ts"
+    "./merge-campaign": "./src/merge-campaign.ts",
+    "./hot-item": "./src/hot-item.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

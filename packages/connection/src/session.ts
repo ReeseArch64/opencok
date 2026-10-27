@@ -284,6 +284,7 @@ export function createSessionHandler(
         } else {
           if (
             (command.startsWith("item.") ||
+              command.startsWith("hot.item.") ||
               command === "mail.reward" ||
               command === "mail.reward.batch" ||
               command === "shoppingMall.buy" ||

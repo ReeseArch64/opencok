@@ -242,6 +242,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  hotItemBusinessMan?(): Promise<Fields | undefined>;
   worldEffectBoard?(): Promise<Fields>;
   expeditionActivity?(owner: string): Promise<Fields>;
   mailChatEnabled?: boolean;

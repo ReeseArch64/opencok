@@ -286,6 +286,7 @@ export class GameService {
     return (await this.initialize(uid)).body;
   }
   async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
+    const businessMan = await this.services.hotItemBusinessMan?.();
     const prayer = await this.services.cityProgression?.(uid, "prayer.init", {});
     const recallTasks = await this.services.cityProgression?.(uid, "recall.task.init", {});
     const regionalRecall = await this.services.cityProgression?.(uid, "region.recall.init", {});
@@ -328,6 +329,7 @@ export class GameService {
           .filter((row) => num(row, "on") !== 2)
           .map((row) => sfs.object(equipmentFields(row))),
       ),
+      ...(businessMan ? { businessMan: sfs.object(businessMan) } : {}),
       ...prayer?.body,
       ...recallTasks?.body,
       ...regionalRecall?.body,
@@ -524,6 +526,11 @@ export class GameService {
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
+      case "hot.item.v2.get":
+      case "hot.item.refresh":
+      case "hot.item.refreshV3":
+      case "hot.item.v2.buy":
+      case "hot.item.v3.buy":
       case "herodraw":
       case "robgeneral":
       case "general.fire":

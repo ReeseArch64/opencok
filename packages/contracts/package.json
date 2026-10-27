@@ -177,7 +177,8 @@
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./responses/fragment-exchange": "./src/responses/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
-    "./responses/monster-exchange": "./src/responses/monster-exchange.ts"
+    "./responses/monster-exchange": "./src/responses/monster-exchange.ts",
+    "./hot-item": "./src/hot-item.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

@@ -600,7 +600,7 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
       return [...grants].map(([itemId, count]) => ({ itemId, count }));
     },
     balance(asset) {
-      return asset === "civilizationSorce"
+      return asset === "civilizationSorce" || asset === "crystal"
         ? ledger.balance(asset)
         : asset === "gold"
           ? ledger.total()
@@ -623,6 +623,12 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
       return ledger.items
         .filter((item) => item.itemId === itemId && item.value === 0 && ledger.valid(item))
         .reduce((sum, item) => sum + item.count, 0);
+    },
+    crystal(delta) {
+      const before = ledger.balance("crystal"),
+        after = valid(before + delta);
+      ledger.profile.crystal = after;
+      ledger.post("profile.crystal", before, after, "activity.crystal");
     },
     civilizationScore(delta) {
       const before = ledger.balance("civilizationSorce"),
@@ -663,6 +669,11 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
           "diamond",
           "dragon_food",
           "dragon_gold",
+          "sandstone",
+          "diamondstone",
+          "marble",
+          "granite",
+          "limestone",
         ].includes(asset)
       )
         throw new Error("Invalid activity resource");
