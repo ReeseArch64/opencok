@@ -1,3 +1,4 @@
+import { campaignTriggerView } from "@opencok/mappings/anniversary";
 import { encode, sfs, str, int } from "@opencok/messages/sfs";
 import { eventTimestamp } from "@opencok/rules/local-events";
 import { cityInteger } from "@opencok/rules/city-progression";
@@ -58,6 +59,7 @@ export const anniversaryDomain: CityDomain = {
     "third.anniversary.reward",
     "get.activity.value",
     "campaign.init",
+    "trigger.activity",
     "campaign.action",
   ],
   types: [],
@@ -74,6 +76,18 @@ export const anniversaryDomain: CityDomain = {
         ),
         event: null,
       };
+    }
+    if (command === "trigger.activity") {
+      const type = cityInteger(int(params, "type"));
+      const target = str(params, "uid", "");
+      if (type === 45 && !target.trim()) return { response: encode({}), event: null };
+      if (type === 45 && target !== context.owner) campaignFailure();
+      new CampaignPlanner(context, {
+        uid: context.owner,
+        client_para1: int(params, "para1", -1),
+      }).event(type === 47 ? 47 : 51, type === 47 ? "" : String(type));
+      refreshCampaignGrants(context);
+      return { response: encode(campaignTriggerView(type)), event: null };
     }
     if (command === "campaign.init") {
       new CampaignPlanner(context).event(8);

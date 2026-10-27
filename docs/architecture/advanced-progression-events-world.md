@@ -724,3 +724,22 @@ draw. No migration or dependency is introduced. Back up prayer rows, history,
 resources, inventory, receipts and event progress together and retain committed
 receipts during rollback. Synthetic PostgreSQL and wire tests cover quoted costs,
 pinned draws, free credits, UTC reset, status effects, upgrade scaling and rollback.
+
+## Client campaign recipes
+
+`trigger.activity` maps client selectors to the fixed client event 51; selector
+47 retains its dedicated share event. Clients cannot choose authoritative item
+acquisition or combat events. The maintained four-part painting recipe verifies
+all owned ingredients and its catalog selector before consuming the exact costs,
+granting the pinned prize and recording campaign score in the same receipt.
+Wrong selectors roll back rather than advancing a score without an exchange.
+The response retains the INT selector and native server-action reward pushes.
+
+Owned cake interactions consume one catalog item, update the configured
+cosmetic statuses and evaluate their exact-count milestone. Overlap-five status
+counters now preserve their original deadline, increment their stored count and
+reset at the configured limit. Applying these interactions to another player
+requires the following target-cosmetic module; this slice rejects that route
+before consuming an item. Current recipes retain their historical exclusive
+calendar bounds. No migration or dependency is introduced. Preserve ingredient,
+reward, variable, status and receipt records together during backup and rollback.
