@@ -111,6 +111,9 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
         grid2Type: 0,
       })),
     );
+    expect((await call()).status).toBe(202);
+    expect(await realm.db.select().from(userprofile)).toHaveLength(0);
+    await realm.db.update(worldpoint).set({ gridType: 2 });
     const lost = new ProvisioningService(
       { verify: async () => identity },
       store,
@@ -230,7 +233,7 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
         x: offset % 10,
         y: Math.floor(offset / 10),
         areaId: 0,
-        gridType: 0,
+        gridType: 2,
         grid2Type: 0,
         pointType: 0,
         resLevel: 0,

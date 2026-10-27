@@ -2336,3 +2336,11 @@ command. PostgreSQL acceptance covers zero-point ownership, retry conservation,
 reserved terrain, wall and shield restoration, native fields, recovered troops
 and unavailable footprints. Cross-battle recreation retains its separate realm
 and target-engine dependencies. No schema or dependency is added.
+
+The native birth terrain gate is `GridType.SPACE` (2), confirmed by
+`WorldPoint.selectFreeBornPoints` and `selectAllFreeBornPoints`. Both initial
+character provisioning and recreation use this gate. Neutral grid type 0 does
+not admit a new resident city. Existing imported cities retain their actual
+terrain and identity. PostgreSQL provisioning acceptance first supplies only
+neutral tiles and verifies that no character is created, then enables space
+tiles and exercises normal receipt, rollback and ownership recovery.
