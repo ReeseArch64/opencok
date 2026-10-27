@@ -131,10 +131,10 @@ Back up global and realm databases consistently before applying migrations.
 
 Configure `MONGO_URI` with a database name and authentication. Local Compose supplies
 an authenticated MongoDB service, an internal network and a named data volume, with no
-host port. `MONGODB_USER`/`MONGODB_PASSWORD` configure local initialization; use URI-safe
-credentials or an explicitly encoded URI. `CHAT_INSTANCE_ID` must be stable and unique
-per running Chat instance; its lease prevents simultaneous consumers sharing an ID.
-The development Compose default is `chat-local`. Keep `CHAT_SECRET` coordinated
+host port. Use URI-safe credentials or an explicitly encoded URI. The entrypoint
+fixes its consumer ID at `chat-local` for a single Chat instance. Additional instances
+require distinct stable IDs in application composition; the lease prevents simultaneous
+consumers sharing an ID. Keep `CHAT_SECRET` coordinated
 with realm configuration and keep `/_internal/social` private or behind trusted TLS.
 
 MongoDB is optional for readiness: an outage preserves PostgreSQL bodies and produces

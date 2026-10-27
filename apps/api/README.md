@@ -117,7 +117,7 @@ readiness and game-realm discovery remain independent of chat availability.
 
 The fixed 3000 ms dependency timeout bounds both request and response consumption. Streamed
 responses are capped at 16 KiB; no chat metadata cache or automatic retry is introduced.
-The public WebSocket remains the chat service's configured `CHAT_WEBSOCKET_URL` and
+The public WebSocket remains the fixed URL advertised by the Chat entrypoint and
 must be directly reachable by clients. The API does not relay WebSocket traffic or
 expose the session-signing secret. The realm shares `CHAT_URL` and derives the same service's internal session,
 nickname and mailbox endpoints from fixed paths. Development Compose

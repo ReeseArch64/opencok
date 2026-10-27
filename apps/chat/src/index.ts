@@ -30,9 +30,9 @@ let app: ChatApplication | undefined;
 try {
   app = new ChatApplication({
     repository,
-    instanceId: config.CHAT_INSTANCE_ID,
+    instanceId: "chat-local",
     signingSecret: config.CHAT_SECRET,
-    websocketUrl: config.CHAT_WEBSOCKET_URL,
+    websocketUrl: "ws://192.168.1.104:8083/chat/ws",
     log: (event) =>
       logEvent(
         "chat_operation",
@@ -47,9 +47,9 @@ try {
   await app.runMaintenance();
   await new Promise<void>((resolve, reject) => {
     app!.server.once("error", reject);
-    app!.server.listen(config.CHAT_PORT, config.CHAT_HOST, resolve);
+    app!.server.listen(8083, "0.0.0.0", resolve);
   });
-  logEvent("listening", { port: config.CHAT_PORT, outcome: "success" });
+  logEvent("listening", { port: 8083, outcome: "success" });
 } catch {
   logEvent("service_failed", { service: "chat", outcome: "failure" }, "error");
   await app?.close();

@@ -14,7 +14,8 @@ Server integration and operating evidence are recorded in the
 Install with `bun install --frozen-lockfile`. Run the root Compose `dev` profile to
 start Chat, PostgreSQL and the existing global/kingdom migrations. The local stack
 configures API discovery and realm session issuance automatically and publishes Chat
-on port 8083. Set `CHAT_WEBSOCKET_URL` for the client-reachable address; see the
+on port 8083. The advertised WebSocket URL is fixed at
+`ws://192.168.1.104:8083/chat/ws` in code; see the
 [stack guide](../../infra/compose/README.md). To run Chat on the host instead, stop
 the Compose Chat service, configure the root `.env` or process environment, and run
 `bun run --cwd apps/chat start`.
@@ -23,12 +24,14 @@ the Compose Chat service, configure the root `.env` or process environment, and 
 | ------------------------ | --------------------------------------------------------------------------------------- |
 | `DATABASE_URL`           | Required PostgreSQL connection URL; topology selects physical databases                 |
 | `CHAT_SECRET`            | Required shared secret for trusted backend session, avatar and nickname requests        |
-| `CHAT_WEBSOCKET_URL`     | Required public `ws(s)://host/chat/ws`, without credentials/query/fragment              |
 | `MONGO_URI`              | Authenticated MongoDB archive URI; PostgreSQL fallback remains available during outages |
-| `CHAT_INSTANCE_ID`       | Stable unique consumer identity; defaults to a process UUID outside Compose             |
-| `CHAT_HOST`, `CHAT_PORT` | Listen address, default `127.0.0.1:8083`                                                |
 | `GLOBAL_DATABASE_NAME`   | Default `opencok_global`                                                                |
 | `CHAT_KINGDOM_DATABASES` | Default `1:opencok_kingdom_1,2:opencok_kingdom_2`                                       |
+
+The entrypoint binds to `0.0.0.0:8083` with consumer ID `chat-local`; these values
+are fixed in code. This entrypoint runs one Chat consumer per deployment. Additional
+instances require distinct IDs supplied through application composition so each
+consumer retains its own lease and cursor.
 
 Configuration uses the shared root environment loader. Legacy MariaDB variables and
 secret-file settings are replaced by these validated settings. Credentials are never
@@ -75,7 +78,7 @@ API metadata and disposable database acceptance now exercise the full server flo
 Native-client behavior remains unverified. The shared API/gateway now exposes the three public metadata GET routes
 when `CHAT_URL` points to this service's HTTP origin. Chat remains the source of
 configuration and readiness; the proxy forwards no caller credentials or query strings.
-The advertised `CHAT_WEBSOCKET_URL` must be directly reachable because the shared gateway
+The advertised WebSocket URL fixed in the entrypoint must be directly reachable because the shared gateway
 does not proxy `/chat/ws` or expose `/external/session`. See the
 [API discovery contract](../api/README.md#public-chat-discovery) and the
 [realm session contract](../server/README.md#realm-chat-sessions) for bounds and errors.

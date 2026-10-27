@@ -3272,7 +3272,7 @@ setting this origin enables all three private integrations. The API uses the sam
 origin for public metadata. Outside Compose, an absent URL disables these integrations.
 Development Compose defaults both services to `http://chat:8083`. Origins must have
 no path, embedded credentials, query or fragment; legacy production chat hosts reject.
-The game-facing WebSocket endpoint remains the chat service's `CHAT_WEBSOCKET_URL` setting.
+The game-facing WebSocket endpoint is fixed in the Chat entrypoint.
 
 The connection adapter signs the legacy form with application ID `100001` and a TTL of
 86,400 seconds. The current chat service stores only a SHA-256 token digest. Signature

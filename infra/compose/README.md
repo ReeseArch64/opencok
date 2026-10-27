@@ -37,9 +37,9 @@ containers. Chat defaults to `chat:8083`: the realm uses
 overrides the shared development signing value on both Chat and the realm. Optional
 `CHAT_URL` selects the shared HTTP(S) origin for API and realm; paths are fixed in
 code. Setting it enables all three private realm integrations, including mailbox.
-Use a bare origin without credentials, path, query or fragment. Set
-`CHAT_WEBSOCKET_URL` when clients need a different address than
-`ws://192.168.1.104:8083/chat/ws`. Use `.env.example` as the reference and preserve
+Use a bare origin without credentials, path, query or fragment. The Chat entrypoint
+advertises `ws://192.168.1.104:8083/chat/ws` as a fixed value; changing the client-facing
+address requires a code change and rebuild. Use `.env.example` as the reference and preserve
 existing values. No app-local env files are needed. The example database URL uses
 Compose service DNS; PostgreSQL has no published host port. Run database tools
 through `docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev exec -T postgres` or the internal network.
@@ -274,9 +274,9 @@ Application and package suites remain alongside their respective implementations
 
 Topic 24 adds authenticated `mongo:8.0.34` on the internal network with the
 `mongodb-data` volume and no host port. Chat uses `MONGO_URI`; local initialization
-uses `MONGODB_USER` and `MONGODB_PASSWORD`. Configure a unique stable `CHAT_INSTANCE_ID`
-for every additional Chat instance. The development default identifies the single
-Compose Chat consumer. Read the [social chat deployment guide](../../docs/social-chat-migration.md)
+uses the local MongoDB development credentials. The Chat entrypoint uses the fixed
+consumer ID `chat-local` for the single Compose instance; additional instances need
+distinct IDs supplied through application composition. Read the [social chat deployment guide](../../docs/social-chat-migration.md)
 for migration order, archive outage behavior, original expiry, rollback and synthetic
 acceptance. Existing MongoDB volumes keep their initialized credentials when environment
 values change; do not delete the volume to rotate credentials.
