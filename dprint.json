@@ -1,0 +1,35 @@
+{
+  "lineWidth": 100,
+  "indentWidth": 4,
+  "useTabs": false,
+  "newLineKind": "lf",
+  "typescript": {
+    "quoteStyle": "alwaysDouble",
+    "quoteProps": "preserve",
+    "semiColons": "always",
+    "trailingCommas": "onlyMultiLine",
+    "bracePosition": "nextLine",
+    "nextControlFlowPosition": "nextLine",
+    "useBraces": "always",
+    "arrowFunction.bracePosition": "sameLine",
+    "module.sortImportDeclarations": "maintain",
+    "module.sortExportDeclarations": "maintain",
+    "importDeclaration.sortNamedImports": "maintain",
+    "exportDeclaration.sortNamedExports": "maintain",
+    "importDeclaration.sortTypeOnlyImports": "none",
+    "exportDeclaration.sortTypeOnlyExports": "none"
+  },
+  "plugins": ["./node_modules/@dprint/typescript/plugin.wasm"],
+  "includes": ["**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts,mjsx,cjsx,mtsx,ctsx}"],
+  "excludes": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/*.tsbuildinfo",
+    "data/**",
+    ".husky/_/**",
+    "packages/drizzle/migrations/**",
+    "**/__snapshots__/**",
+    "packages/drizzle/tests/fixtures/**"
+  ]
+}

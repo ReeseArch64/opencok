@@ -7,3 +7,6 @@ end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = false
 insert_final_newline = true
+
+[*.{js,jsx,ts,tsx,mjs,cjs,mts,cts,mjsx,cjsx,mtsx,ctsx}]
+indent_size = 4

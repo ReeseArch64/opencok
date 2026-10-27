@@ -32,11 +32,11 @@ documentation and express constraints through names, types and tests. Interprete
 directives required to execute scripts are executable syntax and must be preserved.
 
 Install the workspace dependencies with `bun install --frozen-lockfile`. Use the
-Oxlint and Oxfmt versions bundled with the existing `vite-plus` dependency;
-separate global installations are not required. Configure lint rules in the root
-`.oxlintrc.json` and formatting in `.oxfmtrc.json`. These files follow the
-[Oxlint configuration](https://oxc.rs/docs/guide/usage/linter/config) and
-[Oxfmt configuration](https://oxc.rs/docs/guide/usage/formatter/config).
+Oxlint and Oxfmt versions bundled with `vite-plus` and the pinned dprint CLI and
+TypeScript plugin from the root lockfile. Configure lint in `.oxlintrc.json`,
+JS/TS formatting in `dprint.json`, and other formatting in `.oxfmtrc.json`.
+[ADR-0014](../docs/decisions/0014-adopt-dprint-for-typescript-formatting.md) records
+the confirmed policy and [pilot evidence](formatting-pilot/README.md).
 
 Run these commands from the repository root before submitting changes:
 
@@ -51,13 +51,31 @@ pull requests targeting any branch and pushes to all branches; lint warnings fai
 the check. PostgreSQL database, PostgreSQL realm server and Chat and API media
 run only on pushes to `main`, subject to their path filters.
 
-Formatting uses two spaces, double quotes, semicolons, LF line endings and a
-100-column print width. Import and package-key sorting are disabled. Markdown
-keeps its existing prose wrapping. Lint enables correctness rules for the
+JS/TS formatting uses four spaces, double quotes, semicolons, LF and a 100-column
+print width. dprint exclusively owns JS/JSX/TS/TSX and c/m module variants; Oxfmt
+owns its other supported formats, including JSON, YAML, Markdown, CSS and HTML,
+with two-space indentation. Markdown embedded code remains part of its Oxfmt
+ownership. Import/export and package-key sorting are disabled. Markdown keeps
+its existing prose wrapping. Root commands invoke both disjoint owners.
+
+Declaration and control-flow opening braces use Allman placement; `else`, `catch`
+and `finally` start on a new line. Arrow callback block braces stay on the same
+line, and object literals retain expression layout. Empty blocks may stay `{}`
+after a line break. Oxlint `curly` requires braces for every control body, including
+`do` bodies that dprint alone does not wrap. Use `lint:fix`, then `format` and
+`lint` to correct these; repeated lint fixes may be needed for nested guards.
+Multiline arguments, conditions, generic types and chains follow the pinned
+plugin at 100 columns. Trailing commas appear only in multiline JS/TS constructs.
+
+EditorConfig defines four-space source overrides and two-space other-format
+defaults. VS Code recommends dprint and Oxc extensions and selects the local
+dprint binary for JS/TS; select Oxfmt for the other supported languages. Editors
+without these integrations must run root commands. CI uses the same frozen
+dependencies and root commands; no global formatter or remote plugin is needed. Lint enables correctness rules for the
 default TypeScript, Unicorn and Oxc plugins. Type checking remains separate;
 use `bun run --cwd <workspace> check-types` for each implemented workspace.
 
-Both tools exclude private inputs under `data/`, generated Husky adapters under
+All tools exclude private inputs under `data/`, generated Husky adapters under
 `.husky/_/`, workspace `node_modules/`, `dist/`, coverage, TypeScript build metadata,
 Drizzle migrations, snapshots and database fixture data. The former root
 `mobile/` and `legacy/` input directories are no longer part of this checkout;
@@ -90,8 +108,11 @@ delegate to concrete classes while callers migrate.
 
 Separate imports from declarations, adjacent top-level declarations and class methods
 with a blank line. Separate control-flow blocks and final returns from preceding
-statements. Keep related field and local variable declarations together. Oxfmt
-preserves these blank lines; do not compress source to imitate the minified build.
+statements. Keep related field and local variable declarations together. dprint and Oxfmt
+preserve existing meaningful blank lines and collapse decorative repetition.
+Missing logical-stage padding remains a review requirement because the installed
+Oxlint does not provide general padding enforcement. Do not compress source to
+imitate the minified build.
 
 Reserve DTO classes for create and update inputs, named `Create<Resource>Dto`
 and `Update<Resource>Dto`, such as `CreateCityDto`. Declare explicit

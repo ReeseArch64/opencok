@@ -47,7 +47,14 @@ export function syntax(source: string, name: string): unknown {
           ? node.getText(tree)
           : undefined;
 
-    return [ts.SyntaxKind[node.kind], value, children];
+    const semantics = {
+      operator: "operator" in node ? node.operator : undefined,
+      isTypeOnly: "isTypeOnly" in node ? node.isTypeOnly : undefined,
+      isExportEquals: "isExportEquals" in node ? node.isExportEquals : undefined,
+      declarationFlags: ts.isVariableDeclarationList(node) ? node.flags & ts.NodeFlags.BlockScoped : undefined,
+    };
+
+    return [ts.SyntaxKind[node.kind], value, semantics, children];
   }
 
   return visit(tree);
