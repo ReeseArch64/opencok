@@ -4,7 +4,7 @@ import type { PowerState } from "@opencok/contracts/power";
 import type { Row } from "@opencok/contracts/rows";
 import { GameService as Game } from "@opencok/services/game";
 import { Rules } from "@opencok/rules/game";
-import { decode, encode, sfs } from "@opencok/messages/sfs";
+import { decode, encode, fields, sfs } from "@opencok/messages/sfs";
 
 const now = 1792756800000;
 const unused = async (): Promise<never> => {
@@ -122,6 +122,33 @@ test("get.power.info uses one authenticated snapshot and returns legacy widths w
   expect(calls).toEqual([{ uid: "synthetic", now }]);
   expect(clockCalls()).toBe(1);
   expect(state).toEqual(before);
+});
+
+test("login includes power details and battle statistics before opening the profile", async () => {
+  const { game, db, rules, state } = fixture();
+  rules.roles.get("100105")!.player_exp = "100";
+  state.profile!.payTotal = 1n;
+  db.getCityByPlayerId = async () => ({
+    profile: state.profile,
+    resource: {},
+    world: { worldId: 0 },
+    lord: undefined,
+    buildings: [],
+    queues: [],
+    armies: [],
+    items: [],
+    hasMarches: false,
+  });
+  const initial = decode(encode(await game.initial("synthetic")));
+  const info = fields(initial.playerInfo);
+  expect(info.playerPower).toEqual(sfs.int(100));
+  expect(info.armyPower).toEqual(sfs.long(4));
+  expect(info.questpower).toEqual(sfs.int(7));
+  expect(info.battleWin).toEqual(sfs.int(3));
+  expect(info.armyKill).toEqual(sfs.long(9007199254740993n));
+  expect(info.skillPoint).toEqual(sfs.int(0));
+  expect(info.isPayFlag).toEqual(sfs.bool(true));
+  expect(info.nextUpdateTime).toBeUndefined();
 });
 
 test("power requests reject missing, banned and mismatched snapshot owners", async () => {
