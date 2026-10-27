@@ -122,22 +122,19 @@ async function createStack() {
     DEPENDENCY_TIMEOUT_MS: "1000",
   });
   expect(isolated.services.server.volumes ?? []).toEqual([]);
-  isolated.services.server.volumes = [
-    {
-      type: "bind",
-      source: join(folder, "catalog-definitions.ts"),
-      target: "/workspace/packages/resources/src/catalog-definitions.ts",
-      read_only: true,
-      bind: { create_host_path: false },
-    },
-    {
-      type: "bind",
-      source: join(folder, "building-levels.ts"),
-      target: "/workspace/packages/resources/src/buildings/levels.ts",
-      read_only: true,
-      bind: { create_host_path: false },
-    },
-  ];
+  const serverBuild = isolated.services.server.build;
+  const serverDockerfile = await Bun.file(join(root, "apps/server/Dockerfile")).text();
+  expect(serverDockerfile).toContain("RUN bun run --cwd apps/server build");
+  delete serverBuild.dockerfile;
+  serverBuild.dockerfile_inline = serverDockerfile.replace(
+    "RUN bun run --cwd apps/server build",
+    "COPY --from=synthetic-resources /catalog-definitions.ts /workspace/packages/resources/src/catalog-definitions.ts\nCOPY --from=synthetic-resources /building-levels.ts /workspace/packages/resources/src/buildings/levels.ts\nRUN bun run --cwd apps/server build",
+  );
+  serverBuild.additional_contexts = { "synthetic-resources": folder };
+  await Bun.write(
+    join(folder, ".dockerignore"),
+    "*\n!catalog-definitions.ts\n!building-levels.ts\n",
+  );
   Object.assign(isolated.services.api.environment, {
     DATABASE_URL: databaseUrl,
     KINGDOM_ID: "2",
@@ -271,7 +268,7 @@ export function createBuildingCatalog() {
   async function cleanup(passed: boolean) {
     try {
       if (started && !passed) {
-        const logs = await compose(["logs", "--no-color", "--tail", "40"]).catch(
+        const logs = await compose(["logs", "--no-color", "--tail", "1000"]).catch(
           () => "Unable to collect disposable service logs",
         );
         await Bun.write(join(folder, "service-failure.log"), logs);
@@ -482,6 +479,21 @@ async function checkService(stack: Stack, service: string) {
       ).toContain("Mode: standalone");
       break;
     }
+    case "maple": {
+      const rows = JSON.parse(
+        await compose([
+          "exec",
+          "-T",
+          "maple",
+          "maple",
+          "query",
+          "SELECT count() AS count FROM traces WHERE ServiceName IN ('server', 'api')",
+          "--local",
+        ]),
+      );
+      expect(Number(rows[0].count)).toBeGreaterThan(0);
+      break;
+    }
     case "api":
     case "server": {
       const port = service === "api" ? 8080 : 18090;
@@ -571,6 +583,7 @@ describe("isolated Compose stack", () => {
   }, 120000);
 
   const services = [
+    "maple",
     "postgres",
     "postgres-setup",
     "pgadmin",
@@ -755,7 +768,7 @@ describe("isolated Compose stack", () => {
         clients.push(client);
         expect((await client.handshake()).tk?.type).toBe(Type.String);
         expect((await client.login("synthetic-secret")).zn?.value).toBe("COK2");
-        const init = fields((await client.next()).p);
+        const init = fields((await client.next("initialization")).p);
         expect(fields(fields(init.p).user).gold?.value).toBe(9007199254740993n);
         expect((await client.command("cmd.ping")).serverNowTime?.type).toBe(Type.Long);
         expect(fields((await client.command("build.info")).resource).wood?.value).toBe(10000n);

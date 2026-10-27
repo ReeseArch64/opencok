@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "check-types": "tsc --noEmit",
-    "test": "bun --no-env-file test tests"
+    "test": "bun --no-env-file test tests",
+    "test:maple": "bun --no-env-file test integration/maple.test.ts"
   },
   "devDependencies": {
     "@opencok/config": "workspace:*",
@@ -12,6 +13,16 @@
   },
   "dependencies": {
     "@effect/platform-bun": "catalog:",
+    "@opentelemetry/api": "1.10.0",
+    "@opentelemetry/context-async-hooks": "3.0.0",
+    "@opentelemetry/core": "3.0.0",
+    "@opentelemetry/exporter-logs-otlp-http": "0.300.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "0.300.0",
+    "@opentelemetry/exporter-trace-otlp-http": "0.300.0",
+    "@opentelemetry/resources": "3.0.0",
+    "@opentelemetry/sdk-logs": "3.0.0",
+    "@opentelemetry/sdk-metrics": "3.0.0",
+    "@opentelemetry/sdk-trace": "3.0.0",
     "effect": "catalog:",
     "evlog": "2.33.1"
   },

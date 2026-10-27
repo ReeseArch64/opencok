@@ -14393,6 +14393,7 @@ column ["ownerUid","varchar(40)",true,null,null,null]
 column ["requestId","varchar(128)",true,null,null,null]
 column ["eventId","varchar(40)",true,null,null,null]
 column ["eventType","varchar(128)",true,null,null,null]
+column ["traceparent","varchar(55)",false,null,null,null]
 column ["payload","bytea",true,null,null,null]
 column ["createdAt","bigint",true,null,null,null]
 column ["publishedAt","bigint",true,null,null,null]
@@ -14405,9 +14406,9 @@ index ["mutation_outbox_expiry",false,["expiresAt"]]
 index ["mutation_outbox_pending",false,["kingdomId","publishedAt","createdAt"]]
 check ["mutation_outbox_payload","octet_length(\\"payload\\") <= 65536"]
 check ["mutation_outbox_delivery","\\"publishedAt\\" >= 0"]
-insert into "opencok_kingdom"."mutation_outbox" ("kingdomId", "ownerUid", "requestId", "eventId", "eventType", "payload", "createdAt", "publishedAt", "expiresAt", "nextAttemptAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-select "kingdomId", "ownerUid", "requestId", "eventId", "eventType", "payload", "createdAt", "publishedAt", "expiresAt", "nextAttemptAt" from "opencok_kingdom"."mutation_outbox" where "opencok_kingdom"."mutation_outbox"."kingdomId" = $1
-update "opencok_kingdom"."mutation_outbox" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "eventId" = $4, "eventType" = $5, "payload" = $6, "createdAt" = $7, "publishedAt" = $8, "expiresAt" = $9, "nextAttemptAt" = $10 where "opencok_kingdom"."mutation_outbox"."kingdomId" = $11
+insert into "opencok_kingdom"."mutation_outbox" ("kingdomId", "ownerUid", "requestId", "eventId", "eventType", "traceparent", "payload", "createdAt", "publishedAt", "expiresAt", "nextAttemptAt") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+select "kingdomId", "ownerUid", "requestId", "eventId", "eventType", "traceparent", "payload", "createdAt", "publishedAt", "expiresAt", "nextAttemptAt" from "opencok_kingdom"."mutation_outbox" where "opencok_kingdom"."mutation_outbox"."kingdomId" = $1
+update "opencok_kingdom"."mutation_outbox" set "kingdomId" = $1, "ownerUid" = $2, "requestId" = $3, "eventId" = $4, "eventType" = $5, "traceparent" = $6, "payload" = $7, "createdAt" = $8, "publishedAt" = $9, "expiresAt" = $10, "nextAttemptAt" = $11 where "opencok_kingdom"."mutation_outbox"."kingdomId" = $12
 delete from "opencok_kingdom"."mutation_outbox" where "opencok_kingdom"."mutation_outbox"."kingdomId" = $1"
 `;
 

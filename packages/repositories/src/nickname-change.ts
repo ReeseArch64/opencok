@@ -1,3 +1,4 @@
+import { outgoingTrace } from "@opencok/core/operation";
 import { captureCostFact } from "./continued-cost-facts";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
@@ -780,6 +781,7 @@ export function createNicknameChangeStore(
         if (committed && payment.kind === "gold" && payment.pendingEvent) {
           const event = payment.pendingEvent;
           await tx.insert(mutation_outbox).values({
+            traceparent: outgoingTrace(new Headers()).get("traceparent"),
             kingdomId,
             ownerUid: uid,
             requestId: `nickname:${operationId}`,

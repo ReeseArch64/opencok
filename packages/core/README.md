@@ -53,7 +53,8 @@ These opaque IDs use `req_` followed by UUID hex digits so automatic redaction
 cannot mistake digit-heavy UUID segments for payment card numbers.
 Nested API adapters reuse the request context and emit one HTTP completion event.
 TCP sessions get generated `connectionId` values and a fresh `operationId` per
-packet. Known command names are logged; unknown names use `unknown` and a bounded
+packet. Known command names come from `packages/constants/src/logged-commands.ts`; update this
+controlled registry alongside new handlers. Command starts and completions are logged; unknown names use `unknown` and a bounded
 SHA-256 fingerprint. Repeated command failures remain visible. Chat WebSocket
 commands include connection/operation IDs, duration and outcome; existing Chat
 failure callbacks use the same logger at the composition root.
@@ -67,10 +68,40 @@ operation and a controlled reason such as `connection_refused`,
 `dependency_timeout`, `address_in_use` or `database_authentication`; unrecognized
 errors use `unexpected_failure`.
 
-Events go to the process console, with warnings/errors on stderr. Container log
-rotation and retention are operator responsibilities. This integration adds no
-collector, remote backend, durable audit store or process-wide console interception.
-The architecture's Evelog transaction audit remains separate. New command names
-and HTTP endpoints must update the corresponding logging allowlists alongside
-their handlers. Full-stack testing with authorized client inputs remains a
-separate validation step.
+Server and API additionally initialize the scoped OpenTelemetry SDK before their
+application resources, implementing [ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md).
+Redacted events are exported as OTLP logs; explicit spans carry the same trace/span IDs.
+Exception groups contain controlled reason/event metadata. Duration histograms, event
+counters, active operations, CPU time, resident memory and uptime use bounded dimensions.
+`OTEL_EXPORTER_OTLP_ENDPOINT` enables export; without it JSON output remains available.
+
+Use `observeAdapter` for concrete services and adapter factories at composition roots,
+`observeOperation` for explicit workflows, and `observeJob` for detached background runs.
+These helpers preserve synchronous results and errors and never capture arguments or
+return payloads. HTTP/TCP operations use server spans and outgoing HTTP uses client spans
+with W3C trace propagation. Instrument new composed services through the same helpers.
+This covers application boundaries and effects, not every numerical expression.
+
+`observeTransaction` buffers effect metadata until its enclosing commit and discards it
+on rollback; `afterCommit` registers an effect. PostgreSQL captures only allowlisted
+statement/table/count metadata. Outbox rows persist `traceparent` for asynchronous
+publication. Runtime rows/frames that were prepared or queued are distinguishable from
+confirmed business transactions and acknowledged delivery.
+
+Export runs asynchronously at a one-second default interval. Log/span queues hold at most
+8192 records with 256-record batches and bounded export timeouts. Saturation, failed
+exports and abrupt termination can lose telemetry. Delivery failures produce a controlled
+local diagnostic, rate-limited to once per five seconds. Shutdown releases application
+resources before flushing the telemetry providers. Credentials and raw SDK diagnostics
+are never printed. Transactional audit remains independent of telemetry availability.
+
+`OTEL_SLOW_OPERATION_MS` defaults to 1000 ms and emits `operation_slow` for unfinished async
+work. Maple Local stores logs, traces, exceptions and metrics but provides no automatic
+alert scheduler. Its UI runs at `http://127.0.0.1:4318` in Compose; see the
+[runbook](../../infra/compose/README.md#observability) for credentials, queries and recovery.
+Server/API/Maple container logs rotate at 20 MiB with five files.
+
+Run `bun run --cwd packages/core test:maple` for an isolated real-container integration
+check of both service names, all required signals, correlation, authentication and clean
+restart persistence. It generates synthetic inputs and removes only its own containers,
+network and volume. The full `bun run test:stack` suite verifies actual application export.

@@ -1,3 +1,4 @@
+import { outgoingTrace } from "@opencok/core/operation";
 import { randomUUID } from "node:crypto";
 import { and, asc, eq, inArray, lt, sql } from "drizzle-orm";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
@@ -309,6 +310,7 @@ export function createWorldResourceNewExecutor(
         if (changed.size) {
           const id = randomUUID().replaceAll("-", "");
           await tx.insert(mutation_outbox).values({
+            traceparent: outgoingTrace(new Headers()).get("traceparent"),
             kingdomId: authority.kingdomId,
             ownerUid: "",
             requestId: `shared-resources:${id}`,

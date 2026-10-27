@@ -11,6 +11,7 @@ export const mutation_outbox = opencok_kingdom.table(
     requestId: varchar("requestId", { length: 128 }).notNull(),
     eventId: varchar("eventId", { length: 40 }).notNull(),
     eventType: varchar("eventType", { length: 128 }).notNull(),
+    traceparent: varchar("traceparent", { length: 55 }),
     payload: bytea("payload").notNull(),
     createdAt: bigint("createdAt", { mode: "bigint" }).notNull(),
     publishedAt: bigint("publishedAt", { mode: "bigint" }).notNull(),

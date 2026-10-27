@@ -1,3 +1,4 @@
+import { observedFetch } from "@opencok/core/fetch";
 import { reservationJson } from "@opencok/mappings/provisioning";
 import { signProvisioning, verifyProvisioning } from "@opencok/identity/provisioning";
 import { provisionPath, type RealmProvisioner } from "@opencok/contracts/provisioning";
@@ -168,17 +169,22 @@ export function realmProvisioner(
     async create(reservation) {
       const body = reservationJson(reservation),
         timestamp = String(now());
-      const response = await send(target, {
-        method: "POST",
-        redirect: "error",
-        signal: AbortSignal.timeout(timeoutMs),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Character-Time": timestamp,
-          "X-Character-Signature": signProvisioning(body, timestamp, secret),
+      const response = await observedFetch(
+        "realm.provision",
+        target,
+        {
+          method: "POST",
+          redirect: "error",
+          signal: AbortSignal.timeout(timeoutMs),
+          headers: {
+            "Content-Type": "application/json",
+            "X-Character-Time": timestamp,
+            "X-Character-Signature": signProvisioning(body, timestamp, secret),
+          },
+          body,
         },
-        body,
-      });
+        send,
+      );
 
       if (!response.ok) {
         await response.body?.cancel();

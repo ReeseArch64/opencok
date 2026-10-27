@@ -185,7 +185,9 @@ test("caller credentials and upstream private headers never cross the public dis
       expect(response.headers.get(header)).toBeNull();
     expect(response.headers.get("x-request-id")).not.toBe("private-correlation");
     expect(JSON.stringify(logs)).not.toContain("private-");
-    expect(JSON.stringify(logs)).not.toContain("/chat/");
+    expect(JSON.stringify(logs)).not.toContain(origin);
+    expect(JSON.stringify(logs)).not.toContain("/chat/server/links?");
+    expect(JSON.stringify(logs)).not.toContain("other.invalid");
   } finally {
     logger.mockRestore();
   }

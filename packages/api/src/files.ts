@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { logEvent } from "@opencok/core/logging";
 import {
   BODY_LIMIT,
   FILE_LIMIT,
@@ -171,9 +172,15 @@ export function createHandler(store: ImageStore, tickets: AvatarTickets) {
       if (file.size < 1 || file.size > FILE_LIMIT) throw new HttpError(413, "Image too large");
 
       const encoded = await encodeAvatar(file);
+      logEvent("artifact_prepared", {
+        artifactType: "avatar",
+        bytes: encoded.length,
+        outcome: "success",
+      });
       const name = createHash("md5").update(`${grant.owner}_${grant.seq}`).digest("hex") + ".jpg";
       const key = `${grant.owner.slice(-6)}/${name}`;
       const hash = createHash("sha256").update(encoded).digest("hex");
+      let reused = false;
 
       try {
         await store.put(key, encoded, grant.owner, grant.seq, hash);
@@ -183,8 +190,14 @@ export function createHandler(store: ImageStore, tickets: AvatarTickets) {
         const receipt = await store.find(grant.owner, grant.seq);
 
         if (!receipt || receipt.hash !== hash) throw error;
+        reused = true;
       }
 
+      logEvent(reused ? "artifact_reused" : "artifact_stored", {
+        artifactType: "avatar",
+        bytes: encoded.length,
+        outcome: "success",
+      });
       await store.removePrevious(grant.owner, grant.seq);
 
       return json({

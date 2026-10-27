@@ -128,6 +128,13 @@ request correlation, and useful error responses. Performance work should use
 measured latency and resource data. Reports must omit credentials, session
 tokens, device identifiers, and unnecessary player information.
 
+Every maintained application operation should expose its start, result, elapsed time
+and controlled failure reason. Generated effects must be traceable to their originating
+operation, with prepared/queued work distinguished from committed state and confirmed
+delivery. Operators need searchable correlated history and visibility into unfinished
+or slow work, while secrets, payloads and private player identities remain excluded.
+Operational telemetry is not the authority for economic changes or durable audit.
+
 ## Functional scope
 
 OpenCoK includes or coordinates the following product areas:

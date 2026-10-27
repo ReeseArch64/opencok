@@ -1,3 +1,4 @@
+import { observedFetch } from "@opencok/core/fetch";
 export async function fetchChatJson(
   url: string,
   options: RequestInit,
@@ -14,11 +15,16 @@ export async function fetchChatJson(
   let timer: ReturnType<typeof setTimeout> | undefined;
   let cancel: (() => Promise<void>) | undefined;
   const exchange = async () => {
-    const response = await request(url, {
-      ...options,
-      redirect: "error",
-      signal,
-    });
+    const response = await observedFetch(
+      "chat.exchange",
+      url,
+      {
+        ...options,
+        redirect: "error",
+        signal,
+      },
+      request,
+    );
 
     if (
       signal.aborted ||

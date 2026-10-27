@@ -1,6 +1,8 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomUUID } from "node:crypto";
 import { createLogger, initLogger } from "evlog";
+import { observeServerOperation, incomingTrace } from "./operation.ts";
+import { configureTelemetry, telemetry, traceContext, type TelemetryOptions } from "./telemetry.ts";
 
 type Level = "info" | "warn" | "error";
 
@@ -17,18 +19,49 @@ export function initializeLogging(service: string) {
   });
 }
 
+export function initializeTelemetry(service: string, options: TelemetryOptions) {
+  return configureTelemetry(service, options, (event) => {
+    const logger = createLogger({
+      event,
+      service,
+      outcome: "failure",
+      reason: "telemetry_delivery",
+    });
+    logger.setLevel("error");
+    logger.emit();
+  });
+}
+
 export function logContext() {
   return context.getStore() ?? {};
+}
+
+export function updateLogContext(fields: Fields) {
+  const active = context.getStore();
+  if (active) Object.assign(active, fields);
 }
 
 export function withLogContext<A>(fields: Fields, run: () => A): A {
   return context.run({ ...logContext(), ...fields }, run);
 }
 
-export function logEvent(event: string, fields: Fields = {}, level: Level = "info") {
-  const logger = createLogger({ ...logContext(), ...fields, event });
+export function logEvent(event: string, fields: Fields = {}, level: Level = "info"): void {
+  if (level === "error" && telemetry && !traceContext().traceId) {
+    telemetry.tracer.startActiveSpan(`event.${event}`, (span) => {
+      try {
+        logEvent(event, fields, level);
+      } finally {
+        span.end();
+      }
+    });
+    return;
+  }
+  const logger = createLogger({ ...logContext(), ...traceContext(), ...fields, event });
   logger.setLevel(level);
-  logger.emit();
+  const record = logger.emit({
+    _durationMs: typeof fields.durationMs === "number" ? fields.durationMs : undefined,
+  });
+  if (record) telemetry?.emit(record);
 }
 
 export async function logHttpRequest(
@@ -40,33 +73,37 @@ export async function logHttpRequest(
   const requestId = `req_${randomUUID().replaceAll("-", "")}`;
   const started = performance.now();
 
-  return withLogContext({ requestId, component: "http" }, async () => {
-    let status = 500;
+  return incomingTrace(request.headers, () =>
+    withLogContext({ requestId, component: "http" }, () =>
+      observeServerOperation(`http.${httpOperation(new URL(request.url).pathname)}`, async () => {
+        let status = 500;
 
-    try {
-      const response = await fetch(request);
-      status = response.status;
-      response.headers.set("X-Request-ID", requestId);
+        try {
+          const response = await fetch(request);
+          status = response.status;
+          response.headers.set("X-Request-ID", requestId);
 
-      return response;
-    } finally {
-      logEvent(
-        "http",
-        {
-          operation: httpOperation(new URL(request.url).pathname),
-          method: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"].includes(
-            request.method,
-          )
-            ? request.method
-            : "other",
-          status,
-          durationMs: Math.round(performance.now() - started),
-          outcome: status >= 400 ? "failure" : "success",
-        },
-        status >= 500 ? "error" : status >= 400 ? "warn" : "info",
-      );
-    }
-  });
+          return response;
+        } finally {
+          logEvent(
+            "http",
+            {
+              operation: httpOperation(new URL(request.url).pathname),
+              method: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"].includes(
+                request.method,
+              )
+                ? request.method
+                : "other",
+              status,
+              durationMs: Math.round(performance.now() - started),
+              outcome: status >= 400 ? "failure" : "success",
+            },
+            status >= 500 ? "error" : status >= 400 ? "warn" : "info",
+          );
+        }
+      }),
+    ),
+  );
 }
 
 export function httpOperation(path: string) {
@@ -84,6 +121,8 @@ export function httpOperation(path: string) {
     "/chat/server/all",
     "/external/session",
     "/gameservice/www/gateway/json.php",
+    "/gameservice/www/gateway/gateway.php",
+    "/_internal/characters",
   ]);
 
   if (known.has(path)) return path;
@@ -119,6 +158,7 @@ export function errorReason(error: unknown): string {
   };
 
   if (typeof code === "string" && Object.hasOwn(reasons, code)) return reasons[code]!;
+  if (typeof code === "string" && /^(?:E[0-9]{6}|[0-9]{6})$/.test(code)) return code;
 
   if (error.name === "TimeoutError" || error.name === "AbortError") return "dependency_timeout";
 

@@ -1,5 +1,6 @@
 import type { Schedule } from "./schedule.ts";
 import { TimeoutScheduler } from "./timeout-scheduler.ts";
+import { observeJob } from "./operation.ts";
 
 export abstract class PollingWorker {
   private stopped = false;
@@ -30,7 +31,7 @@ export abstract class PollingWorker {
 
   private async run(): Promise<void> {
     try {
-      await this.execute();
+      await observeJob(`worker.${this.constructor.name}`, () => this.execute());
     } catch {
       try {
         this.reportFailure();

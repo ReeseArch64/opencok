@@ -1,3 +1,4 @@
+import { outgoingTrace } from "@opencok/core/operation";
 import { alias } from "drizzle-orm/pg-core";
 import { and, asc, eq, inArray, lte, sql } from "drizzle-orm";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
@@ -213,6 +214,7 @@ export function createTotemEffectStore(
         });
 
       await tx.insert(mutation_outbox).values({
+        traceparent: outgoingTrace(new Headers()).get("traceparent"),
         kingdomId,
         ownerUid: text(activation, "ownerUid"),
         requestId: `totem:${text(activation, "id")}`,
@@ -294,6 +296,7 @@ export function createTotemEffectStore(
 
       if (states.length)
         await tx.insert(mutation_outbox).values({
+          traceparent: outgoingTrace(new Headers()).get("traceparent"),
           kingdomId,
           ownerUid: owner,
           requestId: `totem-state:${text(delivery.activation, "id")}`,

@@ -1,3 +1,5 @@
+import { logEvent } from "@opencok/core/logging";
+import { observeAdapter, observeJob } from "@opencok/core/operation";
 import { HeroEventService } from "@opencok/hero/services/hero-event";
 import { ActivityRewardDomain } from "@opencok/services/activity-reward";
 import { createWorldMarchInspectionStore } from "@opencok/repositories/world-march-inspection";
@@ -369,35 +371,49 @@ export const RealmDependenciesLive = Layer.effect(
     const rules = yield* RealmRules;
     const db = yield* acquireResource(
       "realm.database",
-      async () => new Database(config),
+      async () => observeAdapter(new Database(config), "realm.Database"),
       (db) => db.close(),
     );
     yield* fromPromise("realm.world-favorites", () =>
       checkWorldFavoriteStore(db.kingdom.db, db.databases.global.db),
     );
-    const worldFavorites = createWorldFavoriteStore(
-      db.kingdom.db,
-      db.databases.global.db,
-      config.kingdomId,
+    const worldFavorites = observeAdapter(
+      createWorldFavoriteStore(db.kingdom.db, db.databases.global.db, config.kingdomId),
+      "realm.createWorldFavoriteStore",
     );
     yield* fromPromise("realm.world-search", () => checkWorldSearchStore(db.kingdom.db));
-    const worldSearch = createWorldSearchStore(db.databases, config.kingdomId);
+    const worldSearch = observeAdapter(
+      createWorldSearchStore(db.databases, config.kingdomId),
+      "realm.createWorldSearchStore",
+    );
     yield* fromPromise("realm.world-point-detail", () => checkWorldPointDetailStore(db.kingdom.db));
-    const worldPointDetail = createWorldPointDetailStore(db.databases, config.kingdomId);
+    const worldPointDetail = observeAdapter(
+      createWorldPointDetailStore(db.databases, config.kingdomId),
+      "realm.createWorldPointDetailStore",
+    );
     yield* fromPromise("realm.player-search", () =>
       checkPlayerSearchStore(db.databases, config.kingdomId, config.crossSearchEnabled ?? true),
     );
-    const playerSearch = createPlayerSearchStore(db.databases, config.kingdomId);
-    const cache = new Cache(config);
+    const playerSearch = observeAdapter(
+      createPlayerSearchStore(db.databases, config.kingdomId),
+      "realm.createPlayerSearchStore",
+    );
+    const cache = observeAdapter(new Cache(config), "realm.Cache");
     const avatarFiles = config.avatarFiles
       ? yield* fromPromise("realm.avatar-files", async () => {
           await checkAvatarGrantStore(db.kingdom.db);
 
-          return createAvatarFiles({
-            ...config.avatarFiles!,
-            timeoutMs: config.timeoutMs,
-            tickets: createAvatarTickets((name, ...args) => cache.command(name, ...args)),
-          });
+          return observeAdapter(
+            createAvatarFiles({
+              ...config.avatarFiles!,
+              timeoutMs: config.timeoutMs,
+              tickets: observeAdapter(
+                createAvatarTickets((name, ...args) => cache.command(name, ...args)),
+                "realm.createAvatarTickets",
+              ),
+            }),
+            "realm.createAvatarFiles",
+          );
         })
       : undefined;
     const nicknameServices = yield* fromPromise("realm.nickname-words", () =>
@@ -405,7 +421,7 @@ export const RealmDependenciesLive = Layer.effect(
     );
     const coordination = yield* acquireResource(
       "realm.coordination",
-      async () => new Coordination(config),
+      async () => observeAdapter(new Coordination(config), "realm.Coordination"),
       async (coordination) => coordination.close(),
     );
     yield* fromPromise("realm.database.start", () => db.start()).pipe(Effect.uninterruptible);
@@ -433,66 +449,96 @@ export const RealmDependenciesLive = Layer.effect(
     yield* acquireResource(
       "realm.mail-gift-relay",
       async () =>
-        new MailGiftRelay(
-          () => db.relayMailGifts(),
-          () => {
-            console.warn(
-              JSON.stringify({ event: "mail_gift_relay_failed", kingdom: config.kingdomId }),
-            );
-          },
+        observeAdapter(
+          new MailGiftRelay(
+            () => db.relayMailGifts(),
+            () => {
+              logEvent(
+                "mail_gift_relay_failed",
+                { kingdom: config.kingdomId, outcome: "failure" },
+                "error",
+              );
+            },
+          ),
+          "realm.MailGiftRelay",
         ),
       (relay) => relay.close(),
     );
 
     if (config.mailChat) {
-      const publish = createChatMailboxPublisher({
-        ...config.mailChat,
-        timeoutMs: config.timeoutMs,
-      });
+      const publish = observeAdapter(
+        createChatMailboxPublisher({
+          ...config.mailChat,
+          timeoutMs: config.timeoutMs,
+        }),
+        "realm.createChatMailboxPublisher",
+      );
       yield* acquireResource(
         "realm.mail-chat-relay",
         async () =>
-          new MailGiftRelay(
-            async () => {
-              let delivered = 0;
+          observeAdapter(
+            new MailGiftRelay(
+              async () => {
+                let delivered = 0;
 
-              while (delivered < 50 && (await db.relayMailChat(publish))) delivered++;
+                while (delivered < 50 && (await db.relayMailChat(publish))) delivered++;
 
-              return delivered;
-            },
-            () =>
-              console.warn(
-                JSON.stringify({ event: "mail_chat_relay_failed", kingdom: config.kingdomId }),
-              ),
+                return delivered;
+              },
+              () =>
+                logEvent(
+                  "mail_chat_relay_failed",
+                  { kingdom: config.kingdomId, outcome: "failure" },
+                  "error",
+                ),
+            ),
+            "realm.MailGiftRelay",
           ),
         (relay) => relay.close(),
       );
     }
 
-    const notifications = createRealmNotifications();
-    const scoutMailReader = createWorldScoutMailReader(db.kingdom.db, config.kingdomId);
-    const cn1 = createCn1Sessions(db.databases.global.db, rules, config.kingdomId);
+    const notifications = observeAdapter(
+      createRealmNotifications(),
+      "realm.createRealmNotifications",
+    );
+    const scoutMailReader = observeAdapter(
+      createWorldScoutMailReader(db.kingdom.db, config.kingdomId),
+      "realm.createWorldScoutMailReader",
+    );
+    const cn1 = observeAdapter(
+      createCn1Sessions(db.databases.global.db, rules, config.kingdomId),
+      "realm.createCn1Sessions",
+    );
     const nickname = config.nicknameChat
-      ? createNicknameChangeRuntime({
-          databases: db.databases,
-          kingdomId: config.kingdomId,
-          rules,
-          notifications,
-          timeoutMs: config.timeoutMs,
-          report: () =>
-            console.warn(
-              JSON.stringify({ event: "nickname_delivery_failed", kingdom: config.kingdomId }),
-            ),
-          prepareRefund: (owner, now) => cn1.refresh(owner, now),
-          confirmedSpending: confirmedNicknameCost(rules),
-          refundRatio: async (profile) => cn1.ratio(profile),
-          chat: createChatNicknamePublisher({
-            ...config.nicknameChat,
+      ? observeAdapter(
+          createNicknameChangeRuntime({
+            databases: db.databases,
+            kingdomId: config.kingdomId,
+            rules,
+            notifications,
             timeoutMs: config.timeoutMs,
+            report: () =>
+              logEvent(
+                "nickname_delivery_failed",
+                { kingdom: config.kingdomId, outcome: "failure" },
+                "error",
+              ),
+            prepareRefund: (owner, now) => cn1.refresh(owner, now),
+            confirmedSpending: confirmedNicknameCost(rules),
+            refundRatio: async (profile) => cn1.ratio(profile),
+            chat: observeAdapter(
+              createChatNicknamePublisher({
+                ...config.nicknameChat,
+                timeoutMs: config.timeoutMs,
+              }),
+              "realm.createChatNicknamePublisher",
+            ),
+            alliance: { rules, resolveMailReward: (id) => nicknameAllianceReward(id, rules) },
+            sharedUser: { rules, cache },
           }),
-          alliance: { rules, resolveMailReward: (id) => nicknameAllianceReward(id, rules) },
-          sharedUser: { rules, cache },
-        })
+          "realm.createNicknameChangeRuntime",
+        )
       : undefined;
 
     if (nickname) {
@@ -503,39 +549,45 @@ export const RealmDependenciesLive = Layer.effect(
       yield* acquireResource(
         "realm.nickname-relay",
         async () =>
-          new AvatarVersionRelay(
-            nickname.next,
-            (owner, operationId) => {
-              authority.assertReady();
+          observeAdapter(
+            new AvatarVersionRelay(
+              nickname.next,
+              (owner, operationId) => {
+                authority.assertReady();
 
-              return nickname.deliver(owner, operationId, Date.now());
-            },
-            () =>
-              console.warn(
-                JSON.stringify({ event: "nickname_recovery_failed", kingdom: config.kingdomId }),
-              ),
+                return nickname.deliver(owner, operationId, Date.now());
+              },
+              () =>
+                logEvent(
+                  "nickname_recovery_failed",
+                  { kingdom: config.kingdomId, outcome: "failure" },
+                  "error",
+                ),
+            ),
+            "realm.AvatarVersionRelay",
           ),
         (relay) => relay.close(),
       );
     }
 
     const avatar = avatarFiles
-      ? createAvatarRuntime({
-          db,
-          files: avatarFiles,
-          rules,
-          config,
-          cache,
-          notifications,
-          report: (effect) =>
-            console.warn(
-              JSON.stringify({
-                event: "avatar_delivery_failed",
-                kingdom: config.kingdomId,
-                effect,
-              }),
-            ),
-        })
+      ? observeAdapter(
+          createAvatarRuntime({
+            db,
+            files: avatarFiles,
+            rules,
+            config,
+            cache,
+            notifications,
+            report: () =>
+              logEvent(
+                "avatar_delivery_failed",
+                { kingdom: config.kingdomId, outcome: "failure" },
+                "error",
+              ),
+          }),
+          "realm.createAvatarRuntime",
+        )
       : undefined;
 
     if (config.avatarChat && !avatarFiles) throw new Error("Avatar files unavailable");
@@ -545,17 +597,22 @@ export const RealmDependenciesLive = Layer.effect(
       yield* acquireResource(
         "realm.avatar-version-relay",
         async () =>
-          new AvatarVersionRelay(
-            avatar.nextVersion,
-            (owner, operationId) => {
-              authority.assertReady();
+          observeAdapter(
+            new AvatarVersionRelay(
+              avatar.nextVersion,
+              (owner, operationId) => {
+                authority.assertReady();
 
-              return avatar.versionService.deliver(owner, operationId);
-            },
-            () =>
-              console.warn(
-                JSON.stringify({ event: "avatar_version_relay_failed", kingdom: config.kingdomId }),
-              ),
+                return avatar.versionService.deliver(owner, operationId);
+              },
+              () =>
+                logEvent(
+                  "avatar_version_relay_failed",
+                  { kingdom: config.kingdomId, outcome: "failure" },
+                  "error",
+                ),
+            ),
+            "realm.AvatarVersionRelay",
           ),
         (relay) => relay.close(),
       );
@@ -565,26 +622,30 @@ export const RealmDependenciesLive = Layer.effect(
       yield* acquireResource(
         "realm.avatar-relay",
         async () =>
-          new AvatarRelay(
-            avatar.next,
-            (owner, sequence) => {
-              authority.assertReady();
+          observeAdapter(
+            new AvatarRelay(
+              avatar.next,
+              (owner, sequence) => {
+                authority.assertReady();
 
-              return avatar.service.deliver(owner, sequence);
-            },
-            () =>
-              console.warn(
-                JSON.stringify({ event: "avatar_relay_failed", kingdom: config.kingdomId }),
-              ),
+                return avatar.service.deliver(owner, sequence);
+              },
+              () =>
+                logEvent(
+                  "avatar_relay_failed",
+                  { kingdom: config.kingdomId, outcome: "failure" },
+                  "error",
+                ),
+            ),
+            "realm.AvatarRelay",
           ),
         (relay) => relay.close(),
       );
     }
 
-    const mergeCampaigns = createMergeCampaignStore(
-      db.kingdom.db,
-      authority,
-      rules.advanced.campaignRules ?? [],
+    const mergeCampaigns = observeAdapter(
+      createMergeCampaignStore(db.kingdom.db, authority, rules.advanced.campaignRules ?? []),
+      "realm.createMergeCampaignStore",
     );
     yield* fromPromise("realm.merge-campaigns", () => mergeCampaigns.refresh());
     const worldEffects = async (kingdomId = config.kingdomId) => {
@@ -625,18 +686,21 @@ export const RealmDependenciesLive = Layer.effect(
         return planned.rates;
       },
     };
-    const baseCityBoundary = createCityProductionBoundary(baseProductionPreparation, (row) => {
-      const rule = rules.building(
-        text(row, "itemId"),
-        num(row, "level"),
-        num(row, "star"),
-        num(row, "progress"),
-      );
+    const baseCityBoundary = observeAdapter(
+      createCityProductionBoundary(baseProductionPreparation, (row) => {
+        const rule = rules.building(
+          text(row, "itemId"),
+          num(row, "level"),
+          num(row, "star"),
+          num(row, "progress"),
+        );
 
-      return rule.effects?.productionPerHour === undefined
-        ? undefined
-        : ["wood", "stone", "iron", "food"][rule.effects.productionResourceId ?? -1];
-    });
+        return rule.effects?.productionPerHour === undefined
+          ? undefined
+          : ["wood", "stone", "iron", "food"][rule.effects.productionResourceId ?? -1];
+      }),
+      "realm.createCityProductionBoundary",
+    );
     const cityBoundary: typeof baseCityBoundary = async (
       tx,
       owner,
@@ -646,7 +710,17 @@ export const RealmDependenciesLive = Layer.effect(
       economy,
     ) => {
       await settleTotemEffects(
-        createTotemEffectStore(tx, owner, now, config.mapSize, config.kingdomId, baseCityBoundary),
+        observeAdapter(
+          createTotemEffectStore(
+            tx,
+            owner,
+            now,
+            config.mapSize,
+            config.kingdomId,
+            baseCityBoundary,
+          ),
+          "realm.createTotemEffectStore",
+        ),
         rules,
         config.mapSize,
       );
@@ -656,13 +730,16 @@ export const RealmDependenciesLive = Layer.effect(
     const productionPreparation = {
       async prepare(tx: Parameters<typeof readReconnectProgress>[0], owner: string, now: bigint) {
         await settleTotemEffects(
-          createTotemEffectStore(
-            tx,
-            owner,
-            now,
-            config.mapSize,
-            config.kingdomId,
-            baseCityBoundary,
+          observeAdapter(
+            createTotemEffectStore(
+              tx,
+              owner,
+              now,
+              config.mapSize,
+              config.kingdomId,
+              baseCityBoundary,
+            ),
+            "realm.createTotemEffectStore",
           ),
           rules,
           config.mapSize,
@@ -671,134 +748,173 @@ export const RealmDependenciesLive = Layer.effect(
         return baseProductionPreparation.prepare(tx, owner, now);
       },
     };
-    const specialEventStock = createSpecialEventStock(db.databases.global.db);
-    const paymentObservers = createPaymentObservers(
-      config.paidGiftGateway,
-      rules,
-      async (owner, orderId, platform) => {
-        const tx = realmTransactions.getStore();
+    const specialEventStock = observeAdapter(
+      createSpecialEventStock(db.databases.global.db),
+      "realm.createSpecialEventStock",
+    );
+    const paymentObservers: ReturnType<typeof createPaymentObservers> = observeAdapter(
+      createPaymentObservers(
+        config.paidGiftGateway,
+        rules,
+        async (owner, orderId, platform) => {
+          const tx = realmTransactions.getStore();
 
-        if (!tx) throw new Error("Missing trusted payment transaction");
+          if (!tx) throw new Error("Missing trusted payment transaction");
 
-        return redPacketReader(tx, owner).payment(orderId, platform);
-      },
-      (owner, command, params) => activities.domainCommand(owner, command, params),
-    );
-    const goldEggsRanks = createGoldEggsRanks(
-      [...db.databases.kingdoms].map(([kingdomId, realm]) => ({
-        kingdomId,
-        db: realm.db,
-        eligible: () =>
-          goldEggsEnabled(rules, BigInt(Date.now()), false, kingdomId) &&
-          goldEggsEnabled(rules, BigInt(Date.now()), true, kingdomId),
-      })),
-    );
-    const city = new CityProgressionService(
-      (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
-        createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize, authority),
-      [
-        new GeneralsDomain(),
-        new GeneralDrawDomain(() => cache.generalDrawRanking()),
-        new EquipmentDomain(),
-        new WorkshopDomain(),
-        new PlayerEffectsDomain(),
-        new QuestsDomain(),
-        new ConstructionDomain(),
-        new ResearchDomain(),
-        new CivilizationScienceDomain(),
-        new DragonProgressionDomain(),
-        new DragonTowerDomain(),
-        new DragonTalentsDomain(),
-        new WorldMarchDomain(config.mapSize),
-        new CityDefenseDomain(),
-        new TreasureMapDomain(config.mapSize),
-        new WorldUseDomain(config.mapSize),
-        new WorldRecreationDomain(config.mapSize),
-        new CivilizationCastleDomain(config.mapSize),
-        new TotemDomain(config.mapSize),
-        new MinstrelDomain(),
-        new AlchemistDomain(),
-        new BranchCityDomain(),
-        new DailyInvestmentDomain(),
-        new ShippingInvestmentDomain(),
-        new SevenDayCycleDomain(),
-        new OrdinaryBoxDomain(),
-        new NormalRechargeDomain(config.paidGiftGateway),
-        new GoldEggsDomain(undefined, goldEggsRanks),
-        new EggActivityDomain(),
-        new RechargeActivityDomain(paymentObservers.newcomer),
-        new RechargeFeedbackDomain(paymentObservers.feedback),
-        new ActivityRewardDomain(),
-        new RedPacketDomain(config.paidGiftGateway),
-        new AllianceHeartDomain((uid) => notifications.owners().includes(uid)),
-        new PrayerDomain(),
-        new TroubleDomain(),
-        new OlympicDomain(),
-        new CupBettingDomain(),
-        new GroupBuyDomain(),
-        new ContinuedCostDomain(),
-        new HeroTargetDomain(),
-        new HeroRankingRewardDomain(),
-        new ContinuedCostRewardDomain(),
-        new ExpeditionStageRewardDomain(),
-        new SpecialEventDomain(specialEventStock),
-        new RecallTaskDomain(),
-        new RegionalRecallDomain(),
-        new PlayerItemGiftDomain(),
-        new SeasonalExchangeDomain(),
-        new ExchangeActivityDomain(),
-        new ComebackDomain(),
-        new HotItemDomain(),
-        new VipBoxDomain(),
-        new TargetTaskDomain(),
-        new LuckyDayDomain(),
-        new CastleLevelEventDomain(),
-        new LotteryDomain(),
-        new ExpeditionDomain(),
-        new ExpeditionPhaseDomain(),
-        new AnniversaryDomain(),
-        new AvatarActivationDomain(),
-        new ArenaDomain(),
-        new TrainingDomain(),
-        new HospitalDomain(),
-        new FortificationDomain(),
-      ],
-      rules,
-      economyEffects,
-    );
-    const alliances = new AllianceService(
-      createAllianceRepository(
-        db.kingdom.db,
-        authority,
-        cityBoundary,
-        Date.now,
-        city.domains,
-        async (tx, owner, kind, count, now) => {
-          await city.command(
-            tx,
-            owner,
-            "quest.action",
-            encode({ kind: sfs.string(kind), count: sfs.int(count) }),
-            now,
-            {
-              resource() {
-                throw new Error("Unexpected alliance quest resource grant");
-              },
-              gold() {
-                throw new Error("Unexpected alliance quest gold grant");
-              },
-              item() {
-                throw new Error("Unexpected alliance quest item grant");
-              },
-            },
-          );
+          return redPacketReader(tx, owner).payment(orderId, platform);
         },
+        (owner, command, params) => activities.domainCommand(owner, command, params),
       ),
-      rules,
-      economyEffects,
-      async (value) =>
-        Boolean(await nicknameServices.nicknameBadWords?.(value)) ||
-        Boolean(await nicknameServices.nicknameForbidden?.(value)),
+      "realm.createPaymentObservers",
+    );
+    const goldEggsRanks = observeAdapter(
+      createGoldEggsRanks(
+        [...db.databases.kingdoms].map(([kingdomId, realm]) => ({
+          kingdomId,
+          db: realm.db,
+          eligible: () =>
+            goldEggsEnabled(rules, BigInt(Date.now()), false, kingdomId) &&
+            goldEggsEnabled(rules, BigInt(Date.now()), true, kingdomId),
+        })),
+      ),
+      "realm.createGoldEggsRanks",
+    );
+    const city: CityProgressionService<MutationTransaction> = observeAdapter(
+      new CityProgressionService(
+        (tx: Parameters<typeof readReconnectProgress>[0], owner, now) =>
+          observeAdapter(
+            createCityProgressionStore(tx, owner, now, cityBoundary, config.mapSize, authority),
+            "realm.createCityProgressionStore",
+          ),
+        [
+          observeAdapter(new GeneralsDomain(), "realm.GeneralsDomain"),
+          observeAdapter(
+            new GeneralDrawDomain(() => cache.generalDrawRanking()),
+            "realm.GeneralDrawDomain",
+          ),
+          observeAdapter(new EquipmentDomain(), "realm.EquipmentDomain"),
+          observeAdapter(new WorkshopDomain(), "realm.WorkshopDomain"),
+          observeAdapter(new PlayerEffectsDomain(), "realm.PlayerEffectsDomain"),
+          observeAdapter(new QuestsDomain(), "realm.QuestsDomain"),
+          observeAdapter(new ConstructionDomain(), "realm.ConstructionDomain"),
+          observeAdapter(new ResearchDomain(), "realm.ResearchDomain"),
+          observeAdapter(new CivilizationScienceDomain(), "realm.CivilizationScienceDomain"),
+          observeAdapter(new DragonProgressionDomain(), "realm.DragonProgressionDomain"),
+          observeAdapter(new DragonTowerDomain(), "realm.DragonTowerDomain"),
+          observeAdapter(new DragonTalentsDomain(), "realm.DragonTalentsDomain"),
+          observeAdapter(new WorldMarchDomain(config.mapSize), "realm.WorldMarchDomain"),
+          observeAdapter(new CityDefenseDomain(), "realm.CityDefenseDomain"),
+          observeAdapter(new TreasureMapDomain(config.mapSize), "realm.TreasureMapDomain"),
+          observeAdapter(new WorldUseDomain(config.mapSize), "realm.WorldUseDomain"),
+          observeAdapter(new WorldRecreationDomain(config.mapSize), "realm.WorldRecreationDomain"),
+          observeAdapter(
+            new CivilizationCastleDomain(config.mapSize),
+            "realm.CivilizationCastleDomain",
+          ),
+          observeAdapter(new TotemDomain(config.mapSize), "realm.TotemDomain"),
+          observeAdapter(new MinstrelDomain(), "realm.MinstrelDomain"),
+          observeAdapter(new AlchemistDomain(), "realm.AlchemistDomain"),
+          observeAdapter(new BranchCityDomain(), "realm.BranchCityDomain"),
+          observeAdapter(new DailyInvestmentDomain(), "realm.DailyInvestmentDomain"),
+          observeAdapter(new ShippingInvestmentDomain(), "realm.ShippingInvestmentDomain"),
+          observeAdapter(new SevenDayCycleDomain(), "realm.SevenDayCycleDomain"),
+          observeAdapter(new OrdinaryBoxDomain(), "realm.OrdinaryBoxDomain"),
+          observeAdapter(
+            new NormalRechargeDomain(config.paidGiftGateway),
+            "realm.NormalRechargeDomain",
+          ),
+          observeAdapter(new GoldEggsDomain(undefined, goldEggsRanks), "realm.GoldEggsDomain"),
+          observeAdapter(new EggActivityDomain(), "realm.EggActivityDomain"),
+          observeAdapter(
+            new RechargeActivityDomain(paymentObservers.newcomer),
+            "realm.RechargeActivityDomain",
+          ),
+          observeAdapter(
+            new RechargeFeedbackDomain(paymentObservers.feedback),
+            "realm.RechargeFeedbackDomain",
+          ),
+          observeAdapter(new ActivityRewardDomain(), "realm.ActivityRewardDomain"),
+          observeAdapter(new RedPacketDomain(config.paidGiftGateway), "realm.RedPacketDomain"),
+          observeAdapter(
+            new AllianceHeartDomain((uid) => notifications.owners().includes(uid)),
+            "realm.AllianceHeartDomain",
+          ),
+          observeAdapter(new PrayerDomain(), "realm.PrayerDomain"),
+          observeAdapter(new TroubleDomain(), "realm.TroubleDomain"),
+          observeAdapter(new OlympicDomain(), "realm.OlympicDomain"),
+          observeAdapter(new CupBettingDomain(), "realm.CupBettingDomain"),
+          observeAdapter(new GroupBuyDomain(), "realm.GroupBuyDomain"),
+          observeAdapter(new ContinuedCostDomain(), "realm.ContinuedCostDomain"),
+          observeAdapter(new HeroTargetDomain(), "realm.HeroTargetDomain"),
+          observeAdapter(new HeroRankingRewardDomain(), "realm.HeroRankingRewardDomain"),
+          observeAdapter(new ContinuedCostRewardDomain(), "realm.ContinuedCostRewardDomain"),
+          observeAdapter(new ExpeditionStageRewardDomain(), "realm.ExpeditionStageRewardDomain"),
+          observeAdapter(new SpecialEventDomain(specialEventStock), "realm.SpecialEventDomain"),
+          observeAdapter(new RecallTaskDomain(), "realm.RecallTaskDomain"),
+          observeAdapter(new RegionalRecallDomain(), "realm.RegionalRecallDomain"),
+          observeAdapter(new PlayerItemGiftDomain(), "realm.PlayerItemGiftDomain"),
+          observeAdapter(new SeasonalExchangeDomain(), "realm.SeasonalExchangeDomain"),
+          observeAdapter(new ExchangeActivityDomain(), "realm.ExchangeActivityDomain"),
+          observeAdapter(new ComebackDomain(), "realm.ComebackDomain"),
+          observeAdapter(new HotItemDomain(), "realm.HotItemDomain"),
+          observeAdapter(new VipBoxDomain(), "realm.VipBoxDomain"),
+          observeAdapter(new TargetTaskDomain(), "realm.TargetTaskDomain"),
+          observeAdapter(new LuckyDayDomain(), "realm.LuckyDayDomain"),
+          observeAdapter(new CastleLevelEventDomain(), "realm.CastleLevelEventDomain"),
+          observeAdapter(new LotteryDomain(), "realm.LotteryDomain"),
+          observeAdapter(new ExpeditionDomain(), "realm.ExpeditionDomain"),
+          observeAdapter(new ExpeditionPhaseDomain(), "realm.ExpeditionPhaseDomain"),
+          observeAdapter(new AnniversaryDomain(), "realm.AnniversaryDomain"),
+          observeAdapter(new AvatarActivationDomain(), "realm.AvatarActivationDomain"),
+          observeAdapter(new ArenaDomain(), "realm.ArenaDomain"),
+          observeAdapter(new TrainingDomain(), "realm.TrainingDomain"),
+          observeAdapter(new HospitalDomain(), "realm.HospitalDomain"),
+          observeAdapter(new FortificationDomain(), "realm.FortificationDomain"),
+        ],
+        rules,
+        economyEffects,
+      ),
+      "realm.CityProgressionService",
+    );
+    const alliances = observeAdapter(
+      new AllianceService(
+        observeAdapter(
+          createAllianceRepository(
+            db.kingdom.db,
+            authority,
+            cityBoundary,
+            Date.now,
+            city.domains,
+            async (tx, owner, kind, count, now) => {
+              await city.command(
+                tx,
+                owner,
+                "quest.action",
+                encode({ kind: sfs.string(kind), count: sfs.int(count) }),
+                now,
+                {
+                  resource() {
+                    throw new Error("Unexpected alliance quest resource grant");
+                  },
+                  gold() {
+                    throw new Error("Unexpected alliance quest gold grant");
+                  },
+                  item() {
+                    throw new Error("Unexpected alliance quest item grant");
+                  },
+                },
+              );
+            },
+          ),
+          "realm.createAllianceRepository",
+        ),
+        rules,
+        economyEffects,
+        async (value) =>
+          Boolean(await nicknameServices.nicknameBadWords?.(value)) ||
+          Boolean(await nicknameServices.nicknameForbidden?.(value)),
+      ),
+      "realm.AllianceService",
     );
     let allianceCursor: string | undefined;
     const recoverAlliances = async () => {
@@ -822,12 +938,10 @@ export const RealmDependenciesLive = Layer.effect(
             ),
           });
         } catch {
-          console.warn(
-            JSON.stringify({
-              event: "alliance_research_recovery_failed",
-              kingdom: config.kingdomId,
-              alliance: saved.allianceId,
-            }),
+          logEvent(
+            "alliance_research_recovery_failed",
+            { kingdom: config.kingdomId, outcome: "failure" },
+            "error",
           );
         }
       }
@@ -838,12 +952,15 @@ export const RealmDependenciesLive = Layer.effect(
             db.kingdom.db,
             authority,
             async (event) => {
-              const execute = createRealmSocialExecutor({
-                ...config.chatSession!,
-                authority,
-                realm: config.kingdomId,
-                timeoutMs: config.timeoutMs,
-              });
+              const execute = observeAdapter(
+                createRealmSocialExecutor({
+                  ...config.chatSession!,
+                  authority,
+                  realm: config.kingdomId,
+                  timeoutMs: config.timeoutMs,
+                }),
+                "realm.createRealmSocialExecutor",
+              );
               await execute(event.owner, "mine.call.publish", {
                 operationId: sfs.string(event.requestId),
               });
@@ -862,12 +979,15 @@ export const RealmDependenciesLive = Layer.effect(
             db.kingdom.db,
             authority,
             async (event) => {
-              const execute = createRealmSocialExecutor({
-                authority,
-                ...config.chatSession!,
-                realm: config.kingdomId,
-                timeoutMs: config.timeoutMs,
-              });
+              const execute = observeAdapter(
+                createRealmSocialExecutor({
+                  authority,
+                  ...config.chatSession!,
+                  realm: config.kingdomId,
+                  timeoutMs: config.timeoutMs,
+                }),
+                "realm.createRealmSocialExecutor",
+              );
               const result = await execute(event.owner, "chat.notice.commit", {
                 operationId: sfs.string(event.requestId),
               });
@@ -909,7 +1029,10 @@ export const RealmDependenciesLive = Layer.effect(
           authority,
           (event) =>
             publishAllianceMutation(
-              createAlliancePublicationReader(db.kingdom.db, authority),
+              observeAdapter(
+                createAlliancePublicationReader(db.kingdom.db, authority),
+                "realm.createAlliancePublicationReader",
+              ),
               event.payload,
               (owner, command, body) => notifications.publish(owner, command, body),
               rules,
@@ -922,7 +1045,7 @@ export const RealmDependenciesLive = Layer.effect(
       }
     };
     yield* Effect.tryPromise({
-      try: recoverAlliances,
+      try: () => observeJob("realm.alliance_recovery", recoverAlliances),
       catch: () => new Error("Alliance recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -931,80 +1054,129 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     const activityDomains: ReadonlyMap<number, ActivityDomain> = city.domains;
-    const activities = new TimedActivityService(
-      createActivityExecutor(db.kingdom.db, authority, activityDomains, Date.now, {
-        before: async (tx, owner, now, command) => {
-          if (command.command === "activity.restore") return now;
+    const activities: TimedActivityService = observeAdapter(
+      new TimedActivityService(
+        observeAdapter(
+          createActivityExecutor(db.kingdom.db, authority, activityDomains, Date.now, {
+            before: async (tx, owner, now, command) => {
+              if (command.command === "activity.restore") return now;
 
-          const transition =
-            ["queue.finish", "queue.ccd"].includes(command.command) ||
-            cityQueueCommands[command.command]?.action === "queue.finish";
-          const params = decode(Buffer.from(command.request));
-          const queueId = transition
-            ? str(
-                params,
-                cityQueueCommands[command.command]?.queueKey ??
-                  (command.command === "queue.ccd" ? "qUUID" : "uuid"),
-              )
-            : undefined;
-          const at = await activityTransitionInstant(tx, owner, queueId, now);
-          await productionPreparation.prepare(tx, owner, at);
+              const transition =
+                ["queue.finish", "queue.ccd"].includes(command.command) ||
+                cityQueueCommands[command.command]?.action === "queue.finish";
+              const params = decode(Buffer.from(command.request));
+              const queueId = transition
+                ? str(
+                    params,
+                    cityQueueCommands[command.command]?.queueKey ??
+                      (command.command === "queue.ccd" ? "qUUID" : "uuid"),
+                  )
+                : undefined;
+              const at = await activityTransitionInstant(tx, owner, queueId, now);
+              await productionPreparation.prepare(tx, owner, at);
 
-          return at;
-        },
-        command: city.command,
-        next: city.next,
-        accelerate: city.accelerate,
-      }),
-      rules,
-      economyEffects,
-      cosmeticInteractionParticipants,
+              return at;
+            },
+            command: city.command,
+            next: city.next,
+            accelerate: city.accelerate,
+          }),
+          "realm.createActivityExecutor",
+        ),
+        rules,
+        economyEffects,
+        cosmeticInteractionParticipants,
+      ),
+      "realm.TimedActivityService",
     );
-    const expeditionTreasury = new ExpeditionTreasuryService(
-      createExpeditionTreasuryExecutor(db.kingdom.db, authority),
-      rules,
+    const expeditionTreasury = observeAdapter(
+      new ExpeditionTreasuryService(
+        observeAdapter(
+          createExpeditionTreasuryExecutor(db.kingdom.db, authority),
+          "realm.createExpeditionTreasuryExecutor",
+        ),
+        rules,
+      ),
+      "realm.ExpeditionTreasuryService",
     );
-    const worldInterest = createWorldInterest(db.kingdom.db, authority, config.mapSize);
+    const worldInterest = observeAdapter(
+      createWorldInterest(db.kingdom.db, authority, config.mapSize),
+      "realm.createWorldInterest",
+    );
     let worldCursor: { dueAt: bigint; id: string } | undefined;
     let worldImportCursor: string | undefined;
-    const heroCalendar = new HeroCalendarService(
-      createHeroCalendarStore(db.kingdom.db, authority),
-      rules,
+    const heroCalendar = observeAdapter(
+      new HeroCalendarService(
+        observeAdapter(
+          createHeroCalendarStore(db.kingdom.db, authority),
+          "realm.createHeroCalendarStore",
+        ),
+        rules,
+      ),
+      "realm.HeroCalendarService",
     );
-    const heroRankPublication = new HeroRankPublicationService(
-      createHeroRankSource(db.kingdom.db, authority),
-      createHeroRankProjection(db.databases.global.db, authority),
-      (rows) => cache.publishHeroRanking(rows),
-      rules,
+    const heroRankPublication = observeAdapter(
+      new HeroRankPublicationService(
+        observeAdapter(
+          createHeroRankSource(db.kingdom.db, authority),
+          "realm.createHeroRankSource",
+        ),
+        observeAdapter(
+          createHeroRankProjection(db.databases.global.db, authority),
+          "realm.createHeroRankProjection",
+        ),
+        (rows) => cache.publishHeroRanking(rows),
+        rules,
+      ),
+      "realm.HeroRankPublicationService",
     );
-    const heroRankingFinality = new HeroRankingFinalityService(
-      createHeroRankFinalityRealm(db.kingdom.db, authority),
-      createHeroRankFinalityRegistry(db.databases.global.db, authority),
-      createHeroRankProjection(db.databases.global.db, authority),
-      rules,
-      [...db.databases.kingdoms.keys()],
+    const heroRankingFinality = observeAdapter(
+      new HeroRankingFinalityService(
+        observeAdapter(
+          createHeroRankFinalityRealm(db.kingdom.db, authority),
+          "realm.createHeroRankFinalityRealm",
+        ),
+        observeAdapter(
+          createHeroRankFinalityRegistry(db.databases.global.db, authority),
+          "realm.createHeroRankFinalityRegistry",
+        ),
+        observeAdapter(
+          createHeroRankProjection(db.databases.global.db, authority),
+          "realm.createHeroRankProjection",
+        ),
+        rules,
+        [...db.databases.kingdoms.keys()],
+      ),
+      "realm.HeroRankingFinalityService",
     );
-    const campaignAudience = createCampaignAudience(db.kingdom.db, authority);
-    const hotBusinessMan = createHotBusinessMan(rules);
+    const campaignAudience = observeAdapter(
+      createCampaignAudience(db.kingdom.db, authority),
+      "realm.createCampaignAudience",
+    );
+    const hotBusinessMan = observeAdapter(
+      createHotBusinessMan(rules),
+      "realm.createHotBusinessMan",
+    );
     let publishedHotBusinessMan: string | undefined;
     yield* Effect.tryPromise({
-      try: async () => {
-        const current = hotBusinessMan.current();
+      try: () =>
+        observeJob("realm.businessman_publication_unavailable", async () => {
+          const current = hotBusinessMan.current();
 
-        if (!current || current.key === publishedHotBusinessMan) return;
+          if (!current || current.key === publishedHotBusinessMan) return;
 
-        await publishHotBusinessMan(
-          notifications.owners(),
-          campaignAudience,
-          () => hotBusinessMan.current()?.body ?? current.body,
-          (owner, command, body) => {
-            authority.assertReady();
+          await publishHotBusinessMan(
+            notifications.owners(),
+            campaignAudience,
+            () => hotBusinessMan.current()?.body ?? current.body,
+            (owner, command, body) => {
+              authority.assertReady();
 
-            return notifications.publish(owner, command, body);
-          },
-        );
-        publishedHotBusinessMan = current.key;
-      },
+              return notifications.publish(owner, command, body);
+            },
+          );
+          publishedHotBusinessMan = current.key;
+        }),
       catch: () => new Error("Businessman publication unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1014,34 +1186,35 @@ export const RealmDependenciesLive = Layer.effect(
     );
 
     yield* Effect.tryPromise({
-      try: async () => {
-        await mergeCampaigns.refresh();
+      try: () =>
+        observeJob("realm.merge_campaign_recovery_unavailable", async () => {
+          await mergeCampaigns.refresh();
 
-        for (let index = 0; index < 16; index++) {
-          const delivered = await relayMutationEvent(
-            db.kingdom.db,
-            authority,
-            async () => {
-              await publishMergeEffectBoard(
-                notifications.owners(),
-                campaignAudience,
-                currentMergeBoard,
-                (owner, command, body) => {
-                  authority.assertReady();
+          for (let index = 0; index < 16; index++) {
+            const delivered = await relayMutationEvent(
+              db.kingdom.db,
+              authority,
+              async () => {
+                await publishMergeEffectBoard(
+                  notifications.owners(),
+                  campaignAudience,
+                  currentMergeBoard,
+                  (owner, command, body) => {
+                    authority.assertReady();
 
-                  return notifications.publish(owner, command, body);
-                },
-              );
-            },
-            Date.now,
-            "merge.campaign.board",
-            1000,
-            mergeCampaignActor,
-          );
+                    return notifications.publish(owner, command, body);
+                  },
+                );
+              },
+              Date.now,
+              "merge.campaign.board",
+              1000,
+              mergeCampaignActor,
+            );
 
-          if (!delivered) break;
-        }
-      },
+            if (!delivered) break;
+          }
+        }),
       catch: () => new Error("Merge campaign recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1050,41 +1223,86 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
 
-    const costRankingFacts = createCostRankingFacts(db.kingdom.db, authority);
-    const continuedCostFinality = new ContinuedCostFinalityService(
-      costRankingFacts,
-      createCostFinalityOwned(db.kingdom.db, authority),
-      createCostFinalityShared(db.databases.global.db, authority),
+    const costRankingFacts = observeAdapter(
+      createCostRankingFacts(db.kingdom.db, authority),
+      "realm.createCostRankingFacts",
     );
-    const continuedCostRanking = new ContinuedCostRankingService(
-      costRankingFacts,
-      createCostRankingRegistry(db.databases.global.db, authority),
-      rules,
-      [...db.databases.kingdoms.keys()],
-    );
-    const expeditionCalendar = new ExpeditionCalendarService(
-      createExpeditionCalendarStore(db.databases.global.db),
-      rules,
-      [...db.databases.kingdoms.keys()],
-    );
-    const expeditionMatching = new ExpeditionMatchingService(
-      expeditionCalendar,
-      createExpeditionMatchingRealmStore(
-        db.kingdom.db,
-        authority,
-        Date.now,
-        rules.configuration.serverConfig?.get("power_limit")?.rankingHideGm === "1",
+    const continuedCostFinality = observeAdapter(
+      new ContinuedCostFinalityService(
+        costRankingFacts,
+        observeAdapter(
+          createCostFinalityOwned(db.kingdom.db, authority),
+          "realm.createCostFinalityOwned",
+        ),
+        observeAdapter(
+          createCostFinalityShared(db.databases.global.db, authority),
+          "realm.createCostFinalityShared",
+        ),
       ),
-      createExpeditionMatchingRegistry(db.databases.global.db),
-      rules,
+      "realm.ContinuedCostFinalityService",
     );
-    const expeditionPhases = new ExpeditionPhaseService(
-      expeditionCalendar,
-      createExpeditionPhaseStore(db.kingdom.db, authority),
+    const continuedCostRanking = observeAdapter(
+      new ContinuedCostRankingService(
+        costRankingFacts,
+        observeAdapter(
+          createCostRankingRegistry(db.databases.global.db, authority),
+          "realm.createCostRankingRegistry",
+        ),
+        rules,
+        [...db.databases.kingdoms.keys()],
+      ),
+      "realm.ContinuedCostRankingService",
     );
-    const expeditionActivity = new ExpeditionActivityService(
-      createExpeditionActivityReader(db.kingdom.db, authority),
-      rules,
+    const expeditionCalendar = observeAdapter(
+      new ExpeditionCalendarService(
+        observeAdapter(
+          createExpeditionCalendarStore(db.databases.global.db),
+          "realm.createExpeditionCalendarStore",
+        ),
+        rules,
+        [...db.databases.kingdoms.keys()],
+      ),
+      "realm.ExpeditionCalendarService",
+    );
+    const expeditionMatching = observeAdapter(
+      new ExpeditionMatchingService(
+        expeditionCalendar,
+        observeAdapter(
+          createExpeditionMatchingRealmStore(
+            db.kingdom.db,
+            authority,
+            Date.now,
+            rules.configuration.serverConfig?.get("power_limit")?.rankingHideGm === "1",
+          ),
+          "realm.createExpeditionMatchingRealmStore",
+        ),
+        observeAdapter(
+          createExpeditionMatchingRegistry(db.databases.global.db),
+          "realm.createExpeditionMatchingRegistry",
+        ),
+        rules,
+      ),
+      "realm.ExpeditionMatchingService",
+    );
+    const expeditionPhases = observeAdapter(
+      new ExpeditionPhaseService(
+        expeditionCalendar,
+        observeAdapter(
+          createExpeditionPhaseStore(db.kingdom.db, authority),
+          "realm.createExpeditionPhaseStore",
+        ),
+      ),
+      "realm.ExpeditionPhaseService",
+    );
+    const expeditionActivity = observeAdapter(
+      new ExpeditionActivityService(
+        observeAdapter(
+          createExpeditionActivityReader(db.kingdom.db, authority),
+          "realm.createExpeditionActivityReader",
+        ),
+        rules,
+      ),
+      "realm.ExpeditionActivityService",
     );
     let expeditionNoticeCursor = 0;
     const expeditionNotified = new Map<string, bigint>();
@@ -1140,72 +1358,147 @@ export const RealmDependenciesLive = Layer.effect(
         if (!delivered) break;
       }
     };
-    const costRankRewards = new ContinuedCostRewardService(
-      createCostRankAwardStore(db.kingdom.db, authority),
-      createCostRankingRegistry(db.databases.global.db, authority),
-      createCostFinalityShared(db.databases.global.db, authority),
-      rules,
-      (owner, id) =>
-        activities.domainCommand(owner, "continuedcost.rank.deliver", {
-          awardId: sfs.string(id),
-          operationId: sfs.string(costRankAwardOperation(id)),
-        }),
-    );
-    const expeditionStageRewards = new ExpeditionStageRewardService(
-      createExpeditionAwardStore(db.kingdom.db, authority),
-      createExpeditionAwardStandings(db.databases.global.db, config.kingdomId),
-      rules,
-      (owner, id) =>
-        activities.domainCommand(owner, "expedition.award.deliver", {
-          awardId: sfs.string(id),
-          operationId: sfs.string(expeditionAwardOperation(id)),
-        }),
-    );
-    const expeditionHistory = new ExpeditionHistoryService(
-      createExpeditionHistorySource(db.kingdom.db, db.databases.global.db, authority),
-      rules,
-    );
-    const expeditionStageFinality = new ExpeditionStageFinalityService(
-      createExpeditionStageRealm(db.kingdom.db, authority),
-      createExpeditionStageRegistry(db.databases.global.db, authority),
-    );
-    const expeditionScorePublication = new ExpeditionScorePublicationService(
-      createExpeditionScoreSource(db.kingdom.db, authority),
-      createExpeditionScoreProjection(db.databases.global.db, authority),
-      (clock, version, now) =>
-        cache.publishExpeditionDiscovery(
-          expeditionDiscovery(clock, version, now, expeditionOpen(rules, now)),
+    const costRankRewards = observeAdapter(
+      new ContinuedCostRewardService(
+        observeAdapter(
+          createCostRankAwardStore(db.kingdom.db, authority),
+          "realm.createCostRankAwardStore",
         ),
+        observeAdapter(
+          createCostRankingRegistry(db.databases.global.db, authority),
+          "realm.createCostRankingRegistry",
+        ),
+        observeAdapter(
+          createCostFinalityShared(db.databases.global.db, authority),
+          "realm.createCostFinalityShared",
+        ),
+        rules,
+        (owner, id) =>
+          activities.domainCommand(owner, "continuedcost.rank.deliver", {
+            awardId: sfs.string(id),
+            operationId: sfs.string(costRankAwardOperation(id)),
+          }),
+      ),
+      "realm.ContinuedCostRewardService",
     );
-    const expeditionLiveView = new ExpeditionLiveViewService(
-      createExpeditionLiveSource(db.kingdom.db, db.databases.global.db, authority),
+    const expeditionStageRewards = observeAdapter(
+      new ExpeditionStageRewardService(
+        observeAdapter(
+          createExpeditionAwardStore(db.kingdom.db, authority),
+          "realm.createExpeditionAwardStore",
+        ),
+        observeAdapter(
+          createExpeditionAwardStandings(db.databases.global.db, config.kingdomId),
+          "realm.createExpeditionAwardStandings",
+        ),
+        rules,
+        (owner, id) =>
+          activities.domainCommand(owner, "expedition.award.deliver", {
+            awardId: sfs.string(id),
+            operationId: sfs.string(expeditionAwardOperation(id)),
+          }),
+      ),
+      "realm.ExpeditionStageRewardService",
     );
-    const heroRankingRewards = new HeroRankingRewardService(
-      createHeroRankRewardStore(db.kingdom.db, authority),
-      createHeroRankRewardStandings(db.databases.global.db, config.kingdomId),
-      rules,
-      (owner, id) =>
-        activities.domainCommand(owner, "hero.rank.deliver", {
-          awardId: sfs.string(id),
-          operationId: sfs.string(heroRankAwardOperation(id)),
-        }),
+    const expeditionHistory = observeAdapter(
+      new ExpeditionHistoryService(
+        observeAdapter(
+          createExpeditionHistorySource(db.kingdom.db, db.databases.global.db, authority),
+          "realm.createExpeditionHistorySource",
+        ),
+        rules,
+      ),
+      "realm.ExpeditionHistoryService",
     );
-    const heroMatching = new HeroMatchingService(
-      createHeroMatchingRealmStore(db.kingdom.db, authority),
-      createHeroMatchingRegistry(db.databases.global.db),
-      rules,
+    const expeditionStageFinality = observeAdapter(
+      new ExpeditionStageFinalityService(
+        observeAdapter(
+          createExpeditionStageRealm(db.kingdom.db, authority),
+          "realm.createExpeditionStageRealm",
+        ),
+        observeAdapter(
+          createExpeditionStageRegistry(db.databases.global.db, authority),
+          "realm.createExpeditionStageRegistry",
+        ),
+      ),
+      "realm.ExpeditionStageFinalityService",
+    );
+    const expeditionScorePublication = observeAdapter(
+      new ExpeditionScorePublicationService(
+        observeAdapter(
+          createExpeditionScoreSource(db.kingdom.db, authority),
+          "realm.createExpeditionScoreSource",
+        ),
+        observeAdapter(
+          createExpeditionScoreProjection(db.databases.global.db, authority),
+          "realm.createExpeditionScoreProjection",
+        ),
+        (clock, version, now) =>
+          cache.publishExpeditionDiscovery(
+            expeditionDiscovery(clock, version, now, expeditionOpen(rules, now)),
+          ),
+      ),
+      "realm.ExpeditionScorePublicationService",
+    );
+    const expeditionLiveView = observeAdapter(
+      new ExpeditionLiveViewService(
+        observeAdapter(
+          createExpeditionLiveSource(db.kingdom.db, db.databases.global.db, authority),
+          "realm.createExpeditionLiveSource",
+        ),
+      ),
+      "realm.ExpeditionLiveViewService",
+    );
+    const heroRankingRewards = observeAdapter(
+      new HeroRankingRewardService(
+        observeAdapter(
+          createHeroRankRewardStore(db.kingdom.db, authority),
+          "realm.createHeroRankRewardStore",
+        ),
+        observeAdapter(
+          createHeroRankRewardStandings(db.databases.global.db, config.kingdomId),
+          "realm.createHeroRankRewardStandings",
+        ),
+        rules,
+        (owner, id) =>
+          activities.domainCommand(owner, "hero.rank.deliver", {
+            awardId: sfs.string(id),
+            operationId: sfs.string(heroRankAwardOperation(id)),
+          }),
+      ),
+      "realm.HeroRankingRewardService",
+    );
+    const heroMatching = observeAdapter(
+      new HeroMatchingService(
+        observeAdapter(
+          createHeroMatchingRealmStore(db.kingdom.db, authority),
+          "realm.createHeroMatchingRealmStore",
+        ),
+        observeAdapter(
+          createHeroMatchingRegistry(db.databases.global.db),
+          "realm.createHeroMatchingRegistry",
+        ),
+        rules,
+      ),
+      "realm.HeroMatchingService",
     );
     const recoverHeroCalendar = async () => {
       await heroCalendar.refresh();
       await heroMatching.refresh();
     };
     yield* Effect.tryPromise({
-      try: recoverHeroCalendar,
+      try: () => observeJob("realm.hero_calendar_recovery", recoverHeroCalendar),
       catch: () => new Error("Hero calendar recovery unavailable"),
     }).pipe(Effect.catch(() => Effect.void));
-    const olympicSchedule = new OlympicScheduleService(
-      createOlympicScheduleStore(db.kingdom.db, authority),
-      rules,
+    const olympicSchedule = observeAdapter(
+      new OlympicScheduleService(
+        observeAdapter(
+          createOlympicScheduleStore(db.kingdom.db, authority),
+          "realm.createOlympicScheduleStore",
+        ),
+        rules,
+      ),
+      "realm.OlympicScheduleService",
     );
     let olympicScanAt = 0n,
       olympicCursor: string | undefined;
@@ -1234,15 +1527,23 @@ export const RealmDependenciesLive = Layer.effect(
             operationId: sfs.string(olympicSettlementOperation(record.owner, record.ids)),
           });
         } catch {
-          console.warn(
-            JSON.stringify({ event: "olympic_settlement_failed", kingdom: config.kingdomId }),
+          logEvent(
+            "olympic_settlement_failed",
+            { kingdom: config.kingdomId, outcome: "failure" },
+            "error",
           );
         }
       }
     };
-    const cupSchedule = new CupScheduleService(
-      createCupScheduleStore(db.kingdom.db, authority),
-      rules,
+    const cupSchedule = observeAdapter(
+      new CupScheduleService(
+        observeAdapter(
+          createCupScheduleStore(db.kingdom.db, authority),
+          "realm.createCupScheduleStore",
+        ),
+        rules,
+      ),
+      "realm.CupScheduleService",
     );
     let cupScanAt = 0n,
       cupCursor: string | undefined;
@@ -1273,8 +1574,10 @@ export const RealmDependenciesLive = Layer.effect(
             operationId: sfs.string(cupSettlementOperation(record.owner, record.ids)),
           });
         } catch {
-          console.warn(
-            JSON.stringify({ event: "cup_settlement_failed", kingdom: config.kingdomId }),
+          logEvent(
+            "cup_settlement_failed",
+            { kingdom: config.kingdomId, outcome: "failure" },
+            "error",
           );
         }
       }
@@ -1297,14 +1600,19 @@ export const RealmDependenciesLive = Layer.effect(
             ),
           });
         } catch {
-          console.warn(
-            JSON.stringify({ event: "group_buy_settlement_failed", kingdom: config.kingdomId }),
+          logEvent(
+            "group_buy_settlement_failed",
+            { kingdom: config.kingdomId, outcome: "failure" },
+            "error",
           );
         }
       }
     };
     const goldEggsRuntime = new GoldEggsRuntime(
-      createGoldEggsRuntimeStore(db.kingdom.db, authority),
+      observeAdapter(
+        createGoldEggsRuntimeStore(db.kingdom.db, authority),
+        "realm.createGoldEggsRuntimeStore",
+      ),
       goldEggsRanks,
       rules,
       (owner, period, global) =>
@@ -1477,8 +1785,10 @@ export const RealmDependenciesLive = Layer.effect(
           try {
             await activities.domainCommand(owner, "heart.init", { notify: sfs.bool(true) });
           } catch {
-            console.warn(
-              JSON.stringify({ event: "heart_delivery_deferred", kingdom: config.kingdomId }),
+            logEvent(
+              "heart_delivery_deferred",
+              { kingdom: config.kingdomId, outcome: "failure" },
+              "warn",
             );
           }
         }
@@ -1508,8 +1818,10 @@ export const RealmDependenciesLive = Layer.effect(
         try {
           await activities.domainCommand(owner, "gift.init", { notify: sfs.bool(true) });
         } catch {
-          console.warn(
-            JSON.stringify({ event: "item_gift_delivery_deferred", kingdom: config.kingdomId }),
+          logEvent(
+            "item_gift_delivery_deferred",
+            { kingdom: config.kingdomId, outcome: "failure" },
+            "warn",
           );
         }
       }
@@ -1541,21 +1853,22 @@ export const RealmDependenciesLive = Layer.effect(
         if (!delivered) break;
       }
     };
-    const monsterRefresh = createWorldMonsterRefreshExecutor(
-      db.kingdom.db,
-      authority,
-      config.mapSize,
+    const monsterRefresh = observeAdapter(
+      createWorldMonsterRefreshExecutor(db.kingdom.db, authority, config.mapSize),
+      "realm.createWorldMonsterRefreshExecutor",
     );
-    const resourceRefresh = createWorldResourceRefreshExecutor(
-      db.kingdom.db,
-      authority,
-      config.mapSize,
+    const resourceRefresh = observeAdapter(
+      createWorldResourceRefreshExecutor(db.kingdom.db, authority, config.mapSize),
+      "realm.createWorldResourceRefreshExecutor",
     );
-    const resourceNewRefresh = createWorldResourceNewExecutor(
-      db.kingdom.db,
-      authority,
-      config.mapSize,
-      worldResourceAreaCount(rules, config.mapSize),
+    const resourceNewRefresh = observeAdapter(
+      createWorldResourceNewExecutor(
+        db.kingdom.db,
+        authority,
+        config.mapSize,
+        worldResourceAreaCount(rules, config.mapSize),
+      ),
+      "realm.createWorldResourceNewExecutor",
     );
     const recoverWorld = async () => {
       try {
@@ -1563,11 +1876,10 @@ export const RealmDependenciesLive = Layer.effect(
           refreshWorldResourceNew(store, rules, config.mapSize),
         );
       } catch {
-        console.warn(
-          JSON.stringify({
-            event: "world_shared_resource_recovery_failed",
-            kingdom: config.kingdomId,
-          }),
+        logEvent(
+          "world_shared_resource_recovery_failed",
+          { kingdom: config.kingdomId, outcome: "failure" },
+          "error",
         );
       }
 
@@ -1576,8 +1888,10 @@ export const RealmDependenciesLive = Layer.effect(
           refreshWorldResources(store, rules, config.mapSize, await economyEffects.world()),
         );
       } catch {
-        console.warn(
-          JSON.stringify({ event: "world_resource_recovery_failed", kingdom: config.kingdomId }),
+        logEvent(
+          "world_resource_recovery_failed",
+          { kingdom: config.kingdomId, outcome: "failure" },
+          "error",
         );
       }
 
@@ -1586,8 +1900,10 @@ export const RealmDependenciesLive = Layer.effect(
           refreshWorldMonsters(store, rules, config.mapSize),
         );
       } catch {
-        console.warn(
-          JSON.stringify({ event: "world_monster_recovery_failed", kingdom: config.kingdomId }),
+        logEvent(
+          "world_monster_recovery_failed",
+          { kingdom: config.kingdomId, outcome: "failure" },
+          "error",
         );
       }
 
@@ -1657,13 +1973,16 @@ export const RealmDependenciesLive = Layer.effect(
       await db.kingdom.db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         await expireTotems(
-          createTotemEffectStore(
-            tx,
-            "",
-            totemNow,
-            config.mapSize,
-            config.kingdomId,
-            baseCityBoundary,
+          observeAdapter(
+            createTotemEffectStore(
+              tx,
+              "",
+              totemNow,
+              config.mapSize,
+              config.kingdomId,
+              baseCityBoundary,
+            ),
+            "realm.createTotemEffectStore",
           ),
           config.mapSize,
         );
@@ -1676,8 +1995,10 @@ export const RealmDependenciesLive = Layer.effect(
             operationId: sfs.string(`totem-tick:${Date.now()}:${owner}`),
           });
         } catch {
-          console.warn(
-            JSON.stringify({ event: "totem_recovery_failed", kingdom: config.kingdomId }),
+          logEvent(
+            "totem_recovery_failed",
+            { kingdom: config.kingdomId, outcome: "failure" },
+            "error",
           );
         }
       }
@@ -1693,12 +2014,10 @@ export const RealmDependenciesLive = Layer.effect(
               operationId: sfs.string(`world-import:${entry.id}`),
             });
           } catch {
-            console.warn(
-              JSON.stringify({
-                event: "world_import_failed",
-                kingdom: config.kingdomId,
-                march: entry.id,
-              }),
+            logEvent(
+              "world_import_failed",
+              { kingdom: config.kingdomId, outcome: "failure" },
+              "error",
             );
           }
         }
@@ -1713,12 +2032,10 @@ export const RealmDependenciesLive = Layer.effect(
             operationId: sfs.string(`world:${entry.id}:${entry.version}`),
           });
         } catch {
-          console.warn(
-            JSON.stringify({
-              event: "world_recovery_failed",
-              kingdom: config.kingdomId,
-              march: entry.id,
-            }),
+          logEvent(
+            "world_recovery_failed",
+            { kingdom: config.kingdomId, outcome: "failure" },
+            "error",
           );
         }
       }
@@ -1773,21 +2090,22 @@ export const RealmDependenciesLive = Layer.effect(
         }
     };
     yield* Effect.tryPromise({
-      try: async () => {
-        for (let i = 0; i < 64; i++) {
-          const delivered = await relayMutationEvent(
-            db.kingdom.db,
-            authority,
-            async (event) => {
-              await notifications.publish(event.owner, "status.push", decode(event.payload));
-            },
-            Date.now,
-            "totem.status",
-          );
+      try: () =>
+        observeJob("realm.totem_status_relay_unavailable", async () => {
+          for (let i = 0; i < 64; i++) {
+            const delivered = await relayMutationEvent(
+              db.kingdom.db,
+              authority,
+              async (event) => {
+                await notifications.publish(event.owner, "status.push", decode(event.payload));
+              },
+              Date.now,
+              "totem.status",
+            );
 
-          if (!delivered) break;
-        }
-      },
+            if (!delivered) break;
+          }
+        }),
       catch: () => new Error("Totem status relay unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1795,22 +2113,32 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forever,
       Effect.forkScoped,
     );
-    const production = new ProductionService(
-      createProductionExecutor(db.kingdom.db, authority, {
-        ...productionPreparation,
-        recordAction: async (tx, owner, kind, itemId, count, now, economy) => {
-          await city.command(
-            tx,
-            owner,
-            "quest.action",
-            encode({ kind: sfs.string(kind), itemId: sfs.string(itemId), count: sfs.int(count) }),
-            now,
-            economy,
-          );
-        },
-      }),
-      rules,
-      economyEffects,
+    const production = observeAdapter(
+      new ProductionService(
+        observeAdapter(
+          createProductionExecutor(db.kingdom.db, authority, {
+            ...productionPreparation,
+            recordAction: async (tx, owner, kind, itemId, count, now, economy) => {
+              await city.command(
+                tx,
+                owner,
+                "quest.action",
+                encode({
+                  kind: sfs.string(kind),
+                  itemId: sfs.string(itemId),
+                  count: sfs.int(count),
+                }),
+                now,
+                economy,
+              );
+            },
+          }),
+          "realm.createProductionExecutor",
+        ),
+        rules,
+        economyEffects,
+      ),
+      "realm.ProductionService",
     );
     let importCursor: string | undefined;
     let recoveryCursor: { dueAt: bigint; id: string } | undefined;
@@ -1829,7 +2157,7 @@ export const RealmDependenciesLive = Layer.effect(
       for (const saved of pending) {
         const operationId =
           "restore:" +
-          createHash("sha256")
+          observeAdapter(createHash("sha256"), "realm.createHash")
             .update(
               [
                 saved.uuid,
@@ -1844,12 +2172,10 @@ export const RealmDependenciesLive = Layer.effect(
         try {
           await activities.restore(saved.ownerId, operationId, saved.uuid);
         } catch {
-          console.warn(
-            JSON.stringify({
-              event: "activity_import_failed",
-              kingdom: config.kingdomId,
-              queue: saved.uuid,
-            }),
+          logEvent(
+            "activity_import_failed",
+            { kingdom: config.kingdomId, outcome: "failure" },
+            "error",
           );
         }
       }
@@ -1876,18 +2202,16 @@ export const RealmDependenciesLive = Layer.effect(
             operationId: sfs.string(`finish:${activity.id}:${activity.version}`),
           });
         } catch {
-          console.warn(
-            JSON.stringify({
-              event: "activity_recovery_failed",
-              kingdom: config.kingdomId,
-              activity: activity.id,
-            }),
+          logEvent(
+            "activity_recovery_failed",
+            { kingdom: config.kingdomId, outcome: "failure" },
+            "error",
           );
         }
       }
     };
     yield* Effect.tryPromise({
-      try: recoverHeroCalendar,
+      try: () => observeJob("realm.hero_calendar_recovery", recoverHeroCalendar),
       catch: () => new Error("Hero calendar recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1896,10 +2220,11 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: async () => {
-        await recoverHeroTargets();
-        await recoverHeroScoreNotifications();
-      },
+      try: () =>
+        observeJob("realm.hero_reward_recovery_unavailable", async () => {
+          await recoverHeroTargets();
+          await recoverHeroScoreNotifications();
+        }),
       catch: () => new Error("Hero reward recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1908,13 +2233,14 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: async () => {
-        try {
-          await expeditionMatching.refresh();
-        } finally {
-          await expeditionPhases.refresh();
-        }
-      },
+      try: () =>
+        observeJob("realm.expedition_matching_recovery_unavailable", async () => {
+          try {
+            await expeditionMatching.refresh();
+          } finally {
+            await expeditionPhases.refresh();
+          }
+        }),
       catch: () => new Error("Expedition matching recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1923,7 +2249,8 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: recoverExpeditionNotifications,
+      try: () =>
+        observeJob("realm.expedition_activity_publication", recoverExpeditionNotifications),
       catch: () => new Error("Expedition activity publication unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1932,40 +2259,44 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: async () => {
-        await settleRedPacketExpiry(
-          createRedPacketExpiryStore(db.kingdom.db, authority),
-          rules,
-          BigInt(Date.now()),
-        ).catch(() => undefined);
+      try: () =>
+        observeJob("realm.campaign_notice_publication_unavailable", async () => {
+          await settleRedPacketExpiry(
+            observeAdapter(
+              createRedPacketExpiryStore(db.kingdom.db, authority),
+              "realm.createRedPacketExpiryStore",
+            ),
+            rules,
+            BigInt(Date.now()),
+          ).catch(() => undefined);
 
-        for (const type of ["campaign.notice", "redPackets.announce"])
-          for (let index = 0; index < 64; index++) {
-            try {
-              const delivered = await relayMutationEvent(
-                db.kingdom.db,
-                authority,
-                (event) =>
-                  (type === "campaign.notice"
-                    ? publishCampaignNotice
-                    : publishRedPacketAnnouncement)(
-                    event.payload,
-                    event.owner,
-                    notifications.owners(),
-                    campaignAudience,
-                    (owner, command, body) => notifications.publish(owner, command, body),
-                  ),
-                Date.now,
-                type,
-                1000,
-              );
+          for (const type of ["campaign.notice", "redPackets.announce"])
+            for (let index = 0; index < 64; index++) {
+              try {
+                const delivered = await relayMutationEvent(
+                  db.kingdom.db,
+                  authority,
+                  (event) =>
+                    (type === "campaign.notice"
+                      ? publishCampaignNotice
+                      : publishRedPacketAnnouncement)(
+                      event.payload,
+                      event.owner,
+                      notifications.owners(),
+                      campaignAudience,
+                      (owner, command, body) => notifications.publish(owner, command, body),
+                    ),
+                  Date.now,
+                  type,
+                  1000,
+                );
 
-              if (!delivered) break;
-            } catch {
-              continue;
+                if (!delivered) break;
+              } catch {
+                continue;
+              }
             }
-          }
-      },
+        }),
       catch: () => new Error("Campaign notice publication unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1974,7 +2305,8 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => continuedCostFinality.refresh(),
+      try: () =>
+        observeJob("realm.consumption_ranking_finality", () => continuedCostFinality.refresh()),
       catch: () => new Error("Consumption ranking finality unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1983,7 +2315,8 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => continuedCostRanking.refresh(),
+      try: () =>
+        observeJob("realm.consumption_ranking_publication", () => continuedCostRanking.refresh()),
       catch: () => new Error("Consumption ranking publication unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -1992,7 +2325,8 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => expeditionStageFinality.refresh(),
+      try: () =>
+        observeJob("realm.expedition_stage_finality", () => expeditionStageFinality.refresh()),
       catch: () => new Error("Expedition stage finality unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2001,7 +2335,10 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => expeditionScorePublication.refresh(),
+      try: () =>
+        observeJob("realm.expedition_score_publication", () =>
+          expeditionScorePublication.refresh(),
+        ),
       catch: () => new Error("Expedition score publication unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2010,7 +2347,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => heroRankPublication.refresh(),
+      try: () => observeJob("realm.hero_ranking_publication", () => heroRankPublication.refresh()),
       catch: () => new Error("Hero ranking publication unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2019,7 +2356,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => heroRankingFinality.refresh(),
+      try: () => observeJob("realm.hero_ranking_finality", () => heroRankingFinality.refresh()),
       catch: () => new Error("Hero ranking finality unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2028,61 +2365,62 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: async () => {
-        await heroRankingRewards.refresh().catch(() => undefined);
-        await expeditionStageRewards.refresh().catch(() => undefined);
-        await costRankRewards.refresh().catch(() => undefined);
+      try: () =>
+        observeJob("realm.hero_ranking_reward_recovery_unavailable", async () => {
+          await heroRankingRewards.refresh().catch(() => undefined);
+          await expeditionStageRewards.refresh().catch(() => undefined);
+          await costRankRewards.refresh().catch(() => undefined);
 
-        for (const type of [
-          "hero.rank.mail",
-          "gold.eggs.mail",
-          "egg.activity.mail",
-          "world.scout.mail",
-          "hero.target.mail",
-          "campaign.mail",
-          "redPackets.mail",
-          "expedition.award.mail",
-          "continuedcost.rank.mail",
-        ]) {
-          for (let index = 0; index < 64; index++) {
-            const delivered = await relayMutationEvent(
-              db.kingdom.db,
-              authority,
-              async (event) => {
-                if (type === "world.scout.mail") {
-                  await publishWorldScoutMail(
-                    event.payload,
-                    event.owner,
-                    scoutMailReader,
-                    (recipient, command, body) => notifications.publish(recipient, command, body),
-                  );
+          for (const type of [
+            "hero.rank.mail",
+            "gold.eggs.mail",
+            "egg.activity.mail",
+            "world.scout.mail",
+            "hero.target.mail",
+            "campaign.mail",
+            "redPackets.mail",
+            "expedition.award.mail",
+            "continuedcost.rank.mail",
+          ]) {
+            for (let index = 0; index < 64; index++) {
+              const delivered = await relayMutationEvent(
+                db.kingdom.db,
+                authority,
+                async (event) => {
+                  if (type === "world.scout.mail") {
+                    await publishWorldScoutMail(
+                      event.payload,
+                      event.owner,
+                      scoutMailReader,
+                      (recipient, command, body) => notifications.publish(recipient, command, body),
+                    );
 
-                  return;
-                }
+                    return;
+                  }
 
-                const data = decode(event.payload);
+                  const data = decode(event.payload);
 
-                if (str(data, "owner") !== event.owner)
-                  throw new Error("Foreign progression mail publication");
+                  if (str(data, "owner") !== event.owner)
+                    throw new Error("Foreign progression mail publication");
 
-                await notifications.publish(event.owner, "push.mail", fields(data.mail));
+                  await notifications.publish(event.owner, "push.mail", fields(data.mail));
 
-                if (data.achievement)
-                  await notifications.publish(
-                    event.owner,
-                    "push.hero.target.achieved",
-                    fields(data.achievement),
-                  );
-              },
-              Date.now,
-              type,
-              60000,
-            );
+                  if (data.achievement)
+                    await notifications.publish(
+                      event.owner,
+                      "push.hero.target.achieved",
+                      fields(data.achievement),
+                    );
+                },
+                Date.now,
+                type,
+                60000,
+              );
 
-            if (!delivered) break;
+              if (!delivered) break;
+            }
           }
-        }
-      },
+        }),
       catch: () => new Error("Hero ranking reward recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2091,7 +2429,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: recoverOlympicBets,
+      try: () => observeJob("realm.olympic_settlement", recoverOlympicBets),
       catch: () => new Error("Olympic settlement unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2100,7 +2438,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: recoverCupBets,
+      try: () => observeJob("realm.cup_settlement", recoverCupBets),
       catch: () => new Error("Cup settlement unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2109,7 +2447,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: recoverGroupBuys,
+      try: () => observeJob("realm.group_buy_settlement", recoverGroupBuys),
       catch: () => new Error("Group-buy settlement unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2118,7 +2456,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => goldEggsRuntime.refresh(),
+      try: () => observeJob("realm.gold_eggs_recovery", () => goldEggsRuntime.refresh()),
       catch: () => new Error("Gold eggs recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2127,7 +2465,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: recoverSpecialPurchases,
+      try: () => observeJob("realm.special_event_recovery", recoverSpecialPurchases),
       catch: () => new Error("Special event recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2136,7 +2474,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => recoverContinuedCosts(),
+      try: () => observeJob("realm.continued_cost_recovery", () => recoverContinuedCosts()),
       catch: () => new Error("Continued-cost recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2145,7 +2483,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: recoverCosmeticInteractions,
+      try: () => observeJob("realm.cosmetic_interaction_recovery", recoverCosmeticInteractions),
       catch: () => new Error("Cosmetic interaction recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2154,7 +2492,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: recoverAllianceHearts,
+      try: () => observeJob("realm.heart_recovery", recoverAllianceHearts),
       catch: () => new Error("Heart recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2163,7 +2501,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: recoverPlayerItemGifts,
+      try: () => observeJob("realm.item_gift_recovery", recoverPlayerItemGifts),
       catch: () => new Error("Item gift recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2172,7 +2510,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: recoverWorld,
+      try: () => observeJob("realm.world_recovery", recoverWorld),
       catch: () => new Error("World recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2181,7 +2519,7 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     yield* Effect.tryPromise({
-      try: () => recoverActivities(),
+      try: () => observeJob("realm.activity_recovery", () => recoverActivities()),
       catch: () => new Error("Activity recovery unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2189,7 +2527,13 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forever,
       Effect.forkScoped,
     );
-    const trade = new TradeService(createTradeExecutor(db.kingdom.db, authority), rules);
+    const trade = observeAdapter(
+      new TradeService(
+        observeAdapter(createTradeExecutor(db.kingdom.db, authority), "realm.createTradeExecutor"),
+        rules,
+      ),
+      "realm.TradeService",
+    );
     const confirmCampaignInventory = async (
       tx: MutationTransaction,
       owner: string,
@@ -2208,65 +2552,80 @@ export const RealmDependenciesLive = Layer.effect(
         "campaign.record",
       );
     };
-    const shops = new ShopService(
-      createShopRepository(
-        db.kingdom.db,
-        authority,
-        Date.now,
-        (tx, owner, purchase, inventory, now) =>
-          confirmCampaignInventory(
-            tx,
-            owner,
-            campaignInventoryObservations(
-              inventory,
-              /^\d+$/.test(purchase.id) && purchase.saleType
-                ? {
-                    code: 68,
-                    selector: purchase.saleType,
-                    attributes: {
-                      key_shopId: purchase.id,
-                      key_shopBuyNum: purchase.count,
-                      key_shopSaleType: purchase.saleType,
-                    },
-                  }
-                : undefined,
-            ),
-            now,
+    const shops = observeAdapter(
+      new ShopService(
+        observeAdapter(
+          createShopRepository(
+            db.kingdom.db,
+            authority,
+            Date.now,
+            (tx, owner, purchase, inventory, now) =>
+              confirmCampaignInventory(
+                tx,
+                owner,
+                campaignInventoryObservations(
+                  inventory,
+                  /^\d+$/.test(purchase.id) && purchase.saleType
+                    ? {
+                        code: 68,
+                        selector: purchase.saleType,
+                        attributes: {
+                          key_shopId: purchase.id,
+                          key_shopBuyNum: purchase.count,
+                          key_shopSaleType: purchase.saleType,
+                        },
+                      }
+                    : undefined,
+                ),
+                now,
+              ),
           ),
+          "realm.createShopRepository",
+        ),
+        rules,
       ),
-      rules,
+      "realm.ShopService",
     );
-    const mailRewards = new MailRewardService(
-      createMailRewardExecutor(
-        db.kingdom.db,
-        authority,
-        Date.now,
-        () => mailRewardRealmAllowed(db.databases.global.db, config.kingdomId),
-        (tx, owner, entry, inventory, now) =>
-          confirmCampaignInventory(
-            tx,
-            owner,
-            campaignInventoryObservations(inventory, {
-              code: 61,
-              selector: text(entry, "title"),
-              attributes: { key_mailTitle: text(entry, "title") },
-            }),
-            now,
+    const mailRewards = observeAdapter(
+      new MailRewardService(
+        observeAdapter(
+          createMailRewardExecutor(
+            db.kingdom.db,
+            authority,
+            Date.now,
+            () => mailRewardRealmAllowed(db.databases.global.db, config.kingdomId),
+            (tx, owner, entry, inventory, now) =>
+              confirmCampaignInventory(
+                tx,
+                owner,
+                campaignInventoryObservations(inventory, {
+                  code: 61,
+                  selector: text(entry, "title"),
+                  attributes: { key_mailTitle: text(entry, "title") },
+                }),
+                now,
+              ),
           ),
+          "realm.createMailRewardExecutor",
+        ),
+        rules,
       ),
-      rules,
+      "realm.MailRewardService",
     );
     yield* Effect.tryPromise({
-      try: async () => {
-        const removed = await cleanupSocialRealm(db.kingdom.db, authority);
+      try: () =>
+        observeJob("realm.social_retention_cleanup_unavailable", async () => {
+          const removed = await cleanupSocialRealm(db.kingdom.db, authority);
 
-        if (removed >= 500)
-          console.warn(
-            JSON.stringify({ event: "social_retention_backlog", kingdom: config.kingdomId }),
-          );
+          if (removed >= 500)
+            logEvent(
+              "social_retention_backlog",
+              { kingdom: config.kingdomId, outcome: "failure" },
+              "warn",
+            );
 
-        return removed;
-      },
+          return removed;
+        }),
       catch: () => new Error("Social retention cleanup unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
@@ -2275,74 +2634,105 @@ export const RealmDependenciesLive = Layer.effect(
       Effect.forkScoped,
     );
     const socialRemote = config.chatSession
-      ? createRealmSocialExecutor({
-          authority,
-          ...config.chatSession,
-          realm: config.kingdomId,
-          timeoutMs: config.timeoutMs,
-        })
+      ? observeAdapter(
+          createRealmSocialExecutor({
+            authority,
+            ...config.chatSession,
+            realm: config.kingdomId,
+            timeoutMs: config.timeoutMs,
+          }),
+          "realm.createRealmSocialExecutor",
+        )
       : undefined;
-    const friendshipMine = new FriendshipMineService(
-      createFriendshipMineExecutor(db, authority, () => initialFriendshipMine(rules), Date.now, {
-        before: async (tx, owner, now) => {
-          await productionPreparation.prepare(tx, owner, now);
-        },
-      }),
-      rules,
-      economyEffects,
-      socialRemote,
+    const friendshipMine = observeAdapter(
+      new FriendshipMineService(
+        observeAdapter(
+          createFriendshipMineExecutor(
+            db,
+            authority,
+            () => initialFriendshipMine(rules),
+            Date.now,
+            {
+              before: async (tx, owner, now) => {
+                await productionPreparation.prepare(tx, owner, now);
+              },
+            },
+          ),
+          "realm.createFriendshipMineExecutor",
+        ),
+        rules,
+        economyEffects,
+        socialRemote,
+      ),
+      "realm.FriendshipMineService",
     );
-    const notices = new ChatNoticeService(
-      createInventoryExecutor(db.kingdom.db, authority, Date.now, {
-        before: async (tx, owner, now) => {
-          await productionPreparation.prepare(tx, owner, now);
-        },
-      }),
-      rules,
-      economyEffects,
-      Date.now,
-      async (owner) => {
-        if (!socialRemote) throw new Error("Chat unavailable");
+    const notices = observeAdapter(
+      new ChatNoticeService(
+        observeAdapter(
+          createInventoryExecutor(db.kingdom.db, authority, Date.now, {
+            before: async (tx, owner, now) => {
+              await productionPreparation.prepare(tx, owner, now);
+            },
+          }),
+          "realm.createInventoryExecutor",
+        ),
+        rules,
+        economyEffects,
+        Date.now,
+        async (owner) => {
+          if (!socialRemote) throw new Error("Chat unavailable");
 
-        await socialRemote(owner, "chat.notice.authorize", {});
-      },
-      createChatNoticeCostReader(db.kingdom.db, config.kingdomId),
-    );
-    const postbox = new PostboxService(
-      createPostboxExecutor(db.kingdom.db, authority, Date.now, {
-        before: async (tx, owner, now) => {
-          await productionPreparation.prepare(tx, owner, now);
+          await socialRemote(owner, "chat.notice.authorize", {});
         },
-      }),
-      rules,
-      economyEffects,
+        observeAdapter(
+          createChatNoticeCostReader(db.kingdom.db, config.kingdomId),
+          "realm.createChatNoticeCostReader",
+        ),
+      ),
+      "realm.ChatNoticeService",
+    );
+    const postbox = observeAdapter(
+      new PostboxService(
+        observeAdapter(
+          createPostboxExecutor(db.kingdom.db, authority, Date.now, {
+            before: async (tx, owner, now) => {
+              await productionPreparation.prepare(tx, owner, now);
+            },
+          }),
+          "realm.createPostboxExecutor",
+        ),
+        rules,
+        economyEffects,
+      ),
+      "realm.PostboxService",
     );
 
     if (socialRemote)
       yield* Effect.tryPromise({
-        try: async () => {
-          authority.assertReady();
-          const batch = await socialRemote(`realm-${config.kingdomId}`, "mine.inbox.poll", {});
-          const commands = batch.commands?.value as { type: number; value: Fields }[] | undefined;
+        try: () =>
+          observeJob("realm.friendship_help_recovery_unavailable", async () => {
+            authority.assertReady();
+            const batch = await socialRemote(`realm-${config.kingdomId}`, "mine.inbox.poll", {});
+            const commands = batch.commands?.value as { type: number; value: Fields }[] | undefined;
 
-          for (const entry of commands ?? []) {
-            const data = entry.value,
-              owner = str(data, "owner"),
-              id = str(data, "id");
-            await friendshipMine.command(
-              owner,
-              "mine.receive.help",
-              {
-                operationId: sfs.string(id),
-                actor: data.actor!,
-                generation: data.generation!,
-                name: data.name!,
-              },
-              true,
-            );
-            await socialRemote(owner, "mine.inbox.ack", { id: sfs.string(id) });
-          }
-        },
+            for (const entry of commands ?? []) {
+              const data = entry.value,
+                owner = str(data, "owner"),
+                id = str(data, "id");
+              await friendshipMine.command(
+                owner,
+                "mine.receive.help",
+                {
+                  operationId: sfs.string(id),
+                  actor: data.actor!,
+                  generation: data.generation!,
+                  name: data.name!,
+                },
+                true,
+              );
+              await socialRemote(owner, "mine.inbox.ack", { id: sfs.string(id) });
+            }
+          }),
         catch: () => new Error("Friendship help recovery unavailable"),
       }).pipe(
         Effect.catch(() => Effect.void),
@@ -2353,45 +2743,46 @@ export const RealmDependenciesLive = Layer.effect(
 
     if (socialRemote)
       yield* Effect.tryPromise({
-        try: async () => {
-          authority.assertReady();
-          const owners = notifications.owners();
-          let cursor = "";
+        try: () =>
+          observeJob("realm.social_event_delivery_unavailable", async () => {
+            authority.assertReady();
+            const owners = notifications.owners();
+            let cursor = "";
 
-          for (let index = 0; index < Math.max(1, owners.length); index += 4) {
-            const batch = await socialRemote(`realm-${config.kingdomId}`, "realm.events.poll", {
-              token: sfs.string(authority.instance),
-              epoch: sfs.string(String(authority.epoch)),
-              owners: sfs.array(owners.slice(index, index + 4).map((owner) => sfs.string(owner))),
-              ...(cursor ? { end: sfs.string(cursor) } : {}),
-            });
-
-            if (index === 0) cursor = str(batch, "cursor", "");
-
-            const deliveries = batch.deliveries?.value as
-              | { type: number; value: Fields }[]
-              | undefined;
-
-            for (const entry of deliveries ?? []) {
-              const data = entry.value;
-              await notifications.publish(str(data, "owner"), str(data, "cmd"), {
-                ...(data.data?.value as Fields),
-                eventId: data.id!,
+            for (let index = 0; index < Math.max(1, owners.length); index += 4) {
+              const batch = await socialRemote(`realm-${config.kingdomId}`, "realm.events.poll", {
+                token: sfs.string(authority.instance),
+                epoch: sfs.string(String(authority.epoch)),
+                owners: sfs.array(owners.slice(index, index + 4).map((owner) => sfs.string(owner))),
+                ...(cursor ? { end: sfs.string(cursor) } : {}),
               });
+
+              if (index === 0) cursor = str(batch, "cursor", "");
+
+              const deliveries = batch.deliveries?.value as
+                | { type: number; value: Fields }[]
+                | undefined;
+
+              for (const entry of deliveries ?? []) {
+                const data = entry.value;
+                await notifications.publish(str(data, "owner"), str(data, "cmd"), {
+                  ...(data.data?.value as Fields),
+                  eventId: data.id!,
+                });
+              }
+
+              if (batch.resync?.value === true)
+                for (const owner of owners.slice(index, index + 4))
+                  await notifications.publish(owner, "push.chat.resync", {});
             }
 
-            if (batch.resync?.value === true)
-              for (const owner of owners.slice(index, index + 4))
-                await notifications.publish(owner, "push.chat.resync", {});
-          }
-
-          if (cursor)
-            await socialRemote(`realm-${config.kingdomId}`, "realm.events.ack", {
-              token: sfs.string(authority.instance),
-              epoch: sfs.string(String(authority.epoch)),
-              cursor: sfs.string(cursor),
-            });
-        },
+            if (cursor)
+              await socialRemote(`realm-${config.kingdomId}`, "realm.events.ack", {
+                token: sfs.string(authority.instance),
+                epoch: sfs.string(String(authority.epoch)),
+                cursor: sfs.string(cursor),
+              });
+          }),
         catch: () => new Error("Social event delivery unavailable"),
       }).pipe(
         Effect.catch(() => Effect.void),
@@ -2400,82 +2791,114 @@ export const RealmDependenciesLive = Layer.effect(
         Effect.forkScoped,
       );
 
-    const inventory = new InventoryService(
-      createInventoryExecutor(db.kingdom.db, authority, Date.now, {
-        before: async (tx, owner, now) => {
-          await productionPreparation.prepare(tx, owner, now);
-        },
-        recordAction: async (tx, owner, kind, itemId, count, now, economy) => {
-          await city.command(
-            tx,
-            owner,
-            "quest.action",
-            encode({ kind: sfs.string(kind), itemId: sfs.string(itemId), count: sfs.int(count) }),
-            now,
-            economy,
-          );
-        },
-        useEffect: async (tx, owner, itemId, count, now, economy) =>
-          decode(
-            Buffer.from(
-              (
-                await city.command(
-                  tx,
-                  owner,
-                  itemId === "200031"
-                    ? "prayer.item"
-                    : rules.goods.get(itemId)?.type === "36"
-                      ? "ordinary.box.open"
-                      : ["37", "40"].includes(rules.goods.get(itemId)?.type ?? "")
-                        ? "dragon.item"
-                        : "effect.item",
-                  encode({ itemId: sfs.string(itemId), count: sfs.int(count) }),
-                  now,
-                  economy,
-                )
-              ).response,
-            ),
-          ),
-      }),
-      rules,
-      {
-        world: async () =>
-          worldPowerEffects(decodeWorldPowerEffects(await worldEffects(config.kingdomId)), rules, {
-            kingdomId: config.kingdomId,
-            version: "12.06.0",
-            now: Date.now(),
+    const inventory = observeAdapter(
+      new InventoryService(
+        observeAdapter(
+          createInventoryExecutor(db.kingdom.db, authority, Date.now, {
+            before: async (tx, owner, now) => {
+              await productionPreparation.prepare(tx, owner, now);
+            },
+            recordAction: async (tx, owner, kind, itemId, count, now, economy) => {
+              await city.command(
+                tx,
+                owner,
+                "quest.action",
+                encode({
+                  kind: sfs.string(kind),
+                  itemId: sfs.string(itemId),
+                  count: sfs.int(count),
+                }),
+                now,
+                economy,
+              );
+            },
+            useEffect: async (tx, owner, itemId, count, now, economy) =>
+              decode(
+                Buffer.from(
+                  (
+                    await city.command(
+                      tx,
+                      owner,
+                      itemId === "200031"
+                        ? "prayer.item"
+                        : rules.goods.get(itemId)?.type === "36"
+                          ? "ordinary.box.open"
+                          : ["37", "40"].includes(rules.goods.get(itemId)?.type ?? "")
+                            ? "dragon.item"
+                            : "effect.item",
+                      encode({ itemId: sfs.string(itemId), count: sfs.int(count) }),
+                      now,
+                      economy,
+                    )
+                  ).response,
+                ),
+              ),
           }),
-        emperor: () => cache.emperorVersion(config.kingdomId),
-      },
-    );
-    const comebackSessions = createComebackSessions(db.kingdom.db, authority, (tx, owner, now) =>
-      executeInventoryTransaction(
-        tx,
-        owner,
-        (state) =>
-          planComebackLogin(state, rules, economyEffects, now, (economy) =>
-            city.command(tx, owner, "comeback.init", encode({}), now, economy),
-          ),
-        "comeback.init",
+          "realm.createInventoryExecutor",
+        ),
+        rules,
+        {
+          world: async () =>
+            worldPowerEffects(
+              decodeWorldPowerEffects(await worldEffects(config.kingdomId)),
+              rules,
+              {
+                kingdomId: config.kingdomId,
+                version: "12.06.0",
+                now: Date.now(),
+              },
+            ),
+          emperor: () => cache.emperorVersion(config.kingdomId),
+        },
       ),
+      "realm.InventoryService",
+    );
+    const comebackSessions = observeAdapter(
+      createComebackSessions(db.kingdom.db, authority, (tx, owner, now) =>
+        executeInventoryTransaction(
+          tx,
+          owner,
+          (state) =>
+            planComebackLogin(state, rules, economyEffects, now, (economy) =>
+              city.command(tx, owner, "comeback.init", encode({}), now, economy),
+            ),
+          "comeback.init",
+        ),
+      ),
+      "realm.createComebackSessions",
     );
 
     return {
       paidGifts: { consume: paymentObservers.consume },
       provisioning: config.provisioningSecret
         ? characterProvisioningHandler(
-            new CharacterProvisioningController(
-              new CharacterProvisioningService(
-                createCharacterCreator(db.kingdom.db, authority, config.mapSize),
-                rules,
+            observeAdapter(
+              new CharacterProvisioningController(
+                observeAdapter(
+                  new CharacterProvisioningService(
+                    observeAdapter(
+                      createCharacterCreator(db.kingdom.db, authority, config.mapSize),
+                      "realm.createCharacterCreator",
+                    ),
+                    rules,
+                  ),
+                  "realm.CharacterProvisioningService",
+                ),
               ),
+              "realm.CharacterProvisioningController",
             ),
             config.provisioningSecret,
           )
         : undefined,
       inventory,
-      mutations: createMutationExecutor(db.kingdom.db, authority),
-      economy: createEconomyMutationExecutor(db.kingdom.db, authority),
+      mutations: observeAdapter(
+        createMutationExecutor(db.kingdom.db, authority),
+        "realm.createMutationExecutor",
+      ),
+      economy: observeAdapter(
+        createEconomyMutationExecutor(db.kingdom.db, authority),
+        "realm.createEconomyMutationExecutor",
+      ),
       profileSessions: {
         async open(owner, id, now) {
           if (nickname) await cn1.open(owner, id, now);
@@ -2495,223 +2918,263 @@ export const RealmDependenciesLive = Layer.effect(
       db,
       cache,
       coordination,
-      game: new GameController(
-        new GameService(
-          db,
-          rules,
-          config,
-          Date.now,
-          {
-            timed: async (owner, command, params) => {
-              const target = ["queue.open", "queue.rent"].includes(command)
-                ? undefined
-                : str(params, command === "queue.ccd" ? "qUUID" : "uuid");
-              await recoverActivities(owner, target);
+      game: observeAdapter(
+        new GameController(
+          observeAdapter(
+            new GameService(
+              db,
+              rules,
+              config,
+              Date.now,
+              {
+                timed: async (owner, command, params) => {
+                  const target = ["queue.open", "queue.rent"].includes(command)
+                    ? undefined
+                    : str(params, command === "queue.ccd" ? "qUUID" : "uuid");
+                  await recoverActivities(owner, target);
 
-              return activities.command(owner, command, params);
-            },
-            production: async (owner, command, params) => {
-              await recoverActivities(owner);
+                  return activities.command(owner, command, params);
+                },
+                production: async (owner, command, params) => {
+                  await recoverActivities(owner);
 
-              return production.command(owner, command, params);
-            },
-            reconcileAlliance: async (owner) => {
-              await alliances.command(owner, "alliance.tick", {});
-            },
-            alliance: async (owner, command, params) => {
-              await recoverActivities(owner);
+                  return production.command(owner, command, params);
+                },
+                reconcileAlliance: async (owner) => {
+                  await alliances.command(owner, "alliance.tick", {});
+                },
+                alliance: async (owner, command, params) => {
+                  await recoverActivities(owner);
 
-              return alliances.command(owner, command, params);
-            },
-            cityProgression: async (owner, command, params) => {
-              if (command === "newexpidition.rankinfo")
-                return { body: await expeditionHistory.read(owner), pushes: [] };
+                  return alliances.command(owner, command, params);
+                },
+                cityProgression: async (owner, command, params) => {
+                  if (command === "newexpidition.rankinfo")
+                    return { body: await expeditionHistory.read(owner), pushes: [] };
 
-              if ((expeditionTreasuryCommands as readonly string[]).includes(command))
-                return expeditionTreasury.command(owner, command, params);
+                  if ((expeditionTreasuryCommands as readonly string[]).includes(command))
+                    return expeditionTreasury.command(owner, command, params);
 
-              await recoverActivities(owner);
+                  await recoverActivities(owner);
 
-              if (
-                [
-                  "target.init",
-                  "target.task.ui",
-                  "target.task.item",
-                  "target.task.receive",
-                  "target.paid",
-                ].includes(command)
-              )
-                await activities.domainCommand(owner, "world.tick", {});
+                  if (
+                    [
+                      "target.init",
+                      "target.task.ui",
+                      "target.task.item",
+                      "target.task.receive",
+                      "target.paid",
+                    ].includes(command)
+                  )
+                    await activities.domainCommand(owner, "world.tick", {});
 
-              if (command === "continuedcost.info" || command === "continuedcost.reward")
-                await recoverContinuedCosts(owner);
+                  if (command === "continuedcost.info" || command === "continuedcost.reward")
+                    await recoverContinuedCosts(owner);
 
-              const result = await activities.domainCommand(owner, command, params);
+                  const result = await activities.domainCommand(owner, command, params);
 
-              if (command === "item.send") {
-                const recipient = str(params, "uid");
+                  if (command === "item.send") {
+                    const recipient = str(params, "uid");
 
-                if (notifications.owners().includes(recipient))
-                  await deliverPlayerItemGifts([recipient]);
-              }
+                    if (notifications.owners().includes(recipient))
+                      await deliverPlayerItemGifts([recipient]);
+                  }
 
-              if (command === "newexpidition.activityinfo")
-                return { ...result, body: await expeditionLiveView.enrich(owner, result.body) };
+                  if (command === "newexpidition.activityinfo")
+                    return { ...result, body: await expeditionLiveView.enrich(owner, result.body) };
 
-              return result;
-            },
-            reconcileTimed: async (owner) => {
-              await recoverActivities(owner);
-              await production.command(owner, "production.settle", {});
-            },
-            trade: (owner, command, params) => trade.command(owner, command, params),
-            shop: (owner, command, params) => shops.command(owner, command, params),
-            mailReward: (owner, command, params) => mailRewards.command(owner, command, params),
-            friendshipMine: (owner, command, params) =>
-              friendshipMine.command(owner, command, params),
-            notice: (owner, command, params) => notices.command(owner, command, params),
-            postbox: (owner, command, params) => postbox.command(owner, command, params),
-            inventory: (owner, command, params) => inventory.command(owner, command, params),
-            expeditionActivity: (owner) => expeditionActivity.activity(owner),
-            reconnect: async (uid, now, plan) => {
-              authority.assertReady();
-              const binding = await readFriendshipBinding(
-                db.databases.global.db,
-                config.kingdomId,
-                uid,
-              );
+                  return result;
+                },
+                reconcileTimed: async (owner) => {
+                  await recoverActivities(owner);
+                  await production.command(owner, "production.settle", {});
+                },
+                trade: (owner, command, params) => trade.command(owner, command, params),
+                shop: (owner, command, params) => shops.command(owner, command, params),
+                mailReward: (owner, command, params) => mailRewards.command(owner, command, params),
+                friendshipMine: (owner, command, params) =>
+                  friendshipMine.command(owner, command, params),
+                notice: (owner, command, params) => notices.command(owner, command, params),
+                postbox: (owner, command, params) => postbox.command(owner, command, params),
+                inventory: (owner, command, params) => inventory.command(owner, command, params),
+                expeditionActivity: (owner) => expeditionActivity.activity(owner),
+                reconnect: async (uid, now, plan) => {
+                  authority.assertReady();
+                  const binding = await readFriendshipBinding(
+                    db.databases.global.db,
+                    config.kingdomId,
+                    uid,
+                  );
 
-              return executeReconnectProgress(db.kingdom.db, authority, uid, BigInt(now), plan, {
-                binding,
-                initial: () => initialFriendshipMine(rules),
-              });
-            },
-            ...nicknameServices,
-            nicknameChange: nickname
-              ? async (...args) => {
+                  return executeReconnectProgress(
+                    db.kingdom.db,
+                    authority,
+                    uid,
+                    BigInt(now),
+                    plan,
+                    {
+                      binding,
+                      initial: () => initialFriendshipMine(rules),
+                    },
+                  );
+                },
+                ...nicknameServices,
+                nicknameChange: nickname
+                  ? async (...args) => {
+                      authority.assertReady();
+
+                      return nickname.command(...args);
+                    }
+                  : undefined,
+                worldPointDetail,
+                worldMarchInspection: observeAdapter(
+                  createWorldMarchInspectionStore(db.kingdom.db),
+                  "realm.createWorldMarchInspectionStore",
+                ),
+                worldScout: observeAdapter(
+                  createWorldScoutStore(db.kingdom.db, config.mapSize),
+                  "realm.createWorldScoutStore",
+                ),
+                worldFightBulletins: {
+                  store: observeAdapter(
+                    createWorldBulletinStore(db.kingdom.db),
+                    "realm.createWorldBulletinStore",
+                  ),
+                  page: (...args) => cache.worldFightBulletins(...args),
+                },
+                playerSearch,
+                worldSearch,
+                worldUtility: observeAdapter(
+                  createWorldUtilityStore(db.kingdom.db, authority, config.mapSize),
+                  "realm.createWorldUtilityStore",
+                ),
+                worldFavorites,
+                avatarFinish: avatar
+                  ? {
+                      ...avatar.service,
+                      finish: (...args) => {
+                        authority.assertReady();
+
+                        return avatar.service.finish(...args);
+                      },
+                    }
+                  : undefined,
+                avatarVersion: avatar
+                  ? {
+                      ...avatar.versionService,
+                      update: (...args) => {
+                        authority.assertReady();
+
+                        return avatar.versionService.update(...args);
+                      },
+                    }
+                  : undefined,
+                avatar: avatarFiles
+                  ? {
+                      ...avatarFiles,
+                      read: (uid, now, inspect) => {
+                        authority.assertReady();
+
+                        return readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect);
+                      },
+                    }
+                  : undefined,
+                social: config.chatSession
+                  ? (() => {
+                      const execute = observeAdapter(
+                        createRealmSocialExecutor({
+                          authority,
+                          ...config.chatSession,
+                          realm: config.kingdomId,
+                          timeoutMs: config.timeoutMs,
+                        }),
+                        "realm.createRealmSocialExecutor",
+                      );
+
+                      return async (owner, command, params) => {
+                        authority.assertReady();
+
+                        return execute(owner, command, params);
+                      };
+                    })()
+                  : undefined,
+                mailChatEnabled: !!config.mailChat,
+                chatSession: config.chatSession
+                  ? (() => {
+                      const issue = observeAdapter(
+                        createRealmChatSessionIssuer({
+                          ...config.chatSession,
+                          timeoutMs: config.timeoutMs,
+                        }),
+                        "realm.createRealmChatSessionIssuer",
+                      );
+
+                      return async (request) => {
+                        authority.assertReady();
+
+                        return issue(request);
+                      };
+                    })()
+                  : undefined,
+                expeditionRanking: (limit) => cache.expeditionRanking(limit),
+                scoreActivityRanking: () => cache.scoreActivityRanking(),
+                battleFightPublication: () => cache.battleFightPublication(),
+                playoffPublication: () => cache.playoffPublication(),
+                heroHistoryPublication: (keys, alliance) =>
+                  cache.heroHistoryPublication(keys, alliance),
+                heroRankingPosition: (query) => cache.heroRankingPosition(query),
+                throneRankingPeriod: (realm) => cache.throneRankingPeriod(realm),
+                donationScores: (allianceId, kind, date) =>
+                  cache.donationScores(allianceId, kind, date),
+                flowerRankingPublication: (realm, uid, limit, global) =>
+                  cache.flowerRankingPublication(realm, uid, limit, global),
+                militaryRanking: (type, group) => cache.militaryRanking(type, group),
+                attributeRanking: (type) => cache.attributeRanking(type),
+                publishedGlobalRanking: (kind) =>
+                  kind === "consumption"
+                    ? continuedCostRanking.board(() => cache.publishedGlobalRanking(kind))
+                    : cache.publishedGlobalRanking(kind),
+                globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
+                dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
+                expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
+                worldPowerEffects: (kingdomId) => worldEffects(kingdomId),
+                worldEffectBoard: currentMergeBoard,
+                hotItemBusinessMan: async () => {
                   authority.assertReady();
 
-                  return nickname.command(...args);
-                }
-              : undefined,
-            worldPointDetail,
-            worldMarchInspection: createWorldMarchInspectionStore(db.kingdom.db),
-            worldScout: createWorldScoutStore(db.kingdom.db, config.mapSize),
-            worldFightBulletins: {
-              store: createWorldBulletinStore(db.kingdom.db),
-              page: (...args) => cache.worldFightBulletins(...args),
-            },
-            playerSearch,
-            worldSearch,
-            worldUtility: createWorldUtilityStore(db.kingdom.db, authority, config.mapSize),
-            worldFavorites,
-            avatarFinish: avatar
-              ? {
-                  ...avatar.service,
-                  finish: (...args) => {
-                    authority.assertReady();
-
-                    return avatar.service.finish(...args);
-                  },
-                }
-              : undefined,
-            avatarVersion: avatar
-              ? {
-                  ...avatar.versionService,
-                  update: (...args) => {
-                    authority.assertReady();
-
-                    return avatar.versionService.update(...args);
-                  },
-                }
-              : undefined,
-            avatar: avatarFiles
-              ? {
-                  ...avatarFiles,
-                  read: (uid, now, inspect) => {
-                    authority.assertReady();
-
-                    return readAvatarGrant(db.kingdom.db, config.kingdomId, uid, now, inspect);
-                  },
-                }
-              : undefined,
-            social: config.chatSession
-              ? (() => {
-                  const execute = createRealmSocialExecutor({
-                    authority,
-                    ...config.chatSession,
-                    realm: config.kingdomId,
-                    timeoutMs: config.timeoutMs,
-                  });
-
-                  return async (owner, command, params) => {
-                    authority.assertReady();
-
-                    return execute(owner, command, params);
-                  };
-                })()
-              : undefined,
-            mailChatEnabled: !!config.mailChat,
-            chatSession: config.chatSession
-              ? (() => {
-                  const issue = createRealmChatSessionIssuer({
-                    ...config.chatSession,
-                    timeoutMs: config.timeoutMs,
-                  });
-
-                  return async (request) => {
-                    authority.assertReady();
-
-                    return issue(request);
-                  };
-                })()
-              : undefined,
-            expeditionRanking: (limit) => cache.expeditionRanking(limit),
-            scoreActivityRanking: () => cache.scoreActivityRanking(),
-            battleFightPublication: () => cache.battleFightPublication(),
-            playoffPublication: () => cache.playoffPublication(),
-            heroHistoryPublication: (keys, alliance) =>
-              cache.heroHistoryPublication(keys, alliance),
-            heroRankingPosition: (query) => cache.heroRankingPosition(query),
-            throneRankingPeriod: (realm) => cache.throneRankingPeriod(realm),
-            donationScores: (allianceId, kind, date) =>
-              cache.donationScores(allianceId, kind, date),
-            flowerRankingPublication: (realm, uid, limit, global) =>
-              cache.flowerRankingPublication(realm, uid, limit, global),
-            militaryRanking: (type, group) => cache.militaryRanking(type, group),
-            attributeRanking: (type) => cache.attributeRanking(type),
-            publishedGlobalRanking: (kind) =>
-              kind === "consumption"
-                ? continuedCostRanking.board(() => cache.publishedGlobalRanking(kind))
-                : cache.publishedGlobalRanking(kind),
-            globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
-            dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
-            expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
-            worldPowerEffects: (kingdomId) => worldEffects(kingdomId),
-            worldEffectBoard: currentMergeBoard,
-            hotItemBusinessMan: async () => {
-              authority.assertReady();
-
-              return hotBusinessMan.current()?.body;
-            },
-            worldTurretKills: (kingdomId, territory) =>
-              cache.worldTurretKills(kingdomId, territory),
-            emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
-            changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
-            lastSystemMail: (uid) => cache.lastSystemMail(uid),
-            systemMailPage: (uid, ids, count, time, inspect) =>
-              cache.systemMailPage(uid, ids, count, time, inspect),
-            playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
-          },
-          new HeroEventService(db, rules, config, Date.now, {
-            heroHistoryPublication: (keys, alliance) =>
-              cache.heroHistoryPublication(keys, alliance),
-            heroRankingPosition: (query) => cache.heroRankingPosition(query),
-          }),
+                  return hotBusinessMan.current()?.body;
+                },
+                worldTurretKills: (kingdomId, territory) =>
+                  cache.worldTurretKills(kingdomId, territory),
+                emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
+                changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),
+                lastSystemMail: (uid) => cache.lastSystemMail(uid),
+                systemMailPage: (uid, ids, count, time, inspect) =>
+                  cache.systemMailPage(uid, ids, count, time, inspect),
+                playerUpdateTimes: (kingdomId, uids) => cache.playerUpdateTimes(kingdomId, uids),
+              },
+              observeAdapter(
+                new HeroEventService(db, rules, config, Date.now, {
+                  heroHistoryPublication: (keys, alliance) =>
+                    cache.heroHistoryPublication(keys, alliance),
+                  heroRankingPosition: (query) => cache.heroRankingPosition(query),
+                }),
+                "realm.HeroEventService",
+              ),
+            ),
+            "realm.GameService",
+          ),
         ),
+        "realm.GameController",
       ),
-      world: new WorldController(
-        new WorldService(db, config.mapSize, config.kingdomId, { ...worldInterest, rules }),
+      world: observeAdapter(
+        new WorldController(
+          observeAdapter(
+            new WorldService(db, config.mapSize, config.kingdomId, { ...worldInterest, rules }),
+            "realm.WorldService",
+          ),
+        ),
+        "realm.WorldController",
       ),
     };
   }),

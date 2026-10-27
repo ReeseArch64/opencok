@@ -1,3 +1,4 @@
+import { observeAdapter } from "@opencok/core/operation";
 import { Cache } from "@opencok/storage/session";
 import { firebaseIdentity } from "@opencok/identity/firebase";
 import { ProvisioningService } from "@opencok/services/provisioning";
@@ -27,18 +28,19 @@ export const ApiDependenciesLive = Layer.effect(
     const config = yield* ApiConfig;
     const accounts = yield* acquireResource(
       "api.accounts",
-      async () => new AccountStore(config),
+      async () => observeAdapter(new AccountStore(config), "api.AccountStore"),
       (store) => store.close(),
     );
-    const directory = new ServerDirectory(config);
-    const redis = new DiscoveryRedis(config);
+    const directory = observeAdapter(new ServerDirectory(config), "api.ServerDirectory");
+    const redis = observeAdapter(new DiscoveryRedis(config), "api.DiscoveryRedis");
     yield* fromPromise("api.directory", () => directory.read()).pipe(Effect.uninterruptible);
     yield* fromPromise("api.accounts.start", () => accounts.start()).pipe(Effect.uninterruptible);
     yield* fromPromise("api.redis", () => redis.health()).pipe(Effect.uninterruptible);
     const identity = config.provisioning
       ? yield* acquireResource(
           "api.identity",
-          async () => firebaseIdentity(config.provisioning!.projectId),
+          async () =>
+            observeAdapter(await firebaseIdentity(config.provisioning!.projectId), "api.identity"),
           (value) => value.close(),
         )
       : undefined;
@@ -47,31 +49,49 @@ export const ApiDependenciesLive = Layer.effect(
       provisioning:
         identity && config.provisioning
           ? provisioningHandler(
-              new ProvisioningController(
-                new ProvisioningService(
-                  identity,
-                  accounts.provisioning(),
-                  new Map(
-                    config.provisioning.realms.map((realm) => [
-                      realm.id,
-                      realmProvisioner(realm.url, config.provisioning!.secret, config.timeoutMs),
-                    ]),
+              observeAdapter(
+                new ProvisioningController(
+                  observeAdapter(
+                    new ProvisioningService(
+                      identity,
+                      accounts.provisioning(),
+                      new Map(
+                        config.provisioning.realms.map((realm) => [
+                          realm.id,
+                          realmProvisioner(
+                            realm.url,
+                            config.provisioning!.secret,
+                            config.timeoutMs,
+                          ),
+                        ]),
+                      ),
+                    ),
+                    "api.ProvisioningService",
                   ),
                 ),
+                "api.ProvisioningController",
               ),
             )
           : undefined,
       files: config.filesEnabled
-        ? yield* createFiles((name, ...args) => new Cache(config).command(name, ...args))
+        ? yield* observeAdapter(
+            createFiles((name, ...args) =>
+              observeAdapter(new Cache(config), "api.Cache").command(name, ...args),
+            ),
+            "api.createFiles",
+          )
         : undefined,
       accounts,
       directory,
       redis,
       chatDiscovery: config.chatUrl
-        ? createChatDiscovery({
-            origin: config.chatUrl,
-            timeoutMs: config.timeoutMs,
-          })
+        ? observeAdapter(
+            createChatDiscovery({
+              origin: config.chatUrl,
+              timeoutMs: config.timeoutMs,
+            }),
+            "api.createChatDiscovery",
+          )
         : undefined,
     };
   }),

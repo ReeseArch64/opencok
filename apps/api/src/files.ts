@@ -1,3 +1,4 @@
+import { observeAdapter } from "@opencok/core/operation";
 import { Effect } from "effect";
 import { readEnvironment } from "@opencok/env/effect";
 import { filesSchema } from "@opencok/env/files";
@@ -38,8 +39,14 @@ export const createFiles = (command: (name: string, ...args: string[]) => Promis
       async (resource) => resource.destroy(),
     );
 
-    return createHandler(
-      new S3ImageStore(client, config.S3_BUCKET, signingClient),
-      createAvatarTickets(command),
+    return observeAdapter(
+      createHandler(
+        observeAdapter(
+          new S3ImageStore(client, config.S3_BUCKET, signingClient),
+          "api.S3ImageStore",
+        ),
+        observeAdapter(createAvatarTickets(command), "api.createAvatarTickets"),
+      ),
+      "api.createHandler",
     );
   });

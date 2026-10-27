@@ -4138,3 +4138,13 @@ Branch-city NPC rewards remain outside this visibility correction.
 login restoration. `integration/branch-city.test.ts` checks PostgreSQL
 persistence, retries and reward-counter preservation using a disposable realm.
 Native APK rendering and other client tracks require separate device validation.
+
+## Operational observability
+
+[ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
+governs Evlog/OpenTelemetry export to Maple Local. Composed application operations
+and dependencies emit correlated start/result/error records and duration metrics.
+Generated effects are distinguished from committed transactions and deferred
+delivery. See the [shared contract](../../packages/core/README.md#operational-logging)
+and [Compose runbook](../../infra/compose/README.md#observability) for the dashboard,
+configuration, credentials and retention/alerting limitations.

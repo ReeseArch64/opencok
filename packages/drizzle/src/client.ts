@@ -1,5 +1,9 @@
 import { drizzle } from "drizzle-orm/node-postgres";
+import { getTableName, is, Table } from "drizzle-orm";
 import { Pool, type PoolConfig } from "pg";
+import { observePostgresClient } from "./observed-client";
+import { logEvent } from "@opencok/core/logging";
+import { observeTransaction } from "@opencok/core/transaction";
 import type { DatabaseRole } from "./roles";
 import * as globalSchema from "./schema/global";
 import * as kingdomSchema from "./schema/kingdom";
@@ -16,7 +20,45 @@ export function createDatabase<T extends DatabaseRole>(role: T, config: PoolConf
   if (role !== "global" && role !== "kingdom") throw new Error("Unknown database role");
 
   const pool = new Pool({ ...config, options: `${config.options ?? ""} -c timezone=UTC` });
+  const tables = new Set(
+    Object.values(schemas[role])
+      .filter((value) => is(value, Table))
+      .map((table) => getTableName(table)),
+  );
+  pool.on("connect", (client) => {
+    observePostgresClient(client, role, tables);
+    logEvent("database_connected", {
+      component: "postgresql",
+      databaseRole: role,
+      outcome: "success",
+    });
+  });
+  pool.on("error", () =>
+    logEvent(
+      "database_pool_failed",
+      { component: "postgresql", databaseRole: role, outcome: "failure" },
+      "error",
+    ),
+  );
   const db = drizzle(pool, { schema: schemas[role] });
+  const transaction = db.transaction.bind(db);
+  const observeSavepoints = (tx: Parameters<Parameters<typeof transaction>[0]>[0]) => {
+    const savepoint = tx.transaction.bind(tx);
+    tx.transaction = (apply) =>
+      observeTransaction(`postgresql.${role}.savepoint`, () =>
+        savepoint((inner) => {
+          observeSavepoints(inner);
+          return apply(inner);
+        }),
+      );
+  };
+  db.transaction = (apply, settings) =>
+    observeTransaction(`postgresql.${role}.transaction`, () =>
+      transaction((tx) => {
+        observeSavepoints(tx);
+        return apply(tx);
+      }, settings),
+    );
 
   return { role, db, pool, close: () => pool.end() };
 }

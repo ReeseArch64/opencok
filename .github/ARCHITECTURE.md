@@ -265,12 +265,17 @@ compatibility and cannot silently rewrite in-flight calculations.
 
 ## 12. Observability, Evelog and search
 
-Current services use Evlog through [shared logging](../packages/core/README.md#operational-logging).
-Operational logs contain controlled component/operation, correlation, duration and
-outcome, without tokens, keys, payloads or player data. Prometheus/Loki/Grafana are
-target backends; hosting remains open. Evelog is the durable game audit concept,
-distinct from the Evlog library. Elasticsearch is optional derived search.
-Firebase product telemetry and FCM never replace persisted state or session delivery.
+Current server/API services use Evlog through [shared logging](../packages/core/README.md#operational-logging)
+and export filtered logs, traces, controlled exceptions and duration/process metrics to
+Maple Local in Compose. [ADR-0013](../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
+records the authorized implementation and suspends Grafana, Loki, Prometheus, Axiom and
+Sentry for these signals while Maple passes verification. Production capacity remains open.
+Operational events cover composed service/adapter calls, HTTP/TCP, PostgreSQL statements,
+workers, generated media/frames and confirmed transaction effects. Bodies, SQL, credentials,
+player identities and raw exception messages/stacks are excluded. Maple is an operational
+projection; Evelog is the separate durable game audit concept. Local Maple has no native
+automatic alerting. Elasticsearch remains optional derived search. Firebase product
+telemetry and FCM never replace persisted state or session delivery.
 [Observability and push design](../docs/architecture/operations.md#12-observability-evelog-and-search).
 
 ## 13. VPS Kubernetes, delivery, and continuity

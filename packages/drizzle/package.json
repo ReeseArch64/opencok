@@ -30,6 +30,7 @@
   "dependencies": {
     "drizzle-orm": "0.45.4",
     "pg": "8.23.1",
-    "@opencok/env": "workspace:*"
+    "@opencok/env": "workspace:*",
+    "@opencok/core": "workspace:*"
   }
 }

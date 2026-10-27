@@ -1,6 +1,8 @@
 import { Effect, Layer } from "effect";
 import { runService } from "@opencok/core/runtime";
-import { EnvironmentLive } from "@opencok/env/effect";
+import { EnvironmentLive, readEnvironment } from "@opencok/env/effect";
+import { telemetrySchema } from "@opencok/env/telemetry";
+import { telemetryScope } from "@opencok/core/telemetry-scope";
 import { ApiDependenciesLive, serveApi } from "./app.ts";
 import { ApiConfigLive } from "./config.ts";
 
@@ -11,5 +13,10 @@ const dependencies = ApiDependenciesLive.pipe(
 
 runService(
   "api",
-  Effect.scoped(serveApi.pipe(Effect.andThen(Effect.never))).pipe(Effect.provide(dependencies)),
+  Effect.scoped(
+    Effect.gen(function* () {
+      yield* telemetryScope("api", yield* readEnvironment(telemetrySchema));
+      yield* serveApi.pipe(Effect.andThen(Effect.never), Effect.provide(dependencies));
+    }),
+  ).pipe(Effect.provide(EnvironmentLive)),
 );
