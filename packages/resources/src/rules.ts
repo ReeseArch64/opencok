@@ -67,11 +67,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     variableSource &&
     typeof variableSource !== "string" &&
     variableSource.kind === CatalogKind.Automation
-      ? new Map(
-          variableSource.variables
-            .filter((v) => v.id.startsWith("long_3th_"))
-            .map((v) => [`${v.scope}$${v.id}`, v]),
-        )
+      ? new Map(variableSource.variables.map((v) => [`${v.scope}$${v.id}`, v]))
       : new Map();
   const buildings =
     directory === undefined

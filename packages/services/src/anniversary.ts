@@ -103,11 +103,6 @@ export const anniversaryDomain: CityDomain = {
       refreshCampaignGrants(context);
       return { response: encode({}), event: null };
     }
-    if (
-      !context.rules.advanced.anniversaryWeeks?.size ||
-      !context.rules.advanced.campaignVariables?.size
-    )
-      campaignFailure();
     const planner = new CampaignPlanner(context);
     if (command === "campaign.action") {
       const code = cityInteger(int(params, "event"), 1, 10000),
@@ -122,6 +117,11 @@ export const anniversaryDomain: CityDomain = {
       const keys = str(params, "keys").split(";").filter(Boolean);
       return { response: encode(campaignVariableFields(planner, keys)), event: null };
     }
+    if (
+      !context.rules.advanced.anniversaryWeeks?.size ||
+      !context.rules.advanced.campaignVariables?.size
+    )
+      campaignFailure();
     if (command === "third.anniversary")
       return { response: encode(anniversaryView(info(context, planner))), event: null };
     const index = cityInteger(int(params, "boxIdx"), 1) - 1;

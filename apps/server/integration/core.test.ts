@@ -1,3 +1,4 @@
+import { catalog as campaignVariablesCatalog } from "../../../packages/resources/src/catalogs/data/trigger-var";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { eq } from "drizzle-orm";
 import { acquireRealmAuthority } from "@opencok/repositories/realm-authority";
@@ -321,6 +322,25 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       });
       expect(costInfo._cok_).toEqual(sfs.long(9007199254740993n));
       expect(costInfo.costPoint).toBeUndefined();
+      const previousVariables = runtimeRules.advanced.campaignVariables;
+      try {
+        runtimeRules.advanced.campaignVariables = new Map(
+          campaignVariablesCatalog.variables.map((variable) => [
+            `${variable.scope}$${variable.id}`,
+            variable,
+          ]),
+        );
+        const genericVariables = await client.command("get.activity.value", {
+          keys: sfs.string("I$long_sss;$kingwar_testitem_sent_2"),
+          _cok_: sfs.int(455),
+        });
+        expect(genericVariables._cok_).toEqual(sfs.int(455));
+        expect(genericVariables.values).toEqual(
+          sfs.string("I$long_sss=100;$kingwar_testitem_sent_2=0"),
+        );
+      } finally {
+        runtimeRules.advanced.campaignVariables = previousVariables;
+      }
       expect((await client.command("continuedcost.apply", {})).errorCode?.value).toBe("102192");
       expect((await client.command("hero.target.deliver", {})).errorCode?.value).toBe("102192");
       expect((await client.command("hero.rank.deliver", {})).errorCode?.value).toBe("102192");

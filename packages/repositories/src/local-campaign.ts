@@ -12,7 +12,7 @@ export async function readCampaignVariables(
     .from(trigger_var)
     .where(
       and(
-        like(trigger_var.key, "long\\_3th\\_%"),
+        like(trigger_var.key, "long\\_%"),
         or(
           and(eq(trigger_var.type, 1), eq(trigger_var.uid, owner)),
           and(eq(trigger_var.type, 2), eq(trigger_var.uid, String(kingdomId))),
@@ -35,7 +35,8 @@ export async function writeCampaignVariables(
     if (
       row.uid !== owner ||
       num(row, "type") !== 1 ||
-      !/^long_3th_[a-zA-Z0-9_-]+$/.test(text(row, "key")) ||
+      !/^long_[a-zA-Z0-9_ -]+$/.test(text(row, "key")) ||
+      text(row, "key").length > 200 ||
       !/^-?\d{1,19}$/.test(text(row, "value")) ||
       BigInt(text(row, "value")) < -9223372036854775808n ||
       BigInt(text(row, "value")) > 9223372036854775807n
