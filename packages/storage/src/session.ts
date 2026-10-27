@@ -1,3 +1,4 @@
+import { loadWorldFightBulletins } from "./world-bulletins";
 import { publishExpeditionDiscovery } from "./expedition-discovery";
 import type { ExpeditionDiscoveryPublication } from "@opencok/contracts/expedition-score-publication";
 import { loadGeneralDrawRanking } from "./general-draws";
@@ -350,6 +351,19 @@ export class Cache {
       result.set(uid, content);
     }
     return result;
+  }
+  async worldFightBulletins(
+    alliance: string,
+    start: number,
+    end: number,
+  ): Promise<readonly string[]> {
+    return loadWorldFightBulletins(
+      (...args) => this.command(...args),
+      this.config.kingdomId,
+      alliance,
+      start,
+      end,
+    );
   }
   async worldEffects(kingdomId = this.config.kingdomId): Promise<ReadonlyMap<string, string>> {
     if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
