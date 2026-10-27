@@ -153,7 +153,8 @@
     "./comeback": "./src/comeback.ts",
     "./comeback-session": "./src/comeback-session.ts",
     "./normal-recharge": "./src/normal-recharge.ts",
-    "./world-birth": "./src/world-birth.ts"
+    "./world-birth": "./src/world-birth.ts",
+    "./world-terrain": "./src/world-terrain.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

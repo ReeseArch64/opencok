@@ -197,7 +197,8 @@
     "./normal-recharge": "./src/normal-recharge.ts",
     "./responses/world-use": "./src/responses/world-use.ts",
     "./responses/world-recreation": "./src/responses/world-recreation.ts",
-    "./world-birth": "./src/world-birth.ts"
+    "./world-birth": "./src/world-birth.ts",
+    "./world-terrain": "./src/world-terrain.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
