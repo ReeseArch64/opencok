@@ -21,6 +21,8 @@ import { createMergeCampaignStore, mergeCampaignActor } from "@opencok/repositor
 import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
 import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
 import { serverFeature } from "@opencok/rules/power-context";
+import { createWorldMonsterRefreshExecutor } from "@opencok/repositories/world-monster-refresh";
+import { refreshWorldMonsters } from "@opencok/services/world-monster-refresh";
 import { createWorldRecreationDomain } from "@opencok/services/world-recreation";
 import { assertWorldTerrain } from "@opencok/repositories/world-terrain";
 import { createWorldUseDomain } from "@opencok/services/world-use";
@@ -1447,6 +1449,11 @@ export const RealmDependenciesLive = Layer.effect(
         if (!delivered) break;
       }
     };
+    const monsterRefresh = createWorldMonsterRefreshExecutor(
+      db.kingdom.db,
+      authority,
+      config.mapSize,
+    );
     const resourceRefresh = createWorldResourceRefreshExecutor(
       db.kingdom.db,
       authority,
@@ -1479,6 +1486,15 @@ export const RealmDependenciesLive = Layer.effect(
       } catch {
         console.warn(
           JSON.stringify({ event: "world_resource_recovery_failed", kingdom: config.kingdomId }),
+        );
+      }
+      try {
+        await monsterRefresh.execute(undefined, (store) =>
+          refreshWorldMonsters(store, rules, config.mapSize),
+        );
+      } catch {
+        console.warn(
+          JSON.stringify({ event: "world_monster_recovery_failed", kingdom: config.kingdomId }),
         );
       }
       for (let index = 0; index < 64; index++) {
@@ -1606,6 +1622,7 @@ export const RealmDependenciesLive = Layer.effect(
         "world.user.rcr",
         "resource.new.detail",
         "world.resources",
+        "world.monsters",
         "buy.citydef",
         "world.user.rcd",
         "world.march",
