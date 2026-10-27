@@ -25,5 +25,8 @@ export interface WorldResourceRefreshStore {
   save(clock: WorldResourceClock): Promise<void>;
 }
 export interface WorldResourceRefreshExecutor {
-  execute(now: bigint, work: (store: WorldResourceRefreshStore) => Promise<void>): Promise<void>;
+  execute(
+    now: bigint | undefined,
+    work: (store: WorldResourceRefreshStore) => Promise<void>,
+  ): Promise<void>;
 }

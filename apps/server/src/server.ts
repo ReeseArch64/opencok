@@ -1351,10 +1351,8 @@ export const RealmDependenciesLive = Layer.effect(
     );
     const recoverWorld = async () => {
       try {
-        const resourceNow = BigInt(Date.now());
-        const resourceEffects = await economyEffects.world();
-        await resourceRefresh.execute(resourceNow, (store) =>
-          refreshWorldResources(store, rules, config.mapSize, resourceEffects),
+        await resourceRefresh.execute(undefined, async (store) =>
+          refreshWorldResources(store, rules, config.mapSize, await economyEffects.world()),
         );
       } catch {
         console.warn(

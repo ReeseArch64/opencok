@@ -15,14 +15,16 @@ export function createWorldResourceRefreshExecutor(
   db: Database["kingdom"]["db"],
   authority: RealmAuthority,
   size = 1201,
+  captureTime = Date.now,
 ): WorldResourceRefreshExecutor {
   return {
-    async execute(now, work) {
-      if (now < 0n || now > BigInt(Number.MAX_SAFE_INTEGER))
-        throw new Error("Invalid resource clock");
+    async execute(at, work) {
       await db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
         await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
+        const now = at ?? BigInt(captureTime());
+        if (now < 0n || now > BigInt(Number.MAX_SAFE_INTEGER))
+          throw new Error("Invalid resource clock");
         const [info] = await tx.select().from(server_info).where(eq(server_info.uid, "server"));
         if (!info?.activityTime || info.activityTime > now) return;
         const [clock] = await tx

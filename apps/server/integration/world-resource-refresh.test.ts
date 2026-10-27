@@ -202,3 +202,46 @@ test("resource catch-up bounds each page and retains blocked replacement tickets
     await h.close();
   }
 }, 120000);
+
+test("resource recovery captures the authoritative clock only after acquiring the shared world lock", async () => {
+  const h = await resourceHarness();
+  const blocker = await h.db.pool.connect();
+  try {
+    await blocker.query("BEGIN");
+    await blocker.query("SELECT pg_advisory_xact_lock(728214, 0)");
+    let clock = 1000000;
+    const executor = createWorldResourceRefreshExecutor(h.db.db, h.authority, 4, () => clock);
+    let observed = 0n;
+    const pending = executor.execute(undefined, async (store) => {
+      observed = store.now;
+      await refreshWorldResources(store, h.rules, 4, new Map(), () => 0);
+    });
+    try {
+      const deadline = Date.now() + 5000;
+      let waiting = false;
+      while (Date.now() < deadline) {
+        const locks = await h.db.pool.query(
+          "SELECT 1 FROM pg_locks WHERE locktype='advisory' AND classid=728214 AND NOT granted",
+        );
+        if (locks.rowCount) {
+          waiting = true;
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+      expect(waiting).toBe(true);
+      clock = 2000000;
+    } finally {
+      await blocker.query("ROLLBACK");
+    }
+    await pending;
+    expect(observed).toBe(2000000n);
+    const points = await h.db.db.select().from(worldpoint).where(eq(worldpoint.pointType, 3));
+    expect(points).toHaveLength(4);
+    expect(points.every((point) => point.flushTime === 23600000n)).toBe(true);
+  } finally {
+    await blocker.query("ROLLBACK");
+    blocker.release();
+    await h.close();
+  }
+}, 120000);

@@ -65,3 +65,10 @@ resource generation, neutral resources, battle resource targets, monster rewards
 and territory engines have separate source lifecycles and are not established by
 these ordinary-node tests. Their concrete dependencies must be audited separately;
 this document does not label every remaining producer as combat-dependent.
+
+Production captures the refresh clock after acquiring the shared world lock.
+World effects are read inside that same transaction through the authoritative
+merge overlay, so a delayed worker cannot reuse an earlier cache snapshot or
+backdate a new node lifetime. Explicit clocks remain available to deterministic
+acceptance fixtures. Eleven integrated resource and merge cases passed with 210
+assertions, including an actual PostgreSQL lock wait before clock capture.
