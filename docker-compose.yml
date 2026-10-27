@@ -31,16 +31,16 @@ services:
     build:
       context: ./infra/observability/maple
       dockerfile: Dockerfile
-    restart: on-failure:5
+    restart: unless-stopped
     profiles: [all, dev]
-    networks: [opencok-internal-network]
+    networks: [opencok-internal-network, opencok-external-network]
     environment:
-      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-only}
-      MAPLE_LOCAL_ACCESS_TOKEN: ${MAPLE_LOCAL_ACCESS_TOKEN:-opencok-development-dashboard-only}
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
+      MAPLE_LOCAL_ACCESS_TOKEN: ${MAPLE_LOCAL_ACCESS_TOKEN}
       MAPLE_TELEMETRY: "off"
-      MAPLE_NO_UPDATE_CHECK: "1"
+      MAPLE_NO_UPDATE_CHECK: 1
     ports:
-      - 127.0.0.1:${MAPLE_PORT:-4318}:4318
+      - 4318:4318
     volumes:
       - maple-data:/data
     stop_grace_period: 45s
