@@ -30,6 +30,15 @@ export async function publishAllianceMutation(
       await publish(str(row, "uid"), "push.al.leave", { allianceId: sfs.string(id) });
   }
   if (!snapshot.record) return;
+  if (command === "activity.accept.reward") {
+    const actor = str(data, "actor");
+    for (const member of snapshot.members)
+      if (text(member, "uid") !== actor)
+        await publish(text(member, "uid"), "al.point.push", {
+          alliancePoint: sfs.long(long(snapshot.record, "alliancepoint")),
+        });
+    return;
+  }
   const record = snapshot.record,
     leader = snapshot.members.find((row) => row.rank === 5),
     effects = allianceScienceEffects(snapshot.sciences, rules);

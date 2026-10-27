@@ -1,3 +1,4 @@
+import { activityRewardDomain } from "@opencok/services/activity-reward";
 import { branchCityDomain } from "@opencok/services/branch-city";
 import {
   createHotItemDomain,
@@ -658,6 +659,7 @@ export const RealmDependenciesLive = Layer.effect(
         createOrdinaryBoxDomain(),
         createRechargeActivityDomain(),
         createRechargeFeedbackDomain(),
+        activityRewardDomain,
         createRedPacketDomain(config.paidGiftGateway),
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
         createPrayerDomain(),

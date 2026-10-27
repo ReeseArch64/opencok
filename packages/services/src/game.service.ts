@@ -547,6 +547,7 @@ export class GameService {
         if (!this.services.mailReward) throw new GameError(errors.unsupported);
         ({ body, pushes } = await this.services.mailReward(uid, command, params));
         break;
+      case "activity.accept.reward":
       case "hot.item.v2.get":
       case "hot.item.refresh":
       case "hot.item.refreshV3":

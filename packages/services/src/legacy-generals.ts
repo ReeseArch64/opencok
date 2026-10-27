@@ -157,3 +157,48 @@ export function legacyGeneralCommand(
   } else generalFailure();
   return {};
 }
+
+export function rewardLegacyGenerals(
+  context: CityProgressionContext,
+  id: string,
+  count: number,
+): Fields[] {
+  const pending = context.write.generalRoster?.legacy ?? [],
+    owned = [...context.state.effects.generals, ...pending];
+  if (owned.some((row) => text(row, "generalId") === id)) return [];
+  const rule = context.rules.power.generals?.get(id);
+  cityInteger(count, 1, 256);
+  if (!rule || owned.length + count > 256) generalFailure();
+  const rows: Row[] = [],
+    views: Fields[] = [];
+  let defense = owned.filter((row) => num(row, "status") === 1).length;
+  for (let index = 0; index < count; index++) {
+    const row: Row = {
+      uid: context.owner,
+      uuid: randomUUID(),
+      generalId: id,
+      level: 1,
+      color: cityInteger(rule.color, 0, 5),
+      status: defense++ < 3 ? 1 : 0,
+      exp: 0,
+      time: context.now,
+      ability: null,
+      abilityIndex: 1,
+      plusSkillPoint: 0,
+    };
+    rows.push(row);
+    const [view] = ownGeneralSnapshots(
+      [row],
+      context.state.skills,
+      new Map([[String(row.uuid), decodeGeneralAbilities(row.ability)]]),
+      context.owner,
+      context.rules,
+      Number(context.now),
+    );
+    views.push(generalInfo(view!));
+  }
+  const write = (context.write.generalRoster ??= {});
+  write.legacy = [...pending, ...rows];
+  context.power(cityAmount(rule.power ?? 0) * BigInt(count));
+  return views;
+}

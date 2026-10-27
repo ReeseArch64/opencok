@@ -2567,3 +2567,77 @@ fencing, realm authority and atomic ledger or receipt failure. Five rule and
 service cases passed with 34 assertions; package boundaries, required lint and
 formatting, and 25 workspace type checks passed. The activity command composition
 requires its consumer's integration verification.
+
+## Owned imported activity reward claims
+
+`activity.accept.reward` consumes the existing owned `user_activity` row and its
+`server_push` reward in one fenced city transaction. A missing, foreign, banned,
+wrong-realm or already consumed entitlement cannot grant assets. The configured
+minimum version retains the reference's concatenated integer comparison. Expired
+announcement dates do not erase an already owned entitlement. A missing reward or
+unsupported configured type leaves its claim available rather than charging or
+partially applying it.
+
+Reward bytes use strict UTF-8 and the reference's padded-string trim. At most 64
+blocks retain their original order; blocks are validated individually rather than
+merged across intervening actions. Goods, equipment, game gold, crystals, ordinary
+and dedicated resources, legacy generals, quest power, alliance contribution,
+alliance points and configured military counters use their existing owned stores.
+The native fields retain their integer, long and array types. A goods grant
+produces actual item event 40 through the common campaign observer; it does not
+produce a fabricated funded-mail claim.
+
+Legacy general rewards preserve level one, the requested batch, the three defense
+slots and the existing ownership check. A later block requesting an already owned
+general does not create another copy. Player level changes update only generals
+present at that point in the configured sequence. Consecutive level changes use
+their effective previous levels, so saved power cannot count an earlier increment
+again. A newly granted level-one general is not raised merely because another XP
+block leaves the player's level unchanged.
+
+The shared player experience planner applies effect 80 as float32 converted to
+double, narrows the complete old-experience-plus-scaled-award expression with Java
+integer semantics, follows the factual role thresholds and applies the configured
+maximum. Already capped imported experience remains intact. Native `expDelta`
+retains only the last requested block amount. This calculation also serves
+existing construction, quest, sign-in and progression rewards, whose callers pass
+raw amounts. Quest power survives subsequent power updates in the same context.
+
+Alliance rewards lock the current owned membership and shared pool before
+planning. The writer checks the saved counters again, records their actual
+before/after values under `activity-reward:{actId}` and writes the claim marker in
+the original mutation. These non-inventory counters have their own journal; the
+inventory posting-chain validation remains unchanged. A durable alliance
+invalidation publishes the current `al.point.push` total only to current local
+members other than the claimant. Military grants compose the clock, rank and
+weekly-cap helper above in the same transaction; native quantities describe the
+requested grant while the journal records the actual capped credit.
+
+The supplied reference has no entitlement issuance or reconnect announcement
+protocol to reproduce. Its `UserActivity.getLoginInfo` implementation is empty,
+and the original extension bytecode confirms the empty body and lack of callers
+for the entitlement insert/select producers. These rows are factual import or
+external backoffice input. The separate scheduled `server_push` mail pipeline
+uses mail delivery records; it is not evidence for inventing activity enrollment
+or a new native announcement field.
+
+No migration, dependency, environment variable or private resource is added.
+Back up entitlements, announcement rewards, inventories, equipment, generals,
+player progression, alliance and military counters, both canonical journals,
+receipts and outbox together. Preserve claim markers and journals during rollback;
+restoring only a wallet or status can invalidate its award evidence. An older
+binary must not expose the reference's repeat-claim bug against these records.
+Native-device execution remains unverified.
+
+Nineteen PostgreSQL, ordered-parser and experience-rule cases passed with 184
+assertions. They cover concurrent replay, unique claims, version and realm gates,
+missing metadata, all grant families, sequential ownership and level changes,
+real XP bonuses, maximum experience, canonical journals, military caps and
+receipt-failure rollback. The complete server unit suite passed 1,535 tests with
+276,837 assertions across 281 files. Broader progression and integrated-stack
+checks follow the composed dependent modules.
+
+Nine existing construction, quest, legacy-general and draw PostgreSQL regression
+cases passed with 82 assertions. Two strengthened version/category cases passed
+with 19 assertions, including the non-semantic concatenated version order and
+rejection of a raw `silver` alias that the reference does not grant.

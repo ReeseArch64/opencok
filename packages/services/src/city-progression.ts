@@ -1,3 +1,4 @@
+import { planPlayerExperience } from "@opencok/rules/player-experience";
 import { flushHeroScore } from "./hero-score";
 import { flushExpeditionScores } from "./new-expedition";
 import type { ExpeditionScoreAction } from "@opencok/contracts/new-expedition";
@@ -437,32 +438,47 @@ export class CityProgressionContext {
     this.recordHero(6, "0", delta);
     this.recordHero(6, "1", building);
     this.write.statistics = {
+      ...previous,
       power: cityAmount(previous.power + delta),
       buildingPower: cityAmount(previous.buildingPower + building),
       armyCure: cityInteger(previous.armyCure + cured),
     };
   }
   experience(amount: number) {
-    let level = this.write.profile?.level ?? num(this.state.profile, "level"),
-      exp = (this.write.profile?.exp ?? num(this.state.profile, "exp")) + cityInteger(amount);
-    cityInteger(exp);
-    const oldLevel = level;
-    const oldPower = cityInteger(this.rules.role(level).power ?? 0);
-    const maximum = cityInteger(this.rules.items.get("player_max")?.k1 ?? 60, 1);
-    while (level < maximum && this.rules.roles.has(String(100100 + level + 1))) {
-      const threshold = cityInteger(this.rules.role(level).player_exp, 1);
-      if (exp < threshold) break;
-      exp -= threshold;
-      level++;
-    }
+    const oldLevel = this.write.profile?.level ?? num(this.state.profile, "level"),
+      oldPower = cityInteger(this.rules.role(oldLevel).power ?? 0),
+      { level, exp } = planPlayerExperience(this.rules, {
+        level: oldLevel,
+        exp: this.write.profile?.exp ?? num(this.state.profile, "exp"),
+        amount: cityInteger(amount),
+        effect: this.effect(80),
+      });
     this.write.profile = { level, exp };
     const delta = cityInteger(this.rules.role(level).power ?? 0) - oldPower;
-    const generals = this.state.effects.generals.reduce(
-      (sum, general) =>
-        sum + cityAmount(this.rules.power.generals?.get(text(general, "generalId"))?.power ?? 0),
-      0n,
-    );
-    const total = BigInt(delta) + generals * BigInt(level - oldLevel);
+    let total = BigInt(delta);
+    if (level !== oldLevel) {
+      const pending = this.write.generalRoster?.legacy ?? [],
+        deleted = new Set(this.write.generalRoster?.deletedLegacy ?? []),
+        generals = new Map(
+          [...this.state.effects.generals, ...pending]
+            .filter((general) => !deleted.has(text(general, "uuid")))
+            .map((general) => [text(general, "uuid"), general]),
+        );
+      const existing = new Set(this.state.effects.generals.map((general) => text(general, "uuid"))),
+        earlierLevel = this.write.legacyGeneralLevel;
+      for (const general of generals.values()) {
+        const previousLevel =
+          earlierLevel !== undefined && existing.has(text(general, "uuid"))
+            ? earlierLevel
+            : num(general, "level");
+        total +=
+          cityAmount(this.rules.power.generals?.get(text(general, "generalId"))?.power ?? 0) *
+          BigInt(level - previousLevel);
+      }
+      this.write.legacyGeneralLevel = level;
+      if (this.write.generalRoster?.legacy)
+        this.write.generalRoster.legacy = pending.map((general) => ({ ...general, level }));
+    }
     if (total) this.power(total);
   }
 }

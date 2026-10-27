@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  activityReward?: import("./activity-reward").ActivityRewardReader;
   branchCity?: Row | null;
   hotItem?: import("./hot-item").HotItemState;
   campaignProfile?: Row;
@@ -150,6 +151,8 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  legacyGeneralLevel?: number;
+  activityRewardClaim?: import("./activity-reward").ActivityRewardWrite;
   branchCityOpenState?: number;
   hotItem?: import("./hot-item").HotItemWrite;
   costRankAward?: string;
@@ -220,7 +223,7 @@ export interface CityProgressionWrite {
   forts?: readonly Row[];
   queues?: readonly Row[];
   profile?: { level: number; exp: number };
-  statistics?: { power: bigint; buildingPower: bigint; armyCure: number };
+  statistics?: { power: bigint; buildingPower: bigint; armyCure: number; questPower?: number };
   buildingExperience?: { currentMax: bigint; historyMax: bigint };
 }
 

@@ -1,3 +1,5 @@
+import { militaryRankAwardReader, writeMilitaryRankAward } from "./military-rank-awards";
+import { activityRewardReader, writeActivityReward } from "./activity-reward";
 import { user_branch_city_info } from "@opencok/drizzle/schema/opencok_kingdom/user_branch_city_info";
 import { redPacketReader, writeRedPackets } from "./red-packets";
 import { readHotItems, writeHotItems } from "./hot-item";
@@ -184,12 +186,17 @@ export function createCityProgressionStore(
           ? await readWorldMutationState(tx, owner, request, mapSize, command)
           : undefined;
       return {
+        militaryAward:
+          command === "activity.accept.reward" ? militaryRankAwardReader(tx, owner) : undefined,
+        activityReward:
+          command === "activity.accept.reward" ? activityRewardReader(tx, owner) : undefined,
         redPackets:
           command?.startsWith("redPackets.") || command === "campaign.paid.gift"
             ? redPacketReader(tx, owner)
             : undefined,
         campaignProfile:
           command?.startsWith("campaign.") ||
+          command === "activity.accept.reward" ||
           command?.startsWith("redPackets.") ||
           command === "trigger.activity" ||
           command?.startsWith("hot.item.")
@@ -413,6 +420,9 @@ export function createCityProgressionStore(
         if (write.vipBox) await writeVipBox(tx, owner, write.vipBox);
         if (write.targetTask) await writeTargetTasks(tx, owner, write.targetTask);
         if (write.redPackets) await writeRedPackets(tx, owner, write.redPackets);
+        if (write.militaryAward) await writeMilitaryRankAward(tx, owner, write.militaryAward, now);
+        if (write.activityRewardClaim)
+          await writeActivityReward(tx, owner, write.activityRewardClaim);
         if (write.rechargeFeedback)
           await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);
         if (write.rechargeActivity) await writeRechargeActivity(tx, owner, write.rechargeActivity);
@@ -453,7 +463,7 @@ export function createCityProgressionStore(
         if (write.worldMutation) await writeWorldMutation(tx, owner, write.worldMutation);
         if (write.dragons) await writeDragonProgression(tx, owner, write.dragons);
         await writePlayerEffects(tx, owner, write);
-        if (write.generalRoster) await writeGeneralRoster(tx, owner, write.generalRoster, now);
+
         await writeEquipment(tx, owner, write);
         if (write.quests) await writeQuests(tx, owner, write.quests);
         for (const row of write.buildings ?? []) {
@@ -598,11 +608,13 @@ export function createCityProgressionStore(
         }
         if (write.profile) {
           await tx.update(userprofile).set(write.profile).where(eq(userprofile.uid, owner));
-          await tx
-            .update(user_general)
-            .set({ level: write.profile.level })
-            .where(eq(user_general.uid, owner));
+          if (write.legacyGeneralLevel !== undefined)
+            await tx
+              .update(user_general)
+              .set({ level: write.legacyGeneralLevel })
+              .where(eq(user_general.uid, owner));
         }
+        if (write.generalRoster) await writeGeneralRoster(tx, owner, write.generalRoster, now);
         if (write.statistics)
           await tx
             .insert(playerinfo)
