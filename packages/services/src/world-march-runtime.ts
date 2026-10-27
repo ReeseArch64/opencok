@@ -1,3 +1,4 @@
+import { recordTargetTask } from "./target-task";
 import {
   selectMarchCompanions,
   attachMarchCompanions,
@@ -246,6 +247,7 @@ function returnState(context: CityProgressionContext, state: RuntimeMarch, now: 
     ),
   );
   recordExpeditionScore(context, 1, state.targetResource, amount, now);
+  recordTargetTask(context, 1, amount, String(state.targetResource), now);
   if (target.ownerMarchUUid !== state.id) worldMutationFailure();
   target.resCostValue = cityInteger(num(target, "resCostValue") + amount);
   target.ownerMarchUUid = "";

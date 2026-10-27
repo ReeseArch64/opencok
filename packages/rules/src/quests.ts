@@ -11,6 +11,7 @@ import {
 import { cityInteger } from "./city-progression";
 
 export interface QuestAction {
+  targetCondition?: string;
   legacy?: number;
   main?: number;
   daily?: number;

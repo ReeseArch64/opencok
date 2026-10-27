@@ -1,3 +1,4 @@
+import { recordTargetTask } from "./target-task";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { sfs, str, int, encode, type Fields } from "@opencok/messages/sfs";
@@ -38,6 +39,7 @@ function complete(context: CityProgressionContext, row: Row, count: number) {
     throw new GameError(errors.invalid, "city_progression");
   const [, free] = transferTroops(count, num(row, "num"), count);
   context.write.forts = [{ ...row, num: free, build: 0, finishTime: 0n }];
+  recordTargetTask(context, 2, count, "5");
   context.power(unitPower(troopDefinition(context.rules, text(row, "armyId")), count));
   return { armyId: sfs.string(text(row, "armyId")), free: sfs.int(free) };
 }

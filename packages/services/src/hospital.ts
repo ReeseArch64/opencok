@@ -1,3 +1,4 @@
+import { recordTargetTask } from "./target-task";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { Type, sfs, str, int, encode, type Fields } from "@opencok/messages/sfs";
@@ -77,6 +78,7 @@ function complete(
   context.write.armies = armies;
   context.write.hospital = hospital;
   context.power(power, 0n, healed);
+  recordTargetTask(context, 2, healed, "3");
   return {
     army: sfs.array(
       armies.map((army) =>

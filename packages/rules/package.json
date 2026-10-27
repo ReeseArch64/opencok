@@ -130,7 +130,8 @@
     "./seven-day-cycle": "./src/seven-day-cycle.ts",
     "./ordinary-box": "./src/ordinary-box.ts",
     "./recharge-activity": "./src/recharge-activity.ts",
-    "./recharge-feedback": "./src/recharge-feedback.ts"
+    "./recharge-feedback": "./src/recharge-feedback.ts",
+    "./target-task": "./src/target-task.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
