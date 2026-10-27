@@ -164,7 +164,8 @@
     "./red-packets": "./src/red-packets.ts",
     "./world-city-geometry": "./src/world-city-geometry.ts",
     "./military-rank-awards": "./src/military-rank-awards.ts",
-    "./player-experience": "./src/player-experience.ts"
+    "./player-experience": "./src/player-experience.ts",
+    "./world-terrain": "./src/world-terrain.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

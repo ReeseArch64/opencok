@@ -179,7 +179,8 @@
     "./monster-exchange": "./src/monster-exchange.ts",
     "./responses/monster-exchange": "./src/responses/monster-exchange.ts",
     "./paid-gifts": "./src/paid-gifts.ts",
-    "./military-rank-awards": "./src/military-rank-awards.ts"
+    "./military-rank-awards": "./src/military-rank-awards.ts",
+    "./world-terrain": "./src/world-terrain.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

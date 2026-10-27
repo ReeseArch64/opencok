@@ -25,7 +25,8 @@
     "./catalog-model": "./src/catalog-model.ts",
     "./catalog-mechanics": "./src/catalog-mechanics.ts",
     "./fixtures": "./src/xml-fixtures.ts",
-    "./catalogs/*": "./src/catalogs/types/*.ts"
+    "./catalogs/*": "./src/catalogs/types/*.ts",
+    "./world-terrain": "./src/world-terrain.ts"
   },
   "dependencies": {
     "@opencok/rules": "workspace:*",
