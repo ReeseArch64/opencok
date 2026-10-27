@@ -13,7 +13,7 @@ export const config = Effect.gen(function* () {
     avatarChat: settings.GAME_AVATAR_CHAT_URL
       ? { url: settings.GAME_AVATAR_CHAT_URL, signingSecret: settings.CHAT_SECRET! }
       : undefined,
-    avatarFiles: settings.GAME_FILES_URL ? { origin: settings.GAME_FILES_URL } : undefined,
+    avatarFiles: settings.API_URL ? { origin: settings.API_URL } : undefined,
     nicknameChat: settings.CHAT_URL
       ? {
           url: new URL("/_internal/nickname", settings.CHAT_URL).href,

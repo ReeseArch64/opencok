@@ -139,7 +139,7 @@ requires the remaining service settings through its process environment.
 | `GLOBAL_DATABASE_NAME`  | Defaults to `opencok_global`.                                                                                                          |
 | `CHAT_URL`              | Optional shared Chat HTTP(S) origin; enables session issuance, nickname delivery and mailbox effects.                                  |
 | `CHAT_SECRET`           | Required when the session URL is configured; must match the maintained chat service.                                                   |
-| `GAME_FILES_URL`        | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                          |
+| `API_URL`               | Optional internal API HTTP(S) origin; unset disables avatar grants.                                                                    |
 | `GAME_SECRET`           | Required private secret matching the legacy mobile login issuer.                                                                       |
 | `REDIS_URL`             | Shared API/realm URL; defaults to `redis://127.0.0.1:6379/0` outside Compose. Set the local Compose URL or an external production URL. |
 | `GAME_ZOOKEEPER`        | Defaults to `127.0.0.1:2181`.                                                                                                          |
@@ -2873,7 +2873,7 @@ parsing. Rules preserve Java signed parsing, 64-bit arithmetic wrapping, inclusi
 eligibility deadlines and the level/cooldown/ban error precedence (`105775`, `105769`,
 `105770`). Castle and record reads are lazy, owner-bound and limited to the required fields.
 
-Configure `GAME_FILES_URL` as the internal HTTP(S) API origin reachable from the
+Configure `API_URL` as the internal HTTP(S) API origin reachable from the
 realm. API and realm share the existing Redis instance for short-lived, opaque,
 purpose-bound authorization tickets. The origin accepts no path, embedded
 credentials, query or fragment. An absent origin keeps issuance unsupported;
@@ -3087,7 +3087,7 @@ The opt-in completion runtime now schedules this consumer.
 
 [Issue #81](https://github.com/ReeseArch64/opencok/issues/81) connects
 `user.avatar.finish` to the maintained receipt transaction, all three consumers and local
-session notifications. Configure `GAME_FILES_URL` and the existing shared Redis to
+session notifications. Configure `API_URL` and the existing shared Redis to
 enable completion. Optional `GAME_AVATAR_CHAT_URL` selects the private
 `/_internal/avatar-profile` endpoint and requires its matching `CHAT_SECRET`.
 Chat session issuance is independent. Without Chat, local completion proceeds and

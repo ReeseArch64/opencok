@@ -65,15 +65,15 @@ test("realm Chat integration requires an optional HTTP origin and shared signing
 });
 
 test("realm avatar integration needs only an explicit private API origin", () => {
-  expect(parseServerEnvironment(base).GAME_FILES_URL).toBeUndefined();
+  expect(parseServerEnvironment(base).API_URL).toBeUndefined();
   const configured = {
     ...base,
-    GAME_FILES_URL: "http://files.internal:8084",
+    API_URL: "http://files.internal:8084",
   };
-  expect(parseServerEnvironment(configured).GAME_FILES_URL).toBe("http://files.internal:8084");
-  expect(
-    parseServerEnvironment({ ...base, GAME_FILES_URL: configured.GAME_FILES_URL }).GAME_FILES_URL,
-  ).toBe(configured.GAME_FILES_URL);
+  expect(parseServerEnvironment(configured).API_URL).toBe("http://files.internal:8084");
+  expect(parseServerEnvironment({ ...base, API_URL: configured.API_URL }).API_URL).toBe(
+    configured.API_URL,
+  );
   for (const url of [
     "invalid",
     "file:///private",
@@ -82,23 +82,21 @@ test("realm avatar integration needs only an explicit private API origin", () =>
     "http://files.internal/?private=x",
     "http://files.internal/#x",
   ])
-    expect(() => parseServerEnvironment({ ...configured, GAME_FILES_URL: url })).toThrow(
-      "GAME_FILES_URL",
-    );
+    expect(() => parseServerEnvironment({ ...configured, API_URL: url })).toThrow("API_URL");
 });
 
 test("avatar completion requires its own private chat endpoint, files and signing secret", () => {
   const configured = {
     ...base,
     GAME_AVATAR_CHAT_URL: "http://chat.internal/_internal/avatar-profile",
-    GAME_FILES_URL: "http://files.internal",
+    API_URL: "http://files.internal",
     CHAT_SECRET: "synthetic",
   };
   expect(parseServerEnvironment(base).GAME_AVATAR_CHAT_URL).toBeUndefined();
   expect(parseServerEnvironment(configured).GAME_AVATAR_CHAT_URL).toBe(
     configured.GAME_AVATAR_CHAT_URL,
   );
-  for (const field of ["GAME_FILES_URL", "CHAT_SECRET"])
+  for (const field of ["API_URL", "CHAT_SECRET"])
     expect(() => parseServerEnvironment({ ...configured, [field]: undefined })).toThrow(field);
   for (const url of [
     "http://chat.internal/external/session",

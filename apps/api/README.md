@@ -162,7 +162,7 @@ for storage operations so container traffic does not depend on host-port hairpin
 Presigned image URLs always use `S3_PUBLIC_ENDPOINT`.
 
 The root development Compose file supplies local MinIO settings and the realm's
-private `GAME_FILES_URL=http://api:8080`. It is a development environment only;
+private `API_URL=http://api:8080`. It is a development environment only;
 production receives the five S3 settings directly through its own deployment.
 No Compose file or media overlay is required for production.
 

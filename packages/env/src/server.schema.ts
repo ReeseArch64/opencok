@@ -6,7 +6,7 @@ import { databaseName, redisUrl, realmSettings, chatUrl } from "./service.schema
 export const serverSchema = z
   .object({
     PROVISIONING_SIGNING_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
-    GAME_FILES_URL: z.preprocess(
+    API_URL: z.preprocess(
       blankToUndefined,
       z
         .url({ protocol: /^https?$/ })
@@ -65,8 +65,8 @@ export const serverSchema = z
     message: "Chat signing secret required",
     path: ["CHAT_SECRET"],
   })
-  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.GAME_FILES_URL, {
-    path: ["GAME_FILES_URL"],
+  .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.API_URL, {
+    path: ["API_URL"],
   })
   .refine((settings) => !settings.GAME_AVATAR_CHAT_URL || !!settings.CHAT_SECRET, {
     path: ["CHAT_SECRET"],

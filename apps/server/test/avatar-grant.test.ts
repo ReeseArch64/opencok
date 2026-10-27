@@ -396,9 +396,7 @@ test("files configuration needs only a private API origin and no signing-key fil
   expect(
     (
       await Effect.runPromise(
-        config.pipe(
-          Effect.provideService(EnvironmentSource, { ...source, GAME_FILES_URL: origin }),
-        ),
+        config.pipe(Effect.provideService(EnvironmentSource, { ...source, API_URL: origin })),
       )
     ).avatarFiles,
   ).toEqual({ origin });

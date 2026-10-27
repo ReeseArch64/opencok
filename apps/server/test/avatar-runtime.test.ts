@@ -414,7 +414,7 @@ test("runtime configuration loads media independently of optional avatar chat", 
     DATABASE_URL: "postgres://synthetic:synthetic@invalid.example/global",
     GAME_SECRET: "synthetic",
     GAME_RESOURCES: "synthetic",
-    GAME_FILES_URL: "http://files.internal",
+    API_URL: "http://files.internal",
     GAME_AVATAR_CHAT_URL: "http://chat.internal/_internal/avatar-profile",
     CHAT_SECRET: secret,
   };
@@ -423,7 +423,7 @@ test("runtime configuration loads media independently of optional avatar chat", 
   );
   expect(result.avatarChat).toEqual({ url: base.GAME_AVATAR_CHAT_URL, signingSecret: secret });
   expect(result.avatarFiles).toEqual({
-    origin: base.GAME_FILES_URL,
+    origin: base.API_URL,
   });
   const withoutChat = await Effect.runPromise(
     config.pipe(
