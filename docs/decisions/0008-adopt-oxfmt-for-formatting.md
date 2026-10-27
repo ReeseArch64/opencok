@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded
 date: 2026-10-23
 decision-makers: ReeseArch64
 ---
@@ -70,3 +70,5 @@ or a historical evaluation was performed.
 - **Review again when**: the stated boundaries cannot be maintained, a required
   dependency becomes unsupported, or measured compatibility/operational results
   invalidate the choice. A replacement requires a linked superseding ADR.
+
+- **2026-10-27**: Superseded by [ADR-0014](0014-adopt-dprint-for-typescript-formatting.md) after a measured pilot and maintainer confirmation. Oxfmt remains the formatter for formats outside JS/TS.
