@@ -6,11 +6,13 @@ in `docker-compose.yml`; `docker-compose.dev.yml` explicitly adds local Redis
 readiness dependencies for API/server. The game login secret, shared `REDIS_URL`
 and optional endpoint overrides are substituted from the root `.env`.
 
-Use both files for local development. Every service uses both profiles `all` and
-`dev`; either profile starts the same complete set of containers, including
-pgAdmin, Redis Insight and Portainer. Only Redis also has the `redis` profile;
-it selects Redis alone, without applications or inspection tools. The `observability`
-profile selects only Maple, without application startup dependencies.
+Use both files for local development. The `dev` profile starts the application stack;
+`all` also includes pgAdmin, Redis Insight and Portainer. The `devops` profile selects
+these three administration tools together with PostgreSQL, PostgreSQL setup and Redis.
+The `redis` profile selects Redis and Redis Insight; `database` selects PostgreSQL,
+PostgreSQL setup and pgAdmin. The `observability` profile selects only Maple, without
+application startup dependencies. Combine `--profile dev --profile devops` to start
+the development stack with administration tools.
 Chat runs as its own service. Media runs inside the API using the five S3 settings
 and shared Redis authorization; there is no Files container or media overlay. See the
 [API guide](../../apps/api/README.md#avatar-media). MinIO and `minio-setup` provide the
@@ -152,7 +154,7 @@ the local stack or Redis Insight, and do not print resolved Compose config with
 real credentials. Base Compose requires `REDIS_URL` even when inspecting a subset
 of services because interpolation covers the full file.
 
-For a Redis-only local instance using nonsecret example settings:
+For local Redis with Redis Insight using nonsecret example settings:
 
 ```sh
 docker compose --env-file .env.example -f docker-compose.yml --profile redis up -d --wait
@@ -218,14 +220,14 @@ bun run test:stack
 
 `bun --no-env-file test tests/compose` checks the base and development YAML
 statically without Docker: shared URL mappings, outbound networks, local dependency
-override and Redis-only selection. It does not prove Compose merge or runtime health.
+override and profile selection with administration dependencies. It does not prove Compose merge or runtime health.
 
 The integration test loads both base and dev files and forces a synthetic local
 `REDIS_URL` before interpolation, regardless of inherited environment settings.
 It creates an isolated Compose configuration with synthetic
 accounts, a compiled synthetic catalog registry and CDN files, unique ports/networks and disposable volumes. It
-checks that `dev` and `all` select the same complete service set and runs a named
-lifecycle/functional test for each of the 13 services. Long-running containers must
+checks that `dev` excludes administration tools and `all` selects every service,
+then runs a named lifecycle/functional test for each service using `all`. Long-running containers must
 be running; `postgres-setup` and `minio-setup` must exit successfully. Checks cover
 PostgreSQL databases, setup registrations, pgAdmin ping/login page, Redis TTLs,
 ZooKeeper status, API/server readiness, gateway routing, MinIO health/CDN policy,

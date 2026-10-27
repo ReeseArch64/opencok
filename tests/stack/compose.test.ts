@@ -80,15 +80,16 @@ async function createStack() {
     "mongodb://synthetic:synthetic-mongo-secret@mongodb:27017/opencok_chat?authSource=admin";
   for (const [name, service] of Object.entries(isolated.services) as [string, any][]) {
     service.container_name = project + "-" + name;
-    expect(new Set(service.profiles)).toEqual(
-      new Set(
-        name === "redis"
-          ? ["all", "dev", "redis"]
-          : name === "maple"
-            ? ["all", "dev", "observability"]
-            : ["all", "dev"],
-      ),
-    );
+    const profiles: Record<string, string[]> = {
+      portainer: ["all", "devops"],
+      pgadmin: ["all", "devops", "database"],
+      postgres: ["all", "dev", "devops", "database"],
+      "postgres-setup": ["all", "dev", "devops", "database"],
+      redis: ["all", "dev", "devops", "redis"],
+      redisinsight: ["all", "devops", "redis"],
+      maple: ["all", "dev", "observability"],
+    };
+    expect(new Set(service.profiles)).toEqual(new Set(profiles[name] ?? ["all", "dev"]));
   }
   for (const [name, volume] of Object.entries(isolated.volumes) as [string, any][])
     volume.name = project + "_" + name;
@@ -193,7 +194,7 @@ async function createStack() {
     "-f",
     join(folder, "compose.json"),
     "--profile",
-    "dev",
+    "all",
   ];
   async function compose(args: string[], input?: string) {
     const child = Bun.spawn([...base, ...args], {
@@ -299,21 +300,25 @@ export function createBuildingCatalog() {
     expect(config.services.server.environment.DATABASE_URL).toContain(
       "@postgres:5432/opencok_global",
     );
-    const allBase = [...base];
-    allBase[allBase.length - 1] = "all";
-    const allConfig = Bun.spawn([...allBase, "config", "--services"], {
+    const devBase = [...base];
+    devBase[devBase.length - 1] = "dev";
+    const devConfig = Bun.spawn([...devBase, "config", "--services"], {
       cwd: root,
       env,
       stdout: "pipe",
       stderr: "pipe",
     });
-    const [allServices, allErrors, allCode] = await Promise.all([
-      new Response(allConfig.stdout).text(),
-      new Response(allConfig.stderr).text(),
-      allConfig.exited,
+    const [devServices, devErrors, devCode] = await Promise.all([
+      new Response(devConfig.stdout).text(),
+      new Response(devConfig.stderr).text(),
+      devConfig.exited,
     ]);
-    if (allCode) throw new Error("All profile configuration failed: " + allErrors);
-    expect(allServices.trim().split("\n").sort()).toEqual(Object.keys(config.services).sort());
+    if (devCode) throw new Error("Dev profile configuration failed: " + devErrors);
+    expect(devServices.trim().split("\n").sort()).toEqual(
+      Object.keys(config.services)
+        .filter((name) => !["pgadmin", "redisinsight", "portainer"].includes(name))
+        .sort(),
+    );
     started = true;
     await compose(["up", "--build", "--detach", "--wait", "--wait-timeout", "120"]);
     return {
@@ -614,7 +619,7 @@ describe("isolated Compose stack", () => {
   ];
 
   test(
-    "both profiles cover every declared container",
+    "all profile covers every declared container",
     checked(async () => {
       expect(stack.services).toEqual([...services].sort());
     }),

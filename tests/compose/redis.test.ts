@@ -34,18 +34,18 @@ test.each(["api", "server"])("development override adds Redis readiness for %s",
   expect(dev.services[name]!.environment).toBeUndefined();
 });
 
-test("redis profile selects only Redis with no dependency expansion", () => {
+test("redis profile selects Redis and Redis Insight", () => {
   const selected = Object.entries(base.services)
     .filter(([, service]) => service.profiles?.includes("redis"))
     .map(([name]) => name);
 
-  expect(selected).toEqual(["redis"]);
+  expect(selected).toEqual(["redis", "redisinsight"]);
   expect(base.services.redis!.depends_on ?? {}).toEqual({});
   expect(base.services.redis!.ports ?? []).toEqual([]);
   expect(base.services.redis!.image).toBe("redis:6.2.24-bookworm");
 });
 
-test("all and dev select the full stack while Redis Insight stays development-only", () => {
+test("all selects the full stack while dev excludes administration tools", () => {
   const services = Object.keys(base.services).sort();
   const all = Object.entries(base.services)
     .filter(([, service]) => service.profiles?.includes("all"))
@@ -57,9 +57,28 @@ test("all and dev select the full stack while Redis Insight stays development-on
     .sort();
 
   expect(all).toEqual(services);
-  expect(development).toEqual(services);
-  expect(base.services.redisinsight!.profiles).toEqual(["all", "dev"]);
+  expect(development).toEqual(
+    services.filter((name) => !["pgadmin", "redisinsight", "portainer"].includes(name)),
+  );
+  expect(base.services.redisinsight!.profiles).toEqual(["all", "devops", "redis"]);
   expect(base.services.redisinsight!.depends_on!.redis).toEqual({ condition: "service_healthy" });
+});
+
+test.each([
+  ["devops", ["pgadmin", "portainer", "postgres", "postgres-setup", "redis", "redisinsight"]],
+  ["database", ["pgadmin", "postgres", "postgres-setup"]],
+])("%s selects administration services with their dependencies", (profile, expected) => {
+  const selected = Object.entries(base.services)
+    .filter(([, service]) => service.profiles?.includes(profile))
+    .map(([name]) => name)
+    .sort();
+
+  expect(selected).toEqual(expected);
+  for (const name of selected) {
+    for (const dependency of Object.keys(base.services[name]!.depends_on ?? {})) {
+      expect(selected).toContain(dependency);
+    }
+  }
 });
 
 test("only actual Redis consumers receive REDIS_URL", () => {

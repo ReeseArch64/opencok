@@ -54,7 +54,7 @@ services:
     image: portainer/portainer-ce:lts
     command: [--http-enabled]
     container_name: opencok-portainer
-    profiles: [all, dev]
+    profiles: [all, devops]
     networks: [opencok-external-network]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -66,7 +66,7 @@ services:
     image: postgres:17.11-bookworm
     container_name: opencok-postgres
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, dev, devops, database]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       POSTGRES_DB: postgres
@@ -89,7 +89,7 @@ services:
       dockerfile: infra/compose/postgres.Dockerfile
     container_name: opencok-postgres-setup
     restart: no
-    profiles: [all, dev]
+    profiles: [all, dev, devops, database]
     networks: [opencok-internal-network]
     environment:
       POSTGRES_USER: postgres
@@ -104,7 +104,7 @@ services:
     image: dpage/pgadmin4:9.18
     container_name: opencok-pgadmin
     restart: unless-stopped
-    profiles: [all, dev]
+    profiles: [all, devops, database]
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@opencok.com
@@ -124,7 +124,7 @@ services:
     image: redis:6.2.24-bookworm
     container_name: opencok-redis
     restart: unless-stopped
-    profiles: [all, dev, redis]
+    profiles: [all, dev, devops, redis]
     networks: [opencok-internal-network]
     volumes:
       - redis-data:/data
@@ -167,7 +167,7 @@ services:
     image: redis/redisinsight:latest
     container_name: opencok-redisinsight
     restart: no
-    profiles: [all, dev]
+    profiles: [all, devops, redis]
     depends_on:
       redis:
         condition: service_healthy
