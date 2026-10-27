@@ -114,6 +114,12 @@ while validation and wire serialization remain in their existing packages.
 Hero and general implementations live in `packages/hero/src`, with `contracts`,
 `rules`, `services`, `mappings`, `validations`, `repositories`, `storage` and
 `resources` directories preserving those responsibilities inside the domain.
+Named hero archetypes begin in `hero/src/domain`: `Mulan extends Hero` owns
+recruitment and progression configuration, and `MulanDefinitionMapper` binds it
+to the existing general catalog. Other general fields remain transitional
+compatibility configuration in that mapper. See the
+[named hero migration proposal](../packages/resources/README.md#named-hero-migration-proposal)
+for the implemented boundary and proposed typed-consumer migration.
 Other packages import these modules through `@opencok/hero/<responsibility>/*`.
 Constants, enums and Controllers remain in their existing packages; database schema
 constants and catalog records remain in `drizzle` and `resources`. Catalog import
