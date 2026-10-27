@@ -14,5 +14,10 @@
     "@opencok/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
+  },
+  "dependencies": {
+    "@opencok/contracts": "workspace:*",
+    "@opencok/enums": "workspace:*",
+    "@opencok/validations": "workspace:*"
   }
 }

@@ -2,7 +2,13 @@
 
 The first browser client slice: the OpenCok loading screen, real image-loading
 progress and a periodic HTTP connectivity check. Written in TypeScript using
-the existing Bun workspace; no frontend framework or new runtime dependency.
+the existing Bun workspace; no frontend framework or new third-party library.
+
+`WebApplication` composes the server and `PingController`; `HttpGatewayProbe` owns
+the bounded health request. In the browser, `LoadingApplication` coordinates the
+`LoadingView` and `GatewayPingClient` through explicit ports. Response contracts,
+the health target enum and runtime validation use the shared workspace packages.
+The existing `ping.ts` exports remain available to callers.
 
 ## Run locally
 
