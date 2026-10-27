@@ -1,3 +1,4 @@
+export { hero_rank_award } from "./opencok_kingdom/hero_rank_award";
 export { hero_rank_closure } from "./opencok_kingdom/hero_rank_closure";
 export { ability_page } from "./opencok_kingdom/ability_page";
 export { accept_fb_record } from "./opencok_kingdom/accept_fb_record";

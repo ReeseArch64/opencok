@@ -18,6 +18,7 @@ export const hero_rank_closure = opencok_kingdom.table(
     digest: varchar("digest", { length: 32 }).notNull(),
     createdAt: bigint("createdAt", { mode: "bigint" }).notNull(),
     kingdomRank: varchar("kingdomRank", { length: 255 }),
+    awardCursor: varchar("awardCursor", { length: 40 }).notNull().default(sql.raw("''")),
   },
   (table) => [
     primaryKey({ name: "hero_rank_closure_PRIMARY", columns: [table.periodId] }),

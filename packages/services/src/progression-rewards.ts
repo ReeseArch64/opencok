@@ -30,7 +30,7 @@ const assets = [
   "dragon_gold",
 ] as const;
 export function pinProgressionReward(
-  context: CityProgressionContext,
+  context: Pick<CityProgressionContext, "rules" | "now">,
   id: string,
   catalog = context.rules.reconnect.rewards,
 ) {

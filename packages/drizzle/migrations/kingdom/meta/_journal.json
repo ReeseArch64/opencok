@@ -232,6 +232,13 @@
       "when": 1793038495362,
       "tag": "0032_hero_ranking_finality",
       "breakpoints": false
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1793041052199,
+      "tag": "0033_hero_ranking_rewards",
+      "breakpoints": false
     }
   ]
 }

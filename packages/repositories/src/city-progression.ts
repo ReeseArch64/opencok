@@ -1,3 +1,4 @@
+import { heroRankAwardReader, writeHeroRankAward } from "./hero-ranking-rewards";
 import { heroScoreReader, writeHeroScore } from "./hero-score";
 import { readOlympic, writeOlympic } from "./olympic";
 import { readCupBetting, writeCupBetting } from "./cup-betting";
@@ -152,6 +153,8 @@ export function createCityProgressionStore(
         throw new Error("Civilization science aggregate exceeds bound");
       alliance = profile.allianceId ?? "";
       return {
+        heroRankingAward:
+          command === "hero.rank.deliver" ? heroRankAwardReader(tx, owner) : undefined,
         heroScore: heroScoreReader(tx, owner, alliance),
         profile,
         resource,
@@ -318,6 +321,8 @@ export function createCityProgressionStore(
         }
         if (write.cosmeticTarget)
           await writeCosmeticTarget(tx, owner, cosmeticTarget?.uid, write.cosmeticTarget);
+        if (write.heroRankingAward)
+          await writeHeroRankAward(tx, owner, write.heroRankingAward, now);
         if (write.heroScore) await writeHeroScore(tx, owner, alliance, write.heroScore);
         if (write.olympic) await writeOlympic(tx, owner, write.olympic);
         if (write.cupBetting) await writeCupBetting(tx, owner, write.cupBetting);
