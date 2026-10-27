@@ -70,14 +70,13 @@ export function worldMonsterHealth(
 ): WorldMonsterHealth | undefined {
   if (typeof remote !== "boolean") return invalid();
   if (remote || integer(point.pointType) !== 15) return undefined;
-  return {
-    current: integer(point.monsterCurrHP ?? 0),
-    maximum: worldMonsterMaximum(
+  const stored = integer(point.monsterCurrHP ?? 0),
+    maximum = worldMonsterMaximum(
       15,
       point.pointItem == null ? null : text(point.pointItem, 255),
       rules,
-    ),
-  };
+    );
+  return { current: Math.max(stored > 0 ? stored : maximum, 0), maximum };
 }
 export function selectWorldExplorationMarch(
   observer: string,
