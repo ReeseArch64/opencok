@@ -199,7 +199,7 @@ test("social transactions survive restart, revoke access and archive verified bo
         })
       ).messages,
     ).toHaveLength(1);
-    await pg.docker(["pause", mongo]);
+    await pg.docker(["kill", "--signal", "STOP", mongo]);
     try {
       await expect(first.archivePending!()).rejects.toThrow();
       expect(
@@ -221,7 +221,7 @@ test("social transactions survive restart, revoke access and archive verified bo
         ).messages,
       ).toHaveLength(1);
     } finally {
-      await pg.docker(["unpause", mongo]);
+      await pg.docker(["kill", "--signal", "CONT", mongo]);
     }
     for (let attempt = 0; ; attempt++) {
       try {
