@@ -213,6 +213,12 @@ test("a killed realm recovers the same march and publishes native transitions on
       return client;
     };
     let commander = await login(reservations[0]!);
+    const heroInfo = await commander.command("hero.event.info.get", {
+      activityId: sfs.string("9000000"),
+      _cok_: sfs.long(9007199254740993n),
+    });
+    expect(heroInfo._cok_).toEqual(sfs.long(9007199254740993n));
+    expect(heroInfo.eventList?.type).toBe(Type.Array);
     const prayerInfo = await commander.command("user.pray.info", {});
     expect(prayerInfo.wood).toEqual(sfs.int(9000));
     const prayerBefore = (
@@ -281,6 +287,10 @@ test("a killed realm recovers the same march and publishes native transitions on
       oldEpoch,
     );
     commander = await login(reservations[0]!);
+    expect(
+      (await commander.command("hero.event.info.get", { activityId: sfs.string("9000000") }))
+        .eventList?.type,
+    ).toBe(Type.Array);
     expect((await commander.command("user.pray", prayerRequest)).WOOD).toEqual(prayerDraw.WOOD!);
     expect(
       (await realm.db.select().from(user_pray).where(eq(user_pray.uid, owner)))[0]!,

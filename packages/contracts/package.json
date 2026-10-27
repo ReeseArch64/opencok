@@ -155,7 +155,8 @@
     "./olympic": "./src/olympic.ts",
     "./responses/olympic": "./src/responses/olympic.ts",
     "./hero-event": "./src/hero-event.ts",
-    "./responses/hero-event": "./src/responses/hero-event.ts"
+    "./responses/hero-event": "./src/responses/hero-event.ts",
+    "./hero-calendar": "./src/hero-calendar.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
