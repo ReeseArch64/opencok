@@ -81,3 +81,9 @@ merge overlay, so a delayed worker cannot reuse an earlier cache snapshot or
 backdate a new node lifetime. Explicit clocks remain available to deterministic
 acceptance fixtures. Eleven integrated resource and merge cases passed with 210
 assertions, including an actual PostgreSQL lock wait before clock capture.
+
+Player resource items use `world.use` and persist `flushFlag=1`. Their base
+capacity is independent of effects 305 and 307. Such nodes stay outside natural
+area quotas, postpone expiry while occupied and clear without replacement tickets
+when free. The bounded expiry scan includes both natural and player nodes; only
+natural nodes can produce ordinary or black-land wait tickets.

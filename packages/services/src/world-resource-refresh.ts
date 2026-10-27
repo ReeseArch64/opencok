@@ -58,7 +58,7 @@ export async function refreshWorldResources(
       continue;
     }
     const area = worldResourceBlackLand(point) ? 0 : num(point, "areaId");
-    if ((await store.population(area)) <= limit(area))
+    if (num(point, "flushFlag") === 0 && (await store.population(area)) <= limit(area))
       await store.ticket(
         area,
         num(point, "resLevel"),
