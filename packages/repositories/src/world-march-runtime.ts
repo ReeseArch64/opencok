@@ -510,7 +510,7 @@ export async function unregisteredWorldMarches(db: Database["kingdom"]["db"], af
         eq(world_march.worldId, 0),
         eq(world_march.type, 0),
         or(
-          eq(world_march.targetType, 3),
+          inArray(world_march.targetType, [3, 37]),
           and(
             eq(world_march.targetType, 2),
             eq(world_march.state, 1),
