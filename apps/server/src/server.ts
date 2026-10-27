@@ -5,6 +5,13 @@ import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
 import { serverFeature } from "@opencok/rules/power-context";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
 import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
+import { createRedPacketExpiryStore } from "@opencok/repositories/red-packets";
+import {
+  createRedPacketDomain,
+  paidGiftParameters,
+  publishRedPacketAnnouncement,
+  settleRedPacketExpiry,
+} from "@opencok/services/red-packets";
 import { createExchangeActivityDomain } from "@opencok/services/exchange-activity";
 import { avatarActivationDomain } from "@opencok/services/avatar-activation";
 import {
@@ -639,6 +646,7 @@ export const RealmDependenciesLive = Layer.effect(
         createOrdinaryBoxDomain(),
         createRechargeActivityDomain(),
         createRechargeFeedbackDomain(),
+        createRedPacketDomain(config.paidGiftGateway),
         createAllianceHeartDomain((uid) => notifications.owners().includes(uid)),
         createPrayerDomain(),
         troubleDomain,
@@ -1667,28 +1675,36 @@ export const RealmDependenciesLive = Layer.effect(
     );
     yield* Effect.tryPromise({
       try: async () => {
-        for (let index = 0; index < 64; index++) {
-          try {
-            const delivered = await relayMutationEvent(
-              db.kingdom.db,
-              authority,
-              (event) =>
-                publishCampaignNotice(
-                  event.payload,
-                  event.owner,
-                  notifications.owners(),
-                  campaignAudience,
-                  (owner, command, body) => notifications.publish(owner, command, body),
-                ),
-              Date.now,
-              "campaign.notice",
-              1000,
-            );
-            if (!delivered) break;
-          } catch {
-            continue;
+        await settleRedPacketExpiry(
+          createRedPacketExpiryStore(db.kingdom.db, authority),
+          rules,
+          BigInt(Date.now()),
+        ).catch(() => undefined);
+        for (const type of ["campaign.notice", "redPackets.announce"])
+          for (let index = 0; index < 64; index++) {
+            try {
+              const delivered = await relayMutationEvent(
+                db.kingdom.db,
+                authority,
+                (event) =>
+                  (type === "campaign.notice"
+                    ? publishCampaignNotice
+                    : publishRedPacketAnnouncement)(
+                    event.payload,
+                    event.owner,
+                    notifications.owners(),
+                    campaignAudience,
+                    (owner, command, body) => notifications.publish(owner, command, body),
+                  ),
+                Date.now,
+                type,
+                1000,
+              );
+              if (!delivered) break;
+            } catch {
+              continue;
+            }
           }
-        }
       },
       catch: () => new Error("Campaign notice publication unavailable"),
     }).pipe(
@@ -1760,6 +1776,7 @@ export const RealmDependenciesLive = Layer.effect(
           "hero.rank.mail",
           "hero.target.mail",
           "campaign.mail",
+          "redPackets.mail",
           "expedition.award.mail",
           "continuedcost.rank.mail",
         ]) {
@@ -2130,6 +2147,15 @@ export const RealmDependenciesLive = Layer.effect(
       },
     );
     return {
+      paidGifts: {
+        async consume(owner: string, orderId: string, platform: string) {
+          await activities.domainCommand(
+            owner,
+            "campaign.paid.gift",
+            paidGiftParameters(owner, orderId, platform),
+          );
+        },
+      },
       provisioning: config.provisioningSecret
         ? characterProvisioningHandler(
             new CharacterProvisioningController(
@@ -2326,7 +2352,7 @@ export const RealmDependenciesLive = Layer.effect(
 
 export class RealmServer extends Context.Service<
   RealmServer,
-  Effect.Success<ReturnType<typeof listenServer>>
+  Effect.Success<ReturnType<typeof listenServer>> & Pick<ServerDependencies, "paidGifts">
 >()("@opencok/server/Server") {}
 
 export const RealmServerLive = Layer.effect(
@@ -2334,7 +2360,8 @@ export const RealmServerLive = Layer.effect(
   Effect.gen(function* () {
     const config = yield* RealmConfig;
     const dependencies = yield* RealmDependencies;
-    return yield* listenServer(config, dependencies);
+    const server = yield* listenServer(config, dependencies);
+    return { ...server, paidGifts: dependencies.paidGifts };
   }),
 );
 
