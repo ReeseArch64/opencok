@@ -1,4 +1,5 @@
 import { activityRewardDomain } from "@opencok/services/activity-reward";
+import { createWorldMarchInspectionStore } from "@opencok/repositories/world-march-inspection";
 import { createEggActivityDomain } from "@opencok/services/egg-activity";
 import { createGoldEggsRanks, createGoldEggsRuntimeStore } from "@opencok/repositories/gold-eggs";
 import { createGoldEggsDomain, goldEggsAwardParameters } from "@opencok/services/gold-eggs";
@@ -2402,6 +2403,7 @@ export const RealmDependenciesLive = Layer.effect(
               }
             : undefined,
           worldPointDetail,
+          worldMarchInspection: createWorldMarchInspectionStore(db.kingdom.db),
           playerSearch,
           worldSearch,
           worldUtility: createWorldUtilityStore(db.kingdom.db, authority, config.mapSize),
