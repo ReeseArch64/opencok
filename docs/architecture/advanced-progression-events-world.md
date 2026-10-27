@@ -2427,3 +2427,61 @@ shield. Previously returned travel, load and collection forecasts were not the
 source preflight contract and are no longer substituted for it. PostgreSQL
 acceptance covers a minimal native request, target-count changes, shield state,
 overdue checkpoint preservation and troop conservation.
+
+## Native city anchors and saved footprint compatibility
+
+New cities, directed and random teleports, civilization castles and future march
+routes use the native lower-right anchor. Its ordered footprint is left, above,
+above-left and anchor. The anchor receives main type 1 and the other cells receive
+range type 8; maintained city ranges retain the matching `pointItem` anchor link.
+Civilization castles use main 68 and range 69 with their original `pointItem`
+payloads. Coordinate bounds reject wrapped four-cell placements. Read loading
+always retains a single-cell target, so a resource or treasure target on a map
+edge does not need to be a valid city anchor. Gold-funded random teleport uses the
+same validated native destination selection as its item-funded counterpart.
+
+An existing maintained forward footprint can be normalized in its owned world
+transaction. The owner, resident world, map placement lock, four occupied cells,
+marches and active checkpoints provide the evidence. A uniquely matching legacy
+square retains exactly the same four physical IDs. Its logical anchor advances
+by one row and one column; main metadata moves to that anchor, and ranges receive
+the appropriate type and city link. The resident `user_world.pointId`,
+`userprofile.worldPoint`, known `world_march.ownerId` and checkpoint `origin` change
+together. Troop buffers, cargo, segments, versions and every recorded deadline
+remain unchanged. The coordinate and terrain fields of the physical cells stay
+in place. Native imported cities remain unchanged, including native range cells
+whose unused owner or point metadata was not populated by the reference server.
+
+Only owned recognized checkpoint envelopes are reanchored. Unknown marches,
+malformed checkpoints, inconsistent profile pointers, visiting or foreign-return
+metadata, another actor's march references and pending foreign arrivals defer the
+normalization. A proven legacy footprint remains available to future routes while
+those blockers remain. Ambiguous ownership or incomplete cells cannot authorize
+an assumed footprint or rewrite. A native preflight reads that evidence without
+normalizing it. Once a blocker disappears, a later world recovery can normalize
+the same saved city without resetting troops or clocks. Arrival outbox records
+retain their original city binding until their recipient delivery acknowledges.
+
+Provisioning locks its four native cells before inserting a character. Teleports
+clear the previous footprint and its stale range links, reserve the validated new
+footprint and update both player and world anchors in the economic transaction.
+An imported native footprint with unlabelled range owners can move after its main
+and range geometry have been verified; those imported rows are not repaired as a
+side effect of reading or starting a march.
+
+No migration, dependency, environment variable or catalog change is added.
+Inventory remains 848 tables and 6,917 fields. Back up city cells, player and world
+anchors, march rows and checkpoints, troop balances, receipts and outbox together.
+A binary predating this geometry convention needs the compatibility adapter or
+world-mutation gating during rollback; it must not reinterpret a native anchor
+as a forward footprint. Preserve ambiguous records for reconciliation instead of
+rewriting them or restarting their deadlines.
+
+Twelve PostgreSQL geometry cases passed with 50 assertions. They cover concurrent
+adoption, preserved metadata and checkpoints, fresh-pool recovery, imported native
+ranges, ambiguity, unknown actors, pending arrivals, rollback, native preflight
+and both teleport funding paths. Fourteen existing march, trouble, companion and
+civilization cases passed. Native provisioning passed with 65 assertions, the
+two-realm TCP regression with 222, and killed-process recovery with 47. Five
+geometry rule cases, required lint and formatting, and 19 implemented workspace
+type checks passed. Device execution remains unverified.

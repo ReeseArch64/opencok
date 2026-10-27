@@ -145,7 +145,8 @@
     "./red-packets": "./src/red-packets.ts",
     "./activity-directory": "./src/activity-directory.ts",
     "./hot-item": "./src/hot-item.ts",
-    "./world-utility": "./src/world-utility.ts"
+    "./world-utility": "./src/world-utility.ts",
+    "./world-city-geometry": "./src/world-city-geometry.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

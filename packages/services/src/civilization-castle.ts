@@ -61,7 +61,7 @@ export function createCivilizationCastleDomain(size: number): CityDomain {
       const body: Fields = {};
       const pointWrites: Row[] = [];
       const erase = () => {
-        for (const id of worldFootprint(oldPoint, size)) {
+        for (const id of world.civilizationFootprint ?? worldFootprint(oldPoint, size)) {
           const point = world.points.find((entry) => num(entry, "id") === id);
           if (
             !point ||

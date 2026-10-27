@@ -173,6 +173,19 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
         .map((point) => point.pointType)
         .sort(),
     ).toEqual([1, 8, 8, 8]);
+    const nativeCity = await realm.db
+      .select()
+      .from(worldpoint)
+      .where(eq(worldpoint.ownerId, reservation.gameUid));
+    const nativeAnchor = nativeCity.find((point) => point.pointType === 1)!.id;
+    expect(nativeAnchor).toBe(12);
+    expect(profile!.worldPoint).toBe(nativeAnchor);
+    expect(nativeCity.map((point) => point.id).sort((a, b) => a - b)).toEqual([1, 2, 11, 12]);
+    expect(
+      nativeCity
+        .filter((point) => point.pointType === 8)
+        .every((point) => point.pointItem === String(nativeAnchor)),
+    ).toBe(true);
     await realm.db
       .update(userprofile)
       .set({ gold: 17n, level: 2 })
