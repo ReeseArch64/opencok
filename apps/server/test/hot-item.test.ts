@@ -280,6 +280,10 @@ test("businessman login shares the realm calendar, keeps its board until the nex
   );
   expect(sent).toEqual(["owner", "other"]);
   const store = {
+    async getPowerByPlayerId() {
+      const { emptyPowerState } = await import("./fixtures/power-state");
+      return emptyPowerState({ uid: "synthetic" });
+    },
     async getCityByPlayerId() {
       return {
         profile: { uid: "synthetic" },
