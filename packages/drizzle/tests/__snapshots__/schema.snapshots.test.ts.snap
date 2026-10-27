@@ -14808,3 +14808,18 @@ select "owner", "realm", "created_at" from "opencok_chat"."chat_social_import" w
 update "opencok_chat"."chat_social_import" set "owner" = $1, "realm" = $2, "created_at" = $3 where "opencok_chat"."chat_social_import"."owner" = $4
 delete from "opencok_chat"."chat_social_import" where "opencok_chat"."chat_social_import"."owner" = $1"
 `;
+
+exports[`opencok_kingdom.recharge_feedback_claim: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["uid","varchar(40)",true,null,null,null]
+column ["id","varchar(40)",true,null,null,null]
+column ["startTime","bigint",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+primary ["recharge_feedback_claim_PRIMARY",["uid","id","startTime","endTime"]]
+check ["recharge_feedback_claim_bounds","\\"startTime\\" >= 0 AND \\"endTime\\" >= \\"startTime\\" AND \\"createdAt\\" >= 0"]
+insert into "opencok_kingdom"."recharge_feedback_claim" ("uid", "id", "startTime", "endTime", "createdAt") values ($1, $2, $3, $4, $5)
+select "uid", "id", "startTime", "endTime", "createdAt" from "opencok_kingdom"."recharge_feedback_claim" where "opencok_kingdom"."recharge_feedback_claim"."uid" = $1
+update "opencok_kingdom"."recharge_feedback_claim" set "uid" = $1, "id" = $2, "startTime" = $3, "endTime" = $4, "createdAt" = $5 where "opencok_kingdom"."recharge_feedback_claim"."uid" = $6
+delete from "opencok_kingdom"."recharge_feedback_claim" where "opencok_kingdom"."recharge_feedback_claim"."uid" = $1"
+`;

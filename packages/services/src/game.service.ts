@@ -548,6 +548,7 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "pay.recharge.ui.state":
       case "new.sercum.ui":
       case "new.sercum.reward":
       case "get.table.value":

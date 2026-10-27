@@ -22,6 +22,7 @@ export interface WorldCatalogs {
   barbarians?: Map<string, Rule>;
 }
 export interface AdvancedCatalogs {
+  rechargeFeedback?: Map<string, Rule>;
   rechargeThresholds?: Map<string, Rule>;
   ordinaryBoxes?: Map<string, Rule>;
   exchangeCycles?: Map<string, Rule>;

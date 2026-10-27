@@ -76,7 +76,8 @@
     "./shipping-investment": "./src/shipping-investment.ts",
     "./seven-day-cycle": "./src/seven-day-cycle.ts",
     "./ordinary-box": "./src/ordinary-box.ts",
-    "./recharge-activity": "./src/recharge-activity.ts"
+    "./recharge-activity": "./src/recharge-activity.ts",
+    "./recharge-feedback": "./src/recharge-feedback.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

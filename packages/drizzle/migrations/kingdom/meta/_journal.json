@@ -162,6 +162,13 @@
       "when": 1792971218509,
       "tag": "0022_ordinary_box_gold_mode",
       "breakpoints": false
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792972357969,
+      "tag": "0023_recharge_feedback_claims",
+      "breakpoints": false
     }
   ]
 }

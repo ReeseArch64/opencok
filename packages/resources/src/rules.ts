@@ -50,6 +50,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
   };
   const declared = async (name: GameplayCatalog) =>
     (await available(name)) ? parseDeclared(await read(name), name) : undefined;
+  const rechargeFeedbackRecords = await optionalRecords(GameplayCatalog.DailyRecharge);
   const campaignSource = (await available(GameplayCatalog.TriggerActivity))
     ? await read(GameplayCatalog.TriggerActivity)
     : undefined;
@@ -328,6 +329,9 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
     {
+      rechargeFeedback: rechargeFeedbackRecords.length
+        ? indexRules(rechargeFeedbackRecords, GameplayCatalog.DailyRecharge)
+        : new Map<string, Rule>(),
       rechargeThresholds: await optional(GameplayCatalog.NewsHeap),
       ordinaryBoxes: await optional(GameplayCatalog.BoxOrdinary),
       exchangeCycles: await optional(GameplayCatalog.ExchangeCycle),
