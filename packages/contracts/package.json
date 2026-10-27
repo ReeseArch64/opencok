@@ -11,6 +11,7 @@
   },
   "type": "module",
   "exports": {
+    "./expedition-calendar": "./src/expedition-calendar.ts",
     "./hero-ranking-rewards": "./src/hero-ranking-rewards.ts",
     "./hero-ranking-finality": "./src/hero-ranking-finality.ts",
     "./hero-rank-publication": "./src/hero-rank-publication.ts",
