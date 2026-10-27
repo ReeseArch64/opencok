@@ -7,7 +7,7 @@ import { chooseWeight } from "@opencok/rules/equipment";
 import { ownGeneralSnapshots } from "@opencok/rules/profile-generals";
 import { generalInfo } from "@opencok/mappings/profile";
 import { decodeGeneralAbilities } from "./profile";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function recruitLegacyGeneral(context: CityProgressionContext, id: string) {
   const rule = context.rules.power.generals?.get(id),

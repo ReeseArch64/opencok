@@ -12,7 +12,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
 import { reconnectMarchDragon, reconnectMarchGeneral } from "@opencok/mappings/reconnect-marches";
 import { ownedGeneral, writeGeneral, generalChanges } from "./generals";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function dragonChange(context: CityProgressionContext, uuid: string, marching: boolean) {
   const write = (context.write.worldMutation ??= {});

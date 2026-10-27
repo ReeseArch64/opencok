@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { createHash, randomUUID, randomInt } from "node:crypto";
 import { sfs, encode, str } from "@opencok/messages/sfs";
 import { feedbackWindow, feedbackPrice, feedbackFailure } from "@opencok/rules/recharge-feedback";
@@ -9,7 +10,7 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { rechargeFeedbackView } from "@opencok/mappings/recharge-feedback";
 import { pinProgressionReward } from "./progression-rewards";
 import type { RechargeFeedbackGateway } from "@opencok/contracts/recharge-feedback";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 export function rechargeFeedbackOperationId(owner: string, eventId: string): string {
   if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) feedbackFailure();
@@ -17,11 +18,20 @@ export function rechargeFeedbackOperationId(owner: string, eventId: string): str
   return `feedback:${createHash("sha256").update(`${owner}\0${eventId}`).digest("hex")}`;
 }
 
-export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway): CityDomain {
-  return {
-    commands: ["pay.recharge.ui.state", "feedback.paid"],
-    types: [],
-    async prepare(context, command, params) {
+export class RechargeFeedbackDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(gateway?: RechargeFeedbackGateway) {
+    super();
+
+    this.commands = ["pay.recharge.ui.state", "feedback.paid"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const reader = context.state.rechargeFeedback;
 
       if (!reader) feedbackFailure();
@@ -146,9 +156,14 @@ export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway):
         }));
 
       return empty();
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       feedbackFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createRechargeFeedbackDomain(gateway?: RechargeFeedbackGateway): CityDomain {
+  return new RechargeFeedbackDomain(gateway);
 }

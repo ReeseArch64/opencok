@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import { createHash, randomInt } from "node:crypto";
 import { sfs, encode, str, Type, type Fields } from "@opencok/messages/sfs";
@@ -25,7 +26,8 @@ import { errors } from "@opencok/constants/game";
 import { pinGoldEggRewards } from "./gold-eggs-rewards";
 import { grantNativeProgressionReward } from "./progression-rewards";
 import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function charge(context: CityProgressionContext, value: number) {
   if (context.balance("gold") < BigInt(value)) throw new GameError(errors.gold, "city_progression");
@@ -33,11 +35,16 @@ function charge(context: CityProgressionContext, value: number) {
   if (value) context.economy.gold(-BigInt(value));
 }
 
-export function createEggActivityDomain(
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  return {
-    commands: [
+export class EggActivityDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = [
       "egg.act.info",
       "egg.act.open",
       "egg.act.reward",
@@ -45,9 +52,11 @@ export function createEggActivityDomain(
       "egg.exp.reward",
       "egg.goods.full",
       "egg.activity.init",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const state = context.state.eggActivity,
         opened = eggActivityOpen(context.rules, context.now),
         empty = () => ({ response: encode({}), event: null });
@@ -247,9 +256,16 @@ export function createEggActivityDomain(
       (context.write.eggActivity ??= {}).record = row;
 
       return { response: encode(body), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       eggActivityFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createEggActivityDomain(
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new EggActivityDomain(random);
 }

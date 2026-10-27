@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { encode, sfs, str, int, Type, type Fields } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
@@ -23,7 +24,8 @@ import { newEquipment } from "./equipment";
 import { recordExpeditionScore } from "./new-expedition";
 import { refreshQuests } from "./quests";
 import { CampaignPlanner } from "./local-campaign";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function best(owner: string, pool: readonly Row[]): Row {
   if (!pool.length) hotItemFailure();
@@ -151,17 +153,26 @@ function resource(context: CityProgressionContext, id: number, delta: bigint) {
   else context.economy.resource(asset, delta);
 }
 
-export function createHotItemDomain(random: (maximum: number) => number = randomInt): CityDomain {
-  return {
-    commands: [
+export class HotItemDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = [
       "hot.item.v2.get",
       "hot.item.refresh",
       "hot.item.refreshV3",
       "hot.item.v2.buy",
       "hot.item.v3.buy",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const state = context.state.hotItem;
 
       if (!state) hotItemFailure();
@@ -343,11 +354,16 @@ export function createHotItemDomain(random: (maximum: number) => number = random
       }
 
       return { response: encode(body), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       hotItemFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createHotItemDomain(random: (maximum: number) => number = randomInt): CityDomain {
+  return new HotItemDomain(random);
 }
 
 export function createHotBusinessMan(rules: import("@opencok/rules/game").Rules, clock = Date.now) {

@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { num, long } from "@opencok/contracts/rows";
 import { encode, str } from "@opencok/messages/sfs";
@@ -8,15 +9,22 @@ import {
   shippingInvestmentFailure,
 } from "@opencok/rules/shipping-investment";
 import { shippingInvestmentView } from "@opencok/mappings/shipping-investment";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createShippingInvestmentDomain(
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  return {
-    commands: ["shipping.trade.invest.ui", "shipping.trade.invest.reward"],
-    types: [],
-    async prepare(context, command, params) {
+export class ShippingInvestmentDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = ["shipping.trade.invest.ui", "shipping.trade.invest.reward"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const empty = () => ({ response: encode({}), event: null });
 
       if (
@@ -86,9 +94,16 @@ export function createShippingInvestmentDomain(
         ),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       shippingInvestmentFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createShippingInvestmentDomain(
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new ShippingInvestmentDomain(random);
 }

@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt, randomUUID } from "node:crypto";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
 import { sfs, encode, int } from "@opencok/messages/sfs";
@@ -13,13 +14,22 @@ import {
 import { localActivityConditions, investmentDays } from "@opencok/rules/daily-investment";
 import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import { vipBoxView, vipBoxNotice } from "@opencok/mappings/vip-box";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createVipBoxDomain(random: (maximum: number) => number = randomInt): CityDomain {
-  return {
-    commands: ["vip.box.init", "vip.box.turntable.ui", "vip.box.turntable.reward"],
-    types: [],
-    async prepare(context, command, params) {
+export class VipBoxDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = ["vip.box.init", "vip.box.turntable.ui", "vip.box.turntable.reward"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const state = context.state.vipBox;
 
       if (!state) vipBoxFailure();
@@ -203,9 +213,14 @@ export function createVipBoxDomain(random: (maximum: number) => number = randomI
         }),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       vipBoxFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createVipBoxDomain(random: (maximum: number) => number = randomInt): CityDomain {
+  return new VipBoxDomain(random);
 }

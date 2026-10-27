@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { sfs, encode, str } from "@opencok/messages/sfs";
 import { long, num, text } from "@opencok/contracts/rows";
 import { costRankingBands } from "@opencok/rules/continued-cost-ranking";
@@ -15,7 +16,7 @@ import type { CostRankingRegistry } from "@opencok/contracts/continued-cost-rank
 import type { CostFinalityShared } from "@opencok/contracts/continued-cost-finality";
 import type { AvatarSystemMail } from "@opencok/contracts/files";
 import type { Rules } from "@opencok/rules/game";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 export class ContinuedCostRewardService {
   private running?: Promise<void>;
@@ -127,10 +128,12 @@ export class ContinuedCostRewardService {
   }
 }
 
-export const continuedCostRewardDomain: CityDomain = {
-  commands: ["continuedcost.rank.deliver"],
-  types: [],
-  async prepare(context, _command, params) {
+export class ContinuedCostRewardDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["continuedcost.rank.deliver"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     const id = str(params, "awardId");
 
     if (!/^[a-f0-9]{32}$/.test(id) || str(params, "operationId") !== costRankAwardOperation(id))
@@ -179,8 +182,11 @@ export const continuedCostRewardDomain: CityDomain = {
     context.write.costRankAward = id;
 
     return { response: encode({}), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new Error("Unsupported consumption award activity");
-  },
-};
+  };
+}
+
+export const continuedCostRewardDomain: CityDomain = new ContinuedCostRewardDomain();

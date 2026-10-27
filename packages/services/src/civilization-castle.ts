@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { encode, sfs, str, int, type Fields } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { serverFeature } from "@opencok/rules/power-context";
@@ -10,7 +11,8 @@ import {
 } from "@opencok/rules/city-progression";
 import { worldFootprint } from "@opencok/rules/world-march-runtime";
 import { civilizationCastleView } from "@opencok/mappings/civilization-castle";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function gain(context: CityProgressionContext, row: Row, count: number) {
   if (count < 0 || !Number.isSafeInteger(count)) castleFailure();
@@ -24,11 +26,20 @@ function gain(context: CityProgressionContext, row: Row, count: number) {
   row.resourceNum = Number(row.resourceNum ?? 0) - count;
 }
 
-export function createCivilizationCastleDomain(size: number): CityDomain {
-  return {
-    commands: ["civilizationCastle"],
-    types: [],
-    async prepare(context, _command, params) {
+export class CivilizationCastleDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(size: number) {
+    super();
+
+    this.commands = ["civilizationCastle"];
+
+    this.types = [];
+
+    this.prepare = async (context, _command, params) => {
       if (
         !serverFeature(context.rules, "civilization_fortress_on", {
           kingdomId: context.rules.kingdomId,
@@ -262,9 +273,14 @@ export function createCivilizationCastleDomain(size: number): CityDomain {
             })
           : null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       castleFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createCivilizationCastleDomain(size: number): CityDomain {
+  return new CivilizationCastleDomain(size);
 }

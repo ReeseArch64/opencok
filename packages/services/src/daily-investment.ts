@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomUUID } from "node:crypto";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
 import { encode, str, int, Type } from "@opencok/messages/sfs";
@@ -13,7 +14,8 @@ import { cityInteger, cityAmount } from "@opencok/rules/city-progression";
 import { javaMailBytes } from "@opencok/rules/avatar-mail";
 import { dailyInvestmentView } from "@opencok/mappings/daily-investment";
 import type { Rule } from "@opencok/rules/game";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function mail(context: CityProgressionContext, rule: Rule, key: string) {
   const id = rule[key];
@@ -47,10 +49,17 @@ function mail(context: CityProgressionContext, rule: Rule, key: string) {
   ];
 }
 
-export const dailyInvestmentDomain: CityDomain = {
-  commands: ["invest.add", "invest.open.ui", "invest.receive", "invest.init"],
-  types: [],
-  async prepare(context, command, params) {
+export class DailyInvestmentDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "invest.add",
+    "invest.open.ui",
+    "invest.receive",
+    "invest.init",
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.dailyInvestment;
 
     if (!state) investmentFailure();
@@ -213,8 +222,11 @@ export const dailyInvestmentDomain: CityDomain = {
       ),
       event: null,
     };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     investmentFailure();
-  },
-};
+  };
+}
+
+export const dailyInvestmentDomain: CityDomain = new DailyInvestmentDomain();

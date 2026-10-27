@@ -8,7 +8,7 @@ import { previewRewards } from "@opencok/rules/rewards";
 import { mailRewardEntries } from "@opencok/rules/mail-rewards";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import type { RewardPreview } from "@opencok/contracts/rewards";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 const assets = [
   "wood",

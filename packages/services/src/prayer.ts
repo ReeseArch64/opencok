@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { sfs, encode, int, str } from "@opencok/messages/sfs";
 import { num, long, type Row } from "@opencok/contracts/rows";
@@ -15,7 +16,8 @@ import { prayerView, prayerLogin, prayerResult, prayerItemView } from "@opencok/
 import { refreshQuests } from "./quests";
 import { recordExpeditionScore } from "./new-expedition";
 import { CampaignPlanner } from "./local-campaign";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function refreshPrayerBuilding(context: CityProgressionContext, previous: Row, next: Row) {
   if (num(next, "itemId") !== 428000 || num(next, "level") < 1) return;
@@ -45,11 +47,20 @@ export function refreshPrayerBuilding(context: CityProgressionContext, previous:
   context.write.prayer = { record };
 }
 
-export function createPrayerDomain(random: (maximum: number) => number = randomInt): CityDomain {
-  return {
-    commands: ["prayer.init", "user.pray.info", "user.pray", "prayer.item"],
-    types: [],
-    async prepare(context, command, params) {
+export class PrayerDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = ["prayer.init", "user.pray.info", "user.pray", "prayer.item"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const altar = context.state.buildings.find(
         (row) => num(row, "itemId") === 428000 && num(row, "level") > 0,
       );
@@ -195,9 +206,14 @@ export function createPrayerDomain(random: (maximum: number) => number = randomI
       new CampaignPlanner(context).event(11);
 
       return { response: encode(prayerResult(body)), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       prayerFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createPrayerDomain(random: (maximum: number) => number = randomInt): CityDomain {
+  return new PrayerDomain(random);
 }

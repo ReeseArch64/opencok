@@ -1,15 +1,18 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { num } from "@opencok/contracts/rows";
 import { encode, int, sfs, Type } from "@opencok/messages/sfs";
 import { serverFeature } from "@opencok/rules/power-context";
 import { cityInteger } from "@opencok/rules/city-progression";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export const branchCityDomain: CityDomain = {
-  commands: ["branchcity.init", "branchcity.open"],
-  types: [],
-  async prepare(context, command, params) {
+export class BranchCityDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["branchcity.init", "branchcity.open"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const saved = context.state.branchCity;
 
     if (saved === undefined) throw new GameError(errors.unsupported, "city_progression");
@@ -59,8 +62,11 @@ export const branchCityDomain: CityDomain = {
       }),
       event: null,
     };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new GameError(errors.unsupported);
-  },
-};
+  };
+}
+
+export const branchCityDomain: CityDomain = new BranchCityDomain();

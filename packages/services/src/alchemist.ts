@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { encode, sfs, str, type Fields } from "@opencok/messages/sfs";
@@ -6,12 +7,14 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { localEventWindow } from "@opencok/rules/local-events";
 import { alchemistInfo } from "@opencok/mappings/alchemist";
 import { grantNativeProgressionReward, pinProgressionReward } from "./progression-rewards";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export const alchemistDomain: CityDomain = {
-  commands: ["alchemist"],
-  types: [],
-  async prepare(context, _command, params) {
+export class AlchemistDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["alchemist"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     if (!localEventWindow(context.rules.power.activityPanels?.get("57139"), context.now))
       throw new GameError(errors.unsupported, "city_progression");
 
@@ -65,8 +68,11 @@ export const alchemistDomain: CityDomain = {
     body.info = sfs.object(alchemistInfo(row, rule));
 
     return { response: encode(body), event: action === "info" ? null : undefined };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new GameError(errors.unsupported, "city_progression");
-  },
-};
+  };
+}
+
+export const alchemistDomain: CityDomain = new AlchemistDomain();

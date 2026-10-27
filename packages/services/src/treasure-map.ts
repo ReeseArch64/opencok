@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { speedTreasureMarch, worldMarchMutationEvent } from "./world-march-runtime";
 import { treasureMapSpeed } from "@opencok/mappings/treasure-map";
 import { randomInt, randomUUID } from "node:crypto";
@@ -16,7 +17,8 @@ import {
 import { treasureMapView } from "@opencok/mappings/treasure-map";
 import { equipmentItem } from "@opencok/mappings/equipment";
 import { treasureMapRoster, writeTreasureMap, deleteTreasureMap } from "./treasure-map-state";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 async function generate(
   context: CityProgressionContext,
@@ -119,11 +121,20 @@ export const treasureMapCommands = [
   "treasuremap.spd",
 ];
 
-export function createTreasureMapDomain(size: number): CityDomain {
-  return {
-    commands: treasureMapCommands,
-    types: [],
-    async prepare(context, command, params) {
+export class TreasureMapDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(size: number) {
+    super();
+
+    this.commands = treasureMapCommands;
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       if (!context.state.worldMutation) worldMutationFailure();
 
       if (command === "treasuremap.init") {
@@ -174,9 +185,14 @@ export function createTreasureMapDomain(size: number): CityDomain {
         }),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       worldMutationFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createTreasureMapDomain(size: number): CityDomain {
+  return new TreasureMapDomain(size);
 }

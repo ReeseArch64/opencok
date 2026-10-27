@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { createHash, randomUUID } from "node:crypto";
 import { sfs, encode, decode, str, int, Type, fields, type Fields } from "@opencok/messages/sfs";
 import { long, num, text, type Row } from "@opencok/contracts/rows";
@@ -14,7 +15,8 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { previewRewards } from "@opencok/rules/rewards";
 import { randomInt } from "node:crypto";
 import { pinProgressionReward } from "./progression-rewards";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function identity(...values: unknown[]) {
   return createHash("sha256").update(JSON.stringify(values)).digest("hex").slice(0, 32);
@@ -280,10 +282,12 @@ export async function flushHeroScore(context: CityProgressionContext) {
     };
 }
 
-export const heroTargetDomain: CityDomain = {
-  commands: ["hero.target.deliver"],
-  types: [],
-  async prepare(context, _command, params: Fields) {
+export class HeroTargetDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["hero.target.deliver"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params: Fields) => {
     const act = str(params, "actId"),
       alliance = str(params, "aid", ""),
       stage = int(params, "stage"),
@@ -390,8 +394,11 @@ export const heroTargetDomain: CityDomain = {
     });
 
     return { response: encode({}), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new Error("Unsupported hero target activity");
-  },
-};
+  };
+}
+
+export const heroTargetDomain: CityDomain = new HeroTargetDomain();

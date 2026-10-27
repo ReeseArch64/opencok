@@ -23,7 +23,7 @@ import { temporaryEffect } from "@opencok/rules/player-effects";
 import { unitPower } from "@opencok/rules/military";
 import { grantRewards, refreshQuests } from "./quests";
 import { generalRefinement } from "@opencok/mappings/generals";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function generalAbility(
   context: CityProgressionContext,

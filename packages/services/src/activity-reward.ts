@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { applyMilitaryRankAward } from "./military-rank-awards";
 import type { ActivityRewardWrite } from "@opencok/contracts/activity-reward";
 import { rewardLegacyGenerals } from "./legacy-generals";
@@ -12,7 +13,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { equipmentItem, equipment } from "@opencok/mappings/equipment";
 import { grantPinnedProgressionReward } from "./progression-rewards";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 const resourceAssets = {
   wood: "wood",
@@ -29,10 +30,12 @@ const resourceAssets = {
   limestone: "limestone",
 } as const;
 
-export const activityRewardDomain: CityDomain = {
-  commands: ["activity.accept.reward"],
-  types: [],
-  async prepare(context, _command, params) {
+export class ActivityRewardDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["activity.accept.reward"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     if (
       num(context.state.profile, "serverId") !== context.rules.kingdomId ||
       num(context.state.profile, "banFlag") !== 0 ||
@@ -190,8 +193,11 @@ export const activityRewardDomain: CityDomain = {
     }
 
     return { response: encode(activityRewardView(body, goods, equips, generals)), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     return {};
-  },
-};
+  };
+}
+
+export const activityRewardDomain: CityDomain = new ActivityRewardDomain();

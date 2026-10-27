@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { sfs, encode, int, str } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
@@ -18,15 +19,22 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
 import { CampaignPlanner, refreshCampaignGrants } from "./local-campaign";
 import type { FragmentExchangeOffer } from "@opencok/contracts/fragment-exchange";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createFragmentExchangeDomain(
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  return {
-    commands: ["act.exchange", "act.ex.reward", "act.ex.flush"],
-    types: [],
-    async prepare(context, command, params) {
+export class FragmentExchangeDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = ["act.exchange", "act.ex.reward", "act.ex.flush"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const recipes = context.rules.advanced.fragments?.size
           ? fragmentExchangeRecipes(context.rules.advanced.fragments.values())
           : [],
@@ -232,9 +240,16 @@ export function createFragmentExchangeDomain(
         }),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       campaignFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createFragmentExchangeDomain(
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new FragmentExchangeDomain(random);
 }

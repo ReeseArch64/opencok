@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { num, text } from "@opencok/contracts/rows";
 import { encode, sfs, str, int, type Fields } from "@opencok/messages/sfs";
@@ -17,15 +18,22 @@ import { ordinaryBoxPreview } from "@opencok/mappings/ordinary-box";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { previewRewards } from "@opencok/rules/rewards";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createOrdinaryBoxDomain(
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  return {
-    commands: ["get.table.value", "ordinary.box.open", "ordinary.box.init"],
-    types: [],
-    async prepare(context, command, params) {
+export class OrdinaryBoxDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = ["get.table.value", "ordinary.box.open", "ordinary.box.init"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const ruleContext = {
           kingdomId: context.rules.kingdomId,
           version: "12.06.0",
@@ -162,9 +170,16 @@ export function createOrdinaryBoxDomain(
         response: encode(type === 1 ? { params: sfs.object(body), type: sfs.int(1) } : body),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       boxFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createOrdinaryBoxDomain(
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new OrdinaryBoxDomain(random);
 }

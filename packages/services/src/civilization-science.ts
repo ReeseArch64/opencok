@@ -1,3 +1,5 @@
+import { TimedActivityAction } from "@opencok/enums/timed-activity-action";
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { serverFeature } from "@opencok/rules/power-context";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -10,7 +12,8 @@ import {
 import { civilizationScienceView } from "@opencok/mappings/civilization-science";
 import { researchCosts } from "@opencok/rules/research";
 import { cityInteger, cityAmount, progressionActivityData } from "@opencok/rules/city-progression";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function current(context: CityProgressionContext, base: number) {
   return (
@@ -51,10 +54,16 @@ function complete(context: CityProgressionContext, base: number, expected?: numb
   };
 }
 
-export const civilizationScienceDomain: CityDomain = {
-  commands: ["civilization.science.data.init", "race.science.research", "race.science.directly"],
-  types: [19],
-  async prepare(context, command, params) {
+export class CivilizationScienceDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "civilization.science.data.init",
+    "race.science.research",
+    "race.science.directly",
+  ];
+
+  public readonly types: CityDomain["types"] = [19];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     if (command === "civilization.science.data.init") {
       const bases = [...(context.rules.power.civilizationSciences?.keys() ?? [])]
         .map(Number)
@@ -162,8 +171,9 @@ export const civilizationScienceDomain: CityDomain = {
       item: encode({ itemId: sfs.string(String(base)) }),
       response: encode(costs()),
     };
-  },
-  async apply(context, action, activity) {
+  };
+
+  public readonly apply: CityDomain["apply"] = async (context, action, activity) => {
     const base = cityInteger(activity.itemId, 1),
       row = current(context, base),
       data = progressionActivityData(activity.data);
@@ -175,21 +185,23 @@ export const civilizationScienceDomain: CityDomain = {
       pending.length !== 1 ||
       pending[0]!.uuid !== activity.queueId ||
       (data && data.kind !== "civilization") ||
-      action === "start"
+      action === TimedActivityAction.Start
     )
       throw new GameError(errors.queue, "city_progression");
 
     civilizationScience(context.rules, base, num(row, "level") + 1);
 
-    if (action === "cancel") {
+    if (action === TimedActivityAction.Cancel) {
       context.refund(data);
 
       return { resource: sfs.object(context.resource()) };
     }
 
-    if (action === "restore" || action === "reschedule")
+    if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule)
       return civilizationScienceView(context.rules, base, num(row, "level"), activity.dueAt);
 
     return complete(context, base, data?.target?.level);
-  },
-};
+  };
+}
+
+export const civilizationScienceDomain: CityDomain = new CivilizationScienceDomain();

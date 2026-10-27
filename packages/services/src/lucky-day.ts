@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { encode, sfs } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
@@ -9,13 +10,22 @@ import {
 import { luckyFailure, luckyChoice } from "@opencok/rules/lucky-day";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { luckyDayView } from "@opencok/mappings/lucky-day";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createLuckyDayDomain(random: (maximum: number) => number = randomInt): CityDomain {
-  return {
-    commands: ["luckyday.effect", "luckyday.init"],
-    types: [],
-    async prepare(context, command) {
+export class LuckyDayDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = ["luckyday.effect", "luckyday.init"];
+
+    this.types = [];
+
+    this.prepare = async (context, command) => {
       const state = context.state.luckyDay;
 
       if (!state) luckyFailure();
@@ -145,9 +155,14 @@ export function createLuckyDayDomain(random: (maximum: number) => number = rando
         ),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       luckyFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createLuckyDayDomain(random: (maximum: number) => number = randomInt): CityDomain {
+  return new LuckyDayDomain(random);
 }

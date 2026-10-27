@@ -13,7 +13,7 @@ import { dragonDefinition, dragonFeature } from "@opencok/rules/dragon-progressi
 import { treasureMapItem, treasureMapFree } from "@opencok/rules/treasure-map";
 import { pinProgressionReward } from "./progression-rewards";
 import { treasureMapRoster, writeTreasureMap, deleteTreasureMap } from "./treasure-map-state";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function appendMail(context: CityProgressionContext, message: AvatarSystemMail) {
   const write = (context.write.quests ??= {});

@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { GameError } from "@opencok/errors/game";
 import { encode, sfs, int, str } from "@opencok/messages/sfs";
@@ -23,15 +24,22 @@ import { inventoryItem } from "@opencok/mappings/bootstrap";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
 import { CampaignPlanner, refreshCampaignGrants } from "./local-campaign";
 import type { MonsterExchangeConfig } from "@opencok/contracts/monster-exchange";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createMonsterExchangeDomain(
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  return {
-    commands: ["act.exchange", "act.ex.reward", "act.ex.flush"],
-    types: [],
-    async prepare(context, command, params) {
+export class MonsterExchangeDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    this.commands = ["act.exchange", "act.ex.reward", "act.ex.flush"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const rows = new Map(
         [...(context.state.monsterExchange ?? []), ...(context.write.monsterExchange ?? [])].map(
           (row) => [num(row, "actId"), row],
@@ -324,9 +332,16 @@ export function createMonsterExchangeDomain(
         }),
         event: null,
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       campaignFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createMonsterExchangeDomain(
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new MonsterExchangeDomain(random);
 }

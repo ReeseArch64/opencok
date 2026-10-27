@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { sfs, encode, decode, fields, int, str, Type, type Fields } from "@opencok/messages/sfs";
 import { num, long } from "@opencok/contracts/rows";
@@ -8,7 +9,8 @@ import { cityCosmeticProjection } from "@opencok/rules/city-cosmetics";
 import { cityCosmeticFields } from "@opencok/mappings/city-cosmetics";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
 import { playerItemGiftRecipient } from "@opencok/rules/player-item-gifts";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function event(context: CityProgressionContext, body: Fields, sender = context.owner) {
   return encode({
@@ -19,10 +21,16 @@ function event(context: CityProgressionContext, body: Fields, sender = context.o
   });
 }
 
-export const troubleDomain: CityDomain = {
-  commands: ["get.trouble.list", "trouble.speed", "trouble.deliver"],
-  types: [],
-  async prepare(context, command, params) {
+export class TroubleDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "get.trouble.list",
+    "trouble.speed",
+    "trouble.deliver",
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     if (!context.state.trouble) worldMutationFailure();
 
     if (command === "get.trouble.list")
@@ -100,11 +108,14 @@ export const troubleDomain: CityDomain = {
       };
 
     return { response: encode({}), event: event(context, body, sender) };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     worldMutationFailure();
-  },
-};
+  };
+}
+
+export const troubleDomain: CityDomain = new TroubleDomain();
 
 export async function deliverWorldTroubles(
   payload: Buffer,

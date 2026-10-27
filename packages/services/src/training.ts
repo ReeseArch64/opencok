@@ -1,3 +1,5 @@
+import { TimedActivityAction } from "@opencok/enums/timed-activity-action";
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { recordTargetTask } from "./target-task";
 import { recordExpeditionScore } from "./new-expedition";
 import { GameError } from "@opencok/errors/game";
@@ -25,7 +27,8 @@ import {
   reserveTroops,
 } from "@opencok/rules/military";
 import { idleDeadline } from "@opencok/rules/timed-activity";
-import { CityProgressionContext, type CityDomain } from "./city-progression";
+import { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityDomain } from "./city-domain.ts";
 
 export function militaryBoolean(params: Fields, name: string, fallback = false) {
   if (!params[name]) return fallback;
@@ -224,15 +227,15 @@ async function apply(
   if (!saved || saved.itemId !== armyId || long(row, "finishTime") !== long(saved, "updateTime"))
     throw new GameError(errors.invalid, "city_progression");
 
-  if (action === "start") throw new GameError(errors.invalid, "city_progression");
+  if (action === TimedActivityAction.Start) throw new GameError(errors.invalid, "city_progression");
 
-  if (action === "restore" || action === "reschedule") {
+  if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule) {
     context.write.armies = [{ ...row, finishTime: activity.dueAt }];
 
     return { itemId: sfs.string(armyId), allId: sfs.string(armyId) };
   }
 
-  if (action === "cancel") {
+  if (action === TimedActivityAction.Cancel) {
     context.refund(data);
     context.write.armies = [{ ...row, train: 0, finishTime: 0n }];
 
@@ -242,9 +245,14 @@ async function apply(
   return complete(context, row, num(row, "train"));
 }
 
-export const trainingDomain: CityDomain = {
-  commands: ["army.add", "army.cd", "army.fire"],
-  types: [1, 8, 9, 10, 17],
-  prepare,
-  apply,
-};
+export class TrainingDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["army.add", "army.cd", "army.fire"];
+
+  public readonly types: CityDomain["types"] = [1, 8, 9, 10, 17];
+
+  public readonly prepare: CityDomain["prepare"] = prepare;
+
+  public readonly apply: CityDomain["apply"] = apply;
+}
+
+export const trainingDomain: CityDomain = new TrainingDomain();

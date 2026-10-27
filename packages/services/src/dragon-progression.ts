@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt, randomUUID } from "node:crypto";
 import { sfs, str, int, encode, Type, type Fields, type Value } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
@@ -24,7 +25,8 @@ import {
   progressionRewardPreview,
   grantPinnedProgressionReward,
 } from "./progression-rewards";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function dragonRoster(context: CityProgressionContext) {
   return {
@@ -265,10 +267,12 @@ export const dragonProgressionCommands = [
   "petdragon.upgrade.skill",
 ];
 
-export const dragonProgressionDomain: CityDomain = {
-  commands: dragonProgressionCommands,
-  types: [],
-  async prepare(context, command, params) {
+export class DragonProgressionDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = dragonProgressionCommands;
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     if (command !== "dragon.init" && command !== "dragon.tick") commandGate(context, command);
 
     if (command === "dragon.item") {
@@ -736,11 +740,14 @@ export const dragonProgressionDomain: CityDomain = {
       return { response: encode(extra) };
 
     return { response: encode({ ...view(context, row), ...extra }) };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     dragonFailure();
-  },
-};
+  };
+}
+
+export const dragonProgressionDomain: CityDomain = new DragonProgressionDomain();
 
 function dragonSkillCommand(
   context: CityProgressionContext,

@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import { randomInt, randomUUID } from "node:crypto";
 import { num, type Row } from "@opencok/contracts/rows";
@@ -14,7 +15,8 @@ import { previewRewards } from "@opencok/rules/rewards";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { castleLevelState } from "@opencok/mappings/castle-level-event";
 import { pinProgressionReward, grantNativeProgressionReward } from "./progression-rewards";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 import type { CastleLevelEventRow } from "@opencok/contracts/castle-level-event";
 
 function ruleContext(context: CityProgressionContext) {
@@ -55,10 +57,17 @@ function emptyRow(context: CityProgressionContext, current: number): CastleLevel
   };
 }
 
-export const castleLevelEventDomain: CityDomain = {
-  commands: ["castle.ui.state", "castle.level.reward", "castle.share.reward", "castle.event.init"],
-  types: [],
-  async prepare(context, command, params) {
+export class CastleLevelEventDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "castle.ui.state",
+    "castle.level.reward",
+    "castle.share.reward",
+    "castle.event.init",
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.castleLevelEvent;
 
     if (!state) castleEventFailure();
@@ -238,8 +247,11 @@ export const castleLevelEventDomain: CityDomain = {
       }),
       event: null,
     };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     castleEventFailure();
-  },
-};
+  };
+}
+
+export const castleLevelEventDomain: CityDomain = new CastleLevelEventDomain();

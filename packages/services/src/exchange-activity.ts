@@ -1,21 +1,29 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { encode, decode, sfs, str, type Value } from "@opencok/messages/sfs";
 import { campaignFailure } from "@opencok/rules/local-campaign";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { createFragmentExchangeDomain } from "./fragment-exchange";
 import { createMonsterExchangeDomain } from "./monster-exchange";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createExchangeActivityDomain(
-  random: (maximum: number) => number = randomInt,
-): CityDomain {
-  const fragments = createFragmentExchangeDomain(random),
-    tokens = createMonsterExchangeDomain(random);
+export class ExchangeActivityDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
 
-  return {
-    commands: fragments.commands,
-    types: [],
-    async prepare(context, command, params) {
+  public constructor(random: (maximum: number) => number = randomInt) {
+    super();
+
+    const fragments = createFragmentExchangeDomain(random),
+      tokens = createMonsterExchangeDomain(random);
+
+    this.commands = fragments.commands;
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       if (command === "act.exchange") {
         const ids = str(params, "ids").split("|").filter(Boolean),
           exchange: Value[] = [];
@@ -41,9 +49,16 @@ export function createExchangeActivityDomain(
         context.rules.power.activityPanels?.get(id)?.exchange === "1" ? tokens : fragments;
 
       return domain.prepare(context, command, params);
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       campaignFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createExchangeActivityDomain(
+  random: (maximum: number) => number = randomInt,
+): CityDomain {
+  return new ExchangeActivityDomain(random);
 }

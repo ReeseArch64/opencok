@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { decodeLegacyJsonObject } from "@opencok/messages/legacy-json";
 import { randomInt } from "node:crypto";
 import { sfs, encode, str, int, Type, type Fields, type Value } from "@opencok/messages/sfs";
@@ -13,7 +14,8 @@ import {
   generalDrawPurchase,
 } from "@opencok/rules/general-draws";
 import { grantRewards } from "./quests";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function view(context: CityProgressionContext, row: Row): Fields {
   const config = context.rules.items.get("golden_opentime");
@@ -48,16 +50,24 @@ function view(context: CityProgressionContext, row: Row): Fields {
   };
 }
 
-export function createGeneralDrawDomain(
-  globalRanking: () => Promise<readonly string[]> = async () => [],
-): CityDomain {
-  return {
-    commands: ["herodraw"],
-    types: [],
-    async apply() {
+export class GeneralDrawDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly apply: CityDomain["apply"];
+  public readonly prepare: CityDomain["prepare"];
+
+  public constructor(globalRanking: () => Promise<readonly string[]> = async () => []) {
+    super();
+
+    this.commands = ["herodraw"];
+
+    this.types = [];
+
+    this.apply = async () => {
       generalFailure();
-    },
-    async prepare(context, _command, params) {
+    };
+
+    this.prepare = async (context, _command, params) => {
       const available = (key: string) =>
         generalFeatureAvailable(context.rules, key, {
           kingdomId: context.rules.kingdomId,
@@ -258,6 +268,12 @@ export function createGeneralDrawDomain(
         responseKind: "nested",
         event: event ?? (action === "rank" || action === "info" ? null : undefined),
       };
-    },
-  };
+    };
+  }
+}
+
+export function createGeneralDrawDomain(
+  globalRanking: () => Promise<readonly string[]> = async () => [],
+): CityDomain {
+  return new GeneralDrawDomain(globalRanking);
 }

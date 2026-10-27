@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { scoutWatchtowerValues } from "@opencok/rules/world-scout-watchtower";
 import {
   scoutSoldierLimit,
@@ -73,7 +74,8 @@ import {
 } from "@opencok/rules/world-resource-detail";
 import { reconnectMarchBase } from "@opencok/mappings/reconnect-marches";
 import { serverFeature } from "@opencok/rules/power-context";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function troubleDetectSpeed(context: CityProgressionContext) {
   return scoutWatchtowerValues(
@@ -1388,11 +1390,20 @@ export const worldMutationCommands = [
   "world.mv.gold",
 ];
 
-export function createWorldMarchDomain(size: number): CityDomain {
-  return {
-    commands: worldMutationCommands,
-    types: [],
-    async prepare(context, command, params) {
+export class WorldMarchDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(size: number) {
+    super();
+
+    this.commands = worldMutationCommands;
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       if (!context.state.worldMutation) worldMutationFailure();
 
       if (
@@ -2032,11 +2043,16 @@ export function createWorldMarchDomain(size: number): CityDomain {
           marchRows(context).find((row) => row.uuid === id)!,
         ),
       );
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       worldMutationFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createWorldMarchDomain(size: number): CityDomain {
+  return new WorldMarchDomain(size);
 }
 
 export function worldMarchMutationEvent(context: CityProgressionContext, params: Fields): Fields {

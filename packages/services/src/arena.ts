@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { createHash, randomUUID } from "node:crypto";
 import { encode, decode, sfs, str, int, Type, type Fields } from "@opencok/messages/sfs";
 import { num, text, type Row } from "@opencok/contracts/rows";
@@ -11,11 +12,18 @@ import { arenaArmySelection, arenaFailure, arenaRankDelta } from "@opencok/rules
 import { cityInteger } from "@opencok/rules/city-progression";
 import { serverFeature } from "@opencok/rules/power-context";
 import { arenaInfo, arenaArmy } from "@opencok/mappings/arena";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
-  return {
-    commands: [
+export class ArenaDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(gateway?: ArenaBattleGateway) {
+    super();
+
+    this.commands = [
       "arena.info",
       "arena.apply",
       "arena.army",
@@ -24,9 +32,11 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
       "arena.leave",
       "arena.matched",
       "arena.finished",
-    ],
-    types: [],
-    async prepare(context, command, params) {
+    ];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const saved = context.state.arena;
 
       if (!saved) arenaFailure();
@@ -252,11 +262,16 @@ export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
       }
 
       return arenaFailure();
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       arenaFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createArenaDomain(gateway?: ArenaBattleGateway): CityDomain {
+  return new ArenaDomain(gateway);
 }
 
 export async function publishArenaMutation(

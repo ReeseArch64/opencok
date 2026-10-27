@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { createHash, randomUUID } from "node:crypto";
 import { encode, sfs, str } from "@opencok/messages/sfs";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
@@ -14,7 +15,7 @@ import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
 import { cupMatchView, cupBetView } from "@opencok/mappings/cup-betting";
 import { grantNativeProgressionReward, pinProgressionReward } from "./progression-rewards";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 import type { CupScheduleStore } from "@opencok/contracts/cup-betting";
 import type { Rules } from "@opencok/rules/game";
 
@@ -44,17 +45,19 @@ export function cupSettlementOperation(owner: string, ids: readonly string[]) {
     .digest("hex")}`;
 }
 
-export const cupBettingDomain: CityDomain = {
-  commands: [
+export class CupBettingDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
     "euro.cup.info",
     "euro.cup.bet.info",
     "euro.cup.record",
     "euro.cup.bet",
     "euro.cup.reward",
     "euro.cup.settle",
-  ],
-  types: [],
-  async prepare(context, command, params) {
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.cupBetting;
 
     if (!state) invalid();
@@ -259,8 +262,11 @@ export const cupBettingDomain: CityDomain = {
     }
 
     return { response: encode({ reward: sfs.array(rewards) }), event: null };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     invalid();
-  },
-};
+  };
+}
+
+export const cupBettingDomain: CityDomain = new CupBettingDomain();

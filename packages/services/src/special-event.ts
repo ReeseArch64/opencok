@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { specialEventInfo } from "@opencok/mappings/special-event";
 import { createHash } from "node:crypto";
 import { encode, str } from "@opencok/messages/sfs";
@@ -10,7 +11,7 @@ import type {
   SpecialEventBuyer,
 } from "@opencok/contracts/special-event";
 import type { Rules } from "@opencok/rules/game";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 export class SpecialEventPurchaseService {
   constructor(
@@ -70,13 +71,20 @@ export function specialEventOperation(eventId: string) {
   return `special:${createHash("sha256").update(eventId).digest("hex")}`;
 }
 
-export function createSpecialEventDomain(
-  stock: Pick<SpecialEventStock, "counts" | "find">,
-): CityDomain {
-  return {
-    commands: ["special.ui.state", "special.paid"],
-    types: [],
-    async prepare(context, command, params) {
+export class SpecialEventDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(stock: Pick<SpecialEventStock, "counts" | "find">) {
+    super();
+
+    this.commands = ["special.ui.state", "special.paid"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       if (command === "special.ui.state") {
         const period = specialEventWindow(context.rules, {
           kingdomId: context.rules.kingdomId,
@@ -119,9 +127,16 @@ export function createSpecialEventDomain(
       };
 
       return { response: encode({}), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       throw new Error("Special event has no timed queue");
-    },
-  };
+    };
+  }
+}
+
+export function createSpecialEventDomain(
+  stock: Pick<SpecialEventStock, "counts" | "find">,
+): CityDomain {
+  return new SpecialEventDomain(stock);
 }

@@ -12,7 +12,7 @@ import type {
   WorldScoutTarget,
   WorldScoutMail,
 } from "@opencok/contracts/world-scout-report";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 import {
   scoutApproximate,
   scoutBarbarianArmy,

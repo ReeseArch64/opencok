@@ -132,6 +132,17 @@ owns the Promise-compatible runtime lifetime. Relay classes specialize the share
 `PollingWorker` and `CursorWorker` lifecycle implementations in core. These classes
 preserve the existing Effect ownership model and protocol execution order.
 
+`CityProgressionService` owns city command routing and timed-activity dispatch.
+`CityProgressionContextFactory` loads the transactional state and effect snapshot;
+`CityProgressionContext` owns the pending write and economy plan. Their structural
+domain contract lives in `city-domain.ts`. Construction, research, military,
+equipment, quests and event domain classes specialize `CityCommandDomain`. Configured
+domains receive gateways, random sources and world size through constructors; their
+factory entrypoints preserve the same contract for existing callers. The realm
+composition instantiates these classes directly. Equipment and workshop have separate
+implementations. `TimedActivityAction` and
+`TimedActivityStatus` name the existing string actions and numeric persistence states.
+
 Feature-by-feature migration details belong in the [realm runbook](../apps/server/README.md),
 [API guide](../apps/api/README.md), [chat guide](../apps/chat/README.md),
 [media runbook](../apps/api/README.md#avatar-media) and [migration evidence](../docs/migration-validation.md).

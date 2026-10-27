@@ -4,7 +4,7 @@ import { mailRewardEntries } from "@opencok/rules/mail-rewards";
 import { cityInteger } from "@opencok/rules/city-progression";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
 import { pinProgressionReward } from "./progression-rewards";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function sharedResourceRewards(
   context: Pick<CityProgressionContext, "rules" | "now">,

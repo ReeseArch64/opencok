@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { mergeSignInRewards } from "@opencok/rules/merge-campaign";
 import { recordTargetTask } from "./target-task";
 import { recordCampaignUse } from "./local-campaign";
@@ -20,7 +21,8 @@ import {
 import { previewRewards } from "@opencok/rules/rewards";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { questTasks } from "@opencok/mappings/quests";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function grantRewards(
   context: CityProgressionContext,
@@ -555,11 +557,16 @@ async function prepare(context: CityProgressionContext, command: string, params:
   return { response: encode(body), event: null };
 }
 
-export const questsDomain: CityDomain = {
-  commands,
-  types: [],
-  prepare,
-  apply: async () => {
+export class QuestsDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = commands;
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = prepare;
+
+  public readonly apply: CityDomain["apply"] = async () => {
     throw new GameError(errors.invalid, "city_progression");
-  },
-};
+  };
+}
+
+export const questsDomain: CityDomain = new QuestsDomain();

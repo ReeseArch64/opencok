@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import { createHash, randomInt, randomUUID } from "node:crypto";
 import { long, text } from "@opencok/contracts/rows";
@@ -12,7 +13,7 @@ import { rewardPreviewArray } from "@opencok/mappings/rewards";
 import { rechargeActivityLogin } from "@opencok/mappings/recharge-activity";
 import { grantNativeProgressionReward, pinProgressionReward } from "./progression-rewards";
 import type { RechargeActivityGateway } from "@opencok/contracts/recharge-activity";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
 function invalid(): never {
   throw new GameError(errors.invalid, "city_progression");
@@ -24,11 +25,20 @@ export function rechargeActivityOperationId(owner: string, eventId: string) {
   return `sercum:${createHash("sha256").update(`${owner}\0${eventId}`).digest("hex")}`;
 }
 
-export function createRechargeActivityDomain(gateway?: RechargeActivityGateway): CityDomain {
-  return {
-    commands: ["new.sercum.init", "new.sercum.ui", "new.sercum.reward", "new.sercum.paid"],
-    types: [],
-    async prepare(context, command, params) {
+export class RechargeActivityDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(gateway?: RechargeActivityGateway) {
+    super();
+
+    this.commands = ["new.sercum.init", "new.sercum.ui", "new.sercum.reward", "new.sercum.paid"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const state = context.state.rechargeActivity;
 
       if (!state) invalid();
@@ -172,9 +182,14 @@ export function createRechargeActivityDomain(gateway?: RechargeActivityGateway):
       context.write.rechargeActivity = { claims: [id] };
 
       return { response: encode({ id: sfs.string(id), reward: sfs.array(reward) }), event: null };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       invalid();
-    },
-  };
+    };
+  }
+}
+
+export function createRechargeActivityDomain(gateway?: RechargeActivityGateway): CityDomain {
+  return new RechargeActivityDomain(gateway);
 }

@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { encode, decode, sfs, fields, str, Type, type Fields } from "@opencok/messages/sfs";
 import { text, num } from "@opencok/contracts/rows";
 import {
@@ -7,12 +8,14 @@ import {
 } from "@opencok/rules/player-item-gifts";
 import { playerItemGiftView, playerItemGiftLogin } from "@opencok/mappings/player-item-gifts";
 import { inventoryChanges } from "@opencok/mappings/inventory";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export const playerItemGiftDomain: CityDomain = {
-  commands: ["item.send", "gift.init"],
-  types: [],
-  async prepare(context, command, params) {
+export class PlayerItemGiftDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["item.send", "gift.init"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.playerItemGifts;
 
     if (!state) playerItemGiftFailure();
@@ -84,11 +87,14 @@ export const playerItemGiftDomain: CityDomain = {
             })
           : null,
     };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     playerItemGiftFailure();
-  },
-};
+  };
+}
+
+export const playerItemGiftDomain: CityDomain = new PlayerItemGiftDomain();
 
 export async function publishPlayerItemGiftMutation(
   payload: Uint8Array,

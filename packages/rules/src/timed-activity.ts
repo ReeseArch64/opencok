@@ -3,6 +3,8 @@ import type {
   ProductionAccount,
   ProductionRate,
 } from "@opencok/contracts/timed-activity";
+import { TimedActivityAction } from "@opencok/enums/timed-activity-action";
+import { TimedActivityStatus } from "@opencok/enums/timed-activity-status";
 
 export const idleDeadline = 9223372036854775807n;
 
@@ -37,7 +39,7 @@ export function transitionActivity(
   activityInstant(now);
 
   if (
-    activity.status !== 0 ||
+    activity.status !== TimedActivityStatus.Active ||
     activity.version !== expectedVersion ||
     !Number.isSafeInteger(activity.version) ||
     activity.version >= 2147483647
@@ -59,7 +61,14 @@ export function transitionActivity(
     return { ...activity, dueAt, version: activity.version + 1 };
   }
 
-  return { ...activity, version: activity.version + 1, status: action === "finish" ? 1 : 2 };
+  return {
+    ...activity,
+    version: activity.version + 1,
+    status:
+      action === TimedActivityAction.Finish
+        ? TimedActivityStatus.Completed
+        : TimedActivityStatus.Cancelled,
+  };
 }
 
 export function validateProductionRate(rate: ProductionRate) {

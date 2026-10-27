@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { encode, decode, sfs, fields, str, int, Type, type Fields } from "@opencok/messages/sfs";
 import { text, num } from "@opencok/contracts/rows";
 import { allianceHeartFailure, allianceHeartRule } from "@opencok/rules/alliance-heart";
@@ -8,15 +9,22 @@ import {
   allianceHeartNotification,
 } from "@opencok/mappings/alliance-heart";
 import { GameError } from "@opencok/errors/game";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export function createAllianceHeartDomain(
-  connected: (uid: string) => boolean = () => false,
-): CityDomain {
-  return {
-    commands: ["heart.send", "heart.init"],
-    types: [],
-    async prepare(context, command, params) {
+export class AllianceHeartDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"];
+  public readonly types: CityDomain["types"];
+  public readonly prepare: CityDomain["prepare"];
+  public readonly apply: CityDomain["apply"];
+
+  public constructor(connected: (uid: string) => boolean = () => false) {
+    super();
+
+    this.commands = ["heart.send", "heart.init"];
+
+    this.types = [];
+
+    this.prepare = async (context, command, params) => {
       const state = context.state.allianceHeart;
 
       if (!state) allianceHeartFailure();
@@ -144,11 +152,18 @@ export function createAllianceHeartDomain(
             : {}),
         }),
       };
-    },
-    async apply() {
+    };
+
+    this.apply = async () => {
       allianceHeartFailure();
-    },
-  };
+    };
+  }
+}
+
+export function createAllianceHeartDomain(
+  connected: (uid: string) => boolean = () => false,
+): CityDomain {
+  return new AllianceHeartDomain(connected);
 }
 
 export async function publishAllianceHeartMutation(

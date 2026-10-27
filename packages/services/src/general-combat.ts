@@ -8,7 +8,7 @@ import {
 } from "@opencok/rules/general-progression";
 import { generalEffects, ownedGeneral, writeGeneral } from "./generals";
 import { defenseGeneral } from "./general-assignments";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function generalCombatSnapshot(
   context: CityProgressionContext,

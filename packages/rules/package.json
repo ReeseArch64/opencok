@@ -16,6 +16,7 @@
   "dependencies": {
     "@opencok/constants": "workspace:*",
     "@opencok/contracts": "workspace:*",
-    "@opencok/errors": "workspace:*"
+    "@opencok/errors": "workspace:*",
+    "@opencok/enums": "workspace:*"
   }
 }

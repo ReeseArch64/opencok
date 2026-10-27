@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { randomInt } from "node:crypto";
 import { encode, str } from "@opencok/messages/sfs";
 import { long, num, text } from "@opencok/contracts/rows";
@@ -8,12 +9,14 @@ import { temporaryEffect } from "@opencok/rules/player-effects";
 import { avatarActivationResponse } from "@opencok/mappings/city-cosmetics";
 import { cosmeticInteractionEvent } from "./city-cosmetics";
 import { CampaignPlanner } from "./local-campaign";
-import type { CityDomain } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
 
-export const avatarActivationDomain: CityDomain = {
-  commands: ["avatar.activate"],
-  types: [],
-  async prepare(context, _command, params) {
+export class AvatarActivationDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = ["avatar.activate"];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     const id = str(params, "avatarId"),
       rule = context.rules.power.statuses?.get(id),
       target = context.state.cosmeticTarget;
@@ -80,8 +83,11 @@ export const avatarActivationDomain: CityDomain = {
     const body = avatarActivationResponse(state, context.rules, plan.deleted[0]);
 
     return { response: encode(body), event: cosmeticInteractionEvent(context, body) };
-  },
-  async apply() {
+  };
+
+  public readonly apply: CityDomain["apply"] = async () => {
     campaignFailure();
-  },
-};
+  };
+}
+
+export const avatarActivationDomain: CityDomain = new AvatarActivationDomain();

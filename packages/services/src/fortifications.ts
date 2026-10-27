@@ -1,3 +1,5 @@
+import { TimedActivityAction } from "@opencok/enums/timed-activity-action";
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { recordTargetTask } from "./target-task";
 import { GameError } from "@opencok/errors/game";
 import { errors } from "@opencok/constants/game";
@@ -23,7 +25,8 @@ import {
   transferTroops,
 } from "@opencok/rules/military";
 import { idleDeadline } from "@opencok/rules/timed-activity";
-import { CityProgressionContext, type CityDomain } from "./city-progression";
+import { CityProgressionContext } from "./city-progression-context.ts";
+import type { CityDomain } from "./city-domain.ts";
 import { militaryBoolean } from "./training";
 
 export function fortificationCapacity(context: CityProgressionContext) {
@@ -155,16 +158,19 @@ async function apply(
   )
     throw new GameError(errors.queue, "city_progression");
 
-  if (troopQueueType(troopDefinition(context.rules, activity.itemId)) !== 2 || action === "start")
+  if (
+    troopQueueType(troopDefinition(context.rules, activity.itemId)) !== 2 ||
+    action === TimedActivityAction.Start
+  )
     throw new GameError(errors.invalid, "city_progression");
 
-  if (action === "restore" || action === "reschedule") {
+  if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule) {
     context.write.forts = [{ ...row, finishTime: activity.dueAt }];
 
     return { itemId: sfs.string(activity.itemId) };
   }
 
-  if (action === "cancel") {
+  if (action === TimedActivityAction.Cancel) {
     context.refund(data);
     context.write.forts = [{ ...row, build: 0, finishTime: 0n }];
 
@@ -174,9 +180,19 @@ async function apply(
   return complete(context, row, num(row, "build"));
 }
 
-export const fortificationDomain: CityDomain = {
-  commands: ["fort.build", "fort.cd", "fort.destory", "fort.destroy"],
-  types: [2],
-  prepare,
-  apply,
-};
+export class FortificationDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
+    "fort.build",
+    "fort.cd",
+    "fort.destory",
+    "fort.destroy",
+  ];
+
+  public readonly types: CityDomain["types"] = [2];
+
+  public readonly prepare: CityDomain["prepare"] = prepare;
+
+  public readonly apply: CityDomain["apply"] = apply;
+}
+
+export const fortificationDomain: CityDomain = new FortificationDomain();

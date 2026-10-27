@@ -6,7 +6,7 @@ import { long, num, text, type Row } from "@opencok/contracts/rows";
 import { cityCosmeticProjection } from "@opencok/rules/city-cosmetics";
 import { cityCosmeticFields, cityCosmeticUpdate } from "@opencok/mappings/city-cosmetics";
 import { playerItemGiftRecipient } from "@opencok/rules/player-item-gifts";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function cosmeticOwnership(
   context: CityProgressionContext,

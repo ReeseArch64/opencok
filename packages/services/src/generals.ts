@@ -1,3 +1,4 @@
+import { CityCommandDomain } from "./city-command-domain.ts";
 import { restoredResourceGenerals } from "./world-resource-generals";
 import { newGeneralPrestigeLevel } from "@opencok/rules/new-general-prestige";
 import { generalPrison, recoverGenerals } from "./general-recovery";
@@ -31,7 +32,8 @@ import {
 import { newGeneralSkillEffects } from "@opencok/rules/new-general-skills";
 import { newGeneralEquipmentEffects } from "@opencok/rules/new-general-equipment";
 import { newGeneral, generalPurchase, generalRefinement } from "@opencok/mappings/generals";
-import type { CityDomain, CityProgressionContext } from "./city-progression";
+import type { CityDomain } from "./city-domain.ts";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function generalRoster(context: CityProgressionContext) {
   return (
@@ -481,8 +483,8 @@ async function prepare(context: CityProgressionContext, command: string, params:
   };
 }
 
-export const generalsDomain: CityDomain = {
-  commands: [
+export class GeneralsDomain extends CityCommandDomain {
+  public readonly commands: CityDomain["commands"] = [
     "general.init",
     "newgeneral",
     "newgeneral.buy",
@@ -493,10 +495,15 @@ export const generalsDomain: CityDomain = {
     "general.def.ch",
     "general.pick",
     "general.recruit",
-  ],
-  types: [],
-  prepare,
-  async apply() {
+  ];
+
+  public readonly types: CityDomain["types"] = [];
+
+  public readonly prepare: CityDomain["prepare"] = prepare;
+
+  public readonly apply: CityDomain["apply"] = async () => {
     generalFailure();
-  },
-};
+  };
+}
+
+export const generalsDomain: CityDomain = new GeneralsDomain();

@@ -24,7 +24,7 @@ import {
   recruitGeneral,
   generalEffects,
 } from "./generals";
-import type { CityProgressionContext } from "./city-progression";
+import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function officeContext(context: CityProgressionContext) {
   const castle = context.state.buildings.find((row) => row.itemId === 400000);
