@@ -177,7 +177,8 @@
     "./comeback": "./src/comeback.ts",
     "./normal-recharge": "./src/normal-recharge.ts",
     "./world-use": "./src/world-use.ts",
-    "./world-birth": "./src/world-birth.ts"
+    "./world-birth": "./src/world-birth.ts",
+    "./world-terrain": "./src/world-terrain.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
