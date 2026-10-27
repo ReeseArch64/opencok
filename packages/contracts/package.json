@@ -205,7 +205,8 @@
     "./egg-activity": "./src/egg-activity.ts",
     "./world-march-inspection": "./src/world-march-inspection.ts",
     "./world-scout": "./src/world-scout.ts",
-    "./world-monster-refresh": "./src/world-monster-refresh.ts"
+    "./world-monster-refresh": "./src/world-monster-refresh.ts",
+    "./world-bulletins": "./src/world-bulletins.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

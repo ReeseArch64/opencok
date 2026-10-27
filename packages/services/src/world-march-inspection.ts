@@ -33,7 +33,11 @@ export async function inspectWorldMarch(
     phase = num(march, "state");
   if (
     ![0, 1, 2].includes(phase) ||
-    !((type === 0 && [0, 2, 3, 37].includes(targetType)) || (type === 13 && targetType === 1))
+    !(
+      (type === 0 && [0, 2, 3, 37].includes(targetType)) ||
+      (type === 1 && [1, 2, 3, 44].includes(targetType)) ||
+      (type === 13 && targetType === 1)
+    )
   )
     unavailable();
   const army = march.armyInfo ? decodeWorldMarchArmy(march.armyInfo as Buffer) : null;
