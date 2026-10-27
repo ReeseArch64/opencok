@@ -12,7 +12,7 @@ import { user_resource } from "@opencok/drizzle/schema/opencok_kingdom/user_reso
 import { user_item } from "@opencok/drizzle/schema/opencok_kingdom/user_item";
 import { createWorldMarchDomain } from "@opencok/services/world-march-runtime";
 import { createWorldInterest, dueWorldMarches } from "@opencok/repositories/world-march-runtime";
-import { sfs } from "@opencok/messages/sfs";
+import { sfs, Type } from "@opencok/messages/sfs";
 import { cityHarness } from "./support/city";
 
 async function worldHarness() {
@@ -235,6 +235,57 @@ test("unregistered ordinary marches import without reserving troops or paying co
     const [point] = await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 10));
     expect(point!.resCostValue).toBe(80);
     expect((await h.db.db.select().from(world_march_checkpoint))[0]!.status).toBe(1);
+  } finally {
+    await h.close();
+  }
+}, 120000);
+
+test("native march preflight is a shield and target-occupancy read without troops or overdue march settlement", async () => {
+  const h = await worldHarness();
+  try {
+    const empty = await h.command("world.march.check", { point: sfs.int(10) });
+    expect(empty.body.needBreakShield!.type).toBe(Type.Bool);
+    expect(empty.body.needBreakShield!.value).toBe(false);
+    expect(empty.body.marchTime).toBeUndefined();
+    expect(empty.body.armyLoad).toBeUndefined();
+    await h.start();
+    const [checkpoint] = await h.db.db.select().from(world_march_checkpoint);
+    h.clock.now = Number(checkpoint!.dueAt) + 7200000;
+    await expect(
+      h.command("world.march.check", { point: sfs.int(10), wantToFight: sfs.int(0) }),
+    ).rejects.toMatchObject({ code: "103730" });
+    await expect(
+      h.command("world.march.check", {
+        point: sfs.int(10),
+        wantToFight: sfs.int(0),
+        cityType: sfs.int(3),
+      }),
+    ).rejects.toMatchObject({ code: "108896" });
+    await h.command("world.march.check", { point: sfs.int(10), wantToFight: sfs.int(1) });
+    expect((await h.db.db.select().from(world_march_checkpoint))[0]).toEqual(checkpoint);
+    expect(
+      (await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 10)))[0]!.resCostValue,
+    ).toBe(0);
+    await h.db.db
+      .update(worldpoint)
+      .set({ pointType: 2, ownerId: "other", ownerMarchUUid: "foreign" })
+      .where(eq(worldpoint.id, 20));
+    await h.db.db
+      .update(worldpoint)
+      .set({ shieldTime: BigInt(h.clock.now + 60000) })
+      .where(eq(worldpoint.id, 1));
+    const camp = await h.command("world.march.check", { point: sfs.int(20) });
+    expect(camp.body.needBreakShield!.value).toBe(true);
+    expect(
+      (await h.db.db.select().from(user_army).where(eq(user_army.uid, "owner")))[0]!.free,
+    ).toBe(90);
+    await expect(
+      h.command("world.march", {
+        point: sfs.int(20),
+        type: sfs.int(0),
+        soldiers: sfs.object({ "107000": sfs.int(10) }),
+      }),
+    ).rejects.toThrow();
   } finally {
     await h.close();
   }

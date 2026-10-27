@@ -1,3 +1,4 @@
+import type { WorldMarchCheckResponse } from "@opencok/contracts/responses/world-march-runtime";
 import { num, long, text, type Row } from "@opencok/contracts/rows";
 import { decodeWorldMarchArmy } from "@opencok/messages/world-resource-army";
 import { sfs, Type, type Fields } from "@opencok/messages/sfs";
@@ -41,4 +42,8 @@ export function worldMarchDetail(
     actionSpeed: { type: Type.Float, value: Math.fround(Number(row.collectSpd ?? 0)) },
     actionMax: sfs.int(capacity),
   };
+}
+
+export function worldMarchCheck(response: WorldMarchCheckResponse): Fields {
+  return { needBreakShield: sfs.bool(response.needBreakShield) };
 }

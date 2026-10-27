@@ -112,12 +112,26 @@ export async function readWorldMutationState(
       : undefined;
   if (cityBosses && cityBosses.length > 1024)
     throw new Error("City fire source aggregate exceeds bound");
+  const [targetMarchCount] =
+    command === "world.march.check"
+      ? await tx
+          .select({ count: sql<number>`count(*)::integer` })
+          .from(world_march)
+          .where(
+            and(
+              eq(world_march.worldId, 0),
+              eq(world_march.targetId, int(params, "point", 0)),
+              inArray(world_march.state, [0, 1]),
+            ),
+          )
+      : [];
   return {
     world,
     points,
     marches,
     checkpoints,
     randomDestination,
+    targetMarchCount: targetMarchCount?.count,
     cityBosses,
     treasures: await readTreasureMaps(tx, owner),
   };
