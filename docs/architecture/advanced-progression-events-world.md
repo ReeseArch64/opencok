@@ -2221,3 +2221,28 @@ their Source backends and accepted-payment/reward paths are implemented. Combat
 resource battles (38) remain gated. Those remaining engines and native-device
 rendering are separate completion work; this section does not declare topics
 25–27 complete. No migration, dependency or environment variable is added.
+
+## Ordinary resource supply and dragon skill acceptance
+
+The source audit identified an absent ordinary world resource producer, despite
+existing gathering, return and search handlers. The maintained lifecycle and its
+precise remaining boundaries are recorded in
+[ordinary world resource creation and recovery](ordinary-world-resources.md).
+
+The audit also checked the source `PetDragonSkillService` material workflow.
+`petdragon.upgrade.skill` now validates the whole material selection and processes
+strengthening materials before ordinary experience materials, independent of
+client order. It retains unused ordinary materials when boosters already reach
+the cap and rejects an already capped target before consumption. Experience
+discarded at the final cap no longer inflates the skill's transferable total.
+Concurrent retries and reversed input order produce the same persisted result.
+
+The inspected public handler families include petdragon incubation, info,
+friendship, gifts, civilization unlock, active selection, feeding, level upgrades,
+travel, names and skills; dragon talents; civilization science; civilization
+castle placement, settlement, speed-up, movement and removal; and totem placement,
+recycling and status delivery. Existing tests establish those maintained slices,
+not full native acceptance. Tower battle outcomes, civilization garrison and
+robbery, battle-triggered talents and totem damage still require their validated
+combat integrations. Ordinary world refresh is a server-owned producer and adds
+no client command or alternate wire representation.

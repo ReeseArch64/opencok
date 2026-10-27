@@ -28,7 +28,7 @@ export async function publishWorldMutation(
     await publish(owner, name, fields(push.value.body));
   }
   const recipients = await interested(pointIds, owner, "");
-  for (const recipient of recipients) {
+  for (const recipient of recipients.filter(Boolean)) {
     for (const totem of (body.totems?.value ?? []) as { value: Fields }[])
       await publish(recipient, "push.totem.change.info", totem.value);
     for (const march of marches)

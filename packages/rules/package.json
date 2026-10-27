@@ -161,6 +161,7 @@
     "./hero-calendar": "./src/hero-calendar.ts",
     "./fragment-exchange": "./src/fragment-exchange.ts",
     "./monster-exchange": "./src/monster-exchange.ts",
+    "./world-resource-refresh": "./src/world-resource-refresh.ts",
     "./merge-campaign": "./src/merge-campaign.ts",
     "./hot-item": "./src/hot-item.ts",
     "./activity-operators": "./src/activity-operators.ts"
