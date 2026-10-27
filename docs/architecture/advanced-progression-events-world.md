@@ -3081,6 +3081,63 @@ weighted versus guaranteed scaling and bounded malformed inputs. Native TCP
 acceptance exercises active synthetic boards, real free-turn rewards, both rank
 commands and private-delivery denial in both realms. Native-device execution
 remains unverified. The separate `egg.act.*`/`egg.exp.reward`/`egg.rec.reward`
-EggActivityService and MonthlyCardService `mCard.reward` are concrete independent
-noncombat engines still requiring their own implementation and acceptance; this
-section does not declare topic26 complete from enum or panel coverage.
+EggActivityService is a concrete independent minigame requiring its own
+implementation and acceptance in the following section. MonthlyCardService
+`mCard.reward` belongs to the separate base commercial delivery and claim
+boundary. This section does not declare topic26 complete from enum or panel
+coverage.
+
+## Legacy egg activity
+
+The independent EggActivityService engine now supports native `egg.act.info`,
+`egg.act.open`, `egg.act.reward`, `egg.act.cd`, `egg.exp.reward` and
+`egg.goods.full`. It uses the maintained six-row `egg` catalog and the original
+inclusive dates in69007, August1–16,2016. That control is a date gate; its k1
+mail identity is not treated as a feature version. Closed info returns BOOL
+opened false without initializing an egg. Original dates remain unchanged.
+
+The owned existing `egg_activity` row stores the weighted current egg, actual
+cooldown, egg XP and XP tier. The chosen current egg opens free; switching to
+another declared egg charges its actual gold cost. Cooling eggs must finish
+before their real weighted reward can be granted. Early clearing retains Source
+whole-second truncation followed by ceiling division, including zero gold for a
+remaining fractional second, and moves readiness to three seconds before now.
+Committed retries preserve that cost, random reward, next egg and inventory.
+Actual gold spend and earned goods use the shared campaign observers. Egg XP is
+separate from player experience and does not fabricate a hero score producer.
+
+Only goods actually granted by an egg enter its owned `user_egg` collection.
+Completing the declared dark and question-mark set grants its real full-set prize
+and egg XP once. XP claims subtract the reached tier's threshold and advance up
+to the final tier; that final tier remains repeatable when enough actual XP has
+been earned. Native fields retain UTF egg and pipe-separated goods identities,
+INT XP and claim markers, and LONG cooldowns. Stored Long.MAX_VALUE maps to native
+minus one. Source state and collections persist across configured event windows;
+opening a new window does not invent a reset or a second full-set entitlement.
+
+The private login hook retains the Source post-closure settlement. An owned,
+valid, actually pending egg whose saved positive cooldown has matured can create
+one pinned claimable11724 system mail. Cooldown closure, mail, canonical receipt
+and `egg.activity.mail` outbox commit together. Competing logins and restarts
+cannot repeat the reward. This path does not grant egg XP, add collection entries,
+select another egg or scan historical purchases. An absent row, zero/default
+cooldown, future cooldown or missing valid date configuration cannot fabricate a
+pending egg. Invalid legacy state requires reconciliation with its original facts.
+The login hook is absent from native dispatch; ordinary claims close when their
+event window closes. Existing mail collection performs the actual eventual grant.
+
+Persistence stays within existing tables. Collections are bounded to32 rows and
+the schema's200-character goods field; catalog pools and full-set requirements
+are bounded before economic writes. Actor ownership, native types, deadlines,
+inventory, collection flags, XP, mail, receipts and outbox remain in the same
+fenced realm transaction. Back up those records together and retain them during
+rollback. No schema, dependency or environment setting is added. PostgreSQL tests
+exercise weighted grants, real debits, XP and full-set claims, concurrent retries,
+rollback, replacement authority, closed pending-mail recovery and its real mail
+claim. Unit tests retain historical boundaries and native scalar types; native
+TCP tests exercise info, actual opening, paid clearing and grants in both realms.
+MonthlyCardService `mCard.reward` consumes a distinct commercial card delivered
+by the original Type5 base purchase body. Its provider delivery and commercial
+claim remain outside this minigame migration; no card activation or paid grant is
+inferred from campaign payment observations. This section does not establish
+acceptance of unrelated combat modes or native-device execution.

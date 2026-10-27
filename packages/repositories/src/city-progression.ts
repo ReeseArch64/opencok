@@ -2,6 +2,7 @@ import { militaryRankAwardReader, writeMilitaryRankAward } from "./military-rank
 import { activityRewardReader, writeActivityReward } from "./activity-reward";
 import { user_branch_city_info } from "@opencok/drizzle/schema/opencok_kingdom/user_branch_city_info";
 import { redPacketReader, writeRedPackets } from "./red-packets";
+import { readEggActivity, writeEggActivity } from "./egg-activity";
 import { goldEggsReader, writeGoldEggs } from "./gold-eggs";
 import { readNormalRecharge, writeNormalRecharge } from "./normal-recharge";
 import { readComeback, writeComeback } from "./comeback";
@@ -226,6 +227,7 @@ export function createCityProgressionStore(
           ? worldMonsterReader(tx, mapSize)
           : undefined,
         campaignProfile:
+          command?.startsWith("egg.") ||
           command?.startsWith("goldeggs.") ||
           command?.startsWith("normal.recharge.") ||
           command?.startsWith("campaign.") ||
@@ -301,6 +303,7 @@ export function createCityProgressionStore(
           command === "pay.recharge.ui.state" || command === "feedback.paid"
             ? rechargeFeedbackReader(tx, owner)
             : undefined,
+        eggActivity: command?.startsWith("egg.") ? await readEggActivity(tx, owner) : undefined,
         goldEggs: command?.startsWith("goldeggs.")
           ? goldEggsReader(tx, owner, num(profile, "serverId"), now)
           : undefined,
@@ -468,6 +471,7 @@ export function createCityProgressionStore(
           await writeActivityReward(tx, owner, write.activityRewardClaim);
         if (write.rechargeFeedback)
           await writeRechargeFeedback(tx, owner, write.rechargeFeedback, now);
+        if (write.eggActivity) await writeEggActivity(tx, owner, write.eggActivity);
         if (write.goldEggs) await writeGoldEggs(tx, owner, write.goldEggs, now);
         if (write.normalRecharge) await writeNormalRecharge(tx, owner, write.normalRecharge, now);
         if (write.rechargeActivity) await writeRechargeActivity(tx, owner, write.rechargeActivity);

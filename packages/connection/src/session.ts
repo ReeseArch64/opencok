@@ -294,6 +294,7 @@ export function createSessionHandler(
               command.startsWith("hot.item.") ||
               command.startsWith("comeback.") ||
               command.startsWith("goldeggs.") ||
+              command.startsWith("egg.") ||
               command === "mail.reward" ||
               command === "mail.reward.batch" ||
               command === "shoppingMall.buy" ||
