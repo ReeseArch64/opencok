@@ -170,7 +170,8 @@
     "./city-defense": "./src/city-defense.ts",
     "./treasure-map": "./src/treasure-map.ts",
     "./world-city-geometry": "./src/world-city-geometry.ts",
-    "./military-rank-awards": "./src/military-rank-awards.ts"
+    "./military-rank-awards": "./src/military-rank-awards.ts",
+    "./player-experience": "./src/player-experience.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
