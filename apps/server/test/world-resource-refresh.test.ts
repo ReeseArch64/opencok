@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { loadRules } from "@opencok/resources/rules";
 import {
+  worldResourceAreaCount,
   worldResourceChoice,
   worldResourceDuration,
   worldResourceQuota,
@@ -58,4 +59,10 @@ test("resource creation applies native float capacity effects only to nongold no
   expect(
     worldResourceChoice(rules, group, { x: 600, y: 600 }, 1201, 3600000n, effects, false, () => 0),
   ).toBeUndefined();
+});
+
+test("normal resource regions retain the Source combined last-row and last-column area", () => {
+  expect(worldResourceAreaCount(rules, 1200)).toBe(576);
+  expect(worldResourceAreaCount(rules, 1201)).toBe(577);
+  expect(worldResourceAreaCount(rules, 100)).toBe(4);
 });

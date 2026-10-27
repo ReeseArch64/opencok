@@ -18,7 +18,7 @@ export function worldResourceDuration(rules: Rules, level: number, dead = false)
 }
 export function worldResourceAreaCount(rules: Rules, size: number) {
   const width = cityInteger(rules.items.get("worldmap_city")?.k6, 1);
-  return Math.ceil(size / width) ** 2;
+  return Math.floor(size / width) ** 2 + (size % width === 0 ? 0 : 1);
 }
 export function worldResourceQuota(rules: Rules) {
   const width = cityInteger(rules.items.get("worldmap_city")?.k6, 1),
