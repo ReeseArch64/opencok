@@ -52,6 +52,8 @@ export const reconnectMarchSchema = z.strictObject({
   territoryStartTime: field.long.optional(),
   territoryUpdateTime: field.long.optional(),
   occupyEndTime: field.long.optional(),
+  treasureMapTime: field.int.optional(),
+  treasureMapFinishTime: field.long.optional(),
   tct: field.long.optional(),
   exploreSt: field.long.optional(),
   exploreTime: field.long.optional(),

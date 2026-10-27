@@ -1,6 +1,6 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { treasure_map } from "@opencok/drizzle/schema/opencok_kingdom/treasure_map";
-import { num, text, long } from "@opencok/contracts/rows";
+import { num, text, long, type Row } from "@opencok/contracts/rows";
 import type { WorldMutationWrite } from "@opencok/contracts/world-march-runtime";
 import type { MutationTransaction } from "./mutation";
 
@@ -54,4 +54,41 @@ export async function writeTreasureMaps(
           inArray(treasure_map.uuid, [...write.deletedTreasures]),
         ),
       );
+}
+
+export async function withTreasureMarchTimes<T extends Row>(
+  db: Pick<MutationTransaction, "select">,
+  rows: readonly T[],
+): Promise<(T & { treasureMapTime?: number; treasureMapFinishTime?: bigint })[]> {
+  const selected = rows.filter(
+    (row) => num(row, "type") === 0 && num(row, "state") === 1 && num(row, "targetType") === 2,
+  );
+  if (!selected.length) return [...rows];
+  const maps = await db
+    .select()
+    .from(treasure_map)
+    .where(
+      and(
+        eq(treasure_map.state, 1),
+        inArray(treasure_map.currentOwner, [
+          ...new Set(selected.map((row) => text(row, "ownerUid"))),
+        ]),
+        inArray(
+          treasure_map.marchId,
+          selected.map((row) => text(row, "uuid")),
+        ),
+      ),
+    )
+    .orderBy(asc(treasure_map.uuid))
+    .limit(32768);
+  const indexed = new Map<string, (typeof maps)[number]>();
+  for (const row of maps) {
+    const key = `${row.currentOwner}:${row.marchId}`;
+    if (indexed.has(key)) throw new Error("Ambiguous treasure march identity");
+    indexed.set(key, row);
+  }
+  return rows.map((row) => {
+    const map = indexed.get(`${row.ownerUid}:${row.uuid}`);
+    return map ? { ...row, treasureMapTime: map.time, treasureMapFinishTime: map.finishTime } : row;
+  });
 }

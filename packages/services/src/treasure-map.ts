@@ -1,3 +1,5 @@
+import { speedTreasureMarch, worldMarchMutationEvent } from "./world-march-runtime";
+import { treasureMapSpeed } from "@opencok/mappings/treasure-map";
 import { randomInt, randomUUID } from "node:crypto";
 import { num, type Row } from "@opencok/contracts/rows";
 import { encode, sfs, str, type Fields } from "@opencok/messages/sfs";
@@ -93,7 +95,12 @@ async function generate(
   });
   return { treasureMap: sfs.array(created.map((row) => sfs.object(treasureMapView(row)))) };
 }
-export const treasureMapCommands = ["treasuremap.init", "treasuremap.get", "treasuremap.destroy"];
+export const treasureMapCommands = [
+  "treasuremap.init",
+  "treasuremap.get",
+  "treasuremap.destroy",
+  "treasuremap.spd",
+];
 export function createTreasureMapDomain(size: number): CityDomain {
   return {
     commands: treasureMapCommands,
@@ -116,6 +123,13 @@ export function createTreasureMapDomain(size: number): CityDomain {
           response: encode(await generate(context, size, str(params, "itemid"))),
           event: null,
         };
+      if (command === "treasuremap.spd") {
+        const gold = speedTreasureMarch(context, str(params, "marchid"));
+        return {
+          response: encode(treasureMapSpeed({ gold })),
+          event: encode(worldMarchMutationEvent(context, params)),
+        };
+      }
       if (command !== "treasuremap.destroy") worldMutationFailure();
       const id = str(params, "treasureuuid"),
         row = treasureMapRoster(context).find((row) => row.uuid === id && num(row, "state") === 0);

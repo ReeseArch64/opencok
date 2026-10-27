@@ -58,9 +58,11 @@ function validate(state: MarchLifecycle, owner: string, version: number, now: bi
     const elapsed = state.dueAt - state.startedAt;
     if (elapsed > BigInt(limit)) invalid();
   }
-  if (state.purpose !== undefined && state.purpose !== "trouble") invalid();
+  if (state.purpose !== undefined && state.purpose !== "trouble" && state.purpose !== "treasure")
+    invalid();
   if (state.purpose === "trouble" && (state.phase === "gathering" || state.cargo !== null))
     invalid();
+  if (state.purpose === "treasure" && state.cargo !== null) invalid();
   troops(state.troops, state.purpose === "trouble");
   cargo(state.cargo);
   if (!["outbound", "gathering", "returning", "completed"].includes(state.phase)) invalid();
@@ -162,7 +164,13 @@ export function returnFromGathering(
 ): MarchTransition {
   validate(state, owner, version, now);
   cargo(gathered);
-  if (state.phase !== "gathering" || now < state.dueAt || state.cargo !== null) invalid();
+  if (
+    state.purpose === "treasure" ||
+    state.phase !== "gathering" ||
+    now < state.dueAt ||
+    state.cargo !== null
+  )
+    invalid();
   return transition(state, {
     phase: "returning",
     startedAt: state.dueAt,

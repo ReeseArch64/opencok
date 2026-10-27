@@ -78,7 +78,14 @@ export async function readQuests(
 }
 export async function writeQuests(tx: MutationTransaction, owner: string, write: QuestWrite) {
   for (const message of write.mail ?? [])
-    await insertSystemMail(tx, message, owner, message.uid.slice(0, 32), message.createTime);
+    await insertSystemMail(
+      tx,
+      message,
+      owner,
+      message.uid.slice(0, 32),
+      message.createTime,
+      message.itemIdFlag ?? 1,
+    );
   for (const rows of [write.tasks, write.story, write.daily])
     for (const row of rows ?? []) {
       if (
