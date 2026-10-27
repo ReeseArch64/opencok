@@ -1622,3 +1622,56 @@ delivery. Schema contracts and snapshots passed 1,687 tests with 49,629 assertio
 and 839 snapshots. Physical schemas and upgrades passed 1,537 tests with 37,033
 assertions. Required lint, formatting, kingdom migration consistency and
 server/nine package type checks passed. Device execution remains unverified.
+
+## Confirmed consumption ranking publication
+
+Consumption competition now publishes the best hundred confirmed spenders per
+owned realm to a canonical shared PostgreSQL board. Actual negative economy
+postings prove each immutable spending frame. The wallet mutation, operation
+receipt, ledger, outbox, spending fact and absolute aggregate commit together.
+Nickname changes use their existing committed payment reservation as their
+financial witness; refunded reservations produce no competitive spending.
+A bounded startup backfill accepts older outbox frames only with the matching
+operation receipt or committed nickname payment. Raw legacy activity totals
+remain local because they do not establish a confirmed debit.
+
+The period identity fixes start, end and resource type. Shared registration also
+pins its reward bands and configured participating realms on first admission.
+Later feature, reward or configuration edits cannot replace that census.
+Publication uses absolute values and fenced ownership sequences. Retries cannot
+increment totals, overwrite a foreign realm's member or advance after a failed
+shared write. Every financial value retains its signed 64-bit integer precision.
+The board sorts descending spend with ascending member identity on ties, avoiding
+the source comparator's overflowing integer subtraction. Public entries retain
+the native field types, order and current consumption privacy preference.
+
+The public consumption query uses this board for registered periods and retains
+the legacy cache fallback for periods without a registered owned projection.
+Payment ranking retains its existing reader. Publication drains up to four
+64-frame migration pages and eight period manifests per refresh; after the
+startup tail is exhausted, new spending is captured by its original transaction.
+The one-second worker needs no new configuration or dependencies. Automatic
+ranking closure and its funded prizes are the following module.
+
+Apply global migration `0019_continued_cost_ranking` and kingdom migration
+`0039_continued_cost_facts` before this binary. They add six tables and an outbox
+source index, preserving existing fields and legacy totals. Inventory becomes
+845 tables and 6,895 fields: 150 global and 695 kingdom tables. Back up immutable
+spending facts, aggregates, manifests, ownership versions, original payment
+witnesses, receipts and outbox together. Retain them during binary rollback.
+Deleting a fact independently can make its original frame eligible for recovery
+again. Existing unverified totals must not be imported as financial evidence.
+
+Nine PostgreSQL acceptance cases passed with 61 assertions, including values
+above JavaScript's safe integer range, transaction rollback, first-bound census,
+foreign identity rejection, a 65-frame recovery tail, period rollover, sealed
+score preservation and committed versus refunded nickname payments. Thirty-five
+nickname and spending regression cases passed with 358 assertions. The server
+unit suite passed 1,486 tests with 245,144 assertions. Native TCP and process-kill
+recovery passed two cases with 249 assertions; a real nickname debit appeared
+exactly once in both realms' native consumption board. All fourteen critical
+authentication and timed-economy mutations were killed. Schema contracts and
+snapshots passed 1,699 tests with 49,977 assertions and 845 snapshots. Physical
+schema and upgrade checks passed 1,546 tests with 37,283 assertions. Required
+lint, formatting, both migration consistency checks and server/nine package type
+checks passed. Device execution remains unverified.

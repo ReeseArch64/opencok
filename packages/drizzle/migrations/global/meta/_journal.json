@@ -134,6 +134,13 @@
       "when": 1793047594937,
       "tag": "0018_expedition_stage_finality",
       "breakpoints": false
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793049532095,
+      "tag": "0019_continued_cost_ranking",
+      "breakpoints": false
     }
   ]
 }

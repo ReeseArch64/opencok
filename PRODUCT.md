@@ -151,6 +151,16 @@ states and equipment sets contribute through one effect calculation; changes
 preserve production earned before the change. Workshop completion delivers items
 and advances its waiting list atomically.
 
+### Consumption competitions
+
+Consumption rankings use confirmed debits and exact signed 64-bit amounts.
+Equal totals use ascending player identity. Arithmetic overflow in a legacy
+ranking helper must not reverse earned positions. Previews, income, client
+counters and unverified legacy totals do not establish competitive spending.
+The player's native kingdom-visibility choice remains part of each published
+entry. Final prizes require a closed participant cohort and durable entitlements;
+repeating delivery or claiming a funded mail cannot grant the same assets again.
+
 ## Mobile client transition
 
 Keep the validated Elex APK as the transitional mobile client while the backend
