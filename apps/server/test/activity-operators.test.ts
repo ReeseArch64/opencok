@@ -202,3 +202,33 @@ test("group-buy operators use the matching saved round and reject corrupt or amb
     ).some((entry) => entry.id === 5),
   ).toBe(false);
 });
+
+test("today-sale and overseas panels retain their separate backend gates and actual opening deadline", async () => {
+  const rules = await loadRules(),
+    snapshot = operatorSnapshot();
+  rules.advanced.activityPages = new Map([
+    ["sale", { id: "24", Type: "24" }],
+    ["overseas", { id: "26", Type: "26" }],
+  ]);
+  expect(activityOperators(rules, snapshot, context)).toEqual([]);
+  rules.configuration.payControl!.set("69026", {
+    k1: "3.9.0",
+    k2: "all",
+    k4: "0",
+    k5: "2016-01-01-00-00",
+    k6: "2016-01-02-00-00",
+  });
+  rules.configuration.payControl!.set("69027", { k1: "3.9.0", k2: "all", k6: "7" });
+  expect(activityOperators(rules, snapshot, context)).toEqual([
+    { id: 24, endTime: 0n },
+    { id: 26, endTime: (BigInt(operatorsNow) + 6n * 86400000n) / 1000n },
+  ]);
+  for (const activityTime of [0n, BigInt(operatorsNow) + 1n, BigInt(operatorsNow) - 7n * 86400000n])
+    expect(activityOperators(rules, { ...snapshot, server: { activityTime } }, context)).toEqual([
+      { id: 24, endTime: 0n },
+    ]);
+  rules.configuration.payControl!.set("69026", { k1: "13.0.0", k2: "all" });
+  expect(activityOperators(rules, snapshot, context).map((row) => row.id)).toEqual([26]);
+  rules.configuration.payControl!.set("69027", { k1: "3.9.0", k2: "close", k6: "7" });
+  expect(activityOperators(rules, snapshot, context)).toEqual([]);
+});

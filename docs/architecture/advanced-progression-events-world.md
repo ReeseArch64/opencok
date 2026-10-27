@@ -2673,9 +2673,8 @@ fields remain intact, and saved long clocks do not pass through JavaScript numbe
 conversion before the Source division by 1000.
 
 This projection does not substitute regional recall for the separate legacy
-`comeback` engine. Normal accumulated recharge (type 20), today-sale (24) and overseas trade (26)
-remain outside this first projection until
-their Source backends and accepted-payment/reward paths are implemented. Combat
+`comeback` engine. Normal accumulated recharge (type 20) remains outside this first projection until
+its Source backend and accepted-payment/reward path are implemented. Combat
 resource battles (38) remain gated. Those remaining engines and native-device
 rendering are separate completion work; this section does not declare topics
 25–27 complete. No migration, dependency or environment variable is added.
@@ -2758,3 +2757,22 @@ it neither enrolls nor replaces historical panel dates. Migration0043 adds the
 metadata, schema inventory, SQL snapshot and physical PostgreSQL verification.
 No external dependency or environment setting is added. This module does not
 establish native-device rendering or completion of topics25–27.
+
+## Today-sale and overseas operator pages
+
+The Source audit identifies TODAY_SALE24 as the existing `SpecialEventToday`
+backend, served by `special.ui.state` and the authoritative special-sale stock and
+accepted-payment reservation path. Its operator entry uses only the69026 version
+and realm control and returns LONG endTime zero. The sale's own fixed dates and
+purchase/stock gates remain in that backend, preserving the Source distinction
+between its navigation entry and actionable inventory.
+
+OVERSEAS_TRADE26 projects the existing `ShippingTradeInvest` backend, served by
+`shipping.trade.invest.ui` and `shipping.trade.invest.reward`. Its operator deadline
+uses the positive, nonfuture persisted realm opening plus69027.k6days, with a
+strict end boundary. The investment backend retains its separate Source version
+and realm gate, sequential persisted tiers, active VIP requirement, actual gold
+stake, pinned weighted return and atomic receipt. Completing a tier does not
+remove the Source navigation entry early. Historical dates and closed production
+controls remain intact. Neither projection adds a payment claim route, mutation,
+schema, dependency or environment setting.
