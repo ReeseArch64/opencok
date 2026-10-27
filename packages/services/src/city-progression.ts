@@ -130,6 +130,7 @@ export function createCityProgressionHandlers<T>(
             uuid,
           ),
         repository.treasurePoints,
+        repository.birthPoint,
       ),
     };
   };
@@ -271,6 +272,10 @@ export class CityProgressionContext {
     readonly effect: (id: number) => number,
     readonly generalEffect: (id: number, buildingId?: number, uuid?: string) => number = () => 0,
     readonly treasurePoints?: (ids: readonly number[]) => Promise<readonly Row[]>,
+    readonly birthPoint?: (
+      rules: import("@opencok/contracts/world-birth").WorldBirthRules,
+      mode?: import("@opencok/contracts/world-birth").WorldBirthMode,
+    ) => Promise<import("@opencok/contracts/world-birth").WorldBirthPlacement>,
   ) {}
   get owner() {
     return text(this.state.profile, "uid");

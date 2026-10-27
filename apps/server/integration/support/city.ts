@@ -166,7 +166,7 @@ export async function cityHarness(
     };
     const handlers = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, at) =>
-        createCityProgressionStore(tx, owner, at, boundary),
+        createCityProgressionStore(tx, owner, at, boundary, 1200, authority),
       [constructionDomain, ...extra],
       rules,
       effects,

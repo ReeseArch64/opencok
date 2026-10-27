@@ -19,7 +19,6 @@ export interface WorldMutationState {
   cityBosses?: readonly Row[];
   cityFootprint?: readonly number[];
   civilizationFootprint?: readonly number[];
-  randomDestination?: number;
   world: Row;
   points: readonly Row[];
   marches: readonly Row[];

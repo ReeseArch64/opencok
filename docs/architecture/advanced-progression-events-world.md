@@ -2975,11 +2975,18 @@ move notifications and point invalidations commit through the existing outbox.
 This route remains available when new ordinary march admission is disabled.
 
 Source recreation uses the initial birth placement path on space grid type
-two. The saved birth priorities differ from ordinary random teleport selection. The initial implementation
-restores this placement and lifecycle; Source `WorldBornManager` phased
-`resdential` priorities and shared initial provisioning distribution are a
-separate persistence followup. Existing imported cities are not relocated by this
+two. The saved birth priorities differ from ordinary random teleport selection. The [resident birth allocator](resident-world-birth.md) persists Source
+`WorldBornManager` phased `resdential` priorities and shares the placement
+distribution with initial provisioning and random relocation. Existing imported cities are not relocated by this
 command. PostgreSQL acceptance covers zero-point ownership, retry conservation,
 reserved terrain, wall and shield restoration, native fields, recovered troops
 and unavailable footprints. Cross-battle recreation retains its separate realm
 and target-engine dependencies. No schema or dependency is added.
+
+The native birth terrain gate is `GridType.SPACE` (2), confirmed by
+`WorldPoint.selectFreeBornPoints` and `selectAllFreeBornPoints`. Both initial
+character provisioning and recreation use this gate. Neutral grid type 0 does
+not admit a new resident city. Existing imported cities retain their actual
+terrain and identity. PostgreSQL provisioning acceptance first supplies only
+neutral tiles and verifies that no character is created, then enables space
+tiles and exercises normal receipt, rollback and ownership recovery.

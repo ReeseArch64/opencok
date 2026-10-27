@@ -1,3 +1,4 @@
+import { seedSyntheticWorldBirth } from "./support/world-birth";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
@@ -82,10 +83,18 @@ test("a killed realm recovers the same march and publishes native transitions on
         resLevel: 0,
         resInitValue: 0,
         pointType: 0,
-        gridType: 0,
+        bornAreaId: (id - 1) % 100 < 60 ? 1 : 4,
+        gridType: 2,
         grid2Type: 0,
       })),
     );
+    rules.world.residential = new Map(
+      Array.from({ length: 98 }, (_, index) => [
+        String(43000 + index),
+        { id: String(43000 + index), area_id: index === 0 ? "1" : "4" },
+      ]),
+    );
+    await seedSyntheticWorldBirth(realm.db, authority, rules, 0);
     for (const subject of ["owner", "near", "far"]) {
       const identity = { issuer: "https://securetoken.google.com/synthetic-world", subject },
         input = {
@@ -142,6 +151,7 @@ test("a killed realm recovers the same march and publishes native transitions on
       pointType: 3,
       resLevel: 1,
       resInitValue: 5,
+      flushTime: BigInt(Date.now()) + 21600000n,
       resCostValue: 0,
       pointItem: "0",
       ownerId: "",

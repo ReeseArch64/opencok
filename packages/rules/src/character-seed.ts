@@ -1,3 +1,4 @@
+import { worldBirthRules } from "./world-birth";
 import { randomUUID } from "node:crypto";
 import type { CharacterReservation, CharacterSeed } from "@opencok/contracts/provisioning";
 import { starterVersion } from "@opencok/contracts/provisioning";
@@ -133,6 +134,7 @@ export function characterSeed(input: CharacterReservation, rules: Rules): Charac
   const vipScore = integer(rules.items.get("vip")?.k1);
 
   return {
+    birth: worldBirthRules(rules),
     profile: {
       uid,
       name: input.name,
