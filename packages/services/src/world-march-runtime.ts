@@ -1,4 +1,14 @@
 import { scoutWatchtowerValues } from "@opencok/rules/world-scout-watchtower";
+import {
+  scoutSoldierLimit,
+  scoutArmySpeed,
+  scoutExpeditionEffect,
+  scoutDeparture,
+  scoutDepartureProgress,
+  scoutRoute,
+  scoutArrival,
+  scoutTarget,
+} from "./world-scout-runtime";
 import { worldBirthRules } from "@opencok/rules/world-birth";
 import {
   startTreasureExcavation,
@@ -33,6 +43,7 @@ import {
   encodeWorldMarchArmy,
   decodeWorldMarchArmy,
   isMaintainedMarchArmy,
+  decodeWorldMarchSpeedEffects,
   type SavedMarchArmy,
 } from "@opencok/messages/world-resource-army";
 import type { RuntimeMarch } from "@opencok/contracts/world-march-runtime";
@@ -70,15 +81,22 @@ function troubleDetectSpeed(context: CityProgressionContext) {
 }
 function checkpoint(state: RuntimeMarch) {
   return encode({
-    ...(state.purpose === "trouble"
-      ? { purpose: sfs.string(state.purpose), troubleItem: sfs.string(state.troubleItem!) }
-      : state.purpose === "treasure"
-        ? {
-            purpose: sfs.string(state.purpose),
-            treasureUUID: sfs.string(state.treasureUUID!),
-            ...(state.treasureReward ? { treasureReward: sfs.string(state.treasureReward) } : {}),
-          }
-        : {}),
+    ...(state.purpose === "scout"
+      ? {
+          purpose: sfs.string("scout"),
+          scoutHonour: sfs.bool(state.scoutHonour ?? false),
+          scoutTargetOwner: sfs.string(state.scoutTargetOwner ?? ""),
+          scoutReport: sfs.string(state.scoutReport ?? ""),
+        }
+      : state.purpose === "trouble"
+        ? { purpose: sfs.string(state.purpose), troubleItem: sfs.string(state.troubleItem!) }
+        : state.purpose === "treasure"
+          ? {
+              purpose: sfs.string(state.purpose),
+              treasureUUID: sfs.string(state.treasureUUID!),
+              ...(state.treasureReward ? { treasureReward: sfs.string(state.treasureReward) } : {}),
+            }
+          : {}),
     ...(state.sharedReward !== undefined
       ? {
           sharedReward: sfs.string(state.sharedReward),
@@ -135,19 +153,27 @@ function restore(raw: Row): RuntimeMarch {
   );
   const cargo = data.cargo?.type === Type.Object ? fields(data.cargo) : null;
   const purpose = str(data, "purpose", "");
-  if (purpose && purpose !== "trouble" && purpose !== "treasure") worldMutationFailure();
+  if (purpose && purpose !== "trouble" && purpose !== "treasure" && purpose !== "scout")
+    worldMutationFailure();
   const state: RuntimeMarch = {
-    ...(purpose === "trouble"
-      ? { purpose, troubleItem: str(data, "troubleItem") }
-      : purpose === "treasure"
-        ? {
-            purpose,
-            treasureUUID: str(data, "treasureUUID"),
-            ...(str(data, "treasureReward", "")
-              ? { treasureReward: str(data, "treasureReward") }
-              : {}),
-          }
-        : {}),
+    ...(purpose === "scout"
+      ? {
+          purpose,
+          scoutHonour: data.scoutHonour?.value === true,
+          scoutTargetOwner: str(data, "scoutTargetOwner", ""),
+          scoutReport: str(data, "scoutReport", ""),
+        }
+      : purpose === "trouble"
+        ? { purpose, troubleItem: str(data, "troubleItem") }
+        : purpose === "treasure"
+          ? {
+              purpose,
+              treasureUUID: str(data, "treasureUUID"),
+              ...(str(data, "treasureReward", "")
+                ? { treasureReward: str(data, "treasureReward") }
+                : {}),
+            }
+          : {}),
     ...(data.sharedReward
       ? {
           sharedReward: str(data, "sharedReward"),
@@ -633,15 +659,120 @@ function returnState(context: CityProgressionContext, state: RuntimeMarch, now: 
   }).march;
   return { ...state, ...returned };
 }
-export function recoverWorldMarches(context: CityProgressionContext) {
+export function recoverWorldMarches(
+  context: CityProgressionContext,
+  size = context.state.worldMutation?.mapSize ?? 1200,
+) {
   const indexed = new Map(
     (context.state.worldMutation?.checkpoints ?? []).map((row) => [text(row, "id"), row]),
   );
   for (const row of context.write.worldMutation?.checkpoints ?? [])
     indexed.set(text(row, "id"), row);
   const records = [...indexed.values()].filter((row) => num(row, "status") === 0);
+  const nativeScouts = marchRows(context).filter((row) => num(row, "type") === 1);
+  if (nativeScouts.some((row) => !records.some((record) => record.id === row.uuid))) {
+    const reserved = new Map<string, number>();
+    for (const row of nativeScouts) {
+      const army = row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null;
+      if (!army || army.owner !== context.owner) worldMutationFailure();
+      for (const unit of army.soldiers ?? []) {
+        if (!unit.armsId || unit.owner !== context.owner || unit.dead !== 0) worldMutationFailure();
+        reserved.set(
+          unit.armsId,
+          cityInteger((reserved.get(unit.armsId) ?? 0) + cityInteger(unit.total, 1), 1),
+        );
+      }
+    }
+    for (const [armyId, quantity] of reserved)
+      if (
+        !balances(context).some((balance) => balance.armyId === armyId && balance.march >= quantity)
+      )
+        worldMutationFailure();
+  }
   for (const row of marchRows(context)) {
     if (records.some((record) => record.id === row.uuid)) continue;
+    if (num(row, "type") === 1) {
+      const army = row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null;
+      if (
+        !army ||
+        army.owner !== context.owner ||
+        (army.soldiers?.length ?? 0) > 128 ||
+        ![0, 2].includes(num(row, "state"))
+      )
+        worldMutationFailure();
+      const quantities = new Map<string, number>();
+      for (const unit of army.soldiers ?? []) {
+        if (unit.owner !== context.owner || unit.dead !== 0 || !unit.armsId) worldMutationFailure();
+        quantities.set(
+          unit.armsId,
+          cityInteger((quantities.get(unit.armsId) ?? 0) + cityInteger(unit.total, 1), 1),
+        );
+      }
+      const troops = [...quantities].map(([armyId, quantity]) => ({ armyId, quantity }));
+      for (const unit of troops)
+        if (
+          !balances(context).some(
+            (balance) => balance.armyId === unit.armyId && balance.march >= unit.quantity,
+          )
+        )
+          worldMutationFailure();
+      const savedSpeeds = decodeWorldMarchSpeedEffects(row.armyInfo as Buffer);
+      const legacySpeed = (id: string) => {
+        const effect = savedSpeeds?.get(id);
+        if (effect === undefined) return scoutArmySpeed(context, id);
+        const speed = Math.fround(
+          Math.fround(
+            Math.fround(Number(context.rules.arms.get(id)?.speed)) *
+              Math.fround(Math.max(100 + effect, 20)),
+          ) / 100,
+        );
+        if (!Number.isFinite(speed) || speed <= 0) worldMutationFailure();
+        return speed;
+      };
+      const phase = num(row, "state") === 0 ? "outbound" : "returning";
+      const startedAt =
+        phase === "outbound" ? long(row, "marchStartTime") : long(row, "returnStartTime");
+      const dueAt = long(row, "arrivalTime") || long(row, "marchArrivalTime");
+      if (
+        startedAt < 0n ||
+        dueAt < startedAt ||
+        startedAt > context.now ||
+        dueAt - startedAt > 2147483647n ||
+        text(row, "plunderRes")
+      )
+        worldMutationFailure();
+      const state: RuntimeMarch = {
+        purpose: "scout",
+        id: text(row, "uuid"),
+        owner: context.owner,
+        worldId: 0,
+        origin: num(row, "ownerId"),
+        target: num(row, "targetId"),
+        targetType: num(row, "targetType"),
+        targetResource: 0,
+        scoutHonour: num(row, "honourWatchtower") > 0,
+        scoutTargetOwner: text(row, "targetUid"),
+        version: 1,
+        phase,
+        startedAt,
+        dueAt,
+        returnDuration: BigInt(Math.max(1, num(row, "marchTime"))),
+        troops,
+        cargo: null,
+        capacity: 0,
+        collectRate: 0,
+        marchSpeed: troops.length ? Math.min(...troops.map((unit) => legacySpeed(unit.armyId))) : 1,
+        troopIds: Object.fromEntries(troops.map((unit) => [unit.armyId, unit.armyId])),
+        segments: text(row, "blackLandMarchTime")
+          ? JSON.parse(text(row, "blackLandMarchTime"))
+          : [],
+      };
+      saveMarch(context, state, row);
+      records.push(
+        context.write.worldMutation!.checkpoints!.find((record) => record.id === state.id)!,
+      );
+      continue;
+    }
     const treasure =
       num(row, "type") === 0 && num(row, "targetType") === 2 && num(row, "state") === 1
         ? treasureMapRoster(context).find(
@@ -875,7 +1006,9 @@ export function recoverWorldMarches(context: CityProgressionContext) {
     ) {
       if (state.phase === "outbound") {
         const target = point(context, state.target);
-        if (state.purpose === "treasure") {
+        if (state.purpose === "scout") {
+          state = scoutArrival(context, state, scoutTarget(context, state.target), size);
+        } else if (state.purpose === "treasure") {
           const excavation = startTreasureExcavation(context, state, target, original);
           if (!excavation) {
             state = {
@@ -1129,7 +1262,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
           event: null,
         };
       }
-      recoverWorldMarches(context);
+      recoverWorldMarches(context, size);
       const push = () => worldMarchMutationEvent(context, params);
       const reply = (body: Fields, event = true) => ({
         response: encode(body),
@@ -1186,6 +1319,8 @@ export function createWorldMarchDomain(size: number): CityDomain {
           target = point(context, targetId),
           world = context.state.worldMutation.world,
           shared = num(target, "pointType") === 37,
+          scout = int(params, "type") === 1,
+          scouting = scout ? scoutDeparture(context, targetId) : undefined,
           trouble = int(params, "type") === 13,
           selectedItem = trouble ? context.economy.ownedItem?.(str(params, "itemUuid")) : undefined,
           treasure =
@@ -1204,14 +1339,22 @@ export function createWorldMarchDomain(size: number): CityDomain {
             ? num(target, "pointType") !== 1 ||
               !text(target, "ownerId") ||
               text(target, "ownerId") === context.owner
-            : int(params, "type") !== 0 ||
-              (!treasure && ![3, 37].includes(num(target, "pointType"))) ||
-              (!shared && Boolean(text(target, "ownerMarchUUid") || text(target, "ownerId"))) ||
-              (!treasure && num(target, "resInitValue") <= num(target, "resCostValue")))
+            : scout
+              ? false
+              : int(params, "type") !== 0 ||
+                (!treasure && ![3, 37].includes(num(target, "pointType"))) ||
+                (!shared && Boolean(text(target, "ownerMarchUUid") || text(target, "ownerId"))) ||
+                (!treasure && num(target, "resInitValue") <= num(target, "resCostValue")))
         )
           worldMutationFailure();
         const companions = selectMarchCompanions(context, params, marchRows(context));
-        if (marchRows(context).length >= Math.max(1, Math.trunc(1 + context.effect(55))))
+        if (
+          marchRows(context).length >=
+          Math.max(
+            1,
+            1 + Math.trunc(context.effect(55)) + (scout ? scoutExpeditionEffect(context, 908) : 0),
+          )
+        )
           worldMutationFailure();
         const soldiers = params.soldiers ? fields(params.soldiers) : {},
           troops: { armyId: string; quantity: number }[] = [],
@@ -1234,7 +1377,10 @@ export function createWorldMarchDomain(size: number): CityDomain {
           troops.push({ armyId: id, quantity });
           troopIds[id] = id;
           total += quantity;
-          marchSpeed = Math.min(marchSpeed, Math.fround(Number(rule.speed)));
+          marchSpeed = Math.min(
+            marchSpeed,
+            scout ? scoutArmySpeed(context, id) : Math.fround(Number(rule.speed)),
+          );
           army.soldiers!.push({
             owner: context.owner,
             armsId: id,
@@ -1247,15 +1393,16 @@ export function createWorldMarchDomain(size: number): CityDomain {
         }
         const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
         if (!castle) worldMutationFailure();
-        const max =
-          Number(
-            context.rules
-              .building("400000", num(castle, "level"))
-              .clientParameters?.[0]?.value.split(";")[0] ?? 0,
-          ) + context.effect(56);
-        if ((!troops.length && !trouble) || total > max) worldMutationFailure();
+        const max = scout
+          ? scoutSoldierLimit(context)
+          : Number(
+              context.rules
+                .building("400000", num(castle, "level"))
+                .clientParameters?.[0]?.value.split(";")[0] ?? 0,
+            ) + context.effect(56);
+        if ((!troops.length && !trouble && !scout) || total > max) worldMutationFailure();
         if (!troops.length) marchSpeed = 1;
-        const resource = trouble || treasure ? 0 : cityInteger(target.pointItem, 0, 5);
+        const resource = scout || trouble || treasure ? 0 : cityInteger(target.pointItem, 0, 5);
         const raw = resourceRawArmyLoad(
           {
             cachedLoad: 0,
@@ -1272,7 +1419,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
           context.rules,
         );
         const capacity =
-          trouble || treasure
+          scout || trouble || treasure
             ? 0
             : resourceArmyLoad(
                 { rawArmyLoad: raw, pointType: 3, pointItem: String(resource), plunder: [] },
@@ -1290,22 +1437,24 @@ export function createWorldMarchDomain(size: number): CityDomain {
             )?.points
           : undefined;
         if (trouble && !targetFootprint) worldMutationFailure();
-        const route = ordinaryMarchRoute(
-          context.rules,
-          size,
-          num(world, "pointId"),
-          targetId,
-          marchSpeed,
-          trouble
-            ? context.effect(401) + troubleDetectSpeed(context) + context.effect(402)
-            : context.effect(60) + context.effect(97) + context.effect(2193),
-          true,
-          trouble,
-          trouble ? 0 : context.effect(402),
-          trouble,
-          sourceFootprint,
-          targetFootprint,
-        );
+        const route = scout
+          ? scoutRoute(context, scouting!.target, size, marchSpeed)
+          : ordinaryMarchRoute(
+              context.rules,
+              size,
+              num(world, "pointId"),
+              targetId,
+              marchSpeed,
+              trouble
+                ? context.effect(401) + troubleDetectSpeed(context) + context.effect(402)
+                : context.effect(60) + context.effect(97) + context.effect(2193),
+              true,
+              trouble,
+              trouble ? 0 : context.effect(402),
+              trouble,
+              sourceFootprint,
+              targetFootprint,
+            );
         const duration = route.duration;
         const gatherEffect =
           resource === 5
@@ -1317,7 +1466,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
               context.effect(2195) +
               context.effect([153, 156, 155, 154][resource] ?? 65);
         const collectRate =
-          trouble || treasure
+          scout || trouble || treasure
             ? 0
             : resourceGatherRate(
                 context.rules,
@@ -1328,11 +1477,13 @@ export function createWorldMarchDomain(size: number): CityDomain {
               );
         const reserved = reserveMarch(
           {
-            ...(trouble
-              ? { purpose: "trouble" as const }
-              : treasure
-                ? { purpose: "treasure" as const }
-                : {}),
+            ...(scout
+              ? { purpose: "scout" as const }
+              : trouble
+                ? { purpose: "trouble" as const }
+                : treasure
+                  ? { purpose: "treasure" as const }
+                  : {}),
             id: randomUUID(),
             owner: context.owner,
             worldId: 0,
@@ -1361,18 +1512,29 @@ export function createWorldMarchDomain(size: number): CityDomain {
             },
           ];
         }
+        if (scout) scoutDepartureProgress(context);
         attachMarchCompanions(context, army, companions);
         const state: RuntimeMarch = {
           ...reserved.march,
-          ...(trouble
-            ? { troubleItem: selectedItem!.itemId }
-            : treasure
-              ? { treasureUUID: text(treasure, "uuid") }
-              : {}),
+          ...(scout
+            ? { scoutHonour: scouting!.honour, scoutTargetOwner: text(target, "ownerId") }
+            : trouble
+              ? { troubleItem: selectedItem!.itemId }
+              : treasure
+                ? { treasureUUID: text(treasure, "uuid") }
+                : {}),
           capacity,
           collectRate,
           marchSpeed,
-          targetType: trouble ? 1 : treasure ? 0 : shared ? 37 : 3,
+          targetType: scout
+            ? num(target, "pointType")
+            : trouble
+              ? 1
+              : treasure
+                ? 0
+                : shared
+                  ? 37
+                  : 3,
           targetResource: resource,
           troopIds,
           segments: route.segments,
@@ -1385,9 +1547,24 @@ export function createWorldMarchDomain(size: number): CityDomain {
           ownerColor: num(world, "color"),
           allianceId: text(context.state.profile, "allianceId"),
           targetId,
-          targetType: trouble ? 1 : treasure ? 0 : shared ? 37 : 3,
-          targetUid: trouble ? text(target, "ownerId") : "",
-          type: trouble ? 13 : 0,
+          targetType: scout
+            ? num(target, "pointType")
+            : trouble
+              ? 1
+              : treasure
+                ? 0
+                : shared
+                  ? 37
+                  : 3,
+          targetUid: scout || trouble ? text(target, "ownerId") : "",
+          type: scout ? 1 : trouble ? 13 : 0,
+          honourWatchtower: scouting?.honour ? 1 : 0,
+          slowDown:
+            scout &&
+            num(target, "pointType") === 1 &&
+            context.foreignEffect?.(scouting!.target.participant!.effects, 37) !== 0
+              ? 1
+              : 0,
           state: 0,
           worldId: 0,
           marchStartTime: context.now,
