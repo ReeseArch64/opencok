@@ -1,8 +1,55 @@
-import { sfs, type Fields } from "@opencok/messages/sfs";
+import { sfs, str, type Fields } from "@opencok/messages/sfs";
+import { GameError } from "@opencok/errors/game";
+import { errors } from "@opencok/constants/game";
 import { num, text, long, type Row } from "@opencok/contracts/rows";
 import type { Rules } from "@opencok/rules/game";
 import { generalProperties, generalPropertyRule } from "@opencok/rules/general-refinement";
 import { generalPairs } from "@opencok/rules/general-progression";
+
+const generalActions: Readonly<Record<string, readonly string[]>> = {
+  newgeneral: [
+    "recruit",
+    "skilluse",
+    "addexp",
+    "garrison",
+    "canclegarrison",
+    "activatetalent",
+    "resettalent",
+    "activaterefine",
+    "refinevalue",
+    "refinerollback",
+    "refinelock",
+    "refinetype",
+    "breach",
+    "star",
+    "baseskillup",
+  ],
+  heroOffice: ["info", "appoint", "remove", "refreshExp"],
+  robgeneral: [
+    "openprison",
+    "insult",
+    "free",
+    "kill",
+    "suicide",
+    "checkrelive",
+    "quickrelive",
+    "releaseall",
+  ],
+  generaltrun: ["openui", "openwheel"],
+};
+
+export function generalRequest(command: string, params: Fields) {
+  const separator = command.indexOf(".");
+  if (separator < 0) return { command, params };
+  const prefix = command.slice(0, separator);
+  const action = command.slice(separator + 1);
+  if (!Object.hasOwn(generalActions, prefix) || !generalActions[prefix]!.includes(action))
+    return { command, params };
+  if (params.M__REQUEST_ID__H && str(params, "M__REQUEST_ID__H") !== action)
+    throw new GameError(errors.invalid, "city_progression");
+  return { command: prefix, params: { ...params, M__REQUEST_ID__H: sfs.string(action) } };
+}
+
 export function generalLevels(raw: string) {
   return sfs.array(
     [...generalPairs(raw)].map(([id, level]) =>

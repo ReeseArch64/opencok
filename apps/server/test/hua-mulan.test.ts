@@ -78,7 +78,12 @@ test("Hua Mulan has 60 talents and spends the level 99 budget without inventing 
   ).toBe(564);
   expect(() => activateGeneralTalent(rules, learned, 53571157, 0)).toThrow();
   expect(() =>
-    activateGeneralTalent(rules, { ...row, level: 1, talent: "53571100;3" }, 53571100, 0),
+    activateGeneralTalent(
+      rules,
+      { ...row, level: 1, talent: "53571100;3", talentpoint: 0 },
+      53571100,
+      0,
+    ),
   ).toThrow();
 });
 
@@ -110,7 +115,7 @@ test("Hua Mulan trees branch like native heroes and either completed path unlock
     expect(maximum).toBeGreaterThanOrEqual(50);
     expect(maximum).toBeLessThanOrEqual(500);
   }
-  const row = { ...generalRecruit(rules, 53571, "owner", 1n), level: 99 };
+  const row = { ...generalRecruit(rules, 53571, "owner", 1n), level: 99, talentpoint: 564 };
   const root = activateGeneralTalent(rules, row, 53571100, 1);
   const right = activateGeneralTalent(rules, root, 53571102, 1);
   expect(right.talent).toBe("53571100;10|53571102;10");

@@ -1,4 +1,5 @@
 import { activityDirectory } from "@opencok/mappings/activity-directory";
+import { generalRequest } from "@opencok/mappings/generals";
 import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
 import { worldRecreationCommands } from "./world-recreation";
 import { worldUseCommands } from "./world-use";
@@ -465,6 +466,7 @@ export class GameService {
     });
   }
   async execute(uid: string, command: string, params: Fields): Promise<Result> {
+    ({ command, params } = generalRequest(command, params));
     if ((allianceCommands as readonly string[]).includes(command)) {
       if (!this.services.alliance) throw new GameError(errors.unsupported);
       return this.services.alliance(uid, command, params);

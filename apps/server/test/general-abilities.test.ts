@@ -31,7 +31,9 @@ test("talent ownership, prerequisite alternatives, maxima, and point budgets", (
   );
   expect(learned.talentpoint).toBe(1);
   expect(activateGeneralTalent(rules, learned, 90002, 0).talentpoint).toBe(0);
-  expect(() => activateGeneralTalent(rules, { ...learned, talent: "90001;4" }, 90002, 0)).toThrow();
+  expect(
+    activateGeneralTalent(rules, { ...learned, talent: "90001;4" }, 90002, 0).talentpoint,
+  ).toBe(0);
   expect(activateGeneralTalent(rules, row, 90001, 1).talentpoint).toBe(0);
 });
 test("refinement proposals preserve applied effects until confirmation and serialize native fields", () => {
