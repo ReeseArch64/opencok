@@ -274,6 +274,7 @@ services:
       GAME_FEED_MAX_COUNT: ${GAME_FEED_MAX_COUNT:-3}
       GAME_PLAYER_KINGDOMS: ${GAME_PLAYER_KINGDOMS:-}
       GAME_MAIL_CHAT_URL: ${GAME_MAIL_CHAT_URL:-}
+      GAME_NICKNAME_CHAT_URL: ${GAME_NICKNAME_CHAT_URL:-http://chat:8083/_internal/nickname}
       GAME_CHAT_SESSION_URL: ${GAME_CHAT_SESSION_URL:-http://chat:8083/external/session}
       CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-opencok-chat-development}
       GAME_MAP_SIZE: 1201

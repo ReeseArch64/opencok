@@ -36,7 +36,12 @@ async function createStack() {
   const httpPort = await freePort(),
     gamePort = await freePort(),
     databasePort = await freePort();
-  const env = { ...process.env, COMPOSE_PROFILES: "", GAME_LOGIN_SECRET: "synthetic-secret" };
+  const env = {
+    ...process.env,
+    COMPOSE_PROFILES: "",
+    GAME_LOGIN_SECRET: "synthetic-secret",
+    GAME_NICKNAME_CHAT_URL: "",
+  };
   const sourceConfig = Bun.spawn(
     [
       "docker",
@@ -58,6 +63,9 @@ async function createStack() {
   ]);
   if (configCode) throw new Error("Base Compose configuration is invalid");
   const isolated = JSON.parse(serialized);
+  expect(isolated.services.server.environment.GAME_NICKNAME_CHAT_URL).toBe(
+    "http://chat:8083/_internal/nickname",
+  );
   isolated.name = project;
   isolated.services.mongodb.environment = {
     MONGO_INITDB_ROOT_USERNAME: "synthetic",
@@ -208,6 +216,11 @@ async function createStack() {
       sections: [],
     },
     quest: { kind: "table", records: [], sections: [] },
+    goods: {
+      kind: "table",
+      records: [{ id: "200021", type: "17", price: "100" }],
+      sections: [],
+    },
     role: {
       kind: "table",
       records: [
@@ -228,6 +241,7 @@ async function createStack() {
       kind: "table",
       records: [
         { id: "player_max", k3: 30 },
+        { id: "function_on6", k12: 0 },
         { id: "resources_basics", k7: 100, k8: 300 },
         { id: "on_trumpet", k2: 0 },
         { id: "worldmap_city", k4: 50, k6: 50, k7: 0 },
@@ -634,7 +648,7 @@ describe("isolated Compose stack", () => {
       INSERT INTO opencok_kingdom.user_building (uuid,uid,"itemId",pos,level) VALUES ('synthetic-building','synthetic-player',400000,0,1);
       INSERT INTO opencok_kingdom.queue (uuid,"ownerId",qid,type,"startTime","endTime","updateTime") VALUES ('synthetic-queue','synthetic-player',1,0,9223372036854775807,9223372036854775807,9223372036854775807);
       INSERT INTO opencok_kingdom.user_world (uid,"pointId","worldId","lastCityDefTime") VALUES ('synthetic-player',12011,0,0);
-      INSERT INTO opencok_kingdom.worldpoint (id,"worldId",x,y,"areaId","gridType","grid2Type","pointType","resLevel","resInitValue") VALUES (12011,0,10,10,0,0,0,1,1,0);
+      INSERT INTO opencok_kingdom.worldpoint (id,"worldId",x,y,"areaId","gridType","grid2Type","pointType","resLevel","resInitValue","ownerId","ownerName") VALUES (12011,0,10,10,0,0,0,1,1,0,'synthetic-player','Synthetic');
     `,
         );
 
@@ -749,7 +763,49 @@ describe("isolated Compose stack", () => {
           (await client.command("build.upgrade", { uuid: sfs.string("synthetic-building") }))
             .errorCode?.value,
         ).toBe("102192");
+        const rename = {
+          nickName: sfs.string("Renamed Player"),
+          operationId: sfs.string("9e2e3153-a297-4cb0-9024-4323d647c937"),
+        };
+        for (let attempt = 0; attempt < 2; attempt++) {
+          const reply = await client.command("user.modify.nickName", rename);
+          expect(reply.status).toEqual(sfs.bool(true));
+          expect(reply.gold).toEqual(sfs.long(9007199254740893n));
+        }
+        expect(
+          (
+            await sql(
+              "opencok_global",
+              `SELECT "gameUserName" FROM opencok_global.account_new WHERE "gameUid"='synthetic-player';`,
+            )
+          ).trim(),
+        ).toBe("Renamed Player");
+        expect(
+          (
+            await sql(
+              "opencok_kingdom_2",
+              `SELECT "ownerName" FROM opencok_kingdom.worldpoint WHERE "ownerId"='synthetic-player';`,
+            )
+          ).trim(),
+        ).toBe("Renamed Player");
+        await eventually(
+          async () =>
+            (
+              await sql(
+                "opencok_kingdom_2",
+                `SELECT "pendingEffects" FROM opencok_kingdom.nickname_change WHERE "ownerUid"='synthetic-player';`,
+              )
+            ).trim() === "0",
+        );
         client.close();
+        const reconnected = new Client(gamePort, 2);
+        clients.push(reconnected);
+        await reconnected.handshake();
+        expect((await reconnected.login("synthetic-secret")).zn?.value).toBe("COK2");
+        const restored = fields(fields(fields((await reconnected.next()).p).p).user);
+        expect(restored.name).toEqual(sfs.string("Renamed Player"));
+        expect(restored.gold).toEqual(sfs.long(9007199254740893n));
+        reconnected.close();
         await compose(["pause", "redis"]);
         await eventually(async () => (await fetch(baseUrl + "/readyz")).status === 503);
         await compose(["unpause", "redis"]);
