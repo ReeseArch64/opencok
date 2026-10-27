@@ -1,4 +1,5 @@
 import { activityRewardDomain } from "@opencok/services/activity-reward";
+import { branchCityDomain } from "@opencok/services/branch-city";
 import {
   createHotItemDomain,
   createHotBusinessMan,
@@ -651,6 +652,7 @@ export const RealmDependenciesLive = Layer.effect(
         createTotemDomain(config.mapSize),
         minstrelDomain,
         alchemistDomain,
+        branchCityDomain,
         dailyInvestmentDomain,
         createShippingInvestmentDomain(),
         createSevenDayCycleDomain(),
