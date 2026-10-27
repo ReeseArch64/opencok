@@ -1,4 +1,5 @@
-import { and, eq, sql, asc, or } from "drizzle-orm";
+import { and, eq, sql, asc, or, inArray } from "drizzle-orm";
+import { world_barbarion } from "@opencok/drizzle/schema/opencok_kingdom/world_barbarion";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { worldMonsterAreaRanges } from "@opencok/rules/world-monsters";
 import type { WorldMonsterReader } from "@opencok/contracts/world-monsters";
@@ -16,7 +17,9 @@ export function worldMonsterReader(tx: MutationTransaction, size: number): World
           free ? eq(worldpoint.pointType, 0) : undefined,
           sql`coalesce(${worldpoint.ownerId},'')=''`,
           sql`coalesce(${worldpoint.ownerMarchUUid},'')=''`,
-          sql`(${worldpoint.pointType}<>0 OR NOT EXISTS(SELECT 1 FROM opencok_kingdom.world_march m WHERE m."worldId"=0 AND m."targetId"=${worldpoint.id}))`,
+          sql`(${worldpoint.pointType}<>0 OR NOT EXISTS(SELECT 1 FROM opencok_kingdom.world_march m WHERE m."worldId"=0 AND m."targetId" IN (${worldpoint.id},${worldpoint.id}+1,${worldpoint.id}+${size},${worldpoint.id}+${size + 1})))`,
+          sql`(${worldpoint.pointType}<>0 OR NOT EXISTS(SELECT 1 FROM opencok_kingdom.world_barbarion b WHERE b."pointId"=${worldpoint.id}))`,
+          sql`NOT EXISTS(SELECT 1 FROM opencok_kingdom.t_worldboss b WHERE b.point=${worldpoint.id} AND b.status=1)`,
           or(
             ...ranges.map(
               ([x1, x2, y1, y2]) =>
@@ -32,6 +35,15 @@ export function worldMonsterReader(tx: MutationTransaction, size: number): World
     return rows;
   };
   return {
+    async barbarians(points) {
+      if (points.length > 4096) throw new Error("Barbarian actor aggregate exceeds bound");
+      if (!points.length) return [];
+      return tx
+        .select()
+        .from(world_barbarion)
+        .where(inArray(world_barbarion.pointId, [...points]))
+        .for("update");
+    },
     async nearestBoss(origin) {
       if (!Number.isInteger(origin) || origin < 0 || origin > size * size)
         throw new Error("Invalid boss search origin");

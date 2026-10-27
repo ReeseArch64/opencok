@@ -303,6 +303,7 @@ export function createSessionHandler(
               command === "redPackets.rv" ||
               command === "world.use" ||
               command === "world.get.monster" ||
+              command === "world.get.barbarion" ||
               command === "trade.info" ||
               command === "trade.exchange" ||
               command === "trade.cancel") &&
