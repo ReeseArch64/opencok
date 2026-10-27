@@ -144,7 +144,8 @@
     "./merge-campaign": "./src/merge-campaign.ts",
     "./world-resource-refresh": "./src/world-resource-refresh.ts",
     "./red-packets": "./src/red-packets.ts",
-    "./hot-item": "./src/hot-item.ts"
+    "./hot-item": "./src/hot-item.ts",
+    "./world-utility": "./src/world-utility.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

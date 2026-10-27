@@ -182,7 +182,9 @@
     "./paid-gifts": "./src/paid-gifts.ts",
     "./activity-directory": "./src/activity-directory.ts",
     "./responses/activity-directory": "./src/responses/activity-directory.ts",
-    "./hot-item": "./src/hot-item.ts"
+    "./hot-item": "./src/hot-item.ts",
+    "./world-utility": "./src/world-utility.ts",
+    "./responses/world-utility": "./src/responses/world-utility.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
