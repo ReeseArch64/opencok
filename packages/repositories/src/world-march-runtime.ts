@@ -160,6 +160,7 @@ export async function writeWorldMutation(
       .update(worldpoint)
       .set({
         pointType: num(row, "pointType"),
+        flushFlag: row.flushFlag == null ? undefined : num(row, "flushFlag"),
         sendHeartDurationTime:
           row.sendHeartDurationTime == null ? undefined : long(row, "sendHeartDurationTime"),
         heartType: row.heartType == null ? undefined : text(row, "heartType"),

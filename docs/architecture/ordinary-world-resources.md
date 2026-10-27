@@ -74,3 +74,9 @@ monster rewards and territory engines have separate source lifecycles and are no
 established by these ordinary-node tests. Their concrete dependencies must be
 audited separately; this document does not label every remaining producer as
 combat-dependent.
+
+Player resource items use `world.use` and persist `flushFlag=1`. Their base
+capacity is independent of effects 305 and 307. Such nodes stay outside natural
+area quotas, postpone expiry while occupied and clear without replacement tickets
+when free. The bounded expiry scan includes both natural and player nodes; only
+natural nodes can produce ordinary or black-land wait tickets.

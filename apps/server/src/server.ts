@@ -1,3 +1,4 @@
+import { createWorldUseDomain } from "@opencok/services/world-use";
 import { createTreasureMapDomain } from "@opencok/services/treasure-map";
 import { cityDefenseDomain } from "@opencok/services/city-defense";
 import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
@@ -603,6 +604,7 @@ export const RealmDependenciesLive = Layer.effect(
         createWorldMarchDomain(config.mapSize),
         cityDefenseDomain,
         createTreasureMapDomain(config.mapSize),
+        createWorldUseDomain(config.mapSize),
         createCivilizationCastleDomain(config.mapSize),
         createTotemDomain(config.mapSize),
         minstrelDomain,
@@ -1421,6 +1423,7 @@ export const RealmDependenciesLive = Layer.effect(
       }
       for (const command of [
         "treasuremap.spd",
+        "world.use",
         "world.resources",
         "buy.citydef",
         "world.user.rcd",

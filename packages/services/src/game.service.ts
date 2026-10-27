@@ -1,3 +1,4 @@
+import { worldUseCommands } from "./world-use";
 import { treasureMapCommands } from "./treasure-map";
 import { cityDefenseCommands } from "./city-defense";
 import { worldUtility } from "./world-utility";
@@ -469,7 +470,8 @@ export class GameService {
     if (
       worldMutationCommands.includes(command) ||
       cityDefenseCommands.includes(command) ||
-      treasureMapCommands.includes(command)
+      treasureMapCommands.includes(command) ||
+      worldUseCommands.includes(command)
     ) {
       if (
         command === "world.tick" ||

@@ -32,7 +32,7 @@ export function createWorldResourceRefreshExecutor(
           .where(eq(world_resource_runtime.worldId, 0))
           .for("update");
         const changed: number[] = [];
-        const ordinary = sql`${worldpoint.worldId}=0 AND ${worldpoint.pointType}=3 AND ${worldpoint.pointItem} IN ('0','1','2','3','4','5') AND coalesce(${worldpoint.flushFlag},0)=0`;
+        const ordinary = sql`${worldpoint.worldId}=0 AND ${worldpoint.pointType}=3 AND ${worldpoint.pointItem} IN ('0','1','2','3','4','5')`;
         await work({
           now,
           opening: info.activityTime,

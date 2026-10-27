@@ -183,7 +183,8 @@
     "./responses/world-utility": "./src/responses/world-utility.ts",
     "./responses/city-defense": "./src/responses/city-defense.ts",
     "./responses/treasure-map": "./src/responses/treasure-map.ts",
-    "./responses/world-march-runtime": "./src/responses/world-march-runtime.ts"
+    "./responses/world-march-runtime": "./src/responses/world-march-runtime.ts",
+    "./responses/world-use": "./src/responses/world-use.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
