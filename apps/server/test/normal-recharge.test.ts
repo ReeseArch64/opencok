@@ -88,7 +88,12 @@ test("normal operators use saved realm facts and the trusted paid producer remai
       throw new Error("Trusted payment reached through native route");
     },
   });
-  for (const command of ["normal.recharge.paid", "normal.recharge.init"])
+  for (const command of [
+    "normal.recharge.paid",
+    "normal.recharge.init",
+    "new.sercum.paid",
+    "feedback.paid",
+  ])
     await expect(game.execute("owner", command, { _cok_: sfs.string("opaque") })).rejects.toThrow(
       "102192",
     );

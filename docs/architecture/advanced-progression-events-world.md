@@ -2440,3 +2440,33 @@ remains unconfigured and rejects trusted delivery calls. No native paid command,
 provider endpoint, schema migration, dependency or environment setting is added.
 Provider integration and native paid-response/device acceptance remain explicit
 external boundaries; this section does not claim topics25–27 complete.
+
+## Shared delivered-payment observers
+
+A configured `paidGiftGateway` now reaches normal recharge, verified gift
+campaigns, newcomer recharge and recharge feedback through the existing internal
+`paidGifts.consume` port. The dispatcher establishes the canonical owner/provider/
+order context for that call and assigns each observer its own stable command
+receipt. Newcomer and feedback adapters reuse the exact owned status-two
+paylog/SKU/price/time validation and declared delivered gold. Proof reads use the
+current fenced mutation transaction; adapters cannot be called successfully from
+an unrelated private event or native player command. No primary gift body is
+issued by these observers.
+
+Each observer commits independently. A later failure rejects the delivery
+acknowledgement so the trusted caller can retry the same order; completed
+observers replay their receipts and remaining observers finish. Original payment
+instants retain the existing period semantics. Closed observer windows and valid
+zero-gold outcomes acknowledge without fabricating progress. Feedback counts
+exclude pending/noncompleted paylog rows, including records that cannot present
+a delivered proof. The dispatcher creates no order-history scan, startup reward
+backfill or public payment route. Providers still own actual payment acceptance,
+primary delivery and retry until this internal acknowledgement succeeds.
+
+PostgreSQL tests exercise concurrent duplicate callbacks, all four observer
+receipts, actual normal/newcomer totals and feedback mails, zero-gold delivery,
+pending-order exclusion, unrelated-event denial, failure in the final observer
+and safe retry. Native two-realm acceptance configures the proof adapter and
+checks the real server composition, canonical retry and login replay. The
+existing default composition remains unconfigured for external payment
+providers. This composition adds no schema, dependency or environment setting.

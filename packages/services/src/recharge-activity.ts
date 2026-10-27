@@ -52,7 +52,7 @@ export function createRechargeActivityDomain(gateway?: RechargeActivityGateway):
           typeof receipt.rechargeGold !== "bigint" ||
           receipt.occurredAt < 0n ||
           receipt.occurredAt > context.now ||
-          receipt.rechargeGold <= 0n ||
+          receipt.rechargeGold < 0n ||
           !Number.isSafeInteger(Number(receipt.occurredAt))
         )
           invalid();
@@ -60,7 +60,7 @@ export function createRechargeActivityDomain(gateway?: RechargeActivityGateway):
           ...ruleContext,
           now: Number(receipt.occurredAt),
         });
-        if (!eventWindow?.active) invalid();
+        if (!eventWindow?.active || receipt.rechargeGold === 0n) return empty();
         context.write.rechargeActivity = { total: cityAmount(total + receipt.rechargeGold) };
         return empty();
       }

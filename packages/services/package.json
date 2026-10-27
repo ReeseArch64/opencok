@@ -147,7 +147,8 @@
     "./comeback": "./src/comeback.ts",
     "./red-packets": "./src/red-packets.ts",
     "./normal-recharge": "./src/normal-recharge.ts",
-    "./delivered-payment": "./src/delivered-payment.ts"
+    "./delivered-payment": "./src/delivered-payment.ts",
+    "./payment-observers": "./src/payment-observers.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
