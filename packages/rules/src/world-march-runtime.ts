@@ -121,10 +121,13 @@ export function resourceGatherRate(
   resource: number,
   castleLevel: number,
   effect: number,
+  shared = false,
 ) {
   const rule = rules.items.get("resources_speed"),
     castle = rules.building("400000", castleLevel);
-  const base = Math.fround(Number(rule?.[`k${resource + 1}`]));
+  const base = Math.fround(
+    Number(shared ? rules.items.get("on_event2")?.k4 : rule?.[`k${resource + 1}`]),
+  );
   const fixed =
     resource === 5 ? 0 : Number(castle.clientParameters?.[4]?.value.split(";")[resource] ?? 0);
   const value = Math.fround(
