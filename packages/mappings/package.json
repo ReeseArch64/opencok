@@ -111,7 +111,8 @@
     "./activity-operators": "./src/activity-operators.ts",
     "./comeback": "./src/comeback.ts",
     "./normal-recharge": "./src/normal-recharge.ts",
-    "./world-use": "./src/world-use.ts"
+    "./world-use": "./src/world-use.ts",
+    "./world-recreation": "./src/world-recreation.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

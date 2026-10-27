@@ -1036,26 +1036,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
           });
           savePoint(context, row);
         }
-        for (const row of marchRows(context)) {
-          const id = text(row, "uuid"),
-            record =
-              context.write.worldMutation?.checkpoints?.find((row) => row.id === id) ??
-              context.state.worldMutation.checkpoints.find((row) => row.id === id);
-          if (!record) worldMutationFailure();
-          let state = restore(record);
-          if (state.phase !== "returning") state = returnState(context, state, context.now);
-          else state = { ...state, version: state.version + 1 };
-          state = {
-            ...state,
-            origin: target,
-            phase: "returning",
-            startedAt: context.now,
-            dueAt: context.now + 1n,
-            returnDuration: 1n,
-            segments: [],
-          };
-          saveMarch(context, state, { ...row, ownerId: target });
-        }
+        relocateWorldMarches(context, target);
         (context.write.worldMutation ??= {}).world = {
           ...world,
           pointId: target,
@@ -1195,4 +1176,27 @@ export function speedTreasureMarch(context: CityProgressionContext, id: string) 
   saveMarch(context, { ...state, dueAt: context.now, version: state.version + 1 }, original);
   recoverWorldMarches(context);
   return context.balance("gold");
+}
+
+export function relocateWorldMarches(context: CityProgressionContext, target: number) {
+  for (const row of marchRows(context)) {
+    const id = text(row, "uuid"),
+      record =
+        context.write.worldMutation?.checkpoints?.find((row) => row.id === id) ??
+        context.state.worldMutation?.checkpoints.find((row) => row.id === id);
+    if (!record) worldMutationFailure();
+    let state = restore(record);
+    if (state.phase !== "returning") state = returnState(context, state, context.now);
+    else state = { ...state, version: state.version + 1 };
+    state = {
+      ...state,
+      origin: target,
+      phase: "returning",
+      startedAt: context.now,
+      dueAt: context.now + 1n,
+      returnDuration: 1n,
+      segments: [],
+    };
+    saveMarch(context, state, { ...row, ownerId: target });
+  }
 }

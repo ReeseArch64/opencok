@@ -154,7 +154,8 @@
     "./normal-recharge": "./src/normal-recharge.ts",
     "./delivered-payment": "./src/delivered-payment.ts",
     "./payment-observers": "./src/payment-observers.ts",
-    "./world-use": "./src/world-use.ts"
+    "./world-use": "./src/world-use.ts",
+    "./world-recreation": "./src/world-recreation.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
