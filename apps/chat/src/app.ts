@@ -3,9 +3,9 @@ import { createRealmSocialHandler } from "@opencok/controllers/realm-social";
 import { randomUUID } from "node:crypto";
 import { createChatDeliveryService } from "@opencok/services/chat-delivery";
 import { createChatSocialService, chatSocialCommands } from "@opencok/services/chat-social";
-import { createChatMailboxHandler } from "@opencok/controllers/chat-mailbox";
-import { createChatAvatarProfileHandler } from "@opencok/controllers/chat-avatar-profile";
-import { createChatNicknameHandler } from "@opencok/controllers/chat-nickname";
+import { ChatMailboxController } from "@opencok/controllers/chat-mailbox";
+import { ChatAvatarProfileController } from "@opencok/controllers/chat-avatar-profile";
+import { ChatNicknameController } from "@opencok/controllers/chat-nickname";
 import type { ChatRepository, Log } from "@opencok/contracts/chat";
 
 import { createTokenVerifier } from "@opencok/identity/chat-token";
@@ -114,18 +114,18 @@ export function createChatApp({
         })
       : undefined,
     mailboxHandler: repository.mailbox
-      ? createChatMailboxHandler({ mailboxes: repository.mailbox, signingSecret, log })
+      ? new ChatMailboxController({ mailboxes: repository.mailbox, signingSecret, log }).handle
       : undefined,
-    nicknameHandler: createChatNicknameHandler({
+    nicknameHandler: new ChatNicknameController({
       nicknames: repository.nicknames,
       signingSecret,
       log,
-    }),
-    profileHandler: createChatAvatarProfileHandler({
+    }).handle,
+    profileHandler: new ChatAvatarProfileController({
       profiles: repository.profiles,
       signingSecret,
       log,
-    }),
+    }).handle,
     sessionHandler: createSessionHandler({ sessionStore, signingSecret, log }),
     configHandler: createConfigHandler({ websocketUrl, isReady }),
     serverListHandler: createServerListHandler({ websocketUrl, isReady }),
