@@ -92,6 +92,16 @@ research, heroes or currency. Character creation is authenticated and grants
 this package once per identity and realm, with at most two realm characters.
 Existing progression is never reset by retrying account creation.
 
+Hua Mulan is an infantry combat hero with three branching talent trees and a
+level-99 progression target. Each talent has one or ten levels. Percentage
+bonuses should reach 50%–500% at their maximum, with flat basic attributes and
+striking distance retaining their native units. Her art uses the same close
+portrait framing as neighboring heroes. Recruitment and learning consume the
+normal fragment and point budgets.
+The client presents every other hero with white rarity and no Legendary ribbon;
+Hua Mulan retains her own rarity and ribbon. This presentation does not reset
+existing ownership, levels, talents or assignments.
+
 ### Reliable local operation
 
 Essential gameplay must not stall because an optional external dependency is

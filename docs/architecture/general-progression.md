@@ -85,25 +85,38 @@ define her existing fragment 213293, five star skills 54228–54232 and 60 talen
 skill-book 211453 consumption remain authoritative; no account receives a hero.
 
 Her base skills unlock at stars one through five. Formation grants infantry
-health and attack (10% at level one, 38% at level fifteen). Basic attack grants
-1–4.5 points, damage grants 2–9%, striking distance grants one at its single
-level, and basic puncture grants 1–4.5 points. These are initial balance values.
-Effects target infantry variants: 1051/1052, 1011/1012, 1321/1322, 1061/1062,
-406/407 and 6631, consumed through the existing combat snapshot pipeline.
+health and attack (50% at level one, 470% at level fifteen). Basic attack grants
+10–80 points, damage grants 50–260%, striking distance grants one at its single
+level, and basic puncture grants 10–80 points. Effects target infantry variants:
+1051/1052, 1011/1012, 1321/1322, 1061/1062, 406/407 and 6631, consumed through
+the existing combat snapshot pipeline. Basic attack and puncture retain their
+native flat units; striking distance remains a distance rather than a percentage.
 
 Three talent trees, abilities 41020011, 53571201 and 53571202, contain 20 nodes
-each. Vanguard emphasizes health/basic attack; Offensive emphasizes attack/damage;
+each, arranged in 12 rows with native columns 2, 4 and 6. Two- and three-way
+branches reconverge on central nodes; completing either predecessor unlocks a
+merge, consistently with native rendering and the server prerequisite rule.
+Vanguard emphasizes health/basic attack; Offensive emphasizes attack/damage;
 Spear emphasizes basic puncture and two single-level striking-distance nodes.
-The other 58 nodes each accept 100 points. Their combined capacity is 5,802,
-covering the existing level-99 budget of 5,640 without increasing earned points.
-Each path requires completion of the preceding node and unlocks nodes through
-level 96. Per-point increments are 0.1% health/attack, 0.02% damage, and 0.005
-basic attack/puncture. The general level cap is 99. Learning remains optional;
-previews of an unlearned talent correctly show zero current contribution.
+All nodes have maximum level 1 or 10. Percentage talent maxima scale from
+50% to 500% by depth; increments are 5–50% per point. Flat basic attributes use
+the same numeric range in their native units. Nodes unlock through level 96.
 
-The private Android patch `data/android/patches/033-hua-mulan` changes only this
+The 58 ten-level nodes and two one-level nodes accept 582 points. Hua Mulan's
+catalog sets `talentPointDivisor=10`, yielding 564 spendable points at level 99
+from the existing 5,640-point level catalog. The general rule floors the divided
+cumulative point total, preserving consistent experience gains, recruitment and
+talent resets. Other heroes retain the default divisor of one. No shared level
+catalog or player record is changed. The general level cap remains 99; unlearned
+talents correctly show zero current contribution.
+
+The private Android patch `data/android/patches/033-hua-mulan` changes this
 hero's definitions, fragment presentation, new localized strings and supporting
-rendering. It rebuilds and verifies all 807 database SPD byte ranges. Both main
+rendering. Other heroes use client `type=0` and `color=0` for white rarity;
+the list cell displays the Legendary ribbon only for 53571 while preserving
+combat/development/support subtype icons. Existing player rows and other hero
+gameplay definitions are unchanged. It rebuilds and verifies all 807 database
+SPD byte ranges. Both main
 and Green locale INIs receive the strings; the Lua language adapter resolves the
 new hero's keys even when an older native language cache remains active. The
 hero's talent popup parses fractional scalar bonuses without truncating them.

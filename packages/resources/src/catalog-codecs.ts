@@ -1728,6 +1728,7 @@ export const catalogCodecs: Readonly<Record<string, CatalogCodec>> = {
     "dialog_num": { "field": "dialogNum", "separators": ["|"] },
   },
   "general_base": {
+    "talent_point_divisor": { "field": "talentPointDivisor" },
     "id": { "field": "id" },
     "new_acc_max_lv": { "field": "newAccMaxLv" },
     "is_unlock": { "field": "isUnlock" },

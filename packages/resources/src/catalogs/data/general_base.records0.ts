@@ -5255,6 +5255,7 @@ export const records: readonly GeneralBaseDefinition[] = [
     "piecesId": 213293,
     "levelMax": 99,
     "talent": 72,
+    "talentPointDivisor": 10,
     "generalAb": [41020011, 53571201, 53571202],
     "loot": 1,
     "lootLevel": 5,

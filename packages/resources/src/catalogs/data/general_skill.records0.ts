@@ -4018,8 +4018,8 @@ export const records: readonly GeneralSkillDefinition[] = [
     "type": 0,
     "para1": [[1051, 1052, 1011, 1012]],
     "typeValue": 0,
-    "base": [10, 10, 10, 10],
-    "add": [2, 2, 2, 2],
+    "base": [50, 50, 50, 50],
+    "add": [30, 30, 30, 30],
     "sign": 1,
     "general": 53571,
     "item": [
@@ -4041,8 +4041,8 @@ export const records: readonly GeneralSkillDefinition[] = [
     "type": 0,
     "para1": [[1321, 1322]],
     "typeValue": 1,
-    "base": [1, 1],
-    "add": [0.25, 0.25],
+    "base": [10, 10],
+    "add": [5, 5],
     "sign": 1,
     "general": 53571,
     "item": [
@@ -4064,8 +4064,8 @@ export const records: readonly GeneralSkillDefinition[] = [
     "type": 0,
     "para1": [[1061, 1062]],
     "typeValue": 0,
-    "base": [2, 2],
-    "add": [0.5, 0.5],
+    "base": [50, 50],
+    "add": [15, 15],
     "sign": 1,
     "general": 53571,
     "item": [
@@ -4103,8 +4103,8 @@ export const records: readonly GeneralSkillDefinition[] = [
     "type": 0,
     "para1": [[6631]],
     "typeValue": 1,
-    "base": [1],
-    "add": [0.25],
+    "base": [10],
+    "add": [5],
     "sign": 1,
     "general": 53571,
     "item": [
