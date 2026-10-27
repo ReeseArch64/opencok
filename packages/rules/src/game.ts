@@ -21,6 +21,13 @@ export interface WorldCatalogs {
   neutralResources?: Map<string, Rule>;
   barbarians?: Map<string, Rule>;
 }
+export interface AdvancedCatalogs {
+  dragonTravel?: Map<string, Rule>;
+  dragonSkillExp?: Map<string, Rule>;
+  dragonTalent?: Map<string, Rule>;
+  dragonTalentExp?: Map<string, Rule>;
+  dragonTower?: Map<string, Rule>;
+}
 export interface AllianceCatalogs {
   gifts?: Map<string, Rule>;
   ranks?: Map<string, Rule>;
@@ -58,6 +65,7 @@ export interface ReconnectCatalogs {
   positionUnlock?: readonly Rule[];
 }
 export interface ProfileCatalogs {
+  nicknameWords?: readonly string[];
   characters?: Map<string, Rule>;
   achievementCount?: number;
   achievements?: readonly Rule[];
@@ -141,6 +149,7 @@ export class Rules {
     readonly progression: ProgressionCatalogs = {},
     readonly general: GeneralCatalogs = {},
     readonly alliance: AllianceCatalogs = {},
+    readonly advanced: AdvancedCatalogs = {},
   ) {}
   building(itemId: string, level: number, star = 0, progress = 0): BuildingState {
     return buildingLevel(this.buildings, itemId, level, star, progress);

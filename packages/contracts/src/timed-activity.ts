@@ -47,7 +47,11 @@ export interface ActivityEconomy {
       | "woodbind"
       | "stonebind"
       | "ironbind"
-      | "foodbind",
+      | "foodbind"
+      | "chip"
+      | "diamond"
+      | "dragon_food"
+      | "dragon_gold",
     delta: bigint,
   ): void;
   item(itemId: string, delta: number): void;

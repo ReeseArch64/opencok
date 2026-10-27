@@ -20,6 +20,10 @@ export function reconnectSettlementTimes(
   };
   for (const research of state.allianceResearch ?? [])
     add(long(research.startTime) + long(research.needTime));
+  for (const talent of state.effects.dragonTalents ?? []) {
+    add(long(talent.startTime));
+    add(long(talent.actTime) + 1n);
+  }
   for (const status of state.effects.states) {
     add(long(status.startTime));
     add(long(status.endTime));

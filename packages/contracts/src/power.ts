@@ -12,6 +12,7 @@ export interface WorldPowerEffect {
 }
 
 export interface PowerSnapshot {
+  dragonTalents?: readonly Row[];
   profile: Row;
   statistics: Row | undefined;
   generals: readonly Row[];
@@ -84,6 +85,7 @@ export type PlayerEffectSnapshot = Pick<
   | "heroes"
   | "dragons"
   | "dragonSkills"
+  | "dragonTalents"
   | "states"
   | "vip"
   | "allianceSciences"

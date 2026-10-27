@@ -1,3 +1,5 @@
+import { dragonTalentsDomain } from "@opencok/services/dragon-talents";
+import { dragonProgressionDomain } from "@opencok/services/dragon-progression";
 import { minstrelDomain } from "@opencok/services/minstrel";
 import { civilizationScienceDomain } from "@opencok/services/civilization-science";
 import { createChatNoticeCostReader } from "@opencok/repositories/chat-notice-cost";
@@ -363,6 +365,8 @@ export const RealmDependenciesLive = Layer.effect(
         constructionDomain,
         researchDomain,
         civilizationScienceDomain,
+        dragonProgressionDomain,
+        dragonTalentsDomain,
         minstrelDomain,
         trainingDomain,
         hospitalDomain,
@@ -805,7 +809,9 @@ export const RealmDependenciesLive = Layer.effect(
                 await city.command(
                   tx,
                   owner,
-                  "effect.item",
+                  ["37", "40"].includes(rules.goods.get(itemId)?.type ?? "")
+                    ? "dragon.item"
+                    : "effect.item",
                   encode({ itemId: sfs.string(itemId), count: sfs.int(count) }),
                   now,
                   economy,

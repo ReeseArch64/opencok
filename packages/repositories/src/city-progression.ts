@@ -1,3 +1,4 @@
+import { readDragonProgression, writeDragonProgression } from "./dragon-progression";
 import { activity_minstrel } from "@opencok/drizzle/schema/opencok_kingdom/activity_minstrel";
 import { user_civilization_science } from "@opencok/drizzle/schema/opencok_kingdom/user_civilization_science";
 import { user_general } from "@opencok/drizzle/schema/opencok_kingdom/user_general";
@@ -117,6 +118,7 @@ export function createCityProgressionStore(
         profile,
         resource,
         civilizationSciences,
+        dragons: await readDragonProgression(tx, owner),
         minstrel:
           command === "minstrel"
             ? (
@@ -191,6 +193,7 @@ export function createCityProgressionStore(
               set: value,
             });
         }
+        if (write.dragons) await writeDragonProgression(tx, owner, write.dragons);
         await writePlayerEffects(tx, owner, write);
         if (write.generalRoster) await writeGeneralRoster(tx, owner, write.generalRoster, now);
         await writeEquipment(tx, owner, write);
@@ -396,6 +399,7 @@ export function createCityProgressionStore(
         write.buildings?.length ||
         changedScience ||
         write.civilizationSciences?.length ||
+        write.dragons ||
         write.profile ||
         write.deletedBuildings?.length
       )

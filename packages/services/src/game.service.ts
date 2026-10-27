@@ -1,3 +1,4 @@
+import { dragonProgressionCommands } from "./dragon-progression";
 import { friendshipMineCommands } from "./friendship-mine";
 import { noticeCommands } from "./chat-notice";
 import { nativeChatCommands } from "./chat-native";
@@ -276,6 +277,12 @@ export class GameService {
     const quest = await this.services.cityProgression?.(uid, "quest.init", {});
     const equipment = await this.services.cityProgression?.(uid, "equipment.init", {});
     const generals = await this.services.cityProgression?.(uid, "general.init", {});
+    const dragons = await this.services.cityProgression?.(uid, "dragon.init", {});
+    const civilization = await this.services.cityProgression?.(
+      uid,
+      "civilization.science.data.init",
+      {},
+    );
     const alliance = await this.services.alliance?.(uid, "alliance.init", {});
     const state = await this.state(uid);
     const world = state.world;
@@ -289,6 +296,8 @@ export class GameService {
       ),
       ...equipment?.body,
       ...generals?.body,
+      ...dragons?.body,
+      ...civilization?.body,
       ...alliance?.body,
       ...effects?.body,
       ...quest?.body,
@@ -378,6 +387,16 @@ export class GameService {
     await this.services.reconcileAlliance?.(uid);
     let body: Fields;
     let pushes: Result["pushes"] = [];
+    if (dragonProgressionCommands.includes(command)) {
+      if (
+        command === "dragon.item" ||
+        command === "dragon.init" ||
+        command === "dragon.tick" ||
+        !this.services.cityProgression
+      )
+        throw new GameError(errors.unsupported);
+      return this.services.cityProgression(uid, command, params);
+    }
     switch (command) {
       case "trade.info":
       case "trade.exchange":
@@ -454,6 +473,7 @@ export class GameService {
       case "fort.cd":
       case "fort.destory":
       case "fort.destroy":
+      case "dragonskill":
       case "minstrel":
       case "civilization.science.data.init":
       case "race.science.research":

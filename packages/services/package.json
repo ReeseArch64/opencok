@@ -72,6 +72,10 @@
     "./general-draws": "./src/general-draws.ts",
     "./alliances": "./src/alliances.ts",
     "./alliance-publication": "./src/alliance-publication.ts",
+    "./civilization-science": "./src/civilization-science.ts",
+    "./minstrel": "./src/minstrel.ts",
+    "./dragon-progression": "./src/dragon-progression.ts",
+    "./dragon-talents": "./src/dragon-talents.ts",
     "./chat-delivery": "./src/chat-delivery.ts",
     "./chat-social": "./src/chat-social.ts",
     "./postbox": "./src/postbox.ts",
@@ -79,9 +83,7 @@
     "./chat-notice": "./src/chat-notice.ts",
     "./friendship-mine": "./src/friendship-mine.ts",
     "./realm-chat-delivery": "./src/realm-chat-delivery.ts",
-    "./realm-social": "./src/realm-social.ts",
-    "./civilization-science": "./src/civilization-science.ts",
-    "./minstrel": "./src/minstrel.ts"
+    "./realm-social": "./src/realm-social.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

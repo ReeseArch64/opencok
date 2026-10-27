@@ -55,11 +55,12 @@
     "./equipment": "./src/equipment.ts",
     "./generals": "./src/generals.ts",
     "./alliance": "./src/alliance.ts",
+    "./civilization-science": "./src/civilization-science.ts",
+    "./minstrel": "./src/minstrel.ts",
+    "./dragon-progression": "./src/dragon-progression.ts",
     "./chat-social": "./src/chat-social.ts",
     "./postbox": "./src/postbox.ts",
-    "./chat-native": "./src/chat-native.ts",
-    "./civilization-science": "./src/civilization-science.ts",
-    "./minstrel": "./src/minstrel.ts"
+    "./chat-native": "./src/chat-native.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

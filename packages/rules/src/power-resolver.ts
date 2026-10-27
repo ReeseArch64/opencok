@@ -135,7 +135,13 @@ export function playerGameEffect(
   const office = officeEffects(state.office, state.kingdomFights, world, rules, context);
   const territory = territoryTreeEffects(state.profile, state.territoryTrees, rules);
   const hero = heroEffects(state.heroes, rules, context);
-  const dragon = dragonSkillEffects(state.dragons, state.dragonSkills, rules, context);
+  const dragon = dragonSkillEffects(
+    state.dragons,
+    state.dragonSkills,
+    rules,
+    context,
+    state.dragonTalents,
+  );
   const military = militaryEffects(state.military, rules, context);
   const prestige = prestigeEffects(state.profile, state.prestige, rules, context);
   const miracle = miracleEffects(state.miracle, rules, context);
