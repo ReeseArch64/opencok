@@ -75,7 +75,7 @@ export async function inspectWorldMarch(
   let end = long(march, "arrivalTime");
   if (phase === 1 && [3, 37].includes(targetType)) {
     if (speed <= 0) unavailable();
-    const duration = Math.ceil(Math.fround(Math.fround(maximum) / speed) * 1000);
+    const duration = Math.ceil(Math.fround(Math.fround(Math.fround(maximum) / speed) * 1000));
     if (!Number.isSafeInteger(duration)) unavailable();
     end += BigInt(duration);
   }
