@@ -61,7 +61,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     campaignSource &&
     typeof campaignSource !== "string" &&
     campaignSource.kind === CatalogKind.Automation
-      ? campaignSource.rules.filter((rule) => JSON.stringify(rule).includes("3th_"))
+      ? campaignSource.rules
       : [];
   const campaignVariables =
     variableSource &&

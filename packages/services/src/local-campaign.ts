@@ -1,3 +1,4 @@
+import { campaignNoticeFrame } from "@opencok/mappings/campaign-notice";
 import { eventRealmEnabled } from "@opencok/rules/availability";
 import { cosmeticOwnership, cosmeticTargetStates } from "./city-cosmetics";
 import { randomInt, randomUUID } from "node:crypto";
@@ -176,6 +177,16 @@ export class CampaignPlanner {
           parts[0]!,
           this.value(parts[1]!),
         );
+      case 108: {
+        const required = cityInteger(parts[0], 1, 5),
+          profile = this.context.state.campaignProfile;
+        return Boolean(profile?.allianceId && num(profile, "memberRank") === required);
+      }
+      case 109: {
+        const limit = cityInteger(parts[0], 1),
+          rank = num(this.context.state.campaignProfile ?? {}, "flowerRank");
+        return rank > 0 && rank <= limit;
+      }
       case 32: {
         const selector = (clause.parameters ?? "").toLowerCase();
         return (
@@ -232,6 +243,31 @@ export class CampaignPlanner {
       case 30:
       case 42:
         return;
+      case 61: {
+        if (parts.length !== 2 || !parts[1]) campaignFailure();
+        const scope = cityInteger(parts[0], 1, 3);
+        if (scope === 3) return;
+        const profile = this.context.state.campaignProfile ?? {},
+          allianceId = text(profile, "allianceId"),
+          name = text(this.context.state.profile, "name");
+        if (scope === 1 && !allianceId) return;
+        if (!this.context.economy.event) campaignFailure();
+        this.context.economy.event({
+          id: randomUUID().replaceAll("-", ""),
+          type: "campaign.notice",
+          payload: campaignNoticeFrame({
+            owner: this.context.owner,
+            at: this.context.now,
+            scope: scope === 1 ? 1 : 2,
+            allianceId,
+            message: {
+              msgId: parts[1]!,
+              para: scope === 1 ? [name] : [text(profile, "allianceName"), name],
+            },
+          }),
+        });
+        return;
+      }
       case 48: {
         for (const reward of (action.parameters ?? "").split(",").filter(Boolean))
           this.push(12, {

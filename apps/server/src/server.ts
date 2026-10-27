@@ -1,3 +1,5 @@
+import { createCampaignAudience } from "@opencok/repositories/campaign-notice";
+import { publishCampaignNotice } from "@opencok/services/campaign-notice";
 import {
   ContinuedCostRewardService,
   continuedCostRewardDomain,
@@ -829,6 +831,7 @@ export const RealmDependenciesLive = Layer.effect(
       rules,
       [...db.databases.kingdoms.keys()],
     );
+    const campaignAudience = createCampaignAudience(db.kingdom.db, authority);
     const costRankingFacts = createCostRankingFacts(db.kingdom.db, authority);
     const continuedCostFinality = new ContinuedCostFinalityService(
       costRankingFacts,
@@ -1559,6 +1562,38 @@ export const RealmDependenciesLive = Layer.effect(
     yield* Effect.tryPromise({
       try: recoverExpeditionNotifications,
       catch: () => new Error("Expedition activity publication unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+    yield* Effect.tryPromise({
+      try: async () => {
+        for (let index = 0; index < 64; index++) {
+          try {
+            const delivered = await relayMutationEvent(
+              db.kingdom.db,
+              authority,
+              (event) =>
+                publishCampaignNotice(
+                  event.payload,
+                  event.owner,
+                  notifications.owners(),
+                  campaignAudience,
+                  (owner, command, body) => notifications.publish(owner, command, body),
+                ),
+              Date.now,
+              "campaign.notice",
+              1000,
+            );
+            if (!delivered) break;
+          } catch {
+            continue;
+          }
+        }
+      },
+      catch: () => new Error("Campaign notice publication unavailable"),
     }).pipe(
       Effect.catch(() => Effect.void),
       Effect.andThen(Effect.sleep(1000)),

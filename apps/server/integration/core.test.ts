@@ -1,3 +1,5 @@
+import { catalog as campaignRulesCatalog } from "../../../packages/resources/src/catalogs/data/trigger-activity";
+import { flower_info } from "@opencok/drizzle/schema/opencok_kingdom/flower_info";
 import { catalog as campaignVariablesCatalog } from "../../../packages/resources/src/catalogs/data/trigger-var";
 import { mail } from "@opencok/drizzle/schema/opencok_kingdom/mail";
 import { eq } from "drizzle-orm";
@@ -112,6 +114,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         pf: "Google",
         gold: 9007199254740993n,
       });
+      await db.insert(flower_info).values({ uid, lastflowerRanking: 1 });
       await db.insert(mail).values({
         uid: "synthetic-mail-reward",
         toUser: uid,
@@ -266,6 +269,13 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         zkPath: `/opencok-experiment/COK${id}`,
       };
       const runtimeRules = await loadRules(resources, id);
+      runtimeRules.advanced.campaignRules = campaignRulesCatalog.rules;
+      runtimeRules.advanced.campaignVariables = new Map(
+        campaignVariablesCatalog.variables.map((variable) => [
+          `${variable.scope}$${variable.id}`,
+          variable,
+        ]),
+      );
       runtimeRules.shops.set("wire-shop", {
         id: "wire-shop",
         onsale: "1",
@@ -316,6 +326,19 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
           ?.value,
       ).toBe("synthetic-init");
       expect((await client.command("cmd.ping")).serverNowTime?.type).toBe(Type.Long);
+      await eventually(async () =>
+        client.received.some((packet) => str(fields(packet.p), "c", "") === "push.common.notice"),
+      );
+      const campaignLoginNotice = fields(
+        fields(
+          client.received.find((packet) => str(fields(packet.p), "c", "") === "push.common.notice")!
+            .p,
+        ).p,
+      );
+      expect(campaignLoginNotice.msgId).toEqual(sfs.string("9440790"));
+      expect(campaignLoginNotice.para).toEqual(
+        sfs.array([sfs.string(""), sfs.string(`Synthetic ${id}`)]),
+      );
       expect((await client.command("get.trouble.list")).array).toEqual(sfs.array([]));
       const costInfo = await client.command("continuedcost.info", {
         _cok_: sfs.long(9007199254740993n),
