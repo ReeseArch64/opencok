@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { and, asc, eq, lte, sql } from "drizzle-orm";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
+import { black_land_res_dead } from "@opencok/drizzle/schema/opencok_kingdom/black_land_res_dead";
 import { world_res_dead } from "@opencok/drizzle/schema/opencok_kingdom/world_res_dead";
 import { world_resource_runtime } from "@opencok/drizzle/schema/opencok_kingdom/world_resource_runtime";
 import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { mutation_outbox } from "@opencok/drizzle/schema/opencok_kingdom/mutation_outbox";
 import { encode, sfs } from "@opencok/messages/sfs";
-import { num, text } from "@opencok/contracts/rows";
+import { num, text, long } from "@opencok/contracts/rows";
 import type { WorldResourceRefreshExecutor } from "@opencok/contracts/world-resource-refresh";
 import type { Database } from "./game";
 import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
@@ -31,7 +32,7 @@ export function createWorldResourceRefreshExecutor(
           .where(eq(world_resource_runtime.worldId, 0))
           .for("update");
         const changed: number[] = [];
-        const ordinary = sql`${worldpoint.worldId}=0 AND ${worldpoint.pointType}=3 AND ${worldpoint.pointItem} IN ('0','1','2','3','4','5') AND coalesce(${worldpoint.flushFlag},0)=0 AND NOT (${worldpoint.x} BETWEEN 575 AND 625 AND ${worldpoint.y} BETWEEN 575 AND 625)`;
+        const ordinary = sql`${worldpoint.worldId}=0 AND ${worldpoint.pointType}=3 AND ${worldpoint.pointItem} IN ('0','1','2','3','4','5') AND coalesce(${worldpoint.flushFlag},0)=0`;
         await work({
           now,
           opening: info.activityTime,
@@ -45,21 +46,56 @@ export function createWorldResourceRefreshExecutor(
               .orderBy(asc(worldpoint.flushTime), asc(worldpoint.id))
               .limit(64)
               .for("update"),
-          pending: () =>
-            tx
+          async pending() {
+            const normal = await tx
               .select()
               .from(world_res_dead)
               .where(lte(world_res_dead.deadFinishTime, now))
               .orderBy(asc(world_res_dead.deadFinishTime), asc(world_res_dead.id))
               .limit(64)
-              .for("update"),
+              .for("update");
+            const black = await tx
+              .select()
+              .from(black_land_res_dead)
+              .where(lte(black_land_res_dead.deadFinishTime, now))
+              .orderBy(asc(black_land_res_dead.deadFinishTime), asc(black_land_res_dead.id))
+              .limit(64)
+              .for("update");
+            return [...normal, ...black.map((row) => ({ ...row, areaId: 0, blackLand: 1 }))]
+              .sort((a, b) =>
+                long(a, "deadFinishTime") < long(b, "deadFinishTime")
+                  ? -1
+                  : long(a, "deadFinishTime") > long(b, "deadFinishTime")
+                    ? 1
+                    : text(a, "id").localeCompare(text(b, "id")),
+              )
+              .slice(0, 64);
+          },
           async population(area) {
+            if (area === 0) {
+              const result = await tx.execute<{ count: string }>(
+                sql`SELECT (SELECT count(*) FROM opencok_kingdom.worldpoint WHERE "worldId"=0 AND "pointType"=3 AND "pointItem" IN ('0','1','2','3','4','5') AND coalesce("flushFlag",0)=0 AND x BETWEEN 575 AND 625 AND y BETWEEN 575 AND 625) + (SELECT count(*) FROM opencok_kingdom.black_land_res_dead) AS count`,
+              );
+              return Number(result.rows[0]!.count);
+            }
             const result = await tx.execute<{ count: string }>(
               sql`SELECT (SELECT count(*) FROM opencok_kingdom.worldpoint WHERE "worldId"=0 AND "areaId"=${area} AND "pointType"=3 AND "pointItem" IN ('0','1','2','3','4','5') AND coalesce("flushFlag",0)=0 AND NOT (x BETWEEN 575 AND 625 AND y BETWEEN 575 AND 625)) + (SELECT count(*) FROM opencok_kingdom.world_res_dead WHERE "areaId"=${area}) AS count`,
             );
             return Number(result.rows[0]!.count);
           },
           async free(area) {
+            if (area === 0) {
+              const [point] = await tx
+                .select()
+                .from(worldpoint)
+                .where(
+                  sql`${worldpoint.worldId}=0 AND ${worldpoint.pointType}=0 AND ${worldpoint.gridType}=0 AND ${worldpoint.grid2Type}=0 AND ${worldpoint.resInitValue}=0 AND coalesce(${worldpoint.ownerId},'')='' AND coalesce(${worldpoint.ownerMarchUUid},'')='' AND coalesce(${worldpoint.territoryAlliance},'')='' AND coalesce(${worldpoint.reserve},0)=0 AND coalesce(${worldpoint.trap},'')='' AND ${worldpoint.x} BETWEEN 575 AND 625 AND ${worldpoint.y} BETWEEN 575 AND 625`,
+                )
+                .orderBy(sql`random()`)
+                .limit(1)
+                .for("update");
+              return point;
+            }
             const [point] = await tx
               .select()
               .from(worldpoint)
@@ -101,6 +137,15 @@ export function createWorldResourceRefreshExecutor(
             changed.push(id);
           },
           async ticket(area, level, type, deadline) {
+            if (area === 0) {
+              await tx.insert(black_land_res_dead).values({
+                id: randomUUID().replaceAll("-", ""),
+                areaId: 0,
+                level,
+                deadFinishTime: deadline,
+              });
+              return;
+            }
             await tx.insert(world_res_dead).values({
               id: randomUUID().replaceAll("-", ""),
               areaId: area,
@@ -110,12 +155,25 @@ export function createWorldResourceRefreshExecutor(
             });
           },
           async retry(ticket, deadline) {
+            if (ticket.blackLand) {
+              await tx
+                .update(black_land_res_dead)
+                .set({ deadFinishTime: deadline })
+                .where(eq(black_land_res_dead.id, text(ticket, "id")));
+              return;
+            }
             await tx
               .update(world_res_dead)
               .set({ deadFinishTime: deadline })
               .where(eq(world_res_dead.id, text(ticket, "id")));
           },
           async removeTicket(ticket) {
+            if (ticket.blackLand) {
+              await tx
+                .delete(black_land_res_dead)
+                .where(eq(black_land_res_dead.id, text(ticket, "id")));
+              return;
+            }
             await tx.delete(world_res_dead).where(eq(world_res_dead.id, text(ticket, "id")));
           },
           async spawn(point, type, level, amount, deadline) {

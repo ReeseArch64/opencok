@@ -6,6 +6,7 @@ import { cityInteger } from "@opencok/rules/city-progression";
 import { worldMutationFailure } from "@opencok/rules/world-march-runtime";
 import {
   worldResourceAreaCount,
+  worldResourceBlackLand,
   worldResourceChoice,
   worldResourceDuration,
   worldResourceQuota,
@@ -46,16 +47,20 @@ export async function refreshWorldResources(
   const group = rules.world.resources?.get(used[0] === 0 ? "resources" : `resources${used[0]}`);
   if (!group?.length) worldMutationFailure();
   const quota = worldResourceQuota(rules),
-    areas = worldResourceAreaCount(rules, size);
+    areas = worldResourceAreaCount(rules, size),
+    blackMinimum = cityInteger(rules.items.get("blackland_resource")?.k1),
+    blackMaximum = cityInteger(rules.items.get("blackland_resource")?.k2, blackMinimum, 64);
+  const limit = (area: number) => (area === 0 ? blackMaximum : quota);
   const expired = await store.expired();
   for (const point of expired) {
     if (text(point, "ownerMarchUUid") || text(point, "ownerId")) {
       await store.postpone(point, now + worldResourceDuration(rules, num(point, "resLevel")));
       continue;
     }
-    if ((await store.population(num(point, "areaId"))) <= quota)
+    const area = worldResourceBlackLand(point) ? 0 : num(point, "areaId");
+    if ((await store.population(area)) <= limit(area))
       await store.ticket(
-        num(point, "areaId"),
+        area,
         num(point, "resLevel"),
         text(point, "pointItem"),
         now + worldResourceDuration(rules, num(point, "resLevel"), true),
@@ -72,8 +77,9 @@ export async function refreshWorldResources(
       size,
       now - store.opening,
       effects,
-      store.goldBonusUntil > now,
+      area !== 0 && store.goldBonusUntil > now,
       random,
+      area === 0,
     );
     if (!chosen) return undefined;
     if (chosen.type !== 6)
@@ -89,7 +95,7 @@ export async function refreshWorldResources(
   const pending = await store.pending();
   for (const ticket of pending) {
     const area = num(ticket, "areaId");
-    if ((await store.population(area)) > quota) {
+    if ((await store.population(area)) > limit(area)) {
       await store.removeTicket(ticket);
       continue;
     }
@@ -97,6 +103,15 @@ export async function refreshWorldResources(
     if (chosen && chosen.type !== 6) await store.removeTicket(ticket);
     else await store.retry(ticket, now + worldResourceDuration(rules, num(ticket, "level"), true));
   }
+  let blackPopulation = await store.population(0);
+  if (blackPopulation <= blackMinimum)
+    for (let budget = 0; budget < 64 && blackPopulation < blackMaximum; budget++) {
+      const chosen = await spawn(0);
+      if (!chosen) break;
+      if (chosen.type === 6)
+        await store.ticket(0, 1, "0", now + worldResourceDuration(rules, 1, true));
+      blackPopulation++;
+    }
   let budget = 64;
   for (let visited = 0; visited < 8 && budget > 0 && clock.areaCursor < areas; visited++) {
     const area = clock.areaCursor + 1;

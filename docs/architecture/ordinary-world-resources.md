@@ -24,8 +24,9 @@ to another eligible tile in its saved area. Owned, reserved, stopped and unsuppo
 territory tiles are excluded. Existing city, monster, event and special resource
 points remain untouched.
 
-The worker processes at most 64 expirations, 64 waiting replacements and 64 new
-quota slots per transaction, visiting at most eight ordinary areas. A persisted
+The worker processes at most 64 expirations, 64 waiting replacements, 64 new
+ordinary quota slots and 64 black-land quota slots per transaction, visiting at
+most eight ordinary areas. A persisted
 cursor continues a large refresh after restart. Full pages drain before the next
 30-minute refresh interval. A long outage advances the group clock once on
 recovery and starts a new interval; it does not replay historical random draws.
@@ -59,9 +60,17 @@ rotation, no-node draws, bounded catch-up, blocked replacements and rollback.
 Schema contracts, SQL snapshots and physical database checks cover the new table.
 Device execution remains unverified.
 
-Black-land resource quotas and their separate waiting table are a remaining
-ordinary noncombat implementation boundary at this checkpoint. Special/event
-resource generation, neutral resources, battle resource targets, monster rewards
-and territory engines have separate source lifecycles and are not established by
-these ordinary-node tests. Their concrete dependencies must be audited separately;
-this document does not label every remaining producer as combat-dependent.
+Black-land ordinary resource creation is also maintained. Source geometry is the
+inclusive 575–625 square; free resource tiles use grid type zero, while normal
+areas use grid type two. Black-land selection uses native resource band zero and
+the separate `black_land_res_dead` table. It replenishes toward the configured
+maximum of 31 only when living nodes plus waiting tickets reach the configured
+minimum of 21 or lower. A partial reduction above that threshold does not refill
+the world. Occupied nodes retain their capacity; expiry, delayed recovery,
+capacity effects and native notifications use the same fenced transaction.
+
+Special/event resource generation, neutral resources, battle resource targets,
+monster rewards and territory engines have separate source lifecycles and are not
+established by these ordinary-node tests. Their concrete dependencies must be
+audited separately; this document does not label every remaining producer as
+combat-dependent.

@@ -202,3 +202,85 @@ test("resource catch-up bounds each page and retains blocked replacement tickets
     await h.close();
   }
 }, 120000);
+
+test("black-land resource supply uses native geometry, hysteresis, weighted band zero and its own wait table", async () => {
+  const h = await cityHarness();
+  try {
+    const { black_land_res_dead } =
+      await import("@opencok/drizzle/schema/opencok_kingdom/black_land_res_dead");
+    await h.db.db
+      .insert(server_info)
+      .values({ uid: "server", activityTime: 1n, resGoldAddEndTime: 9999999999n });
+    const points = Array.from({ length: 43 }, (_, index) => ({
+      id: 1 + (575 + index) + 575 * 1201,
+      worldId: 0,
+      x: 575 + index,
+      y: 575,
+      areaId: 300,
+      gridType: index === 40 ? 2 : 0,
+      grid2Type: index === 41 ? 1 : 0,
+      pointType: 0,
+      ownerId: index === 42 ? "other" : "",
+      resLevel: 0,
+      resInitValue: 0,
+    }));
+    await h.db.db.insert(worldpoint).values(points);
+    const executor = createWorldResourceRefreshExecutor(h.db.db, h.authority, 1201);
+    const run = (at: bigint) =>
+      executor.execute(at, (store) =>
+        refreshWorldResources(store, h.rules, 1201, new Map([[307, 100]]), () => 0),
+      );
+    const now = 1000000n;
+    await Promise.all(Array.from({ length: 4 }, () => run(now)));
+    const resources = () => h.db.db.select().from(worldpoint).where(eq(worldpoint.pointType, 3));
+    const initial = await resources();
+    expect(initial).toHaveLength(31);
+    expect(
+      initial.every(
+        (row) =>
+          row.gridType === 0 &&
+          row.resLevel === 8 &&
+          row.resInitValue === 1357200 &&
+          row.pointItem === "0",
+      ),
+    ).toBe(true);
+    expect(initial.some((row) => points.slice(40).some((point) => point.id === row.id))).toBe(
+      false,
+    );
+    const erase = async (id: number) =>
+      h.db.db
+        .update(worldpoint)
+        .set({
+          pointType: 0,
+          pointItem: null,
+          resLevel: 0,
+          resInitValue: 0,
+          resCostValue: 0,
+          flushTime: 0n,
+        })
+        .where(eq(worldpoint.id, id));
+    for (const row of initial.slice(0, 4)) await erase(row.id);
+    await run(now + 1n);
+    expect(await resources()).toHaveLength(27);
+    for (const row of initial.slice(4, 10)) await erase(row.id);
+    await run(now + 2n);
+    expect(await resources()).toHaveLength(31);
+    const occupied = (await resources())[0]!;
+    await h.db.db
+      .update(worldpoint)
+      .set({ ownerId: "owner", ownerMarchUUid: "black-march" })
+      .where(eq(worldpoint.id, occupied.id));
+    const expiry = now + 27n * 3600000n + 3n;
+    await run(expiry);
+    expect(await resources()).toHaveLength(1);
+    expect((await resources())[0]!.id).toBe(occupied.id);
+    expect(await h.db.db.select().from(black_land_res_dead)).toHaveLength(30);
+    expect(await h.db.db.select().from(world_res_dead)).toHaveLength(0);
+    await run(expiry + 15n * 3600000n);
+    expect(await resources()).toHaveLength(31);
+    expect(await h.db.db.select().from(black_land_res_dead)).toHaveLength(0);
+    expect(await h.db.db.select().from(world_res_dead)).toHaveLength(0);
+  } finally {
+    await h.close();
+  }
+}, 120000);

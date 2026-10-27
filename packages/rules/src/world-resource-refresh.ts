@@ -4,6 +4,12 @@ import { chooseWeight } from "./equipment";
 import { cityInteger } from "./city-progression";
 import { worldMutationFailure } from "./world-march-runtime";
 
+export function worldResourceBlackLand(point: Row) {
+  const x = num(point, "x"),
+    y = num(point, "y");
+  return x >= 575 && x <= 625 && y >= 575 && y <= 625;
+}
+
 export function worldResourceDuration(rules: Rules, level: number, dead = false) {
   const hours = Number(rules.items.get(dead ? "resources_death" : "resources_life")?.[`k${level}`]);
   const duration = Math.trunc(hours * 3600000);
@@ -28,14 +34,17 @@ export function worldResourceChoice(
   effects: ReadonlyMap<number, number>,
   goldBonus: boolean,
   random: (maximum: number) => number,
+  blackLand = false,
 ) {
   const bandWidth = cityInteger(rules.items.get("worldmap_city")?.k4, 1),
     center = Math.trunc((size - 1) / 2),
-    band = Math.max(
-      Math.ceil(Math.abs(num(point, "x") - center) / bandWidth),
-      Math.ceil(Math.abs(num(point, "y") - center) / bandWidth),
-    );
-  if (band === 0) return undefined;
+    band = blackLand
+      ? 0
+      : Math.max(
+          Math.ceil(Math.abs(num(point, "x") - center) / bandWidth),
+          Math.ceil(Math.abs(num(point, "y") - center) / bandWidth),
+        );
+  if (band === 0 && !blackLand) return undefined;
   const choices = group.filter(
     (rule) => Number(rule.area_level) === band && BigInt(cityInteger(rule.hours)) * 3600000n <= age,
   );
