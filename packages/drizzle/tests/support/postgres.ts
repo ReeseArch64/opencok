@@ -18,12 +18,15 @@ export class DisposablePostgres {
       stdout: "pipe",
       stderr: "pipe",
     });
-    const [output, , code] = await Promise.all([
+    const [output, errors, code] = await Promise.all([
       new Response(child.stdout).bytes(),
       new Response(child.stderr).text(),
       child.exited,
     ]);
-    if (code) throw new Error(`Disposable PostgreSQL ${args[0]} failed (exit ${code})`);
+    if (code)
+      throw new Error(
+        `Disposable PostgreSQL ${args[0]} failed (exit ${code}): ${errors.replaceAll(String(this.options.password), "[redacted]").trim()}`,
+      );
     return output;
   }
   async connect(database = "postgres") {
