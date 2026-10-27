@@ -7,63 +7,65 @@ do not establish implementation or production readiness. Component runbooks and
 
 ## 12. Observability, Evelog and search
 
+[ADR-0013](../decisions/0013-adopt-maple-for-local-operational-observability.md) governs the
+current local implementation. Server/API retain Evlog JSON output and export logs,
+OpenTelemetry spans, controlled exception events, counters and duration histograms to
+the official Maple Local container. Grafana, Loki, Prometheus, Axiom and Sentry adoption
+is suspended for these signals while Maple continues to pass its integration checks.
+Production hosting/capacity and infrastructure scraping remain separate work.
+
 ```mermaid
 flowchart LR
-  apps[Server, Chat, API with media, bots and workers] -->|Metrics| prom[Prometheus]
-  apps -->|Structured and filtered logs| collector[Log Collector]
-  collector --> loki[Loki]
-  infra[Managed databases, broker, gateways and Kubernetes] -->|Available metrics| prom
-  clients[Frontend, Admin and clients prepared] --> firebase[Firebase - product telemetry]
-  firebase --> product[Funnels, events and perceived quality]
-  prom --> grafana[Grafana - dashboards]
-  loki --> grafana
-  prom --> alerts[Alerts and operational response]
-  transaction[Business transactions and administrative actions] --> eventlog[Evelog - game events and audit]
-  eventlog --> audit[(Durable event and audit logging)]
-  audit -.->|Derived indexing if necessary| elastic[Optional Elasticsearch]
-  elastic -.-> search[Report search and audit]
+  apps[Server and API] -->|Redacted Evlog events| logs[OTLP logs]
+  apps -->|Explicit spans and exceptions| traces[OTLP traces]
+  apps -->|Durations, counters and process metrics| metrics[OTLP metrics]
+  logs --> maple[Maple Local dashboard]
+  traces --> maple
+  metrics --> maple
+  maple --> volume[(Persistent telemetry volume)]
+  transaction[Business transaction] --> audit[(Receipts, ledger and outbox)]
+  audit --> relay[Retryable publication with persisted trace context]
+  relay --> apps
 ```
 
-Firebase collects product telemetry: game entry, screen flows, controlled errors, and
-usage events. It is not authority for balance, purchase or battle outcome. Mobile
-integration depends on the SDK and APK version preparation; do not assume that the
-legacy client already sends these events. Analytics does not receive player secrets,
-tokens, message bodies, or dumps. Its unavailability does not block the game.
-[Reference: Google Analytics for Firebase](https://firebase.google.com/docs/analytics).
+Composed services, domains, controllers and persistence/publication adapters emit start
+and terminal events with controlled operation, outcome, duration and correlation.
+Background workers have detached job/trace contexts. PostgreSQL statement instrumentation
+records only statement kind, schema-allowlisted table and row count. Generated avatar
+bytes and queued TCP frames have metadata events; queuing is not an acknowledgment of
+client delivery. Confirmed effect events are deferred until the transaction commits and
+are discarded on rollback. The outbox preserves W3C `traceparent` across retries/restarts.
 
-Prometheus collects operational metrics; Loki centralizes logs; Grafana queries both.
-Firebase is not a replacement for runtime and infrastructure visibility. To maintain the
-VPS budget, destination/hosting of these backends will be defined outside of the main
-node or only after explicit capacity reservation. Alerts cover queue delay, command
-failures, connections, CPU/memory consumption, replication, per-operation latency, and
-partition owner failure. Set SLOs and capacity from load testing, not an assumed number
-of players per pod.
+Only controlled metadata enters operational records. Exclude SQL, parameters, arbitrary
+URLs, headers, request/response bodies, player/device identities, tokens, keys and raw
+exception messages/stacks. Evlog redacts before OTLP log export. Error groups use controlled
+reason/event metadata. High-cardinality IDs remain searchable log/span fields, never
+metric dimensions. See the [shared contract](../../packages/core/README.md#operational-logging).
 
-Operational logs record correlation, component, known operation, duration, and
-controlled reason. Avoid player payloads, credentials, tokens and keys. High-cardinality
-IDs must not become Loki labels or per-player Prometheus series; the search uses
-structured fields when authorized. [Reference: cardinality in Loki](https://grafana.com/docs/loki/latest/get-started/labels/cardinality/).
+Maple is available at `http://127.0.0.1:4318`, with separate ingest and dashboard/query
+credentials, an offline bundled UI and a persistent `maple-data` volume. Its own external
+telemetry/update checks are disabled. See the [Compose runbook](../../infra/compose/README.md#observability).
+Default raw-log/trace retention is 30 days; metric retention is 90 days. Clean restart
+preserves the store. Upstream checkpoint recovery after an unclean stop can lose recent
+telemetry; back up the volume and keep transactional audit independent.
 
-The current TypeScript development services use the external Evlog library through
-`packages/core/src/logging.ts` for operational JSON output. Shared runtime,
-resource and HTTP adapters instrument API with media and realm; realm TCP sessions
-and Chat HTTP/WebSocket adapters attach generated correlation IDs and controlled
-outcomes. This is a console logging implementation; collectors, Loki hosting and
-persistent audit remain separate work. The
-[shared logging contract](../../packages/core/README.md#operational-logging) defines
-severity, field filtering and retention boundaries.
+Log/span queues are bounded at 8192 entries per process, with 256-entry batches and a
+one-second default export interval. Export failures produce controlled local diagnostics.
+Maple outages do not block gameplay or invalidate committed state. Operational telemetry
+can be lost after overflow, export failure or abrupt termination; it is not a durable
+business audit. Slow operations emit warning events and in-flight metrics expose unfinished
+work. Local Maple does not schedule automatic alerts or guarantee detection latency.
 
-**Evelog:** name of the game's event and audit log, as confirmed by the operator; does
-not represent an external tool. The design proposes an append-only record in PostgreSQL,
-linked to the outbox, with voluminous details archived in MongoDB/storage as per
-retention. Events record action, origin, rule version, correlation and result, with
-restricted access. This does not require adopting event sourcing for the entire game
-state and does not replace Loki's operational logs.
+**Evelog** names the game's durable audit concept, not the Evlog library. PostgreSQL
+receipts, economic postings and outbox already provide a foundation; a complete append-only
+audit product and restricted operator search remain separate work. Voluminous details may
+be archived under retention controls. Maple receives filtered operational projections and
+does not become economic authority. Elasticsearch remains optional reconstructable search.
 
-Elasticsearch remains optional: use only if searches and filters in reports justify the
-cost of a separate index. It receives reconstructable projections, with access and
-deletion control; its unavailability does not block combat, login or progress recording.
-Loki remains the primary destination for logs.
+Firebase product analytics remains separate from runtime observability and state authority.
+It must not receive secrets, message bodies or player dumps. Mobile integration depends on
+the prepared client version; its unavailability never blocks gameplay. Firebase Cloud
+Messaging remains the independent notification channel below.
 
 ### Push notifications with Firebase Cloud Messaging
 
@@ -138,7 +140,7 @@ distribution like K3s is a candidate, after measuring its actual cost. [Referenc
 | Data and queues             | External Neon, Redis.io, MongoDB Cluster and CloudAMQP; do not install your production copies on the VPS.                                            |
 | Frontends                   | Pages for WWW/Docs/Admin; Vercel for Web Game SSR.                                                                                                   |
 | Chat and bots               | Services external to the VPS; hosting and quotas still to be selected.                                                                               |
-| Observability               | Light collectors/exporters in the cluster; target of Prometheus/Loki/Grafana outside of core budget or dedicated capacity yet to be defined.         |
+| Observability               | Maple is verified locally; production telemetry hosting/capacity and collectors remain to be measured under ADR-0013.                                |
 
 Three ZooKeeper pods on the same VPS cannot survive machine loss. Kubernetes does not
 create RAM, vCPU, or physical availability. It also does not automatically duplicate a

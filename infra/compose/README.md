@@ -87,7 +87,7 @@ The one-shot jobs exit with code zero after completion.
 | Redis Insight                            | 5540           |
 | Portainer HTTP (host to container)       | 9443 → 9000    |
 
-Port mappings have no host-IP prefix. Internal connections use service DNS:
+Maple binds its host port to loopback; the other development port mappings have no host-IP prefix. Internal connections use service DNS:
 `postgres:5432`, `redis:6379`, `zookeeper:2181`, `api:8080`, `server:9933`,
 `minio:9000` and `chat:8083`. The API and game server have no directly published host
 ports. The API joins the external network for outbound access. Avatar storage operations use `S3_ENDPOINT=http://minio:9000`;
@@ -192,3 +192,86 @@ Compose Chat consumer. Read the [social chat deployment guide](../../docs/social
 for migration order, archive outage behavior, original expiry, rollback and synthetic
 acceptance. Existing MongoDB volumes keep their initialized credentials when environment
 values change; do not delete the volume to rotate credentials.
+
+## Observability
+
+[ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
+selects Maple Local for server/API logs, traces, controlled errors and duration/process
+metrics. Grafana, Loki, Prometheus, Axiom and Sentry adoption is suspended for these
+signals while Maple passes the required checks. The official `v0.3.0` image contains
+OTLP HTTP ingest, the query API, embedded ClickHouse and the bundled offline dashboard.
+It uses `maple-data:/data`; no second database or hosted Maple account is required.
+Its own outgoing telemetry/update checks are disabled.
+
+Start the services after rebuilding the applications:
+
+```sh
+docker compose --profile dev up --build -d --wait maple server api
+```
+
+Compose's PostgreSQL setup applies migration `0044_mutation_trace_context.sql` before
+server/API start. This adds nullable outbox trace context without resetting existing
+state. Rebuild server/API when updating this integration. Maple is not a gameplay
+readiness dependency: a telemetry outage does not prevent application startup.
+
+Open `http://127.0.0.1:4318`. The dashboard token defaults to
+`opencok-development-dashboard-only`; this is a public development value. The separate
+ingest key defaults to `opencok-development-ingest-only`. Set independently generated
+`MAPLE_LOCAL_ACCESS_TOKEN` and `MAPLE_LOCAL_INGEST_KEY` values in the ignored root `.env`
+before sharing access, then recreate Maple, server and API together. Generate each
+value with `openssl rand -hex 32`; keep them out of source and command output captured
+for reports. The dashboard token can read/query telemetry; the ingest key only writes.
+Maple's port is published on loopback only, unlike the existing development tools.
+`MAPLE_PORT` changes the host port without changing the internal ingest address.
+
+Both services send OTLP to `http://maple:4318`. For applications run outside Compose,
+set `OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318` and the same ingest key.
+`OTEL_EXPORT_INTERVAL_MS` defaults to 1000 and accepts 1000–60000 ms;
+`OTEL_SLOW_OPERATION_MS` defaults to 1000 and accepts 100–60000 ms. Configure these
+values on the applications when overriding Compose defaults. Leaving the endpoint
+unset keeps JSON logs without network export.
+
+In the dashboard, select `server` or `api`, filter by operation/outcome/level and open
+a log's trace to inspect its child spans. Use request/connection/job IDs or the opaque
+mutation reference for a specific operation. Inspect Errors for controlled exception
+groups and Metrics for `opencok.operation.duration`, `opencok.operations.active`,
+`opencok.events`, `process.cpu.time`, `process.memory.rss` and `process.uptime`.
+`operation_slow` marks unfinished asynchronous work beyond the configured threshold.
+A frame queued to TCP is not proof of client receipt. An outbox delivery failure
+remains visible independently of the originating committed command.
+
+Useful local queries require no token arguments because the container environment
+already supplies its access token:
+
+```sh
+docker compose --profile dev exec -T maple maple services --local
+docker compose --profile dev exec -T maple maple logs --service server --since 15m --local
+docker compose --profile dev exec -T maple maple errors --since 15m --local
+docker compose --profile dev exec -T maple maple metrics --local
+```
+
+Maple Local does not schedule automatic alerts. Keep the dashboard open for interactive
+investigation; this integration does not send push notifications. Log/span exporters
+have bounded queues and timeouts. If Maple becomes unreachable, local JSON diagnostics
+report `telemetry_export_failed`; operations continue and operational telemetry can be
+lost. Receipts, ledger and outbox remain the durable business record. Do not interpret
+absence of a telemetry event as proof that a mutation never committed.
+
+Logs/traces default to 30-day retention and metrics to 90 days. Clean restart preserves
+the volume. After an unclean stop the upstream entrypoint restores a checkpoint when
+available or starts a fresh store; recent operational telemetry can be lost. Back up
+`maple-data` and consult the pinned upstream recovery documentation before upgrades.
+Do not use `down --volumes` on a persistent operator stack. Server/API/Maple console
+logs rotate at 20 MiB with five files each.
+
+Verification commands use synthetic inputs and disposable infrastructure:
+
+```sh
+bun run --cwd packages/core test:maple
+bun run test:stack
+```
+
+The first checks every required signal, trace/log correlation, private-field filtering,
+query authentication and clean-restart persistence against the real Maple image. The
+second exercises the actual API/server containers and queries their stored telemetry.
+Production capacity and representative load remain separate admission work.

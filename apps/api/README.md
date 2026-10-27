@@ -193,3 +193,13 @@ are no longer valid. Coordinate API, realm and transitional client deployment; l
 client patch 028 uses the opaque ticket and query transport. Keep private artifacts
 outside Git. Preserve buckets, receipts, profile journals and Redis configuration
 across restarts. No database reset or schema migration is required.
+
+## Operational observability
+
+[ADR-0013](../../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
+governs Evlog/OpenTelemetry export to Maple Local. Composed application operations
+and dependencies emit correlated start/result/error records and duration metrics.
+Generated effects are distinguished from committed transactions and deferred
+delivery. See the [shared contract](../../packages/core/README.md#operational-logging)
+and [Compose runbook](../../infra/compose/README.md#observability) for the dashboard,
+configuration, credentials and retention/alerting limitations.

@@ -30,12 +30,12 @@ export class Client {
   send(packet: Fields) {
     this.socket.write(frame(packet));
   }
-  async next(): Promise<Fields> {
+  async next(operation = "packet"): Promise<Fields> {
     if (this.packets.length) return this.packets.shift()!;
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.waiting = undefined;
-        reject(new Error("Test response timeout"));
+        reject(new Error(`Test response timeout: ${operation}`));
       }, 10000);
       this.waiting = {
         resolve: (value) => {
@@ -51,7 +51,7 @@ export class Client {
   }
   async handshake() {
     this.send(envelope(0, 0, { api: sfs.string("1.7.1"), cl: sfs.string("Android") }));
-    return fields((await this.next()).p);
+    return fields((await this.next("handshake")).p);
   }
   async login(
     secret: string,
@@ -81,12 +81,12 @@ export class Client {
         }),
       }),
     );
-    return fields((await this.next()).p);
+    return fields((await this.next("login")).p);
   }
   async command(name: string, params: Fields = {}): Promise<Fields> {
     this.send(extension(name, params));
     for (let i = 0; i < 20; i++) {
-      const packet = fields((await this.next()).p);
+      const packet = fields((await this.next(`command:${name}`)).p);
       if (str(packet, "c") === name) return fields(packet.p);
     }
     throw new Error("Too many unexpected test responses");

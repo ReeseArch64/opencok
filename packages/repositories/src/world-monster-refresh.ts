@@ -1,3 +1,4 @@
+import { outgoingTrace } from "@opencok/core/operation";
 import { randomUUID } from "node:crypto";
 import { and, eq, sql, inArray, asc, lte } from "drizzle-orm";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
@@ -401,6 +402,7 @@ export function createWorldMonsterRefreshExecutor(
         if (changed.size) {
           const id = randomUUID().replaceAll("-", "");
           await tx.insert(mutation_outbox).values({
+            traceparent: outgoingTrace(new Headers()).get("traceparent"),
             kingdomId: authority.kingdomId,
             ownerUid: "",
             requestId: `monsters:${id}`,

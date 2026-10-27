@@ -1,5 +1,6 @@
 import { Data, Effect } from "effect";
 import { errorReason, logEvent } from "./logging.ts";
+import { observeOperation } from "./operation.ts";
 
 export class ResourceError extends Data.TaggedError("ResourceError")<{
   readonly operation: string;
@@ -11,7 +12,7 @@ export function fromPromise<A>(operation: string, run: () => Promise<A>) {
       const started = performance.now();
 
       try {
-        const result = await run();
+        const result = await observeOperation(operation, run);
 
         if (operation !== "realm.health")
           logEvent("resource_completed", {

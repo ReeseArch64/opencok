@@ -134,7 +134,7 @@ do not renew these deadlines. Early deletion due to moderation remains permitted
 
 This rule applies to **global chat and alliance chat**. Private messages and other
 channels need their own explicit policy, without inheriting retention by accident. Do
-not archive the body of these messages permanently in Evelog or Loki; operational
+not archive the body of these messages permanently in Evelog or operational telemetry; operational
 moderation events store only necessary metadata.
 
 ```mermaid

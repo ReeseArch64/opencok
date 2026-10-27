@@ -1,3 +1,7 @@
+import { createHash } from "node:crypto";
+import { afterCommit } from "@opencok/core/transaction";
+import { logEvent } from "@opencok/core/logging";
+import { observeOperation, outgoingTrace, incomingTrace } from "@opencok/core/operation";
 import { captureCostFact } from "./continued-cost-facts";
 import { lte, and, asc, eq, inArray } from "drizzle-orm";
 import { command_receipt } from "@opencok/drizzle/schema/opencok_kingdom/command_receipt";
@@ -57,100 +61,123 @@ export function createMutationExecutor(
       requestId = input.requestId,
       command = input.command;
     const request = bytes(input.request, 65536);
+    const mutationRef = createHash("sha256")
+      .update(JSON.stringify([authority.kingdomId, owner, requestId]))
+      .digest("hex");
 
-    return db.transaction(
-      async (tx) => {
-        await fenceRealmTransaction(tx, authority);
-        const captured = now();
+    let replayed = false;
+    let postingCount = 0;
+    let eventCount = 0;
+    return observeOperation(
+      "mutation.execute",
+      async () => {
+        const response = await db.transaction(
+          async (tx) => {
+            await fenceRealmTransaction(tx, authority);
+            const captured = now();
 
-        if (!Number.isSafeInteger(captured) || captured < 0)
-          throw new Error("Invalid mutation clock");
+            if (!Number.isSafeInteger(captured) || captured < 0)
+              throw new Error("Invalid mutation clock");
 
-        const createdAt = BigInt(captured);
-        const participants = input.participants === undefined ? undefined : [...input.participants];
+            const createdAt = BigInt(captured);
+            const participants =
+              input.participants === undefined ? undefined : [...input.participants];
 
-        if (participants) {
-          if (
-            !participants.includes(owner) ||
-            participants.length > 2048 ||
-            new Set(participants).size !== participants.length
-          )
-            throw new Error("Invalid mutation participants");
+            if (participants) {
+              if (
+                !participants.includes(owner) ||
+                participants.length > 2048 ||
+                new Set(participants).size !== participants.length
+              )
+                throw new Error("Invalid mutation participants");
 
-          for (const id of participants) identifier(id, 40);
+              for (const id of participants) identifier(id, 40);
 
-          const locked = await tx
-            .select({ uid: userprofile.uid, realm: userprofile.serverId })
-            .from(userprofile)
-            .where(inArray(userprofile.uid, participants))
-            .orderBy(asc(userprofile.uid))
-            .for("update");
+              const locked = await tx
+                .select({ uid: userprofile.uid, realm: userprofile.serverId })
+                .from(userprofile)
+                .where(inArray(userprofile.uid, participants))
+                .orderBy(asc(userprofile.uid))
+                .for("update");
 
-          if (
-            locked.length !== participants.length ||
-            locked.some((row) => row.realm !== authority.kingdomId)
-          )
-            throw new Error("Foreign mutation participant");
-        }
+              if (
+                locked.length !== participants.length ||
+                locked.some((row) => row.realm !== authority.kingdomId)
+              )
+                throw new Error("Foreign mutation participant");
+            }
 
-        const [profile] = await tx
-          .select({
-            realm: userprofile.serverId,
-            banFlag: userprofile.banFlag,
-            banTime: userprofile.banTime,
-          })
-          .from(userprofile)
-          .where(eq(userprofile.uid, owner))
-          .for("update");
+            const [profile] = await tx
+              .select({
+                realm: userprofile.serverId,
+                banFlag: userprofile.banFlag,
+                banTime: userprofile.banTime,
+              })
+              .from(userprofile)
+              .where(eq(userprofile.uid, owner))
+              .for("update");
 
-        if (
-          profile?.realm !== authority.kingdomId ||
-          (profile.banFlag ?? 0) !== 0 ||
-          (profile.banTime ?? 0n) > createdAt
-        )
-          throw new Error("Invalid mutation owner");
+            if (
+              profile?.realm !== authority.kingdomId ||
+              (profile.banFlag ?? 0) !== 0 ||
+              (profile.banTime ?? 0n) > createdAt
+            )
+              throw new Error("Invalid mutation owner");
 
-        const key = { kingdomId: authority.kingdomId, ownerUid: owner, requestId };
-        const [receipt] = await tx
-          .select()
-          .from(command_receipt)
-          .where(
-            and(
-              eq(command_receipt.kingdomId, key.kingdomId),
-              eq(command_receipt.ownerUid, owner),
-              eq(command_receipt.requestId, requestId),
-            ),
-          );
+            const key = { kingdomId: authority.kingdomId, ownerUid: owner, requestId };
+            const [receipt] = await tx
+              .select()
+              .from(command_receipt)
+              .where(
+                and(
+                  eq(command_receipt.kingdomId, key.kingdomId),
+                  eq(command_receipt.ownerUid, owner),
+                  eq(command_receipt.requestId, requestId),
+                ),
+              );
 
-        if (receipt) {
-          if (
-            receipt.request.length === 0 ||
-            (receipt.expiresAt !== null && receipt.expiresAt <= createdAt)
-          )
-            throw new Error("Mutation receipt expired");
+            if (receipt) {
+              if (
+                receipt.request.length === 0 ||
+                (receipt.expiresAt !== null && receipt.expiresAt <= createdAt)
+              )
+                throw new Error("Mutation receipt expired");
 
-          if (receipt.command !== command || !receipt.request.equals(request))
-            throw new Error("Mutation receipt conflict");
+              if (receipt.command !== command || !receipt.request.equals(request))
+                throw new Error("Mutation receipt conflict");
 
-          authority.assertReady();
+              authority.assertReady();
 
-          return Buffer.from(receipt.response);
-        }
+              replayed = true;
+              return Buffer.from(receipt.response);
+            }
 
-        const result = await apply(tx);
-        const response = await appendMutationRecords(
-          tx,
-          authority,
-          { owner, requestId, command, request, expiresAt: input.expiresAt },
-          result,
-          createdAt,
-          accounts,
+            const result = await apply(tx);
+            postingCount = result.postings?.length ?? 0;
+            eventCount = result.events?.length ?? 0;
+            const response = await appendMutationRecords(
+              tx,
+              authority,
+              { owner, requestId, command, request, expiresAt: input.expiresAt },
+              result,
+              createdAt,
+              accounts,
+            );
+            authority.assertReady();
+
+            return response;
+          },
+          { isolationLevel: "read committed", accessMode: "read write" },
         );
-        authority.assertReady();
-
+        logEvent(replayed ? "mutation_replayed" : "mutation_committed", {
+          kingdom: authority.kingdomId,
+          postingCount,
+          eventCount,
+          outcome: "success",
+        });
         return response;
       },
-      { isolationLevel: "read committed", accessMode: "read write" },
+      { component: "mutation", mutationRef },
     );
   };
 }
@@ -229,18 +256,38 @@ export async function appendMutationRecords(
       delta,
       reason: posting.reason,
     });
+    const category = posting.asset.split(".", 1)[0]!;
+    afterCommit("economy_effect_committed", {
+      kingdom: authority.kingdomId,
+      effectIndex: entry,
+      assetCategory: [
+        "profile",
+        "resource",
+        "inventory",
+        "goods",
+        "item",
+        "troop",
+        "equipment",
+      ].includes(category)
+        ? category
+        : "other",
+      direction: delta > 0n ? "increase" : delta < 0n ? "decrease" : "unchanged",
+    });
   }
 
-  for (const event of events)
+  for (const event of events) {
     await tx.insert(mutation_outbox).values({
       ...key,
       eventId: event.id,
       eventType: event.type,
+      traceparent: outgoingTrace(new Headers()).get("traceparent"),
       payload: bytes(event.payload, 65536),
       createdAt,
       publishedAt: 0n,
       expiresAt: event.expiresAt ?? input.expiresAt,
     });
+    afterCommit("outbox_event_created", { kingdom: authority.kingdomId, eventType: event.type });
+  }
 
   for (const event of events)
     if (event.type === "continuedcost.spend")
@@ -257,6 +304,11 @@ export async function appendMutationRecords(
       );
 
   authority.assertReady();
+  afterCommit("mutation_effects_committed", {
+    kingdom: authority.kingdomId,
+    postingCount: postings.length,
+    eventCount: events.length,
+  });
 
   return response;
 }
@@ -307,14 +359,25 @@ export async function relayMutationEvent(
 
   try {
     await Promise.race([
-      publish({
-        kingdomId: event.kingdomId,
-        owner: event.ownerUid,
-        requestId: event.requestId,
-        id: event.eventId,
-        type: event.eventType,
-        payload: Buffer.from(event.payload),
-      }),
+      incomingTrace(new Headers(event.traceparent ? { traceparent: event.traceparent } : {}), () =>
+        observeOperation(
+          "outbox.publish",
+          () =>
+            publish({
+              kingdomId: event.kingdomId,
+              owner: event.ownerUid,
+              requestId: event.requestId,
+              id: event.eventId,
+              type: event.eventType,
+              payload: Buffer.from(event.payload),
+            }),
+          {
+            mutationRef: createHash("sha256")
+              .update(JSON.stringify([event.kingdomId, event.ownerUid, event.requestId]))
+              .digest("hex"),
+          },
+        ),
+      ),
       new Promise<never>((_, reject) => {
         timer = setTimeout(() => reject(new Error("Mutation publication timeout")), 3000);
       }),
@@ -337,6 +400,11 @@ export async function relayMutationEvent(
           );
       });
 
+    logEvent(
+      "outbox_delivery_failed",
+      { kingdom: authority.kingdomId, outcome: "failure", retryScheduled: retryDelayMs > 0 },
+      "error",
+    );
     throw error;
   } finally {
     clearTimeout(timer);
@@ -363,5 +431,6 @@ export async function relayMutationEvent(
     authority.assertReady();
   });
 
+  logEvent("outbox_delivered", { kingdom: authority.kingdomId, outcome: "success" });
   return true;
 }

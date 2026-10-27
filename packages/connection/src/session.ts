@@ -1,3 +1,5 @@
+import { loggedGameCommands } from "@opencok/constants/logged-commands";
+import { observeServerOperation } from "@opencok/core/operation";
 import {
   MAX_CONNECTIONS,
   SOCKET_TIMEOUT_MS,
@@ -6,7 +8,7 @@ import {
 } from "@opencok/constants/connection";
 import type { Socket } from "node:net";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
-import { errorReason, logEvent, withLogContext } from "@opencok/core/logging";
+import { errorReason, logEvent, withLogContext, updateLogContext } from "@opencok/core/logging";
 import { text } from "@opencok/contracts/rows";
 import { authenticate, LoginError } from "@opencok/identity/mobile";
 import { dynamicResourceConfig } from "@opencok/mappings/bootstrap";
@@ -94,7 +96,8 @@ export function createSessionHandler(
         return;
       }
 
-      socket.write(bytes);
+      const writable = socket.write(bytes);
+      report("frame_queued", { bytes: bytes.length, writable, outcome: "success" });
     };
     const handle = async (packet: Fields) => {
       if (!ready()) {
@@ -300,23 +303,12 @@ export function createSessionHandler(
       metrics.commands++;
       const started = performance.now();
       const commandHash = createHash("sha256").update(command).digest("hex").slice(0, 16);
-      const knownCommands = [
-        "cmd.finishinit",
-        "cmd.ping",
-        "login.dataconfig",
-        "setting.xml",
-        "login.other",
-        "build.info",
-        "get.user.info.multi",
-        "get.user.info",
-        "get.power.info",
-        "user.lv",
-        "world.get",
-      ];
       const commandFields = {
-        command: knownCommands.includes(command) ? command : "unknown",
+        command: loggedGameCommands.has(command) ? command : "unknown",
         commandHash,
       };
+      updateLogContext(commandFields);
+      report("command_started", commandFields);
       let outcome = "success";
       let reason: string | undefined;
 
@@ -436,7 +428,7 @@ export function createSessionHandler(
                 if (!socket.destroyed)
                   await withLogContext(
                     { connectionId, operationId, kingdom: config.kingdomId, component: "tcp" },
-                    () => handle(packet),
+                    () => observeServerOperation("tcp.packet", () => handle(packet)),
                   );
               } finally {
                 pending--;

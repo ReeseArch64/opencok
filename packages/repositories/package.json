@@ -23,6 +23,7 @@
     "@opencok/ledger": "workspace:*",
     "@opencok/mappings": "workspace:*",
     "@opencok/messages": "workspace:*",
-    "@opencok/hero": "workspace:*"
+    "@opencok/hero": "workspace:*",
+    "@opencok/core": "workspace:*"
   }
 }

@@ -58,12 +58,13 @@ test("parallel and nested HTTP logging keeps independent IDs and emits once per 
       );
     }),
   );
-  expect(records).toHaveLength(2);
+  const requests = records.filter((record) => record.event === "http");
+  expect(requests).toHaveLength(2);
   const ids = response.map((response) => response.headers.get("X-Request-ID"));
   expect(new Set(ids).size).toBe(2);
-  expect(records.map((record) => record.requestId).sort()).toEqual([...ids].sort());
+  expect(requests.map((record) => record.requestId).sort()).toEqual([...ids].sort());
   expect(
-    records.every((record) => record.operation === "unknown" && record.outcome === "success"),
+    requests.every((record) => record.operation === "unknown" && record.outcome === "success"),
   ).toBe(true);
   expect(JSON.stringify(records)).not.toMatch(/private-|untrusted/);
 });
@@ -77,7 +78,12 @@ test("digit-heavy request IDs survive redaction while credentials remain masked"
   });
   const requestId = "req_4827383746294286a709504965c3e4e6";
   expect(response.headers.get("X-Request-ID")).toBe(requestId);
-  expect(records.map((record) => record.requestId)).toEqual([requestId, requestId]);
+  expect(records.map((record) => record.requestId)).toEqual([
+    requestId,
+    requestId,
+    requestId,
+    requestId,
+  ]);
   expect(JSON.stringify(records)).not.toContain("private-token");
 });
 
@@ -92,7 +98,11 @@ test("HTTP failures carry status and severity without leaking thrown errors", as
       throw new Error("private-database-password");
     }),
   ).rejects.toThrow("private-database-password");
-  expect(records.map((record) => [record.level, record.status])).toEqual([
+  expect(
+    records
+      .filter((record) => record.event === "http")
+      .map((record) => [record.level, record.status]),
+  ).toEqual([
     ["warn", 400],
     ["error", 503],
     ["error", 500],
@@ -106,14 +116,14 @@ test("dependency failures identify the failed operation while keeping error deta
       throw new Error("postgresql://private-user:private-password@private-host");
     }),
   );
-  expect(records).toHaveLength(1);
-  expect(records[0]).toMatchObject({
+  expect(records.filter((record) => record.event === "resource_failed")).toHaveLength(1);
+  expect(records.at(-1)).toMatchObject({
     event: "resource_failed",
     operation: "realm.database.start",
     level: "error",
     outcome: "failure",
   });
-  expect(records[0]!.durationMs).toBeNumber();
+  expect(records.at(-1)!.durationMs).toBeNumber();
   expect(JSON.stringify(records)).not.toContain("private-");
 });
 

@@ -1,3 +1,4 @@
+import { observedFetch } from "@opencok/core/fetch";
 import type { AvatarFiles, AvatarTickets } from "@opencok/contracts/files";
 
 export function createAvatarFiles(options: {
@@ -42,7 +43,8 @@ export function createAvatarFiles(options: {
 
       if (controller.signal.aborted) throw new Error();
 
-      const response = await request(
+      const response = await observedFetch(
+        "avatar.exchange",
         `${url.origin}/_internal/avatars/${owner}/${sequence}${image ? "/url" : ""}`,
         {
           method: "GET",
@@ -50,6 +52,7 @@ export function createAvatarFiles(options: {
           redirect: "error",
           signal: controller.signal,
         },
+        request,
       );
       reader = response.body?.getReader();
       const limit = image ? 4096 : 128;

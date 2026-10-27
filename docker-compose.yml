@@ -23,8 +23,38 @@ volumes:
   minio-data: ~
   redisinsight-data: ~
   portainer-data: ~
+  maple-data: ~
+
+x-operational-logging: &operational-logging
+  driver: json-file
+  options:
+    max-size: 20m
+    max-file: "5"
 
 services:
+  maple:
+    image: ghcr.io/mapletechlabs/maple:v0.3.0
+    restart: on-failure:5
+    profiles: [all, dev]
+    networks: [opencok-internal-network]
+    environment:
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-only}
+      MAPLE_LOCAL_ACCESS_TOKEN: ${MAPLE_LOCAL_ACCESS_TOKEN:-opencok-development-dashboard-only}
+      MAPLE_TELEMETRY: "off"
+      MAPLE_NO_UPDATE_CHECK: "1"
+    ports:
+      - 127.0.0.1:${MAPLE_PORT:-4318}:4318
+    volumes:
+      - maple-data:/data
+    stop_grace_period: 45s
+    logging: *operational-logging
+    healthcheck:
+      test: [CMD, maple, services, --local, --limit, "1"]
+      interval: 15s
+      timeout: 10s
+      start_period: 60s
+      retries: 8
+
   portainer:
     image: portainer/portainer-ce:lts
     command: [--http-enabled]
@@ -249,6 +279,7 @@ services:
         condition: service_healthy
 
   server:
+    logging: *operational-logging
     build:
       context: .
       dockerfile: apps/server/Dockerfile
@@ -258,6 +289,9 @@ services:
     networks: [opencok-internal-network]
     environment:
       NODE_ENV: development
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-only}
+      OTEL_EXPORT_INTERVAL_MS: 1000
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
       KINGDOM_ID: 1
       KINGDOM_DATABASE_NAME: opencok_kingdom_1
@@ -301,6 +335,7 @@ services:
       retries: 12
 
   api:
+    logging: *operational-logging
     build:
       context: .
       dockerfile: apps/api/Dockerfile
@@ -310,6 +345,9 @@ services:
     networks: [opencok-internal-network, opencok-external-network]
     environment:
       NODE_ENV: development
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY:-opencok-development-ingest-only}
+      OTEL_EXPORT_INTERVAL_MS: 1000
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/opencok_global
       GLOBAL_DATABASE_NAME: opencok_global
       KINGDOM_ID: 1
