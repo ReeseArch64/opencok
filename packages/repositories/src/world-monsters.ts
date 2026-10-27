@@ -35,6 +35,26 @@ export function worldMonsterReader(tx: MutationTransaction, size: number): World
     return rows;
   };
   return {
+    async claimed(points) {
+      if (
+        !points.length ||
+        points.length > 4 ||
+        points.some((id) => !Number.isInteger(id) || id < 1 || id > size * size)
+      )
+        throw new Error("Invalid monster placement footprint");
+      const [claim] = await tx
+        .select({ id: worldpoint.id })
+        .from(worldpoint)
+        .where(
+          and(
+            eq(worldpoint.worldId, 0),
+            inArray(worldpoint.id, [...points]),
+            sql`(coalesce(${worldpoint.ownerId},'')<>'' OR coalesce(${worldpoint.ownerMarchUUid},'')<>'' OR EXISTS(SELECT 1 FROM opencok_kingdom.world_march m WHERE m."worldId"=0 AND m."targetId" IN (${worldpoint.id},${worldpoint.id}+1,${worldpoint.id}+${size},${worldpoint.id}+${size + 1})) OR EXISTS(SELECT 1 FROM opencok_kingdom.t_worldboss b WHERE b.point=${worldpoint.id} AND b.status=1) OR EXISTS(SELECT 1 FROM opencok_kingdom.world_barbarion b WHERE b."pointId"=${worldpoint.id}))`,
+          ),
+        )
+        .limit(1);
+      return Boolean(claim);
+    },
     async barbarians(points) {
       if (points.length > 4096) throw new Error("Barbarian actor aggregate exceeds bound");
       if (!points.length) return [];

@@ -176,6 +176,7 @@ export function createCityProgressionStore(
       const worldMutation =
         command?.startsWith("world.") ||
         command === "get.act.boss.point" ||
+        command === "create.boss" ||
         command?.startsWith("treasuremap.") ||
         command === "buy.citydef" ||
         command === "totem" ||
@@ -183,9 +184,13 @@ export function createCityProgressionStore(
           ? await readWorldMutationState(tx, owner, request, mapSize, command)
           : undefined;
       return {
-        worldMonsters: ["world.get.monster", "world.get.barbarion", "get.act.boss.point"].includes(
-          command ?? "",
-        )
+        worldMonsters: [
+          "world.use",
+          "create.boss",
+          "world.get.monster",
+          "world.get.barbarion",
+          "get.act.boss.point",
+        ].includes(command ?? "")
           ? worldMonsterReader(tx, mapSize)
           : undefined,
         campaignProfile:
