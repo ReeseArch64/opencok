@@ -295,6 +295,13 @@
       "when": 1793052712409,
       "tag": "0041_continued_cost_awards",
       "breakpoints": false
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1793059594462,
+      "tag": "0042_world_resource_refresh",
+      "breakpoints": false
     }
   ]
 }

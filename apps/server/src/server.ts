@@ -3,6 +3,8 @@ import { createMergeCampaignStore, mergeCampaignActor } from "@opencok/repositor
 import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
 import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
 import { serverFeature } from "@opencok/rules/power-context";
+import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
+import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
 import { createExchangeActivityDomain } from "@opencok/services/exchange-activity";
 import { avatarActivationDomain } from "@opencok/services/avatar-activation";
 import {
@@ -1342,7 +1344,23 @@ export const RealmDependenciesLive = Layer.effect(
         if (!delivered) break;
       }
     };
+    const resourceRefresh = createWorldResourceRefreshExecutor(
+      db.kingdom.db,
+      authority,
+      config.mapSize,
+    );
     const recoverWorld = async () => {
+      try {
+        const resourceNow = BigInt(Date.now());
+        const resourceEffects = await economyEffects.world();
+        await resourceRefresh.execute(resourceNow, (store) =>
+          refreshWorldResources(store, rules, config.mapSize, resourceEffects),
+        );
+      } catch {
+        console.warn(
+          JSON.stringify({ event: "world_resource_recovery_failed", kingdom: config.kingdomId }),
+        );
+      }
       for (let index = 0; index < 64; index++) {
         const delivered = await relayMutationEvent(
           db.kingdom.db,
@@ -1462,6 +1480,7 @@ export const RealmDependenciesLive = Layer.effect(
         }
       }
       for (const command of [
+        "world.resources",
         "world.march",
         "world.march.retreat",
         "world.march.check",
