@@ -21,4 +21,3 @@ CREATE TABLE "opencok_global"."expedition_match_realm" (
 	CONSTRAINT "expedition_match_realm_PRIMARY" PRIMARY KEY("periodId","kingdomId"),
 	CONSTRAINT "expedition_match_realm_bounds" CHECK ("kingdomId" > 0 AND "previousMatch" >= 0 AND "previousMatch" <> "kingdomId" AND "registeredAt" >= 0 AND "opponent" >= 0 AND "opponent" <> "kingdomId" AND ("matchedAt" = 0 OR "matchedAt" >= "registeredAt") AND octet_length("statistics") BETWEEN 1 AND 8192)
 );
-
