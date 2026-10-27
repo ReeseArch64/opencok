@@ -57,7 +57,9 @@ services:
     profiles: [all, devops]
     networks: [opencok-external-network]
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
       - portainer-data:/data
     ports:
       - 9443:9000
