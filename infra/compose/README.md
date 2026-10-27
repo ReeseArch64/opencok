@@ -17,9 +17,10 @@ ZooKeeper.
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the private
 `GAME_LOGIN_SECRET` exception. Chat defaults to `chat:8083`: the realm uses
-`/external/session` and the API proxies public metadata. `CHAT_SIGNING_SECRET`
+`/external/session` for sessions and `/_internal/nickname` for player renames,
+and the API proxies public metadata. `CHAT_SIGNING_SECRET`
 overrides the shared development signing value on both Chat and the realm. Optional
-`GAME_CHAT_SESSION_URL` and `API_CHAT_URL` select another host. Set
+`GAME_CHAT_SESSION_URL`, `GAME_NICKNAME_CHAT_URL` and `API_CHAT_URL` select another host. Set
 `CHAT_WEBSOCKET_URL` when clients need a different address than
 `ws://192.168.1.104:8083/chat/ws`. Use `.env.example` as the reference and preserve
 existing values. No app-local env files are needed. The example database URL uses
@@ -34,6 +35,13 @@ docker compose --profile dev up -d --no-deps --wait server
 
 A container restart retains its previous environment. A stale login secret causes
 signature rejection (`LoginErr`) even when the root `.env` is correct.
+
+Player renames require the private Chat nickname endpoint and matching signing
+secret. Compose passes both by default. After updating this configuration or its
+root `.env` override, recreate the server with the command above; a restart alone
+does not enable renames in an existing container. Existing accounts, inventories
+and rename receipts are preserved. Custom deployments must configure the endpoint
+explicitly as described in [Profile and preferences](../../apps/server/PROFILE_PREFERENCES.md#activation-and-recovery).
 
 Gameplay catalogs are included as readable TypeScript in `packages/resources/src/catalogs`.
 The nickname filter is bundled as `packages/resources/data/badwords.json`.
