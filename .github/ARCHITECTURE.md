@@ -184,7 +184,7 @@ combat consumes immutable general snapshots. See [general progression](../docs/a
 for native commands, recovery, draw catalog compatibility and acceptance limits.
 
 [Advanced progression, local events and resident world](../docs/architecture/advanced-progression-events-world.md#implemented-scope-and-acceptance-boundaries)
-records the implemented topics25–27 families, integration checkpoints and combat
+records the implemented topics 25–27 families, integration checkpoints and combat
 and native-device boundaries. Resident placement requires a known birth phase or
 explicit operator adoption; shared noncombat gathering preserves owned party
 checkpoints and pinned return rewards. Focused terrain, birth, supply and party

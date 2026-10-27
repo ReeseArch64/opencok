@@ -30,7 +30,7 @@ backend.
 | `GetWorldInfo`                  | `world.get`           | Ordinary and producer-backed points, native fixed reservations, interest and owned march views.                    |
 | `GetWorldBarbarionPoint`        | `world.get.barbarion` | Source-gated native barbarian creation/reuse with real actor, health and lifetime.                                 |
 | `GetWorldPointDetail`           | `world.get.detail`    | Actual point/actor snapshots, resource and shared-resource details, owned exploration records.                     |
-| `GetMarchRecord`                | `world.get.march`     | Owned ordinary detail; same-alliance and persisted-observer inspection of actual saved parties.                    |
+| `GetMarchRecord`                | `world.get.march`     | Read-only owned, same-alliance and persisted-observer projection of actual saved parties.                          |
 | `CreateTemporaryMonster`        | `world.get.monster`   | Source temporary ordinary monster creation/reuse, with real terrain and expiry.                                    |
 | `LeaveWorld`                    | `world.leave`         | Remove the caller viewport interest without changing its city or parties.                                          |
 | `MarchWorldPoint`               | `world.march`         | Owned gathering, shared gathering, treasure, trouble and ordinary scouting; specialized targets need their actors. |
