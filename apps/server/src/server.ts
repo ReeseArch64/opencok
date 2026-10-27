@@ -22,6 +22,9 @@ import { cityDefenseDomain } from "@opencok/services/city-defense";
 import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
 import { refreshWorldResources } from "@opencok/services/world-resource-refresh";
+import { createWorldResourceNewExecutor } from "@opencok/repositories/world-resource-new";
+import { refreshWorldResourceNew } from "@opencok/services/world-resource-new";
+import { worldResourceAreaCount } from "@opencok/rules/world-resource-refresh";
 import { createRedPacketExpiryStore, redPacketReader } from "@opencok/repositories/red-packets";
 import {
   createRedPacketDomain,
@@ -1420,7 +1423,26 @@ export const RealmDependenciesLive = Layer.effect(
       authority,
       config.mapSize,
     );
+    const resourceNewRefresh = createWorldResourceNewExecutor(
+      db.kingdom.db,
+      authority,
+      config.mapSize,
+      worldResourceAreaCount(rules, config.mapSize),
+    );
     const recoverWorld = async () => {
+      try {
+        await resourceNewRefresh.execute(undefined, (store) =>
+          refreshWorldResourceNew(store, rules, config.mapSize),
+        );
+      } catch {
+        console.warn(
+          JSON.stringify({
+            event: "world_shared_resource_recovery_failed",
+            kingdom: config.kingdomId,
+          }),
+        );
+      }
+
       try {
         await resourceRefresh.execute(undefined, async (store) =>
           refreshWorldResources(store, rules, config.mapSize, await economyEffects.world()),
@@ -1552,6 +1574,7 @@ export const RealmDependenciesLive = Layer.effect(
         "treasuremap.spd",
         "world.use",
         "world.user.rcr",
+        "resource.new.detail",
         "world.resources",
         "buy.citydef",
         "world.user.rcd",

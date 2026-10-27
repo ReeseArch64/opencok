@@ -156,7 +156,8 @@
     "./delivered-payment": "./src/delivered-payment.ts",
     "./payment-observers": "./src/payment-observers.ts",
     "./world-use": "./src/world-use.ts",
-    "./world-recreation": "./src/world-recreation.ts"
+    "./world-recreation": "./src/world-recreation.ts",
+    "./world-resource-new": "./src/world-resource-new.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

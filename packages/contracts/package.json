@@ -198,7 +198,8 @@
     "./responses/world-use": "./src/responses/world-use.ts",
     "./responses/world-recreation": "./src/responses/world-recreation.ts",
     "./world-birth": "./src/world-birth.ts",
-    "./world-terrain": "./src/world-terrain.ts"
+    "./world-terrain": "./src/world-terrain.ts",
+    "./world-resource-new": "./src/world-resource-new.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
