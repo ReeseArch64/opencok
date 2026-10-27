@@ -2380,3 +2380,33 @@ configuration key is added. PostgreSQL acceptance covers fire settlement,
 concurrent extinguish and repair, cooldown, wall cap, black-land probe, persisted
 boss rates and insufficient-gold rollback. Device execution and the separate
 combat producers that start fires remain unverified.
+
+## Owned treasure map hints
+
+The source `GetTreasureMap` and `DestroyTreasureMap` handlers now have maintained
+`treasuremap.get` and `treasuremap.destroy` routes, plus the source login list of
+unstarted maps. Generation checks owned item counts, color, player level and
+weighted heritage rows. It creates only the difference between owned items and
+saved unstarted maps of that color; concurrent retries cannot create duplicate
+hints. Generation retains the items until occupation or explicit destruction.
+Each request creates at most 128 hints; another request continues a larger owned
+backlog. Foreign map identities cannot be destroyed or projected through login.
+
+Hint geometry preserves the source's four corner regions and excluded black-land
+coordinate strips. Target checks use bounded transactional reads, with the source
+nearby fallback order. A map is not created if no usable terrain exists. The first
+eligible row for a color supplies the source hint's range and displayed time;
+the weighted selected heritage identity is retained independently. These differ
+for a maintained purple variant and must not be silently conflated.
+
+Destruction requires an owned unstarted map and consumes exactly one matching
+item. The item debit, removal and operation receipt commit together. Reconnect
+projects saved identities, owners, target, time, color and state with native field
+order and types. No schema, dependency or external service is added; the existing
+`treasure_map` table owns these records. Back up map rows with inventory and
+receipts. An older binary can retain the rows with treasure handlers disabled.
+
+This checkpoint establishes generation, login and destruction. Excavation,
+acceleration, completion mail and march recovery require their corresponding
+owned noncombat march lifecycle; takeover of an occupied enemy camp additionally
+requires its validated battle engine. These dependencies are distinct.

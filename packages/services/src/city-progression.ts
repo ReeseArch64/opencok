@@ -128,6 +128,7 @@ export function createCityProgressionHandlers<T>(
             buildingId,
             uuid,
           ),
+        repository.treasurePoints,
       ),
     };
   };
@@ -268,6 +269,7 @@ export class CityProgressionContext {
     readonly economy: ActivityEconomy,
     readonly effect: (id: number) => number,
     readonly generalEffect: (id: number, buildingId?: number, uuid?: string) => number = () => 0,
+    readonly treasurePoints?: (ids: readonly number[]) => Promise<readonly Row[]>,
   ) {}
   get owner() {
     return text(this.state.profile, "uid");
