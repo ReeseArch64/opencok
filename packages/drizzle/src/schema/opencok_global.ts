@@ -105,3 +105,5 @@ export { nickname_change_receipt } from "./opencok_global/nickname_change_receip
 export { cn1_profile_session } from "./opencok_global/cn1_profile_session";
 export { game_identity } from "./opencok_global/game_identity";
 export { character_provisioning } from "./opencok_global/character_provisioning";
+export * from "./opencok_global/expedition_stage_period";
+export * from "./opencok_global/expedition_stage_watermark";

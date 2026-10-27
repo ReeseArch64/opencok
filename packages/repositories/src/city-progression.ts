@@ -220,6 +220,7 @@ export function createCityProgressionStore(
           ? await readDragonTower(tx, owner, now, num(profile, "serverId"), request)
           : undefined,
         expedition: await readExpedition(tx, profile, now, command, request),
+        expeditionScore: { load: (at) => readExpedition(tx, profile, at) },
         arena:
           command?.startsWith("arena.") || command === "show.arena.army"
             ? await readArena(tx, owner)

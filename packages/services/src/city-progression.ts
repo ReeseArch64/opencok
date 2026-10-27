@@ -1,4 +1,6 @@
 import { flushHeroScore } from "./hero-score";
+import { flushExpeditionScores } from "./new-expedition";
+import type { ExpeditionScoreAction } from "@opencok/contracts/new-expedition";
 import type { HeroScoreAction } from "@opencok/contracts/hero-score";
 import { refreshCampaignGrants } from "./local-campaign";
 import { generalDrawPeriod } from "@opencok/rules/general-draws";
@@ -186,6 +188,7 @@ export function createCityProgressionHandlers<T>(
             key: activity.itemId,
           });
         }
+        await flushExpeditionScores(plan);
         await flushHeroScore(plan);
         await repository.update(plan.write, economy);
         return encode(body);
@@ -204,6 +207,7 @@ export function createCityProgressionHandlers<T>(
       if (!domain?.accelerate) throw new GameError(errors.unsupported, "city_progression");
       const { repository, plan } = await context(tx, activity.ownerId, now, economy);
       await domain.accelerate(plan, activity, remaining);
+      await flushExpeditionScores(plan);
       await flushHeroScore(plan);
       await repository.update(plan.write, economy);
     },
@@ -212,6 +216,7 @@ export function createCityProgressionHandlers<T>(
       if (!domain?.next) return undefined;
       const { repository, plan } = await context(tx, activity.ownerId, now, economy);
       const result = await domain.next(plan, activity);
+      await flushExpeditionScores(plan);
       await flushHeroScore(plan);
       await repository.update(plan.write, economy);
       return result;
@@ -230,6 +235,7 @@ export function createCityProgressionHandlers<T>(
       const result = await domain.prepare(plan, command, decode(Buffer.from(params)));
       refreshCampaignGrants(plan);
       if (!domain.commands.includes("task.reward.get")) refreshQuests(plan);
+      await flushExpeditionScores(plan);
       await flushHeroScore(plan);
       await repository.update(plan.write, economy);
       return result;
@@ -240,14 +246,19 @@ export function createCityProgressionHandlers<T>(
 export class CityProgressionContext {
   readonly write: CityProgressionWrite = {};
   readonly heroActions: HeroScoreAction[] = [];
-  recordHero(type: number, parameter: string, count: number | bigint = 1, at = this.now) {
+  readonly expeditionActions: ExpeditionScoreAction[] = [];
+  get scoreAt() {
+    const due = this.completing?.dueAt;
+    return due !== undefined && due < this.now ? due : this.now;
+  }
+  recordHero(type: number, parameter: string, count: number | bigint = 1, at = this.scoreAt) {
     const value = BigInt(count);
     if (value === 0n) return;
     if (at > this.now || at < 0n || parameter.length > 40 || this.heroActions.length >= 128)
       throw new Error("Invalid confirmed hero action");
     this.heroActions.push({ type, parameter, count: value, at });
   }
-  completing?: Pick<TimedActivity, "type" | "itemId">;
+  completing?: Pick<TimedActivity, "type" | "itemId"> & Partial<Pick<TimedActivity, "dueAt">>;
   readonly costs: Record<string, string> = {};
   readonly items: Record<string, number> = {};
   constructor(

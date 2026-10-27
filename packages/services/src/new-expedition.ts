@@ -30,27 +30,72 @@ export function recordExpeditionScore(
   action: number,
   param = 1,
   count = 1,
-  occurredAt = context.now,
+  occurredAt = context.scoreAt,
 ) {
-  const phase = context.state.expedition?.phase;
+  if (context.state.expedition?.projectionOnly) return;
   if (
-    context.state.expedition?.projectionOnly ||
-    !phase ||
-    occurredAt < phase.startTime ||
-    occurredAt >= phase.endTime ||
-    !expeditionOpen(context.rules, context.now) ||
-    num(context.state.profile, "crossFightSrcServerId") > 0
+    occurredAt < 0n ||
+    occurredAt > context.now ||
+    !Number.isFinite(count) ||
+    count < 0 ||
+    context.expeditionActions.length >= 128
+  )
+    throw new Error("Invalid confirmed expedition action");
+  if (count) context.expeditionActions.push({ action, parameter: param, count, at: occurredAt });
+}
+export async function flushExpeditionScores(context: CityProgressionContext) {
+  const actions = context.expeditionActions.splice(0);
+  if (
+    !actions.length ||
+    num(context.state.profile, "crossFightSrcServerId") > 0 ||
+    num(context.state.profile, "serverId") !== context.rules.kingdomId
   )
     return;
-  const delta = expeditionScore(context.rules, phase.stage, action, param, count, context.effect);
-  if (!delta) return;
-  const row = current(context),
-    score = num(row, "score") + delta;
-  if (!Number.isFinite(score)) expeditionFailure();
-  context.write.expedition = [
-    ...(context.write.expedition ?? []).filter((item) => item.stage !== phase.stage),
-    { ...row, score },
-  ];
+  const snapshots = new Map<bigint, import("@opencok/contracts/new-expedition").ExpeditionState>();
+  for (const action of actions) {
+    let snapshot = snapshots.get(action.at);
+    if (!snapshot) {
+      snapshot = (await context.state.expeditionScore?.load(action.at)) ?? context.state.expedition;
+      if (!snapshot) continue;
+      snapshots.set(action.at, snapshot);
+    }
+    const { phase, period } = snapshot;
+    if (
+      snapshot.closed ||
+      snapshot.projectionOnly ||
+      !period ||
+      !phase ||
+      action.at < phase.startTime ||
+      action.at >= phase.endTime ||
+      !expeditionOpen(context.rules, action.at)
+    )
+      continue;
+    const delta = expeditionScore(
+      context.rules,
+      phase.stage,
+      action.action,
+      action.parameter,
+      action.count,
+      context.effect,
+    );
+    if (!delta) continue;
+    const periodId = text(period, "periodId"),
+      matches = (row: Row) =>
+        num(row, "stage") === phase.stage && text(row, "periodId") === periodId;
+    const row = {
+      ...snapshot.progress.find(matches),
+      ...context.write.expedition?.find(matches),
+      uid: context.owner,
+      periodId,
+      stage: phase.stage,
+    };
+    const score = num(row, "score") + delta;
+    if (!Number.isFinite(score)) expeditionFailure();
+    context.write.expedition = [
+      ...(context.write.expedition ?? []).filter((item) => !matches(item)),
+      { ...row, score },
+    ];
+  }
 }
 export const expeditionDomain: CityDomain = {
   commands: [
