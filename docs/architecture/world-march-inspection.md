@@ -43,3 +43,5 @@ Snapshots of parties, troops, points, checkpoints, command receipts and outbox
 remain identical across a successful inspection. Synthetic native serialization
 and maintained-snapshot cases verify saved troop levels and backwards-compatible
 resource decoding. No schema, dependency or environment variable is added.
+
+Public `world.get.march` uses this read-only projection for both the caller and authorized other characters. It never enters owned march recovery or alliance reconciliation. The separate `world.user.march` query and background recovery retain their owned settlement behavior. Native correlation and long command-base timestamps survive inspection, quotation and archive responses; their complete correlated frame is bounded before publication. Ordinary Source scout records can be inspected without enabling battle calculation.

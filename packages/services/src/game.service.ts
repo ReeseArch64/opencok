@@ -493,21 +493,24 @@ export class GameService {
     }
     if (command === "al.fight.bulletin") {
       if (!this.services.worldFightBulletins) throw new GameError(errors.unsupported);
-      return {
-        body: await worldFightBulletins(
+      return this.worldQueryResult(
+        command,
+        params,
+        await worldFightBulletins(
           this.services.worldFightBulletins,
           uid,
           params,
           this.config.kingdomId,
           this.now(),
         ),
-        pushes: [],
-      };
+      );
     }
     if (command === "world.scout.detail") {
       if (!this.services.worldScout) throw new GameError(errors.unsupported);
-      return {
-        body: await worldScoutQuotation(
+      return this.worldQueryResult(
+        command,
+        params,
+        await worldScoutQuotation(
           this.services.worldScout,
           uid,
           params,
@@ -517,13 +520,14 @@ export class GameService {
           this.now(),
           this.services,
         ),
-        pushes: [],
-      };
+      );
     }
-    if (command === "world.get.march" && wireString(params, "uid", uid) !== uid) {
+    if (command === "world.get.march") {
       if (!this.services.worldMarchInspection) throw new GameError(errors.unsupported);
-      return {
-        body: await inspectWorldMarch(
+      return this.worldQueryResult(
+        command,
+        params,
+        await inspectWorldMarch(
           this.services.worldMarchInspection,
           uid,
           params,
@@ -532,8 +536,7 @@ export class GameService {
           this.now(),
           this.services,
         ),
-        pushes: [],
-      };
+      );
     }
     if (command !== "activity.operators") await this.services.reconcileAlliance?.(uid);
     let body: Fields;
@@ -2710,6 +2713,12 @@ export class GameService {
     );
     if (uids.includes("3000002")) out.push(sfs.object(guidePlayerSummary()));
     return { uids: sfs.array(out) };
+  }
+  private worldQueryResult(command: string, params: Fields, body: Fields): Result {
+    for (const key of ["_cok_", "cmdBaseTime"]) if (params[key]) body[key] = params[key]!;
+    if (encode(extension(command, body)).length > MAX_FRAME)
+      throw new GameError(errors.unsupported, "world_state");
+    return { body, pushes: [] };
   }
   private checkProfile(profile: Row | undefined, now = this.now()): Row {
     if (!profile) throw new GameError(errors.missing);
