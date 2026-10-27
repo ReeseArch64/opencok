@@ -1,3 +1,8 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+import { createMergeCampaignStore, mergeCampaignActor } from "@opencok/repositories/merge-campaign";
+import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
+import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
+import { serverFeature } from "@opencok/rules/power-context";
 import { createExchangeActivityDomain } from "@opencok/services/exchange-activity";
 import { avatarActivationDomain } from "@opencok/services/avatar-activation";
 import {
@@ -374,6 +379,11 @@ export const RealmDependenciesLive = Layer.effect(
     cache.bindRealmOwner(authority.epoch);
     yield* fromPromise("realm.mutations", () => checkMutationStore(db.kingdom.db));
     fenceRealmDatabase(db.kingdom.db, authority);
+    const realmTransactions = new AsyncLocalStorage<MutationTransaction>();
+    const transactRealm = db.kingdom.db.transaction.bind(db.kingdom.db);
+    db.kingdom.db.transaction = (apply, settings) =>
+      transactRealm((tx) => realmTransactions.run(tx, () => apply(tx)), settings);
+
     yield* fromPromise("realm.opening-clock", () =>
       initializeRealmOpeningClock(db.kingdom.db, authority),
     );
@@ -515,20 +525,41 @@ export const RealmDependenciesLive = Layer.effect(
         (relay) => relay.close(),
       );
     }
+    const mergeCampaigns = createMergeCampaignStore(
+      db.kingdom.db,
+      authority,
+      rules.advanced.campaignRules ?? [],
+    );
+    yield* fromPromise("realm.merge-campaigns", () => mergeCampaigns.refresh());
+    const worldEffects = async (kingdomId = config.kingdomId) => {
+      const cached = await cache.worldEffects(kingdomId);
+      return kingdomId === config.kingdomId
+        ? mergeCampaigns.overlay(cached, undefined, realmTransactions.getStore())
+        : cached;
+    };
+    const currentMergeBoard = async () => {
+      const effects = await mergeCampaigns.current(undefined, realmTransactions.getStore());
+      const enabled = serverFeature(rules, "server_buff", {
+        kingdomId: config.kingdomId,
+        version: "12.06.0",
+        now: Date.now(),
+      });
+      return mergeEffectBoard(enabled ? effects : []);
+    };
     const economyEffects = {
       world: async () =>
-        worldPowerEffects(
-          decodeWorldPowerEffects(await cache.worldEffects(config.kingdomId)),
-          rules,
-          { kingdomId: config.kingdomId, version: "12.06.0", now: Date.now() },
-        ),
+        worldPowerEffects(decodeWorldPowerEffects(await worldEffects(config.kingdomId)), rules, {
+          kingdomId: config.kingdomId,
+          version: "12.06.0",
+          now: Date.now(),
+        }),
       emperor: () => cache.emperorVersion(config.kingdomId),
     };
     const baseProductionPreparation = {
       async prepare(tx: Parameters<typeof readReconnectProgress>[0], owner: string, now: bigint) {
         const state = await readReconnectProgress(tx, owner, config.kingdomId, now);
         const planned = await productionContext(state, rules, now, {
-          worldPowerEffects: (id) => cache.worldEffects(id),
+          worldPowerEffects: (id) => worldEffects(id),
           emperorVersion: (id) => cache.emperorVersion(id),
         });
         await persistReconnectProgress(tx, state, planned.write, authority, now);
@@ -846,6 +877,40 @@ export const RealmDependenciesLive = Layer.effect(
       [...db.databases.kingdoms.keys()],
     );
     const campaignAudience = createCampaignAudience(db.kingdom.db, authority);
+    yield* Effect.tryPromise({
+      try: async () => {
+        await mergeCampaigns.refresh();
+        for (let index = 0; index < 16; index++) {
+          const delivered = await relayMutationEvent(
+            db.kingdom.db,
+            authority,
+            async () => {
+              await publishMergeEffectBoard(
+                notifications.owners(),
+                campaignAudience,
+                currentMergeBoard,
+                (owner, command, body) => {
+                  authority.assertReady();
+                  return notifications.publish(owner, command, body);
+                },
+              );
+            },
+            Date.now,
+            "merge.campaign.board",
+            1000,
+            mergeCampaignActor,
+          );
+          if (!delivered) break;
+        }
+      },
+      catch: () => new Error("Merge campaign recovery unavailable"),
+    }).pipe(
+      Effect.catch(() => Effect.void),
+      Effect.andThen(Effect.sleep(1000)),
+      Effect.forever,
+      Effect.forkScoped,
+    );
+
     const costRankingFacts = createCostRankingFacts(db.kingdom.db, authority);
     const continuedCostFinality = new ContinuedCostFinalityService(
       costRankingFacts,
@@ -2039,11 +2104,11 @@ export const RealmDependenciesLive = Layer.effect(
       rules,
       {
         world: async () =>
-          worldPowerEffects(
-            decodeWorldPowerEffects(await cache.worldEffects(config.kingdomId)),
-            rules,
-            { kingdomId: config.kingdomId, version: "12.06.0", now: Date.now() },
-          ),
+          worldPowerEffects(decodeWorldPowerEffects(await worldEffects(config.kingdomId)), rules, {
+            kingdomId: config.kingdomId,
+            version: "12.06.0",
+            now: Date.now(),
+          }),
         emperor: () => cache.emperorVersion(config.kingdomId),
       },
     );
@@ -2224,7 +2289,8 @@ export const RealmDependenciesLive = Layer.effect(
           globalCelebrityRanking: (rankType) => cache.globalCelebrityRanking(rankType),
           dragonRanking: (ranges, allianceId) => cache.dragonRanking(ranges, allianceId),
           expeditionStage: (kingdomId) => cache.expeditionStage(kingdomId),
-          worldPowerEffects: (kingdomId) => cache.worldEffects(kingdomId),
+          worldPowerEffects: (kingdomId) => worldEffects(kingdomId),
+          worldEffectBoard: currentMergeBoard,
           worldTurretKills: (kingdomId, territory) => cache.worldTurretKills(kingdomId, territory),
           emperorVersion: (kingdomId) => cache.emperorVersion(kingdomId),
           changeAccountCount: (deviceId) => cache.deviceChangeCount(deviceId),

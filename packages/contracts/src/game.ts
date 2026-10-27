@@ -242,6 +242,7 @@ export interface LoginConfigurationState {
 }
 
 export interface GameServices {
+  worldEffectBoard?(): Promise<Fields>;
   expeditionActivity?(owner: string): Promise<Fields>;
   mailChatEnabled?: boolean;
   reconnect?<T>(
