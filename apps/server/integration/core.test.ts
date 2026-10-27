@@ -1,3 +1,6 @@
+import type { DeliveredGiftProof } from "@opencok/contracts/paid-gifts";
+import { paylog } from "@opencok/drizzle/schema/opencok_kingdom/paylog";
+import { server_info } from "@opencok/drizzle/schema/opencok_kingdom/server_info";
 import { avatar_storage } from "@opencok/drizzle/schema/opencok_kingdom/avatar_storage";
 import { catalog as campaignRulesCatalog } from "../../../packages/resources/src/catalogs/data/trigger-activity";
 import { flower_info } from "@opencok/drizzle/schema/opencok_kingdom/flower_info";
@@ -243,7 +246,14 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     expect(await chat.runMaintenance()).toBe(true);
     await new Promise<void>((resolve) => chat!.server.listen(0, "127.0.0.1", resolve));
     const chatPort = (chat.server.address() as AddressInfo).port;
+    const deliveredOrders = new Map<string, DeliveredGiftProof>();
     const base: Config = {
+      paidGiftGateway: {
+        delivered: async ({ owner, orderId }) => {
+          const proof = deliveredOrders.get(orderId);
+          return proof?.owner === owner ? proof : null;
+        },
+      },
       nicknameChat: {
         url: `http://127.0.0.1:${chatPort}/_internal/nickname`,
         signingSecret: "synthetic-profile-secret",
@@ -767,6 +777,89 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(fields(replacedInit.user).gold?.value).toBe(9007199254740893n);
 
       expect((await replacement.command("cmd.ping")).serverNowTime?.type).toBe(Type.Long);
+      const paidAt = BigInt(Date.now()),
+        paidYear = new Date(Number(paidAt)).getUTCFullYear(),
+        paidOwner = `synthetic-player-${id}`,
+        paidOrder = `synthetic-paid-${id}`;
+      const payControl = (runtimeRules.configuration.payControl ??= new Map());
+      for (const key of ["69022", "69023", "69025"])
+        payControl.set(key, {
+          id: key,
+          k1: "1.0.0",
+          k2: "all",
+          k4: "1",
+          k5: key === "69023" ? "0" : `${paidYear}-01-01-00-00`,
+          k6: `${paidYear + 1}-01-01-00-00`,
+          k7: `${paidYear}-01-01-00-00`,
+          k8: `${paidYear + 1}-01-01-00-00`,
+        });
+      const catalog = (runtimeRules.advanced.castleExchanges ??= new Map());
+      catalog.set("synthetic-delivery", {
+        id: "synthetic-delivery",
+        product_id: "gold_1",
+        dollar: "4.99",
+        gold_doller: "1700",
+      });
+      runtimeRules.reconnect.rewards!.set("990000001", { id: "990000001", gold: "7" });
+      for (const template of ["12000", "11809"])
+        runtimeRules.mail.set(template, exchangeCatalog.mail.get(template)!);
+      runtimeRules.advanced.normalRechargeThresholds = new Map([
+        ["normal", { id: "normal", type: "1", Node: "500", level: "1", Gift: "990000001" }],
+      ]);
+      runtimeRules.advanced.rechargeThresholds = new Map([
+        ["9912999", { id: "9912999", pay_node: "500", pay_reward: "990000001" }],
+      ]);
+      runtimeRules.advanced.rechargeFeedback = new Map([
+        ["feedback", { id: "feedback", product_id: "gold_1", number: "1", reward: "990000001" }],
+      ]);
+      const playerDb = databases.getKingdom(id);
+      await playerDb.db
+        .insert(server_info)
+        .values({ uid: "server", payTotalTime: 1n })
+        .onConflictDoUpdate({ target: server_info.uid, set: { payTotalTime: 1n } });
+      await playerDb.db.insert(paylog).values({
+        uid: paidOwner,
+        orderId: paidOrder,
+        pf: "synthetic",
+        productId: "gold_1",
+        spend: 4.99,
+        time: paidAt,
+        status: 2,
+        payLevel: 1,
+      });
+      deliveredOrders.set(paidOrder, {
+        owner: paidOwner,
+        kingdomId: id,
+        orderId: paidOrder,
+        platform: "synthetic",
+        exchangeId: "synthetic-delivery",
+        productId: "gold_1",
+        priceCents: 499,
+        occurredAt: paidAt,
+      });
+      const paidCampaigns = runtimeRules.advanced.campaignRules;
+      runtimeRules.advanced.campaignRules = [];
+      try {
+        await Promise.all([
+          server.paidGifts!.consume(paidOwner, paidOrder, "synthetic"),
+          server.paidGifts!.consume(paidOwner, paidOrder, "synthetic"),
+        ]);
+      } finally {
+        runtimeRules.advanced.campaignRules = paidCampaigns;
+      }
+      const observation = await playerDb.pool.query(
+        'select p.gold::text as normal,l."newSerCumRechargeTotal"::text as newcomer,(select count(*)::int from opencok_kingdom.recharge_feedback_claim f where f.uid=p.uid) as feedback from opencok_kingdom.pay_total p join opencok_kingdom.user_lord l on l.uid=p.uid where p.uid=$1 and p.type=1',
+        [paidOwner],
+      );
+      expect(observation.rows).toEqual([{ normal: "1700", newcomer: "1700", feedback: 1 }]);
+      const paidLogin = new Client(server.port, id);
+      clients.push(paidLogin);
+      await paidLogin.handshake();
+      expect((await paidLogin.login(base.loginSecret, paidOwner)).id?.type).toBe(Type.Int);
+      const paidInit = fields(fields((await paidLogin.next()).p).p);
+      expect(fields(paidInit.repayinfo).payPoint).toEqual(sfs.long(1700));
+      expect(paidInit.newSerCumRechargeTotal).toEqual(sfs.long(1700));
+      expect(fields(paidInit.user).gold).toEqual(sfs.long(9007199254740893n));
     }
     const otherCache = new Cache({ ...base, kingdomId: 2 });
     expect(await cache.claim("synthetic-shared-uid", "synthetic-token-1")).toBe(true);

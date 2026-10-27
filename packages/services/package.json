@@ -153,7 +153,8 @@
     "./activity-reward": "./src/activity-reward.ts",
     "./comeback": "./src/comeback.ts",
     "./normal-recharge": "./src/normal-recharge.ts",
-    "./delivered-payment": "./src/delivered-payment.ts"
+    "./delivered-payment": "./src/delivered-payment.ts",
+    "./payment-observers": "./src/payment-observers.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
