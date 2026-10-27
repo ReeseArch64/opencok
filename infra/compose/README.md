@@ -13,6 +13,12 @@ and shared Redis authorization; there is no Files container or media overlay. Se
 client CDN alongside the TypeScript API/server, gateway, PostgreSQL, Redis and
 ZooKeeper.
 
+The API, chat and realm images build minified JavaScript with Bun before starting
+their entrypoints. Run `bun run --cwd apps/<service> build` to build an individual
+service locally (`<service>` is `api`, `chat` or `server`). These artifacts target
+Bun and still require the Bun runtime. The realm build also copies its nickname
+filter into `dist/data`. Rebuild images after source or resource changes.
+
 ## Local inputs and start
 
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the private
