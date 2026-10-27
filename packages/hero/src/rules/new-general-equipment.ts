@@ -31,14 +31,14 @@ export interface NewGeneralEquippedState extends NewGeneralEffectState {
 }
 
 function simple(raw: string | null | undefined, separator: string, limit = 65535): string[] {
-  if (raw == null) return [];
+  if (raw == null) {return [];}
 
   if (typeof raw !== "string" || raw.length > limit)
-    throw new Error("Invalid general equipment content");
+    {throw new Error("Invalid general equipment content");}
 
   const values = raw.split(separator).filter(Boolean);
 
-  if (values.length > 4096) throw new Error("Too many general equipment values");
+  if (values.length > 4096) {throw new Error("Too many general equipment values");}
 
   return values;
 }
@@ -46,7 +46,7 @@ function simple(raw: string | null | undefined, separator: string, limit = 65535
 function javaSplit(raw: string, separator: string): string[] {
   const values = raw.split(separator);
 
-  while (values.at(-1) === "") values.pop();
+  while (values.at(-1) === "") {values.pop();}
 
   return values;
 }
@@ -57,26 +57,26 @@ function ownerValue(
 ): number {
   const value = resolve(id);
 
-  if (typeof value !== "number") throw new Error("Invalid general equipment modifier");
+  if (typeof value !== "number") {throw new Error("Invalid general equipment modifier");}
 
   return Math.fround(value);
 }
 
 function multiplier(rule: Rule, resolve: (id: NewGeneralEquipmentModifier) => number): number {
-  if (!rule.color || !rule.site) return 1;
+  if (!rule.color || !rule.site) {return 1;}
 
   const color = generalInteger(rule.color);
 
-  if (color < 0 || color > 5) throw new Error("Invalid equipment color");
+  if (color < 0 || color > 5) {throw new Error("Invalid equipment color");}
 
   let value = 0;
 
   if (color >= 2)
-    value = Math.fround(value + ownerValue(resolve, ([214, 215, 216, 217] as const)[color - 2]!));
+    {value = Math.fround(value + ownerValue(resolve, ([214, 215, 216, 217] as const)[color - 2]!));}
 
   const site = generalInteger(rule.site);
 
-  if (site < 0 || site > 6) throw new Error("Invalid equipment site");
+  if (site < 0 || site > 6) {throw new Error("Invalid equipment site");}
 
   value = Math.fround(
     value + ownerValue(resolve, ([207, 209, 208, 210, 211, 212, 213] as const)[site]!),
@@ -98,23 +98,23 @@ function itemEffects(
   const factor = multiplier(rule, resolve);
 
   if (rule.site === "6") {
-    if (rule.para1 === undefined) throw new Error("Missing dragon equipment effects");
+    if (rule.para1 === undefined) {throw new Error("Missing dragon equipment effects");}
 
     const ids = simple(rule.para1, "|");
     const amounts = simple(rule.num1, "|");
 
     for (const [i, id] of ids.entries())
-      append(values, generalInteger(id), Math.fround(javaFloat(amounts[i]) * factor));
+      {append(values, generalInteger(id), Math.fround(javaFloat(amounts[i]) * factor));}
   } else {
     for (let index = 1; index < 100; index++) {
       const raw = rule[`para${index}`];
 
-      if (mailBlank(raw)) break;
+      if (mailBlank(raw)) {break;}
 
       const ids = simple(raw, "|");
       const value = Math.fround(javaFloat(rule[`num${index}`]) * factor);
 
-      for (const id of ids) append(values, generalInteger(id), value);
+      for (const id of ids) {append(values, generalInteger(id), value);}
     }
   }
 
@@ -125,17 +125,17 @@ function itemEffects(
   for (const entry of entries) {
     const parts = javaSplit(entry, ",");
 
-    if (parts[0] === undefined) throw new Error("Missing equipment extra effect");
+    if (parts[0] === undefined) {throw new Error("Missing equipment extra effect");}
 
     const ids = parts[0].includes("@") ? javaSplit(parts[0], "@") : [parts[0]];
     const effects = ids.map(generalInteger);
     const value = Math.fround(javaFloat(parts[1]) * extraFactor);
 
-    for (const id of effects) append(extra, id, value);
+    for (const id of effects) {append(extra, id, value);}
   }
 
   for (const id of javaIntHashMapOrder(extra.keys()))
-    values.set(id, values.has(id) ? Math.fround(extra.get(id)! + values.get(id)!) : extra.get(id)!);
+    {values.set(id, values.has(id) ? Math.fround(extra.get(id)! + values.get(id)!) : extra.get(id)!);}
 
   return values;
 }
@@ -148,7 +148,7 @@ export function newGeneralEquipmentEffects(
 ): ReadonlyMap<number, number> {
   generalSavedInteger(generalId);
 
-  if (orderedEquipment.length > 4096) throw new Error("Too many general equipment pieces");
+  if (orderedEquipment.length > 4096) {throw new Error("Too many general equipment pieces");}
 
   const result = new Map<number, number>();
   const suits = new Map<string, number>();
@@ -162,34 +162,34 @@ export function newGeneralEquipmentEffects(
       result.set(id, Math.fround((result.get(id) ?? 0) + Math.fround(values.get(id)! * factor)));
     }
 
-    if (rule.suit_id !== undefined) suits.set(rule.suit_id, (suits.get(rule.suit_id) ?? 0) + 1);
+    if (rule.suit_id !== undefined) {suits.set(rule.suit_id, (suits.get(rule.suit_id) ?? 0) + 1);}
   }
 
   for (const id of javaHashMapOrder(suits.keys())) {
     const rule = rules.power.equipmentSets?.get(id) ?? {};
 
     for (let tier = 1; tier <= 3; tier++) {
-      if (suits.get(id)! < tier * 2) continue;
+      if (suits.get(id)! < tier * 2) {continue;}
 
       const heroes = rule[`suit_hero${tier}`];
 
       if (heroes !== undefined && !generalContent(heroes, ",").includes(String(generalId)))
-        continue;
+        {continue;}
 
       const value = javaFloat(rule[`suit_num${tier}`]);
       const raw = rule[`suit_para${tier}`];
 
-      if (raw === undefined) throw new Error("Missing general equipment suit effects");
+      if (raw === undefined) {throw new Error("Missing general equipment suit effects");}
 
-      if (!raw) continue;
+      if (!raw) {continue;}
 
-      if (raw.length > 65535) throw new Error("Oversized general equipment suit effects");
+      if (raw.length > 65535) {throw new Error("Oversized general equipment suit effects");}
 
       const effects = raw
         .split("|")
         .filter((part, i, all) => part.length > 0 || i === all.length - 1);
 
-      if (effects.length > 4096) throw new Error("Too many general equipment suit effects");
+      if (effects.length > 4096) {throw new Error("Too many general equipment suit effects");}
 
       for (const effect of effects) {
         const key = generalInteger(effect);

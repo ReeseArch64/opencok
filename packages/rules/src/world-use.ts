@@ -10,11 +10,11 @@ export function worldItemTarget(rule: Rule, random: (maximum: number) => number)
     weights = rule.para2?.split(";") ?? [];
 
   if (!ids.length || ids.length > 256 || !ids.every((id) => /^\d{1,12}$/.test(id)))
-    worldMutationFailure();
+    {worldMutationFailure();}
 
-  if (weights.length <= 1) return ids[0]!;
+  if (weights.length <= 1) {return ids[0]!;}
 
-  if (ids.length !== weights.length) worldMutationFailure();
+  if (ids.length !== weights.length) {worldMutationFailure();}
 
   return ids[
     chooseWeight(
@@ -36,7 +36,7 @@ export function worldItemFree(point: Row) {
 export function worldItemResource(rules: Rules, id: string) {
   const resource = rules.world.resources?.get("resources")?.find((row) => row.id === id);
 
-  if (!resource) worldMutationFailure();
+  if (!resource) {worldMutationFailure();}
 
   const type = cityInteger(resource.res_type, 0, 5),
     level = cityInteger(resource.res_level, 1, 10),

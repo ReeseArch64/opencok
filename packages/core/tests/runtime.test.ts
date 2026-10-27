@@ -28,13 +28,13 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
       let output = "";
       while (!output.includes("ready")) {
         const { value, done } = await reader.read();
-        if (done) throw new Error("Process exited before startup");
+        if (done) {throw new Error("Process exited before startup");}
         output += new TextDecoder().decode(value);
       }
       child.kill(signal);
       while (true) {
         const { value, done } = await reader.read();
-        if (done) break;
+        if (done) {break;}
         output += new TextDecoder().decode(value);
       }
       await child.exited;
@@ -42,7 +42,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
       expect(output).toContain('"event":"stopped"');
       expect(await new Response(child.stderr).text()).toBe("");
     } finally {
-      if (child.exitCode === null) child.kill("SIGKILL");
+      if (child.exitCode === null) {child.kill("SIGKILL");}
       await child.exited;
     }
   });

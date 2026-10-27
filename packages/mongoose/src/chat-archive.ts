@@ -33,18 +33,18 @@ export function createChatArchiveStore(uri: string, now = Date.now): ChatArchive
       await client.connect();
       await initialize();
 
-      if (message.expiresAt <= now()) return;
+      if (message.expiresAt <= now()) {return;}
 
       const old = await collection.findOne({ _id: message.sequenceId });
 
-      if (old && old.version > message.version) return;
+      if (old && old.version > message.version) {return;}
 
       if (
         old &&
         old.version === message.version &&
         (old.hash !== message.hash || old.expiresAt !== message.expiresAt)
       )
-        throw new Error("Archive content conflict");
+        {throw new Error("Archive content conflict");}
 
       try {
         await collection.replaceOne(
@@ -60,7 +60,7 @@ export function createChatArchiveStore(uri: string, now = Date.now): ChatArchive
           existing.version < message.version ||
           !(error && typeof error === "object" && "code" in error && error.code === 11000)
         )
-          throw error;
+          {throw error;}
       }
     },
     async getMany(ids) {
@@ -75,7 +75,7 @@ export function createChatArchiveStore(uri: string, now = Date.now): ChatArchive
       await client.connect();
       const row = await collection.findOne({ _id: sequenceId });
 
-      if (!row || row.deleted) return null;
+      if (!row || row.deleted) {return null;}
 
       const { _id: _sequence, expiry: _expiry, ...message } = row;
 

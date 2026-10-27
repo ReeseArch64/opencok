@@ -23,7 +23,7 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
       const next = results.every((result) => result.status === "fulfilled") && coordination.ready;
 
       if (!checked || next !== healthy)
-        logEvent(
+        {logEvent(
           "readiness_changed",
           {
             component: "realm",
@@ -34,7 +34,7 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
             coordination: coordination.ready,
           },
           next ? "info" : "warn",
-        );
+        );}
 
       checked = true;
       healthy = next;
@@ -42,7 +42,7 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
     const ready = () => healthy && coordination.ready && !stopping;
     yield* check;
 
-    if (!ready()) return yield* Effect.fail(new ResourceError({ operation: "realm.readiness" }));
+    if (!ready()) {return yield* Effect.fail(new ResourceError({ operation: "realm.readiness" }));}
 
     const listener = yield* acquireResource(
       "realm.tcp",
@@ -55,11 +55,11 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
         logEvent("connections_draining", { kingdom: config.kingdomId, connections: sockets.size });
         const closed = new Promise<void>((resolve) => listener.close(() => resolve()));
 
-        for (const socket of sockets) socket.destroy();
+        for (const socket of sockets) {socket.destroy();}
 
         await closed;
 
-        while (inFlight.size) await Promise.allSettled(inFlight);
+        while (inFlight.size) {await Promise.allSettled(inFlight);}
       },
     );
     yield* fromPromise(
@@ -79,12 +79,12 @@ export function listenServer(config: ConnectionConfig, dependencies: ServerDepen
       const path = new URL(request.url).pathname;
 
       if (path === provisionPath)
-        return ready() && dependencies.provisioning
+        {return ready() && dependencies.provisioning
           ? dependencies.provisioning(request)
-          : new Response(null, { status: 503 });
+          : new Response(null, { status: 503 });}
 
       if (path !== "/healthz" && path !== "/readyz")
-        return new Response("Not found", { status: 404 });
+        {return new Response("Not found", { status: 404 });}
 
       return Response.json(
         {

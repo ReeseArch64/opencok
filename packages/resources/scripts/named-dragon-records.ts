@@ -14,13 +14,13 @@ export function namedDragonDefinition(record: object) {
   const identity = "id" in record ? identities.get(record.id as number) : undefined;
   const definition = identity && dragonDefinitionByIdentity.get(identity);
 
-  if (!definition) throw new Error("Dragon catalog import requires a named server configuration");
+  if (!definition) {throw new Error("Dragon catalog import requires a named server configuration");}
 
   return definition;
 }
 
 export function namedDragonRecord(catalog: string, record: object) {
-  if (catalog !== GameplayCatalog.DragonBase) return undefined;
+  if (catalog !== GameplayCatalog.DragonBase) {return undefined;}
 
   const definition = namedDragonDefinition(record);
   const identity = identities.get(definition.id)!;

@@ -54,7 +54,7 @@ test("alliance limits use k1 and reject malformed or unrepresentable configurati
   expect(allianceRankingQuery("power", rules(), now)).toEqual({ kind: "power", limit: 2, now });
   expect(allianceRankingQuery("kills", rules("+32767"), now).limit).toBe(32767);
   for (const limit of ["", " 2", "2 ", "0", "-1", "2.5", "32768", "1e2"])
-    expect(() => allianceRankingQuery("power", rules(limit), now)).toThrow("102192");
+    {expect(() => allianceRankingQuery("power", rules(limit), now)).toThrow("102192");}
   expect(() => allianceRankingQuery("power", rules(), NaN)).toThrow();
 });
 
@@ -234,7 +234,7 @@ test("invalid or mixed-alliance inputs reject instead of leaking records or emit
     { ...snapshot([row("self")]), videos: [{ allianceId: "other" }] },
     { ...snapshot([]), fallbackRank: 0n },
   ])
-    expect(() => selectAllianceRanking(query, state, catalog)).toThrow();
+    {expect(() => selectAllianceRanking(query, state, catalog)).toThrow();}
   const invalidRows: Row[] = [
     { nums: "9223372036854775808" },
     { fightpower: 9007199254740992 },
@@ -243,12 +243,12 @@ test("invalid or mixed-alliance inputs reject instead of leaking records or emit
     { curMember: 2147483648 },
   ];
   for (const changes of invalidRows)
-    expect(() =>
+    {expect(() =>
       allianceRanking("power", {
         rows: [{ alliance: row("self", changes), maxMember: 10, video: undefined }],
         selfRanking: 1,
       }),
-    ).toThrow();
+    ).toThrow();}
 });
 
 test("missing alliance labels consume their slots and model strings retain Java trim boundaries", () => {

@@ -52,18 +52,18 @@ test("direct long-to-float rounding matches 1809 Java cases including double-rou
   let naiveDifferences = 0;
   for (const [raw, expected] of oracle.longFloat as [string, number][]) {
     expect(bits(resourceLongFloat(BigInt(raw)))).toBe(expected);
-    if (bits(Math.fround(Number(BigInt(raw)))) !== expected) naiveDifferences++;
+    if (bits(Math.fround(Number(BigInt(raw)))) !== expected) {naiveDifferences++;}
   }
   expect(naiveDifferences).toBeGreaterThan(0);
   for (const value of [-9223372036854775809n, 9223372036854775808n])
-    expect(() => resourceLongFloat(value)).toThrow();
+    {expect(() => resourceLongFloat(value)).toThrow();}
 });
 
 test("remaining quantity and elapsed collection match 2129 frozen Java arithmetic cases", () => {
   expect(oracle.remaining).toHaveLength(81);
   expect(oracle.collections).toHaveLength(2048);
   for (const [initial, cost, expected] of oracle.remaining as number[][])
-    expect(resourceRemaining(initial!, cost!)).toBe(expected!);
+    {expect(resourceRemaining(initial!, cost!)).toBe(expected!);}
   for (const [type, remaining, load, rate, now, arrival, expected] of oracle.collections as [
     number,
     number,
@@ -123,7 +123,7 @@ test("new-resource aggregation matches 128 Java cases with per-march clocks and 
     let read = 0;
     const detail = resourceGroupDetail(remaining, input, () => BigInt(clocks[read++]!));
     expect(read).toBe(clocks.length);
-    if (expected === null) expect(detail).toBeUndefined();
+    if (expected === null) {expect(detail).toBeUndefined();}
     else {
       expect(bits(detail!.speed)).toBe(expected[0]);
       expect(detail!.remaining).toBe(expected[1]);
@@ -163,7 +163,7 @@ test("resource capacity uses numeric resource weights then a single plunder valu
     ["００２", 26],
     ["\u2003", 93],
   ] as [string | null, number][])
-    expect(load(item)).toBe(expected);
+    {expect(load(item)).toBe(expected);}
   expect(load("1", 18)).toBe(50);
   expect(load("1", 19)).toBe(50);
   expect(load("1", 37)).toBe(43);
@@ -252,12 +252,12 @@ test("finite float inputs can overflow aggregation as in Java while malformed in
   expect(detail.speed).toBe(Infinity);
   expect(decode(encode(worldResourceGroup(detail)))).toEqual(worldResourceGroup(detail));
   for (const rate of [NaN, Infinity, -Infinity, 1e100])
-    expect(() => resourceCollected(3, 100, march({ collectSpd: rate }), 1000n)).toThrow();
+    {expect(() => resourceCollected(3, 100, march({ collectSpd: rate }), 1000n)).toThrow();}
   for (const patch of [
     { armyLoad: 1.5 },
     { marchArrivalTime: 9223372036854775808n },
   ] as Partial<WorldResourceCollection>[])
-    expect(() => resourceCollected(3, 100, march(patch), 1000n)).toThrow();
+    {expect(() => resourceCollected(3, 100, march(patch), 1000n)).toThrow();}
   expect(() => resourceRemaining(2147483648, 0)).toThrow();
   expect(() => resourceOwnerDetail(3, 100, march({ collectedBeforeSpd: 2147483648 }))).toThrow();
   expect(() =>
@@ -265,9 +265,9 @@ test("finite float inputs can overflow aggregation as in Java while malformed in
   ).toThrow();
   expect(() => resourceGroupDetail(0, Array(32768).fill(march()), () => 0n)).toThrow();
   for (const item of ["\0", "\ud800", "1".repeat(256)])
-    expect(() =>
+    {expect(() =>
       resourceArmyLoad({ rawArmyLoad: 1, pointType: 3, pointItem: item, plunder: [] }, rules()),
-    ).toThrow();
+    ).toThrow();}
   const inputs = [march({ collectSpd: 0.1 }), march({ collectSpd: 0.2 })];
   const before = structuredClone(inputs);
   resourceGroupDetail(100, inputs, () => 10000n);

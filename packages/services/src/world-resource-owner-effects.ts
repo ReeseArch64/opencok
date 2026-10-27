@@ -29,7 +29,7 @@ export async function readResourceOwnerLoadEffects(
     !services.worldPowerEffects ||
     snapshot.effects.generals.length > 4096
   )
-    throw new GameError(errors.unsupported, "power_state");
+    {throw new GameError(errors.unsupported, "power_state");}
 
   const context = resourceOwnerRuleContext(snapshot, environment);
   const state = snapshot.effects;

@@ -24,7 +24,7 @@ export function groupBuyOperation(
   kind: "reserve" | "cancel" | "paid" | "close" | "settle",
   identity: string,
 ) {
-  if (!identity || identity.length > 256) invalid();
+  if (!identity || identity.length > 256) {invalid();}
 
   return `group:${kind}:${createHash("sha256").update(identity).digest("hex")}`;
 }
@@ -33,7 +33,7 @@ function mail(context: CityProgressionContext, id: string) {
   const template = context.rules.mail.get(id),
     contents = javaMailBytes(template?.message);
 
-  if (!template || !contents) invalid();
+  if (!template || !contents) {invalid();}
 
   const quests = (context.write.quests ??= {});
   quests.mail = [
@@ -82,7 +82,7 @@ export class GroupBuyDomain extends CityCommandDomain {
         config = context.rules.items.get("alliance_groupbuys"),
         empty = () => ({ response: encode({}), event: null });
 
-      if (!state || !config) invalid();
+      if (!state || !config) {invalid();}
 
       const ruleContext = {
           kingdomId: context.rules.kingdomId,
@@ -108,24 +108,24 @@ export class GroupBuyDomain extends CityCommandDomain {
           str(params, "operationId") !==
           groupBuyOperation("settle", `${context.owner}:${id}:${round}`)
         )
-          invalid();
+          {invalid();}
 
         const loaded = await state.load({ id }, round),
           closed = loaded.rounds[round - 1]!,
           record = loaded.record;
 
-        if (closed.flag !== 1 || BigInt(closed.cTime) > context.now) invalid();
+        if (closed.flag !== 1 || BigInt(closed.cTime) > context.now) {invalid();}
 
-        if (!record || num(record, "reward") >= num(record, "point")) return empty();
+        if (!record || num(record, "reward") >= num(record, "point")) {return empty();}
 
         if (!closed.mail) {
-          if (loaded.pending) invalid();
+          if (loaded.pending) {invalid();}
 
           const tier = (closed.tiers ?? groupBuyTiers(context.rules, round))
             .toSorted((a, b) => a.level - b.level)
             .findLast((tier) => tier.level <= loaded.total);
 
-          if (!tier) invalid();
+          if (!tier) {invalid();}
 
           closed.mail = tier.mail;
           closed.total = loaded.total;
@@ -134,7 +134,7 @@ export class GroupBuyDomain extends CityCommandDomain {
 
         const count = cityInteger(record.point, 1, 128) - cityInteger(record.reward, 0, 128);
 
-        for (let i = 0; i < count; i++) mail(context, closed.mail);
+        for (let i = 0; i < count; i++) {mail(context, closed.mail);}
 
         context.write.groupBuy = {
           activity: loaded.activity,
@@ -159,17 +159,17 @@ export class GroupBuyDomain extends CityCommandDomain {
             eventId,
           }))
         )
-          invalid();
+          {invalid();}
 
         const loaded = await state.load({ id }, round),
           record = loaded.record;
 
-        if (!record) invalid();
+        if (!record) {invalid();}
 
         const entries = text(record, "info").split("|"),
           entry = entries.find((entry) => entry.startsWith(`${marker}:`));
 
-        if (!entry || !entry.endsWith(":0")) invalid();
+        if (!entry || !entry.endsWith(":0")) {invalid();}
 
         context.write.groupBuy = {
           activity: loaded.activity,
@@ -183,7 +183,7 @@ export class GroupBuyDomain extends CityCommandDomain {
         const eventId = str(params, "eventId");
 
         if (!gateway || str(params, "operationId") !== groupBuyOperation("paid", eventId))
-          invalid();
+          {invalid();}
 
         const proof = await gateway.accepted({
           owner: context.owner,
@@ -199,7 +199,7 @@ export class GroupBuyDomain extends CityCommandDomain {
           !open ||
           castle < cityInteger(config.k3)
         )
-          invalid();
+          {invalid();}
 
         const loaded = await state.load({ id: proof.activityId }, proof.round),
           round = loaded.rounds[proof.round - 1]!,
@@ -212,7 +212,7 @@ export class GroupBuyDomain extends CityCommandDomain {
           proof.occurredAt < BigInt(round.sTime) ||
           proof.occurredAt > BigInt(round.cTime)
         )
-          invalid();
+          {invalid();}
 
         const previous = loaded.record,
           marker = createHash("sha256").update(eventId).digest("hex"),
@@ -222,17 +222,17 @@ export class GroupBuyDomain extends CityCommandDomain {
           parts = entry?.split(":");
 
         if (!parts || parts[1] !== proof.exchangeId || BigInt(parts[2]!) > proof.occurredAt)
-          invalid();
+          {invalid();}
 
-        if (parts[4] === "1") return empty();
+        if (parts[4] === "1") {return empty();}
 
-        if (parts[4] !== "0") invalid();
+        if (parts[4] !== "0") {invalid();}
 
-        if (round.flag === 1) invalid();
+        if (round.flag === 1) {invalid();}
 
         const point = num(previous ?? {}, "point") + cityInteger(parts[3], 1, 10);
 
-        if (point > cityInteger(config.k4, 1, 10)) invalid();
+        if (point > cityInteger(config.k4, 1, 10)) {invalid();}
 
         const record: Row = {
           id: text(loaded.activity, "id"),
@@ -270,9 +270,9 @@ export class GroupBuyDomain extends CityCommandDomain {
           str(params, "operationId") !==
             groupBuyOperation("close", `${loaded.activity.id}:${roundIndex}`)
         )
-          invalid();
+          {invalid();}
 
-        if (round.flag === 1) return empty();
+        if (round.flag === 1) {return empty();}
 
         const proof = await gateway.reconciled({
           kingdomId: context.rules.kingdomId,
@@ -282,18 +282,18 @@ export class GroupBuyDomain extends CityCommandDomain {
           cutoff: BigInt(round.cTime),
         });
 
-        if (!proof || loaded.pending || cityInteger(proof.totalPoints) !== loaded.total) invalid();
+        if (!proof || loaded.pending || cityInteger(proof.totalPoints) !== loaded.total) {invalid();}
 
         const tier = tiers
           .toSorted((a, b) => a.level - b.level)
           .findLast((tier) => tier.level <= loaded.total);
 
-        if (loaded.total > 0 && !tier) invalid();
+        if (loaded.total > 0 && !tier) {invalid();}
 
         round.flag = 1;
         round.total = loaded.total;
 
-        if (tier) round.mail = tier.mail;
+        if (tier) {round.mail = tier.mail;}
 
         context.write.groupBuy = {
           activity: {
@@ -309,7 +309,7 @@ export class GroupBuyDomain extends CityCommandDomain {
       const period = groupBuyPeriod(context.rules);
 
       if (!open || !period || context.now < period.start || context.now > period.end) {
-        if (command === "groupbuys.reserve") invalid();
+        if (command === "groupbuys.reserve") {invalid();}
 
         return empty();
       }
@@ -320,7 +320,7 @@ export class GroupBuyDomain extends CityCommandDomain {
         ) + 1;
 
       if (roundIndex < 1) {
-        if (command === "groupbuys.reserve") invalid();
+        if (command === "groupbuys.reserve") {invalid();}
 
         return empty();
       }
@@ -346,12 +346,12 @@ export class GroupBuyDomain extends CityCommandDomain {
           context.now > BigInt(round.cTime) ||
           round.flag === 1
         )
-          invalid();
+          {invalid();}
 
         const saved = entries.find((entry) => entry.startsWith(`${marker}:`));
 
         if (saved) {
-          if (saved.split(":")[1] !== exchangeId) invalid();
+          if (saved.split(":")[1] !== exchangeId) {invalid();}
 
           return empty();
         }
@@ -361,7 +361,7 @@ export class GroupBuyDomain extends CityCommandDomain {
           .reduce((sum, entry) => sum + cityInteger(entry.split(":")[3], 1, 10), 0);
 
         if (num(record ?? {}, "point") + reserved + product.point > cityInteger(config.k4, 1, 10))
-          invalid();
+          {invalid();}
 
         entries.push(`${marker}:${exchangeId}:${context.now}:${product.point}:0`);
         context.write.groupBuy = {

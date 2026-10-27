@@ -56,7 +56,7 @@ test("avatar reports reject malformed targets before persistence", async () => {
       uid: sfs.string(uid),
     })),
   ];
-  for (const params of invalid) await expect(f.run(params)).rejects.toThrow();
+  for (const params of invalid) {await expect(f.run(params)).rejects.toThrow();}
   expect(f.reports).toEqual([]);
 });
 

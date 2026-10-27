@@ -98,9 +98,9 @@ test("resource ranking keys use Sunday weeks while refresh deadlines use Monday"
 
 test("resource readers reject malformed scores and maintain the inclusive 101-row boundary", async () => {
   for (const values of [["self"], ["self", "NaN"], ["self", ""], Array(204).fill("1")])
-    await expect(
+    {await expect(
       loadDonationRanking(async () => values, 1, "a", "resource-history", ""),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   const values = Array.from({ length: 101 }, (_, i) => [String(i), String(i)]).flat();
   expect(
     await loadDonationRanking(async () => values, 1, "a", "resource-history", ""),

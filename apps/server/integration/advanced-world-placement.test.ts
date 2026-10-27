@@ -25,7 +25,7 @@ async function fixture() {
   );
   try {
     for (const id of ["civilization_fortress_on", "totem_on"])
-      h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });
+      {h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });}
     h.rules.advanced.totems!.set("20015001", {
       ...h.rules.advanced.totems!.get("20015001")!,
       cover_area: "2",

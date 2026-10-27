@@ -46,7 +46,7 @@ export function fortification(row: Row, rules: Rules): Fields {
     ["time", "time"],
     ["load", "load"],
   ])
-    if (rule[source!] !== undefined) result[field!] = sfs.int(cityInteger(rule[source!]));
+    {if (rule[source!] !== undefined) {result[field!] = sfs.int(cityInteger(rule[source!]));}}
 
   result.power = { type: Type.Float, value: Math.fround(Number(rule.power ?? 0)) };
 
@@ -57,13 +57,13 @@ function initialUnits(rules: Rules, ids: readonly number[], parameter: number): 
   const result = new Set<string>();
 
   for (const id of ids)
-    for (const item of rules.buildings
+    {for (const item of rules.buildings
       .get(id)
       ?.clientParameters?.[parameter]?.value.split(";")
       .filter(Boolean) ?? []) {
       troopDefinition(rules, item);
       result.add(item);
-    }
+    }}
 
   return [...result];
 }
@@ -75,19 +75,19 @@ export function militarySnapshot(
   rules: Rules,
 ): Fields {
   if (armies.length > 1024 || hospital.length > 1024 || forts.length > 1024)
-    throw new Error("Military snapshot exceeds bound");
+    {throw new Error("Military snapshot exceeds bound");}
 
   const soldiers = new Map(armies.map((row) => [text(row, "armyId"), row])),
     defenses = new Map(forts.map((row) => [text(row, "armyId"), row]));
 
   if (soldiers.size !== armies.length || defenses.size !== forts.length)
-    throw new Error("Duplicate military identity");
+    {throw new Error("Duplicate military identity");}
 
   for (const armyId of initialUnits(rules, [423000, 424000, 425000, 426000], 0))
-    if (!soldiers.has(armyId)) soldiers.set(armyId, { armyId, level: 0, free: 0, march: 0 });
+    {if (!soldiers.has(armyId)) {soldiers.set(armyId, { armyId, level: 0, free: 0, march: 0 });}}
 
   for (const armyId of initialUnits(rules, [416000], 3))
-    if (!defenses.has(armyId)) defenses.set(armyId, { armyId, level: 1, num: 0 });
+    {if (!defenses.has(armyId)) {defenses.set(armyId, { armyId, level: 1, num: 0 });}}
 
   return {
     army: sfs.array(

@@ -15,7 +15,7 @@ class StageCache extends Cache {
   }
   override async command(command: string, ...args: string[]) {
     this.calls.push([command, ...args]);
-    if (this.fail) throw new Error("Synthetic stage failure");
+    if (this.fail) {throw new Error("Synthetic stage failure");}
     return this.response;
   }
 }
@@ -23,7 +23,7 @@ class StageCache extends Cache {
 function fixture() {
   const rules = new Rules(new Map(), new Map(), new Map());
   for (const key of ["tech_newEffect", "17_wk"])
-    rules.features.set(key, { version: "99.0.0", online: "2", test: "3" });
+    {rules.features.set(key, { version: "99.0.0", online: "2", test: "3" });}
   rules.items.set("merge_server", { k5: "1;4" });
   const profile: Row = { serverId: 2, crossFightSrcServerId: -1 };
   const cache = new StageCache();
@@ -41,7 +41,7 @@ function fixture() {
       (effect) => {
         expect(effect).toBe(895);
         state.effects++;
-        if (state.failEffect) throw new Error("Synthetic effect failure");
+        if (state.failEffect) {throw new Error("Synthetic effect failure");}
         return state.value;
       },
     );
@@ -100,7 +100,7 @@ test("absent stage data stays unavailable while invalid identities, statuses and
   }
   cache.calls.length = 0;
   for (const realm of [0, -1, NaN, 1.5, 2147483648])
-    await expect(cache.expeditionStage(realm)).rejects.toThrow();
+    {await expect(cache.expeditionStage(realm)).rejects.toThrow();}
   expect(cache.calls).toEqual([]);
 });
 

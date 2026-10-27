@@ -50,15 +50,15 @@ function databases() {
       const text = statement.text;
       queries.push({ role, text, params });
       if (text.startsWith("begin")) {
-        if (role === "kingdom") pendingBefore = structuredClone(pending);
-        else logsBefore = structuredClone(logs);
+        if (role === "kingdom") {pendingBefore = structuredClone(pending);}
+        else {logsBefore = structuredClone(logs);}
       }
       if (text === "rollback") {
-        if (role === "kingdom" && pendingBefore) pending = pendingBefore;
-        if (role === "global" && logsBefore) logs = logsBefore;
+        if (role === "kingdom" && pendingBefore) {pending = pendingBefore;}
+        if (role === "global" && logsBefore) {logs = logsBefore;}
       }
       if (role === "kingdom" && text.startsWith("select")) {
-        if (options.fail === "read") throw new Error("Synthetic pending read failure");
+        if (options.fail === "read") {throw new Error("Synthetic pending read failure");}
         return {
           rows: pending
             .slice(0, params[0] as number)
@@ -75,35 +75,35 @@ function databases() {
           options.fail === "update" ||
           (options.fail === "second update" && params[2] === "foreign")
         )
-          throw new Error("Synthetic global update failure");
+          {throw new Error("Synthetic global update failure");}
         const [isOpened, receiveTime, uid, sendTime, owner] = params;
         for (const log of logs)
-          if (
+          {if (
             log.uid === uid &&
             log.sendTime === BigInt(sendTime as string) &&
             log.toUid === owner
           ) {
             log.isOpened = isOpened as number;
             log.receiveTime = BigInt(receiveTime as string);
-          }
+          }}
       }
       if (role === "global" && text === "commit" && options.fail === "global commit") {
         logsBefore = undefined;
         throw new Error("Synthetic ambiguous global commit");
       }
       if (role === "kingdom" && text.startsWith("delete")) {
-        if (options.fail === "ack") throw new Error("Synthetic acknowledgment failure");
+        if (options.fail === "ack") {throw new Error("Synthetic acknowledgment failure");}
         for (let i = 0; i < params.length; i += 4)
-          pending = pending.filter(
+          {pending = pending.filter(
             (entry) =>
               entry.mailUid !== params[i] ||
               entry.sendTime !== BigInt(params[i + 1] as string) ||
               entry.toUser !== params[i + 2] ||
               entry.openedAt !== BigInt(params[i + 3] as string),
-          );
+          );}
       }
       if (role === "kingdom" && text === "commit" && options.fail === "realm commit")
-        throw new Error("Synthetic realm commit failure");
+        {throw new Error("Synthetic realm commit failure");}
       return { rows: [] };
     },
   });
@@ -138,7 +138,7 @@ test("gift relay locks a bounded realm batch and updates only matching global lo
   )!;
   expect(update.params).toEqual([1, opened, "gift", sent, "self"]);
   for (const column of ["uid", "sendTime", "toUid"])
-    expect(update.text).toContain(`"mail_gift_log"."${column}" =`);
+    {expect(update.text).toContain(`"mail_gift_log"."${column}" =`);}
   expect(update.text).not.toMatch(/isRewarded|isThanks|contents|rewards/);
   const globalCommit = queries.findIndex(
     (entry) => entry.role === "global" && entry.text === "commit",
@@ -169,8 +169,8 @@ test("gift relay retains pending openings after dependency and acknowledgment fa
     expect(state().pending).toEqual(before.pending);
     expect(queries.at(-1)).toEqual({ role: "kingdom", text: "rollback", params: [] });
     if (["read", "update", "second update"].includes(fail))
-      expect(state().logs).toEqual(before.logs);
-    else expect(state().logs[0]?.receiveTime).toBe(opened);
+      {expect(state().logs).toEqual(before.logs);}
+    else {expect(state().logs[0]?.receiveTime).toBe(opened);}
     options.fail = "";
     expect(await relayMailGiftOpenings(kingdom, global)).toBe(3);
     expect(state().pending).toEqual([]);
@@ -184,6 +184,6 @@ test("gift relay retains pending openings after dependency and acknowledgment fa
 test("gift relay rejects invalid batch bounds without opening transactions", () => {
   const { kingdom, global, queries } = databases();
   for (const limit of [0, -1, 1.5, NaN, 1001])
-    expect(() => relayMailGiftOpenings(kingdom, global, limit)).toThrow();
+    {expect(() => relayMailGiftOpenings(kingdom, global, limit)).toThrow();}
   expect(queries).toEqual([]);
 });

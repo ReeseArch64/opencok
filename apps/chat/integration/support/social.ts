@@ -30,7 +30,7 @@ export async function verifySocialTransports(
   const apps: Awaited<ReturnType<typeof startChatProcess>>[] = [];
   const sockets: WebSocket[] = [];
   try {
-    for (let index = 0; index < 2; index++) apps.push(await startChatProcess(index, databaseUrl));
+    for (let index = 0; index < 2; index++) {apps.push(await startChatProcess(index, databaseUrl));}
     const urls = apps.map((app) => app.url);
     const clients = [];
     for (const [index, uid] of ["alice", "bob"].entries()) {
@@ -60,7 +60,7 @@ export async function verifySocialTransports(
       let counter = Date.now();
       const wait = async (predicate: () => boolean) => {
         for (let attempt = 0; attempt < 300; attempt++) {
-          if (predicate()) return;
+          if (predicate()) {return;}
           await Bun.sleep(10);
         }
         throw new Error("Chat frame timed out");
@@ -81,10 +81,10 @@ export async function verifySocialTransports(
     const alice = clients[0]!,
       bob = clients[1]!;
     for (const client of clients)
-      expect(
+      {expect(
         (await client.send("room.joinMulti", { rooms: [{ group: "global", id: "global_public" }] }))
           .reply.error,
-      ).toBeUndefined();
+      ).toBeUndefined();}
     const sent = await alice.send("chat.room", {
       roomId: "global_public",
       msg: "Across two chat instances",
@@ -145,10 +145,10 @@ export async function verifySocialTransports(
       .reply.result!;
     const roomId = String(room.roomId);
     for (const client of clients)
-      expect(
+      {expect(
         (await client.send("room.joinMulti", { rooms: [{ group: "private", id: roomId }] })).reply
           .error,
-      ).toBeUndefined();
+      ).toBeUndefined();}
     await alice.send("chat.room", { roomId, msg: "Private live message" });
     await apps[1]!.runDistribution();
     await bob.wait(() => bob.frames.some((frame) => frame.data?.msg === "Private live message"));
@@ -258,16 +258,16 @@ export async function verifySocialTransports(
       });
       const cursor = str(batch, "cursor");
       if (cursor)
-        await realm2("realm-2", "realm.events.ack", { ...identity, cursor: sfs.string(cursor) });
-      if (found && foundNativeRoom) break;
+        {await realm2("realm-2", "realm.events.ack", { ...identity, cursor: sfs.string(cursor) });}
+      if (found && foundNativeRoom) {break;}
     }
     expect(found).toBe(true);
     expect(foundNativeRoom).toBe(true);
     for (const uid of ["alice", "bob"])
-      await databases.global.db
+      {await databases.global.db
         .update(account_new)
         .set({ facebookAccount: `facebook-${uid}` })
-        .where(eq(account_new.gameUid, uid));
+        .where(eq(account_new.gameUid, uid));}
     await databases.getKingdom(2).db.insert(user_resource).values({
       uid: "bob",
       wood: 0n,
@@ -409,7 +409,7 @@ export async function verifySocialTransports(
             operationId: sfs.string(event.requestId),
           });
           if (result.expired?.value === true && result.delivered?.value !== true)
-            await notices.refund(event.owner, event.requestId);
+            {await notices.refund(event.owner, event.requestId);}
         },
         Date.now,
         "social.notice",
@@ -462,7 +462,7 @@ export async function verifySocialTransports(
       recovered.send(JSON.stringify({ cmd, params, sendTime: Date.now() }));
       for (let attempt = 0; attempt < 300; attempt++) {
         const result = replies.find((reply) => reply.cmd === cmd);
-        if (result) return result;
+        if (result) {return result;}
         await Bun.sleep(10);
       }
       throw new Error("Restart recovery frame timed out");
@@ -473,7 +473,7 @@ export async function verifySocialTransports(
         .result?.msgs,
     ).toContainEqual(expect.objectContaining({ msg: "Durable across process restart" }));
   } finally {
-    for (const socket of sockets) socket.terminate();
-    for (const app of apps) await app.close();
+    for (const socket of sockets) {socket.terminate();}
+    for (const app of apps) {await app.close();}
   }
 }

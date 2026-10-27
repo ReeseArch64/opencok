@@ -59,7 +59,7 @@ export class CityProgressionContextFactory<T> {
           id as Parameters<typeof playerGameEffect>[6],
         );
 
-        if (!Number.isFinite(value)) throw new GameError(errors.invalid, "city_progression");
+        if (!Number.isFinite(value)) {throw new GameError(errors.invalid, "city_progression");}
 
         cache.set(id, value);
       }

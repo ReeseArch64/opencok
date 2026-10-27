@@ -11,11 +11,11 @@ export async function nextAvatarRevision(tx: Transaction, owner: string): Promis
   const value = result.rows[0]?.revision;
 
   if (result.rows.length !== 1 || typeof value !== "string" || !/^[1-9][0-9]*$/.test(value))
-    throw new Error("Invalid avatar publication revision");
+    {throw new Error("Invalid avatar publication revision");}
 
   const revision = BigInt(value);
 
-  if (revision > 9223372036854775807n) throw new Error("Avatar publication exhausted");
+  if (revision > 9223372036854775807n) {throw new Error("Avatar publication exhausted");}
 
   return revision;
 }

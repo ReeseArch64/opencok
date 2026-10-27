@@ -15,7 +15,7 @@ export async function readSeasonalExchange(tx: MutationTransaction, owner: strin
     .limit(2)
     .for("share");
 
-  if (periods.length > 1) throw new Error("Ambiguous seasonal exchange period");
+  if (periods.length > 1) {throw new Error("Ambiguous seasonal exchange period");}
 
   const [record] = await tx
     .select()
@@ -28,7 +28,7 @@ export async function readSeasonalExchange(tx: MutationTransaction, owner: strin
 
 export async function writeSeasonalExchange(tx: MutationTransaction, owner: string, row: Row) {
   if (row.uid !== owner || num(row, "actId") !== 5)
-    throw new Error("Invalid seasonal exchange owner");
+    {throw new Error("Invalid seasonal exchange owner");}
 
   seasonalExchangeRewards(text(row, "rewards"));
   const value = {

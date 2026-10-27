@@ -114,7 +114,7 @@ test("expedition malformed public metadata, duplicate entries and unrepresentabl
     "x".repeat(65536),
     " ".repeat(65536),
   ])
-    expect(() => project([{ uid: "self", score: 1, info: raw }])).toThrow();
+    {expect(() => project([{ uid: "self", score: 1, info: raw }])).toThrow();}
   expect(() => project([{ uid: "self", score: NaN, info }])).toThrow();
   expect(() =>
     project([
@@ -126,11 +126,11 @@ test("expedition malformed public metadata, duplicate entries and unrepresentabl
     project(Array.from({ length: 5 }, (_, i) => ({ uid: String(i), score: 1, info }))),
   ).toThrow();
   for (const k2 of ["0", "-1", "32768", " 2", "2.5", ""])
-    expect(() =>
+    {expect(() =>
       expeditionRankingLimit(
         new Rules(new Map(), new Map(), new Map(), undefined, new Map([["ranking", { k2 }]])),
       ),
-    ).toThrow();
+    ).toThrow();}
   expect(
     expeditionRankingLimit(
       new Rules(

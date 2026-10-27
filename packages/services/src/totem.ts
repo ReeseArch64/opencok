@@ -30,7 +30,7 @@ function totemMail(
 ): AvatarSystemMail {
   const contents = javaMailBytes(`${template.message}|${params.join("|")}`);
 
-  if (!template.message || !contents) totemFailure();
+  if (!template.message || !contents) {totemFailure();}
 
   return {
     uid: randomUUID().replaceAll("-", "") + "00",
@@ -55,7 +55,7 @@ function mail(
 ) {
   const template = context.rules.mail.get(rule[field] ?? "");
 
-  if (!template) totemFailure();
+  if (!template) {totemFailure();}
 
   const write = (context.write.quests ??= {});
   write.mail = [...(write.mail ?? []), totemMail(template, context.owner, context.now, params)];
@@ -82,7 +82,7 @@ export async function expireTotems(store: TotemEffectStore, size: number) {
       );
     }
 
-    if (due.length < 64) break;
+    if (due.length < 64) {break;}
   }
 }
 
@@ -108,7 +108,7 @@ export async function settleTotemEffects(store: TotemEffectStore, rules: Rules, 
           randomInt,
         );
       } catch (error) {
-        if (!(error instanceof GameError) || error.code !== errors.locked) throw error;
+        if (!(error instanceof GameError) || error.code !== errors.locked) {throw error;}
 
         plan = { states: [], deleted: [] };
       }
@@ -147,7 +147,7 @@ export async function settleTotemEffects(store: TotemEffectStore, rules: Rules, 
       await store.apply(delivery, plan.states, plan.deleted, message, encode(push));
     }
 
-    if (pending.length < 64) break;
+    if (pending.length < 64) {break;}
   }
 }
 
@@ -165,10 +165,10 @@ export class TotemDomain extends CityCommandDomain {
     this.types = [];
 
     this.prepare = async (context, command, params) => {
-      if (command === "totem.tick") return { response: encode({}), event: null };
+      if (command === "totem.tick") {return { response: encode({}), event: null };}
 
       if (command === "totem.init")
-        return {
+        {return {
           response: encode({
             totems: sfs.array(
               (context.state.totems?.history ?? []).map((row) =>
@@ -180,7 +180,7 @@ export class TotemDomain extends CityCommandDomain {
             ),
           }),
           event: null,
-        };
+        };}
 
       if (
         !serverFeature(context.rules, "totem_on", {
@@ -189,17 +189,17 @@ export class TotemDomain extends CityCommandDomain {
           now: Number(context.now),
         })
       )
-        totemFailure();
+        {totemFailure();}
 
       const state = context.state.totems,
         world = context.state.worldMutation;
 
-      if (!state || !world) totemFailure();
+      if (!state || !world) {totemFailure();}
 
       const action = str(params, "M__REQUEST_ID__H");
 
       if (action === "info")
-        return {
+        {return {
           response: encode({
             totems: sfs.array(
               state.history.map((row) =>
@@ -211,7 +211,7 @@ export class TotemDomain extends CityCommandDomain {
             ),
           }),
           event: null,
-        };
+        };}
 
       const pointId = int(params, "pointId"),
         points: Row[] = [],
@@ -224,11 +224,11 @@ export class TotemDomain extends CityCommandDomain {
         const item = context.economy.ownedItem?.(str(params, "itemUUid"));
         const goods = item ? context.rules.goods.get(item.itemId) : undefined;
 
-        if (!item || item.count < 1 || goods?.type !== "47") totemFailure();
+        if (!item || item.count < 1 || goods?.type !== "47") {totemFailure();}
 
         const rule = context.rules.advanced.totems?.get(goods.para1 ?? "");
 
-        if (!rule) totemFailure();
+        if (!rule) {totemFailure();}
 
         totemId = cityInteger(rule.id, 1);
         const history = state.history.find((row) => num(row, "totemId") === totemId);
@@ -237,13 +237,13 @@ export class TotemDomain extends CityCommandDomain {
           history &&
           long(history, "putTime") + BigInt(cityInteger(rule.cd_time)) * 60000n > context.now
         )
-          totemFailure();
+          {totemFailure();}
 
         if (
           state.active.filter((row) => row.ownerUid === context.owner).length >=
           cityInteger(context.rules.items.get("totem")?.k1 ?? 1, 1)
         )
-          totemFailure();
+          {totemFailure();}
 
         const footprint = totemFootprint(pointId, cityInteger(rule.cover_area, 1), size);
 
@@ -261,7 +261,7 @@ export class TotemDomain extends CityCommandDomain {
             num(point, "grid2Type") !== 0 ||
             num(point, "resInitValue") > 0
           )
-            totemFailure();
+            {totemFailure();}
 
           points.push({
             ...point,
@@ -294,17 +294,17 @@ export class TotemDomain extends CityCommandDomain {
           size,
         );
 
-        for (const point of points) point.fireTime = dueAt;
+        for (const point of points) {point.fireTime = dueAt;}
 
         for (const row of nearby)
-          if (long(row, "dueAt") > dueAt) {
+          {if (long(row, "dueAt") > dueAt) {
             activations.push({ ...row, dueAt, expectedDueAt: long(row, "dueAt") });
             const point = world.points.find((p) => num(p, "id") === num(row, "pointId"));
 
-            if (!point) totemFailure();
+            if (!point) {totemFailure();}
 
             points.push({ ...point, fireTime: dueAt });
-          }
+          }}
 
         activations.push({
           id: randomUUID().replaceAll("-", ""),
@@ -318,7 +318,7 @@ export class TotemDomain extends CityCommandDomain {
           payload: pinTotemConfiguration(context.rules, rule),
         });
 
-        if (goods.permanent_props !== "1") context.economy.item(item.itemId, -1);
+        if (goods.permanent_props !== "1") {context.economy.item(item.itemId, -1);}
 
         context.write.totems = { history: [{ uid: context.owner, totemId, putTime: context.now }] };
         mail(context, rule, "place_mail", [
@@ -335,7 +335,7 @@ export class TotemDomain extends CityCommandDomain {
           (row) => num(row, "pointId") === pointId && row.ownerUid === context.owner,
         );
 
-        if (!activation) totemFailure();
+        if (!activation) {totemFailure();}
 
         totemId = num(activation, "totemId");
         const config = restoreTotemConfiguration(activation.payload as Buffer);
@@ -348,7 +348,7 @@ export class TotemDomain extends CityCommandDomain {
             text(point, "ownerId") !== context.owner ||
             ![64, 65].includes(num(point, "pointType"))
           )
-            totemFailure();
+            {totemFailure();}
 
           points.push({
             ...point,
@@ -365,11 +365,11 @@ export class TotemDomain extends CityCommandDomain {
         activations.push({ ...activation, status: 2, expectedDueAt: long(activation, "dueAt") });
         const rule = context.rules.advanced.totems?.get(String(totemId));
 
-        if (!rule) totemFailure();
+        if (!rule) {totemFailure();}
 
         mail(context, rule, "recycle_mail", [context.rules.kingdomId, pointId]);
         status = 2;
-      } else totemFailure();
+      } else {totemFailure();}
 
       context.write.totems = { ...context.write.totems, activations };
       context.write.worldMutation = { points };

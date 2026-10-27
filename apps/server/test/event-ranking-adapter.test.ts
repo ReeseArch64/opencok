@@ -164,15 +164,15 @@ test("completed hero history queries retain exact power and select only rewarded
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
       const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
-      if (table === "userprofile") return { rows: [["self", "alliance", 1, 0, "0"]] };
-      if (table === "user_building") return { rows: [[4]] };
-      if (table === "alliance_member") return { rows: [["9007199254740993"]] };
+      if (table === "userprofile") {return { rows: [["self", "alliance", 1, 0, "0"]] };}
+      if (table === "user_building") {return { rows: [[4]] };}
+      if (table === "alliance_member") {return { rows: [["9007199254740993"]] };}
       if (table === "hero_event")
-        return {
+        {return {
           rows: query.text.includes('"rewardStatus"')
             ? [["old", "rule", 4, "9007199254740993", "1_2", "2|1"]]
             : [["rule", 4]],
-        };
+        };}
       return { rows: [] };
     },
   };

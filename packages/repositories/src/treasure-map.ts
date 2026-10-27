@@ -13,7 +13,7 @@ export async function readTreasureMaps(tx: MutationTransaction, owner: string) {
     .limit(4097)
     .for("update");
 
-  if (rows.length > 4096) throw new Error("Treasure map aggregate exceeds bound");
+  if (rows.length > 4096) {throw new Error("Treasure map aggregate exceeds bound");}
 
   return rows;
 }
@@ -24,14 +24,14 @@ export async function writeTreasureMaps(
   write: WorldMutationWrite,
 ) {
   for (const row of write.treasures ?? []) {
-    if (row.currentOwner !== owner) throw new Error("Foreign treasure map write");
+    if (row.currentOwner !== owner) {throw new Error("Foreign treasure map write");}
 
     const [prior] = await tx
       .select({ owner: treasure_map.currentOwner })
       .from(treasure_map)
       .where(eq(treasure_map.uuid, text(row, "uuid")));
 
-    if (prior && prior.owner !== owner) throw new Error("Foreign treasure map identity");
+    if (prior && prior.owner !== owner) {throw new Error("Foreign treasure map identity");}
 
     const value = {
       uuid: text(row, "uuid"),
@@ -53,14 +53,14 @@ export async function writeTreasureMaps(
   }
 
   if (write.deletedTreasures?.length)
-    await tx
+    {await tx
       .delete(treasure_map)
       .where(
         and(
           eq(treasure_map.currentOwner, owner),
           inArray(treasure_map.uuid, [...write.deletedTreasures]),
         ),
-      );
+      );}
 }
 
 export async function withTreasureMarchTimes<T extends Row>(
@@ -71,7 +71,7 @@ export async function withTreasureMarchTimes<T extends Row>(
     (row) => num(row, "type") === 0 && num(row, "state") === 1 && num(row, "targetType") === 2,
   );
 
-  if (!selected.length) return [...rows];
+  if (!selected.length) {return [...rows];}
 
   const maps = await db
     .select()
@@ -95,7 +95,7 @@ export async function withTreasureMarchTimes<T extends Row>(
   for (const row of maps) {
     const key = `${row.currentOwner}:${row.marchId}`;
 
-    if (indexed.has(key)) throw new Error("Ambiguous treasure march identity");
+    if (indexed.has(key)) {throw new Error("Ambiguous treasure march identity");}
 
     indexed.set(key, row);
   }

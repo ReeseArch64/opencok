@@ -19,7 +19,7 @@ import type { CityProgressionContext } from "./city-progression-context.ts";
 function current(context: CityProgressionContext): Row {
   const state = context.state.expedition;
 
-  if (!state?.period || !state.phase) expeditionFailure();
+  if (!state?.period || !state.phase) {expeditionFailure();}
 
   return {
     ...(context.write.expedition ?? state.progress).find(
@@ -38,7 +38,7 @@ export function recordExpeditionScore(
   count = 1,
   occurredAt = context.scoreAt,
 ) {
-  if (context.state.expedition?.projectionOnly) return;
+  if (context.state.expedition?.projectionOnly) {return;}
 
   if (
     occurredAt < 0n ||
@@ -47,9 +47,9 @@ export function recordExpeditionScore(
     count < 0 ||
     context.expeditionActions.length >= 128
   )
-    throw new Error("Invalid confirmed expedition action");
+    {throw new Error("Invalid confirmed expedition action");}
 
-  if (count) context.expeditionActions.push({ action, parameter: param, count, at: occurredAt });
+  if (count) {context.expeditionActions.push({ action, parameter: param, count, at: occurredAt });}
 }
 
 export async function flushExpeditionScores(context: CityProgressionContext) {
@@ -60,7 +60,7 @@ export async function flushExpeditionScores(context: CityProgressionContext) {
     num(context.state.profile, "crossFightSrcServerId") > 0 ||
     num(context.state.profile, "serverId") !== context.rules.kingdomId
   )
-    return;
+    {return;}
 
   const snapshots = new Map<bigint, import("@opencok/contracts/new-expedition").ExpeditionState>();
 
@@ -70,7 +70,7 @@ export async function flushExpeditionScores(context: CityProgressionContext) {
     if (!snapshot) {
       snapshot = (await context.state.expeditionScore?.load(action.at)) ?? context.state.expedition;
 
-      if (!snapshot) continue;
+      if (!snapshot) {continue;}
 
       snapshots.set(action.at, snapshot);
     }
@@ -86,7 +86,7 @@ export async function flushExpeditionScores(context: CityProgressionContext) {
       action.at >= phase.endTime ||
       !expeditionOpen(context.rules, action.at)
     )
-      continue;
+      {continue;}
 
     const delta = expeditionScore(
       context.rules,
@@ -97,7 +97,7 @@ export async function flushExpeditionScores(context: CityProgressionContext) {
       context.effect,
     );
 
-    if (!delta) continue;
+    if (!delta) {continue;}
 
     const periodId = text(period, "periodId"),
       matches = (row: Row) =>
@@ -111,7 +111,7 @@ export async function flushExpeditionScores(context: CityProgressionContext) {
     };
     const score = num(row, "score") + delta;
 
-    if (!Number.isFinite(score)) expeditionFailure();
+    if (!Number.isFinite(score)) {expeditionFailure();}
 
     context.write.expedition = [
       ...(context.write.expedition ?? []).filter((item) => !matches(item)),
@@ -135,10 +135,10 @@ export class ExpeditionDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.expedition;
 
-    if (!state) expeditionFailure();
+    if (!state) {expeditionFailure();}
 
     if (command === "expedition.show")
-      return {
+      {return {
         response: encode({
           victoryCount: sfs.int(num(state.period ?? {}, "victoryTimes")),
           ...(params.currentCount
@@ -150,32 +150,32 @@ export class ExpeditionDomain extends CityCommandDomain {
             : {}),
         }),
         event: null,
-      };
+      };}
 
     if (command === "distribution.record.show")
-      return {
+      {return {
         response: encode({
           disRecordList: sfs.array(
             (state.distributions ?? []).map((row) => sfs.object(expeditionDistribution(row))),
           ),
         }),
         event: null,
-      };
+      };}
 
     if (command === "tax.record.show")
-      return {
+      {return {
         response: encode({
           taxRecordList: sfs.array(
             (state.taxRecords ?? []).map((row) => sfs.object(expeditionTaxRecord(row))),
           ),
         }),
         event: null,
-      };
+      };}
 
-    if (!expeditionOpen(context.rules, context.now)) expeditionFailure();
+    if (!expeditionOpen(context.rules, context.now)) {expeditionFailure();}
 
     if (command === "newexpidition.activityinfo")
-      return {
+      {return {
         response: encode(
           expeditionInfo(
             state,
@@ -184,11 +184,11 @@ export class ExpeditionDomain extends CityCommandDomain {
           ),
         ),
         event: null,
-      };
+      };}
 
     const id = str(params, "id");
 
-    if (!/^\d{1,9}$/.test(id)) expeditionFailure();
+    if (!/^\d{1,9}$/.test(id)) {expeditionFailure();}
 
     const definition = context.rules.advanced.expeditionRewards?.get(id),
       row = current(context),
@@ -213,7 +213,7 @@ export class ExpeditionDomain extends CityCommandDomain {
             String(science.itemId) === definition.science_quest && num(science, "level") > 0,
         ))
     )
-      expeditionFailure();
+      {expeditionFailure();}
 
     const reward = pinProgressionReward(context, definition.reward ?? ""),
       rewardinfo = grantNativeProgressionReward(context, reward);
@@ -229,7 +229,7 @@ export class ExpeditionDomain extends CityCommandDomain {
       const template = context.rules.mail.get("12076"),
         contents = javaMailBytes(template?.message);
 
-      if (!template || !contents) expeditionFailure();
+      if (!template || !contents) {expeditionFailure();}
 
       const mail = {
         uid: randomUUID().replaceAll("-", "") + "00",
@@ -250,7 +250,7 @@ export class ExpeditionDomain extends CityCommandDomain {
 
     const takeReward = [...claimed, Number(id)].join("|");
 
-    if (takeReward.length > 500) expeditionFailure();
+    if (takeReward.length > 500) {expeditionFailure();}
 
     const saved = { ...row, takeReward };
     context.write.expedition = [saved];

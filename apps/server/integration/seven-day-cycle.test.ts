@@ -28,7 +28,7 @@ async function fixture() {
   h.clock.now = Date.UTC(2026, 9, 25, 12);
   h.rules.advanced.exchangeCycles!.clear();
   for (let page = 0; page < 3; page++)
-    for (let stage = 1; stage <= 7; stage++) {
+    {for (let stage = 1; stage <= 7; stage++) {
       const id = String(99100000 + page * 100 + stage);
       h.rules.advanced.exchangeCycles!.set(id, {
         id,
@@ -40,7 +40,7 @@ async function fixture() {
         time: "0",
         reward: stage % 2 === 0 ? "990001" : "0",
       });
-    }
+    }}
   h.rules.reconnect.rewards!.set("990001", { id: "990001", gold: "7" });
   h.rules.features.set("luck_draw", {
     id: "luck_draw",

@@ -75,7 +75,7 @@ test("published readers reject failed or malformed dependencies without partial 
 function fixture() {
   const rules = new Rules(new Map(), new Map(), new Map());
   for (const key of ["new_rank_recharge", "new_rank_cost"])
-    rules.features.set(key, { online: "all", version: "1.0.0" });
+    {rules.features.set(key, { online: "all", version: "1.0.0" });}
   const profile = { uid: "self", serverId: 1, banFlag: 0, banTime: 0n };
   const calls: string[] = [];
   const db = {

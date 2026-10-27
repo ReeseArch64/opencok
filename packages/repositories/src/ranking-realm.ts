@@ -8,9 +8,9 @@ export async function readNormalRankingRealm(
   kingdomId: number,
 ): Promise<boolean> {
   if (!Number.isInteger(kingdomId) || kingdomId < 1 || kingdomId > 2147483647)
-    throw new DependencyError("ranking realm input");
+    {throw new DependencyError("ranking realm input");}
 
-  if (kingdomId > 999999) return false;
+  if (kingdomId > 999999) {return false;}
 
   try {
     const rows = await db
@@ -20,10 +20,10 @@ export async function readNormalRankingRealm(
       .limit(1);
     const row = rows[0];
 
-    if (!row) return false;
+    if (!row) {return false;}
 
     if (row.id !== kingdomId || !Number.isInteger(row.type))
-      throw new DependencyError("ranking realm row");
+      {throw new DependencyError("ranking realm row");}
 
     return [0, 1, 6, 23].includes(row.type);
   } catch (error) {
@@ -36,7 +36,7 @@ export async function readNormalRankingRealm(
       typeof cause.code === "string" &&
       /^[0-9A-Z]{5}$/.test(cause.code)
     )
-      return false;
+      {return false;}
 
     throw new DependencyError("ranking realm");
   }
@@ -47,9 +47,9 @@ export async function readCrossRankingRealm(
   kingdomId: number,
 ): Promise<boolean> {
   if (!Number.isInteger(kingdomId) || kingdomId < 1 || kingdomId > 2147483647)
-    throw new DependencyError("ranking realm input");
+    {throw new DependencyError("ranking realm input");}
 
-  if (kingdomId > 999999) return false;
+  if (kingdomId > 999999) {return false;}
 
   const row = (
     await db
@@ -59,10 +59,10 @@ export async function readCrossRankingRealm(
       .limit(1)
   )[0];
 
-  if (!row) return false;
+  if (!row) {return false;}
 
   if (row.id !== kingdomId || !Number.isInteger(row.type))
-    throw new DependencyError("ranking realm row");
+    {throw new DependencyError("ranking realm row");}
 
   return [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 21, 22].includes(row.type);
 }

@@ -35,7 +35,7 @@ test("invalid consumption snapshots cannot introduce duplicate identities, out-o
     JSON.stringify([{ ...score, score: "9223372036854775808", paid: "0", free: "0", lastAt: "1" }]),
     costScoreSnapshot([score]).replace("9007199254740993", "-1"),
   ])
-    expect(() => readCostScoreSnapshot(raw)).toThrow();
+    {expect(() => readCostScoreSnapshot(raw)).toThrow();}
   expect(() => costScoreSnapshot([score, score])).toThrow();
   expect(() =>
     costScoreSnapshot(Array.from({ length: 101 }, (_, i) => ({ ...score, uid: String(i) }))),

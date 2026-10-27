@@ -32,7 +32,7 @@ export class VipBoxDomain extends CityCommandDomain {
     this.prepare = async (context, command, params) => {
       const state = context.state.vipBox;
 
-      if (!state) vipBoxFailure();
+      if (!state) {vipBoxFailure();}
 
       const enabled = serverFeature(context.rules, "box_vip", {
         kingdomId: context.rules.kingdomId,
@@ -41,21 +41,21 @@ export class VipBoxDomain extends CityCommandDomain {
       });
 
       if (!enabled) {
-        if (command === "vip.box.init") return { response: encode({}), event: null };
+        if (command === "vip.box.init") {return { response: encode({}), event: null };}
 
         vipBoxFailure();
       }
 
       const tables = [...(context.rules.advanced.vipBoxes?.values() ?? [])];
 
-      if (!tables.length || tables.length > 4096) vipBoxFailure();
+      if (!tables.length || tables.length > 4096) {vipBoxFailure();}
 
       const vip = context.state.effects.vip ?? {};
       let scoreLevel = 0;
 
       for (const rule of context.rules.power.vip?.values() ?? [])
-        if (cityInteger(rule.point) <= num(vip, "score"))
-          scoreLevel = (cityInteger(rule.id) % 100) + 1;
+        {if (cityInteger(rule.point) <= num(vip, "score"))
+          {scoreLevel = (cityInteger(rule.id) % 100) + 1;}}
 
       const baseLevel = num(vip, "level") >= 0 ? num(vip, "level") : scoreLevel,
         level = baseLevel + (baseLevel >= 10 ? cityInteger(num(vip, "sLevel")) : 0),
@@ -94,7 +94,7 @@ export class VipBoxDomain extends CityCommandDomain {
               ),
           );
 
-        if (!eligible.length) vipBoxFailure();
+        if (!eligible.length) {vipBoxFailure();}
 
         const table =
           eligible[
@@ -118,17 +118,17 @@ export class VipBoxDomain extends CityCommandDomain {
         context.write.vipBox = { record: row };
       }
 
-      if (!row) vipBoxFailure();
+      if (!row) {vipBoxFailure();}
 
       const table = context.rules.advanced.vipBoxes?.get(String(num(row, "tableid")));
 
-      if (!table || cityInteger(table.vip) !== band) vipBoxFailure();
+      if (!table || cityInteger(table.vip) !== band) {vipBoxFailure();}
 
       const contents = vipBoxContents(table),
         indices = vipBoxIndices(text(row, "itemidlist"), contents.items.length);
 
       if (indices.length !== num(row, "stepNum") || indices.length > 0 !== num(row, "free") > 0)
-        vipBoxFailure();
+        {vipBoxFailure();}
 
       if (command === "vip.box.turntable.ui") {
         const tableInfo = Object.fromEntries(
@@ -161,10 +161,10 @@ export class VipBoxDomain extends CityCommandDomain {
         long(row, "refreshTime") / 86400000n !== context.now / 86400000n ||
         indices.length >= contents.items.length
       )
-        vipBoxFailure();
+        {vipBoxFailure();}
 
       if (num(row, "free") > 0)
-        context.economy.item(table.deplete!, -contents.costs[Math.max(0, indices.length - 1)]!);
+        {context.economy.item(table.deplete!, -contents.costs[Math.max(0, indices.length - 1)]!);}
 
       const index = vipBoxWeighted(
           contents.weights.map((weight, index) => (indices.includes(index) ? 0 : weight)),
@@ -173,7 +173,7 @@ export class VipBoxDomain extends CityCommandDomain {
         itemId = contents.items[index]!,
         count = contents.counts[index]!;
 
-      if (!context.rules.goods.has(itemId)) vipBoxFailure();
+      if (!context.rules.goods.has(itemId)) {vipBoxFailure();}
 
       context.economy.item(itemId, count);
       const notable = (table.notice_item ?? "").split(";").includes(String(index + 1)),

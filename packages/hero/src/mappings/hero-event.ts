@@ -94,18 +94,18 @@ export function heroPanelView(
   };
 
   if (activity.endTime !== undefined && activity.endTime !== null)
-    result.endTime = sfs.long(long(activity, "endTime"));
+    {result.endTime = sfs.long(long(activity, "endTime"));}
 
-  if (merge) result.merge = sfs.bool(true);
+  if (merge) {result.merge = sfs.bool(true);}
 
   result.id = sfs.string(panel.id!);
 
-  if (panel.activityid !== undefined) result.activityid = sfs.string(panel.activityid);
+  if (panel.activityid !== undefined) {result.activityid = sfs.string(panel.activityid);}
 
-  if (reward) result.reward = reward;
+  if (reward) {result.reward = reward;}
 
   for (const key of ["exchange", "res_andmd5", "res_iosmd5"])
-    if (panel[key] !== undefined) result[key] = sfs.string(panel[key]!);
+    {if (panel[key] !== undefined) {result[key] = sfs.string(panel[key]!);}}
 
   result.popup = sfs.string(
     now >= long(activity, "startTime") &&
@@ -117,7 +117,7 @@ export function heroPanelView(
   );
 
   for (const key of ["androidmd5", "iosmd5"])
-    if (panel[key] !== undefined) result[key] = sfs.string(panel[key]!);
+    {if (panel[key] !== undefined) {result[key] = sfs.string(panel[key]!);}}
 
   return validateFields(heroPanelSchema, result);
 }

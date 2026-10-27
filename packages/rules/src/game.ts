@@ -210,7 +210,7 @@ export class Rules {
         rule.build_id === prefix &&
         ruleAvailable(rule, { kingdomId: this.kingdomId, version: MOBILE_CLIENT_VERSION, now })
       )
-        max = Math.max(max, Number(javaDecimal(rule.star ?? "", 32)));
+        {max = Math.max(max, Number(javaDecimal(rule.star ?? "", 32)));}
     }
 
     return max;
@@ -238,7 +238,7 @@ export class Rules {
   role(level: number): Rule {
     const rule = this.roles.get(String(100100 + level));
 
-    if (!rule) throw new GameError(errors.unsupported, "role_rule");
+    if (!rule) {throw new GameError(errors.unsupported, "role_rule");}
 
     return rule;
   }
@@ -247,7 +247,7 @@ export class Rules {
     const value = rule.costs?.[key] ?? 0n;
 
     if (typeof value !== "bigint" || value < 0n)
-      throw new GameError(errors.unsupported, "cost_rule");
+      {throw new GameError(errors.unsupported, "cost_rule");}
 
     return value;
   }

@@ -17,7 +17,7 @@ interface Bucket {
 function hash(key: string): number {
   let code = 0;
 
-  for (let i = 0; i < key.length; i++) code = (Math.imul(code, 31) + key.charCodeAt(i)) | 0;
+  for (let i = 0; i < key.length; i++) {code = (Math.imul(code, 31) + key.charCodeAt(i)) | 0;}
 
   return code ^ (code >>> 16);
 }
@@ -26,19 +26,19 @@ function rotate(root: Node, node: Node, left: boolean): Node {
   const promoted = (left ? node.right : node.left)!;
   const child = left ? promoted.left : promoted.right;
 
-  if (left) node.right = child;
-  else node.left = child;
+  if (left) {node.right = child;}
+  else {node.left = child;}
 
-  if (child) child.parent = node;
+  if (child) {child.parent = node;}
 
   promoted.parent = node.parent;
 
-  if (!node.parent) root = promoted;
-  else if (node.parent.left === node) node.parent.left = promoted;
-  else node.parent.right = promoted;
+  if (!node.parent) {root = promoted;}
+  else if (node.parent.left === node) {node.parent.left = promoted;}
+  else {node.parent.right = promoted;}
 
-  if (left) promoted.left = node;
-  else promoted.right = node;
+  if (left) {promoted.left = node;}
+  else {promoted.right = node;}
 
   node.parent = promoted;
 
@@ -52,7 +52,7 @@ function balance(root: Node, node: Node): Node {
     const parent = node.parent;
     const grand = parent.parent;
 
-    if (!grand) break;
+    if (!grand) {break;}
 
     const left = parent === grand.left;
     const uncle = left ? grand.right : grand.left;
@@ -86,11 +86,11 @@ function direction(a: Node, b: Node): boolean {
 }
 
 function moveRoot(bucket: Bucket, root: Node) {
-  if (bucket.head === root) return;
+  if (bucket.head === root) {return;}
 
-  if (root.prev) root.prev.next = root.next;
+  if (root.prev) {root.prev.next = root.next;}
 
-  if (root.next) root.next.prev = root.prev;
+  if (root.next) {root.next.prev = root.prev;}
 
   root.prev = undefined;
   root.next = bucket.head;
@@ -123,8 +123,8 @@ function treeify(bucket: Bucket) {
 
       node.parent = parent;
 
-      if (left) parent.left = node;
-      else parent.right = node;
+      if (left) {parent.left = node;}
+      else {parent.right = node;}
 
       root = balance(root, node);
       break;
@@ -145,17 +145,17 @@ function ordered(keys: Iterable<string>, hashKey: (key: string) => number): stri
     for (let index = 0; index < old.length; index++) {
       const bucket = old[index];
 
-      if (!bucket) continue;
+      if (!bucket) {continue;}
 
       const sides: Node[][] = [[], []];
 
       for (let node: Node | undefined = bucket.head; node; node = node.next)
-        sides[(node.hash & old.length) === 0 ? 0 : 1]!.push(node);
+        {sides[(node.hash & old.length) === 0 ? 0 : 1]!.push(node);}
 
       for (let side = 0; side < 2; side++) {
         const nodes = sides[side]!;
 
-        if (!nodes.length) continue;
+        if (!nodes.length) {continue;}
 
         for (let i = 0; i < nodes.length; i++) {
           nodes[i]!.prev = nodes[i - 1];
@@ -164,7 +164,7 @@ function ordered(keys: Iterable<string>, hashKey: (key: string) => number): stri
 
         const split = { head: nodes[0]!, tree: bucket.tree && nodes.length > 6 };
 
-        if (split.tree && sides[1 - side]!.length) treeify(split);
+        if (split.tree && sides[1 - side]!.length) {treeify(split);}
 
         buckets[index + side * old.length] = split;
       }
@@ -172,19 +172,19 @@ function ordered(keys: Iterable<string>, hashKey: (key: string) => number): stri
   }
 
   for (const key of keys) {
-    if (seen.has(key)) continue;
+    if (seen.has(key)) {continue;}
 
-    if (seen.size >= 4096 || typeof key !== "string") throw new Error("Invalid hash map keys");
+    if (seen.size >= 4096 || typeof key !== "string") {throw new Error("Invalid hash map keys");}
 
     const node: Node = { key, hash: hashKey(key), red: false };
     const index = node.hash & (buckets.length - 1);
     const bucket = buckets[index];
 
-    if (!bucket) buckets[index] = { head: node, tree: false };
+    if (!bucket) {buckets[index] = { head: node, tree: false };}
     else if (bucket.tree) {
       let root = bucket.head;
 
-      while (root.parent) root = root.parent;
+      while (root.parent) {root = root.parent;}
 
       let parent = root;
 
@@ -201,12 +201,12 @@ function ordered(keys: Iterable<string>, hashKey: (key: string) => number): stri
         node.prev = parent;
         node.next = parent.next;
 
-        if (parent.next) parent.next.prev = node;
+        if (parent.next) {parent.next.prev = node;}
 
         parent.next = node;
 
-        if (left) parent.left = node;
-        else parent.right = node;
+        if (left) {parent.left = node;}
+        else {parent.right = node;}
 
         moveRoot(bucket, balance(root, node));
         break;
@@ -224,20 +224,20 @@ function ordered(keys: Iterable<string>, hashKey: (key: string) => number): stri
       node.prev = tail;
 
       if (length >= 8) {
-        if (buckets.length < 64) resize();
-        else treeify(bucket);
+        if (buckets.length < 64) {resize();}
+        else {treeify(bucket);}
       }
     }
 
     seen.add(key);
 
-    if (seen.size > buckets.length * 0.75) resize();
+    if (seen.size > buckets.length * 0.75) {resize();}
   }
 
   const result: string[] = [];
 
   for (const bucket of buckets)
-    for (let node = bucket?.head; node; node = node.next) result.push(node.key);
+    {for (let node = bucket?.head; node; node = node.next) {result.push(node.key);}}
 
   return result;
 }
@@ -250,7 +250,7 @@ export function javaIntHashMapOrder(keys: Iterable<number>): number[] {
   function* strings() {
     for (const key of keys) {
       if (!Number.isInteger(key) || key < -2147483648 || key > 2147483647)
-        throw new Error("Invalid integer hash map key");
+        {throw new Error("Invalid integer hash map key");}
 
       yield String(key);
     }

@@ -70,7 +70,7 @@ test("malformed general abilities fail with sanitized errors instead of losing p
     '[{"__proto__":1}]',
     '[{"2147483648":1}]',
   ])
-    expect(() => generalSkillPoints([{ ability: Buffer.from(raw) }])).toThrow("102192");
+    {expect(() => generalSkillPoints([{ ability: Buffer.from(raw) }])).toThrow("102192");}
   expect(() => generalSkillPoints([{ ability: "[]" }])).toThrow("102192");
 });
 
@@ -193,9 +193,9 @@ test("dragon equipment pairs vector values and requires persisted refinement whe
     ]),
   );
   for (const extraProperty of [null, ""])
-    expect(() =>
+    {expect(() =>
       equipmentEffects([{ itemId: 1001, on: 1, extraProperty }], rules, effectValue),
-    ).toThrow("102192");
+    ).toThrow("102192");}
   rules.power.equipment!.get("1001")!.num1 = "4|8";
   expect(() =>
     equipmentEffects([{ itemId: 1001, on: 1, extraProperty: "487,3" }], rules, effectValue),
@@ -239,9 +239,9 @@ test("equipment accumulation preserves Java float grouping and requires resolved
   expect(() => equipmentEffects(rows, rules, () => Infinity)).toThrow("102192");
   expect(() => equipmentEffects([{ itemId: 9999, on: 1 }], rules, () => 0)).toThrow("102192");
   for (const extraProperty of ["487", "487,NaN", "487,0x10", "487,1e100", "bad,1"])
-    expect(() =>
+    {expect(() =>
       equipmentEffects([{ itemId: 1001, on: 1, extraProperty }], rules, () => 0),
-    ).toThrow("102192");
+    ).toThrow("102192");}
 });
 
 test("equipment contributions clamp after each item and expose previously loaded modifiers", () => {
@@ -325,7 +325,7 @@ test("equipment set thresholds share the first value and strengthen only complet
   expect(equipmentSetEffects(equipment, null, rules, context, new Map()).get(487)).toBe(22);
   equipment[0]!.strengthLevel = 0;
   expect(equipmentSetEffects(equipment, null, rules, context, new Map()).get(487)).toBe(12);
-  for (const row of equipment) row.strengthLevel = 99;
+  for (const row of equipment) {row.strengthLevel = 99;}
   expect(equipmentSetEffects(equipment, null, rules, context, new Map()).get(487)).toBe(162);
   equipment.push({ ...equipment[0]! });
   expect(equipmentSetEffects(equipment, null, rules, context, new Map()).get(487)).toBe(12);

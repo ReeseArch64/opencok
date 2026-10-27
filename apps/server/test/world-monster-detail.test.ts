@@ -73,7 +73,7 @@ test("monster health uses NPC Gift or summed army counts, with distinct army and
   expect(worldMonsterMaximum(9, "monster", r)).toBe(12);
   expect(worldMonsterMaximum(15, "monster", r)).toBe(12);
   for (const type of [0, 3, 6, 14, 37, 49, 50, 66])
-    expect(worldMonsterMaximum(type, "missing", r)).toBe(0);
+    {expect(worldMonsterMaximum(type, "missing", r)).toBe(0);}
   expect(worldMonsterMaximum(15, "empty", r)).toBe(0);
   expect(worldMonsterMaximum(15, null, r)).toBe(0);
   expect(worldMonsterMaximum(15, "\u180e\u2003", r)).toBe(0);
@@ -117,7 +117,7 @@ test("health preserves signed Java integer parsing and addition including negati
 test("missing required monster or army catalog data fails without fabricated HP", () => {
   const r = rules();
   for (const item of ["missing", "\0", "\ud800", "a".repeat(256)])
-    expect(() => worldMonsterMaximum(15, item, r)).toThrow();
+    {expect(() => worldMonsterMaximum(15, item, r)).toThrow();}
   r.world.fieldMonsters!.set("npc", { NPC: "1" });
   expect(() => worldMonsterMaximum(15, "npc", r)).toThrow();
   r.world.armies!.delete("b");
@@ -166,7 +166,7 @@ test("exploration uses the first matching destination before checking occupy sta
   expect(worldExplorationDetail("observer", point(), [elsewhere], false)).toBeUndefined();
   expect(worldExplorationDetail("observer", point(), [], false)).toBeUndefined();
   for (const state of [null, 0, 2, -1])
-    expect(worldExplorationDetail("observer", point(), [march({ state })], false)).toBeUndefined();
+    {expect(worldExplorationDetail("observer", point(), [march({ state })], false)).toBeUndefined();}
 });
 
 test("exploration follows supplied owner-map order without introducing world or march-type filters", () => {
@@ -174,9 +174,9 @@ test("exploration follows supplied owner-map order without introducing world or 
   expect(worldExplorationDetail("observer", point({ worldId: 7 }), [unusual], false)).toBeDefined();
   expect(worldExplorationDetail("observer", point(), [unusual], true)).toBeUndefined();
   for (const pointType of [0, 9, 15, 18, 37, 49])
-    expect(
+    {expect(
       worldExplorationDetail("observer", point({ pointType }), [unusual], false),
-    ).toBeUndefined();
+    ).toBeUndefined();}
 });
 
 test("exploration time uses arrival plus exploration duration with exact signed-long wrapping", () => {
@@ -237,10 +237,10 @@ test("malformed, trailing, oversized and excessively nested root array reports r
     Buffer.concat([reportBytes, Buffer.from([0])]),
     Buffer.alloc(4 * 1024 * 1024 + 1),
   ])
-    expect(() => decodeArray(bytes)).toThrow();
+    {expect(() => decodeArray(bytes)).toThrow();}
   expect(() => encodeArray(Array(32768).fill(sfs.null()))).toThrow();
   let nested: Value = sfs.null();
-  for (let i = 0; i < 34; i++) nested = sfs.array([nested]);
+  for (let i = 0; i < 34; i++) {nested = sfs.array([nested]);}
   expect(() => encodeArray([nested])).toThrow();
   const deep = Buffer.concat(
     [...Array(34)].map(() => Buffer.from("110001", "hex")).concat(Buffer.from([0])),
@@ -265,7 +265,7 @@ test("exploration enforces owner identity and exact storage bounds without mutat
     march({ exploreReport: Buffer.alloc(65536) }),
   ];
   for (const row of invalid)
-    expect(() => worldExplorationDetail("observer", point(), [row], false)).toThrow();
+    {expect(() => worldExplorationDetail("observer", point(), [row], false)).toThrow();}
   expect(() => worldExplorationDetail("observer", point(), [march(), march()], false)).toThrow();
   expect(() =>
     worldExplorationDetail("observer", point(), Array(32768).fill(march()), false),

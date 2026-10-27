@@ -16,7 +16,7 @@ export function allianceText(value: string, min: number, max: number) {
     !value.isWellFormed() ||
     /[\p{C}<>&]/u.test(value)
   )
-    allianceFailure();
+    {allianceFailure();}
 
   return value;
 }
@@ -27,18 +27,18 @@ export function allianceMember(rows: readonly Row[], owner: string, allianceId?:
   );
 
   if (!row || !text(row, "allianceId") || num(row, "rank") < 1 || num(row, "rank") > 5)
-    allianceFailure(errors.locked);
+    {allianceFailure(errors.locked);}
 
   return row;
 }
 
 export function allianceRight(member: Row, rules: Rules, right: string) {
   if (rules.alliance.ranks?.get(`710${num(member, "rank")}`)?.[right] !== "1")
-    allianceFailure(errors.locked);
+    {allianceFailure(errors.locked);}
 }
 
 export function allianceTargets(raw: string): string[] {
-  if (!raw) return [];
+  if (!raw) {return [];}
 
   let value: unknown;
 
@@ -53,7 +53,7 @@ export function allianceTargets(raw: string): string[] {
     value.length > 32 ||
     value.some((id) => typeof id !== "string" || !/^\d{1,10}$/.test(id))
   )
-    allianceFailure();
+    {allianceFailure();}
 
   return value;
 }
@@ -63,7 +63,7 @@ export function alliancePermissions(raw: string) {
     [0, 1, 2].flatMap((kind) => [1, 2].map((rank) => [`${kind}_${rank}`, 1])),
   );
 
-  if (!raw) return defaults;
+  if (!raw) {return defaults;}
 
   let value: unknown;
 
@@ -73,10 +73,10 @@ export function alliancePermissions(raw: string) {
     return allianceFailure();
   }
 
-  if (!value || typeof value !== "object" || Array.isArray(value)) allianceFailure();
+  if (!value || typeof value !== "object" || Array.isArray(value)) {allianceFailure();}
 
   for (const [key, entry] of Object.entries(value)) {
-    if (!Object.hasOwn(defaults, key) || ![0, 1].includes(entry)) allianceFailure();
+    if (!Object.hasOwn(defaults, key) || ![0, 1].includes(entry)) {allianceFailure();}
 
     defaults[key] = entry;
   }
@@ -85,12 +85,12 @@ export function alliancePermissions(raw: string) {
 }
 
 export function changeAlliancePermissions(member: Row, raw: string, changes: string) {
-  if (num(member, "rank") !== 5) allianceFailure(errors.locked);
+  if (num(member, "rank") !== 5) {allianceFailure(errors.locked);}
 
   const values = alliancePermissions(raw),
     parts = changes.split(";");
 
-  if (!parts.length || parts.length > 6) allianceFailure();
+  if (!parts.length || parts.length > 6) {allianceFailure();}
 
   const seen = new Set<string>();
 
@@ -104,7 +104,7 @@ export function changeAlliancePermissions(member: Row, raw: string, changes: str
       extra !== undefined ||
       !["0", "1"].includes(value ?? "")
     )
-      allianceFailure();
+      {allianceFailure();}
 
     seen.add(key);
     values[key] = Number(value);
@@ -152,7 +152,7 @@ export function allianceCapacity(alliance: Row, scienceEffect = 0) {
 export function allianceCreationCost(rules: Rules, castle: number) {
   const config = rules.items.get("alliance_cost");
 
-  if (castle < cityInteger(config?.k8, 1)) allianceFailure(errors.locked);
+  if (castle < cityInteger(config?.k8, 1)) {allianceFailure(errors.locked);}
 
   return castle >= cityInteger(config?.k6, 1) ? 0n : BigInt(cityInteger(config?.k5, 1));
 }
@@ -170,12 +170,12 @@ export function allianceJoinAllowed(
     members.some((row) => row.uid === profile.uid && text(row, "allianceId")) ||
     members.filter((row) => row.allianceId === alliance.uid).length >= capacity
   )
-    allianceFailure(errors.full);
+    {allianceFailure(errors.full);}
 
   if (
     num(profile, "crossFightSrcServerId") > 0 ||
     power < long(alliance, "powerRestriction") ||
     castle < num(alliance, "castleRestriction")
   )
-    allianceFailure(errors.locked);
+    {allianceFailure(errors.locked);}
 }

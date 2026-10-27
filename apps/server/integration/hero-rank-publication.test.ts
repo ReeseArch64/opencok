@@ -47,7 +47,7 @@ async function fixture() {
       [h.db, "left"],
       [second, "right"],
     ] as const)
-      await db.db.insert(hero_event).values({
+      {await db.db.insert(hero_event).values({
         uuid: id,
         eventId: "9001000",
         activityId: "main",
@@ -55,7 +55,7 @@ async function fixture() {
         rewardType: 1,
         startTime: BigInt(h.clock.now - 1000),
         endTime: BigInt(h.clock.now + 3600000),
-      });
+      });}
     await h.db.db.insert(score_act).values([
       { uid: "owner", actId: "left", level: 0, score: 100, finishFlag: 0, rewardFlag: "" },
       { uid: "other", actId: "left", level: 0, score: 100, finishFlag: 0, rewardFlag: "" },
@@ -95,7 +95,7 @@ async function fixture() {
         1,
         "12.06.0",
       );
-      if (typeof query === "number") throw new Error("Synthetic hero ranking gate closed");
+      if (typeof query === "number") {throw new Error("Synthetic hero ranking gate closed");}
       return query;
     };
     return {
@@ -111,11 +111,11 @@ async function fixture() {
       service2,
       lookup,
       close: async () => {
-        for (const close of closers.toReversed()) await close();
+        for (const close of closers.toReversed()) {await close();}
       },
     };
   } catch (error) {
-    for (const close of closers.toReversed()) await close();
+    for (const close of closers.toReversed()) {await close();}
     throw error;
   }
 }
@@ -212,7 +212,7 @@ test("failed hero projection and cache publication retry without losing a page o
       h.source,
       h.projection,
       async (rows) => {
-        if (failing) throw new Error("Synthetic Redis loss");
+        if (failing) {throw new Error("Synthetic Redis loss");}
         await h.cache.publishHeroRanking(rows);
       },
       h.rules,

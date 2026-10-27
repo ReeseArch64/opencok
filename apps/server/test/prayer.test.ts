@@ -21,9 +21,9 @@ test("native prayer reads and actions preserve long correlation and keep item-cr
       cityProgression: async () => ({ body: {}, pushes: [] }),
     });
   for (const command of ["user.pray.info", "user.pray"])
-    expect(
+    {expect(
       (await game.execute("owner", command, { _cok_: sfs.long(9007199254740993n) })).body._cok_,
-    ).toEqual(sfs.long(9007199254740993n));
+    ).toEqual(sfs.long(9007199254740993n));}
   await expect(game.execute("owner", "prayer.item", { count: sfs.int(999999) })).rejects.toThrow();
   await expect(game.execute("owner", "prayer.init", {})).rejects.toThrow();
 });

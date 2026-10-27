@@ -28,7 +28,7 @@ export function redPacketReader(tx: MutationTransaction, owner: string): RedPack
       )[0];
     },
     async packet(uid) {
-      if (!uid || uid.length > 255) throw new Error("Invalid red packet identity");
+      if (!uid || uid.length > 255) {throw new Error("Invalid red packet identity");}
 
       const [packet] = await tx
         .select()
@@ -36,7 +36,7 @@ export function redPacketReader(tx: MutationTransaction, owner: string): RedPack
         .where(eq(red_packets.uid, uid))
         .for("update");
 
-      if (!packet) return undefined;
+      if (!packet) {return undefined;}
 
       const records = await tx
         .select()
@@ -45,7 +45,7 @@ export function redPacketReader(tx: MutationTransaction, owner: string): RedPack
         .orderBy(asc(red_packets_records.getTime), asc(red_packets_records.player))
         .limit(4097);
 
-      if (records.length > 4096) throw new Error("Red packet records exceed bound");
+      if (records.length > 4096) {throw new Error("Red packet records exceed bound");}
 
       return { packet, records };
     },
@@ -57,7 +57,7 @@ export function redPacketReader(tx: MutationTransaction, owner: string): RedPack
         .orderBy(asc(red_packets_records.uid))
         .limit(4097);
 
-      if (rows.length > 4096) throw new Error("Received red packets exceed bound");
+      if (rows.length > 4096) {throw new Error("Received red packets exceed bound");}
 
       return rows;
     },
@@ -89,9 +89,9 @@ export async function writeRedPackets(
   owner: string,
   write: RedPacketWrite,
 ) {
-  if ((write.created?.length ?? 0) > 128) throw new Error("Too many red packet creations");
+  if ((write.created?.length ?? 0) > 128) {throw new Error("Too many red packet creations");}
 
-  for (const row of write.created ?? []) await tx.insert(red_packets).values(packetValues(row));
+  for (const row of write.created ?? []) {await tx.insert(red_packets).values(packetValues(row));}
 
   if (write.updated) {
     const row = write.updated;
@@ -108,7 +108,7 @@ export async function writeRedPackets(
   if (write.claim) {
     const row = write.claim;
 
-    if (text(row, "player") !== owner) throw new Error("Foreign red packet claimant");
+    if (text(row, "player") !== owner) {throw new Error("Foreign red packet claimant");}
 
     await tx.insert(red_packets_records).values({
       uid: text(row, "uid"),
@@ -131,7 +131,7 @@ export function createRedPacketExpiryStore(
   return {
     settle(now, refund) {
       if (now < 0n || !Number.isSafeInteger(Number(now)))
-        throw new Error("Invalid packet expiry clock");
+        {throw new Error("Invalid packet expiry clock");}
 
       return db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
@@ -167,7 +167,7 @@ export function createRedPacketExpiryStore(
             rows.some((row) => (row.value ?? 0) <= 0) ||
             rows.reduce((sum, row) => sum + (row.value ?? 0), packet.remain ?? 0) !== packet.total
           )
-            throw new Error("Invalid packet funding history");
+            {throw new Error("Invalid packet funding history");}
 
           const refundPlan = refund(packet);
 

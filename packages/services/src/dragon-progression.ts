@@ -66,23 +66,23 @@ function finishTravel(
 ) {
   const rule = context.rules.advanced.dragonTravel?.get(String(travel.travelItemId));
 
-  if (!rule) dragonFailure();
+  if (!rule) {dragonFailure();}
 
   const percent = (Number(end - BigInt(travel.travelStartTime)) / 1000 / Number(rule.time)) * 100;
   const rewards = (rule.time_reward ?? "").split("|"),
     limits = (rule.time_percent ?? "").split("|");
   let id: string | undefined;
 
-  if (percent >= 100) id = rewards.at(-1);
+  if (percent >= 100) {id = rewards.at(-1);}
   else
-    for (const [index, pair] of limits.entries()) {
+    {for (const [index, pair] of limits.entries()) {
       const [min, max] = pair.split(";").map(Number);
 
       if (min! <= percent && percent < max!) {
         id = rewards[index];
         break;
       }
-    }
+    }}
 
   travel.travelState = 2;
   travel.travelEndTime = Number(end);
@@ -99,10 +99,10 @@ function settleDragon(context: CityProgressionContext, saved: Row): Row {
     num(row, "dragonState") === 1 &&
     context.now >= long(row, "clickEggTime") + BigInt(cityInteger(base.hatch_time)) * 1000n
   )
-    row.dragonState = 2;
+    {row.dragonState = 2;}
 
   if (long(row, "lastClickBubbleTime") / 86400000n !== context.now / 86400000n)
-    row.clickBubbleTimesForDay = 0;
+    {row.clickBubbleTimesForDay = 0;}
 
   dragonDecay(row, level, context.rules, context.now, context.effect);
   const travel = dragonJson(row.travelData, emptyDragonTravel);
@@ -110,11 +110,11 @@ function settleDragon(context: CityProgressionContext, saved: Row): Row {
   if (travel.travelState === 1) {
     const rule = context.rules.advanced.dragonTravel?.get(String(travel.travelItemId));
 
-    if (!rule) dragonFailure();
+    if (!rule) {dragonFailure();}
 
     const end = BigInt(travel.travelStartTime) + BigInt(cityInteger(rule.time)) * 1000n;
 
-    if (context.now >= end) finishTravel(context, row, travel, end);
+    if (context.now >= end) {finishTravel(context, row, travel, end);}
   }
 
   writeDragon(context, row);
@@ -139,11 +139,11 @@ function view(context: CityProgressionContext, row: Row) {
 }
 
 function requireFeature(context: CityProgressionContext, key: string) {
-  if (!dragonFeature(context.rules, key, context.now)) dragonFailure();
+  if (!dragonFeature(context.rules, key, context.now)) {dragonFailure();}
 }
 
 function requireDragon(row: Row) {
-  if (num(row, "dragonState") !== 3) dragonFailure();
+  if (num(row, "dragonState") !== 3) {dragonFailure();}
 }
 
 function checkName(context: CityProgressionContext, raw: string, row?: Row) {
@@ -163,7 +163,7 @@ function checkName(context: CityProgressionContext, raw: string, row?: Row) {
       (prior) => prior.uuid !== row?.uuid && prior.nickName === name,
     )
   )
-    dragonFailure();
+    {dragonFailure();}
 
   return name;
 }
@@ -176,7 +176,7 @@ export function newDragonSkill(
 ) {
   const rule = context.rules.power.dragonSkills?.get(id);
 
-  if (!rule) dragonFailure();
+  if (!rule) {dragonFailure();}
 
   const row = {
     uuid: randomUUID().replaceAll("-", ""),
@@ -198,7 +198,7 @@ export function grantDragon(context: CityProgressionContext, id: string) {
   const base = context.rules.power.dragonBases?.get(id);
 
   if (!base || dragonRoster(context).dragons.some((row) => text(row, "itemId") === id))
-    dragonFailure();
+    {dragonFailure();}
 
   const row: Row = {
     uuid: randomUUID().replaceAll("-", ""),
@@ -225,7 +225,7 @@ export function grantDragon(context: CityProgressionContext, id: string) {
   writeDragon(context, row);
 
   for (const [index, skill] of (base.skill ?? "").split("|").filter(Boolean).entries())
-    newDragonSkill(context, skill, cityInteger(id), index);
+    {newDragonSkill(context, skill, cityInteger(id), index);}
 
   return row;
 }
@@ -233,12 +233,12 @@ export function grantDragon(context: CityProgressionContext, id: string) {
 function commandGate(context: CityProgressionContext, command: string) {
   requireFeature(context, "dragon_new");
 
-  if (command.includes("travel")) requireFeature(context, "dragon_travel");
+  if (command.includes("travel")) {requireFeature(context, "dragon_travel");}
 
   if (command === "petdragon.eat.exp" || command === "petdragon.level.up")
-    requireFeature(context, "dragon_levelup");
+    {requireFeature(context, "dragon_levelup");}
 
-  if (command.includes("nickName")) requireFeature(context, "dragon_nickname");
+  if (command.includes("nickName")) {requireFeature(context, "dragon_nickname");}
 }
 
 export const dragonProgressionCommands = [
@@ -273,17 +273,17 @@ export class DragonProgressionDomain extends CityCommandDomain {
   public readonly types: CityDomain["types"] = [];
 
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
-    if (command !== "dragon.init" && command !== "dragon.tick") commandGate(context, command);
+    if (command !== "dragon.init" && command !== "dragon.tick") {commandGate(context, command);}
 
     if (command === "dragon.item") {
       const itemId = str(params, "itemId"),
         count = cityInteger(int(params, "count"), 1, 128),
         rule = context.rules.goods.get(itemId);
 
-      if (!rule || !["37", "40"].includes(rule.type ?? "")) dragonFailure();
+      if (!rule || !["37", "40"].includes(rule.type ?? "")) {dragonFailure();}
 
       if (rule.type === "37") {
-        if (count !== 1) dragonFailure();
+        if (count !== 1) {dragonFailure();}
 
         const row = grantDragon(context, rule.para1!);
 
@@ -307,7 +307,7 @@ export class DragonProgressionDomain extends CityCommandDomain {
     ) {
       const id = context.rules.items.get("dragon_new")?.k5;
 
-      if (!id) dragonFailure();
+      if (!id) {dragonFailure();}
 
       const row = grantDragon(context, id);
       writeDragon(context, { ...row, dragonState: 0, useFlag: 1, clickEggTime: 0n });
@@ -317,23 +317,23 @@ export class DragonProgressionDomain extends CityCommandDomain {
       const { base } = dragonDefinition(context.rules, dragon);
 
       for (const [index, id] of (base.skill ?? "").split("|").filter(Boolean).entries())
-        if (
+        {if (
           !dragonRoster(context).skills.some(
             (skill) =>
               num(skill, "ownerId") === num(dragon, "itemId") && num(skill, "index1") === index,
           )
         )
-          newDragonSkill(context, id, num(dragon, "itemId"), index);
+          {newDragonSkill(context, id, num(dragon, "itemId"), index);}}
     }
 
     const original = dragonRoster(context).dragons;
 
-    for (const row of original) settleDragon(context, row);
+    for (const row of original) {settleDragon(context, row);}
 
-    if (command === "dragon.tick") return { response: encode({}), event: null };
+    if (command === "dragon.tick") {return { response: encode({}), event: null };}
 
     if (command === "dragon.init" || command === "petdragon.get.all")
-      return {
+      {return {
         response: encode({
           userPetDragonList: sfs.array(
             dragonRoster(context).dragons.map((row) => sfs.object(view(context, row))),
@@ -343,7 +343,7 @@ export class DragonProgressionDomain extends CityCommandDomain {
           ),
         }),
         event: null,
-      };
+      };}
 
     if (command === "petdragon.civilizedmake") {
       const id = str(params, "petDragonTableId"),
@@ -356,7 +356,7 @@ export class DragonProgressionDomain extends CityCommandDomain {
         cityPrestige(context.state, context.rules, cityInteger(condition[0])) <
           cityInteger(condition[1])
       )
-        dragonFailure();
+        {dragonFailure();}
 
       const row = grantDragon(context, id);
 
@@ -389,32 +389,32 @@ export class DragonProgressionDomain extends CityCommandDomain {
     }
 
     if (command === "petdragon.upgrade.skill" || command === "petdragon.change.skill")
-      return { response: encode(dragonSkillCommand(context, command, params)) };
+      {return { response: encode(dragonSkillCommand(context, command, params)) };}
 
     const saved = dragonRoster(context).dragons.find(
       (row) => row.uuid === str(params, "petDragonUid"),
     );
 
-    if (!saved) dragonFailure();
+    if (!saved) {dragonFailure();}
 
     const row = { ...saved },
       { base, level } = dragonDefinition(context.rules, row),
       global = context.rules.items.get("dragon_new");
 
-    if (!global) dragonFailure();
+    if (!global) {dragonFailure();}
 
     let extra: Fields = {};
 
     if (command === "petdragon.getinfo")
-      return { response: encode(view(context, row)), event: null };
+      {return { response: encode(view(context, row)), event: null };}
 
     if (command === "petdragon.startincubate") {
       if (num(row, "dragonState") === 0) {
         row.dragonState = 1;
         row.clickEggTime = context.now;
-      } else if (num(row, "dragonState") !== 1 && num(row, "dragonState") !== 2) dragonFailure();
+      } else if (num(row, "dragonState") !== 1 && num(row, "dragonState") !== 2) {dragonFailure();}
     } else if (command === "petdragon.incubate") {
-      if (num(row, "dragonState") !== 2) dragonFailure();
+      if (num(row, "dragonState") !== 2) {dragonFailure();}
 
       row.dragonState = 3;
       row.friendly = cityInteger(level.friendship);
@@ -427,27 +427,27 @@ export class DragonProgressionDomain extends CityCommandDomain {
           (prior) => num(prior, "dragonState") === 3 && num(prior, "useFlag") === 1,
         )
       )
-        row.useFlag = 1;
+        {row.useFlag = 1;}
 
       context.power(dragonPower(row, context.rules));
     } else if (command === "petdragon.speed.incubate") {
-      if (num(row, "dragonState") !== 1) dragonFailure();
+      if (num(row, "dragonState") !== 1) {dragonFailure();}
 
       const item = context.economy.ownedItem?.(str(params, "goodsUuid"));
 
-      if (!item) dragonFailure();
+      if (!item) {dragonFailure();}
 
       const good = context.rules.goods.get(item.itemId),
         count = cityInteger(int(params, "useGoodsNum"), 1, 32767);
 
-      if (good?.para1 !== "1" || good.para2 !== "1" || good.type !== "2") dragonFailure();
+      if (good?.para1 !== "1" || good.para2 !== "1" || good.type !== "2") {dragonFailure();}
 
       context.spendItem(item.itemId, count);
       row.clickEggTime =
         long(row, "clickEggTime") - BigInt(cityInteger(good.para3)) * BigInt(count) * 1000n;
 
       if (context.now >= long(row, "clickEggTime") + BigInt(cityInteger(base.hatch_time)) * 1000n)
-        row.dragonState = 2;
+        {row.dragonState = 2;}
 
       extra = {
         goodsItemId: sfs.string(item.itemId),
@@ -463,7 +463,7 @@ export class DragonProgressionDomain extends CityCommandDomain {
           num(row, "clickBubbleTimesForDay") >= cityInteger(global.k3) ||
           context.now < long(row, "lastClickBubbleTime") + BigInt(cityInteger(global.k2)) * 1000n
         )
-          dragonFailure();
+          {dragonFailure();}
 
         row.clickBubbleTimesForDay = num(row, "clickBubbleTimesForDay") + 1;
         row.clickBubbleTotalTimes = cityInteger(num(row, "clickBubbleTotalTimes") + 1);
@@ -489,7 +489,7 @@ export class DragonProgressionDomain extends CityCommandDomain {
           num(row, "friendly") >= max ||
           context.now < BigInt(communication.communicateTimestamps[kind] ?? 0) + BigInt(cd) * 1000n
         )
-          dragonFailure();
+          {dragonFailure();}
 
         dragonFriendly(
           row,
@@ -510,11 +510,11 @@ export class DragonProgressionDomain extends CityCommandDomain {
           !(base.gift ?? "").split("|").includes(item.itemId) ||
           num(row, "friendly") >= max
         )
-          dragonFailure();
+          {dragonFailure();}
 
         const good = context.rules.goods.get(item.itemId);
 
-        if (!good) dragonFailure();
+        if (!good) {dragonFailure();}
 
         context.spendItem(item.itemId, count);
         dragonFriendly(
@@ -540,20 +540,20 @@ export class DragonProgressionDomain extends CityCommandDomain {
           gold: sfs.long(context.balance("gold")),
         };
       } else if (command === "petdragon.change.use.flag") {
-        if (num(row, "useFlag") === 1) return { response: encode({}), event: null };
+        if (num(row, "useFlag") === 1) {return { response: encode({}), event: null };}
 
         if (
           marching(context, row) ||
           context.now < (context.state.dragons?.switchedAt ?? 0n) + 3000n
         )
-          dragonFailure();
+          {dragonFailure();}
 
         const previous = dragonRoster(context).dragons.find(
           (prior) => num(prior, "useFlag") === 1 && num(prior, "dragonState") === 3,
         );
 
         if (previous) {
-          if (marching(context, previous)) dragonFailure();
+          if (marching(context, previous)) {dragonFailure();}
 
           writeDragon(context, { ...previous, useFlag: 0 });
         }
@@ -564,12 +564,12 @@ export class DragonProgressionDomain extends CityCommandDomain {
           newUseUuid: sfs.string(text(row, "uuid")),
         };
       } else if (command === "petdragon.eat.exp") {
-        if (num(row, "exp") >= cityInteger(level.exp)) dragonFailure();
+        if (num(row, "exp") >= cityInteger(level.exp)) {dragonFailure();}
 
         const count = cityInteger(int(params, "count", 1), 1, 32767),
           kind = cityInteger(int(params, "eatExpType"), 0, 1);
 
-        if (kind === 0) context.economy.gold(-cityAmount(level.exp_gold) * BigInt(count));
+        if (kind === 0) {context.economy.gold(-cityAmount(level.exp_gold) * BigInt(count));}
         else {
           const costs: Partial<Record<(typeof cityAssets)[number], bigint>> = {};
 
@@ -595,7 +595,7 @@ export class DragonProgressionDomain extends CityCommandDomain {
         } else {
           const [mult, round] = (base.hold_crit ?? "1;1").split(";").map(Number);
 
-          if (!round || !mult) dragonFailure();
+          if (!round || !mult) {dragonFailure();}
 
           const crit = Math.trunc(count / round);
           gained =
@@ -618,12 +618,12 @@ export class DragonProgressionDomain extends CityCommandDomain {
           num(row, "exp") < cityInteger(level.exp) ||
           Number(next.base_id) !== num(row, "itemId")
         )
-          dragonFailure();
+          {dragonFailure();}
 
         for (const pair of (level.level_item ?? "").split("|").filter(Boolean)) {
           const [id, count] = pair.split(";");
 
-          if (!id) dragonFailure();
+          if (!id) {dragonFailure();}
 
           context.spendItem(
             id,
@@ -655,7 +655,7 @@ export class DragonProgressionDomain extends CityCommandDomain {
           ) ||
           marching(context, row)
         )
-          dragonFailure();
+          {dragonFailure();}
 
         const types = (level.travel ?? "").split("|"),
           index = cityInteger(int(params, "travelType"), 1, types.length),
@@ -680,7 +680,7 @@ export class DragonProgressionDomain extends CityCommandDomain {
                 .at(-1)
             : undefined);
 
-        if (!rule) dragonFailure();
+        if (!rule) {dragonFailure();}
 
         Object.assign(travel, {
           travelState: 1,
@@ -696,7 +696,7 @@ export class DragonProgressionDomain extends CityCommandDomain {
         command === "petdragon.travel.stop" ||
         command === "petdragon.immediately.travel"
       ) {
-        if (travel.travelState !== 1) dragonFailure();
+        if (travel.travelState !== 1) {dragonFailure();}
 
         let end = context.now;
 
@@ -708,21 +708,21 @@ export class DragonProgressionDomain extends CityCommandDomain {
               Number((end - context.now) / 1000n),
           );
 
-          if (cost < 0 || cost > num(row, "friendly")) dragonFailure();
+          if (cost < 0 || cost > num(row, "friendly")) {dragonFailure();}
 
           dragonFriendly(row, -cost, max, context.now);
         }
 
         finishTravel(context, row, travel, end);
       } else if (command === "petdragon.travel.take.reward") {
-        if (travel.travelState !== 2) dragonFailure();
+        if (travel.travelState !== 2) {dragonFailure();}
 
         if (travel.rewardGoods)
-          extra = {
+          {extra = {
             awardItems: sfs.object({
               rewards: grantPinnedProgressionReward(context, travel.rewardGoods),
             }),
-          };
+          };}
 
         Object.assign(travel, {
           travelState: 0,
@@ -731,13 +731,13 @@ export class DragonProgressionDomain extends CityCommandDomain {
           rewardGoods: null,
         });
         row.travelData = JSON.stringify(travel);
-      } else dragonFailure();
+      } else {dragonFailure();}
     }
 
     writeDragon(context, row);
 
     if (command === "petdragon.modify.nickName" || command === "petdragon.change.use.flag")
-      return { response: encode(extra) };
+      {return { response: encode(extra) };}
 
     return { response: encode({ ...view(context, row), ...extra }) };
   };
@@ -762,12 +762,12 @@ function dragonSkillCommand(
   const skills = dragonRoster(context).skills,
     target = skills.find((row) => row.uuid === str(params, "uuid"));
 
-  if (!target) dragonFailure();
+  if (!target) {dragonFailure();}
 
   const row = { ...target },
     rule = context.rules.power.dragonSkills?.get(text(row, "skillId"));
 
-  if (!rule) dragonFailure();
+  if (!rule) {dragonFailure();}
 
   if (command === "petdragon.change.skill") {
     const replacement = skills.find((prior) => prior.uuid === str(params, "replaceUuid")),
@@ -782,7 +782,7 @@ function dragonSkillCommand(
       num(row, "ownerId") !== num(dragon, "itemId") ||
       marching(context, dragon)
     )
-      dragonFailure();
+      {dragonFailure();}
 
     const replacementRule = context.rules.power.dragonSkills?.get(text(replacement, "skillId")),
       { base } = dragonDefinition(context.rules, dragon);
@@ -799,7 +799,7 @@ function dragonSkillCommand(
         (replacementRule.skill_learn_object ?? "").split("|").includes(text(dragon, "itemId"))
       )
     )
-      dragonFailure();
+      {dragonFailure();}
 
     if (
       replacementRule.is_special === "1" &&
@@ -810,7 +810,7 @@ function dragonSkillCommand(
           context.rules.power.dragonSkills?.get(text(prior, "skillId"))?.is_special === "1",
       )
     )
-      dragonFailure();
+      {dragonFailure();}
 
     context.economy.gold(-cityAmount(rule.learn_gold));
     writeSkill(context, {
@@ -841,7 +841,7 @@ function dragonSkillCommand(
 
   const material = params.materialArr;
 
-  if (material?.type !== Type.Array) dragonFailure();
+  if (material?.type !== Type.Array) {dragonFailure();}
 
   const ids = (material.value as Value[]).map((value) => str({ id: value }, "id"));
 
@@ -851,7 +851,7 @@ function dragonSkillCommand(
     new Set(ids).size !== ids.length ||
     ids.includes(text(row, "uuid"))
   )
-    dragonFailure();
+    {dragonFailure();}
 
   const materials = ids.map((id) => {
     const source = skills.find((prior) => prior.uuid === id),
@@ -860,7 +860,7 @@ function dragonSkillCommand(
         : undefined;
 
     if (!source || !sourceRule || num(source, "ownerId") !== 0 || sourceRule.born_dragon)
-      dragonFailure();
+      {dragonFailure();}
 
     return source;
   });
@@ -870,7 +870,7 @@ function dragonSkillCommand(
     baseMaximum = cityInteger(rule.maxLv, 1),
     maximumStrength = Math.min(boostLimit, num(row, "strengthenLevel") + boosters.length);
 
-  if (num(row, "level") >= baseMaximum + maximumStrength) dragonFailure();
+  if (num(row, "level") >= baseMaximum + maximumStrength) {dragonFailure();}
 
   const consumed: string[] = [];
   const addExperience = (source: Row, maximum: number) => {
@@ -890,11 +890,11 @@ function dragonSkillCommand(
         (entry) => entry.quality === rule.quality && Number(entry.level) === num(row, "level"),
       );
 
-      if (thresholds.length !== 1) dragonFailure();
+      if (thresholds.length !== 1) {dragonFailure();}
 
       const threshold = cityInteger(thresholds[0]!.exp, 1);
 
-      if (num(row, "exp") < threshold) break;
+      if (num(row, "exp") < threshold) {break;}
 
       if (num(row, "level") >= maximum) {
         discarded = num(row, "exp") - threshold + 1;
@@ -916,14 +916,14 @@ function dragonSkillCommand(
     const full = addExperience(source, baseMaximum + maximumStrength);
     row.strengthenLevel = Math.min(boostLimit, num(row, "strengthenLevel") + 1);
 
-    if (full && num(row, "strengthenLevel") === boostLimit) break;
+    if (full && num(row, "strengthenLevel") === boostLimit) {break;}
   }
 
   if (num(row, "level") < baseMaximum + num(row, "strengthenLevel"))
-    for (const source of ordinary)
-      if (addExperience(source, baseMaximum + num(row, "strengthenLevel"))) break;
+    {for (const source of ordinary)
+      {if (addExperience(source, baseMaximum + num(row, "strengthenLevel"))) {break;}}}
 
-  if (!consumed.length) dragonFailure();
+  if (!consumed.length) {dragonFailure();}
 
   writeSkill(context, row);
   const write = context.write.dragons!;

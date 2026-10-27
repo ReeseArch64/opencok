@@ -52,10 +52,10 @@ export class ContinuedCostRewardService {
         rows = await this.standings.standings(id);
       this.start = (index + 1) % closures.length;
 
-      if (!period || !rows) continue;
+      if (!period || !rows) {continue;}
 
       if (!period.expectedRealms.includes(this.rules.kingdomId))
-        throw new Error("Foreign consumption ranking award period");
+        {throw new Error("Foreign consumption ranking award period");}
 
       const bands = costRankingBands(period.rewards);
 
@@ -77,14 +77,14 @@ export class ContinuedCostRewardService {
                   );
 
                 if (!template || !contents)
-                  throw new Error("Missing consumption ranking award mail template");
+                  {throw new Error("Missing consumption ranking award mail template");}
 
                 const reward =
                   band.reward === "0"
                     ? null
                     : pinProgressionReward({ rules: this.rules, now: at }, band.reward);
 
-                if (reward !== null) mailRewardEntries(reward);
+                if (reward !== null) {mailRewardEntries(reward);}
 
                 return {
                   sender: template.sender ?? "",
@@ -101,7 +101,7 @@ export class ContinuedCostRewardService {
       }
 
       if (num(closure, "awardCursor") === rows.length)
-        await this.store.finished(closure, rows.length, at);
+        {await this.store.finished(closure, rows.length, at);}
     }
   }
 
@@ -118,13 +118,13 @@ export class ContinuedCostRewardService {
     }
 
     for (const award of await this.store.pending(at))
-      try {
+      {try {
         await this.deliver(text(award, "ownerUid"), text(award, "id"));
       } catch {
         await this.store.defer(text(award, "id"), BigInt(this.now()));
-      }
+      }}
 
-    if (failed) throw failure;
+    if (failed) {throw failure;}
   }
 }
 
@@ -137,7 +137,7 @@ export class ContinuedCostRewardDomain extends CityCommandDomain {
     const id = str(params, "awardId");
 
     if (!/^[a-f0-9]{32}$/.test(id) || str(params, "operationId") !== costRankAwardOperation(id))
-      throw new Error("Invalid consumption award delivery operation");
+      {throw new Error("Invalid consumption award delivery operation");}
 
     const award = await context.state.costRankAward?.load(id);
 
@@ -147,13 +147,13 @@ export class ContinuedCostRewardDomain extends CityCommandDomain {
       long(award, "createdAt") > context.now ||
       id !== costRankAwardId(text(award, "periodId"), context.owner)
     )
-      throw new Error("Missing owned consumption ranking entitlement");
+      {throw new Error("Missing owned consumption ranking entitlement");}
 
-    if (long(award, "deliveredAt") > 0n) return { response: encode({}), event: null };
+    if (long(award, "deliveredAt") > 0n) {return { response: encode({}), event: null };}
 
     const draft = costRankMail(text(award, "payload"));
 
-    if (!context.economy.event) throw new Error("Consumption reward publication unavailable");
+    if (!context.economy.event) {throw new Error("Consumption reward publication unavailable");}
 
     const mail: AvatarSystemMail = {
       uid: id + "00",

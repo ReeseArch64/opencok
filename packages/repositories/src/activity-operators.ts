@@ -16,7 +16,7 @@ export async function readActivityOperators(
   now: number,
 ): Promise<ActivityOperatorsSnapshot> {
   if (!owner || owner.length > 40 || !Number.isSafeInteger(now) || now < 0)
-    throw new Error("Invalid activity operators selection");
+    {throw new Error("Invalid activity operators selection");}
 
   return db.transaction(
     async (tx) => {
@@ -31,7 +31,7 @@ export async function readActivityOperators(
         .from(userprofile)
         .where(eq(userprofile.uid, owner));
 
-      if (!profile) return { server: {}, buildings: [], country: "", groupBuys: [] };
+      if (!profile) {return { server: {}, buildings: [], country: "", groupBuys: [] };}
 
       const [server] = await tx
         .select({
@@ -105,7 +105,7 @@ export async function readActivityOperators(
         groupBuys.length > 2 ||
         groupBuys.some((row) => (row.roundInfo?.length ?? 0) > 32768)
       )
-        throw new Error("Activity operator aggregate exceeds bound");
+        {throw new Error("Activity operator aggregate exceeds bound");}
 
       return {
         profile,

@@ -19,8 +19,8 @@ test("ordinary box bit fields preserve every unrelated signed word and adjacent 
   expect(boxWord(words, 1, 1, 31)).toBe(990100);
   expect(words[0]).toBe(-1);
   expect(words[2]).toBe(2147483647);
-  for (let slot = 1; slot <= 12; slot++) setBoxCounter(words, slot, slot * 10);
-  for (let slot = 1; slot <= 12; slot++) expect(boxCounter(words, slot)).toBe(slot * 10);
+  for (let slot = 1; slot <= 12; slot++) {setBoxCounter(words, slot, slot * 10);}
+  for (let slot = 1; slot <= 12; slot++) {expect(boxCounter(words, slot)).toBe(slot * 10);}
   expect(() => setBoxCounter(words, 1, 128)).toThrow();
   expect(() => boxWords("2147483648,")).toThrow();
   expect(() => boxWords("unrecognized input")).toThrow();

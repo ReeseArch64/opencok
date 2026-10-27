@@ -27,7 +27,7 @@ export function paidGiftOperation(owner: string, orderId: string, platform: stri
     orderId.includes("\0") ||
     platform.includes("\0")
   )
-    campaignFailure();
+    {campaignFailure();}
 
   return `paid-gift:${createHash("sha256").update(`${owner}\0${platform}\0${orderId}`).digest("hex")}`;
 }
@@ -43,7 +43,7 @@ export function paidGiftParameters(owner: string, orderId: string, platform: str
 export function createSystemPacket(context: CityProgressionContext, parameters: string) {
   const parts = parameters.split(";");
 
-  if (parts.length !== 8 || !parts[5]) campaignFailure();
+  if (parts.length !== 8 || !parts[5]) {campaignFailure();}
 
   const range = cityInteger(parts[0], 0, 1),
     type = cityInteger(parts[1], 0, 1),
@@ -58,7 +58,7 @@ export function createSystemPacket(context: CityProgressionContext, parameters: 
         ? String(context.rules.kingdomId)
         : text(context.state.campaignProfile ?? {}, "allianceId");
 
-  if (!rangeId || total < people || !context.economy.event) campaignFailure();
+  if (!rangeId || total < people || !context.economy.event) {campaignFailure();}
 
   const packet: Row = {
     uid: randomUUID().replaceAll("-", ""),
@@ -120,10 +120,10 @@ function profileEligible(context: CityProgressionContext) {
 }
 
 function packetAudience(context: CityProgressionContext, packet: Row) {
-  if (!profileEligible(context)) return false;
+  if (!profileEligible(context)) {return false;}
 
   if (num(packet, "range") === 0)
-    return text(packet, "rangeId") === String(context.rules.kingdomId);
+    {return text(packet, "rangeId") === String(context.rules.kingdomId);}
 
   return (
     num(packet, "range") === 1 &&
@@ -164,7 +164,7 @@ export class RedPacketDomain extends CityCommandDomain {
     this.prepare = async (context, command, params) => {
       const reader = context.state.redPackets;
 
-      if (!reader || !profileEligible(context)) campaignFailure();
+      if (!reader || !profileEligible(context)) {campaignFailure();}
 
       if (command === "campaign.paid.gift") {
         const orderId = str(params, "orderId"),
@@ -174,7 +174,7 @@ export class RedPacketDomain extends CityCommandDomain {
           !gateway ||
           str(params, "operationId") !== paidGiftOperation(context.owner, orderId, platform)
         )
-          campaignFailure();
+          {campaignFailure();}
 
         const proof = await gateway.delivered({
             owner: context.owner,
@@ -207,7 +207,7 @@ export class RedPacketDomain extends CityCommandDomain {
           (payment.time === null ? -1n : long(payment, "time")) !== proof.occurredAt ||
           Math.round(num(payment, "spend") * 100) !== proof.priceCents
         )
-          campaignFailure();
+          {campaignFailure();}
 
         new CampaignPlanner(
           Object.assign(Object.create(context) as CityProgressionContext, {
@@ -258,7 +258,7 @@ export class RedPacketDomain extends CityCommandDomain {
           !context.economy.consumeItem ||
           !context.economy.event
         )
-          campaignFailure();
+          {campaignFailure();}
 
         const duration = BigInt(cityInteger(rule.para2, 1)) * 3600000n;
         context.economy.consumeItem(uuid, 1);
@@ -320,7 +320,7 @@ export class RedPacketDomain extends CityCommandDomain {
       }
 
       if (command === "redPackets.rvd.id")
-        return {
+        {return {
           response: encode({
             records: sfs.array(
               (await reader.received()).map((row) =>
@@ -333,27 +333,27 @@ export class RedPacketDomain extends CityCommandDomain {
             ),
           }),
           event: null,
-        };
+        };}
 
-      if (int(params, "serverId") !== context.rules.kingdomId) campaignFailure();
+      if (int(params, "serverId") !== context.rules.kingdomId) {campaignFailure();}
 
       const uid = str(params, "uid"),
         loaded = await reader.packet(uid);
 
       if (!loaded)
-        return {
+        {return {
           response: encode(
             command === "redPackets.status"
               ? { server: sfs.int(context.rules.kingdomId), status: sfs.int(3) }
               : { key_goldSum: sfs.string(uid), status: sfs.int(3), recordGold: sfs.int(0) },
           ),
           event: null,
-        };
+        };}
 
       const packet = { ...loaded.packet },
         records = [...loaded.records];
 
-      if (!packetAudience(context, packet)) campaignFailure();
+      if (!packetAudience(context, packet)) {campaignFailure();}
 
       const system = text(packet, "sender") === "3000002",
         prior = records.find((row) => text(row, "player") === context.owner),
@@ -363,16 +363,16 @@ export class RedPacketDomain extends CityCommandDomain {
       let status = eligible ? packetStatus(packet, Boolean(prior), context.now) : 4;
 
       if (command === "redPackets.status")
-        return {
+        {return {
           response: encode({ server: sfs.int(context.rules.kingdomId), status: sfs.int(status) }),
           event: null,
-        };
+        };}
 
       if (!eligible)
-        return {
+        {return {
           response: encode({ key_goldSum: sfs.string(uid), status: sfs.int(4) }),
           event: null,
-        };
+        };}
 
       let add = 0;
 
@@ -392,7 +392,7 @@ export class RedPacketDomain extends CityCommandDomain {
           records.some((record) => num(record, "value") <= 0) ||
           records.reduce((sum, record) => sum + num(record, "value"), remain) !== total
         )
-          campaignFailure();
+          {campaignFailure();}
 
         add = packetDistribution(
           packet,
@@ -462,9 +462,9 @@ export async function publishRedPacketAnnouncement(
     int(body, "post") !== 12 ||
     !str(body, "redPackets")
   )
-    throw new Error("Invalid red packet announcement");
+    {throw new Error("Invalid red packet announcement");}
 
-  if (BigInt(now) >= end) return;
+  if (BigInt(now) >= end) {return;}
 
   const owners = [...new Set(online)];
 
@@ -476,22 +476,22 @@ export async function publishRedPacketAnnouncement(
     );
 
     for (let offset = 0; offset < recipients.length; offset += 32)
-      await Promise.all(
+      {await Promise.all(
         recipients
           .slice(offset, offset + 32)
           .map((recipient) => publish(recipient, "push.chat", body)),
-      );
+      );}
   }
 }
 
 export function settleRedPacketExpiry(store: RedPacketExpiryStore, rules: Rules, now: bigint) {
   return store.settle(now, (packet) => {
-    if (text(packet, "sender") === "3000002" || num(packet, "remain") <= 0) return null;
+    if (text(packet, "sender") === "3000002" || num(packet, "remain") <= 0) {return null;}
 
     const template = rules.mail.get("11636"),
       contents = javaMailBytes(template?.message);
 
-    if (!template || !contents || num(packet, "remain") > num(packet, "total")) campaignFailure();
+    if (!template || !contents || num(packet, "remain") > num(packet, "total")) {campaignFailure();}
 
     const uid =
       createHash("sha256")

@@ -55,7 +55,7 @@ function fixture(mode = "1") {
     },
     async mail() {
       calls.push("mail");
-      if (failure === "mail") throw new Error("Synthetic mail failure");
+      if (failure === "mail") {throw new Error("Synthetic mail failure");}
       return {
         profile,
         ...(intent!.pendingEffects & 1 ? { mail: avatarVersionMail(intent!) } : {}),
@@ -63,17 +63,17 @@ function fixture(mode = "1") {
     },
     async profile() {
       calls.push("profile");
-      if (failure === "profile") throw new Error("Synthetic marker failure");
+      if (failure === "profile") {throw new Error("Synthetic marker failure");}
     },
     async chat() {
       calls.push("chat");
-      if (failure === "chat") throw new Error("Synthetic chat failure");
+      if (failure === "chat") {throw new Error("Synthetic chat failure");}
     },
     async notify(owner, command) {
       calls.push("notify");
       expect(owner).toBe("1001");
       expect(command).toBe("push.mail");
-      if (failure === "notification") throw new Error("Synthetic disconnect");
+      if (failure === "notification") {throw new Error("Synthetic disconnect");}
     },
     report(effect) {
       reports.push(effect);

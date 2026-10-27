@@ -109,7 +109,7 @@ function snapshot(
       queries.push({ text: query.text, params });
       const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
       if (table === "userprofile")
-        return {
+        {return {
           rows: options.missingProfile
             ? []
             : [
@@ -123,9 +123,9 @@ function snapshot(
                     )[key] ?? null,
                 ),
               ],
-        };
+        };}
       if (table === "user_civilization_prestige") {
-        if (options.failure) throw new Error("Synthetic prestige read failure");
+        if (options.failure) {throw new Error("Synthetic prestige read failure");}
         return { rows: options.missingPrestige ? [] : [[String(prestige)]] };
       }
       return { rows: [] };
@@ -170,11 +170,11 @@ test("missing prestige defaults to zero; unselected/missing profiles skip the pr
     try {
       expect((await database.getCityByPlayerId("synthetic", 0)).civilizationPrestige).toBe(0n);
       if (!options.missingPrestige)
-        expect(
+        {expect(
           queries.some((query) =>
             query.text.includes('from "opencok_kingdom"."user_civilization_prestige"'),
           ),
-        ).toBe(false);
+        ).toBe(false);}
     } finally {
       await database.close();
     }

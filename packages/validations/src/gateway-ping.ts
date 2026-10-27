@@ -2,7 +2,7 @@ import type { GatewayPingResponse } from "@opencok/contracts/responses/gateway-p
 
 export class GatewayPingValidator {
   public parse(value: unknown): GatewayPingResponse {
-    if (typeof value !== "object" || value === null) throw new Error("Invalid gateway ping");
+    if (typeof value !== "object" || value === null) {throw new Error("Invalid gateway ping");}
 
     const result = value as Partial<GatewayPingResponse>;
 
@@ -15,7 +15,7 @@ export class GatewayPingValidator {
           !Number.isFinite(result.latencyMs) ||
           result.latencyMs < 0))
     )
-      throw new Error("Invalid gateway ping");
+      {throw new Error("Invalid gateway ping");}
 
     return result as GatewayPingResponse;
   }

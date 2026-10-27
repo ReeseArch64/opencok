@@ -17,22 +17,22 @@ function database() {
   const client = {
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
-      if (query.text.startsWith("begin")) saved = { epoch, owner, realm };
-      if (query.text === "rollback") ({ epoch, owner, realm } = saved);
+      if (query.text.startsWith("begin")) {saved = { epoch, owner, realm };}
+      if (query.text === "rollback") {({ epoch, owner, realm } = saved);}
       if (query.text.startsWith("insert into")) {
         realm = params[0] as number;
         owner = params[2] as string;
         epoch++;
-        if (disconnectOnWrite) ready = false;
+        if (disconnectOnWrite) {ready = false;}
         return { rows: [[String(epoch)]] };
       }
       if (query.text.startsWith("select"))
-        return {
+        {return {
           rows:
             params[0] === realm && BigInt(params[1] as string) === epoch && params[2] === owner
               ? [[String(epoch)]]
               : [],
-        };
+        };}
       return { rows: [] };
     },
   };
@@ -80,7 +80,7 @@ test("coordination loss prevents acquisition and rolls back an acquisition that 
 test("active lease checks suspend writes on coordination loss and reject invalid realm identities", async () => {
   const fixture = database();
   for (const id of [0, -1, 1.5, 2147483648])
-    await expect(acquireRealmAuthority(fixture.db, id, fixture.ready)).rejects.toThrow();
+    {await expect(acquireRealmAuthority(fixture.db, id, fixture.ready)).rejects.toThrow();}
   expect(fixture.queries).toEqual([]);
   const authority = await acquireRealmAuthority(fixture.db, 1, fixture.ready);
   fixture.disconnect();

@@ -65,7 +65,7 @@ export function towerUserView(
 export function towerLayerView(row: Row): Fields {
   const awards = text(row, "awards");
 
-  if (awards.length > 65535) towerFailure();
+  if (awards.length > 65535) {towerFailure();}
 
   return validateFields(towerLayerSchema, {
     layer: sfs.int(num(row, "layer")),
@@ -86,7 +86,7 @@ export function towerBuffViews(rows: readonly Row[], layer: number, rules: Rules
     .filter((row) => {
       const rule = rules.advanced.dragonTowerBuffs?.get(text(row, "buffid"));
 
-      if (!rule) towerFailure();
+      if (!rule) {towerFailure();}
 
       return rule.time === "-1" || layer <= num(row, "remainlayers");
     })

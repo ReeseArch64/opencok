@@ -40,7 +40,7 @@ export async function authenticate(
   config: MobileAuthConfig,
   now = Date.now(),
 ): Promise<Row> {
-  if (str(packet, "zn") !== `COK${config.kingdomId}`) throw new LoginError("zone");
+  if (str(packet, "zn") !== `COK${config.kingdomId}`) {throw new LoginError("zone");}
 
   const data = fields(packet.p);
   const uid = str(data, "gameUid", "");
@@ -55,34 +55,34 @@ export async function authenticate(
     deviceUuid.length > 200 ||
     !deviceUuid
   )
-    throw new LoginError("identity");
+    {throw new LoginError("identity");}
 
-  if (str(data, "appVersion") !== MOBILE_CLIENT_VERSION) throw new LoginError("version");
+  if (str(data, "appVersion") !== MOBILE_CLIENT_VERSION) {throw new LoginError("version");}
 
-  if (!timestamp || timestamp.length > 64) throw new LoginError("timestamp");
+  if (!timestamp || timestamp.length > 64) {throw new LoginError("timestamp");}
 
-  if (!/^[a-f0-9]{32}$/.test(signature)) throw new LoginError("signature_format");
+  if (!/^[a-f0-9]{32}$/.test(signature)) {throw new LoginError("signature_format");}
 
   const expected = createHash("md5")
     .update(timestamp + config.loginSecret + uid)
     .digest("hex");
 
-  if (!equal(signature, expected)) throw new LoginError("signature");
+  if (!equal(signature, expected)) {throw new LoginError("signature");}
 
   const profile = await db.getProfileById(uid);
 
-  if (!profile) throw new LoginError("profile_missing");
+  if (!profile) {throw new LoginError("profile_missing");}
 
-  if (!equal(deviceUuid, text(profile, "deviceUuid"))) throw new LoginError("device");
+  if (!equal(deviceUuid, text(profile, "deviceUuid"))) {throw new LoginError("device");}
 
   if (long(profile, "banTime") > BigInt(now) || num(profile, "banFlag") !== 0)
-    throw new LoginError("banned");
+    {throw new LoginError("banned");}
 
   const platform = str(data, "pf", "").trim() || text(profile, "pf");
   const devicePlatforms = ["csmod_games", "Google", "market_global"];
 
   if (!devicePlatforms.includes(platform) || !devicePlatforms.includes(text(profile, "pf")))
-    throw new LoginError("platform");
+    {throw new LoginError("platform");}
 
   const accounts = await db.getAccountsByPlayerId(uid);
 
@@ -94,7 +94,7 @@ export async function authenticate(
         equal(text(a, "uuid"), deviceUuid),
     )
   )
-    throw new LoginError("global_account");
+    {throw new LoginError("global_account");}
 
   return profile;
 }

@@ -38,6 +38,6 @@ test("only the native group-buy query is exposed and it retains LONG correlation
     "groupbuys.close",
     "groupbuys.settle",
   ])
-    await expect(game.execute("owner", command, {})).rejects.toThrow();
+    {await expect(game.execute("owner", command, {})).rejects.toThrow();}
   expect(groupBuyOperation("paid", "order")).not.toBe(groupBuyOperation("reserve", "order"));
 });

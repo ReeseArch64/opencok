@@ -8,7 +8,7 @@ import type { CostRankingPeriod } from "@opencok/contracts/continued-cost-rankin
 
 export function costRankingPeriodId(start: bigint, end: bigint, type: number) {
   if (start <= 0n || end <= start || end > 9223372036854775807n)
-    throw new Error("Invalid consumption ranking window");
+    {throw new Error("Invalid consumption ranking window");}
 
   cityInteger(type, 1, 6);
 
@@ -19,20 +19,20 @@ export function costRankingPeriodId(start: bigint, end: bigint, type: number) {
 }
 
 export function costRankingBands(raw: string) {
-  if (!raw || raw.length > 8192) throw new Error("Missing consumption ranking rewards");
+  if (!raw || raw.length > 8192) {throw new Error("Missing consumption ranking rewards");}
 
   const covered = new Set<number>();
   const bands = raw.split("|").map((part) => {
     const values = part.split(";");
 
     if (values.length !== 3 || !/^\d{1,12}$/.test(values[2]!))
-      throw new Error("Invalid consumption ranking rewards");
+      {throw new Error("Invalid consumption ranking rewards");}
 
     const min = cityInteger(values[0], 1, 100),
       max = cityInteger(values[1], min, 100);
 
     for (let rank = min; rank <= max; rank++) {
-      if (covered.has(rank)) throw new Error("Overlapping consumption ranking rewards");
+      if (covered.has(rank)) {throw new Error("Overlapping consumption ranking rewards");}
 
       covered.add(rank);
     }
@@ -40,7 +40,7 @@ export function costRankingBands(raw: string) {
     return { min, max, reward: values[2]! };
   });
 
-  if (bands.length > 100) throw new Error("Consumption ranking reward bound exceeded");
+  if (bands.length > 100) {throw new Error("Consumption ranking reward bound exceeded");}
 
   return bands;
 }
@@ -54,7 +54,7 @@ export function costRankingPlan(
     start = eventTimestamp(panel?.start),
     end = eventTimestamp(panel?.end);
 
-  if (!config || start === undefined || end === undefined || start <= 0n || end <= start) return;
+  if (!config || start === undefined || end === undefined || start <= 0n || end <= start) {return;}
 
   const type = cityInteger(config.k2, 1, 6),
     rewards = config.k5 ?? "";
@@ -69,9 +69,9 @@ export function costRankingPlan(
       ),
     );
 
-  if (census.length > 128) throw new Error("Consumption ranking realm bound exceeded");
+  if (census.length > 128) {throw new Error("Consumption ranking realm bound exceeded");}
 
-  if (!census.includes(rules.kingdomId)) return;
+  if (!census.includes(rules.kingdomId)) {return;}
 
   return {
     id: costRankingPeriodId(start, end, type),
@@ -106,20 +106,20 @@ export function verifyCostFactCoverage(
     free = 0n;
 
   for (const row of postings) {
-    if (row.accountUid !== value.owner) continue;
+    if (row.accountUid !== value.owner) {continue;}
 
     const spent = BigInt(String(row.before)) - BigInt(String(row.after)),
       asset = String(row.asset);
 
-    if (spent <= 0n) continue;
+    if (spent <= 0n) {continue;}
 
     if (value.type === 1 && gold.has(asset)) {
       amount += spent;
 
-      if (["profile.gold", "profile.dmmGold"].includes(asset)) free += spent;
-      else paid += spent;
-    } else if (value.type === 2 && asset.startsWith("item.")) amount += spent;
-    else if (assets[value.type]?.includes(asset)) amount += spent;
+      if (["profile.gold", "profile.dmmGold"].includes(asset)) {free += spent;}
+      else {paid += spent;}
+    } else if (value.type === 2 && asset.startsWith("item.")) {amount += spent;}
+    else if (assets[value.type]?.includes(asset)) {amount += spent;}
   }
 
   if (
@@ -127,5 +127,5 @@ export function verifyCostFactCoverage(
     paid !== value.paid ||
     free !== value.free
   )
-    throw new Error("Consumption fact is not backed by its owned debit postings");
+    {throw new Error("Consumption fact is not backed by its owned debit postings");}
 }

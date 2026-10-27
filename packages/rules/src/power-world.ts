@@ -10,7 +10,7 @@ export function worldPowerEffects(
   context: RuleContext,
   crossThrone = false,
 ): ReadonlyMap<number, number> {
-  if (!Number.isSafeInteger(context.now)) return invalidEffect();
+  if (!Number.isSafeInteger(context.now)) {return invalidEffect();}
 
   const effects = new Map<number, number>();
   const special = crossThrone || serverFeature(rules, "server_buff", context);
@@ -18,14 +18,14 @@ export function worldPowerEffects(
   for (const record of records) {
     const id = effectInteger(record.id);
 
-    if (id < 0) return invalidEffect();
+    if (id < 0) {return invalidEffect();}
 
-    if (record.endTime !== undefined && effectLong(record.endTime) <= BigInt(context.now)) continue;
+    if (record.endTime !== undefined && effectLong(record.endTime) <= BigInt(context.now)) {continue;}
 
     const value = effectFloat(record.value);
 
     if (!special && ((id >= 307 && id <= 310) || id === 400 || (id >= 2143 && id <= 2159)))
-      continue;
+      {continue;}
 
     effects.set(id, value);
   }

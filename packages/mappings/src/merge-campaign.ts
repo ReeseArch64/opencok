@@ -15,7 +15,7 @@ export function mergeEffectBoard(effects: readonly MergeEffect[]): Fields {
         effect.end <= 0,
     )
   )
-    throw new Error("Invalid merge effect board");
+    {throw new Error("Invalid merge effect board");}
 
   return {
     status: sfs.array(

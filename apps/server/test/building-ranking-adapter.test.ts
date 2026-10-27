@@ -23,10 +23,10 @@ function database(
       const text = statement.text;
       queries.push({ text, params });
       const fail = (phase: string) => {
-        if (options.fail === phase) throw new Error(`Synthetic ${phase} failure`);
+        if (options.fail === phase) {throw new Error(`Synthetic ${phase} failure`);}
       };
       if (text.startsWith('select "uid", "level", "serverId"'))
-        return { rows: [["self", 20, 1, "0", 0]] };
+        {return { rows: [["self", 20, 1, "0", 0]] };}
       if (text.includes('left join "opencok_kingdom"."alliance"')) {
         fail("board");
         return {
@@ -121,7 +121,7 @@ test("castle candidates order stars before time and fallback peers intentionally
   expect(peers.text).toContain('"buildingPower" desc nulls last');
   expect(peers.text).not.toMatch(/userprofile|alliance|star|banTime|crossFight/);
   for (const entry of queries)
-    expect(entry.text).not.toMatch(/\b(insert|update|delete)\b|select \*|email|"gold"/);
+    {expect(entry.text).not.toMatch(/\b(insert|update|delete)\b|select \*|email|"gold"/);}
 });
 
 test("cached-window self positions avoid fallback and missing castles or statistics retain legacy defaults", async () => {

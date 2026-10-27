@@ -48,7 +48,7 @@ function definition(context: CityProgressionContext, row: Row) {
 function history(context: CityProgressionContext) {
   let total = 0n;
 
-  for (const row of context.state.buildings) total += buildingExperience(context, row);
+  for (const row of context.state.buildings) {total += buildingExperience(context, row);}
 
   return {
     currentMax:
@@ -66,16 +66,16 @@ function buildingExperience(context: CityProgressionContext, row: Row) {
   let total = 0n;
 
   for (let level = 0; level < num(row, "level"); level++)
-    total += BigInt(context.rules.building(text(row, "itemId"), level).experience ?? 0);
+    {total += BigInt(context.rules.building(text(row, "itemId"), level).experience ?? 0);}
 
   if (num(row, "level") === 30)
-    for (let star = 0; star <= num(row, "star"); star++) {
+    {for (let star = 0; star <= num(row, "star"); star++) {
       const rule = context.rules.building(text(row, "itemId"), 30, star);
 
       for (const step of rule.upgrades?.experience ?? [])
-        if (star < num(row, "star") || step.progress <= num(row, "progress"))
-          total += BigInt(step.value);
-    }
+        {if (star < num(row, "star") || step.progress <= num(row, "progress"))
+          {total += BigInt(step.value);}}
+    }}
 
   return total;
 }
@@ -87,7 +87,7 @@ function makeDomainQueue(context: CityProgressionContext, row: Row) {
     type === undefined ||
     context.state.queues.some((queue) => num(queue, "type") === type && num(queue, "qid") === 1)
   )
-    return;
+    {return;}
 
   context.write.queues = [
     {
@@ -139,7 +139,7 @@ function complete(
   const addedPower = BigInt(after.power ?? 0) - BigInt(current.power ?? 0);
   context.power(addedPower, addedPower);
 
-  if (addedPower > 0n) recordExpeditionScore(context, 3, 1, cityInteger(addedPower));
+  if (addedPower > 0n) {recordExpeditionScore(context, 3, 1, cityInteger(addedPower));}
 
   const previous = history(context),
     earned = BigInt(current.experience ?? 0),
@@ -150,12 +150,12 @@ function complete(
     historyMax: currentMax > previous.historyMax ? currentMax : previous.historyMax,
   };
 
-  if (experience) context.experience(cityInteger(experience));
+  if (experience) {context.experience(cityInteger(experience));}
 
   context.write.buildings = [completed];
   refreshPrayerBuilding(context, row, completed);
 
-  if (!context.completing) recordTargetTask(context, 3, 1);
+  if (!context.completing) {recordTargetTask(context, 3, 1);}
 
   enrollCastleLevel(context, completed);
   makeDomainQueue(context, completed);
@@ -174,7 +174,7 @@ function noAssociatedActivity(context: CityProgressionContext, row: Row) {
     type !== undefined &&
     context.state.queues.some((queue) => num(queue, "type") === type && text(queue, "itemId"))
   )
-    throw new GameError(errors.occupied, "city_progression");
+    {throw new GameError(errors.occupied, "city_progression");}
 }
 
 async function prepare(
@@ -186,7 +186,7 @@ async function prepare(
     const request = str(params, "M__REQUEST_ID__H");
 
     if (request !== "info" && request !== "glory")
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     command = `buildingUnlock.${request}`;
   }
@@ -195,10 +195,10 @@ async function prepare(
     const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
 
     if (!castle || num(castle, "level") < 30)
-      throw new GameError(errors.troopBuilding, "city_progression");
+      {throw new GameError(errors.troopBuilding, "city_progression");}
 
     if (context.state.buildings.some((row) => num(row, "itemId") === 422000))
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const position = context.rules.positions.get("9955");
 
@@ -207,7 +207,7 @@ async function prepare(
       !position.position ||
       context.state.buildings.some((row) => num(row, "pos") === Number(position.position))
     )
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const row: Row = {
       uuid: randomUUID(),
@@ -226,7 +226,7 @@ async function prepare(
     const power = BigInt(definition(context, row).power ?? 0);
     context.power(power, power);
 
-    if (power > 0n) recordExpeditionScore(context, 3, 1, cityInteger(power));
+    if (power > 0n) {recordExpeditionScore(context, 3, 1, cityInteger(power));}
 
     return { response: encode(building(row, context.rules, false, Number(context.now))) };
   }
@@ -235,12 +235,12 @@ async function prepare(
     const pos1 = cityInteger(int(params, "pos1")),
       pos2 = cityInteger(int(params, "pos2"));
 
-    if (pos1 === pos2) throw new GameError(errors.invalid, "city_progression");
+    if (pos1 === pos2) {throw new GameError(errors.invalid, "city_progression");}
 
     const from = context.state.buildings.find((row) => num(row, "pos") === pos1),
       to = context.state.buildings.find((row) => num(row, "pos") === pos2);
 
-    if (!from) throw new GameError(errors.invalid, "city_progression");
+    if (!from) {throw new GameError(errors.invalid, "city_progression");}
 
     context.idleBuilding(from);
     checkCityPosition(context.state, context.rules, pos2, text(from, "itemId"));
@@ -252,7 +252,7 @@ async function prepare(
 
     const payment = int(params, "gold", 0);
 
-    if (![0, 1].includes(payment)) throw new GameError(errors.invalid, "city_progression");
+    if (![0, 1].includes(payment)) {throw new GameError(errors.invalid, "city_progression");}
 
     context.spendItem("200032", 1, payment === 1);
     context.write.buildings = [{ ...from, pos: pos2 }, ...(to ? [{ ...to, pos: pos1 }] : [])];
@@ -266,13 +266,13 @@ async function prepare(
   }
 
   if (command === "buildingUnlock.info")
-    return {
+    {return {
       response: encode({
         count: sfs.long(
           cityUnlockCount(context.state, context.rules, cityInteger(int(params, "type"))),
         ),
       }),
-    };
+    };}
 
   if (command === "buildingUnlock.glory") {
     const row = context.ownBuilding(str(params, "uuid"));
@@ -281,7 +281,7 @@ async function prepare(
       conditions = rule.unlockConditions ?? [];
 
     if (!conditions.length || num(row, "unlockFlag") !== 0)
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const allowed = conditions.every(
       (condition) =>
@@ -291,15 +291,15 @@ async function prepare(
 
     if (!allowed) {
       if (int(params, "cost", 0) !== 1 || !rule.unlockPayment)
-        throw new GameError(errors.resource, "city_progression");
+        {throw new GameError(errors.resource, "city_progression");}
 
       const payment = rule.unlockPayment;
 
       if (payment.paymentId <= 1)
-        context.economy.gold(
+        {context.economy.gold(
           -payment.amount * BigInt(payment.paymentId === 1 ? num(row, "costUnlockTimes") + 1 : 1),
-        );
-      else context.spendItem(String(payment.paymentId), cityInteger(payment.amount));
+        );}
+      else {context.spendItem(String(payment.paymentId), cityInteger(payment.amount));}
     }
 
     const updated = {
@@ -321,12 +321,12 @@ async function prepare(
     const row = context.state.buildings.find((value) => num(value, "itemId") === 400000);
 
     if (!row || num(row, "reward") !== 1)
-      throw new GameError(errors.rewardClaimed, "city_progression");
+      {throw new GameError(errors.rewardClaimed, "city_progression");}
 
     const rewardId = buildingDisplayParameters(definition(context, row))[3];
 
     if (!rewardId || !context.rules.reconnect.rewards?.has(rewardId))
-      throw new GameError(errors.unsupported, "city_progression");
+      {throw new GameError(errors.unsupported, "city_progression");}
 
     const rewards = previewRewards(
       rewardId,
@@ -337,14 +337,14 @@ async function prepare(
 
     for (const reward of rewards) {
       if (reward.kind === "item" && reward.type === 7)
-        context.economy.item(reward.id, cityInteger(reward.count, 1));
+        {context.economy.item(reward.id, cityInteger(reward.count, 1));}
       else if (reward.kind === "count" && reward.type === 5)
-        context.economy.gold(BigInt(cityInteger(reward.value)));
+        {context.economy.gold(BigInt(cityInteger(reward.value)));}
       else if (reward.kind === "count" && reward.type === 6)
-        context.experience(cityInteger(reward.value));
+        {context.experience(cityInteger(reward.value));}
       else if (reward.kind === "count" && reward.type >= 0 && reward.type <= 4)
-        context.economy.resource(cityAssets[reward.type]!, BigInt(cityInteger(reward.value)));
-      else throw new GameError(errors.unsupported, "city_progression");
+        {context.economy.resource(cityAssets[reward.type]!, BigInt(cityInteger(reward.value)));}
+      else {throw new GameError(errors.unsupported, "city_progression");}
     }
 
     context.write.buildings = [{ ...row, reward: 0 }];
@@ -379,7 +379,7 @@ async function prepare(
     checkCityPosition(context.state, context.rules, num(row, "pos"), text(row, "itemId"));
 
     if (context.state.buildings.some((building) => num(building, "pos") === num(row, "pos")))
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     if (
       context.state.buildings.length >= 256 ||
@@ -387,12 +387,12 @@ async function prepare(
         context.state.buildings.filter((building) => building.itemId === row.itemId).length >=
           current.maxInstances)
     )
-      throw new GameError(errors.invalid, "city_progression");
-  } else noAssociatedActivity(context, row);
+      {throw new GameError(errors.invalid, "city_progression");}
+  } else {noAssociatedActivity(context, row);}
 
   if (command === "build.destroy") {
     if (current.maxInstances === 1 || num(row, "level") === 0)
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const durationMs = BigInt(cityInteger(current.demolitionSeconds ?? 0, 1)) * 1000n;
     context.write.buildings = [{ ...row, opType: 2 }];
@@ -413,7 +413,7 @@ async function prepare(
     num(row, "star") > 0 &&
     num(row, "unlockFlag") !== 1
   )
-    throw new GameError(errors.locked, "city_progression");
+    {throw new GameError(errors.locked, "city_progression");}
 
   const next = context.rules.nextBuilding(
     text(row, "itemId"),
@@ -428,11 +428,11 @@ async function prepare(
     next.starLevel === num(row, "star") &&
     next.starProgress === num(row, "progress")
   )
-    throw new GameError(errors.buildingMax, "city_progression");
+    {throw new GameError(errors.buildingMax, "city_progression");}
 
   const payment = int(params, "gold", 0);
 
-  if (![0, 1, 2].includes(payment)) throw new GameError(errors.invalid, "city_progression");
+  if (![0, 1, 2].includes(payment)) {throw new GameError(errors.invalid, "city_progression");}
 
   const reduction =
     context.effect(num(row, "level") < 19 ? 772 : num(row, "level") < 30 ? 2078 : 773) * 3600 +
@@ -449,23 +449,23 @@ async function prepare(
   const costs: Partial<Record<(typeof cityAssets)[number], bigint>> = {};
 
   for (const asset of cityAssets)
-    costs[asset] = reducedCityCost(
+    {costs[asset] = reducedCityCost(
       current.costs?.[asset] ?? 0n,
       asset === "silver"
         ? 0
         : context.effect(({ wood: 752, food: 753, iron: 754, stone: 755 } as const)[asset]),
       context.effect(454) + context.effect(2143),
-    );
+    );}
 
   context.checkPower(BigInt(next.power ?? 0) - BigInt(current.power ?? 0));
   context.spend(costs, payment !== 0);
 
   for (const item of current.requiredItems ?? [])
-    context.spendItem(
+    {context.spendItem(
       String(item.itemId),
       cityInteger(item.quantity ?? 1n),
       payment !== 0 && item.itemId !== 200065,
-    );
+    );}
 
   const data = context.data("upgrade", {
     target: { level: next.level, star: next.starLevel, progress: next.starProgress },
@@ -500,26 +500,26 @@ async function apply(
     data = progressionActivityData(activity.data);
 
   if (num(row, "opType") !== 1 && num(row, "opType") !== 2)
-    throw new GameError(errors.queue, "city_progression");
+    {throw new GameError(errors.queue, "city_progression");}
 
   if (data && data.kind !== (num(row, "opType") === 1 ? "upgrade" : "destroy"))
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
-  if (action === TimedActivityAction.Start) throw new GameError(errors.invalid, "city_progression");
+  if (action === TimedActivityAction.Start) {throw new GameError(errors.invalid, "city_progression");}
 
   if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule)
-    return building(row, context.rules, num(row, "opType") === 1, Number(context.now));
+    {return building(row, context.rules, num(row, "opType") === 1, Number(context.now));}
 
   if (action === TimedActivityAction.Cancel) {
-    if (num(row, "opType") === 1) context.refund(data);
+    if (num(row, "opType") === 1) {context.refund(data);}
 
-    if (num(row, "level") === 0) context.write.deletedBuildings = [text(row, "uuid")];
-    else context.write.buildings = [{ ...row, opType: 0 }];
+    if (num(row, "level") === 0) {context.write.deletedBuildings = [text(row, "uuid")];}
+    else {context.write.buildings = [{ ...row, opType: 0 }];}
 
     return { goods: sfs.array([]), resource: sfs.object(context.resource()) };
   }
 
-  if (num(row, "opType") === 1) return complete(context, row, data);
+  if (num(row, "opType") === 1) {return complete(context, row, data);}
 
   const power = BigInt(definition(context, row).power ?? 0);
   context.power(-power, -power);

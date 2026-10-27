@@ -129,10 +129,10 @@ test("ordinary activity windows include both endpoints and honor the configured 
     [300000, true],
     [300001, false],
   ] as const)
-    expect(
+    {expect(
       luckyDayEffects(profile, lucky, server, rules, { ...context, now: context.now + offset! })
         .size > 0,
-    ).toBe(open);
+    ).toBe(open);}
   const panel = rules.power.activityPanels!.get("57091")!;
   panel.start = "2026-10-23-09-00";
   panel.end = "2026-10-23-09-05";
@@ -185,7 +185,7 @@ test("absent, inactive and expired records contribute nothing and preserve exact
     { ...lucky, lucky_id: 0 },
     { ...lucky, time: BigInt(context.now) },
   ])
-    expect(luckyDayEffects(profile, row, undefined, rules, context).size).toBe(0);
+    {expect(luckyDayEffects(profile, row, undefined, rules, context).size).toBe(0);}
   expect(
     luckyDayEffects(profile, { ...lucky, time: 9007199254740993n }, server, rules, context).get(
       487,
@@ -221,11 +221,11 @@ test("lucky-day player versions retain direct Java comparison before realm and e
   const rules = fixture();
   const control = rules.configuration.payControl!.get("69028")!;
   for (const version of ["13", ".12..6.0.1", "１２.６.０"])
-    expect(luckyDayEffects(profile, lucky, server, rules, { ...context, version }).get(487)).toBe(
+    {expect(luckyDayEffects(profile, lucky, server, rules, { ...context, version }).get(487)).toBe(
       15,
-    );
+    );}
   for (const version of ["", "\u2000", "12.6", "13.bad"])
-    expect(() => luckyDayEffects(profile, lucky, server, rules, { ...context, version })).toThrow();
+    {expect(() => luckyDayEffects(profile, lucky, server, rules, { ...context, version })).toThrow();}
   control.k2 = "bad";
   expect(luckyDayEffects(profile, lucky, server, rules, { ...context, version: "11" }).size).toBe(
     0,

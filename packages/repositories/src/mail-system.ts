@@ -37,7 +37,7 @@ export function readSystemMail(
         !query.anchor.isWellFormed())) ||
     typeof inspect !== "function"
   )
-    throw new DependencyError("system mail input");
+    {throw new DependencyError("system mail input");}
 
   return databases.getKingdom(kingdomId).db.transaction(
     async (tx) => {
@@ -59,7 +59,7 @@ export function readSystemMail(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
-        return { profile };
+        {return { profile };}
 
       let after: bigint | undefined;
 
@@ -102,7 +102,7 @@ export function readSystemMail(
         sizes.some((row) => !Number.isSafeInteger(row.size) || row.size < 0) ||
         sizes.reduce((sum, row) => sum + row.size, 0) > 4 * 1024 * 1024
       )
-        throw new DependencyError("system mail capacity");
+        {throw new DependencyError("system mail capacity");}
 
       const entries = sizes.length
         ? await tx
@@ -150,7 +150,7 @@ export function readSystemMail(
               sizes[index]?.size,
         )
       )
-        throw new DependencyError("system mail snapshot");
+        {throw new DependencyError("system mail snapshot");}
 
       await inspect(entries, {
         senders: (uids) => readMailSenders(databases, kingdomId, tx, uids),

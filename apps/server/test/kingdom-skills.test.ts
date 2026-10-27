@@ -62,12 +62,12 @@ test("bounded Java list sorting matches 360 JDK cases including 36 comparator fa
       return a.id === b.id ? 0 : (a.tabIndex - b.tabIndex) | 0;
     };
     if (vector.order === null)
-      expect(() => javaListSort(input, compare)).toThrow("comparison contract");
+      {expect(() => javaListSort(input, compare)).toThrow("comparison contract");}
     else
-      expect(
+      {expect(
         javaListSort(input, compare).map((entry) => entry.position),
         JSON.stringify([vector.seed, vector.length, vector.mode]),
-      ).toEqual(vector.order);
+      ).toEqual(vector.order);}
     expect(input).toEqual(before);
     expect(comparisons).toBe(vector.comparisons);
     expect(trace).toBe(vector.trace);
@@ -115,13 +115,13 @@ test("kingdom skill restoration validates all constructor numeric fields and ski
     ).toEqual(["valid"]);
   }
   for (const skillCategory of ["-1", "5", "2147483648"])
-    expect(restoredKingdomSkills([kingdomSkill({ skillCategory })])).toEqual([]);
+    {expect(restoredKingdomSkills([kingdomSkill({ skillCategory })])).toEqual([]);}
   for (const skillCategory of ["0", "4", "+２"])
-    expect(restoredKingdomSkills([kingdomSkill({ skillCategory })])).toHaveLength(1);
+    {expect(restoredKingdomSkills([kingdomSkill({ skillCategory })])).toHaveLength(1);}
   for (const effectType of ["-2147483648", "2147483647"])
-    expect(
+    {expect(
       restoredKingdomSkills([kingdomSkill({ effectType, cd: "-1", value: "-2147483648" })]),
-    ).toHaveLength(1);
+    ).toHaveLength(1);}
   const before = structuredClone(valid);
   expect(restoredKingdomSkills([valid])[0]).toEqual({
     id: "valid",
@@ -136,7 +136,7 @@ test("kingdom skill restoration validates all constructor numeric fields and ski
 
 test("kingdom skill costs use Java trailing-empty removal and Float constructor validation accepts nonfinite values", () => {
   for (const costMaterial of ["0", "1;", "1;;", ";", ";;", "+２;-3;"])
-    expect(restoredKingdomSkills([kingdomSkill({ costMaterial })]), costMaterial).toHaveLength(1);
+    {expect(restoredKingdomSkills([kingdomSkill({ costMaterial })]), costMaterial).toHaveLength(1);}
   for (const costMaterial of [
     "",
     ";1",
@@ -147,14 +147,14 @@ test("kingdom skill costs use Java trailing-empty removal and Float constructor 
     "1".repeat(65536),
     Array(4097).fill("1").join(";"),
   ])
-    expect(
+    {expect(
       restoredKingdomSkills([kingdomSkill({ costMaterial })]),
       costMaterial.slice(0, 30),
-    ).toEqual([]);
+    ).toEqual([]);}
   for (const sucRatio of ["NaN", "-Infinity", "0x1.2p3f", " 1 ", "1e1000"])
-    expect(restoredKingdomSkills([kingdomSkill({ sucRatio })])).toHaveLength(1);
+    {expect(restoredKingdomSkills([kingdomSkill({ sucRatio })])).toHaveLength(1);}
   for (const sucRatio of ["∞", "1,5", "0x1", ""])
-    expect(restoredKingdomSkills([kingdomSkill({ sucRatio })])).toEqual([]);
+    {expect(restoredKingdomSkills([kingdomSkill({ sucRatio })])).toEqual([]);}
   expect(
     restoredKingdomSkills([
       kingdomSkill({
@@ -207,11 +207,11 @@ test("kingdom skill wire composition uses wrapped Java ordering and preserves co
     const input = rows(vector.seed, vector.length, vector.mode);
     const records = input.map((entry) => {
       const record = kingdomSkill({ tabIndex: String(entry.tabIndex), online: "2" });
-      if (entry.id === null) delete record.id;
-      else record.id = String(entry.id);
+      if (entry.id === null) {delete record.id;}
+      else {record.id = String(entry.id);}
       return record;
     });
-    if (vector.order === null) expect(() => project(records)).toThrow("comparison contract");
+    if (vector.order === null) {expect(() => project(records)).toThrow("comparison contract");}
     else {
       const result = vector.order
         .map((position, index) => {

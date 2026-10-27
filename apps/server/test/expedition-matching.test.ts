@@ -32,7 +32,7 @@ test("expedition pairs are reciprocal, stable after recovery and never fabricate
   expect(first.filter((x) => x.opponent > 0)).toHaveLength(2);
   expect(first.filter((x) => x.opponent === 0)).toHaveLength(1);
   for (const row of first.filter((x) => x.opponent > 0))
-    expect(first.find((x) => x.kingdomId === row.opponent)!.opponent).toBe(row.kingdomId);
+    {expect(first.find((x) => x.kingdomId === row.opponent)!.opponent).toBe(row.kingdomId);}
   expect(expeditionMatchPairs([realm(1)], config, seed)).toEqual([{ kingdomId: 1, opponent: 0 }]);
   expect(
     expeditionMatchPairs([realm(1, 2), realm(2, 1)], config, seed).every((x) => x.opponent === 0),

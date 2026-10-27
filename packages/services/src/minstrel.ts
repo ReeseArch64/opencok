@@ -22,7 +22,7 @@ function shareMail(
   const contents = javaMailBytes(template?.message);
 
   if (!template || !contents || !rewardId || !context.rules.reconnect.rewards?.has(rewardId))
-    throw new GameError(errors.unsupported, "city_progression");
+    {throw new GameError(errors.unsupported, "city_progression");}
 
   const rewards = previewRewards(
     rewardId,
@@ -32,19 +32,19 @@ function shareMail(
   );
   const reward = rewards
     .map((entry) => {
-      if (entry.kind === "item" && entry.type === 7) return `goods,${entry.id},${entry.count}`;
+      if (entry.kind === "item" && entry.type === 7) {return `goods,${entry.id},${entry.count}`;}
 
       if (entry.kind === "count") {
         const asset = ["wood", "stone", "iron", "food", "silver", "gold"][entry.type];
 
-        if (asset) return `${asset},0,${entry.value}`;
+        if (asset) {return `${asset},0,${entry.value}`;}
       }
 
       throw new GameError(errors.unsupported, "city_progression");
     })
     .join("|");
 
-  if (!reward) throw new GameError(errors.invalid, "city_progression");
+  if (!reward) {throw new GameError(errors.invalid, "city_progression");}
 
   const write = (context.write.quests ??= {});
   write.mail = [
@@ -72,11 +72,11 @@ export class MinstrelDomain extends CityCommandDomain {
 
   public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     if (!localEventWindow(context.rules.power.activityPanels?.get("57112"), context.now))
-      throw new GameError(errors.unsupported, "city_progression");
+      {throw new GameError(errors.unsupported, "city_progression");}
 
     const rule = context.rules.items.get("minstrel");
 
-    if (!rule) throw new GameError(errors.unsupported, "city_progression");
+    if (!rule) {throw new GameError(errors.unsupported, "city_progression");}
 
     const action = str(params, "M__REQUEST_ID__H");
     const row: Row = {
@@ -93,23 +93,23 @@ export class MinstrelDomain extends CityCommandDomain {
     };
 
     if (long(row, "resettime") / 86400000n !== context.now / 86400000n)
-      Object.assign(row, { listen: 0, share: 0, reward: 0, resettime: context.now });
+      {Object.assign(row, { listen: 0, share: 0, reward: 0, resettime: context.now });}
 
     const body: Fields = {};
 
     if (action === "listen") {
       if (num(row, "listen") >= cityInteger(rule.k5))
-        throw new GameError(errors.invalid, "city_progression");
+        {throw new GameError(errors.invalid, "city_progression");}
 
-      if (num(row, "listen") === 0) body.rewards = grantRewards(context, rule.k6);
+      if (num(row, "listen") === 0) {body.rewards = grantRewards(context, rule.k6);}
 
       row.listen = num(row, "listen") + 1;
       row.listentime = context.now;
     } else if (action === "share") {
       if (num(row, "share") >= cityInteger(rule.k7))
-        throw new GameError(errors.invalid, "city_progression");
+        {throw new GameError(errors.invalid, "city_progression");}
 
-      if (num(row, "share") === 0) shareMail(context, rule.k8, rule.k9);
+      if (num(row, "share") === 0) {shareMail(context, rule.k8, rule.k9);}
 
       row.share = num(row, "share") + 1;
       row.sharetime = context.now;
@@ -120,12 +120,12 @@ export class MinstrelDomain extends CityCommandDomain {
         num(row, "reward") >= cityInteger(rule.k1) ||
         context.now - long(row, "rewardtime") < interval
       )
-        throw new GameError(errors.invalid, "city_progression");
+        {throw new GameError(errors.invalid, "city_progression");}
 
       body.rewards = grantRewards(context, rule.k4);
       row.reward = num(row, "reward") + 1;
       row.rewardtime = context.now;
-    } else if (action !== "info") throw new GameError(errors.invalid, "city_progression");
+    } else if (action !== "info") {throw new GameError(errors.invalid, "city_progression");}
 
     context.write.minstrel = row;
     body.info = sfs.object(minstrelInfo(row, rule));

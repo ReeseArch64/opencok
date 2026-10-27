@@ -41,9 +41,9 @@ test("native recharge actions preserve correlation and accepted-event producers 
     { cityProgression: async () => ({ body: {}, pushes: [] }) },
   );
   for (const command of ["new.sercum.ui", "new.sercum.reward"])
-    expect(
+    {expect(
       (await game.execute("owner", command, { _cok_: sfs.long(9007199254740993n) })).body._cok_,
-    ).toEqual(sfs.long(9007199254740993n));
+    ).toEqual(sfs.long(9007199254740993n));}
   await expect(game.execute("owner", "new.sercum.paid", {})).rejects.toThrow();
   await expect(game.execute("owner", "new.sercum.init", {})).rejects.toThrow();
 });

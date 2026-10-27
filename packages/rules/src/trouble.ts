@@ -14,7 +14,7 @@ export function troubleItem(rules: Rules, item: string) {
     status.effect ||
     !goods.para1
   )
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   cityInteger(status.time, 1);
 

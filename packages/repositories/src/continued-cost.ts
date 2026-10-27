@@ -46,7 +46,7 @@ export async function writeContinuedCost(
     write.logs.length > 128 ||
     new Set(write.logs).size !== write.logs.length
   )
-    throw new Error("Invalid continued-cost owner or logs");
+    {throw new Error("Invalid continued-cost owner or logs");}
 
   continuedCostClaims(row.getLv);
   const value = {
@@ -62,7 +62,7 @@ export async function writeContinuedCost(
   };
 
   if (value.periodStart <= 0n || value.updateTime < value.periodStart)
-    throw new Error("Invalid continued-cost period");
+    {throw new Error("Invalid continued-cost period");}
 
   await tx
     .insert(activity_cost)
@@ -73,14 +73,14 @@ export async function writeContinuedCost(
     });
 
   for (const level of write.logs)
-    await tx.insert(activity_cost_log).values({
+    {await tx.insert(activity_cost_log).values({
       uid: randomUUID(),
       userId: owner,
       type: value.type,
       total: long(row, "total"),
       lv: cityInteger(level, 1),
       time: long(row, "updateTime"),
-    });
+    });}
 }
 
 export async function pendingContinuedCosts(
@@ -111,7 +111,7 @@ export async function writeContinuedCostHide(
   owner: string,
   value: number,
 ) {
-  if (![0, 1].includes(value)) throw new Error("Invalid continued-cost privacy flag");
+  if (![0, 1].includes(value)) {throw new Error("Invalid continued-cost privacy flag");}
 
   const changed = await tx
     .update(user_mixed_info)
@@ -119,5 +119,5 @@ export async function writeContinuedCostHide(
     .where(eq(user_mixed_info.uid, owner))
     .returning({ uid: user_mixed_info.uid });
 
-  if (changed.length !== 1) throw new Error("Missing continued-cost privacy owner");
+  if (changed.length !== 1) {throw new Error("Missing continued-cost privacy owner");}
 }

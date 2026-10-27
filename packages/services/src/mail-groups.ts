@@ -43,7 +43,7 @@ function validatePreview(owner: string, group: MailGroupEntry, preview: MailGrou
     (rule?.kind === "uid" && preview.total > 1n) ||
     preview.entries.length !== Number(preview.total < 7n ? preview.total : 7n)
   )
-    throw new ProtocolError();
+    {throw new ProtocolError();}
 
   validateMailWindow(owner, preview.entries);
   const observedUnread = BigInt(
@@ -59,7 +59,7 @@ function validatePreview(owner: string, group: MailGroupEntry, preview: MailGrou
         (index > 0 && entry.createTime > preview.entries[index - 1]!.createTime),
     )
   )
-    throw new ProtocolError();
+    {throw new ProtocolError();}
 }
 
 export function mailGroupProjection(
@@ -72,11 +72,11 @@ export function mailGroupProjection(
 ): { body: Fields; cleanup: MailGroupCleanup } {
   const selected = mailGroupWindow(owner, query, page.groups);
 
-  if (page.previews.length !== selected.length) throw new ProtocolError();
+  if (page.previews.length !== selected.length) {throw new ProtocolError();}
 
   const senderIds = new Set(mailGroupSenders(page.groups));
 
-  if ([...presentation.senders.keys()].some((id) => !senderIds.has(id))) throw new ProtocolError();
+  if ([...presentation.senders.keys()].some((id) => !senderIds.has(id))) {throw new ProtocolError();}
 
   let size = 0;
 
@@ -85,13 +85,13 @@ export function mailGroupProjection(
     validatePreview(owner, group, preview);
 
     for (const entry of preview.entries)
-      size +=
+      {size +=
         (entry.contents?.length ?? 0) +
         (entry.extra?.length ?? 0) +
-        Buffer.byteLength(entry.rewardId ?? "");
+        Buffer.byteLength(entry.rewardId ?? "");}
   }
 
-  if (size > 4 * 1024 * 1024) throw new ProtocolError();
+  if (size > 4 * 1024 * 1024) {throw new ProtocolError();}
 
   const groups: MailGroupCleanup["groups"][number][] = [];
   const mailIds = new Set<string>();
@@ -102,10 +102,10 @@ export function mailGroupProjection(
     const preview = page.previews[index]!;
 
     if (rule?.kind === "sender") {
-      if (!presentation.senders.size) throw new ProtocolError();
+      if (!presentation.senders.size) {throw new ProtocolError();}
 
       if (!presentation.senders.has(group.groupIndex) && preview.total !== 0n)
-        throw new ProtocolError();
+        {throw new ProtocolError();}
     }
 
     if (!rule || preview.total === 0n) {
@@ -120,8 +120,8 @@ export function mailGroupProjection(
     if (rule.kind === "uid") {
       const decoded = decodeMailContent(first);
 
-      if (decoded) message.detail = sfs.object(decoded.body);
-      else mailIds.add(first.uid);
+      if (decoded) {message.detail = sfs.object(decoded.body);}
+      else {mailIds.add(first.uid);}
     } else {
       const entries = rule.kind === "sender" ? [...preview.entries].reverse() : preview.entries;
       message[rule.field] = mailListProjection(

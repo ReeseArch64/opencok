@@ -18,16 +18,16 @@ export function createCn1Sessions(
     current.set(owner, row);
 
     if (current.size > 8192)
-      for (const key of current.keys()) {
-        if (!active.has(key) && key !== owner) current.delete(key);
+      {for (const key of current.keys()) {
+        if (!active.has(key) && key !== owner) {current.delete(key);}
 
-        if (current.size <= 8192) break;
-      }
+        if (current.size <= 8192) {break;}
+      }}
 
-    if (current.size > 8192) throw new Error("CN1 session capacity exceeded");
+    if (current.size > 8192) {throw new Error("CN1 session capacity exceeded");}
   };
   const timestamp = (now: number) => {
-    if (!Number.isSafeInteger(now) || now < 0) throw new Error("Invalid CN1 session time");
+    if (!Number.isSafeInteger(now) || now < 0) {throw new Error("Invalid CN1 session time");}
 
     return BigInt(now);
   };
@@ -41,11 +41,11 @@ export function createCn1Sessions(
         .limit(1)
         .for("update");
 
-      if (!row) return null;
+      if (!row) {return null;}
 
-      if (id && row.sessionId !== id) return row;
+      if (id && row.sessionId !== id) {return row;}
 
-      if (!id || !row.sessionId) return row;
+      if (!id || !row.sessionId) {return row;}
 
       const elapsed = time > row.sampledAt ? (time - row.sampledAt) / 60000n : 0n;
       const onlineMinutes =
@@ -61,7 +61,7 @@ export function createCn1Sessions(
         .where(and(eq(session.ownerUid, owner), eq(session.sessionId, id)))
         .returning();
 
-      if (!updated) throw new Error("CN1 session changed");
+      if (!updated) {throw new Error("CN1 session changed");}
 
       return updated;
     });
@@ -79,11 +79,11 @@ export function createCn1Sessions(
           .limit(1)
           .for("update");
 
-        if (!saved) return null;
+        if (!saved) {return null;}
 
         let isAddict = saved.isAddict;
 
-        if (isAddict === 2 && saved.authAt < time) isAddict = 0;
+        if (isAddict === 2 && saved.authAt < time) {isAddict = 0;}
 
         let onlineMinutes = saved.onlineMinutes;
 
@@ -92,9 +92,9 @@ export function createCn1Sessions(
           active.get(owner) === saved.sessionId &&
           time > saved.sampledAt
         )
-          onlineMinutes = Number(
+          {onlineMinutes = Number(
             BigInt.asIntN(32, BigInt(onlineMinutes) + (time - saved.sampledAt) / 60000n),
-          );
+          );}
 
         const control = rules.configuration.payControl?.get("69036");
 
@@ -104,7 +104,7 @@ export function createCn1Sessions(
             control &&
             (time - saved.offlineAt) / 60000n >= javaDecimal(control.k4, 32))
         )
-          onlineMinutes = 0;
+          {onlineMinutes = 0;}
 
         const [updated] = await tx
           .update(session)
@@ -132,7 +132,7 @@ export function createCn1Sessions(
       const owner = profile.uid;
 
       if (typeof owner !== "string" || !current.has(owner))
-        throw new Error("CN1 session not restored");
+        {throw new Error("CN1 session not restored");}
 
       const row = current.get(owner)!;
 

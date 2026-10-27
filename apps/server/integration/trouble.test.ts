@@ -48,7 +48,7 @@ async function fixture() {
       .insert(user_world)
       .values({ uid, pointId: point, worldId: 0, lastCityDefTime: 0n });
     for (const id of [point, point + 1, point + 1200, point + 1201])
-      await h.db.db.insert(worldpoint).values({
+      {await h.db.db.insert(worldpoint).values({
         id,
         worldId: 0,
         x: (id - 1) % 1200,
@@ -60,7 +60,7 @@ async function fixture() {
         resLevel: 1,
         resInitValue: 0,
         ownerId: uid,
-      });
+      });}
   }
   await h.db.db.insert(user_item).values([
     { uuid: "trouble", ownerId: "owner", itemId: "210097", count: 2, value: 0 },
@@ -235,7 +235,7 @@ test("recalled and moved-target trouble marches never apply an effect", async ()
     await h.db.db.update(worldpoint).set({ ownerId: "new-owner" }).where(eq(worldpoint.id, 10));
     h.clock.now += 1000000;
     await h.command("world.tick", {});
-    for (const row of await h.arrivals()) await deliverWorldTroubles(row.payload, h.deliver);
+    for (const row of await h.arrivals()) {await deliverWorldTroubles(row.payload, h.deliver);}
     expect(await h.db.db.select().from(user_state)).toHaveLength(0);
     expect(await h.db.db.select().from(trouble_log)).toHaveLength(0);
   } finally {
@@ -266,12 +266,12 @@ test("trouble history retains ten structured records and paid removal rolls back
       sql`DROP TRIGGER reject_trouble_delivery ON opencok_kingdom.command_receipt`,
     );
     for (let n = 0; n < 12; n++)
-      await h.deliver("other", {
+      {await h.deliver("other", {
         item: sfs.string("210097"),
         sender: sfs.string("owner"),
         username: sfs.string(`Sender, ${n}`),
         at: sfs.long(BigInt(h.clock.now)),
-      });
+      });}
     expect(await h.db.db.select().from(trouble_log)).toHaveLength(10);
     const response = await h.command("get.trouble.list", {}, "other"),
       rows = response.body.array!.value as Value[];

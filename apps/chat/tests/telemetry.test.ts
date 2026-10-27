@@ -29,7 +29,7 @@ test("chat HTTP exports authenticated redacted logs, failure traces and duration
     server.listen(0, "127.0.0.1");
     await once(server, "listening");
     const address = server.address();
-    if (!address || typeof address === "string") throw new Error("Missing port");
+    if (!address || typeof address === "string") {throw new Error("Missing port");}
     const response = await fetch(`http://127.0.0.1:${address.port}/_health?private-token=secret`, {
       headers: { authorization: "Bearer private-chat-token", uid: "private-player" },
     });

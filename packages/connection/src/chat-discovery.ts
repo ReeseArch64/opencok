@@ -2,7 +2,7 @@ import { chatDiscoveryPaths, isRecord, type ChatDiscovery } from "@opencok/contr
 import { fetchChatJson } from "./chat-http.ts";
 
 function websocket(value: unknown): value is string {
-  if (typeof value !== "string") return false;
+  if (typeof value !== "string") {return false;}
 
   try {
     const url = new URL(value);
@@ -50,7 +50,7 @@ export function createChatDiscovery(options: {
     options.timeoutMs < 100 ||
     options.timeoutMs > 30000
   )
-    throw new Error("Invalid chat discovery configuration");
+    {throw new Error("Invalid chat discovery configuration");}
 
   const base = origin.origin;
   const timeoutMs = options.timeoutMs;
@@ -58,7 +58,7 @@ export function createChatDiscovery(options: {
 
   return async (path) => {
     try {
-      if (!(chatDiscoveryPaths as readonly string[]).includes(path)) throw new Error();
+      if (!(chatDiscoveryPaths as readonly string[]).includes(path)) {throw new Error();}
 
       const value = await fetchChatJson(
         new URL(path, base).toString(),
@@ -67,7 +67,7 @@ export function createChatDiscovery(options: {
         request,
       );
 
-      if (!isRecord(value) || value.code !== 1) throw new Error();
+      if (!isRecord(value) || value.code !== 1) {throw new Error();}
 
       const data = value.data;
 
@@ -85,7 +85,7 @@ export function createChatDiscovery(options: {
           !isRecord(data.messageShow) ||
           !isRecord(data.normalMessageTypes)
         )
-          throw new Error();
+          {throw new Error();}
 
         return {
           code: 1,
@@ -117,7 +117,7 @@ export function createChatDiscovery(options: {
         typeof value.message !== "string" ||
         value.message.length > 255
       )
-        throw new Error();
+        {throw new Error();}
 
       return {
         code: 1,

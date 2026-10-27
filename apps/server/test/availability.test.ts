@@ -14,13 +14,13 @@ const context = { kingdomId: 2, version: "12.06.0", now };
 
 test("item switches retain exact realms, inclusive ranges and early matching before later invalid entries", () => {
   for (const selector of ["all", "2", "1-2", "2-4", "7;2;11-20", ";2;", "2;bad"])
-    expect(switchRealmEnabled(selector, 2), selector).toBe(true);
+    {expect(switchRealmEnabled(selector, 2), selector).toBe(true);}
   for (const selector of ["", "0", "close", "20", "3-8", "1;3-8", "4-2"])
-    expect(switchRealmEnabled(selector, 2), selector).toBe(false);
+    {expect(switchRealmEnabled(selector, 2), selector).toBe(false);}
   for (const selector of [undefined, "bad;2", "9007199254740992"])
-    expect(() => switchRealmEnabled(selector, 2)).toThrow();
+    {expect(() => switchRealmEnabled(selector, 2)).toThrow();}
   for (const realm of [1.5, NaN, Infinity])
-    expect(() => switchRealmEnabled("all", realm)).toThrow();
+    {expect(() => switchRealmEnabled("all", realm)).toThrow();}
   expect(switchRealmEnabled("all", 0)).toBe(true);
   expect(switchRealmEnabled("0", 0)).toBe(false);
 });
@@ -33,7 +33,7 @@ test("direct version gates compare Java integer components and expose malformed 
   expect(versionAtLeast("12.6.0", "12.6.1")).toBe(false);
   expect(versionAtLeast("9.99.99", "12.0.0")).toBe(false);
   for (const version of ["", "12.6", "12.6.0-beta", "12.x.0", "9007199254740992.0.0"])
-    expect(() => versionAtLeast(version, "12.6.0")).toThrow();
+    {expect(() => versionAtLeast(version, "12.6.0")).toThrow();}
   expect(() => versionAtLeast("12.6.0", "")).toThrow();
   expect(versionAtLeast("12.6.0.1", "12.6.0")).toBe(true);
 });

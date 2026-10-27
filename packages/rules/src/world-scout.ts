@@ -10,7 +10,7 @@ function invalid(): never {
 
 function integer(value: unknown) {
   if (typeof value === "number") {
-    if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647) return invalid();
+    if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647) {return invalid();}
 
     return value;
   }
@@ -27,13 +27,13 @@ function cast(value: number) {
 }
 
 export function barbarianCurrentHP(point: Row, actor: Row | undefined, rules: Rules, now: bigint) {
-  if (!actor) return 0;
+  if (!actor) {return 0;}
 
   const config = rules.world.barbarians?.get(text(actor, "configId")),
     duration = integer(config?.para2),
     current = integer(actor.currentHP ?? 0);
 
-  if (long(point, "fireTime") <= 0n) return current;
+  if (long(point, "fireTime") <= 0n) {return current;}
 
   const rate = integer(config?.para11),
     spent = BigInt(duration) - (long(point, "fireTime") - now) / 1000n,
@@ -50,7 +50,7 @@ export function scoutCost(
   rules: Rules,
   expenditure: number,
 ) {
-  if (!Number.isFinite(expenditure)) invalid();
+  if (!Number.isFinite(expenditure)) {invalid();}
 
   if (num(point, "pointType") === 44) {
     const config = rules.world.barbarians?.get(text(point, "pointItem"));
@@ -63,7 +63,7 @@ export function scoutCost(
     divisor = integer(config?.k10),
     scale = integer(config?.k11);
 
-  if (divisor === 0) invalid();
+  if (divisor === 0) {invalid();}
 
   const ordinary = text(point, "ownerId")
     ? cast(base + Math.pow(num(targetCastle ?? {}, "level") / (divisor * 1.0), 2) * scale)

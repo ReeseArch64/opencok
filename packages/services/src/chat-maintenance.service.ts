@@ -10,7 +10,7 @@ export class ChatMaintenanceService {
   public readonly isReady = (): boolean => !this.stopped && this.ready;
 
   public readonly run = (): Promise<boolean> => {
-    if (this.stopped) return Promise.resolve(false);
+    if (this.stopped) {return Promise.resolve(false);}
 
     return (this.running ??= this.maintain().finally(() => {
       this.running = undefined;
@@ -33,9 +33,9 @@ export class ChatMaintenanceService {
       for (let batch = 0; batch < 5; batch++) {
         const removed = await repository.deleteExpired();
 
-        if (removed.messages < 500 && removed.sessions < 500) break;
+        if (removed.messages < 500 && removed.sessions < 500) {break;}
 
-        if (batch === 4) log({ operation: "chat.retention", category: "retention_backlog" });
+        if (batch === 4) {log({ operation: "chat.retention", category: "retention_backlog" });}
       }
 
       if (repository.archivePending) {
@@ -47,10 +47,10 @@ export class ChatMaintenanceService {
           for (let batch = 0; batch < 10 && performance.now() < deadline; batch++) {
             pending = await repository.archivePending();
 
-            if (pending < 100) break;
+            if (pending < 100) {break;}
           }
 
-          if (pending >= 100) log({ operation: "chat.archive", category: "retention_backlog" });
+          if (pending >= 100) {log({ operation: "chat.archive", category: "retention_backlog" });}
         } catch {
           log({ operation: "chat.archive", category: "unavailable" });
         }

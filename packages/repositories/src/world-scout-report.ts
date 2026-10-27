@@ -68,7 +68,7 @@ async function companionDragons(tx: MutationTransaction, uid: string) {
     .limit(65);
 
   if (rows.length > 64 || rows.some((row) => row.uid !== uid))
-    throw new Error("Scout dragon bound exceeded");
+    {throw new Error("Scout dragon bound exceeded");}
 
   return rows;
 }
@@ -76,7 +76,7 @@ async function companionDragons(tx: MutationTransaction, uid: string) {
 async function reinforcement(tx: MutationTransaction, march: Row, kingdom: number) {
   const uid = march.ownerUid;
 
-  if (!validUid(uid) || num(march, "worldId") !== 0) throw new Error("Invalid scout reinforcement");
+  if (!validUid(uid) || num(march, "worldId") !== 0) {throw new Error("Invalid scout reinforcement");}
 
   const [profile] = await tx
       .select(profileFields)
@@ -95,7 +95,7 @@ async function reinforcement(tx: MutationTransaction, march: Row, kingdom: numbe
     num(profile, "crossFightSrcServerId") > 0 ||
     !statistics
   )
-    throw new Error("Unknown scout reinforcement owner");
+    {throw new Error("Unknown scout reinforcement owner");}
 
   const [guild] = profile.allianceId
     ? await tx
@@ -113,7 +113,7 @@ async function participant(
   uid: string,
   kingdom: number,
 ): Promise<ScoutParticipant | undefined> {
-  if (!validUid(uid)) throw new Error("Invalid scout participant");
+  if (!validUid(uid)) {throw new Error("Invalid scout participant");}
 
   const [profile] = await tx
     .select(profileFields)
@@ -121,13 +121,13 @@ async function participant(
     .where(eq(userprofile.uid, uid))
     .limit(1);
 
-  if (!profile || profile.serverId !== kingdom || num(profile, "crossFightSrcServerId") > 0) return;
+  if (!profile || profile.serverId !== kingdom || num(profile, "crossFightSrcServerId") > 0) {return;}
 
   const [world] = await tx.select().from(user_world).where(eq(user_world.uid, uid));
   const [resources] = await tx.select().from(user_resource).where(eq(user_resource.uid, uid));
   const effects = await readWorldResourceOwner(tx, uid);
 
-  if (!world || world.worldId !== 0 || !resources || !effects || effects.newGenerals.moved) return;
+  if (!world || world.worldId !== 0 || !resources || !effects || effects.newGenerals.moved) {return;}
 
   const buildings = await tx
     .select()
@@ -206,7 +206,7 @@ async function participant(
     marches.length > 256 ||
     offices.length > 256
   )
-    throw new Error("Scout participant exceeds bound");
+    {throw new Error("Scout participant exceeds bound");}
 
   const [guild] = profile.allianceId
     ? await tx.select().from(alliance).where(eq(alliance.uid, profile.allianceId))
@@ -227,7 +227,7 @@ async function participant(
         .limit(257)
     : [];
 
-  if (turrets.length > 256) throw new Error("Scout territory bound exceeded");
+  if (turrets.length > 256) {throw new Error("Scout territory bound exceeded");}
 
   const territorySkills = turrets.length
     ? await tx
@@ -243,7 +243,7 @@ async function participant(
         .limit(1025)
     : [];
 
-  if (territorySkills.length > 1024) throw new Error("Scout territory skill bound exceeded");
+  if (territorySkills.length > 1024) {throw new Error("Scout territory skill bound exceeded");}
 
   const kingSkills = await tx
       .select({
@@ -266,7 +266,7 @@ async function participant(
       .limit(1025);
 
   if (kingSkills.length > 1024 || kingSkillLogs.length > 1024)
-    throw new Error("Scout kingdom repair bound exceeded");
+    {throw new Error("Scout kingdom repair bound exceeded");}
 
   return {
     profile,
@@ -304,7 +304,7 @@ export async function readWorldScoutTargets(
     ids.some((id) => !Number.isInteger(id) || id < 1 || id > 16000000) ||
     new Set(ids).size !== ids.length
   )
-    throw new Error("Scout target bound exceeded");
+    {throw new Error("Scout target bound exceeded");}
 
   const result = new Map<number, WorldScoutTarget>(),
     people = new Map<string, ScoutParticipant | undefined>();
@@ -315,11 +315,11 @@ export async function readWorldScoutTargets(
       .from(worldpoint)
       .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, id)));
 
-    if (!point) continue;
+    if (!point) {continue;}
 
     const uid = text(point, "ownerId");
 
-    if (uid && !people.has(uid)) people.set(uid, await participant(tx, uid, kingdom));
+    if (uid && !people.has(uid)) {people.set(uid, await participant(tx, uid, kingdom));}
 
     const [occupyingMarch] = text(point, "ownerMarchUUid")
       ? await tx
@@ -348,10 +348,10 @@ export async function readWorldScoutTargets(
       : [];
     const reinforcements = [];
 
-    if (reinforcementRows.length > 128) throw new Error("Scout reinforcements exceed bound");
+    if (reinforcementRows.length > 128) {throw new Error("Scout reinforcements exceed bound");}
 
     for (const march of reinforcementRows)
-      reinforcements.push(await reinforcement(tx, march, kingdom));
+      {reinforcements.push(await reinforcement(tx, march, kingdom));}
 
     const rallies = defender
       ? await tx
@@ -368,7 +368,7 @@ export async function readWorldScoutTargets(
           .limit(129)
       : [];
 
-    if (rallies.length > 128) throw new Error("Scout rally bound exceeded");
+    if (rallies.length > 128) {throw new Error("Scout rally bound exceeded");}
 
     const rallyDetails = [];
 
@@ -390,7 +390,7 @@ export async function readWorldScoutTargets(
         .where(eq(table.id, text(march, "teamId")))
         .limit(2);
 
-      if (teams.length > 1) throw new Error("Ambiguous scout team");
+      if (teams.length > 1) {throw new Error("Ambiguous scout team");}
 
       const team = teams[0],
         members: ScoutReinforcement[] = [];
@@ -415,9 +415,9 @@ export async function readWorldScoutTargets(
           .orderBy(asc(world_march.uuid))
           .limit(129);
 
-        if (rows.length > 128) throw new Error("Scout rally members exceed bound");
+        if (rows.length > 128) {throw new Error("Scout rally members exceed bound");}
 
-        for (const member of rows) members.push(await reinforcement(tx, member, kingdom));
+        for (const member of rows) {members.push(await reinforcement(tx, member, kingdom));}
       }
 
       rallyDetails.push({ march, team, members });
@@ -445,7 +445,7 @@ export async function readWorldScoutTargets(
           .limit(129)
       : [];
 
-    if (cityBosses.length > 128) throw new Error("Scout city-boss bound exceeded");
+    if (cityBosses.length > 128) {throw new Error("Scout city-boss bound exceeded");}
 
     result.set(id, {
       point,
@@ -467,7 +467,7 @@ export async function writeWorldScoutMails(
   owner: string,
   values: readonly WorldScoutMail[],
 ) {
-  if (values.length > 512) throw new Error("Scout mail bound exceeded");
+  if (values.length > 512) {throw new Error("Scout mail bound exceeded");}
 
   for (const value of values) {
     if (
@@ -502,7 +502,7 @@ export async function writeWorldScoutMails(
         value.recipient !== value.targetOwner) ||
       (value.sender !== "" && value.sender !== owner)
     )
-      throw new Error("Invalid owned scout mail");
+      {throw new Error("Invalid owned scout mail");}
 
     const [scout] = await tx
       .select()
@@ -531,7 +531,7 @@ export async function writeWorldScoutMails(
       scout.marchStartTime > value.createdAt ||
       (scout.marchArrivalTime !== null && scout.marchArrivalTime > value.createdAt)
     )
-      throw new Error("Missing owned scout mail march");
+      {throw new Error("Missing owned scout mail march");}
 
     const [target] = await tx
       .select()
@@ -539,7 +539,7 @@ export async function writeWorldScoutMails(
       .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, value.target)));
 
     if (!target || text(target, "ownerId") !== value.targetOwner)
-      throw new Error("Changed scout mail target");
+      {throw new Error("Changed scout mail target");}
 
     const [recipient] = await tx
       .select({ realm: userprofile.serverId })
@@ -547,7 +547,7 @@ export async function writeWorldScoutMails(
       .where(eq(userprofile.uid, value.recipient));
 
     if (!recipient || recipient.realm !== actor.realm)
-      throw new Error("Missing resident scout mail recipient");
+      {throw new Error("Missing resident scout mail recipient");}
 
     await tx.insert(mail).values({
       uid: value.id,

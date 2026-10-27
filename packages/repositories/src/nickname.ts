@@ -26,7 +26,7 @@ export async function nicknameOccupied(
       typeof cause.code === "string" &&
       /^[0-9A-Z]{5}$/.test(cause.code)
     )
-      return false;
+      {return false;}
 
     throw new DependencyError("nickname availability");
   }
@@ -59,7 +59,7 @@ export async function readNicknameOccupation(
     )
     .map((row) => nicknameTrim(row.uid));
 
-  if (!ids.length) return false;
+  if (!ids.length) {return false;}
 
   const keys = new Set(ids.map(mysqlUtf8UnicodeKey));
   const accounts = await db

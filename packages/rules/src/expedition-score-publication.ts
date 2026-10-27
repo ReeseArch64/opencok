@@ -21,7 +21,7 @@ export function expeditionDiscovery(
   enabled = true,
 ) {
   if (!enabled)
-    clock = { ...clock, stage: 0, opponent: 0, startTime: 0n, endTime: 9223372036854775807n };
+    {clock = { ...clock, stage: 0, opponent: 0, startTime: 0n, endTime: 9223372036854775807n };}
 
   const stage = cityInteger(clock.stage, 0, 8),
     kingdomId = cityInteger(clock.serverId, 1),
@@ -36,7 +36,7 @@ export function expeditionDiscovery(
     version.sequence < 1n ||
     revision < 1n
   )
-    throw new Error("Foreign expedition discovery state");
+    {throw new Error("Foreign expedition discovery state");}
 
   return {
     key: `opencok:global:expedition-match:${kingdomId}`,

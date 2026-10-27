@@ -12,7 +12,7 @@ import type { CityDomain } from "@opencok/services/city-progression";
 export async function scoutHarness(extra: readonly CityDomain[] = []) {
   const h = await cityHarness([createWorldMarchDomain(1200), ...extra]);
   for (const id of ["world_march", "mail_defence", "barbarion_switch", "glory_watchtower"])
-    h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });
+    {h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });}
   await h.db.db.update(userprofile).set({ appVersion: "12.06.0" });
   await h.db.db.insert(user_world).values([
     { uid: "owner", pointId: 1202, worldId: 0, color: 1, lastCityDefTime: 0n },
@@ -41,7 +41,7 @@ export async function scoutHarness(extra: readonly CityDomain[] = []) {
     [1220, "other"],
     [10, ""],
   ] as const)
-    await h.db.db.insert(worldpoint).values({
+    {await h.db.db.insert(worldpoint).values({
       id,
       worldId: 0,
       x: (id - 1) % 1200,
@@ -55,7 +55,7 @@ export async function scoutHarness(extra: readonly CityDomain[] = []) {
       resCostValue: 0,
       ownerId: owner,
       ownerName: owner ? "Synthetic" : "",
-    });
+    });}
   await seedSyntheticWorldBirth(h.db.db, h.authority, h.rules);
   return {
     ...h,

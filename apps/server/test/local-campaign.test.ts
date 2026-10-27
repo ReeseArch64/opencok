@@ -44,9 +44,9 @@ test("anniversary public commands preserve correlation and reject internal event
     "get.activity.value",
     "item.askFor",
   ])
-    expect((await game.execute("owner", command, { _cok_: sfs.int(5) })).body._cok_).toEqual(
+    {expect((await game.execute("owner", command, { _cok_: sfs.int(5) })).body._cok_).toEqual(
       sfs.int(5),
-    );
+    );}
   expect(commands).toHaveLength(5);
   await expect(game.execute("owner", "campaign.action", { event: sfs.int(58) })).rejects.toThrow();
   await expect(game.execute("owner", "campaign.init", {})).rejects.toThrow();

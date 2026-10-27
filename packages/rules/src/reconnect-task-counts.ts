@@ -54,7 +54,7 @@ export function reconnectResourceOutput(
   for (const row of buildings) {
     const type = types.get(String(row.itemId));
 
-    if (type === undefined) continue;
+    if (type === undefined) {continue;}
 
     const rule = rules.building(
       String(row.itemId),
@@ -64,7 +64,7 @@ export function reconnectResourceOutput(
     );
 
     if (rule.effects?.productionPerHour !== undefined)
-      result.set(type, ((result.get(type) ?? 0) + integer(rule.effects.productionPerHour)) | 0);
+      {result.set(type, ((result.get(type) ?? 0) + integer(rule.effects.productionPerHour)) | 0);}
   }
 
   return result;
@@ -96,14 +96,14 @@ export function reconnectTaskInitialCount(
       const counts = requirements.map(() => 0);
 
       for (const building of state.buildings)
-        for (const requirement of requirements)
-          if (matches(building, requirement)) {
+        {for (const requirement of requirements)
+          {if (matches(building, requirement)) {
             const index = requirements.indexOf(requirement);
             counts[index] = (counts[index]! + 1) | 0;
-          }
+          }}}
 
       return counts.reduce((total, count, index) => {
-        if (limits[index] === undefined) throw new Error("Missing task building threshold");
+        if (limits[index] === undefined) {throw new Error("Missing task building threshold");}
 
         return (total + Math.min(count, integer(limits[index]))) | 0;
       }, 0);
@@ -149,11 +149,11 @@ export function reconnectTaskInitialCount(
       return state.profile.pf === "facebook" ? 0 : integer(rule.para2);
     case 39:
       return state.equipment.filter((row) => {
-        if (integer(row.on) !== 1) return false;
+        if (integer(row.on) !== 1) {return false;}
 
         const color = Number(String(integer(row.itemId)).slice(-1));
 
-        if (color < 0 || color > 5) throw new Error("Invalid task equipment color");
+        if (color < 0 || color > 5) {throw new Error("Invalid task equipment color");}
 
         return true;
       }).length;
@@ -162,7 +162,7 @@ export function reconnectTaskInitialCount(
     case 65:
       return [1, 2].includes(integer(state.civilizationCastle?.status)) ? 1 : 0;
     default:
-      if (kind < 0 || kind > 65) throw new Error("Unknown task trigger");
+      if (kind < 0 || kind > 65) {throw new Error("Unknown task trigger");}
 
       return 0;
   }

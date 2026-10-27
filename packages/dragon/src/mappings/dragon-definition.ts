@@ -8,7 +8,7 @@ export class DragonDefinitionMapper {
   public toDefinition(dragon: Dragon): DragonBaseCatalogRecord {
     dragon.validate();
 
-    if (!dragon.server) throw new Error(`Dragon has no server configuration: ${dragon.name}`);
+    if (!dragon.server) {throw new Error(`Dragon has no server configuration: ${dragon.name}`);}
 
     return {
       id: this.bindings.dragons[dragon.identity],

@@ -22,7 +22,7 @@ function read(row: typeof periods.$inferSelect): CostRankingPeriod {
     period.expectedRealms.length > 128 ||
     [...new Set(period.expectedRealms)].toSorted((a, b) => a - b).join("|") !== row.expectedRealms
   )
-    throw new Error("Invalid final consumption cohort");
+    {throw new Error("Invalid final consumption cohort");}
 
   costRankingBands(period.rewards);
 
@@ -57,12 +57,12 @@ export function createCostFinalityShared(
         seal.createdAt < period.endTime + 300000n ||
         seal.createdAt > now
       )
-        throw new Error("Foreign or premature consumption proof");
+        {throw new Error("Foreign or premature consumption proof");}
 
       const rows = readCostScoreSnapshot(seal.snapshot);
 
       if (rows.length !== seal.scoreCount || costScoreDigest(rows) !== seal.digest)
-        throw new Error("Corrupt owned consumption closure");
+        {throw new Error("Corrupt owned consumption closure");}
 
       await writeCostRankingSnapshot(db, authority, period, rows, now, {
         digest: seal.digest,
@@ -87,9 +87,9 @@ export function createCostFinalityShared(
           !period.expectedRealms.includes(authority.kingdomId) ||
           now < saved.endTime + 300000n
         )
-          throw new Error("Invalid consumption finality cohort");
+          {throw new Error("Invalid consumption finality cohort");}
 
-        if (saved.state === 1) return saved.finalizedAt;
+        if (saved.state === 1) {return saved.finalizedAt;}
 
         const proofs = await tx.select().from(marks).where(eq(marks.periodId, period.id));
 
@@ -97,7 +97,7 @@ export function createCostFinalityShared(
           proofs.length !== period.expectedRealms.length ||
           !period.expectedRealms.every((id) => proofs.some((row) => row.kingdomId === id))
         )
-          return;
+          {return;}
 
         for (const proof of proofs) {
           const rows = await tx
@@ -106,7 +106,7 @@ export function createCostFinalityShared(
             .where(and(eq(scores.periodId, period.id), eq(scores.kingdomId, proof.kingdomId)));
 
           if (rows.length !== proof.scoreCount || costScoreDigest(rows) !== proof.digest)
-            throw new Error("Consumption cohort proof no longer matches shared scores");
+            {throw new Error("Consumption cohort proof no longer matches shared scores");}
         }
 
         await tx
@@ -129,7 +129,7 @@ export function createCostFinalityShared(
             .where(and(eq(periods.id, id), eq(periods.state, 1)))
             .limit(1);
 
-          if (!period) return;
+          if (!period) {return;}
 
           const definition = read(period);
 
@@ -137,7 +137,7 @@ export function createCostFinalityShared(
             !definition.expectedRealms.includes(authority.kingdomId) ||
             period.finalizedAt < period.endTime + 300000n
           )
-            throw new Error("Invalid finalized consumption standings");
+            {throw new Error("Invalid finalized consumption standings");}
 
           const proofs = await tx.select().from(marks).where(eq(marks.periodId, id));
 
@@ -147,7 +147,7 @@ export function createCostFinalityShared(
               proofs.some((proof) => proof.kingdomId === realm),
             )
           )
-            throw new Error("Missing finalized consumption cohort proofs");
+            {throw new Error("Missing finalized consumption cohort proofs");}
 
           const economic = await tx
             .select({
@@ -166,13 +166,13 @@ export function createCostFinalityShared(
             economic.length > 100 * definition.expectedRealms.length ||
             economic.some((row) => !definition.expectedRealms.includes(row.kingdomId))
           )
-            throw new Error("Invalid finalized consumption population");
+            {throw new Error("Invalid finalized consumption population");}
 
           for (const proof of proofs) {
             const rows = economic.filter((row) => row.kingdomId === proof.kingdomId);
 
             if (rows.length !== proof.scoreCount || costScoreDigest(rows) !== proof.digest)
-              throw new Error("Final consumption standings differ from their verified proof");
+              {throw new Error("Final consumption standings differ from their verified proof");}
           }
 
           return tx

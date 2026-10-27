@@ -24,7 +24,7 @@ export async function cleanupSocialRealm(
       .limit(500);
 
     for (const row of receipts)
-      await tx
+      {await tx
         .update(command_receipt)
         .set({ request: Buffer.alloc(0), response: Buffer.alloc(0), expiresAt: null })
         .where(
@@ -33,7 +33,7 @@ export async function cleanupSocialRealm(
             eq(command_receipt.ownerUid, row.ownerUid),
             eq(command_receipt.requestId, row.requestId),
           ),
-        );
+        );}
 
     const events = await tx
       .select()
@@ -67,12 +67,12 @@ export async function cleanupSocialRealm(
       .limit(500);
 
     if (boxes.length)
-      await tx.delete(post_box).where(
+      {await tx.delete(post_box).where(
         inArray(
           post_box.uid,
           boxes.map((row) => row.uid),
         ),
-      );
+      );}
 
     const mails = await tx
       .select({ uid: post_mail.uid })
@@ -81,12 +81,12 @@ export async function cleanupSocialRealm(
       .limit(500);
 
     if (mails.length)
-      await tx.delete(post_mail).where(
+      {await tx.delete(post_mail).where(
         inArray(
           post_mail.uid,
           mails.map((row) => row.uid),
         ),
-      );
+      );}
 
     const relations = await tx
       .select({ uid: post_relation.uid })
@@ -95,12 +95,12 @@ export async function cleanupSocialRealm(
       .limit(500);
 
     if (relations.length)
-      await tx.delete(post_relation).where(
+      {await tx.delete(post_relation).where(
         inArray(
           post_relation.uid,
           relations.map((row) => row.uid),
         ),
-      );
+      );}
 
     return receipts.length + events.length + boxes.length + mails.length + relations.length;
   });

@@ -36,7 +36,7 @@ export function requireEnvironment<E extends object, K extends keyof E>(
 ): NonNullable<E[K]> {
   const value = environment[key];
 
-  if (value === undefined || value === null) throw new EnvironmentError([String(key)], "missing");
+  if (value === undefined || value === null) {throw new EnvironmentError([String(key)], "missing");}
 
   return value as NonNullable<E[K]>;
 }

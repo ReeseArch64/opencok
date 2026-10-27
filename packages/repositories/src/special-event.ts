@@ -18,7 +18,7 @@ function identity(value: string, limit: number) {
     !value.isWellFormed() ||
     value.includes("\0")
   )
-    throw new Error("Invalid special event identity");
+    {throw new Error("Invalid special event identity");}
 }
 
 function reservation(value: SpecialEventReservation) {
@@ -31,7 +31,7 @@ function reservation(value: SpecialEventReservation) {
   cityAmount(value.reservedAt);
 
   if (value.start > value.end || value.reservedAt < value.start || value.reservedAt > value.end)
-    throw new Error("Invalid special event reservation period");
+    {throw new Error("Invalid special event reservation period");}
 }
 
 export function createSpecialEventStock(db: Global): SpecialEventStock {
@@ -67,7 +67,7 @@ export function createSpecialEventStock(db: Global): SpecialEventStock {
             old.periodEnd !== value.end ||
             old.state === 2
           )
-            throw new Error("Special event reservation conflict");
+            {throw new Error("Special event reservation conflict");}
 
           return old;
         }
@@ -87,7 +87,7 @@ export function createSpecialEventStock(db: Global): SpecialEventStock {
           )
           .limit(1);
 
-        if (daily) throw new Error("Special event daily limit reached");
+        if (daily) {throw new Error("Special event daily limit reached");}
 
         const [count] = await tx
           .select({ total: sql<string>`count(*)::text` })
@@ -100,7 +100,7 @@ export function createSpecialEventStock(db: Global): SpecialEventStock {
             ),
           );
 
-        if (BigInt(count!.total) >= BigInt(limit)) throw new Error("Special event stock exhausted");
+        if (BigInt(count!.total) >= BigInt(limit)) {throw new Error("Special event stock exhausted");}
 
         const [row] = await tx
           .insert(table)
@@ -128,22 +128,22 @@ export function createSpecialEventStock(db: Global): SpecialEventStock {
       identity(eventId, 128);
       cityAmount(at);
 
-      if (at <= 0n) throw new Error("Invalid special event payment clock");
+      if (at <= 0n) {throw new Error("Invalid special event payment clock");}
 
       return db.transaction(async (tx) => {
         await deadline(tx);
         const [existing] = await tx.select().from(table).where(eq(table.eventId, eventId)).limit(1);
 
-        if (!existing) throw new Error("Missing special event reservation");
+        if (!existing) {throw new Error("Missing special event reservation");}
 
         await lock(tx, existing.exchangeId);
         const [row] = await tx.select().from(table).where(eq(table.eventId, eventId)).for("update");
 
         if (!row || row.state === 2 || at < row.periodStart || at > row.periodEnd)
-          throw new Error("Invalid special event payment time or state");
+          {throw new Error("Invalid special event payment time or state");}
 
         if (row.state === 1) {
-          if (row.purchaseTime !== at) throw new Error("Special event payment conflict");
+          if (row.purchaseTime !== at) {throw new Error("Special event payment conflict");}
 
           return row;
         }
@@ -163,7 +163,7 @@ export function createSpecialEventStock(db: Global): SpecialEventStock {
         await deadline(tx);
         const [row] = await tx.select().from(table).where(eq(table.eventId, eventId)).limit(1);
 
-        if (!row) throw new Error("Missing special event reservation");
+        if (!row) {throw new Error("Missing special event reservation");}
 
         await lock(tx, row.exchangeId);
         const [current] = await tx
@@ -173,15 +173,15 @@ export function createSpecialEventStock(db: Global): SpecialEventStock {
           .for("update");
 
         if (current!.state === 1)
-          throw new Error("Cannot cancel a confirmed special event purchase");
+          {throw new Error("Cannot cancel a confirmed special event purchase");}
 
         await tx.update(table).set({ state: 2 }).where(eq(table.eventId, eventId));
       });
     },
     async counts(period, products) {
-      if (products.length > 256) throw new Error("Special event product bound exceeded");
+      if (products.length > 256) {throw new Error("Special event product bound exceeded");}
 
-      if (!products.length) return new Map();
+      if (!products.length) {return new Map();}
 
       const rows = await db
         .select({ id: table.exchangeId, total: sql<string>`count(*)::text` })
@@ -221,7 +221,7 @@ export function createSpecialEventStock(db: Global): SpecialEventStock {
       cityInteger(kingdom, 1);
       cityAmount(now);
 
-      if (now <= 0n) throw new Error("Invalid special event delivery time");
+      if (now <= 0n) {throw new Error("Invalid special event delivery time");}
 
       const changed = await db
         .update(table)
@@ -236,7 +236,7 @@ export function createSpecialEventStock(db: Global): SpecialEventStock {
         )
         .returning({ id: table.eventId });
 
-      if (changed.length !== 1) throw new Error("Foreign special event acknowledgment");
+      if (changed.length !== 1) {throw new Error("Foreign special event acknowledgment");}
     },
     async defer(eventId, now) {
       identity(eventId, 128);
@@ -255,7 +255,7 @@ export async function writeSpecialEventPurchase(
   row: import("@opencok/contracts/rows").Row,
 ) {
   if (row.uid !== owner || text(row, "id").length > 40 || !text(row, "id"))
-    throw new Error("Foreign special event daily purchase");
+    {throw new Error("Foreign special event daily purchase");}
 
   const value = {
     uid: owner,
@@ -264,7 +264,7 @@ export async function writeSpecialEventPurchase(
     buyTime: cityAmount(row.buyTime),
   };
 
-  if (value.buyTime < value.beginTime) throw new Error("Invalid special event daily purchase time");
+  if (value.buyTime < value.beginTime) {throw new Error("Invalid special event daily purchase time");}
 
   await tx
     .insert(exchange_time)
@@ -294,7 +294,7 @@ export function createSpecialEventBuyer(
         .limit(1);
 
       if (!profile || profile.realm !== input.kingdomId)
-        throw new Error("Unavailable special event buyer");
+        {throw new Error("Unavailable special event buyer");}
 
       const [purchase] = await db
         .select({ at: exchange_time.buyTime })

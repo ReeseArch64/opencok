@@ -10,8 +10,8 @@ export function frame(data: Fields): Buffer {
   const header = Buffer.alloc(bytes.length > 65535 ? 5 : 3);
   header[0] = bytes.length > 65535 ? 0x88 : 0x80;
 
-  if (header.length === 5) header.writeUInt32BE(bytes.length, 1);
-  else header.writeUInt16BE(bytes.length, 1);
+  if (header.length === 5) {header.writeUInt32BE(bytes.length, 1);}
+  else {header.writeUInt16BE(bytes.length, 1);}
 
   return Buffer.concat([header, bytes]);
 }
@@ -31,7 +31,7 @@ export class FrameReader {
       if (this.headerUsed === 0) {
         const flags = chunk[offset++]!;
 
-        if (![0x80, 0x88, 0xa0, 0xa8].includes(flags)) throw new ProtocolError();
+        if (![0x80, 0x88, 0xa0, 0xa8].includes(flags)) {throw new ProtocolError();}
 
         this.header[0] = flags;
         this.headerUsed = 1;
@@ -44,14 +44,14 @@ export class FrameReader {
         this.headerUsed += count;
         offset += count;
 
-        if (this.headerUsed < this.headerSize) break;
+        if (this.headerUsed < this.headerSize) {break;}
       }
 
       if (!this.body) {
         const size =
           this.headerSize === 5 ? this.header.readUInt32BE(1) : this.header.readUInt16BE(1);
 
-        if (size < 3 || size > MAX_FRAME) throw new ProtocolError();
+        if (size < 3 || size > MAX_FRAME) {throw new ProtocolError();}
 
         this.body = Buffer.alloc(size);
         this.bodyUsed = 0;
@@ -62,7 +62,7 @@ export class FrameReader {
       this.bodyUsed += count;
       offset += count;
 
-      if (this.bodyUsed < this.body.length) break;
+      if (this.bodyUsed < this.body.length) {break;}
 
       let body = this.body;
 
@@ -76,7 +76,7 @@ export class FrameReader {
 
       packets.push(decode(body));
 
-      if (packets.length > 64) throw new ProtocolError();
+      if (packets.length > 64) {throw new ProtocolError();}
 
       this.headerUsed = 0;
       this.body = undefined;

@@ -19,7 +19,7 @@ test("maintained normal resource groups expose all four native weighted tables",
   for (const group of rules.world.resources!.values()) {
     expect(group).toHaveLength(310);
     for (const band of Array.from({ length: 21 }, (_, index) => index))
-      expect(group.some((rule) => Number(rule.area_level) === band)).toBe(true);
+      {expect(group.some((rule) => Number(rule.area_level) === band)).toBe(true);}
   }
   expect(worldResourceQuota(rules)).toBe(500);
   expect(worldResourceDuration(rules, 1)).toBe(21600000n);

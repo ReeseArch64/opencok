@@ -74,7 +74,7 @@ export function createComebackSessions(
       !sessionId.isWellFormed() ||
       sessionId.includes("\0")
     )
-      throw new Error("Invalid comeback session");
+      {throw new Error("Invalid comeback session");}
 
     const now = BigInt(captured),
       suffix = kind === "observe" ? `${sessionId}:${now / 60000n}` : sessionId;
@@ -90,16 +90,16 @@ export function createComebackSessions(
       async (tx) => {
         const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
 
-        if (!profile) throw new Error("Missing comeback session owner");
+        if (!profile) {throw new Error("Missing comeback session owner");}
 
         await lockComebackDevice(tx, profile);
         const saved = await readComebackSession(tx, owner);
 
-        if (saved && now < saved.openedAt) throw new Error("Reversed comeback session clock");
+        if (saved && now < saved.openedAt) {throw new Error("Reversed comeback session clock");}
 
         if (kind !== "open") {
           if (!saved || saved.sessionId !== sessionId || saved.closedAt > 0n)
-            return { response: Buffer.alloc(0) };
+            {return { response: Buffer.alloc(0) };}
 
           const observed = maximum(now, saved.observedAt);
           await writeComebackSession(
@@ -160,7 +160,7 @@ export function createComebackSessions(
             .where(eq(userprofile.deviceId, device))
             .limit(257);
 
-          if (actors.length > 256) throw new Error("Comeback device aggregate exceeds bound");
+          if (actors.length > 256) {throw new Error("Comeback device aggregate exceeds bound");}
 
           let latest = 0n,
             unknown = false;
@@ -173,7 +173,7 @@ export function createComebackSessions(
               actor.realm !== authority.kingdomId ||
               (actor.cross ?? 0) > 0
             )
-              unknown = true;
+              {unknown = true;}
 
             latest = maximum(latest, actor.at ?? 0n, session?.observedAt ?? 0n);
           }

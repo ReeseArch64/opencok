@@ -481,7 +481,7 @@ export const RealmDependenciesLive = Layer.effect(
               async () => {
                 let delivered = 0;
 
-                while (delivered < 50 && (await db.relayMailChat(publish))) delivered++;
+                while (delivered < 50 && (await db.relayMailChat(publish))) {delivered++;}
 
                 return delivered;
               },
@@ -590,7 +590,7 @@ export const RealmDependenciesLive = Layer.effect(
         )
       : undefined;
 
-    if (config.avatarChat && !avatarFiles) throw new Error("Avatar files unavailable");
+    if (config.avatarChat && !avatarFiles) {throw new Error("Avatar files unavailable");}
 
     if (avatar) {
       yield* fromPromise("realm.avatar-version", () => checkAvatarVersionStore(db.kingdom.db));
@@ -759,7 +759,7 @@ export const RealmDependenciesLive = Layer.effect(
         async (owner, orderId, platform) => {
           const tx = realmTransactions.getStore();
 
-          if (!tx) throw new Error("Missing trusted payment transaction");
+          if (!tx) {throw new Error("Missing trusted payment transaction");}
 
           return redPacketReader(tx, owner).payment(orderId, platform);
         },
@@ -947,7 +947,7 @@ export const RealmDependenciesLive = Layer.effect(
       }
 
       if (config.chatSession)
-        for (let index = 0; index < 64; index++) {
+        {for (let index = 0; index < 64; index++) {
           const published = await relayMutationEvent(
             db.kingdom.db,
             authority,
@@ -970,11 +970,11 @@ export const RealmDependenciesLive = Layer.effect(
             5000,
           );
 
-          if (!published) break;
-        }
+          if (!published) {break;}
+        }}
 
       if (config.chatSession)
-        for (let index = 0; index < 64; index++) {
+        {for (let index = 0; index < 64; index++) {
           const published = await relayMutationEvent(
             db.kingdom.db,
             authority,
@@ -993,15 +993,15 @@ export const RealmDependenciesLive = Layer.effect(
               });
 
               if (result.expired?.value === true && result.delivered?.value !== true)
-                await notices.refund(event.owner, event.requestId);
+                {await notices.refund(event.owner, event.requestId);}
             },
             Date.now,
             "social.notice",
             5000,
           );
 
-          if (!published) break;
-        }
+          if (!published) {break;}
+        }}
 
       for (let index = 0; index < 64; index++) {
         const published = await relayMutationEvent(
@@ -1011,16 +1011,16 @@ export const RealmDependenciesLive = Layer.effect(
             const data = decode(event.payload);
 
             if (BigInt((data.expiresAt?.value as bigint) ?? 0) > BigInt(Date.now()))
-              await notifications.publish(str(data, "recipient"), "push.lua.postMail", {
+              {await notifications.publish(str(data, "recipient"), "push.lua.postMail", {
                 message: data.message!,
                 chat: data.chat!,
-              });
+              });}
           },
           Date.now,
           "social.post",
         );
 
-        if (!published) break;
+        if (!published) {break;}
       }
 
       for (let index = 0; index < 64; index++) {
@@ -1041,7 +1041,7 @@ export const RealmDependenciesLive = Layer.effect(
           "alliance.changed",
         );
 
-        if (!published) break;
+        if (!published) {break;}
       }
     };
     yield* Effect.tryPromise({
@@ -1059,7 +1059,7 @@ export const RealmDependenciesLive = Layer.effect(
         observeAdapter(
           createActivityExecutor(db.kingdom.db, authority, activityDomains, Date.now, {
             before: async (tx, owner, now, command) => {
-              if (command.command === "activity.restore") return now;
+              if (command.command === "activity.restore") {return now;}
 
               const transition =
                 ["queue.finish", "queue.ccd"].includes(command.command) ||
@@ -1163,7 +1163,7 @@ export const RealmDependenciesLive = Layer.effect(
         observeJob("realm.businessman_publication_unavailable", async () => {
           const current = hotBusinessMan.current();
 
-          if (!current || current.key === publishedHotBusinessMan) return;
+          if (!current || current.key === publishedHotBusinessMan) {return;}
 
           await publishHotBusinessMan(
             notifications.owners(),
@@ -1212,7 +1212,7 @@ export const RealmDependenciesLive = Layer.effect(
               mergeCampaignActor,
             );
 
-            if (!delivered) break;
+            if (!delivered) {break;}
           }
         }),
       catch: () => new Error("Merge campaign recovery unavailable"),
@@ -1309,13 +1309,13 @@ export const RealmDependenciesLive = Layer.effect(
     const recoverExpeditionNotifications = async () => {
       const clock = await currentExpeditionClock(db.kingdom.db, authority);
 
-      if (!clock) return;
+      if (!clock) {return;}
 
       const online = notifications.owners(),
         active = new Set(online);
 
       for (const owner of expeditionNotified.keys())
-        if (!active.has(owner)) expeditionNotified.delete(owner);
+        {if (!active.has(owner)) {expeditionNotified.delete(owner);}}
 
       const selected = Array.from(
         { length: Math.min(32, online.length) },
@@ -1323,11 +1323,11 @@ export const RealmDependenciesLive = Layer.effect(
       );
 
       if (online.length)
-        expeditionNoticeCursor = (expeditionNoticeCursor + selected.length) % online.length;
+        {expeditionNoticeCursor = (expeditionNoticeCursor + selected.length) % online.length;}
 
       await Promise.allSettled(
         selected.map(async (owner) => {
-          if (expeditionNotified.get(owner) === clock.revision) return;
+          if (expeditionNotified.get(owner) === clock.revision) {return;}
 
           await activities.domainCommand(owner, "expedition.notify", {
             revision: sfs.string(String(clock.revision)),
@@ -1355,7 +1355,7 @@ export const RealmDependenciesLive = Layer.effect(
           60000,
         );
 
-        if (!delivered) break;
+        if (!delivered) {break;}
       }
     };
     const costRankRewards = observeAdapter(
@@ -1506,18 +1506,18 @@ export const RealmDependenciesLive = Layer.effect(
       const at = BigInt(Date.now()),
         period = olympicPeriod(rules);
 
-      if (!period) return;
+      if (!period) {return;}
 
       if (at >= olympicScanAt) {
         await olympicSchedule.refresh();
         olympicScanAt = at + 300000n;
       }
 
-      if (at <= period.end) return;
+      if (at <= period.end) {return;}
 
       const pending = await pendingOlympicSettlements(db.kingdom.db, olympicCursor);
 
-      if (!pending.length) olympicCursor = undefined;
+      if (!pending.length) {olympicCursor = undefined;}
 
       for (const record of pending) {
         olympicCursor = record.owner;
@@ -1551,21 +1551,21 @@ export const RealmDependenciesLive = Layer.effect(
       const at = BigInt(Date.now()),
         calendar = cupCalendar(rules);
 
-      if (!calendar) return;
+      if (!calendar) {return;}
 
       if (at >= cupScanAt) {
         await cupSchedule.refresh();
         cupScanAt = at + 300000n;
       }
 
-      if (at <= calendar.end) return;
+      if (at <= calendar.end) {return;}
 
       const pending = await pendingCupSettlements(db.kingdom.db, cupCursor);
 
-      if (!pending.length) cupCursor = undefined;
+      if (!pending.length) {cupCursor = undefined;}
 
       for (const record of pending) {
-        if (!record.owner) continue;
+        if (!record.owner) {continue;}
 
         cupCursor = record.owner;
 
@@ -1586,7 +1586,7 @@ export const RealmDependenciesLive = Layer.effect(
     const recoverGroupBuys = async () => {
       const pending = await pendingGroupBuys(db.kingdom.db, groupBuyCursor);
 
-      if (!pending.length) groupBuyCursor = undefined;
+      if (!pending.length) {groupBuyCursor = undefined;}
 
       for (const record of pending) {
         groupBuyCursor = record;
@@ -1656,7 +1656,7 @@ export const RealmDependenciesLive = Layer.effect(
               recipients.value.length > 64 ||
               body?.type !== Type.Object
             )
-              throw new Error("Invalid hero score notification");
+              {throw new Error("Invalid hero score notification");}
 
             const score = fields(body);
 
@@ -1668,17 +1668,17 @@ export const RealmDependenciesLive = Layer.effect(
                 int(score, "score"),
               ))
             )
-              return;
+              {return;}
 
             for (const owner of recipients.value as string[])
-              await notifications.publish(owner, "push.act.score.obtain", score);
+              {await notifications.publish(owner, "push.act.score.obtain", score);}
           },
           Date.now,
           "hero.score.notify",
           60000,
         );
 
-        if (!delivered) break;
+        if (!delivered) {break;}
       }
     };
     const recoverHeroTargets = async () => {
@@ -1695,7 +1695,7 @@ export const RealmDependenciesLive = Layer.effect(
           60000,
         );
 
-        if (!delivered) break;
+        if (!delivered) {break;}
       }
     };
     const recoverContinuedCosts = async (owner?: string) => {
@@ -1708,7 +1708,7 @@ export const RealmDependenciesLive = Layer.effect(
               const fact = readContinuedCostSpending(event.payload);
 
               if (fact.owner !== event.owner)
-                throw new Error("Foreign continued-cost evidence owner");
+                {throw new Error("Foreign continued-cost evidence owner");}
 
               await activities.domainCommand(event.owner, "continuedcost.apply", {
                 ...decode(event.payload),
@@ -1723,18 +1723,18 @@ export const RealmDependenciesLive = Layer.effect(
             owner,
           );
 
-          if (!delivered) break;
+          if (!delivered) {break;}
         } catch (error) {
-          if (owner) throw error;
+          if (owner) {throw error;}
         }
       }
 
       if (owner && (await pendingContinuedCosts(db.kingdom.db, config.kingdomId, owner)))
-        throw new Error("Continued-cost delivery pending");
+        {throw new Error("Continued-cost delivery pending");}
     };
     const recoverCosmeticInteractions = async () => {
       for (const command of ["trouble.deliver", "trouble.speed"])
-        for (let index = 0; index < 64; index++) {
+        {for (let index = 0; index < 64; index++) {
           const delivered = await relayMutationEvent(
             db.kingdom.db,
             authority,
@@ -1749,11 +1749,11 @@ export const RealmDependenciesLive = Layer.effect(
             command,
           );
 
-          if (!delivered) break;
-        }
+          if (!delivered) {break;}
+        }}
 
       for (const type of ["trigger.activity", "avatar.activate"])
-        for (let index = 0; index < 64; index++) {
+        {for (let index = 0; index < 64; index++) {
           const delivered = await relayMutationEvent(
             db.kingdom.db,
             authority,
@@ -1767,8 +1767,8 @@ export const RealmDependenciesLive = Layer.effect(
             type,
           );
 
-          if (!delivered) break;
-        }
+          if (!delivered) {break;}
+        }}
     };
     let heartCursor = 0;
     const recoverAllianceHearts = async () => {
@@ -1795,7 +1795,7 @@ export const RealmDependenciesLive = Layer.effect(
       }
 
       for (const command of ["heart.send", "heart.init"])
-        for (let index = 0; index < 64; index++) {
+        {for (let index = 0; index < 64; index++) {
           const delivered = await relayMutationEvent(
             db.kingdom.db,
             authority,
@@ -1809,8 +1809,8 @@ export const RealmDependenciesLive = Layer.effect(
             command,
           );
 
-          if (!delivered) break;
-        }
+          if (!delivered) {break;}
+        }}
     };
     let giftCursor = 0;
     const deliverPlayerItemGifts = async (owners: readonly string[]) => {
@@ -1850,7 +1850,7 @@ export const RealmDependenciesLive = Layer.effect(
           "gift.init",
         );
 
-        if (!delivered) break;
+        if (!delivered) {break;}
       }
     };
     const monsterRefresh = observeAdapter(
@@ -1919,11 +1919,11 @@ export const RealmDependenciesLive = Layer.effect(
           "target.paid",
         );
 
-        if (!delivered) break;
+        if (!delivered) {break;}
       }
 
       for (const command of ["dragontower", "dragontower.init", "dragontower.tick"])
-        for (let index = 0; index < 64; index++) {
+        {for (let index = 0; index < 64; index++) {
           const delivered = await relayMutationEvent(
             db.kingdom.db,
             authority,
@@ -1935,8 +1935,8 @@ export const RealmDependenciesLive = Layer.effect(
             command,
           );
 
-          if (!delivered) break;
-        }
+          if (!delivered) {break;}
+        }}
 
       for (let index = 0; index < 64; index++) {
         const delivered = await relayMutationEvent(
@@ -1950,11 +1950,11 @@ export const RealmDependenciesLive = Layer.effect(
           "expedition.king.present",
         );
 
-        if (!delivered) break;
+        if (!delivered) {break;}
       }
 
       for (const command of ["arena.matched", "arena.enter", "arena.leave", "arena.finished"])
-        for (let index = 0; index < 64; index++) {
+        {for (let index = 0; index < 64; index++) {
           const delivered = await relayMutationEvent(
             db.kingdom.db,
             authority,
@@ -1966,8 +1966,8 @@ export const RealmDependenciesLive = Layer.effect(
             command,
           );
 
-          if (!delivered) break;
-        }
+          if (!delivered) {break;}
+        }}
 
       const totemNow = BigInt(Date.now());
       await db.kingdom.db.transaction(async (tx) => {
@@ -2007,7 +2007,7 @@ export const RealmDependenciesLive = Layer.effect(
       worldImportCursor = imported.length === 64 ? imported.at(-1)!.id : undefined;
 
       for (const entry of imported)
-        if (entry.owner) {
+        {if (entry.owner) {
           try {
             await recoverActivities(entry.owner);
             await activities.domainCommand(entry.owner, "world.tick", {
@@ -2020,7 +2020,7 @@ export const RealmDependenciesLive = Layer.effect(
               "error",
             );
           }
-        }
+        }}
 
       const due = await dueWorldMarches(db.kingdom.db, BigInt(Date.now()), worldCursor);
       worldCursor = due.length === 64 ? due.at(-1) : undefined;
@@ -2066,7 +2066,7 @@ export const RealmDependenciesLive = Layer.effect(
         "world.mv",
         "world.mv.gold",
       ])
-        for (let index = 0; index < 64; index++) {
+        {for (let index = 0; index < 64; index++) {
           const delivered = await relayMutationEvent(
             db.kingdom.db,
             authority,
@@ -2086,8 +2086,8 @@ export const RealmDependenciesLive = Layer.effect(
             command,
           );
 
-          if (!delivered) break;
-        }
+          if (!delivered) {break;}
+        }}
     };
     yield* Effect.tryPromise({
       try: () =>
@@ -2103,7 +2103,7 @@ export const RealmDependenciesLive = Layer.effect(
               "totem.status",
             );
 
-            if (!delivered) break;
+            if (!delivered) {break;}
           }
         }),
       catch: () => new Error("Totem status relay unavailable"),
@@ -2152,7 +2152,7 @@ export const RealmDependenciesLive = Layer.effect(
         owner ? undefined : importCursor,
       );
 
-      if (!owner) importCursor = pending.length === 64 ? pending.at(-1)!.uuid : undefined;
+      if (!owner) {importCursor = pending.length === 64 ? pending.at(-1)!.uuid : undefined;}
 
       for (const saved of pending) {
         const operationId =
@@ -2189,10 +2189,10 @@ export const RealmDependenciesLive = Layer.effect(
         owner ? undefined : recoveryCursor,
       );
 
-      if (!owner) recoveryCursor = due.length === 64 ? due.at(-1) : undefined;
+      if (!owner) {recoveryCursor = due.length === 64 ? due.at(-1) : undefined;}
 
       for (const activity of due) {
-        if (activity.queueId === stopQueue) break;
+        if (activity.queueId === stopQueue) {break;}
 
         try {
           await activities.command(activity.ownerId, "queue.finish", {
@@ -2271,7 +2271,7 @@ export const RealmDependenciesLive = Layer.effect(
           ).catch(() => undefined);
 
           for (const type of ["campaign.notice", "redPackets.announce"])
-            for (let index = 0; index < 64; index++) {
+            {for (let index = 0; index < 64; index++) {
               try {
                 const delivered = await relayMutationEvent(
                   db.kingdom.db,
@@ -2291,11 +2291,11 @@ export const RealmDependenciesLive = Layer.effect(
                   1000,
                 );
 
-                if (!delivered) break;
+                if (!delivered) {break;}
               } catch {
                 continue;
               }
-            }
+            }}
         }),
       catch: () => new Error("Campaign notice publication unavailable"),
     }).pipe(
@@ -2401,23 +2401,23 @@ export const RealmDependenciesLive = Layer.effect(
                   const data = decode(event.payload);
 
                   if (str(data, "owner") !== event.owner)
-                    throw new Error("Foreign progression mail publication");
+                    {throw new Error("Foreign progression mail publication");}
 
                   await notifications.publish(event.owner, "push.mail", fields(data.mail));
 
                   if (data.achievement)
-                    await notifications.publish(
+                    {await notifications.publish(
                       event.owner,
                       "push.hero.target.achieved",
                       fields(data.achievement),
-                    );
+                    );}
                 },
                 Date.now,
                 type,
                 60000,
               );
 
-              if (!delivered) break;
+              if (!delivered) {break;}
             }
           }
         }),
@@ -2540,7 +2540,7 @@ export const RealmDependenciesLive = Layer.effect(
       events: readonly CampaignObservation[],
       now: number,
     ) => {
-      if (!campaignObservationNeeded(rules, events, now)) return undefined;
+      if (!campaignObservationNeeded(rules, events, now)) {return undefined;}
 
       return executeInventoryTransaction(
         tx,
@@ -2618,11 +2618,11 @@ export const RealmDependenciesLive = Layer.effect(
           const removed = await cleanupSocialRealm(db.kingdom.db, authority);
 
           if (removed >= 500)
-            logEvent(
+            {logEvent(
               "social_retention_backlog",
               { kingdom: config.kingdomId, outcome: "failure" },
               "warn",
-            );
+            );}
 
           return removed;
         }),
@@ -2680,7 +2680,7 @@ export const RealmDependenciesLive = Layer.effect(
         economyEffects,
         Date.now,
         async (owner) => {
-          if (!socialRemote) throw new Error("Chat unavailable");
+          if (!socialRemote) {throw new Error("Chat unavailable");}
 
           await socialRemote(owner, "chat.notice.authorize", {});
         },
@@ -2708,7 +2708,7 @@ export const RealmDependenciesLive = Layer.effect(
     );
 
     if (socialRemote)
-      yield* Effect.tryPromise({
+      {yield* Effect.tryPromise({
         try: () =>
           observeJob("realm.friendship_help_recovery_unavailable", async () => {
             authority.assertReady();
@@ -2739,10 +2739,10 @@ export const RealmDependenciesLive = Layer.effect(
         Effect.andThen(Effect.sleep(1000)),
         Effect.forever,
         Effect.forkScoped,
-      );
+      );}
 
     if (socialRemote)
-      yield* Effect.tryPromise({
+      {yield* Effect.tryPromise({
         try: () =>
           observeJob("realm.social_event_delivery_unavailable", async () => {
             authority.assertReady();
@@ -2757,7 +2757,7 @@ export const RealmDependenciesLive = Layer.effect(
                 ...(cursor ? { end: sfs.string(cursor) } : {}),
               });
 
-              if (index === 0) cursor = str(batch, "cursor", "");
+              if (index === 0) {cursor = str(batch, "cursor", "");}
 
               const deliveries = batch.deliveries?.value as
                 | { type: number; value: Fields }[]
@@ -2772,16 +2772,16 @@ export const RealmDependenciesLive = Layer.effect(
               }
 
               if (batch.resync?.value === true)
-                for (const owner of owners.slice(index, index + 4))
-                  await notifications.publish(owner, "push.chat.resync", {});
+                {for (const owner of owners.slice(index, index + 4))
+                  {await notifications.publish(owner, "push.chat.resync", {});}}
             }
 
             if (cursor)
-              await socialRemote(`realm-${config.kingdomId}`, "realm.events.ack", {
+              {await socialRemote(`realm-${config.kingdomId}`, "realm.events.ack", {
                 token: sfs.string(authority.instance),
                 epoch: sfs.string(String(authority.epoch)),
                 cursor: sfs.string(cursor),
-              });
+              });}
           }),
         catch: () => new Error("Social event delivery unavailable"),
       }).pipe(
@@ -2789,7 +2789,7 @@ export const RealmDependenciesLive = Layer.effect(
         Effect.andThen(Effect.sleep(250)),
         Effect.forever,
         Effect.forkScoped,
-      );
+      );}
 
     const inventory = observeAdapter(
       new InventoryService(
@@ -2901,7 +2901,7 @@ export const RealmDependenciesLive = Layer.effect(
       ),
       profileSessions: {
         async open(owner, id, now) {
-          if (nickname) await cn1.open(owner, id, now);
+          if (nickname) {await cn1.open(owner, id, now);}
 
           await comebackSessions.open(owner, id, now);
         },
@@ -2909,7 +2909,7 @@ export const RealmDependenciesLive = Layer.effect(
           try {
             await comebackSessions.close(owner, id, now);
           } finally {
-            if (nickname) await cn1.close(owner, id, now);
+            if (nickname) {await cn1.close(owner, id, now);}
           }
         },
         observe: comebackSessions.observe,
@@ -2950,10 +2950,10 @@ export const RealmDependenciesLive = Layer.effect(
                 },
                 cityProgression: async (owner, command, params) => {
                   if (command === "newexpidition.rankinfo")
-                    return { body: await expeditionHistory.read(owner), pushes: [] };
+                    {return { body: await expeditionHistory.read(owner), pushes: [] };}
 
                   if ((expeditionTreasuryCommands as readonly string[]).includes(command))
-                    return expeditionTreasury.command(owner, command, params);
+                    {return expeditionTreasury.command(owner, command, params);}
 
                   await recoverActivities(owner);
 
@@ -2966,10 +2966,10 @@ export const RealmDependenciesLive = Layer.effect(
                       "target.paid",
                     ].includes(command)
                   )
-                    await activities.domainCommand(owner, "world.tick", {});
+                    {await activities.domainCommand(owner, "world.tick", {});}
 
                   if (command === "continuedcost.info" || command === "continuedcost.reward")
-                    await recoverContinuedCosts(owner);
+                    {await recoverContinuedCosts(owner);}
 
                   const result = await activities.domainCommand(owner, command, params);
 
@@ -2977,11 +2977,11 @@ export const RealmDependenciesLive = Layer.effect(
                     const recipient = str(params, "uid");
 
                     if (notifications.owners().includes(recipient))
-                      await deliverPlayerItemGifts([recipient]);
+                      {await deliverPlayerItemGifts([recipient]);}
                   }
 
                   if (command === "newexpidition.activityinfo")
-                    return { ...result, body: await expeditionLiveView.enrich(owner, result.body) };
+                    {return { ...result, body: await expeditionLiveView.enrich(owner, result.body) };}
 
                   return result;
                 },

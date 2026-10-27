@@ -41,16 +41,16 @@ const generalActions: Readonly<Record<string, readonly string[]>> = {
 export function generalRequest(command: string, params: Fields) {
   const separator = command.indexOf(".");
 
-  if (separator < 0) return { command, params };
+  if (separator < 0) {return { command, params };}
 
   const prefix = command.slice(0, separator);
   const action = command.slice(separator + 1);
 
   if (!Object.hasOwn(generalActions, prefix) || !generalActions[prefix]!.includes(action))
-    return { command, params };
+    {return { command, params };}
 
   if (params.M__REQUEST_ID__H && str(params, "M__REQUEST_ID__H") !== action)
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   return { command: prefix, params: { ...params, M__REQUEST_ID__H: sfs.string(action) } };
 }
@@ -147,10 +147,10 @@ export function generalRefinement(row: Row, rules: Rules): Fields {
     const next = proposed.get(index);
 
     if (next)
-      growth += Math.trunc(
+      {growth += Math.trunc(
         ((next.value - property.value) / Number(generalPropertyRule(rules, property.id).max)) *
           10000,
-      );
+      );}
   }
 
   return {

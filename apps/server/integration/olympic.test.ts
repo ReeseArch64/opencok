@@ -32,7 +32,7 @@ async function fixture() {
       ["wood", 0, "2023-01-01-01-00"],
       ["gold", 5, "2023-01-01-02-00"],
     ] as const)
-      h.rules.advanced.olympicBets!.set(id, {
+      {h.rules.advanced.olympicBets!.set(id, {
         id,
         type: String(type),
         start: "2023-01-01-00-00",
@@ -43,7 +43,7 @@ async function fixture() {
         rate: "100",
         cheat: "1000",
         earn_ratio: "10",
-      });
+      });}
     await h.db.db
       .update(user_resource)
       .set({ wood: 1000n, woodbind: 1000n, lastUpdateTime: BigInt(h.clock.now) });
@@ -82,7 +82,7 @@ async function fixture() {
       (await h.db.db.select().from(userprofile).where(eq(userprofile.uid, owner)))[0]!;
     const settle = async (owner = "owner") => {
       const pending = (await pendingOlympicSettlements(h.db.db)).find((row) => row.owner === owner);
-      if (!pending) throw new Error("Missing synthetic Olympic settlement");
+      if (!pending) {throw new Error("Missing synthetic Olympic settlement");}
       return h.command(
         "Olympic.settle",
         { operationId: sfs.string(olympicSettlementOperation(owner, pending.ids)) },
@@ -119,7 +119,7 @@ test("Olympic stakes consume owned bound resources once and share a conserved po
 test("Olympic admission enforces resource type, positive stake, cap and cutoff without accepting client outcomes", async () => {
   const h = await fixture();
   try {
-    for (const count of [0, -1, 1001]) await expect(h.bet(count)).rejects.toThrow();
+    for (const count of [0, -1, 1001]) {await expect(h.bet(count)).rejects.toThrow();}
     await expect(h.bet(1, "JP", "owner", "wood", 5)).rejects.toThrow();
     await expect(h.bet(1, "")).rejects.toThrow();
     expect(await h.db.db.select().from(user_olympic_bet)).toHaveLength(0);

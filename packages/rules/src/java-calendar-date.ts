@@ -23,28 +23,28 @@ function fixedDate(year: number, month: number, day: number, julian: boolean): b
 function numericField(value: string, start: number): { value: number; end: number } | undefined {
   let index = start;
 
-  while (value[index] === " " || value[index] === "\t") index++;
+  while (value[index] === " " || value[index] === "\t") {index++;}
 
-  if (value[index] === "\ufffd") return { value: 0, end: index + 1 };
+  if (value[index] === "\ufffd") {return { value: 0, end: index + 1 };}
 
   const negative = value[index] === "-";
 
-  if (negative) index++;
+  if (negative) {index++;}
 
-  if (value[index] === "∞") return { value: negative ? -2147483648 : 2147483647, end: index + 1 };
+  if (value[index] === "∞") {return { value: negative ? -2147483648 : 2147483647, end: index + 1 };}
 
   let digits = "";
 
   while (index < value.length) {
     const digit = javaDigit(value.charCodeAt(index));
 
-    if (digit === undefined) break;
+    if (digit === undefined) {break;}
 
     digits += digit;
     index++;
   }
 
-  if (!digits) return undefined;
+  if (!digits) {return undefined;}
 
   let exponent = 0;
 
@@ -52,14 +52,14 @@ function numericField(value: string, start: number): { value: number; end: numbe
     let end = index + 1;
     const negativeExponent = value[end] === "-";
 
-    if (negativeExponent) end++;
+    if (negativeExponent) {end++;}
 
     let power = "";
 
     while (end < value.length) {
       const digit = javaDigit(value.charCodeAt(end));
 
-      if (digit === undefined) break;
+      if (digit === undefined) {break;}
 
       power += digit;
       end++;
@@ -82,11 +82,11 @@ function numericField(value: string, start: number): { value: number; end: numbe
   const decimalAt = (digits.length + exponent) | 0;
   digits = digits.replace(/0+$/, "");
 
-  if (!digits || decimalAt < 0) return { value: 0, end: index };
+  if (!digits || decimalAt < 0) {return { value: 0, end: index };}
 
   const limit = negative ? -2147483648 : 2147483647;
 
-  if (decimalAt > 19) return { value: limit, end: index };
+  if (decimalAt > 19) {return { value: limit, end: index };}
 
   if (decimalAt >= digits.length) {
     const magnitude = BigInt(digits + "0".repeat(decimalAt - digits.length));
@@ -121,7 +121,7 @@ export function javaCalendarDate(
     (previousTime !== undefined &&
       (typeof previousTime !== "bigint" || BigInt.asIntN(64, previousTime) !== previousTime))
   )
-    throw new Error("Invalid calendar date input");
+    {throw new Error("Invalid calendar date input");}
 
   const parsed: number[] = [];
   let index = 0;
@@ -129,12 +129,12 @@ export function javaCalendarDate(
   for (let field = 0; field < fields; field++) {
     const part = numericField(value, index);
 
-    if (!part) return undefined;
+    if (!part) {return undefined;}
 
     parsed.push(part.value);
     index = part.end;
 
-    if (field < fields - 1 && value[index++] !== "-") return undefined;
+    if (field < fields - 1 && value[index++] !== "-") {return undefined;}
   }
 
   const sourceYear = parsed[0]!;

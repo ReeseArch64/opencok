@@ -8,7 +8,7 @@ import type { OwnGeneralSnapshot } from "@opencok/hero/contracts/reconnect-gener
 import { generalInfo } from "@opencok/hero/mappings/profile-generals";
 
 function serializeReconnectGenerals(generals: readonly OwnGeneralSnapshot[]): Fields {
-  if (generals.length > 32767) return invalid();
+  if (generals.length > 32767) {return invalid();}
 
   return {
     userGenerals: sfs.array(

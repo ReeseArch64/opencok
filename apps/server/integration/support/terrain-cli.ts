@@ -55,15 +55,15 @@ export async function terrainCliHarness() {
         break;
       } catch (error) {
         probe.close();
-        if (attempt >= 20) throw error;
+        if (attempt >= 20) {throw error;}
         await Bun.sleep(100);
       }
     }
     for (const name of ["building", "role", "position"])
-      await writeFile(
+      {await writeFile(
         join(directory, `${name}.xml`),
         `<database><ItemSpec id="${name === "building" ? 400001 : name === "role" ? 100101 : 1}" level="1"/></database>`,
-      );
+      );}
     await writeFile(
       join(directory, "item.xml"),
       '<database><ItemSpec id="worldmap_city" k1="2" k3="5" k6="2"/><ItemSpec id="worldmap_explore" k1="2"/><ItemSpec id="worldmap_num" k1="50"/></database>',
@@ -126,7 +126,7 @@ export async function terrainCliHarness() {
       run,
       async close() {
         await db!.close();
-        if (zkStarted) await pg.docker(["rm", "--force", "--volumes", zkName]);
+        if (zkStarted) {await pg.docker(["rm", "--force", "--volumes", zkName]);}
         await rm(directory, { recursive: true, force: true });
         await pg.stop();
       },
@@ -134,7 +134,7 @@ export async function terrainCliHarness() {
   } catch (error) {
     await admin.end().catch(() => undefined);
     await db?.close();
-    if (zkStarted) await pg.docker(["rm", "--force", "--volumes", zkName]);
+    if (zkStarted) {await pg.docker(["rm", "--force", "--volumes", zkName]);}
     await rm(directory, { recursive: true, force: true });
     await pg.stop();
     throw error;

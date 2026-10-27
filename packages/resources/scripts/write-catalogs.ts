@@ -26,42 +26,42 @@ export function catalogHash(value: unknown): string {
 }
 
 export function render(value: unknown, key?: string): string {
-  if (typeof value === "bigint") return String(value) + "n";
+  if (typeof value === "bigint") {return String(value) + "n";}
   if (typeof value === "number") {
-    if (!Number.isFinite(value)) throw new Error("Non-finite catalog number");
+    if (!Number.isFinite(value)) {throw new Error("Non-finite catalog number");}
     return String(value);
   }
   if (key === "kind" && typeof value === "string")
-    return "CatalogKind." + Object.entries(CatalogKind).find(([, item]) => item === value)![0];
+    {return "CatalogKind." + Object.entries(CatalogKind).find(([, item]) => item === value)![0];}
   if (key === "scope" && typeof value === "string" && ["C", "G", "I", "P", "S"].includes(value))
-    return "VariableScope." + value;
-  if (Array.isArray(value)) return "[" + value.map((item) => render(item)).join(",") + "]";
+    {return "VariableScope." + value;}
+  if (Array.isArray(value)) {return "[" + value.map((item) => render(item)).join(",") + "]";}
   if (value && typeof value === "object")
-    return (
+    {return (
       "{" +
       Object.entries(value)
         .filter(([, item]) => item !== undefined)
         .map(([field, item]) => JSON.stringify(field) + ":" + render(item, field))
         .join(",") +
       "}"
-    );
+    );}
   return JSON.stringify(value);
 }
 
 function typeOf(value: CatalogValue): string {
-  if (!Array.isArray(value)) return typeof value;
+  if (!Array.isArray(value)) {return typeof value;}
   const members = [...new Set(value.map((item) => typeOf(item)))].sort();
   return "readonly (" + (members.join(" | ") || "never") + ")[]";
 }
 function recordType(records: readonly object[], name: string): string {
   const fields = new Map<string, { count: number; types: Set<string> }>();
   for (const record of records)
-    for (const [key, value] of Object.entries(record)) {
+    {for (const [key, value] of Object.entries(record)) {
       const field = fields.get(key) ?? { count: 0, types: new Set<string>() };
       field.count++;
       field.types.add(typeOf(value as CatalogValue));
       fields.set(key, field);
-    }
+    }}
   return (
     "export interface " +
     name +
@@ -108,7 +108,7 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
     records?: number;
   }[] = [];
   for await (const source of sources) {
-    if (source.id === GameplayCatalog.Building) continue;
+    if (source.id === GameplayCatalog.Building) {continue;}
     const { definition, codec: sourceCodec } = convertCatalog(source.ordered, source.id);
     const codec =
       source.id === GameplayCatalog.GeneralBase
@@ -117,7 +117,7 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
     const hash = catalogHash({ definition, codec });
     let module = modules.get(hash);
     const member = names.get(source.id as GameplayCatalog);
-    if (!member) throw new Error("Unknown catalog source: " + source.id);
+    if (!member) {throw new Error("Unknown catalog source: " + source.id);}
     if (!module) {
       module = source.id;
       modules.set(hash, module);
@@ -285,11 +285,11 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
     });
   }
   for (const file of await readdir(directory))
-    if (!generated.has(file)) await rm(join(directory, file));
+    {if (!generated.has(file)) {await rm(join(directory, file));}}
   for (const file of await readdir(typesDirectory))
-    if (!generatedTypes.has(file)) await rm(join(typesDirectory, file));
+    {if (!generatedTypes.has(file)) {await rm(join(typesDirectory, file));}}
   for (const file of await readdir(heroTypesDirectory))
-    if (!generatedHeroTypes.has(file)) await rm(join(heroTypesDirectory, file));
+    {if (!generatedHeroTypes.has(file)) {await rm(join(heroTypesDirectory, file));}}
   const header = 'import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";\n';
   const modelImports =
     'import type { TileMapDefinition, AutomationCatalog, VariableCatalog, WebRoutingCatalog } from "./catalog-model.ts";\n';

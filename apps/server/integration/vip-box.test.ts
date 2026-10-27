@@ -14,7 +14,7 @@ async function fixture() {
   h.rules.features.set("box_vip", { id: "box_vip", online: "all", test: "all", version: "1.0.0" });
   h.rules.advanced.vipBoxes!.clear();
   for (const vip of [8, 11])
-    h.rules.advanced.vipBoxes!.set(String(990000 + vip), {
+    {h.rules.advanced.vipBoxes!.set(String(990000 + vip), {
       id: String(990000 + vip),
       vip: String(vip),
       condition: "1;1",
@@ -25,7 +25,7 @@ async function fixture() {
       item_num: "1;2;3",
       rate: "1;1;1",
       notice_item: "1;2;3",
-    });
+    });}
   const score = [...h.rules.power.vip!.values()].find(
     (rule) => (Number(rule.id) % 100) + 1 === 8,
   )!.point!;

@@ -174,10 +174,10 @@ test("normal recharge counts exact delivered catalog gold once, mails reached th
       h.rules,
     );
     for (const message of messages)
-      await claimant.command("owner", "mail.reward", {
+      {await claimant.command("owner", "mail.reward", {
         uid: sfs.string(message.uid),
         operationId: sfs.string(randomUUID()),
-      });
+      });}
     expect((await h.profile()).gold).toBe(100014n);
     expect(
       (await h.db.db.select().from(user_resource).where(eq(user_resource.uid, "owner")))[0]?.wood,

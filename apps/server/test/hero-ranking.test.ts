@@ -27,7 +27,7 @@ test("hero ranking keys retain realm bands, current event versions, alliance ban
     );
   const personal = lookup(1);
   expect(typeof personal).toBe("object");
-  if (typeof personal === "number") throw new Error();
+  if (typeof personal === "number") {throw new Error();}
   expect(personal.keys).toHaveLength(40);
   expect(personal.keys[0]).toBe("HERO_PERSON_RANK_0_1_-2147483648");
   expect(personal.member).toBe("self");

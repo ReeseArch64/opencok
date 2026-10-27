@@ -33,7 +33,7 @@ function castle(context: CityProgressionContext) {
 
 export function enrollCastleLevel(context: CityProgressionContext, row: Row) {
   if (num(row, "itemId") !== 400000 || !castleEventOpen(context.rules, ruleContext(context)))
-    return;
+    {return;}
 
   const current = level(row);
 
@@ -42,9 +42,9 @@ export function enrollCastleLevel(context: CityProgressionContext, row: Row) {
       (rule) => cityInteger(rule.castle_lv, 1) === current,
     )
   )
-    context.write.castleLevelEnrollments = [
+    {context.write.castleLevelEnrollments = [
       ...new Set([...(context.write.castleLevelEnrollments ?? []), current]),
-    ];
+    ];}
 }
 
 function emptyRow(context: CityProgressionContext, current: number): CastleLevelEventRow {
@@ -70,20 +70,20 @@ export class CastleLevelEventDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.castleLevelEvent;
 
-    if (!state) castleEventFailure();
+    if (!state) {castleEventFailure();}
 
     const empty = () => ({ response: encode({}), event: null });
 
     if (!castleEventOpen(context.rules, ruleContext(context))) {
       if (command === "castle.level.reward" || command === "castle.share.reward")
-        castleEventFailure();
+        {castleEventFailure();}
 
       return empty();
     }
 
     const rules = [...(context.rules.advanced.castleLevels?.values() ?? [])];
 
-    if (!rules.length || rules.length > 64) castleEventFailure();
+    if (!rules.length || rules.length > 64) {castleEventFailure();}
 
     const current = castle(context),
       rows = state.rows.map((row) => ({ ...row }));
@@ -98,13 +98,13 @@ export class CastleLevelEventDomain extends CityCommandDomain {
         context.write.castleLevelEnrollments?.includes(current) &&
         !rows.some((row) => num(row, "level") === current)
       )
-        rows.push(emptyRow(context, current));
+        {rows.push(emptyRow(context, current));}
 
       const preview = (id: string, paid: boolean) => {
         const catalog = paid ? context.rules.advanced.payRewards : context.rules.reconnect.rewards;
         const rule = catalog?.get(id);
 
-        if (!rule) castleEventFailure();
+        if (!rule) {castleEventFailure();}
 
         return rewardPreviewArray(
           previewRewards(id, context.rules, ruleContext(context), randomInt, rule),
@@ -168,7 +168,7 @@ export class CastleLevelEventDomain extends CityCommandDomain {
           num(row, "lv_reward") > 0 ||
           !castleEventMailWindow(rule, state.serverOpenTime, context.now)
         )
-          continue;
+          {continue;}
 
         const reward = pinProgressionReward(
           context,
@@ -178,7 +178,7 @@ export class CastleLevelEventDomain extends CityCommandDomain {
         const template = context.rules.mail.get("11791"),
           contents = javaMailBytes(template?.message);
 
-        if (!template || !contents) castleEventFailure();
+        if (!template || !contents) {castleEventFailure();}
 
         row.lv_reward = cityInteger(rule.lv_reward, 1);
         writes.push(row);
@@ -201,7 +201,7 @@ export class CastleLevelEventDomain extends CityCommandDomain {
         ];
       }
 
-      if (writes.length) context.write.castleLevelEvent = writes;
+      if (writes.length) {context.write.castleLevelEvent = writes;}
 
       return empty();
     }
@@ -209,12 +209,12 @@ export class CastleLevelEventDomain extends CityCommandDomain {
     const id = str(params, "id"),
       rule = context.rules.advanced.castleLevels?.get(id);
 
-    if (!rule) castleEventFailure();
+    if (!rule) {castleEventFailure();}
 
     const target = cityInteger(rule.castle_lv, 1),
       row = rows.find((row) => num(row, "level") === target);
 
-    if (!row || current < target) castleEventFailure();
+    if (!row || current < target) {castleEventFailure();}
 
     let rewardId = rule.lv_reward!,
       field = "lv_reward";
@@ -224,15 +224,15 @@ export class CastleLevelEventDomain extends CityCommandDomain {
         thresholds = (rule.Sharing_condition ?? "").split("|"),
         rewards = (rule.Shared_reward ?? "").split("|");
 
-      if (!thresholds[position] || !rewards[position]) castleEventFailure();
+      if (!thresholds[position] || !rewards[position]) {castleEventFailure();}
 
       field = `share_reward_${position}`;
       rewardId = rewards[position]!;
 
-      if ((state.counts.get(target) ?? 0) < cityInteger(thresholds[position], 1)) return empty();
+      if ((state.counts.get(target) ?? 0) < cityInteger(thresholds[position], 1)) {return empty();}
     }
 
-    if (num(row, field) > 0) castleEventFailure();
+    if (num(row, field) > 0) {castleEventFailure();}
 
     const pinned = pinProgressionReward(context, rewardId, context.rules.advanced.payRewards);
     const reward = grantNativeProgressionReward(context, pinned);

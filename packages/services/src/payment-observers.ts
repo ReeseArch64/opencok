@@ -25,7 +25,7 @@ export function createPaymentObservers(
   const accepted = async (owner: string, eventId: string) => {
     const delivery = deliveries.getStore();
 
-    if (!delivery || delivery.owner !== owner || delivery.eventId !== eventId) return null;
+    if (!delivery || delivery.owner !== owner || delivery.eventId !== eventId) {return null;}
 
     return deliveredPayment(
       gateway,

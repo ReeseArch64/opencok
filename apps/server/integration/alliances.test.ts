@@ -271,7 +271,7 @@ test("shared gift claims enforce recipient, expiry and one reward per saved enti
     id = await h.create();
   await h.allianceCommand("al.apply", { allianceId: sfs.string(id) }, "other");
   for (const uid of ["owner", "other"])
-    await h.db.db.insert(user_gift).values({
+    {await h.db.db.insert(user_gift).values({
       uuid: uid + "-gift",
       giftId: "shared",
       uid,
@@ -284,7 +284,7 @@ test("shared gift claims enforce recipient, expiry and one reward per saved enti
       time: BigInt(h.clock.now),
       expiretime: 4,
       valid: 1,
-    });
+    });}
   await expect(
     h.allianceCommand("al.opengift", { giftId: sfs.string("other-gift") }),
   ).rejects.toThrow();

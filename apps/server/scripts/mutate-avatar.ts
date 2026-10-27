@@ -34,7 +34,7 @@ async function run(source: string) {
       },
     ],
   });
-  if (!result.success) throw new Error("Avatar mutation bundle failed");
+  if (!result.success) {throw new Error("Avatar mutation bundle failed");}
   const child = Bun.spawn([process.execPath, "--no-env-file", "test", "avatar-lifecycle.test.js"], {
     cwd: directory,
     stdin: "ignore",
@@ -50,12 +50,12 @@ async function run(source: string) {
 }
 try {
   const original = await readFile(ruleFile, "utf8");
-  if (await run(original)) throw new Error("Avatar mutation baseline failed");
+  if (await run(original)) {throw new Error("Avatar mutation baseline failed");}
   for (const [name, from, to] of mutations) {
     if (original.split(from).length !== 2)
-      throw new Error(`Avatar mutation target changed: ${name}`);
+      {throw new Error(`Avatar mutation target changed: ${name}`);}
     if ((await run(original.replace(from, to))) === 0)
-      throw new Error(`Critical avatar mutation survived: ${name}`);
+      {throw new Error(`Critical avatar mutation survived: ${name}`);}
     console.log(`Killed: ${name}`);
   }
   console.log(`${mutations.length} critical avatar mutations killed`);

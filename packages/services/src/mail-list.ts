@@ -23,12 +23,12 @@ export function mailSenderFields(entry: MailListEntry, sender: MailSender | unde
   };
 
   if (info) {
-    if (typeof info.pic !== "string") throw new ProtocolError();
+    if (typeof info.pic !== "string") {throw new ProtocolError();}
 
     result.pic = sfs.string(info.pic);
     result.picVer = sfs.string(info.picVer ?? "0");
 
-    if (!mailBlank(info.abbr)) result.alliance = sfs.string(info.abbr!);
+    if (!mailBlank(info.abbr)) {result.alliance = sfs.string(info.abbr!);}
   }
 
   return result;
@@ -80,7 +80,7 @@ export function mailEnvelope(entry: MailListEntry, contents: string): Fields {
   if (entry.type === 7) {
     const preview = fightPreview(contents, entry.toUser);
 
-    if (preview) result.contents = preview;
+    if (preview) {result.contents = preview;}
   }
 
   return result;
@@ -107,7 +107,7 @@ export function mailListProjection(
     const decoded = decodeMailContent(entry);
 
     if (!decoded) {
-      if (mode === "conversation") throw new ProtocolError();
+      if (mode === "conversation") {throw new ProtocolError();}
 
       invalidIds.push(entry.uid);
       continue;
@@ -175,7 +175,7 @@ export function validateMailWindow(owner: string, window: readonly MailListEntry
     ) >
       4 * 1024 * 1024
   )
-    throw new ProtocolError();
+    {throw new ProtocolError();}
 
-  if (window.length > 1000) throw new ProtocolError();
+  if (window.length > 1000) {throw new ProtocolError();}
 }

@@ -59,7 +59,7 @@ export function createChatRepository(config: {
   );
 
   for (const database of [databases.global, ...databases.kingdoms.values()])
-    database.pool.on("error", () => {});
+    {database.pool.on("error", () => {});}
 
   const db = databases.global.db;
   const now = () => utc(config.now?.() ?? new Date());
@@ -67,7 +67,7 @@ export function createChatRepository(config: {
     async authorizeRealm(realm, token, epoch) {
       const kingdom = databases.kingdoms.get(realm);
 
-      if (!kingdom) return false;
+      if (!kingdom) {return false;}
 
       const [authority] = await kingdom.db
         .select()
@@ -124,7 +124,7 @@ export function createChatRepository(config: {
         .limit(1);
       const kingdom = databases.kingdoms.get(Number(account?.server));
 
-      if (!kingdom) return null;
+      if (!kingdom) {return null;}
 
       const [state] = await kingdom.db
         .select({
@@ -151,7 +151,7 @@ export function createChatRepository(config: {
         .where(eq(userprofile.uid, uid))
         .limit(1);
 
-      if (!state || state.serverId !== Number(account?.server)) return null;
+      if (!state || state.serverId !== Number(account?.server)) {return null;}
 
       return {
         ...state,
@@ -178,7 +178,7 @@ export function createChatRepository(config: {
         .limit(500);
 
       if (expiredMessages.length)
-        await db
+        {await db
           .update(chat_message)
           .set({ body: null, deleted_at: now() })
           .where(
@@ -186,7 +186,7 @@ export function createChatRepository(config: {
               chat_message.sequence_id,
               expiredMessages.map((row) => row.id),
             ),
-          );
+          );}
 
       const expiredMail = await db
         .select({
@@ -199,7 +199,7 @@ export function createChatRepository(config: {
         .limit(500);
 
       for (const row of expiredMail)
-        await db
+        {await db
           .delete(chat_mailbox_message)
           .where(
             and(
@@ -207,7 +207,7 @@ export function createChatRepository(config: {
               eq(chat_mailbox_message.owner_uid, row.owner),
               eq(chat_mailbox_message.message_id, row.id),
             ),
-          );
+          );}
 
       const events = await db
         .select({ id: chat_event.sequence })
@@ -217,12 +217,12 @@ export function createChatRepository(config: {
         .limit(1000);
 
       if (events.length)
-        await db.delete(chat_event).where(
+        {await db.delete(chat_event).where(
           inArray(
             chat_event.sequence,
             events.map((row) => row.id),
           ),
-        );
+        );}
 
       const feeds = await db
         .select({ id: chat_feed.id })
@@ -252,12 +252,12 @@ export function createChatRepository(config: {
         .limit(500);
 
       if (ownerCommands.length)
-        await db.delete(chat_owner_command).where(
+        {await db.delete(chat_owner_command).where(
           inArray(
             chat_owner_command.id,
             ownerCommands.map((row) => row.id),
           ),
-        );
+        );}
 
       const reports = await db
         .select({ id: chat_report.id })
@@ -266,12 +266,12 @@ export function createChatRepository(config: {
         .limit(500);
 
       if (reports.length)
-        await db.delete(chat_report).where(
+        {await db.delete(chat_report).where(
           inArray(
             chat_report.id,
             reports.map((row) => row.id),
           ),
-        );
+        );}
 
       const intents = await db
         .select()
@@ -280,7 +280,7 @@ export function createChatRepository(config: {
         .limit(500);
 
       for (const intent of intents)
-        await db
+        {await db
           .delete(chat_mailbox_intent)
           .where(
             and(
@@ -289,7 +289,7 @@ export function createChatRepository(config: {
               eq(chat_mailbox_intent.effect, intent.effect),
               eq(chat_mailbox_intent.type, intent.type),
             ),
-          );
+          );}
 
       const expiredSessions = db
         .select({ id: chat_session.token_hash })
@@ -333,7 +333,7 @@ export function createChatRepository(config: {
       const state = await repository.getPlayerStateById(uid);
       const kingdom = state && databases.kingdoms.get(state.serverId);
 
-      if (!state || !kingdom) throw new Error("Social owner unavailable");
+      if (!state || !kingdom) {throw new Error("Social owner unavailable");}
 
       const contacts: ChatLegacyRelations["contacts"] = [];
 
@@ -347,14 +347,14 @@ export function createChatRepository(config: {
         );
 
         for (const row of rows.rows)
-          if (row.friendUid !== uid && row.friendUid.length <= 40 && row.stat > 0 && row.stat <= 4)
-            contacts.push({
+          {if (row.friendUid !== uid && row.friendUid.length <= 40 && row.stat > 0 && row.stat <= 4)
+            {contacts.push({
               other: row.friendUid,
               state: row.stat,
               description: row.description?.toString("utf8") ?? "",
-            });
+            });}}
 
-        if (contacts.length > 1000) throw new Error("Social contacts exceed bound");
+        if (contacts.length > 1000) {throw new Error("Social contacts exceed bound");}
       }
 
       const blocks = await kingdom.db
@@ -363,7 +363,7 @@ export function createChatRepository(config: {
         .where(eq(chat_shield.owner, uid))
         .limit(1001);
 
-      if (blocks.length > 1000) throw new Error("Social blocks exceed bound");
+      if (blocks.length > 1000) {throw new Error("Social blocks exceed bound");}
 
       return {
         realm: state.serverId,
@@ -372,7 +372,7 @@ export function createChatRepository(config: {
       };
     },
     async (ids) => {
-      if (!ids.length) return [];
+      if (!ids.length) {return [];}
 
       const rows = await db
         .select({ uid: account_new.gameUid, facebookId: account_new.facebookAccount })
@@ -387,7 +387,7 @@ export function createChatRepository(config: {
       const kingdom = state && databases.kingdoms.get(state.serverId);
 
       if (!kingdom || !state?.allianceId || state.allianceId !== state.membershipAllianceId)
-        return [];
+        {return [];}
 
       return kingdom.db
         .select({ uid: userprofile.uid, name: userprofile.name })
@@ -412,7 +412,7 @@ export function createChatRepository(config: {
   repository.delivery = createChatDeliveryStore(db, clock);
 
   if (config.renderRealmEvents)
-    repository.realmEvents = createRealmChatEvents(databases, repository, config.renderRealmEvents);
+    {repository.realmEvents = createRealmChatEvents(databases, repository, config.renderRealmEvents);}
 
   return { ...repository, close: () => databases.close() };
 }

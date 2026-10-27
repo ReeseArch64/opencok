@@ -11,7 +11,7 @@ function integer(row: Row, key: string): number {
   const value = long(row, key);
 
   if (value < -2147483648n || value > 2147483647n)
-    throw new GameError(errors.unsupported, "player_summary");
+    {throw new GameError(errors.unsupported, "player_summary");}
 
   return Number(value);
 }
@@ -32,7 +32,7 @@ function serializePlayerSummary(
   };
 
   for (const key of ["uid", "name", "allianceId", "pic", "abbr"])
-    result[key] = sfs.string(text(data, key));
+    {result[key] = sfs.string(text(data, key));}
 
   for (const key of [
     "picVer",
@@ -43,15 +43,15 @@ function serializePlayerSummary(
     "sLevel",
     "stateId",
   ])
-    result[key] = sfs.int(integer(data, key));
+    {result[key] = sfs.int(integer(data, key));}
 
   const vip = integer(data, "vipLevel");
   result.vipLevel = sfs.int(remote && vip === -1 ? 0 : vip);
 
   if (data.showBanner !== null && data.showBanner !== undefined)
-    result.showBanner = sfs.int(
+    {result.showBanner = sfs.int(
       text(data, "registrationCountry") === "TW" ? 0 : integer(data, "showBanner"),
-    );
+    );}
 
   return result;
 }

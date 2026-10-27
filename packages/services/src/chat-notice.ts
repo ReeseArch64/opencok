@@ -24,19 +24,19 @@ export class ChatNoticeService {
   ) {}
 
   async command(owner: string, command: string, params: Fields) {
-    if (!noticeCommands.includes(command)) throw new GameError(errors.unsupported);
+    if (!noticeCommands.includes(command)) {throw new GameError(errors.unsupported);}
 
-    if (str(params, "itemId") !== "200011") throw new GameError(errors.invalid);
+    if (str(params, "itemId") !== "200011") {throw new GameError(errors.invalid);}
 
     const message = str(params, "msg");
 
     if (!message || [...message].length > 500 || !message.isWellFormed() || message.includes("\0"))
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const request: Fields = {};
 
     for (const key of Object.keys(params).sort())
-      if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) request[key] = params[key]!;
+      {if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) {request[key] = params[key]!;}}
 
     const requestId = params.operationId
       ? str(params, "operationId")
@@ -59,17 +59,17 @@ export class ChatNoticeService {
           long(state.profile, "noticeBanTime") > BigInt(now) ||
           long(state.profile, "chatBanTime") > BigInt(now)
         )
-          throw new GameError(errors.invalid, "social_rule");
+          {throw new GameError(errors.invalid, "social_rule");}
 
         const planner = new InventoryPlanner(state, this.rules, this.effects, now);
         const economy = activityEconomy(planner);
         const existing = economy.quantity?.("200011") ?? 0;
 
-        if (existing > 0 || int(params, "usePoint", 0) === 0) planner.spendItems("200011", 1);
+        if (existing > 0 || int(params, "usePoint", 0) === 0) {planner.spendItems("200011", 1);}
         else {
           const price = cityInteger(this.rules.goods.get("200011")?.price);
 
-          if (price <= 0) throw new GameError(errors.invalid);
+          if (price <= 0) {throw new GameError(errors.invalid);}
 
           economy.gold(-BigInt(price));
         }
@@ -108,12 +108,12 @@ export class ChatNoticeService {
   }
 
   async refund(owner: string, original: string) {
-    if (!this.costs) throw new GameError(errors.unsupported);
+    if (!this.costs) {throw new GameError(errors.unsupported);}
 
     const cost = await this.costs(owner, original);
 
     if (cost.createdAt + 86_400_000 > this.now() || !cost.postings.length)
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const requestId = `notice-refund-${createHash("sha256").update(original).digest("hex")}`;
     const response = await this.execute(
@@ -129,9 +129,9 @@ export class ChatNoticeService {
         for (const posting of cost.postings) {
           const amount = posting.before - posting.after;
 
-          if (amount <= 0n) throw new GameError(errors.invalid);
+          if (amount <= 0n) {throw new GameError(errors.invalid);}
 
-          if (posting.asset.startsWith("item.") && amount === 1n) planner.add("200011", 1);
+          if (posting.asset.startsWith("item.") && amount === 1n) {planner.add("200011", 1);}
           else if (
             posting.asset.startsWith("profile.") &&
             [
@@ -148,7 +148,7 @@ export class ChatNoticeService {
               after = before + amount;
             planner.profile[pool] = after;
             planner.post(posting.asset, before, after, "notice.refund");
-          } else throw new GameError(errors.invalid);
+          } else {throw new GameError(errors.invalid);}
         }
 
         return planner.result({ refunded: sfs.bool(true), original: sfs.string(original) });

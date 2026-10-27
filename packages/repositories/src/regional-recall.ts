@@ -47,7 +47,7 @@ export async function readRegionalRecall(
         )
         .limit(2049);
 
-      if (rows.length > 2048) throw new Error("Regional recall alliance exceeds bound");
+      if (rows.length > 2048) {throw new Error("Regional recall alliance exceeds bound");}
 
       members.push(...rows.map((row) => row.uid));
     }
@@ -70,7 +70,7 @@ export async function writeRegionalRecall(
     text(row, "reward").length > 255 ||
     long(row, "endtime") < long(row, "begintime")
   )
-    throw new Error("Invalid regional recall write");
+    {throw new Error("Invalid regional recall write");}
 
   const value = {
     uid: owner,
@@ -88,14 +88,14 @@ export async function writeRegionalRecall(
     .values(value)
     .onConflictDoUpdate({ target: user_region_recall.uid, set: value });
 
-  if ((write.mail?.length ?? 0) > 2048) throw new Error("Regional recall mail exceeds bound");
+  if ((write.mail?.length ?? 0) > 2048) {throw new Error("Regional recall mail exceeds bound");}
 
   for (const message of write.mail ?? [])
-    await insertSystemMail(
+    {await insertSystemMail(
       tx,
       message,
       message.owner,
       message.uid.slice(0, 32),
       message.createTime,
-    );
+    );}
 }

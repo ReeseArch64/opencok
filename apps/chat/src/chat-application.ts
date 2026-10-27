@@ -50,7 +50,7 @@ export class ChatApplication {
       !Number.isSafeInteger(cleanupIntervalMs) ||
       cleanupIntervalMs < 1_000
     )
-      throw new TypeError("invalid chat app configuration");
+      {throw new TypeError("invalid chat app configuration");}
 
     const sessionStore = repository.sessions;
     const messages = repository.messages;
@@ -159,8 +159,8 @@ export class ChatApplication {
     await this.gateway.close();
 
     if (this.server.listening)
-      await new Promise<void>((resolve, reject) =>
+      {await new Promise<void>((resolve, reject) =>
         this.server.close((error) => (error ? reject(error) : resolve())),
-      );
+      );}
   }
 }

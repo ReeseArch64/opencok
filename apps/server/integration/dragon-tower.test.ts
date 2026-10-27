@@ -16,7 +16,7 @@ async function fixture() {
   const h = await cityHarness([dragonTowerDomain]);
   h.clock.now = Date.UTC(2026, 9, 26, 12);
   for (const key of ["dragon_tower", "dragon_tower_heal"])
-    h.rules.features.set(key, { id: key, version: "1.0.0", online: "all", test: "all" });
+    {h.rules.features.set(key, { id: key, version: "1.0.0", online: "all", test: "all" });}
   await h.db.db
     .update(user_building)
     .set({ level: 10 })
@@ -67,9 +67,9 @@ test("tower entry pins offered monsters and share rewards persist once without s
       await h.db.db.select().from(userprofile).where(eq(userprofile.uid, "owner"))
     )[0]!.gold;
     for (const action of ["battle", "quickbattle"])
-      await expect(
+      {await expect(
         h.towerCommand(action, { layer: sfs.int(84501), difficulty: sfs.int(1) }),
-      ).rejects.toThrow();
+      ).rejects.toThrow();}
     expect(
       (await h.db.db.select().from(userprofile).where(eq(userprofile.uid, "owner")))[0]!.gold,
     ).toBe(beforeGold);

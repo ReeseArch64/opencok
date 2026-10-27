@@ -65,9 +65,9 @@ export class ChatWebSocketGateway implements WebSocketGateway {
         }
 
         if (!socket.destroyed)
-          this.wss.handleUpgrade(request, socket, head, (ws) =>
+          {this.wss.handleUpgrade(request, socket, head, (ws) =>
             this.wss.emit("connection", ws, request, identity.uid),
-          );
+          );}
       } catch {
         this.options.log?.({
           correlationId: randomUUID(),
@@ -80,7 +80,7 @@ export class ChatWebSocketGateway implements WebSocketGateway {
   }
 
   public async close(): Promise<void> {
-    for (const socket of this.wss.clients) socket.terminate();
+    for (const socket of this.wss.clients) {socket.terminate();}
 
     await new Promise<void>((resolve, reject) =>
       this.wss.close((error) => (error ? reject(error) : resolve())),

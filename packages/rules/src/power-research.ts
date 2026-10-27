@@ -31,15 +31,15 @@ export function towerResearchEffect(
     const item = integer(row.itemid);
     const base = bases?.get(String(item));
 
-    if (!base) return invalid();
+    if (!base) {return invalid();}
 
-    if (integer(base.hide) === 1) continue;
+    if (integer(base.hide) === 1) {continue;}
 
     const rule = levels?.get(addId(item, integer(row.level ?? 0), 100000));
 
-    if (!rule) return invalid();
+    if (!rule) {return invalid();}
 
-    if (!rule.effect?.trim() || !rule.value?.trim()) continue;
+    if (!rule.effect?.trim() || !rule.value?.trim()) {continue;}
 
     const ids = rule.effect.split(";").filter(Boolean);
     const values = rule.value.split(";").filter(Boolean);
@@ -48,7 +48,7 @@ export function towerResearchEffect(
       const id = integer(ids[index]);
       const value = float(values[index]);
 
-      if (id === requested) total = Math.fround(total + value);
+      if (id === requested) {total = Math.fround(total + value);}
     }
   }
 
@@ -63,7 +63,7 @@ export function civilizationResearchEffect(
 ): number {
   const selected = new Map<number, Row>();
 
-  for (const row of rows) selected.set(integer(row.baseItemID), row);
+  for (const row of rows) {selected.set(integer(row.baseItemID), row);}
 
   let total = initial;
 
@@ -71,12 +71,12 @@ export function civilizationResearchEffect(
     const row = selected.get(base)!;
     const rule = levels?.get(addId(base, integer(row.level ?? 0)));
 
-    if (!rule) continue;
+    if (!rule) {continue;}
 
     const value = rule.para2 === undefined ? -1 : Math.fround(float(rule.para2) / 100);
 
     for (const raw of rule.para1?.split("|").filter(Boolean) ?? [])
-      if (integer(raw) === requested) total = Math.fround(total + value);
+      {if (integer(raw) === requested) {total = Math.fround(total + value);}}
   }
 
   return total;

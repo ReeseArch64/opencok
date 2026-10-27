@@ -15,7 +15,7 @@ export class BranchCityDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const saved = context.state.branchCity;
 
-    if (saved === undefined) throw new GameError(errors.unsupported, "city_progression");
+    if (saved === undefined) {throw new GameError(errors.unsupported, "city_progression");}
 
     let state = saved === null ? 0 : cityInteger(saved.openstate, 0, 2);
     const feature = (key: string) =>
@@ -29,7 +29,7 @@ export class BranchCityDomain extends CityCommandDomain {
       const typed = params.branchCityType !== undefined;
 
       if (typed && params.branchCityType!.type !== Type.Int)
-        throw new GameError(errors.invalid, "city_progression");
+        {throw new GameError(errors.invalid, "city_progression");}
 
       const hero = typed && int(params, "branchCityType") === 1;
       const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
@@ -41,7 +41,7 @@ export class BranchCityDomain extends CityCommandDomain {
         required === undefined ||
         num(castle, "level") + num(castle, "star") < cityInteger(required, 1)
       )
-        throw new GameError(errors.invalid, "city_progression");
+        {throw new GameError(errors.invalid, "city_progression");}
 
       const next = hero ? 2 : 1;
 

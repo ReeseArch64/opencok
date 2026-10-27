@@ -35,19 +35,19 @@ function kingdom(rows: Row[], failState = false) {
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
       if (query.text.includes('from "opencok_kingdom"."userprofile"'))
-        return {
+        {return {
           rows: rows
             .filter((row) => params.includes(row.uid))
             .map((row) => columns.map((key) => row[key] ?? null)),
-        };
+        };}
       if (query.text.includes('from "opencok_kingdom"."alliance_title"'))
-        return {
+        {return {
           rows: rows
             .filter((row) => row.officer !== undefined && params.includes(row.uid))
             .map((row) => [row.uid, row.officer]),
-        };
+        };}
       if (query.text.includes('from "opencok_kingdom"."user_state"')) {
-        if (failState) throw new Error("Synthetic state failure");
+        if (failState) {throw new Error("Synthetic state failure");}
         return {
           rows: rows
             .filter((row) => row.stateId !== undefined && params.includes(row.uid))
@@ -55,11 +55,11 @@ function kingdom(rows: Row[], failState = false) {
         };
       }
       if (query.text.includes('from "opencok_kingdom"."stat_reg"'))
-        return {
+        {return {
           rows: rows
             .filter((row) => params.includes(row.uid))
             .map((row) => [row.uid, row.registrationCountry ?? null]),
-        };
+        };}
       return { rows: [] };
     },
   };
@@ -82,7 +82,7 @@ function databases(
     },
   };
   const kingdoms = new Map([[1, local]]);
-  if (remote) kingdoms.set(2, remote);
+  if (remote) {kingdoms.set(2, remote);}
   const dbs = {
     kingdoms,
     getKingdom: (id: number) => kingdoms.get(id)!,
@@ -277,7 +277,7 @@ test("profile update markers use one realm-scoped read and retain exact string t
   }
   const before = cache.calls.length;
   for (const id of [0, -1, 1.5])
-    await expect(cache.playerUpdateTimes(id, ["1001"])).rejects.toThrow();
+    {await expect(cache.playerUpdateTimes(id, ["1001"])).rejects.toThrow();}
   await expect(cache.playerUpdateTimes(1, [""])).rejects.toThrow();
   await expect(cache.playerUpdateTimes(1, ["a".repeat(256)])).rejects.toThrow();
   expect(cache.calls).toHaveLength(before);

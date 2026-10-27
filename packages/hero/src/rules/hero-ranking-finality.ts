@@ -35,16 +35,16 @@ export function heroFinalityPeriod(
   const type = cityInteger(event.type, 1, 4),
     endTime = long(event, "endTime");
 
-  if (type >= 3 && !text(event, "serverGroup")) return;
+  if (type >= 3 && !text(event, "serverGroup")) {return;}
 
   const groupFor = (realm: number) => {
     const query = heroRankingLookup(event, "member", "member", rules, realm, "12.06.0", false);
 
-    if (typeof query === "number") throw new Error("Unavailable hero finality group");
+    if (typeof query === "number") {throw new Error("Unavailable hero finality group");}
 
     const group = query.keys[0]!.match(/_0_([0-9|]+)_-?\d+$/)?.[1];
 
-    if (!group) throw new Error("Invalid hero finality rank group");
+    if (!group) {throw new Error("Invalid hero finality rank group");}
 
     return group;
   };
@@ -61,7 +61,7 @@ export function heroFinalityPeriod(
     !expectedRealms.includes(rules.kingdomId) ||
     expectedRealms.some((realm) => !configured.includes(realm))
   )
-    throw new Error("Invalid hero finality realm cohort");
+    {throw new Error("Invalid hero finality realm cohort");}
 
   return {
     id: heroFinalityIdentity(type, group, endTime),
@@ -77,7 +77,7 @@ export function heroCountryOrder(group: string, totals: ReadonlyMap<number, bigi
   const members = group.split("|").map((value) => cityInteger(value, 1));
 
   if (members.some((realm) => !totals.has(realm)))
-    throw new Error("Incomplete hero kingdom score proof");
+    {throw new Error("Incomplete hero kingdom score proof");}
 
   return (
     members

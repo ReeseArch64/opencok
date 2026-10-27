@@ -29,7 +29,7 @@ test("defaults and blank optional settings permit offline tools", () => {
 
 test("accepts supported modes, database roles and PostgreSQL URL formats", () => {
   for (const NODE_ENV of ["development", "testing", "production"] as const)
-    expect(parseEnvironment({ NODE_ENV }).NODE_ENV).toBe(NODE_ENV);
+    {expect(parseEnvironment({ NODE_ENV }).NODE_ENV).toBe(NODE_ENV);}
   for (const DATABASE_ROLE of ["global", "kingdom"] as const) {
     const env = parseDatabaseEnvironment({
       DATABASE_ROLE,

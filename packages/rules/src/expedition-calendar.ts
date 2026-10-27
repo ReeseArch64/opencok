@@ -13,14 +13,14 @@ export function expeditionCalendarStages(rules: Rules) {
   const order = (rules.items.get("17_wk")?.k3 ?? "").split(";").map((x) => cityInteger(x, 0, 8));
 
   if (order.length !== 9 || new Set(order).size !== 9 || order[0] !== 0 || order[1] !== 1)
-    expeditionFailure();
+    {expeditionFailure();}
 
   return order.map((stage) => {
     const entries = [...(rules.advanced.expeditionStages?.values() ?? [])].filter(
       (row) => Number(row.stage) === stage,
     );
 
-    if (entries.length !== 1) expeditionFailure();
+    if (entries.length !== 1) {expeditionFailure();}
 
     const hours = cityInteger(entries[0]!.time, 1, 8760);
 
@@ -47,7 +47,7 @@ export function expeditionCalendarPhases(period: Row): ExpeditionPhase[] {
     expeditionFailure();
   }
 
-  if (!Array.isArray(raw) || raw.length < 1 || raw.length > 9) expeditionFailure();
+  if (!Array.isArray(raw) || raw.length < 1 || raw.length > 9) {expeditionFailure();}
 
   expeditionPhase(period, long(period, "startTime"));
 
@@ -73,24 +73,24 @@ export function expeditionCalendarPlan(
   realms: readonly number[],
   now: bigint,
 ): ExpeditionCalendarPlan {
-  if (!expeditionOpen(rules, now)) return {};
+  if (!expeditionOpen(rules, now)) {return {};}
 
-  if (now < 0n || now > 8640000000000000n) expeditionFailure();
+  if (now < 0n || now > 8640000000000000n) {expeditionFailure();}
 
   const census = [...new Set(realms.map((id) => cityInteger(id, 1)))].sort((a, b) => a - b);
 
   if (census.length !== realms.length || census.length > 128 || !census.includes(rules.kingdomId))
-    expeditionFailure();
+    {expeditionFailure();}
 
   const prior = state.latest;
 
   if (prior) {
     expeditionCalendarPhases(prior);
 
-    if (now < long(prior, "createdAt")) return {};
+    if (now < long(prior, "createdAt")) {return {};}
 
     if (long(prior, "endTime") > now) {
-      if (num(prior, "state") !== 0) expeditionFailure();
+      if (num(prior, "state") !== 0) {expeditionFailure();}
 
       return { current: prior };
     }
@@ -111,7 +111,7 @@ export function expeditionCalendarPlan(
       (row) => long(row, "endTime") > 0n && long(row, "endTime") < 9223372036854775807n,
     );
 
-    if (legacy.length > 1) expeditionFailure();
+    if (legacy.length > 1) {expeditionFailure();}
 
     if (legacy.length) {
       const row = legacy[0]!,
@@ -122,7 +122,7 @@ export function expeditionCalendarPlan(
         long(row, "startTime") < 0n ||
         long(row, "endTime") <= long(row, "startTime")
       )
-        expeditionFailure();
+        {expeditionFailure();}
 
       sourceId = text(row, "uuid");
       cycle = Math.max(1, cityInteger(row.count));
@@ -158,7 +158,7 @@ export function expeditionCalendarPlan(
   const startTime = schedule[0]!.startTime,
     endTime = schedule.at(-1)!.endTime;
 
-  if (endTime > 8640000000000000n || startTime > now) expeditionFailure();
+  if (endTime > 8640000000000000n || startTime > now) {expeditionFailure();}
 
   const id = createHash("sha256")
     .update(JSON.stringify([sourceId, String(startTime), String(endTime)]))

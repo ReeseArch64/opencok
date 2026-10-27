@@ -32,7 +32,7 @@ test("native nearest-point and leave commands validate resident ownership and re
   const h = await utilityHarness();
   try {
     for (const id of [169, 170, 189, 190])
-      await h.db.db.insert(worldpoint).values({
+      {await h.db.db.insert(worldpoint).values({
         id,
         worldId: 0,
         x: (id - 1) % 20,
@@ -43,7 +43,7 @@ test("native nearest-point and leave commands validate resident ownership and re
         pointType: 0,
         resLevel: 0,
         resInitValue: 0,
-      });
+      });}
     const find = (point = 211) =>
       h.service.execute("owner", "point.nearest.find", { point: sfs.int(point) });
     const nearest = decode(encode((await find()).body));

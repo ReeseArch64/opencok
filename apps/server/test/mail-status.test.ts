@@ -22,9 +22,9 @@ test("empty mailbox status returns eight int category objects or a selected pair
     ),
   );
   for (let category = 1; category <= 8; category++)
-    expect(result(category, [])).toEqual({ total: sfs.long(0), unread: sfs.long(0) });
+    {expect(result(category, [])).toEqual({ total: sfs.long(0), unread: sfs.long(0) });}
   for (const category of [-2147483648, -1, 0, 9, 2147483647])
-    expect(result(category, [])).toEqual({});
+    {expect(result(category, [])).toEqual({});}
 });
 
 test("combined mailbox mappings cover message, moderation, battle and bottle variants without inventing categories", () => {
@@ -79,7 +79,7 @@ test("mail status counts preserve int wrapping, long precision and distinct inva
 
 test("mail status rejects malformed snapshots and noninteger selectors before emitting counts", () => {
   for (const category of [NaN, Infinity, 1.5, 2147483648])
-    expect(() => mailStatusQuery(category, now)).toThrow();
+    {expect(() => mailStatusQuery(category, now)).toThrow();}
   expect(() => mailStatusQuery(1, NaN)).toThrow();
   for (const counts of [
     [count(2), count(2)],
@@ -89,5 +89,5 @@ test("mail status rejects malformed snapshots and noninteger selectors before em
     [count(2.5)],
     Array.from({ length: 32768 }, (_, i) => count(i)),
   ])
-    expect(() => result(undefined, counts)).toThrow("102192");
+    {expect(() => result(undefined, counts)).toThrow("102192");}
 });

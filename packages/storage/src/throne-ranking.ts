@@ -6,12 +6,12 @@ export async function loadThroneRankingPeriod(
   realm: number,
 ): Promise<ThroneRankingPeriod | undefined> {
   if (!Number.isInteger(realm) || realm < 1 || realm > 2147483647)
-    throw new DependencyError("throne realm");
+    {throw new DependencyError("throne realm");}
 
   const values = await command("HGETALL", `fight_of_king_inf${realm}`);
 
   if (!Array.isArray(values) || values.length % 2 || values.length > 65534)
-    throw new DependencyError("throne publication");
+    {throw new DependencyError("throne publication");}
 
   let bytes = 0;
   let result: ThroneRankingPeriod | undefined;
@@ -27,16 +27,16 @@ export async function loadThroneRankingPeriod(
       typeof info !== "string" ||
       !info.isWellFormed()
     )
-      throw new DependencyError("throne period");
+      {throw new DependencyError("throne period");}
 
     bytes += Buffer.byteLength(info);
 
     if (bytes > 4 * 1024 * 1024 || Buffer.byteLength(info) > 8192)
-      throw new DependencyError("throne state size");
+      {throw new DependencyError("throne state size");}
 
     const index = Number(key);
 
-    if (index > (result?.index ?? 0)) result = { index, info };
+    if (index > (result?.index ?? 0)) {result = { index, info };}
   }
 
   return result;

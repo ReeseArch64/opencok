@@ -41,7 +41,7 @@ export function commitAvatarFinish(
     !Number.isSafeInteger(query.now) ||
     query.now < 0
   )
-    return invalid();
+    {return invalid();}
 
   return db.transaction(
     async (tx) => {
@@ -69,7 +69,7 @@ export function commitAvatarFinish(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
-        return { profile };
+        {return { profile };}
 
       const receipt = await find(owner, query.sequence);
 
@@ -79,7 +79,7 @@ export function commitAvatarFinish(
         receipt.sequence !== String(query.sequence) ||
         receipt.hash !== query.hash
       )
-        return invalid();
+        {return invalid();}
 
       const version = profile.picVer;
 
@@ -89,7 +89,7 @@ export function commitAvatarFinish(
         version < -2147483648 ||
         version > 2147483647
       )
-        return invalid();
+        {return invalid();}
 
       const prior = (
         await tx
@@ -112,15 +112,15 @@ export function commitAvatarFinish(
         prior &&
         (prior.ownerUid !== owner || prior.sequence !== query.sequence || prior.hash !== query.hash)
       )
-        return invalid();
+        {return invalid();}
 
       const current = Math.max(0, version % 1000000);
 
-      if (recoverOnly && (!prior || query.sequence > current)) return invalid();
+      if (recoverOnly && (!prior || query.sequence > current)) {return invalid();}
 
       if (query.sequence <= current) {
         if (query.sequence === current && !prior)
-          await tx.insert(avatar_completion).values({
+          {await tx.insert(avatar_completion).values({
             ownerUid: owner,
             sequence: query.sequence,
             hash: query.hash,
@@ -128,12 +128,12 @@ export function commitAvatarFinish(
             committedAt: BigInt(query.now),
             effects: JSON.stringify({ version: 1, observed: true }),
             pendingEffects: 0,
-          });
+          });}
 
         return { profile, picVer: version, superseded: query.sequence < current, applied: false };
       }
 
-      if (prior || query.sequence !== current + 1) return invalid();
+      if (prior || query.sequence !== current + 1) {return invalid();}
 
       let active = true;
       let castleRead = false;
@@ -144,7 +144,7 @@ export function commitAvatarFinish(
         plan = {
           ...(await inspect(Object.freeze({ ...profile }), {
             async castleLevel() {
-              if (!active || castleRead) return invalid();
+              if (!active || castleRead) {return invalid();}
 
               castleRead = true;
               const rows = await tx
@@ -153,12 +153,12 @@ export function commitAvatarFinish(
                 .where(and(eq(user_building.uid, owner), eq(user_building.itemId, 400000)))
                 .limit(2);
 
-              if (rows.length > 1 || rows.some((row) => row.uid !== owner)) return invalid();
+              if (rows.length > 1 || rows.some((row) => row.uid !== owner)) {return invalid();}
 
               return rows[0]?.level ?? 0;
             },
             async uploadRecord() {
-              if (!active || recordRead) return invalid();
+              if (!active || recordRead) {return invalid();}
 
               recordRead = true;
               const record = (
@@ -173,7 +173,7 @@ export function commitAvatarFinish(
                   .limit(1)
               )[0];
 
-              if (record && record.uid !== owner) return invalid();
+              if (record && record.uid !== owner) {return invalid();}
 
               return record;
             },
@@ -191,7 +191,7 @@ export function commitAvatarFinish(
         Buffer.byteLength(plan.effects) > 65535 ||
         ![6, 7].includes(plan.pendingEffects)
       )
-        return invalid();
+        {return invalid();}
 
       let effects;
 
@@ -233,7 +233,7 @@ export function commitAvatarFinish(
         (plan.pendingEffects === 7) !== (effects.mail !== null) ||
         (!plan.moderated && effects.mail !== null)
       )
-        return invalid();
+        {return invalid();}
 
       const pending = await tx
         .select({ sequence: avatar_completion.sequence })
@@ -241,10 +241,10 @@ export function commitAvatarFinish(
         .where(and(eq(avatar_completion.ownerUid, owner), gt(avatar_completion.pendingEffects, 0)))
         .limit(1000);
 
-      if (pending.length >= 1000) throw new Error("Avatar completion backlog full");
+      if (pending.length >= 1000) {throw new Error("Avatar completion backlog full");}
 
       if (plan.moderated)
-        await tx
+        {await tx
           .insert(pic_upload_record)
           .values({
             uid: owner,
@@ -263,7 +263,7 @@ export function commitAvatarFinish(
               updateTime: BigInt(query.now),
               stat: 0,
             },
-          });
+          });}
 
       const changed = await tx
         .update(userprofile)
@@ -277,7 +277,7 @@ export function commitAvatarFinish(
         )
         .returning({ uid: userprofile.uid });
 
-      if (changed.length !== 1 || changed[0]!.uid !== owner) return invalid();
+      if (changed.length !== 1 || changed[0]!.uid !== owner) {return invalid();}
 
       await tx.insert(avatar_completion).values({
         ownerUid: owner,

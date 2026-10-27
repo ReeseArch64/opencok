@@ -45,15 +45,15 @@ function database(failure?: string) {
   const client = {
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
-      if (query.text.startsWith("begin")) pending = [];
-      if (query.text === "commit") committed.push(...pending);
-      if (query.text === "rollback") pending = [];
-      if (query.text.startsWith("select")) return { rows: [["4"]] };
+      if (query.text.startsWith("begin")) {pending = [];}
+      if (query.text === "commit") {committed.push(...pending);}
+      if (query.text === "rollback") {pending = [];}
+      if (query.text.startsWith("select")) {return { rows: [["4"]] };}
       if (query.text.startsWith("insert") || query.text.startsWith("update")) {
         const table = query.text.match(/"opencok_kingdom"\."([^"]+)"/)![1]!;
-        if (table === failure) throw new Error("Synthetic write failure");
+        if (table === failure) {throw new Error("Synthetic write failure");}
         pending.push(table);
-        if (failure === "disconnect") active = false;
+        if (failure === "disconnect") {active = false;}
         return { rows: query.text.includes("returning") ? [["owner"]] : [] };
       }
       return { rows: [] };
@@ -68,7 +68,7 @@ function database(failure?: string) {
       epoch: 4n,
       instance: "synthetic",
       assertReady: () => {
-        if (!active) throw new Error("Inactive owner");
+        if (!active) {throw new Error("Inactive owner");}
       },
     },
   };

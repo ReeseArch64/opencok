@@ -17,7 +17,7 @@ test("shared resources retain the dormant Source calendar and native footprint w
     lifetime: 14400000n,
   });
   expect(worldResourceNewFootprint(7, 5)).toEqual([7, 6, 2, 1]);
-  for (const point of [0, 1, 5, 6, 11, 26]) expect(worldResourceNewFootprint(point, 5)).toEqual([]);
+  for (const point of [0, 1, 5, 6, 11, 26]) {expect(worldResourceNewFootprint(point, 5)).toEqual([]);}
   const item = rules.items.get("on_event2")!;
   rules.items.set("on_event2", { ...item, k9: "2030-01-01-00-00", k10: "2030-01-02-00-00" });
   expect(worldResourceNewSettings(rules, BigInt(Date.UTC(2030, 0, 1)))!.open).toBe(true);
@@ -64,5 +64,5 @@ test("shared resource cursors reject malformed, unversioned and out-of-realm bou
     '{"version":1,"areaCursor":1,"nextRefreshAt":"9007199254740992"}',
     '{"version":1,"areaCursor":1,"nextRefreshAt":"0","extra":0}',
   ])
-    expect(() => parseWorldResourceNewClock(value, 577)).toThrow();
+    {expect(() => parseWorldResourceNewClock(value, 577)).toThrow();}
 });

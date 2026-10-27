@@ -65,10 +65,10 @@ test("all tasks including TIME must be complete before the lifecycle terminates"
   });
   const states = [-1, 0, 1, 2];
   for (const chat of states)
-    for (const timer of states) {
+    {for (const timer of states) {
       const result = nicknameAllianceTask(tasks(chat, timer, 5n), rules(), 1, now);
       expect(result.complete).toBe(chat === 1 && timer === 1);
-    }
+    }}
 });
 
 test("done lifecycle and disabled realm gates skip later catalog dependencies", () => {
@@ -118,7 +118,7 @@ test("malformed reached rules and unrepresentable lifecycle state reject without
     { id: "46602", state: 2147483648, num: 0n },
     { id: "46602", state: 0, num: 9223372036854775808n },
   ])
-    expect(() => nicknameAllianceTask([...tasks(), bad], rules(), 1, now)).toThrow();
+    {expect(() => nicknameAllianceTask([...tasks(), bad], rules(), 1, now)).toThrow();}
   const nullable = tasks();
   nullable[2] = { id: "46608", state: null, num: null };
   expect(nicknameAllianceTask(nullable, rules(), 1, now).updates).toEqual([

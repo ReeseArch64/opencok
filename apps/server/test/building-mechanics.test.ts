@@ -11,7 +11,7 @@ test("editing typed costs changes the mobile response while keeping realm catalo
   const first = createBuildingCatalog();
   const second = createBuildingCatalog();
   const original = first.get(400001);
-  if (!original) throw new Error("Missing castle definition");
+  if (!original) {throw new Error("Missing castle definition");}
   expect(original.requiredBuildings).toEqual([{ buildingId: 419000, level: 1 }]);
   first.set(400001, { ...original, costs: { ...original.costs, wood: 9007199254740993n } });
   const rules = new Rules(first, new Map(), new Map());

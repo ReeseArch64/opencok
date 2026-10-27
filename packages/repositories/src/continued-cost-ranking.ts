@@ -29,7 +29,7 @@ export function createCostRankingFacts(
           await tx.execute(sql`set local lock_timeout='1s'`);
           await fenceRealmTransaction(tx, authority);
 
-          if (caughtUp) return 0;
+          if (caughtUp) {return 0;}
 
           await tx.execute(sql`select pg_advisory_xact_lock(728229,${authority.kingdomId})`);
           const pending = await tx
@@ -80,9 +80,9 @@ export function createCostRankingFacts(
             .limit(64);
 
           for (const { event, nickname, receipt } of pending) {
-            if (receipt) await captureCostFact(tx, event, now);
+            if (receipt) {await captureCostFact(tx, event, now);}
             else {
-              if (!nickname) throw new Error("Missing confirmed nickname consumption witness");
+              if (!nickname) {throw new Error("Missing confirmed nickname consumption witness");}
 
               const payment = nicknameChangePayment(nickname);
 
@@ -93,7 +93,7 @@ export function createCostRankingFacts(
                 payment.pendingEvent.type !== event.eventType ||
                 !Buffer.from(payment.pendingEvent.payload, "base64").equals(event.payload)
               )
-                throw new Error("Conflicting confirmed nickname consumption witness");
+                {throw new Error("Conflicting confirmed nickname consumption witness");}
 
               await captureCostFact(
                 tx,
@@ -118,7 +118,7 @@ export function createCostRankingFacts(
           return pending.length;
         })
         .then((count) => {
-          if (count < 64) caughtUp = true;
+          if (count < 64) {caughtUp = true;}
 
           return count;
         });

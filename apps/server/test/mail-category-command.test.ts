@@ -160,14 +160,14 @@ test("empty category windows retain acknowledgment versus empty-result shapes wi
     ).body,
   ).toEqual({ success: sfs.bool(true), _cok_: sfs.string("ack") });
   for (const category of [1, 4, 7])
-    expect(
+    {expect(
       (
         await f.game.execute("self", "mread.batch.category", {
           ...params(category),
           num: sfs.int(1),
         })
       ).body,
-    ).toEqual({ result: sfs.array() });
+    ).toEqual({ result: sfs.array() });}
 });
 
 test("chat category enriches only selected senders and resolves stored translations in sender language", async () => {
@@ -234,15 +234,15 @@ test("translation gates, malformed IDs, missing or blank stored values preserve 
         translationId: setup === "malformed" ? "invalid" : "pt|stored",
       }),
     );
-    if (setup === "disabled") f.config.mailTranslationEnabled = false;
+    if (setup === "disabled") {f.config.mailTranslationEnabled = false;}
     if (setup === "null-language")
-      f.senders.set("sender", { name: "Current", pic: "portrait", lang: null });
+      {f.senders.set("sender", { name: "Current", pic: "portrait", lang: null });}
     if (setup === "blank" || setup === "invalid-utf8")
-      f.translations.push({
+      {f.translations.push({
         id: "stored",
         language: "en",
         contents: setup === "blank" ? Buffer.from("\t \n") : Buffer.from([0xff]),
-      });
+      });}
     const result = await f.game.execute(
       "self",
       "mread.batch.category",
@@ -284,19 +284,19 @@ test("projection, lookup and correlation failures produce no malformed-row remov
         contents: Buffer.from(failure === "contents" ? "extra" : "broken"),
       }),
     );
-    if (failure === "sender") f.readers.senders = unused;
-    if (failure === "marker") f.services.playerUpdateTimes = unused;
-    if (failure === "translation") f.readers.translations = unused;
+    if (failure === "sender") {f.readers.senders = unused;}
+    if (failure === "marker") {f.services.playerUpdateTimes = unused;}
+    if (failure === "translation") {f.readers.translations = unused;}
     if (failure === "foreign-translation")
-      f.translations.push({ id: "other", language: "en", contents: Buffer.from("text") });
+      {f.translations.push({ id: "other", language: "en", contents: Buffer.from("text") });}
     if (failure === "duplicate-translation")
-      f.translations.push(
+      {f.translations.push(
         ...Array.from({ length: 2 }, () => ({
           id: "id",
           language: "en",
           contents: Buffer.from("text"),
         })),
-      );
+      );}
     await expect(
       f.game.execute("self", "mread.batch.category", {
         ...params(chat ? 4 : 3),

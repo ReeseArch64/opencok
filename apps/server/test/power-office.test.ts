@@ -70,7 +70,7 @@ test("unassigned, unknown and local ready-king positions do not receive office b
     { ...office, positionId: "-1" },
     { ...office, positionId: "216000000" },
   ])
-    expect(officeEffects(row, [], new Map(), rules, context).size).toBe(0);
+    {expect(officeEffects(row, [], new Map(), rules, context).size).toBe(0);}
   expect(
     officeEffects({ positionId: "216000000", serverId: 2 }, [], new Map(), rules, context),
   ).toEqual(new Map([[487, 25]]));
@@ -83,7 +83,7 @@ test("office suppression uses the server gate and the fight window with a five-s
     officeEffects(office, [fight], new Map(), rules, { ...context, now: context.now + 4999 }).size,
   ).toBe(0);
   for (const now of [context.now - 1, context.now + 5000, context.now + 10000])
-    expect(officeEffects(office, [fight], new Map(), rules, { ...context, now }).get(487)).toBe(12);
+    {expect(officeEffects(office, [fight], new Map(), rules, { ...context, now }).get(487)).toBe(12);}
   rules.features.get("officials")!.online = "2";
   expect(officeEffects(office, [fight], new Map(), rules, context).get(487)).toBe(12);
   expect(officeEffects(office, [fight], new Map(), rules, { ...context, kingdomId: 2 }).size).toBe(
@@ -99,7 +99,7 @@ test("positive world officer prohibition suppresses bonuses independently of the
   rules.power.offices!.clear();
   expect(officeEffects(office, [], new Map([[306, 0.001]]), rules, context).size).toBe(0);
   for (const value of [0, -1])
-    expect(() => officeEffects(office, [], new Map([[306, value]]), rules, context)).toThrow();
+    {expect(() => officeEffects(office, [], new Map([[306, value]]), rules, context)).toThrow();}
 });
 
 test("fight reconstruction honors positive clocks, exact long deadlines and unrelated activity types", () => {
@@ -113,7 +113,7 @@ test("fight reconstruction honors positive clocks, exact long deadlines and unre
     { ...fight, endTime: 0n },
     { ...fight, endTime: BigInt(context.now + 5000) },
   ];
-  for (const row of inactive) expect(kingdomFightActive([row], context.now)).toBe(false);
+  for (const row of inactive) {expect(kingdomFightActive([row], context.now)).toBe(false);}
   expect(kingdomFightActive([fight, { ...fight, type: 1 }], context.now)).toBe(true);
   expect(kingdomFightActive([{ ...fight, endTime: 9007199254740993n }], context.now)).toBe(true);
   expect(kingdomFightActive([{ ...fight, openTime: BigInt(context.now) }], context.now)).toBe(true);

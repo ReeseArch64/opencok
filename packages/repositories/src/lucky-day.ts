@@ -19,7 +19,7 @@ export async function writeLuckyDay(tx: MutationTransaction, owner: string, row:
     long(row, "time") < 0n ||
     text(row, "effectId").length > 40
   )
-    throw new Error("Invalid lucky day owner or state");
+    {throw new Error("Invalid lucky day owner or state");}
 
   const value = {
     uid: owner,

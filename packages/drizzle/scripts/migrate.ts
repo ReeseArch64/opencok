@@ -6,7 +6,7 @@ import { EnvironmentError, requireEnv } from "@opencok/env/database";
 import { databaseSchemas, type DatabaseRole } from "../src/roles";
 
 export async function migrateDatabase(pool: Pool, role: DatabaseRole) {
-  if (role !== "global" && role !== "kingdom") throw new Error("Unknown database role");
+  if (role !== "global" && role !== "kingdom") {throw new Error("Unknown database role");}
   const client = await pool.connect();
   try {
     await client.query("SELECT pg_advisory_lock(1936028531,1)");
@@ -22,7 +22,7 @@ export async function migrateDatabase(pool: Pool, role: DatabaseRole) {
       [otherSchemas],
     );
     if (existing.rowCount)
-      throw new Error("Database contains schemas belonging to a different role");
+      {throw new Error("Database contains schemas belonging to a different role");}
     await migrate(drizzle(client), {
       migrationsFolder: join(import.meta.dir, "../migrations", role),
     });

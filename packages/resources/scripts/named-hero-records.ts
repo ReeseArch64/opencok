@@ -11,11 +11,11 @@ const identities = new Map<number, string>(
 );
 
 export function namedHeroRecord(catalog: string, record: object) {
-  if (catalog !== GameplayCatalog.GeneralBase || !("id" in record)) return undefined;
+  if (catalog !== GameplayCatalog.GeneralBase || !("id" in record)) {return undefined;}
 
   const identity = identities.get(record.id as number);
 
-  if (!identity) throw new Error(`Hero catalog import requires a named definition: ${record.id}`);
+  if (!identity) {throw new Error(`Hero catalog import requires a named definition: ${record.id}`);}
 
   const member = Object.entries(HeroIdentity).find(([, value]) => value === identity)![0];
 
@@ -29,7 +29,7 @@ export function namedHeroRecord(catalog: string, record: object) {
 export function namedHeroDefinition(record: object) {
   const identity = "id" in record ? identities.get(record.id as number) : undefined;
 
-  if (!identity) throw new Error("Hero catalog import requires a named definition");
+  if (!identity) {throw new Error("Hero catalog import requires a named definition");}
 
   return heroDefinitionByIdentity[identity as HeroIdentity];
 }

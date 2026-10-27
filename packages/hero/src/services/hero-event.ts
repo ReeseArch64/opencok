@@ -51,15 +51,15 @@ export class HeroEventService {
       current = checkGameProfile(await this.db.getProfileById(uid), now);
 
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const source = current.crossFightSrcServerId,
       realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source),
       cross = command === "hero.cross.info";
 
-    if (cross && realm === this.config.kingdomId) return {};
+    if (cross && realm === this.config.kingdomId) {return {};}
 
-    if (!this.db.heroEvents) throw new GameError(errors.unsupported, "ranking");
+    if (!this.db.heroEvents) {throw new GameError(errors.unsupported, "ranking");}
 
     const selection = cross
       ? { panels: true }
@@ -72,7 +72,7 @@ export class HeroEventService {
         profile = checkGameProfile(state.profile, now);
 
       if (profile.uid !== uid || num(profile, "serverId") !== realm)
-        throw new GameError(errors.invalid);
+        {throw new GameError(errors.invalid);}
 
       const preview = (id: string) =>
         id === "0"
@@ -93,7 +93,7 @@ export class HeroEventService {
           const type =
             panel.type === "10" ? 1 : panel.type === "12" ? 2 : panel.type === "14" ? 3 : 0;
 
-          if (!type || panel.function_on === "0") continue;
+          if (!type || panel.function_on === "0") {continue;}
 
           const merge = [...(this.rules.power.mergeActivities?.values() ?? [])].some(
             (row) =>
@@ -107,15 +107,15 @@ export class HeroEventService {
             const start = eventTimestamp(panel.start),
               end = eventTimestamp(panel.end);
 
-            if (start === undefined || end === undefined || at <= start || at >= end) continue;
+            if (start === undefined || end === undefined || at <= start || at >= end) {continue;}
           }
 
           let activity = state.activities.find((row) => num(row, "activityType") === type);
 
           if (!activity && !state.scoreManagerRunning)
-            activity = nextHeroPanel(this.rules, type, realm, at);
+            {activity = nextHeroPanel(this.rules, type, realm, at);}
 
-          if (!activity || (type === 1 && long(activity, "startTime") - at > 86400000n)) continue;
+          if (!activity || (type === 1 && long(activity, "startTime") - at > 86400000n)) {continue;}
 
           panels.push(
             heroPanelView(
@@ -128,23 +128,23 @@ export class HeroEventService {
           );
         }
 
-        if (panels.length > 256) throw new GameError(errors.invalid);
+        if (panels.length > 256) {throw new GameError(errors.invalid);}
 
         return { activity: sfs.array(panels.map(sfs.object)) };
       }
 
       const activity = state.activities[0];
 
-      if (!activity) return {};
+      if (!activity) {return {};}
 
       if (command === "hero.event.ranking.get") {
         const event = state.events[0];
 
-        if (!event) return {};
+        if (!event) {return {};}
 
         const { level } = heroEventBand(event, state, this.rules);
 
-        if (level < 0) return heroEventReward([]);
+        if (level < 0) {return heroEventReward([]);}
 
         const view = heroEventRewards(event, level, this.rules);
 
@@ -157,7 +157,7 @@ export class HeroEventService {
       for (const event of state.events) {
         const { level, score } = heroEventBand(event, state, this.rules);
 
-        if (level < 0) continue;
+        if (level < 0) {continue;}
 
         const view = heroEventRewards(event, level, this.rules),
           query = heroRankingLookup(
@@ -170,10 +170,10 @@ export class HeroEventService {
           );
         let position: number;
 
-        if (typeof query === "number") position = query;
+        if (typeof query === "number") {position = query;}
         else {
           if (!this.services.heroRankingPosition)
-            throw new GameError(errors.unsupported, "ranking");
+            {throw new GameError(errors.unsupported, "ranking");}
 
           position = await this.services.heroRankingPosition(query);
         }
@@ -188,12 +188,12 @@ export class HeroEventService {
               : [];
 
         if (ids.length > 64 || new Set(ids).size !== ids.length)
-          throw new GameError(errors.invalid);
+          {throw new GameError(errors.invalid);}
 
         let details: readonly Row[] = [];
 
         if (ids.length) {
-          if (!this.db.heroHistoryPresentation) throw new GameError(errors.unsupported, "ranking");
+          if (!this.db.heroHistoryPresentation) {throw new GameError(errors.unsupported, "ranking");}
 
           details = (await this.db.heroHistoryPresentation([], ids)).realms;
         }
@@ -220,7 +220,7 @@ export class HeroEventService {
 
       return heroEventInfo(entries, cityInteger(activity.activityType, 1, 3), ranked);
     } catch (error) {
-      if (realm !== this.config.kingdomId) return {};
+      if (realm !== this.config.kingdomId) {return {};}
 
       throw error;
     }
@@ -231,28 +231,28 @@ export class HeroEventService {
     const current = checkGameProfile(await this.db.getProfileById(uid), now);
 
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const source = current.crossFightSrcServerId;
     const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
     const type = wireInt(params, "type");
 
-    if (!Number.isInteger(type) || type < 0 || type > 4) throw new GameError(errors.invalid);
+    if (!Number.isInteger(type) || type < 0 || type > 4) {throw new GameError(errors.invalid);}
 
-    if (!this.db.heroHistory) throw new GameError(errors.unsupported, "ranking");
+    if (!this.db.heroHistory) {throw new GameError(errors.unsupported, "ranking");}
 
     const state = await this.db.heroHistory(uid, realm, type, now);
     const profile = checkGameProfile(state.profile, now);
 
     if (profile.uid !== uid || num(profile, "serverId") !== realm)
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
-    if (!state.active || !state.events.length) return heroHistory([]);
+    if (!state.active || !state.events.length) {return heroHistory([]);}
 
     const alliance = type === 2 || type === 4;
     const band = heroHistoryBand(type, state.castleLevel, state.alliancePower, this.rules);
 
-    if (band < 0 || (!alliance && band >= 40)) return heroHistory([]);
+    if (band < 0 || (!alliance && band >= 40)) {return heroHistory([]);}
 
     const rewards = heroHistoryRewards(this.rules, text(state.active, "eventId"), band);
     const keys = state.events.map((event) => {
@@ -266,17 +266,17 @@ export class HeroEventService {
         false,
       );
 
-      if (typeof lookup === "number" || !lookup.keys[band]) throw new GameError(errors.invalid);
+      if (typeof lookup === "number" || !lookup.keys[band]) {throw new GameError(errors.invalid);}
 
       return lookup.keys[band]!;
     });
 
     if (!this.services.heroHistoryPublication || !this.db.heroHistoryPresentation)
-      throw new GameError(errors.unsupported, "ranking");
+      {throw new GameError(errors.unsupported, "ranking");}
 
     const publications = await this.services.heroHistoryPublication(keys, alliance);
 
-    if (publications.length !== state.events.length) throw new GameError(errors.invalid);
+    if (publications.length !== state.events.length) {throw new GameError(errors.invalid);}
 
     const ids = [...new Set(publications.flatMap((row) => [...row.members]))];
     const realmIds = [
@@ -301,7 +301,7 @@ export class HeroEventService {
         );
 
         for (const summary of summaries)
-          players.set(text(summary.data, "uid"), { ...summary.data, server: summary.kingdomId });
+          {players.set(text(summary.data, "uid"), { ...summary.data, server: summary.kingdomId });}
       }
     }
 
@@ -311,7 +311,7 @@ export class HeroEventService {
         const members = publication.members.flatMap((id, position) => {
           const rewardId = rewards[position];
 
-          if (rewardId === undefined) return [];
+          if (rewardId === undefined) {return [];}
 
           const member: Row = {
             [alliance ? "allianceId" : "uid"]: id,
@@ -326,11 +326,11 @@ export class HeroEventService {
               : presentation.alliances.find((row) => row.allianceId === id);
 
             if (data != null && (typeof data !== "object" || Array.isArray(data)))
-              throw new GameError(errors.invalid);
+              {throw new GameError(errors.invalid);}
 
             if (data)
-              for (const key of ["name", "server", "abbr", "icon"])
-                if ((data as Row)[key] != null) member[key] = (data as Row)[key]!;
+              {for (const key of ["name", "server", "abbr", "icon"])
+                {if ((data as Row)[key] != null) {member[key] = (data as Row)[key]!;}}}
           } else {
             const data = players.get(id);
 
@@ -371,18 +371,18 @@ export class HeroEventService {
     const current = checkGameProfile(await this.db.getProfileById(uid), now);
 
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const source = current.crossFightSrcServerId;
     const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
 
-    if (!this.db.heroInsideRanking) throw new GameError(errors.unsupported, "ranking");
+    if (!this.db.heroInsideRanking) {throw new GameError(errors.unsupported, "ranking");}
 
     const state = await this.db.heroInsideRanking(uid, realm, wireString(params, "actId"), now);
     const profile = checkGameProfile(state.profile, now);
 
     if (profile.uid !== uid || num(profile, "serverId") !== realm)
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     return heroInsideRanking(state.rows);
   }
@@ -392,19 +392,19 @@ export class HeroEventService {
     const current = checkGameProfile(await this.db.getProfileById(uid), now);
 
     if (current.uid !== uid || num(current, "serverId") !== this.config.kingdomId)
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const source = current.crossFightSrcServerId;
     const realm = source == null || Number(source) === -1 ? this.config.kingdomId : Number(source);
     const activityId = wireString(params, "activityId");
 
-    if (!this.db.heroRanking) throw new GameError(errors.unsupported, "ranking");
+    if (!this.db.heroRanking) {throw new GameError(errors.unsupported, "ranking");}
 
     const state = await this.db.heroRanking(uid, realm, activityId, now);
     const profile = checkGameProfile(state.profile, now);
 
     if (profile.uid !== uid || num(profile, "serverId") !== realm)
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const positions: number[] = [];
 
@@ -418,9 +418,9 @@ export class HeroEventService {
         MOBILE_CLIENT_VERSION,
       );
 
-      if (typeof query === "number") positions.push(query);
+      if (typeof query === "number") {positions.push(query);}
       else {
-        if (!this.services.heroRankingPosition) throw new GameError(errors.unsupported, "ranking");
+        if (!this.services.heroRankingPosition) {throw new GameError(errors.unsupported, "ranking");}
 
         positions.push(await this.services.heroRankingPosition(query));
       }

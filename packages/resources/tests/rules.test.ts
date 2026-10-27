@@ -12,7 +12,7 @@ test("reconnect treasure catalogs preserve declaration order and exact level str
   const directory = await mkdtemp(join(tmpdir(), "opencok-reconnect-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     expect((await loadRules(directory)).reconnect.treasures?.size).toBe(0);
     await writeFile(
       join(directory, "treasure.xml"),
@@ -36,7 +36,7 @@ test("reward catalogs retain the final duplicate definition required by the refe
   const directory = await mkdtemp(join(tmpdir(), "opencok-reward-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     expect((await loadRules(directory)).reconnect.rewards?.size).toBe(0);
     await writeFile(
       join(directory, "reward.xml"),
@@ -61,7 +61,7 @@ test("profile catalogs count every achievement record and keep military/server l
   const directory = await mkdtemp(join(tmpdir(), "opencok-profile-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     const missing = (await loadRules(directory)).profile;
     expect(missing.achievementCount).toBe(0);
     expect(missing.militaryRanks?.size).toBe(0);
@@ -102,7 +102,7 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
   const directory = await mkdtemp(join(tmpdir(), "opencok-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     const rules = await loadRules(directory, 2);
     expect(rules.kingdomId).toBe(2);
     expect(rules.role(1).level).toBe("1");
@@ -152,10 +152,10 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "lucky_effect",
       "monarch_title_lord",
     ])
-      await writeFile(
+      {await writeFile(
         join(directory, `${name}.xml`),
         '<database><ItemSpec id="001" power="007"/></database>',
-      );
+      );}
     await writeFile(
       join(directory, "vip.xml"),
       '<database><Group id="vip"><ItemSpec id="001" power="007"/></Group></database>',
@@ -174,10 +174,10 @@ test("resource loading preserves optional files, duplicate policy and realm-spec
       "fb_share",
       "servers_config",
     ])
-      await writeFile(
+      {await writeFile(
         join(directory, `${name}.xml`),
         '<database><Group id="synthetic"><ItemSpec id="001" value="007"/></Group></database>',
-      );
+      );}
     const catalogs = (await loadRules(directory)).configuration;
     expect(catalogs.generalSales?.get("001")?.value).toBe("007");
     expect(catalogs.payControl?.get("001")?.value).toBe("007");
@@ -229,7 +229,7 @@ test("duplicates remain explicit across groups and malformed resource records ar
   expect(parseRules(duplicate, "function_on").get("a")?.value).toBe("2");
   expect(parseRules(duplicate, "goods").get("a")?.value).toBe("2");
   for (const name of ["science", "equipment", "status", "dragon_skill", "activity_panel"])
-    expect(parseRules(duplicate, name).get("a")?.value).toBe("2");
+    {expect(parseRules(duplicate, name).get("a")?.value).toBe("2");}
   expect(
     parseRules('<database><ItemSpec value="ignored"/><ItemSpec id="a"/></database>', "goods").size,
   ).toBe(1);
@@ -242,7 +242,7 @@ test("duplicates remain explicit across groups and malformed resource records ar
     "<database>",
     '<!DOCTYPE database [<!ENTITY secret "private">]><database><ItemSpec id="a"/></database>',
   ])
-    expect(() => parseRules(xml, "building")).toThrow();
+    {expect(() => parseRules(xml, "building")).toThrow();}
 });
 
 test("VIP resources select only the named group and retain threshold declaration order", () => {
@@ -261,7 +261,7 @@ test("mail catalogs preserve template strings and final duplicate definitions", 
   const directory = await mkdtemp(join(tmpdir(), "opencok-mail-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     expect((await loadRules(directory)).mail.size).toBe(0);
     await writeFile(
       join(directory, "mail.xml"),
@@ -287,7 +287,7 @@ test("world monster catalogs load optionally, preserve final duplicates and stay
   const directory = await mkdtemp(join(tmpdir(), "opencok-world-monster-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     const absent = (await loadRules(directory)).world;
     expect(absent.fieldMonsters?.size).toBe(0);
     expect(absent.armies?.size).toBe(0);
@@ -318,7 +318,7 @@ test("neutral resource durations load optionally and preserve final duplicate de
   const directory = await mkdtemp(join(tmpdir(), "opencok-neutral-resource-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     expect((await loadRules(directory)).world.neutralResources?.size).toBe(0);
     await writeFile(
       join(directory, "sp_resources.xml"),
@@ -342,7 +342,7 @@ test("barbarian catalogs load optionally and retain final duplicate definitions 
   const directory = await mkdtemp(join(tmpdir(), "opencok-barbarian-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     expect((await loadRules(directory)).world.barbarians?.size).toBe(0);
     await writeFile(
       join(directory, "barbarion.xml"),
@@ -364,7 +364,7 @@ test("new-general catalogs are optional, preserve final definitions and stay sep
   const directory = await mkdtemp(join(tmpdir(), "opencok-new-general-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     const absent = (await loadRules(directory)).power;
     expect(absent.newGeneralBases?.size).toBe(0);
     expect(absent.newGeneralSkills?.size).toBe(0);
@@ -405,7 +405,7 @@ test("new-general office and refinement catalogs load optionally with exact stri
   const directory = await mkdtemp(join(tmpdir(), "opencok-new-general-effects-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     const absent = (await loadRules(directory)).power;
     expect(absent.newGeneralOffices?.size).toBe(0);
     expect(absent.newGeneralRefinement?.size).toBe(0);
@@ -439,7 +439,7 @@ test("prestige catalogs retain every ordered definition for first-range selectio
   const directory = await mkdtemp(join(tmpdir(), "opencok-prestige-order-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     const absent = (await loadRules(directory)).power;
     expect(absent.prestigeLevelRecords).toEqual([]);
     expect(absent.prestigeLevels?.size).toBe(0);
@@ -470,7 +470,7 @@ test("kingdom skill catalogs retain source order and duplicate or absent IDs ind
   const directory = await mkdtemp(join(tmpdir(), "opencok-kingdom-skill-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     const absent = (await loadRules(directory)).configuration;
     expect(absent.kingdomSkillRecords).toEqual([]);
     expect(absent.kingdomSkills?.size).toBe(0);
@@ -509,7 +509,7 @@ test("item group catalogs isolate data configuration from the final global ID in
   const directory = await mkdtemp(join(tmpdir(), "opencok-data-config-group-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     await writeFile(
       join(directory, "item.xml"),
       '<database><ItemSpec id="root-only" value="ignored"/><Group id="data_config"><ItemSpec id="player_max" k1="first"/><ItemSpec id="player_max" k1=" 007 "/><ItemSpec id="mail" k1="group"/></Group><Group id="other"><ItemSpec id="player_max" k1="global"/><ItemSpec id="overlord" k1="3"/></Group></database>',
@@ -533,7 +533,7 @@ test("the final duplicate data-config group replaces its view without clearing e
   const directory = await mkdtemp(join(tmpdir(), "opencok-data-config-repeat-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     await writeFile(
       join(directory, "item.xml"),
       '<database><Group id="data_config"><ItemSpec id="old" value="keep-global"/></Group><Group id="data_config"><ItemSpec id="new" value="visible"/><ItemSpec value="missing-id"/><ItemSpec id="null" value="literal-id"/><ItemSpec id="" value="blank-id"/></Group></database>',
@@ -563,7 +563,7 @@ test("missing or ungrouped item files supply an explicitly empty data-config gro
   const directory = await mkdtemp(join(tmpdir(), "opencok-data-config-missing-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     expect((await loadRules(directory)).configuration.dataConfig?.size).toBe(0);
     for (const xml of [
       "<database/>",
@@ -573,7 +573,7 @@ test("missing or ungrouped item files supply an explicitly empty data-config gro
       await writeFile(join(directory, "item.xml"), xml);
       const rules = await loadRules(directory);
       expect(rules.configuration.dataConfig?.size).toBe(0);
-      if (xml !== "<database/>") expect(rules.items.has("player_max")).toBe(true);
+      if (xml !== "<database/>") {expect(rules.items.has("player_max")).toBe(true);}
     }
   } finally {
     await rm(directory, { recursive: true, force: true });
@@ -599,7 +599,7 @@ test("item declarations use direct element attributes, final duplicate IDs and l
     "<!DOCTYPE database><database/>",
     "<database>",
   ])
-    expect(() => parseRules(invalid, "item")).toThrow();
+    {expect(() => parseRules(invalid, "item")).toThrow();}
 });
 
 test("auxiliary configuration indexes use direct declarations and preserve empty, repeated and absent IDs", () => {
@@ -627,7 +627,7 @@ test("auxiliary configuration indexes use direct declarations and preserve empty
       "<!DOCTYPE database><database/>",
       '<database><Group><ItemSpec id="a"/></Group></database>',
     ])
-      expect(() => parseRules(malformed, name)).toThrow();
+      {expect(() => parseRules(malformed, name)).toThrow();}
   }
 });
 
@@ -635,11 +635,11 @@ test("kingdom skills, feature and payment metadata share the declared-catalog lo
   const directory = await mkdtemp(join(tmpdir(), "opencok-auxiliary-config-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     const xml =
       '<database><ItemSpec id="ignored"/><Group id="first"><ItemSpec id="same" value="first"/></Group><Group id="second"><ItemSpec id="same" value="last"/><ItemSpec id="" value="blank"/></Group></database>';
     for (const name of ["kingdomskill", "function_on", "pay_servercontrol"])
-      await writeFile(join(directory, `${name}.xml`), xml);
+      {await writeFile(join(directory, `${name}.xml`), xml);}
     const rules = await loadRules(directory);
     for (const catalog of [
       rules.features,
@@ -663,7 +663,7 @@ test("ranking resources load military groups and hero reward bands without requi
   const directory = await mkdtemp(join(tmpdir(), "opencok-ranking-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     const empty = await loadRules(directory);
     expect(empty.ranking.militaryGroups?.size).toBe(0);
     expect(empty.ranking.heroEvents?.size).toBe(0);
@@ -687,7 +687,7 @@ test("nickname alliance catalog is optional and retains the last duplicate with 
   const directory = await mkdtemp(join(tmpdir(), "opencok-alliance-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     expect((await loadRules(directory)).configuration.allianceTeleport?.size).toBe(0);
     await writeFile(
       join(directory, "alliance_teleport.xml"),
@@ -716,7 +716,7 @@ test("territory building catalog preserves declaration order and duplicate level
   const directory = await mkdtemp(join(tmpdir(), "opencok-territory-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(join(directory, `${name}.xml`), records);
+      {await writeFile(join(directory, `${name}.xml`), records);}
     expect((await loadRules(directory)).world.allianceBuildings).toBeUndefined();
     await writeFile(
       join(directory, "alliance_building.xml"),
@@ -738,6 +738,6 @@ test("default avatar cooldown rejects replacements before three days and accepts
   const updated = 1792756800000;
   const record = { updateTime: BigInt(updated), banTime: 0n };
   for (const elapsed of [86400000, 259199999])
-    expect(() => checkAvatarRecord(rules, record, updated + elapsed)).toThrow();
+    {expect(() => checkAvatarRecord(rules, record, updated + elapsed)).toThrow();}
   expect(() => checkAvatarRecord(rules, record, updated + 259200000)).not.toThrow();
 });

@@ -124,14 +124,14 @@ test("mine rule offsets preserve Java signed arithmetic and reject malformed inp
     maxMiners: 2147483647,
   });
   for (const key of ["itemId", "level", "exp", "miner", "call"])
-    for (const value of [1.5, 2147483648, -2147483649, "1e3", "bad"])
-      expect(() => friendshipMineView({ itemId: 8100, level: 1, [key]: value }, rules())).toThrow(
+    {for (const value of [1.5, 2147483648, -2147483649, "1e3", "bad"])
+      {expect(() => friendshipMineView({ itemId: 8100, level: 1, [key]: value }, rules())).toThrow(
         "102192",
-      );
+      );}}
   for (const value of [9007199254740992, "9223372036854775808", "-9223372036854775809", "1.5"])
-    expect(() =>
+    {expect(() =>
       friendshipMineView({ itemId: 8100, level: 1, mineTime: value }, rules()),
-    ).toThrow();
+    ).toThrow();}
   expect(() => friendshipMineView({ itemId: 8100, level: 5 }, rules())).toThrow();
   expect(() => initialFriendshipMine(rules(new Map()))).toThrow();
 });
@@ -179,7 +179,7 @@ test("reconnect mine use case initializes lazily and never substitutes defaults 
     ),
   ).rejects.toThrow("Synthetic failure");
   for (const uid of ["", " ", "x".repeat(41)])
-    await expect(
+    {await expect(
       reconnectFriendshipMine(
         {
           async friendshipMine() {
@@ -189,5 +189,5 @@ test("reconnect mine use case initializes lazily and never substitutes defaults 
         uid,
         catalog,
       ),
-    ).rejects.toThrow("102192");
+    ).rejects.toThrow("102192");}
 });

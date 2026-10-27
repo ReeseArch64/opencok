@@ -26,7 +26,7 @@ export async function finishAvatar(
 ): Promise<AvatarFinishSnapshot> {
   const query = avatarFinishQuery(receipt, now);
 
-  if (!/^[0-9]{1,20}$/.test(owner)) throw new GameError(errors.invalid, "avatar_rule");
+  if (!/^[0-9]{1,20}$/.test(owner)) {throw new GameError(errors.invalid, "avatar_rule");}
 
   const template = mailTemplate ? { ...mailTemplate } : undefined;
 
@@ -42,7 +42,7 @@ export async function finishAvatar(
         avatarFinishInterval(rules);
         const record = await readers.uploadRecord();
 
-        if (record && record.uid !== owner) throw new GameError(errors.invalid, "avatar_rule");
+        if (record && record.uid !== owner) {throw new GameError(errors.invalid, "avatar_rule");}
 
         checkAvatarRecord(rules, record, now);
       }

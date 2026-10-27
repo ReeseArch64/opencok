@@ -2,7 +2,7 @@ import type { Rule, Rules } from "@opencok/rules/game";
 export const goldEggsNow = Date.UTC(2030, 0, 2, 12);
 export function configureGoldEggs(rules: Rules) {
   for (const id of ["golden_egg_open", "golden_egg_all_rank_open"])
-    rules.features.set(id, { id, online: "all", test: "all", version: "7.23.0" });
+    {rules.features.set(id, { id, online: "all", test: "all", version: "7.23.0" });}
   rules.power.activityPanels!.set("57175", {
     ...rules.power.activityPanels!.get("57175")!,
     start: "2030-01-01-00-00",

@@ -83,13 +83,13 @@ test("group requests preserve nonnegative pagination without the message-list ne
     now: mailCategoryNow,
   });
   expect(query(1000, 0, 0).limit).toBe(0);
-  for (const type of [-1, 0, 4, 9, 11, 100, 500, 1001, NaN]) expect(() => query(type)).toThrow();
+  for (const type of [-1, 0, 4, 9, 11, 100, 500, 1001, NaN]) {expect(() => query(type)).toThrow();}
   for (const value of [-1, 0.5, 2147483648, Infinity, NaN]) {
     expect(() => query(1000, value, 1)).toThrow();
     expect(() => query(10, 0, value)).toThrow();
   }
   for (const now of [-1, 1.5, Number.MAX_SAFE_INTEGER + 1, NaN])
-    expect(() => mailGroupQuery(1000, 0, 1, now)).toThrow();
+    {expect(() => mailGroupQuery(1000, 0, 1, now)).toThrow();}
 });
 
 test("group families preserve effective query types and single-message cross-type membership", () => {
@@ -105,9 +105,9 @@ test("group families preserve effective query types and single-message cross-typ
   for (let type = -1; type <= 501; type++) {
     expect(mailGroupRule(type)?.types).toEqual(expected.get(type));
     for (let stored = 0; stored < 50; stored++)
-      expect(mailGroupContains(group(type), { uid: "mail", fromUser: "mail", type: stored })).toBe(
+      {expect(mailGroupContains(group(type), { uid: "mail", fromUser: "mail", type: stored })).toBe(
         expected.get(type)?.includes(stored) ?? false,
-      );
+      );}
   }
   expect(mailGroupContains(group(2), { uid: "mail", fromUser: null, type: 28 })).toBe(true);
   expect(mailGroupContains(group(2), { uid: "other", fromUser: "mail", type: 28 })).toBe(false);
@@ -139,11 +139,11 @@ test("group windows validate full ownership, mode, capacity and ordering before 
     [group(2, "mail", { updateTime: 9223372036854775808n })],
     Array.from({ length: 1001 }, (_, index) => group(2, `g${index}`)),
   ])
-    expect(() => mailGroupWindow("self", query(), invalid)).toThrow();
+    {expect(() => mailGroupWindow("self", query(), invalid)).toThrow();}
   expect(() => mailGroupWindow("self", query(1000, 0, 8), groups)).toThrow();
   expect(() => mailGroupWindow("self", query(10), [group(100)])).toThrow();
   for (const owner of ["", "\u180e", "x".repeat(41), "\ud800", "\0"])
-    expect(() => mailGroupWindow(owner, query(), [])).toThrow();
+    {expect(() => mailGroupWindow(owner, query(), [])).toThrow();}
 });
 
 test("sender resolution uses the entire group page and Java whitespace semantics", () => {
@@ -184,7 +184,7 @@ test("conversation summaries keep whole-group counts and reverse only the newest
   for (const chat of chats) {
     expect(chat.lastUpdateTime).toEqual(sfs.string("owner-marker"));
     for (const key of ["status", "fromUser", "fromName", "pic", "detail", "totalNum", "unread"])
-      expect(chat[key]).toBeUndefined();
+      {expect(chat[key]).toBeUndefined();}
   }
   expect(result.cleanup).toEqual({ groups: [], mailIds: [] });
   expect(structuredClone(page)).toEqual(before);
@@ -212,20 +212,20 @@ test("moderator group reads exclude media while retaining text translations and 
     { ...context, translationEnabled: false },
     { ...context, senders: new Map([["sender", { name: "name", pic: "pic", lang: null }]]) },
   ])
-    expect(
+    {expect(
       nested(messages(project(page, disabled, 10).body)[0]!, "chats")[0]!.translationId,
-    ).toBeUndefined();
+    ).toBeUndefined();}
   const missing = nested(messages(project(page, presentation(true), 10).body)[0]!, "chats")[0]!;
   expect(missing.translationId).toEqual(sfs.string("pt|stored"));
   expect(missing.translationMsg).toBeUndefined();
   for (const type of [23, 24])
-    expect(() =>
+    {expect(() =>
       project({ ...page, previews: [preview([mailListEntry({ type })])] }, presentation(true), 10),
-    ).not.toThrow();
+    ).not.toThrow();}
   for (const type of [22, 39, 40])
-    expect(() =>
+    {expect(() =>
       project({ ...page, previews: [preview([mailListEntry({ type })])] }, presentation(true), 10),
-    ).toThrow();
+    ).toThrow();}
 });
 
 test("resource, trade and monster summaries keep newest-first previews and full totals", () => {
@@ -276,7 +276,7 @@ test("single-message groups retain ordinary details and zero counters regardless
   expect(message!.save).toEqual(sfs.int(1));
   expect(message!.rewardStatus).toEqual(sfs.int(0));
   expect(message!.rewardId).toEqual(sfs.string("item"));
-  for (const key of ["reply", "share", "like", "donate"]) expect(message![key]).toEqual(sfs.int(1));
+  for (const key of ["reply", "share", "like", "donate"]) {expect(message![key]).toEqual(sfs.int(1));}
   expect(message!.mbLevel).toEqual(sfs.int(0));
   expect(message!.lastUpdateTime).toBeUndefined();
 });
@@ -410,7 +410,7 @@ test("projection rejects inconsistent ownership, membership, ordering, counts an
     preview(entries.map((entry, index) => (index === 1 ? { ...entry, uid: "m0" } : entry))),
   ];
   for (const entry of invalid)
-    expect(() => project({ ...page, previews: [entry] })).toThrow(ProtocolError);
+    {expect(() => project({ ...page, previews: [entry] })).toThrow(ProtocolError);}
   expect(() => project({ ...page, previews: [] })).toThrow(ProtocolError);
   expect(() => project({ groups: [group(-1)], previews: [preview([mailListEntry()])] })).toThrow(
     ProtocolError,

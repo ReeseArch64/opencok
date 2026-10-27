@@ -39,7 +39,7 @@ export function readOwnedMailWindow(
     ) ||
     typeof inspect !== "function"
   )
-    throw new Error("Invalid mail window query");
+    {throw new Error("Invalid mail window query");}
 
   return databases.getKingdom(kingdomId).db.transaction(
     async (tx) => {
@@ -64,7 +64,7 @@ export function readOwnedMailWindow(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
-        return { profile };
+        {return { profile };}
 
       const extraOwner = and(
         eq(mail_contents.uid, selectedMail.uid),
@@ -101,7 +101,7 @@ export function readOwnedMailWindow(
         sizes.some((row) => !Number.isSafeInteger(row.size) || row.size < 0) ||
         sizes.reduce((total, row) => total + row.size, 0) > 4 * 1024 * 1024
       )
-        throw new Error("Mail list capacity exceeded");
+        {throw new Error("Mail list capacity exceeded");}
 
       const entries = sizes.length
         ? await tx
@@ -149,7 +149,7 @@ export function readOwnedMailWindow(
               sizes[index]?.size,
         )
       )
-        throw new Error("Inconsistent mail list snapshot");
+        {throw new Error("Inconsistent mail list snapshot");}
 
       const invalid = await inspect(entries, {
         senders: (uids) => readMailSenders(databases, kingdomId, tx, uids),
@@ -162,10 +162,10 @@ export function readOwnedMailWindow(
         new Set(invalid).size !== invalid.length ||
         invalid.some((id) => !selected.has(id))
       )
-        throw new Error("Invalid mail list removal plan");
+        {throw new Error("Invalid mail list removal plan");}
 
       if (invalid.length)
-        await tx.delete(mail).where(and(eq(mail.toUser, uid), inArray(mail.uid, invalid)));
+        {await tx.delete(mail).where(and(eq(mail.toUser, uid), inArray(mail.uid, invalid)));}
 
       return { profile };
     },

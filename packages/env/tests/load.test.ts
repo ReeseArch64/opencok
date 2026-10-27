@@ -30,8 +30,8 @@ async function fixture(rootFile?: string) {
     "load.ts",
     "index.ts",
   ])
-    await copyFile(new URL(`../src/${name}`, import.meta.url), join(source, name));
-  if (rootFile !== undefined) await writeFile(join(root, ".env"), rootFile);
+    {await copyFile(new URL(`../src/${name}`, import.meta.url), join(source, name));}
+  if (rootFile !== undefined) {await writeFile(join(root, ".env"), rootFile);}
   await mkdir(join(root, "node_modules/@opencok"), { recursive: true });
   await symlink(
     fileURLToPath(new URL(".", import.meta.resolve("zod/package.json"))),

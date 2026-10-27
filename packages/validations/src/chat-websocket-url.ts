@@ -3,7 +3,7 @@ export class ChatWebsocketUrl {
 
   public constructor(public readonly value: string) {
     try {
-      if (typeof value !== "string") throw new TypeError();
+      if (typeof value !== "string") {throw new TypeError();}
 
       const url = new URL(value);
 
@@ -18,7 +18,7 @@ export class ChatWebsocketUrl {
         url.search ||
         url.hash
       )
-        throw new TypeError();
+        {throw new TypeError();}
 
       this.url = url;
     } catch {

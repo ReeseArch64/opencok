@@ -116,21 +116,21 @@ function fixture() {
         query: async (query: { text: string }, params: unknown[] = []) => {
           const text = query.text;
           queries.push({ realm, text, params });
-          if (state.fail === `${realm}:${text}`) throw new Error("Synthetic private failure");
+          if (state.fail === `${realm}:${text}`) {throw new Error("Synthetic private failure");}
           if (text.startsWith("begin")) {
             expect(text).toBe("begin isolation level repeatable read read only");
             return { rows: [] };
           }
-          if (text === "commit" || text === "rollback") return { rows: [] };
+          if (text === "commit" || text === "rollback") {return { rows: [] };}
           expect(text).toStartWith("select ");
           expect(text).not.toMatch(/for update|for share|password|email|referrer|"ip"|monsterInfo/);
           const table = /from "opencok_kingdom"\."([^"]+)"/.exec(text)?.[1];
           expect(table).toBeDefined();
-          if (table !== "world_march") expect(text).not.toMatch(/armyInfo|plunderRes/);
-          if (state.fail === `${realm}:${table}`) throw new Error("Synthetic private failure");
-          if (params.length === 1 && params[0] === 0) return { rows: [] };
+          if (table !== "world_march") {expect(text).not.toMatch(/armyInfo|plunderRes/);}
+          if (state.fail === `${realm}:${table}`) {throw new Error("Synthetic private failure");}
+          if (params.length === 1 && params[0] === 0) {return { rows: [] };}
           const key = `${realm}:${table}${table === "userprofile" && text.includes('"serverId"') ? ":observer" : ""}`;
-          if (state.raw.has(key)) return { rows: state.raw.get(key) };
+          if (state.raw.has(key)) {return { rows: state.raw.get(key) };}
           const owner = state.owners.get(realm)!;
           const values = (row: Row | undefined, keys: string[]) =>
             row ? [keys.map((k) => row[k] ?? null)] : [];
@@ -159,8 +159,8 @@ function fixture() {
               table!,
             )
           )
-            return { rows: [] };
-          if (table === "world_march" && params.length === 4) return { rows: [] };
+            {return { rows: [] };}
+          if (table === "world_march" && params.length === 4) {return { rows: [] };}
           if (table === "world_march") {
             expect(params).toEqual([state.points.get(realm)![0]!.ownerMarchUUid, 2]);
             expect(text).toContain('"world_march"."uuid" = $1');
@@ -232,7 +232,7 @@ function fixture() {
     kingdoms: databases,
     getKingdom: (id: number) => {
       const result = databases.get(id);
-      if (!result) throw new Error("Synthetic missing realm");
+      if (!result) {throw new Error("Synthetic missing realm");}
       return result;
     },
   } as unknown as Parameters<typeof createWorldPointDetailStore>[0];
@@ -252,12 +252,12 @@ const reads = (f: ReturnType<typeof fixture>, table: string) =>
 
 test("point queries preserve signed point IDs and normalize the local realm sentinel", () => {
   for (const server of [undefined, -1, 1])
-    expect(worldPointDetailQuery(-1, server, 1, now)).toEqual({ point: -1, kingdomId: 1, now });
+    {expect(worldPointDetailQuery(-1, server, 1, now)).toEqual({ point: -1, kingdomId: 1, now });}
   expect(worldPointDetailQuery(2147483647, 2, 1, now).kingdomId).toBe(2);
   for (const server of [0, -2, NaN, Infinity, 1.5, 2147483648])
-    expect(() => worldPointDetailQuery(1, server, 1, now)).toThrow();
+    {expect(() => worldPointDetailQuery(1, server, 1, now)).toThrow();}
   for (const point of [NaN, 1.5, -2147483649, 2147483648])
-    expect(() => worldPointDetailQuery(point, 1, 1, now)).toThrow();
+    {expect(() => worldPointDetailQuery(point, 1, 1, now)).toThrow();}
   expect(() => worldPointDetailQuery(1, 1, 0, now)).toThrow();
   expect(() => worldPointDetailQuery(1, 1, 1, -1)).toThrow();
   expect(() => worldPointDetailQuery(1, 1, 1, 9007199254740992)).toThrow();
@@ -270,35 +270,35 @@ test("point occupancy recognizes either owner identity or name using Java whites
     expect(worldPointOccupied({ ownerId: "owner", ownerName: blank })).toBe(true);
   }
   for (const nonblank of ["\u00a0", "\u2007", "\u202f", "\u200b"])
-    expect(worldPointOccupied({ ownerId: nonblank })).toBe(true);
+    {expect(worldPointOccupied({ ownerId: nonblank })).toBe(true);}
   for (const value of ["\0", "\ud800", "x".repeat(256)])
-    expect(() => worldPointOccupied({ ownerId: value })).toThrow();
+    {expect(() => worldPointOccupied({ ownerId: value })).toThrow();}
 });
 
 test("owner base fields retain exact local SFS types and type-specific omissions across all point kinds", () => {
   for (const remote of [false, true])
-    for (let type = 0; type <= 69; type++) {
+    {for (let type = 0; type <= 69; type++) {
       const result = worldPointOwner(
         worldPointOwnerBase(samplePoint({ pointType: type }), ownerSnapshot(), remote),
       );
       let expected = { uid: sfs.string("target"), registerTime: sfs.long(200n) } as ReturnType<
         typeof worldPointOwner
       >;
-      if (!remote && type === 15) expected = {};
-      else if (!remote && type === 6) expected = { uid: sfs.string("target") };
+      if (!remote && type === 15) {expected = {};}
+      else if (!remote && type === 6) {expected = { uid: sfs.string("target") };}
       else {
-        if ([1, 2, 3, 4, 5, 37].includes(type)) expected.pic = sfs.string("g101");
+        if ([1, 2, 3, 4, 5, 37].includes(type)) {expected.pic = sfs.string("g101");}
         if ([1, 2].includes(type))
-          Object.assign(expected, {
+          {Object.assign(expected, {
             power: sfs.long(9007199254740993n),
             killArmy: sfs.long(-9223372036854775808n),
-          });
+          });}
         if ([1, 2, 3].includes(type))
-          Object.assign(expected, { rank: sfs.int(4), vl: sfs.int(0), afn: sfs.string("SYN") });
+          {Object.assign(expected, { rank: sfs.int(4), vl: sfs.int(0), afn: sfs.string("SYN") });}
       }
       expect(result).toEqual(expected);
       expect(decode(encode(result))).toEqual(result);
-    }
+    }}
 });
 
 test("missing owners and alliance data retain legacy defaults without invented statistics or metadata", () => {
@@ -610,9 +610,9 @@ test("captured query fields cannot be changed during authorization and readiness
   expect(f.queries.every((q) => q.params[0] === 0)).toBe(true);
   expect(() => createWorldPointDetailStore(f.topology, 0)).toThrow();
   for (const patch of [{ point: 1.5 }, { kingdomId: 0 }, { now: -1 }])
-    await expect(
+    {await expect(
       f.store.read("observer", { point: 701, kingdomId: 1, now, ...patch }),
-    ).rejects.toThrow("Invalid world detail query");
+    ).rejects.toThrow("Invalid world detail query");}
   await expect(f.store.read("\0", { point: 701, kingdomId: 1, now })).rejects.toThrow(
     "Invalid world detail query",
   );
@@ -733,7 +733,7 @@ test("remote monster, city, barbarian, neutral and world-boss details omit local
       "data",
       "reward",
     ])
-      expect(result.body[key]).toBeUndefined();
+      {expect(result.body[key]).toBeUndefined();}
     expect(f.clocks()).toBe(1);
     expect(f.queries.some((q) => /world_march|world_barbarion|user_mixed_info/.test(q.text))).toBe(
       false,
@@ -1012,15 +1012,15 @@ test("resource snapshots bound payloads and preserve signed long precision plus 
 
 test("resource read and commit failures roll back the active realm without retrying another realm", async () => {
   for (const realm of [1, 2])
-    for (const failure of ["world_march", "commit"]) {
+    {for (const failure of ["world_march", "commit"]) {
       const f = resourceFixture(realm);
       f.state.fail = `${realm}:${failure}`;
       await expect(f.readResource()).rejects.toThrow("world point detail unavailable");
       expect(f.queries.at(-1)).toEqual({ realm, text: "rollback", params: [] });
       expect(reads(f, "world_march")).toHaveLength(1);
       if (realm === 2)
-        expect(f.queries.some((q) => q.realm === 1 && q.text === "commit")).toBe(true);
-    }
+        {expect(f.queries.some((q) => q.realm === 1 && q.text === "commit")).toBe(true);}
+    }}
 });
 
 test("resource authorization precedes payload reads and readiness probes the required columns without data", async () => {
@@ -1045,5 +1045,5 @@ test("resource authorization precedes payload reads and readiness probes the req
     "changeCollectSpdTime",
     "occupyResourceEndTime",
   ])
-    expect(probe.text).toContain(`"${column}"`);
+    {expect(probe.text).toContain(`"${column}"`);}
 });

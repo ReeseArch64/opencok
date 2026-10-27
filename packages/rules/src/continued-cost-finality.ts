@@ -5,7 +5,7 @@ import type { CostFrozenScore } from "@opencok/contracts/continued-cost-finality
 
 export function costScoreSnapshot(rows: readonly CostRankingScore[]) {
   if (rows.length > 100 || new Set(rows.map((row) => row.uid)).size !== rows.length)
-    throw new Error("Invalid consumption closure population");
+    {throw new Error("Invalid consumption closure population");}
 
   return JSON.stringify(
     rows.map((row) => ({
@@ -20,12 +20,12 @@ export function costScoreSnapshot(rows: readonly CostRankingScore[]) {
 
 export function readCostScoreSnapshot(raw: string): readonly CostRankingScore[] {
   if (Buffer.byteLength(raw) > 1048576)
-    throw new Error("Consumption closure snapshot bound exceeded");
+    {throw new Error("Consumption closure snapshot bound exceeded");}
 
   const data: unknown = JSON.parse(raw);
 
   if (!Array.isArray(data) || data.length > 100)
-    throw new Error("Invalid consumption closure snapshot");
+    {throw new Error("Invalid consumption closure snapshot");}
 
   const rows = data.map((value: CostFrozenScore) => {
     if (
@@ -40,7 +40,7 @@ export function readCostScoreSnapshot(raw: string): readonly CostRankingScore[] 
         (part) => typeof part === "string" && /^(0|[1-9][0-9]*)$/.test(part),
       )
     )
-      throw new Error("Invalid frozen consumption score");
+      {throw new Error("Invalid frozen consumption score");}
 
     const row = {
       ...value,
@@ -50,13 +50,13 @@ export function readCostScoreSnapshot(raw: string): readonly CostRankingScore[] 
       lastAt: cityAmount(value.lastAt),
     };
 
-    if (row.score <= 0n) throw new Error("Empty frozen consumption score");
+    if (row.score <= 0n) {throw new Error("Empty frozen consumption score");}
 
     return row;
   });
 
   if (new Set(rows.map((row) => row.uid)).size !== rows.length)
-    throw new Error("Duplicate frozen consumption identity");
+    {throw new Error("Duplicate frozen consumption identity");}
 
   return rows;
 }

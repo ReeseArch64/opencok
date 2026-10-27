@@ -24,16 +24,16 @@ export function newGeneralStatusEffect(
   effect: number,
   now: bigint,
 ): number {
-  if (typeof now !== "bigint") throw new Error("Invalid new-general status clock");
+  if (typeof now !== "bigint") {throw new Error("Invalid new-general status clock");}
 
   generalSavedLong(now);
   generalSavedInteger(effect);
 
-  if (statuses.length > 4096) throw new Error("Too many new-general statuses");
+  if (statuses.length > 4096) {throw new Error("Too many new-general statuses");}
 
   const selected = new Map<number, NewGeneralStatus>();
 
-  for (const status of statuses) selected.set(generalSavedInteger(status.stateId), status);
+  for (const status of statuses) {selected.set(generalSavedInteger(status.stateId), status);}
 
   let value = 0;
 
@@ -41,7 +41,7 @@ export function newGeneralStatusEffect(
     const status = selected.get(id)!;
 
     if (now > generalSavedLong(status.endTime) || now < generalSavedLong(status.startTime))
-      continue;
+      {continue;}
 
     const effects = generalMap(rules.power.statuses?.get(String(id))?.effect, javaFloat);
     value = Math.fround(value + (effects.get(effect) ?? 0));
@@ -57,7 +57,7 @@ export function newGeneralRefinementEffect(
   effect: number,
 ): number {
   try {
-    if (!generalFeatureAvailable(rules, "general_random_effect", context)) return 0;
+    if (!generalFeatureAvailable(rules, "general_random_effect", context)) {return 0;}
 
     generalSavedInteger(effect);
     const selected = new Map<number, string[]>();
@@ -65,7 +65,7 @@ export function newGeneralRefinementEffect(
     for (const entry of generalContent(raw, "|", 300)) {
       const parts = generalContent(entry, ";");
 
-      if (parts.length < 2) continue;
+      if (parts.length < 2) {continue;}
 
       const members = parts[1]!.split("_").filter((member) => !mailBlank(member));
       selected.set(generalInteger(parts[0]), members);
@@ -78,11 +78,11 @@ export function newGeneralRefinementEffect(
       const amount = javaFloat(members[1]);
       const rule = rules.power.newGeneralRefinement?.get(members[0]!);
 
-      if (!rule) throw new Error("Missing new-general refinement rule");
+      if (!rule) {throw new Error("Missing new-general refinement rule");}
 
       const effects = new Set(generalContent(rule.effect, ";").map(generalInteger));
 
-      if (effects.has(effect)) value = Math.fround(value + amount);
+      if (effects.has(effect)) {value = Math.fround(value + amount);}
     }
 
     return value;

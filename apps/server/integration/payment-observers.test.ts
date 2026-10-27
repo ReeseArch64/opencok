@@ -47,7 +47,7 @@ async function fixture() {
     h.rules,
     async (owner, order, platform) => {
       const tx = transactions.getStore();
-      if (!tx) throw new Error("Payment reader escaped its mutation transaction");
+      if (!tx) {throw new Error("Payment reader escaped its mutation transaction");}
       readers++;
       return redPacketReader(tx, owner).payment(order, platform);
     },
@@ -59,7 +59,7 @@ async function fixture() {
     original((tx) => transactions.run(tx, () => apply(tx)), settings);
   h.clock.now = Date.UTC(2030, 0, 2, 12);
   for (const id of ["69022", "69023", "69025"])
-    h.rules.configuration.payControl!.set(id, {
+    {h.rules.configuration.payControl!.set(id, {
       id,
       k1: "1.0.0",
       k2: "all",
@@ -68,7 +68,7 @@ async function fixture() {
       k6: "2030-01-05-00-00",
       k7: "2030-01-01-00-00",
       k8: "2030-01-05-00-00",
-    });
+    });}
   await h.db.db.insert(server_info).values({ uid: "server", payTotalTime: 1n });
   h.rules.advanced.campaignRules = [];
   h.rules.advanced.castleExchanges = new Map([
@@ -147,7 +147,7 @@ test("one configured delivered-order adapter funds all observers once and unacce
       "new.sercum.paid",
       "feedback.paid",
     ])
-      expect(commands.filter((value) => value === command)).toHaveLength(1);
+      {expect(commands.filter((value) => value === command)).toHaveLength(1);}
     const zero = await h.order({ rechargeGold: 0n });
     await h.consume(zero);
     expect(await h.total()).toBe(1700n);
@@ -200,14 +200,14 @@ test("closed observers acknowledge verified delivery without retroactive paid re
   const h = await fixture();
   try {
     for (const id of ["69022", "69023", "69025"])
-      h.rules.configuration.payControl!.get(id)!.k2 = "close";
+      {h.rules.configuration.payControl!.get(id)!.k2 = "close";}
     const order = await h.order();
     await h.consume(order);
     expect(await h.total()).toBeUndefined();
     expect((await h.newcomer()) ?? 0n).toBe(0n);
     expect(await h.messages()).toHaveLength(0);
     for (const id of ["69022", "69023", "69025"])
-      h.rules.configuration.payControl!.get(id)!.k2 = "all";
+      {h.rules.configuration.payControl!.get(id)!.k2 = "all";}
     await h.consume(order);
     expect(await h.total()).toBeUndefined();
     expect((await h.newcomer()) ?? 0n).toBe(0n);

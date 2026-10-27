@@ -16,13 +16,13 @@ export class AlchemistDomain extends CityCommandDomain {
 
   public readonly prepare: CityDomain["prepare"] = async (context, _command, params) => {
     if (!localEventWindow(context.rules.power.activityPanels?.get("57139"), context.now))
-      throw new GameError(errors.unsupported, "city_progression");
+      {throw new GameError(errors.unsupported, "city_progression");}
 
     const rule = context.rules.items.get("alchemist"),
       action = str(params, "M__REQUEST_ID__H");
 
     if (!rule || !["info", "reward"].includes(action))
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const row: Row = {
       uid: context.owner,
@@ -38,10 +38,10 @@ export class AlchemistDomain extends CityCommandDomain {
     };
 
     if (row.uid !== context.owner || num(row, "type") !== 1)
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     if (long(row, "resettime") / 86400000n !== context.now / 86400000n)
-      Object.assign(row, { listen: 0, share: 0, reward: 0, resettime: context.now });
+      {Object.assign(row, { listen: 0, share: 0, reward: 0, resettime: context.now });}
 
     const body: Fields = {};
 
@@ -55,7 +55,7 @@ export class AlchemistDomain extends CityCommandDomain {
       }
 
       if (num(row, "reward") >= cityInteger(rule.k1))
-        throw new GameError(errors.invalid, "city_progression");
+        {throw new GameError(errors.invalid, "city_progression");}
 
       body.rewards = sfs.array(
         grantNativeProgressionReward(context, pinProgressionReward(context, rule.k4 ?? "")),

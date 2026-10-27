@@ -9,11 +9,11 @@ export abstract class ChatRoomController extends ChatCommandController {
 
   protected async requireRoom(context: CommandContext, roomId: unknown): Promise<Room> {
     if (typeof roomId !== "string" || !context.connection.joinedRooms.has(roomId))
-      throw new ChatCommandError("invalid_room");
+      {throw new ChatCommandError("invalid_room");}
 
     const room = await this.options.authorizeRoom(context.uid, roomId);
 
-    if (!room) throw new ChatCommandError("invalid_room");
+    if (!room) {throw new ChatCommandError("invalid_room");}
 
     return room;
   }

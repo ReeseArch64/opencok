@@ -8,12 +8,12 @@ import { generalFailure } from "./general-progression.ts";
 export function generalDrawPeriod(rules: Rules, now: bigint) {
   const panel = rules.power.activityPanels?.get("57153");
 
-  if (!panel?.start || !panel.end) generalFailure();
+  if (!panel?.start || !panel.end) {generalFailure();}
 
   const start = ruleTime(panel.start),
     end = ruleTime(panel.end);
 
-  if (end <= start) generalFailure();
+  if (end <= start) {generalFailure();}
 
   return { start, end, open: now >= start && now <= end };
 }
@@ -46,7 +46,7 @@ export function generalDrawState(
   ].reduce((max, key) => (long(row, key) > max ? long(row, key) : max), 0n);
 
   if (!previous || (period.open && latest < period.start))
-    row = {
+    {row = {
       uid: owner,
       hide_king: num(previous ?? {}, "hide_king"),
       normal_free: 1,
@@ -64,26 +64,26 @@ export function generalDrawState(
       gold_last_add_millis: 0n,
       last_normal_wheel_millis: 0n,
       rewardFlags: "",
-    };
+    };}
 
   if (period.open) {
     for (const [count, at, minutes] of [
       ["normal_free", "normal_last_free_millis", config?.k7],
       ["silver_usable_free", "silver_last_free_millis", config?.k8],
     ] as const)
-      if (
+      {if (
         num(row, count) === 0 &&
         now - long(row, at) >= BigInt(cityInteger(minutes, 1)) * 60000n
       ) {
         row[count] = 1;
         row[at] = now;
-      }
+      }}
 
     for (const prefix of ["silver", "gold"])
-      if (long(row, `${prefix}_last_add_millis`) / 86400000n !== now / 86400000n) {
+      {if (long(row, `${prefix}_last_add_millis`) / 86400000n !== now / 86400000n) {
         row[`${prefix}_daily`] = 0;
         row[`${prefix}_last_add_millis`] = 0n;
-      }
+      }}
   }
 
   return row;
@@ -114,7 +114,7 @@ export function generalDrawPurchase(
     (type === 1 && num(row, "silver_usable") < paid) ||
     (type === 2 && num(row, "gold_usable") < paid)
   )
-    generalFailure();
+    {generalFailure();}
 
   if (type === 0) {
     const previous = num(row, "normal_total"),
@@ -123,7 +123,7 @@ export function generalDrawPurchase(
     next.normal_free = num(row, "normal_free") - free;
     next.last_normal_wheel_millis = now;
 
-    if (free) next.normal_last_free_millis = now;
+    if (free) {next.normal_last_free_millis = now;}
 
     for (const [prefix, divisor, cap] of [
       ["silver", config?.k1, config?.k9],
@@ -150,7 +150,7 @@ export function generalDrawPurchase(
     if (type === 1) {
       next.silver_usable_free = num(row, "silver_usable_free") - free;
 
-      if (free) next.silver_last_free_millis = now;
+      if (free) {next.silver_last_free_millis = now;}
     }
   }
 

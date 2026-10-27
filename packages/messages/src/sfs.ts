@@ -13,7 +13,7 @@ export const sfs = {
   short: (value: number): Value => ({ type: Type.Short, value }),
   int: (value: number): Value => ({ type: Type.Int, value }),
   long: (value: bigint | number | string): Value => {
-    if (typeof value === "number" && !Number.isSafeInteger(value)) throw new ProtocolError();
+    if (typeof value === "number" && !Number.isSafeInteger(value)) {throw new ProtocolError();}
 
     return { type: Type.Long, value: BigInt(value) };
   },
@@ -30,7 +30,7 @@ export class ProtocolError extends Error {
 }
 
 export function fields(value: Value | undefined): Fields {
-  if (value?.type !== Type.Object) throw new ProtocolError();
+  if (value?.type !== Type.Object) {throw new ProtocolError();}
 
   return value.value as Fields;
 }
@@ -38,9 +38,9 @@ export function fields(value: Value | undefined): Fields {
 export function str(data: Fields, key: string, fallback?: string): string {
   const value = data[key];
 
-  if (!value && fallback !== undefined) return fallback;
+  if (!value && fallback !== undefined) {return fallback;}
 
-  if (value?.type !== Type.String) throw new ProtocolError();
+  if (value?.type !== Type.String) {throw new ProtocolError();}
 
   return value.value as string;
 }
@@ -48,9 +48,9 @@ export function str(data: Fields, key: string, fallback?: string): string {
 export function int(data: Fields, key: string, fallback?: number): number {
   const value = data[key];
 
-  if (!value && fallback !== undefined) return fallback;
+  if (!value && fallback !== undefined) {return fallback;}
 
-  if (value?.type !== Type.Int) throw new ProtocolError();
+  if (value?.type !== Type.Int) {throw new ProtocolError();}
 
   return value.value as number;
 }
@@ -79,7 +79,7 @@ class Reader {
 
   take(count: number): Buffer {
     if (!Number.isInteger(count) || count < 0 || this.pos + count > this.bytes.length)
-      throw new ProtocolError();
+      {throw new ProtocolError();}
 
     const data = this.bytes.subarray(this.pos, this.pos + count);
     this.pos += count;
@@ -90,7 +90,7 @@ class Reader {
   count(): number {
     const count = this.take(2).readUInt16BE();
 
-    if (count > MAX_ITEMS) throw new ProtocolError();
+    if (count > MAX_ITEMS) {throw new ProtocolError();}
 
     return count;
   }
@@ -106,7 +106,7 @@ class Reader {
   }
 
   read(depth = 0, tag?: Type): Value {
-    if (depth > MAX_DEPTH || --this.budget < 0) throw new ProtocolError();
+    if (depth > MAX_DEPTH || --this.budget < 0) {throw new ProtocolError();}
 
     const type = tag ?? this.take(1).readUInt8();
     let value: unknown;
@@ -118,7 +118,7 @@ class Reader {
       case Type.Bool: {
         const flag = this.take(1).readUInt8();
 
-        if (flag > 1) throw new ProtocolError();
+        if (flag > 1) {throw new ProtocolError();}
 
         value = flag === 1;
         break;
@@ -154,9 +154,9 @@ class Reader {
         for (let i = 0; i < size; i++) {
           const key = this.string();
 
-          if (Buffer.byteLength(key) > 255) throw new ProtocolError();
+          if (Buffer.byteLength(key) > 255) {throw new ProtocolError();}
 
-          if (Object.hasOwn(result, key)) throw new ProtocolError();
+          if (Object.hasOwn(result, key)) {throw new ProtocolError();}
 
           result[key] = this.read(depth + 1);
         }
@@ -168,7 +168,7 @@ class Reader {
         const result: Value[] = [];
         const size = this.count();
 
-        for (let i = 0; i < size; i++) result.push(this.read(depth + 1));
+        for (let i = 0; i < size; i++) {result.push(this.read(depth + 1));}
 
         value = result;
         break;
@@ -176,12 +176,12 @@ class Reader {
       default: {
         const element = arrayElement[type];
 
-        if (element === undefined) throw new ProtocolError();
+        if (element === undefined) {throw new ProtocolError();}
 
         const result: unknown[] = [];
         const size = this.count();
 
-        for (let i = 0; i < size; i++) result.push(this.read(depth + 1, element).value);
+        for (let i = 0; i < size; i++) {result.push(this.read(depth + 1, element).value);}
 
         value = result;
       }
@@ -199,7 +199,7 @@ class Writer {
   add(bytes: Buffer) {
     this.size += bytes.length;
 
-    if (this.size > MAX_BYTES) throw new ProtocolError();
+    if (this.size > MAX_BYTES) {throw new ProtocolError();}
 
     this.chunks.push(bytes);
   }
@@ -211,7 +211,7 @@ class Writer {
   }
 
   count(count: number) {
-    if (count > MAX_ITEMS) throw new ProtocolError();
+    if (count > MAX_ITEMS) {throw new ProtocolError();}
 
     this.number(2, (b) => b.writeUInt16BE(count));
   }
@@ -219,18 +219,18 @@ class Writer {
   string(value: string) {
     const data = Buffer.from(value, "utf8");
 
-    if (data.length > MAX_ITEMS) throw new ProtocolError();
+    if (data.length > MAX_ITEMS) {throw new ProtocolError();}
 
     this.number(2, (b) => b.writeUInt16BE(data.length));
     this.add(data);
   }
 
   write(item: Value, depth = 0, tagged = true) {
-    if (depth > MAX_DEPTH || --this.budget < 0) throw new ProtocolError();
+    if (depth > MAX_DEPTH || --this.budget < 0) {throw new ProtocolError();}
 
     const { type, value } = item;
 
-    if (tagged) this.number(1, (b) => b.writeUInt8(type));
+    if (tagged) {this.number(1, (b) => b.writeUInt8(type));}
 
     switch (type) {
       case Type.Null:
@@ -270,7 +270,7 @@ class Writer {
         this.count(entries.length);
 
         for (const [key, child] of entries) {
-          if (Buffer.byteLength(key) > 255) throw new ProtocolError();
+          if (Buffer.byteLength(key) > 255) {throw new ProtocolError();}
 
           this.string(key);
           this.write(child, depth + 1);
@@ -282,19 +282,19 @@ class Writer {
         const children = value as Value[];
         this.count(children.length);
 
-        for (const child of children) this.write(child, depth + 1);
+        for (const child of children) {this.write(child, depth + 1);}
 
         break;
       }
       default: {
         const element = arrayElement[type];
 
-        if (element === undefined) throw new ProtocolError();
+        if (element === undefined) {throw new ProtocolError();}
 
         const children = value as unknown[];
         this.count(children.length);
 
-        for (const child of children) this.write({ type: element, value: child }, depth + 1, false);
+        for (const child of children) {this.write({ type: element, value: child }, depth + 1, false);}
       }
     }
   }
@@ -308,12 +308,12 @@ export function encode(data: Fields): Buffer {
 }
 
 export function decode(bytes: Buffer): Fields {
-  if (bytes.length > MAX_BYTES) throw new ProtocolError();
+  if (bytes.length > MAX_BYTES) {throw new ProtocolError();}
 
   const reader = new Reader(bytes);
   const result = fields(reader.read());
 
-  if (reader.pos !== bytes.length) throw new ProtocolError();
+  if (reader.pos !== bytes.length) {throw new ProtocolError();}
 
   return result;
 }
@@ -326,12 +326,12 @@ export function encodeArray(data: Value[]): Buffer {
 }
 
 export function decodeArray(bytes: Buffer): Value[] {
-  if (bytes.length > MAX_BYTES) throw new ProtocolError();
+  if (bytes.length > MAX_BYTES) {throw new ProtocolError();}
 
   const reader = new Reader(bytes);
   const result = reader.read();
 
-  if (result.type !== Type.Array || reader.pos !== bytes.length) throw new ProtocolError();
+  if (result.type !== Type.Array || reader.pos !== bytes.length) {throw new ProtocolError();}
 
   return result.value as Value[];
 }

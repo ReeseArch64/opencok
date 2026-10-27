@@ -37,7 +37,7 @@ async function fixture(native = false) {
     .values({ uid: "owner", pointId: anchor, worldId: 0, lastCityDefTime: 123n });
   await h.db.db.update(userprofile).set({ worldPoint: anchor }).where(eq(userprofile.uid, "owner"));
   for (const id of [1, 2, 1201, 1202, 10, 20, 21, 1220, 1221])
-    await h.db.db.insert(worldpoint).values({
+    {await h.db.db.insert(worldpoint).values({
       id,
       worldId: 0,
       x: (id - 1) % 1200,
@@ -56,7 +56,7 @@ async function fixture(native = false) {
       monsterInfo: id === anchor ? Buffer.from("synthetic-city-metadata") : null,
       flushFlag: id === anchor ? 3 : 0,
       fireTime: id === anchor ? 456n : 0n,
-    });
+    });}
   await h.db.db.insert(user_army).values({ uid: "owner", armyId: "107000", level: 1, free: 100 });
   const tick = () => h.command("world.tick", {}),
     start = () =>

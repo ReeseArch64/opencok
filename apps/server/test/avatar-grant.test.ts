@@ -158,7 +158,7 @@ test("avatar grant binds durable version and identity to the existing files conf
   expect(second.body.sequence).toEqual(sfs.int(5));
   expect(f.profile).toEqual(before);
   for (const command of ["user.avatar.finish", "user.update.picVer"])
-    await expect(f.game.execute("1001", command, {})).rejects.toMatchObject({ code: "102192" });
+    {await expect(f.game.execute("1001", command, {})).rejects.toMatchObject({ code: "102192" });}
 });
 
 test("eligibility preserves sequence, castle, cooldown and report-ban error precedence before HTTP", async () => {
@@ -275,9 +275,9 @@ test("avatar rules retain encoded sequences, lazy config parsing and Java long a
     [2000042, 43],
     [2147483647, 483648],
   ])
-    expect(avatarSequence(version)).toBe(next!);
+    {expect(avatarSequence(version)).toBe(next!);}
   for (const version of [-2147483649, null, 1.5, NaN, 999999, 1999999, 2147483648])
-    expect(() => avatarSequence(version)).toThrow();
+    {expect(() => avatarSequence(version)).toThrow();}
   expect(avatarMinimumLevel(rules("0", "invalid"))).toBeUndefined();
   expect(() => avatarMinimumLevel(rules("1", "＋1"))).toThrow();
   expect(avatarMinimumLevel(rules("1", "+１０"))).toBe(10);
@@ -323,9 +323,9 @@ test("Redis authorization binds purpose, owner, sequence and exact expiry withou
   time++;
   await expect(tickets.verify(token, "upload")).rejects.toThrow();
   for (const owner of ["", "abc", "1".repeat(21), "1\n"])
-    await expect(tickets.issue(owner, 1, "upload")).rejects.toThrow();
+    {await expect(tickets.issue(owner, 1, "upload")).rejects.toThrow();}
   for (const sequence of [0, 1000000, 1.5])
-    await expect(tickets.issue("1001", sequence, "upload")).rejects.toThrow();
+    {await expect(tickets.issue("1001", sequence, "upload")).rejects.toThrow();}
 });
 
 test("private receipt exchange rejects malformed or mismatched replies and bounds streaming/deadlines", async () => {
@@ -342,9 +342,9 @@ test("private receipt exchange rejects malformed or mismatched replies and bound
     new Response(`v1\n1001\n5\n${hash}\nextra`, { headers: { "content-type": "text/plain" } }),
     new Response(`v1\n1001\n5\n${hash}\n`, { headers: { "content-type": "application/json" } }),
   ])
-    await expect(client(async () => response).find("1001", 5)).rejects.toThrow(
+    {await expect(client(async () => response).find("1001", 5)).rejects.toThrow(
       "Avatar files unavailable",
-    );
+    );}
   let cancelled = false;
   const oversized = new ReadableStream<Uint8Array>({
     start(controller) {
@@ -407,9 +407,9 @@ test("files configuration needs only a private API origin and no signing-key fil
     "http://files.internal/path",
     "http://files.internal/?private=x",
   ])
-    expect(() =>
+    {expect(() =>
       createAvatarFiles({ origin: value, tickets: ticketFixture(), timeoutMs: 1000 }),
-    ).toThrow();
+    ).toThrow();}
 });
 
 test("authenticated avatar URL renewal signs current realm profiles without upload eligibility checks", async () => {
@@ -431,7 +431,7 @@ test("authenticated avatar URL renewal signs current realm profiles without uplo
   f.profile.picVer = 0;
   expect((await game.execute("1001", "user.avatar.url", {})).body.path).toEqual(sfs.string(""));
   for (const target of [sfs.int(1002), sfs.string("missing")])
-    await expect(game.execute("1001", "user.avatar.url", { gameuid: target })).rejects.toThrow();
+    {await expect(game.execute("1001", "user.avatar.url", { gameuid: target })).rejects.toThrow();}
   profiles.get("1002")!.serverId = 2;
   await expect(
     game.execute("1001", "user.avatar.url", { gameuid: sfs.string("1002") }),

@@ -702,7 +702,7 @@ test("older callers do not enter the honour watchtower shield admission or speed
 }, 120000);
 
 for (const duePeer of [false, true])
-  test(`outbound scout recall ignores unprojectable foreign intel${duePeer ? " and defers another due scout" : " while restoring its owned troops"}`, async () => {
+  {test(`outbound scout recall ignores unprojectable foreign intel${duePeer ? " and defers another due scout" : " while restoring its owned troops"}`, async () => {
     const h = await scoutHarness();
     try {
       await h.db.db.insert(user_item).values({
@@ -744,7 +744,7 @@ for (const duePeer of [false, true])
       if (peer) {
         expect(peer.dueAt).toBeLessThan(selected.dueAt);
         h.clock.now = Number(peer.dueAt);
-      } else h.clock.now++;
+      } else {h.clock.now++;}
       const recall = { uuid: id, operationId: sfs.string(randomUUID()) };
       await Promise.all(Array.from({ length: 3 }, () => h.command("world.march.retreat", recall)));
       const returning = (
@@ -778,10 +778,10 @@ for (const duePeer of [false, true])
     } finally {
       await h.close();
     }
-  }, 120000);
+  }, 120000);}
 
 for (const unavailable of ["expired", "burned"])
-  test(`${unavailable} barbarians at scout arrival return the owned party without an intel report`, async () => {
+  {test(`${unavailable} barbarians at scout arrival return the owned party without an intel report`, async () => {
     const h = await scoutHarness();
     try {
       const rule = h.rules.world.barbarians!.get("4800000")!,
@@ -845,4 +845,4 @@ for (const unavailable of ["expired", "burned"])
     } finally {
       await h.close();
     }
-  }, 120000);
+  }, 120000);}

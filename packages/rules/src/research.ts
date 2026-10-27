@@ -15,13 +15,13 @@ import {
 } from "./city-progression";
 
 export function researchDefinition(rules: Rules, itemId: string, level: number): Rule {
-  if (!/^\d{4,8}00$/.test(itemId)) throw new GameError(errors.invalid, "city_progression");
+  if (!/^\d{4,8}00$/.test(itemId)) {throw new GameError(errors.invalid, "city_progression");}
 
   cityInteger(level, 0, 99);
   const rule = rules.power.sciences?.get(String(cityInteger(itemId) + level));
 
   if (!rule || cityInteger(rule.science_lv) !== level)
-    throw new GameError(errors.unsupported, "city_progression");
+    {throw new GameError(errors.unsupported, "city_progression");}
 
   return rule;
 }
@@ -33,7 +33,7 @@ export function checkResearchRequirements(state: CityProgressionState, rules: Ru
       level = id % 100;
 
     if (!state.sciences.some((row) => text(row, "itemId") === base && num(row, "level") >= level))
-      throw new GameError(errors.researchPrerequisite, "research_prerequisite");
+      {throw new GameError(errors.researchPrerequisite, "research_prerequisite");}
   }
 
   for (const condition of rule.building_condition?.split(";").filter(Boolean) ?? []) {
@@ -42,7 +42,7 @@ export function checkResearchRequirements(state: CityProgressionState, rules: Ru
       level = id % 100;
 
     if (!state.buildings.some((row) => num(row, "itemId") === base && cityLevel(row) >= level))
-      throw new GameError(errors.researchPrerequisite, "research_building");
+      {throw new GameError(errors.researchPrerequisite, "research_building");}
   }
 
   if (rule.reputation_condition) {
@@ -52,7 +52,7 @@ export function checkResearchRequirements(state: CityProgressionState, rules: Ru
       extra.length ||
       cityPrestige(state, rules, cityInteger(civilization)) < cityInteger(minimum)
     )
-      throw new GameError(errors.researchPrerequisite, "city_progression");
+      {throw new GameError(errors.researchPrerequisite, "city_progression");}
   }
 
   if (rule.vip) {
@@ -61,10 +61,10 @@ export function checkResearchRequirements(state: CityProgressionState, rules: Ru
     let level = 0;
 
     for (const entry of rules.power.vip?.values() ?? [])
-      if (cityInteger(entry.point) <= num(vip ?? {}, "score")) level = cityInteger(entry.id) - 7000;
+      {if (cityInteger(entry.point) <= num(vip ?? {}, "score")) {level = cityInteger(entry.id) - 7000;}}
 
     if (required > 10 ? num(vip ?? {}, "sLevel") < required - 10 : level < required)
-      throw new GameError(errors.vip, "city_progression");
+      {throw new GameError(errors.vip, "city_progression");}
   }
 }
 
@@ -77,7 +77,7 @@ export function researchCosts(rule: Rule, effect: CityEffect): Partial<Record<Ci
       asset = cityAssets[id]!;
 
     if (extra.length || result[asset] !== undefined)
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const reduction =
       effect(181) +

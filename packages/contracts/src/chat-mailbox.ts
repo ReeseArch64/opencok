@@ -73,7 +73,7 @@ export function validChatMailbox(value: unknown): value is ChatMailboxUpdate {
 }
 
 export function encodeChatMailbox(update: ChatMailboxUpdate): string {
-  if (!validChatMailbox(update)) throw new Error("Invalid chat mailbox operation");
+  if (!validChatMailbox(update)) {throw new Error("Invalid chat mailbox operation");}
 
   return JSON.stringify({
     owner: update.owner,
@@ -91,7 +91,7 @@ export function decodeChatMailbox(body: string): ChatMailboxUpdate {
   const value: unknown = JSON.parse(body);
 
   if (!validChatMailbox(value) || Object.keys(value).length !== 8)
-    throw new Error("Invalid chat mailbox operation");
+    {throw new Error("Invalid chat mailbox operation");}
 
   return value;
 }

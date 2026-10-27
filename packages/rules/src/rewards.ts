@@ -32,11 +32,11 @@ function invalid(): never {
 }
 
 function integer(raw: unknown): number {
-  if (!/^[+-]?\d+$/.test(String(raw))) return invalid();
+  if (!/^[+-]?\d+$/.test(String(raw))) {return invalid();}
 
   const result = Number(raw);
 
-  if (!Number.isInteger(result) || result < -2147483648 || result > 2147483647) return invalid();
+  if (!Number.isInteger(result) || result < -2147483648 || result > 2147483647) {return invalid();}
 
   return result;
 }
@@ -53,14 +53,14 @@ function select(rate: string, random: RewardRandom): number {
   const weights = split(rate, ";").map(integer);
   const total = weights.reduce((sum, weight) => (sum + weight) | 0, 0);
 
-  if (total <= 0) return invalid();
+  if (total <= 0) {return invalid();}
 
   let draw = random(total);
 
-  if (!Number.isInteger(draw) || draw < 0 || draw >= total) return invalid();
+  if (!Number.isInteger(draw) || draw < 0 || draw >= total) {return invalid();}
 
   for (let index = 0; index < weights.length; index++) {
-    if (draw < weights[index]!) return index;
+    if (draw < weights[index]!) {return index;}
 
     draw = (draw - weights[index]!) | 0;
   }
@@ -71,7 +71,7 @@ function select(rate: string, random: RewardRandom): number {
 function randomItems(rule: Rule, random: RewardRandom): Map<string, number> {
   const result = new Map<string, number>();
 
-  if (rule.rate === undefined) return result;
+  if (rule.rate === undefined) {return result;}
 
   const groups = split(rule.item, "|");
   const counts = split(rule.num, "|");
@@ -79,7 +79,7 @@ function randomItems(rule: Rule, random: RewardRandom): Map<string, number> {
 
   for (const [index, rate] of split(rule.rate, "|").entries()) {
     if (groups[index] === undefined || counts[index] === undefined || circles[index] === undefined)
-      return invalid();
+      {return invalid();}
 
     const items = split(groups[index], ";");
     const amounts = split(counts[index], ";");
@@ -91,7 +91,7 @@ function randomItems(rule: Rule, random: RewardRandom): Map<string, number> {
       const choice = select(rate, random);
       const id = items[choice];
 
-      if (id === undefined || amounts[choice] === undefined || !id.trim()) continue;
+      if (id === undefined || amounts[choice] === undefined || !id.trim()) {continue;}
 
       const count = integer(amounts[choice]);
       const amount = guaranteed ? roundedFloat(count) : count;
@@ -109,19 +109,19 @@ export function previewRewards(
   random: RewardRandom,
   rewardRule?: Rule,
 ): readonly RewardPreview[] {
-  if (context.kingdomId !== rules.kingdomId) return invalid();
+  if (context.kingdomId !== rules.kingdomId) {return invalid();}
 
   const rule = rewardRule ?? rules.reconnect.rewards?.get(rewardId ?? "") ?? {};
   const result: RewardPreview[] = [];
   const add = (key: string, type: number) => {
-    if (rule[key] === undefined) return;
+    if (rule[key] === undefined) {return;}
 
     const value = integer(rule[key]);
 
-    if (value > 0) result.push({ kind: "count", type, value });
+    if (value > 0) {result.push({ kind: "count", type, value });}
   };
 
-  for (const [key, type] of resourceTypes) add(key, type);
+  for (const [key, type] of resourceTypes) {add(key, type);}
 
   if (rule.item !== undefined) {
     const items = randomItems(rule, random);
@@ -130,12 +130,12 @@ export function previewRewards(
     for (const id of order) {
       const count = items.get(id);
 
-      if (count === undefined) continue;
+      if (count === undefined) {continue;}
 
       const item = integer(id);
 
       if (item < 50) {
-        if (item >= 0 && item <= 34) result.push({ kind: "count", type: item, value: count });
+        if (item >= 0 && item <= 34) {result.push({ kind: "count", type: item, value: count });}
       } else {
         const equipment =
           (item >= 1000000 && item <= 1999999) || (item >= 10000004 && item <= 10050555);
@@ -157,19 +157,19 @@ export function previewRewards(
     for (const segment of split(rule.prestige, "|")) {
       const pair = split(segment, ";");
 
-      if (pair.length === 2) prestige.set(integer(pair[0]), integer(pair[1]));
+      if (pair.length === 2) {prestige.set(integer(pair[0]), integer(pair[1]));}
     }
 
     for (const civilization of hashOrder(prestige.keys()))
-      result.push({
+      {result.push({
         kind: "prestige",
         type: 31,
         currentCivilization: civilization === 0,
         value: prestige.get(civilization)!,
-      });
+      });}
   }
 
-  if (result.length > 32767) return invalid();
+  if (result.length > 32767) {return invalid();}
 
   return result;
 }

@@ -21,7 +21,7 @@ class FakeCache extends Cache {
 
   override async command(command: string, ...args: string[]): Promise<unknown> {
     this.calls.push([command, ...args]);
-    if (this.failures.has(args[0]!)) throw new Error("Synthetic list command failure");
+    if (this.failures.has(args[0]!)) {throw new Error("Synthetic list command failure");}
     return this.replies.has(args[0]!) ? this.replies.get(args[0]!) : [];
   }
 }
@@ -34,7 +34,7 @@ test("reserved-name reads use ordered global Redis lists without realm prefixes 
   }
   expect(cache.calls).toEqual(keys.map((key) => ["LRANGE", key, "0", "-1"]));
   for (const key of ["name", "forbidden_words_name\n", "forbidden_words_other", ""])
-    await expect(cache.nicknameForbiddenWords(key)).rejects.toThrow("nickname forbidden list");
+    {await expect(cache.nicknameForbiddenWords(key)).rejects.toThrow("nickname forbidden list");}
   expect(cache.calls).toHaveLength(5);
 });
 
@@ -111,7 +111,7 @@ test("a failed word-file read never reaches Redis or clears previously loaded pa
   let calls = 0;
   const filter = new NicknameWordFilter(
     async () => {
-      if (failed) throw new Error("Synthetic file failure");
+      if (failed) {throw new Error("Synthetic file failure");}
       return ["blocked"];
     },
     async () => {
@@ -137,7 +137,7 @@ test("a reached reader failure keeps prior name patterns while preserving alread
       async () => content,
       async (key) => {
         calls.push(key);
-        if (failure && key === failureAt) throw new Error("Synthetic acquisition failure");
+        if (failure && key === failureAt) {throw new Error("Synthetic acquisition failure");}
         return [failure ? "new pattern" : "old pattern"];
       },
     );
@@ -181,10 +181,10 @@ test("the old pattern snapshot remains available until the last list read finish
     async () => ["blocked"],
     async (key) => {
       if (key === keys[4] && pending)
-        return new Promise<string[]>((resolve) => {
+        {return new Promise<string[]>((resolve) => {
           finish = resolve;
           entered();
-        });
+        });}
       return ["old pattern"];
     },
   );

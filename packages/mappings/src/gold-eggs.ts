@@ -2,7 +2,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { GoldEggsCell, GoldEggsStanding } from "@opencok/contracts/gold-eggs";
 
 export function goldEggsCellsView(cells: readonly GoldEggsCell[]) {
-  if (cells.length > 64) throw new Error("Gold eggs cell projection bound exceeded");
+  if (cells.length > 64) {throw new Error("Gold eggs cell projection bound exceeded");}
 
   return sfs.array(
     cells.map((cell) =>
@@ -21,7 +21,7 @@ export function goldEggsRankingView(
   realm: number,
   global = false,
 ): Fields {
-  if (rows.length > 150) throw new Error("Gold eggs ranking projection bound exceeded");
+  if (rows.length > 150) {throw new Error("Gold eggs ranking projection bound exceeded");}
 
   const values = sfs.array(
     rows.map((row, index) =>

@@ -77,8 +77,8 @@ test("account allowlists preserve Java blank checks, exact tokens and all semant
       featureAnnouncementEnabled(announcement, rules, { ...context, uid: "", platform: "" }),
     ).toBe(true);
     for (const selector of [undefined, "", " ", "\t", "\u2000", "0", ";;"]) {
-      if (selector === undefined) delete binding[channel];
-      else binding[channel] = selector;
+      if (selector === undefined) {delete binding[channel];}
+      else {binding[channel] = selector;}
       expect(featureAnnouncementEnabled(announcement, rules, context)).toBe(false);
     }
     binding[channel] = ";market_global;;AppStore;";
@@ -122,7 +122,7 @@ test("boss availability skips announcement gates and selects the service-specifi
       start: "future",
     };
     rules.features.set(key, { id: key, ...gate });
-    if (id !== key) rules.features.set(id, { id, ...gate, online: "close" });
+    if (id !== key) {rules.features.set(id, { id, ...gate, online: "close" });}
     let calls = 0;
     const running = {
       ...context,
@@ -218,9 +218,9 @@ test("subscription announcements use realm metadata and exact platform without v
     end: "past",
   };
   for (const platform of ["AppStore", "market_global", "market_global2"])
-    expect(featureAnnouncementEnabled(row, rules, { ...context, platform })).toBe(true);
+    {expect(featureAnnouncementEnabled(row, rules, { ...context, platform })).toBe(true);}
   for (const platform of ["", "appstore", "Google", "market_global "])
-    expect(featureAnnouncementEnabled(row, rules, { ...context, platform })).toBe(false);
+    {expect(featureAnnouncementEnabled(row, rules, { ...context, platform })).toBe(false);}
   row.online = "close";
   expect(featureAnnouncementEnabled(row, rules, context)).toBe(false);
   row.online = "bad";

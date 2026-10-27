@@ -35,26 +35,26 @@ export function sharedUserInfo(
   now: number,
 ): SharedUserUpdate {
   if (typeof version !== "bigint" || version <= 0n || version > 9223372036854775807n)
-    throw new Error("Invalid shared user version");
+    {throw new Error("Invalid shared user version");}
 
   const profile = sharedSearchProfile(row, rules, now);
   const entry = playerSearchEntry({ kingdomId, remote: true, data: profile });
   const fields: Fields = {};
 
-  for (const key of keys) if (entry[key]) fields[key] = entry[key]!;
+  for (const key of keys) {if (entry[key]) {fields[key] = entry[key]!;}}
 
   validateFields(sharedUserInfoSchema, fields);
   const parts = Object.entries(fields).map(([key, field]) => {
-    if (field.type === Type.String) return `${JSON.stringify(key)}:${JSON.stringify(field.value)}`;
+    if (field.type === Type.String) {return `${JSON.stringify(key)}:${JSON.stringify(field.value)}`;}
 
     if (field.type === Type.Int || field.type === Type.Long)
-      return `${JSON.stringify(key)}:${String(field.value)}`;
+      {return `${JSON.stringify(key)}:${String(field.value)}`;}
 
     throw new Error("Invalid shared user field");
   });
   const body = `{${parts.join(",")}}`;
 
-  if (Buffer.byteLength(body) > 65535) throw new Error("Oversized shared user profile");
+  if (Buffer.byteLength(body) > 65535) {throw new Error("Oversized shared user profile");}
 
   return {
     owner: String(profile.uid),

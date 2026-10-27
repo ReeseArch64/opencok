@@ -24,12 +24,12 @@ function addEquipment(effects: Map<number, number>, id: number, value: number) {
 }
 
 function equipmentMultiplier(rule: Rule, effectValue: (id: number) => number): number {
-  if (!rule.color || !rule.site) return 1;
+  if (!rule.color || !rule.site) {return 1;}
 
   const color = integer(rule.color);
   const site = integer(rule.site);
 
-  if (color < 0 || color > 5 || site < 0 || site > 6) return invalid();
+  if (color < 0 || color > 5 || site < 0 || site > 6) {return invalid();}
 
   const colorEffect = color >= 2 ? float(effectValue(212 + color)) : 0;
   const siteEffect = float(effectValue([207, 209, 208, 210, 211, 212, 213][site]!));
@@ -45,11 +45,11 @@ export function equipmentEffects(
   const effects = new Map<number, number>();
 
   for (const row of equipment) {
-    if (integer(row.on) !== 1) continue;
+    if (integer(row.on) !== 1) {continue;}
 
     const rule = rules.power.equipment?.get(text(row, "itemId"));
 
-    if (!rule) return invalid();
+    if (!rule) {return invalid();}
 
     const multiplier = equipmentMultiplier(rule, (id) => effectValue(id, effects));
     const equipped = new Map<number, number>();
@@ -58,21 +58,21 @@ export function equipmentEffects(
       const ids = split(rule.para1);
       const values = split(rule.num1);
 
-      if (!ids.length || values.length < ids.length) return invalid();
+      if (!ids.length || values.length < ids.length) {return invalid();}
 
       for (const [index, id] of ids.entries())
-        add(equipped, integer(id), float(float(values[index]) * multiplier));
+        {add(equipped, integer(id), float(float(values[index]) * multiplier));}
 
-      if (rule.para2 !== undefined && !text(row, "extraProperty")) return invalid();
+      if (rule.para2 !== undefined && !text(row, "extraProperty")) {return invalid();}
     } else {
       for (let index = 1; index < 100; index++) {
         const ids = rule[`para${index}`];
 
-        if (!ids?.trim()) break;
+        if (!ids?.trim()) {break;}
 
         const value = float(float(rule[`num${index}`]) * multiplier);
 
-        for (const id of split(ids)) add(equipped, integer(id), value);
+        for (const id of split(ids)) {add(equipped, integer(id), value);}
       }
     }
 
@@ -81,25 +81,25 @@ export function equipmentEffects(
     for (const segment of split(text(row, "extraProperty"))) {
       const [ids, raw] = segment.split(",");
 
-      if (!ids) return invalid();
+      if (!ids) {return invalid();}
 
       const value = float(float(raw) * multiplier);
 
-      for (const id of split(ids, "@")) add(extra, integer(id), value);
+      for (const id of split(ids, "@")) {add(extra, integer(id), value);}
     }
 
-    for (const [id, value] of extra) add(equipped, id, value);
+    for (const [id, value] of extra) {add(equipped, id, value);}
 
-    for (const [id, value] of equipped) addEquipment(effects, id, value);
+    for (const [id, value] of equipped) {addEquipment(effects, id, value);}
   }
 
   return effects;
 }
 
 function addSet(effects: Map<number, number>, ids: string | undefined, values: string | undefined) {
-  if (ids === undefined || values === undefined) return;
+  if (ids === undefined || values === undefined) {return;}
 
-  for (const id of split(ids)) addEquipment(effects, integer(id), float(split(values)[0]));
+  for (const id of split(ids)) {addEquipment(effects, integer(id), float(split(values)[0]));}
 }
 
 export function equipmentSetEffects(
@@ -115,17 +115,17 @@ export function equipmentSetEffects(
     const counts = new Map<string, { count: number; level: number }>();
 
     for (const row of equipment) {
-      if (integer(row.on) !== 1) continue;
+      if (integer(row.on) !== 1) {continue;}
 
       const rule = rules.power.equipment?.get(text(row, "itemId"));
 
-      if (!rule) return invalid();
+      if (!rule) {return invalid();}
 
-      if (!rule.suit_id) continue;
+      if (!rule.suit_id) {continue;}
 
       const set = rules.power.equipmentSets?.get(rule.suit_id);
 
-      if (!set) return invalid();
+      if (!set) {return invalid();}
 
       const prior = counts.get(rule.suit_id) ?? { count: 0, level: 10 };
       counts.set(rule.suit_id, {
@@ -139,7 +139,7 @@ export function equipmentSetEffects(
 
       for (let index = 1; index <= 3; index++) {
         if (count >= index * 2 && set[`suit_hero${index}`] === undefined)
-          addSet(effects, set[`suit_para${index}`], set[`suit_num${index}`]);
+          {addSet(effects, set[`suit_para${index}`], set[`suit_num${index}`]);}
       }
 
       if (level > 0 && count === 6 && serverFeature(rules, "equipment_strengthen", context)) {
@@ -153,7 +153,7 @@ export function equipmentSetEffects(
           try {
             addSet(effects, id, value);
           } catch (error) {
-            if (!(error instanceof GameError)) throw error;
+            if (!(error instanceof GameError)) {throw error;}
           }
         }
       }
@@ -162,16 +162,16 @@ export function equipmentSetEffects(
 
   const selected = split(selection ?? "0;0;0", ";");
 
-  if (selected.length < 3) return invalid();
+  if (selected.length < 3) {return invalid();}
 
   for (let index = 0; index < 3; index++) {
     const id = selected[index]!;
 
-    if (id === "0") continue;
+    if (id === "0") {continue;}
 
     const set = rules.power.equipmentSets?.get(id);
 
-    if (!set) return invalid();
+    if (!set) {return invalid();}
 
     addSet(effects, set[`suit_para${index + 1}`], set[`suit_num${index + 1}`]);
   }

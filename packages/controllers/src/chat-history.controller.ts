@@ -14,8 +14,8 @@ export abstract class ChatHistoryController extends ChatRoomController {
     const visible: ChatMessage[] = [];
 
     for (const message of messages)
-      if (!this.options.access || (await this.options.access.canRead(uid, message)))
-        visible.push(message);
+      {if (!this.options.access || (await this.options.access.canRead(uid, message)))
+        {visible.push(message);}}
 
     return visible;
   }

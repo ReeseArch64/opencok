@@ -11,9 +11,9 @@ import { pinProgressionReward } from "../../../packages/services/src/progression
 test("every maintained consumption rank prize resolves to funded claimable mail", async () => {
   const rules = await loadRules();
   for (const { reward } of costRankingBands(rules.items.get("continued_cost")!.k5!))
-    expect(
+    {expect(
       mailRewardEntries(pinProgressionReward({ rules, now: 1900000000000n }, reward)).length,
-    ).toBeGreaterThan(0);
+    ).toBeGreaterThan(0);}
   expect(rules.mail.get("12199")?.message).toBeTruthy();
 });
 test("consumption reward identities bind their financial period and owner while payloads retain pinned assets", () => {
@@ -34,5 +34,5 @@ test("consumption reward identities bind their financial period and owner while 
     JSON.stringify({ ...mail, contents: "invalid" }),
     JSON.stringify({ ...mail, reward: "unfunded" }),
   ])
-    expect(() => costRankMail(raw)).toThrow();
+    {expect(() => costRankMail(raw)).toThrow();}
 });

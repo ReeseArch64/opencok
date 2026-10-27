@@ -37,7 +37,7 @@ export async function readReconnectProgress(
   now: bigint,
 ): Promise<ReconnectProgressState> {
   if (!uid.trim() || uid.length > 40 || !uid.isWellFormed() || uid.includes("\0"))
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   const profile = (
     await tx
@@ -87,7 +87,7 @@ export async function readReconnectProgress(
       .for("update")
   )[0];
 
-  if (!profile) throw new GameError(errors.missing);
+  if (!profile) {throw new GameError(errors.missing);}
 
   if (
     profile.uid !== uid ||
@@ -95,15 +95,15 @@ export async function readReconnectProgress(
     (profile.banFlag ?? 0) !== 0 ||
     (profile.banTime ?? 0n) > now
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   const resource = (
     await tx.select().from(user_resource).where(eq(user_resource.uid, uid)).limit(1).for("update")
   )[0];
 
-  if (!resource) throw new GameError(errors.missing);
+  if (!resource) {throw new GameError(errors.missing);}
 
-  if (resource.uid !== uid) throw new GameError(errors.invalid);
+  if (resource.uid !== uid) {throw new GameError(errors.invalid);}
 
   const world = (
     await tx
@@ -128,7 +128,7 @@ export async function readReconnectProgress(
       .limit(1)
   )[0];
 
-  if (world && world.uid !== uid) throw new GameError(errors.invalid);
+  if (world && world.uid !== uid) {throw new GameError(errors.invalid);}
 
   const effects = await readPlayerEffects(tx, profile, true);
   const newGenerals = await readResourceNewGenerals(tx, uid, false);
@@ -220,7 +220,7 @@ export async function readReconnectProgress(
     .orderBy(asc(user_hospital.armyId))
     .limit(1025);
 
-  if (hospital.length > 1024) throw new Error("Hospital aggregate exceeds bound");
+  if (hospital.length > 1024) {throw new Error("Hospital aggregate exceeds bound");}
 
   const walls = await tx
     .select()
@@ -253,7 +253,7 @@ export async function readReconnectProgress(
       items,
     ].some((rows) => rows.length > 32767)
   )
-    throw new GameError(errors.unsupported, "reconnect");
+    {throw new GameError(errors.unsupported, "reconnect");}
 
   return {
     allianceResearch: profile.allianceId

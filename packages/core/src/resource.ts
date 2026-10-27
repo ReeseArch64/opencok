@@ -15,11 +15,11 @@ export function fromPromise<A>(operation: string, run: () => Promise<A>) {
         const result = await observeOperation(operation, run);
 
         if (operation !== "realm.health")
-          logEvent("resource_completed", {
+          {logEvent("resource_completed", {
             operation,
             outcome: "success",
             durationMs: Math.round(performance.now() - started),
-          });
+          });}
 
         return result;
       } catch (error) {

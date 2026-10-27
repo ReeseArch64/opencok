@@ -141,17 +141,17 @@ test("batch rules distinguish notice/type filters, message pagination and separa
     now,
   });
   for (const type of [0, 1, 12, -2147483648, 2147483647])
-    expect(mailBatchQuery(type, -2147483648, -1, null, now)).toEqual({
+    {expect(mailBatchQuery(type, -2147483648, -1, null, now)).toEqual({
       kind: "empty",
       begin: 0,
       limit: 0,
       fromUser: null,
       now,
-    });
-  for (const type of [10, 1000]) expect(() => mailBatchQuery(type, 0, 1, null, now)).toThrow();
+    });}
+  for (const type of [10, 1000]) {expect(() => mailBatchQuery(type, 0, 1, null, now)).toThrow();}
   for (const type of [4, 9])
-    for (const sender of [null, "", " \t\u2000", "x".repeat(41), "\0", "\ud800"])
-      expect(() => mailBatchQuery(type, 0, 1, sender, now)).toThrow();
+    {for (const sender of [null, "", " \t\u2000", "x".repeat(41), "\0", "\ud800"])
+      {expect(() => mailBatchQuery(type, 0, 1, sender, now)).toThrow();}}
   expect(mailBatchQuery(4, 0, 1, "\u00a0", now).fromUser).toBe("\u00a0");
   expect(mailBatchQuery(2, 0, 1, "\0", now).fromUser).toBeNull();
   for (const value of [NaN, Infinity, 0.5, 2147483648, -2147483649]) {
@@ -290,10 +290,10 @@ test("unknown/empty batch selectors return arrays while malformed requests never
   f.services.playerUpdateTimes = unused;
   f.readers.translations = unused;
   for (const selector of [0, 1, 12, -1, 2147483647])
-    expect(
+    {expect(
       (await f.game.execute("self", "mread.batch", { ...params(selector), offset: sfs.int(-1) }))
         .body,
-    ).toEqual({ result: sfs.array() });
+    ).toEqual({ result: sfs.array() });}
   for (const input of [
     {},
     { ...params(2), num: sfs.long(1) },
@@ -352,9 +352,9 @@ test("batch dependency, snapshot and projection failures never return a successf
         contents: Buffer.from(failure === "extra" ? "extra" : "plain"),
       }),
     );
-    if (failure === "sender") f.readers.senders = unused;
-    if (failure === "translation") f.readers.translations = unused;
-    if (failure === "marker") f.services.playerUpdateTimes = unused;
+    if (failure === "sender") {f.readers.senders = unused;}
+    if (failure === "translation") {f.readers.translations = unused;}
+    if (failure === "marker") {f.services.playerUpdateTimes = unused;}
     await expect(
       f.game.execute("self", "mread.batch", {
         ...params(4),
@@ -451,8 +451,8 @@ test("explicit mread.chat message selectors preserve batch queries, envelopes an
     const batch = fixture();
     const chat = fixture();
     if (type !== null)
-      for (const f of [batch, chat])
-        f.entries.push(mailListEntry({ type, contents: Buffer.from("{n:1}") }));
+      {for (const f of [batch, chat])
+        {f.entries.push(mailListEntry({ type, contents: Buffer.from("{n:1}") }));}}
     const input = { ...params(selector!), fromUser: sfs.string("sender"), _cok_: sfs.int(7) };
     expect(await chat.game.execute("self", "mread.chat", input)).toEqual(
       await batch.game.execute("self", "mread.batch", input),

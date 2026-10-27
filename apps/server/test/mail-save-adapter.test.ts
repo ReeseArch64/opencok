@@ -21,17 +21,17 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
       const text = statement.text;
       queries.push({ text, params });
       if (text.startsWith("begin"))
-        before = { entries: structuredClone(entries), markers: new Map(markers) };
+        {before = { entries: structuredClone(entries), markers: new Map(markers) };}
       if (text === "rollback" && before) {
         entries = before.entries;
         markers = before.markers;
       }
       if (text.includes('from "opencok_kingdom"."userprofile"')) {
-        if (options.fail === "profile") throw new Error("Synthetic profile failure");
+        if (options.fail === "profile") {throw new Error("Synthetic profile failure");}
         return { rows: options.profile === null ? [] : [options.profile ?? ["self", 1, "0", 0]] };
       }
       if (text.startsWith('update "opencok_kingdom"."mail"')) {
-        if (options.fail === "mail") throw new Error("Synthetic mail failure");
+        if (options.fail === "mail") {throw new Error("Synthetic mail failure");}
         const [flag, owner, ...ids] = params;
         const selected = entries.filter(
           (entry) =>
@@ -40,11 +40,11 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
             (!text.includes("<= 0") || (entry.flag ?? 0) <= 0) &&
             (!text.includes("<> 0") || (entry.flag ?? 0) !== 0),
         );
-        for (const entry of selected) entry.flag = flag as number;
+        for (const entry of selected) {entry.flag = flag as number;}
         return { rows: selected.map((entry) => [entry.uid]) };
       }
       if (text.startsWith('insert into "opencok_kingdom"."mail_update"')) {
-        if (options.fail === "marker") throw new Error("Synthetic marker failure");
+        if (options.fail === "marker") {throw new Error("Synthetic marker failure");}
         for (let i = 0; i < params.length; i += 3) {
           const key = `${params[i]}:${params[i + 1]}`;
           const time = BigInt(params[i + 2] as string);
@@ -53,7 +53,7 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
         }
       }
       if (text === "commit" && options.fail === "commit")
-        throw new Error("Synthetic commit failure");
+        {throw new Error("Synthetic commit failure");}
       return { rows: [] };
     },
   };
@@ -85,9 +85,9 @@ test("single saves are recipient scoped, atomic with markers and repeated save/c
   expect(queries.at(-1)?.text).toBe("commit");
   const markerCount = () => queries.filter((entry) => entry.text.startsWith("insert")).length;
   for (const id of ["a", "b", "missing", "foreign"])
-    expect((await saveMail(db, 1, "self", mailSaveQuery("save", id, 99, now + 10))).result).toBe(
+    {expect((await saveMail(db, 1, "self", mailSaveQuery("save", id, 99, now + 10))).result).toBe(
       "unchanged",
-    );
+    );}
   expect(markerCount()).toBe(1);
   expect((await saveMail(db, 1, "self", mailSaveQuery("save", "c", 0, now))).result).toBe("save");
   expect((await saveMail(db, 1, "self", mailSaveQuery("cancel", "a", 0, now - 1))).result).toBe(
@@ -175,9 +175,9 @@ test("the mutation adapter rejects malformed direct callers without executing SQ
   const fixture = database();
   const query = mailSaveQuery("save", "a", 1, now);
   for (const owner of ["", " ", "x".repeat(41), "a\0b", "\ud800"])
-    expect(() => saveMail(fixture.db, 1, owner, query)).toThrow();
+    {expect(() => saveMail(fixture.db, 1, owner, query)).toThrow();}
   for (const realm of [0, -1, 1.5, 2147483648])
-    expect(() => saveMail(fixture.db, realm, "self", query)).toThrow();
+    {expect(() => saveMail(fixture.db, realm, "self", query)).toThrow();}
   for (const patch of [
     { now: -1 },
     { now: NaN },
@@ -190,6 +190,6 @@ test("the mutation adapter rejects malformed direct callers without executing SQ
     { ids: ["\ud800"] },
     { ids: ["x".repeat(41)] },
   ])
-    expect(() => saveMail(fixture.db, 1, "self", { ...query, ...patch } as typeof query)).toThrow();
+    {expect(() => saveMail(fixture.db, 1, "self", { ...query, ...patch } as typeof query)).toThrow();}
   expect(fixture.queries).toEqual([]);
 });

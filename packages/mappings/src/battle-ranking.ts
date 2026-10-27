@@ -44,9 +44,9 @@ export function playoffRanking(
   const times = playoffTimes(publication, self, now);
   const fields: Fields = {};
 
-  if (times.battleState !== undefined) fields.battleState = sfs.int(times.battleState);
+  if (times.battleState !== undefined) {fields.battleState = sfs.int(times.battleState);}
 
-  if (times.endTime !== undefined) fields.endTime = sfs.long(times.endTime);
+  if (times.endTime !== undefined) {fields.endTime = sfs.long(times.endTime);}
 
   fields.teamId = sfs.string(allianceId);
   fields.enemyId = sfs.string(self?.enemyIds[publication.turns - 1] ?? "");

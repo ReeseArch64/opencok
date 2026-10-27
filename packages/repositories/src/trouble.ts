@@ -11,7 +11,7 @@ export async function readTrouble(tx: MutationTransaction, owner: string, histor
     .from(user_world)
     .where(eq(user_world.uid, owner));
 
-  if (world && world.world !== 0) throw new Error("Foreign trouble world");
+  if (world && world.world !== 0) {throw new Error("Foreign trouble world");}
 
   return {
     point: world?.point ?? 0,
@@ -32,7 +32,7 @@ export async function writeTrouble(
   entry: TroubleHistoryWrite,
 ) {
   if (entry.username.length > 255 || !/^\d{1,12}$/.test(entry.item))
-    throw new Error("Invalid trouble history");
+    {throw new Error("Invalid trouble history");}
 
   cityInteger(entry.status, 1);
   await tx.insert(trouble_log).values({

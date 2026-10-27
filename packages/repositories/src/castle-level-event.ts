@@ -24,11 +24,11 @@ export async function readCastleLevelEvent(
   for (const [shard, table] of shards.entries()) {
     const owned = await tx.select().from(table).where(eq(table.uid, owner)).limit(65).for("update");
 
-    if (owned.length > 64) throw new Error("Too many castle event entitlements");
+    if (owned.length > 64) {throw new Error("Too many castle event entitlements");}
 
     for (const row of owned) {
       if (rows.some((other) => other.level === row.level))
-        throw new Error("Ambiguous castle event entitlement");
+        {throw new Error("Ambiguous castle event entitlement");}
 
       rows.push({ ...row, shard });
     }
@@ -38,7 +38,7 @@ export async function readCastleLevelEvent(
       .from(table)
       .groupBy(table.level);
 
-    for (const row of totals) counts.set(row.level, (counts.get(row.level) ?? 0) + row.count);
+    for (const row of totals) {counts.set(row.level, (counts.get(row.level) ?? 0) + row.count);}
   }
 
   const [server] = await tx.select().from(server_info).where(eq(server_info.uid, "server"));
@@ -48,7 +48,7 @@ export async function readCastleLevelEvent(
     .where(eq(castle_exchange.uid, owner))
     .limit(1025);
 
-  if (exchanges.length > 1024) throw new Error("Too many castle event exchanges");
+  if (exchanges.length > 1024) {throw new Error("Too many castle event exchanges");}
 
   return {
     rows,
@@ -64,11 +64,11 @@ export async function writeCastleLevelEvent(
   rows: readonly CastleLevelEventRow[],
   enrollments: readonly number[],
 ) {
-  if (rows.length > 64 || enrollments.length > 64) throw new Error("Too many castle event writes");
+  if (rows.length > 64 || enrollments.length > 64) {throw new Error("Too many castle event writes");}
 
   for (const row of rows) {
     if (row.uid !== owner || ![0, 1].includes(row.shard))
-      throw new Error("Invalid castle event owner");
+      {throw new Error("Invalid castle event owner");}
 
     const table = shards[row.shard]!;
     const value = {
@@ -86,7 +86,7 @@ export async function writeCastleLevelEvent(
       .where(and(eq(table.uid, owner), eq(table.level, cityInteger(row.level, 1))))
       .returning({ uid: table.uid });
 
-    if (updated.length !== 1) throw new Error("Missing castle event entitlement");
+    if (updated.length !== 1) {throw new Error("Missing castle event entitlement");}
   }
 
   for (const level of new Set(enrollments)) {
@@ -100,6 +100,6 @@ export async function writeCastleLevelEvent(
       exists ||= !!row;
     }
 
-    if (!exists) await tx.insert(shards[castleEventShard(owner)]!).values({ uid: owner, level });
+    if (!exists) {await tx.insert(shards[castleEventShard(owner)]!).values({ uid: owner, level });}
   }
 }

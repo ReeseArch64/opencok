@@ -19,10 +19,10 @@ function database(
       const text = statement.text;
       queries.push({ text, params });
       const fail = (phase: string) => {
-        if (options.fail === phase) throw new Error(`Synthetic ${phase} failure`);
+        if (options.fail === phase) {throw new Error(`Synthetic ${phase} failure`);}
       };
       if (text.startsWith('select "uid", "level", "serverId"'))
-        return { rows: [["self", 10, 1, "0", 0]] };
+        {return { rows: [["self", 10, 1, "0", 0]] };}
       if (text.includes("left join")) {
         fail("board");
         return {
@@ -93,15 +93,15 @@ test("contribution snapshots select positive totals before post-window exclusion
   expect(fallback.text).toContain('"contributeSum" > (select');
   expect(fallback.text).not.toMatch(/join|userprofile|banTime|gmFlag/);
   for (const entry of queries)
-    expect(entry.text).not.toMatch(/\b(insert|update|delete|truncate)\b|select \*|"gold"|email/);
+    {expect(entry.text).not.toMatch(/\b(insert|update|delete|truncate)\b|select \*|"gold"|email/);}
 });
 
 test("empty contribution boards and orphan records retain query results while failures roll back", async () => {
   for (const options of [{ empty: true }, { orphan: true }]) {
     const { db } = database(options);
     const result = await readPlayerRanking(db, "self", query);
-    if (options.empty) expect(result.candidates).toEqual([]);
-    else expect(result.candidates[0]?.profileUid).toBeNull();
+    if (options.empty) {expect(result.candidates).toEqual([]);}
+    else {expect(result.candidates[0]?.profileUid).toBeNull();}
   }
   for (const options of [{ fail: "board" }, { fail: "count" }, { missingCount: true }]) {
     const { db, queries } = database(options);

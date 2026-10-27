@@ -18,7 +18,7 @@ import type { RuleContext } from "@opencok/rules/availability";
 import { publicProfileProgress, publicProfileSocial } from "@opencok/rules/profile";
 
 function serializePublicStatistics(statistics: Row | undefined): Fields {
-  if (!statistics) return {};
+  if (!statistics) {return {};}
 
   return {
     ...playerStatistics(statistics),
@@ -37,7 +37,7 @@ function serializePublicProfileBase(
   lastUpdateTime: string,
   profileKingdomId = context.kingdomId,
 ): Fields {
-  if (!state.profile || !state.lord) throw new GameError(errors.unsupported, "public_profile");
+  if (!state.profile || !state.lord) {throw new GameError(errors.unsupported, "public_profile");}
 
   const progress = publicProfileProgress(state, rules, context, profileKingdomId);
   const social = publicProfileSocial(state, profileKingdomId);
@@ -59,15 +59,15 @@ function serializePublicProfileBase(
     flowerVal: sfs.int(social.flowerVal),
   };
 
-  if (social.officer !== undefined) fields.officer = sfs.string(social.officer);
+  if (social.officer !== undefined) {fields.officer = sfs.string(social.officer);}
 
-  for (const key of ["uid", "name", "pic"]) fields[key] = sfs.string(text(state.profile, key));
+  for (const key of ["uid", "name", "pic"]) {fields[key] = sfs.string(text(state.profile, key));}
 
   for (const key of ["level", "exp", "picVer", "picfraId", "gmFlag"])
-    fields[key] = sfs.int(integer(state.profile, key));
+    {fields[key] = sfs.int(integer(state.profile, key));}
 
   for (const key of ["maxExp", "vip", "vipEndTime", "armedLevel", "market"] as const)
-    fields[key] = sfs.int(progress[key]);
+    {fields[key] = sfs.int(progress[key]);}
 
   return fields;
 }
@@ -90,25 +90,25 @@ function serializePublicEquipment(row: Row, strengthen: boolean): Fields {
     fields.suit_value_sign = sfs.string("2-2#4-2#6-2#8-1#10-1");
 
     for (const key of ["Buff", "buff", "buff_str", "buff_Str", "buffStr", "BuffStr"])
-      fields[key] = sfs.string("50");
+      {fields[key] = sfs.string("50");}
   }
 
   if (row.lockProperty !== null && row.lockProperty !== undefined) {
     const raw = text(row, "lockProperty");
     const segments = raw.split("|");
 
-    if (raw) while (segments.at(-1) === "") segments.pop();
+    if (raw) {while (segments.at(-1) === "") {segments.pop();}}
 
     let locks = "";
 
     for (const segment of segments) {
       const parts = segment.split(",");
 
-      while (parts.at(-1) === "" && parts.length > 1) parts.pop();
+      while (parts.at(-1) === "" && parts.length > 1) {parts.pop();}
 
-      if (parts.length < 2) throw new GameError(errors.unsupported, "public_profile");
+      if (parts.length < 2) {throw new GameError(errors.unsupported, "public_profile");}
 
-      if (parts[1] === "1") locks += (locks ? "|" : "") + parts[0]!;
+      if (parts[1] === "1") {locks += (locks ? "|" : "") + parts[0]!;}
     }
 
     fields.lockProperty = sfs.string(locks);

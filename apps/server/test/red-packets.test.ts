@@ -22,7 +22,7 @@ test("saved random distributions exhaust maintained pools in the configured clai
     [6000, 20],
     [12000, 30],
   ])
-    for (let draw = 0; draw < 100; draw++) {
+    {for (let draw = 0; draw < 100; draw++) {
       const packet: Row = {
         total: total!,
         remain: total!,
@@ -32,7 +32,7 @@ test("saved random distributions exhaust maintained pools in the configured clai
       };
       for (let person = 0; person < people!; person++) {
         const value = packetDistribution(packet, parameters, random);
-        if (person === 0 && total === 250) firstClaims.add(value);
+        if (person === 0 && total === 250) {firstClaims.add(value);}
         expect(value).toBeGreaterThanOrEqual(1);
         expect(value).toBeLessThanOrEqual(Number(packet.remain));
         packet.remain = Number(packet.remain) - value;
@@ -40,7 +40,7 @@ test("saved random distributions exhaust maintained pools in the configured clai
         expect(Number(packet.remain)).toBeGreaterThanOrEqual(people! - person - 1);
       }
       expect(packet.remain).toBe(0);
-    }
+    }}
   expect(firstClaims.size).toBeGreaterThan(5);
 });
 test("average distribution preserves the source ceiling and last-recipient remainder while statuses distinguish claimed empty and strict expiry", () => {
@@ -104,9 +104,9 @@ test("native packet commands preserve correlation while trusted paid producers a
     "redPackets.status",
     "redPackets.rvd.id",
   ])
-    expect((await game.execute("owner", command, { _cok_: sfs.int(7) })).body._cok_).toEqual(
+    {expect((await game.execute("owner", command, { _cok_: sfs.int(7) })).body._cok_).toEqual(
       sfs.int(7),
-    );
+    );}
   expect(routed).toHaveLength(4);
   for (const command of [
     "campaign.paid.gift",
@@ -114,6 +114,6 @@ test("native packet commands preserve correlation while trusted paid producers a
     "campaign.record",
     "redPackets.expire",
   ])
-    await expect(game.execute("owner", command, { event: sfs.int(56) })).rejects.toThrow();
+    {await expect(game.execute("owner", command, { event: sfs.int(56) })).rejects.toThrow();}
   expect(routed).toHaveLength(4);
 });

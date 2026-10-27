@@ -164,7 +164,7 @@ test("ordinary four-cell boss props preserve range metadata, use native anchors 
       monsterCurrHP: 0,
       flushFlag: 1,
     });
-    for (const id of [11, 12, 15]) expect((await h.point(id)).pointType).toBe(17);
+    for (const id of [11, 12, 15]) {expect((await h.point(id)).pointType).toBe(17);}
     expect(await h.point(11)).toMatchObject({
       monsterCurrHP: 77,
       startTime: 12n,

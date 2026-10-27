@@ -23,7 +23,7 @@ import { readProfileAlliance } from "./profile-alliance.ts";
 
 export async function checkPublicProfileStore(db: Database["kingdom"]["db"]) {
   for (const table of [user_skill, user_honor, user_achievement, flower_ranking, alliance_vedio])
-    await db.select().from(table).limit(0);
+    {await db.select().from(table).limit(0);}
 }
 
 export async function loadPublicProfile(
@@ -32,7 +32,7 @@ export async function loadPublicProfile(
   uid: string,
   observerAllianceId: string,
 ): Promise<RoutedPublicProfile | undefined> {
-  if (!/^[0-9]{1,40}$/.test(uid)) return undefined;
+  if (!/^[0-9]{1,40}$/.test(uid)) {return undefined;}
 
   const account = (
     await databases.global.db
@@ -43,7 +43,7 @@ export async function loadPublicProfile(
   )[0];
   const server = account?.server ?? String(localKingdomId);
 
-  if (!/^[+-]?\d+$/.test(server)) throw new DependencyError("player realm");
+  if (!/^[+-]?\d+$/.test(server)) {throw new DependencyError("player realm");}
 
   const kingdomId = Number(server);
 
@@ -53,7 +53,7 @@ export async function loadPublicProfile(
     kingdomId > 2147483647 ||
     !databases.kingdoms.has(kingdomId)
   )
-    throw new DependencyError("player realm");
+    {throw new DependencyError("player realm");}
 
   const state = await readPublicProfile(
     databases.getKingdom(kingdomId).db,
@@ -61,10 +61,10 @@ export async function loadPublicProfile(
     observerAllianceId,
   );
 
-  if (!state.profile) return undefined;
+  if (!state.profile) {return undefined;}
 
   if (state.profile.uid !== uid || Number(state.profile.serverId) !== kingdomId)
-    throw new DependencyError("player realm");
+    {throw new DependencyError("player realm");}
 
   return { state, kingdomId };
 }
@@ -74,7 +74,7 @@ export function readPublicProfile(
   uid: string,
   observerAllianceId = "",
 ): Promise<PublicProfileState> {
-  if (!uid.trim() || uid.length > 40) throw new Error("Invalid public profile identity");
+  if (!uid.trim() || uid.length > 40) {throw new Error("Invalid public profile identity");}
 
   return db.transaction(
     async (tx) => {
@@ -98,7 +98,7 @@ export function readPublicProfile(
       )[0];
 
       if (!profile)
-        return {
+        {return {
           profile: undefined,
           statistics: undefined,
           vip: undefined,
@@ -114,7 +114,7 @@ export function readPublicProfile(
           equipment: [],
           honors: [],
           completedAchievements: 0,
-        };
+        };}
 
       const statistics = (
         await tx
@@ -193,7 +193,7 @@ export function readPublicProfile(
         .orderBy(asc(user_building.uuid))
         .limit(2);
 
-      if (taverns.length > 1) throw new Error("Ambiguous public profile tavern");
+      if (taverns.length > 1) {throw new Error("Ambiguous public profile tavern");}
 
       const generals = await tx
         .select({
@@ -210,7 +210,7 @@ export function readPublicProfile(
         .orderBy(asc(user_general.uuid))
         .limit(32768);
 
-      if (generals.length > 32767) throw new Error("Public profile collection exceeds wire limit");
+      if (generals.length > 32767) {throw new Error("Public profile collection exceeds wire limit");}
 
       const skills = generals.length
         ? await tx
@@ -231,7 +231,7 @@ export function readPublicProfile(
             .limit(32768)
         : [];
 
-      if (skills.length > 32767) throw new Error("Public profile collection exceeds wire limit");
+      if (skills.length > 32767) {throw new Error("Public profile collection exceeds wire limit");}
 
       const equipment = await tx
         .select({
@@ -249,7 +249,7 @@ export function readPublicProfile(
         .orderBy(asc(user_equip.uuid))
         .limit(32768);
 
-      if (equipment.length > 32767) throw new Error("Public profile collection exceeds wire limit");
+      if (equipment.length > 32767) {throw new Error("Public profile collection exceeds wire limit");}
 
       const honors = await tx
         .select({
@@ -261,7 +261,7 @@ export function readPublicProfile(
         .orderBy(asc(user_honor.id))
         .limit(32768);
 
-      if (honors.length > 32767) throw new Error("Public profile collection exceeds wire limit");
+      if (honors.length > 32767) {throw new Error("Public profile collection exceeds wire limit");}
 
       const achievementCounts = await tx
         .select({ count: count() })
@@ -270,7 +270,7 @@ export function readPublicProfile(
       const completedAchievements = achievementCounts[0]?.count;
 
       if (!Number.isSafeInteger(completedAchievements) || completedAchievements! < 0)
-        throw new Error("Invalid public achievement count");
+        {throw new Error("Invalid public achievement count");}
 
       const flowers = (
         await tx

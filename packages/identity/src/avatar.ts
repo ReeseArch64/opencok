@@ -7,7 +7,7 @@ export function avatarImagePath(owner: string, sequence: number): string {
     sequence < 1 ||
     sequence > 999999
   )
-    throw new Error("Invalid avatar image input");
+    {throw new Error("Invalid avatar image input");}
 
   const name = createHash("md5").update(`${owner}_${sequence}`).digest("hex");
 

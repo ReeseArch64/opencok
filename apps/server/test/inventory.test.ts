@@ -14,7 +14,7 @@ test("catalog prices distinguish bundles, fallback, batch and material costs wit
   expect(inventoryPrice(rule, 2, true)).toEqual({ count: 2, price: 20 });
   expect(inventoryPrice({ type: "7", make: "1|2|30" }, 2, false)).toEqual({ count: 2, price: 60 });
   for (const value of [0, -1, 1.5, NaN, Infinity, 2147483648, "1", null])
-    expect(() => inventoryCount(value)).toThrow();
+    {expect(() => inventoryCount(value)).toThrow();}
   expect(() => inventoryPrice({ price: "2147483647" }, 2, true)).toThrow();
   expect(() => inventoryPrice({ price: "0" }, 1, false)).toThrow();
 });
@@ -36,7 +36,7 @@ test("recipes select alternatives, enforce every simultaneous cost and reject ma
   expect(() => inventoryRecipe({ ...rule, para3: "1" }, "10", "100", 1)).toThrow();
   expect(() => inventoryRecipe(rule, "10", "200", 2147483647)).toThrow();
   for (const text of ["", "1;-1", "1;0", "1;2|1;3", "1;2;3", "x;1"])
-    expect(() => inventoryPairs(text)).toThrow();
+    {expect(() => inventoryPairs(text)).toThrow();}
 });
 
 test("weighted outcomes cover every boundary exactly and reject invalid random sources", () => {
@@ -54,7 +54,7 @@ test("weighted outcomes cover every boundary exactly and reject invalid random s
     "300",
   ]);
   for (const value of [-1, 6, 0.5, NaN])
-    expect(() => inventoryWeighted(weights, () => value)).toThrow();
+    {expect(() => inventoryWeighted(weights, () => value)).toThrow();}
   expect(() => inventoryWeighted(new Map())).toThrow();
   expect(() =>
     inventoryWeighted(

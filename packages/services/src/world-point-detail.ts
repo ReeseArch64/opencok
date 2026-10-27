@@ -46,12 +46,12 @@ export function restoredExplorationMarch(
   point: Row,
   marches: readonly Row[],
 ): string | undefined {
-  if (marches.length > 4096) return unsupported();
+  if (marches.length > 4096) {return unsupported();}
 
   const byId = new Map<string, Row>();
 
   for (const row of marches) {
-    if (typeof row.uuid !== "string" || !row.uuid || byId.has(row.uuid)) return unsupported();
+    if (typeof row.uuid !== "string" || !row.uuid || byId.has(row.uuid)) {return unsupported();}
 
     byId.set(row.uuid, row);
   }
@@ -81,7 +81,7 @@ export async function worldPointDetail(
     (params.serverId !== undefined &&
       (params.serverId.type !== Type.Int || !favoriteInteger(params.serverId.value)))
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   const query = worldPointDetailQuery(
     params.point.value,
@@ -98,7 +98,7 @@ export async function worldPointDetail(
   );
   const profile = state.profile;
 
-  if (!profile) throw new GameError(errors.missing);
+  if (!profile) {throw new GameError(errors.missing);}
 
   if (
     profile.uid !== observer ||
@@ -109,13 +109,13 @@ export async function worldPointDetail(
     state.kingdomId !== query.kingdomId ||
     state.remote !== (query.kingdomId !== kingdomId)
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
-  if (query.point <= 0) return {};
+  if (query.point <= 0) {return {};}
 
   const point = state.point;
 
-  if (!point) throw new GameError(errors.missing);
+  if (!point) {throw new GameError(errors.missing);}
 
   if (
     !state.world ||
@@ -126,20 +126,20 @@ export async function worldPointDetail(
     !favoriteInteger(point.pointType) ||
     !state.owner
   )
-    return unsupported();
+    {return unsupported();}
 
   const type = point.pointType;
 
-  if (type < 0 || type > 69) return unsupported();
+  if (type < 0 || type > 69) {return unsupported();}
 
   const occupied = worldPointOccupied(point);
 
   if (state.remote) {
     if (type === 3 && !occupied)
-      return roundTripLegacyObject({
+      {return roundTripLegacyObject({
         point: sfs.int(query.point),
         tq: sfs.int(resourceRemaining(point.resInitValue as number, point.resCostValue as number)),
-      });
+      });}
 
     return roundTripLegacyObject({
       ...worldPointOwner(worldPointOwnerBase(point, state.owner, true)),
@@ -159,7 +159,7 @@ export async function worldPointDetail(
     };
 
     if (type === 37) {
-      if (!favoriteInteger(point.monsterCurrHP ?? 0)) return unsupported();
+      if (!favoriteInteger(point.monsterCurrHP ?? 0)) {return unsupported();}
 
       result.existMember = sfs.int((point.monsterCurrHP ?? 0) as number);
     }
@@ -168,11 +168,11 @@ export async function worldPointDetail(
   }
 
   if (!occupied && (type === 49 || type === 50))
-    return {
+    {return {
       ...owner,
       ...(await specialWorldFields(state, observer, rules, now, services)),
       point: sfs.int(query.point),
-    };
+    };}
 
   const result: Fields = {
     ...owner,
@@ -195,7 +195,7 @@ export async function worldPointDetail(
       city.effects.profile.serverId !== kingdomId ||
       !services.worldPowerEffects
     )
-      return unsupported();
+      {return unsupported();}
 
     const context = { now, kingdomId, version: MOBILE_CLIENT_VERSION };
     const world = worldPowerEffects(
@@ -230,11 +230,11 @@ export async function worldPointDetail(
   }
 
   if (type === 44) {
-    if (!state.barbarian) return unsupported();
+    if (!state.barbarian) {return unsupported();}
 
     const row = state.barbarian.row;
 
-    if (row && row.pointId !== query.point) return unsupported();
+    if (row && row.pointId !== query.point) {return unsupported();}
 
     const plan = barbarianArmyPlan(row, rules, clock());
     let remaining: ReadonlyMap<string | null, number | null> | null = null;
@@ -251,7 +251,7 @@ export async function worldPointDetail(
   }
 
   if (type === 6) {
-    if (!state.exploration) return unsupported();
+    if (!state.exploration) {return unsupported();}
 
     const marches = state.exploration.march ? [state.exploration.march] : [];
     Object.assign(
@@ -261,7 +261,7 @@ export async function worldPointDetail(
   }
 
   if (type === 60 && !mailBlank(point.pointItem as string | null)) {
-    if (!state.neutralResource) return unsupported();
+    if (!state.neutralResource) {return unsupported();}
 
     Object.assign(
       result,
@@ -275,7 +275,7 @@ export async function worldPointDetail(
     !mailBlank(point.territoryAlliance as string | null) &&
     point.territoryAlliance === profile.allianceId
   )
-    result.territory_positive_effect = sfs.int(1);
+    {result.territory_positive_effect = sfs.int(1);}
 
   return result;
 }

@@ -98,7 +98,7 @@ test("avatar reports persist atomic increments, legacy defaults and moderation i
     expect((await read("alias"))!.report).toBe(0);
     expect((await read("ALIAS"))!.report).toBe(0);
     for (const owner of ["missing", "foreign", "banned"])
-      await expect(submit("unauthorized-target", owner)).rejects.toThrow();
+      {await expect(submit("unauthorized-target", owner)).rejects.toThrow();}
     expect(await read("unauthorized-target")).toBeUndefined();
     expect(
       (await db.select().from(userprofile).where(eq(userprofile.uid, "reporter")))[0]!.banFlag,

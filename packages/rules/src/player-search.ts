@@ -39,7 +39,7 @@ function validate(query: PlayerSearchQuery): void {
     query.maximum > 32766 ||
     query.limit !== query.maximum + 1
   )
-    invalid();
+    {invalid();}
 }
 
 export function playerSearchQuery(
@@ -66,25 +66,25 @@ export function playerSearchQuery(
 
 export function playerSearchPage<T>(rows: readonly T[], page: number, maximumPages: number): T[] {
   if (!integer(page) || !integer(maximumPages) || maximumPages < 0 || rows.length > 32767)
-    return invalid();
+    {return invalid();}
 
-  if (rows.length <= 10) return [...rows];
+  if (rows.length <= 10) {return [...rows];}
 
-  if (page > maximumPages) return [];
+  if (page > maximumPages) {return [];}
 
   const start = Math.imul((page - 1) | 0, 10),
     end = Math.imul(page, 10);
 
-  if (start >= end) return [];
+  if (start >= end) {return [];}
 
-  if (start < 0) return invalid();
+  if (start < 0) {return invalid();}
 
   const result: T[] = [];
 
   for (let index = start; index < end && index < rows.length; index++) {
     const row = rows[index];
 
-    if (row == null) break;
+    if (row == null) {break;}
 
     result.push(row);
   }
@@ -95,7 +95,7 @@ export function playerSearchPage<T>(rows: readonly T[], page: number, maximumPag
 function local(query: PlayerSearchQuery, rows: readonly Row[]): PlayerSearchEntry[] {
   validate(query);
 
-  if (rows.length > query.limit) return invalid();
+  if (rows.length > query.limit) {return invalid();}
 
   return rows.map((data) => {
     if (
@@ -104,7 +104,7 @@ function local(query: PlayerSearchQuery, rows: readonly Row[]): PlayerSearchEntr
       !integer(data.level) ||
       data.level < query.minimumLevel
     )
-      return invalid();
+      {return invalid();}
 
     return { kingdomId: query.kingdomId, remote: false, data };
   });
@@ -113,12 +113,12 @@ function local(query: PlayerSearchQuery, rows: readonly Row[]): PlayerSearchEntr
 export function playerSearchRemoteBudget(query: PlayerSearchQuery, rows: readonly Row[]) {
   const candidates = local(query, rows);
 
-  if (!query.cross) return { limit: 0, minimumLevel: (query.minimumLevel - 2) | 0 };
+  if (!query.cross) {return { limit: 0, minimumLevel: (query.minimumLevel - 2) | 0 };}
 
   const seed = playerSearchPage(candidates, 1, Math.trunc(query.maximum / 10));
   const limit = (Math.imul(query.limit, 2) - seed.length) | 0;
 
-  if (limit < 0 || limit > 32767) return invalid();
+  if (limit < 0 || limit > 32767) {return invalid();}
 
   return { limit, minimumLevel: (query.minimumLevel - 2) | 0 };
 }
@@ -132,7 +132,7 @@ export function selectPlayerSearch(
   const maximumPages = Math.trunc(query.maximum / 10);
 
   if (!query.cross) {
-    if (remote.length) return invalid();
+    if (remote.length) {return invalid();}
 
     return {
       key: query.key,
@@ -145,7 +145,7 @@ export function selectPlayerSearch(
 
   const budget = playerSearchRemoteBudget(query, rows);
 
-  if (remote.length > budget.limit) return invalid();
+  if (remote.length > budget.limit) {return invalid();}
 
   const combined = playerSearchPage(candidates, 1, maximumPages);
   const byKey = new Map<string, PlayerSearchRemote>();
@@ -158,7 +158,7 @@ export function selectPlayerSearch(
       !entry.key.isWellFormed() ||
       entry.key.includes("\0")
     )
-      return invalid();
+      {return invalid();}
 
     byKey.set(entry.key, entry);
   }
@@ -174,18 +174,18 @@ export function selectPlayerSearch(
   for (const key of keys) {
     const entry = byKey.get(key)!;
 
-    if (entry.data.uid == null) continue;
+    if (entry.data.uid == null) {continue;}
 
     if (entry.data.uid !== key || !integer(entry.kingdomId) || entry.kingdomId <= 0)
-      return invalid();
+      {return invalid();}
 
     const level = entry.data.mainBuildingLevel;
 
-    if (level == null) continue;
+    if (level == null) {continue;}
 
-    if (!integer(level)) return invalid();
+    if (!integer(level)) {return invalid();}
 
-    if (level <= 0 || level < query.minimumLevel) continue;
+    if (level <= 0 || level < query.minimumLevel) {continue;}
 
     combined.push({ kingdomId: entry.kingdomId, remote: true, data: entry.data });
   }
@@ -200,25 +200,25 @@ export function selectPlayerSearch(
 }
 
 export function sharedSearchProfile(row: Row, rules: Pick<Rules, "power">, now: number): Row {
-  if (!Number.isSafeInteger(now) || now < 0) return invalid();
+  if (!Number.isSafeInteger(now) || now < 0) {return invalid();}
 
   const number = (key: string, fallback = 0) => {
     const value = row[key] ?? fallback;
 
-    if (!integer(value)) return invalid();
+    if (!integer(value)) {return invalid();}
 
     return value;
   };
   const deadline = (key: string) => {
     const value = row[key] ?? 0n;
 
-    if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) return invalid();
+    if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) {return invalid();}
 
     return value;
   };
 
   for (const key of ["allianceId", "abbr"])
-    if (row[key] != null && typeof row[key] !== "string") return invalid();
+    {if (row[key] != null && typeof row[key] !== "string") {return invalid();}}
 
   const allianceId = row.allianceId as string | null | undefined;
   const abbr = row.abbr as string | null | undefined;
@@ -226,7 +226,7 @@ export function sharedSearchProfile(row: Row, rules: Pick<Rules, "power">, now: 
   let vipLevel = 0;
 
   if (expiry > BigInt(now)) {
-    if (!rules.power.vip?.size) return invalid();
+    if (!rules.power.vip?.size) {return invalid();}
 
     const score = number("vipScore");
 
@@ -234,9 +234,9 @@ export function sharedSearchProfile(row: Row, rules: Pick<Rules, "power">, now: 
       let selected: string | undefined;
 
       for (const rule of rules.power.vip.values())
-        if (javaDecimal(rule.point, 32) <= BigInt(score)) selected = rule.id;
+        {if (javaDecimal(rule.point, 32) <= BigInt(score)) {selected = rule.id;}}
 
-      if (selected !== undefined) vipLevel = (Number(javaDecimal(selected, 32)) % 100) + 1;
+      if (selected !== undefined) {vipLevel = (Number(javaDecimal(selected, 32)) % 100) + 1;}
     } catch {
       return invalid();
     }

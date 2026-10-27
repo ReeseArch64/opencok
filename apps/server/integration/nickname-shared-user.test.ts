@@ -152,7 +152,7 @@ function loseCommit(pool: ReturnType<typeof createDatabases>["global"]["pool"], 
   Object.defineProperty(pool, "connect", {
     configurable: true,
     value: (...connectArgs: unknown[]) => {
-      if (connectArgs.length) return Reflect.apply(original, pool, connectArgs);
+      if (connectArgs.length) {return Reflect.apply(original, pool, connectArgs);}
       return connect().then((client) => {
         let touched = false;
         return {
@@ -164,8 +164,8 @@ function loseCommit(pool: ReturnType<typeof createDatabases>["global"]["pool"], 
                   : first && typeof first === "object" && "text" in first
                     ? first.text
                     : undefined;
-            if (typeof text === "string" && text.startsWith("begin")) touched = false;
-            if (typeof text === "string" && text.startsWith(statement)) touched = true;
+            if (typeof text === "string" && text.startsWith("begin")) {touched = false;}
+            if (typeof text === "string" && text.startsWith(statement)) {touched = true;}
             const result = await Reflect.apply(client.query, client, args);
             if (armed && touched && text === "commit") {
               armed = false;
@@ -191,13 +191,13 @@ beforeAll(async () => {
       topology.globalDatabase,
       ...topology.kingdoms.map((entry) => entry.database),
     ])
-      await admin.query(`CREATE DATABASE "${name}"`);
+      {await admin.query(`CREATE DATABASE "${name}"`);}
   } finally {
     await admin.end();
   }
   databases = createDatabases(pg.options, topology);
   await migrateDatabase(databases.global.pool, "global");
-  for (const entry of topology.kingdoms) await migrateDatabase(realm(entry.id).pool, "kingdom");
+  for (const entry of topology.kingdoms) {await migrateDatabase(realm(entry.id).pool, "kingdom");}
   redisUrl = await redis.start();
 }, 120_000);
 afterAll(async () => {
@@ -318,7 +318,7 @@ test("one-connection pools keep shared publication and nickname mutation in the 
   Object.defineProperty(pool, "connect", {
     configurable: true,
     value: (...connectArgs: unknown[]) => {
-      if (connectArgs.length) return Reflect.apply(original, pool, connectArgs);
+      if (connectArgs.length) {return Reflect.apply(original, pool, connectArgs);}
       return connect().then((client) => ({
         async query(...args: unknown[]) {
           const first = args[0],
@@ -352,7 +352,7 @@ test("one-connection pools keep shared publication and nickname mutation in the 
     expect(serial.global.pool.totalCount).toBe(1);
     expect(serial.global.pool.idleCount).toBe(0);
     rename = instance.change(other, randomUUID(), "Pool Rename", now);
-    for (let attempt = 0; attempt < 100 && !pool.waitingCount; attempt++) await Bun.sleep(5);
+    for (let attempt = 0; attempt < 100 && !pool.waitingCount; attempt++) {await Bun.sleep(5);}
     expect(pool.waitingCount).toBeGreaterThan(0);
     resume.resolve();
     expect(await publication).toBe(true);
@@ -444,10 +444,10 @@ test("a timed-out Redis write cannot replace a newer publication even after cloc
       const wait = first;
       first = false;
       const task = (async () => {
-        if (wait) await gate.promise;
+        if (wait) {await gate.promise;}
         await cache().publishSharedUserInfo(update, layout);
       })();
-      if (wait) delayed = task;
+      if (wait) {delayed = task;}
       return task;
     },
   };

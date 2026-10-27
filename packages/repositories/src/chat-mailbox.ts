@@ -36,7 +36,7 @@ export function createChatMailboxStore(
 
           if (receipt) {
             if (receipt.owner_uid !== update.owner || receipt.payload_hash !== hash)
-              throw new Error("Conflicting chat mailbox replay");
+              {throw new Error("Conflicting chat mailbox replay");}
 
             return "unchanged";
           }
@@ -50,11 +50,11 @@ export function createChatMailboxStore(
           );
 
           if (update.action === "read")
-            await tx.update(chat_mailbox_message).set({ read: true }).where(selection);
-          else await tx.delete(chat_mailbox_message).where(selection);
+            {await tx.update(chat_mailbox_message).set({ read: true }).where(selection);}
+          else {await tx.delete(chat_mailbox_message).where(selection);}
 
           for (const type of update.types)
-            await tx
+            {await tx
               .insert(chat_mailbox_intent)
               .values({
                 realm: update.kingdomId,
@@ -66,7 +66,7 @@ export function createChatMailboxStore(
                 action: update.action,
                 cutoff: BigInt(update.requestedAt),
               })
-              .onConflictDoNothing();
+              .onConflictDoNothing();}
 
           await tx.insert(chat_mailbox_receipt).values({
             kingdom_id: update.kingdomId,
@@ -94,7 +94,7 @@ export function createChatMailboxStore(
         limit < 1 ||
         limit > 1000
       )
-        throw new Error("Invalid chat mailbox query");
+        {throw new Error("Invalid chat mailbox query");}
 
       return db
         .select({

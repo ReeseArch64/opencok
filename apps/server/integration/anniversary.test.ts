@@ -155,9 +155,9 @@ test("anniversary validates owned counters, shared limits, exact end time and co
       h.command("get.activity.value", { keys: sfs.string("P$long_other_user_secret") }),
     ).rejects.toThrow();
     for (const index of [0, -1, 6])
-      await expect(
+      {await expect(
         h.command("third.anniversary.reward", { boxIdx: sfs.int(index) }),
-      ).rejects.toThrow();
+      ).rejects.toThrow();}
     h.rules.advanced.campaignRules = [];
     await expect(h.command("third.anniversary.reward", { boxIdx: sfs.int(1) })).rejects.toThrow();
     expect(

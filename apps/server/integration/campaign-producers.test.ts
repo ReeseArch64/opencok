@@ -36,7 +36,7 @@ async function fixture() {
     events: readonly CampaignObservation[],
     at: number,
   ) => {
-    if (!campaignObservationNeeded(h.rules, events, at)) return undefined;
+    if (!campaignObservationNeeded(h.rules, events, at)) {return undefined;}
     return executeInventoryTransaction(
       tx,
       owner,
@@ -174,7 +174,7 @@ test("a failed campaign observer rolls back shop debit, delivery, counters, stoc
       economy_posting,
       mutation_outbox,
     ])
-      expect(await h.db.db.select().from(table)).toHaveLength(0);
+      {expect(await h.db.db.select().from(table)).toHaveLength(0);}
     await h.db.pool.query(`drop trigger reject_shop_campaign on opencok_kingdom.trigger_var`);
     await h.buy(1, id);
     expect(await h.counter("long_3th_anniversary_fire_buy_time_count")).toBe("1");
@@ -369,7 +369,7 @@ test("batch mail claims retain campaign pushes and roll back every earlier claim
       },
     ];
     for (const uid of ["batch-a", "batch-b"])
-      await h.db.db.insert(mail).values({
+      {await h.db.db.insert(mail).values({
         uid,
         toUser: "owner",
         title: "152625",
@@ -378,7 +378,7 @@ test("batch mail claims retain campaign pushes and roll back every earlier claim
         rewardStatus: 0,
         contents: Buffer.from("synthetic"),
         createTime: BigInt(h.clock.now),
-      });
+      });}
     await h.db.pool.query(
       `create function reject_second_campaign_claim() returns trigger language plpgsql as $$ begin if new.command='mail.reward.claim' and new."requestId"='mail-claim:batch-b' then raise exception 'synthetic second claim failure'; end if; return new; end $$`,
     );

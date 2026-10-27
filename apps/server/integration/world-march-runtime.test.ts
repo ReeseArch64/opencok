@@ -30,7 +30,7 @@ async function worldHarness() {
   ]);
   await h.db.db.insert(user_army).values({ uid: "owner", armyId: "107000", level: 1, free: 100 });
   for (const id of [1, 2, 1201, 1202, 10, 11, 1210, 1211, 20, 21, 1220, 1221])
-    await h.db.db.insert(worldpoint).values({
+    {await h.db.db.insert(worldpoint).values({
       id,
       worldId: 0,
       x: (id - 1) % 1200,
@@ -45,7 +45,7 @@ async function worldHarness() {
       pointItem: id === 10 ? "0" : null,
       ownerId: [1, 2, 1201, 1202].includes(id) ? "owner" : "",
       ownerName: "Synthetic",
-    });
+    });}
   const start = (operationId = sfs.string(randomUUID())) =>
     h.command("world.march", {
       point: sfs.int(10),

@@ -36,14 +36,14 @@ export function createChatSocialStore(
 ) {
   const timestamp = () => BigInt(clock().getTime());
   async function ensureImported(uid: string) {
-    if (!legacy) return;
+    if (!legacy) {return;}
 
     const [existing] = await db
       .select()
       .from(chat_social_import)
       .where(eq(chat_social_import.owner, uid));
 
-    if (existing || !(await load(uid))) return;
+    if (existing || !(await load(uid))) {return;}
 
     const data = await legacy(uid);
     await db.transaction(async (tx) => {
@@ -54,10 +54,10 @@ export function createChatSocialStore(
         .onConflictDoNothing()
         .returning();
 
-      if (!marker) return;
+      if (!marker) {return;}
 
       for (const row of data.contacts)
-        await tx
+        {await tx
           .insert(chat_relation)
           .values({
             owner: uid,
@@ -67,10 +67,10 @@ export function createChatSocialStore(
             description: row.description,
             createdAt: timestamp(),
           })
-          .onConflictDoNothing();
+          .onConflictDoNothing();}
 
       for (const row of data.blocks)
-        await tx
+        {await tx
           .insert(chat_relation)
           .values({
             owner: uid,
@@ -80,13 +80,13 @@ export function createChatSocialStore(
             state: 1,
             createdAt: timestamp(),
           })
-          .onConflictDoNothing();
+          .onConflictDoNothing();}
     });
   }
   async function ensureManyImported(uids: string[]) {
     const ids = [...new Set(uids)];
 
-    if (!legacy || !ids.length) return;
+    if (!legacy || !ids.length) {return;}
 
     const markers = await db
       .select({ uid: chat_social_import.owner })
@@ -94,7 +94,7 @@ export function createChatSocialStore(
       .where(inArray(chat_social_import.owner, ids));
     const present = new Set(markers.map((row) => row.uid));
 
-    for (const uid of ids) if (!present.has(uid)) await ensureImported(uid);
+    for (const uid of ids) {if (!present.has(uid)) {await ensureImported(uid);}}
   }
   const activeMember = (uid: string, room: string) =>
     and(
@@ -104,19 +104,19 @@ export function createChatSocialStore(
     );
   const access: ChatAccessStore = {
     async roomInfo(uid, roomId) {
-      if (!/^private_[a-f0-9-]{36}$/.test(roomId)) return null;
+      if (!/^private_[a-f0-9-]{36}$/.test(roomId)) {return null;}
 
       const id = roomId.slice(8);
       const [member] = await db.select().from(chat_private_member).where(activeMember(uid, id));
 
-      if (!member) return null;
+      if (!member) {return null;}
 
       const [room] = await db
         .select()
         .from(chat_private_room)
         .where(and(eq(chat_private_room.id, id), isNull(chat_private_room.deletedAt)));
 
-      if (!room) return null;
+      if (!room) {return null;}
 
       const members = await db
         .select()
@@ -174,11 +174,11 @@ export function createChatSocialStore(
       };
     },
     async filter(uid, messages) {
-      if (!messages.length) return [];
+      if (!messages.length) {return [];}
 
       const state = await load(uid);
 
-      if (!state || state.banned || (state.banUntil ?? 0) > clock().getTime()) return [];
+      if (!state || state.banned || (state.banUntil ?? 0) > clock().getTime()) {return [];}
 
       const senders = [...new Set(messages.map((message) => message.senderUid))];
       await ensureManyImported([uid, ...senders]);
@@ -223,21 +223,21 @@ export function createChatSocialStore(
           blocked.has(message.senderUid) &&
           ![100, 101, 102, 103, 105].includes(message.post ?? 0)
         )
-          return false;
+          {return false;}
 
         if (message.roomId.startsWith("private_"))
-          return (
+          {return (
             joined.has(message.roomId) &&
             Date.parse(message.createdAt) >= joined.get(message.roomId)!
-          );
+          );}
 
         if (message.roomId.startsWith("alliance_"))
-          return (
+          {return (
             !!state.allianceId &&
             state.allianceId === state.membershipAllianceId &&
             message.roomId === `alliance_${state.originalServerId}_${state.allianceId}` &&
             Date.parse(message.createdAt) >= (state.allianceJoinedAt ?? 0)
-          );
+          );}
 
         return true;
       });
@@ -246,7 +246,7 @@ export function createChatSocialStore(
       await ensureImported(uid);
       const state = await load(uid);
 
-      if (!state || state.banned || (state.banUntil ?? 0) > clock().getTime()) return false;
+      if (!state || state.banned || (state.banUntil ?? 0) > clock().getTime()) {return false;}
 
       const [mute] = await db.select().from(chat_moderation).where(eq(chat_moderation.owner, uid));
 
@@ -259,7 +259,7 @@ export function createChatSocialStore(
     async canReceive(uid, sender) {
       await ensureImported(uid);
 
-      if (sender !== uid) await ensureImported(sender);
+      if (sender !== uid) {await ensureImported(sender);}
 
       const [block] = await db
         .select({ owner: chat_relation.owner })
@@ -278,7 +278,7 @@ export function createChatSocialStore(
       return !block;
     },
     async privateRoom(uid, roomId) {
-      if (!roomId.startsWith("private_")) return false;
+      if (!roomId.startsWith("private_")) {return false;}
 
       const [member] = await db
         .select({ role: chat_private_member.role })
@@ -293,7 +293,7 @@ export function createChatSocialStore(
         ![100, 101, 102, 103, 105].includes(message.post ?? 0) &&
         !(await access.canReceive(uid, message.senderUid))
       )
-        return false;
+        {return false;}
 
       if (message.roomId.startsWith("alliance_")) {
         const state = await load(uid);
@@ -305,7 +305,7 @@ export function createChatSocialStore(
           state.membershipAllianceId !== state.allianceId ||
           message.roomId !== `alliance_${state.originalServerId}_${state.allianceId}`
         )
-          return false;
+          {return false;}
 
         return Date.parse(message.createdAt) >= (state.allianceJoinedAt ?? 0);
       }
@@ -327,14 +327,14 @@ export function createChatSocialStore(
       const imported: { owner: string; data: ChatLegacyRelations }[] = [];
 
       if (legacy)
-        for (const uid of new Set([input.owner, input.target].filter(Boolean))) {
+        {for (const uid of new Set([input.owner, input.target].filter(Boolean))) {
           const [marker] = await db
             .select()
             .from(chat_social_import)
             .where(eq(chat_social_import.owner, uid));
 
-          if (!marker && (await load(uid))) imported.push({ owner: uid, data: await legacy(uid) });
-        }
+          if (!marker && (await load(uid))) {imported.push({ owner: uid, data: await legacy(uid) });}
+        }}
 
       const ids = new Set(
         [input.owner, input.target, ...input.members, ...input.notices].filter(Boolean),
@@ -352,25 +352,25 @@ export function createChatSocialStore(
           )
           .limit(1000);
 
-        for (const row of relations) ids.add(row.other);
+        for (const row of relations) {ids.add(row.other);}
 
         for (const item of imported)
-          if (item.owner === input.owner) for (const row of item.data.contacts) ids.add(row.other);
+          {if (item.owner === input.owner) {for (const row of item.data.contacts) {ids.add(row.other);}}}
       }
 
       const players = new Map<string, Awaited<ReturnType<PlayerStateLoader>>>();
       const selected = [...ids];
 
       for (let index = 0; index < selected.length; index += 16)
-        await Promise.all(
+        {await Promise.all(
           selected.slice(index, index + 16).map(async (uid) => {
             players.set(uid, await load(uid));
           }),
-        );
+        );}
 
       const actor = players.get(input.owner);
 
-      if (!actor) throw new ChatCommandError("unauthorized");
+      if (!actor) {throw new ChatCommandError("unauthorized");}
 
       const target = players.get(input.target) ?? null;
       const facebookPlayers =
@@ -395,7 +395,7 @@ export function createChatSocialStore(
           );
 
         if (receipt) {
-          if (receipt.hash !== hash) throw new ChatCommandError("conflicting_request");
+          if (receipt.hash !== hash) {throw new ChatCommandError("conflicting_request");}
 
           return JSON.parse(receipt.response.toString("utf8")) as Record<string, unknown>;
         }
@@ -409,10 +409,10 @@ export function createChatSocialStore(
             .onConflictDoNothing()
             .returning();
 
-          if (!marker) continue;
+          if (!marker) {continue;}
 
           for (const row of item.data.contacts)
-            await tx
+            {await tx
               .insert(chat_relation)
               .values({
                 owner: item.owner,
@@ -422,10 +422,10 @@ export function createChatSocialStore(
                 description: row.description,
                 createdAt: now,
               })
-              .onConflictDoNothing();
+              .onConflictDoNothing();}
 
           for (const row of item.data.blocks)
-            await tx
+            {await tx
               .insert(chat_relation)
               .values({
                 owner: item.owner,
@@ -435,7 +435,7 @@ export function createChatSocialStore(
                 state: 1,
                 createdAt: now,
               })
-              .onConflictDoNothing();
+              .onConflictDoNothing();}
         }
 
         async function event(
@@ -520,7 +520,7 @@ export function createChatSocialStore(
           },
           async removeRelations(owner, kind, others) {
             if (others.length)
-              await tx
+              {await tx
                 .delete(chat_relation)
                 .where(
                   and(
@@ -528,7 +528,7 @@ export function createChatSocialStore(
                     eq(chat_relation.kind, kind),
                     or(inArray(chat_relation.other, others), inArray(chat_relation.id, others)),
                   ),
-                );
+                );}
           },
           async room(id) {
             const [row] = await tx
@@ -615,7 +615,7 @@ export function createChatSocialStore(
               })
               .returning();
 
-            if (!saved) throw new Error("Room message insert failed");
+            if (!saved) {throw new Error("Room message insert failed");}
 
             await tx.insert(chat_event).values({
               id: randomUUID(),
@@ -656,7 +656,7 @@ export function createChatSocialStore(
               .limit(1);
 
             if (BigInt(sequence) > (last?.sequence ?? 0n))
-              throw new ChatCommandError("invalid_cursor");
+              {throw new ChatCommandError("invalid_cursor");}
 
             await tx
               .update(chat_private_member)
@@ -680,13 +680,13 @@ export function createChatSocialStore(
               .returning();
 
             if (row)
-              await event(
+              {await event(
                 input.owner,
                 "push.chat.delete",
                 { seqId: sequence, roomId: row.room_key },
                 null,
                 row.room_key,
-              );
+              );}
           },
           async moderate(owner, moderator, reason, notice, until) {
             await tx
@@ -743,7 +743,7 @@ export function createChatSocialStore(
                   ),
                 );
 
-              if (intents.some((intent) => intent.action === "delete")) continue;
+              if (intents.some((intent) => intent.action === "delete")) {continue;}
 
               await tx.insert(chat_mailbox_message).values({
                 kingdom_id: realm,
@@ -822,9 +822,9 @@ export function createChatSocialStore(
           },
           async removeFeedNotices(owner, ids) {
             if (ids.length)
-              await tx
+              {await tx
                 .delete(chat_feed_notice)
-                .where(and(eq(chat_feed_notice.owner, owner), inArray(chat_feed_notice.feed, ids)));
+                .where(and(eq(chat_feed_notice.owner, owner), inArray(chat_feed_notice.feed, ids)));}
           },
         };
         const result = await plan(unit);
@@ -842,14 +842,14 @@ export function createChatSocialStore(
         ];
 
         if (!reads.includes(input.command))
-          await tx.insert(chat_operation).values({
+          {await tx.insert(chat_operation).values({
             owner: input.owner,
             operationId: input.operationId,
             command: input.command,
             hash,
             response: Buffer.from(JSON.stringify(result)),
             createdAt: now,
-          });
+          });}
 
         return result;
       });

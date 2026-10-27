@@ -28,26 +28,26 @@ export class ContinuedCostFinalityService {
     let ready = false;
 
     for (let page = 0; page < 4; page++)
-      if ((await this.facts.ingest(at)) < 64) {
+      {if ((await this.facts.ingest(at)) < 64) {
         ready = true;
         break;
-      }
+      }}
 
-    if (!ready) return;
+    if (!ready) {return;}
 
     const periods = await this.shared.candidates(this.cursor, at);
 
     for (const period of periods) {
       const seal = await this.owned.seal(period, at);
 
-      if (!seal) continue;
+      if (!seal) {continue;}
 
-      if (seal.phase === 2) continue;
+      if (seal.phase === 2) {continue;}
 
       await this.shared.prove(period, seal, at);
       const finalized = await this.shared.finalize(period, at);
 
-      if (finalized !== undefined) await this.owned.acknowledge(period, finalized);
+      if (finalized !== undefined) {await this.owned.acknowledge(period, finalized);}
     }
 
     this.cursor = periods.length === 8 ? periods.at(-1)?.id : undefined;

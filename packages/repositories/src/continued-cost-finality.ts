@@ -30,7 +30,7 @@ export function createCostFinalityOwned(
           !period.expectedRealms.includes(authority.kingdomId) ||
           now < period.endTime + 300000n
         )
-          throw new Error("Premature or foreign consumption closure");
+          {throw new Error("Premature or foreign consumption closure");}
 
         const [prior] = await tx
           .select()
@@ -38,9 +38,9 @@ export function createCostFinalityOwned(
           .where(eq(closures.periodId, period.id))
           .for("update");
 
-        if (prior) return prior;
+        if (prior) {return prior;}
 
-        if (await pendingOwnedProgression(tx, authority.kingdomId, period.endTime, now)) return;
+        if (await pendingOwnedProgression(tx, authority.kingdomId, period.endTime, now)) {return;}
 
         const [nickname] = await tx
           .select({ id: nickname_change.operationId })
@@ -55,7 +55,7 @@ export function createCostFinalityOwned(
           )
           .limit(1);
 
-        if (period.type === 1 && nickname) return;
+        if (period.type === 1 && nickname) {return;}
 
         await tx
           .insert(periods)
@@ -80,7 +80,7 @@ export function createCostFinalityOwned(
           manifest.endTime !== period.endTime ||
           manifest.type !== period.type
         )
-          throw new Error("Conflicting owned consumption manifest");
+          {throw new Error("Conflicting owned consumption manifest");}
 
         const rows = await tx
           .select({ score: scores, profile: userprofile, hide: user_mixed_info.costHide })
@@ -140,7 +140,7 @@ export function createCostFinalityOwned(
           finalizedAt < period.endTime + 300000n ||
           (saved.finalizedAt !== 0n && saved.finalizedAt !== finalizedAt)
         )
-          throw new Error("Invalid consumption final acknowledgement");
+          {throw new Error("Invalid consumption final acknowledgement");}
 
         await tx
           .update(closures)

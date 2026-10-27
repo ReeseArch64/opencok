@@ -6,15 +6,15 @@ export function invalid(): never {
 }
 
 export function signed(value: unknown, bits: 32 | 64): bigint {
-  if (value === null || value === undefined) return 0n;
+  if (value === null || value === undefined) {return 0n;}
 
-  if (typeof value === "number" && !Number.isSafeInteger(value)) return invalid();
+  if (typeof value === "number" && !Number.isSafeInteger(value)) {return invalid();}
 
-  if (!/^[+-]?\d+$/.test(String(value))) return invalid();
+  if (!/^[+-]?\d+$/.test(String(value))) {return invalid();}
 
   const parsed = BigInt(String(value));
 
-  if (BigInt.asIntN(bits, parsed) !== parsed) return invalid();
+  if (BigInt.asIntN(bits, parsed) !== parsed) {return invalid();}
 
   return parsed;
 }

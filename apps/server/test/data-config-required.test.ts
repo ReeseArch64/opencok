@@ -55,8 +55,8 @@ test("required numeric, scalar string and boss attributes cannot silently disapp
     ["overlord", "k1"],
   ];
   for (const id of dataConfigItems().keys())
-    if (id.startsWith("worldboss") && !id.endsWith("_other"))
-      attributes.push([id, "k1"], [id, "k10"]);
+    {if (id.startsWith("worldboss") && !id.endsWith("_other"))
+      {attributes.push([id, "k1"], [id, "k10"]);}}
   for (const [id, key] of attributes) {
     const rules = catalog();
     delete rules.items.get(id)![key];
@@ -72,14 +72,14 @@ test("required numeric, scalar string and boss attributes cannot silently disapp
 test("optional records keep distinct absent, empty and present-field contracts", () => {
   const rules = catalog();
   const optional = ["FB_follow", "lordtips_time", "loading_show_type"];
-  for (const id of optional) rules.items.delete(id);
+  for (const id of optional) {rules.items.delete(id);}
   let result = project(rules);
   for (const key of ["followFB", "lordtips_time", "loading_show_type", "alliance_quest_init_level"])
-    expect(result[key]).toBeUndefined();
-  for (const id of optional) rules.items.set(id, {});
+    {expect(result[key]).toBeUndefined();}
+  for (const id of optional) {rules.items.set(id, {});}
   result = project(rules);
   for (const key of ["followFB", "lordtips_time", "loading_show_type"])
-    expect(result[key]).toBeUndefined();
+    {expect(result[key]).toBeUndefined();}
   rules.items.set("FB_follow", { id: "FB_follow" });
   rules.items.set("lordtips_time", { id: "lordtips_time" });
   result = project(rules);
@@ -133,7 +133,7 @@ test("only the selected world mode requires its army, score and scene records", 
   rules.items.set("wag_army", {});
   rules.items.set("wag_score", { k10: "5" });
   rules.items.set("wag_scene", { k1: "10" });
-  for (const id of normal) rules.items.delete(id);
+  for (const id of normal) {rules.items.delete(id);}
   expect(project(rules, { worldCup: true }).dragon_world_row).toEqual(sfs.int(10));
   expect(() => project(rules)).toThrow();
   for (const id of cup) {

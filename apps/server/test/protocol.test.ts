@@ -37,7 +37,7 @@ describe("SFS compatibility boundary", () => {
   });
   test("truncations, duplicate keys, unsupported types and oversized strings fail", () => {
     const bytes = encode({ x: sfs.string("city") });
-    for (let i = 0; i < bytes.length; i++) expect(() => decode(bytes.subarray(0, i))).toThrow();
+    for (let i = 0; i < bytes.length; i++) {expect(() => decode(bytes.subarray(0, i))).toThrow();}
     expect(() => decode(Buffer.concat([bytes, Buffer.from([0])]))).toThrow();
     expect(() => decode(Buffer.from("1200020001780000017800", "hex"))).toThrow();
     expect(() => decode(Buffer.from("12000100017813", "hex"))).toThrow();
@@ -45,7 +45,7 @@ describe("SFS compatibility boundary", () => {
     expect(() => encode({ ["x".repeat(256)]: sfs.int(1) })).toThrow();
     expect(() => sfs.long(Number.MAX_SAFE_INTEGER + 1)).toThrow();
     let value = sfs.object();
-    for (let i = 0; i < 40; i++) value = sfs.object({ child: value });
+    for (let i = 0; i < 40; i++) {value = sfs.object({ child: value });}
     expect(() => encode(fields(value))).toThrow();
   });
   test("TCP fragmentation and concatenation preserve packet order", () => {
@@ -54,7 +54,7 @@ describe("SFS compatibility boundary", () => {
     const data = Buffer.concat([frame(a), frame(b)]);
     const reader = new FrameReader();
     const packets = [];
-    for (const byte of data) packets.push(...reader.feed(Buffer.from([byte])));
+    for (const byte of data) {packets.push(...reader.feed(Buffer.from([byte])));}
     expect(packets).toEqual([a, b]);
     expect(new FrameReader().feed(data)).toEqual([a, b]);
   });

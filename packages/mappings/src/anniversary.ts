@@ -52,7 +52,7 @@ export function anniversaryStatisticsView(
   const row = state.statistics,
     when = new Date(Number(long(profile, "regTime")));
 
-  if (!Number.isFinite(when.getTime())) throw new Error("Invalid anniversary registration date");
+  if (!Number.isFinite(when.getTime())) {throw new Error("Invalid anniversary registration date");}
 
   const result: Fields = {};
 
@@ -61,9 +61,9 @@ export function anniversaryStatisticsView(
     result.atkName = sfs.string(text(state.times, "name"));
   }
 
-  if (long(state.times, "defend")) result.defTime = sfs.long(long(state.times, "defend"));
+  if (long(state.times, "defend")) {result.defTime = sfs.long(long(state.times, "defend"));}
 
-  if (long(state.times, "team")) result.teamAtkTime = sfs.long(long(state.times, "team"));
+  if (long(state.times, "team")) {result.teamAtkTime = sfs.long(long(state.times, "team"));}
 
   result.regTime = sfs.string(when.toISOString().slice(0, 10).replaceAll("-", "/"));
   result.regTop = sfs.long(long(row, "regtop"));

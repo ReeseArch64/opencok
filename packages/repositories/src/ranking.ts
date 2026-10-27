@@ -21,7 +21,7 @@ export function readPlayerRanking(
     query.limit > 32767 ||
     !Number.isSafeInteger(query.now)
   )
-    throw new Error("Invalid player ranking query");
+    {throw new Error("Invalid player ranking query");}
 
   return db.transaction(
     async (tx) => {
@@ -40,10 +40,10 @@ export function readPlayerRanking(
       )[0];
 
       if (!profile || (profile.banFlag ?? 0) !== 0 || (profile.banTime ?? 0n) > BigInt(query.now))
-        return { profile, candidates: [], fallbackRank: 1n };
+        {return { profile, candidates: [], fallbackRank: 1n };}
 
       if (query.kind === "building")
-        return { profile, ...(await readBuildingRanking(tx, uid, query.limit)) };
+        {return { profile, ...(await readBuildingRanking(tx, uid, query.limit)) };}
 
       const identity = {
         profileUid: userprofile.uid,
@@ -86,7 +86,7 @@ export function readPlayerRanking(
           .from(material_cost_ranking)
           .where(gt(material_cost_ranking.contributeSum, own));
 
-        if (counts.length !== 1) throw new Error("Missing contribution ranking count");
+        if (counts.length !== 1) {throw new Error("Missing contribution ranking count");}
 
         return { profile, candidates, fallbackRank: counts[0]!.rank };
       }
@@ -114,7 +114,7 @@ export function readPlayerRanking(
           .from(userprofile)
           .where(gt(userprofile.level, profile.level));
 
-        if (counts.length !== 1) throw new Error("Missing player ranking count");
+        if (counts.length !== 1) {throw new Error("Missing player ranking count");}
 
         return { profile, candidates, fallbackRank: counts[0]!.rank };
       }
@@ -164,7 +164,7 @@ export function readPlayerRanking(
         .limit(1);
       const counts = await tx.select(countRank).from(playerinfo).where(gt(metric, own));
 
-      if (counts.length !== 1) throw new Error("Missing player ranking count");
+      if (counts.length !== 1) {throw new Error("Missing player ranking count");}
 
       return { profile, candidates, fallbackRank: counts[0]!.rank };
     },

@@ -21,7 +21,7 @@ export class Client {
           const waiting = this.waiting;
           this.waiting = undefined;
           waiting.resolve(packet);
-        } else this.packets.push(packet);
+        } else {this.packets.push(packet);}
       }
     });
     this.socket.on("error", () => this.waiting?.reject(new Error("Test socket failed")));
@@ -31,7 +31,7 @@ export class Client {
     this.socket.write(frame(packet));
   }
   async next(operation = "packet"): Promise<Fields> {
-    if (this.packets.length) return this.packets.shift()!;
+    if (this.packets.length) {return this.packets.shift()!;}
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.waiting = undefined;
@@ -87,7 +87,7 @@ export class Client {
     this.send(extension(name, params));
     for (let i = 0; i < 20; i++) {
       const packet = fields((await this.next(`command:${name}`)).p);
-      if (str(packet, "c") === name) return fields(packet.p);
+      if (str(packet, "c") === name) {return fields(packet.p);}
     }
     throw new Error("Too many unexpected test responses");
   }

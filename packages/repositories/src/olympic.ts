@@ -27,7 +27,7 @@ export async function readOlympic(tx: MutationTransaction, owner: string): Promi
       .for("update");
 
   if (questions.length > 1024 || bets.length > 4096)
-    throw new Error("Olympic aggregate exceeds bound");
+    {throw new Error("Olympic aggregate exceeds bound");}
 
   return {
     questions,
@@ -45,7 +45,7 @@ export async function readOlympic(tx: MutationTransaction, owner: string): Promi
 
 export async function writeOlympic(tx: MutationTransaction, owner: string, write: OlympicWrite) {
   if ((write.questions?.length ?? 0) > 1024 || (write.bets?.length ?? 0) > 4096)
-    throw new Error("Olympic write exceeds bound");
+    {throw new Error("Olympic write exceeds bound");}
 
   for (const row of write.questions ?? []) {
     const id = text(row, "id"),
@@ -64,7 +64,7 @@ export async function writeOlympic(tx: MutationTransaction, owner: string, write
       };
 
     if (!id || id.length > 40 || result.length > 10 || value.startBetTime >= value.startTime)
-      throw new Error("Invalid Olympic question write");
+      {throw new Error("Invalid Olympic question write");}
 
     await tx
       .insert(question_match)
@@ -88,18 +88,18 @@ export async function writeOlympic(tx: MutationTransaction, owner: string, write
       betCountry.length > 10 ||
       result.length > 10
     )
-      throw new Error("Invalid Olympic bet owner");
+      {throw new Error("Invalid Olympic bet owner");}
 
     const type = cityInteger(row.resourceType, 0, 5);
 
-    if (type === 4) throw new Error("Invalid Olympic resource");
+    if (type === 4) {throw new Error("Invalid Olympic resource");}
 
     const [saved] = await tx
       .select({ uid: user_olympic_bet.uid })
       .from(user_olympic_bet)
       .where(eq(user_olympic_bet.uuid, uuid));
 
-    if (saved && saved.uid !== owner) throw new Error("Foreign Olympic bet");
+    if (saved && saved.uid !== owner) {throw new Error("Foreign Olympic bet");}
 
     const value = {
       uuid,

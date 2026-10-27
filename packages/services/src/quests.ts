@@ -30,7 +30,7 @@ export function grantRewards(
   signIn = false,
 ) {
   if (!id || !context.rules.reconnect.rewards?.has(id))
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   const preview = previewRewards(
     id,
@@ -51,22 +51,22 @@ export function grantRewards(
 
       context.write.equipment = rows;
     } else if (reward.kind === "item" && reward.type === 7)
-      context.economy.item(reward.id, reward.count);
+      {context.economy.item(reward.id, reward.count);}
     else if (reward.kind === "count") {
       if (reward.type === 18) {
-        if (!context.economy.winPoints) throw new GameError(errors.unsupported, "city_progression");
+        if (!context.economy.winPoints) {throw new GameError(errors.unsupported, "city_progression");}
 
         context.economy.winPoints(BigInt(reward.value));
-      } else if (reward.type === 6) context.experience(reward.value);
-      else if (reward.type === 5) context.economy.gold(BigInt(reward.value));
+      } else if (reward.type === 6) {context.experience(reward.value);}
+      else if (reward.type === 5) {context.economy.gold(BigInt(reward.value));}
       else {
         const asset = (["wood", "stone", "iron", "food", "silver"] as const)[reward.type];
 
-        if (!asset) throw new GameError(errors.unsupported, "city_progression");
+        if (!asset) {throw new GameError(errors.unsupported, "city_progression");}
 
         context.economy.resource(asset, BigInt(reward.value));
       }
-    } else throw new GameError(errors.unsupported, "city_progression");
+    } else {throw new GameError(errors.unsupported, "city_progression");}
   }
 
   return rewardPreviewArray(rewards);
@@ -77,14 +77,14 @@ export function refreshQuests(
   action?: Parameters<typeof progressQuests>[4],
 ) {
   if (action?.legacy)
-    recordTargetTask(
+    {recordTargetTask(
       context,
       action.legacy,
       action.count,
       action.targetCondition ?? action.key ?? "1",
-    );
+    );}
 
-  if (!context.state.quests) return;
+  if (!context.state.quests) {return;}
 
   const merge = (original: readonly Row[], written: readonly Row[] | undefined, key: string) => [
     ...original.filter((row) => !written?.some((next) => String(next[key]) === String(row[key]))),
@@ -129,8 +129,8 @@ export function refreshQuests(
   };
 
   if (write.quests.resetDaily)
-    for (const row of state.quests.daily)
-      if (num(row, "state") === 1) {
+    {for (const row of state.quests.daily)
+      {if (num(row, "state") === 1) {
         const rule = context.rules.progression.daily?.get(String(row.id)),
           id = rewardAtLevel(
             num(row, "type") === 1 ? rule?.special_reward : rule?.normal_reward,
@@ -138,7 +138,7 @@ export function refreshQuests(
           );
 
         if (!id || !context.rules.reconnect.rewards?.has(id))
-          throw new GameError(errors.invalid, "city_progression");
+          {throw new GameError(errors.invalid, "city_progression");}
 
         const rewards = previewRewards(
           id,
@@ -149,12 +149,12 @@ export function refreshQuests(
         const reward = rewards
           .map((entry) => {
             if (entry.kind === "item" && entry.type === 7)
-              return `goods,${entry.id},${entry.count}`;
+              {return `goods,${entry.id},${entry.count}`;}
 
             if (entry.kind === "count") {
               const asset = ["wood", "stone", "iron", "food", "silver", "gold"][entry.type];
 
-              if (asset) return `${asset},0,${entry.value}`;
+              if (asset) {return `${asset},0,${entry.value}`;}
             }
 
             throw new GameError(errors.unsupported, "city_progression");
@@ -163,7 +163,7 @@ export function refreshQuests(
         const template = context.rules.mail.get("12160");
         const contents = javaMailBytes(template?.message);
 
-        if (!contents || !reward) throw new GameError(errors.invalid, "city_progression");
+        if (!contents || !reward) {throw new GameError(errors.invalid, "city_progression");}
 
         write.quests.mail = [
           ...(write.quests.mail ?? []),
@@ -181,7 +181,7 @@ export function refreshQuests(
             createTime: context.now,
           },
         ];
-      }
+      }}}
 }
 
 const commands = [
@@ -209,7 +209,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
   refreshQuests(context);
   const q = context.state.quests;
 
-  if (!q) throw new GameError(errors.unsupported, "city_progression");
+  if (!q) {throw new GameError(errors.unsupported, "city_progression");}
 
   const write = context.write.quests!,
     catalog = context.rules.progression;
@@ -218,10 +218,10 @@ async function prepare(context: CityProgressionContext, command: string, params:
     const row = rows.find((row) => String(row.id) === id);
 
     if (!row || num(row, "state") !== 1)
-      throw new GameError(
+      {throw new GameError(
         row && num(row, "state") === 2 ? errors.rewardClaimed : errors.locked,
         "city_progression",
-      );
+      );}
 
     row.state = 2;
 
@@ -240,9 +240,9 @@ async function prepare(context: CityProgressionContext, command: string, params:
         kind,
       )
     )
-      unavailable();
+      {unavailable();}
 
-    if (kind === "use") recordCampaignUse(context, str(params, "itemId"), count);
+    if (kind === "use") {recordCampaignUse(context, str(params, "itemId"), count);}
 
     if (kind.startsWith("alliance.")) {
       refreshQuests(context, {
@@ -277,7 +277,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
     return { response: encode({}), event: null };
   } else if (command === "quest.init") {
     if (!context.state.queues.some((row) => num(row, "type") === 12))
-      context.write.queues = [
+      {context.write.queues = [
         {
           uuid: randomUUID(),
           ownerId: context.owner,
@@ -289,7 +289,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
           updateTime: idleDeadline,
           totalTime: 0n,
         },
-      ];
+      ];}
 
     const section = storySection(write.story ?? [], context.rules);
     body = {
@@ -324,7 +324,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
       (long(q.fresh, "signInTime") > 0n &&
         questPeriod(long(q.fresh, "signInTime")) === questPeriod(context.now))
     )
-      unavailable();
+      {unavailable();}
 
     const rule = [...(catalog.freshSignIn?.values() ?? [])].find(
       (rule) => Number(rule.day) === day,
@@ -350,7 +350,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
           .sort((a, b) => Number(a.point) - Number(b.point))[0]?.id;
       const rule = catalog.legacyRewards?.get(id ?? "");
 
-      if (!rule || claimed.includes(rule.id!) || score < Number(rule.point)) unavailable();
+      if (!rule || claimed.includes(rule.id!) || score < Number(rule.point)) {unavailable();}
 
       const ids = (rule!.reward ?? "").split("|");
       body = {
@@ -362,7 +362,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
       };
       write.dailyClaims = [...claimed, rule!.id!].join(",");
     } else
-      body = {
+      {body = {
         dailyQuest: sfs.array(
           (write.legacy ?? []).map((row) =>
             sfs.object({
@@ -373,7 +373,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
           ),
         ),
         activityVal: sfs.int(score),
-      };
+      };}
   } else if (command === "task.reward.get") {
     const id = str(params, "id"),
       rule = context.rules.reconnect.quests?.find((rule) => rule.id === id);
@@ -382,7 +382,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
       !rule ||
       (rule.pre && !write.tasks?.some((row) => row.id === rule.pre && num(row, "state") > 0))
     )
-      unavailable();
+      {unavailable();}
 
     claim(write.tasks ?? [], id);
     body.reward = grantRewards(context, rule!.reward);
@@ -394,7 +394,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
       !rule ||
       (write.tasks ?? []).filter((row) => num(row, "state") === 2).length < Number(rule.para1)
     )
-      unavailable();
+      {unavailable();}
 
     write.taskStage = Number(id) + 1;
     body = {
@@ -417,12 +417,12 @@ async function prepare(context: CityProgressionContext, command: string, params:
       const id = String(int(params, "id")),
         rule = catalog.story?.get(id);
 
-      if (Number(rule?.group) !== section) unavailable();
+      if (Number(rule?.group) !== section) {unavailable();}
 
       claim(write.story ?? [], id);
       body.award = grantRewards(context, rule?.rewards);
     } else
-      body = {
+      {body = {
         storyTaskList: questTasks(
           (write.story ?? []).filter(
             (row) => Number(catalog.story?.get(String(row.id))?.group) === section,
@@ -430,15 +430,15 @@ async function prepare(context: CityProgressionContext, command: string, params:
           "story",
         ),
         section: sfs.int(section),
-      };
+      };}
   } else if (command.startsWith("daily.task")) {
-    if (!text(q.alliance, "uid")) unavailable();
+    if (!text(q.alliance, "uid")) {unavailable();}
 
     if (command === "daily.task.reward") {
       const id = String(int(params, "id")),
         type = int(params, "type");
 
-      if (![0, 1].includes(type)) unavailable();
+      if (![0, 1].includes(type)) {unavailable();}
 
       claim(
         (write.daily ?? []).filter((row) => num(row, "type") === type),
@@ -459,7 +459,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
         .filter((rule) => Number(rule.point) > before)
         .sort((a, b) => Number(a.point) - Number(b.point))[0];
 
-      if (!rule || num(q.alliance, "taskNum") < Number(rule.point)) unavailable();
+      if (!rule || num(q.alliance, "taskNum") < Number(rule.point)) {unavailable();}
 
       write.allianceBox = { threshold: Number(rule!.point), period: questPeriod(context.now) };
       write.lord!.newDailyTaskBoxRewardState = Number(rule!.point);
@@ -468,10 +468,10 @@ async function prepare(context: CityProgressionContext, command: string, params:
         newDailyTaskBoxRewardState: sfs.int(Number(rule!.point)),
       };
     } else
-      body = {
+      {body = {
         dailyTaskList: questTasks(write.daily ?? [], "daily"),
         newDailyTaskBoxRewardState: sfs.int(write.lord!.newDailyTaskBoxRewardState),
-      };
+      };}
   } else {
     const record = q.signIn,
       now = context.now,
@@ -482,9 +482,9 @@ async function prepare(context: CityProgressionContext, command: string, params:
     let day = num(record, "day");
 
     if (!same) {
-      if (today - previous > 1n) day = Math.floor(Math.min(day, 28) / 7) * 7;
+      if (today - previous > 1n) {day = Math.floor(Math.min(day, 28) / 7) * 7;}
 
-      if (day >= 28) day = 0;
+      if (day >= 28) {day = 0;}
     }
 
     let reward = text(record, "reward");
@@ -497,7 +497,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
         const [lo, hi] = (ranges?.[`k${n}`] ?? "").split(";").map(Number);
 
         if (castleLevel(context.state) >= lo! && castleLevel(context.state) <= hi!)
-          key = `Week${n}`;
+          {key = `Week${n}`;}
       }
 
       const stage = Math.floor(day / 7);
@@ -511,7 +511,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
     const rewards = reward.split(";");
 
     if (command === "signIn.reward") {
-      if (same) throw new GameError(errors.rewardClaimed, "city_progression");
+      if (same) {throw new GameError(errors.rewardClaimed, "city_progression");}
 
       body = {
         reward: grantRewards(context, rewards[day % 7]?.split("|")[1], true),
@@ -529,7 +529,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
       write.daily = progressed.daily;
       write.legacy = progressed.legacy;
     } else
-      body = {
+      {body = {
         loginReward: sfs.array(
           rewards.map((entry, index) => {
             const [multiple, , id] = entry.split("|");
@@ -551,7 +551,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
         currentDay: sfs.int(same && day % 7 === 0 ? 7 : day % 7),
         isValid: sfs.int(same ? 1 : 0),
         reward_multiple: { type: Type.Float, value: context.effect(310) },
-      };
+      };}
   }
 
   return { response: encode(body), event: null };

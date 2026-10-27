@@ -16,13 +16,13 @@ export async function planChatSocial(
   const { actor, target, now } = tx;
 
   if (actor.banned || (actor.banUntil ?? 0) > Number(now))
-    throw new ChatCommandError("unauthorized");
+    {throw new ChatCommandError("unauthorized");}
 
   if (
     ["chat.private", "chat.room.mk", "chat.room.send", "chat.feed.send"].includes(input.command) &&
     !tx.canSend
   )
-    throw new ChatCommandError("chat_muted");
+    {throw new ChatCommandError("chat_muted");}
 
   const event = (
     cmd: string,
@@ -64,13 +64,13 @@ export async function planChatSocial(
       row.alliance === actor.allianceId &&
       actor.allianceId === actor.membershipAllianceId);
 
-  if (input.command === "chat.room.invitee") return { members: tx.invitees };
+  if (input.command === "chat.room.invitee") {return { members: tx.invitees };}
 
-  if (input.command === "fb.friend.get") return { friends: tx.facebookPlayers };
+  if (input.command === "fb.friend.get") {return { friends: tx.facebookPlayers };}
 
   if (input.command === "fb.friend.favo") {
     if (!target?.facebookId || !actor.facebookId || input.owner === input.target)
-      throw new ChatCommandError("facebook_binding_required");
+      {throw new ChatCommandError("facebook_binding_required");}
 
     await tx.putRelation({
       ...relation(input.owner, input.target, "facebook", 2),
@@ -121,7 +121,7 @@ export async function planChatSocial(
     }
 
     if (!target || input.owner === input.target || (await tx.blocked(input.owner, input.target)))
-      throw new ChatCommandError("invalid_contact");
+      {throw new ChatCommandError("invalid_contact");}
 
     const rows = await tx.pair(input.owner, input.target);
     const own = rows.find((row) => row.owner === input.owner),
@@ -143,20 +143,20 @@ export async function planChatSocial(
       const friend = owner === input.owner ? input.target : input.owner;
       const old = index === 0 ? own : other;
 
-      if (!states[index]) await tx.removeRelations(owner, "contact", [friend]);
+      if (!states[index]) {await tx.removeRelations(owner, "contact", [friend]);}
       else
-        await tx.putRelation({
+        {await tx.putRelation({
           ...(old ?? relation(owner, friend, "contact", states[index]!)),
           state: states[index]!,
           description:
             index === 0 && input.command === "contact.desc"
               ? input.description
               : (old?.description ?? ""),
-        });
+        });}
     }
 
     if (input.command === "contact.delete")
-      await tx.removeRelations(input.owner, "facebook", [input.target]);
+      {await tx.removeRelations(input.owner, "facebook", [input.target]);}
 
     await event("push.contact", { friendUid: input.owner, stat: states[1] }, input.target);
 
@@ -169,10 +169,10 @@ export async function planChatSocial(
   }
 
   if (input.command === "chat.lock") {
-    if (!target || input.owner === input.target) throw new ChatCommandError("invalid_target");
+    if (!target || input.owner === input.target) {throw new ChatCommandError("invalid_target");}
 
     if ((await tx.relations(input.owner, "block")).length >= 1000)
-      throw new ChatCommandError("block_limit");
+      {throw new ChatCommandError("block_limit");}
 
     await tx.putRelation(relation(input.owner, input.target, "block", 1));
 
@@ -182,7 +182,7 @@ export async function planChatSocial(
   if (input.command === "chat.unlock" || input.command === "chat.unlock.batch") {
     const ids = input.command === "chat.unlock" ? [input.target] : input.ids;
 
-    if (!ids.length || ids.length > 100) throw new ChatCommandError("invalid_target");
+    if (!ids.length || ids.length > 100) {throw new ChatCommandError("invalid_target");}
 
     await tx.removeRelations(input.owner, "block", ids);
 
@@ -190,18 +190,18 @@ export async function planChatSocial(
   }
 
   if (input.command === "chat.shield.list")
-    return {
+    {return {
       list: (await tx.relations(input.owner, "block")).map((row) => ({
         uuid: row.id || row.other,
         owner: row.owner,
         other: row.other,
         time: Number(row.createdAt),
       })),
-    };
+    };}
 
   if (input.command === "chat.report") {
     if (!target || input.owner === input.target || !input.body)
-      throw new ChatCommandError("invalid_report");
+      {throw new ChatCommandError("invalid_report");}
 
     return { id: await tx.report(input.owner, input.target, input.body) };
   }
@@ -214,7 +214,7 @@ export async function planChatSocial(
       input.owner === input.target ||
       (target.gmFlag ?? 0) >= actor.gmFlag
     )
-      throw new ChatCommandError("moderation_denied");
+      {throw new ChatCommandError("moderation_denied");}
 
     const until = input.command.endsWith("unban")
       ? 0n
@@ -233,7 +233,7 @@ export async function planChatSocial(
       !input.body ||
       (await tx.blocked(input.owner, input.target))
     )
-      throw new ChatCommandError("private_message_denied");
+      {throw new ChatCommandError("private_message_denied");}
 
     const id = await tx.direct(
       input.owner,
@@ -248,7 +248,7 @@ export async function planChatSocial(
 
   if (input.command === "chat.message.delete") {
     if (!actor.gmFlag || actor.moderationAllowed === false)
-      throw new ChatCommandError("moderation_denied");
+      {throw new ChatCommandError("moderation_denied");}
 
     await tx.removeMessage(input.sequence);
 
@@ -261,7 +261,7 @@ export async function planChatSocial(
       input.notices.length > 50 ||
       input.notices.some((uid) => !/^[a-zA-Z0-9_-]{1,40}$/.test(uid))
     )
-      throw new ChatCommandError("invalid_message");
+      {throw new ChatCommandError("invalid_message");}
 
     const alliance =
       input.feedAuth === "alliance" &&
@@ -270,7 +270,7 @@ export async function planChatSocial(
         ? actor.allianceId
         : "";
 
-    if (input.feedAuth === "alliance" && !alliance) throw new ChatCommandError("invalid_room");
+    if (input.feedAuth === "alliance" && !alliance) {throw new ChatCommandError("invalid_room");}
 
     let parent: string | null = null;
 
@@ -278,7 +278,7 @@ export async function planChatSocial(
       const original = await tx.feed(input.feedId);
 
       if (!original || original.parent || !feedAccess(original))
-        throw new ChatCommandError("feed_permission_denied");
+        {throw new ChatCommandError("feed_permission_denied");}
 
       parent = original.id;
     }
@@ -318,7 +318,7 @@ export async function planChatSocial(
         state.membershipAllianceId !== alliance ||
         (await tx.blocked(input.owner, uid))
       )
-        continue;
+        {continue;}
 
       await tx.feedNotice(uid, id);
       await event("push.chat.feed.notice", { id }, uid);
@@ -331,7 +331,7 @@ export async function planChatSocial(
     const feed = await tx.feed(input.feedId);
 
     if (!feed || (feed.owner !== input.owner && !(actor.gmFlag && actor.moderationAllowed)))
-      throw new ChatCommandError("feed_permission_denied");
+      {throw new ChatCommandError("feed_permission_denied");}
 
     await tx.removeFeed(feed.id);
 
@@ -352,7 +352,7 @@ export async function planChatSocial(
       actor.serverId,
       actor.allianceId === actor.membershipAllianceId ? (actor.allianceId ?? "") : "",
     ))
-      if (feedAccess(row) && !(await tx.blocked(input.owner, row.owner))) feed.push(row.body);
+      {if (feedAccess(row) && !(await tx.blocked(input.owner, row.owner))) {feed.push(row.body);}}
 
     return { feed };
   }
@@ -361,12 +361,12 @@ export async function planChatSocial(
     const members = [...new Set([input.owner, ...input.members])];
 
     if (members.length < 2 || members.length > 50 || members.some((uid) => !tx.players.get(uid)))
-      throw new ChatCommandError("invalid_room");
+      {throw new ChatCommandError("invalid_room");}
 
-    if ((await tx.myRooms(input.owner)).length >= 50) throw new ChatCommandError("room_limit");
+    if ((await tx.myRooms(input.owner)).length >= 50) {throw new ChatCommandError("room_limit");}
 
     for (const uid of members)
-      if (await tx.blocked(input.owner, uid)) throw new ChatCommandError("invalid_member");
+      {if (await tx.blocked(input.owner, uid)) {throw new ChatCommandError("invalid_member");}}
 
     const id = randomUUID(),
       name = input.name || members.join(", ").slice(0, 100),
@@ -381,39 +381,39 @@ export async function planChatSocial(
     });
 
     for (const owner of members)
-      await tx.putMember({
+      {await tx.putMember({
         room: id,
         owner,
         role: owner === input.owner ? 2 : 0,
         joinedAt: now,
         leftAt: null,
         readSequence: 0n,
-      });
+      });}
 
     const result = { id: roomId, roomId, name, members };
     await roomControl(roomId, 0, members);
 
-    for (const uid of members) await event("push.chat.room.invite", result, uid);
+    for (const uid of members) {await event("push.chat.room.invite", result, uid);}
 
-    if (input.body) await tx.append(roomId, input.owner, input.operationId, input.body);
+    if (input.body) {await tx.append(roomId, input.owner, input.operationId, input.body);}
 
     return result;
   }
 
   if (input.command === "chat.room.user.rooms")
-    return {
+    {return {
       rooms: (await tx.myRooms(input.owner)).map((row) => ({
         ...row,
         createdAt: Number(row.createdAt),
         deletedAt: row.deletedAt === null ? null : Number(row.deletedAt),
         roomId: `private_${row.id}`,
       })),
-    };
+    };}
 
   const rooms = input.command === "chat.room.member.quitmult" ? input.ids : [input.room];
 
   if (!rooms.length || rooms.some((room) => !/^private_[a-f0-9-]{36}$/.test(room)))
-    throw new ChatCommandError("invalid_room");
+    {throw new ChatCommandError("invalid_room");}
 
   let result: ChatSocialResponse = {};
 
@@ -424,16 +424,16 @@ export async function planChatSocial(
       member = members.find((row) => row.owner === input.owner);
     requireRoomRole(member?.role, 0);
 
-    if (!room || !member) throw new ChatCommandError("invalid_room");
+    if (!room || !member) {throw new ChatCommandError("invalid_room");}
 
     if (input.command === "chat.room.members")
-      result = {
+      {result = {
         members: members.map((row) => ({ uid: row.owner, role: row.role === 2 ? 0 : 1 })),
-      };
+      };}
     else if (input.command === "chat.room.name") {
       requireRoomRole(member.role, 2);
 
-      if (!input.name) throw new ChatCommandError("invalid_name");
+      if (!input.name) {throw new ChatCommandError("invalid_name");}
 
       await tx.putRoom({ ...room, name: input.name, version: room.version + 1 });
       await roomControl(roomId, 5, input.name);
@@ -442,13 +442,13 @@ export async function planChatSocial(
       requireRoomRole(member.role, 2);
       const additions = input.members.filter((uid) => !members.some((old) => old.owner === uid));
 
-      if (members.length + additions.length > 50) throw new ChatCommandError("room_capacity");
+      if (members.length + additions.length > 50) {throw new ChatCommandError("room_capacity");}
 
       for (const uid of additions) {
         if (!tx.players.get(uid) || (await tx.blocked(input.owner, uid)))
-          throw new ChatCommandError("invalid_member");
+          {throw new ChatCommandError("invalid_member");}
 
-        if ((await tx.myRooms(uid)).length >= 50) throw new ChatCommandError("room_limit");
+        if ((await tx.myRooms(uid)).length >= 50) {throw new ChatCommandError("room_limit");}
 
         await tx.putMember({
           room: id,
@@ -461,7 +461,7 @@ export async function planChatSocial(
         await event("push.chat.room.invite", { roomId, name: room.name }, uid);
       }
 
-      if (additions.length) await roomControl(roomId, 1, additions);
+      if (additions.length) {await roomControl(roomId, 1, additions);}
     } else if (
       ["chat.room.member.kick", "chat.room.member.quit", "chat.room.member.quitmult"].includes(
         input.command,
@@ -472,11 +472,11 @@ export async function planChatSocial(
       if (input.command === "chat.room.member.kick") {
         requireRoomRole(member.role, 2);
 
-        if (leaving.includes(room.owner)) throw new ChatCommandError("room_permission_denied");
+        if (leaving.includes(room.owner)) {throw new ChatCommandError("room_permission_denied");}
       }
 
       for (const row of members)
-        if (leaving.includes(row.owner)) await tx.putMember({ ...row, leftAt: now });
+        {if (leaving.includes(row.owner)) {await tx.putMember({ ...row, leftAt: now });}}
 
       if (leaving.includes(room.owner)) {
         const successor = members.find((row) => !leaving.includes(row.owner));
@@ -484,14 +484,14 @@ export async function planChatSocial(
         if (successor) {
           await tx.putMember({ ...successor, role: 2 });
           await tx.putRoom({ ...room, owner: successor.owner, version: room.version + 1 });
-        } else await tx.putRoom({ ...room, deletedAt: now, version: room.version + 1 });
+        } else {await tx.putRoom({ ...room, deletedAt: now, version: room.version + 1 });}
       }
 
       await roomControl(roomId, input.command === "chat.room.member.kick" ? 2 : 3, leaving);
 
-      for (const uid of leaving) await event("push.chat.room.quit", { roomId, uid }, uid);
+      for (const uid of leaving) {await event("push.chat.room.quit", { roomId, uid }, uid);}
     } else if (input.command === "chat.room.send") {
-      if (!input.body) throw new ChatCommandError("invalid_message");
+      if (!input.body) {throw new ChatCommandError("invalid_message");}
 
       const saved = await tx.append(roomId, input.owner, input.operationId, input.body);
       result = { roomId, seqId: saved.sequenceId, serverTime: Number(now) };
@@ -499,21 +499,21 @@ export async function planChatSocial(
       const messages = [];
 
       for (const item of await tx.history(roomId, member.joinedAt, input.sequence, input.limit))
-        if (
+        {if (
           [100, 101, 102, 103, 105].includes(item.post ?? 0) ||
           !(await tx.blocked(input.owner, item.senderUid))
         )
-          messages.push({
+          {messages.push({
             ...item,
             msg: item.body,
             seqId: String(item.sequenceId),
             timeLong: Date.parse(item.createdAt),
-          });
+          });}}
 
       result = { id: roomId, msg: messages };
     } else if (input.command === "chat.set.status")
-      await tx.markRead(id, input.owner, input.sequence);
-    else throw new ChatCommandError("unsupported_command");
+      {await tx.markRead(id, input.owner, input.sequence);}
+    else {throw new ChatCommandError("unsupported_command");}
   }
 
   return result;

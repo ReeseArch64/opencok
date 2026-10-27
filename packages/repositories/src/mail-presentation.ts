@@ -36,11 +36,11 @@ export async function readMailSenders(
     new Set(uids).size !== uids.length ||
     uids.some((uid) => !uid || uid.length > 40 || uid.includes("\0") || !uid.isWellFormed())
   )
-    throw new Error("Invalid mail sender query");
+    {throw new Error("Invalid mail sender query");}
 
   const result = new Map<string, MailSender>();
 
-  if (!uids.length) return result;
+  if (!uids.length) {return result;}
 
   const routes = await databases.global.db
     .select({ uid: account_new.gameUid, server: account_new.server })
@@ -53,7 +53,7 @@ export async function readMailSenders(
     new Set(routes.map((row) => row.uid)).size !== routes.length ||
     routes.some((row) => !uids.includes(row.uid))
   )
-    throw new DependencyError("mail sender routing");
+    {throw new DependencyError("mail sender routing");}
 
   const directory = new Map(routes.map((row) => [row.uid, row.server]));
   const groups = new Map<number, string[]>();
@@ -69,7 +69,7 @@ export async function readMailSenders(
       realm > 2147483647 ||
       !databases.kingdoms.has(realm)
     )
-      throw new DependencyError("mail sender realm");
+      {throw new DependencyError("mail sender realm");}
 
     const members = groups.get(realm) ?? [];
     members.push(uid);
@@ -98,23 +98,23 @@ export async function readMailSenders(
         new Set(rows.map((row) => row.uid)).size !== rows.length ||
         rows.some((row) => !ids.includes(row.uid) || row.serverId !== realm)
       )
-        throw new DependencyError("mail sender identity");
+        {throw new DependencyError("mail sender identity");}
 
       for (const row of rows)
-        result.set(row.uid, {
+        {result.set(row.uid, {
           name: row.name,
           pic: row.pic,
           picVer: String(row.picVer ?? 0),
           lang: realm === kingdomId ? (row.lang ?? "") : row.lang,
           abbr: row.abbr,
-        });
+        });}
     };
 
-    if (realm === kingdomId) await read(local);
+    if (realm === kingdomId) {await read(local);}
     else
-      await databases
+      {await databases
         .getKingdom(realm)
-        .db.transaction(read, { isolationLevel: "repeatable read", accessMode: "read only" });
+        .db.transaction(read, { isolationLevel: "repeatable read", accessMode: "read only" });}
   }
 
   return result;
@@ -132,7 +132,7 @@ export async function readMailTranslations(db: Reader, requests: readonly MailTr
         !(languages as readonly string[]).includes(request.language),
     )
   )
-    throw new Error("Invalid mail translation query");
+    {throw new Error("Invalid mail translation query");}
 
   const groups = new Map<(typeof languages)[number], Set<string>>();
 
@@ -160,13 +160,13 @@ export async function readMailTranslations(db: Reader, requests: readonly MailTr
       new Set(sizes.map((row) => row.id)).size !== sizes.length ||
       sizes.some((row) => !set.has(row.id) || !Number.isSafeInteger(row.size) || row.size < 0)
     )
-      throw new Error("Invalid mail translation metadata");
+      {throw new Error("Invalid mail translation metadata");}
 
     bytes += sizes.reduce((total, row) => total + row.size, 0);
 
-    if (bytes > 4 * 1024 * 1024) throw new Error("Mail translation capacity exceeded");
+    if (bytes > 4 * 1024 * 1024) {throw new Error("Mail translation capacity exceeded");}
 
-    if (!sizes.length) continue;
+    if (!sizes.length) {continue;}
 
     const rows = await db
       .select({ id: translationv2.id, contents: column })
@@ -185,7 +185,7 @@ export async function readMailTranslations(db: Reader, requests: readonly MailTr
       new Set(rows.map((row) => row.id)).size !== rows.length ||
       rows.some((row) => expected.get(row.id) !== (row.contents?.length ?? 0))
     )
-      throw new Error("Inconsistent mail translation snapshot");
+      {throw new Error("Inconsistent mail translation snapshot");}
 
     result.push(...rows.map((row) => ({ ...row, language })));
   }

@@ -129,10 +129,10 @@ test("setter preserves signed integers, defaults omitted audio on updates and sh
     pushes: [],
   });
   for (let index = 0; index < 2; index++)
-    await instance.game.execute("self", "parse.push.set", {
+    {await instance.game.execute("self", "parse.push.set", {
       type: params.type,
       status: sfs.int(-2147483648),
-    });
+    });}
   expect(instance.writes).toEqual([
     { type: -2147483648, status: 2147483647, audio: -9 },
     { type: -2147483648, status: -2147483648, audio: 1 },
@@ -190,7 +190,7 @@ test("malformed preference integers fail before profile reads or writes", async 
   }
   const incomplete: Fields[] = [{}, { type: sfs.int(0) }, { status: sfs.int(1) }];
   for (const params of incomplete)
-    await expect(instance.game.execute("self", "parse.push.set", params)).rejects.toThrow();
+    {await expect(instance.game.execute("self", "parse.push.set", params)).rejects.toThrow();}
   expect(instance.calls).toEqual([]);
   expect(instance.writes).toEqual([]);
 });
@@ -205,9 +205,9 @@ test("missing and banned players cannot initialize or change preferences", async
   for (const profile of profiles) {
     instance.profile(profile);
     for (const command of ["pushSetting.get", "parse.push.set"])
-      await expect(
+      {await expect(
         instance.game.execute("self", command, { type: sfs.int(1), status: sfs.int(0) }),
-      ).rejects.toThrow();
+      ).rejects.toThrow();}
   }
   expect(instance.writes).toEqual([]);
   expect(instance.calls).not.toContain("initialize");

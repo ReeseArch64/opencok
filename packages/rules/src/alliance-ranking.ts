@@ -15,11 +15,11 @@ function invalid(): never {
 }
 
 function integer(value: unknown): number {
-  if (!/^[+-]?\d+$/.test(String(value))) return invalid();
+  if (!/^[+-]?\d+$/.test(String(value))) {return invalid();}
 
   const parsed = Number(value);
 
-  if (!Number.isInteger(parsed) || parsed < -2147483648 || parsed > 2147483647) return invalid();
+  if (!Number.isInteger(parsed) || parsed < -2147483648 || parsed > 2147483647) {return invalid();}
 
   return parsed;
 }
@@ -31,7 +31,7 @@ export function allianceRankingQuery(
 ): AllianceRankingQuery {
   const limit = integer(rules.items.get("ranking")?.k1);
 
-  if (limit < 1 || limit > 32767 || !Number.isSafeInteger(now)) return invalid();
+  if (limit < 1 || limit > 32767 || !Number.isSafeInteger(now)) {return invalid();}
 
   return { kind, limit, now };
 }
@@ -48,7 +48,7 @@ export function selectAllianceRanking(
     snapshot.sciences.length > 32767 ||
     snapshot.videos.length > query.limit
   )
-    return invalid();
+    {return invalid();}
 
   const candidates =
     query.kind === "kills" ? snapshot.candidates.slice(0, -1) : snapshot.candidates;
@@ -59,7 +59,7 @@ export function selectAllianceRanking(
     const leader = text(row, "leaderUid");
     const pair = JSON.stringify([id, leader]);
 
-    if (!id.trim() || !leader.trim() || pairs.has(pair)) return invalid();
+    if (!id.trim() || !leader.trim() || pairs.has(pair)) {return invalid();}
 
     pairs.add(pair);
     positions.set(id, index + 1);
@@ -73,7 +73,7 @@ export function selectAllianceRanking(
     const id = text(row, "allianceId");
     const key = JSON.stringify([id, integer(row.scienceId)]);
 
-    if (!ids.has(id) || scienceKeys.has(key)) return invalid();
+    if (!ids.has(id) || scienceKeys.has(key)) {return invalid();}
 
     scienceKeys.add(key);
     const records = sciences.get(id) ?? [];
@@ -86,7 +86,7 @@ export function selectAllianceRanking(
   for (const row of snapshot.videos) {
     const id = text(row, "allianceId");
 
-    if (!ids.has(id) || videos.has(id)) return invalid();
+    if (!ids.has(id) || videos.has(id)) {return invalid();}
 
     videos.set(id, row);
   }

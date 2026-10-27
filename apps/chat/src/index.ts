@@ -84,7 +84,7 @@ try {
 let stopping = false;
 
 async function stop() {
-  if (stopping) return;
+  if (stopping) {return;}
 
   stopping = true;
 
@@ -100,8 +100,8 @@ async function stop() {
 }
 
 for (const signal of ["SIGTERM", "SIGINT"] as const)
-  process.once(signal, () => {
+  {process.once(signal, () => {
     void stop().catch(() => {
       process.exitCode = 1;
     });
-  });
+  });}

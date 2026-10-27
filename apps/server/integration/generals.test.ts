@@ -105,9 +105,9 @@ test("building unlock and bounded experience consumption survive reconnect and r
     await h.command("general.init", {});
     expect(await h.db.db.select().from(new_general)).toHaveLength(1);
     for (const owner of ["owner", "other"])
-      await h.db.db
+      {await h.db.db
         .insert(user_item)
-        .values({ uuid: `${owner}-xp`, ownerId: owner, itemId: "200390", count: 10, value: 0 });
+        .values({ uuid: `${owner}-xp`, ownerId: owner, itemId: "200390", count: 10, value: 0 });}
     const request = {
       M__REQUEST_ID__H: sfs.string("addexp"),
       id: sfs.int(53500),

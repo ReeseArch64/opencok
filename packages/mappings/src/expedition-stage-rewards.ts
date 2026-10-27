@@ -17,12 +17,12 @@ export function expeditionHistorySnapshot(result: Row) {
     !Array.isArray(raw.users) ||
     raw.users.length > 10
   )
-    throw new Error("Invalid expedition final history");
+    {throw new Error("Invalid expedition final history");}
 
   const userlist: Row[] = [];
 
   for (const row of raw.users) {
-    if (!row || typeof row !== "object" || typeof row.uid !== "string" || !row.metadata) break;
+    if (!row || typeof row !== "object" || typeof row.uid !== "string" || !row.metadata) {break;}
 
     let value: unknown;
 
@@ -40,7 +40,7 @@ export function expeditionHistorySnapshot(result: Row) {
       !("abbr" in value) ||
       typeof value.abbr !== "string"
     )
-      break;
+      {break;}
 
     const metadata = value as Row;
     userlist.push({
@@ -69,7 +69,7 @@ export function expeditionHistorySnapshot(result: Row) {
 }
 
 function users(raw: unknown): Fields[] {
-  if (!Array.isArray(raw) || raw.length > 10) throw new Error("Invalid expedition history users");
+  if (!Array.isArray(raw) || raw.length > 10) {throw new Error("Invalid expedition history users");}
 
   return raw.map((row): Fields => {
     if (
@@ -81,7 +81,7 @@ function users(raw: unknown): Fields[] {
       !Number.isInteger(row.serverId) ||
       !Number.isInteger(row.ranking)
     )
-      throw new Error("Invalid expedition history member");
+      {throw new Error("Invalid expedition history member");}
 
     return {
       uid: sfs.string(row.uid),
@@ -98,12 +98,12 @@ function users(raw: unknown): Fields[] {
 
 function kingdoms(raw: unknown): Fields[] {
   if (!Array.isArray(raw) || raw.length !== 2)
-    throw new Error("Invalid expedition history kingdoms");
+    {throw new Error("Invalid expedition history kingdoms");}
 
   return raw.map((row): Fields => {
-    if (!row || typeof row !== "object") throw new Error("Invalid expedition history kingdom");
+    if (!row || typeof row !== "object") {throw new Error("Invalid expedition history kingdom");}
 
-    if (Object.keys(row).length === 0) return {};
+    if (Object.keys(row).length === 0) {return {};}
 
     if (
       !Number.isInteger(row.serverId) ||
@@ -111,7 +111,7 @@ function kingdoms(raw: unknown): Fields[] {
       typeof row.banner !== "string" ||
       ![0, 1].includes(row.win)
     )
-      throw new Error("Invalid expedition history kingdom");
+      {throw new Error("Invalid expedition history kingdom");}
 
     return {
       serverId: sfs.int(row.serverId),
@@ -147,7 +147,7 @@ export function expeditionHistory(rows: readonly Row[], servers: readonly Row[])
             typeof value.begintime !== "string" ||
             !/^\d{1,19}$/.test(value.begintime)
           )
-            throw new Error("Invalid owned expedition history");
+            {throw new Error("Invalid owned expedition history");}
 
           stage = Number(value.stage);
           at = BigInt(value.begintime);
@@ -165,7 +165,7 @@ export function expeditionHistory(rows: readonly Row[], servers: readonly Row[])
         }
 
         if (!Number.isInteger(stage) || stage < 0 || stage > 8 || at < 0n)
-          throw new Error("Invalid expedition history stage");
+          {throw new Error("Invalid expedition history stage");}
 
         return sfs.object({
           stage: sfs.int(stage),

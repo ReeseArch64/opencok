@@ -34,7 +34,7 @@ function fixture() {
 }
 
 function bits(value: number): string {
-  if (Number.isNaN(value)) return "7fc00000";
+  if (Number.isNaN(value)) {return "7fc00000";}
   const buffer = new ArrayBuffer(4);
   const view = new DataView(buffer);
   view.setFloat32(0, value);
@@ -47,8 +47,8 @@ test("CN1 reward bands match 755 independent Java 8 numeric and tokenization out
     const { rules, control } = fixture();
     control.k3 = bands as string;
     const run = () => cn1RewardRatio(active(minutes), rules, context);
-    if (expected === "error") expect(run).toThrow();
-    else expect(bits(run()), JSON.stringify([bands, minutes])).toBe(expected);
+    if (expected === "error") {expect(run).toThrow();}
+    else {expect(bits(run()), JSON.stringify([bands, minutes])).toBe(expected);}
   }
 });
 
@@ -72,9 +72,9 @@ test("known absent or exempt CN1 state bypasses catalogs and online time without
     ),
   ).toBe(1);
   for (const isAddict of [undefined, null, "1", NaN, Infinity, 0.1, 2147483648, -2147483649])
-    expect(() =>
+    {expect(() =>
       cn1RewardRatio({ isAddict, onlineLastTime: 0 } as Cn1SessionState, unreachable, context),
-    ).toThrow("Invalid CN1 session integer");
+    ).toThrow("Invalid CN1 session integer");}
   expect(() => cn1RewardRatio(undefined as unknown as null, unreachable, context)).toThrow();
 });
 
@@ -99,16 +99,16 @@ test("CN1 compares player versions directly before realm gates and retains reach
   control.k2 = "invalid";
   expect(cn1RewardRatio(active(), rules, { ...context, version: "11" })).toBe(1);
   for (const version of ["", " ", "12.6", "13.bad", "12.6.0.bad"])
-    expect(() => cn1RewardRatio(active(), rules, { ...context, version })).toThrow();
+    {expect(() => cn1RewardRatio(active(), rules, { ...context, version })).toThrow();}
   for (const k1 of [undefined, "", " ", "12.6", "13.bad"])
-    expect(() => {
+    {expect(() => {
       control.k1 = k1 as string;
       return cn1RewardRatio(active(), rules, context);
-    }).toThrow();
+    }).toThrow();}
   control.k1 = "12.6.0";
   control.k2 = "2";
   for (const version of ["13", "12.7", ".１２..６.０.99"])
-    expect(cn1RewardRatio(active(), rules, { ...context, version })).toBe(0.5);
+    {expect(cn1RewardRatio(active(), rules, { ...context, version })).toBe(0.5);}
 });
 
 test("production and test CN1 gates preserve selector dialect and independent test switches", () => {
@@ -124,13 +124,13 @@ test("production and test CN1 gates preserve selector dialect and independent te
   control.k2 = "invalid";
   expect(() => cn1RewardRatio(active(), rules, context)).toThrow();
   for (const first of [undefined, "0", "1", "all", " 1"])
-    for (const second of [undefined, "0", "1", "all", " 1"]) {
+    {for (const second of [undefined, "0", "1", "all", " 1"]) {
       control.k72 = first as string;
       control.k107 = second as string;
       expect(cn1RewardRatio(active(), rules, { ...context, testServer: true })).toBe(
         first === "1" && second === "1" ? 0.5 : 1,
       );
-    }
+    }}
   control.k2 = "2";
   expect(cn1RewardRatio(active(), rules, context)).toBe(0.5);
 });
@@ -154,7 +154,7 @@ test("CN1 reads signed saved session minutes only after the control opens and ac
     expect(() => cn1RewardRatio(state, rules, context)).toThrow("Invalid CN1 session integer");
   }
   for (const isAddict of [-2147483648, -1, 1, 2, 2147483647])
-    expect(cn1RewardRatio({ isAddict, onlineLastTime: 15 }, rules, context)).toBe(0.5);
+    {expect(cn1RewardRatio({ isAddict, onlineLastTime: 15 }, rules, context)).toBe(0.5);}
   expect(cn1RewardRatio(active(-2147483648), rules, context)).toBe(1);
   expect(cn1RewardRatio(active(2147483647), rules, context)).toBe(0);
 });
@@ -216,10 +216,10 @@ test("nickname refund consumes the configured CN1 ratio lazily and preserves fre
   }
   const brokenState = undefined as unknown as null;
   for (const platform of [null, "", "CN1", "cn1 ", "market_global", "dmm"])
-    expect(
+    {expect(
       nicknameGoldRefund(initial, platform, "5", () => cn1RewardRatio(brokenState, rules, context))
         .delta,
-    ).toBe(5n);
+    ).toBe(5n);}
   expect(() =>
     nicknameGoldRefund(initial, "cn1", "5", () => cn1RewardRatio(brokenState, rules, context)),
   ).toThrow();
@@ -237,12 +237,12 @@ test("CN1 refund ratios use the existing real resource loader without transformi
   const directory = await mkdtemp(join(tmpdir(), "opencok-cn1-rules-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(
+      {await writeFile(
         join(directory, `${name}.xml`),
         name === "building"
           ? '<database><ItemSpec id="400001" level="1"/></database>'
           : '<database><ItemSpec id="synthetic"/></database>',
-      );
+      );}
     expect(cn1RewardRatio(active(), await loadRules(directory), context)).toBe(1);
     await writeFile(
       join(directory, "pay_servercontrol.xml"),

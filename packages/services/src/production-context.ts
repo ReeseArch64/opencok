@@ -23,7 +23,7 @@ export async function productionContext(
   now: bigint,
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion">,
 ) {
-  if (!services.worldPowerEffects) throw new Error("Missing production world effects");
+  if (!services.worldPowerEffects) {throw new Error("Missing production world effects");}
 
   const world = decodeWorldPowerEffects(await services.worldPowerEffects(rules.kingdomId));
   const emperor = state.effects.throneRewards.length
@@ -41,7 +41,7 @@ export async function productionContext(
             (queue) => num(queue, "scienceId") === num(row, "scienceId"),
           );
 
-          if (!pending || at < long(pending, "startTime") + long(pending, "needTime")) return row;
+          if (!pending || at < long(pending, "startTime") + long(pending, "needTime")) {return row;}
 
           allianceScienceRule(rules, num(row, "scienceId"), num(row, "level") + 1);
 
@@ -186,7 +186,7 @@ export async function productionContext(
       capacity = definition.effects?.productionCapacity ?? 4000;
 
     if (resourceId === undefined || resourceId < 0 || resourceId > 3 || base === undefined)
-      throw new Error("Missing production definition");
+      {throw new Error("Missing production definition");}
 
     const horizon = BigInt(Number.MAX_SAFE_INTEGER - 1);
     const cuts = new Set(
@@ -200,7 +200,7 @@ export async function productionContext(
     cuts.delete(horizon);
     const boostEnd = long(building, "effectTime");
 
-    if (boostEnd > from) cuts.add(boostEnd);
+    if (boostEnd > from) {cuts.add(boostEnd);}
 
     const result: ProductionRate[] = [];
 
@@ -222,7 +222,7 @@ export async function productionContext(
       const bonus = boostEnd > at ? Number(rules.items.get("building_base")?.k7) : 0;
 
       if (!Number.isFinite(effect) || !Number.isFinite(bonus))
-        throw new Error("Invalid production effect");
+        {throw new Error("Invalid production effect");}
 
       const rate = base * Math.max(0, 1 + effect / 100) * Math.max(0, 1 + bonus / 100);
       const cap = capacity * (1 + Math.max(0, effect) / 100) * (1 + Math.max(0, bonus) / 100);
@@ -231,7 +231,7 @@ export async function productionContext(
         !Number.isSafeInteger(Math.round(rate * Number(productionScale))) ||
         !Number.isSafeInteger(Math.floor(cap))
       )
-        throw new Error("Production rate overflow");
+        {throw new Error("Production rate overflow");}
 
       const next = {
         at,
@@ -241,10 +241,10 @@ export async function productionContext(
       const previous = result.at(-1);
 
       if (!previous || previous.perHour !== next.perHour || previous.capacity !== next.capacity)
-        result.push(next);
+        {result.push(next);}
     }
 
-    if (result.length > 256) throw new Error("Production rate schedule exceeds bound");
+    if (result.length > 256) {throw new Error("Production rate schedule exceeds bound");}
 
     return result;
   };

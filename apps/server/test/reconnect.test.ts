@@ -56,7 +56,7 @@ test("reconnect rejects malformed currency inputs before serialization", () => {
     "dmmPaidGold",
     "dmmPaidSpecialGold",
   ])
-    for (const value of [
+    {for (const value of [
       9007199254740992,
       1.5,
       NaN,
@@ -68,7 +68,7 @@ test("reconnect rejects malformed currency inputs before serialization", () => {
       "1e3",
       "secret-invalid-value",
     ])
-      expect(() => reconnectBalances({ [key]: value })).toThrow("102192");
+      {expect(() => reconnectBalances({ [key]: value })).toThrow("102192");}}
 });
 
 test("reconnect army uses persisted fields without needing static army rules", () => {
@@ -92,7 +92,7 @@ test("reconnect army uses persisted fields without needing static army rules", (
     level: sfs.int(5),
   });
   for (const train of [1, -1, 2147483647])
-    expect(
+    {expect(
       decode(encode(reconnectArmy({ ...army, train, finishTime: 9007199254740993n }))),
     ).toEqual({
       id: sfs.string("synthetic-army"),
@@ -101,7 +101,7 @@ test("reconnect army uses persisted fields without needing static army rules", (
       level: sfs.int(5),
       train: sfs.int(train),
       finish: sfs.long(9007199254740993n),
-    });
+    });}
   expect(reconnectArmy({ armyId: "zero", train: null })).toEqual({
     id: sfs.string("zero"),
     free: sfs.int(0),
@@ -133,5 +133,5 @@ test("reconnect armies preserve supplied order and reject ambiguous or unreprese
     ),
     { armyId: "a", train: 1, finishTime: "9223372036854775808" },
   ];
-  for (const row of invalid) expect(() => reconnectArmy(row)).toThrow();
+  for (const row of invalid) {expect(() => reconnectArmy(row)).toThrow();}
 });

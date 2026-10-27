@@ -15,7 +15,7 @@ export function createWorldBulletinStore(db: Database["kingdom"]["db"]): WorldBu
         !Number.isSafeInteger(now) ||
         now < 0
       )
-        throw new Error("Invalid world bulletin principal");
+        {throw new Error("Invalid world bulletin principal");}
 
       return db.transaction(
         async (tx) => {
@@ -38,7 +38,7 @@ export function createWorldBulletinStore(db: Database["kingdom"]["db"]): WorldBu
             (profile.banTime ?? 0n) > BigInt(now) ||
             mailBlank(profile.alliance)
           )
-            return undefined;
+            {return undefined;}
 
           return profile.alliance!;
         },

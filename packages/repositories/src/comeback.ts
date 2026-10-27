@@ -25,7 +25,7 @@ export async function readComeback(
     .limit(65)
     .for("update");
 
-  if (records.length > 64) throw new Error("Comeback history exceeds bound");
+  if (records.length > 64) {throw new Error("Comeback history exceeds bound");}
 
   const [deviceRecord] = await tx
     .select({
@@ -50,7 +50,7 @@ export async function readComeback(
       ),
     );
 
-  if (viewed && viewed.value !== "1") throw new Error("Invalid comeback view marker");
+  if (viewed && viewed.value !== "1") {throw new Error("Invalid comeback view marker");}
 
   const [charges] = await tx
     .select({ total: sql<string>`coalesce(sum(${paylog.spend}),0)::text` })
@@ -58,7 +58,7 @@ export async function readComeback(
     .where(eq(paylog.uid, owner));
   const amount = Number(charges?.total ?? 0);
 
-  if (!Number.isFinite(amount)) throw new Error("Invalid comeback payment history");
+  if (!Number.isFinite(amount)) {throw new Error("Invalid comeback payment history");}
 
   return {
     records,
@@ -76,7 +76,7 @@ export async function writeComeback(tx: MutationTransaction, owner: string, writ
       deviceId = text(row, "deviceId");
 
     if (row.uid !== owner || !/^\d{1,11}$/.test(configId) || deviceId.length > 255)
-      throw new Error("Invalid comeback record identity");
+      {throw new Error("Invalid comeback record identity");}
 
     comebackClaims(row.dailyReward, 30);
     comebackClaims(row.payReward, 100);
@@ -104,7 +104,7 @@ export async function writeComeback(tx: MutationTransaction, owner: string, writ
         old.payTotal !== value.payTotal ||
         (old.deviceId ?? "") !== value.deviceId)
     )
-      throw new Error("Comeback enrollment identity changed");
+      {throw new Error("Comeback enrollment identity changed");}
 
     await tx
       .insert(user_comeback_record)
@@ -120,10 +120,10 @@ export async function writeComeback(tx: MutationTransaction, owner: string, writ
   }
 
   if (write.clearBackFlags)
-    await tx
+    {await tx
       .update(userprofile)
       .set({ backFlag_mc: 0, backFlag_op: 0 })
-      .where(eq(userprofile.uid, owner));
+      .where(eq(userprofile.uid, owner));}
 
   if (write.viewedAt !== undefined) {
     const at = cityAmount(write.viewedAt);
@@ -141,7 +141,7 @@ export async function writeComeback(tx: MutationTransaction, owner: string, writ
       write.mail.owner !== owner ||
       long(write.record ?? {}, "backTime") !== write.mail.createTime
     )
-      throw new Error("Invalid comeback enrollment mail");
+      {throw new Error("Invalid comeback enrollment mail");}
 
     await insertSystemMail(
       tx,

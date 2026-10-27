@@ -36,10 +36,10 @@ export class CityProgressionContext {
   recordHero(type: number, parameter: string, count: number | bigint = 1, at = this.scoreAt) {
     const value = BigInt(count);
 
-    if (value === 0n) return;
+    if (value === 0n) {return;}
 
     if (at > this.now || at < 0n || parameter.length > 40 || this.heroActions.length >= 128)
-      throw new Error("Invalid confirmed hero action");
+      {throw new Error("Invalid confirmed hero action");}
 
     this.heroActions.push({ type, parameter, count: value, at });
   }
@@ -104,7 +104,7 @@ export class CityProgressionContext {
       }
 
       if (cost) {
-        if (!purchase) throw new GameError(errors.insufficientResource, "city_progression");
+        if (!purchase) {throw new GameError(errors.insufficientResource, "city_progression");}
 
         this.economy.gold(-cityResourceGold(this.rules, asset, cost));
       }
@@ -114,7 +114,7 @@ export class CityProgressionContext {
   spendItem(itemId: string, requested: number, purchase = false) {
     let count = cityInteger(requested);
 
-    if (!count) return;
+    if (!count) {return;}
 
     if (purchase) {
       const owned = this.economy.quantity?.(itemId) ?? 0;
@@ -148,7 +148,7 @@ export class CityProgressionContext {
       const amount = cityAmount(value) / 2n;
 
       if (amount)
-        this.economy.resource(asset as Parameters<ActivityEconomy["resource"]>[0], amount);
+        {this.economy.resource(asset as Parameters<ActivityEconomy["resource"]>[0], amount);}
     }
   }
 
@@ -156,7 +156,7 @@ export class CityProgressionContext {
     const row = { ...this.state.resource };
 
     for (const asset of [...cityAssets, "woodbind", "stonebind", "ironbind", "foodbind"])
-      row[asset] = this.balance(asset);
+      {row[asset] = this.balance(asset);}
 
     return resource(row);
   }
@@ -164,7 +164,7 @@ export class CityProgressionContext {
   ownBuilding(id: string) {
     const row = this.state.buildings.find((building) => building.uuid === id);
 
-    if (!row) throw new GameError(errors.missing, "city_progression");
+    if (!row) {throw new GameError(errors.missing, "city_progression");}
 
     return row;
   }
@@ -174,19 +174,19 @@ export class CityProgressionContext {
       num(row, "opType") !== 0 ||
       this.state.queues.some((q) => num(q, "type") === 0 && q.itemId === row.uuid)
     )
-      throw new GameError(errors.occupied, "city_progression");
+      {throw new GameError(errors.occupied, "city_progression");}
   }
 
   checkPower(additional: bigint) {
     const limit = this.rules.configuration.serverConfig?.get("power_limit");
 
     if (limit?.enabled !== "1" || (limit.gmBypass === "1" && num(this.state.profile, "gmFlag") > 0))
-      return;
+      {return;}
 
     let reserved = 0n;
 
     for (const row of this.state.armies)
-      if (
+      {if (
         num(row, "train") > 0 &&
         !(
           [1, 8, 9, 10, 17].includes(this.completing?.type ?? -1) &&
@@ -195,35 +195,35 @@ export class CityProgressionContext {
       ) {
         const rule = this.rules.arms.get(text(row, "armyId"));
 
-        if (!rule) throw new GameError(errors.unsupported, "city_progression");
+        if (!rule) {throw new GameError(errors.unsupported, "city_progression");}
 
         reserved += unitPower(rule, num(row, "train"));
-      }
+      }}
 
     for (const row of this.state.forts)
-      if (
+      {if (
         num(row, "build") > 0 &&
         !(this.completing?.type === 2 && this.completing.itemId === row.armyId)
       ) {
         const rule = this.rules.arms.get(text(row, "armyId"));
 
-        if (!rule) throw new GameError(errors.unsupported, "city_progression");
+        if (!rule) {throw new GameError(errors.unsupported, "city_progression");}
 
         reserved += unitPower(rule, num(row, "build"));
-      }
+      }}
 
     if (this.completing?.type !== 3)
-      for (const row of this.state.hospital)
-        if (num(row, "heal") > 0) {
+      {for (const row of this.state.hospital)
+        {if (num(row, "heal") > 0) {
           const rule = this.rules.arms.get(text(row, "armyId"));
 
-          if (!rule) throw new GameError(errors.unsupported, "city_progression");
+          if (!rule) {throw new GameError(errors.unsupported, "city_progression");}
 
           reserved += unitPower(rule, num(row, "heal"));
-        }
+        }}}
 
     for (const row of this.state.buildings)
-      if (
+      {if (
         num(row, "opType") === 1 &&
         !(this.completing?.type === 0 && this.completing.itemId === row.uuid)
       ) {
@@ -241,10 +241,10 @@ export class CityProgressionContext {
           Number(this.now),
         );
         reserved += BigInt(Math.max(0, (next.power ?? 0) - (current.power ?? 0)));
-      }
+      }}
 
     for (const row of this.state.sciences)
-      if (
+      {if (
         this.state.queues.some(
           (queue) => num(queue, "type") === 6 && queue.itemId === row.itemId,
         ) &&
@@ -255,15 +255,15 @@ export class CityProgressionContext {
           ),
           next = this.rules.power.sciences?.get(String(num(row, "itemId") + num(row, "level") + 1));
 
-        if (!current || !next) throw new GameError(errors.unsupported, "city_progression");
+        if (!current || !next) {throw new GameError(errors.unsupported, "city_progression");}
 
         reserved += cityAmount(next.power ?? 0) - cityAmount(current.power ?? 0);
-      }
+      }}
 
     const power = this.write.statistics?.power ?? long(this.state.statistics, "power");
 
     if (power + reserved + additional > cityAmount(limit.max_power))
-      throw new GameError(errors.powerLimit, "city_progression");
+      {throw new GameError(errors.powerLimit, "city_progression");}
   }
 
   power(delta: bigint, building = 0n, cured = 0) {
@@ -273,7 +273,7 @@ export class CityProgressionContext {
       armyCure: num(this.state.statistics, "armyCure"),
     };
 
-    if (delta > 0n) this.checkPower(delta);
+    if (delta > 0n) {this.checkPower(delta);}
 
     this.recordHero(6, "0", delta);
     this.recordHero(6, "1", building);
@@ -322,9 +322,9 @@ export class CityProgressionContext {
       this.write.legacyGeneralLevel = level;
 
       if (this.write.generalRoster?.legacy)
-        this.write.generalRoster.legacy = pending.map((general) => ({ ...general, level }));
+        {this.write.generalRoster.legacy = pending.map((general) => ({ ...general, level }));}
     }
 
-    if (total) this.power(total);
+    if (total) {this.power(total);}
   }
 }

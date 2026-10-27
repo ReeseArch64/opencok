@@ -15,7 +15,7 @@ export function mailRewardSelection(
     ids.length > 64 ||
     ids.some((id) => !id || id.length > 40 || !id.isWellFormed() || id.includes("\0"))
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   const labels = types
     .split(",")
@@ -27,25 +27,25 @@ export function mailRewardSelection(
         Number(raw) < -2147483648 ||
         Number(raw) > 2147483647
       )
-        throw new GameError(errors.invalid);
+        {throw new GameError(errors.invalid);}
 
       const label = Number(raw);
 
       return label >= 0 && label <= 5 ? label : 6;
     });
 
-  if (labels.length > 64 || (!batch && labels.length)) throw new GameError(errors.invalid);
+  if (labels.length > 64 || (!batch && labels.length)) {throw new GameError(errors.invalid);}
 
   return { ids: [...new Set(ids)], labels: [...new Set(labels)], batch };
 }
 
 export function mailRewardEntries(raw: string | null): readonly MailRewardEntry[] {
   if (!raw || Buffer.byteLength(raw) > 65535 || !raw.isWellFormed())
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   const entries = raw.split("|").filter(Boolean);
 
-  if (!entries.length || entries.length > 64) throw new GameError(errors.invalid);
+  if (!entries.length || entries.length > 64) {throw new GameError(errors.invalid);}
 
   const merged = new Map<string, MailRewardEntry>();
 
@@ -58,7 +58,7 @@ export function mailRewardEntries(raw: string | null): readonly MailRewardEntry[
       !/^\d+$/.test(parts[1]!) ||
       !/^\d+$/.test(parts[2]!)
     )
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const category = parts[0]!,
       itemId = parts[1]!,

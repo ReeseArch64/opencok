@@ -23,7 +23,7 @@ test("dragon incubation, feeding, levels, skills and travel persist atomically a
       "dragon_travel",
       "dragon_nickname",
     ])
-      h.rules.features.set(key, { id: key, version: "1.0.0", online: "all", test: "all" });
+      {h.rules.features.set(key, { id: key, version: "1.0.0", online: "all", test: "all" });}
     await h.db.db.insert(user_pet_dragon).values({
       uuid: "dragon",
       uid: "owner",
@@ -77,7 +77,7 @@ test("dragon incubation, feeding, levels, skills and travel persist atomically a
       .slice(0, 2);
     expect(skillIds.length).toBe(2);
     for (const [index, rule] of skillIds.entries())
-      await h.db.db.insert(user_pet_dragon_skill).values({
+      {await h.db.db.insert(user_pet_dragon_skill).values({
         uuid: `skill${index}`,
         uid: "owner",
         skillId: rule.id!,
@@ -87,7 +87,7 @@ test("dragon incubation, feeding, levels, skills and travel persist atomically a
         ownerId: 0,
         index1: -1,
         strengthenLevel: 0,
-      });
+      });}
     const skillRequest = {
       uuid: sfs.string("skill0"),
       materialArr: sfs.array([sfs.string("skill1")]),
@@ -163,7 +163,7 @@ test("dragon skill strengthening precedes ordinary materials and discards capped
   const h = await cityHarness([dragonProgressionDomain]);
   try {
     for (const id of ["dragon_new", "dragon_skill", "dragon_skill_levelup"])
-      h.rules.features.set(id, { id, version: "1.0.0", online: "all", test: "all" });
+      {h.rules.features.set(id, { id, version: "1.0.0", online: "all", test: "all" });}
     const skill = {
       id: "synthetic-target",
       type: "1",
@@ -178,15 +178,15 @@ test("dragon skill strengthening precedes ordinary materials and discards capped
       id: "synthetic-booster",
     });
     for (let level = 1; level <= 4; level++)
-      h.rules.advanced.dragonSkillExp!.set(`synthetic-${level}`, {
+      {h.rules.advanced.dragonSkillExp!.set(`synthetic-${level}`, {
         id: `synthetic-${level}`,
         quality: "999",
         level: String(level),
         exp: "100",
-      });
+      });}
     for (const owner of ["owner", "other"])
-      for (const id of ["target", "ordinary", "boost1", "boost2"])
-        await h.db.db.insert(user_pet_dragon_skill).values({
+      {for (const id of ["target", "ordinary", "boost1", "boost2"])
+        {await h.db.db.insert(user_pet_dragon_skill).values({
           uuid: `${owner}-${id}`,
           uid: owner,
           skillId: id.startsWith("boost") ? "synthetic-booster" : skill.id,
@@ -196,7 +196,7 @@ test("dragon skill strengthening precedes ordinary materials and discards capped
           ownerId: 0,
           index1: -1,
           strengthenLevel: 0,
-        });
+        });}}
     const upgrade = (owner: string, order: string[]) => ({
       uuid: sfs.string(`${owner}-target`),
       materialArr: sfs.array(order.map((id) => sfs.string(`${owner}-${id}`))),

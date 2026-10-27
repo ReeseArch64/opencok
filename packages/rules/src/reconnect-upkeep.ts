@@ -33,7 +33,7 @@ export function reconnectUpkeep(
 ) {
   const byUuid = new Map(buildings.map((row) => [String(row.uuid), row]));
 
-  if (byUuid.size !== buildings.length) throw new Error("Duplicate upkeep building");
+  if (byUuid.size !== buildings.length) {throw new Error("Duplicate upkeep building");}
 
   const ordered = javaHashMapOrder(byUuid.keys()).map((key) => byUuid.get(key)!);
   const building = (id: number) => ordered.find((row) => int(row.itemId) === id);
@@ -63,7 +63,7 @@ export function reconnectUpkeep(
     protectedFood = cast(float(float(int(rule.effects?.protectedFood)) + additive));
     const multiplier = environment.effect(38);
 
-    if (multiplier > 0) protectedFood = cast(protectedFood * (float(100 + multiplier) / 100));
+    if (multiplier > 0) {protectedFood = cast(protectedFood * (float(100 + multiplier) / 100));}
   }
 
   const templar = building(439000);
@@ -89,7 +89,7 @@ export function reconnectUpkeep(
     environment.consumptionRatio < 0 ||
     environment.consumptionRatio > 1
   )
-    throw new Error("Invalid upkeep consumption ratio");
+    {throw new Error("Invalid upkeep consumption ratio");}
 
   return {
     rates,

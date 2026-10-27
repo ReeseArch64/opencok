@@ -67,9 +67,9 @@ export function dragonView(
   };
 
   if (row.nickName !== null && row.nickName !== undefined)
-    result.nickName = sfs.string(text(row, "nickName"));
+    {result.nickName = sfs.string(text(row, "nickName"));}
 
-  if (dragonFeature(rules, "dragon_battle", now)) result.inMarch = sfs.byte(marching ? 1 : 0);
+  if (dragonFeature(rules, "dragon_battle", now)) {result.inMarch = sfs.byte(marching ? 1 : 0);}
 
   if (dragonFeature(rules, "dragon_friendship", now)) {
     const timestamps = dragonJson(row.communicateData, {
@@ -112,7 +112,7 @@ export function dragonView(
       ),
     };
 
-    if (rewardItems) view.rewardItems = rewardItems;
+    if (rewardItems) {view.rewardItems = rewardItems;}
 
     result.travelInfo = sfs.object(view);
   }

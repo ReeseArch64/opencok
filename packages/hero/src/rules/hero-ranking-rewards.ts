@@ -23,11 +23,11 @@ export function heroRankPrize(event: Row, standing: Row, rules: Rules) {
     index = band.rankLevels.findIndex((limit) => rank <= limit);
 
   if (index >= 0)
-    return {
+    {return {
       rewardId: band.ranking[index]!,
       template: ["", "11639", "11650", "11668", "11670"][type]!,
-    };
+    };}
 
   if ((type === 1 || type === 3) && num(standing, "rank") <= 1000)
-    return { rewardId: null, template: type === 1 ? "11684" : "11685" };
+    {return { rewardId: null, template: type === 1 ? "11684" : "11685" };}
 }

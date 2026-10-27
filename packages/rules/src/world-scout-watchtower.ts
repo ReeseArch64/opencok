@@ -12,7 +12,7 @@ export function scoutWatchtowerValues(rules: Rules, tower: Row | undefined, cont
     !legacyPlayerVersionAtLeast(context.version, rules.features.get("glory_watchtower")?.version) ||
     num(tower, "progress") < 0
   )
-    return { speed: 0, cooldown: undefined, ready: false };
+    {return { speed: 0, cooldown: undefined, ready: false };}
 
   const definition = rules.building(
     "417000",

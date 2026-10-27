@@ -38,7 +38,7 @@ export async function publishExpeditionDiscovery(
     !decimal(value.expiresAt) ||
     Buffer.byteLength(value.value) > 8192
   )
-    throw new DependencyError("redis");
+    {throw new DependencyError("redis");}
 
   let parsed;
 
@@ -55,7 +55,7 @@ export async function publishExpeditionDiscovery(
     parsed.ownerEpoch !== value.ownerEpoch ||
     parsed.sequence !== value.sequence
   )
-    throw new DependencyError("redis");
+    {throw new DependencyError("redis");}
 
   const result = await command(
     "EVAL",
@@ -69,7 +69,7 @@ export async function publishExpeditionDiscovery(
     match[1]!,
   );
 
-  if (result !== 0 && result !== 1) throw new DependencyError("redis");
+  if (result !== 0 && result !== 1) {throw new DependencyError("redis");}
 
   return result === 1;
 }

@@ -38,7 +38,7 @@ export function scoutWatchtower(context: CityProgressionContext) {
 export function scoutTarget(context: CityProgressionContext, id: number) {
   const target = context.state.worldMutation?.scoutTargets?.get(id);
 
-  if (!target) worldMutationFailure();
+  if (!target) {worldMutationFailure();}
 
   return target;
 }
@@ -58,7 +58,7 @@ export function scoutDeparture(context: CityProgressionContext, id: number) {
     num(context.state.worldMutation!.world, "pointId") === id ||
     uid === context.owner
   )
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   if (kind === 44) {
     if (
@@ -71,9 +71,9 @@ export function scoutDeparture(context: CityProgressionContext, id: number) {
       long(target.point, "flushTime") <= context.now ||
       barbarianCurrentHP(target.point, target.barbarian, context.rules, context.now) <= 0
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
   } else {
-    if (!watch.tower) worldMutationFailure();
+    if (!watch.tower) {worldMutationFailure();}
 
     if (
       !uid ||
@@ -85,9 +85,9 @@ export function scoutDeparture(context: CityProgressionContext, id: number) {
         (guild === text(target.point, "allianceId") ||
           guild === text(target.participant.profile, "allianceId")))
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
 
-    if (kind === 1 && num(target.participant.world, "pointId") !== id) worldMutationFailure();
+    if (kind === 1 && num(target.participant.world, "pointId") !== id) {worldMutationFailure();}
 
     if (
       kind !== 1 &&
@@ -96,7 +96,7 @@ export function scoutDeparture(context: CityProgressionContext, id: number) {
         num(target.occupyingMarch, "targetId") !== id ||
         num(target.occupyingMarch, "state") !== 1)
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
 
     const selectors = scoutTowerSelectors(context.rules, watch.tower);
 
@@ -105,7 +105,7 @@ export function scoutDeparture(context: CityProgressionContext, id: number) {
       target.rallies.length &&
       !target.rallyDetails
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
   }
 
   const shield = scoutShield(context, target).protected;
@@ -123,7 +123,7 @@ export function scoutDeparture(context: CityProgressionContext, id: number) {
     ) &&
     !watch.ready
   )
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   const castle = target.participant?.buildings.find((row) => num(row, "itemId") === 400000),
     cost = scoutCost(target.point, castle, context.rules, context.effect(404));
@@ -133,17 +133,17 @@ export function scoutDeparture(context: CityProgressionContext, id: number) {
     const config = context.rules.world.barbarians?.get(text(target.point, "pointItem")),
       parts = config?.para4?.split(";");
 
-    if (!parts || parts.length !== 2) worldMutationFailure();
+    if (!parts || parts.length !== 2) {worldMutationFailure();}
 
     const resource = cityInteger(parts[0], 0, 5),
       asset = ["wood", "stone", "iron", "food", "silver", "gold"][resource]!;
 
     if (asset === "gold") {
-      if (context.balance("gold") < BigInt(cost)) worldMutationFailure();
+      if (context.balance("gold") < BigInt(cost)) {worldMutationFailure();}
 
       context.economy.gold(-BigInt(cost));
-    } else context.spend({ [asset]: BigInt(cost) }, false);
-  } else context.spend({ food: BigInt(cost) }, false);
+    } else {context.spend({ [asset]: BigInt(cost) }, false);}
+  } else {context.spend({ food: BigInt(cost) }, false);}
 
   const honour = kind === 1 && shield && watch.ready;
 
@@ -164,7 +164,7 @@ export function scoutDeparture(context: CityProgressionContext, id: number) {
       (row) => num(row, "id") === num(context.state.worldMutation!.world, "pointId"),
     );
 
-    if (!origin) worldMutationFailure();
+    if (!origin) {worldMutationFailure();}
 
     const write = (context.write.worldMutation ??= {});
     write.points = [
@@ -217,12 +217,12 @@ export function scoutRoute(
       ? resolveWorldCityGeometry(id, size, text(target.point, "ownerId"), state.points)?.points
       : undefined;
 
-  if (!returning && kind === 1 && !destination) worldMutationFailure();
+  if (!returning && kind === 1 && !destination) {worldMutationFailure();}
 
   let adjusted = speed;
 
   if (!returning && kind === 1 && target.participant) {
-    if (!context.foreignEffect) worldMutationFailure();
+    if (!context.foreignEffect) {worldMutationFailure();}
 
     adjusted = Math.fround(
       speed /
@@ -261,7 +261,7 @@ function failMail(
 ) {
   const template = context.rules.mail.get(id);
 
-  if (!template?.message) worldMutationFailure();
+  if (!template?.message) {worldMutationFailure();}
 
   planScoutMail(
     context,
@@ -303,7 +303,7 @@ export function scoutArrival(
       now: Number(context.now),
     })
   )
-    state = {
+    {state = {
       ...state,
       scoutReport: planScoutMail(
         context,
@@ -313,7 +313,7 @@ export function scoutArrival(
         context.owner,
         scoutBarbarianReport(context, target),
       ),
-    };
+    };}
   else if (
     valid &&
     uid &&
@@ -322,7 +322,7 @@ export function scoutArrival(
     (!text(context.state.profile, "allianceId") ||
       text(context.state.profile, "allianceId") !== text(person.profile, "allianceId"))
   ) {
-    if (!context.foreignEffect) worldMutationFailure();
+    if (!context.foreignEffect) {worldMutationFailure();}
 
     const shield = scoutShield(context, target).protected,
       territoryAnti = [1, 2].includes(kind) && scoutTerritoryAnti(context, target) > 0,
@@ -336,7 +336,7 @@ export function scoutArrival(
 
     if (shield && !state.scoutHonour) {
       if (newMail)
-        failMail(context, state, target, "11687", context.owner, [text(person.profile, "name")]);
+        {failMail(context, state, target, "11687", context.owner, [text(person.profile, "name")]);}
     } else if (anti && !(shield && state.scoutHonour)) {
       if (newMail) {
         failMail(context, state, target, territoryAnti ? "11746" : "11689", context.owner, [
@@ -360,7 +360,7 @@ export function scoutArrival(
           );
 
       if (shield)
-        report.protectCD = sfs.long((scoutShield(context, target).end - context.now) / 1000n);
+        {report.protectCD = sfs.long((scoutShield(context, target).end - context.now) / 1000n);}
 
       state = {
         ...state,
@@ -419,7 +419,7 @@ function scoutSourceFootprint(id: number, size: number) {
 export function scoutArmySpeed(context: CityProgressionContext, id: string) {
   const rule = context.rules.arms.get(id);
 
-  if (!rule) worldMutationFailure();
+  if (!rule) {worldMutationFailure();}
 
   const type = cityInteger(rule.arm, 1),
     base = Number(rule.speed);
@@ -430,42 +430,42 @@ export function scoutArmySpeed(context: CityProgressionContext, id: string) {
     const effects = generalSkillEffects(generalSkillPoints([generals.get(key)!]), context.rules);
     let value = Math.fround(type <= 8 ? (effects.get(1300 + type) ?? 0) : 0);
 
-    if (type < 8) value = Math.fround(value + Math.fround(effects.get(1300) ?? 0));
+    if (type < 8) {value = Math.fround(value + Math.fround(effects.get(1300) ?? 0));}
 
     bonus = Math.trunc(Math.fround(Math.fround(bonus) + value));
   }
 
   if (type <= 8)
-    bonus = Math.trunc(
+    {bonus = Math.trunc(
       Math.fround(
         Math.fround(bonus) + Math.fround(context.effect(780 + Math.floor((type - 1) / 2))),
       ),
-    );
+    );}
 
   const speed = Math.fround(
     Math.fround(Math.fround(base) * Math.fround(Math.max(100 + bonus, 20))) / 100,
   );
 
-  if (!Number.isFinite(speed) || speed <= 0) worldMutationFailure();
+  if (!Number.isFinite(speed) || speed <= 0) {worldMutationFailure();}
 
   return speed;
 }
 
 function scoutShield(context: CityProgressionContext, target: WorldScoutTarget) {
   if (num(target.point, "pointType") !== 1 || !text(target.point, "ownerId"))
-    return { protected: false, end: 0n };
+    {return { protected: false, end: 0n };}
 
   let end = 0n;
 
   for (const row of target.participant?.effects.effects.states ?? []) {
-    if (long(row, "endTime") <= context.now) continue;
+    if (long(row, "endTime") <= context.now) {continue;}
 
     if (
       (context.rules.power.statuses?.get(text(row, "stateId"))?.effect ?? "")
         .split("|")
         .some((pair) => pair.split(";")[0] === "61")
     )
-      end = end > long(row, "endTime") ? end : long(row, "endTime");
+      {end = end > long(row, "endTime") ? end : long(row, "endTime");}
   }
 
   return { protected: end > context.now || long(target.point, "shieldTime") > context.now, end };
@@ -478,7 +478,7 @@ function scoutTerritoryAnti(context: CityProgressionContext, target: WorldScoutT
     territoryTreeEffects(snapshot.profile, snapshot.territoryTrees, context.rules).get(62) ?? 0;
   const guild = text(person.profile, "allianceId");
 
-  if (!guild) return value;
+  if (!guild) {return value;}
 
   const size = context.state.worldMutation?.mapSize ?? 1200;
   const home = cityInteger(person.world.pointId, 1, size * size);
@@ -493,19 +493,19 @@ function scoutTerritoryAnti(context: CityProgressionContext, target: WorldScoutT
       num(tower, "type") !== 20 ||
       num(tower, "atWorldId") !== 0
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
 
     if (
       Math.abs(((point - 1) % size) - ((home - 1) % size)) > side ||
       Math.abs(Math.trunc((point - 1) / size) - Math.trunc((home - 1) / size)) > side
     )
-      continue;
+      {continue;}
 
-    if (!selected || num(tower, "level") > num(selected, "level")) selected = tower;
+    if (!selected || num(tower, "level") > num(selected, "level")) {selected = tower;}
   }
 
   if (selected)
-    for (const skill of person.territorySkills ?? []) {
+    {for (const skill of person.territorySkills ?? []) {
       if (
         text(skill, "buildingUid") !== text(selected, "uid") ||
         num(skill, "effect") !== 62 ||
@@ -513,10 +513,10 @@ function scoutTerritoryAnti(context: CityProgressionContext, target: WorldScoutT
         long(skill, "endTime") <= context.now ||
         !context.rules.alliance.buildingSkills?.has(text(skill, "skillId"))
       )
-        continue;
+        {continue;}
 
       value = (value + num(skill, "effectValue")) | 0;
-    }
+    }}
 
   return value;
 }
@@ -540,7 +540,7 @@ export function scoutExpeditionEffect(context: CityProgressionContext, id: 908 |
       now: Number(context.now),
     })
   )
-    return 0;
+    {return 0;}
 
   return Math.trunc(context.effect(id));
 }
@@ -548,14 +548,14 @@ export function scoutExpeditionEffect(context: CityProgressionContext, id: 908 |
 export function scoutSoldierLimit(context: CityProgressionContext) {
   const f = Math.fround;
   const cast = (value: number) => {
-    if (!Number.isFinite(value)) worldMutationFailure();
+    if (!Number.isFinite(value)) {worldMutationFailure();}
 
     return Math.max(-2147483648, Math.min(2147483647, Math.trunc(value)));
   };
   let base = cityInteger(context.rules.items.get("building_base")?.k5);
 
   for (const row of context.state.buildings) {
-    if (num(row, "itemId") !== 427000) continue;
+    if (num(row, "itemId") !== 427000) {continue;}
 
     const rule = context.rules.building(
       "427000",
@@ -569,7 +569,7 @@ export function scoutSoldierLimit(context: CityProgressionContext) {
       num(row, "level") === 1 &&
       num(row, "unlockFlag") === 0
     )
-      continue;
+      {continue;}
 
     base += cityInteger(rule.effects?.reinforcementCapacity ?? 0);
   }

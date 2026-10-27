@@ -141,7 +141,7 @@ test("public profiles interpret stored visibility integers as visible only at ex
     state.mixed = { showEquip: value, showMedal: value, marchSoldierShow: value };
     const result = await game.execute("1001", "get.user.info", { uid: sfs.string("2001") });
     for (const key of ["showEquip", "showMedal", "showMarchSoldier"])
-      expect(result.body[key]).toEqual(sfs.bool(value === 1));
+      {expect(result.body[key]).toEqual(sfs.bool(value === 1));}
   }
 });
 

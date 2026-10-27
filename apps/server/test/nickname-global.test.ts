@@ -62,20 +62,20 @@ function fixture(accounts = [account()], mappings = [mapping()]) {
       let writes: ((state: State) => void)[] = [];
       let releaseOwner: (() => void) | undefined;
       const end = () => {
-        for (const [key, owner] of locks) if (owner === id) locks.delete(key);
+        for (const [key, owner] of locks) {if (owner === id) {locks.delete(key);}}
         releaseOwner?.();
         releaseOwner = undefined;
         working = undefined;
         writes = [];
       };
       const change = (write: (state: State) => void) => {
-        if (!working) throw new Error("Write without account lock");
+        if (!working) {throw new Error("Write without account lock");}
         write(working);
         writes.push(write);
       };
       const fail = (stage: string) => {
         if (failure === stage)
-          throw Object.assign(new Error("Synthetic SQL failure"), { code: "XX000" });
+          {throw Object.assign(new Error("Synthetic SQL failure"), { code: "XX000" });}
       };
       return {
         release: (destroy = false) => {
@@ -87,15 +87,15 @@ function fixture(accounts = [account()], mappings = [mapping()]) {
         query: async (query: { text: string }, params: unknown[] = []) => {
           const text = query.text;
           queries.push({ id, text, params });
-          if (text.startsWith("begin")) return { rows: [] };
+          if (text.startsWith("begin")) {return { rows: [] };}
           if (text === "rollback") {
-            if (rollbackFailure) throw new Error("Synthetic rollback failure");
+            if (rollbackFailure) {throw new Error("Synthetic rollback failure");}
             end();
             return { rows: [] };
           }
           if (text === "commit") {
             fail("commit");
-            for (const write of writes) write(saved);
+            for (const write of writes) {write(saved);}
             end();
             fail("lost");
             return { rows: [] };
@@ -103,7 +103,7 @@ function fixture(accounts = [account()], mappings = [mapping()]) {
           if (text.includes("pg_try_advisory_xact_lock")) {
             const key = params[0] as string;
             const acquired = !locks.has(key);
-            if (acquired) locks.set(key, id);
+            if (acquired) {locks.set(key, id);}
             return { rows: [{ acquired }] };
           }
           expect([...locks.values()]).toContain(id);
@@ -141,11 +141,11 @@ function fixture(accounts = [account()], mappings = [mapping()]) {
               await previous;
               working = structuredClone(saved);
               fail("owner-lock");
-              if (failure === "owner-disappeared") return { rows: [] };
+              if (failure === "owner-disappeared") {return { rows: [] };}
               return { rows: working.accounts.has(uid) ? [[uid]] : [] };
             }
             fail("owner-read");
-            if (failure === "owner-network") throw new Error("Synthetic transport failure");
+            if (failure === "owner-network") {throw new Error("Synthetic transport failure");}
             const uid = new RegExp(params[0] as string, "u");
             return {
               rows: [...state.accounts.values()]
@@ -185,9 +185,9 @@ function fixture(accounts = [account()], mappings = [mapping()]) {
             fail("mapping-delete");
             const keys = new Set<string>();
             for (let index = 0; index < params.length; index += 2)
-              keys.add(mappingKey(params[index] as string, params[index + 1] as string));
+              {keys.add(mappingKey(params[index] as string, params[index + 1] as string));}
             change((data) => {
-              for (const key of keys) data.mappings.delete(key);
+              for (const key of keys) {data.mappings.delete(key);}
             });
             return { rows: [] };
           }
@@ -199,7 +199,7 @@ function fixture(accounts = [account()], mappings = [mapping()]) {
             const [uid, type, value] = params as [string, string, string];
             change((data) => {
               const key = mappingKey(uid, type);
-              if (data.mappings.has(key)) throw new Error("Synthetic uniqueness failure");
+              if (data.mappings.has(key)) {throw new Error("Synthetic uniqueness failure");}
               data.mappings.set(key, { uid, type, value, lastTime: 0n, active: 0 });
             });
             return {
@@ -257,7 +257,7 @@ test("global rename changes only the account name and replaces owned name mappin
     active: 0,
   });
   for (const row of rows.slice(1))
-    expect(after.mappings.get(mappingKey(row.uid, row.type))).toEqual(row);
+    {expect(after.mappings.get(mappingKey(row.uid, row.type))).toEqual(row);}
   expect(instance.queries.at(-1)?.text).toBe("commit");
   expect(instance.locks.size).toBe(0);
 });

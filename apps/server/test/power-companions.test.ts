@@ -30,7 +30,7 @@ function fixture() {
     k2: "2026-10-23-12-01",
   });
   for (const id of ["dragon_new", "dragon_levelup"])
-    rules.features.set(id, { id, version: "99.0.0", online: "1" });
+    {rules.features.set(id, { id, version: "99.0.0", online: "1" });}
   return rules;
 }
 

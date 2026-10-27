@@ -21,13 +21,13 @@ export function heroMatchGroups(
     realms.length > 4096 ||
     new Set(realms.map((realm) => realm.kingdomId)).size !== realms.length
   )
-    throw new Error("Invalid hero match cohort");
+    {throw new Error("Invalid hero match cohort");}
 
   for (const realm of realms) {
     cityInteger(realm.kingdomId, 1);
     cityInteger(realm.shuffle);
 
-    if (realm.power < 0n) throw new Error("Invalid hero matching power");
+    if (realm.power < 0n) {throw new Error("Invalid hero matching power");}
   }
 
   const ordered = realms.toSorted((a, b) =>
@@ -44,7 +44,7 @@ export function heroMatchGroups(
       const matched = group.slice(index, index + matchSize),
         serverGroup = matched.map((realm) => realm.kingdomId).join("|");
 
-      for (const realm of matched) result.push({ kingdomId: realm.kingdomId, serverGroup });
+      for (const realm of matched) {result.push({ kingdomId: realm.kingdomId, serverGroup });}
     }
   }
 

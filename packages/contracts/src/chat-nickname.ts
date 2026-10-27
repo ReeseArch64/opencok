@@ -36,7 +36,7 @@ export function validChatNickname(value: unknown): value is ChatNicknameUpdate {
 }
 
 export function encodeChatNickname(update: ChatNicknameUpdate): string {
-  if (!validChatNickname(update)) throw new Error("Invalid chat nickname operation");
+  if (!validChatNickname(update)) {throw new Error("Invalid chat nickname operation");}
 
   return JSON.stringify({
     owner: update.owner,
@@ -49,7 +49,7 @@ export function decodeChatNickname(body: string): ChatNicknameUpdate {
   const value: unknown = JSON.parse(body);
 
   if (!validChatNickname(value) || Object.keys(value).length !== 3)
-    throw new Error("Invalid chat nickname operation");
+    {throw new Error("Invalid chat nickname operation");}
 
   return value;
 }

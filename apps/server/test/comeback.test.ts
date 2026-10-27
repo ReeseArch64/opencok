@@ -38,7 +38,7 @@ test("comeback catalogs preserve Source opening, lost intervals, payment levels,
   for (const field of ["previousOnlineAt", "devicePreviousOnlineAt"] as const) {
     const snapshot = state();
     snapshot.session![field] = now + 1n;
-    if (field === "previousOnlineAt") snapshot.deviceRecord = { backType: 1, backTime: now - 1n };
+    if (field === "previousOnlineAt") {snapshot.deviceRecord = { backType: 1, backTime: now - 1n };}
     expect(comebackEnrollment(rules, snapshot, profile, 10, now)).toBeUndefined();
   }
   const snapshot = state();
@@ -65,9 +65,9 @@ test("comeback catalogs preserve Source opening, lost intervals, payment levels,
   const charged = { ...state(), totalCharge: 6 };
   expect(comebackEnrollment(rules, charged, profile, 10, now)?.type).toBe(1);
   for (const totalCharge of [5, 201])
-    expect(
+    {expect(
       comebackEnrollment(rules, { ...charged, totalCharge }, profile, 10, now),
-    ).toBeUndefined();
+    ).toBeUndefined();}
   expect(
     comebackEnrollment(rules, charged, { ...profile, country: "DE" }, 10, now),
   ).toBeUndefined();
@@ -102,7 +102,7 @@ test("private comeback clocks round trip exact longs and reject malformed or unb
     JSON.stringify({ version: 1, sessionId: "x" }),
     encodeComebackSession(saved).replace('"openedAt":"', '"openedAt":"-'),
   ])
-    expect(() => decodeComebackSession(raw)).toThrow();
+    {expect(() => decodeComebackSession(raw)).toThrow();}
   expect(() => encodeComebackSession({ ...saved, observedAt: now - 1n })).toThrow();
   expect(() => comebackPayNodes({ pay_node: "1|1", pay_reward: "1|2" })).toThrow();
   expect(() => comebackPayNodes({ pay_node: "0", pay_reward: "1" })).toThrow();

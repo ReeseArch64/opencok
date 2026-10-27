@@ -24,7 +24,7 @@ export async function readArena(tx: MutationTransaction, owner: string) {
     .limit(129);
 
   if (legacy.length > 1 || armies.length > 128)
-    throw new Error("Ambiguous or oversized arena owner");
+    {throw new Error("Ambiguous or oversized arena owner");}
 
   const [world] = await tx.select().from(user_world).where(eq(user_world.uid, owner));
 
@@ -35,7 +35,7 @@ export async function writeArena(tx: MutationTransaction, owner: string, write: 
   if (write.registration) {
     const row = write.registration;
 
-    if (row.uid !== owner) throw new Error("Foreign arena registration");
+    if (row.uid !== owner) {throw new Error("Foreign arena registration");}
 
     const value = {
       uid: owner,
@@ -57,7 +57,7 @@ export async function writeArena(tx: MutationTransaction, owner: string, write: 
   }
 
   for (const row of write.armies ?? []) {
-    if (row.uid !== owner) throw new Error("Foreign virtual arena army");
+    if (row.uid !== owner) {throw new Error("Foreign virtual arena army");}
 
     const value = { uid: owner, armyId: text(row, "armyId"), free: num(row, "free") };
     await tx

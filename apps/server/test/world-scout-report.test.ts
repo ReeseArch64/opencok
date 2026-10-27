@@ -133,7 +133,7 @@ test("scout JSON retains exact signed I64 resources and rejects invalid, overlon
   ).toThrow();
   expect(() => encodeScoutReport({ bad: sfs.string("x".repeat(65536)) })).toThrow();
   let nested: Fields = {};
-  for (let index = 0; index < 14; index++) nested = { next: sfs.object(nested) };
+  for (let index = 0; index < 14; index++) {nested = { next: sfs.object(nested) };}
   expect(() => encodeScoutReport(nested)).toThrow();
 });
 test("watchtower intel uses Source aggregate and detailed shapes, float straw effect, forts key and training-building stars", () => {
@@ -177,7 +177,7 @@ test("city dragon intel resolves actual level catalog and excludes eggs, unused 
   const h = fixture(),
     level = [...rules.power.dragonLevels!.values()].find((row) => Number(row.level) === 1)!;
   for (const id of ["dragon_new", "dragon_battle"])
-    rules.features.set(id, { id, version: "1.0.0", online: "all", test: "all" });
+    {rules.features.set(id, { id, version: "1.0.0", online: "all", test: "all" });}
   h.person.dragons = [
     {
       uuid: "egg",

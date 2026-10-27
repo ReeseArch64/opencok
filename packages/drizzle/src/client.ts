@@ -17,7 +17,7 @@ import {
 const schemas = { global: globalSchema, kingdom: kingdomSchema };
 
 export function createDatabase<T extends DatabaseRole>(role: T, config: PoolConfig) {
-  if (role !== "global" && role !== "kingdom") throw new Error("Unknown database role");
+  if (role !== "global" && role !== "kingdom") {throw new Error("Unknown database role");}
 
   const pool = new Pool({ ...config, options: `${config.options ?? ""} -c timezone=UTC` });
   const tables = new Set(
@@ -86,7 +86,7 @@ export function createDatabases(
     getKingdom(id: number) {
       const kingdom = kingdoms.get(id);
 
-      if (!kingdom) throw new Error("Kingdom is not configured");
+      if (!kingdom) {throw new Error("Kingdom is not configured");}
 
       return kingdom;
     },

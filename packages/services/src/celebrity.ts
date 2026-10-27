@@ -18,7 +18,7 @@ export async function celebrityDescription(
 ): Promise<Fields> {
   const profile = await db.getProfileById(owner);
 
-  if (!profile) throw new GameError(errors.missing);
+  if (!profile) {throw new GameError(errors.missing);}
 
   if (
     profile.uid !== owner ||
@@ -26,30 +26,30 @@ export async function celebrityDescription(
     num(profile, "banFlag") !== 0 ||
     long(profile, "banTime") > BigInt(now)
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   const uid = str(params, "uid");
 
-  if (typeof uid !== "string") throw new GameError(errors.invalid);
+  if (typeof uid !== "string") {throw new GameError(errors.invalid);}
 
   const empty = { description: sfs.string("") };
 
-  if (mailBlank(uid)) return empty;
+  if (mailBlank(uid)) {return empty;}
 
   const serverId = int(params, "serverId");
 
   if (!Number.isInteger(serverId) || serverId < -2147483648 || serverId > 2147483647)
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
-  if (!db.celebrityDescription) throw new GameError(errors.unsupported);
+  if (!db.celebrityDescription) {throw new GameError(errors.unsupported);}
 
   const bytes = await db.celebrityDescription(uid, serverId);
 
-  if (bytes === null || bytes === undefined) return empty;
+  if (bytes === null || bytes === undefined) {return empty;}
 
-  if (!Buffer.isBuffer(bytes) || bytes.length > 65535) throw new GameError(errors.unsupported);
+  if (!Buffer.isBuffer(bytes) || bytes.length > 65535) {throw new GameError(errors.unsupported);}
 
-  if (bytes.length === 0) return empty;
+  if (bytes.length === 0) {return empty;}
 
   let description: string;
 
@@ -72,7 +72,7 @@ export async function saveCelebrityDescription(
 ): Promise<Fields> {
   const profile = await db.getProfileById(owner);
 
-  if (!profile) throw new GameError(errors.missing);
+  if (!profile) {throw new GameError(errors.missing);}
 
   if (
     profile.uid !== owner ||
@@ -80,24 +80,24 @@ export async function saveCelebrityDescription(
     num(profile, "banFlag") !== 0 ||
     long(profile, "banTime") > BigInt(now)
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
-  if (num(profile, "gmFlag") !== 11) return {};
+  if (num(profile, "gmFlag") !== 11) {return {};}
 
-  if (!db.saveCelebrityDescription) throw new GameError(errors.unsupported);
+  if (!db.saveCelebrityDescription) {throw new GameError(errors.unsupported);}
 
   await db.saveCelebrityDescription(owner, now, () => {
     const description = str(params, "description");
 
-    if (typeof description !== "string") throw new GameError(errors.invalid);
+    if (typeof description !== "string") {throw new GameError(errors.invalid);}
 
-    if (!services.filterBadWords) throw new GameError(errors.unsupported);
+    if (!services.filterBadWords) {throw new GameError(errors.unsupported);}
 
     const filtered = services.filterBadWords(description);
 
-    if (typeof filtered !== "string") throw new GameError(errors.unsupported);
+    if (typeof filtered !== "string") {throw new GameError(errors.unsupported);}
 
-    if (!filtered.isWellFormed()) return null;
+    if (!filtered.isWellFormed()) {return null;}
 
     const bytes = javaMailBytes(filtered);
 

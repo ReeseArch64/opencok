@@ -10,18 +10,18 @@ export function vipBoxFailure(): never {
 export function vipBoxBand(rules: readonly Rule[], level: number): number {
   const bands = [...new Set(rules.map((row) => cityInteger(row.vip, 1, 255)))];
 
-  if (!bands.length || bands.length > 128) vipBoxFailure();
+  if (!bands.length || bands.length > 128) {vipBoxFailure();}
 
   return Math.max(0, ...bands.filter((value) => value <= level)) || 8;
 }
 
 export function vipBoxIndices(value: string, length: number): readonly number[] {
-  if (!value) return [];
+  if (!value) {return [];}
 
   const tokens = value.replace(/,$/, "").split(","),
     indices = tokens.map((value) => cityInteger(value, 0, length - 1));
 
-  if (new Set(indices).size !== indices.length || indices.length > length) vipBoxFailure();
+  if (new Set(indices).size !== indices.length || indices.length > length) {vipBoxFailure();}
 
   return indices;
 }
@@ -40,7 +40,7 @@ export function vipBoxWeighted(
   for (let index = 0; index < weights.length; index++) {
     sum += weights[index]!;
 
-    if (draw < sum) return index;
+    if (draw < sum) {return index;}
   }
 
   return vipBoxFailure();
@@ -58,11 +58,11 @@ export function vipBoxContents(rule: Rule) {
     weights.length !== items.length ||
     items.some((item) => !/^\d{1,40}$/.test(item))
   )
-    vipBoxFailure();
+    {vipBoxFailure();}
 
   const costs = (rule.deplete_num ?? "").split(";").map((value) => cityInteger(value, 1));
 
-  if (!rule.deplete || costs.length < items.length - 1) vipBoxFailure();
+  if (!rule.deplete || costs.length < items.length - 1) {vipBoxFailure();}
 
   return { items, counts, weights, costs };
 }

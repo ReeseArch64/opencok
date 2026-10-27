@@ -6,13 +6,13 @@ const context = { now: Date.UTC(2026, 9, 23, 12), kingdomId: 1, version: "0.0.0"
 function fixture() {
   const rules = new Rules(new Map(), new Map(), new Map());
   for (const key of ["tech_newEffect", "17_wk"])
-    rules.features.set(key, {
+    {rules.features.set(key, {
       version: "99.0.0",
       online: "1",
       test: "2",
       start: "2026-10-23-12-00",
       end: "2026-10-23-13-00",
-    });
+    });}
   const state = { mergeServer: false, stage: 3, homeKingdomId: 1 };
   let reads = 0;
   let effects = 0;
@@ -39,13 +39,13 @@ function fixture() {
         { ...context, ...patch },
         () => {
           reads++;
-          if (failRead) throw new Error("Unavailable synthetic stage");
+          if (failRead) {throw new Error("Unavailable synthetic stage");}
           return state;
         },
         (id) => {
           expect(id).toBe(895);
           effects++;
-          if (failEffect) throw new Error("Unavailable synthetic effect");
+          if (failEffect) {throw new Error("Unavailable synthetic effect");}
           return value;
         },
       ),

@@ -34,11 +34,11 @@ export class ShippingInvestmentDomain extends CityCommandDomain {
           now: Number(context.now),
         })
       )
-        return empty();
+        {return empty();}
 
       const mixed = context.state.quests?.mixed;
 
-      if (!mixed || mixed.uid !== context.owner) return empty();
+      if (!mixed || mixed.uid !== context.owner) {return empty();}
 
       const plans = [...(context.rules.advanced.shippingInvestments?.values() ?? [])];
 
@@ -47,7 +47,7 @@ export class ShippingInvestmentDomain extends CityCommandDomain {
         plans.length > 1024 ||
         new Set(plans.map((rule) => cityInteger(rule.Seq, 1))).size !== plans.length
       )
-        shippingInvestmentFailure();
+        {shippingInvestmentFailure();}
 
       let count = cityInteger(mixed.shippingTradeInvest ?? 0),
         gold = cityInteger(mixed.shippingTradeInvestGold ?? 0);
@@ -56,23 +56,23 @@ export class ShippingInvestmentDomain extends CityCommandDomain {
         const id = str(params, "id"),
           rule = context.rules.advanced.shippingInvestments?.get(id);
 
-        if (!rule) shippingInvestmentFailure();
+        if (!rule) {shippingInvestmentFailure();}
 
-        if (cityInteger(rule.Seq, 1) !== count + 1) return empty();
+        if (cityInteger(rule.Seq, 1) !== count + 1) {return empty();}
 
         const vip = context.state.effects.vip;
         let vipLevel = 0;
 
         if (vip && long(vip, "vipEndTime") > context.now)
-          for (const item of context.rules.power.vip?.values() ?? [])
-            if (cityInteger(item.point) <= num(vip, "score"))
-              vipLevel = (cityInteger(item.id) % 100) + 1;
+          {for (const item of context.rules.power.vip?.values() ?? [])
+            {if (cityInteger(item.point) <= num(vip, "score"))
+              {vipLevel = (cityInteger(item.id) % 100) + 1;}}}
 
-        if (vipLevel < cityInteger(rule.vip)) return empty();
+        if (vipLevel < cityInteger(rule.vip)) {return empty();}
 
         const cost = cityInteger(rule.Needgold, 1);
 
-        if (context.balance("gold") < BigInt(cost)) shippingInvestmentFailure();
+        if (context.balance("gold") < BigInt(cost)) {shippingInvestmentFailure();}
 
         gold = shippingInvestmentAward(rule, random);
         context.economy.gold(-BigInt(cost));

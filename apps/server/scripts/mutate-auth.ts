@@ -32,7 +32,7 @@ async function run(source: string) {
       },
     ],
   });
-  if (!result.success) throw new Error("Auth mutation bundle failed");
+  if (!result.success) {throw new Error("Auth mutation bundle failed");}
   const child = Bun.spawn([process.execPath, "--no-env-file", "test", "login.test.js"], {
     cwd: directory,
     stdin: "ignore",
@@ -48,11 +48,11 @@ async function run(source: string) {
 }
 try {
   const original = await readFile(authFile, "utf8");
-  if (await run(original)) throw new Error("Auth mutation baseline failed");
+  if (await run(original)) {throw new Error("Auth mutation baseline failed");}
   for (const [name, from, to] of mutations) {
-    if (original.split(from).length !== 2) throw new Error(`Auth mutation target changed: ${name}`);
+    if (original.split(from).length !== 2) {throw new Error(`Auth mutation target changed: ${name}`);}
     if ((await run(original.replace(from, to))) === 0)
-      throw new Error(`Critical auth mutation survived: ${name}`);
+      {throw new Error(`Critical auth mutation survived: ${name}`);}
     console.log(`Killed: ${name}`);
   }
   console.log(`${mutations.length} critical auth mutations killed`);

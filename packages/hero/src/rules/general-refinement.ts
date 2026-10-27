@@ -23,11 +23,11 @@ function range(min: number, max: number, random: GeneralRandom) {
     max < min ||
     max - min > 2147483646
   )
-    generalFailure();
+    {generalFailure();}
 
   const value = random(max - min + 1);
 
-  if (!Number.isInteger(value) || value < 0 || value > max - min) generalFailure();
+  if (!Number.isInteger(value) || value < 0 || value > max - min) {generalFailure();}
 
   return min + value;
 }
@@ -35,18 +35,18 @@ function range(min: number, max: number, random: GeneralRandom) {
 export function generalProperties(raw: string): GeneralProperties {
   const values = new Map<number, GeneralProperty>();
 
-  if (!raw) return values;
+  if (!raw) {return values;}
 
   for (const entry of raw.split("|")) {
     const [slot, data, extra] = entry.split(";"),
       parts = data?.split("_");
 
-    if (extra !== undefined || parts?.length !== 3) generalFailure();
+    if (extra !== undefined || parts?.length !== 3) {generalFailure();}
 
     const index = cityInteger(slot, 1, 5),
       value = Number(parts[1]);
 
-    if (values.has(index) || !Number.isFinite(value) || value < 0) generalFailure();
+    if (values.has(index) || !Number.isFinite(value) || value < 0) {generalFailure();}
 
     values.set(index, { id: cityInteger(parts[0], 1), value, count: cityInteger(parts[2]) });
   }
@@ -63,7 +63,7 @@ export function generalPropertiesContent(values: GeneralProperties) {
 export function generalPropertyRule(rules: Rules, id: number) {
   const rule = rules.power.newGeneralRefinement?.get(String(id));
 
-  if (!rule || !Number.isFinite(Number(rule.max)) || Number(rule.max) <= 0) generalFailure();
+  if (!rule || !Number.isFinite(Number(rule.max)) || Number(rule.max) <= 0) {generalFailure();}
 
   return rule;
 }
@@ -81,7 +81,7 @@ function choose(rules: Rules, row: Row, exclude: ReadonlySet<number>, random: Ge
   for (const rule of choices) {
     value -= Number(rule.rate);
 
-    if (value < 0) return cityInteger(rule.id, 1);
+    if (value < 0) {return cityInteger(rule.id, 1);}
   }
 
   return generalFailure();
@@ -102,7 +102,7 @@ export function activateGeneralRefinement(rules: Rules, row: Row, random: Genera
     (generalPairs(base.refine_num).get(next) ?? 0) <= 0 ||
     cost === undefined
   )
-    generalFailure();
+    {generalFailure();}
 
   const id = choose(rules, row, new Set([...values.values()].map((value) => value.id)), random),
     max = Number(generalPropertyRule(rules, id).max);
@@ -125,7 +125,7 @@ function limit(rules: readonly Rule[] | undefined, id: number, consumed: number,
     const [min, max] = rule.consume?.split(";").map(Number) ?? [];
 
     if (Number(rule.general_id) === id && consumed >= min! && consumed <= max!)
-      return cityInteger(rule[field]);
+      {return cityInteger(rule[field]);}
   }
 
   return 0;
@@ -140,7 +140,7 @@ function valueRange(rules: Rules, id: number, index: number, value: number) {
       value <= Number(rule.now_max),
   );
 
-  if (!rule) generalFailure();
+  if (!rule) {generalFailure();}
 
   return rule;
 }
@@ -166,17 +166,17 @@ function refineValue(
       limit(rules.general.refinementLimits, num(row, "id"), num(row, "refinecard"), "max_num") &&
     range(1, 10000, random) <= cityInteger(rules.items.get("general_random_effect")?.k2, 0, 10000)
   )
-    return maximum;
+    {return maximum;}
 
   let min = Number(config.random_min),
     max = Number(config.random_max);
   const most = cityInteger(config.most_count);
 
   if (most > 0 && property.count > most)
-    min = Math.min(
+    {min = Math.min(
       0,
       min + (property.count - most) * cityInteger(rules.items.get("general_random_effect")?.k3),
-    );
+    );}
 
   const addition = Math.fround((range(min, max, random) * maximum) / 10000);
   let value = Math.fround(property.value + addition);
@@ -200,7 +200,7 @@ function refineValue(
 
   value = Math.max(0, value);
 
-  if (value >= maximum) value = Math.fround(value - 2 * addition);
+  if (value >= maximum) {value = Math.fround(value - 2 * addition);}
 
   return round(Math.max(0, Math.min(maximum, value)));
 }
@@ -209,13 +209,13 @@ export function refineGeneralValues(rules: Rules, row: Row, batch: boolean, rand
   const current = generalProperties(text(row, "refineproperty")),
     values = generalProperties(text(row, "refreshproperty") || text(row, "refineproperty"));
 
-  if (!values.size || values.size !== current.size) generalFailure();
+  if (!values.size || values.size !== current.size) {generalFailure();}
 
   const needed = [...values].filter(
     ([, value]) => value.value < Number(generalPropertyRule(rules, value.id).max),
   );
 
-  if (!needed.length) generalFailure();
+  if (!needed.length) {generalFailure();}
 
   let raw = "";
 
@@ -227,15 +227,15 @@ export function refineGeneralValues(rules: Rules, row: Row, batch: boolean, rand
     for (const [index, property] of values) {
       const maximum = Number(generalPropertyRule(rules, property.id).max);
 
-      if (property.value >= maximum) continue;
+      if (property.value >= maximum) {continue;}
 
       let value = refineValue(rules, row, values, index, property, random);
       const previous = batch ? property.value : current.get(index)!.value;
 
       if (value === previous)
-        value = round(Math.max(0, Math.min(maximum, value + (range(0, 1, random) ? 0.01 : -0.01))));
+        {value = round(Math.max(0, Math.min(maximum, value + (range(0, 1, random) ? 0.01 : -0.01))));}
 
-      if (value > previous) allDown = false;
+      if (value > previous) {allDown = false;}
       else {
         down += Math.trunc(((previous - value) / maximum) * 10000);
         downIndices.push(index);
@@ -281,12 +281,12 @@ export function refineGeneralTypes(rules: Rules, row: Row, random: GeneralRandom
     locked = new Set(generalList(text(row, "lockproperty")));
   const slots = [...values.keys()].filter((index) => !locked.has(index));
 
-  if (!slots.length) generalFailure();
+  if (!slots.length) {generalFailure();}
 
   const cost = generalPairs(base.refine_effect).get(slots.length),
     lockCost = locked.size ? generalPairs(base.refine_effect_lock).get(locked.size) : 0;
 
-  if (cost === undefined || lockCost === undefined) generalFailure();
+  if (cost === undefined || lockCost === undefined) {generalFailure();}
 
   const maps = [
     values,
@@ -311,7 +311,7 @@ export function refineGeneralTypes(rules: Rules, row: Row, random: GeneralRandom
     for (const map of maps) {
       const value = map.get(index);
 
-      if (value) map.set(index, { ...value, id, value: round((next * value.value) / maximum) });
+      if (value) {map.set(index, { ...value, id, value: round((next * value.value) / maximum) });}
     }
   }
 

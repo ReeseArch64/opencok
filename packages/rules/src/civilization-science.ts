@@ -10,11 +10,11 @@ export function civilizationScience(rules: Rules, base: number, level: number): 
   cityInteger(level, 0, 999);
   const catalog = rules.power.civilizationSciences;
 
-  if (catalog?.has(String(base - 1))) throw new GameError(errors.invalid, "city_progression");
+  if (catalog?.has(String(base - 1))) {throw new GameError(errors.invalid, "city_progression");}
 
   for (let offset = 0; offset <= level; offset++)
-    if (!catalog?.has(String(base + offset)))
-      throw new GameError(errors.unsupported, "city_progression");
+    {if (!catalog?.has(String(base + offset)))
+      {throw new GameError(errors.unsupported, "city_progression");}}
 
   return catalog!.get(String(base + level))!;
 }
@@ -33,7 +33,7 @@ export function civilizationScienceRequirements(
           num(row, "itemId") === Math.trunc(value / 100) * 100 && cityLevel(row) >= value % 100,
       )
     )
-      throw new GameError(errors.researchPrerequisite, "city_progression");
+      {throw new GameError(errors.researchPrerequisite, "city_progression");}
   }
 
   for (const id of rule.science_condition?.split(";").filter(Boolean) ?? []) {
@@ -41,23 +41,23 @@ export function civilizationScienceRequirements(
     let base = required;
 
     if (!rules.power.civilizationSciences?.has(String(base)))
-      throw new GameError(errors.unsupported, "city_progression");
+      {throw new GameError(errors.unsupported, "city_progression");}
 
-    while (rules.power.civilizationSciences.has(String(base - 1))) base--;
+    while (rules.power.civilizationSciences.has(String(base - 1))) {base--;}
 
     if (
       !(state.civilizationSciences ?? []).some(
         (row) => num(row, "baseItemID") === base && num(row, "level") >= required - base,
       )
     )
-      throw new GameError(errors.researchPrerequisite, "city_progression");
+      {throw new GameError(errors.researchPrerequisite, "city_progression");}
   }
 
   for (const pair of rule.reputation_condition?.split("|").filter(Boolean) ?? []) {
     const [type, level, ...extra] = pair.split(";");
 
     if (extra.length || cityPrestige(state, rules, cityInteger(type)) < cityInteger(level))
-      throw new GameError(errors.researchPrerequisite, "city_progression");
+      {throw new GameError(errors.researchPrerequisite, "city_progression");}
   }
 
   const required = cityInteger(rule.vip ?? 0),
@@ -65,9 +65,9 @@ export function civilizationScienceRequirements(
   let level = 0;
 
   for (const entry of rules.power.vip?.values() ?? [])
-    if (cityInteger(entry.point) <= num(vip ?? {}, "score"))
-      level = Math.max(level, cityInteger(entry.id) - 7000);
+    {if (cityInteger(entry.point) <= num(vip ?? {}, "score"))
+      {level = Math.max(level, cityInteger(entry.id) - 7000);}}
 
   if (required > 10 ? num(vip ?? {}, "sLevel") < required - 10 : level < required)
-    throw new GameError(errors.vip, "city_progression");
+    {throw new GameError(errors.vip, "city_progression");}
 }

@@ -27,7 +27,7 @@ export function prayerView(
     "goldsilver",
     "goldsteel",
   ])
-    body[key] = sfs.int(key === "steel" ? steel : num(row, key));
+    {body[key] = sfs.int(key === "steel" ? steel : num(row, key));}
 
   Object.assign(body, {
     isFirstFree: sfs.bool(num(row, "isFirstFree") === 1),

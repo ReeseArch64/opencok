@@ -49,7 +49,7 @@ export class HeroRankingRewardService {
         rows = await this.standings.page(closure);
       this.start = (index + 1) % closures.length;
 
-      if (!rows) continue;
+      if (!rows) {continue;}
 
       if (!rows.length) {
         await this.store.finished(closure);
@@ -73,7 +73,7 @@ export class HeroRankingRewardService {
                     template?.message ? `${template.message}|${num(standing, "rank")}` : undefined,
                   );
 
-                if (!template || !contents) throw new Error("Missing hero ranking reward template");
+                if (!template || !contents) {throw new Error("Missing hero ranking reward template");}
 
                 return owners.map((ownerUid) => ({
                   id: heroRankAwardIdentity(text(closure, "periodId"), member, ownerUid),
@@ -94,7 +94,7 @@ export class HeroRankingRewardService {
         closure.awardCursor = member;
         work += Math.max(1, count);
 
-        if (work >= 64) break;
+        if (work >= 64) {break;}
       }
     }
   }
@@ -119,7 +119,7 @@ export class HeroRankingRewardService {
       }
     }
 
-    if (failed) throw failure;
+    if (failed) {throw failure;}
   }
 }
 
@@ -132,7 +132,7 @@ export class HeroRankingRewardDomain extends CityCommandDomain {
     const id = str(params, "awardId");
 
     if (!/^[a-f0-9]{32}$/.test(id) || str(params, "operationId") !== heroRankAwardOperation(id))
-      throw new Error("Invalid hero ranking delivery operation");
+      {throw new Error("Invalid hero ranking delivery operation");}
 
     const saved = await context.state.heroRankingAward?.load(id);
 
@@ -141,19 +141,19 @@ export class HeroRankingRewardDomain extends CityCommandDomain {
       saved.award.ownerUid !== context.owner ||
       long(saved.award, "createdAt") > context.now
     )
-      throw new Error("Missing owned hero ranking entitlement");
+      {throw new Error("Missing owned hero ranking entitlement");}
 
     const award = saved.award;
 
-    if (long(award, "deliveredAt") > 0n) return { response: encode({}), event: null };
+    if (long(award, "deliveredAt") > 0n) {return { response: encode({}), event: null };}
 
     context.write.heroRankingAward = { id };
 
-    if (saved.recorded) return { response: encode({}), event: null };
+    if (saved.recorded) {return { response: encode({}), event: null };}
 
     const reward = award.pinnedReward === null ? null : text(award, "pinnedReward");
 
-    if (reward !== null) mailRewardEntries(reward);
+    if (reward !== null) {mailRewardEntries(reward);}
 
     const mail: AvatarSystemMail = {
       uid: id + "00",
@@ -172,7 +172,7 @@ export class HeroRankingRewardDomain extends CityCommandDomain {
     quests.mail = [...(quests.mail ?? []), mail];
 
     if (award.rewardId !== null)
-      context.write.heroRankingAward.history = {
+      {context.write.heroRankingAward.history = {
         uid: context.owner,
         allianceId: award.member!,
         eventId: award.actId!,
@@ -180,9 +180,9 @@ export class HeroRankingRewardDomain extends CityCommandDomain {
         level: award.level!,
         rewardId: award.rewardId!,
         time: context.now,
-      };
+      };}
 
-    if (!context.economy.event) throw new Error("Hero ranking mail publication unavailable");
+    if (!context.economy.event) {throw new Error("Hero ranking mail publication unavailable");}
 
     const full = context.rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
     context.economy.event({

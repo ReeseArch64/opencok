@@ -12,7 +12,7 @@ export class ChatRoomAccessAuthorizer {
   }
 
   public readonly authorize: RoomAuthorizer = async (uid, roomId) => {
-    if (!roomId.startsWith("private_")) return this.publicRooms.authorize(uid, roomId);
+    if (!roomId.startsWith("private_")) {return this.publicRooms.authorize(uid, roomId);}
 
     return (await this.repository.access?.privateRoom(uid, roomId)) &&
       (await this.repository.getPlayerStateById(uid))

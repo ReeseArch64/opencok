@@ -22,7 +22,7 @@ export class ChatHistoryCursorController extends ChatHistoryController {
       params.before < 0 ||
       typeof params.archive !== "boolean"
     )
-      throw new ChatCommandError("invalid_cursor");
+      {throw new ChatCommandError("invalid_cursor");}
 
     const page = await messages.page({
       roomId: room.roomId,

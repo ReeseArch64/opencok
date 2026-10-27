@@ -12,11 +12,11 @@ function database(
     query: async (statement: { text: string }, params: unknown[] = []) => {
       queries.push({ text: statement.text, params });
       if (statement.text.includes('from "opencok_kingdom"."userprofile"')) {
-        if (options.fail === "profile") throw new Error("Synthetic profile failure");
+        if (options.fail === "profile") {throw new Error("Synthetic profile failure");}
         return { rows: options.missing ? [] : [["self", 1, "0", options.banned ? 1 : 0]] };
       }
       if (statement.text.includes('from "opencok_kingdom"."mail"')) {
-        if (options.fail === "counts") throw new Error("Synthetic mailbox failure");
+        if (options.fail === "counts") {throw new Error("Synthetic mailbox failure");}
         return {
           rows: options.overflow
             ? Array.from({ length: 32768 }, (_, i) => [i, 0, false, "1"])
@@ -53,9 +53,9 @@ test("mail status aggregates only the authenticated recipient and preserves null
   expect(counts.text).toContain("count(*)::text");
   expect(counts.text).toContain('group by "opencok_kingdom"."mail"."type"');
   for (const entry of queries)
-    expect(entry.text).not.toMatch(
+    {expect(entry.text).not.toMatch(
       /\b(insert|update|delete)\b|select \*|contents|rewardId|fromName|email|"gold"/,
-    );
+    );}
 });
 
 test("unknown categories and missing or banned profiles skip mailbox reads; failures and excessive groups roll back", async () => {
@@ -75,8 +75,8 @@ test("unknown categories and missing or banned profiles skip mailbox reads; fail
   }
   const untouched = database();
   for (const uid of ["", " ", "x".repeat(41)])
-    expect(() => readMailStatus(untouched.db, uid, query)).toThrow();
+    {expect(() => readMailStatus(untouched.db, uid, query)).toThrow();}
   for (const category of [NaN, 1.5, 2147483648])
-    expect(() => readMailStatus(untouched.db, "self", { ...query, category })).toThrow();
+    {expect(() => readMailStatus(untouched.db, "self", { ...query, category })).toThrow();}
   expect(untouched.queries).toEqual([]);
 });

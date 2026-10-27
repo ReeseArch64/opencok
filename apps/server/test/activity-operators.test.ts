@@ -52,7 +52,7 @@ test("operators reject foreign/banned principals and corrupt owned state, and mi
     { uid: "owner", serverId: 1, banTime: BigInt(operatorsNow) + 1n },
   ];
   for (const profile of profiles)
-    expect(() => activityOperators(rules, { ...snapshot, profile }, context)).toThrow();
+    {expect(() => activityOperators(rules, { ...snapshot, profile }, context)).toThrow();}
   expect(() =>
     activityOperators(
       rules,
@@ -224,9 +224,9 @@ test("today-sale and overseas panels retain their separate backend gates and act
     { id: 26, endTime: (BigInt(operatorsNow) + 6n * 86400000n) / 1000n },
   ]);
   for (const activityTime of [0n, BigInt(operatorsNow) + 1n, BigInt(operatorsNow) - 7n * 86400000n])
-    expect(activityOperators(rules, { ...snapshot, server: { activityTime } }, context)).toEqual([
+    {expect(activityOperators(rules, { ...snapshot, server: { activityTime } }, context)).toEqual([
       { id: 24, endTime: 0n },
-    ]);
+    ]);}
   rules.configuration.payControl!.set("69026", { k1: "13.0.0", k2: "all" });
   expect(activityOperators(rules, snapshot, context).map((row) => row.id)).toEqual([26]);
   rules.configuration.payControl!.set("69027", { k1: "3.9.0", k2: "close", k6: "7" });

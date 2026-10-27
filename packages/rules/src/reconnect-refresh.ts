@@ -33,12 +33,12 @@ export function reconnectBuildingRefresh(
   const views: { itemId: string; pos: number; refreshTime: bigint }[] = [];
 
   for (const item of [415000, 413000])
-    for (const row of ordered) {
+    {for (const row of ordered) {
       const position = int(row.pos);
 
-      if (int(row.itemId) !== item || position < 17 || position > 26) continue;
+      if (int(row.itemId) !== item || position < 17 || position > 26) {continue;}
 
-      if (int(row.level) < 1) throw new Error("Invalid tutorial resource building");
+      if (int(row.level) < 1) {throw new Error("Invalid tutorial resource building");}
 
       const rule = rules.building(String(item), int(row.level), int(row.star), int(row.progress));
       const rate = float(float(float(int(rule.effects?.productionPerHour)) / 3600) / 1000);
@@ -59,7 +59,7 @@ export function reconnectBuildingRefresh(
       }
 
       views.push({ itemId: String(item), pos: position, refreshTime });
-    }
+    }}
 
   return { writes, views };
 }

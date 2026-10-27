@@ -115,7 +115,7 @@ test("natural field supply uses bounded durable area progress across races, rest
       .where(eq(worldpoint.id, original[0]!.id));
     await h.run(11799999n);
     expect((await h.points()).filter((row) => row.pointType === 9)).toHaveLength(100);
-    for (let index = 0; index < 5; index++) await h.run(11800000n);
+    for (let index = 0; index < 5; index++) {await h.run(11800000n);}
     const after = (await h.points()).filter((row) => row.pointType === 9);
     expect(after).toHaveLength(101);
     expect(after.find((row) => row.id === original[0]!.id)!.startTime).toBe(1000000n);
@@ -257,10 +257,10 @@ test("barbarian claimed expiry postpones all four cells and feature closure prev
   const h = await fixture();
   try {
     for (const id of [11, 12, 15, 16])
-      await h.db.db
+      {await h.db.db
         .update(worldpoint)
         .set({ pointType: id === 16 ? 44 : 45, pointItem: "102", flushTime: 10n })
-        .where(eq(worldpoint.id, id));
+        .where(eq(worldpoint.id, id));}
     await h.db.db.insert(world_march).values({
       uuid: "factual",
       ownerUid: "other",
@@ -492,10 +492,10 @@ test("expiry checkpoints advance beyond a protected page and resume without star
   try {
     await h.db.db.update(server_info).set({ activityTime: 0n });
     for (let id = 1; id <= 65; id++)
-      await h.db.db
+      {await h.db.db
         .update(worldpoint)
         .set({ pointType: 9, pointItem: "9414", flushTime: 10n, ownerId: id <= 64 ? "other" : "" })
-        .where(eq(worldpoint.id, id));
+        .where(eq(worldpoint.id, id));}
     await h.run(1099511627776n);
     expect((await h.points())[64]!.pointType).toBe(9);
     expect((await h.clock("expiry")).area).toBe(64);

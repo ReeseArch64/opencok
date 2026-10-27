@@ -11,6 +11,6 @@ export abstract class CursorWorker<Key extends object> extends PollingWorker {
     const entry = await this.next(this.cursor);
     this.cursor = entry ? Object.freeze({ ...entry }) : undefined;
 
-    if (entry && !this.isStopped()) await this.deliver(entry);
+    if (entry && !this.isStopped()) {await this.deliver(entry);}
   }
 }

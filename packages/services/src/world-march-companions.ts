@@ -40,13 +40,13 @@ export function selectMarchCompanions(
       (id) => id.length > 40 || id.includes("\0") || !id.isWellFormed(),
     )
   )
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   const armies = marches.map((row) =>
     row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null,
   );
 
-  if (armies.some((army) => army && army.owner !== context.owner)) worldMutationFailure();
+  if (armies.some((army) => army && army.owner !== context.owner)) {worldMutationFailure();}
 
   let dragon: Row | undefined, general: Row | undefined;
 
@@ -55,7 +55,7 @@ export function selectMarchCompanions(
       !dragonFeature(context.rules, "dragon_new", context.now) ||
       !dragonFeature(context.rules, "dragon_battle", context.now)
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
 
     dragon = context.state.dragons?.dragons.find((row) => row.uuid === dragonId);
 
@@ -67,7 +67,7 @@ export function selectMarchCompanions(
       dragonJson(dragon.travelData, emptyDragonTravel).travelState === 1 ||
       armies.some((army) => army?.dragons?.some((row) => row.uuid === dragonId))
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
 
     dragonDefinition(context.rules, dragon);
   }
@@ -83,7 +83,7 @@ export function selectMarchCompanions(
         cityInteger(context.rules.items.get("general")?.k1, 1) ||
       armies.some((army) => army?.general?.id === id)
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
 
     general = generalMarch(context.rules, ownedGeneral(context, id));
   }
@@ -119,23 +119,23 @@ export function attachMarchCompanions(
 export function releaseMarchCompanions(context: CityProgressionContext, row: Row) {
   const army = row.armyInfo ? decodeWorldMarchArmy(row.armyInfo as Buffer) : null;
 
-  if (!army || army.owner !== context.owner) worldMutationFailure();
+  if (!army || army.owner !== context.owner) {worldMutationFailure();}
 
   for (const dragon of army.dragons ?? []) {
-    if (dragon.owner !== context.owner) worldMutationFailure();
+    if (dragon.owner !== context.owner) {worldMutationFailure();}
 
     if (context.state.dragons?.dragons.some((row) => row.uuid === dragon.uuid))
-      dragonChange(context, dragon.uuid!, false);
+      {dragonChange(context, dragon.uuid!, false);}
   }
 
   if (army.general) {
-    if (army.general.owner !== context.owner) worldMutationFailure();
+    if (army.general.owner !== context.owner) {worldMutationFailure();}
 
     const general =
       context.write.generalRoster?.generals?.find((row) => row.id === army.general!.id) ??
       context.state.generalRoster?.generals.find((row) => row.id === army.general!.id);
 
-    if (general && num(general, "state") === 3) writeGeneral(context, generalMarchReturn(general));
+    if (general && num(general, "state") === 3) {writeGeneral(context, generalMarchReturn(general));}
   }
 }
 
@@ -165,10 +165,10 @@ export function marchCompanionPushes(context: CityProgressionContext) {
   const pushes = [...(context.write.worldMutation?.companionPushes ?? [])];
 
   if (context.write.generalRoster?.generals?.length)
-    pushes.push({
+    {pushes.push({
       command: "push.general.info",
       body: encode(generalChanges(context, context.write.generalRoster.generals)),
-    });
+    });}
 
   return pushes;
 }

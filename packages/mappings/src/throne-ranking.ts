@@ -10,13 +10,13 @@ export function throneRankingBoard(
   realm: number,
   uid: string,
 ): Fields | undefined {
-  if (!snapshot.period) return undefined;
+  if (!snapshot.period) {return undefined;}
 
-  if (!throneRankingOpen(snapshot.period)) return undefined;
+  if (!throneRankingOpen(snapshot.period)) {return undefined;}
 
   const rows = snapshot.rows;
 
-  if (rows.length > 32767) throw new Error("Oversized throne ranking");
+  if (rows.length > 32767) {throw new Error("Oversized throne ranking");}
 
   const found = rows.findIndex((row) => row.uid === uid);
 
@@ -31,7 +31,7 @@ export function throneRankingBoard(
         };
 
         for (const key of ["name", "allianceName", "abbr", "kingdomName"])
-          result[key] = sfs.string(String(row[key] ?? ""));
+          {result[key] = sfs.string(String(row[key] ?? ""));}
 
         result.serverId = sfs.int(Number(javaDecimal(String(row.serverId), 32)));
 
@@ -52,9 +52,9 @@ export function throneRanking(boards: readonly Fields[]): Fields {
 export function throneRankingOpen(state: ThroneRankingPeriod): boolean {
   const period = decodeLegacyJsonObject(state.info);
 
-  if (period.isCrossOpen === undefined) return false;
+  if (period.isCrossOpen === undefined) {return false;}
 
-  if (period.isCrossOpen.type !== Type.Bool) throw new Error("Invalid throne opening state");
+  if (period.isCrossOpen.type !== Type.Bool) {throw new Error("Invalid throne opening state");}
 
   return period.isCrossOpen.value as boolean;
 }

@@ -29,11 +29,11 @@ test("null roots, empty lists and compatible missing fields retain Java serializ
     soldiers: [],
   });
   for (const name of ["nullLists", "missingFields"] as const)
-    expect(decodeWorldResourceArmy(data(name))).toEqual({
+    {expect(decodeWorldResourceArmy(data(name))).toEqual({
       owner: null,
       cachedLoad: 0,
       soldiers: null,
-    });
+    });}
 });
 
 test("unrelated saved object graphs can contain primitive arrays, enums, maps, inherited fields and custom block data", () => {
@@ -70,20 +70,20 @@ test("incompatible roots, field types, list entries and unsupported externalizab
     "badElement",
     "externalizable",
   ] as const)
-    expect(() => decodeWorldResourceArmy(data(name))).toThrow();
+    {expect(() => decodeWorldResourceArmy(data(name))).toThrow();}
 });
 
 test("saved troop decoding rejects every truncated prefix and trailing bytes", () => {
   const bytes = data("arrayList");
   for (let length = 0; length < bytes.length; length++)
-    expect(() => decodeWorldResourceArmy(bytes.subarray(0, length))).toThrow();
+    {expect(() => decodeWorldResourceArmy(bytes.subarray(0, length))).toThrow();}
   for (const suffix of [Buffer.from([0]), Buffer.from([0x79]), data("nullRoot")])
-    expect(() => decodeWorldResourceArmy(Buffer.concat([bytes, suffix]))).toThrow();
+    {expect(() => decodeWorldResourceArmy(Buffer.concat([bytes, suffix]))).toThrow();}
 });
 
 test("saved troop decoding bounds nesting, list size, byte length and invalid stream headers", () => {
   for (const name of ["deep", "wide"] as const)
-    expect(() => decodeWorldResourceArmy(data(name))).toThrow();
+    {expect(() => decodeWorldResourceArmy(data(name))).toThrow();}
   expect(() => decodeWorldResourceArmy(Buffer.alloc(65536))).toThrow();
   expect(() =>
     decodeWorldResourceArmy(new Uint8Array([0xac, 0xed, 0, 5, 0x70]) as Buffer),

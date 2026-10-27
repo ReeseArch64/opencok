@@ -50,7 +50,7 @@ test("the signed nickname request carries only the durable operation identity", 
     { ...update, operationId: "not-an-operation" },
     { ...update, name: "Forged Name" },
   ])
-    expect(() => decodeChatNickname(JSON.stringify(value))).toThrow();
+    {expect(() => decodeChatNickname(JSON.stringify(value))).toThrow();}
 });
 
 async function exchange(options: {

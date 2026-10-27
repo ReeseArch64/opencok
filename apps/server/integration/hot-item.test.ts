@@ -189,7 +189,7 @@ test("daily budgets retain free refreshes, exclude early gold rerolls, charge es
       expect(await h.command("hot.item.refresh", { operationId })).toEqual(result);
       expect(int(result.body, "goldCost")).toBe(index === 0 ? 0 : index === 1 ? 5 : 10);
       if (index < 2)
-        expect(h.offers(result.body).every((offer) => int(offer, "priceType") !== 5)).toBe(true);
+        {expect(h.offers(result.body).every((offer) => int(offer, "priceType") !== 5)).toBe(true);}
     }
     expect(
       (await h.db.db.select().from(userprofile).where(eq(userprofile.uid, "owner")))[0]?.gold,

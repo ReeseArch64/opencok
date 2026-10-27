@@ -44,25 +44,25 @@ function parseArgs(argv) {
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
     const next = () => {
-      if (i + 1 >= argv.length) die(`Missing value for ${a}`);
+      if (i + 1 >= argv.length) {die(`Missing value for ${a}`);}
       return argv[++i];
     };
 
-    if (a === "--repo-root") out.repoRoot = next();
-    else if (a === "--dir") out.dir = next();
-    else if (a === "--no-create-dir") out.noCreateDir = true;
-    else if (a === "--title") out.title = next();
-    else if (a === "--status") out.status = next();
-    else if (a === "--template") out.template = next();
-    else if (a === "--strategy") out.strategy = next();
-    else if (a === "--deciders") out.deciders = next();
-    else if (a === "--consulted") out.consulted = next();
-    else if (a === "--informed") out.informed = next();
-    else if (a === "--technical-story") out.technicalStory = next();
-    else if (a === "--chosen-option") out.chosenOption = next();
-    else if (a === "--update-index") out.updateIndex = true;
-    else if (a === "--index-file") out.indexFile = next();
-    else if (a === "--json") out.json = true;
+    if (a === "--repo-root") {out.repoRoot = next();}
+    else if (a === "--dir") {out.dir = next();}
+    else if (a === "--no-create-dir") {out.noCreateDir = true;}
+    else if (a === "--title") {out.title = next();}
+    else if (a === "--status") {out.status = next();}
+    else if (a === "--template") {out.template = next();}
+    else if (a === "--strategy") {out.strategy = next();}
+    else if (a === "--deciders") {out.deciders = next();}
+    else if (a === "--consulted") {out.consulted = next();}
+    else if (a === "--informed") {out.informed = next();}
+    else if (a === "--technical-story") {out.technicalStory = next();}
+    else if (a === "--chosen-option") {out.chosenOption = next();}
+    else if (a === "--update-index") {out.updateIndex = true;}
+    else if (a === "--index-file") {out.indexFile = next();}
+    else if (a === "--json") {out.json = true;}
     else if (a === "--help" || a === "-h") {
       process.stdout.write(
         [
@@ -92,11 +92,11 @@ function parseArgs(argv) {
     }
   }
 
-  if (!out.title) die("Missing required --title");
+  if (!out.title) {die("Missing required --title");}
 
-  if (!["simple", "madr"].includes(out.template)) die(`Invalid --template: ${out.template}`);
+  if (!["simple", "madr"].includes(out.template)) {die(`Invalid --template: ${out.template}`);}
   if (!["auto", "number", "slug"].includes(out.strategy))
-    die(`Invalid --strategy: ${out.strategy}`);
+    {die(`Invalid --strategy: ${out.strategy}`);}
 
   return out;
 }
@@ -111,7 +111,7 @@ function detectAdrDir(repoRoot) {
   ];
   for (const p of candidates) {
     try {
-      if (fs.statSync(p).isDirectory()) return p;
+      if (fs.statSync(p).isDirectory()) {return p;}
     } catch {}
   }
   return null;
@@ -132,9 +132,9 @@ function listMdFiles(dir) {
 function detectStrategy(adrDir) {
   const md = listMdFiles(adrDir);
   for (const name of md) {
-    if (/^\d+-/.test(name)) return "number";
+    if (/^\d+-/.test(name)) {return "number";}
   }
-  if (md.length > 0) return "slug";
+  if (md.length > 0) {return "slug";}
   return "number";
 }
 
@@ -142,7 +142,7 @@ function detectNumberingWidth(adrDir) {
   const md = listMdFiles(adrDir);
   for (const name of md) {
     const m = name.match(/^(\d+)-/);
-    if (m) return m[1].length;
+    if (m) {return m[1].length;}
   }
   return null;
 }
@@ -152,9 +152,9 @@ function nextNumber(adrDir) {
   let maxN = 0;
   for (const name of md) {
     const m = name.match(/^(\d+)-/);
-    if (!m) continue;
+    if (!m) {continue;}
     const n = Number.parseInt(m[1], 10);
-    if (Number.isFinite(n)) maxN = Math.max(maxN, n);
+    if (Number.isFinite(n)) {maxN = Math.max(maxN, n);}
   }
   return maxN ? maxN + 1 : 1;
 }
@@ -162,7 +162,7 @@ function nextNumber(adrDir) {
 function loadTemplate(templateName) {
   const skillRoot = path.resolve(__dirname, "..");
   const templatePath = path.join(skillRoot, "assets", "templates", `adr-${templateName}.md`);
-  if (!fs.existsSync(templatePath)) die(`Template not found: ${templatePath}`);
+  if (!fs.existsSync(templatePath)) {die(`Template not found: ${templatePath}`);}
   return fs.readFileSync(templatePath, "utf8");
 }
 
@@ -200,14 +200,14 @@ function renderTemplate(raw, vars) {
 function chooseIndexFile(adrDir) {
   for (const name of ["README.md", "index.md"]) {
     const p = path.join(adrDir, name);
-    if (fs.existsSync(p)) return p;
+    if (fs.existsSync(p)) {return p;}
   }
   return path.join(adrDir, "README.md");
 }
 
 function insertIndexEntryUnderHeading(lines, headingRegex, entryLine) {
   const headingIndex = lines.findIndex((l) => headingRegex.test(l));
-  if (headingIndex === -1) return { lines, inserted: false };
+  if (headingIndex === -1) {return { lines, inserted: false };}
 
   let sectionEnd = lines.length;
   for (let i = headingIndex + 1; i < lines.length; i++) {
@@ -239,10 +239,10 @@ function insertIndexEntryUnderHeading(lines, headingRegex, entryLine) {
 
 function updateIndex(indexFile, { relLink, title, status, date }) {
   let content = "";
-  if (fs.existsSync(indexFile)) content = fs.readFileSync(indexFile, "utf8");
-  else content = "# ADR Log\n\n";
+  if (fs.existsSync(indexFile)) {content = fs.readFileSync(indexFile, "utf8");}
+  else {content = "# ADR Log\n\n";}
 
-  if (content.includes(relLink)) return false;
+  if (content.includes(relLink)) {return false;}
 
   const normalized = content.replace(/\r\n/g, "\n");
   const hadTrailingNewline = normalized.endsWith("\n");
@@ -257,7 +257,7 @@ function updateIndex(indexFile, { relLink, title, status, date }) {
   const nextLines = r.inserted ? r.lines : [...lines, entryLine];
 
   let next = nextLines.join("\n");
-  if (hadTrailingNewline) next += "\n";
+  if (hadTrailingNewline) {next += "\n";}
 
   fs.mkdirSync(path.dirname(indexFile), { recursive: true });
   fs.writeFileSync(indexFile, next, "utf8");
@@ -268,19 +268,19 @@ function main() {
   const args = parseArgs(process.argv);
 
   const repoRoot = path.resolve(process.cwd(), args.repoRoot);
-  if (!fs.existsSync(repoRoot)) die(`Repo root does not exist: ${repoRoot}`);
+  if (!fs.existsSync(repoRoot)) {die(`Repo root does not exist: ${repoRoot}`);}
 
   let adrDir;
-  if (args.dir) adrDir = path.resolve(repoRoot, args.dir);
-  else adrDir = detectAdrDir(repoRoot) || path.join(repoRoot, "adr");
+  if (args.dir) {adrDir = path.resolve(repoRoot, args.dir);}
+  else {adrDir = detectAdrDir(repoRoot) || path.join(repoRoot, "adr");}
 
   if (!fs.existsSync(adrDir)) {
-    if (args.noCreateDir) die(`ADR directory does not exist: ${adrDir}`);
+    if (args.noCreateDir) {die(`ADR directory does not exist: ${adrDir}`);}
     fs.mkdirSync(adrDir, { recursive: true });
   }
 
   let strategy = args.strategy;
-  if (strategy === "auto") strategy = detectStrategy(adrDir);
+  if (strategy === "auto") {strategy = detectStrategy(adrDir);}
 
   const title = String(args.title).trim();
   const slug = slugify(title);
@@ -296,7 +296,7 @@ function main() {
 
   let out = path.join(adrDir, filename);
   if (fs.existsSync(out)) {
-    if (strategy === "number") die(`ADR already exists: ${out}`);
+    if (strategy === "number") {die(`ADR already exists: ${out}`);}
     let i = 2;
     while (true) {
       const candidate = path.join(adrDir, `${slug}-${i}.md`);

@@ -31,7 +31,7 @@ async function fixture() {
     "general_battle",
     "dragon_travel",
   ])
-    h.rules.features.set(key, { id: key, version: "1.0.0", online: "all", test: "all" });
+    {h.rules.features.set(key, { id: key, version: "1.0.0", online: "all", test: "all" });}
   h.rules.items.get("effect")!.k1 += "|55;2";
   await h.db.db
     .update(user_building)
@@ -42,7 +42,7 @@ async function fixture() {
     .values({ uid: "owner", pointId: 1, worldId: 0, color: 1, lastCityDefTime: 0n });
   await h.db.db.insert(user_army).values({ uid: "owner", armyId: "107000", level: 1, free: 100 });
   for (const id of [1, 2, 1201, 1202, 10, 11, 1210, 1211, 20, 21, 1220, 1221])
-    await h.db.db.insert(worldpoint).values({
+    {await h.db.db.insert(worldpoint).values({
       id,
       worldId: 0,
       x: (id - 1) % 1200,
@@ -57,7 +57,7 @@ async function fixture() {
       pointItem: [10, 20].includes(id) ? "0" : null,
       ownerId: [1, 2, 1201, 1202].includes(id) ? "owner" : "",
       ownerName: "Synthetic",
-    });
+    });}
   await h.db.db
     .insert(new_general)
     .values(

@@ -46,7 +46,7 @@ export class ChatWebSocketConnection implements Peer {
   }
 
   public readonly sendFrame = (frame: Frame): void => {
-    if (this.socket.readyState !== this.socket.OPEN) return;
+    if (this.socket.readyState !== this.socket.OPEN) {return;}
 
     const encoded = JSON.stringify({ ...frame, ...this.clientIdentity });
 
@@ -60,12 +60,12 @@ export class ChatWebSocketConnection implements Peer {
   };
 
   public readonly authorizeSession = async (closeOnFailure = true): Promise<boolean> => {
-    if (!(this.options.isReady ?? (() => true))()) return false;
+    if (!(this.options.isReady ?? (() => true))()) {return false;}
 
     const identity = await this.deadline.run(() => this.options.verifyToken(this.token, this.uid));
 
     if (identity?.uid !== this.uid) {
-      if (closeOnFailure) this.socket.close(1008, "Session unavailable");
+      if (closeOnFailure) {this.socket.close(1008, "Session unavailable");}
 
       return false;
     }
@@ -88,7 +88,7 @@ export class ChatWebSocketConnection implements Peer {
 
     this.queue = this.queue
       .then(async () => {
-        if (socket.readyState !== socket.OPEN) return;
+        if (socket.readyState !== socket.OPEN) {return;}
 
         const started = performance.now();
         const operationId = randomUUID();
@@ -109,7 +109,7 @@ export class ChatWebSocketConnection implements Peer {
         let frame: IncomingFrame;
 
         try {
-          if (binary) throw new Error("binary frame");
+          if (binary) {throw new Error("binary frame");}
 
           const parsed: unknown = JSON.parse(raw.toString());
 
@@ -119,7 +119,7 @@ export class ChatWebSocketConnection implements Peer {
             !parsed.cmd ||
             !isRecord(parsed.params)
           )
-            throw new Error("invalid frame");
+            {throw new Error("invalid frame");}
 
           frame = { cmd: parsed.cmd, params: parsed.params, sendTime: parsed.sendTime };
         } catch {
@@ -136,13 +136,13 @@ export class ChatWebSocketConnection implements Peer {
 
         try {
           const result = await this.deadline.run(async () => {
-            if (!(await authorizeSession(false))) throw new ChatCommandError("unauthorized");
+            if (!(await authorizeSession(false))) {throw new ChatCommandError("unauthorized");}
 
-            if (this.bootstrap.has(frame.cmd)) return { status: "ok" };
+            if (this.bootstrap.has(frame.cmd)) {return { status: "ok" };}
 
             const handler = Object.hasOwn(handlers, frame.cmd) ? handlers[frame.cmd] : null;
 
-            if (!handler) throw new ChatCommandError("unsupported_command");
+            if (!handler) {throw new ChatCommandError("unsupported_command");}
 
             return handler({
               uid,
@@ -161,7 +161,7 @@ export class ChatWebSocketConnection implements Peer {
           log({ correlationId: randomUUID(), operation: frame.cmd, category: code });
           sendFrame({ ...base, error: { code } });
 
-          if (code === "unauthorized") socket.close(1008, "Session unavailable");
+          if (code === "unauthorized") {socket.close(1008, "Session unavailable");}
         }
       })
       .finally(() => {

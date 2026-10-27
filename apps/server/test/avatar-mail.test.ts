@@ -53,18 +53,18 @@ function fixture(entry = completion()) {
         working = structuredClone(state);
         return { rows: [] };
       }
-      if (text === "rollback") return { rows: [] };
+      if (text === "rollback") {return { rows: [] };}
       if (text === "commit") {
-        if (failure === "commit") throw new Error("Synthetic commit failure");
+        if (failure === "commit") {throw new Error("Synthetic commit failure");}
         state = working;
-        if (failure === "lost") throw new Error("Synthetic lost response");
+        if (failure === "lost") {throw new Error("Synthetic lost response");}
         return { rows: [] };
       }
       const table = text.match(/(?:from|into|update) "opencok_kingdom"\."([^"]+)"/)?.[1];
       const op = `${text.split(" ")[0]}:${table}`;
-      if (op === failure) throw new Error("Synthetic database failure");
+      if (op === failure) {throw new Error("Synthetic database failure");}
       if (text.startsWith("select")) {
-        if (table === "userprofile") return { rows: working.profile ? [working.profile] : [] };
+        if (table === "userprofile") {return { rows: working.profile ? [working.profile] : [] };}
         const e = working.entry;
         return {
           rows: e
@@ -97,13 +97,13 @@ function fixture(entry = completion()) {
               : working.groups;
         const id =
           String(row.uid) + (table === "mail_group" ? `:${row.groupType}:${row.groupIndex}` : "");
-        if (target.has(id)) throw new Error("Synthetic duplicate key");
+        if (target.has(id)) {throw new Error("Synthetic duplicate key");}
         target.set(id, row);
       }
       if (text.startsWith("update")) {
         expect(table).toBe("avatar_completion");
         expect(params.slice(1)).toEqual(["1001", 5, working.entry!.pendingEffects]);
-        if (failure === "cas") return { rows: [] };
+        if (failure === "cas") {return { rows: [] };}
         working.entry!.pendingEffects = Number(params[0]);
         return { rows: [["1001"]] };
       }
@@ -131,7 +131,7 @@ test("mail UTF-8 backing buffers match frozen synthetic Java 8 lengths and hashe
     expect(bytes?.length).toBe(v.length);
     expect(createHash("sha256").update(bytes!).digest("hex")).toBe(v.sha256);
   }
-  for (const value of [undefined, "", " \t\n", "\u2003"]) expect(javaMailBytes(value)).toBeNull();
+  for (const value of [undefined, "", " \t\n", "\u2003"]) {expect(javaMailBytes(value)).toBeNull();}
   expect(() => javaMailBytes("\ud800")).toThrow();
 });
 
@@ -149,7 +149,7 @@ test("captured templates preserve notice selection, category, share wrapping and
     createTime: time,
   });
   for (const type of ["", "0", "\t"])
-    expect(avatarSystemMail(completion({ type }), stem).type).toBe(15);
+    {expect(avatarSystemMail(completion({ type }), stem).type).toBe(15);}
   expect(avatarSystemMail(completion({ type: " 0 " }), stem).type).toBe(2);
   for (const [category, suffix] of [
     ["AB", "AB"],
@@ -158,7 +158,7 @@ test("captured templates preserve notice selection, category, share wrapping and
     ["long", "00"],
     ["😀", "😀"],
   ])
-    expect(avatarSystemMail(completion({ category: category! }), stem).uid).toBe(stem + suffix);
+    {expect(avatarSystemMail(completion({ category: category! }), stem).uid).toBe(stem + suffix);}
   expect(avatarSystemMail(completion({ share: "2147483647" }), stem).reply).toBe(-2);
   expect(avatarSystemMail(completion({ share: "-2147483648" }), stem).reply).toBe(0);
   expect(() => avatarSystemMail(completion({ share: "＋1" }), stem)).toThrow();
@@ -339,7 +339,7 @@ test("foreign or missing owners and invalid intents cannot deliver messages", as
   }
   const f = fixture();
   for (const owner of ["", "other", "1".repeat(21)])
-    expect(() => deliverAvatarMail(f.db, 1, owner, 5, avatarSystemMail)).toThrow();
+    {expect(() => deliverAvatarMail(f.db, 1, owner, 5, avatarSystemMail)).toThrow();}
   expect(f.queries).toEqual([]);
   for (const template of [
     { title: "x".repeat(256) },
@@ -348,7 +348,7 @@ test("foreign or missing owners and invalid intents cannot deliver messages", as
     { message: "" },
     { share: "invalid" },
   ] as Record<string, string>[])
-    expect(() => avatarSystemMail(completion(template), stem)).toThrow();
+    {expect(() => avatarSystemMail(completion(template), stem)).toThrow();}
 });
 
 test("delivery validates plans and clears exactly bit one for every pending combination", async () => {

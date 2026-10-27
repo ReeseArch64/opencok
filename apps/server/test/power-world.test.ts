@@ -14,7 +14,7 @@ class WorldCache extends Cache {
   }
   override async command(command: string, ...args: string[]) {
     this.calls.push([command, ...args]);
-    if (this.fail) throw new Error("Synthetic Redis failure");
+    if (this.fail) {throw new Error("Synthetic Redis failure");}
     return this.response;
   }
 }
@@ -57,7 +57,7 @@ test("explicit destination realm routes world effects without changing the cache
     ["HGETALL", "opencok:kingdom:1:world-effects"],
   ]);
   for (const kingdomId of [0, -1, NaN, 1.5])
-    await expect(cache.worldEffects(kingdomId)).rejects.toThrow();
+    {await expect(cache.worldEffects(kingdomId)).rejects.toThrow();}
   expect(cache.calls).toHaveLength(2);
 });
 
@@ -105,9 +105,9 @@ test("world JSON skips records without values and rejects inexact deadline shape
     '{"value":"1","endTime":1e3}',
     '{"value":"1","endTime":9223372036854775808}',
   ])
-    expect(() => decodeWorldPowerEffects(new Map([["487", json]]))).toThrow("102192");
+    {expect(() => decodeWorldPowerEffects(new Map([["487", json]]))).toThrow("102192");}
   for (const id of ["-1", "0487", "2147483648", "private-invalid"])
-    expect(() => decodeWorldPowerEffects(new Map([[id, '{"value":"1"}']]))).toThrow("102192");
+    {expect(() => decodeWorldPowerEffects(new Map([[id, '{"value":"1"}']]))).toThrow("102192");}
   expect(() =>
     decodeWorldPowerEffects(new Map(Array.from({ length: 4097 }, (_, id) => [String(id), "{}"]))),
   ).toThrow("102192");
@@ -129,9 +129,9 @@ test("world effect expiry is exclusive and old malformed values do not survive r
   );
   expect(records).toEqual(before);
   for (const value of ["NaN", "Infinity", "1e100", "", "0x10"])
-    expect(() =>
+    {expect(() =>
       worldPowerEffects([{ id: 487, value, endTime: undefined }], rules, context),
-    ).toThrow("102192");
+    ).toThrow("102192");}
 });
 
 test("special world effects honor the server gate while ordinary power modifiers remain available", () => {

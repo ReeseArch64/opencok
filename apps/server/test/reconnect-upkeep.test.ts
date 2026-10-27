@@ -20,9 +20,9 @@ function fixture() {
   rules.items.set("account", { k7: "1" });
   rules.items.set("on_trumpet", { k2: "all" });
   for (const key of ["p6_all", "p6_security_resources", "p6_weak"])
-    rules.features.set(key, { version: "2.0.0", online: "all" });
+    {rules.features.set(key, { version: "2.0.0", online: "all" });}
   for (let arm = 1; arm <= 8; arm++)
-    rules.arms.set(String(arm), { upkeep: "86400000", new_arms: "1", arm: String(arm) });
+    {rules.arms.set(String(arm), { upkeep: "86400000", new_arms: "1", arm: String(arm) });}
   const buildings: Row[] = [
     { uuid: "cellar", itemId: 404000, level: 30, star: 1, progress: 50 },
     { uuid: "templar", itemId: 439000, level: 1, unlockFlag: 1 },
@@ -68,9 +68,9 @@ test("bound display has the legacy strict version boundary and is disabled in sp
     ["2.0.3", false],
     ["2.0.4", true],
   ] as const)
-    expect(
+    {expect(
       reconnectUpkeep([], buildings, rules, { ...context, version }, environment).showBound,
-    ).toBe(expected);
+    ).toBe(expected);}
   const special = reconnectUpkeep([], buildings, rules, context, {
     ...environment,
     specialServer: true,

@@ -19,13 +19,13 @@ export async function readDailyInvestment(tx: MutationTransaction, owner: string
 
 export async function writeDailyInvestment(tx: MutationTransaction, owner: string, row: Row) {
   if (row.uid !== owner || ![0, 1].includes(num(row, "endactive")))
-    throw new Error("Invalid investment owner or state");
+    {throw new Error("Invalid investment owner or state");}
 
   investmentFlags(text(row, "isreceive"));
   const timestamps = ["beginTime", "receiveTime", "promptTime"].map((key) => long(row, key));
 
   if (timestamps.some((at) => at < 0n || at > 9223372036854775807n))
-    throw new Error("Invalid investment timestamp");
+    {throw new Error("Invalid investment timestamp");}
 
   const value = {
     uid: owner,

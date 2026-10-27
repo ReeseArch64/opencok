@@ -191,12 +191,12 @@ test("health port bind failure rolls back an already opened TCP listener", async
   const occupied = createServer();
   await new Promise<void>((resolve) => occupied.listen(0, "127.0.0.1", resolve));
   const address = occupied.address();
-  if (!address || typeof address === "string") throw new Error("Missing listener address");
+  if (!address || typeof address === "string") {throw new Error("Missing listener address");}
   const settings = await Effect.runPromise(config.pipe(Effect.provide(source)));
   const probe = createServer();
   await new Promise<void>((resolve) => probe.listen(0, "127.0.0.1", resolve));
   const probeAddress = probe.address();
-  if (!probeAddress || typeof probeAddress === "string") throw new Error("Missing probe address");
+  if (!probeAddress || typeof probeAddress === "string") {throw new Error("Missing probe address");}
   const port = probeAddress.port;
   await new Promise<void>((resolve) => probe.close(() => resolve()));
   const runtime = ManagedRuntime.make(

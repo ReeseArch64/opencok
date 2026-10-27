@@ -48,7 +48,7 @@ test("Source event division includes boss denominator but the final overwritten 
     ["refresh_event_csmod_boss", "500"],
     ["refresh_event_csmod_npc", "600"],
   ])
-    rules.world.fieldMonsterGroups!.set(group!, [{ day: "0;99", para1: `${id};10` }]);
+    {rules.world.fieldMonsterGroups!.set(group!, [{ day: "0;99", para1: `${id};10` }]);}
   expect([...worldMonsterQuotas(rules, 0n, false, () => 9)]).toEqual([
     ["100", 4],
     ["200", 2],

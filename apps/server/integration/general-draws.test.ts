@@ -22,7 +22,7 @@ test("event draws conserve tier tickets, discounted costs, scores, and one-time 
   ]);
   try {
     for (const id of ["golden_roulette", "golden_roulette_Integral_reward"])
-      h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });
+      {h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });}
     h.rules.power.activityPanels!.set("57153", {
       start: "1970-01-01-00-00",
       end: "2100-01-01-00-00",

@@ -12,7 +12,7 @@ export async function reconnectFriendshipMine(
   uid: string,
   rules: Rules,
 ) {
-  if (!uid.trim() || uid.length > 40) throw new GameError(errors.unsupported, "reconnect");
+  if (!uid.trim() || uid.length > 40) {throw new GameError(errors.unsupported, "reconnect");}
 
   const mine = await store.friendshipMine(uid, () => initialFriendshipMine(rules));
 

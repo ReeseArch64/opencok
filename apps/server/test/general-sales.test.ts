@@ -70,12 +70,12 @@ test("synthetic XML sale declarations reach configuration without flattening dup
   const directory = await mkdtemp(join(tmpdir(), "opencok-general-sale-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(
+      {await writeFile(
         join(directory, `${name}.xml`),
         name === "building"
           ? '<database><ItemSpec id="400001" level="1"/></database>'
           : '<database><ItemSpec id="synthetic"/></database>',
-      );
+      );}
     const items = [...dataConfigItems().values()]
       .map(
         (rule) =>

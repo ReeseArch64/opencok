@@ -25,14 +25,14 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     if (directory === undefined) {
       const factory = catalogDefinitions[name as keyof typeof catalogDefinitions];
 
-      if (!factory) throw new Error("Missing gameplay catalog");
+      if (!factory) {throw new Error("Missing gameplay catalog");}
 
       return factory();
     }
 
     const file = join(directory, `${name}.xml`);
 
-    if ((await stat(file)).size > 16 * 1024 * 1024) throw new Error("Oversized gameplay resource");
+    if ((await stat(file)).size > 16 * 1024 * 1024) {throw new Error("Oversized gameplay resource");}
 
     return readFile(file, "utf8");
   };
@@ -50,9 +50,9 @@ export async function loadRules(directory?: string, kingdomId = 1) {
   const optionalRecords = async (name: GameplayCatalog) =>
     (await available(name)) ? records(await read(name), name) : [];
   const parseDeclared = (source: string | CatalogDefinition, name: GameplayCatalog) => {
-    if (typeof source === "string") return fixtures!.parseDeclaredCatalog(source);
+    if (typeof source === "string") {return fixtures!.parseDeclaredCatalog(source);}
 
-    if (source.kind !== CatalogKind.Table) throw new Error("Expected gameplay table");
+    if (source.kind !== CatalogKind.Table) {throw new Error("Expected gameplay table");}
 
     return legacyDeclaredCatalog(source, catalogCodecs[name] ?? {});
   };
@@ -413,7 +413,7 @@ async function exists(path: string): Promise<boolean> {
 
     return true;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {return false;}
 
     throw error;
   }

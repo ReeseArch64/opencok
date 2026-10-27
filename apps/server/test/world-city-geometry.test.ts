@@ -16,7 +16,7 @@ function city(anchor: number, points: number[], type = 8) {
 test("native city footprints use the source lower-right anchor and reject edge wrapping", () => {
   expect(worldFootprint(12, 10)).toEqual([11, 2, 1, 12]);
   expect(worldFootprint(100, 10)).toEqual([99, 90, 89, 100]);
-  for (const point of [1, 10, 11, 91]) expect(() => worldFootprint(point, 10)).toThrow();
+  for (const point of [1, 10, 11, 91]) {expect(() => worldFootprint(point, 10)).toThrow();}
   expect(worldFootprint(1, 10, false)).toEqual([1]);
   expect(worldCityCandidates(1, 10)).toEqual([1, 2, 11, 12]);
 });

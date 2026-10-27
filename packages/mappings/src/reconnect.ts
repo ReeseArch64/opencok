@@ -46,7 +46,7 @@ function serializeReconnectBalances(profile: Row): Fields {
 }
 
 function serializeReconnectArmy(row: Row): Fields {
-  if (typeof row.armyId !== "string" || !row.armyId || row.armyId.length > 20) return invalid();
+  if (typeof row.armyId !== "string" || !row.armyId || row.armyId.length > 20) {return invalid();}
 
   const result: Fields = {
     id: sfs.string(row.armyId),
@@ -65,7 +65,7 @@ function serializeReconnectArmy(row: Row): Fields {
 }
 
 function serializeReconnectArmies(rows: readonly Row[]): Fields {
-  if (rows.length > 32767) return invalid();
+  if (rows.length > 32767) {return invalid();}
 
   const seen = new Set<string>();
 
@@ -75,7 +75,7 @@ function serializeReconnectArmies(rows: readonly Row[]): Fields {
         const army = reconnectArmy(row);
         const id = row.armyId as string;
 
-        if (seen.has(id)) return invalid();
+        if (seen.has(id)) {return invalid();}
 
         seen.add(id);
 
@@ -123,7 +123,7 @@ function serializeReconnectQueues(
   rules: Rules,
   now: number,
 ): Fields {
-  if (rows.length > 32767) return invalid();
+  if (rows.length > 32767) {return invalid();}
 
   const buildingIndex = new Map(buildings.map((row) => [text(row, "uuid"), row]));
   const equipmentIndex = new Map(equipment.map((row) => [text(row, "uuid"), row]));
@@ -134,7 +134,7 @@ function serializeReconnectQueues(
       rows.map((row) => {
         const id = text(row, "uuid");
 
-        if (!id || seen.has(id)) return invalid();
+        if (!id || seen.has(id)) {return invalid();}
 
         seen.add(id);
         const type = Number(signed(row.type, 32));
@@ -142,45 +142,45 @@ function serializeReconnectQueues(
         let item: Fields = {};
 
         if (!mailBlank(itemId)) {
-          if (type < 0 || type > 41) return invalid();
+          if (type < 0 || type > 41) {return invalid();}
 
           if (type === 0) {
             const target = buildingIndex.get(itemId);
 
-            if (target) item = building(target, rules, true, now);
+            if (target) {item = building(target, rules, true, now);}
           } else if ([1, 8, 9, 10, 17].includes(type)) {
             const first = itemId.split("|").filter(Boolean)[0];
             const selected = first === undefined ? "" : first.split(";").filter(Boolean)[0];
 
-            if (selected === undefined) return invalid();
+            if (selected === undefined) {return invalid();}
 
             item = { itemId: sfs.string(selected), allId: sfs.string(itemId) };
           } else if (type === 11) {
             const target = equipmentIndex.get(itemId);
 
             if (target)
-              item = {
+              {item = {
                 itemId: sfs.string(String(signed(target.itemId, 32))),
                 cost: sfs.string(text(target, "cost")),
-              };
+              };}
           } else if (type === 12) {
             const parts = itemId.split(";").filter(Boolean);
             const index = Number(signed(row.para, 32));
             const selected = parts[index < parts.length ? index : 0];
 
-            if (selected === undefined) return invalid();
+            if (selected === undefined) {return invalid();}
 
             item = {
               itemId: sfs.string(selected),
               para: sfs.int(index),
               allId: sfs.string(itemId),
             };
-          } else item = { itemId: sfs.string(itemId) };
+          } else {item = { itemId: sfs.string(itemId) };}
         }
 
-        for (const key of ["qid", "type", "isHelped"]) signed(row[key], 32);
+        for (const key of ["qid", "type", "isHelped"]) {signed(row[key], 32);}
 
-        for (const key of ["startTime", "endTime", "updateTime", "totalTime"]) signed(row[key], 64);
+        for (const key of ["startTime", "endTime", "updateTime", "totalTime"]) {signed(row[key], 64);}
 
         const totalTime =
           signed(row.totalTime, 64) ||
@@ -197,8 +197,8 @@ function serializeReconnectResources(row: Row, showBound: boolean): Fields {
   const result: Fields = {};
 
   if (showBound)
-    for (const key of ["wood", "iron", "stone", "food"])
-      result[`${key}_bind`] = sfs.long(signed(row[`${key}bind`], 64));
+    {for (const key of ["wood", "iron", "stone", "food"])
+      {result[`${key}_bind`] = sfs.long(signed(row[`${key}bind`], 64));}}
 
   for (const key of ["wood", "stone", "iron", "food"]) {
     const amount = signed(row[key], 64);
@@ -214,13 +214,13 @@ function serializeReconnectResources(row: Row, showBound: boolean): Fields {
   result.silver = sfs.int(Number(signed(row.silver, 32)));
 
   for (const key of ["chip", "diamond"])
-    result[key] = sfs.int(Math.max(0, Number(signed(row[key], 32))));
+    {result[key] = sfs.int(Math.max(0, Number(signed(row[key], 32))));}
 
   result.dragonFood = sfs.int(Number(signed(row.dragon_food, 32)));
   result.dragonGold = sfs.int(Number(signed(row.dragon_gold, 32)));
 
   for (const key of ["sandstone", "diamondstone", "marble", "granite", "limestone"])
-    result[key] = sfs.int(Math.max(0, Number(signed(row[key], 32))));
+    {result[key] = sfs.int(Math.max(0, Number(signed(row[key], 32))));}
 
   return { resource: sfs.object(result) };
 }
@@ -242,19 +242,19 @@ function serializeReconnectTasks(
     if (task.type === 3) {
       const maximum = rules.items.get("wb_info")?.k4;
 
-      if (maximum === undefined) return invalid();
+      if (maximum === undefined) {return invalid();}
 
       fields.currPhase = sfs.int(Number(signed(task.phase, 32)));
       fields.maxPhase = sfs.int(Number(signed(maximum, 32)));
     }
 
     if (reward)
-      fields.reward = rewardPreviewArray(previewRewards(task.reward, rules, context, random));
+      {fields.reward = rewardPreviewArray(previewRewards(task.reward, rules, context, random));}
 
     return validateValue(reconnectTaskSchema, sfs.object(fields));
   };
   const group = (tasks: readonly ReconnectTask[], reward: boolean): Fields => {
-    if (tasks.length > 32767) return invalid();
+    if (tasks.length > 32767) {return invalid();}
 
     return {
       task: sfs.array(
@@ -267,12 +267,12 @@ function serializeReconnectTasks(
   };
   const pushes = plan.pushes.map((push) => {
     if (push.command === "push.task.new")
-      return { command: push.command, fields: group(push.tasks, true) };
+      {return { command: push.command, fields: group(push.tasks, true) };}
 
     if (push.command === "push.ckf.task.complete") {
       const fields = group(push.tasks, false);
 
-      if (!push.tasks.some((task) => task.type === 1)) delete fields.task;
+      if (!push.tasks.some((task) => task.type === 1)) {delete fields.task;}
 
       return { command: push.command, fields };
     }

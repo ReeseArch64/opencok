@@ -28,39 +28,39 @@ export async function systemMailProjection(
     typeof time !== "bigint" ||
     BigInt.asIntN(64, time) !== time
   )
-    throw new Error("Invalid system mail pagination");
+    {throw new Error("Invalid system mail pagination");}
 
   const messages: { uid: string; time: bigint; body: Fields; sender: string | null }[] = [];
   const senderIds = new Set<string>();
 
   for (const entry of entries) {
-    if (privateTypes.has(entry.type)) continue;
+    if (privateTypes.has(entry.type)) {continue;}
 
     let contents = storedMailText(entry.contents);
 
     if (contents.toLowerCase() === "extra") {
-      if (entry.extra === null) throw new Error("Missing persisted mail contents");
+      if (entry.extra === null) {throw new Error("Missing persisted mail contents");}
 
       contents = storedMailText(entry.extra);
     }
 
-    if (contents.toLowerCase() === "extra") continue;
+    if (contents.toLowerCase() === "extra") {continue;}
 
     let fromUser = entry.fromUser ?? "";
 
     if (entry.type === 26) {
       fromUser = str(decodeLegacyJsonObject(contents), "inviterUid");
 
-      if (!mailBlank(fromUser)) senderIds.add(fromUser);
+      if (!mailBlank(fromUser)) {senderIds.add(fromUser);}
     }
 
-    if (entry.type === 10 && !mailBlank(fromUser)) senderIds.add(fromUser);
+    if (entry.type === 10 && !mailBlank(fromUser)) {senderIds.add(fromUser);}
 
     contents = contents.replaceAll("\\n", "\n");
     const chunks: Value[] = [];
 
     for (let offset = 0; offset < contents.length; offset += 5000)
-      chunks.push(
+      {chunks.push(
         sfs.string(
           contents
             .slice(offset, offset + 5000)
@@ -69,7 +69,7 @@ export async function systemMailProjection(
               "?",
             ),
         ),
-      );
+      );}
 
     const body: Fields = {
       uid: sfs.string(entry.uid),
@@ -105,12 +105,12 @@ export async function systemMailProjection(
   for (const message of messages) {
     const sender = message.sender === null ? undefined : senders.get(message.sender);
 
-    if (!sender) continue;
+    if (!sender) {continue;}
 
     if (mailBlank(str(message.body, "fromName")) && sender.name !== null)
-      message.body.fromName = sfs.string(sender.name);
+      {message.body.fromName = sfs.string(sender.name);}
 
-    if (sender.pic !== null) message.body.pic = sfs.string(sender.pic);
+    if (sender.pic !== null) {message.body.pic = sfs.string(sender.pic);}
 
     message.body.picVer = sfs.string(sender.picVer ?? "0");
   }
@@ -130,7 +130,7 @@ export async function systemMailProjection(
           ) ||
           typeof more !== "boolean"
         )
-          throw new Error("Invalid system mail page");
+          {throw new Error("Invalid system mail page");}
 
         const body: Fields = {
           id: sfs.string("0"),
@@ -145,7 +145,7 @@ export async function systemMailProjection(
       },
     );
 
-    if (!result) throw new Error("Missing system mail page");
+    if (!result) {throw new Error("Missing system mail page");}
 
     return result;
   }
@@ -170,12 +170,12 @@ export async function systemMailProjection(
         continue;
       }
 
-      if (selected.length >= count) break;
+      if (selected.length >= count) {break;}
 
       selected.push(message);
       lastUid = message.uid;
     }
-  } else selected.push(...messages);
+  } else {selected.push(...messages);}
 
   const body: Fields = {
     id: sfs.string("0"),

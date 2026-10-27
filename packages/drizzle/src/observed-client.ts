@@ -43,7 +43,7 @@ export function observePostgresClient(
       operation,
       () => {
         const result = Reflect.apply(query, this, args);
-        if (!(result instanceof Promise)) return result;
+        if (!(result instanceof Promise)) {return result;}
         return result.then(
           (value: { rowCount?: number; rows?: unknown[] }) => {
             logEvent("database_result", {
@@ -54,11 +54,11 @@ export function observePostgresClient(
               commitState: "statement_completed",
             });
             if (["INSERT", "UPDATE", "DELETE"].includes(command))
-              afterCommit("database_rows_changed", {
+              {afterCommit("database_rows_changed", {
                 operation,
                 table,
                 rowCount: value?.rowCount ?? 0,
-              });
+              });}
             return value;
           },
           (error: unknown) => {

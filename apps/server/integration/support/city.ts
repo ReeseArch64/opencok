@@ -53,7 +53,7 @@ export async function cityHarness(
     const rules = await loadRules();
     if (!extra.some((domain) => domain.commands.includes("target.task.ui"))) {
       const target = rules.features.get("target_quest");
-      if (target) rules.features.set("target_quest", { ...target, online: "close", test: "close" });
+      if (target) {rules.features.set("target_quest", { ...target, online: "close", test: "close" });}
     }
     let now = 1000000;
     const effects = { world: async () => new Map<number, number>(), emperor: async () => null };
@@ -109,7 +109,7 @@ export async function cityHarness(
         buildingPower: power,
       });
       for (const type of [0, 1, 2, 3, 6, 8, 9, 10, 11, 12])
-        await db.db.insert(queue).values({
+        {await db.db.insert(queue).values({
           uuid: `${owner}-q${type}`,
           ownerId: owner,
           qid: 1,
@@ -119,7 +119,7 @@ export async function cityHarness(
           endTime: idleDeadline,
           updateTime: idleDeadline,
           totalTime: 0n,
-        });
+        });}
     }
     const basePreparation = {
       async prepare(tx: Parameters<typeof readReconnectProgress>[0], owner: string, at: bigint) {
@@ -149,11 +149,11 @@ export async function cityHarness(
       at: bigint,
     ) => {
       if (totems)
-        await settleTotemEffects(
+        {await settleTotemEffects(
           createTotemEffectStore(tx, owner, at, mapSize, 1, baseBoundary),
           rules,
           mapSize,
-        );
+        );}
     };
     const boundary: typeof baseBoundary = async (tx, owner, at, change, deleted, economy) => {
       await prepareTotems(tx, owner, at);
@@ -180,7 +180,7 @@ export async function cityHarness(
         () => now,
         {
           before: async (tx, owner, at, command) => {
-            if (command.command === "activity.restore") return at;
+            if (command.command === "activity.restore") {return at;}
             const transition =
               ["queue.finish", "queue.ccd"].includes(command.command) ||
               cityQueueCommands[command.command]?.action === "queue.finish";

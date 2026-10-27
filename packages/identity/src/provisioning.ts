@@ -31,7 +31,7 @@ export function verifyProvisioning(
     !signature ||
     !/^[a-f0-9]{64}$/.test(signature)
   )
-    return false;
+    {return false;}
 
   return timingSafeEqual(
     Buffer.from(signature, "hex"),

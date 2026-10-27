@@ -114,7 +114,7 @@ test("saved token offers allow out-of-order claims, complete their cycle and sco
     expect(await h.claim(3, id)).toEqual(first);
     expect(await h.db.db.select().from(user_item)).toEqual(items);
     await expect(h.claim(3)).rejects.toThrow();
-    for (const level of [1, 5, 2]) await h.claim(level);
+    for (const level of [1, 5, 2]) {await h.claim(level);}
     const complete = await h.claim(4);
     expect(complete.body.activity?.type).toBe(18);
     expect((await h.state()).receiveLevels).toBe("");

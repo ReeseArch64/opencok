@@ -9,16 +9,16 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { Rules } from "@opencok/rules/game";
 
 function signed(value: unknown, bits: 32 | 64): bigint {
-  if (value === undefined || value === null) return 0n;
+  if (value === undefined || value === null) {return 0n;}
 
   if (typeof value === "number" && !Number.isSafeInteger(value))
-    throw new GameError(errors.unsupported, "power_rule");
+    {throw new GameError(errors.unsupported, "power_rule");}
 
-  if (!/^[+-]?\d+$/.test(String(value))) throw new GameError(errors.unsupported, "power_rule");
+  if (!/^[+-]?\d+$/.test(String(value))) {throw new GameError(errors.unsupported, "power_rule");}
 
   const parsed = BigInt(String(value));
 
-  if (BigInt.asIntN(bits, parsed) !== parsed) throw new GameError(errors.unsupported, "power_rule");
+  if (BigInt.asIntN(bits, parsed) !== parsed) {throw new GameError(errors.unsupported, "power_rule");}
 
   return parsed;
 }
@@ -37,7 +37,7 @@ function serializePlayerStatistics(statistics: Row | undefined): Fields {
     armyCure: "armyCure",
     cityDes: "cityDestroyed",
   }))
-    fields[wire] = sfs.int(Number(signed(statistics?.[column], 32)));
+    {fields[wire] = sfs.int(Number(signed(statistics?.[column], 32)));}
 
   fields.armyKill = sfs.long(signed(statistics?.armyKill, 64));
 
@@ -63,17 +63,17 @@ function serializePowerInfo(
     "knight_title",
     "sagatower_science",
   ] as const)
-    fields[key] = sfs.int(Number(signed(power[key], 32)));
+    {fields[key] = sfs.int(Number(signed(power[key], 32)));}
 
   for (const key of ["armyPower", "fortPower", "petDragonPower", "prinessPower"] as const)
-    fields[key] = sfs.long(signed(power[key], 64));
+    {fields[key] = sfs.long(signed(power[key], 64));}
 
   let nextUpdateTime = 0n;
 
   if (upload) {
     const seconds = rules.items.get("hero")?.k7;
 
-    if (seconds === undefined) throw new GameError(errors.unsupported, "power_rule");
+    if (seconds === undefined) {throw new GameError(errors.unsupported, "power_rule");}
 
     nextUpdateTime = BigInt.asIntN(64, signed(upload.updateTime, 64) + signed(seconds, 64) * 1000n);
   }

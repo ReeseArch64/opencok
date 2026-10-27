@@ -24,8 +24,8 @@ test("signed legacy allocation and immutable media sequences have distinct exhau
     [2147483647, 483648, 483648],
   ] as const) {
     expect(legacyAvatarVersion(before)).toBe(allocated);
-    if (upload === null) expect(() => avatarSequence(before)).toThrow();
-    else expect(avatarSequence(before)).toBe(upload);
+    if (upload === null) {expect(() => avatarSequence(before)).toThrow();}
+    else {expect(avatarSequence(before)).toBe(upload);}
   }
   for (const bad of [null, undefined, NaN, 1.5, -2147483649, 2147483648]) {
     expect(() => legacyAvatarVersion(bad)).toThrow();
@@ -98,5 +98,5 @@ test("publication revisions preserve exact Long values and admit zero sequence o
   expect(decodeAvatarProfile(encodeAvatarProfile(update))).toEqual(update);
   expect(validAvatarProfile({ ...update, revision: undefined })).toBe(false);
   for (const revision of [0n, -1n, 9223372036854775808n, "1", 1])
-    expect(validAvatarProfile({ ...update, revision })).toBe(false);
+    {expect(validAvatarProfile({ ...update, revision })).toBe(false);}
 });

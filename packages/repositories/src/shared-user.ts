@@ -46,7 +46,7 @@ export async function readSharedUserProfile(tx: Transaction, uid: string, kingdo
     .limit(2);
 
   if (rows.length !== 1 || rows[0]!.uid !== uid || rows[0]!.profileServerId !== kingdomId)
-    throw new Error("Shared user profile unavailable");
+    {throw new Error("Shared user profile unavailable");}
 
   return rows[0]!;
 }

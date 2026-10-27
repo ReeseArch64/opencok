@@ -16,7 +16,7 @@ function integer(value: unknown) {
     value < -2147483648 ||
     value > 2147483647
   )
-    throw new GameError(errors.unsupported, "world_monster_detail");
+    {throw new GameError(errors.unsupported, "world_monster_detail");}
 
   return value;
 }
@@ -24,12 +24,12 @@ function integer(value: unknown) {
 function consumedNPC(point: Row) {
   const raw = point.monsterInfo;
 
-  if (raw == null) return 0;
+  if (raw == null) {return 0;}
 
   if (!(raw instanceof Uint8Array) || raw.byteLength > 65535)
-    throw new GameError(errors.unsupported, "world_monster_detail");
+    {throw new GameError(errors.unsupported, "world_monster_detail");}
 
-  if (!raw.byteLength) return 0;
+  if (!raw.byteLength) {return 0;}
 
   let value: string;
 
@@ -42,11 +42,11 @@ function consumedNPC(point: Row) {
   let start = 0,
     end = value.length;
 
-  while (start < end && value.charCodeAt(start) <= 32) start++;
+  while (start < end && value.charCodeAt(start) <= 32) {start++;}
 
-  while (end > start && value.charCodeAt(end - 1) <= 32) end--;
+  while (end > start && value.charCodeAt(end - 1) <= 32) {end--;}
 
-  if (start === end) return 0;
+  if (start === end) {return 0;}
 
   try {
     return Number(javaDecimal(value.slice(start, end), 32));
@@ -58,11 +58,11 @@ function consumedNPC(point: Row) {
 export function worldMapMonsterFields(point: Row, rules?: Rules): Readonly<Record<string, number>> {
   const type = num(point, "pointType");
 
-  if (type === 6) return { mc_state: integer(point.monsterCastleState ?? 0) };
+  if (type === 6) {return { mc_state: integer(point.monsterCastleState ?? 0) };}
 
-  if (![9, 15].includes(type) || mailBlank(text(point, "pointItem"))) return {};
+  if (![9, 15].includes(type) || mailBlank(text(point, "pointItem"))) {return {};}
 
-  if (!rules) throw new GameError(errors.unsupported, "world_monster_detail");
+  if (!rules) {throw new GameError(errors.unsupported, "world_monster_detail");}
 
   const item = text(point, "pointItem"),
     maximum = worldMonsterMaximum(type, item, rules),
@@ -73,7 +73,7 @@ export function worldMapMonsterFields(point: Row, rules?: Rules): Readonly<Recor
     };
 
   if (rules.world.fieldMonsters?.get(item)?.NPC === "1")
-    fields.mrn = Math.max((maximum - consumedNPC(point)) | 0, 0);
+    {fields.mrn = Math.max((maximum - consumedNPC(point)) | 0, 0);}
 
   return fields;
 }

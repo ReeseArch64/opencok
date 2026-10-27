@@ -36,7 +36,7 @@ export async function moderateAvatar(
     now < 0 ||
     !["approve", "reject"].includes(decision)
   )
-    throw new Error("Invalid avatar moderation request");
+    {throw new Error("Invalid avatar moderation request");}
 
   return db.transaction(
     async (tx) => {
@@ -48,7 +48,7 @@ export async function moderateAvatar(
         .for("update");
 
       if (!profile || profile.serverId !== kingdomId)
-        throw new Error("Avatar moderation owner unavailable");
+        {throw new Error("Avatar moderation owner unavailable");}
 
       const [prior] = await tx
         .select()
@@ -64,12 +64,12 @@ export async function moderateAvatar(
           saved?.decision !== decision ||
           saved?.expectedPicVer !== expectedPicVer
         )
-          throw new Error("Avatar moderation operation conflict");
+          {throw new Error("Avatar moderation operation conflict");}
 
         return { operationId, picVer: prior.picVer, changed: prior.picVer !== expectedPicVer };
       }
 
-      if (profile.picVer !== expectedPicVer) throw new Error("Avatar moderation version changed");
+      if (profile.picVer !== expectedPicVer) {throw new Error("Avatar moderation version changed");}
 
       const pending = await tx
         .select({ id: avatar_version_update.operationId })
@@ -82,7 +82,7 @@ export async function moderateAvatar(
         )
         .limit(1000);
 
-      if (pending.length >= 1000) throw new Error("Avatar moderation backlog full");
+      if (pending.length >= 1000) {throw new Error("Avatar moderation backlog full");}
 
       const [record] = await tx
         .select()
@@ -94,11 +94,11 @@ export async function moderateAvatar(
 
       if (plan.record) {
         if (record)
-          await tx
+          {await tx
             .update(pic_upload_record)
             .set(plan.record)
-            .where(eq(pic_upload_record.uid, owner));
-        else await tx.insert(pic_upload_record).values({ uid: owner, ...plan.record });
+            .where(eq(pic_upload_record.uid, owner));}
+        else {await tx.insert(pic_upload_record).values({ uid: owner, ...plan.record });}
       }
 
       const intent = {
@@ -129,7 +129,7 @@ export async function moderateAvatar(
           .where(and(eq(userprofile.uid, owner), eq(userprofile.picVer, expectedPicVer)))
           .returning({ uid: userprofile.uid });
 
-        if (changed.length !== 1) throw new Error("Avatar moderation profile changed");
+        if (changed.length !== 1) {throw new Error("Avatar moderation profile changed");}
       }
 
       await tx.insert(avatar_version_update).values(intent);

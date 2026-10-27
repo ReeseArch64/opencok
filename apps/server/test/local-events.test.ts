@@ -19,6 +19,6 @@ test("local event windows validate UTC calendar dates and include both reference
     "bad",
     "2026-00-01-00-00",
   ])
-    expect(eventTimestamp(value)).toBeUndefined();
+    {expect(eventTimestamp(value)).toBeUndefined();}
   expect(eventTimestamp("2024-02-29-00-00")).toBeDefined();
 });

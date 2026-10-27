@@ -3,23 +3,23 @@ import type { ColumnContract, TableContract } from "./schema";
 export type Row = Record<string, unknown>;
 
 export function sampleValue(column: ColumnContract, variant: number): unknown {
-  if (column.value === "boolean") return variant === 1;
-  if (column.value === "json") return [{ id: `synthetic-${variant}`, amount: variant }];
-  if (column.type === "uuid") return `00000000-0000-4000-8000-${String(variant).padStart(12, "0")}`;
+  if (column.value === "boolean") {return variant === 1;}
+  if (column.value === "json") {return [{ id: `synthetic-${variant}`, amount: variant }];}
+  if (column.type === "uuid") {return `00000000-0000-4000-8000-${String(variant).padStart(12, "0")}`;}
   if (column.calendar) {
-    if (column.calendar === "date") return `2020-01-0${variant}`;
+    if (column.calendar === "date") {return `2020-01-0${variant}`;}
     const precision = Number(column.calendar.match(/\((\d+)\)/)?.[1] ?? 0);
     return `2020-01-0${variant} 12:34:56${precision ? `.${"1".repeat(precision)}` : ""}`;
   }
-  if (column.value === "bigint") return 9007199254740992n + BigInt(variant);
+  if (column.value === "bigint") {return 9007199254740992n + BigInt(variant);}
   if (column.value === "number")
-    return /^(?:numeric|real|double)/.test(column.type) && !/,0\)/.test(column.type)
+    {return /^(?:numeric|real|double)/.test(column.type) && !/,0\)/.test(column.type)
       ? variant + 0.25
-      : variant;
+      : variant;}
   if (column.value === "buffer") {
     const buffer = Buffer.alloc(column.bytes ?? 6, variant);
-    if (buffer.length > 1) buffer[1] = 255;
-    if (buffer.length > 2) buffer[2] = 0;
+    if (buffer.length > 1) {buffer[1] = 255;}
+    if (buffer.length > 2) {buffer[2] = 0;}
     return buffer;
   }
   if (column.type.startsWith("numeric")) {
@@ -34,7 +34,7 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
   const row = Object.fromEntries(
     spec.columns.map((column) => [column.property ?? column.name, sampleValue(column, variant)]),
   );
-  if (spec.checks.some(([name]) => name === "world_resource_runtime_bounds")) row.worldId = 0;
+  if (spec.checks.some(([name]) => name === "world_resource_runtime_bounds")) {row.worldId = 0;}
   if (spec.checks.some(([name]) => name === "expedition_manifest_bounds")) {
     row.matchServerId = variant + 100;
     row.endTime = (row.startTime as bigint) + 10n;
@@ -92,11 +92,11 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.groupSize = 30;
     row.matchSize = 2;
   }
-  if (spec.checks.some(([name]) => name === "question_match_settlement")) row.ended = 1;
-  if (spec.checks.some(([name]) => name === "chat_relation_kind")) row.kind = "contact";
+  if (spec.checks.some(([name]) => name === "question_match_settlement")) {row.ended = 1;}
+  if (spec.checks.some(([name]) => name === "chat_relation_kind")) {row.kind = "contact";}
   if (spec.checks.some(([name]) => name === "user_mixed_info_box_gold_mode"))
-    row.ordinaryBoxGold = (variant - 1) % 2;
-  for (const key of spec.foreignKeys) for (const name of key.columns) row[name] = 9007199254740993n;
+    {row.ordinaryBoxGold = (variant - 1) % 2;}
+  for (const key of spec.foreignKeys) {for (const name of key.columns) {row[name] = 9007199254740993n;}}
   if (spec.indexes.some((key) => key.name === "mail_chat_read_intent_PRIMARY")) {
     row.chatTypes = variant === 1 ? "1,20" : "2";
     row.action = "read";
@@ -129,7 +129,7 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.payment = "{}";
   }
   if (spec.indexes.some((key) => key.name === "character_provisioning_PRIMARY"))
-    row.state = variant % 2;
+    {row.state = variant % 2;}
   if (spec.indexes.some((key) => key.name === "expedition_period_PRIMARY")) {
     row.matchServerId = variant + 1;
     row.endTime = (row.startTime as bigint) + 1n;
@@ -144,12 +144,12 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.nextAttemptAt = 0n;
   }
   if (spec.indexes.some((key) => key.name === "world_march_checkpoint_PRIMARY"))
-    row.status = (variant - 1) % 2;
-  if (spec.indexes.some((key) => key.name === "timed_activity_PRIMARY")) row.status = 0;
+    {row.status = (variant - 1) % 2;}
+  if (spec.indexes.some((key) => key.name === "timed_activity_PRIMARY")) {row.status = 0;}
   if (spec.indexes.some((key) => key.name === "building_production_PRIMARY"))
-    row.remainder = BigInt(variant);
+    {row.remainder = BigInt(variant);}
   if (spec.indexes.some((key) => key.name === "economy_posting_PRIMARY"))
-    row.after = (row.before as bigint) + (row.delta as bigint);
+    {row.after = (row.before as bigint) + (row.delta as bigint);}
   if (spec.checks.some(([name]) => name === "expedition_stage_award_bounds")) {
     row.deliveredAt = 0n;
     row.nextAttemptAt = 0n;
@@ -160,12 +160,12 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
       row.endTime = (row.startTime as bigint) + 1n;
       row.createdAt = row.endTime;
     }
-    if ("opponent" in row) row.opponent = 100 + variant;
-    if ("leader" in row) row.leader = variant;
-    if ("state" in row) row.state = 0;
-    if ("scoreCount" in row) row.scoreCount = 0n;
-    if ("winner" in row) row.winner = 0;
-    if ("finalizedAt" in row) row.finalizedAt = 0n;
+    if ("opponent" in row) {row.opponent = 100 + variant;}
+    if ("leader" in row) {row.leader = variant;}
+    if ("state" in row) {row.state = 0;}
+    if ("scoreCount" in row) {row.scoreCount = 0n;}
+    if ("winner" in row) {row.winner = 0;}
+    if ("finalizedAt" in row) {row.finalizedAt = 0n;}
     if ("phase" in row) {
       row.phase = 0;
       row.scoreCount = 0n;
@@ -182,18 +182,18 @@ export function sampleRow(spec: TableContract, variant = 1): Row {
     row.state = (variant - 1) % 2;
   }
   if (spec.checks.some(([name]) => name === "continued_cost_fact_bounds"))
-    row.counted = (variant - 1) % 2;
+    {row.counted = (variant - 1) % 2;}
   return row;
 }
 
 export function literalDefault(column: ColumnContract): unknown {
-  if (column.default === null) return null;
+  if (column.default === null) {return null;}
   const value = column.default.startsWith("'")
     ? column.default.slice(1, -1).replaceAll("''", "'")
     : column.default;
-  if (column.value === "bigint") return BigInt(value);
-  if (column.value === "number") return Number(value);
-  if (column.value === "buffer") return Buffer.from(value);
+  if (column.value === "bigint") {return BigInt(value);}
+  if (column.value === "number") {return Number(value);}
+  if (column.value === "buffer") {return Buffer.from(value);}
   if (column.type.startsWith("numeric")) {
     const scale = Number(column.type.match(/,(\d+)\)/)?.[1] ?? 0);
     const [integer, fraction = ""] = value.split(".");

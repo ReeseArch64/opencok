@@ -23,12 +23,12 @@ async function withCatalogs(run: (directory: string) => Promise<void>) {
   const directory = await mkdtemp(join(tmpdir(), "opencok-login-catalogs-"));
   try {
     for (const name of ["building", "role", "position"])
-      await writeFile(
+      {await writeFile(
         join(directory, `${name}.xml`),
         name === "building"
           ? '<database><ItemSpec id="400001" level="1"/></database>'
           : '<database><ItemSpec id="synthetic"/></database>',
-      );
+      );}
     await run(directory);
   } finally {
     await rm(directory, { recursive: true, force: true });
@@ -40,7 +40,7 @@ test("settings and sharing preserve every direct declaration including duplicate
     const xml =
       '<database><ItemSpec id="ignored"/><Group id="same"><ItemSpec id="repeat" value="001"/><ItemSpec value="城"/><ItemSpec id="" value=""/></Group><Group id="same"><ItemSpec id="repeat" value="002"/><Other value=" text "/><Group id="nested"><ItemSpec id="hidden"/></Group></Group></database>';
     for (const name of ["setting", "fb_share"])
-      await writeFile(join(directory, `${name}.xml`), xml);
+      {await writeFile(join(directory, `${name}.xml`), xml);}
     const rules = await loadRules(directory);
     const expected: Fields[] = [
       { id: sfs.string("repeat"), value: sfs.string("001") },
@@ -65,8 +65,8 @@ test("missing and empty loaded login catalogs produce empty arrays without falli
   await withCatalogs(async (directory) => {
     for (const empty of [false, true]) {
       if (empty)
-        for (const name of ["setting", "fb_share", "function_on", "function_star"])
-          await writeFile(join(directory, `${name}.xml`), "<database/>");
+        {for (const name of ["setting", "fb_share", "function_on", "function_star"])
+          {await writeFile(join(directory, `${name}.xml`), "<database/>");}}
       const rules = await loadRules(directory);
       rules.settings.set("decoy", { id: "decoy" });
       rules.configuration.facebookShare!.set("decoy", { id: "decoy" });
@@ -187,8 +187,8 @@ test("star numeric parsing follows Java Int and only evaluates matching availabl
     expect(rules.maxStar("400000", 1000)).toBe(expected);
   }
   for (const raw of [undefined, "", " 2", "2 ", "1.0", "1e1", "2147483648", "-2147483649"]) {
-    if (raw === undefined) delete rule.star;
-    else rule.star = raw;
+    if (raw === undefined) {delete rule.star;}
+    else {rule.star = raw;}
     expect(() => rules.maxStar("400000", 1000)).toThrow();
     expect(rules.maxStar("401000", 1000)).toBe(0);
     rule.online = "close";

@@ -13,7 +13,7 @@ export async function realmChatDeliveries(
   const deliveries: { id: string; owner: string; cmd: string; data: unknown }[] = [];
 
   for (let index = 0; index < owners.length; index += 8)
-    await Promise.all(
+    {await Promise.all(
       owners.slice(index, index + 8).map(async (owner) => {
         const state = await repository.getPlayerStateById(owner);
 
@@ -23,7 +23,7 @@ export async function realmChatDeliveries(
           state.banned ||
           (state.banUntil ?? 0) > Date.now()
         )
-          return;
+          {return;}
 
         const messages = events.flatMap((event) => (event.message ? [event.message] : []));
         const visible = new Set(
@@ -35,22 +35,22 @@ export async function realmChatDeliveries(
         const authorize = createRoomAuthorizer(async () => state);
 
         for (const event of events) {
-          if (event.target && event.target !== owner && event.owner !== owner) continue;
+          if (event.target && event.target !== owner && event.owner !== owner) {continue;}
 
           if (event.message) {
             const item: ChatMessage = event.message;
 
-            if (!visible.has(item.sequenceId)) continue;
+            if (!visible.has(item.sequenceId)) {continue;}
 
             if (!item.roomId.startsWith("private_") && !(await authorize(owner, item.roomId)))
-              continue;
+              {continue;}
 
             const privateRoom = item.roomId.startsWith("private_");
             const room = privateRoom
               ? await repository.access?.roomInfo?.(owner, item.roomId)
               : undefined;
 
-            if (privateRoom && !room) continue;
+            if (privateRoom && !room) {continue;}
 
             deliveries.push({
               id: event.id,
@@ -89,18 +89,18 @@ export async function realmChatDeliveries(
               const data = event.frame.data;
               const id = isRecord(data) ? data.roomId : undefined;
 
-              if (typeof id !== "string") continue;
+              if (typeof id !== "string") {continue;}
 
               if (
                 event.frame.cmd === "push.chat.room.quit" &&
                 !(await repository.access?.privateRoom(owner, id))
               )
-                deliveries.push({
+                {deliveries.push({
                   id: event.id,
                   owner,
                   cmd: "push.chat.room.kick",
                   data: { id: id.replace(/^private_/, "") },
-                });
+                });}
 
               continue;
             }
@@ -110,15 +110,15 @@ export async function realmChatDeliveries(
               !(await authorize(owner, event.roomId)) &&
               !(await repository.access?.privateRoom(owner, event.roomId))
             )
-              continue;
+              {continue;}
 
-            if (typeof event.frame.cmd !== "string") throw new ChatCommandError("invalid_event");
+            if (typeof event.frame.cmd !== "string") {throw new ChatCommandError("invalid_event");}
 
             deliveries.push({ id: event.id, owner, cmd: event.frame.cmd, data: event.frame.data });
           }
         }
       }),
-    );
+    );}
 
   return deliveries;
 }

@@ -42,7 +42,7 @@ export function readMailContents(
     ) ||
     typeof inspect !== "function"
   )
-    throw new Error("Invalid mail content query");
+    {throw new Error("Invalid mail content query");}
 
   return db.transaction(
     async (tx) => {
@@ -67,7 +67,7 @@ export function readMailContents(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
-        return { profile };
+        {return { profile };}
 
       const selection = and(eq(selectedMail.toUser, uid), inArray(selectedMail.uid, query.ids));
       const extraOwner = and(
@@ -94,7 +94,7 @@ export function readMailContents(
         sizes.some((row) => !Number.isSafeInteger(row.size) || row.size < 0) ||
         sizes.reduce((sum, row) => sum + row.size, 0) > 4 * 1024 * 1024
       )
-        throw new Error("Mail content capacity exceeded");
+        {throw new Error("Mail content capacity exceeded");}
 
       const entries = sizes.length
         ? await tx
@@ -120,7 +120,7 @@ export function readMailContents(
         ) >
           4 * 1024 * 1024
       )
-        throw new Error("Inconsistent mail content snapshot");
+        {throw new Error("Inconsistent mail content snapshot");}
 
       const invalid = inspect(entries);
       const selected = new Set(entries.map((row) => row.uid));
@@ -130,10 +130,10 @@ export function readMailContents(
         new Set(invalid).size !== invalid.length ||
         invalid.some((id) => !selected.has(id))
       )
-        throw new Error("Invalid mail content removal plan");
+        {throw new Error("Invalid mail content removal plan");}
 
       if (invalid.length)
-        await tx.delete(mail).where(and(eq(mail.toUser, uid), inArray(mail.uid, invalid)));
+        {await tx.delete(mail).where(and(eq(mail.toUser, uid), inArray(mail.uid, invalid)));}
 
       return { profile };
     },

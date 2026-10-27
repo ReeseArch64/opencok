@@ -37,7 +37,7 @@ export class MailRewardService {
 
   async command(owner: string, command: string, params: Fields): Promise<InventoryCommandResponse> {
     if (command !== "mail.reward" && command !== "mail.reward.batch")
-      throw new GameError(errors.unsupported);
+      {throw new GameError(errors.unsupported);}
 
     const batch = command === "mail.reward.batch";
     const selection = mailRewardSelection(
@@ -56,7 +56,7 @@ export class MailRewardService {
           operation.value,
         ))
     )
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const requestId = operation ? (operation.value as string).toLowerCase() : randomUUID();
     const request = encode({
@@ -80,13 +80,13 @@ export class MailRewardService {
     const rewards = mailRewardEntries(text(entry, "rewardId"));
 
     for (const reward of rewards)
-      if (
+      {if (
         reward.category !== "goods" &&
         reward.category !== "gold" &&
         reward.category !== "crystal" &&
         !resources.has(reward.category)
       )
-        throw new GameError(errors.unsupported);
+        {throw new GameError(errors.unsupported);}}
 
     const plan = planInventoryGrants(
       state,
@@ -110,7 +110,7 @@ export class MailRewardService {
       const before = changes[key] ?? long(kind === "profile" ? state.profile : state.resource, key),
         after = before + BigInt(amount);
 
-      if (before < 0n || after > maximum) throw new GameError(errors.invalid);
+      if (before < 0n || after > maximum) {throw new GameError(errors.invalid);}
 
       changes[key] = after;
       postings.push({
@@ -125,7 +125,7 @@ export class MailRewardService {
     };
 
     for (const reward of rewards) {
-      if (reward.category === "goods") continue;
+      if (reward.category === "goods") {continue;}
 
       if (reward.category === "gold") {
         const dmm = text(state.profile, "pf") === "dmm";
@@ -135,11 +135,11 @@ export class MailRewardService {
           long(state.profile, dmm ? "dmmPaidGold" : "paidGold") +
           long(state.profile, dmm ? "dmmPaidSpecialGold" : "paidSpecialGold");
 
-        if (total < 0n || total > 9223372036854775807n) throw new GameError(errors.invalid);
+        if (total < 0n || total > 9223372036854775807n) {throw new GameError(errors.invalid);}
 
         body.gold = sfs.long(total);
       } else if (reward.category === "crystal")
-        body.crystal = sfs.long(credit("profile", "crystal", reward.count));
+        {body.crystal = sfs.long(credit("profile", "crystal", reward.count));}
       else {
         const key = resources.get(reward.category)!;
         const regular = ["wood", "stone", "iron", "food"].includes(key);
@@ -159,32 +159,32 @@ export class MailRewardService {
                 : key;
         body[wire] = sfs.long(value);
 
-        if (regular) body[`${key}_bind`] = sfs.long(long(state.resource, `${key}bind`));
+        if (regular) {body[`${key}_bind`] = sfs.long(long(state.resource, `${key}bind`));}
       }
     }
 
     if (plan.items.length)
-      body.goods = sfs.array(
+      {body.goods = sfs.array(
         plan.items.map((item) => sfs.object(inventoryItem({ ...item }, this.rules))),
-      );
+      );}
 
     const pushes: InventoryCommandResponse["pushes"] = [];
 
     if (plan.items.length)
-      pushes.push({
+      {pushes.push({
         command: "push.useritem",
         body: {
           useritemlist: sfs.array(
             plan.items.map((item) => sfs.object(inventoryItem({ ...item }, this.rules))),
           ),
         },
-      });
+      });}
 
     if (Object.keys(changedResources).length)
-      pushes.push({
+      {pushes.push({
         command: "push.city.refresh",
         body: resource({ ...state.resource, ...changedResources }),
-      });
+      });}
 
     return {
       ...plan,

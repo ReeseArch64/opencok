@@ -18,7 +18,7 @@ export function readMailStatus(
         query.category < -2147483648 ||
         query.category > 2147483647))
   )
-    throw new Error("Invalid mailbox status query");
+    {throw new Error("Invalid mailbox status query");}
 
   return db.transaction(
     async (tx) => {
@@ -41,7 +41,7 @@ export function readMailStatus(
         (profile.banTime ?? 0n) > BigInt(query.now) ||
         (query.category !== undefined && (query.category < 1 || query.category > 8))
       )
-        return { profile, counts: [] };
+        {return { profile, counts: [] };}
 
       const status = sql<number>`coalesce(${mail.status}, 0)`;
       const allianceNotice = sql<boolean>`${mail.title} = '115429'`;
@@ -57,7 +57,7 @@ export function readMailStatus(
         .groupBy(mail.type, status, allianceNotice)
         .limit(32768);
 
-      if (counts.length > 32767) throw new Error("Mailbox status groups exceed limit");
+      if (counts.length > 32767) {throw new Error("Mailbox status groups exceed limit");}
 
       return { profile, counts };
     },

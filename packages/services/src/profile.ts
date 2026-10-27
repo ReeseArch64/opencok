@@ -13,42 +13,42 @@ export function publicProfileAlliance(
   rules: Rules,
   remote: boolean,
 ): Fields {
-  if (!text(state.profile ?? {}, "allianceId").trim()) return {};
+  if (!text(state.profile ?? {}, "allianceId").trim()) {return {};}
 
   if (
     !state.alliance ||
     text(state.alliance.alliance, "uid") !== text(state.profile!, "allianceId")
   )
-    throw new GameError(errors.unsupported, "public_profile");
+    {throw new GameError(errors.unsupported, "public_profile");}
 
   let permissions: ReadonlyMap<string, number> | undefined;
   const raw = state.alliance.alliance.permission;
 
   if (raw !== null && raw !== undefined) {
     try {
-      if (typeof raw !== "string") throw new Error();
+      if (typeof raw !== "string") {throw new Error();}
 
       const decoded = decodeStoredJson(Buffer.from(raw));
 
-      if (!decoded || typeof decoded !== "object" || Array.isArray(decoded)) throw new Error();
+      if (!decoded || typeof decoded !== "object" || Array.isArray(decoded)) {throw new Error();}
 
       permissions = new Map(
         Object.entries(decoded).map(([key, value]) => {
-          if (key.length > 255) throw new Error();
+          if (key.length > 255) {throw new Error();}
 
           if (typeof value !== "bigint" && typeof value !== "number" && typeof value !== "string")
-            throw new Error();
+            {throw new Error();}
 
           if (
             typeof value === "string" &&
             !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value)
           )
-            throw new Error();
+            {throw new Error();}
 
           const number = Number(value);
 
           if (!Number.isInteger(number) || number < -2147483648 || number > 2147483647)
-            throw new Error();
+            {throw new Error();}
 
           return [key, number];
         }),

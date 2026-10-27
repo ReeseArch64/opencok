@@ -35,7 +35,7 @@ test("all remaining catalogs expose domain definitions without XML documents", a
   for (const source of provenance) {
     const factory = catalogDefinitions[source.id as keyof typeof catalogDefinitions];
     expect(typeof factory).toBe("function");
-    if (verified.has(source.module)) continue;
+    if (verified.has(source.module)) {continue;}
     const catalog = await factory();
     expect(String(catalog.kind)).toBe(source.kind);
     expect(Object.keys(catalog)).not.toContain("ordered");
@@ -44,9 +44,9 @@ test("all remaining catalogs expose domain definitions without XML documents", a
       const additions = maintainedAdditions[source.id] ?? [];
       expect(catalog.records.length).toBe(source.records! + additions.length);
       for (const id of additions)
-        expect(catalog.records.filter((record) => "id" in record && record.id === id)).toHaveLength(
+        {expect(catalog.records.filter((record) => "id" in record && record.id === id)).toHaveLength(
           1,
-        );
+        );}
       for (const record of catalog.records) {
         const keys = Object.keys(record);
         expect(keys).not.toContain(":@");

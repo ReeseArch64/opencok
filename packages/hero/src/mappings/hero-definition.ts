@@ -102,11 +102,11 @@ export class HeroDefinitionMapper {
     values: readonly number[],
     shape: HeroCatalogValueShape,
   ): number | readonly number[] | string {
-    if (shape === HeroCatalogValueShape.List) return values;
+    if (shape === HeroCatalogValueShape.List) {return values;}
 
-    if (values.length > 1) throw new Error("Catalog scalar cannot represent multiple references");
+    if (values.length > 1) {throw new Error("Catalog scalar cannot represent multiple references");}
 
-    if (values.length) return values[0]!;
+    if (values.length) {return values[0]!;}
 
     return shape === HeroCatalogValueShape.EmptyText ? "" : 0;
   }
@@ -115,7 +115,7 @@ export class HeroDefinitionMapper {
     values: readonly (readonly number[])[],
     shape: HeroCatalogValueShape,
   ): number | string | readonly (readonly number[])[] {
-    if (values.length || shape === HeroCatalogValueShape.List) return values;
+    if (values.length || shape === HeroCatalogValueShape.List) {return values;}
 
     return shape === HeroCatalogValueShape.EmptyText ? "" : 0;
   }

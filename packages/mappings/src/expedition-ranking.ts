@@ -5,7 +5,7 @@ import type { ExpeditionRankingResult } from "@opencok/contracts/expedition-rank
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
 function serializeExpeditionRanking(result: ExpeditionRankingResult | undefined): Fields {
-  if (result === undefined) return {};
+  if (result === undefined) {return {};}
 
   return {
     selfRanking: sfs.int(result.selfRanking),

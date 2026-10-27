@@ -129,7 +129,7 @@ test("activation accepts a saved matching cosmetic family without extending its 
       event.payload,
       async () => [],
       async (_owner, command, body) => {
-        if (command === "status.push") sent.push(body);
+        if (command === "status.push") {sent.push(body);}
       },
     );
     expect((sent[0]!.status!.value as Value[]).length).toBeGreaterThan(0);

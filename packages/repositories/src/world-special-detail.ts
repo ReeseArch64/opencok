@@ -42,7 +42,7 @@ const marchColumns = {
 };
 
 function one<T>(rows: T[]): T | undefined {
-  if (rows.length > 1) throw new Error("Ambiguous specialized world state");
+  if (rows.length > 1) {throw new Error("Ambiguous specialized world state");}
 
   return rows[0];
 }
@@ -54,13 +54,13 @@ function text(value: unknown): string {
     !value.isWellFormed() ||
     value.includes("\0")
   )
-    throw new Error("Invalid specialized world identifier");
+    {throw new Error("Invalid specialized world identifier");}
 
   return value;
 }
 
 async function banner(db: Reader, id: unknown): Promise<string> {
-  if (id == null || id === "") return "UN";
+  if (id == null || id === "") {return "UN";}
 
   const row = one(
     await db
@@ -83,15 +83,15 @@ export async function readSpecialWorldDetail(
 ): Promise<WorldSpecialDetailSnapshot | undefined> {
   const type = point.pointType as number;
 
-  if (!territoryTypes.includes(type) && (remote || ![49, 50].includes(type))) return undefined;
+  if (!territoryTypes.includes(type) && (remote || ![49, 50].includes(type))) {return undefined;}
 
   const state: WorldSpecialDetailSnapshot = { marches: [], resources: [], kills: [], ranks: [] };
 
   if ([49, 50].includes(type)) {
     if (!mailBlank(point.ownerId as string | null) || !mailBlank(point.ownerName as string | null))
-      return state;
+      {return state;}
 
-    if (typeof point.reserve !== "bigint") throw new Error("Missing boss selector");
+    if (typeof point.reserve !== "bigint") {throw new Error("Missing boss selector");}
 
     const selector = Number((point.reserve & 0xf00000n) >> 20n);
     state.boss = (
@@ -111,13 +111,13 @@ export async function readSpecialWorldDetail(
         .orderBy(asc(t_worldbossrank.id))
         .limit(10001);
 
-      if (state.ranks.length > 10000) throw new Error("Boss rank snapshot exceeds limit");
+      if (state.ranks.length > 10000) {throw new Error("Boss rank snapshot exceeds limit");}
     }
 
     return state;
   }
 
-  if (type === 46 && !remote) state.observerBanner = await banner(db, observer.allianceId);
+  if (type === 46 && !remote) {state.observerBanner = await banner(db, observer.allianceId);}
 
   state.territory = one(
     await db
@@ -133,16 +133,16 @@ export async function readSpecialWorldDetail(
   );
   const territory = state.territory;
 
-  if (!territory) return state;
+  if (!territory) {return state;}
 
   if (
     territory.pointId !== point.id ||
     territory.atWorldId !== point.worldId ||
     territory.type !== type
   )
-    throw new Error("Foreign territory state");
+    {throw new Error("Foreign territory state");}
 
-  if (type === 46) state.banner = await banner(db, territory.allianceId);
+  if (type === 46) {state.banner = await banner(db, territory.allianceId);}
 
   const owner = point.ownerId;
 
@@ -157,22 +157,22 @@ export async function readSpecialWorldDetail(
     const allianceId = state.ownerProfile?.allianceId ?? point.allianceId;
 
     if (allianceId != null && allianceId !== "")
-      state.ownerAlliance = one(
+      {state.ownerAlliance = one(
         await db
           .select({ uid: alliance.uid, abbr: alliance.abbr })
           .from(alliance)
           .where(eq(alliance.uid, text(allianceId)))
           .limit(2),
-      );
+      );}
 
     if (point.ownerMarchUUid != null && point.ownerMarchUUid !== "")
-      state.leader = one(
+      {state.leader = one(
         await db
           .select(marchColumns)
           .from(world_march)
           .where(eq(world_march.uuid, text(point.ownerMarchUUid)))
           .limit(2),
-      );
+      );}
 
     const leader = state.leader;
 
@@ -182,7 +182,7 @@ export async function readSpecialWorldDetail(
         leader.targetId !== point.id ||
         leader.worldId !== point.worldId)
     )
-      throw new Error("Foreign territory leader");
+      {throw new Error("Foreign territory leader");}
 
     if (leader?.teamId && !mailBlank(point.allianceId as string | null)) {
       const teamTable = [15, 16].includes(leader.type as number)
@@ -207,7 +207,7 @@ export async function readSpecialWorldDetail(
           state.team.worldId !== point.worldId ||
           state.team.leaderUid !== owner)
       )
-        throw new Error("Foreign territory team");
+        {throw new Error("Foreign territory team");}
     }
 
     state.marches = await db
@@ -236,13 +236,13 @@ export async function readSpecialWorldDetail(
       ) >
         4 * 1024 * 1024
     )
-      throw new Error("Territory army snapshot exceeds limit");
+      {throw new Error("Territory army snapshot exceeds limit");}
 
     if (
       [14, 20, 21, 46, 47].includes(type) &&
       state.marches.some((march) => march.ownerUid === owner)
     )
-      state.ownerEffects = await readWorldResourceOwner(db, text(owner));
+      {state.ownerEffects = await readWorldResourceOwner(db, text(owner));}
   }
 
   let resources: Row[] = [];
@@ -256,11 +256,11 @@ export async function readSpecialWorldDetail(
       .orderBy(asc(user_territory_resource.uid))
       .limit(1001);
 
-    if (resources.length > 1000) throw new Error("Territory warehouse exceeds limit");
+    if (resources.length > 1000) {throw new Error("Territory warehouse exceeds limit");}
   }
 
   if (type === 21 && territory.active === 1) {
-    if (!turret) throw new Error("Missing turret archive reader");
+    if (!turret) {throw new Error("Missing turret archive reader");}
 
     kills = await turret(kingdomId, text(territory.uid));
 
@@ -268,7 +268,7 @@ export async function readSpecialWorldDetail(
       kills.size > 1000 ||
       [...kills.values()].reduce((n, value) => n + Buffer.byteLength(value), 0) > 4 * 1024 * 1024
     )
-      throw new Error("Turret archive exceeds limit");
+      {throw new Error("Turret archive exceeds limit");}
   }
 
   const ids = [...new Set([...resources.map((row) => text(row.uid)), ...kills.keys()].map(text))];

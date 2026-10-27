@@ -31,10 +31,10 @@ import { CityProgressionContext } from "./city-progression-context.ts";
 import type { CityDomain } from "./city-domain.ts";
 
 export function militaryBoolean(params: Fields, name: string, fallback = false) {
-  if (!params[name]) return fallback;
+  if (!params[name]) {return fallback;}
 
   if (params[name]!.type !== Type.Bool || typeof params[name]!.value !== "boolean")
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   return params[name]!.value as boolean;
 }
@@ -51,9 +51,9 @@ export function trainingCapacity(context: CityProgressionContext, type: number) 
     context.generalEffect(131, building) +
     context.effect(2152);
 
-  if (specific) capacity += context.effect(specific) + context.generalEffect(specific, building);
+  if (specific) {capacity += context.effect(specific) + context.generalEffect(specific, building);}
 
-  if (type === 17) capacity += totalBuildingParameter(context.state, context.rules, 439000, 1);
+  if (type === 17) {capacity += totalBuildingParameter(context.state, context.rules, 439000, 1);}
 
   return cityInteger(Math.max(0, Math.ceil(capacity * (1 + context.effect(852) / 100))));
 }
@@ -77,7 +77,7 @@ function current(context: CityProgressionContext, armyId: string): Row {
 
 function complete(context: CityProgressionContext, row: Row, count: number) {
   if (count <= 0 || num(row, "train") !== count)
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   const [, free] = transferTroops(count, num(row, "free"), count);
   const completed = { ...row, free, train: 0, finishTime: 0n, foodCostTime: context.now };
@@ -90,9 +90,9 @@ function complete(context: CityProgressionContext, row: Row, count: number) {
     troopQueueType(troopDefinition(context.rules, text(row, "armyId")))
   ];
 
-  if (targetCondition) recordTargetTask(context, 2, count, targetCondition);
+  if (targetCondition) {recordTargetTask(context, 2, count, targetCondition);}
 
-  if (power > 0n) recordExpeditionScore(context, 3, 3, cityInteger(power));
+  if (power > 0n) {recordExpeditionScore(context, 3, 3, cityInteger(power));}
 
   return {
     id: sfs.string(text(row, "armyId")),
@@ -110,7 +110,7 @@ async function prepare(
     type = troopQueueType(rule),
     row = current(context, armyId);
 
-  if (![1, 8, 9, 10, 17].includes(type)) throw new GameError(errors.invalid, "city_progression");
+  if (![1, 8, 9, 10, 17].includes(type)) {throw new GameError(errors.invalid, "city_progression");}
 
   const count = cityInteger(int(params, "num"), command === "army.fire" ? 0 : 1);
 
@@ -125,7 +125,7 @@ async function prepare(
   const building = troopBuilding(context.state, rule);
 
   if (count > trainingCapacity(context, type))
-    throw new GameError(errors.invalid, "training_capacity");
+    {throw new GameError(errors.invalid, "training_capacity");}
 
   reserveTroops(context.state, armyId, count);
   context.checkPower(unitPower(rule, count));
@@ -134,7 +134,7 @@ async function prepare(
     num(row, "train") !== 0 ||
     context.state.queues.some((queue) => num(queue, "type") === type && text(queue, "itemId"))
   )
-    throw new GameError(errors.occupied, "city_progression");
+    {throw new GameError(errors.occupied, "city_progression");}
 
   if (
     !context.state.queues.some(
@@ -144,7 +144,7 @@ async function prepare(
         long(queue, "endTime") >= context.now,
     )
   )
-    throw new GameError(errors.full, "city_progression");
+    {throw new GameError(errors.full, "city_progression");}
 
   const speedId = ({ 1: 113, 8: 114, 9: 115, 10: 116 } as Record<number, number>)[type];
   const base =
@@ -167,9 +167,9 @@ async function prepare(
   context.spend(troopCosts(rule, count, context.effect(453) + context.effect(2151)), purchase);
   const itemCount = Math.ceil((cityInteger(rule.fine_iron ?? 0) * count) / 100);
 
-  if (itemCount) context.spendItem("211508", itemCount);
+  if (itemCount) {context.spendItem("211508", itemCount);}
 
-  if (direct) context.accelerate(durationMs, purchase);
+  if (direct) {context.accelerate(durationMs, purchase);}
 
   const pending = {
     ...row,
@@ -179,13 +179,13 @@ async function prepare(
   };
 
   if (direct && militaryBoolean(params, "complete"))
-    return {
+    {return {
       response: encode({
         ...complete(context, pending, count),
         resource: sfs.object(context.resource()),
         gold: sfs.long(context.balance("gold")),
       }),
-    };
+    };}
 
   context.write.armies = [pending];
 
@@ -220,14 +220,14 @@ async function apply(
     num(row, "train") <= 0 ||
     (data && (data.kind !== "train" || data.units?.[armyId] !== num(row, "train")))
   )
-    throw new GameError(errors.queue, "city_progression");
+    {throw new GameError(errors.queue, "city_progression");}
 
   const saved = context.state.queues.find((queue) => queue.uuid === activity.queueId);
 
   if (!saved || saved.itemId !== armyId || long(row, "finishTime") !== long(saved, "updateTime"))
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
-  if (action === TimedActivityAction.Start) throw new GameError(errors.invalid, "city_progression");
+  if (action === TimedActivityAction.Start) {throw new GameError(errors.invalid, "city_progression");}
 
   if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule) {
     context.write.armies = [{ ...row, finishTime: activity.dueAt }];

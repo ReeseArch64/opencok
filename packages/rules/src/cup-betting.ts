@@ -9,7 +9,7 @@ export function cupCalendar(rules: Rules) {
     start = eventTimestamp(rule?.k9),
     end = eventTimestamp(rule?.k10);
 
-  if (!rule || start === undefined || end === undefined || start >= end) return;
+  if (!rule || start === undefined || end === undefined || start >= end) {return;}
 
   return { rule, start, end };
 }
@@ -17,7 +17,7 @@ export function cupCalendar(rules: Rules) {
 export function cupMatches(rules: Rules): Row[] {
   const calendar = cupCalendar(rules);
 
-  if (!calendar) return [];
+  if (!calendar) {return [];}
 
   const teams = (calendar.rule.k1 ?? "").split("|"),
     times = (calendar.rule.k2 ?? "").split("|"),
@@ -25,7 +25,7 @@ export function cupMatches(rules: Rules): Row[] {
     winners = (calendar.rule.k11 ?? "").split("|");
 
   if (teams.length > 256 || teams.length !== times.length || teams.length !== odds.length)
-    throw new Error("Invalid cup schedule");
+    {throw new Error("Invalid cup schedule");}
 
   const rows = teams.map((value, index) => {
     const sides = value.split(";"),
@@ -44,13 +44,13 @@ export function cupMatches(rules: Rules): Row[] {
       startBetTime >= startTime ||
       prices.length !== 2
     )
-      throw new Error("Invalid cup match");
+      {throw new Error("Invalid cup match");}
 
     const oddsA = javaFloat(prices[0]!),
       oddsB = javaFloat(prices[1]!);
 
     if (!Number.isFinite(oddsA) || !Number.isFinite(oddsB) || oddsA <= 0 || oddsB <= 0)
-      throw new Error("Invalid cup odds");
+      {throw new Error("Invalid cup odds");}
 
     const vs = sides.join("|"),
       id = `${vs}-${startTime / 1000n}`,
@@ -73,7 +73,7 @@ export function cupMatches(rules: Rules): Row[] {
   });
 
   if (new Set(rows.map((row) => row.id)).size !== rows.length)
-    throw new Error("Duplicate cup match");
+    {throw new Error("Duplicate cup match");}
 
   return rows;
 }
@@ -81,14 +81,14 @@ export function cupMatches(rules: Rules): Row[] {
 export function cupLimits(rules: Rules, type: number) {
   const config = cupCalendar(rules)?.rule;
 
-  if (!config) throw new Error("Missing cup limits");
+  if (!config) {throw new Error("Missing cup limits");}
 
   const types = (config.k6 ?? "").split(";").map((value) => cityInteger(value, 0, 3)),
     caps = (config.k7 ?? "").split(";").map((value) => cityAmount(value)),
     index = types.indexOf(type);
 
   if (types.length !== caps.length || new Set(types).size !== types.length || index < 0)
-    throw new Error("Invalid cup resource");
+    {throw new Error("Invalid cup resource");}
 
   return {
     count: cityInteger(config.k5, 1, 128),
@@ -101,7 +101,7 @@ export function cupLimits(rules: Rules, type: number) {
 export function cupPayout(amount: number, odds: number) {
   cityInteger(amount, 1);
 
-  if (Number.isNaN(odds) || odds <= 0) throw new Error("Invalid cup receipt odds");
+  if (Number.isNaN(odds) || odds <= 0) {throw new Error("Invalid cup receipt odds");}
 
   return BigInt(
     Math.min(2147483647, Math.ceil(Math.fround(Math.fround(amount) * Math.fround(odds)))),
@@ -134,13 +134,13 @@ export function reconcileCupMatches(
 export function cupOddsString(input: number) {
   const value = Math.fround(input);
 
-  if (value === Infinity) return "Infinity";
+  if (value === Infinity) {return "Infinity";}
 
-  if (!Number.isFinite(value) || value <= 0) throw new Error("Invalid cup float");
+  if (!Number.isFinite(value) || value <= 0) {throw new Error("Invalid cup float");}
 
   let precision = 1;
 
-  while (precision < 9 && Math.fround(Number(value.toPrecision(precision))) !== value) precision++;
+  while (precision < 9 && Math.fround(Number(value.toPrecision(precision))) !== value) {precision++;}
 
   if (value >= 1e7 || value < 1e-3) {
     const [mantissa, exponent] = value.toExponential(precision - 1).split("e");

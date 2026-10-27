@@ -11,7 +11,7 @@ function scheduler() {
       tasks.push(run);
       return () => {
         const index = tasks.indexOf(run);
-        if (index >= 0) tasks.splice(index, 1);
+        if (index >= 0) {tasks.splice(index, 1);}
       };
     },
     tick: async () => {
@@ -23,7 +23,7 @@ function scheduler() {
   };
 }
 async function settle() {
-  for (let i = 0; i < 12; i++) await Promise.resolve();
+  for (let i = 0; i < 12; i++) {await Promise.resolve();}
 }
 
 test("avatar relay advances past failures, wraps, and revisits pending entries without overlap", async () => {
@@ -48,7 +48,7 @@ test("avatar relay advances past failures, wraps, and revisits pending entries w
       await Promise.resolve();
       active = false;
       delivered.push(owner);
-      if (owner === "1001") throw new Error("Synthetic failure");
+      if (owner === "1001") {throw new Error("Synthetic failure");}
     },
     () => {
       reports++;

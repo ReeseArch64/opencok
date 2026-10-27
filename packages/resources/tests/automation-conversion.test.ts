@@ -21,7 +21,7 @@ test("automation conversion preserves nested Boolean conditions and direct if/el
     "trigger-activity",
   );
   expect(definition.kind).toBe(CatalogKind.Automation);
-  if (definition.kind !== CatalogKind.Automation) throw new Error("Unexpected catalog kind");
+  if (definition.kind !== CatalogKind.Automation) {throw new Error("Unexpected catalog kind");}
   const branch = definition.rules[0]!.actions[0]!.branch!;
   expect(branch.conditions[0]!.conditions!.map((c) => c.parameters)).toEqual([
     "$reward;==;10",
@@ -56,6 +56,6 @@ test("compound actions retain ordered counter and reward operations", () => {
     ),
     "trigger-activity",
   );
-  if (definition.kind !== CatalogKind.Automation) throw new Error("Unexpected catalog kind");
+  if (definition.kind !== CatalogKind.Automation) {throw new Error("Unexpected catalog kind");}
   expect(definition.rules[0]!.actions[0]!.actions!.map((action) => action.code)).toEqual([9, 48]);
 });

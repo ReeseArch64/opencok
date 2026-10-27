@@ -24,7 +24,7 @@ test("public statistics distinguish absent records from zero totals and retain e
   expect(Object.keys(result)).toHaveLength(11);
   expect(publicStatistics({}).power).toEqual(sfs.long(0));
   for (const power of [9007199254740992, "9223372036854775808", "1.2", "NaN"])
-    expect(() => publicStatistics({ power })).toThrow();
+    {expect(() => publicStatistics({ power })).toThrow();}
 });
 
 test("public equipment has explicit wire fields and gated strengthening presentation", () => {
@@ -59,7 +59,7 @@ test("public equipment has explicit wire fields and gated strengthening presenta
   expect(strengthened.suit_value_type).toEqual(sfs.string("2-0#4-0#6-0#8-1#10-1"));
   expect(strengthened.suit_value_sign).toEqual(sfs.string("2-2#4-2#6-2#8-1#10-1"));
   for (const alias of ["Buff", "buff", "buff_str", "buff_Str", "buffStr", "BuffStr"])
-    expect(strengthened[alias]).toEqual({ type: Type.String, value: "50" });
+    {expect(strengthened[alias]).toEqual({ type: Type.String, value: "50" });}
   expect(Object.keys(strengthened)).toHaveLength(17);
   expect(() => publicEquipment({ ...row, itemId: 2147483648 }, false)).toThrow();
   expect(() => publicEquipment({ ...row, strengthLevel: 1.5 }, true)).toThrow();
@@ -75,12 +75,12 @@ test("equipment locks preserve legacy delimiter and flag semantics without leaki
     ["7,1|,1|8,1", "7||8"],
     ["||", ""],
   ])
-    expect(publicEquipment({ lockProperty: raw! }, false).lockProperty).toEqual(
+    {expect(publicEquipment({ lockProperty: raw! }, false).lockProperty).toEqual(
       sfs.string(expected!),
-    );
+    );}
   expect(publicEquipment({}, false)).not.toHaveProperty("lockProperty");
   for (const lockProperty of ["", "7", "7,", "7,1||8,1"])
-    expect(() => publicEquipment({ lockProperty }, false)).toThrow();
+    {expect(() => publicEquipment({ lockProperty }, false)).toThrow();}
 });
 
 test("public medals serialize only id and signed level", () => {

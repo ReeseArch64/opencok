@@ -23,7 +23,7 @@ function appendMail(context: CityProgressionContext, message: AvatarSystemMail) 
 function encampMail(context: CityProgressionContext, state: RuntimeMarch, original: Row) {
   const army = original.armyInfo ? decodeWorldMarchArmy(original.armyInfo as Buffer) : null;
 
-  if (!army || army.owner !== context.owner) worldMutationFailure();
+  if (!army || army.owner !== context.owner) {worldMutationFailure();}
 
   const general = army.general
     ? reconnectMarchGeneral(army.general, context.state.generalRoster?.skills ?? [], context.now)
@@ -34,7 +34,7 @@ function encampMail(context: CityProgressionContext, state: RuntimeMarch, origin
           (row) => row.uuid === saved.uuid && row.uid === context.owner,
         );
 
-        if (!dragon) worldMutationFailure();
+        if (!dragon) {worldMutationFailure();}
 
         return {
           dragonId: cityInteger(dragonDefinition(context.rules, dragon).level.id),
@@ -66,7 +66,7 @@ function encampMail(context: CityProgressionContext, state: RuntimeMarch, origin
     }),
   );
 
-  if (!contents) worldMutationFailure();
+  if (!contents) {worldMutationFailure();}
 
   appendMail(context, {
     uid: randomUUID().replaceAll("-", "") + "00",
@@ -97,15 +97,15 @@ export function startTreasureExcavation(
       num(row, "state") === 0,
   );
 
-  if (!map || !treasureMapFree(target)) return undefined;
+  if (!map || !treasureMapFree(target)) {return undefined;}
 
   const item = treasureMapItem(num(map, "colour"));
 
-  if ((context.economy.quantity?.(item) ?? 0) < 1) return undefined;
+  if ((context.economy.quantity?.(item) ?? 0) < 1) {return undefined;}
 
   const rule = context.rules.world.heritage?.get(text(map, "treasureId"));
 
-  if (!rule) worldMutationFailure();
+  if (!rule) {worldMutationFailure();}
 
   const seconds = cityInteger(rule.time, 1),
     reward = pinProgressionReward(context, rule.reward!);
@@ -148,7 +148,7 @@ export function abandonTreasureExcavation(context: CityProgressionContext, state
     (row) => row.uuid === state.treasureUUID && row.marchId === state.id && num(row, "state") === 1,
   );
 
-  if (map) deleteTreasureMap(context, text(map, "uuid"));
+  if (map) {deleteTreasureMap(context, text(map, "uuid"));}
 }
 
 export function finishTreasureExcavation(context: CityProgressionContext, state: RuntimeMarch) {
@@ -156,7 +156,7 @@ export function finishTreasureExcavation(context: CityProgressionContext, state:
     (row) => row.uuid === state.treasureUUID && row.marchId === state.id && num(row, "state") === 1,
   );
 
-  if (!map) return;
+  if (!map) {return;}
 
   const target =
     context.write.worldMutation?.points?.find((row) => num(row, "id") === state.target) ??
@@ -168,14 +168,14 @@ export function finishTreasureExcavation(context: CityProgressionContext, state:
     target.ownerId !== context.owner ||
     target.ownerMarchUUid !== state.id
   )
-    return;
+    {return;}
 
-  if (!state.treasureReward || long(map, "finishTime") !== state.dueAt) worldMutationFailure();
+  if (!state.treasureReward || long(map, "finishTime") !== state.dueAt) {worldMutationFailure();}
 
   const template = context.rules.mail.get("11616"),
     contents = javaMailBytes(template?.message);
 
-  if (!template || !contents) worldMutationFailure();
+  if (!template || !contents) {worldMutationFailure();}
 
   appendMail(context, {
     uid: randomUUID().replaceAll("-", "") + "00",

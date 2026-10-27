@@ -35,7 +35,7 @@ export async function readTotems(tx: MutationTransaction, owner: string) {
     .limit(4097);
 
   if (history.length > 1024 || active.length > 4096)
-    throw new Error("Totem aggregate exceeds bound");
+    {throw new Error("Totem aggregate exceeds bound");}
 
   return { history, active };
 }
@@ -46,7 +46,7 @@ export async function writeTotems(
   write: TotemProgressionWrite,
 ) {
   for (const row of write.history ?? []) {
-    if (row.uid !== owner) throw new Error("Foreign totem history");
+    if (row.uid !== owner) {throw new Error("Foreign totem history");}
 
     const value = { uid: owner, totemId: num(row, "totemId"), putTime: long(row, "putTime") };
     await tx
@@ -58,7 +58,7 @@ export async function writeTotems(
   for (const row of write.activations ?? []) {
     if (row.expectedDueAt === undefined) {
       if (row.ownerUid !== owner || num(row, "status") !== 0)
-        throw new Error("Foreign totem activation");
+        {throw new Error("Foreign totem activation");}
 
       restoreTotemConfiguration(row.payload as Buffer);
       await tx.insert(totem_activation).values({
@@ -81,7 +81,7 @@ export async function writeTotems(
         (status === 2 && row.ownerUid !== owner) ||
         dueAt > long(row, "expectedDueAt")
       )
-        throw new Error("Invalid totem transition");
+        {throw new Error("Invalid totem transition");}
 
       const saved = await tx
         .update(totem_activation)
@@ -96,7 +96,7 @@ export async function writeTotems(
         )
         .returning({ id: totem_activation.id });
 
-      if (saved.length !== 1) throw new Error("Stale totem activation");
+      if (saved.length !== 1) {throw new Error("Stale totem activation");}
     }
   }
 }
@@ -129,7 +129,7 @@ export function createTotemEffectStore(
         .where(and(eq(totem_activation.status, 0), lte(totem_activation.dueAt, now)))
         .limit(1);
 
-      if (!candidate) return [];
+      if (!candidate) {return [];}
 
       await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
       const rows = await tx
@@ -160,7 +160,7 @@ export function createTotemEffectStore(
           )
           .limit(2049);
 
-        if (cities.length > 2048) throw new Error("Totem recipient bound exceeded");
+        if (cities.length > 2048) {throw new Error("Totem recipient bound exceeded");}
 
         result.push({ activation, cities });
       }
@@ -180,7 +180,7 @@ export function createTotemEffectStore(
         )
         .returning({ id: totem_activation.id });
 
-      if (saved.length !== 1) throw new Error("Stale totem expiry");
+      if (saved.length !== 1) {throw new Error("Stale totem expiry");}
 
       const changed = await tx
         .update(worldpoint)
@@ -203,15 +203,15 @@ export function createTotemEffectStore(
         )
         .returning({ id: worldpoint.id });
 
-      if (changed.length !== points.length) throw new Error("Missing totem footprint");
+      if (changed.length !== points.length) {throw new Error("Missing totem footprint");}
 
       for (const delivery of deliveries)
-        await tx.insert(totem_delivery).values({
+        {await tx.insert(totem_delivery).values({
           activationId: text(activation, "id"),
           targetUid: delivery.owner,
           stateId: delivery.stateId,
           appliedAt: 0n,
-        });
+        });}
 
       await tx.insert(mutation_outbox).values({
         traceparent: outgoingTrace(new Headers()).get("traceparent"),
@@ -263,21 +263,21 @@ export function createTotemEffectStore(
     },
     async apply(delivery, states, deleted, mail, push) {
       if (delivery.activation.targetUid !== owner || mail.owner !== owner)
-        throw new Error("Foreign totem delivery");
+        {throw new Error("Foreign totem delivery");}
 
       const at = long(delivery.activation, "dueAt");
 
-      if (at > now) throw new Error("Early totem delivery");
+      if (at > now) {throw new Error("Early totem delivery");}
 
       if (states.length || deleted.length)
-        await boundary(
+        {await boundary(
           tx,
           owner,
           at,
           () => writePlayerEffects(tx, owner, { states, deletedStates: deleted }),
           [],
           untouchedEconomy,
-        );
+        );}
 
       await insertSystemMail(tx, mail, owner, mail.uid.slice(0, 32), at);
       const changed = await tx
@@ -292,10 +292,10 @@ export function createTotemEffectStore(
         )
         .returning({ id: totem_delivery.activationId });
 
-      if (changed.length !== 1) throw new Error("Duplicate totem effect");
+      if (changed.length !== 1) {throw new Error("Duplicate totem effect");}
 
       if (states.length)
-        await tx.insert(mutation_outbox).values({
+        {await tx.insert(mutation_outbox).values({
           traceparent: outgoingTrace(new Headers()).get("traceparent"),
           kingdomId,
           ownerUid: owner,
@@ -305,7 +305,7 @@ export function createTotemEffectStore(
           payload: Buffer.from(push),
           createdAt: now,
           publishedAt: 0n,
-        });
+        });}
     },
   };
 }

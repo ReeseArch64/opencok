@@ -11,20 +11,20 @@ export interface RuleContext {
 }
 
 export function legacyPlayerVersionAtLeast(actual: string, required: string | undefined): boolean {
-  if (mailBlank(required)) return false;
+  if (mailBlank(required)) {return false;}
 
-  if (mailBlank(actual)) return true;
+  if (mailBlank(actual)) {return true;}
 
   return versionAtLeast(actual, required!);
 }
 
 export function versionAtLeast(actual: string, required: string): boolean {
   const parse = (raw: string): number[] => {
-    if (raw.length > 65535) throw new Error("Oversized feature version");
+    if (raw.length > 65535) {throw new Error("Oversized feature version");}
 
     const parts = raw.split(".").filter(Boolean);
 
-    if (parts.length > 4096) throw new Error("Too many feature version parts");
+    if (parts.length > 4096) {throw new Error("Too many feature version parts");}
 
     return parts.map((part) => Number(javaDecimal(part, 32)));
   };
@@ -36,9 +36,9 @@ export function versionAtLeast(actual: string, required: string): boolean {
     const target = minimum[index];
 
     if (value === undefined || target === undefined)
-      throw new Error("Missing feature version part");
+      {throw new Error("Missing feature version part");}
 
-    if (value !== target) return value > target;
+    if (value !== target) {return value > target;}
   }
 
   return true;
@@ -52,11 +52,11 @@ function realmEntries(selector: string | undefined, kingdomId: number): string[]
     kingdomId < -2147483648 ||
     kingdomId > 2147483647
   )
-    throw new Error("Invalid realm selector");
+    {throw new Error("Invalid realm selector");}
 
   const entries = selector.split(";").filter(Boolean);
 
-  if (entries.length > 4096) throw new Error("Too many realm selectors");
+  if (entries.length > 4096) {throw new Error("Too many realm selectors");}
 
   return entries;
 }
@@ -64,9 +64,9 @@ function realmEntries(selector: string | undefined, kingdomId: number): string[]
 export function featureRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
   const entries = realmEntries(selector, kingdomId);
 
-  if (selector === "all") return true;
+  if (selector === "all") {return true;}
 
-  if (selector === "close") return false;
+  if (selector === "close") {return false;}
 
   for (const entry of entries) {
     if (/^[0-9]+-[0-9]+/.exec(entry)?.[0] === entry) {
@@ -76,8 +76,8 @@ export function featureRealmEnabled(selector: string | undefined, kingdomId: num
         kingdomId >= Number(javaDecimal(lower, 32)) &&
         kingdomId <= Number(javaDecimal(upper, 32))
       )
-        return true;
-    } else if (kingdomId === Number(javaDecimal(entry, 32))) return true;
+        {return true;}
+    } else if (kingdomId === Number(javaDecimal(entry, 32))) {return true;}
   }
 
   return false;
@@ -90,9 +90,9 @@ export function switchRealmEnabled(selector: string | undefined, kingdomId: numb
 export function eventRealmEnabled(selector: string | undefined, kingdomId: number): boolean {
   const entries = realmEntries(selector, kingdomId);
 
-  if (selector === "all") return true;
+  if (selector === "all") {return true;}
 
-  if (selector === "close") return false;
+  if (selector === "close") {return false;}
 
   for (const entry of entries) {
     const range = entry.split("-").filter(Boolean);
@@ -102,8 +102,8 @@ export function eventRealmEnabled(selector: string | undefined, kingdomId: numbe
         kingdomId >= Number(javaDecimal(range[0], 32)) &&
         kingdomId <= Number(javaDecimal(range[1], 32))
       )
-        return true;
-    } else if (kingdomId === Number(javaDecimal(entry, 32))) return true;
+        {return true;}
+    } else if (kingdomId === Number(javaDecimal(entry, 32))) {return true;}
   }
 
   return false;
@@ -115,16 +115,16 @@ export function worldActivityRealmEnabled(
 ): boolean {
   const entries = realmEntries(selector, kingdomId);
 
-  if (selector === "all") return true;
+  if (selector === "all") {return true;}
 
-  if (selector === "0") return false;
+  if (selector === "0") {return false;}
 
   for (const entry of entries) {
     const range = entry.split("-").filter(Boolean);
     const lower = Number(javaDecimal(range[0], 32));
     const upper = range.length === 2 ? Number(javaDecimal(range[1], 32)) : lower;
 
-    if (kingdomId >= lower && kingdomId <= upper) return true;
+    if (kingdomId >= lower && kingdomId <= upper) {return true;}
   }
 
   return false;
@@ -138,14 +138,14 @@ export function ruleTimeWindow(
   rule: Readonly<Record<string, string>>,
   context: RuleContext,
 ): boolean {
-  if (!Number.isSafeInteger(context.now)) return false;
+  if (!Number.isSafeInteger(context.now)) {return false;}
 
   const now = BigInt(context.now);
 
   if (rule.start !== undefined && now < ruleTime(rule.start, context.utcOffsetMinutes))
-    return false;
+    {return false;}
 
-  if (rule.end !== undefined && now > ruleTime(rule.end, context.utcOffsetMinutes)) return false;
+  if (rule.end !== undefined && now > ruleTime(rule.end, context.utcOffsetMinutes)) {return false;}
 
   return true;
 }
@@ -161,7 +161,7 @@ export function ruleAvailable(
     !legacyPlayerVersionAtLeast(context.version, rule.version) ||
     !featureRealmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
-    return false;
+    {return false;}
 
   return ruleTimeWindow(rule, context);
 }

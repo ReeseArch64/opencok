@@ -14,13 +14,13 @@ export function rankingCalendar(now: number, offsetMinutes = 0) {
     !Number.isInteger(offsetMinutes) ||
     Math.abs(offsetMinutes) > 840
   )
-    throw new Error("Invalid ranking clock");
+    {throw new Error("Invalid ranking clock");}
 
   const local = now + offsetMinutes * 60000;
   const start = Math.floor(local / day) * day;
   const date = new Date(start);
 
-  if (!Number.isFinite(date.getTime())) throw new Error("Invalid ranking date");
+  if (!Number.isFinite(date.getTime())) {throw new Error("Invalid ranking date");}
 
   const weekday = date.getUTCDay();
   const sunday = start - weekday * day;
@@ -45,7 +45,7 @@ export function donationRankingRows(
   kind: DonationRankingKind,
   now: number,
 ): Row[] {
-  if (rows.length > 32767) throw new Error("Oversized donation ranking");
+  if (rows.length > 32767) {throw new Error("Oversized donation ranking");}
 
   const calendar = rankingCalendar(now);
   const result = rows
@@ -85,7 +85,7 @@ export function donationRankingRows(
 
   return result.sort((a, b) => {
     if (kind === "today")
-      return (b.donation - a.donation) | 0 || (b.rank - a.rank) | 0 || power(a, b);
+      {return (b.donation - a.donation) | 0 || (b.rank - a.rank) | 0 || power(a, b);}
 
     return (b.key - a.key) | 0 || (kind === "all" ? power(a, b) : 0);
   });

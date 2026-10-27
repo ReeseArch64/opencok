@@ -103,7 +103,7 @@ describe("general progression", () => {
   });
   test("rejects malformed quantities and preserves native purchase field names", () => {
     for (const raw of ["1;-1", "1;1|1;2", "1;1;1", "0;1"])
-      expect(() => generalPairs(raw)).toThrow();
+      {expect(() => generalPairs(raw)).toThrow();}
     expect(generalPurchase({ generalId: 53500, countType1: 2 }).buyCountType1).toEqual({
       type: Type.Int,
       value: 2,

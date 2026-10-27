@@ -40,9 +40,9 @@ export function towerOpen(
 }
 
 export function towerArmy(raw: unknown): Map<string, number> {
-  if (raw === undefined || raw === null || raw === "") return new Map();
+  if (raw === undefined || raw === null || raw === "") {return new Map();}
 
-  if (typeof raw !== "string" || raw.length > 16384) towerFailure();
+  if (typeof raw !== "string" || raw.length > 16384) {towerFailure();}
 
   let value: unknown;
 
@@ -58,16 +58,16 @@ export function towerArmy(raw: unknown): Map<string, number> {
     Array.isArray(value) ||
     Object.keys(value).length > 128
   )
-    towerFailure();
+    {towerFailure();}
 
   const result = new Map<string, number>();
 
   for (const [id, count] of Object.entries(value)) {
-    if (!/^[1-9]\d{0,8}$/.test(id)) towerFailure();
+    if (!/^[1-9]\d{0,8}$/.test(id)) {towerFailure();}
 
     const n = cityInteger(count);
 
-    if (n) result.set(id, n);
+    if (n) {result.set(id, n);}
   }
 
   return result;
@@ -80,7 +80,7 @@ export function towerMonsterChoices(
 ): string {
   const row = rules.advanced.dragonTower?.get(String(layer));
 
-  if (!row) towerFailure();
+  if (!row) {towerFailure();}
 
   return ["easy_monster", "medium_monster", "hard_monster"]
     .map((key) => {
@@ -89,7 +89,7 @@ export function towerMonsterChoices(
       const options = ids.map((id) => {
         const definition = rules.advanced.dragonTowerMonsters?.get(id);
 
-        if (!definition) towerFailure();
+        if (!definition) {towerFailure();}
 
         total += cityInteger(definition.weight);
 
@@ -130,7 +130,7 @@ export function towerSelectedArmy(
   values: readonly { id: number; num: number }[],
   limit: number,
 ) {
-  if (!values.length || values.length > 128) towerFailure();
+  if (!values.length || values.length > 128) {towerFailure();}
 
   const result = new Map<string, number>();
   let total = 0;
@@ -141,13 +141,13 @@ export function towerSelectedArmy(
       owned = rows.find((army) => text(army, "armyId") === id);
 
     if (result.has(id) || !rules.arms.has(id) || !owned || num(owned, "free") < count)
-      towerFailure();
+      {towerFailure();}
 
     result.set(id, count);
     total += count;
   }
 
-  if (total > cityInteger(limit, 1)) towerFailure();
+  if (total > cityInteger(limit, 1)) {towerFailure();}
 
   return result;
 }

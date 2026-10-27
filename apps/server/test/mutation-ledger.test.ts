@@ -17,9 +17,9 @@ test("ledger preserves exact signed credits and debits and rejects invalid econo
     -9223372036854775807n,
   );
   for (const before of [-1n, 9223372036854775808n])
-    expect(() => validatePosting({ ...posting, before })).toThrow();
+    {expect(() => validatePosting({ ...posting, before })).toThrow();}
   for (const after of [-1n, 9223372036854775808n])
-    expect(() => validatePosting({ ...posting, after })).toThrow();
+    {expect(() => validatePosting({ ...posting, after })).toThrow();}
   for (const reason of ["", " ", "\0", "\ud800", "x".repeat(129)])
-    expect(() => validatePosting({ ...posting, reason })).toThrow();
+    {expect(() => validatePosting({ ...posting, reason })).toThrow();}
 });

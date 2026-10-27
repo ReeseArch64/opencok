@@ -85,7 +85,7 @@ test("present required item selectors fail when absent or malformed while option
     for (const value of [undefined, "bad;2"]) {
       const record = value === undefined ? other : { ...other, [key]: value };
       const rules = catalog({ [id]: record });
-      if (value === undefined) delete rules.items.get(id)![key];
+      if (value === undefined) {delete rules.items.get(id)![key];}
       expect(() => project(rules)).toThrow();
     }
   }
@@ -135,7 +135,7 @@ test("data config exposes supported game catalogs while preserving strings and e
     "new_resource_battle_base",
     "red_envelopes",
   ])
-    expect(fields(result[key]).id).toBeUndefined();
+    {expect(fields(result[key]).id).toBeUndefined();}
   expect(result.private_unrelated).toBeUndefined();
   expect(result.hero_soul).toBeUndefined();
   expect(result.FB_follow).toBeUndefined();
@@ -240,14 +240,14 @@ test("stamina and mission availability depend on player level, version, realm an
   const rules = catalog({ monster: { k3: "100" } });
   rules.roles.set("100105", { id: "100105", stamina: "150" });
   for (const id of ["stamina_limit", "alliance_mission"])
-    rules.features.set(id, {
+    {rules.features.set(id, {
       id,
       online: "2",
       test: "3",
       version: "12.6.0",
       start: "2026-10-23-12-00",
       end: "2026-10-24-12-00",
-    });
+    });}
   expect(project(rules, { profileLevel: 5 }).monster_count).toEqual(sfs.int(150));
   expect(project(rules).monster_count).toEqual(sfs.int(100));
   expect(project(rules).alliance_mission?.value).toBe("on");
@@ -318,9 +318,9 @@ test("auxiliary catalogs supply general sale limits, pay control and ordered kin
 
 test("malformed integers and long overflows fail while avatar dates retain calendar normalization", () => {
   for (const value of ["1.5", "NaN", "", "2147483648", "-2147483649", "1e3"])
-    expect(() => project(catalog({ resources_basics: { k8: value } }))).toThrow();
+    {expect(() => project(catalog({ resources_basics: { k8: value } }))).toThrow();}
   for (const value of ["9223372036854775808", "-9223372036854775809", "2.5", "no"])
-    expect(() => project(catalog({ wa_score: { k10: value } }))).toThrow();
+    {expect(() => project(catalog({ wa_score: { k10: value } }))).toThrow();}
   expect(fields(project(catalog({ icon: { k4: "2026-02-30" } })).icon).k4?.value).toBe(
     String(Date.UTC(2026, 2, 2)),
   );
@@ -403,12 +403,12 @@ test("configuration preserves function-on blank bypass and direct cross-realm ve
   const rules = catalog();
   rules.features.set("alliance_mission", { version: "12.6.0", online: "2" });
   for (const version of ["", "\u2000", "13", ".12..6.0.1", "１２.６.０"])
-    expect(project(rules, { version }).alliance_mission?.value).toBe("on");
+    {expect(project(rules, { version }).alliance_mission?.value).toBe("on");}
   expect(project(rules, { version: "11" }).alliance_mission?.value).toBe("off");
   expect(() => project(rules, { version: "13.bad" })).toThrow();
   rules.features.clear();
   for (const version of ["2", ".1..0.59.1", "１.０.５９"])
-    expect(project(rules, { version, crossOpen: true }).cross_open).toEqual(sfs.bool(true));
+    {expect(project(rules, { version, crossOpen: true }).cross_open).toEqual(sfs.bool(true));}
   expect(project(rules, { version: "0", crossOpen: true }).cross_open).toEqual(sfs.bool(false));
   for (const version of ["", "\u2000", "1.0", "2.bad"]) {
     expect(() => project(rules, { version, crossOpen: true })).toThrow();
@@ -446,7 +446,7 @@ test("data configuration uses its group view while the overlord scalar keeps the
     overlord: { k1: "group-overlord" },
   });
   rules.configuration.dataConfig = new Map(rules.items);
-  for (const id of rules.items.keys()) rules.items.set(id, { id, k1: "global-decoy", k2: "bad" });
+  for (const id of rules.items.keys()) {rules.items.set(id, { id, k1: "global-decoy", k2: "bad" });}
   rules.items.set("overlord", { k1: "global-overlord" });
   rules.items.set("private_unrelated", { k1: "never-expose" });
   rules.features.set("w_thedoor", { version: "feature-catalog" });

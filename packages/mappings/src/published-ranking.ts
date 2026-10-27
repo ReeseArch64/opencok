@@ -8,17 +8,17 @@ import { validateFields } from "./validation.ts";
 
 function rows(entries: readonly string[], maximum: number): Fields[] {
   if (!Array.isArray(entries) || entries.length > maximum)
-    throw new Error("Invalid published ranking");
+    {throw new Error("Invalid published ranking");}
 
   let bytes = 0;
 
   return entries.map((entry) => {
     if (typeof entry !== "string" || !entry.isWellFormed())
-      throw new Error("Invalid ranking entry");
+      {throw new Error("Invalid ranking entry");}
 
     bytes += Buffer.byteLength(entry);
 
-    if (bytes > 4 * 1024 * 1024) throw new Error("Oversized published ranking");
+    if (bytes > 4 * 1024 * 1024) {throw new Error("Oversized published ranking");}
 
     return decodeLegacyJsonObject(entry);
   });
@@ -30,9 +30,9 @@ export function publishedRanking(entries: readonly string[], uid: string, hide: 
 
   for (const row of board) {
     if (row.uid?.type !== Type.String || row.rank?.type !== Type.Int)
-      throw new Error("Invalid published position");
+      {throw new Error("Invalid published position");}
 
-    if (row.uid.value === uid) rank = row.rank.value as number;
+    if (row.uid.value === uid) {rank = row.rank.value as number;}
   }
 
   return validateFields(publishedRankingSchema, {

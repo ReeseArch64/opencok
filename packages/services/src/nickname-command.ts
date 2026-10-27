@@ -16,7 +16,7 @@ export async function changeNickname(
 ): Promise<Fields> {
   const profile = await db.getProfileById(owner);
 
-  if (!profile) throw new GameError(errors.missing);
+  if (!profile) {throw new GameError(errors.missing);}
 
   if (
     profile.uid !== owner ||
@@ -25,13 +25,13 @@ export async function changeNickname(
     typeof (profile.banTime ?? 0n) !== "bigint" ||
     ((profile.banTime as bigint) ?? 0n) > BigInt(now)
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   if (params.nickName?.type !== Type.String || typeof params.nickName.value !== "string")
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   if (!services.nicknameChange || !services.nicknameForbidden || !services.nicknameBadWords)
-    throw new GameError(errors.unsupported);
+    {throw new GameError(errors.unsupported);}
 
   const operation = params.operationId;
 
@@ -43,7 +43,7 @@ export async function changeNickname(
         operation.value,
       ))
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   const name = await validateNicknameChange(params.nickName.value, {
     forbidden: services.nicknameForbidden,

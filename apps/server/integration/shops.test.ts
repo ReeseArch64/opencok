@@ -254,7 +254,7 @@ test("shops serialize stock and account limits with debit, delivery, receipt, ro
       (await reopened.db.select().from(shop_stock).where(eq(shop_stock.id, "test")))[0]!.purchased,
     ).toBe(3n);
   } finally {
-    for (const db of databases) await db.close();
+    for (const db of databases) {await db.close();}
     await pg.stop();
   }
 }, 120000);

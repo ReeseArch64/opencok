@@ -35,7 +35,7 @@ export async function deleteMailConversations(
           !sender.isWellFormed()),
     )
   )
-    throw new Error("Invalid conversation deletion");
+    {throw new Error("Invalid conversation deletion");}
 
   query = { ...query, senders: [...query.senders] };
 
@@ -60,7 +60,7 @@ export async function deleteMailConversations(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > BigInt(query.now)
       )
-        return { profile };
+        {return { profile };}
 
       const senders = [...new Set(query.senders)];
       const chatTypes = query.moderation ? [2] : query.bottle ? [3] : [1, 20];
@@ -90,7 +90,7 @@ export async function deleteMailConversations(
           );
 
         if (!query.bottle)
-          await tx
+          {await tx
             .delete(mail_group)
             .where(
               and(
@@ -100,7 +100,7 @@ export async function deleteMailConversations(
                   ? sql`${mail_group.groupIndex} = ${null}`
                   : eq(mail_group.groupIndex, sender),
               ),
-            );
+            );}
       }
 
       return { profile };

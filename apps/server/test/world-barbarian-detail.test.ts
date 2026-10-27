@@ -30,14 +30,14 @@ test("bounded Java HashMap decoder reads independent Java 8 serialized maps and 
 test("Java map decoder rejects truncated streams, unexpected classes, wrong descriptors and invalid references", () => {
   const data = Buffer.from(vectors.maps[1]!.data, "base64");
   for (let size = 0; size < data.length; size++)
-    expect(() => decodeJavaIntMap(data.subarray(0, size))).toThrow();
+    {expect(() => decodeJavaIntMap(data.subarray(0, size))).toThrow();}
   for (const bad of [
     Buffer.concat([data, Buffer.from([0])]),
     Buffer.alloc(65536),
     Buffer.from("{}"),
     Buffer.from("aced000574000178", "hex"),
   ])
-    expect(() => decodeJavaIntMap(bad)).toThrow();
+    {expect(() => decodeJavaIntMap(bad)).toThrow();}
   const unknown = Buffer.from(data);
   unknown[unknown.indexOf(Buffer.from("HashMap"))] = 0x58;
   expect(() => decodeJavaIntMap(unknown)).toThrow();

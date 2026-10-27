@@ -18,7 +18,7 @@ test("overlapping hero publication refreshes share one snapshot and a failed run
       page: async () => {
         reads++;
         await gate;
-        if (fail) throw new Error("Synthetic source failure");
+        if (fail) {throw new Error("Synthetic source failure");}
         return [
           {
             event: { uuid: "act", eventId: "9001000", type: 1, endTime: 2000n },
@@ -85,7 +85,7 @@ test("hero publication rejects foreign or invalid cache versions before making a
     { score: 2147483648 },
     { rankKey: "unowned-key" },
   ])
-    await expect(publishHeroRanking(command, 1, [{ ...row, ...patch }])).rejects.toThrow();
+    {await expect(publishHeroRanking(command, 1, [{ ...row, ...patch }])).rejects.toThrow();}
   await expect(publishHeroRanking(command, 1, [row, row])).rejects.toThrow();
   expect(writes).toBe(0);
 });

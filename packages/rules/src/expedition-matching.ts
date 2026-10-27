@@ -15,7 +15,7 @@ export function expeditionMatchingConfiguration(rules: Rules): ExpeditionMatchCo
     const value = Number(raw);
 
     if (typeof raw !== "string" || !raw.trim() || !Number.isFinite(value))
-      throw new Error("Invalid expedition matching weight");
+      {throw new Error("Invalid expedition matching weight");}
 
     return value;
   };
@@ -34,7 +34,7 @@ export function expeditionMatchingConfiguration(rules: Rules): ExpeditionMatchCo
     weights: ["k3", "k8", "k4", "k5", "k6", "k7", "k9", "k10"].map((key) => {
       const n = javaFloat(weights?.[key]);
 
-      if (!Number.isFinite(n)) throw new Error("Invalid expedition matching weight");
+      if (!Number.isFinite(n)) {throw new Error("Invalid expedition matching weight");}
 
       return n;
     }),
@@ -43,7 +43,7 @@ export function expeditionMatchingConfiguration(rules: Rules): ExpeditionMatchCo
 
 export function expeditionMatchStats(raw: unknown): ExpeditionMatchStats {
   if (!raw || typeof raw !== "object" || Array.isArray(raw))
-    throw new Error("Invalid expedition matching statistics");
+    {throw new Error("Invalid expedition matching statistics");}
 
   const x = raw as Record<string, unknown>,
     power = cityAmount(x.topUserPower);
@@ -53,7 +53,7 @@ export function expeditionMatchStats(raw: unknown): ExpeditionMatchStats {
     !Number.isFinite(x.topAlliancePower) ||
     x.topAlliancePower < 0
   )
-    throw new Error("Invalid expedition guild power");
+    {throw new Error("Invalid expedition guild power");}
 
   return {
     topAlliancePower: x.topAlliancePower,
@@ -72,7 +72,7 @@ export function expeditionMatchStats(raw: unknown): ExpeditionMatchStats {
 }
 
 export function decodeExpeditionMatchStats(raw: string) {
-  if (Buffer.byteLength(raw) > 8192) throw new Error("Oversized expedition match statistics");
+  if (Buffer.byteLength(raw) > 8192) {throw new Error("Oversized expedition match statistics");}
 
   return expeditionMatchStats(JSON.parse(raw));
 }
@@ -117,7 +117,7 @@ export function validateExpeditionMatchingConfiguration(config: ExpeditionMatchC
     !Number.isFinite(config.powerClose) ||
     !Number.isFinite(config.powerFar)
   )
-    throw new Error("Invalid persisted expedition matching configuration");
+    {throw new Error("Invalid persisted expedition matching configuration");}
 
   for (const key of [
     "over30",
@@ -128,7 +128,7 @@ export function validateExpeditionMatchingConfiguration(config: ExpeditionMatchC
     "victories",
     "failures",
   ] as const)
-    cityInteger(config[key]);
+    {cityInteger(config[key]);}
 
   cityInteger(config.choices, 1, 128);
 
@@ -149,7 +149,7 @@ export function expeditionMatchPairs(
     config.weights.length !== 8 ||
     config.weights.some((x) => !Number.isFinite(x))
   )
-    throw new Error("Invalid expedition matching cohort");
+    {throw new Error("Invalid expedition matching cohort");}
 
   const ordered = realms
       .map((x) => ({
@@ -165,7 +165,7 @@ export function expeditionMatchPairs(
     result = new Map<number, number>();
 
   for (const realm of ordered) {
-    if (result.has(realm.kingdomId)) continue;
+    if (result.has(realm.kingdomId)) {continue;}
 
     const ranked = ordered
         .filter(
@@ -184,17 +184,17 @@ export function expeditionMatchPairs(
       continue;
     }
 
-    if (!candidates.length) continue;
+    if (!candidates.length) {continue;}
 
     const bound = 2 ** 32 - (2 ** 32 % candidates.length);
     let draw = bound,
       counter = 0;
 
     while (draw >= bound)
-      draw = createHash("sha256")
+      {draw = createHash("sha256")
         .update(JSON.stringify([seed, realm.kingdomId, counter++]))
         .digest()
-        .readUInt32BE();
+        .readUInt32BE();}
 
     const opponent = candidates[draw % candidates.length]!.realm.kingdomId;
     result.set(realm.kingdomId, opponent);

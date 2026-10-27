@@ -17,9 +17,9 @@ export async function writeOrdinaryBox(
   owner: string,
   write: OrdinaryBoxWrite,
 ) {
-  if (typeof write.gold !== "boolean") throw new Error("Invalid ordinary box payment mode");
+  if (typeof write.gold !== "boolean") {throw new Error("Invalid ordinary box payment mode");}
 
-  if (write.mdata !== undefined) boxWords(write.mdata);
+  if (write.mdata !== undefined) {boxWords(write.mdata);}
 
   const value = {
     ordinaryBoxGold: write.gold ? 1 : 0,

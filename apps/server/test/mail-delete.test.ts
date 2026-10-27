@@ -14,33 +14,33 @@ test("ordinary deletion keeps comma split semantics, preserves whitespace IDs an
   expect(mailDeleteQuery(",,", now).ids).toEqual([]);
   expect(mailDeleteQuery("", now).ids).toEqual([]);
   for (const value of ["x".repeat(41), "\0", "\ud800", "a,".repeat(1001), ",".repeat(65536)])
-    expect(() => mailDeleteQuery(value, now)).toThrow();
+    {expect(() => mailDeleteQuery(value, now)).toThrow();}
   for (const time of [-1, NaN, 1.5, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => mailDeleteQuery("a", time)).toThrow();
+    {expect(() => mailDeleteQuery("a", time)).toThrow();}
 });
 
 test("deletion group rules retain all direct, sender and type groups and their media distinctions", () => {
   const direct = [2, 11, 12, 17, 25, 26, 27, 28, 29, 33, 34];
   for (const type of direct)
-    expect(mailDeleteGroups([entry(type)])).toEqual([
+    {expect(mailDeleteGroups([entry(type)])).toEqual([
       { groupType: type, groupIndex: "mail", types: [] },
-    ]);
+    ]);}
   for (const type of [20, 21, 22])
-    expect(mailDeleteGroups([entry(type)])).toEqual([
+    {expect(mailDeleteGroups([entry(type)])).toEqual([
       { groupType: 100, groupIndex: "sender", fromUser: "sender", types: [20, 21, 22] },
-    ]);
+    ]);}
   for (const type of [23, 24, 39, 40])
-    expect(mailDeleteGroups([entry(type)])).toEqual([
+    {expect(mailDeleteGroups([entry(type)])).toEqual([
       { groupType: 500, groupIndex: "sender", fromUser: "sender", types: [23, 24] },
-    ]);
+    ]);}
   for (const [type, groupType] of [
     [5, 200],
     [10, 400],
     [18, 300],
   ] as const)
-    expect(mailDeleteGroups([entry(type)])).toEqual([{ groupType, groupIndex: "", types: [type] }]);
+    {expect(mailDeleteGroups([entry(type)])).toEqual([{ groupType, groupIndex: "", types: [type] }]);}
   for (const type of [6, 7, 8, 13, 14, 15, 16, 30, 32, 37, 38, 43, 44, 45, 46, 99])
-    expect(mailDeleteGroups([entry(type)])).toEqual([]);
+    {expect(mailDeleteGroups([entry(type)])).toEqual([]);}
   expect(
     mailDeleteGroups([entry(21, "a"), entry(22, "b"), entry(20, "c"), entry(21, "d", null)]),
   ).toEqual([{ groupType: 100, groupIndex: "sender", fromUser: "sender", types: [20, 21, 22] }]);
@@ -76,12 +76,12 @@ test("move invitations use exact owned recipients and decode inline or persisted
     Buffer.from("extra"),
     Buffer.alloc(65536, 32),
   ])
-    expect(planMailDeletion("self", [{ ...entry(26), contents }]).inviters).toEqual([]);
+    {expect(planMailDeletion("self", [{ ...entry(26), contents }]).inviters).toEqual([]);}
   for (const inviterUid of [" ", "a\0b", "\ud800", "x".repeat(256)])
-    expect(
+    {expect(
       planMailDeletion("self", [
         { ...entry(26), contents: Buffer.from(JSON.stringify({ inviterUid, inviteeUid: "self" })) },
       ]).inviters,
-    ).toEqual([]);
+    ).toEqual([]);}
   expect(planMailDeletion("self", [{ ...inline, type: 2 }]).inviters).toEqual([]);
 });

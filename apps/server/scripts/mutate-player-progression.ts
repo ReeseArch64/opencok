@@ -89,15 +89,15 @@ async function run(suite: string, module?: string, file?: string, source?: strin
         name: "player-progression-mutation",
         setup(build) {
           if (module)
-            build.onLoad({ filter: new RegExp(`${module}/src/${file}\\.ts$`) }, () => ({
+            {build.onLoad({ filter: new RegExp(`${module}/src/${file}\\.ts$`) }, () => ({
               contents: source!,
               loader: "ts",
-            }));
+            }));}
         },
       },
     ],
   });
-  if (!built.success) throw new Error("Player progression mutation bundle failed");
+  if (!built.success) {throw new Error("Player progression mutation bundle failed");}
   const child = Bun.spawn([process.execPath, "--no-env-file", "test", `${suite}.test.js`], {
     cwd: directory,
     stdin: "ignore",
@@ -113,16 +113,16 @@ async function run(suite: string, module?: string, file?: string, source?: strin
 }
 try {
   for (const suite of new Set(mutations.map((entry) => entry[1])))
-    if (await run(suite)) throw new Error(`Player progression mutation baseline failed: ${suite}`);
+    {if (await run(suite)) {throw new Error(`Player progression mutation baseline failed: ${suite}`);}}
   for (const [name, suite, module, file, from, to] of mutations) {
     const source = await readFile(
       new URL(`../../../packages/${module}/src/${file}.ts`, import.meta.url),
       "utf8",
     );
     if (source.split(from).length !== 2)
-      throw new Error(`Player progression mutation target changed: ${name}`);
+      {throw new Error(`Player progression mutation target changed: ${name}`);}
     if ((await run(suite, module, file, source.replace(from, to))) === 0)
-      throw new Error(`Critical player progression mutation survived: ${name}`);
+      {throw new Error(`Critical player progression mutation survived: ${name}`);}
     console.log(`Killed: ${name}`);
   }
 } finally {

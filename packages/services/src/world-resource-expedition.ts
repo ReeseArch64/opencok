@@ -21,16 +21,16 @@ export async function readResourceExpeditionLoadEffect(
         resourceMergeServer(rules, context.kingdomId),
       )
     )
-      return 0;
+      {return 0;}
 
     const stage = await services.expeditionStage?.(context.kingdomId);
 
-    if (stage !== 3) return 0;
+    if (stage !== 3) {return 0;}
 
     const origin = ownerInteger(profile.crossFightSrcServerId);
     const home = origin === -1 ? ownerInteger(profile.serverId) : origin;
 
-    if (home !== context.kingdomId) return 0;
+    if (home !== context.kingdomId) {return 0;}
 
     const value = resolve(895);
 

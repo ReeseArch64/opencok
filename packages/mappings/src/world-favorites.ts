@@ -8,17 +8,17 @@ import { errors } from "@opencok/constants/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
 function serializeWorldFavorites(state: WorldFavoriteList, owner: string): Fields {
-  if (state.rows.length > 32767) throw new GameError(errors.unsupported, "world_favorite_size");
+  if (state.rows.length > 32767) {throw new GameError(errors.unsupported, "world_favorite_size");}
 
   const favorites = state.rows.map((row) => {
-    if (row.uid !== owner) throw new GameError(errors.invalid);
+    if (row.uid !== owner) {throw new GameError(errors.invalid);}
 
     const value: Fields = {};
 
     for (const key of ["point", "type", "server", "resType", "cityType"]) {
-      if (row[key] == null) continue;
+      if (row[key] == null) {continue;}
 
-      if (!favoriteInteger(row[key])) throw new GameError(errors.invalid);
+      if (!favoriteInteger(row[key])) {throw new GameError(errors.invalid);}
 
       value[key] = sfs.int(row[key]);
     }
@@ -30,7 +30,7 @@ function serializeWorldFavorites(state: WorldFavoriteList, owner: string): Field
         row.name.includes("\0") ||
         row.name.length > 255
       )
-        throw new GameError(errors.invalid);
+        {throw new GameError(errors.invalid);}
 
       value.name = sfs.string(row.name);
     }
@@ -40,15 +40,15 @@ function serializeWorldFavorites(state: WorldFavoriteList, owner: string): Field
         typeof row.createTime !== "bigint" ||
         BigInt.asIntN(64, row.createTime) !== row.createTime
       )
-        throw new GameError(errors.invalid);
+        {throw new GameError(errors.invalid);}
 
       value.createTime = sfs.long(row.createTime);
     }
 
     if (row.server != null)
-      value.serverType = sfs.int(
+      {value.serverType = sfs.int(
         favoriteServerType(Number(row.server), state.serverTypes.get(Number(row.server))),
-      );
+      );}
 
     return sfs.object(value);
   });

@@ -30,7 +30,7 @@ export function heroTargetParameters(params: Fields, owner: string): Fields {
   const rewards = fields(params.rewards),
     reward = rewards[owner];
 
-  if (reward?.type !== Type.String) throw new Error("Missing owned hero reward");
+  if (reward?.type !== Type.String) {throw new Error("Missing owned hero reward");}
 
   const { recipients: _recipients, rewards: _rewards, ...message } = params;
 
@@ -63,7 +63,7 @@ export async function deliverHeroTargetBatch(
     new Set(recipients.value).size !== recipients.value.length ||
     recipients.value.some((owner) => typeof owner !== "string" || !owner || owner.length > 40)
   )
-    throw new Error("Invalid hero reward recipients");
+    {throw new Error("Invalid hero reward recipients");}
 
   const results = await Promise.allSettled(
     (recipients.value as string[]).map((owner) =>
@@ -75,10 +75,10 @@ export async function deliverHeroTargetBatch(
   );
 
   if (failures.length)
-    throw new AggregateError(
+    {throw new AggregateError(
       failures.map((result) => result.reason),
       "Hero reward delivery pending",
-    );
+    );}
 }
 
 function enqueueTarget(
@@ -89,7 +89,7 @@ function enqueueTarget(
   rewardId: string,
   members: readonly string[],
 ) {
-  if (!members.length) return;
+  if (!members.length) {return;}
 
   const template = context.rules.mail.get(
     num(event, "type") === 4
@@ -102,7 +102,7 @@ function enqueueTarget(
   );
 
   if (!template || !template.message || !context.economy.event)
-    throw new Error("Hero target delivery unavailable");
+    {throw new Error("Hero target delivery unavailable");}
 
   for (let offset = 0; offset < members.length; offset += 64) {
     const recipients = members.slice(offset, offset + 64);
@@ -137,7 +137,7 @@ export async function flushHeroScore(context: CityProgressionContext) {
     num(context.state.profile, "crossFightSrcServerId") > 0 ||
     num(context.state.profile, "serverId") !== context.rules.kingdomId
   )
-    return;
+    {return;}
 
   const alliance = text(context.state.profile, "allianceId"),
     scores = new Map<string, Row>(),
@@ -160,13 +160,13 @@ export async function flushHeroScore(context: CityProgressionContext) {
         !featureRealmEnabled(gate?.[keys[0]!], context.rules.kingdomId) ||
         !versionAtLeast("12.06.0", gate?.[keys[1]!] ?? "")
       )
-        continue;
+        {continue;}
 
       if (
         type >= 3 &&
         !text(event, "serverGroup").split("|").includes(String(context.rules.kingdomId))
       )
-        continue;
+        {continue;}
 
       const delta = heroScoreDelta(
         context.rules,
@@ -174,7 +174,7 @@ export async function flushHeroScore(context: CityProgressionContext) {
         actions.filter((action) => action.at === at),
       );
 
-      if (!delta) continue;
+      if (!delta) {continue;}
 
       const key = `${event.uuid}:${member}`,
         prior =
@@ -195,7 +195,7 @@ export async function flushHeroScore(context: CityProgressionContext) {
               ? Math.min(29, num(castle, "level") - 1)
               : -1;
 
-      if (level < 0) continue;
+      if (level < 0) {continue;}
 
       const row: Row = {
           uid: member,
@@ -263,23 +263,23 @@ export async function flushHeroScore(context: CityProgressionContext) {
         const members = snapshot.members.filter((uid) => uid !== context.owner);
 
         for (let offset = 0; offset < members.length; offset += 64)
-          context.economy.event({
+          {context.economy.event({
             id: identity("notify", event.uuid, at.toString(), offset),
             type: "hero.score.notify",
             payload: encode({
               recipients: { type: Type.StringArray, value: members.slice(offset, offset + 64) },
               body: sfs.object(decode(body)),
             }),
-          });
+          });}
       }
     }
   }
 
   if (scores.size)
-    context.write.heroScore = {
+    {context.write.heroScore = {
       scores: [...scores.values()],
       contributions: [...contributions.values()],
-    };
+    };}
 }
 
 export class HeroTargetDomain extends CityCommandDomain {
@@ -303,12 +303,12 @@ export class HeroTargetDomain extends CityCommandDomain {
       !message ||
       str(params, "operationId") !== heroTargetOperation(act, alliance, stage, context.owner)
     )
-      throw new Error("Invalid hero target delivery");
+      {throw new Error("Invalid hero target delivery");}
 
     mailRewardEntries(reward);
     const contents = javaMailBytes(`${message}|${stage}`);
 
-    if (!contents) throw new Error("Missing hero target mail");
+    if (!contents) {throw new Error("Missing hero target mail");}
 
     const quests = (context.write.quests ??= {});
     const mail: AvatarSystemMail = {
@@ -347,7 +347,7 @@ export class HeroTargetDomain extends CityCommandDomain {
                   ? heroHistoryBand(num(row, "type"), 0, snapshot.alliancePower, context.rules)
                   : Math.min(29, num(castle ?? {}, "level") - 1);
 
-            if (level < 0) return undefined;
+            if (level < 0) {return undefined;}
 
             const rewards = heroEventRewards(row, level, context.rules);
 
@@ -380,7 +380,7 @@ export class HeroTargetDomain extends CityCommandDomain {
       };
     }
 
-    if (!context.economy.event) throw new Error("Hero target mail publication unavailable");
+    if (!context.economy.event) {throw new Error("Hero target mail publication unavailable");}
 
     const full = context.rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
     context.economy.event({

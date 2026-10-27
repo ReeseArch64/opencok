@@ -45,11 +45,11 @@ export function worldMonsterBlack(row: Row) {
 }
 
 function rounded(value: number) {
-  if (Number.isNaN(value)) return 0;
+  if (Number.isNaN(value)) {return 0;}
 
-  if (value >= 9223372036854775808) return -1;
+  if (value >= 9223372036854775808) {return -1;}
 
-  if (value <= -9223372036854775808) return 0;
+  if (value <= -9223372036854775808) {return 0;}
 
   return Number(BigInt.asIntN(32, BigInt(Math.floor(value + 0.5))));
 }
@@ -67,7 +67,7 @@ function groupCounts(
   for (const row of group) {
     const range = row.day?.split(";") ?? [];
 
-    if (range.length !== 2) worldMutationFailure();
+    if (range.length !== 2) {worldMutationFailure();}
 
     const first = cityInteger(range[0]),
       last = cityInteger(range[1], first);
@@ -85,27 +85,27 @@ function groupCounts(
 
   const result = new Map<string, number>();
 
-  if (!selected) return result;
+  if (!selected) {return result;}
 
   for (let index = 1; index < 1000; index++) {
     const raw = selected[`${black ? "blackland" : "para"}${index}`];
 
-    if (raw === undefined) break;
+    if (raw === undefined) {break;}
 
     const pair = raw.split(";");
 
-    if (pair.length !== 2) worldMutationFailure();
+    if (pair.length !== 2) {worldMutationFailure();}
 
     const id = String(cityInteger(pair[0], 1)),
       count = rounded(cityInteger(pair[1]) * factor);
 
-    if (count > 0) result.set(id, count);
+    if (count > 0) {result.set(id, count);}
     else if (count === 0) {
       const draw = random(10);
 
-      if (!Number.isInteger(draw) || draw < 0 || draw >= 10) worldMutationFailure();
+      if (!Number.isInteger(draw) || draw < 0 || draw >= 10) {worldMutationFailure();}
 
-      if (draw < factor * 20) result.set(id, 1);
+      if (draw < factor * 20) {result.set(id, 1);}
     }
   }
 
@@ -118,17 +118,17 @@ export function worldMonsterQuotas(
   black: boolean,
   random: (maximum: number) => number,
 ) {
-  if (age < 0n) worldMutationFailure();
+  if (age < 0n) {worldMutationFailure();}
 
   const groups = rules.world.fieldMonsterGroups;
 
-  if (!groups?.get("refresh")?.length) worldMutationFailure();
+  if (!groups?.get("refresh")?.length) {worldMutationFailure();}
 
   const event = black || rules.items.get("function_on2")?.k9 === "1",
     common = groups.get("refresh")!,
     result = new Map<string, number>();
 
-  if (!event) return groupCounts(common, age, black, 1, random);
+  if (!event) {return groupCounts(common, age, black, 1, random);}
 
   const config = rules.items.get("monster_event_config"),
     rate = cityInteger(config?.k1, 0, 100),
@@ -157,7 +157,7 @@ export function worldMonsterQuotas(
     groupCounts(npc, age, black, leaderFactor, random),
     groupCounts(other, age, black, leaderFactor, random),
   ])
-    for (const [id, count] of map) result.set(id, cityInteger((result.get(id) ?? 0) + count));
+    {for (const [id, count] of map) {result.set(id, cityInteger((result.get(id) ?? 0) + count));}}
 
   return result;
 }
@@ -167,7 +167,7 @@ export function worldBarbarianQuota(rules: Rules) {
     side = cityInteger(row?.k2, 1),
     ratio = Math.fround(Number(row?.k3));
 
-  if (!Number.isFinite(ratio) || ratio < 0) worldMutationFailure();
+  if (!Number.isFinite(ratio) || ratio < 0) {worldMutationFailure();}
 
   return Math.trunc(Math.fround(side * side * Math.fround(ratio / 100)));
 }
@@ -193,7 +193,7 @@ export function worldBarbarianChoice(
       (row) => Number(row.area_level) === band,
     );
 
-  if (!choices.length) return undefined;
+  if (!choices.length) {return undefined;}
 
   const rule =
     choices[
@@ -209,11 +209,11 @@ export function worldBarbarianChoice(
 export function worldBarbarianActor(rules: Rules, id: string) {
   const rule = rules.world.barbarians?.get(id);
 
-  if (!rule) worldMutationFailure();
+  if (!rule) {worldMutationFailure();}
 
   const duration = Math.trunc(Number(rule.life_time) * 60 * 60 * 1000);
 
-  if (!Number.isSafeInteger(duration) || duration <= 0) worldMutationFailure();
+  if (!Number.isSafeInteger(duration) || duration <= 0) {worldMutationFailure();}
 
   const parse = (raw: string | undefined) => {
     const values = new Map<string, number>();
@@ -221,7 +221,7 @@ export function worldBarbarianActor(rules: Rules, id: string) {
     for (const entry of (raw ?? "").split("|").filter(Boolean)) {
       const parts = entry.split(";").filter(Boolean);
 
-      if (parts.length !== 2) worldMutationFailure();
+      if (parts.length !== 2) {worldMutationFailure();}
 
       values.set(parts[0]!, Number(javaDecimal(parts[1], 32)));
     }
@@ -230,7 +230,7 @@ export function worldBarbarianActor(rules: Rules, id: string) {
   };
   const army = rules.world.armies?.get(rule.army ?? "");
 
-  if (!army) worldMutationFailure();
+  if (!army) {worldMutationFailure();}
 
   return {
     configId: rule.id!,

@@ -54,7 +54,7 @@ export function createAllianceRepository(
         initial.map((row) => row.allianceId).filter((id): id is string => Boolean(id)),
       );
 
-      if (selection.allianceId) ids.add(selection.allianceId);
+      if (selection.allianceId) {ids.add(selection.allianceId);}
 
       if (selection.mailId) {
         const [message] = await db
@@ -65,10 +65,10 @@ export function createAllianceRepository(
         if (message && [17, 25].includes(message.type)) {
           const data = allianceMailData(message.contents);
 
-          if (message.type === 17 && typeof data.allianceId === "string") ids.add(data.allianceId);
+          if (message.type === 17 && typeof data.allianceId === "string") {ids.add(data.allianceId);}
 
           if (message.type === 25 && typeof data.applicantId === "string")
-            seed.push(data.applicantId);
+            {seed.push(data.applicantId);}
         }
 
         const [application] = await db
@@ -76,9 +76,9 @@ export function createAllianceRepository(
           .from(alliance_apply)
           .where(eq(alliance_apply.uid, selection.mailId));
 
-        if (application?.allianceId) ids.add(application.allianceId);
+        if (application?.allianceId) {ids.add(application.allianceId);}
 
-        if (application?.userId) seed.push(application.userId);
+        if (application?.userId) {seed.push(application.userId);}
       }
 
       const groups = [...ids].sort();
@@ -99,7 +99,7 @@ export function createAllianceRepository(
           .where(inArray(userprofile.uid, participants));
 
         if (profiles.some((row) => row.allianceId && !ids.has(row.allianceId)))
-          throw new Error("Alliance membership changed; retry operation");
+          {throw new Error("Alliance membership changed; retry operation");}
 
         const alliances = groups.length
           ? await tx
@@ -122,7 +122,7 @@ export function createAllianceRepository(
           .for("update");
 
         if (members.some((row) => !participants.includes(row.uid)))
-          throw new Error("Alliance participants changed; retry operation");
+          {throw new Error("Alliance participants changed; retry operation");}
 
         const applications = await tx
           .select()
@@ -135,7 +135,7 @@ export function createAllianceRepository(
           )
           .limit(8193);
 
-        if (applications.length > 8192) throw new Error("Alliance application limit exceeded");
+        if (applications.length > 8192) {throw new Error("Alliance application limit exceeded");}
 
         return executeInventoryTransaction(
           tx,
@@ -316,7 +316,7 @@ export function createAllianceRepository(
                   .where(eq(timed_activity.id, text(row, "id")));
                 const domain = domains.get(Number(row.type));
 
-                if (!saved || !domain) throw new Error("Unsupported helped activity");
+                if (!saved || !domain) {throw new Error("Unsupported helped activity");}
 
                 await domain(
                   tx,
@@ -340,7 +340,7 @@ export function createAllianceRepository(
               await writeAlliance(tx, input.owner, result.write, participants, groups);
 
               for (const action of result.write.actions ?? []) {
-                if (!participants.includes(action.uid)) throw new Error("Foreign alliance action");
+                if (!participants.includes(action.uid)) {throw new Error("Foreign alliance action");}
 
                 await recordAction?.(tx, action.uid, action.kind, action.count, at);
               }
@@ -349,7 +349,7 @@ export function createAllianceRepository(
 
             for (const owner of [...new Set(result.productionOwners ?? [])].sort().reverse()) {
               if (!participants.includes(owner))
-                throw new Error("Foreign alliance production owner");
+                {throw new Error("Foreign alliance production owner");}
 
               const nested = change;
               change = () =>
@@ -393,7 +393,7 @@ async function writeAlliance(
       if (
         !(write.memberships ?? []).some((entry) => entry.uid === owner && entry.allianceId === id)
       )
-        throw new Error("Foreign alliance creation");
+        {throw new Error("Foreign alliance creation");}
 
       allowed.add(id);
     }
@@ -415,7 +415,7 @@ async function writeAlliance(
         );
 
       if (existing.some((entry) => entry.id !== id))
-        throw new Error("Alliance name already exists");
+        {throw new Error("Alliance name already exists");}
     }
 
     const value = row as typeof alliance.$inferInsert;
@@ -426,13 +426,13 @@ async function writeAlliance(
   }
 
   const check = (row: Row, field = "allianceId") => {
-    if (!allowed.has(text(row, field))) throw new Error("Foreign alliance write");
+    if (!allowed.has(text(row, field))) {throw new Error("Foreign alliance write");}
   };
 
   for (const row of write.members ?? []) {
     check(row);
 
-    if (!participants.includes(text(row, "uid"))) throw new Error("Foreign alliance member");
+    if (!participants.includes(text(row, "uid"))) {throw new Error("Foreign alliance member");}
 
     const value = row as typeof alliance_member.$inferInsert;
     await tx
@@ -442,7 +442,7 @@ async function writeAlliance(
   }
 
   for (const id of write.removedMembers ?? []) {
-    if (!participants.includes(id)) throw new Error("Foreign alliance removal");
+    if (!participants.includes(id)) {throw new Error("Foreign alliance removal");}
 
     await tx
       .update(alliance_member)
@@ -456,7 +456,7 @@ async function writeAlliance(
       !participants.includes(member.uid) ||
       (member.allianceId && !allowed.has(member.allianceId))
     )
-      throw new Error("Foreign membership");
+      {throw new Error("Foreign membership");}
 
     await tx
       .update(userprofile)
@@ -475,7 +475,7 @@ async function writeAlliance(
   }
 
   for (const uid of write.firstJoin ?? []) {
-    if (!participants.includes(uid)) throw new Error("Foreign first join");
+    if (!participants.includes(uid)) {throw new Error("Foreign first join");}
 
     await tx
       .insert(user_lord)
@@ -493,7 +493,7 @@ async function writeAlliance(
   }
 
   if (write.deletedApplications?.length)
-    await tx
+    {await tx
       .delete(alliance_apply)
       .where(
         and(
@@ -503,7 +503,7 @@ async function writeAlliance(
             inArray(alliance_apply.allianceId, [...allowed]),
           ),
         ),
-      );
+      );}
 
   for (const row of write.sciences ?? []) {
     check(row);
@@ -527,15 +527,15 @@ async function writeAlliance(
   }
 
   if (write.deletedResearch?.length)
-    await tx.delete(alliance_science_upgrade).where(
+    {await tx.delete(alliance_science_upgrade).where(
       inArray(
         alliance_science_upgrade.allianceId,
         write.deletedResearch.filter((id) => allowed.has(id)),
       ),
-    );
+    );}
 
   for (const row of write.history ?? []) {
-    if (row.uid !== owner) throw new Error("Foreign donation history");
+    if (row.uid !== owner) {throw new Error("Foreign donation history");}
 
     check(row);
     const value = row as typeof donate_history.$inferInsert;
@@ -546,7 +546,7 @@ async function writeAlliance(
   }
 
   for (const row of write.donations ?? []) {
-    if (row.uerid !== owner) throw new Error("Foreign donation offer");
+    if (row.uerid !== owner) {throw new Error("Foreign donation offer");}
 
     const value = row as typeof alliance_donate.$inferInsert;
     await tx
@@ -561,7 +561,7 @@ async function writeAlliance(
   for (const row of write.helps ?? []) {
     check(row);
 
-    if (!participants.includes(text(row, "senderId"))) throw new Error("Foreign help sender");
+    if (!participants.includes(text(row, "senderId"))) {throw new Error("Foreign help sender");}
 
     const value = row as typeof alliance_help.$inferInsert;
     await tx
@@ -571,7 +571,7 @@ async function writeAlliance(
   }
 
   for (const row of write.queues ?? []) {
-    if (!participants.includes(text(row, "ownerId"))) throw new Error("Foreign helped queue");
+    if (!participants.includes(text(row, "ownerId"))) {throw new Error("Foreign helped queue");}
 
     await tx
       .update(queue)
@@ -580,7 +580,7 @@ async function writeAlliance(
   }
 
   for (const row of write.activities ?? []) {
-    if (!participants.includes(text(row, "ownerId"))) throw new Error("Foreign helped activity");
+    if (!participants.includes(text(row, "ownerId"))) {throw new Error("Foreign helped activity");}
 
     const updated = await tx
       .update(timed_activity)
@@ -594,7 +594,7 @@ async function writeAlliance(
       )
       .returning({ id: timed_activity.id });
 
-    if (updated.length !== 1) throw new Error("Helped activity changed");
+    if (updated.length !== 1) {throw new Error("Helped activity changed");}
   }
 
   if (write.publishedGift) {
@@ -605,13 +605,13 @@ async function writeAlliance(
   for (const row of write.sharedGifts ?? []) {
     check(row);
 
-    if (!participants.includes(text(row, "uid"))) throw new Error("Foreign shared gift recipient");
+    if (!participants.includes(text(row, "uid"))) {throw new Error("Foreign shared gift recipient");}
 
     await tx.insert(user_gift).values(row as typeof user_gift.$inferInsert);
   }
 
   for (const row of write.gifts ?? []) {
-    if (row.uid !== owner) throw new Error("Foreign alliance gift");
+    if (row.uid !== owner) {throw new Error("Foreign alliance gift");}
 
     await tx
       .update(user_gift)
@@ -620,13 +620,13 @@ async function writeAlliance(
   }
 
   if (write.deletedGifts?.length)
-    await tx
+    {await tx
       .delete(user_gift)
-      .where(and(eq(user_gift.uid, owner), inArray(user_gift.uuid, [...write.deletedGifts])));
+      .where(and(eq(user_gift.uid, owner), inArray(user_gift.uuid, [...write.deletedGifts])));}
 
   for (const row of write.mailUpdates ?? []) {
     if (row.toUser !== owner || !Buffer.isBuffer(row.contents))
-      throw new Error("Foreign alliance mail update");
+      {throw new Error("Foreign alliance mail update");}
 
     await tx
       .update(mail)
@@ -635,7 +635,7 @@ async function writeAlliance(
   }
 
   for (const row of write.mails ?? []) {
-    if (!participants.includes(text(row, "toUser"))) throw new Error("Foreign alliance mail");
+    if (!participants.includes(text(row, "toUser"))) {throw new Error("Foreign alliance mail");}
 
     const value = row as typeof mail.$inferInsert;
     const inserted = await tx
@@ -645,12 +645,12 @@ async function writeAlliance(
       .returning({ id: mail.uid });
 
     if (inserted.length && value.type === 2)
-      await tx.insert(mail_group).values({
+      {await tx.insert(mail_group).values({
         uid: value.toUser,
         groupType: 2,
         groupIndex: value.uid,
         updateTime: value.createTime,
-      });
+      });}
   }
 
   for (const row of write.blacklist ?? []) {
@@ -663,7 +663,7 @@ async function writeAlliance(
   }
 
   for (const id of write.deletedAlliances ?? []) {
-    if (!allowed.has(id)) throw new Error("Foreign alliance deletion");
+    if (!allowed.has(id)) {throw new Error("Foreign alliance deletion");}
 
     await tx.delete(alliance).where(eq(alliance.uid, id));
     await tx.delete(alliance_science).where(eq(alliance_science.allianceId, id));

@@ -13,7 +13,7 @@ export function castleRule(rules: Rules, level: number) {
     (entry) => Number(entry.level) === level,
   );
 
-  if (!rule) throw new GameError(errors.unsupported, "city_progression");
+  if (!rule) {throw new GameError(errors.unsupported, "city_progression");}
 
   return rule;
 }
@@ -31,12 +31,12 @@ export function settleCastle(rules: Rules, before: Row, now: bigint): Row {
     const interval = BigInt(cityInteger(rules.items.get("civilization_fortress")?.k2, 1)) * 1000n;
     const elapsed = now - long(row, "lastOutputTime");
 
-    if (elapsed < 0n) castleFailure();
+    if (elapsed < 0n) {castleFailure();}
 
     const ticks = elapsed / interval;
     const output = Number(rule.basic_output ?? 0);
 
-    if (!Number.isFinite(output) || output < 0) castleFailure();
+    if (!Number.isFinite(output) || output < 0) {castleFailure();}
 
     row.resourceNum = Math.min(
       cityInteger(rule.storage_ceiling),

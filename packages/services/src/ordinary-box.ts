@@ -42,7 +42,7 @@ export class OrdinaryBoxDomain extends CityCommandDomain {
         mixed = context.state.quests?.mixed ?? {};
 
       if (command === "ordinary.box.init") {
-        if (num(mixed, "ordinaryBoxGold") !== 0) context.write.ordinaryBox = { gold: false };
+        if (num(mixed, "ordinaryBoxGold") !== 0) {context.write.ordinaryBox = { gold: false };}
 
         return { response: encode({}), event: null };
       }
@@ -58,12 +58,12 @@ export class OrdinaryBoxDomain extends CityCommandDomain {
       }
 
       if (command === "get.table.value" && type !== 1 && type !== 2)
-        return { response: encode({}), event: null };
+        {return { response: encode({}), event: null };}
 
       const itemId = str(params, type === 1 ? "params" : "itemId"),
         rule = context.rules.goods.get(itemId);
 
-      if (!rule || rule.type !== "36") boxFailure();
+      if (!rule || rule.type !== "36") {boxFailure();}
 
       const slot = cityInteger(rule.para1, 1, 12),
         words = boxWords(text(mixed, "mdata")),
@@ -72,8 +72,8 @@ export class OrdinaryBoxDomain extends CityCommandDomain {
       let vip = 0;
 
       for (const row of context.rules.power.vip?.values() ?? [])
-        if (cityInteger(row.point) <= num(context.state.effects.vip ?? {}, "score"))
-          vip = (cityInteger(row.id) % 100) + 1;
+        {if (cityInteger(row.point) <= num(context.state.effects.vip ?? {}, "score"))
+          {vip = (cityInteger(row.id) % 100) + 1;}}
 
       const pin = () => {
         const result = boxSelection(
@@ -104,15 +104,15 @@ export class OrdinaryBoxDomain extends CityCommandDomain {
       const body: Fields = {};
 
       if (type === 0) {
-        if (cityInteger(int(params, "count"), 1) !== 1) boxFailure();
+        if (cityInteger(int(params, "count"), 1) !== 1) {boxFailure();}
 
         if (gold) {
           const cost = cityInteger(rule.para5, 1);
 
-          if (context.balance("gold") < BigInt(cost)) boxFailure();
+          if (context.balance("gold") < BigInt(cost)) {boxFailure();}
 
           context.economy.gold(-BigInt(cost));
-        } else if (rule.para4?.trim()) context.economy.item(rule.para4, -1);
+        } else if (rule.para4?.trim()) {context.economy.item(rule.para4, -1);}
 
         body.reward = sfs.array(
           grantNativeProgressionReward(
@@ -129,9 +129,9 @@ export class OrdinaryBoxDomain extends CityCommandDomain {
             count = 0;
 
             if (rule.para3?.trim())
-              body.baodi_reward = sfs.array(
+              {body.baodi_reward = sfs.array(
                 grantNativeProgressionReward(context, pinProgressionReward(context, rule.para3)),
-              );
+              );}
           }
 
           setBoxCounter(words, slot, count);
@@ -140,16 +140,16 @@ export class OrdinaryBoxDomain extends CityCommandDomain {
         pin();
         reward = boxWord(words, slot, 1, 31);
         body.gold = sfs.long(context.balance("gold"));
-      } else gold = false;
+      } else {gold = false;}
 
       const pay = context.rules.advanced.payRewards?.get(String(reward));
 
-      if (!pay) boxFailure();
+      if (!pay) {boxFailure();}
 
       const ids = (pay.item ?? "").split(";").filter(Boolean),
         amounts = (pay.num ?? "").split(";").filter(Boolean);
 
-      if (ids.length !== amounts.length) boxFailure();
+      if (ids.length !== amounts.length) {boxFailure();}
 
       const preview = ordinaryBoxPreview({
         reward_info: ids.map((id, i) => ({ id, num: amounts[i]! })),
@@ -160,9 +160,9 @@ export class OrdinaryBoxDomain extends CityCommandDomain {
       Object.assign(body, preview);
 
       if (type === 1 && rule.para3?.trim())
-        body.baodi_reward = rewardPreviewArray(
+        {body.baodi_reward = rewardPreviewArray(
           previewRewards(rule.para3, context.rules, ruleContext, random),
-        );
+        );}
 
       context.write.ordinaryBox = { mdata: words.join(",") + ",", gold };
 

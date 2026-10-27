@@ -42,7 +42,7 @@ async function fixture() {
         .pathname,
     });
     for (const uid of ["owner", "visitor"])
-      await second.db.insert(userprofile).values({
+      {await second.db.insert(userprofile).values({
         uid,
         name: `Synthetic cross ${uid}`,
         serverId: 2,
@@ -50,7 +50,7 @@ async function fixture() {
         exp: 0,
         country: "BR",
         crossFightSrcServerId: 1,
-      });
+      });}
     await global.db.insert(server_king_info).values([
       { Id: 1, name: "Home", banner: "home-banner" },
       { Id: 2, name: "Guest", banner: "guest-banner" },
@@ -74,7 +74,7 @@ async function fixture() {
       ["57002", "12"],
       ["57003", "14"],
     ])
-      h.rules.power.activityPanels!.set(id!, {
+      {h.rules.power.activityPanels!.set(id!, {
         id: id!,
         type: type!,
         function_on: "1",
@@ -83,7 +83,7 @@ async function fixture() {
         popup: "1",
         exchange: "0",
         androidmd5: "synthetic",
-      });
+      });}
     const start = BigInt(h.clock.now - 10000),
       end = BigInt(h.clock.now + 3600000);
     await h.db.db.insert(hero_activity).values({
@@ -136,7 +136,7 @@ async function fixture() {
             )[0];
           },
           async heroEvents(uid, selected, selection, now) {
-            if (selected !== 1 && selected !== 2) throw new Error("Unconfigured synthetic realm");
+            if (selected !== 1 && selected !== 2) {throw new Error("Unconfigured synthetic realm");}
             return readHeroEvents((selected === 1 ? h.db : second).db, uid, selection, now);
           },
           heroHistoryPresentation: (alliances, realms) =>
@@ -154,7 +154,7 @@ async function fixture() {
       const event = (await h.db.db.select().from(hero_event).where(eq(hero_event.uuid, id)))[0]!,
         profile = (await h.db.db.select().from(userprofile).where(eq(userprofile.uid, owner)))[0]!,
         query = heroRankingLookup(event, owner, profile.allianceId ?? "", h.rules, 1, "12.06.0");
-      if (typeof query === "number") throw new Error("Unexpected synthetic ranking gate");
+      if (typeof query === "number") {throw new Error("Unexpected synthetic ranking gate");}
       await cache.command("ZADD", query.keys[0]!, "-1000", "ahead", "-55", query.member);
       return query.keys[0]!;
     };
@@ -166,11 +166,11 @@ async function fixture() {
       game,
       rank,
       async close() {
-        for (const close of closers.toReversed()) await close();
+        for (const close of closers.toReversed()) {await close();}
       },
     };
   } catch (error) {
-    for (const close of closers.toReversed()) await close();
+    for (const close of closers.toReversed()) {await close();}
     throw error;
   }
 }

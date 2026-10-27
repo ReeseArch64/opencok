@@ -33,7 +33,7 @@ async function run(source: string) {
       },
     ],
   });
-  if (!result.success) throw new Error("Timed economy mutation bundle failed");
+  if (!result.success) {throw new Error("Timed economy mutation bundle failed");}
   const child = Bun.spawn([process.execPath, "--no-env-file", "test", "timed-economy.test.js"], {
     cwd: directory,
     stdin: "ignore",
@@ -49,12 +49,12 @@ async function run(source: string) {
 }
 try {
   const original = await readFile(timedFile, "utf8");
-  if (await run(original)) throw new Error("Timed economy mutation baseline failed");
+  if (await run(original)) {throw new Error("Timed economy mutation baseline failed");}
   for (const [name, from, to] of mutations) {
     if (original.split(from).length !== 2)
-      throw new Error(`Timed economy mutation target changed: ${name}`);
+      {throw new Error(`Timed economy mutation target changed: ${name}`);}
     if ((await run(original.replace(from, to))) === 0)
-      throw new Error(`Critical timed-economy mutation survived: ${name}`);
+      {throw new Error(`Critical timed-economy mutation survived: ${name}`);}
     console.log(`Killed: ${name}`);
   }
   console.log(`${mutations.length} critical timed-economy mutations killed`);

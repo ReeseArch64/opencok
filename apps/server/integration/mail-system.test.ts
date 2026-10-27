@@ -17,7 +17,7 @@ test("system-mail snapshots enforce ownership, inclusive anchors, limits and rea
     const admin = await server.start();
     try {
       for (const name of ["mail_global", "mail_one", "mail_two"])
-        await admin.query(`CREATE DATABASE "${name}"`);
+        {await admin.query(`CREATE DATABASE "${name}"`);}
     } finally {
       await admin.end();
     }
@@ -29,7 +29,7 @@ test("system-mail snapshots enforce ownership, inclusive anchors, limits and rea
       ],
     });
     await migrateDatabase(databases.global.pool, "global");
-    for (const realm of databases.kingdoms.values()) await migrateDatabase(realm.pool, "kingdom");
+    for (const realm of databases.kingdoms.values()) {await migrateDatabase(realm.pool, "kingdom");}
     const db = databases.getKingdom(1).db;
     const profiles = [
       { uid: "self", serverId: 1, banFlag: 0 },
@@ -75,7 +75,7 @@ test("system-mail snapshots enforce ownership, inclusive anchors, limits and rea
     expect((await read("missing", 3000n)).ids).toEqual(["z"]);
     expect((await read("missing")).ids).toEqual(["a", "b", "c", "z"]);
     for (const uid of ["missing", "banned", "foreign"])
-      expect((await read(null, 0n, uid)).entries).toEqual([]);
+      {expect((await read(null, 0n, uid)).entries).toEqual([]);}
     expect(
       (
         await readSystemMail(

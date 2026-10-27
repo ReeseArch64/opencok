@@ -45,7 +45,7 @@ export function applyProgressionStatus(context: CityProgressionContext, id: stri
   context.write.deletedStates = plan.deleted;
   const state = plan.states[0];
 
-  if (!state) return {};
+  if (!state) {return {};}
 
   const declaration = context.rules.power.statuses?.get(String(state.stateId));
   const effects =
@@ -75,7 +75,7 @@ export function applyProgressionStatus(context: CityProgressionContext, id: stri
     ),
   };
 
-  if (plan.deleted[0] !== undefined) body.oldStatus = sfs.string(String(plan.deleted[0]));
+  if (plan.deleted[0] !== undefined) {body.oldStatus = sfs.string(String(plan.deleted[0]));}
 
   return body;
 }
@@ -117,9 +117,9 @@ async function prepare(context: CityProgressionContext, command: string, params:
       count = cityInteger(int(params, "count"), 1),
       rule = context.rules.goods.get(id);
 
-    if (!rule) invalid();
+    if (!rule) {invalid();}
 
-    if (rule!.type === "4") body = applyProgressionStatus(context, rule!.para1!, count);
+    if (rule!.type === "4") {body = applyProgressionStatus(context, rule!.para1!, count);}
     else if (rule!.type === "3" && ["70", "110", "249", "250"].includes(rule!.para1 ?? "")) {
       context.write.vip = vipMutation(
         context.state.effects.vip,
@@ -130,11 +130,11 @@ async function prepare(context: CityProgressionContext, command: string, params:
         cityInteger(cityInteger(rule!.para2) * count),
       );
       body = { vip: sfs.object(vipState(context.write.vip)) };
-    } else invalid();
+    } else {invalid();}
   } else if (command === "collect.svip.switch") {
     const value = int(params, "switch");
 
-    if (![0, 1].includes(value) || !context.state.effects.vip) invalid();
+    if (![0, 1].includes(value) || !context.state.effects.vip) {invalid();}
 
     context.write.vip = { ...context.state.effects.vip!, vip_switch: value };
     body.switch = sfs.int(value);
@@ -142,7 +142,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
     const id = int(params, "statusId"),
       row = context.state.effects.states.find((row) => num(row, "stateId") === id);
 
-    if (!row) throw new GameError(errors.missing, "city_progression");
+    if (!row) {throw new GameError(errors.missing, "city_progression");}
 
     const rule = context.rules.power.statuses?.get(String(id));
 
@@ -162,7 +162,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
         "116",
       ].includes(rule?.type2 ?? "")
     )
-      invalid();
+      {invalid();}
 
     context.write.deletedStates = [id];
   } else if (command === "show.status.item") {

@@ -90,7 +90,7 @@ test("an unavailable collector cannot block operations and export recovers witho
     hostname: "127.0.0.1",
     port: 0,
     fetch() {
-      if (!healthy) return new Response("private-collector-response", { status: 400 });
+      if (!healthy) {return new Response("private-collector-response", { status: 400 });}
       accepted++;
       return Response.json({});
     },

@@ -28,7 +28,7 @@ function fixture() {
             queries.push({ realm, text: query.text, params });
             const pattern = new RegExp(params[0] as string, "u");
             if (query.text.includes('"userprofile"')) {
-              if (failure === "profile") throw new Error("Synthetic profile query failure");
+              if (failure === "profile") {throw new Error("Synthetic profile query failure");}
               expect(query.text).toBe(
                 'select "uid", "gmFlag" from "opencok_kingdom"."userprofile" where "opencok_kingdom"."userprofile"."uid" collate "C" ~ $1',
               );
@@ -39,7 +39,7 @@ function fixture() {
                   .map((row) => [row.uid, row.flag]),
               };
             }
-            if (failure === "description") throw new Error("Synthetic description query failure");
+            if (failure === "description") {throw new Error("Synthetic description query failure");}
             expect(query.text).toBe(
               'select "uid", "description" from "opencok_kingdom"."celebrity" where "opencok_kingdom"."celebrity"."uid" collate "C" ~ $1',
             );

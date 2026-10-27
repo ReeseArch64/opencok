@@ -31,7 +31,7 @@ export async function readWorldResourceOwner(
   db: Reader,
   uid: string,
 ): Promise<WorldResourceOwnerSnapshot | undefined> {
-  if (!text(uid, 255) || !uid) throw new Error("Invalid resource owner");
+  if (!text(uid, 255) || !uid) {throw new Error("Invalid resource owner");}
 
   const profiles = await db
     .select(profileColumns)
@@ -39,11 +39,11 @@ export async function readWorldResourceOwner(
     .where(eq(userprofile.uid, uid))
     .limit(2);
 
-  if (profiles.length > 1) throw new Error("Duplicate resource owner");
+  if (profiles.length > 1) {throw new Error("Duplicate resource owner");}
 
   const profile = profiles[0];
 
-  if (!profile) return undefined;
+  if (!profile) {return undefined;}
 
   if (
     profile.uid !== uid ||
@@ -57,7 +57,7 @@ export async function readWorldResourceOwner(
     !nullableInteger(profile.civilizationType) ||
     !nullableText(profile.decomposeSuitEffect, 100)
   )
-    throw new Error("Invalid resource owner profile");
+    {throw new Error("Invalid resource owner profile");}
 
   const effects = await readPlayerEffects(db, profile, true);
   const buildings = await db

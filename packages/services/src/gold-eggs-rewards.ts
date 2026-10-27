@@ -58,9 +58,9 @@ export function pinGoldEggRewards(
 ) {
   cityInteger(multiple, 1, 10000);
 
-  if (!ids.length) return "";
+  if (!ids.length) {return "";}
 
-  if (ids.length > 4096) goldEggsFailure();
+  if (ids.length > 4096) {goldEggsFailure();}
 
   const merged: Rule = {},
     rates: string[] = [],
@@ -71,13 +71,13 @@ export function pinGoldEggRewards(
   for (const id of ids) {
     const rule = context.rules.reconnect.rewards?.get(id);
 
-    if (!rule) goldEggsFailure();
+    if (!rule) {goldEggsFailure();}
 
     for (const scalar of scalars)
-      if (rule[scalar] !== undefined)
-        merged[scalar] = String(
+      {if (rule[scalar] !== undefined)
+        {merged[scalar] = String(
           cityInteger(Number(merged[scalar] ?? 0) + cityInteger(rule[scalar])),
-        );
+        );}}
 
     if (rule.rate) {
       rates.push(...rule.rate.split("|"));
@@ -93,7 +93,7 @@ export function pinGoldEggRewards(
     rates.length !== nums.length ||
     rates.length !== circles.length
   )
-    goldEggsFailure();
+    {goldEggsFailure();}
 
   let draws = 0;
 
@@ -101,18 +101,18 @@ export function pinGoldEggRewards(
     const guaranteed = rates[index] === "100";
 
     if (guaranteed)
-      nums[index] = nums[index]!.split(";")
+      {nums[index] = nums[index]!.split(";")
         .map((raw) => scale(raw, multiple, true))
-        .join(";");
-    else circles[index] = scale(circles[index]!, multiple, true);
+        .join(";");}
+    else {circles[index] = scale(circles[index]!, multiple, true);}
 
     draws += cityInteger(circles[index]);
   }
 
-  if (draws > 8192) goldEggsFailure();
+  if (draws > 8192) {goldEggsFailure();}
 
   for (const scalar of scalars)
-    if (merged[scalar] !== undefined) merged[scalar] = scale(merged[scalar]!, multiple, false);
+    {if (merged[scalar] !== undefined) {merged[scalar] = scale(merged[scalar]!, multiple, false);}}
 
   const ruleContext = {
     kingdomId: context.rules.kingdomId,
@@ -132,7 +132,7 @@ export function pinGoldEggRewards(
     })) {
       const key = row.kind === "item" ? `item:${row.id}` : `count:${row.type}`;
 
-      if (unique.has(key)) continue;
+      if (unique.has(key)) {continue;}
 
       unique.add(key);
       values.push(row);
@@ -142,13 +142,13 @@ export function pinGoldEggRewards(
   return values
     .map((row) => {
       if (row.kind === "item") {
-        if (row.count <= 0) goldEggsFailure();
+        if (row.count <= 0) {goldEggsFailure();}
 
         return `${row.type === 7 ? "goods" : "equip"},${row.id},${row.count}`;
       }
 
       if (row.kind === "count" && assets[row.type] && row.value > 0)
-        return `${assets[row.type]},0,${row.value}`;
+        {return `${assets[row.type]},0,${row.value}`;}
 
       return goldEggsFailure();
     })

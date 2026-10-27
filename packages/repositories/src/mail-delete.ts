@@ -41,7 +41,7 @@ export function deleteMail(
         !id.isWellFormed(),
     )
   )
-    throw new Error("Invalid mail delete query");
+    {throw new Error("Invalid mail delete query");}
 
   return db.transaction(
     async (tx) => {
@@ -67,7 +67,7 @@ export function deleteMail(
         (profile.banTime ?? 0n) > BigInt(query.now) ||
         !query.ids.length
       )
-        return { profile, deleted: 0 };
+        {return { profile, deleted: 0 };}
 
       const deleted = await tx
         .delete(mail)
@@ -86,7 +86,7 @@ export function deleteMail(
           contents: sql<Buffer | null>`case when ${mail.type} = 26 then ${mail.contents} else null end`,
         });
 
-      if (!deleted.length) return { profile, deleted: 0 };
+      if (!deleted.length) {return { profile, deleted: 0 };}
 
       const ids = deleted.map((row) => row.uid);
       const invitationIds = deleted.filter((row) => row.type === 26).map((row) => row.uid);
@@ -117,7 +117,7 @@ export function deleteMail(
         ) >
         8 * 1024 * 1024
       )
-        throw new Error("Mail deletion metadata exceeds limit");
+        {throw new Error("Mail deletion metadata exceeds limit");}
 
       const cleanup = plan(entries);
       await tx.delete(mail_contents).where(and(inArray(mail_contents.uid, ids), extraOwner));
@@ -152,19 +152,19 @@ export function deleteMail(
             )[0]
           : undefined;
 
-        if (newest) await tx.update(mail_group).set({ updateTime: newest.createTime }).where(key);
-        else await tx.delete(mail_group).where(key);
+        if (newest) {await tx.update(mail_group).set({ updateTime: newest.createTime }).where(key);}
+        else {await tx.delete(mail_group).where(key);}
       }
 
       if (cleanup.inviters.length)
-        await tx
+        {await tx
           .delete(alliance_invite_move)
           .where(
             and(
               eq(alliance_invite_move.invitee, uid),
               inArray(alliance_invite_move.inviter, cleanup.inviters),
             ),
-          );
+          );}
 
       return { profile, deleted: ids.length };
     },

@@ -26,13 +26,13 @@ function database(
           : text.includes('from "opencok_kingdom"."pic_upload_record"')
             ? "record"
             : text;
-      if (source === options.fail) throw new Error("Synthetic dependency failure");
+      if (source === options.fail) {throw new Error("Synthetic dependency failure");}
       if (source === "profile")
-        return {
+        {return {
           rows: options.profile === null ? [] : [options.profile ?? ["1001", 1, "0", 0, 1000004]],
-        };
-      if (source === "castle") return { rows: options.castles ?? [["1001", 10]] };
-      if (source === "record") return { rows: options.record ? [options.record] : [] };
+        };}
+      if (source === "castle") {return { rows: options.castles ?? [["1001", 10]] };}
+      if (source === "record") {return { rows: options.record ? [options.record] : [] };}
       return { rows: [] };
     },
   };
@@ -153,10 +153,10 @@ test("ambiguous state, escaped readers and transaction failures cannot return su
 test("invalid direct avatar store callers reject before database work", () => {
   const fixture = database();
   for (const owner of ["", "other", "1".repeat(21), "1\0"])
-    expect(() => readAvatarGrant(fixture.db, 1, owner, now, async () => grant)).toThrow();
+    {expect(() => readAvatarGrant(fixture.db, 1, owner, now, async () => grant)).toThrow();}
   for (const realm of [0, 1.5, 2147483648])
-    expect(() => readAvatarGrant(fixture.db, realm, "1001", now, async () => grant)).toThrow();
+    {expect(() => readAvatarGrant(fixture.db, realm, "1001", now, async () => grant)).toThrow();}
   for (const time of [-1, NaN, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => readAvatarGrant(fixture.db, 1, "1001", time, async () => grant)).toThrow();
+    {expect(() => readAvatarGrant(fixture.db, 1, "1001", time, async () => grant)).toThrow();}
   expect(fixture.queries).toEqual([]);
 });

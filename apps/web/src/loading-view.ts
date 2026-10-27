@@ -77,7 +77,7 @@ export class LoadingView implements LoadingScreen {
   private element<T extends HTMLElement>(id: string): T {
     const result = this.document.getElementById(id);
 
-    if (!result) throw new Error(`Missing loading element: ${id}`);
+    if (!result) {throw new Error(`Missing loading element: ${id}`);}
 
     return result as T;
   }

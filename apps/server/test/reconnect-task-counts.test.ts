@@ -51,7 +51,7 @@ test("new task counts restore each progress source with legacy integer widths", 
   expect(count(39)).toBe(2);
   expect(count(58)).toBe(9);
   expect(count(65)).toBe(1);
-  for (const kind of [2, 4, 6, 7, 9, 14, 29, 64]) expect(count(kind)).toBe(0);
+  for (const kind of [2, 4, 6, 7, 9, 14, 29, 64]) {expect(count(kind)).toBe(0);}
   expect(() => count(66)).toThrow();
   expect(() => count(8, "400000|400001", "1")).toThrow();
 });

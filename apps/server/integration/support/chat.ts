@@ -10,7 +10,7 @@ export class SocketClient {
     const end = Date.now() + 5000;
     while (Date.now() < end) {
       const index = this.frames.findIndex((frame) => frame.cmd === cmd);
-      if (index >= 0) return this.frames.splice(index, 1)[0]!;
+      if (index >= 0) {return this.frames.splice(index, 1)[0]!;}
       await Bun.sleep(10);
     }
     throw new Error(`Synthetic chat response timeout: ${cmd}`);

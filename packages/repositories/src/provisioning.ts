@@ -33,7 +33,7 @@ export function createProvisioningStore(
           )
           .for("update");
 
-        if (!account || account.disabled) throw new HttpError(403, "Identity unavailable");
+        if (!account || account.disabled) {throw new HttpError(403, "Identity unavailable");}
 
         const [existing] = await tx
           .select()
@@ -46,17 +46,17 @@ export function createProvisioningStore(
           );
 
         if (existing)
-          return {
+          {return {
             reservation: JSON.parse(existing.payload) as CharacterReservation,
             ready: existing.state === 1,
-          };
+          };}
 
         const characters = await tx
           .select({ realm: character_provisioning.kingdomId })
           .from(character_provisioning)
           .where(eq(character_provisioning.identityId, account.id));
 
-        if (characters.length >= 2) throw new HttpError(409, "Character limit reached");
+        if (characters.length >= 2) {throw new HttpError(409, "Character limit reached");}
 
         await tx.execute(
           sql`select pg_advisory_xact_lock(hashtextextended(${`character-device:${input.kingdomId}:${input.deviceUuid}`}, 0))`,
@@ -81,7 +81,7 @@ export function createProvisioningStore(
           );
 
         if (owned.length || pending.length)
-          throw new HttpError(409, "Device already bound in this realm");
+          {throw new HttpError(409, "Device already bound in this realm");}
 
         let uid = "";
 
@@ -101,7 +101,7 @@ export function createProvisioningStore(
           }
         }
 
-        if (!uid) throw new Error("Character identity unavailable");
+        if (!uid) {throw new Error("Character identity unavailable");}
 
         const reservation: CharacterReservation = {
           kingdomId: input.kingdomId,
@@ -140,7 +140,7 @@ export function createProvisioningStore(
           .for("update");
 
         if (!account || account.disabled || account.id !== reservation.identityId)
-          throw new HttpError(403, "Identity unavailable");
+          {throw new HttpError(403, "Identity unavailable");}
 
         const [row] = await tx
           .select()
@@ -153,7 +153,7 @@ export function createProvisioningStore(
           )
           .for("update");
 
-        if (!row) throw new Error("Missing character reservation");
+        if (!row) {throw new Error("Missing character reservation");}
 
         const stored = JSON.parse(row.payload) as CharacterReservation;
 
@@ -163,10 +163,10 @@ export function createProvisioningStore(
           receipt.requestHash !== provisionHash(stored) ||
           provisionHash(reservation) !== receipt.requestHash
         )
-          throw new Error("Character receipt mismatch");
+          {throw new Error("Character receipt mismatch");}
 
         if (row.state === 1)
-          return { gameUid: row.gameUid, kingdomId: row.kingdomId, state: "ready" };
+          {return { gameUid: row.gameUid, kingdomId: row.kingdomId, state: "ready" };}
 
         const timestamp = BigInt(now());
         await tx.insert(account_new).values({

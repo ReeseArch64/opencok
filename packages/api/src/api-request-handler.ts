@@ -25,9 +25,9 @@ export class ApiRequestHandler {
       });
     }
 
-    if (requestId) response.headers.set("X-Request-ID", String(requestId));
+    if (requestId) {response.headers.set("X-Request-ID", String(requestId));}
 
-    if (failure) logEvent("request_failed", { reason: failure, status: response.status }, "error");
+    if (failure) {logEvent("request_failed", { reason: failure, status: response.status }, "error");}
 
     return request.method === "HEAD"
       ? new Response(null, { status: response.status, headers: response.headers })

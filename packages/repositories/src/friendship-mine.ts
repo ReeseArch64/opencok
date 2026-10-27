@@ -29,7 +29,7 @@ export function createFriendshipMineExecutor(
       command.owner,
     );
 
-    if (!binding) throw new Error("Friendship binding required");
+    if (!binding) {throw new Error("Friendship binding required");}
 
     return execute(command, async (tx) => {
       await preparation?.before?.(tx, command.owner, BigInt(now()));
@@ -43,7 +43,7 @@ export function createFriendshipMineExecutor(
         .where(and(eq(user_mine.uid, command.owner), eq(user_mine.fId, binding)))
         .for("update");
 
-      if (!mine) throw new Error("Friendship mine unavailable");
+      if (!mine) {throw new Error("Friendship mine unavailable");}
 
       const helpers: unknown = mine.helpInfo?.length
         ? JSON.parse(mine.helpInfo.toString("utf8"))
@@ -60,7 +60,7 @@ export function createFriendshipMineExecutor(
             !Number.isSafeInteger(helper.time),
         )
       )
-        throw new Error("Invalid mine helper history");
+        {throw new Error("Invalid mine helper history");}
 
       return executeInventoryTransaction(
         tx,
@@ -72,7 +72,7 @@ export function createFriendshipMineExecutor(
             helpers: helpers as MineHelper[],
             async save(row, history) {
               if (text(row, "uid") !== command.owner || history.length > 50)
-                throw new Error("Foreign mine mutation");
+                {throw new Error("Foreign mine mutation");}
 
               await tx
                 .update(user_mine)

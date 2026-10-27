@@ -31,7 +31,7 @@ function fixture(
         const text = statement.text;
         calls.push({ realm: id, text, params });
         if (text.includes('from "opencok_kingdom"."userprofile"')) {
-          if (options.fail === "profile") throw new Error("Synthetic profile failure");
+          if (options.fail === "profile") {throw new Error("Synthetic profile failure");}
           const rows = (users.get(id) ?? [])
             .filter((row) => params.slice(0, -1).includes(row[0]))
             .map((row) =>
@@ -42,7 +42,7 @@ function fixture(
         if (text.includes('from "opencok_kingdom"."translationv2"')) {
           const metadata = text.includes("octet_length");
           if (options.fail === (metadata ? "metadata" : "contents"))
-            throw new Error("Synthetic translation failure");
+            {throw new Error("Synthetic translation failure");}
           const language = text.match(/"(?:en|ja|pt)"/)?.[0].slice(1, -1) ?? "en";
           const ids = params
             .slice(0, -1)
@@ -63,7 +63,7 @@ function fixture(
   const global = {
     query: async (statement: { text: string }, params: unknown[] = []) => {
       calls.push({ realm: 0, text: statement.text, params });
-      if (options.fail === "directory") throw new Error("Synthetic directory failure");
+      if (options.fail === "directory") {throw new Error("Synthetic directory failure");}
       return { rows: options.routes ?? [["remote", "2"]].filter(([uid]) => params.includes(uid)) };
     },
   };
@@ -137,7 +137,7 @@ test("mail sender lookup rejects bad, unconfigured and inconsistent routes witho
     const f = fixture(options);
     await expect(readMailSenders(f.databases, 1, f.db, ["remote"])).rejects.toThrow();
     expect(f.calls.some((call) => call.realm === 1)).toBe(false);
-    if (options.fail !== "directory") expect(f.calls.at(-1)!.text).toBe("rollback");
+    if (options.fail !== "directory") {expect(f.calls.at(-1)!.text).toBe("rollback");}
   }
   const fallback = fixture({ routes: [] });
   expect((await readMailSenders(fallback.databases, 1, fallback.db, ["local"])).has("local")).toBe(
@@ -159,7 +159,7 @@ test("mail sender queries are bounded and skip all dependencies for empty select
     ["\ud800"],
     Array.from({ length: 1001 }, (_, i) => String(i)),
   ])
-    await expect(readMailSenders(f.databases, 1, f.db, ids)).rejects.toThrow();
+    {await expect(readMailSenders(f.databases, 1, f.db, ids)).rejects.toThrow();}
   expect(f.calls).toEqual([]);
 });
 
@@ -203,7 +203,7 @@ test("translation readers bound bodies before loading and reject inconsistent sn
     const f = fixture(options);
     await expect(readMailTranslations(f.db, [{ id: "id", language: "en" }])).rejects.toThrow();
     if ("translationSize" in options && options.translationSize !== 0)
-      expect(f.calls).toHaveLength(1);
+      {expect(f.calls).toHaveLength(1);}
   }
   const missing = fixture();
   expect(await readMailTranslations(missing.db, [{ id: "missing", language: "en" }])).toEqual([]);
@@ -218,6 +218,6 @@ test("translation readers bound bodies before loading and reject inconsistent sn
     [{ id: "x".repeat(256), language: "en" }],
     Array.from({ length: 1001 }, (_, i) => ({ id: String(i), language: "en" })),
   ])
-    await expect(readMailTranslations(f.db, requests)).rejects.toThrow();
+    {await expect(readMailTranslations(f.db, requests)).rejects.toThrow();}
   expect(f.calls).toEqual([]);
 });

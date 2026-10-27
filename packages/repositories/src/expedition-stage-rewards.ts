@@ -54,7 +54,7 @@ export async function writeExpeditionAward(
     .for("update");
 
   if (!award || award.createdAt > now)
-    throw new Error("Invalid owned expedition award acknowledgement");
+    {throw new Error("Invalid owned expedition award acknowledgement");}
 
   const payload = JSON.parse(award.payload) as ExpeditionAwardPayload;
   const [progress] = await tx
@@ -70,15 +70,15 @@ export async function writeExpeditionAward(
     .for("update");
 
   if (payload.claims.length) {
-    if (!progress) throw new Error("Missing expedition reward progress");
+    if (!progress) {throw new Error("Missing expedition reward progress");}
 
     const taken = new Set(progress.takeReward.split("|").filter(Boolean).map(Number));
 
-    for (const claim of payload.claims) taken.add(claim);
+    for (const claim of payload.claims) {taken.add(claim);}
 
     const takeReward = [...taken].join("|");
 
-    if (takeReward.length > 500) throw new Error("Expedition claim flag bound exceeded");
+    if (takeReward.length > 500) {throw new Error("Expedition claim flag bound exceeded");}
 
     await tx
       .update(expedition_progress)
@@ -170,7 +170,7 @@ export function createExpeditionAwardStore(
           now < current.finalizedAt ||
           Buffer.compare(Buffer.from(uid), Buffer.from(current.awardCursor)) <= 0
         )
-          throw new Error("Stale expedition reward cursor");
+          {throw new Error("Stale expedition reward cursor");}
 
         const [profile] = await tx
           .select({ uid: userprofile.uid })
@@ -188,7 +188,7 @@ export function createExpeditionAwardStore(
             payload.claims.length > 128 ||
             Buffer.byteLength(encoded) > 1048576
           )
-            throw new Error("Expedition award payload bound exceeded");
+            {throw new Error("Expedition award payload bound exceeded");}
 
           await tx
             .insert(awards)
@@ -209,7 +209,7 @@ export function createExpeditionAwardStore(
             saved.stage !== current.stage ||
             saved.ownerUid !== uid
           )
-            throw new Error("Foreign expedition award identity");
+            {throw new Error("Foreign expedition award identity");}
         }
 
         await tx
@@ -225,7 +225,7 @@ export function createExpeditionAwardStore(
         const [current] = await tx.select().from(closures).where(key(closure)).for("update");
 
         if (!current || current.phase !== 2 || current.awardCursor !== text(closure, "awardCursor"))
-          throw new Error("Stale expedition reward completion");
+          {throw new Error("Stale expedition reward completion");}
 
         const [remaining] = await tx
           .select({ uid: userprofile.uid })
@@ -233,7 +233,7 @@ export function createExpeditionAwardStore(
           .where(owners(current))
           .limit(1);
 
-        if (remaining) throw new Error("Incomplete expedition reward population");
+        if (remaining) {throw new Error("Incomplete expedition reward population");}
 
         await tx
           .update(closures)
@@ -274,7 +274,7 @@ export function createExpeditionAwardStandings(
     read(closure, owners) {
       return db.transaction(
         async (tx) => {
-          if (owners.length > 64) throw new Error("Expedition standings member bound exceeded");
+          if (owners.length > 64) {throw new Error("Expedition standings member bound exceeded");}
 
           await tx.execute(sql`set local statement_timeout='3s'`);
           const opponent = num(closure, "opponent"),
@@ -292,13 +292,13 @@ export function createExpeditionAwardStandings(
               )
               .limit(1);
 
-          if (!result) return;
+          if (!result) {return;}
 
           if (
             result.winner !== num(closure, "winner") ||
             result.endTime !== long(closure, "endTime")
           )
-            throw new Error("Conflicting expedition prize result");
+            {throw new Error("Conflicting expedition prize result");}
 
           const proofs = await tx
             .select()
@@ -318,7 +318,7 @@ export function createExpeditionAwardStandings(
               (row) => row.opponent === (row.kingdomId === kingdomId ? opponent : kingdomId),
             )
           )
-            return;
+            {return;}
 
           const rows = owners.length
             ? await tx.execute<Row>(
@@ -372,7 +372,7 @@ export function createExpeditionHistorySource(
             (profile.banFlag ?? 0) !== 0 ||
             (profile.banTime ?? 0n) > now
           )
-            throw new GameError(errors.invalid);
+            {throw new GameError(errors.invalid);}
 
           const current = await tx
             .select()
@@ -417,9 +417,9 @@ export function createExpeditionHistorySource(
       );
     },
     async servers(ids) {
-      if (!ids.length) return [];
+      if (!ids.length) {return [];}
 
-      if (ids.length > 24) throw new Error("Expedition history realm bound exceeded");
+      if (ids.length > 24) {throw new Error("Expedition history realm bound exceeded");}
 
       return global
         .select()

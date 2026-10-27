@@ -18,7 +18,7 @@ function scheduler() {
     },
     next: () => {
       const entry = tasks.entries().next().value;
-      if (!entry) throw new Error("No scheduled relay");
+      if (!entry) {throw new Error("No scheduled relay");}
       tasks.delete(entry[0]);
       entry[1]();
     },
@@ -37,7 +37,7 @@ test("gift relay retries after a fixed delay, reports no dependency details and 
   const worker = startMailGiftRelay(
     async () => {
       calls++;
-      if (calls === 1) throw new Error("Synthetic private dependency details");
+      if (calls === 1) {throw new Error("Synthetic private dependency details");}
       return new Promise<number>((done) => {
         resolve = done;
       });

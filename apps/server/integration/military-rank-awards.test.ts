@@ -55,8 +55,8 @@ async function fixture() {
             .from(user_activity)
             .where(and(eq(user_activity.uid, owner), eq(user_activity.actId, id)))
             .for("update");
-          if (!saved) throw new Error("Missing owned trusted entitlement");
-          if (saved.status === 1) return { response: encode({}) };
+          if (!saved) {throw new Error("Missing owned trusted entitlement");}
+          if (saved.status === 1) {return { response: encode({}) };}
           const state = await createCityProgressionStore(
             tx,
             owner,
@@ -73,10 +73,10 @@ async function fixture() {
             ),
             results = [];
           for (const reward of awards.get(id)!)
-            results.push(await applyMilitaryRankAward(context, { ...reward, entitlementId: id }));
+            {results.push(await applyMilitaryRankAward(context, { ...reward, entitlementId: id }));}
           await beforeWrite?.(tx, context);
           if (context.write.militaryAward)
-            await writeMilitaryRankAward(tx, owner, context.write.militaryAward, BigInt(now()));
+            {await writeMilitaryRankAward(tx, owner, context.write.militaryAward, BigInt(now()));}
           await tx
             .update(user_activity)
             .set({ status: 1 })
@@ -195,7 +195,7 @@ test("concurrent different entitlements exhaust only the authoritative remaining
     });
     await h.db.db.insert(user_state).values({ uid: "owner", stateId: 510056, endTime: 999999999n });
     const states = await h.db.db.select().from(user_state);
-    for (let i = 0; i < 5; i++) await h.entitlement(`cap${i}`, [{ kind: "milhonor", amount: 200 }]);
+    for (let i = 0; i < 5; i++) {await h.entitlement(`cap${i}`, [{ kind: "milhonor", amount: 200 }]);}
     const replies = await Promise.all(Array.from({ length: 5 }, (_, i) => h.claim(`cap${i}`)));
     expect(
       replies.reduce(
@@ -234,9 +234,9 @@ test("missing zero future and expired period markers retain the entitlement befo
     for (const marker of [undefined, 0n, BigInt(h.clock.now + 1)]) {
       await h.db.db.delete(server_info);
       if (marker !== undefined)
-        await h.db.db
+        {await h.db.db
           .insert(server_info)
-          .values({ uid: "server", lastClearMilitaryMailSendTime: marker });
+          .values({ uid: "server", lastClearMilitaryMailSendTime: marker });}
       await expect(h.claim("clock", request)).rejects.toThrow();
       expect(await h.rank()).toBeUndefined();
       expect((await h.db.db.select().from(user_activity))[0]!.status).toBe(0);

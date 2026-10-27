@@ -26,7 +26,7 @@ function parseArgs(argv) {
     process.exit(0);
   }
 
-  if (argv.length < 3) die("Missing <path>");
+  if (argv.length < 3) {die("Missing <path>");}
   const file = argv[2];
 
   let status = null;
@@ -34,7 +34,7 @@ function parseArgs(argv) {
   for (let i = 3; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--status") {
-      if (i + 1 >= argv.length) die("Missing value for --status");
+      if (i + 1 >= argv.length) {die("Missing value for --status");}
       status = argv[++i];
     } else if (a === "--json") {
       json = true;
@@ -42,12 +42,12 @@ function parseArgs(argv) {
       die(`Unknown arg: ${a}`);
     }
   }
-  if (!status) die("Missing required --status");
+  if (!status) {die("Missing required --status");}
   return { file, status: String(status).trim(), json };
 }
 
 function setYamlFrontMatterStatus(lines, newStatus) {
-  if (lines.length < 2 || lines[0].trim() !== "---") return { lines, changed: false };
+  if (lines.length < 2 || lines[0].trim() !== "---") {return { lines, changed: false };}
 
   let changed = false;
   const out = [];
@@ -85,7 +85,7 @@ function setBulletStatus(lines, newStatus) {
   let changed = false;
   const out = lines.map((line) => {
     const m = line.match(/^([*-])\s*Status:\s*(.*)$/);
-    if (!m) return line;
+    if (!m) {return line;}
     changed = true;
     return `${m[1]} Status: ${newStatus}`;
   });
@@ -99,7 +99,7 @@ function setSectionStatus(lines, newStatus) {
   for (let i = 0; i < lines.length; i++) {
     out.push(lines[i]);
 
-    if (!/^##\s+Status\s*$/.test(lines[i])) continue;
+    if (!/^##\s+Status\s*$/.test(lines[i])) {continue;}
 
     let j = i + 1;
     while (j < lines.length && lines[j].trim() === "") {
@@ -125,15 +125,15 @@ function setSectionStatus(lines, newStatus) {
 function main() {
   const args = parseArgs(process.argv);
   const filePath = path.resolve(process.cwd(), args.file);
-  if (!fs.existsSync(filePath)) die(`File not found: ${filePath}`);
+  if (!fs.existsSync(filePath)) {die(`File not found: ${filePath}`);}
 
   const content = fs.readFileSync(filePath, "utf8");
   const hadTrailingNewline = content.endsWith("\n");
   const lines = content.replace(/\r\n/g, "\n").split("\n");
 
   let r = setYamlFrontMatterStatus(lines, args.status);
-  if (!r.changed) r = setBulletStatus(lines, args.status);
-  if (!r.changed) r = setSectionStatus(lines, args.status);
+  if (!r.changed) {r = setBulletStatus(lines, args.status);}
+  if (!r.changed) {r = setSectionStatus(lines, args.status);}
   if (!r.changed) {
     die(
       "Could not find a status to update. Expected YAML front matter 'status:', '- Status:'/'* Status:', or a '## Status' section.",

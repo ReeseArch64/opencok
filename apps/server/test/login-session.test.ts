@@ -19,12 +19,12 @@ async function harness(initialize: ServerDependencies["game"]["initialize"]) {
     },
     cache: {
       claim: async (owner: string, token: string) => {
-        if (claims.has(owner)) return false;
+        if (claims.has(owner)) {return false;}
         claims.set(owner, token);
         return true;
       },
       release: async (owner: string, token: string) => {
-        if (claims.get(owner) === token) claims.delete(owner);
+        if (claims.get(owner) === token) {claims.delete(owner);}
       },
       refresh: async () => true,
     },
@@ -46,7 +46,7 @@ async function harness(initialize: ServerDependencies["game"]["initialize"]) {
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
   const address = server.address();
-  if (!address || typeof address === "string") throw new Error("Missing TCP address");
+  if (!address || typeof address === "string") {throw new Error("Missing TCP address");}
 
   const connect = async () => {
     const socket = createConnection(address.port, "127.0.0.1");
@@ -63,8 +63,8 @@ async function harness(initialize: ServerDependencies["game"]["initialize"]) {
     socket.on("data", (bytes) => {
       packets.push(...reader.feed(Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes)));
       const result = packets.find((packet) => packet.c?.value === 0 && packet.a?.value === 1);
-      if (result) login(result);
-      if (packets.some((packet) => str(fields(packet.p), "c", "") === "init")) complete();
+      if (result) {login(result);}
+      if (packets.some((packet) => str(fields(packet.p), "c", "") === "init")) {complete();}
     });
     await once(socket, "connect");
     socket.write(frame(envelope(0, 0, { api: sfs.string("1.7.0") })));
@@ -97,7 +97,7 @@ async function harness(initialize: ServerDependencies["game"]["initialize"]) {
     });
     await Promise.all(closing);
     await new Promise<void>((resolve) => server.close(() => resolve()));
-    while (inFlight.size) await Promise.allSettled(inFlight);
+    while (inFlight.size) {await Promise.allSettled(inFlight);}
   };
 
   return { connect, close, claims, closed };
@@ -180,7 +180,7 @@ test("initialization failure releases its claim and permits a successful retry",
   let calls = 0;
   const h = await harness(async () => {
     if (++calls === 1)
-      throw Object.assign(new Error("synthetic database failure"), { code: "57014" });
+      {throw Object.assign(new Error("synthetic database failure"), { code: "57014" });}
 
     return { body: { marker: sfs.string("retry") }, pushes: [] };
   });

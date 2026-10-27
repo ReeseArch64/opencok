@@ -88,29 +88,29 @@ export async function writeAllianceHeart(
       )
       .returning({ id: worldpoint.id });
 
-    if (changed.length !== 1) throw new Error("Stale heart city");
+    if (changed.length !== 1) {throw new Error("Stale heart city");}
   }
 
   if (write.pending)
-    await tx.insert(receive_heart).values({
+    {await tx.insert(receive_heart).values({
       uid: write.pending.uid,
       senduid: owner,
       duration: write.pending.duration,
       effecttype: write.pending.effect,
-    });
+    });}
 
   if (write.delivered?.length) {
     const ids = write.delivered.map((id) => cityInteger(id, 1));
 
     if (ids.length > 64 || new Set(ids).size !== ids.length)
-      throw new Error("Invalid heart delivery selection");
+      {throw new Error("Invalid heart delivery selection");}
 
     const removed = await tx
       .delete(receive_heart)
       .where(and(eq(receive_heart.uid, owner), inArray(receive_heart.id, ids)))
       .returning({ id: receive_heart.id });
 
-    if (removed.length !== ids.length) throw new Error("Stale heart delivery selection");
+    if (removed.length !== ids.length) {throw new Error("Stale heart delivery selection");}
   }
 }
 
@@ -118,9 +118,9 @@ export async function pendingAllianceHeartOwners(
   db: Database["kingdom"]["db"],
   online: readonly string[],
 ) {
-  if (!online.length) return [];
+  if (!online.length) {return [];}
 
-  if (online.length > 128) throw new Error("Heart owner selection exceeds bound");
+  if (online.length > 128) {throw new Error("Heart owner selection exceeds bound");}
 
   const rows = await db
     .selectDistinct({ uid: receive_heart.uid })

@@ -1,5 +1,5 @@
 export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T) => number): T[] {
-  if (input.length > 4096) throw new Error("Too many sortable records");
+  if (input.length > 4096) {throw new Error("Too many sortable records");}
 
   const values = [...input];
   const runs: { start: number; length: number }[] = [];
@@ -7,7 +7,7 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
   const copy = (source: readonly T[], from: number, to: number, count: number) => {
     const block = source.slice(from, from + count);
 
-    for (let index = 0; index < count; index++) values[to + index] = block[index]!;
+    for (let index = 0; index < count; index++) {values[to + index] = block[index]!;}
   };
   const gallop = (
     key: T,
@@ -49,8 +49,8 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
     while (previous < distance) {
       const middle = previous + ((distance - previous) >>> 1);
 
-      if (advances(source[start + middle]!)) previous = middle + 1;
-      else distance = middle;
+      if (advances(source[start + middle]!)) {previous = middle + 1;}
+      else {distance = middle;}
     }
 
     return distance;
@@ -86,13 +86,13 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
           fromRight++;
           fromLeft = 0;
 
-          if (--rightCount === 0) break merging;
+          if (--rightCount === 0) {break merging;}
         } else {
           values[output++] = saved[a++]!;
           fromLeft++;
           fromRight = 0;
 
-          if (--leftCount === 1) break merging;
+          if (--leftCount === 1) {break merging;}
         }
       } while ((fromLeft | fromRight) < threshold);
 
@@ -105,12 +105,12 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
           a += fromLeft;
           leftCount -= fromLeft;
 
-          if (leftCount <= 1) break merging;
+          if (leftCount <= 1) {break merging;}
         }
 
         values[output++] = values[b++]!;
 
-        if (--rightCount === 0) break merging;
+        if (--rightCount === 0) {break merging;}
 
         fromRight = gallop(saved[a]!, values, b, rightCount, 0, false);
 
@@ -120,12 +120,12 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
           b += fromRight;
           rightCount -= fromRight;
 
-          if (rightCount === 0) break merging;
+          if (rightCount === 0) {break merging;}
         }
 
         values[output++] = saved[a++]!;
 
-        if (--leftCount === 1) break merging;
+        if (--leftCount === 1) {break merging;}
 
         threshold--;
       } while (fromLeft >= 7 || fromRight >= 7);
@@ -137,8 +137,8 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
     if (leftCount === 1) {
       copy(values, b, output, rightCount);
       values[output + rightCount] = saved[a]!;
-    } else if (leftCount === 0) throw new Error("Invalid sort comparison contract");
-    else copy(saved, a, output, leftCount);
+    } else if (leftCount === 0) {throw new Error("Invalid sort comparison contract");}
+    else {copy(saved, a, output, leftCount);}
   };
   const mergeBackward = (left: number, leftCount: number, right: number, rightCount: number) => {
     const saved = values.slice(right, right + rightCount);
@@ -173,13 +173,13 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
           fromLeft++;
           fromRight = 0;
 
-          if (--leftCount === 0) break merging;
+          if (--leftCount === 0) {break merging;}
         } else {
           values[output--] = saved[b--]!;
           fromRight++;
           fromLeft = 0;
 
-          if (--rightCount === 1) break merging;
+          if (--rightCount === 1) {break merging;}
         }
       } while ((fromLeft | fromRight) < threshold);
 
@@ -192,12 +192,12 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
           leftCount -= fromLeft;
           copy(values, a + 1, output + 1, fromLeft);
 
-          if (leftCount === 0) break merging;
+          if (leftCount === 0) {break merging;}
         }
 
         values[output--] = saved[b--]!;
 
-        if (--rightCount === 1) break merging;
+        if (--rightCount === 1) {break merging;}
 
         fromRight = rightCount - gallop(values[a]!, saved, 0, rightCount, rightCount - 1, false);
 
@@ -207,12 +207,12 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
           rightCount -= fromRight;
           copy(saved, b + 1, output + 1, fromRight);
 
-          if (rightCount <= 1) break merging;
+          if (rightCount <= 1) {break merging;}
         }
 
         values[output--] = values[a--]!;
 
-        if (--leftCount === 0) break merging;
+        if (--leftCount === 0) {break merging;}
 
         threshold--;
       } while (fromLeft >= 7 || fromRight >= 7);
@@ -226,8 +226,8 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
       a -= leftCount;
       copy(values, a + 1, output + 1, leftCount);
       values[output] = saved[b]!;
-    } else if (rightCount === 0) throw new Error("Invalid sort comparison contract");
-    else copy(saved, 0, output - rightCount + 1, rightCount);
+    } else if (rightCount === 0) {throw new Error("Invalid sort comparison contract");}
+    else {copy(saved, 0, output - rightCount + 1, rightCount);}
   };
   const merge = (index: number) => {
     let { start: left, length: leftCount } = runs[index]!;
@@ -237,7 +237,7 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
     left += skipped;
     leftCount -= skipped;
 
-    if (leftCount === 0) return;
+    if (leftCount === 0) {return;}
 
     const rightCount = gallop(
       values[left + leftCount - 1]!,
@@ -248,10 +248,10 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
       false,
     );
 
-    if (rightCount === 0) return;
+    if (rightCount === 0) {return;}
 
-    if (leftCount <= rightCount) mergeForward(left, leftCount, right, rightCount);
-    else mergeBackward(left, leftCount, right, rightCount);
+    if (leftCount <= rightCount) {mergeForward(left, leftCount, right, rightCount);}
+    else {mergeBackward(left, leftCount, right, rightCount);}
   };
   let minimum = values.length,
     remainder = 0;
@@ -270,11 +270,11 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
       const descending = compare(values[end++]!, values[start]!) < 0;
 
       while (end < values.length && compare(values[end]!, values[end - 1]!) < 0 === descending)
-        end++;
+        {end++;}
 
       if (descending) {
         for (let left = start, right = end - 1; left < right; left++, right--)
-          [values[left], values[right]] = [values[right]!, values[left]!];
+          {[values[left], values[right]] = [values[right]!, values[left]!];}
       }
     }
 
@@ -288,8 +288,8 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
       while (left < right) {
         const middle = (left + right) >>> 1;
 
-        if (compare(value, values[middle]!) < 0) right = middle;
-        else left = middle + 1;
+        if (compare(value, values[middle]!) < 0) {right = middle;}
+        else {left = middle + 1;}
       }
 
       copy(values, left, left + 1, end - left);
@@ -303,8 +303,8 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
       let index = runs.length - 2;
 
       if (index > 0 && runs[index - 1]!.length <= runs[index]!.length + runs[index + 1]!.length) {
-        if (runs[index - 1]!.length < runs[index + 1]!.length) index--;
-      } else if (runs[index]!.length > runs[index + 1]!.length) break;
+        if (runs[index - 1]!.length < runs[index + 1]!.length) {index--;}
+      } else if (runs[index]!.length > runs[index + 1]!.length) {break;}
 
       merge(index);
     }
@@ -313,7 +313,7 @@ export function javaListSort<T>(input: readonly T[], compare: (left: T, right: T
   while (runs.length > 1) {
     let index = runs.length - 2;
 
-    if (index > 0 && runs[index - 1]!.length < runs[index + 1]!.length) index--;
+    if (index > 0 && runs[index - 1]!.length < runs[index + 1]!.length) {index--;}
 
     merge(index);
   }

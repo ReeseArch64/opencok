@@ -143,7 +143,7 @@ export class Database implements GameStore, FriendshipMineStore {
 
   async rankingPrivacy(uid: string, kind: "payment" | "consumption"): Promise<number> {
     if (!uid || uid.length > 40 || (kind !== "payment" && kind !== "consumption"))
-      throw new Error("Invalid ranking privacy request");
+      {throw new Error("Invalid ranking privacy request");}
 
     const column = kind === "payment" ? user_mixed_info.payHide : user_mixed_info.costHide;
     const rows = await this.kingdom.db
@@ -171,14 +171,14 @@ export class Database implements GameStore, FriendshipMineStore {
 
   heroEvents(uid: string, kingdomId: number, selection: HeroEventSelection, now: number) {
     if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured hero realm");
+      {throw new Error("Unconfigured hero realm");}
 
     return readHeroEvents(this.databases.getKingdom(kingdomId).db, uid, selection, now);
   }
 
   heroHistory(uid: string, kingdomId: number, type: number, now: number) {
     if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured hero ranking realm");
+      {throw new Error("Unconfigured hero ranking realm");}
 
     return readHeroHistory(this.databases.getKingdom(kingdomId).db, uid, type, now);
   }
@@ -189,21 +189,21 @@ export class Database implements GameStore, FriendshipMineStore {
 
   heroInsideRanking(uid: string, kingdomId: number, eventId: string, now: number) {
     if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured hero ranking realm");
+      {throw new Error("Unconfigured hero ranking realm");}
 
     return readHeroInsideRanking(this.databases.getKingdom(kingdomId).db, uid, eventId, now);
   }
 
   heroRanking(uid: string, kingdomId: number, activityId: string, now: number) {
     if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured hero ranking realm");
+      {throw new Error("Unconfigured hero ranking realm");}
 
     return readHeroRanking(this.databases.getKingdom(kingdomId).db, uid, activityId, now);
   }
 
   throneRanking(kingdomId: number, publication?: ThroneRankingPeriod) {
     if (!Number.isInteger(kingdomId) || kingdomId < 1 || !this.databases.kingdoms.has(kingdomId))
-      throw new Error("Unconfigured throne ranking realm");
+      {throw new Error("Unconfigured throne ranking realm");}
 
     return readThroneRanking(
       this.databases.getKingdom(kingdomId).db,
@@ -226,7 +226,7 @@ export class Database implements GameStore, FriendshipMineStore {
 
   flowerRanking(uid: string, realm: number, uids: readonly string[]) {
     if (!Number.isInteger(realm) || realm < 1 || !this.databases.kingdoms.has(realm))
-      throw new Error("Unconfigured flower ranking realm");
+      {throw new Error("Unconfigured flower ranking realm");}
 
     return readFlowerRanking(this.databases.getKingdom(realm).db, uid, uids);
   }
@@ -240,11 +240,11 @@ export class Database implements GameStore, FriendshipMineStore {
     const own = kingdoms.find((realm) => realm.id === config.kingdomId);
 
     if (own && own.database !== config.kingdomDatabase)
-      throw new Error("Player realm configuration conflicts with the selected realm");
+      {throw new Error("Player realm configuration conflicts with the selected realm");}
 
-    if (!own) kingdoms.push({ id: config.kingdomId, database: config.kingdomDatabase });
+    if (!own) {kingdoms.push({ id: config.kingdomId, database: config.kingdomDatabase });}
 
-    if (kingdoms.length > 2) throw new Error("At most two player realms may be configured");
+    if (kingdoms.length > 2) {throw new Error("At most two player realms may be configured");}
 
     this.databases = createDatabases(
       {
@@ -261,7 +261,7 @@ export class Database implements GameStore, FriendshipMineStore {
     );
     this.kingdom = this.databases.getKingdom(config.kingdomId);
 
-    for (const kingdom of this.databases.kingdoms.values()) kingdom.pool.on("error", () => {});
+    for (const kingdom of this.databases.kingdoms.values()) {kingdom.pool.on("error", () => {});}
 
     this.databases.global.pool.on("error", () => {});
   }
@@ -294,7 +294,7 @@ export class Database implements GameStore, FriendshipMineStore {
       celebrity,
       pic_upload_record,
     ])
-      await this.kingdom.db.select().from(table).limit(0);
+      {await this.kingdom.db.select().from(table).limit(0);}
 
     await this.databases.global.db.select().from(account_new).limit(0);
     await this.databases.global.db
@@ -447,7 +447,7 @@ export class Database implements GameStore, FriendshipMineStore {
           .orderBy(asc(user_equip.uuid))
           .limit(1001);
 
-        if (equipment.length > 1000) throw new Error("Oversized equipment inventory");
+        if (equipment.length > 1000) {throw new Error("Oversized equipment inventory");}
 
         const sciences = await tx
           .select()
@@ -563,7 +563,7 @@ export class Database implements GameStore, FriendshipMineStore {
 
   mailConversationRead(uid: string, query: MailConversationReadQuery) {
     if (query.effects.some((effect) => effect.kind === "chat") && !this.config.mailChat)
-      throw new DependencyError("chat read delivery unavailable");
+      {throw new DependencyError("chat read delivery unavailable");}
 
     return markMailConversationRead(this.kingdom.db, this.config.kingdomId, uid, query);
   }
@@ -587,7 +587,7 @@ export class Database implements GameStore, FriendshipMineStore {
   }
 
   mailConversationDelete(uid: string, query: MailConversationDeleteQuery) {
-    if (!this.config.mailChat) throw new DependencyError("chat deletion delivery unavailable");
+    if (!this.config.mailChat) {throw new DependencyError("chat deletion delivery unavailable");}
 
     return deleteMailConversations(this.kingdom.db, this.config.kingdomId, uid, query);
   }
@@ -664,7 +664,7 @@ export class Database implements GameStore, FriendshipMineStore {
               .limit(8193)
           : [];
 
-        if (cosmetics.length > 8192) throw new Error("World cosmetic projection exceeds bound");
+        if (cosmetics.length > 8192) {throw new Error("World cosmetic projection exceeds bound");}
 
         return { world, hasMarches, points, cosmetics };
       },
@@ -711,7 +711,7 @@ export async function readLoginSwitches(db: Database["kingdom"]["db"]): Promise<
       typeof cause.code === "string" &&
       /^[0-9A-Z]{5}$/.test(cause.code)
     )
-      return [];
+      {return [];}
 
     return undefined;
   }
@@ -731,7 +731,7 @@ export async function initializeWorldNewsPreference(
     !Number.isInteger(kingdomId) ||
     kingdomId < 1
   )
-    throw new DependencyError("configuration preference input");
+    {throw new DependencyError("configuration preference input");}
 
   await db.transaction(
     async (tx) => {
@@ -756,7 +756,7 @@ export async function initializeWorldNewsPreference(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > BigInt(now)
       )
-        throw new DependencyError("configuration preference owner");
+        {throw new DependencyError("configuration preference owner");}
 
       await tx.insert(parse_info).values({ uid, type: WORLD_NEWS_PUSH_TYPE, status: 0, audio: 1 });
     },

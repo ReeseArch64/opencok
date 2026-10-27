@@ -14,7 +14,7 @@ export function mailUpdatesProjection(
   entries: readonly MailUpdateEntry[],
   envelope: Fields = {},
 ): Fields {
-  if (entries.length > 10000) throw new Error("Too many mail update markers");
+  if (entries.length > 10000) {throw new Error("Too many mail update markers");}
 
   const ids = new Set<string>();
   const updates: string[] = [];
@@ -32,7 +32,7 @@ export function mailUpdatesProjection(
       entry.updateTime < 0n ||
       entry.updateTime > 9223372036854775807n
     )
-      throw new Error("Invalid mail update marker");
+      {throw new Error("Invalid mail update marker");}
 
     ids.add(entry.uid);
     const uid = JSON.stringify(entry.uid);
@@ -49,7 +49,7 @@ export function mailUpdatesProjection(
         (value) => !Number.isInteger(value) || value < -2147483648 || value > 2147483647,
       )
     )
-      throw new Error("Invalid mail update flags");
+      {throw new Error("Invalid mail update flags");}
 
     updates.push(
       `{"uid":${uid},"status":${status},"rewardStatus":${rewardStatus},"saveFlag":${saveFlag},"mailLastUpdateTime":${entry.updateTime}}`,
@@ -63,7 +63,7 @@ export function mailUpdatesProjection(
     const chunks: Value[] = [];
 
     for (let offset = 0; offset < data.length; offset += 5000)
-      chunks.push(
+      {chunks.push(
         sfs.string(
           data
             .slice(offset, offset + 5000)
@@ -72,7 +72,7 @@ export function mailUpdatesProjection(
               "?",
             ),
         ),
-      );
+      );}
 
     body.updatemailArr = sfs.array(chunks);
   }

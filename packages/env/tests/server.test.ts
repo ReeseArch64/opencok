@@ -7,7 +7,7 @@ test("server settings validate realm routing and require a login secret", () => 
   expect(parseServerEnvironment({ ...base, KINGDOM_ID: "2" }).KINGDOM_ID).toBe(2);
   expect(() => parseServerEnvironment({})).toThrow("GAME_SECRET");
   for (const value of ["0", "-1", "1.5", "invalid"])
-    expect(() => parseServerEnvironment({ ...base, KINGDOM_ID: value })).toThrow("KINGDOM_ID");
+    {expect(() => parseServerEnvironment({ ...base, KINGDOM_ID: value })).toThrow("KINGDOM_ID");}
   expect(() => parseServerEnvironment({ ...base, KINGDOM_DATABASE_NAME: "db;drop" })).toThrow(
     "KINGDOM_DATABASE_NAME",
   );
@@ -25,9 +25,9 @@ test("mail translation defaults enabled and accepts explicit true or false only"
     parseServerEnvironment({ ...base, GAME_MAIL_TRANSLATION: "true" }).GAME_MAIL_TRANSLATION,
   ).toBe(true);
   for (const value of ["0", "1", "yes", "FALSE", ""])
-    expect(() => parseServerEnvironment({ ...base, GAME_MAIL_TRANSLATION: value })).toThrow(
+    {expect(() => parseServerEnvironment({ ...base, GAME_MAIL_TRANSLATION: value })).toThrow(
       "GAME_MAIL_TRANSLATION",
-    );
+    );}
 });
 
 test("realm Chat integration requires an optional HTTP origin and shared signing secret", () => {
@@ -82,7 +82,7 @@ test("realm avatar integration needs only an explicit private API origin", () =>
     "http://files.internal/?private=x",
     "http://files.internal/#x",
   ])
-    expect(() => parseServerEnvironment({ ...configured, API_URL: url })).toThrow("API_URL");
+    {expect(() => parseServerEnvironment({ ...configured, API_URL: url })).toThrow("API_URL");}
 });
 
 test("avatar completion requires its own private chat endpoint, files and signing secret", () => {
@@ -97,7 +97,7 @@ test("avatar completion requires its own private chat endpoint, files and signin
     configured.GAME_AVATAR_CHAT_URL,
   );
   for (const field of ["API_URL", "CHAT_SECRET"])
-    expect(() => parseServerEnvironment({ ...configured, [field]: undefined })).toThrow(field);
+    {expect(() => parseServerEnvironment({ ...configured, [field]: undefined })).toThrow(field);}
   for (const url of [
     "http://chat.internal/external/session",
     configured.GAME_AVATAR_CHAT_URL + "?x=1",
@@ -105,9 +105,9 @@ test("avatar completion requires its own private chat endpoint, files and signin
     "http://u:p@chat.internal/_internal/avatar-profile",
     "https://cok.chat/_internal/avatar-profile",
   ])
-    expect(() => parseServerEnvironment({ ...configured, GAME_AVATAR_CHAT_URL: url })).toThrow(
+    {expect(() => parseServerEnvironment({ ...configured, GAME_AVATAR_CHAT_URL: url })).toThrow(
       "GAME_AVATAR_CHAT_URL",
-    );
+    );}
 });
 
 test("realm startup no longer accepts an external XML resource path", () => {

@@ -41,13 +41,13 @@ export class ActivityRewardDomain extends CityCommandDomain {
       num(context.state.profile, "banFlag") !== 0 ||
       long(context.state.profile, "banTime") > context.now
     )
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const actId = str(params, "actId"),
       saved = await context.state.activityReward?.owned(actId);
 
     if (!saved?.announcement || num(saved.entitlement, "status") !== 0)
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const version = text(saved.announcement, "updateVersion");
 
@@ -56,7 +56,7 @@ export class ActivityRewardDomain extends CityCommandDomain {
       activityRewardVersion(text(context.state.profile, "appVersion")) <
         activityRewardVersion(version)
     )
-      throw new GameError(errors.unsupported, "city_progression");
+      {throw new GameError(errors.unsupported, "city_progression");}
 
     const rewards = activityRewardEntries(saved.announcement.reward);
 
@@ -65,7 +65,7 @@ export class ActivityRewardDomain extends CityCommandDomain {
         .filter((reward) => reward.category === "equip")
         .reduce((total, reward) => total + reward.count, 0) > 256
     )
-      throw new GameError(errors.unsupported, "city_progression");
+      {throw new GameError(errors.unsupported, "city_progression");}
 
     const write: ActivityRewardWrite = { actId, kingdomId: context.rules.kingdomId },
       group = rewards.some(
@@ -85,7 +85,7 @@ export class ActivityRewardDomain extends CityCommandDomain {
         context.economy.gold(BigInt(reward.count));
         body.gold = context.balance("gold");
       } else if (category === "crystal") {
-        if (!context.economy.crystal) throw new GameError(errors.unsupported, "city_progression");
+        if (!context.economy.crystal) {throw new GameError(errors.unsupported, "city_progression");}
 
         context.economy.crystal(BigInt(reward.count));
         body.crystal = context.balance("crystal");
@@ -126,7 +126,7 @@ export class ActivityRewardDomain extends CityCommandDomain {
             next = previous + BigInt(reward.count);
 
           if (previous < 0n || next > 9223372036854775807n)
-            throw new GameError(errors.unsupported, "city_progression");
+            {throw new GameError(errors.unsupported, "city_progression");}
 
           const id = text(group.alliance, "uid");
           write.alliance = { id, points: next };
@@ -139,7 +139,7 @@ export class ActivityRewardDomain extends CityCommandDomain {
           entitlementId: actId,
         });
 
-        if (granted) body[category] = granted.requested;
+        if (granted) {body[category] = granted.requested;}
       } else if (category === "general") {
         generals.push(...rewardLegacyGenerals(context, reward.itemId, reward.count));
       } else if (category === "power") {
@@ -171,15 +171,15 @@ export class ActivityRewardDomain extends CityCommandDomain {
         ] = context.balance(asset);
 
         if (["wood", "stone", "iron", "food"].includes(asset))
-          body[`${wire}_bind` as "wood_bind" | "stone_bind" | "iron_bind" | "food_bind"] =
-            context.balance(`${asset}bind`);
-      } else throw new GameError(errors.unsupported, "city_progression");
+          {body[`${wire}_bind` as "wood_bind" | "stone_bind" | "iron_bind" | "food_bind"] =
+            context.balance(`${asset}bind`);}
+      } else {throw new GameError(errors.unsupported, "city_progression");}
     }
 
     context.write.activityRewardClaim = write;
 
     if (write.alliance) {
-      if (!context.economy.event) throw new GameError(errors.unsupported, "city_progression");
+      if (!context.economy.event) {throw new GameError(errors.unsupported, "city_progression");}
 
       context.economy.event({
         id: "activity-alliance",

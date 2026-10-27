@@ -21,15 +21,15 @@ export class ChatHistoryRoomsController extends ChatHistoryController {
       Array.isArray(requested) ||
       Object.keys(requested).length > 16
     )
-      throw new ChatCommandError("invalid_room");
+      {throw new ChatCommandError("invalid_room");}
 
     const rooms = [];
 
     for (const [roomId, afterMs] of Object.entries(requested)) {
       if (!/^(original_|country_|alliance_|global_|local_|private_[a-f0-9-]{36}$)/.test(roomId))
-        continue;
+        {continue;}
 
-      if (!isSafeInteger(afterMs) || afterMs < 0) throw new ChatCommandError("invalid_time");
+      if (!isSafeInteger(afterMs) || afterMs < 0) {throw new ChatCommandError("invalid_time");}
 
       const room = await this.requireRoom(context, roomId);
       const raw = await this.options.messages.getAll(roomId, afterMs);

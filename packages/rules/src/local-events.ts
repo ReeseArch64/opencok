@@ -2,7 +2,7 @@ import type { Rule, Rules } from "./game";
 import { eventRealmEnabled, versionAtLeast, type RuleContext } from "./availability";
 
 export function eventTimestamp(value: string | undefined): bigint | undefined {
-  if (!value || !/^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}$/.test(value)) return undefined;
+  if (!value || !/^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}$/.test(value)) {return undefined;}
 
   const [year, month, day, hour, minute] = value.split("-").map(Number) as [
     number,
@@ -13,7 +13,7 @@ export function eventTimestamp(value: string | undefined): bigint | undefined {
   ];
 
   if (year < 1970 || month < 1 || month > 12 || day < 1 || hour > 23 || minute > 59)
-    return undefined;
+    {return undefined;}
 
   const date = new Date(Date.UTC(year, month - 1, day, hour, minute));
 
@@ -22,7 +22,7 @@ export function eventTimestamp(value: string | undefined): bigint | undefined {
     date.getUTCMonth() !== month - 1 ||
     date.getUTCDate() !== day
   )
-    return undefined;
+    {return undefined;}
 
   return BigInt(date.getTime());
 }
@@ -39,7 +39,7 @@ export function localEventWindow(rule: Rule | undefined, now: bigint) {
     now < start ||
     now > end
   )
-    return undefined;
+    {return undefined;}
 
   return { start, end };
 }

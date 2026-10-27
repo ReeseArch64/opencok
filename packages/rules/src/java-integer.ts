@@ -11,12 +11,12 @@ export function javaDigit(code: number): number | undefined {
 }
 
 export function javaDecimal(raw: unknown, bits: 32 | 64): bigint {
-  if (typeof raw !== "string" || raw.length > 65535) throw new Error("Invalid decimal integer");
+  if (typeof raw !== "string" || raw.length > 65535) {throw new Error("Invalid decimal integer");}
 
   const negative = raw[0] === "-";
   const start = negative || raw[0] === "+" ? 1 : 0;
 
-  if (start === raw.length) throw new Error("Invalid decimal integer");
+  if (start === raw.length) {throw new Error("Invalid decimal integer");}
 
   const bound = (1n << BigInt(bits - 1)) - (negative ? 0n : 1n);
   let value = 0n;
@@ -24,11 +24,11 @@ export function javaDecimal(raw: unknown, bits: 32 | 64): bigint {
   for (let index = start; index < raw.length; index++) {
     const digit = javaDigit(raw.charCodeAt(index));
 
-    if (digit === undefined) throw new Error("Invalid decimal integer");
+    if (digit === undefined) {throw new Error("Invalid decimal integer");}
 
     value = value * 10n + BigInt(digit);
 
-    if (value > bound) throw new Error("Invalid decimal integer");
+    if (value > bound) {throw new Error("Invalid decimal integer");}
   }
 
   return negative ? -value : value;

@@ -159,7 +159,7 @@ test("consumption score publication is absolute, keeps first-bound rewards and c
 test("consumption backfill drains a bounded tail once and retains separate economic periods across rollover", async () => {
   const h = await fixture();
   try {
-    for (let i = 0; i < 65; i++) await h.spend(10n);
+    for (let i = 0; i < 65; i++) {await h.spend(10n);}
     await h.db.db.delete(facts);
     await h.db.db.delete(scores);
     expect(await h.source.ingest(BigInt(h.clock.now))).toBe(64);
@@ -278,8 +278,8 @@ test("committed nickname debits capture facts and legacy outbox recovery verifie
         {
           global: h.global,
           getKingdom: (id) => {
-            if (id === 1) return h.db;
-            if (id === 2) return h.second;
+            if (id === 1) {return h.db;}
+            if (id === 2) {return h.second;}
             throw new Error("Unconfigured synthetic realm");
           },
         },
@@ -338,8 +338,8 @@ test("a refunded nickname reservation does not become confirmed competitive spen
       {
         global: h.global,
         getKingdom: (id) => {
-          if (id === 1) return h.db;
-          if (id === 2) return h.second;
+          if (id === 1) {return h.db;}
+          if (id === 2) {return h.second;}
           throw new Error("Unconfigured synthetic realm");
         },
       },

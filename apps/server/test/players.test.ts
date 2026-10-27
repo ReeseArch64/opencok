@@ -154,7 +154,7 @@ test("missing, empty, blank and oversized batches return an empty array without 
     { uids: sfs.array([sfs.string(""), sfs.string(" \t ")]) },
     { uids: sfs.array(Array.from({ length: 51 }, (_, i) => sfs.string(String(i)))) },
   ];
-  for (const params of requests) expect((await query(controller, params)).players).toEqual([]);
+  for (const params of requests) {expect((await query(controller, params)).players).toEqual([]);}
   expect(calls).toEqual([]);
 });
 
@@ -166,7 +166,7 @@ test("batch parsing rejects malformed SFS types and IDs before querying persiste
     sfs.array([sfs.null()]),
     sfs.array([sfs.string("a".repeat(256))]),
   ])
-    await expect(query(controller, { uids })).rejects.toThrow("E000000");
+    {await expect(query(controller, { uids })).rejects.toThrow("E000000");}
   expect(calls).toEqual([]);
 });
 

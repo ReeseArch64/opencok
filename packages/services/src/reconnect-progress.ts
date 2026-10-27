@@ -58,8 +58,8 @@ export interface ReconnectResult {
 
 export function validateReconnectResult(result: ReconnectResult, command: string): void {
   for (const packet of [{ command, body: result.body }, ...result.pushes])
-    if (encode(extension(packet.command, packet.body)).length > MAX_FRAME)
-      throw new Error("Oversized reconnect response");
+    {if (encode(extension(packet.command, packet.body)).length > MAX_FRAME)
+      {throw new Error("Oversized reconnect response");}}
 }
 
 export async function planReconnectProgress(
@@ -86,7 +86,7 @@ export async function planReconnectProgress(
     !rules.reconnect.quests ||
     !services.worldPowerEffects
   )
-    throw new Error("Incomplete reconnect context");
+    {throw new Error("Incomplete reconnect context");}
 
   const random = environment.random ?? randomInt;
   const repairs = reconnectGeneralRepairs(
@@ -164,7 +164,7 @@ export async function planReconnectProgress(
       index < times.length - 1 &&
       JSON.stringify(upkeepAt(times[index]!)) === JSON.stringify(upkeep)
     )
-      index++;
+      {index++;}
 
     const settled = settleReconnectFood(resource, times[index]!, upkeep.rates, upkeep.options);
     resource = {
@@ -313,7 +313,7 @@ export async function planReconnectProgress(
       const before = state.armies.find((original) => original.armyId === row.armyId)!;
       const loss = losses.get(String(row.armyId));
 
-      if (!loss) throw new Error("Unaccounted reconnect loss");
+      if (!loss) {throw new Error("Unaccounted reconnect loss");}
 
       return {
         ...loss,
@@ -361,13 +361,13 @@ export async function planReconnectProgress(
   };
 
   if (changedArmies.length)
-    result.pushes.push({
+    {result.pushes.push({
       command: "army.info",
       body: { soldiers: sfs.array(changedArmies.map((row) => sfs.object(reconnectArmy(row)))) },
-    });
+    });}
 
   if (changedWeakness.length)
-    result.pushes.push({
+    {result.pushes.push({
       command: "push.weakness.receive",
       body: {
         weakling: sfs.array(
@@ -383,10 +383,10 @@ export async function planReconnectProgress(
           ),
         ),
       },
-    });
+    });}
 
   if (refresh)
-    result.pushes.push({
+    {result.pushes.push({
       command: "resource.time.refresh",
       body: {
         refreshBuildings: sfs.array(
@@ -399,15 +399,15 @@ export async function planReconnectProgress(
           ),
         ),
       },
-    });
+    });}
 
   const fullMail = rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
 
   for (const message of mail)
-    result.pushes.push({
+    {result.pushes.push({
       command: "push.mail",
       body: { ...avatarMailPush(message, fullMail), itemIdFlag: sfs.int(message.itemIdFlag) },
-    });
+    });}
 
   validateReconnectResult(result, "user.lv");
 

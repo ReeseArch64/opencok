@@ -43,7 +43,7 @@ test("maintained legacy egg catalogs retain historical inclusive dates and exact
     { exp: 1000, reward: "247250" },
   ]);
   for (const random of [() => -1, (maximum: number) => maximum, () => NaN, () => 0.5])
-    expect(() => eggActivityDraw(rules, random)).toThrow();
+    {expect(() => eggActivityDraw(rules, random)).toThrow();}
   rules.configuration.payControl!.set("69007", { ...control, k3: "1|2" });
   expect(() => eggActivityDraw(rules, () => 0)).toThrow();
 });
@@ -67,9 +67,9 @@ test("egg native snapshots preserve sentinel longs and collection types, exact w
   expect(eggActivityClearCost({ ...row, eggCd: now + 14000n }, rules, now)).toBe(1);
   expect(eggActivityClearCost({ ...row, eggCd: now + 15000n }, rules, now)).toBe(2);
   for (const cd of [now, now - 1n, eggActivityIdle])
-    expect(() => eggActivityClearCost({ ...row, eggCd: cd }, rules, now)).toThrow();
+    {expect(() => eggActivityClearCost({ ...row, eggCd: cd }, rules, now)).toThrow();}
   for (const goods of ["1|1", "1|", "-1", "1".repeat(201)])
-    expect(() => eggActivityGoods(goods)).toThrow();
+    {expect(() => eggActivityGoods(goods)).toThrow();}
   expect(eggActivityMissing({ goods: "200001" }, rules.advanced.eggs!.get("132500")!)).toBe(true);
   expect(eggActivityMissing({ goods: "200001|200002" }, rules.advanced.eggs!.get("132500")!)).toBe(
     false,
@@ -80,7 +80,7 @@ test("egg native snapshots preserve sentinel longs and collection types, exact w
     { ...row, exp: -1 },
     { ...row, curEgg: "x" },
   ])
-    expect(() => eggActivityRecord(saved, "owner")).toThrow();
+    {expect(() => eggActivityRecord(saved, "owner")).toThrow();}
 });
 test("only the six native legacy egg commands reach the owned mutation boundary; clients cannot invoke the closed-login settlement hook", async () => {
   const rules = await loadRules();
@@ -99,7 +99,7 @@ test("only the six native legacy egg commands reach the owned mutation boundary;
     "egg.exp.reward",
     "egg.goods.full",
   ])
-    expect((await game.execute("owner", command, {})).body).toEqual({ opened: sfs.bool(false) });
+    {expect((await game.execute("owner", command, {})).body).toEqual({ opened: sfs.bool(false) });}
   expect(seen).toHaveLength(6);
   await expect(game.execute("owner", "egg.activity.init", {})).rejects.toThrow();
 });

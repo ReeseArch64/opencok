@@ -7,23 +7,23 @@ import { decodeStoredJson } from "@opencok/messages/stored-json";
 export function generalSkillPoints(generals: readonly Row[]): readonly (readonly GeneralSkill[])[] {
   try {
     return generals.map((general) => {
-      if (general.ability === null || general.ability === undefined) return [];
+      if (general.ability === null || general.ability === undefined) {return [];}
 
-      if (!Buffer.isBuffer(general.ability)) throw new Error();
+      if (!Buffer.isBuffer(general.ability)) {throw new Error();}
 
       const trees = decodeStoredJson(general.ability);
 
-      if (!Array.isArray(trees)) throw new Error();
+      if (!Array.isArray(trees)) {throw new Error();}
 
       const result: GeneralSkill[] = [];
 
       for (const tree of trees) {
-        if (tree === null || typeof tree !== "object" || Array.isArray(tree)) throw new Error();
+        if (tree === null || typeof tree !== "object" || Array.isArray(tree)) {throw new Error();}
 
-        if (Object.hasOwn(tree, "ids")) continue;
+        if (Object.hasOwn(tree, "ids")) {continue;}
 
         for (const [id, points] of Object.entries(tree)) {
-          if (id === "id") continue;
+          if (id === "id") {continue;}
 
           if (
             !/^\d+$/.test(id) ||
@@ -31,7 +31,7 @@ export function generalSkillPoints(generals: readonly Row[]): readonly (readonly
             typeof points !== "bigint" ||
             BigInt.asIntN(32, points) !== points
           )
-            throw new Error();
+            {throw new Error();}
 
           result.push({ id, points: Number(points) });
         }

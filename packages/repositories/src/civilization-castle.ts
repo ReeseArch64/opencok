@@ -19,11 +19,11 @@ export async function readCivilizationCastle(
   const target = str(params, "targetUid", owner);
 
   if (str(params, "M__REQUEST_ID__H", "") !== "info" || target === owner || !target)
-    return { civilizationCastle: castle };
+    {return { civilizationCastle: castle };}
 
   const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, target));
 
-  if (!profile) throw new Error("Missing civilization castle owner");
+  if (!profile) {throw new Error("Missing civilization castle owner");}
 
   const [foreign] = await tx
     .select()
@@ -37,7 +37,7 @@ export async function readCivilizationCastle(
 }
 
 export async function writeCivilizationCastle(tx: MutationTransaction, owner: string, row: Row) {
-  if (row.uid !== owner) throw new Error("Foreign civilization castle write");
+  if (row.uid !== owner) {throw new Error("Foreign civilization castle write");}
 
   const value = {
     uid: owner,
@@ -59,7 +59,7 @@ export async function writeCivilizationCastle(tx: MutationTransaction, owner: st
     value.resourceNum < 0 ||
     ![0, 1, 2].includes(value.status)
   )
-    throw new Error("Invalid civilization castle");
+    {throw new Error("Invalid civilization castle");}
 
   await tx
     .insert(civilization_castle)

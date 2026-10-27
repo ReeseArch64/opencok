@@ -45,7 +45,7 @@ export function createPostboxExecutor(
                 .limit(1)
                 .for("update", { skipLocked: true });
 
-              if (!row) return null;
+              if (!row) {return null;}
 
               await tx.delete(post_box).where(eq(post_box.uid, row.uid));
 
@@ -77,7 +77,7 @@ export function createPostboxExecutor(
               return row ?? null;
             },
             async relations(ids) {
-              if (!ids.length) return [];
+              if (!ids.length) {return [];}
 
               return tx
                 .select()
@@ -142,9 +142,9 @@ export function createPostboxExecutor(
             },
             async removeMails(ids) {
               if (ids.length)
-                await tx
+                {await tx
                   .delete(post_mail)
-                  .where(and(inArray(post_mail.uid, ids), eq(post_mail.toUser, owner)));
+                  .where(and(inArray(post_mail.uid, ids), eq(post_mail.toUser, owner)));}
             },
             async updateMixed(values) {
               await tx

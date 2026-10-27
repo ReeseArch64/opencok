@@ -30,7 +30,7 @@ test("city strength comparison matches 1331 independent Java 8 signed-long multi
 
 test("city multiplier follows Java decimal parsing and exact signed-long limits", () => {
   for (const multiplier of ["+٢", "00002", "２", "2"])
-    expect(worldCityDetail(2n, 5n, 0n, 0, multiplier).targetTooStrong).toBe(true);
+    {expect(worldCityDetail(2n, 5n, 0n, 0, multiplier).targetTooStrong).toBe(true);}
   for (const multiplier of [
     undefined,
     "",
@@ -44,7 +44,7 @@ test("city multiplier follows Java decimal parsing and exact signed-long limits"
     "-9223372036854775809",
     "𝟚",
   ])
-    expect(() => worldCityDetail(2n, 5n, 0n, 0, multiplier)).toThrow("102192");
+    {expect(() => worldCityDetail(2n, 5n, 0n, 0, multiplier)).toThrow("102192");}
 });
 
 test("city projection preserves nullable primitive defaults, strict positive float comparison and rejects invalid state", () => {
@@ -55,14 +55,14 @@ test("city projection preserves nullable primitive defaults, strict positive flo
     lastBeDuelTime: 0n,
   });
   for (const effect of [0, -0, -1, -Math.fround(1e-45)])
-    expect(worldCityDetail(0n, 0n, 0n, effect, "1").slowDown).toBe(false);
+    {expect(worldCityDetail(0n, 0n, 0n, effect, "1").slowDown).toBe(false);}
   for (const effect of [1, Math.fround(1e-45)])
-    expect(worldCityDetail(0n, 0n, 0n, effect, "1").slowDown).toBe(true);
+    {expect(worldCityDetail(0n, 0n, 0n, effect, "1").slowDown).toBe(true);}
   for (const invalid of [1, "1", 9223372036854775808n, -9223372036854775809n]) {
     expect(() => worldCityDetail(invalid, 0n, 0n, 0, "1")).toThrow("102192");
     expect(() => worldCityDetail(0n, invalid, 0n, 0, "1")).toThrow("102192");
     expect(() => worldCityDetail(0n, 0n, invalid, 0, "1")).toThrow("102192");
   }
   for (const effect of [NaN, Infinity, -Infinity, 0.1])
-    expect(() => worldCityDetail(0n, 0n, 0n, effect, "1")).toThrow("102192");
+    {expect(() => worldCityDetail(0n, 0n, 0n, effect, "1")).toThrow("102192");}
 });

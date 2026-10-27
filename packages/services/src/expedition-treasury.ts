@@ -26,7 +26,7 @@ export class ExpeditionTreasuryService {
   ) {}
 
   async command(owner: string, command: string, params: Fields) {
-    if (!(expeditionTreasuryCommands as readonly string[]).includes(command)) expeditionFailure();
+    if (!(expeditionTreasuryCommands as readonly string[]).includes(command)) {expeditionFailure();}
 
     const operationId = str(params, "operationId", "") || randomUUID(),
       uid = command === "exchequer.show" ? "" : str(params, "uid");
@@ -35,7 +35,7 @@ export class ExpeditionTreasuryService {
       !/^[A-Za-z0-9:._-]{1,128}$/.test(operationId) ||
       (command !== "exchequer.show" && (!uid.trim() || uid.length > 40))
     )
-      expeditionFailure();
+      {expeditionFailure();}
 
     const request = Object.fromEntries(
       Object.keys(params)
@@ -52,7 +52,7 @@ export class ExpeditionTreasuryService {
         participants: [...new Set([owner, ...(uid ? [uid] : [])])],
       },
       async (state) => {
-        if (num(state.profile, "crossFightSrcServerId") > 0) expeditionFailure();
+        if (num(state.profile, "crossFightSrcServerId") > 0) {expeditionFailure();}
 
         const treasury = state.treasury ?? {};
         const balanceFields = Object.fromEntries(
@@ -60,14 +60,14 @@ export class ExpeditionTreasuryService {
         );
 
         if (command === "exchequer.show")
-          return {
+          {return {
             response: encode({
               body: sfs.object({ ...balanceFields, operationId: sfs.string(operationId) }),
               pushes: sfs.array([]),
             }),
-          };
+          };}
 
-        if (!state.target) expeditionFailure();
+        if (!state.target) {expeditionFailure();}
 
         const previous = state.received ?? { uid, recieveResource: 0n, lastClearTime: state.now };
         const received = {
@@ -80,7 +80,7 @@ export class ExpeditionTreasuryService {
         };
 
         if (command === "expedition.recieve.count")
-          return {
+          {return {
             received,
             response: encode({
               body: sfs.object({
@@ -89,15 +89,15 @@ export class ExpeditionTreasuryService {
               }),
               pushes: sfs.array([]),
             }),
-          };
+          };}
 
-        if (text(state.king ?? {}, "uid") !== owner || !state.treasury) expeditionFailure();
+        if (text(state.king ?? {}, "uid") !== owner || !state.treasury) {expeditionFailure();}
 
         const amounts = Object.fromEntries(
           treasuryAssets.map((asset) => [asset, BigInt(cityInteger(int(params, asset, 0)))]),
         ) as Record<(typeof treasuryAssets)[number], bigint>;
 
-        if (!treasuryAssets.some((asset) => amounts[asset] > 0n)) expeditionFailure();
+        if (!treasuryAssets.some((asset) => amounts[asset] > 0n)) {expeditionFailure();}
 
         const weights = this.rules.items.get("resources_weight");
         const weightKeys = { wood: "k1", food: "k4", iron: "k3", stone: "k2" };
@@ -109,7 +109,7 @@ export class ExpeditionTreasuryService {
         received.recieveResource += weighted;
 
         if (received.recieveResource > cityAmount(this.rules.items.get("wk_info_new1")?.k3))
-          expeditionFailure();
+          {expeditionFailure();}
 
         const balances = Object.fromEntries(
           treasuryAssets.map((asset) => [
@@ -129,7 +129,7 @@ export class ExpeditionTreasuryService {
         const template = this.rules.mail.get("11789"),
           contents = javaMailBytes(template?.message);
 
-        if (!template || !contents) expeditionFailure();
+        if (!template || !contents) {expeditionFailure();}
 
         const mail = {
           uid: randomUUID().replaceAll("-", "") + "00",
@@ -189,7 +189,7 @@ export async function publishExpeditionTreasuryMutation(
   const body = decode(payload),
     owner = str(body, "recipient");
 
-  if (!owner || body.mail?.type !== Type.Object) expeditionFailure();
+  if (!owner || body.mail?.type !== Type.Object) {expeditionFailure();}
 
   await publish(owner, "push.mail", body.mail.value as Fields);
 }

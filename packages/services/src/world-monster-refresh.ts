@@ -77,16 +77,16 @@ async function expire(
   const populations = new Map<number, number>();
 
   for (const point of await store.expired()) {
-    if (budget-- <= 0) break;
+    if (budget-- <= 0) {break;}
 
     const live = (await store.points([num(point, "id")]))[0];
 
-    if (!live || long(live, "flushTime") >= store.now) continue;
+    if (!live || long(live, "flushTime") >= store.now) {continue;}
 
     const type = num(live, "pointType");
 
     if (type === 7) {
-      if (live.runtimeClaimed || text(live, "ownerId") || text(live, "ownerMarchUUid")) continue;
+      if (live.runtimeClaimed || text(live, "ownerId") || text(live, "ownerMarchUUid")) {continue;}
 
       await store.write([clear(live, false)]);
       continue;
@@ -102,7 +102,7 @@ async function expire(
     if (
       all.some((row) => row.runtimeClaimed || text(row, "ownerId") || text(row, "ownerMarchUUid"))
     ) {
-      if (type === 44) await store.defer(all, long(live, "flushTime") + 3600000n);
+      if (type === 44) {await store.defer(all, long(live, "flushTime") + 3600000n);}
 
       continue;
     }
@@ -146,24 +146,24 @@ async function expire(
         area = black ? 0 : num(live, "areaId"),
         limit = black ? cityInteger(rules.items.get("blackland_resource")?.k2) : quota;
 
-      if (!populations.has(area)) populations.set(area, await store.population(area));
+      if (!populations.has(area)) {populations.set(area, await store.population(area));}
 
       const population = populations.get(area)!;
 
-      if (population > limit) populations.set(area, population - 1);
+      if (population > limit) {populations.set(area, population - 1);}
 
       if (
         num(live, "flushFlag") === 0 &&
         (black || text(live, "pointItem") !== "4800000") &&
         population <= limit
       )
-        await store.ticket(
+        {await store.ticket(
           num(live, "areaId"),
           "0",
           num(live, "resLevel"),
           store.now + 3600000n,
           1 + ranges.length,
-        );
+        );}
 
       const cleared = [live, ...ranges].map((row) => ({
         ...clear(row, true),
@@ -174,7 +174,7 @@ async function expire(
       }));
       await store.barbarian(cleared);
     } else if (type === 9 || type === 15)
-      await store.write([live, ...ranges].map((row) => clear(row, true)));
+      {await store.write([live, ...ranges].map((row) => clear(row, true)));}
   }
 }
 
@@ -190,7 +190,7 @@ async function fields(
     clock = (await store.clock(kind)) ?? blank();
 
   if (clock.stage === "idle") {
-    if (clock.nextAt > store.now) return;
+    if (clock.nextAt > store.now) {return;}
 
     if (clock.nextAt === 0n && !store.fresh) {
       clock.nextAt = store.now + (kind === "field" ? 9000000n : 60000n);
@@ -234,7 +234,7 @@ async function fields(
           ![9, 15].includes(num(row, "pointType")) ||
           rules.world.fieldMonsters?.get(text(row, "pointItem"))?.num !== "4"
         )
-          continue;
+          {continue;}
 
         let ids: readonly number[];
 
@@ -256,7 +256,7 @@ async function fields(
               point.runtimeClaimed || text(point, "ownerId") || text(point, "ownerMarchUUid"),
           )
         )
-          for (const id of ids) protectedIds.add(id);
+          {for (const id of ids) {protectedIds.add(id);}}
       }
 
       const obsolete = cells
@@ -317,7 +317,7 @@ async function fields(
       while (clock.attempts > 0 && clock.pool.length && budget > 0) {
         const ids = Object.keys(clock.remaining).filter((id) => clock.remaining[id]! > 0);
 
-        if (!ids.length) break;
+        if (!ids.length) {break;}
 
         const id = ids[random(ids.length)]!,
           config = worldMonsterConfiguration(rules, id),
@@ -341,7 +341,7 @@ async function fields(
         clock.pool = clock.pool.filter((id) => !used.has(id));
       }
 
-      if (clock.attempts > 0 && clock.pool.length && budget <= 0) break;
+      if (clock.attempts > 0 && clock.pool.length && budget <= 0) {break;}
 
       clock.area++;
       clock.stage = "reset";
@@ -373,7 +373,7 @@ async function exploration(
     clock = (await store.clock(kind)) ?? blank();
 
   if (clock.stage === "idle") {
-    if (clock.nextAt > 0n) return;
+    if (clock.nextAt > 0n) {return;}
 
     if (!store.fresh) {
       clock.nextAt = store.now + 900000n;
@@ -395,7 +395,7 @@ async function exploration(
       cells.filter((row) => num(row, "gridType") === 2).length <
       cityInteger(rules.items.get("worldmap_explore")?.k6)
     )
-      continue;
+      {continue;}
 
     const quota = cityInteger(rules.items.get("worldmap_explore")?.k2, 0, 64),
       existing = cells.filter((row) => num(row, "pointType") === 6).length,
@@ -405,7 +405,7 @@ async function exploration(
     for (let index = existing; index < quota && budget > 0; index++, budget--) {
       const chosen = chooseWorldMonsterCells(free, true, size, random);
 
-      if (!chosen.length) break;
+      if (!chosen.length) {break;}
 
       const first = cityInteger(rules.items.get("worldmap_explore")?.k3, 1),
         last = cityInteger(rules.items.get("worldmap_explore")?.k4, first),
@@ -423,7 +423,7 @@ async function exploration(
       const ids = new Set(chosen.map((row) => num(row, "id")));
 
       for (let index = free.length - 1; index >= 0; index--)
-        if (ids.has(num(free[index]!, "id"))) free.splice(index, 1);
+        {if (ids.has(num(free[index]!, "id"))) {free.splice(index, 1);}}
     }
 
     if (!budget && existing + created < quota) {
@@ -459,7 +459,7 @@ async function barbarians(
     });
 
   if (clock.stage === "idle") {
-    if (clock.nextAt > store.now) return;
+    if (clock.nextAt > store.now) {return;}
 
     if (clock.nextAt === 0n) {
       clock.initial = store.fresh;
@@ -485,11 +485,11 @@ async function barbarians(
       ).filter((row) => worldMonsterFree(row, area === 0)),
       chosen = chooseWorldMonsterCells(cells, true, size, random);
 
-    if (!chosen.length) return false;
+    if (!chosen.length) {return false;}
 
     const actor = worldBarbarianChoice(rules, chosen[0]!, size, random);
 
-    if (!actor) return false;
+    if (!actor) {return false;}
 
     const points = chosen.map((row, index) => ({
       ...row,
@@ -553,7 +553,7 @@ async function barbarians(
         budget--;
       }
 
-      if (clock.attempts && clock.pool.length && !budget) break;
+      if (clock.attempts && clock.pool.length && !budget) {break;}
 
       clock.area++;
       clock.pool = [];
@@ -572,10 +572,10 @@ async function barbarians(
     return;
   }
 
-  if (!open) return;
+  if (!open) {return;}
 
   for (const ticket of await store.tickets()) {
-    if (!budget--) break;
+    if (!budget--) {break;}
 
     const area = ticket.blackLand ? 0 : num(ticket, "areaId"),
       limit = area === 0 ? cityInteger(rules.items.get("blackland_resource")?.k2) : quota;
@@ -585,8 +585,8 @@ async function barbarians(
       continue;
     }
 
-    if (await spawn(area)) await store.remove(ticket);
-    else await store.retry(ticket, store.now + 3600000n);
+    if (await spawn(area)) {await store.remove(ticket);}
+    else {await store.retry(ticket, store.now + 3600000n);}
   }
 
   if ((await store.population(0)) <= cityInteger(rules.items.get("blackland_resource")?.k1)) {
@@ -595,7 +595,7 @@ async function barbarians(
     while (budget > 0 && (await store.population(0)) < maximum) {
       budget--;
 
-      if (!(await spawn(0))) break;
+      if (!(await spawn(0))) {break;}
     }
   }
 
@@ -603,11 +603,11 @@ async function barbarians(
     while (budget > 0 && (await store.population(clock.area)) < quota) {
       budget--;
 
-      if (!(await spawn(clock.area))) break;
+      if (!(await spawn(clock.area))) {break;}
     }
 
-    if (budget > 0) clock.area++;
-    else break;
+    if (budget > 0) {clock.area++;}
+    else {break;}
   }
 
   if (clock.area > count) {
@@ -627,7 +627,7 @@ export async function refreshWorldMonsters(
 ) {
   await expire(store, rules, size, random);
 
-  if (store.opening <= 0n || store.opening > store.now) return;
+  if (store.opening <= 0n || store.opening > store.now) {return;}
 
   await exploration(store, rules, size, random);
   await barbarians(store, rules, size, random);

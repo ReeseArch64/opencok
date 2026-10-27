@@ -46,7 +46,7 @@ export function hotItemOffer(row: Row): HotItemOffer {
   const goodsId = text(row, "goodsId");
   const match = /^(0|[1-9]\d{0,9});([1-9]\d{0,9})$/.exec(goodsId);
 
-  if (!match || goodsId.length > 20 || text(row, "itemId") !== match[1]) hotItemFailure();
+  if (!match || goodsId.length > 20 || text(row, "itemId") !== match[1]) {hotItemFailure();}
 
   const itemId = match[1]!,
     itemNum = cityInteger(match[2], 1),
@@ -63,7 +63,7 @@ export function hotItemOffer(row: Row): HotItemOffer {
     (hotItemType(itemId) === 0 && !hotResourceAssets[Number(itemId)]) ||
     (priceType < 19 && !hotResourceAssets[priceType])
   )
-    hotItemFailure();
+    {hotItemFailure();}
 
   return {
     goodsId,
@@ -101,7 +101,7 @@ export function hotOfferRow(owner: string, rule: Rule, now: bigint, kind = 0): R
 export function hotItemVersion(rules: Rules, now: bigint): 2 | 3 {
   const store = rules.items.get("store");
 
-  if (!store) hotItemFailure();
+  if (!store) {hotItemFailure();}
 
   const start = eventTimestamp(store.k10),
     end = eventTimestamp(store.k11);
@@ -124,19 +124,19 @@ export function hotRefreshCost(rules: Rules, count: number) {
   cityInteger(count);
   const rows = (rules.items.get("store")?.k2 ?? "").split("|");
 
-  if (!rows.length || rows.length > 64) hotItemFailure();
+  if (!rows.length || rows.length > 64) {hotItemFailure();}
 
   let cost = 0;
 
   for (const [index, row] of rows.entries()) {
     const parts = row.split(";");
 
-    if (parts.length !== 2) hotItemFailure();
+    if (parts.length !== 2) {hotItemFailure();}
 
     const threshold = cityInteger(parts[0], 1);
     cost = cityInteger(parts[1]);
 
-    if (count < threshold || index === rows.length - 1) return cost;
+    if (count < threshold || index === rows.length - 1) {return cost;}
   }
 
   return cost;
@@ -183,7 +183,7 @@ function condition(type: number, raw: string, state: HotItemFilter, rules: Rules
     case 6: {
       const at = eventTimestamp(raw);
 
-      if (at === undefined) hotItemFailure();
+      if (at === undefined) {hotItemFailure();}
 
       return type === 5 ? now > at : now < at;
     }
@@ -239,21 +239,21 @@ function condition(type: number, raw: string, state: HotItemFilter, rules: Rules
 export function hotItemPool(rules: Rules, state: HotItemFilter, manual: boolean): Rule[] {
   const rows = [...(rules.advanced.hotItems?.values() ?? [])];
 
-  if (!rows.length || rows.length > 4096) hotItemFailure();
+  if (!rows.length || rows.length > 4096) {hotItemFailure();}
 
   return rows.filter((rule) => {
-    if (rule.version && !versionAtLeast("12.06.0", rule.version)) return false;
+    if (rule.version && !versionAtLeast("12.06.0", rule.version)) {return false;}
 
-    if (manual && state.refreshCount < 2 && rule.price_type === "5") return false;
+    if (manual && state.refreshCount < 2 && rule.price_type === "5") {return false;}
 
     const clauses = (rule.condition ?? "").split("|").filter(Boolean);
 
-    if (clauses.length > 32) hotItemFailure();
+    if (clauses.length > 32) {hotItemFailure();}
 
     return clauses.every((clause) => {
       const parts = clause.split(";");
 
-      if (parts.length !== 2) hotItemFailure();
+      if (parts.length !== 2) {hotItemFailure();}
 
       return condition(cityInteger(parts[0], 1, 25), parts[1]!, state, rules);
     });
@@ -278,7 +278,7 @@ export function chooseHotItems(
     const weights = available.map((rule) => {
       const rates = (rule.rate ?? "").split(";");
 
-      if (rates.length > 256) hotItemFailure();
+      if (rates.length > 256) {hotItemFailure();}
 
       const index = Math.min(history.get(rule.item ?? "") ?? 0, rates.length - 1);
 
@@ -286,13 +286,13 @@ export function chooseHotItems(
     });
     const total = weights.reduce((sum, value) => sum + value, 0);
 
-    if (total <= 0) break;
+    if (total <= 0) {break;}
 
-    if (total > 2147483647) hotItemFailure();
+    if (total > 2147483647) {hotItemFailure();}
 
     let draw = random(total);
 
-    if (!Number.isInteger(draw) || draw < 0 || draw >= total) hotItemFailure();
+    if (!Number.isInteger(draw) || draw < 0 || draw >= total) {hotItemFailure();}
 
     for (let index = 0; index < weights.length; index++) {
       if (draw < weights[index]!) {
@@ -304,9 +304,9 @@ export function chooseHotItems(
     }
   }
 
-  if (routine) result.push(...pool.filter((rule) => rule.routine !== undefined));
+  if (routine) {result.push(...pool.filter((rule) => rule.routine !== undefined));}
 
-  if (result.length > 64) hotItemFailure();
+  if (result.length > 64) {hotItemFailure();}
 
   return result;
 }
@@ -314,7 +314,7 @@ export function chooseHotItems(
 export function hotFallback(rules: Rules, version: 2 | 3, kind: number, count: number): Rule[] {
   const row = rules.items.get(version === 2 ? "new_store_v2" : `new_store_v3_${kind}`);
 
-  if (!row || count > 64) hotItemFailure();
+  if (!row || count > 64) {hotItemFailure();}
 
   const lists = ["k1", "k2", "k3", "k4", "k5", "k6"].map((key) => (row[key] ?? "").split("|"));
 
@@ -332,17 +332,17 @@ export function hotFallback(rules: Rules, version: 2 | 3, kind: number, count: n
 export function hotBusinessMan(rules: Rules, now: bigint) {
   const row = rules.items.get("store");
 
-  if (!row) hotItemFailure();
+  if (!row) {hotItemFailure();}
 
   const days = (row.k4 ?? "").split(";").map((entry) => cityInteger(entry, 0, 1));
 
-  if (days.length !== 7 || !days.includes(1)) hotItemFailure();
+  if (days.length !== 7 || !days.includes(1)) {hotItemFailure();}
 
   const fixedStart = eventTimestamp(row.k5),
     fixedEnd = eventTimestamp(row.k6);
 
   if (fixedStart === undefined || fixedEnd === undefined || fixedStart >= fixedEnd)
-    hotItemFailure();
+    {hotItemFailure();}
 
   const captured = now + 500n,
     weekday = new Date(Number(captured)).getUTCDay(),
@@ -355,7 +355,7 @@ export function hotBusinessMan(rules: Rules, now: bigint) {
   } else {
     let offset = 0;
 
-    while (days[(weekday + offset) % 7] !== 1 && offset < 7) offset++;
+    while (days[(weekday + offset) % 7] !== 1 && offset < 7) {offset++;}
 
     start = today + BigInt(offset) * 86400000n;
     end = start + 86400000n;
@@ -367,9 +367,9 @@ export function hotBusinessMan(rules: Rules, now: bigint) {
   }
 
   for (let times = 0; times < 7; times++) {
-    if (days[new Date(Number(end)).getUTCDay()] === 1) end += 86400000n;
-    else if (end >= fixedStart && end < fixedEnd) end = fixedEnd;
-    else break;
+    if (days[new Date(Number(end)).getUTCDay()] === 1) {end += 86400000n;}
+    else if (end >= fixedStart && end < fixedEnd) {end = fixedEnd;}
+    else {break;}
   }
 
   return { start, end, isOpen: cityInteger(row.k7, 0, 1), k8: cityInteger(row.k8) };

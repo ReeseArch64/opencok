@@ -32,7 +32,7 @@ export async function readPlayerItemGifts(
     .limit(64)
     .for("update");
 
-  if (!pending.length) return { pending: [] };
+  if (!pending.length) {return { pending: [] };}
 
   const senders = await tx
     .select({ uid: userprofile.uid, name: userprofile.name })
@@ -52,7 +52,7 @@ export async function writePlayerItemGifts(
     const gift = write.send;
     playerItemGiftRecipient(gift.uid);
 
-    if (!gift.itemId || gift.itemId.length > 50) throw new Error("Invalid sent gift item");
+    if (!gift.itemId || gift.itemId.length > 50) {throw new Error("Invalid sent gift item");}
 
     await tx.insert(receive_item).values({
       uid: gift.uid,
@@ -67,14 +67,14 @@ export async function writePlayerItemGifts(
     const ids = write.delivered.map((id) => cityInteger(id, 1));
 
     if (ids.length > 64 || new Set(ids).size !== ids.length)
-      throw new Error("Invalid received gift selection");
+      {throw new Error("Invalid received gift selection");}
 
     const removed = await tx
       .delete(receive_item)
       .where(and(eq(receive_item.uid, owner), inArray(receive_item.id, ids)))
       .returning({ id: receive_item.id });
 
-    if (removed.length !== ids.length) throw new Error("Stale received gift selection");
+    if (removed.length !== ids.length) {throw new Error("Stale received gift selection");}
   }
 }
 
@@ -82,10 +82,10 @@ export async function pendingPlayerItemGiftOwners(
   db: Database["kingdom"]["db"],
   online: readonly string[],
 ) {
-  if (!online.length) return [];
+  if (!online.length) {return [];}
 
   if (online.length > 128 || online.some((uid) => playerItemGiftRecipient(uid) !== uid))
-    throw new Error("Invalid online gift owner selection");
+    {throw new Error("Invalid online gift owner selection");}
 
   const rows = await db
     .selectDistinct({ uid: receive_item.uid })

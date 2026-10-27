@@ -44,15 +44,15 @@ function mergeEnabled(rules: Rules, server: Row, now: bigint) {
 }
 
 export function normalRechargeMergeStart(rules: Rules, server: Row, now: bigint) {
-  if (!mergeEnabled(rules, server, now)) return;
+  if (!mergeEnabled(rules, server, now)) {return;}
 
   const saved = long(server, "mergeTiredRushBeginTime");
 
-  if (saved > 0n) return saved;
+  if (saved > 0n) {return saved;}
 
   const config = rules.items.get("merge_tired_rush");
 
-  if (!config) return;
+  if (!config) {return;}
 
   const base = normal(rules, now)?.end ?? long(server, "lastMergeMillis");
 
@@ -72,11 +72,11 @@ export function normalRechargePeriod(
       now: Number(now),
     })
   )
-    return;
+    {return;}
 
   const admitted = long(server, "payTotalTime");
 
-  if (admitted <= 0n || admitted > now) return;
+  if (admitted <= 0n || admitted > now) {return;}
 
   const begin = long(server, "mergeTiredRushBeginTime");
 
@@ -86,13 +86,13 @@ export function normalRechargePeriod(
     if (config) {
       const end = begin + BigInt(cityInteger(config.k2, 1)) * 86400000n;
 
-      if (now >= begin && now <= end) return { type: 4, start: begin, end };
+      if (now >= begin && now <= end) {return { type: 4, start: begin, end };}
     }
   }
 
   const period = normal(rules, now);
 
-  if (period || !includeMycard) return period;
+  if (period || !includeMycard) {return period;}
 
   const config = rules.items.get("recharge_event"),
     other = dated(config?.k3, config?.k4, now);
@@ -105,7 +105,7 @@ export function normalRechargeThresholds(rules: Rules, type: number) {
     (row) => cityInteger(row.type, 1, 4) === type,
   );
 
-  if (rows.length > 128) normalRechargeFailure();
+  if (rows.length > 128) {normalRechargeFailure();}
 
   rows.sort((a, b) => cityInteger(a.level, 1) - cityInteger(b.level, 1));
   let node = -1n;
@@ -114,11 +114,11 @@ export function normalRechargeThresholds(rules: Rules, type: number) {
     const row = rows[index]!;
 
     if (cityInteger(row.level, 1) !== index + 1 || !row.Gift || !/^\d+$/.test(row.Gift))
-      normalRechargeFailure();
+      {normalRechargeFailure();}
 
     const current = normalRechargeNode(row.Node, type);
 
-    if (current <= node) normalRechargeFailure();
+    if (current <= node) {normalRechargeFailure();}
 
     node = current;
   }
@@ -127,7 +127,7 @@ export function normalRechargeThresholds(rules: Rules, type: number) {
 }
 
 export function normalRechargeNode(raw: string | undefined, type: number) {
-  if (type !== 2) return BigInt(cityInteger(raw, 1));
+  if (type !== 2) {return BigInt(cityInteger(raw, 1));}
 
   const value = Number(raw),
     cents = Math.trunc(Math.fround(Math.fround(value) * Math.fround(100)));
@@ -139,7 +139,7 @@ export function normalRechargeNode(raw: string | undefined, type: number) {
     cents <= 0 ||
     cents > 2147483647
   )
-    normalRechargeFailure();
+    {normalRechargeFailure();}
 
   return BigInt(cents);
 }

@@ -90,7 +90,7 @@ async function seed(
       dmmPaidSpecialGold: 40n,
     });
   if (options.items !== undefined)
-    await realm(kingdomId)
+    {await realm(kingdomId)
       .db.insert(user_item)
       .values({
         uuid: `item-${uid}`,
@@ -99,7 +99,7 @@ async function seed(
         count: options.items,
         value: 17,
         vanishTime: 9007199254740993n,
-      });
+      });}
   if (options.account !== false) {
     await databases.global.db.insert(account_new).values({
       gameUid: uid,
@@ -124,7 +124,7 @@ function loseCommit(pool: ReturnType<typeof createDatabases>["global"]["pool"], 
   Object.defineProperty(pool, "connect", {
     configurable: true,
     value: (...connectArgs: unknown[]) => {
-      if (connectArgs.length) return Reflect.apply(originalConnect, pool, connectArgs);
+      if (connectArgs.length) {return Reflect.apply(originalConnect, pool, connectArgs);}
       return connect().then((client) => {
         let touched = false;
         return {
@@ -136,8 +136,8 @@ function loseCommit(pool: ReturnType<typeof createDatabases>["global"]["pool"], 
                 : first && typeof first === "object" && "text" in first
                   ? first.text
                   : undefined;
-            if (typeof text === "string" && text.startsWith("begin")) touched = false;
-            if (typeof text === "string" && text.trimStart().startsWith(statement)) touched = true;
+            if (typeof text === "string" && text.startsWith("begin")) {touched = false;}
+            if (typeof text === "string" && text.trimStart().startsWith(statement)) {touched = true;}
             const result = await Reflect.apply(client.query, client, args);
             if (armed && touched && text === "commit") {
               armed = false;
@@ -167,7 +167,7 @@ function pauseGlobalCommit() {
   Object.defineProperty(pool, "connect", {
     configurable: true,
     value: (...connectArgs: unknown[]) => {
-      if (connectArgs.length) return Reflect.apply(originalConnect, pool, connectArgs);
+      if (connectArgs.length) {return Reflect.apply(originalConnect, pool, connectArgs);}
       return connect().then((client) => {
         let touched = false;
         return {
@@ -179,17 +179,17 @@ function pauseGlobalCommit() {
                   : first && typeof first === "object" && "text" in first
                     ? first.text
                     : undefined;
-            if (typeof text === "string" && text.startsWith("begin")) touched = false;
+            if (typeof text === "string" && text.startsWith("begin")) {touched = false;}
             if (
               typeof text === "string" &&
               text.startsWith('insert into "opencok_global"."nickname_change_receipt"')
             )
-              touched = true;
+              {touched = true;}
             if (armed && touched && text === "commit") {
               armed = false;
               reached.resolve();
               await resume.promise;
-              if (rejected) throw new Error("Synthetic rejected global commit");
+              if (rejected) {throw new Error("Synthetic rejected global commit");}
             }
             return Reflect.apply(client.query, client, args);
           },
@@ -228,7 +228,7 @@ function notificationFixture(
   });
   const listen = (uid: string) =>
     notifications.subscribe(uid, async (command, body, signal) => {
-      if (signal?.aborted) return false;
+      if (signal?.aborted) {return false;}
       events.push({ command, body: decode(encode(body)) });
       return true;
     });
@@ -242,17 +242,17 @@ beforeAll(async () => {
       topology.globalDatabase,
       ...topology.kingdoms.map((entry) => entry.database),
     ])
-      await admin.query(`CREATE DATABASE "${name}"`);
+      {await admin.query(`CREATE DATABASE "${name}"`);}
   } finally {
     await admin.end();
   }
   databases = createDatabases(pg.options, topology);
   await migrateDatabase(databases.global.pool, "global");
-  for (const entry of topology.kingdoms) await migrateDatabase(realm(entry.id).pool, "kingdom");
+  for (const entry of topology.kingdoms) {await migrateDatabase(realm(entry.id).pool, "kingdom");}
   for (const pool of [databases.global.pool, realm().pool])
-    await pool.query(
+    {await pool.query(
       "CREATE FUNCTION public.reject_nickname() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'synthetic write failure'; END $$",
-    );
+    );}
 }, 120_000);
 
 afterAll(async () => {
@@ -516,7 +516,7 @@ test("unavailable CN1 state and malformed refund price retain a recoverable oper
     price: () => (++reads === 1 || validPrice ? "100" : "invalid"),
     refundRatio: async () => {
       ratios++;
-      if (!available) throw new Error("State unavailable");
+      if (!available) {throw new Error("State unavailable");}
       return 0.5;
     },
   };
@@ -724,7 +724,7 @@ test("real Chat HTTP delivery uses committed authority and late avatar events ca
       { owner: outsider, kingdomId: 1, operationId: first },
       { owner: uid, kingdomId: 2, operationId: first },
     ])
-      await expect(publish(update, new AbortController().signal)).rejects.toThrow();
+      {await expect(publish(update, new AbortController().signal)).rejects.toThrow();}
     const third = randomUUID();
     await store().change(uid, third, "Chat Third", now + 2);
     await realm().pool.query(
@@ -793,7 +793,7 @@ test("an avatar blocked by an uncommitted rename reads the receipt after acquiri
         "SELECT count(*)::int AS count FROM pg_stat_activity WHERE datname = 'nickname_global' AND pid <> pg_backend_pid() AND wait_event_type = 'Lock' AND query LIKE '%account_new%' AND query LIKE '%for update%'",
       );
       waiting = result.rows[0].count > 0;
-      if (!waiting) await Bun.sleep(10);
+      if (!waiting) {await Bun.sleep(10);}
     }
     expect(waiting).toBe(true);
     pause.resume();
@@ -847,7 +847,7 @@ test("nickname runtime sends committed item debit/refund packets and persists th
       operationId = randomUUID(),
       f = notificationFixture();
     f.notifications.subscribe(uid, async (command, body, signal) => {
-      if (signal?.aborted) return false;
+      if (signal?.aborted) {return false;}
       const saved = await item(uid);
       expect(body.count).toEqual(sfs.int(saved!.count));
       f.events.push({ command, body: decode(encode(body)) });
@@ -906,7 +906,7 @@ test("gold runtime sends exact mobile/DMM buckets and current-price CN1 refunds 
       },
     });
     f.notifications.subscribe(uid, async (command, body, signal) => {
-      if (signal?.aborted) return false;
+      if (signal?.aborted) {return false;}
       f.events.push({ command, body: decode(encode(body)) });
       f.goods.price = "200";
       return true;
@@ -1026,12 +1026,12 @@ test("item refunds capture actual intervening counts, signed wrap and recreated-
       change = f.runtime.change(uid, operationId, `Intervening ${uid}`, now);
     try {
       await pause.reached;
-      if (count === null) await realm().db.delete(user_item).where(eq(user_item.ownerId, uid));
+      if (count === null) {await realm().db.delete(user_item).where(eq(user_item.ownerId, uid));}
       else
-        await realm()
+        {await realm()
           .db.update(user_item)
           .set({ count, vanishTime: 9007199254740999n })
-          .where(eq(user_item.ownerId, uid));
+          .where(eq(user_item.ownerId, uid));}
       pause.resume(true);
       expect(await change).toEqual({ status: sfs.bool(false) });
       const expected = count === null ? 1 : (count + 1) | 0;
@@ -1107,7 +1107,7 @@ test("notification deadlines abort late recipients and preserve current-state re
   const gate = Promise.withResolvers<void>();
   f.notifications.subscribe(uid, async (command, body, signal) => {
     await gate.promise;
-    if (signal?.aborted) return false;
+    if (signal?.aborted) {return false;}
     f.events.push({ command, body });
     return true;
   });
@@ -1407,9 +1407,9 @@ test("continued-cost evidence is captured with the nickname debit and published 
     uid = await seed({ gold: 500n }),
     rejected = await seed({ gold: 500n, account: false });
   for (const owner of [uid, rejected])
-    await realm()
+    {await realm()
       .db.insert(user_building)
-      .values({ uuid: `cost-${owner}`, uid: owner, itemId: 400000, pos: 0, level: 1 });
+      .values({ uuid: `cost-${owner}`, uid: owner, itemId: 400000, pos: 0, level: 1 });}
   const operationId = randomUUID();
   const result = await store(1, configured).change(uid, operationId, `Cost ${uid}`, now);
   expect(result.state).toBe("committed");

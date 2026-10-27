@@ -38,7 +38,7 @@ export class ChatHttpRouter {
       request.method === "GET" &&
       ["/chat/server/links", "/chat/server/all"].includes(request.url?.split("?", 1)[0] ?? "")
     ) {
-      if (serverListHandler) serverListHandler(request, response);
+      if (serverListHandler) {serverListHandler(request, response);}
       else {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":[]}');
@@ -59,7 +59,7 @@ export class ChatHttpRouter {
     }
 
     if (request.method === "POST" && request.url === chatAvatarProfilePath) {
-      if (profileHandler) void profileHandler(request, response);
+      if (profileHandler) {void profileHandler(request, response);}
       else {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');
@@ -69,7 +69,7 @@ export class ChatHttpRouter {
     }
 
     if (request.method === "POST" && request.url === chatNicknamePath) {
-      if (nicknameHandler) void nicknameHandler(request, response);
+      if (nicknameHandler) {void nicknameHandler(request, response);}
       else {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');
@@ -79,7 +79,7 @@ export class ChatHttpRouter {
     }
 
     if (request.method === "POST" && request.url === realmSocialPath) {
-      if (socialHandler) void socialHandler(request, response);
+      if (socialHandler) {void socialHandler(request, response);}
       else {
         response.writeHead(503);
         response.end();
@@ -89,7 +89,7 @@ export class ChatHttpRouter {
     }
 
     if (request.method === "POST" && request.url === chatMailboxPath) {
-      if (mailboxHandler) void mailboxHandler(request, response);
+      if (mailboxHandler) {void mailboxHandler(request, response);}
       else {
         response.writeHead(503, { "content-type": "application/json; charset=utf-8" });
         response.end('{"code":0,"data":{}}');

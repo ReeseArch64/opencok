@@ -13,7 +13,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import type { GeneralPreview } from "@opencok/hero/contracts/profile-generals";
 
 function serializePublicGenerals(generals: readonly GeneralPreview[]): Fields {
-  if (!generals.length) throw new GameError(errors.unsupported, "public_profile");
+  if (!generals.length) {throw new GameError(errors.unsupported, "public_profile");}
 
   return {
     skillPoint: sfs.int(generals[0]!.plusSkillPoint),

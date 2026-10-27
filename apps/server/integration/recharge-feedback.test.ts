@@ -34,12 +34,12 @@ async function fixture() {
   });
   h.rules.advanced.rechargeFeedback!.clear();
   for (const number of [1, 2])
-    h.rules.advanced.rechargeFeedback!.set(String(9913000 + number), {
+    {h.rules.advanced.rechargeFeedback!.set(String(9913000 + number), {
       id: String(9913000 + number),
       product_id: "gold_8",
       number: String(number),
       reward: "990001",
-    });
+    });}
   h.rules.reconnect.rewards!.set("990001", { id: "990001", gold: "7" });
   const order = (orderId: string, owner = "owner", time = BigInt(h.clock.now)) =>
     h.db.db.insert(paylog).values({

@@ -15,21 +15,21 @@ function decimal(value: unknown): number {
   const source = String(value ?? "0").trim();
 
   if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(source))
-    throw new GameError(errors.unsupported, "power_rule");
+    {throw new GameError(errors.unsupported, "power_rule");}
 
   const result = Number(source);
 
-  if (!Number.isFinite(result)) throw new GameError(errors.unsupported, "power_rule");
+  if (!Number.isFinite(result)) {throw new GameError(errors.unsupported, "power_rule");}
 
   return result;
 }
 
 function numberToLong(value: number): bigint {
-  if (Number.isNaN(value)) return 0n;
+  if (Number.isNaN(value)) {return 0n;}
 
-  if (value >= 9223372036854775808) return 9223372036854775807n;
+  if (value >= 9223372036854775808) {return 9223372036854775807n;}
 
-  if (value <= -9223372036854775808) return -9223372036854775808n;
+  if (value <= -9223372036854775808) {return -9223372036854775808n;}
 
   return BigInt(Math.trunc(value));
 }
@@ -64,7 +64,7 @@ function researchPower(
 function titlePower(state: PowerSnapshot, rules: Rules, context: PowerContext): number {
   const title = state.knight;
 
-  if (!title) return 0;
+  if (!title) {return 0;}
 
   const contract = Number(integer(title.contract_activity_title, -1n));
   let active = -1;
@@ -73,17 +73,17 @@ function titlePower(state: PowerSnapshot, rules: Rules, context: PowerContext): 
     contract !== -1 &&
     (context.contractTitleExpiries.get(String(contract)) ?? 0n) > BigInt(context.now)
   )
-    active = contract;
+    {active = contract;}
 
   if (active === -1) {
     active = Number(integer(title.activity_title, -1n));
 
-    if (active === -1) return 0;
+    if (active === -1) {return 0;}
 
     const rule = record(rules.power.titles, String(active));
 
     if (rule.type !== "2") {
-      if (rule.activate_array === undefined) throw new GameError(errors.unsupported, "power_rule");
+      if (rule.activate_array === undefined) {throw new GameError(errors.unsupported, "power_rule");}
 
       const requirements = rule.activate_array.split(";");
       const available = requirements.every((id) =>
@@ -95,7 +95,7 @@ function titlePower(state: PowerSnapshot, rules: Rules, context: PowerContext): 
         ),
       );
 
-      if (!available) return 0;
+      if (!available) {return 0;}
     }
   }
 
@@ -105,19 +105,19 @@ function titlePower(state: PowerSnapshot, rules: Rules, context: PowerContext): 
 }
 
 function dragonPower(state: PowerSnapshot, rules: Rules, context: PowerContext): bigint {
-  if (!context.dragonLevelUp) return 0n;
+  if (!context.dragonLevelUp) {return 0n;}
 
   const dragons = state.dragons.filter((row) => integer(row.dragonState) === 3n);
 
-  if (!dragons.length) return 0n;
+  if (!dragons.length) {return 0n;}
 
   if (context.dragonScience && !Number.isFinite(context.dragonAttackPercent))
-    throw new GameError(errors.unsupported, "power_effect");
+    {throw new GameError(errors.unsupported, "power_effect");}
 
   const global = record(rules.items, "dragon_new");
 
   for (const key of ["k10", "k11", "k12"])
-    if (global[key] === undefined) throw new GameError(errors.unsupported, "power_rule");
+    {if (global[key] === undefined) {throw new GameError(errors.unsupported, "power_rule");}}
 
   const divisor = Math.fround(decimal(global.k10));
   const exponent = Math.fround(decimal(global.k11));
@@ -127,16 +127,16 @@ function dragonPower(state: PowerSnapshot, rules: Rules, context: PowerContext):
   for (const row of dragons) {
     const base = record(rules.power.dragonBases, text(row, "itemId"));
 
-    if (base.initFight === undefined) throw new GameError(errors.unsupported, "power_rule");
+    if (base.initFight === undefined) {throw new GameError(errors.unsupported, "power_rule");}
 
     const levels = [...(rules.power.dragonLevels?.values() ?? [])].filter(
       (rule) =>
         integer(rule.base_id) === integer(row.itemId) && integer(rule.level) === integer(row.lv),
     );
 
-    if (levels.length !== 1) throw new GameError(errors.unsupported, "power_rule");
+    if (levels.length !== 1) {throw new GameError(errors.unsupported, "power_rule");}
 
-    if (levels[0]!.attack === undefined) throw new GameError(errors.unsupported, "power_rule");
+    if (levels[0]!.attack === undefined) {throw new GameError(errors.unsupported, "power_rule");}
 
     let attack = Math.fround(decimal(levels[0]!.attack));
 

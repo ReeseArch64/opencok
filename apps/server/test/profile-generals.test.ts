@@ -198,7 +198,7 @@ test("all persisted initiative kinds loaded by the legacy general manager have p
     "622800",
     "622900",
   ];
-  for (const id of ids) rules.power.generalSkills!.set(id, { cd_time: "12" });
+  for (const id of ids) {rules.power.generalSkills!.set(id, { cd_time: "12" });}
   state.skills = ids.map((id) => skill(id));
   expect(
     project()[0]!
@@ -266,7 +266,7 @@ test("malformed abilities and unresolvable general state reject without exposing
     Buffer.from('[{"private":"secret"}]'),
     Buffer.alloc(65536),
   ])
-    expect(() => decodeGeneralAbilities(raw)).toThrow();
+    {expect(() => decodeGeneralAbilities(raw)).toThrow();}
   expect(() => decodeGeneralAbilities(Buffer.from('[{"private":"secret"}]'))).toThrow("102192");
   for (const change of [
     ({ rules }: ReturnType<typeof fixture>) => rules.power.generals!.clear(),

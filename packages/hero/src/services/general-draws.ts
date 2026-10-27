@@ -79,16 +79,16 @@ export class GeneralDrawDomain extends CityCommandDomain {
           now: Number(context.now),
         });
 
-      if (!available("golden_roulette")) generalFailure();
+      if (!available("golden_roulette")) {generalFailure();}
 
       const period = generalDrawPeriod(context.rules, context.now),
         action = str(params, "M__REQUEST_ID__H"),
         config = context.rules.items.get("golden_opentime");
 
-      if (action !== "rank" && !period.open) generalFailure();
+      if (action !== "rank" && !period.open) {generalFailure();}
 
       if (num(context.state.profile, "crossFightSrcServerId") > 0 && action !== "rank")
-        generalFailure();
+        {generalFailure();}
 
       let row = generalDrawState(
           context.rules,
@@ -99,7 +99,7 @@ export class GeneralDrawDomain extends CityCommandDomain {
         body: Fields = {},
         event: Uint8Array | null | undefined;
 
-      if (action === "info") body = view(context, row);
+      if (action === "info") {body = view(context, row);}
       else if (action === "'luckdraw" || action === "luckdraw") {
         const id = str(params, "itemId"),
           rule = context.rules.general.draws?.get(id),
@@ -111,14 +111,14 @@ export class GeneralDrawDomain extends CityCommandDomain {
           num(castle ?? {}, "level") < cityInteger(rule.minlevel, 1) ||
           !/^\d+$/.test(id)
         )
-          generalFailure();
+          {generalFailure();}
 
         if (
           ![1, 10].includes(count) &&
           (!available("golden_roulette_5h_open") ||
             !(config?.k17 ?? "").split(";").includes(String(count)))
         )
-          generalFailure();
+          {generalFailure();}
 
         const items = (rule["items "] ?? rule.items ?? "").split(";"),
           weights = (rule.rate ?? "").split(";").map((value) => cityInteger(value)),
@@ -129,7 +129,7 @@ export class GeneralDrawDomain extends CityCommandDomain {
           items.length !== counts.length ||
           items.some((id) => !context.rules.goods.has(id))
         )
-          generalFailure();
+          {generalFailure();}
 
         const plan = generalDrawPurchase(
           context.rules,
@@ -151,14 +151,14 @@ export class GeneralDrawDomain extends CityCommandDomain {
           context.economy.item(item, quantity);
 
           if (count <= 10)
-            outcomes.push(sfs.object({ id: sfs.string(item), count: sfs.int(quantity) }));
+            {outcomes.push(sfs.object({ id: sfs.string(item), count: sfs.int(quantity) }));}
 
           quantities.set(item, cityInteger((quantities.get(item) ?? 0) + quantity));
         }
 
         if (count > 10)
-          for (const [id, quantity] of quantities)
-            outcomes.push(sfs.object({ id: sfs.string(id), count: sfs.int(quantity) }));
+          {for (const [id, quantity] of quantities)
+            {outcomes.push(sfs.object({ id: sfs.string(id), count: sfs.int(quantity) }));}}
 
         body = {
           ...view(context, row),
@@ -177,7 +177,7 @@ export class GeneralDrawDomain extends CityCommandDomain {
           ),
         });
       } else if (action === "recieve") {
-        if (!available("golden_roulette_Integral_reward")) generalFailure();
+        if (!available("golden_roulette_Integral_reward")) {generalFailure();}
 
         const score = cityInteger(int(params, "score"), 1),
           rewards = generalPairs(config?.k16),
@@ -185,14 +185,14 @@ export class GeneralDrawDomain extends CityCommandDomain {
           claims = generalPairs(text(row, "rewardFlags"));
 
         if (!reward || claims.get(score) === 1 || generalDrawScore(context.rules, row) < score)
-          generalFailure();
+          {generalFailure();}
 
         claims.set(score, 1);
         row.rewardFlags = generalContent(claims);
         body.reward = grantRewards(context, String(reward));
-      } else if (action !== "rank" && action !== "update") generalFailure();
+      } else if (action !== "rank" && action !== "update") {generalFailure();}
 
-      if (action === "update") row.hide_king = num(row, "hide_king") === 1 ? 0 : 1;
+      if (action === "update") {row.hide_king = num(row, "hide_king") === 1 ? 0 : 1;}
 
       if (action === "rank" || action === "update") {
         const ranks = context.state.generalRoster?.wheelRanks ?? [],
@@ -212,14 +212,14 @@ export class GeneralDrawDomain extends CityCommandDomain {
               "last_normal_wheel_millis",
             ].every((key) => long(entry, key) < period.start)
           )
-            continue;
+            {continue;}
 
           rank++;
 
-          if (entry.uid === context.owner) mine = rank;
+          if (entry.uid === context.owner) {mine = rank;}
 
           if (local.length < 200)
-            local.push(
+            {local.push(
               sfs.object({
                 uid: sfs.string(text(entry, "uid")),
                 name: sfs.string(text(entry, "name")),
@@ -228,7 +228,7 @@ export class GeneralDrawDomain extends CityCommandDomain {
                 count: sfs.int(score),
                 rank: sfs.int(rank),
               }),
-            );
+            );}
         }
 
         const global = (await globalRanking()).map((raw, index) => {
@@ -237,7 +237,7 @@ export class GeneralDrawDomain extends CityCommandDomain {
             name = str(entry, "name");
 
           if (!uid || uid.length > 40 || name.length > 80 || entry.hideKing?.type !== Type.Bool)
-            generalFailure();
+            {generalFailure();}
 
           return {
             uid: sfs.string(uid),
@@ -249,7 +249,7 @@ export class GeneralDrawDomain extends CityCommandDomain {
           };
         });
 
-        if (global.length > 1000) generalFailure();
+        if (global.length > 1000) {generalFailure();}
 
         body = {
           hide: sfs.bool(num(row, "hide_king") > 0),
@@ -265,7 +265,7 @@ export class GeneralDrawDomain extends CityCommandDomain {
         };
       }
 
-      if (period.open && action !== "rank") (context.write.generalRoster ??= {}).wheel = row;
+      if (period.open && action !== "rank") {(context.write.generalRoster ??= {}).wheel = row;}
 
       return {
         response: encode({ data: sfs.object(body) }),

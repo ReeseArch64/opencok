@@ -64,7 +64,7 @@ function fixture(
     [10, "trade"],
     [18, "monster"],
   ] as const)
-    rows.push(
+    {rows.push(
       ...Array.from({ length: 10 }, (_, index) =>
         mailListEntry({
           uid: `${prefix}${index}`,
@@ -74,7 +74,7 @@ function fixture(
           contents: Buffer.from(type === 22 || type === 24 ? `text ${index}` : `{n:${index}}`),
         }),
       ),
-    );
+    );}
   rows.push(mailListEntry({ uid: "single", type: 12, contents: Buffer.from("{n:1}") }));
   rows.push(
     mailListEntry({
@@ -124,7 +124,7 @@ function fixture(
       const text = statement.text;
       calls.push({ text, params: values });
       const fail = (step: string) => {
-        if (options.fail === step) throw new Error(`Synthetic ${step} failure`);
+        if (options.fail === step) {throw new Error(`Synthetic ${step} failure`);}
       };
       const equal = (table: string, column: string) => {
         const position = text.match(
@@ -250,7 +250,7 @@ function fixture(
                 (extra(row)?.length ?? 0) +
                 Buffer.byteLength(row.rewardId ?? ""),
           ]);
-          if (options.duplicateMetadata && metadata.length > 1) metadata[1] = metadata[0]!;
+          if (options.duplicateMetadata && metadata.length > 1) {metadata[1] = metadata[0]!;}
           return { rows: metadata };
         }
         fail("bodies");
@@ -322,7 +322,7 @@ function fixture(
     {
       query: async (statement: { text: string }, values: unknown[]) => {
         routes.push(values);
-        if (options.fail === "routing") throw new Error("Synthetic routing failure");
+        if (options.fail === "routing") {throw new Error("Synthetic routing failure");}
         expect(statement.text).toContain('from "opencok_global"."account_new"');
         return { rows: [] };
       },
@@ -346,7 +346,7 @@ function fixture(
   const services: GameServices = {
     playerUpdateTimes: async (realm, ids) => {
       markers.push([realm, ids]);
-      if (options.fail === "marker") throw new Error("Synthetic marker failure");
+      if (options.fail === "marker") {throw new Error("Synthetic marker failure");}
       return new Map([["self", "marker"]]);
     },
   };
@@ -448,7 +448,7 @@ test("moderator groups exclude media and use translations without category-only 
   expect(chat.translationMsg).toEqual(sfs.string(" traduzido "));
   expect(chat.originalLang).toEqual(sfs.string("en"));
   expect(chat.lastUpdateTime).toEqual(sfs.string("marker"));
-  for (const key of ["status", "fromUser", "fromName", "pic"]) expect(chat[key]).toBeUndefined();
+  for (const key of ["status", "fromUser", "fromName", "pic"]) {expect(chat[key]).toBeUndefined();}
   expect(f.calls.some((call) => call.text.startsWith("delete"))).toBe(false);
   const disabled = fixture();
   disabled.config.mailTranslationEnabled = false;
@@ -574,7 +574,7 @@ test("all failure stages roll back planned primary and group changes without tou
     } catch (error) {
       caught = error;
     }
-    while (caught instanceof Error && caught.cause) caught = caught.cause;
+    while (caught instanceof Error && caught.cause) {caught = caught.cause;}
     expect(caught).toBeInstanceOf(Error);
     expect((caught as Error).message).toBe(`Synthetic ${fail} failure`);
     expect(structuredClone(f.rows())).toEqual(beforeRows);
@@ -613,11 +613,11 @@ test("metadata bounds and inconsistent counts or body snapshots reject before cl
     await expect(f.game.execute("self", "mread.batch", params())).rejects.toThrow();
     expect(f.calls.some((call) => call.text.startsWith("delete"))).toBe(false);
     if ("size" in option || "counts" in option || "duplicateMetadata" in option)
-      expect(
+      {expect(
         f.calls.some((call) =>
           call.text.startsWith('select "group_mail"."uid", "group_mail"."toUser"'),
         ),
-      ).toBe(false);
+      ).toBe(false);}
   }
   const huge = fixture();
   huge
@@ -650,14 +650,14 @@ test("repository preview and cleanup capabilities cannot escape the processed pa
     const before = structuredClone([f.rows(), f.groups()]);
     await expect(
       readMailGroups(f.databases, 1, "self", query(), async (groups, readers) => {
-        if (invalid === "sender") await readers.senders(["unrequested"]);
+        if (invalid === "sender") {await readers.senders(["unrequested"]);}
         if (invalid === "foreign-preview")
-          await readers.preview(group(12, "foreign"), mailGroupRule(12)!);
+          {await readers.preview(group(12, "foreign"), mailGroupRule(12)!);}
         const single = groups.find((group) => group.groupIndex === "single")!;
         await readers.preview(single, mailGroupRule(single.groupType)!);
         if (invalid === "repeat-preview")
-          await readers.preview(single, mailGroupRule(single.groupType)!);
-        if (invalid === "conversation") await readers.preview(groups[0]!, mailGroupRule(100)!);
+          {await readers.preview(single, mailGroupRule(single.groupType)!);}
+        if (invalid === "conversation") {await readers.preview(groups[0]!, mailGroupRule(100)!);}
         return {
           groups:
             invalid === "group"
@@ -695,9 +695,9 @@ test("preview extra-body ownership and count-only historical rows preserve bound
       );
       expect(f.calls.some((call) => call.text.startsWith("delete"))).toBe(false);
     } else
-      expect(
+      {expect(
         messages((await f.game.execute("self", "mread.batch", params())).body)[0]!.detail,
-      ).toEqual(sfs.object({ n: sfs.int(9) }));
+      ).toEqual(sfs.object({ n: sfs.int(9) }));}
   }
   const f = fixture();
   f.groups().splice(0, f.groups().length, group(200, "5"));
@@ -755,9 +755,9 @@ test("repository query and selector validation reject invalid capabilities befor
     { ...query(), now: NaN },
     { ...query(), moderation: 1 as never },
   ])
-    expect(() =>
+    {expect(() =>
       readMailGroups(f.databases, 1, "self", invalid, async () => ({ groups: [], mailIds: [] })),
-    ).toThrow("Invalid mail group query");
+    ).toThrow("Invalid mail group query");}
   for (const [realm, uid] of [
     [0, "self"],
     [2.5, "self"],
@@ -765,9 +765,9 @@ test("repository query and selector validation reject invalid capabilities befor
     [1, "\0"],
     [1, "\ud800"],
   ] as const)
-    expect(() =>
+    {expect(() =>
       readMailGroups(f.databases, realm, uid, query(), async () => ({ groups: [], mailIds: [] })),
-    ).toThrow("Invalid mail group query");
+    ).toThrow("Invalid mail group query");}
   expect(f.calls).toEqual([]);
   for (const selection of [
     { kind: "uid", types: [] },

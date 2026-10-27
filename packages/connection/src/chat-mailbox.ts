@@ -38,7 +38,7 @@ export function createChatMailboxPublisher(options: {
     options.timeoutMs < 100 ||
     options.timeoutMs > 30000
   )
-    throw new Error("Invalid chat mailbox configuration");
+    {throw new Error("Invalid chat mailbox configuration");}
 
   const endpoint = url.toString();
   const { signingSecret, timeoutMs, now = Date.now, fetch: request = fetch } = options;
@@ -52,7 +52,7 @@ export function createChatMailboxPublisher(options: {
         time = now();
 
       if (!Number.isSafeInteger(time) || time < 0 || Buffer.byteLength(body) > 4096)
-        throw new Error();
+        {throw new Error();}
 
       const timestamp = String(time);
       const value = await fetchChatJson(
@@ -82,7 +82,7 @@ export function createChatMailboxPublisher(options: {
         value.data.effectIndex !== update.effectIndex ||
         !["applied", "unchanged"].includes(String(value.data.result))
       )
-        throw new Error();
+        {throw new Error();}
     } catch {
       throw new Error("Chat mailbox unavailable");
     }

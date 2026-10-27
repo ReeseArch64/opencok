@@ -27,13 +27,13 @@ export async function checkPlayerSummaryStore(db: KingdomDb) {
     user_mixed_info,
     stat_reg,
   ])
-    await db.select().from(table).limit(0);
+    {await db.select().from(table).limit(0);}
 }
 
 export async function getLocalPlayerSummariesByIds(db: KingdomDb, uids: string[]): Promise<Row[]> {
-  if (!uids.length) return [];
+  if (!uids.length) {return [];}
 
-  if (uids.length > 50) throw new DependencyError("player batch");
+  if (uids.length > 50) {throw new DependencyError("player batch");}
 
   return db.transaction(
     async (tx) => {
@@ -73,7 +73,7 @@ export async function getLocalPlayerSummariesByIds(db: KingdomDb, uids: string[]
         .leftJoin(user_mixed_info, eq(user_mixed_info.uid, userprofile.uid))
         .where(inArray(userprofile.uid, uids));
 
-      if (!rows.length) return [];
+      if (!rows.length) {return [];}
 
       const found = rows.map((row) => row.uid);
       const titles = await tx
@@ -122,9 +122,9 @@ export async function getPlayerSummariesByIds(
   uids: string[],
   allServers: boolean,
 ): Promise<PlayerSummary[]> {
-  if (!uids.length) return [];
+  if (!uids.length) {return [];}
 
-  if (uids.length > 50) throw new DependencyError("player batch");
+  if (uids.length > 50) {throw new DependencyError("player batch");}
 
   const local = await getLocalPlayerSummariesByIds(databases.getKingdom(kingdomId).db, [
     ...new Set(uids),
@@ -136,14 +136,14 @@ export async function getPlayerSummariesByIds(
     return data ? [{ data, kingdomId, remote: false }] : [];
   });
 
-  if (!allServers) return result;
+  if (!allServers) {return result;}
 
   const missing = uids
     .filter((uid) => !byUid.has(uid))
     .map((uid) => uid.replaceAll("@mod", ""))
     .filter((uid) => /^\d+$/.test(uid));
 
-  if (!missing.length) return result;
+  if (!missing.length) {return result;}
 
   const accounts = await databases.global.db
     .select({ uid: account_new.gameUid, server: account_new.server })
@@ -155,7 +155,7 @@ export async function getPlayerSummariesByIds(
     const id = Number(account.server);
 
     if (!Number.isSafeInteger(id) || !databases.kingdoms.has(id))
-      throw new DependencyError("player realm");
+      {throw new DependencyError("player realm");}
 
     const group = groups.get(id) ?? [];
     group.push(account.uid);
@@ -168,7 +168,7 @@ export async function getPlayerSummariesByIds(
     const rows = await getLocalPlayerSummariesByIds(databases.getKingdom(id).db, ids);
 
     for (const data of rows) {
-      if (Number(data.profileServerId) !== id) throw new DependencyError("player realm");
+      if (Number(data.profileServerId) !== id) {throw new DependencyError("player realm");}
 
       remote.set(String(data.uid), { data, kingdomId: id, remote: true });
     }
@@ -177,7 +177,7 @@ export async function getPlayerSummariesByIds(
   for (const uid of missing) {
     const summary = remote.get(uid);
 
-    if (summary) result.push(summary);
+    if (summary) {result.push(summary);}
   }
 
   return result;

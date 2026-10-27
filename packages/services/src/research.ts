@@ -45,20 +45,20 @@ function current(context: CityProgressionContext, itemId: string): Row {
 function complete(context: CityProgressionContext, row: Row, data?: ProgressionActivityData) {
   const level = data?.target?.level ?? num(row, "level") + 1;
 
-  if (level !== num(row, "level") + 1) throw new GameError(errors.invalid, "city_progression");
+  if (level !== num(row, "level") + 1) {throw new GameError(errors.invalid, "city_progression");}
 
   const before = researchDefinition(context.rules, text(row, "itemId"), num(row, "level")),
     after = researchDefinition(context.rules, text(row, "itemId"), level);
   const completed = { ...row, level, cd: idleDeadline };
   context.write.sciences = [completed];
 
-  if (!context.completing) recordTargetTask(context, 12, 1);
+  if (!context.completing) {recordTargetTask(context, 12, 1);}
 
   const delta = cityAmount(after.power ?? 0) - cityAmount(before.power ?? 0);
   context.power(delta);
   context.recordHero(6, "2", delta);
 
-  if (delta > 0n) recordExpeditionScore(context, 3, 2, cityInteger(delta));
+  if (delta > 0n) {recordExpeditionScore(context, 3, 2, cityInteger(delta));}
 
   if (["army", "trap", "up"].includes(after.para1 ?? "")) {
     const id = cityInteger(after.para2),
@@ -66,7 +66,7 @@ function complete(context: CityProgressionContext, row: Row, data?: ProgressionA
       unlocked = after.para1 === "up" ? level : (id % 10) + 1;
 
     if (!context.rules.arms.has(armyId))
-      throw new GameError(errors.unsupported, "city_progression");
+      {throw new GameError(errors.unsupported, "city_progression");}
 
     if (after.para1 === "trap") {
       const saved = context.state.forts.find((fort) => fort.armyId === armyId);
@@ -103,7 +103,7 @@ function complete(context: CityProgressionContext, row: Row, data?: ProgressionA
 
   if (after.skill) {
     if (!["622800", "622900"].includes(after.skill) || !context.state.effects.generals.length)
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const saved = context.state.skills.find((skill) => skill.skillId === after.skill);
     context.write.skills = [
@@ -144,19 +144,19 @@ async function prepare(
   params: Fields,
 ): Promise<PreparedActivity> {
   if (command === "science.data.init")
-    return {
+    {return {
       event: null,
       response: encode({
         science: researchData(context.state.sciences, context.state.queues, context.rules),
       }),
-    };
+    };}
 
   const itemId = str(params, "itemId"),
     row = current(context, itemId),
     rule = researchDefinition(context.rules, itemId, num(row, "level"));
   const maximum = cityInteger(rule.max_lv, 0, 99);
 
-  if (num(row, "level") >= maximum) throw new GameError(errors.researchMax, "city_progression");
+  if (num(row, "level") >= maximum) {throw new GameError(errors.researchMax, "city_progression");}
 
   researchDefinition(context.rules, itemId, num(row, "level") + 1);
 
@@ -164,19 +164,19 @@ async function prepare(
     context.state.queues.some((queue) => num(queue, "type") === 6 && queue.itemId === itemId) ||
     long(row, "cd") !== idleDeadline
   )
-    throw new GameError(errors.occupied, "city_progression");
+    {throw new GameError(errors.occupied, "city_progression");}
 
   const academy = context.state.buildings.find(
     (building) => num(building, "itemId") === 403000 && num(building, "level") > 0,
   );
 
-  if (!academy) throw new GameError(errors.troopBuilding, "city_progression");
+  if (!academy) {throw new GameError(errors.troopBuilding, "city_progression");}
 
   context.idleBuilding(academy);
   checkResearchRequirements(context.state, context.rules, rule);
   const payment = int(params, "gold", 0);
 
-  if (![0, 1].includes(payment)) throw new GameError(errors.invalid, "city_progression");
+  if (![0, 1].includes(payment)) {throw new GameError(errors.invalid, "city_progression");}
 
   const durationMs = cityDuration(
     cityInteger(rule.time_research ?? 0),
@@ -197,7 +197,7 @@ async function prepare(
   for (const pair of rule.science_point?.split("|").filter(Boolean) ?? []) {
     const [id, rawCount, ...extra] = pair.split(";");
 
-    if (!id || extra.length) throw new GameError(errors.invalid, "city_progression");
+    if (!id || extra.length) {throw new GameError(errors.invalid, "city_progression");}
 
     const count = Math.max(0, cityInteger(rawCount) - (id === "210090" ? context.effect(756) : 0));
     context.spendItem(id, cityInteger(Math.trunc(count)));
@@ -252,18 +252,18 @@ async function apply(
     data = progressionActivityData(activity.data);
 
   if (!row || (data && data.kind !== "research"))
-    throw new GameError(errors.queue, "city_progression");
+    {throw new GameError(errors.queue, "city_progression");}
 
   const queues = context.state.queues.filter(
     (queue) => num(queue, "type") === 6 && queue.itemId === activity.itemId,
   );
 
   if (queues.length !== 1 || queues[0]!.uuid !== activity.queueId)
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   researchDefinition(context.rules, activity.itemId, num(row, "level") + 1);
 
-  if (action === TimedActivityAction.Start) throw new GameError(errors.invalid, "city_progression");
+  if (action === TimedActivityAction.Start) {throw new GameError(errors.invalid, "city_progression");}
 
   if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule) {
     context.write.sciences = [{ ...row, cd: activity.dueAt }];

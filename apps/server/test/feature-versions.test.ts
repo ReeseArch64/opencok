@@ -22,8 +22,8 @@ test("feature versions match 2560 independent Java 8 comparison and blank-policy
       [versionAtLeast, direct],
       [legacyPlayerVersionAtLeast, player],
     ] as const) {
-      if (expected === "error") expect(() => query(actual, required)).toThrow();
-      else expect(query(actual, required), JSON.stringify([actual, required])).toBe(expected);
+      if (expected === "error") {expect(() => query(actual, required)).toThrow();}
+      else {expect(query(actual, required), JSON.stringify([actual, required])).toBe(expected);}
     }
   }
 });
@@ -42,7 +42,7 @@ test("version parsing consumes every nonempty component before short-circuit com
     ["13", "13"],
     ["12.6", "12.6"],
   ] as const)
-    expect(() => versionAtLeast(pair[0], pair[1])).toThrow();
+    {expect(() => versionAtLeast(pair[0], pair[1])).toThrow();}
 });
 
 test("bounded versions retain leading zeroes and skip empty segments without allowing oversized inputs", () => {
@@ -64,7 +64,7 @@ test("function-on gates bypass comparison only for Java-blank players after requ
     expect(() => ruleAvailable({ ...rule, online: "bad" }, { ...context, version })).toThrow();
   }
   for (const version of ["\u00a0", "\ufeff", "13.bad"])
-    expect(() => ruleAvailable(rule, { ...context, version })).toThrow();
+    {expect(() => ruleAvailable(rule, { ...context, version })).toThrow();}
   expect(ruleAvailable({ ...rule, online: "\u2000" }, context)).toBe(false);
   expect(ruleAvailable({ ...rule, version: "13", online: "bad" }, context)).toBe(false);
   expect(legacyPlayerVersionAtLeast("bad", undefined)).toBe(false);
@@ -75,9 +75,9 @@ test("account switches compare empty players while announcements preserve versio
   const rule = { id: "function_on7", k5: "12.6.0", k6: "2" };
   rules.items.set(rule.id, rule);
   for (const version of ["13", ".12..6.0.1", "１２.６.０"])
-    expect(accountVerificationEnabled(rules, { ...context, version })).toBe(true);
+    {expect(accountVerificationEnabled(rules, { ...context, version })).toBe(true);}
   for (const version of ["", "\u2000", "12.6", "13.bad"])
-    expect(() => accountVerificationEnabled(rules, { ...context, version })).toThrow();
+    {expect(() => accountVerificationEnabled(rules, { ...context, version })).toThrow();}
   rule.k6 = "bad";
   expect(accountVerificationEnabled(rules, { ...context, version: "11" })).toBe(false);
   rule.k5 = "\u2000";

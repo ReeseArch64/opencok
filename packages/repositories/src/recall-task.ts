@@ -25,7 +25,7 @@ export async function readRecallTasks(
     .limit(65)
     .for("update");
 
-  if (tasks.length > 64) throw new Error("Recall task aggregate exceeds bound");
+  if (tasks.length > 64) {throw new Error("Recall task aggregate exceeds bound");}
 
   const [registration] = countryNeeded
     ? await tx
@@ -53,7 +53,7 @@ export async function writeRecallTasks(
       text(row, "country").length > 40 ||
       long(row, "endTime") < long(row, "beginTime")
     )
-      throw new Error("Invalid recall task notes");
+      {throw new Error("Invalid recall task notes");}
 
     const value = {
       uid: owner,
@@ -76,13 +76,13 @@ export async function writeRecallTasks(
     (write.tasks?.length ?? 0) > 64 ||
     new Set(write.tasks?.map((row) => row.id)).size !== (write.tasks?.length ?? 0)
   )
-    throw new Error("Recall task writes exceed bound");
+    {throw new Error("Recall task writes exceed bound");}
 
-  if (write.reset) await tx.delete(user_recall_task).where(eq(user_recall_task.uid, owner));
+  if (write.reset) {await tx.delete(user_recall_task).where(eq(user_recall_task.uid, owner));}
 
   for (const row of write.tasks ?? []) {
     if (row.uid !== owner || !text(row, "id") || text(row, "id").length > 255)
-      throw new Error("Foreign recall task");
+      {throw new Error("Foreign recall task");}
 
     const value = {
       uid: owner,
@@ -94,7 +94,7 @@ export async function writeRecallTasks(
       receive: cityInteger(row.receive, 0, 1),
     };
 
-    if (write.reset) await tx.insert(user_recall_task).values(value);
+    if (write.reset) {await tx.insert(user_recall_task).values(value);}
     else {
       const updated = await tx
         .update(user_recall_task)
@@ -102,7 +102,7 @@ export async function writeRecallTasks(
         .where(and(eq(user_recall_task.uid, owner), eq(user_recall_task.id, value.id)))
         .returning({ id: user_recall_task.id });
 
-      if (updated.length !== 1) throw new Error("Stale recall task");
+      if (updated.length !== 1) {throw new Error("Stale recall task");}
     }
   }
 }

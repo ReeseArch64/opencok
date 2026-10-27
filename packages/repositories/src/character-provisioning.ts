@@ -29,12 +29,12 @@ export function createCharacterCreator(
   now = Date.now,
 ): CharacterCreator {
   if (!Number.isInteger(mapSize) || mapSize < 2 || mapSize > 32767)
-    throw new Error("Invalid realm map size");
+    {throw new Error("Invalid realm map size");}
 
   return (reservation, plan) =>
     db.transaction(async (tx) => {
       if (reservation.kingdomId !== authority.kingdomId)
-        throw new Error("Wrong provisioning realm");
+        {throw new Error("Wrong provisioning realm");}
 
       await fenceRealmTransaction(tx, authority);
       const uid = reservation.gameUid,
@@ -55,7 +55,7 @@ export function createCharacterCreator(
 
       if (receipt) {
         if (receipt.command !== "character.create" || receipt.request.toString() !== requestHash)
-          throw new Error("Character creation conflict");
+          {throw new Error("Character creation conflict");}
 
         authority.assertReady();
 
@@ -70,7 +70,7 @@ export function createCharacterCreator(
             .where(eq(userprofile.uid, uid))
         ).length
       )
-        throw new Error("Existing character cannot be initialized");
+        {throw new Error("Existing character cannot be initialized");}
 
       await tx.execute(sql`select pg_advisory_xact_lock(728214, 0)`);
       const [ownedCity] = await tx
@@ -82,12 +82,12 @@ export function createCharacterCreator(
         .limit(1)
         .for("update");
 
-      if (ownedCity) throw new Error("Existing city cannot be initialized");
+      if (ownedCity) {throw new Error("Existing city cannot be initialized");}
 
       const captured = now();
 
       if (!Number.isSafeInteger(captured) || captured < reservation.createdAt)
-        throw new Error("Invalid provisioning clock");
+        {throw new Error("Invalid provisioning clock");}
 
       const seed = plan(captured);
       const { point } = await allocateWorldBirth(
@@ -110,10 +110,10 @@ export function createCharacterCreator(
       await tx.insert(user_state).values(seed.shield as typeof user_state.$inferInsert);
 
       if (seed.tasks.length)
-        await tx.insert(user_task).values(seed.tasks as (typeof user_task.$inferInsert)[]);
+        {await tx.insert(user_task).values(seed.tasks as (typeof user_task.$inferInsert)[]);}
 
       if (seed.generals.length)
-        await tx.insert(user_general).values(seed.generals as (typeof user_general.$inferInsert)[]);
+        {await tx.insert(user_general).values(seed.generals as (typeof user_general.$inferInsert)[]);}
 
       await tx.insert(playerinfo).values(seed.player as typeof playerinfo.$inferInsert);
       await tx.insert(user_assets).values({ uid, lastUpdateTime: BigInt(captured) });

@@ -70,9 +70,9 @@ async function fixture(type = 1) {
           ["other", 100],
         ]
       : [["guild", 200]]) as [string, number][])
-      await h.db.db
+      {await h.db.db
         .insert(score_act)
-        .values({ uid, actId: "event", level: 0, score, finishFlag: 0, rewardFlag: "" });
+        .values({ uid, actId: "event", level: 0, score, finishFlag: 0, rewardFlag: "" });}
     if (type === 2) {
       await h.db.db.update(userprofile).set({ allianceId: "guild" });
       await h.db.db

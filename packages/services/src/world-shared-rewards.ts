@@ -16,7 +16,7 @@ export function sharedResourceRewards(
     ids = rule?.k6?.split(";") ?? [],
     weights = rule?.k7?.split(";").map((value) => cityInteger(value)) ?? [];
 
-  if (!ids.length || ids.length !== weights.length) worldMutationFailure();
+  if (!ids.length || ids.length !== weights.length) {worldMutationFailure();}
 
   const total = cityInteger(
     weights.reduce((sum, value) => sum + value, 0),
@@ -38,14 +38,14 @@ export function sharedResourceRewards(
       return choice < 0;
     });
 
-    if (!selected) worldMutationFailure();
+    if (!selected) {worldMutationFailure();}
 
     counts.set(selected, (counts.get(selected) ?? 0) + 1);
   }
 
   const order = javaHashMapOrder(counts.keys());
 
-  if (!order.length) return { reward: "", counts: [] };
+  if (!order.length) {return { reward: "", counts: [] };}
 
   const stored = order.map((id) => ({ id, count: counts.get(id)! }));
   const reward = pinStoredSharedResourceRewards(context, stored);
@@ -61,7 +61,7 @@ export function pinStoredSharedResourceRewards(
     counts.length > 4096 ||
     counts.some((row) => typeof row.id !== "string" || !row.id || row.id.length > 255)
   )
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   const rolls = cityInteger(
     counts.reduce((sum, row) => sum + cityInteger(row.count, 1), 0),
@@ -69,15 +69,15 @@ export function pinStoredSharedResourceRewards(
     4096,
   );
 
-  if (!rolls) return "";
+  if (!rolls) {return "";}
 
   const awards = new Map<string, number>();
 
   for (let index = 0; index < rolls; index++)
-    for (const row of mailRewardEntries(pinProgressionReward(context, counts[0]!.id))) {
+    {for (const row of mailRewardEntries(pinProgressionReward(context, counts[0]!.id))) {
       const key = `${row.category},${row.itemId}`;
       awards.set(key, cityInteger((awards.get(key) ?? 0) + row.count, 1));
-    }
+    }}
 
   return [...awards].map(([key, count]) => `${key},${count}`).join("|");
 }

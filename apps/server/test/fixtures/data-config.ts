@@ -59,15 +59,15 @@ export function dataConfigItems(overrides: Readonly<Record<string, Rule>> = {}):
   };
   for (const family of ["worldboss", "worldboss_elite", "worldboss_special", "worldboss_npc"]) {
     result.set(family, { id: family, k1: "0", k10: "0" });
-    if (family === "worldboss_npc") continue;
+    if (family === "worldboss_npc") {continue;}
     for (const range of ["10_19", "20_29", "30_40"]) {
       const id = `${family}_${range}`;
       result.set(id, { id, k1: "0", k10: "0" });
       result.set(`${id}_other`, { id: `${id}_other` });
     }
   }
-  for (const [id, rule] of Object.entries(scalars)) result.set(id, { id, ...rule });
+  for (const [id, rule] of Object.entries(scalars)) {result.set(id, { id, ...rule });}
   for (const [id, rule] of Object.entries(overrides))
-    result.set(id, { ...result.get(id), id, ...rule });
+    {result.set(id, { ...result.get(id), id, ...rule });}
   return result;
 }

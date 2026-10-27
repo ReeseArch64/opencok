@@ -47,9 +47,9 @@ test("legacy integer parsing accepts Java 8 BMP digits and fullwidth hex while r
   expect(decodeLegacyJsonObject("{value:0xＦｆ}").value).toEqual(sfs.int(255));
   expect(decodeLegacyJsonObject("{value:0x-８０００００００}").value).toEqual(sfs.int(-2147483648));
   for (const value of ["١٢٣", "１２３", "NaN"])
-    expect(() => decodeLegacyJsonObject(`{value:${value}}`)).toThrow(LegacyJsonError);
+    {expect(() => decodeLegacyJsonObject(`{value:${value}}`)).toThrow(LegacyJsonError);}
   for (const value of ["+꧱", "+𝟙", "1²", "0xＧ", "0x-80000001"])
-    expect(decodeLegacyJsonObject(`{value:${value}}`).value).toEqual(sfs.string(value));
+    {expect(decodeLegacyJsonObject(`{value:${value}}`).value).toEqual(sfs.string(value));}
 });
 
 test("numeric content preserves finite mail and only malformed overflow authorizes removal", () => {

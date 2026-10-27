@@ -25,7 +25,7 @@ function validate(owner: string, now: number) {
     !Number.isSafeInteger(now) ||
     now < 0
   )
-    throw new Error("Invalid world favorite query");
+    {throw new Error("Invalid world favorite query");}
 }
 
 export function createWorldFavoriteStore(
@@ -33,7 +33,7 @@ export function createWorldFavoriteStore(
   global: Database["databases"]["global"]["db"],
   kingdomId: number,
 ): WorldFavoriteStore {
-  if (!integer(kingdomId) || kingdomId < 1) throw new Error("Invalid world favorite realm");
+  if (!integer(kingdomId) || kingdomId < 1) {throw new Error("Invalid world favorite realm");}
 
   const authorized = (profile: Row | undefined, owner: string, now: number) =>
     profile?.uid === owner &&
@@ -59,7 +59,7 @@ export function createWorldFavoriteStore(
             .limit(1)
             .for("share");
 
-          if (!authorized(profile, owner, now)) return { profile, rows: [] };
+          if (!authorized(profile, owner, now)) {return { profile, rows: [] };}
 
           const rows = await tx
             .select()
@@ -73,7 +73,7 @@ export function createWorldFavoriteStore(
             .limit(32768);
 
           if (rows.length > 32767 || rows.some((row) => row.uid !== owner))
-            throw new Error("World favorites exceed transport or ownership bounds");
+            {throw new Error("World favorites exceed transport or ownership bounds");}
 
           return { profile, rows };
         },
@@ -91,7 +91,7 @@ export function createWorldFavoriteStore(
         types.some((row) => !servers.includes(row.id) || !integer(row.type)) ||
         new Set(types.map((row) => row.id)).size !== types.length
       )
-        throw new Error("Invalid favorite server metadata");
+        {throw new Error("Invalid favorite server metadata");}
 
       return { ...snapshot, serverTypes: new Map(types.map((row) => [row.id, row.type])) };
     },
@@ -106,7 +106,7 @@ export function createWorldFavoriteStore(
         query.name.includes("\0") ||
         !query.name.isWellFormed()
       )
-        throw new Error("Invalid world favorite mutation");
+        {throw new Error("Invalid world favorite mutation");}
 
       return db.transaction(
         async (tx) => {
@@ -117,7 +117,7 @@ export function createWorldFavoriteStore(
             .limit(1)
             .for("update");
 
-          if (!authorized(profile, owner, query.now)) return { profile };
+          if (!authorized(profile, owner, query.now)) {return { profile };}
 
           const values = {
             uid: owner,
@@ -139,7 +139,7 @@ export function createWorldFavoriteStore(
             .returning({ uid: world_favorite.uid });
 
           if (changed.length !== 1 || changed[0]!.uid !== owner)
-            throw new Error("World favorite replacement failed");
+            {throw new Error("World favorite replacement failed");}
 
           return { profile };
         },
@@ -150,7 +150,7 @@ export function createWorldFavoriteStore(
       validate(owner, now);
 
       if (input.length > 32767 || input.some((key) => !integer(key.point) || !integer(key.server)))
-        throw new Error("Invalid world favorite selection");
+        {throw new Error("Invalid world favorite selection");}
 
       const keys = [
         ...new Map(input.map((key) => [`${key.point}:${key.server}`, { ...key }])).values(),
@@ -167,12 +167,12 @@ export function createWorldFavoriteStore(
               .limit(1)
               .for("update");
 
-            if (!authorized(profile, owner, now)) return { profile, success: false };
+            if (!authorized(profile, owner, now)) {return { profile, success: false };}
 
             owned = profile;
 
             for (let index = 0; index < keys.length; index += 500)
-              await tx
+              {await tx
                 .delete(world_favorite)
                 .where(
                   and(
@@ -188,14 +188,14 @@ export function createWorldFavoriteStore(
                         ),
                     ),
                   ),
-                );
+                );}
 
             return { profile, success: true };
           },
           { isolationLevel: "read committed", accessMode: "read write" },
         );
       } catch {
-        if (!owned) throw new Error("World favorite deletion unavailable");
+        if (!owned) {throw new Error("World favorite deletion unavailable");}
 
         return { profile: owned, success: false };
       }

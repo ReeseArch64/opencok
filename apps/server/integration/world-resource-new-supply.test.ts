@@ -21,8 +21,8 @@ async function fixture() {
     original = h.rules.items.get("on_event2")!;
   h.rules.items.set("worldmap_city", { ...h.rules.items.get("worldmap_city")!, k6: "5" });
   for (let y = 0; y < 5; y++)
-    for (let x = 0; x < 5; x++)
-      await h.db.db.insert(worldpoint).values({
+    {for (let x = 0; x < 5; x++)
+      {await h.db.db.insert(worldpoint).values({
         id: x + y * 5 + 1,
         worldId: 0,
         x,
@@ -34,7 +34,7 @@ async function fixture() {
         resInitValue: 0,
         resLevel: 0,
         ownerId: "",
-      });
+      });}}
   const executor = createWorldResourceNewExecutor(h.db.db, h.authority, 5, 1),
     run = (at: bigint) =>
       executor.execute(at, (store) => refreshWorldResourceNew(store, h.rules, 5, () => 0)),

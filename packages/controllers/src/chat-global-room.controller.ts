@@ -13,7 +13,7 @@ export class ChatGlobalRoomController extends ChatCommandController {
   public async execute({ uid }: CommandContext) {
     const room = await this.authorizeRoom(uid, "global_public");
 
-    if (!room) throw new ChatCommandError("invalid_room");
+    if (!room) {throw new ChatCommandError("invalid_room");}
 
     return { group: room.group, id: room.roomId };
   }

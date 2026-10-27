@@ -25,7 +25,7 @@ function fixture() {
     },
   );
   for (const id of ["civilization", "miracle_buff", "wr_switch"])
-    rules.features.set(id, { id, version: "12.06.0", online: "1" });
+    {rules.features.set(id, { id, version: "12.06.0", online: "1" });}
   rules.power.prestigeLevels!.set("1", {
     id: "1",
     reputation_point: "0;100",
@@ -34,12 +34,12 @@ function fixture() {
   rules.power.prestigeLevels!.set("2", { id: "2", reputation_point: "100", reputation_level: "2" });
   rules.power.prestigeLevels!.set("3", { id: "3", reputation_point: "0", reputation_level: "3" });
   for (const level of [1, 2, 3])
-    rules.power.civilizationFeatures!.set(String(level), {
+    {rules.power.civilizationFeatures!.set(String(level), {
       id: String(level),
       type: "2",
       reputation_level: String(level),
       effect: `487;${level}|999;0.5|487;${level + 0.5}`,
-    });
+    });}
   return rules;
 }
 
@@ -126,9 +126,9 @@ test("prestige requires open client/realm gates and rejects invalid active numer
   expect(prestigeEffects(profile, state, rules, { ...context, version: "12.05.0" }).size).toBe(0);
   expect(prestigeEffects(profile, state, rules, { ...context, kingdomId: 2 }).size).toBe(0);
   for (const prestigeValue of [9007199254740992, 9223372036854775808n, "invalid"])
-    expect(() =>
+    {expect(() =>
       prestigeEffects(profile, [{ civilizationType: 2, prestigeValue }], rules, context),
-    ).toThrow("102192");
+    ).toThrow("102192");}
   rules.power.prestigeLevels!.clear();
   expect(() => prestigeEffects(profile, state, rules, context)).toThrow("102192");
 });
@@ -168,12 +168,12 @@ test("military effects choose the highest positive skill per group and deduplica
     ["2001", "b", "1", "510001"],
     ["3001", "c", "0", "missing"],
   ])
-    rules.power.militarySkills!.set(id!, {
+    {rules.power.militarySkills!.set(id!, {
       id: id!,
       group: group!,
       level: level!,
       status: status!,
-    });
+    });}
   rules.power.statuses!.set("510001", { id: "510001", effect: "487;5|999;3" });
   rules.power.statuses!.set("510002", { id: "510002", effect: "487;10|487;2" });
   const military = { skill: "1001|1002|1002|2001|3001", status: 0, militaryRank: 0 };

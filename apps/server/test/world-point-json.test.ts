@@ -19,8 +19,8 @@ test("remote string serialization matches Java 8 function detection without exec
   expect(vectors.functions).toHaveLength(48);
   for (const [value, recognized] of vectors.functions) {
     const input = { pic: sfs.string(value as string) };
-    if (recognized) expect(() => roundTripLegacyIntegerObject(input)).toThrow();
-    else expect(roundTripLegacyIntegerObject(input)).toEqual(input);
+    if (recognized) {expect(() => roundTripLegacyIntegerObject(input)).toThrow();}
+    else {expect(roundTripLegacyIntegerObject(input)).toEqual(input);}
   }
 });
 
@@ -38,7 +38,7 @@ test("remote public JSON conversion retains quoted strings and legacy excluded p
     ["__proto__"]: "safe",
     constructor: "value",
   }))
-    fields[key] = sfs.string(value);
+    {fields[key] = sfs.string(value);}
   const result = roundTripLegacyIntegerObject(fields);
   expect(result).toEqual(fields);
   expect(decode(encode(result))).toEqual(result);
@@ -66,7 +66,7 @@ test("remote integer object conversion rejects unsupported scalar types, invalid
     sfs.bool(true),
     { type: Type.String, value: 1 },
   ])
-    expect(() => roundTripLegacyIntegerObject({ field: value })).toThrow();
+    {expect(() => roundTripLegacyIntegerObject({ field: value })).toThrow();}
   expect(() =>
     roundTripLegacyIntegerObject({ pic: sfs.string("a".repeat(4 * 1024 * 1024)) }),
   ).toThrow();

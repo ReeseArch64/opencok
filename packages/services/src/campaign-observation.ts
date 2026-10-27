@@ -16,11 +16,11 @@ export function campaignInventoryObservations(
   const quantities = new Map<string, number>();
 
   for (const posting of inventory.postings) {
-    if (!posting.asset.startsWith("item.") || posting.after <= posting.before) continue;
+    if (!posting.asset.startsWith("item.") || posting.after <= posting.before) {continue;}
 
     const item = inventory.items.find((value) => `item.${value.uuid}` === posting.asset);
 
-    if (!item) throw new Error("Missing confirmed campaign item grant");
+    if (!item) {throw new Error("Missing confirmed campaign item grant");}
 
     quantities.set(
       item.itemId,
@@ -56,11 +56,11 @@ export function campaignObservationNeeded(
             (!candidate.parameters || candidate.parameters === event.selector),
         )
       )
-        return false;
+        {return false;}
 
       const first = rule.conditions[0];
 
-      if (first?.code !== 9) return true;
+      if (first?.code !== 9) {return true;}
 
       const [start, end] = (first.parameters ?? "").split(";");
       const begin = campaignTimestamp(start),

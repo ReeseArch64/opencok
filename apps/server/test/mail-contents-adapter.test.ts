@@ -85,10 +85,10 @@ function database(options: { profile?: unknown[] | null; fail?: string; size?: n
     query: async (statement: { text: string }, params: unknown[] = []) => {
       const text = statement.text;
       queries.push({ text, params });
-      if (text.startsWith("begin")) before = rows.map((row) => ({ ...row }));
-      if (text === "rollback") rows = before;
+      if (text.startsWith("begin")) {before = rows.map((row) => ({ ...row }));}
+      if (text === "rollback") {rows = before;}
       const fail = (name: string) => {
-        if (options.fail === name) throw new Error("Synthetic " + name + " failure");
+        if (options.fail === name) {throw new Error("Synthetic " + name + " failure");}
       };
       if (text.includes('from "opencok_kingdom"."userprofile"')) {
         fail("profile");
@@ -128,7 +128,7 @@ function database(options: { profile?: unknown[] | null; fail?: string; size?: n
         const [owner, ...ids] = params;
         rows = rows.filter((row) => row.owner !== owner || !ids.includes(row.uid));
       }
-      if (text === "commit") fail("commit");
+      if (text === "commit") {fail("commit");}
       return { rows: [] };
     },
   };
@@ -189,7 +189,7 @@ test("mail detail repository scopes reads and malformed removals to the recipien
 test("extra contents accept owned and historical unassigned rows while foreign or absent payloads reject without deleting mail", async () => {
   const { db, rows } = database();
   for (const id of ["extra", "blank-extra", "null-extra"])
-    await readMailContents(db, 1, "self", { ids: [id], now }, inspect);
+    {await readMailContents(db, 1, "self", { ids: [id], now }, inspect);}
   const before = rows().map((row) => ({ ...row }));
   await expect(
     readMailContents(db, 1, "self", { ids: ["bad", "foreign-extra"], now }, inspect),
@@ -265,9 +265,9 @@ test("mail detail authorization and transaction failures preserve message state;
 test("direct mail detail callers cannot bypass identifier, time, owner and realm bounds", () => {
   const { db, queries } = database();
   for (const owner of ["", " ", "x".repeat(41), "\0", "\ud800"])
-    expect(() => readMailContents(db, 1, owner, { ids: ["plain"], now }, inspect)).toThrow();
+    {expect(() => readMailContents(db, 1, owner, { ids: ["plain"], now }, inspect)).toThrow();}
   for (const realm of [0, 1.5, 2147483648])
-    expect(() => readMailContents(db, realm, "self", { ids: ["plain"], now }, inspect)).toThrow();
+    {expect(() => readMailContents(db, realm, "self", { ids: ["plain"], now }, inspect)).toThrow();}
   for (const ids of [
     [],
     [""],
@@ -277,8 +277,8 @@ test("direct mail detail callers cannot bypass identifier, time, owner and realm
     ["x".repeat(41)],
     Array.from({ length: 1001 }, (_, i) => String(i)),
   ])
-    expect(() => readMailContents(db, 1, "self", { ids, now }, inspect)).toThrow();
+    {expect(() => readMailContents(db, 1, "self", { ids, now }, inspect)).toThrow();}
   for (const time of [-1, NaN, 1.5])
-    expect(() => readMailContents(db, 1, "self", { ids: ["plain"], now: time }, inspect)).toThrow();
+    {expect(() => readMailContents(db, 1, "self", { ids: ["plain"], now: time }, inspect)).toThrow();}
   expect(queries).toEqual([]);
 });

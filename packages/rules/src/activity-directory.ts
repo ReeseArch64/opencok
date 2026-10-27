@@ -9,7 +9,7 @@ export function activityDirectoryEntries(
   orderIds: (ids: readonly number[]) => readonly number[],
 ): ActivityDirectoryEntryResponse[] {
   if (!Number.isSafeInteger(now) || now < 0 || rows.length > 4096)
-    throw new Error("Invalid activity directory snapshot");
+    {throw new Error("Invalid activity directory snapshot");}
 
   const entries = new Map<number, ActivityDirectoryEntryResponse>();
 
@@ -20,9 +20,9 @@ export function activityDirectoryEntries(
       id = num(row, "id");
 
     if (!Number.isInteger(id) || id < 0 || id > 4294967295)
-      throw new Error("Invalid activity directory identity");
+      {throw new Error("Invalid activity directory identity");}
 
-    if (!supported.has(type) || open <= 0n || (end > 0n && end < BigInt(now))) continue;
+    if (!supported.has(type) || open <= 0n || (end > 0n && end < BigInt(now))) {continue;}
 
     const entry: ActivityDirectoryEntryResponse = { t: type };
 
@@ -33,7 +33,7 @@ export function activityDirectoryEntries(
     ] as const) {
       const value = long(row, column);
 
-      if (value > 0n) entry[field] = Number(BigInt.asIntN(32, value / 1000n));
+      if (value > 0n) {entry[field] = Number(BigInt.asIntN(32, value / 1000n));}
     }
 
     entries.set(id | 0, entry);

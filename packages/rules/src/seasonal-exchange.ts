@@ -8,17 +8,17 @@ export function seasonalExchangeFailure(): never {
 }
 
 export function seasonalExchangeRewards(raw: string) {
-  if (raw.length > 1000) seasonalExchangeFailure();
+  if (raw.length > 1000) {seasonalExchangeFailure();}
 
   const parts = raw.split("|");
 
-  if (parts.length !== 5) seasonalExchangeFailure();
+  if (parts.length !== 5) {seasonalExchangeFailure();}
 
   return parts.map((part) => {
     const values = part.split(";");
 
     if (values.length < 2 || values.length > 3 || !/^\d{1,40}$/.test(values[0]!))
-      seasonalExchangeFailure();
+      {seasonalExchangeFailure();}
 
     return {
       id: values[0]!,
@@ -32,12 +32,12 @@ export function selectSeasonalRewards(config: Rule, random: (maximum: number) =>
   return Array.from({ length: 5 }, (_, index) => {
     const choices = (config[`k${index + 2}`] ?? "").split("|");
 
-    if (!choices.length || choices.length > 1024) seasonalExchangeFailure();
+    if (!choices.length || choices.length > 1024) {seasonalExchangeFailure();}
 
     const options = choices.map((choice) => {
         const fields = choice.split(";");
 
-        if (fields.length !== 3 || !/^\d{1,40}$/.test(fields[0]!)) seasonalExchangeFailure();
+        if (fields.length !== 3 || !/^\d{1,40}$/.test(fields[0]!)) {seasonalExchangeFailure();}
 
         return { id: fields[0]!, count: cityInteger(fields[1], 1), weight: cityInteger(fields[2]) };
       }),
@@ -51,7 +51,7 @@ export function selectSeasonalRewards(config: Rule, random: (maximum: number) =>
     for (const option of options) {
       sum += option.weight;
 
-      if (draw < sum) return `${option.id};${option.count}`;
+      if (draw < sum) {return `${option.id};${option.count}`;}
     }
 
     return seasonalExchangeFailure();

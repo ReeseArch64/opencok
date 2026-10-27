@@ -38,7 +38,7 @@ test("avatar allocation commits atomically, serializes requests and recovers rea
     const admin = await pg.start();
     try {
       for (const name of ["avatar_global", "avatar_realm"])
-        await admin.query(`CREATE DATABASE "${name}"`);
+        {await admin.query(`CREATE DATABASE "${name}"`);}
     } finally {
       await admin.end();
     }
@@ -133,7 +133,7 @@ test("avatar allocation commits atomically, serializes requests and recovers rea
         },
         cache: {
           async publishPlayerUpdateTime(owner, time) {
-            if (cacheDown) throw new Error("Synthetic cache outage");
+            if (cacheDown) {throw new Error("Synthetic cache outage");}
             await cache.publishPlayerUpdateTime(owner, time);
           },
         },
@@ -143,7 +143,7 @@ test("avatar allocation commits atomically, serializes requests and recovers rea
         },
         now: () => now,
         async fetch(_, options) {
-          if (chatDown) throw new Error("Synthetic chat outage");
+          if (chatDown) {throw new Error("Synthetic chat outage");}
           const receive = createChatAvatarProfileHandler({
             profiles: createChatAvatarProfileStore(databases!.global.db),
             signingSecret: secret,

@@ -20,7 +20,7 @@ export async function readTargetTasks(tx: MutationTransaction, owner: string) {
     .limit(65)
     .for("update");
 
-  if (tasks.length > 64) throw new Error("Too many target tasks");
+  if (tasks.length > 64) {throw new Error("Too many target tasks");}
 
   const [server] = await tx.select().from(server_info).where(eq(server_info.uid, "server"));
 
@@ -40,7 +40,7 @@ export async function writeTargetTasks(
       text(row, "version").length > 255 ||
       long(row, "endTime") < long(row, "beginTime")
     )
-      throw new Error("Invalid target task notes owner or period");
+      {throw new Error("Invalid target task notes owner or period");}
 
     const value = {
       uid: owner,
@@ -58,17 +58,17 @@ export async function writeTargetTasks(
       .onConflictDoUpdate({ target: user_target_task_notes.uid, set: value });
   }
 
-  if (write.reset) await tx.delete(user_target_task).where(eq(user_target_task.uid, owner));
+  if (write.reset) {await tx.delete(user_target_task).where(eq(user_target_task.uid, owner));}
 
   if (
     (write.tasks?.length ?? 0) > 64 ||
     new Set(write.tasks?.map((row) => text(row, "id"))).size !== (write.tasks?.length ?? 0)
   )
-    throw new Error("Invalid target task writes");
+    {throw new Error("Invalid target task writes");}
 
   for (const row of write.tasks ?? []) {
     if (row.uid !== owner || !text(row, "id") || text(row, "id").length > 255)
-      throw new Error("Invalid target task owner");
+      {throw new Error("Invalid target task owner");}
 
     const value = {
       uid: owner,
@@ -80,7 +80,7 @@ export async function writeTargetTasks(
       rewardDouble: cityInteger(row.rewardDouble, 0, 999),
     };
 
-    if (write.reset) await tx.insert(user_target_task).values(value);
+    if (write.reset) {await tx.insert(user_target_task).values(value);}
     else {
       const updated = await tx
         .update(user_target_task)
@@ -88,7 +88,7 @@ export async function writeTargetTasks(
         .where(and(eq(user_target_task.uid, owner), eq(user_target_task.id, value.id)))
         .returning({ uid: user_target_task.uid });
 
-      if (updated.length !== 1) throw new Error("Missing owned target task");
+      if (updated.length !== 1) {throw new Error("Missing owned target task");}
     }
   }
 }

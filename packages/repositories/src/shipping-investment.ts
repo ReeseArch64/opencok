@@ -18,5 +18,5 @@ export async function writeShippingInvestment(
     .where(eq(user_mixed_info.uid, owner))
     .returning({ uid: user_mixed_info.uid });
 
-  if (updated.length !== 1) throw new Error("Missing shipping investment owner");
+  if (updated.length !== 1) {throw new Error("Missing shipping investment owner");}
 }

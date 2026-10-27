@@ -23,7 +23,7 @@ export async function readEggActivity(
     .orderBy(asc(user_egg.eggId))
     .limit(33);
 
-  if (collections.length > 32) throw new Error("Egg collections exceed bound");
+  if (collections.length > 32) {throw new Error("Egg collections exceed bound");}
 
   return { record, collections };
 }
@@ -57,7 +57,7 @@ export async function writeEggActivity(
         reward: cityInteger(row.reward ?? 0, 0, 1),
       };
 
-    if (!value.goods) throw new Error("Empty egg collection mutation");
+    if (!value.goods) {throw new Error("Empty egg collection mutation");}
 
     const [before] = await tx
       .select()
@@ -65,7 +65,7 @@ export async function writeEggActivity(
       .where(and(eq(user_egg.uid, owner), eq(user_egg.eggId, value.eggId)));
 
     if (before?.reward === 1 && value.reward !== 1)
-      throw new Error("Reversed egg collection claim");
+      {throw new Error("Reversed egg collection claim");}
 
     await tx
       .insert(user_egg)

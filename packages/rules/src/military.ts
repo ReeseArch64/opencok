@@ -14,11 +14,11 @@ import {
 } from "./city-progression";
 
 export function troopDefinition(rules: Rules, armyId: string): Rule {
-  if (!/^\d{6,10}$/.test(armyId)) throw new GameError(errors.invalid, "city_progression");
+  if (!/^\d{6,10}$/.test(armyId)) {throw new GameError(errors.invalid, "city_progression");}
 
   const rule = rules.arms.get(armyId);
 
-  if (!rule) throw new GameError(errors.unsupported, "city_progression");
+  if (!rule) {throw new GameError(errors.unsupported, "city_progression");}
 
   return rule;
 }
@@ -28,7 +28,7 @@ export function troopQueueType(rule: Rule): number {
     type = cityQueueType(building);
 
   if (type === undefined || ![1, 2, 8, 9, 10, 17].includes(type))
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   return type;
 }
@@ -46,7 +46,7 @@ export function troopBuilding(state: CityProgressionState, rule: Rule): Row {
     num(building, "opType") !== 0 ||
     state.queues.some((queue) => num(queue, "type") === 0 && queue.itemId === building.uuid)
   )
-    throw new GameError(errors.troopBuilding, "city_progression");
+    {throw new GameError(errors.troopBuilding, "city_progression");}
 
   if (rule.science) {
     const [id, level, ...extra] = rule.science.split(";");
@@ -57,7 +57,7 @@ export function troopBuilding(state: CityProgressionState, rule: Rule): Row {
         (row) => text(row, "itemid") === id && num(row, "level") >= cityInteger(level),
       )
     )
-      throw new GameError(errors.researchPrerequisite, "city_progression");
+      {throw new GameError(errors.researchPrerequisite, "city_progression");}
   }
 
   for (const condition of rule.unlock_civi_science?.split("|").filter(Boolean) ?? []) {
@@ -69,7 +69,7 @@ export function troopBuilding(state: CityProgressionState, rule: Rule): Row {
         (row) => text(row, "baseItemID") === id && num(row, "level") >= cityInteger(level),
       )
     )
-      throw new GameError(errors.researchPrerequisite, "city_progression");
+      {throw new GameError(errors.researchPrerequisite, "city_progression");}
   }
 
   return building;
@@ -79,7 +79,7 @@ export function unitPower(rule: Rule, count: number): bigint {
   cityInteger(count);
   const raw = rule.power ?? "0";
 
-  if (!/^\d+(?:\.\d{1,8})?$/.test(raw)) throw new GameError(errors.invalid, "city_progression");
+  if (!/^\d+(?:\.\d{1,8})?$/.test(raw)) {throw new GameError(errors.invalid, "city_progression");}
 
   const [integer, fraction = ""] = raw.split("."),
     scale = 10n ** BigInt(fraction.length);
@@ -111,12 +111,12 @@ export function cityBuildingParameter(row: Row, rules: Rules, index: number): nu
     ),
     parameter = definition.clientParameters?.[index];
 
-  if (!parameter) return 0;
+  if (!parameter) {return 0;}
 
   let value = parameter.value;
 
   for (const step of parameter.steps ?? [])
-    if (step.progress <= num(row, "progress")) value = step.value;
+    {if (step.progress <= num(row, "progress")) {value = step.value;}}
 
   return cityInteger(value);
 }
@@ -143,7 +143,7 @@ export function transferTroops(
   cityInteger(destination);
   cityInteger(count);
 
-  if (count > available) throw new GameError(errors.invalid, "troop_quantity");
+  if (count > available) {throw new GameError(errors.invalid, "troop_quantity");}
 
   return [available - count, cityInteger(destination + count)];
 }
@@ -156,17 +156,17 @@ export function healingSelection(
   const result = new Map<string, number>();
 
   for (const [armyId, field] of Object.entries(params)) {
-    if (ignored.has(armyId)) continue;
+    if (ignored.has(armyId)) {continue;}
 
     if (!/^\d{6,10}$/.test(armyId) || field.type !== integerType)
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     const count = cityInteger(field.value);
 
-    if (count > 0) result.set(armyId, count);
+    if (count > 0) {result.set(armyId, count);}
   }
 
-  if (!result.size || result.size > 256) throw new GameError(errors.invalid, "city_progression");
+  if (!result.size || result.size > 256) {throw new GameError(errors.invalid, "city_progression");}
 
   cityInteger(
     [...result.values()].reduce((sum, count) => sum + count, 0),

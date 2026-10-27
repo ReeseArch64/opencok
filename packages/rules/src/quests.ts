@@ -31,9 +31,9 @@ export function castleLevel(state: CityProgressionState) {
 }
 
 export function questInitial(rule: Rule, state: CityProgressionState, rules: Rules) {
-  if (rule.type2 === "4") return state.tasks.filter((row) => num(row, "state") > 0).length;
+  if (rule.type2 === "4") {return state.tasks.filter((row) => num(row, "state") > 0).length;}
 
-  if (rule.type2 === "40") return text(state.profile, "allianceId") ? 1 : 0;
+  if (rule.type2 === "40") {return text(state.profile, "allianceId") ? 1 : 0;}
 
   return Math.max(
     0,
@@ -80,7 +80,7 @@ export function progressQuests(
   const tasks = plan.tasks.map((task) => {
     const row = { uid, id: task.id, num: task.num, state: task.state, type: task.type };
 
-    if (row.state !== 0) return row;
+    if (row.state !== 0) {return row;}
 
     const rule = catalog.get(task.id)!;
     const total = (rule.para2 ?? "0").split("|").reduce((sum, n) => sum + cityInteger(n), 0);
@@ -96,25 +96,25 @@ export function progressQuests(
       ),
     );
 
-    if (row.num >= total) row.state = 1;
+    if (row.num >= total) {row.state = 1;}
 
     return row;
   });
 
-  if (!q) return { tasks };
+  if (!q) {return { tasks };}
 
   const story = q.story.map((row) => ({ ...row }));
 
   for (const rule of rules.progression.story?.values() ?? [])
-    if (!story.some((row) => String(row.id) === rule.id))
-      story.push({ uid, id: Number(rule.id), type: rule.type === "0" ? 1 : 0, num: 0, state: 0 });
+    {if (!story.some((row) => String(row.id) === rule.id))
+      {story.push({ uid, id: Number(rule.id), type: rule.type === "0" ? 1 : 0, num: 0, state: 0 });}}
 
   for (const row of story) {
-    if (num(row, "state") !== 0) continue;
+    if (num(row, "state") !== 0) {continue;}
 
     const rule = rules.progression.story?.get(String(row.id));
 
-    if (!rule || rule.type === "0") continue;
+    if (!rule || rule.type === "0") {continue;}
 
     const kinds: Record<string, string> = {
       "1": "0",
@@ -144,7 +144,7 @@ export function progressQuests(
       ),
     );
 
-    if (num(row, "num") >= cityInteger(rule.target)) row.state = 1;
+    if (num(row, "num") >= cityInteger(rule.target)) {row.state = 1;}
   }
 
   for (const row of story.filter((row) => num(row, "type") === 1 && num(row, "state") === 0)) {
@@ -201,13 +201,13 @@ export function progressQuests(
       for (let n = 0; n < count && pool.length; n++) {
         const total = pool.reduce((sum, rule) => sum + cityInteger(rule.weight), 0);
 
-        if (!total) break;
+        if (!total) {break;}
 
         let draw = random(total),
           index = 0;
 
         while (index < pool.length - 1 && draw >= cityInteger(pool[index]!.weight))
-          draw -= cityInteger(pool[index++]!.weight);
+          {draw -= cityInteger(pool[index++]!.weight);}
 
         const [rule] = pool.splice(index, 1);
         daily.push({ uid, id: Number(rule!.id), type, num: 0, state: 0 });
@@ -215,7 +215,7 @@ export function progressQuests(
     };
     const info = rules.items.get("dailytasks_info");
 
-    if (random(100) <= Number(info?.k2 ?? 0)) take(1, 1);
+    if (random(100) <= Number(info?.k2 ?? 0)) {take(1, 1);}
 
     take(0, cityInteger(info?.k1 ?? 5));
   }
@@ -225,8 +225,8 @@ export function progressQuests(
     questPeriod(now, 300000n) >= questPeriod(long(q.lord, "newDailyTaskFlushTime")) &&
     text(q.alliance, "uid")
   )
-    for (const row of daily) {
-      if (num(row, "state") !== 0) continue;
+    {for (const row of daily) {
+      if (num(row, "state") !== 0) {continue;}
 
       const rule = rules.progression.daily?.get(String(row.id)),
         parts = rule?.num?.split(";") ?? [];
@@ -237,12 +237,12 @@ export function progressQuests(
           .slice(0, -1)
           .some((key, index) => key !== "0" && key !== (action.key ?? "").split(";")[index])
       )
-        continue;
+        {continue;}
 
       row.num = Math.min(cityInteger(parts.at(-1)), num(row, "num") + action.count);
 
-      if (num(row, "num") >= cityInteger(parts.at(-1))) row.state = 1;
-    }
+      if (num(row, "num") >= cityInteger(parts.at(-1))) {row.state = 1;}
+    }}
 
   const resetLegacy = questPeriod(now) > questPeriod(long(q.lord, "dailyTaskFlushTime"));
   const legacy = [...(rules.progression.legacyDaily?.values() ?? [])]
@@ -291,7 +291,7 @@ export function storySection(rows: readonly Row[], rules: Rules) {
 }
 
 export function rewardAtLevel(raw: string | undefined, level: number) {
-  if (!raw?.includes(";")) return raw;
+  if (!raw?.includes(";")) {return raw;}
 
   return raw
     .split("|")

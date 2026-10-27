@@ -34,7 +34,7 @@ export class PostboxService {
   ) {}
 
   async command(owner: string, command: string, params: Fields) {
-    if (!postboxCommands.includes(command)) throw new GameError(errors.unsupported);
+    if (!postboxCommands.includes(command)) {throw new GameError(errors.unsupported);}
 
     const rule = this.rules.configuration.payControl?.get("69017");
     const now = this.now();
@@ -42,13 +42,13 @@ export class PostboxService {
       end = Date.parse(`${rule?.k2}T00:00:00Z`);
 
     if (!rule || !Number.isFinite(start) || !Number.isFinite(end) || now < start || now > end)
-      throw new GameError(errors.invalid, "postbox_closed");
+      {throw new GameError(errors.invalid, "postbox_closed");}
 
     const operationId = params.operationId ? str(params, "operationId") : randomUUID();
     const request: Fields = {};
 
     for (const key of Object.keys(params).sort())
-      if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) request[key] = params[key]!;
+      {if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) {request[key] = params[key]!;}}
 
     const response = await this.execute(
       {
@@ -66,7 +66,7 @@ export class PostboxService {
           const ids = [...new Set(value.split(separator).filter(Boolean))];
 
           if (ids.length > 100 || ids.some((id) => !/^[a-zA-Z0-9_-]{1,40}$/.test(id)))
-            throw new GameError(errors.invalid);
+            {throw new GameError(errors.invalid);}
 
           return ids;
         };
@@ -75,7 +75,7 @@ export class PostboxService {
         const rawSeal = str(params, "sealId", "");
         const seal = rawSeal === "0" ? "" : rawSeal;
 
-        if (seal && !/^[1-9][0-9]?$/.test(seal)) throw new GameError(errors.invalid);
+        if (seal && !/^[1-9][0-9]?$/.test(seal)) {throw new GameError(errors.invalid);}
 
         if (command === "post.box.put" || command === "post.box.chat") {
           const contents = str(params, "contents");
@@ -86,11 +86,11 @@ export class PostboxService {
             !contents.isWellFormed() ||
             contents.includes("\0")
           )
-            throw new GameError(errors.invalid);
+            {throw new GameError(errors.invalid);}
 
           const prices = (rule.k4 ?? "").split(";");
 
-          if (seal && !prices[Number(seal) - 1]) throw new GameError(errors.invalid);
+          if (seal && !prices[Number(seal) - 1]) {throw new GameError(errors.invalid);}
 
           const price = seal ? cityInteger(prices[Number(seal) - 1]) : 0;
           const id = randomUUID();
@@ -99,7 +99,7 @@ export class PostboxService {
           if (command === "post.box.chat") {
             conversation = await store.relation(str(params, "chatId"));
 
-            if (!conversation) throw new GameError(errors.invalid);
+            if (!conversation) {throw new GameError(errors.invalid);}
           }
 
           planner.spendItems(rule.k9!, 1);
@@ -122,7 +122,7 @@ export class PostboxService {
             const recipient = participants.find((uid) => uid !== owner);
 
             if (!participants.includes(owner) || participants.length !== 2 || !recipient)
-              throw new GameError(errors.invalid);
+              {throw new GameError(errors.invalid);}
 
             if (publicValue) {
               conversation.publicValue = [
@@ -175,13 +175,13 @@ export class PostboxService {
 
             for (const reward of award) {
               if (reward.kind === "item" && reward.type === 7)
-                economy.item(reward.id, reward.count);
+                {economy.item(reward.id, reward.count);}
               else if (reward.kind === "count" && reward.type === 5)
-                economy.gold(BigInt(reward.value));
+                {economy.gold(BigInt(reward.value));}
               else if (reward.kind === "count" && reward.type >= 0 && reward.type <= 4) {
                 const asset = ["wood", "stone", "iron", "food", "silver"] as const;
                 economy.resource(asset[reward.type]!, BigInt(reward.value));
-              } else throw new GameError(errors.unsupported, "postbox_reward");
+              } else {throw new GameError(errors.unsupported, "postbox_reward");}
             }
 
             rewards = award;
@@ -193,18 +193,18 @@ export class PostboxService {
           body.reward = rewardPreviewArray(rewards);
           const ticket = [...planner.changed.values()].find((item) => item.itemId === rule.k9);
 
-          if (ticket) body.goods = sfs.object(inventoryItem({ ...ticket }, this.rules));
+          if (ticket) {body.goods = sfs.object(inventoryItem({ ...ticket }, this.rules));}
         } else if (command === "post.box.get") {
           const count =
             long(store.mixed, "postMailTime") / 86_400_000n === BigInt(Math.floor(now / 86_400_000))
               ? num(store.mixed, "postMail")
               : 0;
 
-          if (count >= config("k10")) throw new GameError(errors.invalid, "postbox_daily_limit");
+          if (count >= config("k10")) {throw new GameError(errors.invalid, "postbox_daily_limit");}
 
           const box = await store.takeBox();
 
-          if (!box) throw new GameError(errors.invalid, "postbox_empty");
+          if (!box) {throw new GameError(errors.invalid, "postbox_empty");}
 
           const row = {
             uid: text(box, "uid"),
@@ -235,7 +235,7 @@ export class PostboxService {
         } else if (command === "post.public") {
           const row = await store.relation(str(params, "chatId"));
 
-          if (!row) throw new GameError(errors.invalid);
+          if (!row) {throw new GameError(errors.invalid);}
 
           row.publicValue = [
             ...new Set([...text(row, "publicValue").split("|").filter(Boolean), owner]),
@@ -258,12 +258,12 @@ export class PostboxService {
             const row = await store.relation(id);
 
             if (row)
-              entries.push(
+              {entries.push(
                 sfs.object({
                   messageList: sfs.array(messages.map((message) => sfs.object(message))),
                   chatInfo: sfs.object(relation(row)),
                 }),
-              );
+              );}
           }
 
           body.unread = sfs.array(entries);
@@ -271,7 +271,7 @@ export class PostboxService {
           const ids = identifiers(str(params, "uid"), "|");
 
           if (str(params, "batch", "0") !== "1" && ids.length > 1)
-            throw new GameError(errors.invalid);
+            {throw new GameError(errors.invalid);}
 
           const rows = await store.mails(ids);
           const latest = rows
@@ -282,7 +282,7 @@ export class PostboxService {
             const id = text(latest, "seal"),
               duration = (rule.k5 ?? "").split(";")[Number(id) - 1];
 
-            if (duration === undefined) throw new GameError(errors.invalid);
+            if (duration === undefined) {throw new GameError(errors.invalid);}
 
             const until = BigInt(now) + BigInt(cityInteger(duration)) * 1000n;
             await store.grantSeal(id, until);

@@ -40,7 +40,7 @@ export function fortificationCapacity(context: CityProgressionContext) {
 
 function complete(context: CityProgressionContext, row: Row, count: number) {
   if (count <= 0 || num(row, "build") !== count)
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   const [, free] = transferTroops(count, num(row, "num"), count);
   context.write.forts = [{ ...row, num: free, build: 0, finishTime: 0n }];
@@ -59,7 +59,7 @@ async function prepare(
   const armyId = str(params, "id"),
     rule = troopDefinition(context.rules, armyId);
 
-  if (troopQueueType(rule) !== 2) throw new GameError(errors.invalid, "city_progression");
+  if (troopQueueType(rule) !== 2) {throw new GameError(errors.invalid, "city_progression");}
 
   const count = cityInteger(
     int(params, "num"),
@@ -91,13 +91,13 @@ async function prepare(
   );
 
   if (reserved + BigInt(count) > BigInt(fortificationCapacity(context)))
-    throw new GameError(errors.fortCapacity, "fortification_capacity");
+    {throw new GameError(errors.fortCapacity, "fortification_capacity");}
 
   if (
     num(row, "build") !== 0 ||
     context.state.queues.some((queue) => num(queue, "type") === 2 && text(queue, "itemId"))
   )
-    throw new GameError(errors.occupied, "city_progression");
+    {throw new GameError(errors.occupied, "city_progression");}
 
   if (
     !context.state.queues.some(
@@ -107,7 +107,7 @@ async function prepare(
         long(queue, "endTime") >= context.now,
     )
   )
-    throw new GameError(errors.full, "city_progression");
+    {throw new GameError(errors.full, "city_progression");}
 
   const durationMs = cityDuration(
     (cityInteger(rule.time) * count) /
@@ -118,7 +118,7 @@ async function prepare(
     purchase = direct ? Object.hasOwn(params, "max") : militaryBoolean(params, "gold");
   context.spend(troopCosts(rule, count), purchase);
 
-  if (direct) context.accelerate(durationMs);
+  if (direct) {context.accelerate(durationMs);}
 
   context.write.forts = [
     { ...row, build: count, finishTime: direct ? context.now : context.now + durationMs },
@@ -156,13 +156,13 @@ async function apply(
     long(row, "finishTime") !== long(saved, "updateTime") ||
     (data && (data.kind !== "fort" || data.units?.[activity.itemId] !== num(row, "build")))
   )
-    throw new GameError(errors.queue, "city_progression");
+    {throw new GameError(errors.queue, "city_progression");}
 
   if (
     troopQueueType(troopDefinition(context.rules, activity.itemId)) !== 2 ||
     action === TimedActivityAction.Start
   )
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule) {
     context.write.forts = [{ ...row, finishTime: activity.dueAt }];

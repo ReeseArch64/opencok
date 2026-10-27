@@ -65,7 +65,7 @@ export function createWorldUtilityStore(
               : [];
 
           if (points.length > 289 || members.length > 1000 || territories.length > 1000)
-            throw new Error("World utility snapshot exceeds bound");
+            {throw new Error("World utility snapshot exceeds bound");}
 
           return { profile, world, points, members, territories };
         },
@@ -76,7 +76,7 @@ export function createWorldUtilityStore(
         await fenceRealmTransaction(tx, authority);
         const [world] = await tx.select().from(user_world).where(eq(user_world.uid, owner));
 
-        if (!world || world.worldId !== 0) throw new Error("Missing resident world owner");
+        if (!world || world.worldId !== 0) {throw new Error("Missing resident world owner");}
 
         await tx.delete(world_interest).where(eq(world_interest.ownerUid, owner));
       });

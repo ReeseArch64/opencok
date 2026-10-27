@@ -87,7 +87,7 @@ export async function executeInventoryTransaction(
     .where(eq(user_resource.uid, owner))
     .for("update");
 
-  if (!profile || !resource) throw new Error("Missing inventory account");
+  if (!profile || !resource) {throw new Error("Missing inventory account");}
 
   const items = await tx
     .select()
@@ -112,7 +112,7 @@ export async function executeInventoryTransaction(
   });
 
   if (result.items.length > 128 || result.cooldowns.size > 128)
-    throw new Error("Inventory mutation too large");
+    {throw new Error("Inventory mutation too large");}
 
   const expected = new Map<string, EconomyPosting>();
   const posting = (asset: string, before: bigint, after: bigint) => {
@@ -138,22 +138,22 @@ export async function executeInventoryTransaction(
       item.vanishTime < 0n ||
       item.vanishTime > 9223372036854775807n
     )
-      throw new Error("Invalid inventory item");
+      {throw new Error("Invalid inventory item");}
 
     seen.add(item.uuid);
     const before = items.find((row) => row.uuid === item.uuid);
 
     if (before && (before.itemId !== item.itemId || (before.value ?? 0) !== item.value))
-      throw new Error("Inventory identity changed");
+      {throw new Error("Inventory identity changed");}
 
     posting(`item.${item.uuid}`, BigInt(before?.count ?? 0), BigInt(item.count));
 
     if (before)
-      await tx
+      {await tx
         .update(user_item)
         .set({ count: item.count, vanishTime: item.vanishTime })
-        .where(and(eq(user_item.uuid, item.uuid), eq(user_item.ownerId, owner)));
-    else await tx.insert(user_item).values({ ...item, ownerId: owner });
+        .where(and(eq(user_item.uuid, item.uuid), eq(user_item.ownerId, owner)));}
+    else {await tx.insert(user_item).values({ ...item, ownerId: owner });}
   }
 
   const profileKeys = [
@@ -194,7 +194,7 @@ export async function executeInventoryTransaction(
   ] as const) {
     for (const [key, value] of Object.entries(changes)) {
       if (!(allowed as readonly string[]).includes(key) || typeof value !== "bigint")
-        throw new Error("Invalid inventory balance");
+        {throw new Error("Invalid inventory balance");}
 
       if (
         kind === "resource" &&
@@ -212,7 +212,7 @@ export async function executeInventoryTransaction(
         ].includes(key) &&
         value > 2147483647n
       )
-        throw new Error("Inventory resource overflow");
+        {throw new Error("Inventory resource overflow");}
 
       posting(
         `${kind}.${key}`,
@@ -223,16 +223,16 @@ export async function executeInventoryTransaction(
   }
 
   if (result.assets?.winPoint !== undefined)
-    await tx
+    {await tx
       .insert(user_assets)
       .values({ uid: owner, winPoint: result.assets.winPoint })
-      .onConflictDoUpdate({ target: user_assets.uid, set: { winPoint: result.assets.winPoint } });
+      .onConflictDoUpdate({ target: user_assets.uid, set: { winPoint: result.assets.winPoint } });}
 
   if (Object.keys(result.profile).length)
-    await tx.update(userprofile).set(result.profile).where(eq(userprofile.uid, owner));
+    {await tx.update(userprofile).set(result.profile).where(eq(userprofile.uid, owner));}
 
   if (Object.keys(result.resource).length)
-    await tx.update(user_resource).set(result.resource).where(eq(user_resource.uid, owner));
+    {await tx.update(user_resource).set(result.resource).where(eq(user_resource.uid, owner));}
 
   for (const [itemId, useTime] of result.cooldowns) {
     if (
@@ -242,7 +242,7 @@ export async function executeInventoryTransaction(
       useTime < 0n ||
       useTime > 9223372036854775807n
     )
-      throw new Error("Invalid item cooldown");
+      {throw new Error("Invalid item cooldown");}
 
     await tx
       .insert(user_item_cd)
@@ -253,7 +253,7 @@ export async function executeInventoryTransaction(
       });
   }
 
-  if (result.postings.length > 256) throw new Error("Inventory posting limit exceeded");
+  if (result.postings.length > 256) {throw new Error("Inventory posting limit exceeded");}
 
   const current = new Map([...expected].map(([asset, entry]) => [asset, entry.before]));
 
@@ -261,13 +261,13 @@ export async function executeInventoryTransaction(
     validatePosting(entry);
 
     if (entry.account !== owner || current.get(entry.asset) !== entry.before)
-      throw new Error("Inventory posting chain mismatch");
+      {throw new Error("Inventory posting chain mismatch");}
 
     current.set(entry.asset, entry.after);
   }
 
   for (const [asset, entry] of expected)
-    if (current.get(asset) !== entry.after) throw new Error("Inventory posting balance mismatch");
+    {if (current.get(asset) !== entry.after) {throw new Error("Inventory posting balance mismatch");}}
 
   const spending = result.confirmedSpending?.(result.postings);
   const base = {

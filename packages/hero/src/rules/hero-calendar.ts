@@ -36,7 +36,7 @@ export function heroCalendarPlan(
   cityAmount(now);
 
   if (state.activities.length > 4096 || state.events.length > 4096)
-    throw new Error("Hero calendar state exceeds bound");
+    {throw new Error("Hero calendar state exceeds bound");}
 
   const activities: Row[] = [],
     events: Row[] = [],
@@ -51,30 +51,30 @@ export function heroCalendarPlan(
       activities.push({ ...activity, finish: 1 });
 
       if (disabled)
-        events.push(
+        {events.push(
           ...state.events
             .filter(
               (event) => event.activityId === activity.uuid && num(event, "rewardStatus") !== 1,
             )
             .map((event) => ({ ...event, rewardStatus: 1 })),
-        );
+        );}
     }
   }
 
   const definitions = [...(rules.advanced.heroActivities?.values() ?? [])];
 
-  if (definitions.length > 32) throw new Error("Hero calendar definition bound exceeded");
+  if (definitions.length > 32) {throw new Error("Hero calendar definition bound exceeded");}
 
   for (const rule of definitions) {
     const type = cityInteger(rule.type, 1, 3);
 
-    if (!heroCalendarOpen(rules, type, now)) continue;
+    if (!heroCalendarOpen(rules, type, now)) {continue;}
 
     const dates = (rule.date ?? "").split("|"),
       date = dates[weekday - 1]?.split(":");
 
     if (dates.length !== 7 || !date || date.length !== 2 || cityInteger(date[0], 1, 7) !== weekday)
-      throw new Error("Invalid hero calendar weekday");
+      {throw new Error("Invalid hero calendar weekday");}
 
     const [ready, run, total, ...extra] = (rule.cycle ?? "").split("|"),
       duration = BigInt(cityInteger(total, 1, 10080)) * 60000n;
@@ -89,7 +89,7 @@ export function heroCalendarPlan(
       !rule.id ||
       rule.id.length > 100
     )
-      throw new Error("Invalid hero cycle");
+      {throw new Error("Invalid hero cycle");}
 
     const eligible = state.activities.filter(
       (row) =>
@@ -99,12 +99,12 @@ export function heroCalendarPlan(
         !activities.some((next) => next.uuid === row.uuid && num(next, "finish") === 1),
     );
 
-    if (eligible.length > 1) throw new Error("Ambiguous hero calendar");
+    if (eligible.length > 1) {throw new Error("Ambiguous hero calendar");}
 
     let activity = eligible[0];
 
     if (!activity) {
-      if (state.blocked || date[1] !== "1") continue;
+      if (state.blocked || date[1] !== "1") {continue;}
 
       const id = heroCalendarIdentity("main", rules.kingdomId, rule.id, day),
         previous = state.activities.find(
@@ -112,7 +112,7 @@ export function heroCalendarPlan(
             row.uuid === id || (row.activityId === rule.id && long(row, "startTime") === day),
         );
 
-      if (previous) continue;
+      if (previous) {continue;}
 
       activity = {
         uuid: id,
@@ -140,9 +140,9 @@ export function heroCalendarPlan(
             : 0,
       )[0];
 
-    if (saved) running = cityAmount(saved.lastTime);
+    if (saved) {running = cityAmount(saved.lastTime);}
 
-    if (round <= 0n || running > round) throw new Error("Invalid saved hero stage interval");
+    if (round <= 0n || running > round) {throw new Error("Invalid saved hero stage interval");}
 
     prepare = round - running;
     const start = long(activity, "startTime"),
@@ -152,13 +152,13 @@ export function heroCalendarPlan(
       startTime = readyTime + prepare,
       endTime = readyTime + round;
 
-    if (now < start || endTime > end || endTime <= now) continue;
+    if (now < start || endTime > end || endTime <= now) {continue;}
 
     const current = state.events.filter(
       (row) => row.activityId === activity!.uuid && long(row, "endTime") > now,
     );
 
-    if (current.length) continue;
+    if (current.length) {continue;}
 
     const groups = (rule.activity ?? "")
       .split("|")
@@ -169,13 +169,13 @@ export function heroCalendarPlan(
       groups.length > 32 ||
       groups.some((group) => !group.length || group.length > 256)
     )
-      throw new Error("Invalid hero event sequence");
+      {throw new Error("Invalid hero event sequence");}
 
     const selected =
       type === 3 ? groups.flat() : [groups.flat()[Number(stage % BigInt(groups.flat().length))]!];
 
     if (selected.length > 8 || new Set(selected).size !== selected.length)
-      throw new Error("Invalid coupled hero stages");
+      {throw new Error("Invalid coupled hero stages");}
 
     const created: string[] = [];
 
@@ -183,12 +183,12 @@ export function heroCalendarPlan(
       const definition = rules.ranking.heroEvents?.get(id),
         category = (definition?.type ?? "").split("|");
 
-      if (!definition || category.length !== 2) throw new Error("Missing hero stage definition");
+      if (!definition || category.length !== 2) {throw new Error("Missing hero stage definition");}
 
       const eventType = cityInteger(category[1], 1, 4);
 
       if ((type < 3 && eventType !== type) || (type === 3 && eventType < 3))
-        throw new Error("Mismatched hero stage type");
+        {throw new Error("Mismatched hero stage type");}
 
       const uuid = heroCalendarIdentity(
         "event",
@@ -198,7 +198,7 @@ export function heroCalendarPlan(
       );
 
       if (state.events.some((row) => row.uuid === uuid))
-        throw new Error("Conflicting ended hero stage");
+        {throw new Error("Conflicting ended hero stage");}
 
       events.push({
         uuid,
@@ -222,13 +222,13 @@ export function heroCalendarPlan(
         ? ""
         : [text(activity, "alreadyEvent"), created.join(";")].filter(Boolean).join(";");
 
-    if (history.length > 1000) throw new Error("Hero stage history exceeds bound");
+    if (history.length > 1000) {throw new Error("Hero stage history exceeds bound");}
 
     const updated = { ...activity, alreadyEvent: history };
     const position = activities.findIndex((row) => row.uuid === activity!.uuid);
 
-    if (position < 0) activities.push(updated);
-    else activities[position] = updated;
+    if (position < 0) {activities.push(updated);}
+    else {activities[position] = updated;}
   }
 
   return { activities, events };

@@ -59,12 +59,12 @@ function fixture(
       const text = statement.text;
       calls.push({ text, params });
       const fail = (name: string) => {
-        if (options.fail === name) throw new Error("Synthetic " + name + " failure");
+        if (options.fail === name) {throw new Error("Synthetic " + name + " failure");}
       };
-      if (text.startsWith("begin")) before = rows.map((row) => ({ ...row }));
-      if (text === "rollback") rows = before;
+      if (text.startsWith("begin")) {before = rows.map((row) => ({ ...row }));}
+      if (text === "rollback") {rows = before;}
       if (text.includes('from "opencok_kingdom"."userprofile"')) {
-        if (text.includes('"name"')) return { rows: [] };
+        if (text.includes('"name"')) {return { rows: [] };}
         fail("profile");
         return { rows: options.profile === null ? [] : [options.profile ?? ["self", 1, "0", 0]] };
       }
@@ -146,7 +146,7 @@ function fixture(
         const [owner, ...ids] = params;
         rows = rows.filter((row) => row.toUser !== owner || !ids.includes(row.uid));
       }
-      if (text === "commit") fail("commit");
+      if (text === "commit") {fail("commit");}
       return { rows: [] };
     },
   };
@@ -207,7 +207,7 @@ test("batch storage maps all selectors to exact stored types before pagination a
     );
     expect(metadata.text).not.toContain('"saveFlag"');
     expect(entries.every((entry) => entry.toUser === "self")).toBe(true);
-    if (type === 2) expect(entries.every((entry) => entry.saveFlag === 0)).toBe(true);
+    if (type === 2) {expect(entries.every((entry) => entry.saveFlag === 0)).toBe(true);}
     expect(f.calls.at(-1)!.text).toBe("commit");
   }
   const f = fixture();
@@ -307,19 +307,19 @@ test("batch metadata bounds and all failures preserve state before cleanup commi
     ).rejects.toThrow();
     expect(f.rows()).toEqual(before);
     expect(f.calls.at(-1)!.text).toBe("rollback");
-    if ("size" in options) expect(f.calls).toHaveLength(4);
+    if ("size" in options) {expect(f.calls).toHaveLength(4);}
   }
   for (const kind of ["rows", "rewards"]) {
     const f = fixture();
     for (let i = 0; i < (kind === "rows" ? 1001 : 65); i++)
-      f.rows().push({
+      {f.rows().push({
         ...mailListEntry({
           uid: `extra-${i}`,
           type: 14,
           rewardId: kind === "rewards" ? "x".repeat(65535) : "",
         }),
         extraOwner: "self",
-      });
+      });}
     await expect(
       readMailBatch(f.databases, 1, "self", query(2, 0, 2147483647), async () => []),
     ).rejects.toThrow("capacity");
@@ -390,11 +390,11 @@ test("direct batch readers reject invalid normalized scopes and unbounded identi
     { ...query(2), limit: 2147483648 },
     { ...query(2), now: -1 },
   ] as MailBatchQuery[])
-    expect(() => readMailBatch(f.databases, 1, "self", invalid, inspect)).toThrow();
+    {expect(() => readMailBatch(f.databases, 1, "self", invalid, inspect)).toThrow();}
   for (const owner of ["", " ", "\0", "\ud800", "x".repeat(41)])
-    expect(() => readMailBatch(f.databases, 1, owner, query(2), inspect)).toThrow();
+    {expect(() => readMailBatch(f.databases, 1, owner, query(2), inspect)).toThrow();}
   for (const realm of [0, 1.5, 2147483648])
-    expect(() => readMailBatch(f.databases, realm, "self", query(2), inspect)).toThrow();
+    {expect(() => readMailBatch(f.databases, realm, "self", query(2), inspect)).toThrow();}
   expect(f.calls).toEqual([]);
 });
 

@@ -25,7 +25,7 @@ export function readAllianceRanking(
     query.limit > 32767 ||
     !Number.isSafeInteger(query.now)
   )
-    throw new Error("Invalid alliance ranking query");
+    {throw new Error("Invalid alliance ranking query");}
 
   return db.transaction(
     async (tx) => {
@@ -45,7 +45,7 @@ export function readAllianceRanking(
       const empty = { profile, candidates: [], sciences: [], videos: [], fallbackRank: 1n };
 
       if (!profile || (profile.banFlag ?? 0) !== 0 || (profile.banTime ?? 0n) > BigInt(query.now))
-        return empty;
+        {return empty;}
 
       const metric = query.kind === "power" ? playerinfo.power : playerinfo.armyKill;
       const members = tx
@@ -111,7 +111,7 @@ export function readAllianceRanking(
           .innerJoin(alliance, eq(alliance.uid, members.allianceId))
           .where(gt(members.score, own));
 
-        if (counts.length !== 1) throw new Error("Missing alliance ranking count");
+        if (counts.length !== 1) {throw new Error("Missing alliance ranking count");}
 
         fallbackRank = counts[0]!.rank;
       }
@@ -135,7 +135,7 @@ export function readAllianceRanking(
         : [];
 
       if (sciences.length > 32767)
-        throw new Error("Alliance ranking science collection exceeds limit");
+        {throw new Error("Alliance ranking science collection exceeds limit");}
 
       const videos = ids.length
         ? await tx

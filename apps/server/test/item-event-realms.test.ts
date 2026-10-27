@@ -19,8 +19,8 @@ test("item, event and world-activity selectors match 3690 independent Java 8 que
   ][]) {
     for (const [index, select] of families.entries()) {
       const expected = outcomes[index]!;
-      if (expected === "error") expect(() => select(selector, realm)).toThrow();
-      else expect(select(selector, realm), JSON.stringify([index, selector, realm])).toBe(expected);
+      if (expected === "error") {expect(() => select(selector, realm)).toThrow();}
+      else {expect(select(selector, realm), JSON.stringify([index, selector, realm])).toBe(expected);}
     }
   }
 });
@@ -52,9 +52,9 @@ test("realm selector families preserve different zero, negative, repeated-hyphen
 test("all realm selector families reject unavailable or oversized inputs and non-Int realm identities", () => {
   for (const select of families) {
     for (const selector of [undefined, "2".repeat(65536), Array(4097).fill("1").join(";")])
-      expect(() => select(selector, 2)).toThrow();
+      {expect(() => select(selector, 2)).toThrow();}
     for (const realm of [NaN, Infinity, 1.5, 2147483648, -2147483649])
-      expect(() => select("all", realm)).toThrow();
+      {expect(() => select("all", realm)).toThrow();}
     expect(select(";".repeat(65535), 2)).toBe(false);
     expect(select(Array(4096).fill("1").join(";"), 2)).toBe(false);
   }

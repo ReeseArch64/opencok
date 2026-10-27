@@ -7,19 +7,19 @@ export function comebackInfoView(activities: readonly ComebackActivity[]): Field
     activities.length > 3 ||
     new Set(activities.map((row) => row.type)).size !== activities.length
   )
-    throw new Error("Invalid comeback activity projection");
+    {throw new Error("Invalid comeback activity projection");}
 
   const body: Fields = { count: sfs.int(activities.length) };
 
   for (const row of activities) {
     if (row.type === 1)
-      body.active1 = sfs.object({
+      {body.active1 = sfs.object({
         endTime: sfs.long(row.endTime),
         state: sfs.bool(row.claimed),
         ...(row.rewards ? { rewards: rewardPreviewArray(row.rewards) } : {}),
-      });
+      });}
     else if (row.type === 2)
-      body.active2 = sfs.object({
+      {body.active2 = sfs.object({
         endTime: sfs.long(row.endTime),
         dailies: sfs.array(
           row.daily.map((entry) =>
@@ -30,9 +30,9 @@ export function comebackInfoView(activities: readonly ComebackActivity[]): Field
             }),
           ),
         ),
-      });
+      });}
     else
-      body.active3 = sfs.object({
+      {body.active3 = sfs.object({
         endTime: sfs.long(row.endTime),
         currPay: sfs.long(row.currentPay),
         payNodes: sfs.array(
@@ -44,7 +44,7 @@ export function comebackInfoView(activities: readonly ComebackActivity[]): Field
             }),
           ),
         ),
-      });
+      });}
   }
 
   return body;
@@ -52,7 +52,7 @@ export function comebackInfoView(activities: readonly ComebackActivity[]): Field
 
 export function comebackRewardView(type: number, rewards: readonly Value[]): Fields {
   if (![1, 2, 3].includes(type) || rewards.length > 64)
-    throw new Error("Invalid comeback reward projection");
+    {throw new Error("Invalid comeback reward projection");}
 
   return { type: sfs.string(String(type)), rewards: sfs.array([...rewards]) };
 }

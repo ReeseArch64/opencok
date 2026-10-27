@@ -13,7 +13,7 @@ export async function readFragmentExchanges(tx: MutationTransaction, owner: stri
     .limit(65)
     .for("update");
 
-  if (rows.length > 64) throw new Error("Fragment exchange aggregate exceeds bound");
+  if (rows.length > 64) {throw new Error("Fragment exchange aggregate exceeds bound");}
 
   return rows;
 }
@@ -24,13 +24,13 @@ export async function writeFragmentExchanges(
   rows: readonly Row[],
 ) {
   if (rows.length > 64 || new Set(rows.map((row) => row.actId)).size !== rows.length)
-    throw new Error("Invalid fragment exchange writes");
+    {throw new Error("Invalid fragment exchange writes");}
 
   for (const row of rows) {
     const id = text(row, "actId");
 
     if (row.uid !== owner || !/^\d{1,10}$/.test(id) || !Buffer.isBuffer(row.reward))
-      throw new Error("Invalid owned fragment exchange");
+      {throw new Error("Invalid owned fragment exchange");}
 
     readFragmentExchangeOffers(row.reward);
     const value = {

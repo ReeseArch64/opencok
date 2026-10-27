@@ -13,7 +13,7 @@ function fixture() {
   const cache = new Cache({ redisUrl: "unused", timeoutMs: 1, kingdomId: 2 });
   cache.command = async (...args) => {
     commands.push(args);
-    if (response instanceof Error) throw response;
+    if (response instanceof Error) {throw response;}
     return response;
   };
   const store = {

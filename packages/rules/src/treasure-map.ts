@@ -16,7 +16,7 @@ export function treasureMapRules(rules: Rules, level: number, colour: number) {
       row.roll !== undefined,
   );
 
-  if (!rows.length) worldMutationFailure();
+  if (!rows.length) {worldMutationFailure();}
 
   return rows;
 }
@@ -39,16 +39,16 @@ export function treasureMapCandidates(
     [clamp(x - maximum), clamp(x - minimum)],
     [clamp(x + minimum), clamp(x + maximum)],
   ])
-    for (let currentX = fromX!; currentX <= toX!; currentX++) {
-      if (black(currentX)) continue;
+    {for (let currentX = fromX!; currentX <= toX!; currentX++) {
+      if (black(currentX)) {continue;}
 
       for (const [fromY, toY] of [
         [clamp(y - maximum), clamp(y - minimum)],
         [clamp(y + minimum), clamp(y + maximum)],
       ])
-        for (let currentY = fromY!; currentY <= toY!; currentY++)
-          if (!black(currentY)) points.add(1 + currentX + currentY * size);
-    }
+        {for (let currentY = fromY!; currentY <= toY!; currentY++)
+          {if (!black(currentY)) {points.add(1 + currentX + currentY * size);}}}
+    }}
 
   return [...points];
 }
@@ -64,7 +64,7 @@ export function treasureMapFallback(point: number, size: number, range: number) 
     currentX <= Math.min(size - 1, x + range);
     currentX++
   ) {
-    if (currentX >= 574 && currentX <= 626) continue;
+    if (currentX >= 574 && currentX <= 626) {continue;}
 
     for (
       let currentY = Math.max(0, y - range);
@@ -73,7 +73,7 @@ export function treasureMapFallback(point: number, size: number, range: number) 
     ) {
       const id = 1 + currentX + currentY * size;
 
-      if ((currentY >= 574 && currentY <= 626) || id === point) continue;
+      if ((currentY >= 574 && currentY <= 626) || id === point) {continue;}
 
       points.push(id);
     }

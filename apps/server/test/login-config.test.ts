@@ -89,7 +89,7 @@ test("feature announcements retain the legacy realm selector and version/platfor
     onOff: sfs.bool(true),
   });
   for (const override of [{ kingdomId: 3 }, { testServer: true }])
-    expect(announcement({ ...context, ...override }).onOff?.value).toBe(false);
+    {expect(announcement({ ...context, ...override }).onOff?.value).toBe(false);}
   expect(announcement({ ...context, testServer: true, kingdomId: 9 }).onOff?.value).toBe(true);
   expect(announcement({ ...context, now: now + 86_400_000 }).onOff?.value).toBe(true);
   expect(announcement({ ...context, version: "12.5.99", now: now - 1 }).onOff?.value).toBe(true);
@@ -147,12 +147,12 @@ test("boss flags require running services while subscriptions use configured rea
   }
   const subscription = { id: "subscribe", ...base };
   for (const platform of ["AppStore", "market_global", "market_global2"])
-    expect(
+    {expect(
       featureAnnouncementEnabled(subscription, catalog, {
         ...context,
         platform,
       }),
-    ).toBe(true);
+    ).toBe(true);}
   expect(
     featureAnnouncementEnabled(subscription, catalog, {
       ...context,
@@ -354,7 +354,7 @@ test("initial and deferred login announce ordinary, account and subscription met
   catalog.roles.set("100100", { id: "100100", player_exp: "100" });
   catalog.features.set("ui", { id: "ui", ...base });
   for (const id of ["payelex", "cn_bind", "role_on", "subscribe"])
-    catalog.features.set(id, { id, ...base });
+    {catalog.features.set(id, { id, ...base });}
   catalog.items.set("cn_bind", { k1: "all", k2: "synthetic" });
   catalog.items.set("role_info", { k4: "market_global", k5: "all" });
   const persisted = configuration();
@@ -537,8 +537,8 @@ test("deferred verification reads empty, null and missing device IDs using legac
     },
   });
   for (const device of ["", null, undefined, "null", " "]) {
-    if (device === undefined) delete state.profile!.deviceId;
-    else state.profile!.deviceId = device;
+    if (device === undefined) {delete state.profile!.deviceId;}
+    else {state.profile!.deviceId = device;}
     const result = await game.execute("synthetic", "login.other", { config: sfs.int(1) });
     expect(result.body.isVerifyChangeAccount).toEqual(sfs.bool(true));
   }

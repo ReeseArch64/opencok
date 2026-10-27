@@ -89,10 +89,10 @@ test("digit-heavy request IDs survive redaction while credentials remain masked"
 
 test("HTTP failures carry status and severity without leaking thrown errors", async () => {
   for (const status of [400, 503])
-    await logHttpRequest(
+    {await logHttpRequest(
       new Request("http://localhost/readyz"),
       () => new Response(null, { status }),
-    );
+    );}
   await expect(
     logHttpRequest(new Request("http://localhost/readyz"), () => {
       throw new Error("private-database-password");

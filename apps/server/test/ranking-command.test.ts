@@ -136,11 +136,11 @@ test("ranking authentication and required provider failures never produce a succ
     "building.rank",
     "silver.contribute.rank",
   ])
-    for (const profile of profiles) {
+    {for (const profile of profiles) {
       const { game, state } = fixture();
       state.profile = profile;
       await expect(game.execute("self", command, {})).rejects.toThrow();
-    }
+    }}
   const failure = fixture();
   failure.db.playerRanking = async () => {
     throw new Error("Synthetic provider failure");

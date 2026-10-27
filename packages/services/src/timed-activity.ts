@@ -50,7 +50,7 @@ export class TimedActivityService {
       input.itemId.length > 255 ||
       input.durationMs <= 0n
     )
-      throw new Error("Invalid activity start");
+      {throw new Error("Invalid activity start");}
 
     return this.run(
       owner,
@@ -74,7 +74,7 @@ export class TimedActivityService {
           )
           .sort((a, b) => num(a, "qid") - num(b, "qid"))[0];
 
-        if (!selected) throw new GameError(errors.full, "city_progression");
+        if (!selected) {throw new GameError(errors.full, "city_progression");}
 
         const activity: TimedActivity = {
           id: randomUUID(),
@@ -117,19 +117,19 @@ export class TimedActivityService {
     try {
       const operationId = str(params, "operationId", "") || randomUUID();
 
-      if (!/^[A-Za-z0-9:._-]{1,128}$/.test(operationId)) throw new Error("Invalid operationId");
+      if (!/^[A-Za-z0-9:._-]{1,128}$/.test(operationId)) {throw new Error("Invalid operationId");}
 
       return await this.run(owner, operationId, command, params, async (state, ledger) => {
-        if (!state.prepare) throw new Error("City progression unavailable");
+        if (!state.prepare) {throw new Error("City progression unavailable");}
 
         const prepared = await state.prepare(command, encode(params), activityEconomy(ledger));
         const item = decode(Buffer.from(prepared.response));
 
         for (const push of prepared.pushes ?? [])
-          ledger.pushes.push({ command: push.command, body: decode(Buffer.from(push.body)) });
+          {ledger.pushes.push({ command: push.command, body: decode(Buffer.from(push.body)) });}
 
         if (prepared.type === undefined)
-          return { queues: [], activities: [], body: item, ledger, event: prepared.event };
+          {return { queues: [], activities: [], body: item, ledger, event: prepared.event };}
 
         const duration = prepared.durationMs;
 
@@ -139,7 +139,7 @@ export class TimedActivityService {
           (duration === 0n && !prepared.ready) ||
           !prepared.itemId
         )
-          throw new Error("Invalid prepared activity");
+          {throw new Error("Invalid prepared activity");}
 
         const dueAt = activityInstant(state.now + duration);
         const selected = state.queues
@@ -151,7 +151,7 @@ export class TimedActivityService {
           )
           .sort((a, b) => num(a, "qid") - num(b, "qid"))[0];
 
-        if (!selected) throw new GameError(errors.full, "city_progression");
+        if (!selected) {throw new GameError(errors.full, "city_progression");}
 
         const activity: TimedActivity = {
           id: randomUUID(),
@@ -188,7 +188,7 @@ export class TimedActivityService {
         return { queues: [row], activities: [activity], body, ledger, event: prepared.event };
       });
     } catch (error) {
-      if (error instanceof ProtocolError) throw new GameError(errors.invalid, "city_progression");
+      if (error instanceof ProtocolError) {throw new GameError(errors.invalid, "city_progression");}
 
       throw error;
     }
@@ -208,13 +208,13 @@ export class TimedActivityService {
           state.activities.some((row) => row.queueId === queueId) ||
           activityState(long(saved, "updateTime"), state.now) === "idle"
         )
-          throw new Error("Queue cannot be restored");
+          {throw new Error("Queue cannot be restored");}
 
         const startedAt = activityInstant(long(saved, "startTime")),
           dueAt = activityInstant(long(saved, "updateTime"));
 
         if (dueAt < startedAt || startedAt > state.now || !text(saved, "itemId"))
-          throw new Error("Invalid saved activity");
+          {throw new Error("Invalid saved activity");}
 
         const activity: TimedActivity = {
           id: randomUUID(),
@@ -254,15 +254,15 @@ export class TimedActivityService {
         queueCommand,
       )
     )
-      throw new Error("Unsupported activity command");
+      {throw new Error("Unsupported activity command");}
 
     const operationId = str(params, "operationId", "") || randomUUID();
 
     if (!operationId || !/^[A-Za-z0-9:._-]{1,128}$/.test(operationId))
-      throw new Error("Stable operationId required for activity mutation");
+      {throw new Error("Stable operationId required for activity mutation");}
 
     if (params.guideStep && str(params, "guideStep").length > 255)
-      throw new Error("Invalid activity guide step");
+      {throw new Error("Invalid activity guide step");}
 
     return this.run(owner, operationId, command, params, async (state, ledger) => {
       if (queueCommand === "queue.open") {
@@ -278,7 +278,7 @@ export class TimedActivityService {
           !Number.isSafeInteger(seconds) ||
           seconds <= 0
         )
-          throw new Error("Invalid queue opening item");
+          {throw new Error("Invalid queue opening item");}
 
         ledger.take(item, 1);
         const saved = state.queues.find((row) => num(row, "type") === 0 && num(row, "qid") === qid);
@@ -320,32 +320,32 @@ export class TimedActivityService {
       );
       const saved = state.queues.find((row) => row.uuid === uuid);
 
-      if (!saved) throw new GameError(errors.queue, "city_progression");
+      if (!saved) {throw new GameError(errors.queue, "city_progression");}
 
       if (
         alias &&
         (!alias.types.includes(num(saved, "type")) ||
           (alias.target && str(params, alias.target) !== text(saved, "itemId")))
       )
-        throw new GameError(errors.invalid, "city_progression");
+        {throw new GameError(errors.invalid, "city_progression");}
 
       if (alias?.action === "queue.finish" && long(saved, "updateTime") > state.now + 1000n)
-        throw new GameError(errors.queuePending, "city_progression");
+        {throw new GameError(errors.queuePending, "city_progression");}
 
       if (queueCommand === "queue.rent") {
         if (num(saved, "qid") === 1 || num(saved, "type") !== 0)
-          throw new Error("Queue cannot be rented");
+          {throw new Error("Queue cannot be rented");}
 
         const seconds = int(params, "rentTime");
 
-        if (seconds <= 0) throw new Error("Invalid queue rental");
+        if (seconds <= 0) {throw new Error("Invalid queue rental");}
 
         const rule = this.rules.items.get("building_base");
         const unit = Number(rule?.k8),
           price = Number(rule?.k9);
 
         if (!(unit > 0) || !Number.isFinite(price) || price < 0)
-          throw new Error("Missing queue rental rule");
+          {throw new Error("Missing queue rental rule");}
 
         debit(
           ledger,
@@ -370,15 +370,15 @@ export class TimedActivityService {
 
       const active = state.activities.find((row) => row.queueId === uuid);
 
-      if (!active) throw new Error("Queue has no registered activity");
+      if (!active) {throw new Error("Queue has no registered activity");}
 
       const expected = str(params, "activityId", "");
 
-      if (expected && expected !== active.id) throw new Error("Activity generation required");
+      if (expected && expected !== active.id) {throw new Error("Activity generation required");}
 
       const version = int(params, "version", active.version);
 
-      if (version !== active.version) throw new Error("Activity version conflict");
+      if (version !== active.version) {throw new Error("Activity version conflict");}
 
       let consumed: { itemId: string; count: number } | undefined;
       let next: TimedActivity,
@@ -389,9 +389,9 @@ export class TimedActivityService {
         let remaining = Number((active.dueAt - state.now) / 1000n);
 
         if (!Number.isSafeInteger(remaining))
-          throw new Error("Activity duration exceeds acceleration bound");
+          {throw new Error("Activity duration exceeds acceleration bound");}
 
-        if (remaining < 0) remaining = 0;
+        if (remaining < 0) {remaining = 0;}
 
         let freeSeconds = Number(this.rules.items.get("resources_basics")?.k8 ?? 0);
 
@@ -402,8 +402,8 @@ export class TimedActivityService {
             let speedup = 0;
 
             for (const rule of this.rules.power.vip?.values() ?? [])
-              if (Number(rule.point) <= num(snapshot.vip, "score"))
-                speedup = Number(rule.speedup ?? 0);
+              {if (Number(rule.point) <= num(snapshot.vip, "score"))
+                {speedup = Number(rule.speedup ?? 0);}}
 
             freeSeconds += speedup * 60;
           }
@@ -422,10 +422,10 @@ export class TimedActivityService {
         const alreadyDue = activityState(active.dueAt, state.now) === "due";
         const free = alreadyDue || (active.type === 0 && remaining <= freeSeconds);
 
-        if (free) remaining = 0;
+        if (free) {remaining = 0;}
         else if (int(params, "isGold") !== 0) {
           if (active.type === 12) {
-            if (!state.accelerate) throw new GameError(errors.unsupported, "city_progression");
+            if (!state.accelerate) {throw new GameError(errors.unsupported, "city_progression");}
 
             await state.accelerate(active, BigInt(remaining) * 1000n, activityEconomy(ledger));
             remaining = 0;
@@ -434,11 +434,11 @@ export class TimedActivityService {
           const troops = [1, 8, 9, 10, 17].includes(active.type);
 
           if (active.type !== 12)
-            debit(
+            {debit(
               ledger,
               citySpeedGold(this.rules, BigInt(remaining) * 1000n, troops),
               "queue.ccd",
-            );
+            );}
 
           remaining = 0;
         } else {
@@ -455,13 +455,13 @@ export class TimedActivityService {
             speed <= 0 ||
             ![1, 2].includes(mode)
           )
-            throw new Error("Invalid acceleration item");
+            {throw new Error("Invalid acceleration item");}
 
           if (mode === 1) {
             count = Math.min(count, Math.max(1, Math.ceil(remaining / speed)));
             remaining = Math.max(0, remaining - speed * count);
           } else {
-            if (count !== 1 || speed > 100) throw new Error("Invalid percentage acceleration");
+            if (count !== 1 || speed > 100) {throw new Error("Invalid percentage acceleration");}
 
             remaining = Math.trunc(remaining * (1 - speed / 100));
           }
@@ -479,7 +479,7 @@ export class TimedActivityService {
         );
         finished = activityState(next.dueAt, state.now) === "due";
 
-        if (finished) next = { ...next, status: 1 };
+        if (finished) {next = { ...next, status: 1 };}
 
         item = decode(
           Buffer.from(
@@ -530,12 +530,12 @@ export class TimedActivityService {
             continuation.durationMs < 0n ||
             continuation.durationMs > 315360000000n
           )
-            throw new Error("Invalid activity continuation");
+            {throw new Error("Invalid activity continuation");}
 
           const startedAt = activityInstant(continuation.startedAt ?? next.dueAt),
             dueAt = activityInstant(startedAt + continuation.durationMs);
 
-          if (startedAt < next.dueAt) throw new Error("Retroactive activity continuation");
+          if (startedAt < next.dueAt) {throw new Error("Retroactive activity continuation");}
 
           const chained: TimedActivity = {
             id: randomUUID(),
@@ -608,7 +608,7 @@ export class TimedActivityService {
     const request: Fields = {};
 
     for (const key of Object.keys(params).sort())
-      if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) request[key] = params[key]!;
+      {if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) {request[key] = params[key]!;}}
 
     const response = await this.execute(
       {
@@ -649,7 +649,7 @@ export class TimedActivityService {
 }
 
 export function debit(ledger: InventoryPlanner, amount: bigint, reason: string) {
-  if (amount < 0n || amount > ledger.total()) throw new GameError(errors.gold, "city_progression");
+  if (amount < 0n || amount > ledger.total()) {throw new GameError(errors.gold, "city_progression");}
 
   for (const key of ledger.pools()) {
     const before = ledger.balance(key),
@@ -665,7 +665,7 @@ export function debit(ledger: InventoryPlanner, amount: bigint, reason: string) 
 
 export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
   const valid = (amount: bigint) => {
-    if (amount < 0n || amount > 9223372036854775807n) throw new Error("Invalid activity balance");
+    if (amount < 0n || amount > 9223372036854775807n) {throw new Error("Invalid activity balance");}
 
     return amount;
   };
@@ -681,11 +681,11 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
       const grants = new Map<string, number>();
 
       for (const posting of ledger.postings.slice(ledger.campaignPostingCursor)) {
-        if (!posting.asset.startsWith("item.") || posting.after <= posting.before) continue;
+        if (!posting.asset.startsWith("item.") || posting.after <= posting.before) {continue;}
 
         const item = ledger.items.find((row) => `item.${row.uuid}` === posting.asset);
 
-        if (!item) throw new Error("Missing campaign item grant");
+        if (!item) {throw new Error("Missing campaign item grant");}
 
         grants.set(
           item.itemId,
@@ -743,7 +743,7 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
       ledger.post("assets.winPoint", before, after, "activity.reward");
     },
     gold(delta) {
-      if (delta < 0n) debit(ledger, -delta, "activity.cost");
+      if (delta < 0n) {debit(ledger, -delta, "activity.cost");}
       else if (delta > 0n) {
         const key = ledger.pools()[0]!,
           before = ledger.balance(key),
@@ -776,7 +776,7 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
           "limestone",
         ].includes(asset)
       )
-        throw new Error("Invalid activity resource");
+        {throw new Error("Invalid activity resource");}
 
       const before = ledger.resources[asset] ?? long(ledger.state.resource, asset),
         after = valid(before + delta);
@@ -784,10 +784,10 @@ export function activityEconomy(ledger: InventoryPlanner): ActivityEconomy {
       ledger.post(`resource.${asset}`, before, after, "activity.resource");
     },
     item(itemId, delta) {
-      if (!Number.isInteger(delta) || delta === 0) throw new Error("Invalid activity item change");
+      if (!Number.isInteger(delta) || delta === 0) {throw new Error("Invalid activity item change");}
 
-      if (delta < 0) ledger.spendItems(itemId, -delta);
-      else ledger.add(itemId, delta);
+      if (delta < 0) {ledger.spendItems(itemId, -delta);}
+      else {ledger.add(itemId, delta);}
     },
   };
 }

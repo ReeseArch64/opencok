@@ -26,7 +26,7 @@ export function lotteryCondition(
     .every((raw) => {
       const [type, value] = raw.split(";").map(Number);
 
-      if (!Number.isInteger(type) || !Number.isInteger(value)) lotteryFailure();
+      if (!Number.isInteger(type) || !Number.isInteger(value)) {lotteryFailure();}
 
       switch (type) {
         case 1:
@@ -58,12 +58,12 @@ export function lotteryCondition(
 export function lotterySlots(raw: string) {
   const slots = raw.split("|");
 
-  if (slots.length !== 9) lotteryFailure();
+  if (slots.length !== 9) {lotteryFailure();}
 
   return slots.map((slot) => {
     const pair = slot.split(":");
 
-    if (pair.length !== 2) lotteryFailure();
+    if (pair.length !== 2) {lotteryFailure();}
 
     return { id: String(cityInteger(pair[0])), count: cityInteger(pair[1]) };
   });
@@ -76,7 +76,7 @@ export function lotteryResourceAmount(
   spread: number,
   draw: number,
 ) {
-  if (!Number.isInteger(draw) || draw < 0 || draw > spread * 2) lotteryFailure();
+  if (!Number.isInteger(draw) || draw < 0 || draw > spread * 2) {lotteryFailure();}
 
   const multiplier = Math.fround(1 + Math.fround(Math.fround(level * coefficient) / 100));
   const variation = Math.fround(1 + Math.fround(Math.fround(draw - spread) / 100));

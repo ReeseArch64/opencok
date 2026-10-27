@@ -126,11 +126,11 @@ test("shared birth allocation honors native priority regions, rolls back failed 
           worldPoint: allocated.point,
         });
         for (const point of allocated.points)
-          await tx
+          {await tx
             .update(worldpoint)
             .set({ pointType: point.id === allocated.point ? 1 : 8, ownerId: uid })
-            .where(eq(worldpoint.id, Number(point.id)));
-        if (fail) throw new Error("failed city placement");
+            .where(eq(worldpoint.id, Number(point.id)));}
+        if (fail) {throw new Error("failed city placement");}
         return allocated.point;
       });
     await expect(

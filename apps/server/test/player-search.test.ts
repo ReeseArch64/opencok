@@ -51,8 +51,8 @@ test("ten-entry slicing matches 1680 frozen Java primitive cases including signe
   expect(oracle.cuts).toHaveLength(1680);
   for (const [count, page, max, nullAt, expected] of oracle.cuts as Vector[]) {
     const rows = Array.from({ length: count }, (_, i) => (i === nullAt ? null : String(i)));
-    if (expected === "error") expect(() => playerSearchPage(rows, page, max)).toThrow();
-    else expect(playerSearchPage(rows, page, max)).toEqual(expected);
+    if (expected === "error") {expect(() => playerSearchPage(rows, page, max)).toThrow();}
+    else {expect(playerSearchPage(rows, page, max)).toEqual(expected);}
   }
 });
 
@@ -69,10 +69,10 @@ test("local and cross selection match 2385 frozen Java list/hash-map cases", () 
     const plan = query(maximum, remoteCount >= 0, page);
     const rows = local(count),
       remote = remotes(Math.max(0, remoteCount));
-    if (expected === "error") expect(() => selectPlayerSearch(plan, rows, remote)).toThrow();
+    if (expected === "error") {expect(() => selectPlayerSearch(plan, rows, remote)).toThrow();}
     else {
       const [budget, total, replyPage, ids] = expected;
-      if (budget !== null) expect(playerSearchRemoteBudget(plan, rows).limit).toBe(budget);
+      if (budget !== null) {expect(playerSearchRemoteBudget(plan, rows).limit).toBe(budget);}
       const result = selectPlayerSearch(plan, rows, remote);
       expect(result.entries.map((entry) => entry.data.uid)).toEqual(ids);
       expect(result.total).toBe(BigInt(total));
@@ -97,19 +97,19 @@ test("query catalog parsing retains Java decimal syntax and explicit capacity bo
   });
   expect(Object.isFrozen(plan)).toBe(true);
   for (const value of ["", " 100", "1.0", "100x", "2147483648", "-1", "32767"])
-    expect(() => playerSearchQuery("", 1, true, 1, rules(value))).toThrow();
+    {expect(() => playerSearchQuery("", 1, true, 1, rules(value))).toThrow();}
   for (const value of ["", "5 ", "2147483648", "-2147483649"])
-    expect(() => playerSearchQuery("", 1, true, 1, rules("100", value))).toThrow();
+    {expect(() => playerSearchQuery("", 1, true, 1, rules("100", value))).toThrow();}
   expect(playerSearchQuery("", 1, false, 1, rules("32766")).limit).toBe(32767);
   expect(() =>
     playerSearchQuery("", 1, false, 1, new Rules(new Map(), new Map(), new Map())),
   ).toThrow();
   for (const page of [NaN, Infinity, 1.5, 2147483648])
-    expect(() => playerSearchQuery("", page, true, 1, rules())).toThrow();
+    {expect(() => playerSearchQuery("", page, true, 1, rules())).toThrow();}
   for (const kingdom of [0, -1, 1.5, 2147483648])
-    expect(() => playerSearchQuery("", 1, true, kingdom, rules())).toThrow();
+    {expect(() => playerSearchQuery("", 1, true, kingdom, rules())).toThrow();}
   for (const key of ["\0", "\ud800", "x".repeat(32768)])
-    expect(() => playerSearchQuery(key, 1, true, 1, rules())).toThrow();
+    {expect(() => playerSearchQuery(key, 1, true, 1, rules())).toThrow();}
   expect(playerSearchQuery("😀", 1, true, 1, rules()).key).toBe("😀");
 });
 
@@ -181,7 +181,7 @@ test("remote selection handles missing cache entries, positive castle filtering 
     { key: "one", kingdomId: 0, data: { uid: "one", mainBuildingLevel: 10 } },
     { key: "one", kingdomId: 2, data: { uid: "one", mainBuildingLevel: "10" } },
   ] as PlayerSearchRemote[])
-    expect(() => selectPlayerSearch(query(), [], [entry])).toThrow();
+    {expect(() => selectPlayerSearch(query(), [], [entry])).toThrow();}
 });
 
 test("injected query/candidate bounds cannot bypass the pure policy", () => {
@@ -193,7 +193,7 @@ test("injected query/candidate bounds cannot bypass the pure policy", () => {
     { key: "\0" },
     { page: 1.5 },
   ])
-    expect(() => selectPlayerSearch({ ...query(), ...patch } as PlayerSearchQuery, [])).toThrow();
+    {expect(() => selectPlayerSearch({ ...query(), ...patch } as PlayerSearchQuery, [])).toThrow();}
   expect(() => selectPlayerSearch(query(10), local(12))).toThrow();
   expect(() => selectPlayerSearch(query(), [{ uid: "low", level: 4 }])).toThrow();
   expect(() => selectPlayerSearch(query(), [{ uid: "", level: 10 }])).toThrow();
@@ -333,7 +333,7 @@ test("remote shared-profile projection preserves sparse positive longs and versi
 
 test("wire projection rejects malformed numbers/strings and validates the search envelope", () => {
   for (const remote of [false, true])
-    for (const patch of [
+    {for (const patch of [
       { uid: "" },
       { uid: "\ud800" },
       { name: "\0" },
@@ -341,9 +341,9 @@ test("wire projection rejects malformed numbers/strings and validates the search
       { power: 1 },
       { power: 9223372036854775808n },
     ] as Row[])
-      expect(() =>
+      {expect(() =>
         playerSearchEntry({ kingdomId: 1, remote, data: { uid: "1", ...patch } }),
-      ).toThrow();
+      ).toThrow();}}
   const result: PlayerSearchResult = { key: "", page: 1, total: 0n, maximum: 100n, entries: [] };
   expect(playerSearch(result)).toEqual({
     key: sfs.string(""),
@@ -359,7 +359,7 @@ test("wire projection rejects malformed numbers/strings and validates the search
     { total: 9223372036854775808n },
     { maximum: -1n },
   ])
-    expect(() => playerSearch({ ...result, ...patch })).toThrow();
+    {expect(() => playerSearch({ ...result, ...patch })).toThrow();}
   const actual = playerSearch(selectPlayerSearch(query(100, false), local(1)));
   const first = fields((actual.list!.value as ReturnType<typeof sfs.object>[])[0]!);
   expect(first.uid).toEqual(sfs.string("L0"));

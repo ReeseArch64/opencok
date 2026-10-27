@@ -15,7 +15,7 @@ test("application inventory contains all 849 tables and 6,923 fields", async () 
   expect(catalog).toHaveLength(849);
   expect(catalog.reduce((n, entry) => n + entry.config.columns.length, 0)).toBe(6923);
   for (const namespaces of Object.values(databaseSchemas))
-    for (const namespace of namespaces) {
+    {for (const namespace of namespaces) {
       expect(
         (await readdir(new URL(`../src/schema/${namespace}/`, import.meta.url))).sort(),
       ).toEqual(
@@ -24,7 +24,7 @@ test("application inventory contains all 849 tables and 6,923 fields", async () 
           .map((entry) => `${entry.config.name}.ts`)
           .sort(),
       );
-    }
+    }}
   expect(catalog.filter((entry) => entry.spec.role === "global")).toHaveLength(151);
   expect(catalog.filter((entry) => entry.spec.role === "kingdom")).toHaveLength(698);
 });

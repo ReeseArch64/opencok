@@ -27,11 +27,11 @@ export function castleEventMailWindow(rule: Rule, opened: bigint, now: bigint): 
 export function castleEventShard(owner: string): number {
   const prefix = owner.slice(0, -6);
 
-  if (/^\d+$/.test(prefix)) return Number(BigInt(prefix) % 2n);
+  if (/^\d+$/.test(prefix)) {return Number(BigInt(prefix) % 2n);}
 
   let hash = 0;
 
-  for (let i = 0; i < owner.length; i++) hash = (Math.imul(hash, 31) + owner.charCodeAt(i)) | 0;
+  for (let i = 0; i < owner.length; i++) {hash = (Math.imul(hash, 31) + owner.charCodeAt(i)) | 0;}
 
   return hash & 1;
 }

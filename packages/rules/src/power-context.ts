@@ -13,7 +13,7 @@ export function serverFeature(rules: Rules, key: string, context: RuleContext): 
     !Number.isSafeInteger(context.now) ||
     !featureRealmEnabled(context.testServer ? rule.test : rule.online, context.kingdomId)
   )
-    return false;
+    {return false;}
 
   return ruleTimeWindow(rule, context);
 }

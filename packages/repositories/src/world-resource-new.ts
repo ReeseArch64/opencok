@@ -57,7 +57,7 @@ export function createWorldResourceNewExecutor(
         const now = at ?? BigInt(captureTime());
 
         if (now < 0n || now > BigInt(Number.MAX_SAFE_INTEGER))
-          throw new Error("Invalid shared resource clock");
+          {throw new Error("Invalid shared resource clock");}
 
         const identity = and(
           eq(trigger_var.type, worldResourceNewIdentity.type),
@@ -76,7 +76,7 @@ export function createWorldResourceNewExecutor(
             num(point, "x") !== (id - 1) % size ||
             num(point, "y") !== Math.floor((id - 1) / size)
           )
-            throw new Error("Invalid shared resource footprint");
+            {throw new Error("Invalid shared resource footprint");}
 
           return tx
             .select()
@@ -110,7 +110,7 @@ export function createWorldResourceNewExecutor(
               .limit(64)
               .for("update"),
           async occupied(point) {
-            if (num(point, "monsterCurrHP") !== 0 || owned(point)) return true;
+            if (num(point, "monsterCurrHP") !== 0 || owned(point)) {return true;}
 
             const rows = await footprint(point);
 
@@ -118,7 +118,7 @@ export function createWorldResourceNewExecutor(
               rows.length !== 4 ||
               rows.some((row) => row.id !== num(point, "id") && !matches(row, point))
             )
-              return true;
+              {return true;}
 
             const [party] = await tx
               .select({ id: world_march.uuid })
@@ -136,12 +136,12 @@ export function createWorldResourceNewExecutor(
           },
           async postpone(point, deadline) {
             if (deadline < 0n || deadline > BigInt(Number.MAX_SAFE_INTEGER))
-              throw new Error("Invalid shared resource deadline");
+              {throw new Error("Invalid shared resource deadline");}
 
             const rows = await footprint(point);
 
             for (const row of rows) {
-              if (row.id !== num(point, "id") && !matches(row, point)) continue;
+              if (row.id !== num(point, "id") && !matches(row, point)) {continue;}
 
               await tx
                 .update(worldpoint)
@@ -157,7 +157,7 @@ export function createWorldResourceNewExecutor(
               rows.length !== 4 ||
               rows.some((row) => row.id !== num(point, "id") && !matches(row, point))
             )
-              throw new Error("Changed shared resource footprint");
+              {throw new Error("Changed shared resource footprint");}
 
             for (const row of rows) {
               await tx
@@ -186,7 +186,7 @@ export function createWorldResourceNewExecutor(
               .for("update");
 
             for (const row of rows) {
-              if (owned(row)) continue;
+              if (owned(row)) {continue;}
 
               await tx
                 .update(worldpoint)
@@ -234,7 +234,7 @@ export function createWorldResourceNewExecutor(
           },
           async spawn(area, amount, slots, deadline) {
             if (deadline > BigInt(Number.MAX_SAFE_INTEGER))
-              throw new Error("Invalid shared resource deadline");
+              {throw new Error("Invalid shared resource deadline");}
 
             const free = (name: string) => {
               const p = sql.raw(name);
@@ -246,7 +246,7 @@ export function createWorldResourceNewExecutor(
             );
             const candidate = result.rows[0];
 
-            if (!candidate) return false;
+            if (!candidate) {return false;}
 
             const ids = worldResourceNewFootprint(candidate.id, size),
               rows = await tx
@@ -270,7 +270,7 @@ export function createWorldResourceNewExecutor(
                   owned(row),
               )
             )
-              return false;
+              {return false;}
 
             for (const row of rows) {
               await tx

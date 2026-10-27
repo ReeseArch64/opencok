@@ -15,15 +15,15 @@ export function reconnectSettlementTimes(
   const from = long(state.resource.lastUpdateTime),
     until = BigInt(context.now);
 
-  if (until <= from) return [from];
+  if (until <= from) {return [from];}
 
   const instants = new Set<bigint>([from, until]);
   const add = (time: bigint) => {
-    if (time > from && time < until) instants.add(time);
+    if (time > from && time < until) {instants.add(time);}
   };
 
   for (const research of state.allianceResearch ?? [])
-    add(long(research.startTime) + long(research.needTime));
+    {add(long(research.startTime) + long(research.needTime));}
 
   for (const talent of state.effects.dragonTalents ?? []) {
     add(long(talent.startTime));
@@ -40,11 +40,11 @@ export function reconnectSettlementTimes(
     add(long(status.endTime) + 1n);
   }
 
-  if (state.effects.vip) add(long(state.effects.vip.vipEndTime));
+  if (state.effects.vip) {add(long(state.effects.vip.vipEndTime));}
 
-  if (state.effects.luckyDay) add(long(state.effects.luckyDay.time));
+  if (state.effects.luckyDay) {add(long(state.effects.luckyDay.time));}
 
-  for (const record of world) if (record.endTime !== undefined) add(record.endTime);
+  for (const record of world) {if (record.endTime !== undefined) {add(record.endTime);}}
 
   for (const fight of state.effects.kingdomFights) {
     add(long(fight.openTime));
@@ -53,32 +53,32 @@ export function reconnectSettlementTimes(
   }
 
   const window = (start: string | undefined, end: string | undefined) => {
-    if (start !== undefined) add(ruleTime(start, context.utcOffsetMinutes));
+    if (start !== undefined) {add(ruleTime(start, context.utcOffsetMinutes));}
 
-    if (end !== undefined) add(ruleTime(end, context.utcOffsetMinutes) + 1n);
+    if (end !== undefined) {add(ruleTime(end, context.utcOffsetMinutes) + 1n);}
   };
 
-  for (const rule of rules.features.values()) window(rule.start, rule.end);
+  for (const rule of rules.features.values()) {window(rule.start, rule.end);}
 
   const hero = rules.power.activityEvents?.get("9005005");
 
-  if (hero) window(hero.k1, hero.k2);
+  if (hero) {window(hero.k1, hero.k2);}
 
   const lucky = rules.power.activityPanels?.get("57091");
 
-  if (lucky) window(lucky.start, lucky.end);
+  if (lucky) {window(lucky.start, lucky.end);}
 
   const merged = long(state.effects.powerServer?.lastMergeMillis);
 
   if (merged > 0n)
-    for (const rule of rules.power.mergeActivities?.values() ?? []) {
-      if (rule.activityId !== "57091") continue;
+    {for (const rule of rules.power.mergeActivities?.values() ?? []) {
+      if (rule.activityId !== "57091") {continue;}
 
       add(merged + long(rule.merge_start) * 60000n);
       add(merged + long(rule.merge_end) * 60000n);
-    }
+    }}
 
-  if (instants.size > 16384) throw new Error("Oversized reconnect effect timeline");
+  if (instants.size > 16384) {throw new Error("Oversized reconnect effect timeline");}
 
   return [...instants].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }

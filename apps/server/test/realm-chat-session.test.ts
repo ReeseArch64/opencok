@@ -338,7 +338,7 @@ test("HTTP issuer validates successful responses and sanitizes transport, authen
       headers: { "content-type": "text/html" },
     }),
   ])
-    await expect(issuer(async () => response)(request)).rejects.toThrow("Chat session unavailable");
+    {await expect(issuer(async () => response)(request)).rejects.toThrow("Chat session unavailable");}
   const unavailable: SessionStore = {
     create: async () => {
       throw new Error("private-store-failure");
@@ -381,7 +381,7 @@ test("form and streamed response bounds fail before oversized input is sent or r
     "Chat session unavailable",
   );
   for (const uid of ["", " ", "x".repeat(41), "\0", "\ud800"])
-    await expect(create({ ...request, uid })).rejects.toThrow("Chat session unavailable");
+    {await expect(create({ ...request, uid })).rejects.toThrow("Chat session unavailable");}
   expect(calls).toBe(0);
   let cancelled = 0;
   const stream = new ReadableStream<Uint8Array>({
@@ -400,14 +400,14 @@ test("form and streamed response bounds fail before oversized input is sent or r
   ).rejects.toThrow("Chat session unavailable");
   expect(cancelled).toBe(1);
   for (const length of ["16385", "-1", "invalid"])
-    await expect(
+    {await expect(
       issuer(
         async () =>
           new Response("{}", {
             headers: { "content-type": "application/json", "content-length": length },
           }),
       )(request),
-    ).rejects.toThrow("Chat session unavailable");
+    ).rejects.toThrow("Chat session unavailable");}
 });
 
 test("the deadline covers both a stalled fetch and a stalled response stream", async () => {
@@ -447,13 +447,13 @@ test("internal endpoint validation cannot send signing material through redirect
     "https://cok.chat/external/session",
     "https://other.cok.chat/external/session",
   ])
-    expect(() =>
+    {expect(() =>
       createRealmChatSessionIssuer({ url, signingSecret: secret, timeoutMs: 1000 }),
-    ).toThrow("Invalid chat session configuration");
+    ).toThrow("Invalid chat session configuration");}
   for (const timeoutMs of [0, 99, 30001, 100.5, NaN])
-    expect(() =>
+    {expect(() =>
       createRealmChatSessionIssuer({ url: endpoint, signingSecret: secret, timeoutMs }),
-    ).toThrow();
+    ).toThrow();}
   expect(() =>
     createRealmChatSessionIssuer({ url: endpoint, signingSecret: "", timeoutMs: 1000 }),
   ).toThrow();

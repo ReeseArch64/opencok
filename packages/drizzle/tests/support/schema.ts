@@ -40,7 +40,7 @@ export const catalog = Object.entries(schemas)
     Object.values(entries).map((table) => {
       const config = getTableConfig(table);
       const id = `${namespace}.${config.name}`;
-      if (!contract[id]) throw new Error(`Unexpected table ${id}`);
+      if (!contract[id]) {throw new Error(`Unexpected table ${id}`);}
       return { id, namespace, table, config, spec: contract[id]! };
     }),
   )

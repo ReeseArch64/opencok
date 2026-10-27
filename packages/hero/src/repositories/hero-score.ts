@@ -30,16 +30,16 @@ export function heroScoreReader(
         .limit(5);
 
       if (events.length > 4 || new Set(events.map((event) => event.type)).size !== events.length)
-        throw new Error("Ambiguous hero scoring events");
+        {throw new Error("Ambiguous hero scoring events");}
 
       if (!events.length)
-        return { events, scores: [], contributions: [], members: [], alliancePower: 0n };
+        {return { events, scores: [], contributions: [], members: [], alliancePower: 0n };}
 
       for (const event of events)
-        if (alliance && [2, 4].includes(event.type ?? 0))
-          await tx.execute(
+        {if (alliance && [2, 4].includes(event.type ?? 0))
+          {await tx.execute(
             sql`select pg_advisory_xact_lock(728221,hashtext(${event.uuid + ":" + alliance}))`,
-          );
+          );}}
 
       const ids = events.map((row) => row.uuid),
         scores = await tx
@@ -68,7 +68,7 @@ export function heroScoreReader(
         : [];
 
       if (contributions.length > 4096 || members.length > 1024)
-        throw new Error("Hero alliance scoring bound exceeded");
+        {throw new Error("Hero alliance scoring bound exceeded");}
 
       const [power] = alliance
         ? await tx
@@ -96,16 +96,16 @@ export async function writeHeroScore(
   write: HeroScoreWrite,
 ) {
   if (write.scores.length > 4 || write.contributions.length > 4)
-    throw new Error("Hero score write bound exceeded");
+    {throw new Error("Hero score write bound exceeded");}
 
   for (const row of write.scores) {
     if (row.uid !== owner && (!alliance || row.uid !== alliance))
-      throw new Error("Foreign hero score write");
+      {throw new Error("Foreign hero score write");}
 
     const score = num(row, "score");
 
     if (!Number.isInteger(score) || score < -2147483648 || score > 2147483647)
-      throw new Error("Invalid hero score");
+      {throw new Error("Invalid hero score");}
 
     const value = {
       uid: text(row, "uid"),
@@ -123,7 +123,7 @@ export async function writeHeroScore(
 
   for (const row of write.contributions) {
     if (row.uid !== owner || !alliance || row.allianceId !== alliance)
-      throw new Error("Foreign hero contribution write");
+      {throw new Error("Foreign hero contribution write");}
 
     const value = {
       uid: owner,
@@ -133,7 +133,7 @@ export async function writeHeroScore(
     };
 
     if (!Number.isInteger(value.score) || value.score < -2147483648 || value.score > 2147483647)
-      throw new Error("Invalid hero contribution");
+      {throw new Error("Invalid hero contribution");}
 
     await tx
       .insert(score_act_in)

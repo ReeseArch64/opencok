@@ -55,7 +55,7 @@ test("signed sessions bind opaque tokens to identities and gate real HTTP/WebSoc
         sessions.set(session.tokenHash.toString("hex"), session);
       },
       async getById(hash) {
-        if (!sessionStorageAvailable) throw new Error("synthetic session outage");
+        if (!sessionStorageAvailable) {throw new Error("synthetic session outage");}
         return sessions.get(hash.toString("hex")) ?? null;
       },
     },
@@ -74,7 +74,7 @@ test("signed sessions bind opaque tokens to identities and gate real HTTP/WebSoc
       return null;
     },
     async health() {
-      if (!available) throw new Error("offline");
+      if (!available) {throw new Error("offline");}
     },
     async deleteExpired() {
       return { messages: 0, sessions: 0 };
@@ -90,7 +90,7 @@ test("signed sessions bind opaque tokens to identities and gate real HTTP/WebSoc
     app.server.listen(0, "127.0.0.1");
     await once(app.server, "listening");
     const address = app.server.address();
-    if (!address || typeof address === "string") throw new Error("Missing port");
+    if (!address || typeof address === "string") {throw new Error("Missing port");}
     const base = `http://127.0.0.1:${address.port}`;
     expect((await fetch(`${base}/_health`)).status).toBe(503);
     await app.runMaintenance();

@@ -11,8 +11,8 @@ test("city quantities, prices and schedules reject negative values and arithmeti
   expect(cityInteger("2147483647")).toBe(2147483647);
   expect(cityAmount("9223372036854775807")).toBe(9223372036854775807n);
   for (const value of [-1, 2147483648, 0.5, NaN, Infinity, "", "1e4"])
-    expect(() => cityInteger(value)).toThrow();
-  for (const value of [-1n, 9223372036854775808n, "NaN"]) expect(() => cityAmount(value)).toThrow();
+    {expect(() => cityInteger(value)).toThrow();}
+  for (const value of [-1n, 9223372036854775808n, "NaN"]) {expect(() => cityAmount(value)).toThrow();}
   expect(cityDuration(60, 100)).toBe(30000n);
   expect(cityDuration(1, 0, 60)).toBe(3000n);
   expect(() => cityDuration(60, -100)).toThrow();
@@ -39,7 +39,7 @@ test("versioned activity data preserves paid costs and rejects unsupported refun
     { ...data, costs: { wood: "-1" } },
     { ...data, items: { "200065": 0 } },
   ])
-    expect(() => progressionActivityData(invalid)).toThrow();
+    {expect(() => progressionActivityData(invalid)).toThrow();}
 });
 
 test("cancellation refunds only half of actual paid balances after bound-resource consumption", async () => {

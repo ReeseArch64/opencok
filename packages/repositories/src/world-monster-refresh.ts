@@ -23,7 +23,7 @@ import { fenceRealmTransaction, type RealmAuthority } from "./realm-authority";
 const key = (family: WorldMonsterFamily) => `opencok.world.monsters.${family}.v1`;
 
 function parseClock(raw: string, authority: RealmAuthority, size: number): WorldMonsterSupplyClock {
-  if (Buffer.byteLength(raw) > 262144) throw new Error("Oversized monster clock");
+  if (Buffer.byteLength(raw) > 262144) {throw new Error("Oversized monster clock");}
 
   const value = JSON.parse(raw);
 
@@ -57,10 +57,10 @@ function parseClock(raw: string, authority: RealmAuthority, size: number): World
         typeof id === "number" && Number.isInteger(id) && id >= 1 && id <= size * size,
     )
   )
-    throw new Error("Invalid monster clock");
+    {throw new Error("Invalid monster clock");}
 
   for (const record of [value.quota, value.remaining])
-    if (
+    {if (
       !record ||
       typeof record !== "object" ||
       Array.isArray(record) ||
@@ -74,7 +74,7 @@ function parseClock(raw: string, authority: RealmAuthority, size: number): World
           count > 2147483647,
       )
     )
-      throw new Error("Invalid monster quota snapshot");
+      {throw new Error("Invalid monster quota snapshot");}}
 
   return {
     version: 1,
@@ -96,7 +96,7 @@ export function createWorldMonsterRefreshExecutor(
   captureTime = Date.now,
 ): WorldMonsterRefreshExecutor {
   if (!Number.isInteger(size) || size < 2 || size > 4000)
-    throw new Error("Invalid monster map size");
+    {throw new Error("Invalid monster map size");}
 
   return {
     async execute(at, work) {
@@ -106,7 +106,7 @@ export function createWorldMonsterRefreshExecutor(
         const now = at ?? BigInt(captureTime());
 
         if (now < 0n || now > BigInt(Number.MAX_SAFE_INTEGER))
-          throw new Error("Invalid monster clock");
+          {throw new Error("Invalid monster clock");}
 
         const [info] = await tx.select().from(server_info).where(eq(server_info.uid, "server")),
           [profile] = await tx.select({ uid: userprofile.uid }).from(userprofile).limit(1),
@@ -131,10 +131,10 @@ export function createWorldMonsterRefreshExecutor(
           opening = info?.activityTime ?? 0n;
         let monsterStart = info?.shuaguaiActStart ?? 0n;
 
-        if (!monsterStart) monsterStart = info?.daoliangStart ?? 0n;
+        if (!monsterStart) {monsterStart = info?.daoliangStart ?? 0n;}
 
-        if (!monsterStart) monsterStart = opening;
-        else if (opening > 0n && now >= opening && now < monsterStart) monsterStart = now;
+        if (!monsterStart) {monsterStart = opening;}
+        else if (opening > 0n && now >= opening && now < monsterStart) {monsterStart = now;}
 
         const changed = new Set<number>();
         const rows = async (ranges: readonly number[][]) => {
@@ -160,19 +160,19 @@ export function createWorldMonsterRefreshExecutor(
             .limit(4097)
             .for("update");
 
-          if (result.length > 4096) throw new Error("Monster area exceeds bound");
+          if (result.length > 4096) {throw new Error("Monster area exceeds bound");}
 
           return result.map((row) => ({ ...row.point, runtimeClaimed: row.claimed ? 1 : 0 }));
         };
         const readPoints = async (ids: readonly number[]) => {
-          if (ids.length > 4096) throw new Error("Monster point aggregate exceeds bound");
+          if (ids.length > 4096) {throw new Error("Monster point aggregate exceeds bound");}
 
-          if (!ids.length) return [];
+          if (!ids.length) {return [];}
 
           const output: Row[] = [];
 
           for (const id of new Set(ids)) {
-            if (!Number.isInteger(id) || id < 1 || id > size * size) continue;
+            if (!Number.isInteger(id) || id < 1 || id > size * size) {continue;}
 
             const x = (id - 1) % size,
               y = Math.floor((id - 1) / size);
@@ -182,7 +182,7 @@ export function createWorldMonsterRefreshExecutor(
           return output;
         };
         const write = async (points: readonly Row[]) => {
-          if (points.length > 256) throw new Error("Monster write aggregate exceeds bound");
+          if (points.length > 256) {throw new Error("Monster write aggregate exceeds bound");}
 
           for (const row of points) {
             if (
@@ -193,7 +193,7 @@ export function createWorldMonsterRefreshExecutor(
               text(row, "ownerId") ||
               text(row, "ownerMarchUUid")
             )
-              throw new Error("Claimed monster point");
+              {throw new Error("Claimed monster point");}
 
             await tx
               .update(worldpoint)
@@ -272,10 +272,10 @@ export function createWorldMonsterRefreshExecutor(
                   .limit(64);
             let selected = await select(saved?.area ?? 0);
 
-            if (!selected.length && saved?.area) selected = await select(0);
+            if (!selected.length && saved?.area) {selected = await select(0);}
 
             if (selected.length || saved?.area)
-              await saveClock("expiry", {
+              {await saveClock("expiry", {
                 version: 1,
                 stage: "idle",
                 area: selected.at(-1)?.id ?? 0,
@@ -285,14 +285,14 @@ export function createWorldMonsterRefreshExecutor(
                 remaining: {},
                 pool: [],
                 attempts: 0,
-              });
+              });}
 
             return readPoints(selected.map((row) => row.id));
           },
           write,
           async defer(points, deadline) {
             if (!points.length || points.length > 4 || deadline < 0n)
-              throw new Error("Invalid deferred monster footprint");
+              {throw new Error("Invalid deferred monster footprint");}
 
             for (const point of points) {
               await tx
@@ -304,7 +304,7 @@ export function createWorldMonsterRefreshExecutor(
           },
           async barbarian(points, actor) {
             if (actor ? points.length !== 4 : points.length < 1 || points.length > 4)
-              throw new Error("Invalid barbarian footprint");
+              {throw new Error("Invalid barbarian footprint");}
 
             if (actor) {
               const army = encodeJavaIntMap(actor.army),
@@ -320,12 +320,12 @@ export function createWorldMonsterRefreshExecutor(
                 })),
               );
             } else
-              await tx.delete(world_barbarion).where(
+              {await tx.delete(world_barbarion).where(
                 inArray(
                   world_barbarion.pointId,
                   points.map((row) => num(row, "id")),
                 ),
-              );
+              );}
 
             await write(points);
           },
@@ -363,7 +363,7 @@ export function createWorldMonsterRefreshExecutor(
           },
           async ticket(area, item, level, deadline, count) {
             if (!Number.isInteger(count) || count < 1 || count > 256)
-              throw new Error("Invalid barbarian tickets");
+              {throw new Error("Invalid barbarian tickets");}
 
             await tx.insert(world_barbarion_dead).values(
               Array.from({ length: count }, () => ({
@@ -377,25 +377,25 @@ export function createWorldMonsterRefreshExecutor(
           },
           async retry(ticket, deadline) {
             if (ticket.blackLand)
-              await tx
+              {await tx
                 .update(black_land_barbarion_dead)
                 .set({ deadFinishTime: deadline })
-                .where(eq(black_land_barbarion_dead.id, text(ticket, "id")));
+                .where(eq(black_land_barbarion_dead.id, text(ticket, "id")));}
             else
-              await tx
+              {await tx
                 .update(world_barbarion_dead)
                 .set({ deadFinishTime: deadline })
-                .where(eq(world_barbarion_dead.id, text(ticket, "id")));
+                .where(eq(world_barbarion_dead.id, text(ticket, "id")));}
           },
           async remove(ticket) {
             if (ticket.blackLand)
-              await tx
+              {await tx
                 .delete(black_land_barbarion_dead)
-                .where(eq(black_land_barbarion_dead.id, text(ticket, "id")));
+                .where(eq(black_land_barbarion_dead.id, text(ticket, "id")));}
             else
-              await tx
+              {await tx
                 .delete(world_barbarion_dead)
-                .where(eq(world_barbarion_dead.id, text(ticket, "id")));
+                .where(eq(world_barbarion_dead.id, text(ticket, "id")));}
           },
         });
 

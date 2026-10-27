@@ -35,7 +35,7 @@ test("general status boundaries are inclusive exact Long comparisons with nullab
     [status.endTime, 2.5],
     [status.endTime + 1n, 0],
   ] as const)
-    expect(newGeneralStatusEffect([status], rules, 78, now)).toBe(value);
+    {expect(newGeneralStatusEffect([status], rules, 78, now)).toBe(value);}
   expect(
     newGeneralStatusEffect([{ stateId: 1, startTime: null, endTime: null }], rules, 78, 0n),
   ).toBe(2.5);
@@ -87,7 +87,7 @@ test("status accumulation follows independent Java 8 map orders and Float parsin
     );
     const statuses = ids.map((stateId) => ({ stateId, startTime: 0n, endTime: 10n }));
     let expected = 0;
-    for (const id of vector.first) expected = Math.fround(expected + javaFloat(values.get(id)));
+    for (const id of vector.first) {expected = Math.fround(expected + javaFloat(values.get(id)));}
     expect(newGeneralStatusEffect(statuses, rules, 78, 5n)).toBe(expected);
     const raw = vectors.floats[index]![0] as string;
     rules.power.statuses!.set("1", { effect: `78;${raw}` });
@@ -109,7 +109,7 @@ test("refinement obeys owner version and inclusive server feature gates before r
     { now: context.now - 1 },
     { now: context.now + 3600001 },
   ])
-    expect(resolve(patch)).toBe(0);
+    {expect(resolve(patch)).toBe(0);}
   expect(resolve({ kingdomId: 2, testServer: true })).toBe(2);
   rules.features.clear();
   expect(newGeneralRefinementEffect("x".repeat(301), rules, context, 78)).toBe(0);

@@ -2,7 +2,7 @@ import { sfs, type Fields } from "@opencok/messages/sfs";
 import { long, text, type Row } from "@opencok/contracts/rows";
 
 export function troubleHistory(rows: readonly Row[]): Fields {
-  if (rows.length > 10) throw new Error("Trouble history exceeds bound");
+  if (rows.length > 10) {throw new Error("Trouble history exceeds bound");}
 
   return {
     array: sfs.array(

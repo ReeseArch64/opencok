@@ -3,12 +3,12 @@ import { campaignFailure } from "./local-campaign";
 import { long, num, type Row } from "@opencok/contracts/rows";
 
 export function packetStatus(packet: Row | undefined, claimed: boolean, now: bigint) {
-  if (claimed) return 0;
+  if (claimed) {return 0;}
 
-  if (!packet) return 3;
+  if (!packet) {return 3;}
 
   if (num(packet, "remain") <= 0 || num(packet, "curPeople") >= num(packet, "totalPeople"))
-    return 2;
+    {return 2;}
 
   return num(packet, "state") === 0 && now < long(packet, "endTime") ? 1 : 3;
 }
@@ -20,13 +20,13 @@ export function packetDistribution(packet: Row, parameters: string, random: () =
     received = cityInteger(num(packet, "curPeople"), 0, count - 1),
     remainingPeople = count - received;
 
-  if (remain < remainingPeople) campaignFailure();
+  if (remain < remainingPeople) {campaignFailure();}
 
-  if (remainingPeople === 1) return remain;
+  if (remainingPeople === 1) {return remain;}
 
-  if (num(packet, "type") === 1) return Math.min(remain, Math.ceil(Math.fround(total / count)));
+  if (num(packet, "type") === 1) {return Math.min(remain, Math.ceil(Math.fround(total / count)));}
 
-  if (num(packet, "type") !== 0) campaignFailure();
+  if (num(packet, "type") !== 0) {campaignFailure();}
 
   const values = parameters.split(";").map(Number);
 
@@ -35,13 +35,13 @@ export function packetDistribution(packet: Row, parameters: string, random: () =
     values.some((value) => !Number.isFinite(value)) ||
     values.slice(0, 4).some((value) => value <= 0)
   )
-    campaignFailure();
+    {campaignFailure();}
 
   const [k, maxK, minK, adsK, randK] = values as [number, number, number, number, number],
     first = random(),
     second = random();
 
-  if (first < 0 || first >= 1 || second < 0 || second >= 1) campaignFailure();
+  if (first < 0 || first >= 1 || second < 0 || second >= 1) {campaignFailure();}
 
   const f = Math.fround,
     maximum = f(f(maxK) * Math.trunc(total / count)),

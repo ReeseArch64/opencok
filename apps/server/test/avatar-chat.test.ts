@@ -69,11 +69,11 @@ function globalFixture() {
         working = structuredClone(state);
         return { rows: [] };
       }
-      if (text === "rollback") return { rows: [] };
+      if (text === "rollback") {return { rows: [] };}
       if (text === "commit") {
-        if (failure === "commit") throw new Error("synthetic-private-detail");
+        if (failure === "commit") {throw new Error("synthetic-private-detail");}
         state = working;
-        if (failure === "lost") throw new Error("synthetic-private-detail");
+        if (failure === "lost") {throw new Error("synthetic-private-detail");}
         return { rows: [] };
       }
       if (text.startsWith("select")) {
@@ -100,11 +100,11 @@ function globalFixture() {
         expect(params).toEqual(["1001", 1, 1]);
         return { rows: working.row ? [working.row] : [] };
       }
-      if (failure === "write") throw new Error("synthetic-private-detail");
+      if (failure === "write") {throw new Error("synthetic-private-detail");}
       expect(text.startsWith("insert") || text.startsWith("update")).toBe(true);
       expect(text).toContain('"opencok_chat"."chat_avatar_profile"');
-      if (text.startsWith("update")) expect(params.slice(8)).toEqual(["1001", 1]);
-      if (failure === "empty") return { rows: [] };
+      if (text.startsWith("update")) {expect(params.slice(8)).toEqual(["1001", 1]);}
+      if (failure === "empty") {return { rows: [] };}
       working.row = params.slice(0, 8);
       return { rows: [["1001"]] };
     },
@@ -137,11 +137,11 @@ function realmFixture() {
         working = structuredClone(state);
         return { rows: [] };
       }
-      if (text === "rollback") return { rows: [] };
+      if (text === "rollback") {return { rows: [] };}
       if (text === "commit") {
-        if (failure === "commit") throw new Error("Synthetic commit failure");
+        if (failure === "commit") {throw new Error("Synthetic commit failure");}
         state = working;
-        if (failure === "lost") throw new Error("Synthetic lost reply");
+        if (failure === "lost") {throw new Error("Synthetic lost reply");}
         return { rows: [] };
       }
       if (text.startsWith("select")) {
@@ -171,7 +171,7 @@ function realmFixture() {
       }
       expect(text).toStartWith('update "opencok_kingdom"."avatar_completion"');
       expect(params.slice(1)).toEqual(["1001", 5, working.entry!.pendingEffects]);
-      if (failure === "cas") return { rows: [] };
+      if (failure === "cas") {return { rows: [] };}
       working.entry!.pendingEffects = Number(params[0]);
       return { rows: [["1001"]] };
     },
@@ -291,7 +291,7 @@ test("chat orders avatar sequences despite clock rollback and accepts exact retr
     { picVer: 6 },
     { committedAt: 2n },
   ])
-    await expect(g.store.publish({ ...newer, ...patch })).rejects.toThrow("Conflicting");
+    {await expect(g.store.publish({ ...newer, ...patch })).rejects.toThrow("Conflicting");}
   expect(await g.store.find("1001", 1)).toEqual(newer);
   expect(g.queries.filter((q) => /^(insert|update)/.test(q.text))).toHaveLength(2);
 });
@@ -385,14 +385,14 @@ test("invalid metadata and pending bits reject before publication", async () => 
   expect(avatarChatUpdate(e, 1)).toEqual(update);
   expect(() => avatarProfileUpdate(e, 1)).toThrow();
   for (const bit of [0, 1, 2, 3, 8, -1])
-    expect(() => avatarChatUpdate({ ...e, pendingEffects: bit }, 1)).toThrow();
+    {expect(() => avatarChatUpdate({ ...e, pendingEffects: bit }, 1)).toThrow();}
   const g = globalFixture();
   for (const [owner, realm] of [
     ["other", 1],
     ["1001", 0],
     ["1001", 2147483648],
   ] as const)
-    await expect(g.store.find(owner, realm)).rejects.toThrow();
+    {await expect(g.store.find(owner, realm)).rejects.toThrow();}
   expect(g.queries).toHaveLength(0);
 });
 
@@ -406,7 +406,7 @@ test("signed internal bodies bind metadata, timestamp and domain without exposin
     verifyChatAvatarProfile(body, String(now), auth(body)["x-opencok-signature"], secret, now),
   ).toBe(true);
   for (const difference of [-30001, 30001])
-    expect(
+    {expect(
       verifyChatAvatarProfile(
         body,
         String(now + difference),
@@ -414,7 +414,7 @@ test("signed internal bodies bind metadata, timestamp and domain without exposin
         secret,
         now,
       ),
-    ).toBe(false);
+    ).toBe(false);}
   expect(
     verifyChatAvatarProfile(body, String(now), auth(body)["x-opencok-signature"], "other", now),
   ).toBe(false);
@@ -456,7 +456,7 @@ test("receiver bounds and validates malformed JSON, UTF-8, fields, bodies and de
     JSON.stringify({ ...object, sequence: "5" }),
     JSON.stringify({ ...object, userName: null }),
   ])
-    expect((await invoke(handler, malformed, auth(malformed))).status).toBe(400);
+    {expect((await invoke(handler, malformed, auth(malformed))).status).toBe(400);}
   expect((await invoke(handler, Buffer.from([255]), auth(""))).status).toBe(400);
   expect((await invoke(handler, "\ufeff" + body, auth(body))).status).toBe(403);
   expect((await invoke(handler, "\ufeff" + body, auth("\ufeff" + body))).status).toBe(400);
@@ -526,9 +526,9 @@ test("publisher validates configuration, aborts and malformed or oversized trans
     url + "/",
     "http://user:pass@chat.internal/_internal/avatar-profile",
   ])
-    expect(() =>
+    {expect(() =>
       createChatAvatarProfilePublisher({ url: target, signingSecret: secret, timeoutMs: 100 }),
-    ).toThrow();
+    ).toThrow();}
   let calls = 0;
   const send = createChatAvatarProfilePublisher({
     url,

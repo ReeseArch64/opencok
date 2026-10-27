@@ -24,11 +24,11 @@ function storage() {
     async query(query: { text: string }, params: unknown[] = []) {
       const text = query.text;
       queries.push({ text, params });
-      if (failOn && text.startsWith(failOn)) throw new Error("Synthetic mailbox SQL failure");
-      if (text.includes('from "opencok_kingdom"."userprofile"')) return { rows: profile };
-      if (text.includes('from "opencok_kingdom"."mail_chat_read_intent"')) return { rows: [["0"]] };
-      if (text.startsWith("select count(*) filter")) return { rows: counts };
-      if (text.includes("octet_length(")) return { rows: selected };
+      if (failOn && text.startsWith(failOn)) {throw new Error("Synthetic mailbox SQL failure");}
+      if (text.includes('from "opencok_kingdom"."userprofile"')) {return { rows: profile };}
+      if (text.includes('from "opencok_kingdom"."mail_chat_read_intent"')) {return { rows: [["0"]] };}
+      if (text.startsWith("select count(*) filter")) {return { rows: counts };}
+      if (text.includes("octet_length(")) {return { rows: selected };}
       return { rows: [] };
     }
   }
@@ -63,16 +63,16 @@ test("batch deletion parses Java category labels while retaining raw result keys
     ],
   });
   for (const raw of [undefined, null, "", "\u2000", ",,,"])
-    expect(mailCategoryDeleteQuery(raw, raw, now)).toEqual({ now, labels: [] });
+    {expect(mailCategoryDeleteQuery(raw, raw, now)).toEqual({ now, labels: [] });}
   for (const raw of [" 0", "1 ", "2147483648", "0x1", "1,bad", Array(1001).fill("0").join(",")])
-    expect(() => mailCategoryDeleteQuery(null, raw, now)).toThrow();
+    {expect(() => mailCategoryDeleteQuery(null, raw, now)).toThrow();}
   expect(mailCategoryDeleteQuery("ordinary-id,,other,ordinary-id", "0", now)).toEqual({
     now,
     labels: [{ raw: "0", category: 0 }],
     ids: ["ordinary-id", "other"],
   });
   for (const ids of ["x".repeat(41), "\0", "\ud800", Array(1001).fill("id").join(",")])
-    expect(() => mailCategoryDeleteQuery(ids, "0", now)).toThrow();
+    {expect(() => mailCategoryDeleteQuery(ids, "0", now)).toThrow();}
 });
 
 test("category deletes count pending rewards before mutation and preserve the distinct primary and extra predicates", async () => {
@@ -213,7 +213,7 @@ test("scalar conversation deletion ignores save flags and removes only the mappe
     expect(deletes[0]!.params).toEqual(["self", type, 0]);
     expect(deletes[0]!.text).not.toContain('"saveFlag"');
     expect(deletes).toHaveLength(group === undefined ? 1 : 2);
-    if (group !== undefined) expect(deletes[1]!.params).toEqual(["self", group, ""]);
+    if (group !== undefined) {expect(deletes[1]!.params).toEqual(["self", group, ""]);}
     expect(
       app.queries.some((query) =>
         /mail_contents|mail_update|mail_chat_read_intent/.test(query.text),

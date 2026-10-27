@@ -38,12 +38,12 @@ test("maintained GoldEggs catalogs preserve historical dates, gated periods and 
   });
   const cap = [...rules.advanced.goldenEggs!.values()].find((row) => row.max)!;
   for (const [id, row] of rules.advanced.goldenEggs!)
-    rules.advanced.goldenEggs!.set(id, { ...row, rate: id === cap.id ? "1" : "0" });
+    {rules.advanced.goldenEggs!.set(id, { ...row, rate: id === cap.id ? "1" : "0" });}
   const capped = goldEggsDisk(rules, () => 0);
   expect(capped.filter((row) => row.id === cap.id)).toHaveLength(Number(cap.max));
   expect(capped.slice(Number(cap.max)).every((row) => row.id === "9051002")).toBe(true);
   for (const random of [() => -1, (maximum: number) => maximum, () => 0.5, () => NaN])
-    expect(() => goldEggsDisk(rules, random)).toThrow();
+    {expect(() => goldEggsDisk(rules, random)).toThrow();}
   expect(() => goldEggsDraw([{ value: "x", weight: 2147483648 }], () => 0)).toThrow();
   expect(() => goldEggsCells("unknown;1;0", rules)).toThrow();
   expect(() => goldEggsCells("9051002;0;0", rules)).toThrow();
@@ -89,9 +89,9 @@ test("GoldEggs weighted multipliers perform independent reward loops while guara
   expect(() => pinGoldEggRewards(context, ["missing"], 1, () => 0)).toThrow();
   expect(goldEggsClaims("0;1", rules)).toEqual([0, 1]);
   for (const claim of ["0;0", "-1", "2", "0;", "0|1"])
-    expect(() => goldEggsClaims(claim, rules)).toThrow();
+    {expect(() => goldEggsClaims(claim, rules)).toThrow();}
   for (const prize of ["0;1", "1-5;2|5-9;3", "1-151;2", "1;not-a-reward"])
-    expect(() => goldEggsPrizes(prize)).toThrow();
+    {expect(() => goldEggsPrizes(prize)).toThrow();}
 });
 test("native local and global rankings preserve factual long scores, Source field spelling, own realm identity and stable ties", () => {
   const row = {
@@ -122,6 +122,6 @@ test("native local and global rankings preserve factual long scores, Source fiel
     first = fields((global.allRank!.value as Value[])[0]);
   expect(first.rank).toEqual(sfs.int(1));
   expect(first.sid).toEqual(sfs.string("1"));
-  for (const field of ["score", "val", "socre"]) expect(first[field]).toEqual(sfs.long(row.score));
+  for (const field of ["score", "val", "socre"]) {expect(first[field]).toEqual(sfs.long(row.score));}
   expect(() => goldEggsSort(Array(301).fill(row))).toThrow();
 });

@@ -19,14 +19,14 @@ function fixture(
       query: async (query: { text: string }, params: unknown[] = []) => {
         calls.push({ realm: id, text: query.text, params });
         const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
-        if (table && table === options.failure) throw new Error("Synthetic route failure");
+        if (table && table === options.failure) {throw new Error("Synthetic route failure");}
         if (table === "userprofile")
-          return {
+          {return {
             rows: options.missing
               ? []
               : [["2001", "Synthetic", 5, 12, null, 0, 0, 0, "", options.profileRealm ?? id]],
-          };
-        if (table === "user_achievement") return { rows: [["0"]] };
+          };}
+        if (table === "user_achievement") {return { rows: [["0"]] };}
         return { rows: [] };
       },
     };
@@ -35,12 +35,12 @@ function fixture(
   const global = {
     query: async (query: { text: string }, params: unknown[] = []) => {
       calls.push({ realm: 0, text: query.text, params });
-      if (options.failure === "directory") throw new Error("Synthetic directory failure");
+      if (options.failure === "directory") {throw new Error("Synthetic directory failure");}
       return { rows: options.server === null ? [] : [[options.server ?? "2"]] };
     },
   };
   const kingdoms = new Map([[1, realm(1)]]);
-  if (options.configured !== false) kingdoms.set(2, realm(2));
+  if (options.configured !== false) {kingdoms.set(2, realm(2));}
   const databases = {
     global: { db: drizzle(global as unknown as NodePgClient, { schema: globalSchema }) },
     kingdoms,
@@ -72,7 +72,7 @@ test("absent directory entries use the local realm while absent targets and nonn
   expect(missing.calls).toHaveLength(4);
   const invalid = fixture();
   for (const uid of ["", "2001@mod", "synthetic", " ", "1".repeat(41)])
-    expect(await loadPublicProfile(invalid.databases, 1, uid, "")).toBeUndefined();
+    {expect(await loadPublicProfile(invalid.databases, 1, uid, "")).toBeUndefined();}
   expect(invalid.calls).toEqual([]);
 });
 
@@ -104,7 +104,7 @@ test("public profile readiness checks additional tables without reading records"
   const client = {
     query: async (query: { text: string }, params: unknown[] = []) => {
       calls.push({ text: query.text, params });
-      if (fail) throw new Error("Synthetic readiness failure");
+      if (fail) {throw new Error("Synthetic readiness failure");}
       return { rows: [] };
     },
   };

@@ -20,7 +20,7 @@ export function createChatNoticePublisher(
     const kingdom = databases.kingdoms.get(realm);
     const state = await repository.getPlayerStateById(owner);
 
-    if (!kingdom || state?.serverId !== realm) throw new Error("Notice owner unavailable");
+    if (!kingdom || state?.serverId !== realm) {throw new Error("Notice owner unavailable");}
 
     const [event] = await kingdom.db
       .select()
@@ -48,15 +48,15 @@ export function createChatNoticePublisher(
       .limit(1);
 
     if (!event || !receipt || !["chat.notice", "chat.original.notice"].includes(receipt.command))
-      throw new Error("Notice receipt missing");
+      {throw new Error("Notice receipt missing");}
 
-    if (event.payload.length === 0) throw new Error("Notice payload unavailable");
+    if (event.payload.length === 0) {throw new Error("Notice payload unavailable");}
 
     const data = decode(event.payload);
     const createdAt = Number(receipt.createdAt);
 
     if (!Number.isSafeInteger(createdAt) || createdAt > now().getTime() + 60_000)
-      throw new Error("Invalid notice receipt time");
+      {throw new Error("Invalid notice receipt time");}
 
     const key = `notice-${realm}-${operationId}`;
     const messageKey = key.length <= 64 ? key : createHash("sha256").update(key).digest("hex");
@@ -78,7 +78,7 @@ export function createChatNoticePublisher(
     }
 
     if (repository.access && !(await repository.access.canSend(owner, true)))
-      throw new Error("Notice sender muted");
+      {throw new Error("Notice sender muted");}
 
     const saved = await repository.messages.create({
       roomId: str(data, "roomId"),

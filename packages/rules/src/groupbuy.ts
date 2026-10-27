@@ -14,7 +14,7 @@ export function groupBuyPeriod(rules: Rules): GroupBuyPeriod | undefined {
     startAt = eventTimestamp(panel?.start),
     end = eventTimestamp(panel?.end);
 
-  if (!config || startAt === undefined || end === undefined || end <= startAt) return;
+  if (!config || startAt === undefined || end === undefined || end <= startAt) {return;}
 
   const start = (startAt / 86400000n) * 86400000n,
     count = cityInteger(config.k6, 1, 31),
@@ -26,9 +26,9 @@ export function groupBuyPeriod(rules: Rules): GroupBuyPeriod | undefined {
     const sTime = Number(start) + i * duration,
       eTime = sTime + duration;
 
-    if (BigInt(eTime) > end) break;
+    if (BigInt(eTime) > end) {break;}
 
-    if (!Number.isSafeInteger(eTime)) throw new Error("Invalid group-buy calendar");
+    if (!Number.isSafeInteger(eTime)) {throw new Error("Invalid group-buy calendar");}
 
     rounds.push({ sTime, eTime, cTime: eTime - wait, flag: 0, tiers: groupBuyTiers(rules, i + 1) });
   }
@@ -39,7 +39,7 @@ export function groupBuyPeriod(rules: Rules): GroupBuyPeriod | undefined {
 export function groupBuyTiers(rules: Rules, round: number): GroupBuyTier[] {
   const raw = rules.items.get("alliance_groupbuys_reward")?.[`k${cityInteger(round, 1, 31)}`];
 
-  if (!raw) throw new Error("Missing group-buy rewards");
+  if (!raw) {throw new Error("Missing group-buy rewards");}
 
   const tiers = raw.split("|").map((value) => {
     const [level, reward, mail, ...extra] = value.split(";");
@@ -51,7 +51,7 @@ export function groupBuyTiers(rules: Rules, round: number): GroupBuyTier[] {
       !rules.reconnect.rewards?.has(reward) ||
       !rules.mail.has(mail)
     )
-      throw new Error("Invalid group-buy reward");
+      {throw new Error("Invalid group-buy reward");}
 
     return { level: cityInteger(level, 1), reward, mail };
   });
@@ -61,7 +61,7 @@ export function groupBuyTiers(rules: Rules, round: number): GroupBuyTier[] {
     tiers.length > 128 ||
     new Set(tiers.map((t) => t.level)).size !== tiers.length
   )
-    throw new Error("Invalid group-buy thresholds");
+    {throw new Error("Invalid group-buy thresholds");}
 
   return tiers;
 }
@@ -69,33 +69,33 @@ export function groupBuyTiers(rules: Rules, round: number): GroupBuyTier[] {
 export function groupBuyProducts(rules: Rules) {
   const raw = rules.items.get("alliance_groupbuys")?.k5;
 
-  if (!raw) throw new Error("Missing group-buy products");
+  if (!raw) {throw new Error("Missing group-buy products");}
 
   const products = raw.split("|").map((value) => {
     const [id, point, ...extra] = value.split(";"),
       rule = rules.advanced.castleExchanges?.get(id!);
 
-    if (extra.length || !id || !rule) throw new Error("Invalid group-buy product");
+    if (extra.length || !id || !rule) {throw new Error("Invalid group-buy product");}
 
     return { id, point: cityInteger(point, 1, 10), rule };
   });
 
   if (products.length > 64 || new Set(products.map((p) => p.id)).size !== products.length)
-    throw new Error("Invalid group-buy products");
+    {throw new Error("Invalid group-buy products");}
 
   return products;
 }
 
 export function groupBuyRounds(raw: unknown) {
-  if (typeof raw !== "string" || raw.length > 32768) throw new Error("Invalid group-buy schedule");
+  if (typeof raw !== "string" || raw.length > 32768) {throw new Error("Invalid group-buy schedule");}
 
   const parsed: unknown = JSON.parse(raw);
 
   if (!Array.isArray(parsed) || !parsed.length || parsed.length > 31)
-    throw new Error("Invalid group-buy rounds");
+    {throw new Error("Invalid group-buy rounds");}
 
   return parsed.map((value): GroupBuyRound => {
-    if (!value || typeof value !== "object") throw new Error("Invalid group-buy round");
+    if (!value || typeof value !== "object") {throw new Error("Invalid group-buy round");}
 
     const row = value as Record<string, unknown>,
       sTime = Number(cityAmount(row.sTime)),
@@ -104,19 +104,19 @@ export function groupBuyRounds(raw: unknown) {
       flag = cityInteger(row.flag, 0, 1);
 
     if (![sTime, eTime, cTime].every(Number.isSafeInteger))
-      throw new Error("Invalid group-buy clock");
+      {throw new Error("Invalid group-buy clock");}
 
     if (sTime >= eTime || cTime < sTime || cTime > eTime)
-      throw new Error("Invalid group-buy boundaries");
+      {throw new Error("Invalid group-buy boundaries");}
 
     let tiers: GroupBuyTier[] | undefined;
 
     if (row.tiers !== undefined) {
       if (!Array.isArray(row.tiers) || !row.tiers.length || row.tiers.length > 128)
-        throw new Error("Invalid group-buy stored tiers");
+        {throw new Error("Invalid group-buy stored tiers");}
 
       tiers = row.tiers.map((value) => {
-        if (!value || typeof value !== "object") throw new Error("Invalid group-buy stored tier");
+        if (!value || typeof value !== "object") {throw new Error("Invalid group-buy stored tier");}
 
         const tier = value as Record<string, unknown>;
 
@@ -126,18 +126,18 @@ export function groupBuyRounds(raw: unknown) {
           !/^\d{1,10}$/.test(tier.reward) ||
           !/^\d{1,10}$/.test(tier.mail)
         )
-          throw new Error("Invalid group-buy stored reward");
+          {throw new Error("Invalid group-buy stored reward");}
 
         return { level: cityInteger(tier.level, 1), reward: tier.reward, mail: tier.mail };
       });
 
       if (new Set(tiers.map((tier) => tier.level)).size !== tiers.length)
-        throw new Error("Duplicate group-buy stored tier");
+        {throw new Error("Duplicate group-buy stored tier");}
     }
 
     const mail = row.mail === undefined ? undefined : String(row.mail);
 
-    if (mail !== undefined && !/^\d{1,10}$/.test(mail)) throw new Error("Invalid group-buy mail");
+    if (mail !== undefined && !/^\d{1,10}$/.test(mail)) {throw new Error("Invalid group-buy mail");}
 
     return {
       sTime,

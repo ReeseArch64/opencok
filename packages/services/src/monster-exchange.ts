@@ -55,12 +55,12 @@ export class MonsterExchangeDomain extends CityCommandDomain {
       const configs: MonsterExchangeConfig[] = [];
 
       for (const row of context.rules.power.activityPanels?.values() ?? []) {
-        if (row.exchange !== "1") continue;
+        if (row.exchange !== "1") {continue;}
 
         try {
           configs.push(monsterExchangeConfig(row));
         } catch (error) {
-          if (!(error instanceof GameError)) throw error;
+          if (!(error instanceof GameError)) {throw error;}
         }
       }
 
@@ -76,14 +76,14 @@ export class MonsterExchangeDomain extends CityCommandDomain {
           (row.start !== undefined && (start === undefined || context.now < start)) ||
           (row.end !== undefined && (end === undefined || context.now >= end))
         )
-          return;
+          {return;}
 
         return configs.find((config) => config.id === id);
       };
       const legacy = (config: MonsterExchangeConfig) => {
         const old = rows.get(6);
 
-        if (!old || text(old, "reserve_2")) return;
+        if (!old || text(old, "reserve_2")) {return;}
 
         try {
           const offers = readMonsterExchangeOffers(text(old, "rewards"));
@@ -93,7 +93,7 @@ export class MonsterExchangeDomain extends CityCommandDomain {
             monsterExchangeLegacyMatches(offers, candidate),
           );
 
-          if (candidates.length !== 1 || candidates[0]!.id !== config.id) return;
+          if (candidates.length !== 1 || candidates[0]!.id !== config.id) {return;}
 
           write({ ...old, reserve_2: `monster-adopted:v1:${config.id}` });
 
@@ -104,14 +104,14 @@ export class MonsterExchangeDomain extends CityCommandDomain {
             reserve_2: monsterExchangeHeader(config),
           };
         } catch (error) {
-          if (!(error instanceof GameError)) throw error;
+          if (!(error instanceof GameError)) {throw error;}
         }
       };
       const fresh = (config: MonsterExchangeConfig) => {
         const offers = selectMonsterExchangeOffers(config, random);
 
         if (offers.some((offer) => !context.rules.reconnect.rewards?.has(offer.reward)))
-          campaignFailure();
+          {campaignFailure();}
 
         return monsterExchangeOffersText(offers);
       };
@@ -123,11 +123,11 @@ export class MonsterExchangeDomain extends CityCommandDomain {
           (num(saved, "reserve_1") !== 6 ||
             !text(saved, "reserve_2").startsWith("monster-exchange:v1:"))
         )
-          campaignFailure();
+          {campaignFailure();}
 
-        if (!saved) saved = legacy(config);
+        if (!saved) {saved = legacy(config);}
 
-        if (!saved && !initialize) campaignFailure();
+        if (!saved && !initialize) {campaignFailure();}
 
         const row: Row = saved
           ? { ...saved }
@@ -144,13 +144,13 @@ export class MonsterExchangeDomain extends CityCommandDomain {
               receiveLevels: "",
             };
 
-        if (!rows.has(Number(config.id))) write(row);
+        if (!rows.has(Number(config.id))) {write(row);}
 
         let header = readMonsterExchangeHeader(text(row, "reserve_2")),
           offers = readMonsterExchangeOffers(text(row, "rewards"));
         const budgetAt = long(row, "flushDate") || long(row, "updateTime");
 
-        if (budgetAt / 86400000n !== context.now / 86400000n) row.flushTimes = 0;
+        if (budgetAt / 86400000n !== context.now / 86400000n) {row.flushTimes = 0;}
 
         if (long(row, "flushDate") / 86400000n !== context.now / 86400000n) {
           row.flushDate = context.now;
@@ -164,7 +164,7 @@ export class MonsterExchangeDomain extends CityCommandDomain {
             context.now,
           );
 
-          if (config.interval !== header.interval) row.updateTime = context.now;
+          if (config.interval !== header.interval) {row.updateTime = context.now;}
 
           row.rewards = fresh(config);
           row.level = 0;
@@ -175,7 +175,7 @@ export class MonsterExchangeDomain extends CityCommandDomain {
           write(row);
         }
 
-        if (header.token !== config.token && command !== "act.ex.flush") campaignFailure();
+        if (header.token !== config.token && command !== "act.ex.flush") {campaignFailure();}
 
         monsterExchangeClaims(text(row, "receiveLevels"), offers.length);
 
@@ -186,7 +186,7 @@ export class MonsterExchangeDomain extends CityCommandDomain {
           offers = readMonsterExchangeOffers(text(row, "rewards"));
 
         if (offers.some((offer) => !context.rules.reconnect.rewards?.has(offer.reward)))
-          campaignFailure();
+          {campaignFailure();}
 
         return monsterExchangeView(
           num(row, "level"),
@@ -217,7 +217,7 @@ export class MonsterExchangeDomain extends CityCommandDomain {
       if (command === "act.exchange") {
         const ids = str(params, "ids").split("|").filter(Boolean);
 
-        if (ids.length > 64) campaignFailure();
+        if (ids.length > 64) {campaignFailure();}
 
         return {
           response: encode({
@@ -225,7 +225,7 @@ export class MonsterExchangeDomain extends CityCommandDomain {
               [...new Set(ids)].flatMap((id) => {
                 const config = active(id);
 
-                if (!config) return [];
+                if (!config) {return [];}
 
                 const { row } = load(config, true, true);
 
@@ -240,7 +240,7 @@ export class MonsterExchangeDomain extends CityCommandDomain {
       const id = str(params, command === "act.ex.flush" ? "actId" : "id"),
         config = active(id);
 
-      if (!config) campaignFailure();
+      if (!config) {campaignFailure();}
 
       const { row, offers, header } = load(config, false, false);
 
@@ -249,7 +249,7 @@ export class MonsterExchangeDomain extends CityCommandDomain {
           nextHeader = header;
 
         if (context.now < long(row, "updateTime") + header.interval - 10000n) {
-          if (header.token !== config.token) campaignFailure();
+          if (header.token !== config.token) {campaignFailure();}
 
           if (num(row, "flushTimes") >= config.free) {
             const cost =
@@ -259,7 +259,7 @@ export class MonsterExchangeDomain extends CityCommandDomain {
             context.economy.item(header.token, -cost);
             const state = context.economy.itemState?.(header.token);
 
-            if (!state) campaignFailure();
+            if (!state) {campaignFailure();}
 
             item = inventoryItem({ ...state }, context.rules);
           }
@@ -293,13 +293,13 @@ export class MonsterExchangeDomain extends CityCommandDomain {
         };
       }
 
-      if (context.now >= long(row, "updateTime") + header.interval) campaignFailure();
+      if (context.now >= long(row, "updateTime") + header.interval) {campaignFailure();}
 
       const level = cityInteger(int(params, "type"), 1, offers.length),
         claims = monsterExchangeClaims(text(row, "receiveLevels"), offers.length),
         selected = offers[level - 1]!;
 
-      if (claims.includes(level)) campaignFailure();
+      if (claims.includes(level)) {campaignFailure();}
 
       context.economy.item(header.token, -selected.count);
       const reward = grantNativeProgressionReward(

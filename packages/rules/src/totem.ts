@@ -17,12 +17,12 @@ export function totemFootprint(point: number, width: number, size: number): numb
     width < 1 ||
     width > 4
   )
-    totemFailure();
+    {totemFailure();}
 
   const x = (point - 1) % size,
     y = Math.floor((point - 1) / size);
 
-  if (x + width > size || y + width > size) totemFailure();
+  if (x + width > size || y + width > size) {totemFailure();}
 
   return Array.from(
     { length: width * width },
@@ -45,13 +45,13 @@ export function totemEndTime(
 ) {
   let minimum = now + BigInt(cityInteger(rule.take_effect_time, 1)) * 60000n;
 
-  if (!points.length) return minimum;
+  if (!points.length) {return minimum;}
 
   const floor = now + BigInt(cityInteger(rule.minimum_time)) * 60000n;
 
-  for (const point of points) if (point.dueAt < minimum) minimum = point.dueAt;
+  for (const point of points) {if (point.dueAt < minimum) {minimum = point.dueAt;}}
 
-  if (minimum < floor) return minimum;
+  if (minimum < floor) {return minimum;}
 
   const range = cityInteger(rule.range_of_action, 1);
   let remaining = [...points],
@@ -61,7 +61,7 @@ export function totemEndTime(
     const first = remaining.shift()!;
     const matches = remaining.filter((p) => totemNeighbours(first.point, p.point, range, size));
 
-    if (first.dueAt === minimum) smallest = Math.min(smallest, matches.length + 1);
+    if (first.dueAt === minimum) {smallest = Math.min(smallest, matches.length + 1);}
 
     remaining = remaining.filter((p) => !matches.includes(p));
   }
@@ -75,7 +75,7 @@ export function totemEndTime(
 export function pinTotemConfiguration(rules: Rules, rule: Rule): Buffer {
   const mail = rules.mail.get(rule.take_effect_mail ?? "");
 
-  if (!mail?.message) totemFailure();
+  if (!mail?.message) {totemFailure();}
 
   const configuration: PinnedTotemConfiguration = {
     width: cityInteger(rule.cover_area, 1),
@@ -86,13 +86,13 @@ export function pinTotemConfiguration(rules: Rules, rule: Rule): Buffer {
   };
 
   for (const state of [configuration.friendlyStateId, configuration.enemyStateId])
-    if (state && !rules.power.statuses?.has(String(state))) totemFailure();
+    {if (state && !rules.power.statuses?.has(String(state))) {totemFailure();}}
 
   return Buffer.from(JSON.stringify(configuration));
 }
 
 export function restoreTotemConfiguration(payload: Buffer): PinnedTotemConfiguration {
-  if (payload.length > 4096) totemFailure();
+  if (payload.length > 4096) {totemFailure();}
 
   const data = JSON.parse(payload.toString("utf8")) as PinnedTotemConfiguration;
 
@@ -113,7 +113,7 @@ export function restoreTotemConfiguration(payload: Buffer): PinnedTotemConfigura
       (v) => typeof v !== "string" || !v.isWellFormed() || v.includes("\0"),
     )
   )
-    totemFailure();
+    {totemFailure();}
 
   return data;
 }

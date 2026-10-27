@@ -148,7 +148,7 @@ export function definitionIndex<T extends { readonly id?: CatalogScalar }>(
   const result = new Map<string, T>();
 
   for (const record of table.records)
-    if (record.id !== undefined && String(record.id).trim()) result.set(String(record.id), record);
+    {if (record.id !== undefined && String(record.id).trim()) {result.set(String(record.id), record);}}
 
   return result;
 }
@@ -174,11 +174,11 @@ export function mapTile(map: TileMapDefinition, layer: number, x: number, y: num
     x >= selected.width ||
     y >= selected.height
   )
-    throw new Error("Tile coordinate outside layer");
+    {throw new Error("Tile coordinate outside layer");}
 
   const value = selected.tiles[y * selected.width + x];
 
-  if (value === undefined) throw new Error("Missing map tile");
+  if (value === undefined) {throw new Error("Missing map tile");}
 
   return value;
 }

@@ -15,7 +15,7 @@ export async function reportAvatar(
 ): Promise<Fields> {
   const profile = await db.getProfileById(owner);
 
-  if (!profile) throw new GameError(errors.missing);
+  if (!profile) {throw new GameError(errors.missing);}
 
   if (
     profile.uid !== owner ||
@@ -23,7 +23,7 @@ export async function reportAvatar(
     num(profile, "banFlag") !== 0 ||
     long(profile, "banTime") > BigInt(now)
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   const target = str(params, "uid");
 
@@ -33,7 +33,7 @@ export async function reportAvatar(
     target.length > 255 ||
     target.includes("\0")
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   try {
     mysqlUtf8UnicodeKey(target);
@@ -41,7 +41,7 @@ export async function reportAvatar(
     throw new GameError(errors.invalid);
   }
 
-  if (!db.updateAvatarReport) throw new GameError(errors.unsupported);
+  if (!db.updateAvatarReport) {throw new GameError(errors.unsupported);}
 
   await db.updateAvatarReport(owner, target, now);
 

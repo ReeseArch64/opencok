@@ -2,9 +2,9 @@ import { Type, type Fields, type Value } from "@opencok/messages/sfs";
 import { wireFields, wireValue } from "@opencok/validations/sfs";
 
 function dataValue(value: Value): unknown {
-  if (value.type === Type.Object) return dataFields(value.value as Fields);
+  if (value.type === Type.Object) {return dataFields(value.value as Fields);}
 
-  if (value.type === Type.Array) return (value.value as Value[]).map(dataValue);
+  if (value.type === Type.Array) {return (value.value as Value[]).map(dataValue);}
 
   return value.value;
 }

@@ -32,18 +32,18 @@ function fixture() {
         query: async (query: { text: string }, params: unknown[] = []) => {
           const text = query.text;
           queries.push({ client, text, params });
-          if (text.startsWith("begin")) return { rows: [] };
+          if (text.startsWith("begin")) {return { rows: [] };}
           if (text === "rollback") {
             pending = undefined;
             release();
             return { rows: [] };
           }
           if (text === "commit") {
-            if (failure === "commit") throw new Error("Synthetic commit failure");
+            if (failure === "commit") {throw new Error("Synthetic commit failure");}
             saved = pending!;
             pending = undefined;
             release();
-            if (failure === "lost") throw new Error("Synthetic lost acknowledgment");
+            if (failure === "lost") {throw new Error("Synthetic lost acknowledgment");}
             return { rows: [] };
           }
           if (text.includes('from "opencok_kingdom"."userprofile"')) {
@@ -56,19 +56,19 @@ function fixture() {
             });
             await previous;
             pending = structuredClone(saved);
-            if (failure === "profile") throw new Error("Synthetic profile failure");
+            if (failure === "profile") {throw new Error("Synthetic profile failure");}
             return {
               rows: profile
                 ? [[profile.uid, profile.serverId, profile.banFlag, profile.banTime]]
                 : [],
             };
           }
-          if (!pending) throw new Error("SQL before owner lock");
+          if (!pending) {throw new Error("SQL before owner lock");}
           if (text.startsWith("select") && text.includes('from "opencok_kingdom"."parse_info"')) {
             expect(text).toContain(
               'where ("opencok_kingdom"."parse_info"."uid" = $1 and "opencok_kingdom"."parse_info"."type" = $2)',
             );
-            if (failure === "select") throw new Error("Synthetic select failure");
+            if (failure === "select") {throw new Error("Synthetic select failure");}
             return {
               rows: pending
                 .filter((row) => row.uid === params[0] && row.type === params[1])
@@ -77,10 +77,10 @@ function fixture() {
           }
           if (text.startsWith('insert into "opencok_kingdom"."parse_info"')) {
             expect(text).not.toContain("on conflict");
-            if (failure === "insert") throw new Error("Synthetic insert failure");
+            if (failure === "insert") {throw new Error("Synthetic insert failure");}
             const [uid, type, status, audio] = params as [string, number, number, number];
             if (pending.some((row) => row.uid === uid && row.type === type))
-              throw new Error("Duplicate preference");
+              {throw new Error("Duplicate preference");}
             pending.push({ uid, type, status, audio });
             return { rows: [], rowCount: 1 };
           }
@@ -88,7 +88,7 @@ function fixture() {
             expect(text).toContain(
               'set "status" = $1, "audio" = $2 where ("opencok_kingdom"."parse_info"."uid" = $3 and "opencok_kingdom"."parse_info"."type" = $4)',
             );
-            if (failure === "update") throw new Error("Synthetic update failure");
+            if (failure === "update") {throw new Error("Synthetic update failure");}
             const [status, audio, uid, type] = params;
             const selected = pending.filter((row) => row.uid === uid && row.type === type);
             for (const row of selected) {
@@ -121,7 +121,7 @@ test("preference writes insert or replace both values for only the locked owner 
   await setPushPreference(instance.db, "self", 2, { type: 15, status: -7, audio: 0 }, now);
   expect(instance.rows()).toEqual([...initial, { uid: "self", type: 15, status: -7, audio: 0 }]);
   for (let index = 0; index < 2; index++)
-    await setPushPreference(instance.db, "self", 2, { type: 15, status: 1, audio: -4 }, now);
+    {await setPushPreference(instance.db, "self", 2, { type: 15, status: 1, audio: -4 }, now);}
   expect(instance.rows()).toEqual([...initial, { uid: "self", type: 15, status: 1, audio: -4 }]);
   expect(instance.queries.filter(({ text }) => text.startsWith("insert"))).toHaveLength(1);
   expect(instance.queries.filter(({ text }) => text.startsWith("update"))).toHaveLength(2);
@@ -177,16 +177,16 @@ test("invalid preference inputs fail before SQL", async () => {
   const instance = fixture();
   const valid = { type: 15, status: 1, audio: 0 };
   for (const key of ["type", "status", "audio"])
-    for (const value of [NaN, Infinity, 0.5, -2147483649, 2147483648])
-      await expect(
+    {for (const value of [NaN, Infinity, 0.5, -2147483649, 2147483648])
+      {await expect(
         setPushPreference(instance.db, "self", 2, { ...valid, [key]: value }, now),
-      ).rejects.toThrow();
+      ).rejects.toThrow();}}
   for (const uid of ["", "x".repeat(41), "a\0b", "\ud800"])
-    await expect(setPushPreference(instance.db, uid, 2, valid, now)).rejects.toThrow();
+    {await expect(setPushPreference(instance.db, uid, 2, valid, now)).rejects.toThrow();}
   for (const time of [-1, 0.5, NaN, Infinity])
-    await expect(setPushPreference(instance.db, "self", 2, valid, time)).rejects.toThrow();
+    {await expect(setPushPreference(instance.db, "self", 2, valid, time)).rejects.toThrow();}
   for (const realm of [0, -1, 0.5, NaN])
-    await expect(setPushPreference(instance.db, "self", realm, valid, now)).rejects.toThrow();
+    {await expect(setPushPreference(instance.db, "self", realm, valid, now)).rejects.toThrow();}
   expect(instance.queries).toEqual([]);
 });
 

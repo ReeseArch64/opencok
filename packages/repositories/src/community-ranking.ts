@@ -33,7 +33,7 @@ export async function readDonationRanking(
   now: number,
 ): Promise<CommunityRankingSnapshot> {
   if (!uid || uid.length > 40 || !Number.isSafeInteger(now))
-    throw new Error("Invalid donation ranking owner");
+    {throw new Error("Invalid donation ranking owner");}
 
   return db.transaction(
     async (tx) => {
@@ -42,9 +42,9 @@ export async function readDonationRanking(
       )[0];
 
       if (!profile || profile.banFlag || (profile.banTime ?? 0n) > BigInt(now))
-        return { profile, rows: [] };
+        {return { profile, rows: [] };}
 
-      if (!profile.allianceId?.trim()) throw new Error("Missing alliance membership");
+      if (!profile.allianceId?.trim()) {throw new Error("Missing alliance membership");}
 
       const found = await tx
         .select({ uid: alliance.uid })
@@ -52,7 +52,7 @@ export async function readDonationRanking(
         .where(eq(alliance.uid, profile.allianceId))
         .limit(1);
 
-      if (!found.length) throw new Error("Missing alliance");
+      if (!found.length) {throw new Error("Missing alliance");}
 
       const rows = await tx
         .select({
@@ -86,7 +86,7 @@ export async function readDonationRanking(
         .limit(32768);
 
       if (rows.length > 32767 || rows.some((row) => row.allianceId !== profile.allianceId))
-        throw new Error("Invalid alliance ranking members");
+        {throw new Error("Invalid alliance ranking members");}
 
       return { profile, rows };
     },
@@ -101,7 +101,7 @@ export async function readCemeteryRanking(
   now: number,
 ): Promise<CommunityRankingSnapshot> {
   if (!uid || uid.length > 40 || !["0", "1"].includes(type) || !Number.isSafeInteger(now))
-    throw new Error("Invalid cemetery ranking query");
+    {throw new Error("Invalid cemetery ranking query");}
 
   return db.transaction(
     async (tx) => {
@@ -110,7 +110,7 @@ export async function readCemeteryRanking(
       )[0];
 
       if (!profile || profile.banFlag || (profile.banTime ?? 0n) > BigInt(now))
-        return { profile, rows: [] };
+        {return { profile, rows: [] };}
 
       const own = (
         await tx

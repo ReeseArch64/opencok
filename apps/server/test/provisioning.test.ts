@@ -35,7 +35,7 @@ test("signed creation messages reject tampering, expiry and response/request ref
   const signature = signProvisioning(body, timestamp, secret);
   expect(verifyProvisioning(body, timestamp, signature, secret, reservation.createdAt)).toBe(true);
   for (const invalid of [null, "", "a".repeat(64), "ff"])
-    expect(verifyProvisioning(body, timestamp, invalid, secret, reservation.createdAt)).toBe(false);
+    {expect(verifyProvisioning(body, timestamp, invalid, secret, reservation.createdAt)).toBe(false);}
   expect(verifyProvisioning(body + " ", timestamp, signature, secret, reservation.createdAt)).toBe(
     false,
   );
@@ -52,7 +52,7 @@ test("signed creation messages reject tampering, expiry and response/request ref
     false,
   );
   for (const key of Object.keys(reservation) as (keyof CharacterReservation)[])
-    expect(
+    {expect(
       provisionHash({
         ...reservation,
         [key]:
@@ -60,7 +60,7 @@ test("signed creation messages reject tampering, expiry and response/request ref
             ? Number(reservation[key]) + 1
             : `${reservation[key]}x`,
       }),
-    ).not.toBe(receipt.requestHash);
+    ).not.toBe(receipt.requestHash);}
 });
 
 test("internal transport authenticates before execution and accepts only signed realm receipts", async () => {

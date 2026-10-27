@@ -38,7 +38,7 @@ export function createChatNicknamePublisher(options: {
     options.timeoutMs < 100 ||
     options.timeoutMs > 30000
   )
-    throw new Error("Invalid chat nickname configuration");
+    {throw new Error("Invalid chat nickname configuration");}
 
   const endpoint = url.toString();
   const { signingSecret, timeoutMs, now = Date.now, fetch: request = fetch } = options;
@@ -52,7 +52,7 @@ export function createChatNicknamePublisher(options: {
         time = now();
 
       if (!Number.isSafeInteger(time) || time < 0 || Buffer.byteLength(body) > 4096)
-        throw new Error();
+        {throw new Error();}
 
       const timestamp = String(time);
       const value = await fetchChatJson(
@@ -81,7 +81,7 @@ export function createChatNicknamePublisher(options: {
         value.data.operationId !== update.operationId ||
         !["applied", "unchanged"].includes(String(value.data.result))
       )
-        throw new Error();
+        {throw new Error();}
     } catch {
       throw new Error("Chat nickname unavailable");
     }

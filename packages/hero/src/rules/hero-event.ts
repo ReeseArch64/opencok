@@ -13,7 +13,7 @@ export function heroEventBand(event: Row, snapshot: HeroEventSnapshot, rules: Ru
       : text(snapshot.profile ?? {}, "uid"),
     score = snapshot.scores.find((row) => row.actId === event.uuid && row.uid === member);
 
-  if (!member) return { level: -1, score };
+  if (!member) {return { level: -1, score };}
 
   const level = score
     ? cityInteger(score.level, 0, 4095)
@@ -29,7 +29,7 @@ export function heroEventBand(event: Row, snapshot: HeroEventSnapshot, rules: Ru
 export function heroEventRewards(event: Row, level: number, rules: Rules) {
   const rule = rules.ranking.heroEvents?.get(text(event, "eventId"));
 
-  if (!rule) throw new Error("Missing hero event definition");
+  if (!rule) {throw new Error("Missing hero event definition");}
 
   const matrix = (key: string) => (rule[key] ?? "").split("|").map((row) => row.split(";"));
   const targets = matrix("target"),
@@ -49,7 +49,7 @@ export function heroEventRewards(event: Row, level: number, rules: Rules) {
     targets[level]!.length !== rewards[level]!.length ||
     rankLevels.length !== ranks[level]!.length
   )
-    throw new Error("Invalid hero reward band");
+    {throw new Error("Invalid hero reward band");}
 
   return {
     rule,
@@ -71,11 +71,11 @@ export function heroScoreFlags(score: Row) {
     ),
   ];
 
-  if (flags.length > 128) throw new Error("Invalid hero reward flags");
+  if (flags.length > 128) {throw new Error("Invalid hero reward flags");}
 
   let capacity = 16;
 
-  while (flags.length > capacity * 0.75) capacity *= 2;
+  while (flags.length > capacity * 0.75) {capacity *= 2;}
 
   return flags
     .toSorted((a, b) => ((a ^ (a >>> 16)) & (capacity - 1)) - ((b ^ (b >>> 16)) & (capacity - 1)))
@@ -90,14 +90,14 @@ export function nextHeroPanel(rules: Rules, type: number, realm: number, now: bi
     !featureRealmEnabled(gate?.[keys[0]!], realm) ||
     !versionAtLeast("12.06.0", gate?.[keys[1]!] ?? "")
   )
-    return;
+    {return;}
 
   for (const rule of rules.advanced.heroActivities?.values() ?? []) {
-    if (cityInteger(rule.type, 1, 3) !== type) continue;
+    if (cityInteger(rule.type, 1, 3) !== type) {continue;}
 
     const dates = (rule.date ?? "").split("|");
 
-    if (dates.length !== 7) throw new Error("Invalid hero weekday calendar");
+    if (dates.length !== 7) {throw new Error("Invalid hero weekday calendar");}
 
     let start = (now / 86400000n) * 86400000n,
       day = new Date(Number(now)).getUTCDay() + 1;
@@ -105,10 +105,10 @@ export function nextHeroPanel(rules: Rules, type: number, realm: number, now: bi
     for (let i = 0; i < 7; i++) {
       const [weekday, on, ...extra] = dates[day - 1]!.split(":");
 
-      if (extra.length) throw new Error("Invalid hero weekday");
+      if (extra.length) {throw new Error("Invalid hero weekday");}
 
       if (cityInteger(weekday, 1, 7) === day && on === "1")
-        return { activityId: rule.id!, startTime: start };
+        {return { activityId: rule.id!, startTime: start };}
 
       start += 86400000n;
       day = day === 7 ? 1 : day + 1;

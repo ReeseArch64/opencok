@@ -22,7 +22,7 @@ export async function territorySoldierCapacity(
   now: number,
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,
 ): Promise<number> {
-  if (!services.worldPowerEffects) throw new Error("Missing territory effect reader");
+  if (!services.worldPowerEffects) {throw new Error("Missing territory effect reader");}
 
   const context = resourceOwnerRuleContext(snapshot, { kingdomId, now });
   const state = snapshot.effects;
@@ -60,7 +60,7 @@ export async function territorySoldierCapacity(
 
   try {
     if (resourceExpeditionConfigured(rules, context, () => resourceMergeServer(rules, kingdomId)))
-      phase = await services.expeditionStage?.(kingdomId);
+      {phase = await services.expeditionStage?.(kingdomId);}
   } catch {}
 
   const origin = ownerInteger(state.profile.crossFightSrcServerId);
@@ -72,7 +72,7 @@ export async function territorySoldierCapacity(
         ([909, 912].includes(id) && home !== kingdomId) ||
         ([910, 913].includes(id) && home === kingdomId)
       )
-        return 0;
+        {return 0;}
 
       return effect(id);
     } catch {
@@ -92,7 +92,7 @@ export async function territorySoldierCapacity(
         ? definition.effects?.reinforcementCapacity
         : definition.effects?.rallyCapacity;
 
-    if (value === undefined) throw new Error("Missing building capacity");
+    if (value === undefined) {throw new Error("Missing building capacity");}
 
     return ownerInteger(value);
   };

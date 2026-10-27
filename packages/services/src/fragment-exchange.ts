@@ -42,7 +42,7 @@ export class FragmentExchangeDomain extends CityCommandDomain {
           (context.state.fragmentExchange ?? []).map((row) => [text(row, "actId"), row]),
         );
       const panel = (id: string) => {
-        if (!/^\d{1,10}$/.test(id)) campaignFailure();
+        if (!/^\d{1,10}$/.test(id)) {campaignFailure();}
 
         const row = context.rules.power.activityPanels?.get(id),
           start = eventTimestamp(row?.start),
@@ -55,9 +55,9 @@ export class FragmentExchangeDomain extends CityCommandDomain {
           (row.start !== undefined && (start === undefined || context.now < start)) ||
           (row.end !== undefined && (end === undefined || context.now >= end))
         )
-          return;
+          {return;}
 
-        if (!recipes.length) campaignFailure();
+        if (!recipes.length) {campaignFailure();}
 
         cityInteger(row.free_num);
         cityInteger(row.refresh_cost);
@@ -74,7 +74,7 @@ export class FragmentExchangeDomain extends CityCommandDomain {
       const load = (id: string, initialize: boolean) => {
         let row = states.get(id);
 
-        if (!row && !initialize) campaignFailure();
+        if (!row && !initialize) {campaignFailure();}
 
         row = {
           ...(row ?? { uid: context.owner, actId: id, refresh: 0, refreshTime: context.now }),
@@ -93,7 +93,7 @@ export class FragmentExchangeDomain extends CityCommandDomain {
           row.reward = Buffer.from(JSON.stringify(offers));
           write(row);
         } else {
-          if (!Buffer.isBuffer(row.reward)) campaignFailure();
+          if (!Buffer.isBuffer(row.reward)) {campaignFailure();}
 
           offers = readFragmentExchangeOffers(row.reward);
         }
@@ -108,7 +108,7 @@ export class FragmentExchangeDomain extends CityCommandDomain {
             !recipe.rewards.includes(offer.reward) ||
             offer.id.some((id) => !recipe.pool.includes(id))
           )
-            campaignFailure();
+            {campaignFailure();}
         }
 
         return { row, offers };
@@ -150,7 +150,7 @@ export class FragmentExchangeDomain extends CityCommandDomain {
       if (command === "act.exchange") {
         const ids = str(params, "ids").split("|").filter(Boolean);
 
-        if (ids.length > 64) campaignFailure();
+        if (ids.length > 64) {campaignFailure();}
 
         return {
           response: encode({
@@ -158,7 +158,7 @@ export class FragmentExchangeDomain extends CityCommandDomain {
               [...new Set(ids)].flatMap((id) => {
                 const config = panel(id);
 
-                if (!config) return [];
+                if (!config) {return [];}
 
                 const { row, offers } = load(id, true);
 
@@ -173,13 +173,13 @@ export class FragmentExchangeDomain extends CityCommandDomain {
       const id = str(params, command === "act.ex.flush" ? "actId" : "id"),
         config = panel(id);
 
-      if (!config) campaignFailure();
+      if (!config) {campaignFailure();}
 
       const { row, offers } = load(id, false);
 
       if (command === "act.ex.flush") {
         if (num(row, "refresh") >= cityInteger(config.free_num))
-          context.economy.gold(-BigInt(cityInteger(config.refresh_cost)));
+          {context.economy.gold(-BigInt(cityInteger(config.refresh_cost)));}
 
         const next = selectFragmentExchangeOffers(recipes, random);
         row.reward = Buffer.from(JSON.stringify(next));
@@ -203,13 +203,13 @@ export class FragmentExchangeDomain extends CityCommandDomain {
       const level = cityInteger(int(params, "type"), 1, 64),
         selected = offers.find((offer) => offer.type === level);
 
-      if (!selected) campaignFailure();
+      if (!selected) {campaignFailure();}
 
       const costs = new Map<string, number>();
 
-      for (const itemId of selected.id) costs.set(itemId, (costs.get(itemId) ?? 0) + 1);
+      for (const itemId of selected.id) {costs.set(itemId, (costs.get(itemId) ?? 0) + 1);}
 
-      for (const [itemId, count] of costs) context.economy.item(itemId, -count);
+      for (const [itemId, count] of costs) {context.economy.item(itemId, -count);}
 
       const pinned = pinProgressionReward(context, selected.reward)
           .split("|")

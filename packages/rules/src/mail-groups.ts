@@ -45,14 +45,14 @@ export function mailGroupQuery(
     !Number.isSafeInteger(now) ||
     now < 0
   )
-    return invalid();
+    {return invalid();}
 
   return { moderation: type === 10, begin, limit, now };
 }
 
 export function mailGroupRule(type: number): MailGroupRule | undefined {
   if (singleTypes.some((candidate) => candidate === type))
-    return { kind: "uid", field: "detail", types: singleTypes };
+    {return { kind: "uid", field: "detail", types: singleTypes };}
 
   switch (type) {
     case 100:
@@ -76,11 +76,11 @@ export function mailGroupContains(
 ): boolean {
   const rule = mailGroupRule(group.groupType);
 
-  if (!rule?.types.includes(entry.type)) return false;
+  if (!rule?.types.includes(entry.type)) {return false;}
 
-  if (rule.kind === "sender") return group.groupIndex === entry.fromUser;
+  if (rule.kind === "sender") {return group.groupIndex === entry.fromUser;}
 
-  if (rule.kind === "uid") return group.groupIndex === entry.uid;
+  if (rule.kind === "uid") {return group.groupIndex === entry.uid;}
 
   return true;
 }
@@ -103,7 +103,7 @@ export function mailGroupWindow(
   query: MailGroupQuery,
   groups: readonly MailGroupEntry[],
 ): readonly MailGroupEntry[] {
-  if (typeof query.moderation !== "boolean") return invalid();
+  if (typeof query.moderation !== "boolean") {return invalid();}
 
   mailGroupQuery(query.moderation ? 10 : 1000, query.begin, query.limit, query.now);
 
@@ -125,7 +125,7 @@ export function mailGroupWindow(
         (index > 0 && group.updateTime > groups[index - 1]!.updateTime),
     )
   )
-    return invalid();
+    {return invalid();}
 
   return groups.slice(0, 7);
 }

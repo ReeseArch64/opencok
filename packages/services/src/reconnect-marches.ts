@@ -31,7 +31,7 @@ const long = (value: unknown) => javaDecimal(String(value ?? 0), 64);
 
 const text = (value: unknown) => {
   if (typeof value !== "string" || !value.isWellFormed() || value.includes("\0"))
-    throw new Error("Invalid march text");
+    {throw new Error("Invalid march text");}
 
   return value;
 };
@@ -56,14 +56,14 @@ function skin(
   for (const id of order) {
     const rule = rules.power.statuses?.get(String(id));
 
-    if (!rule) continue;
+    if (!rule) {continue;}
 
     if (
       march
         ? rule.type2 === "101"
         : rule.effect?.split("|").some((entry) => entry.split(";")[0] === "14")
     )
-      return id;
+      {return id;}
   }
 
   return undefined;
@@ -76,23 +76,23 @@ function occupiedExtras(
   rules: Rules,
   effects: WorldResourceLoadEffects | undefined,
 ): Fields {
-  if (int(row.state) !== 1) return {};
+  if (int(row.state) !== 1) {return {};}
 
   const type = int(row.targetType);
 
   if (type === 6)
-    return {
+    {return {
       exploreSt: sfs.long(long(row.marchArrivalTime)),
       exploreTime: sfs.long(long(row.exploreTime)),
-    };
+    };}
 
   if (type === 41) {
-    if (!point) throw new Error("Missing occupied crystal point");
+    if (!point) {throw new Error("Missing occupied crystal point");}
 
     return { crt: sfs.int(Number(BigInt.asIntN(32, long(point.startOccupyTime) / 1000n))) };
   }
 
-  if (![3, 18, 37, 60, 63].includes(type)) return {};
+  if (![3, 18, 37, 60, 63].includes(type)) {return {};}
 
   if (
     !point ||
@@ -102,7 +102,7 @@ function occupiedExtras(
     army.owner !== row.ownerUid ||
     !effects
   )
-    throw new Error("Missing occupied resource state");
+    {throw new Error("Missing occupied resource state");}
 
   const rawArmyLoad = resourceRawArmyLoad(
     {
@@ -111,7 +111,7 @@ function occupiedExtras(
       effects,
       soldiers: army.soldiers.map((soldier) => {
         if (soldier.owner !== row.ownerUid || !soldier.armsId)
-          throw new Error("Foreign collection army");
+          {throw new Error("Foreign collection army");}
 
         return { ...soldier, armsId: soldier.armsId };
       }),
@@ -155,7 +155,7 @@ export function projectReconnectMarches(
     serverFeature(rules, "dragon_new", context) && serverFeature(rules, "dragon_battle", context);
   const indexed = new Map(state.rows.map((row) => [text(row.uuid), row]));
 
-  if (indexed.size !== state.rows.length) throw new Error("Duplicate reconnect march");
+  if (indexed.size !== state.rows.length) {throw new Error("Duplicate reconnect march");}
 
   const views: ReconnectMarchView[] = javaHashMapOrder(indexed.keys()).map((id) => {
     const row = indexed.get(id)!;
@@ -164,12 +164,12 @@ export function projectReconnectMarches(
       targetType = int(row.targetType),
       world = int(row.worldId);
 
-    if (type < 0 || type > 23) throw new Error("Invalid reconnect march type");
+    if (type < 0 || type > 23) {throw new Error("Invalid reconnect march type");}
 
     const profile = state.profiles.find((profile) => profile.uid === uid);
     const army = row.armyInfo === null ? null : decodeWorldMarchArmy(row.armyInfo as Buffer);
 
-    if (army && army.owner !== uid) throw new Error("Foreign saved march army");
+    if (army && army.owner !== uid) {throw new Error("Foreign saved march army");}
 
     const base = reconnectMarchBase(row, army, rules, {
       serverId: profile
@@ -186,7 +186,7 @@ export function projectReconnectMarches(
     });
     const alliance = state.alliances.find((entry) => entry.uid === row.allianceId);
 
-    if (alliance && alliance.abbr !== null) base.asn = sfs.string(text(alliance.abbr));
+    if (alliance && alliance.abbr !== null) {base.asn = sfs.string(text(alliance.abbr));}
 
     if (allianceTargets.has(targetType)) {
       const target =
@@ -199,7 +199,7 @@ export function projectReconnectMarches(
               )?.allianceId
             : undefined;
 
-      if (typeof target === "string" && target.trim()) base.tali = sfs.string(target);
+      if (typeof target === "string" && target.trim()) {base.tali = sfs.string(target);}
     }
 
     const late: Fields = {};
@@ -211,39 +211,39 @@ export function projectReconnectMarches(
     ) {
       const ordinal = int(office.positionId) % 100;
 
-      if (ordinal >= 0 && ordinal <= 16) late.officer = sfs.string(String(216000 + ordinal));
+      if (ordinal >= 0 && ordinal <= 16) {late.officer = sfs.string(String(216000 + ordinal));}
     }
 
     const attacker = skin(state.states, uid, false, rules, uid === owner);
 
-    if (attacker !== undefined) late.attSkin = sfs.int(attacker);
+    if (attacker !== undefined) {late.attSkin = sfs.int(attacker);}
 
     if (typeof row.targetUid === "string" && row.targetUid && !monsters.has(targetType)) {
       const defender = skin(state.states, row.targetUid, false, rules, row.targetUid === owner);
 
-      if (defender !== undefined) late.defSkin = sfs.int(defender);
+      if (defender !== undefined) {late.defSkin = sfs.int(defender);}
     }
 
     const marchSkin = skin(state.states, uid, true, rules, uid === owner);
 
-    if (marchSkin !== undefined) late.marchSkin = sfs.int(marchSkin);
+    if (marchSkin !== undefined) {late.marchSkin = sfs.int(marchSkin);}
 
     if (type === 8) {
       late.monsterCount = sfs.int(int(row.monsterArmyCount));
       late.monsterLevel = sfs.int(int(row.monsterLevel));
     }
 
-    if (targetType === 63) late.occupyEndTime = sfs.long(long(row.occupyResourceEndTime));
+    if (targetType === 63) {late.occupyEndTime = sfs.long(long(row.occupyResourceEndTime));}
 
     const savedDragon = army?.dragons?.[0];
 
-    if (savedDragon && savedDragon.owner !== uid) throw new Error("Foreign march dragon");
+    if (savedDragon && savedDragon.owner !== uid) {throw new Error("Foreign march dragon");}
 
     const dragon = savedDragon
       ? state.dragons.find((entry) => entry.uid === uid && entry.uuid === savedDragon.uuid)
       : undefined;
 
-    if (army?.general && army.general.owner !== uid) throw new Error("Foreign march general");
+    if (army?.general && army.general.owner !== uid) {throw new Error("Foreign march general");}
 
     const family = [15, 16].includes(type) ? 15 : [18, 19].includes(type) ? 18 : 4;
     const team = state.teams.find(

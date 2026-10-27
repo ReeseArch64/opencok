@@ -31,7 +31,7 @@ export function civilizationScienceView(
     "science_point",
     "vip",
   ])
-    if (rule[key] !== undefined) result[key] = sfs.string(rule[key]);
+    {if (rule[key] !== undefined) {result[key] = sfs.string(rule[key]);}}
 
   return result;
 }

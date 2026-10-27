@@ -49,7 +49,7 @@ test("production checkpoints conserve fractions and never settle an interval twi
   expect(settleProduction(once, 3600000n)).toEqual(once);
   expect(settleProduction(once, 1000n)).toEqual(once);
   let split = production;
-  for (let i = 1; i <= 1000; i++) split = settleProduction(split, BigInt(i) * 3600n);
+  for (let i = 1; i <= 1000; i++) {split = settleProduction(split, BigInt(i) * 3600n);}
   expect(split.amount).toBe(once.amount);
   expect(split.remainder).toBe(once.remainder);
   expect(settleProduction(production, 3600000000000n).amount).toBe(1000n);

@@ -15,10 +15,10 @@ import { fields, sfs, type Value } from "@opencok/messages/sfs";
 test("maintained expedition target, ranking and kingdom reward catalogs all resolve to claimable funded mail", async () => {
   const rules = await loadRules(),
     ids = new Set<string>();
-  for (const row of rules.advanced.expeditionRewards!.values()) if (row.reward) ids.add(row.reward);
+  for (const row of rules.advanced.expeditionRewards!.values()) {if (row.reward) {ids.add(row.reward);}}
   for (const row of rules.advanced.expeditionStages!.values())
-    for (const ranges of [row.rankreward, row.statereward])
-      for (const pair of (ranges ?? "").split("|").filter(Boolean)) ids.add(pair.split(";")[1]!);
+    {for (const ranges of [row.rankreward, row.statereward])
+      {for (const pair of (ranges ?? "").split("|").filter(Boolean)) {ids.add(pair.split(";")[1]!);}}}
   expect(ids.size).toBeGreaterThan(0);
   for (const id of ids) {
     expect(

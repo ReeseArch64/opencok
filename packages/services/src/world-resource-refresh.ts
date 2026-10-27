@@ -22,7 +22,7 @@ export async function refreshWorldResources(
   const { now } = store;
   const ready = store.opening > 0n && store.opening <= now;
 
-  if (ready && store.clock && store.clock.nextRefreshAt > now) return;
+  if (ready && store.clock && store.clock.nextRefreshAt > now) {return;}
 
   const quota = ready ? worldResourceQuota(rules) : 0,
     blackMinimum = ready ? cityInteger(rules.items.get("blackland_resource")?.k1) : 0,
@@ -41,22 +41,22 @@ export async function refreshWorldResources(
     const area = worldResourceBlackLand(point) ? 0 : num(point, "areaId");
 
     if (ready && num(point, "flushFlag") === 0 && (await store.population(area)) <= limit(area))
-      await store.ticket(
+      {await store.ticket(
         area,
         num(point, "resLevel"),
         text(point, "pointItem"),
         now + worldResourceDuration(rules, num(point, "resLevel"), true),
-      );
+      );}
 
     await store.clear(point);
   }
 
-  if (!ready) return;
+  if (!ready) {return;}
 
   const count = cityInteger(rules.items.get("resources_weight")?.k8, 1, 32),
     interval = BigInt(Math.trunc(Number(rules.items.get("resources_weight")?.k7) * 86400000));
 
-  if (interval <= 0n) worldMutationFailure();
+  if (interval <= 0n) {worldMutationFailure();}
 
   const clock = store.clock
     ? { ...store.clock }
@@ -69,7 +69,7 @@ export async function refreshWorldResources(
       };
   let used = clock.usedGroups.split(",").map((id) => cityInteger(id, 0, count - 1));
 
-  if (new Set(used).size !== used.length || used.length > count) worldMutationFailure();
+  if (new Set(used).size !== used.length || used.length > count) {worldMutationFailure();}
 
   if (now >= clock.groupStartedAt + interval) {
     const available = Array.from({ length: count }, (_, index) => index).filter(
@@ -83,13 +83,13 @@ export async function refreshWorldResources(
 
   const group = rules.world.resources?.get(used[0] === 0 ? "resources" : `resources${used[0]}`);
 
-  if (!group?.length) worldMutationFailure();
+  if (!group?.length) {worldMutationFailure();}
 
   const areas = worldResourceAreaCount(rules, size);
   const spawn = async (area: number) => {
     const point = await store.free(area);
 
-    if (!point) return undefined;
+    if (!point) {return undefined;}
 
     const chosen = worldResourceChoice(
       rules,
@@ -103,16 +103,16 @@ export async function refreshWorldResources(
       area === 0,
     );
 
-    if (!chosen) return undefined;
+    if (!chosen) {return undefined;}
 
     if (chosen.type !== 6)
-      await store.spawn(
+      {await store.spawn(
         point,
         chosen.type,
         chosen.level,
         chosen.amount,
         now + worldResourceDuration(rules, chosen.level),
-      );
+      );}
 
     return chosen;
   };
@@ -128,23 +128,23 @@ export async function refreshWorldResources(
 
     const chosen = await spawn(area);
 
-    if (chosen && chosen.type !== 6) await store.removeTicket(ticket);
-    else await store.retry(ticket, now + worldResourceDuration(rules, num(ticket, "level"), true));
+    if (chosen && chosen.type !== 6) {await store.removeTicket(ticket);}
+    else {await store.retry(ticket, now + worldResourceDuration(rules, num(ticket, "level"), true));}
   }
 
   let blackPopulation = await store.population(0);
 
   if (blackPopulation <= blackMinimum)
-    for (let budget = 0; budget < 64 && blackPopulation < blackMaximum; budget++) {
+    {for (let budget = 0; budget < 64 && blackPopulation < blackMaximum; budget++) {
       const chosen = await spawn(0);
 
-      if (!chosen) break;
+      if (!chosen) {break;}
 
       if (chosen.type === 6)
-        await store.ticket(0, 1, "0", now + worldResourceDuration(rules, 1, true));
+        {await store.ticket(0, 1, "0", now + worldResourceDuration(rules, 1, true));}
 
       blackPopulation++;
-    }
+    }}
 
   let budget = 64;
 
@@ -155,15 +155,15 @@ export async function refreshWorldResources(
     while (population < quota && budget-- > 0) {
       const chosen = await spawn(area);
 
-      if (!chosen) break;
+      if (!chosen) {break;}
 
       if (chosen.type === 6)
-        await store.ticket(area, 1, "0", now + worldResourceDuration(rules, 1, true));
+        {await store.ticket(area, 1, "0", now + worldResourceDuration(rules, 1, true));}
 
       population++;
     }
 
-    if (budget > 0 || population >= quota) clock.areaCursor++;
+    if (budget > 0 || population >= quota) {clock.areaCursor++;}
   }
 
   if (clock.areaCursor >= areas) {

@@ -26,7 +26,7 @@ test("throne cache selects the maximum positive period with bounded validated st
   expect(value).toEqual(period);
   expect(await loadThroneRankingPeriod(async () => [], 2)).toBeUndefined();
   for (const response of [["1"], ["bad", "{}"], ["2147483648", "{}"], ["1", "x".repeat(8193)]])
-    await expect(loadThroneRankingPeriod(async () => response, 2)).rejects.toThrow();
+    {await expect(loadThroneRankingPeriod(async () => response, 2)).rejects.toThrow();}
 });
 
 test("throne boards preserve the nineteen-entry boundary, exact longs and absent-self tail position", () => {

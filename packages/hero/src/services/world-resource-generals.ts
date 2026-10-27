@@ -18,7 +18,7 @@ export function restoredResourceGenerals(
   snapshot: WorldResourceOwnerSnapshot["newGenerals"],
   rules: Rules,
 ): NewGeneralEquippedState[] {
-  if (typeof snapshot.moved !== "boolean") throw new Error("Invalid general transfer state");
+  if (typeof snapshot.moved !== "boolean") {throw new Error("Invalid general transfer state");}
 
   const ids: number[] = [];
   const selected = new Map<
@@ -34,7 +34,7 @@ export function restoredResourceGenerals(
   for (const row of bounded(snapshot.generals)) {
     const state = integer(row.state);
 
-    if (state < -128 || state > 127) throw new Error("Invalid saved general byte");
+    if (state < -128 || state > 127) {throw new Error("Invalid saved general byte");}
 
     const statuses: NewGeneralStatus[] = [];
     const general: NewGeneralEquippedState = {
@@ -58,7 +58,7 @@ export function restoredResourceGenerals(
     for (const row of bounded(snapshot.statuses)) {
       const entry = selected.get(integer(row.newGeneralId));
 
-      if (!entry) continue;
+      if (!entry) {continue;}
 
       entry.statuses.push({
         stateId: integer(row.stateId),
@@ -70,21 +70,21 @@ export function restoredResourceGenerals(
     for (const row of bounded(snapshot.equipment)) {
       const generalId = integer(row.generalId);
 
-      if (generalId <= 0) continue;
+      if (generalId <= 0) {continue;}
 
       const entry = selected.get(generalId);
 
-      if (!entry) continue;
+      if (!entry) {continue;}
 
       const itemId = integer(row.itemId);
       const rule = rules.power.equipment?.get(String(itemId));
 
-      if (!rule) throw new Error("Missing general equipment binding rule");
+      if (!rule) {throw new Error("Missing general equipment binding rule");}
 
-      if (entry.general.state === 4) continue;
+      if (entry.general.state === 4) {continue;}
 
       if (typeof rule.site !== "string" || rule.site.length > 65535)
-        throw new Error("Missing or oversized general equipment site");
+        {throw new Error("Missing or oversized general equipment site");}
 
       entry.slots.push(rule.site);
       entry.equipment.set(rule.site, {

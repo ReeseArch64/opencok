@@ -1,7 +1,7 @@
 import { num, text, type Row } from "@opencok/contracts/rows";
 
 export function worldCityCandidates(point: number, size: number) {
-  if (!Number.isInteger(point) || point < 1 || point > size * size) return [];
+  if (!Number.isInteger(point) || point < 1 || point > size * size) {return [];}
 
   const x = (point - 1) % size,
     y = Math.floor((point - 1) / size);
@@ -36,7 +36,7 @@ export function resolveWorldCityGeometry(
     owned.filter((row) => num(row, "pointType") === main).length !== 1 ||
     !owned.some((row) => num(row, "id") === point && num(row, "pointType") === main)
   )
-    return undefined;
+    {return undefined;}
 
   const matches = (ids: readonly number[], native: boolean) =>
     ids.every((id) =>
@@ -62,12 +62,12 @@ export function resolveWorldCityGeometry(
   const nativeMatch = native.length > 0 && matches(native, true),
     legacyMatch = legacy.length > 0 && matches(legacy, false);
 
-  if (nativeMatch && legacyMatch) return undefined;
+  if (nativeMatch && legacyMatch) {return undefined;}
 
-  if (nativeMatch) return { orientation: "native" as const, anchor: point, points: native };
+  if (nativeMatch) {return { orientation: "native" as const, anchor: point, points: native };}
 
   if (owned.length === 4 && legacyMatch)
-    return { orientation: "legacy" as const, anchor: point + size + 1, points: legacy };
+    {return { orientation: "legacy" as const, anchor: point + size + 1, points: legacy };}
 
   return undefined;
 }

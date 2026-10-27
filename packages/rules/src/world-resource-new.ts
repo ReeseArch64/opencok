@@ -13,7 +13,7 @@ export const worldResourceNewIdentity = {
 export function worldResourceNewSettings(rules: Rules, now: bigint) {
   const rule = rules.items.get("on_event2");
 
-  if (!rule) return undefined;
+  if (!rule) {return undefined;}
 
   const start = eventTimestamp(rule.k9),
     end = eventTimestamp(rule.k10);
@@ -30,15 +30,15 @@ export function worldResourceNewSlots(rules: Rules, random: (maximum: number) =>
   const counts = rules.items.get("on_event2")?.k12,
     presence = rules.items.get("on_event3")?.k1;
 
-  if (!counts || !presence) return 0;
+  if (!counts || !presence) {return 0;}
 
   const values = counts.split(";").map((value) => cityInteger(value, 1));
 
-  if (!values.length || values.length > 32) worldMutationFailure();
+  if (!values.length || values.length > 32) {worldMutationFailure();}
 
   const total = values.reduce((sum, value) => sum + value, 0);
 
-  if (!Number.isSafeInteger(total) || total > 2147483647) worldMutationFailure();
+  if (!Number.isSafeInteger(total) || total > 2147483647) {worldMutationFailure();}
 
   let cumulative = 0;
 
@@ -46,9 +46,9 @@ export function worldResourceNewSlots(rules: Rules, random: (maximum: number) =>
     cumulative += value;
     const draw = random(total);
 
-    if (!Number.isInteger(draw) || draw < 0 || draw >= total) worldMutationFailure();
+    if (!Number.isInteger(draw) || draw < 0 || draw >= total) {worldMutationFailure();}
 
-    if (draw < cumulative) return value;
+    if (draw < cumulative) {return value;}
   }
 
   return values[0]!;
@@ -63,13 +63,13 @@ export function worldResourceNewFootprint(point: number, size: number) {
     point > size * size ||
     (point - 1) % size === 0
   )
-    return [];
+    {return [];}
 
   return [point, point - 1, point - size, point - size - 1];
 }
 
 export function parseWorldResourceNewClock(raw: string, areas: number): WorldResourceNewClock {
-  if (raw.length > 256) worldMutationFailure();
+  if (raw.length > 256) {worldMutationFailure();}
 
   let value: unknown;
 
@@ -94,7 +94,7 @@ export function parseWorldResourceNewClock(raw: string, areas: number): WorldRes
     !/^(0|[1-9]\d{0,15})$/.test(clock.nextRefreshAt) ||
     BigInt(clock.nextRefreshAt) > BigInt(Number.MAX_SAFE_INTEGER)
   )
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   return clock;
 }

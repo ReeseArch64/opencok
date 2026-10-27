@@ -14,7 +14,7 @@ export function luckyChoice(rule: Rule, rules: Rules, random: (maximum: number) 
       .filter(Boolean)
       .map((value) => cityInteger(value));
 
-  if (!effects.length || effects.length > 128 || effects.length !== weights.length) luckyFailure();
+  if (!effects.length || effects.length > 128 || effects.length !== weights.length) {luckyFailure();}
 
   const total = cityInteger(
       weights.reduce((sum, value) => sum + value, 0),
@@ -27,7 +27,7 @@ export function luckyChoice(rule: Rule, rules: Rules, random: (maximum: number) 
     running += weights[index]!;
 
     if (draw < running) {
-      if (!rules.power.luckyEffects?.has(effect)) luckyFailure();
+      if (!rules.power.luckyEffects?.has(effect)) {luckyFailure();}
 
       return effect;
     }

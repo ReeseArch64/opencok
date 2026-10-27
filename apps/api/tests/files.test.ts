@@ -28,7 +28,7 @@ const tickets = createAvatarTickets(async (name, ...args) => {
 });
 const owner = "1234567";
 async function grant(expiry = Math.floor(Date.now() / 1000) + 60, sequence = 1) {
-  if (expiry <= Math.floor(Date.now() / 1000)) return "v2." + "0".repeat(64);
+  if (expiry <= Math.floor(Date.now() / 1000)) {return "v2." + "0".repeat(64);}
   return tickets.issue(owner, sequence, "upload");
 }
 async function upload(
@@ -65,12 +65,12 @@ function storage() {
   const store: ImageStore = {
     image: async (key) => `https://s3.example/images/${key}?X-Amz-Signature=${"a".repeat(64)}`,
     async put(path, bytes, uid, sequence, hash) {
-      if (objects.has(path)) throw new HttpError(409, "Image sequence already exists");
+      if (objects.has(path)) {throw new HttpError(409, "Image sequence already exists");}
       objects.set(path, bytes);
       receipts.set(`${uid}:${sequence}`, { owner: uid, sequence, hash });
     },
     async removePrevious(uid, sequence) {
-      if (Number(sequence) <= 1) return;
+      if (Number(sequence) <= 1) {return;}
       const name = createHash("md5")
         .update(`${uid}_${Number(sequence) - 1}`)
         .digest("hex");
@@ -308,7 +308,7 @@ test("API media stays unavailable when its dependency is disabled", async () => 
     `/_internal/avatars/${owner}/1`,
     `/cok/img/234567/${"a".repeat(32)}.jpg`,
   ])
-    expect((await app.fetch(new Request(`http://localhost${path}`))).status).toBe(404);
+    {expect((await app.fetch(new Request(`http://localhost${path}`))).status).toBe(404);}
 });
 
 test("gateway routes exact public avatar paths to API and keeps confirmation private", async () => {
@@ -335,8 +335,8 @@ test("gateway routes exact public avatar paths to API and keeps confirmation pri
     "/cok/img/1/file.jpg",
     `/_internal/avatars/${owner}/1`,
   ])
-    expect(pattern.test(path)).toBe(false);
-  for (const route of Object.values(routers)) expect(route.rule).not.toContain("/_internal");
+    {expect(pattern.test(path)).toBe(false);}
+  for (const route of Object.values(routers)) {expect(route.rule).not.toContain("/_internal");}
 });
 
 test("legacy image routes reject reads without exposing storage or signing capabilities", async () => {
@@ -349,8 +349,8 @@ test("legacy image routes reject reads without exposing storage or signing capab
   };
   const handler = createHandler(store, tickets);
   for (const query of ["", "?expires=1999999999&signature=" + "a".repeat(64)])
-    for (const method of ["GET", "HEAD"])
-      expect(
+    {for (const method of ["GET", "HEAD"])
+      {expect(
         (
           await handler(
             new Request(`http://localhost/cok/img/234567/${"a".repeat(32)}.jpg${query}`, {
@@ -358,7 +358,7 @@ test("legacy image routes reject reads without exposing storage or signing capab
             }),
           )
         ).status,
-      ).toBe(401);
+      ).toBe(401);}}
 });
 
 test("uploads require an issued ticket in the URL and reject extra query parameters", async () => {
@@ -366,7 +366,7 @@ test("uploads require an issued ticket in the URL and reject extra query paramet
   const request = await upload();
   const body = await request.arrayBuffer();
   for (const url of ["http://localhost" + UPLOAD_PATH, request.url + "&extra=1"])
-    expect(
+    {expect(
       (
         await handler(
           new Request(url, {
@@ -376,7 +376,7 @@ test("uploads require an issued ticket in the URL and reject extra query paramet
           }),
         )
       ).status,
-    ).toBe(401);
+    ).toBe(401);}
 });
 
 test("replacement deletes previous bytes, preserves receipts and retries failed cleanup", async () => {

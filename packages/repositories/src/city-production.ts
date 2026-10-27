@@ -18,7 +18,7 @@ export function createCityProductionBoundary(
     for (const building of buildings) {
       const resource = asset(building);
 
-      if (resource === undefined) continue;
+      if (resource === undefined) {continue;}
 
       const from = long(building, "refreshTime") || (now >= 5000n ? now - 5000n : 0n);
       initial.push({
@@ -42,7 +42,7 @@ export function createCityProductionBoundary(
         rates: async (buildingId) => {
           const building = next.find((row) => row.uuid === buildingId);
 
-          if (!building) return [{ at: now, perHour: 0n, capacity: 0n }];
+          if (!building) {return [{ at: now, perHour: 0n, capacity: 0n }];}
 
           return nextRates(building, now);
         },
@@ -61,15 +61,15 @@ export function createCityProductionBoundary(
         );
 
       for (const account of accounts)
-        if (account.amount > 0n) {
+        {if (account.amount > 0n) {
           if (!["wood", "stone", "iron", "food"].includes(account.asset))
-            throw new Error("Invalid demolished production asset");
+            {throw new Error("Invalid demolished production asset");}
 
           economy.resource(
             text(account, "asset") as "wood" | "stone" | "iron" | "food",
             account.amount,
           );
-        }
+        }}
     }
   };
 }

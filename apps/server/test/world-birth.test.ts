@@ -60,7 +60,7 @@ test("birth state rejects malformed private snapshots without mutating the suppl
     { counts: [] },
     { version: 2147483647 },
   ])
-    expect(() => parseWorldBirth(JSON.stringify({ ...state, ...changed }))).toThrow();
+    {expect(() => parseWorldBirth(JSON.stringify({ ...state, ...changed }))).toThrow();}
   const decoded = parseWorldBirth(raw);
   decoded.counts[67] = 1;
   expect(state.counts).toEqual({});

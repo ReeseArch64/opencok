@@ -25,12 +25,12 @@ export function validateGeneralTalents(
       value < 1 ||
       value > cityInteger(skill.max_lv, 1)
     )
-      generalFailure();
+      {generalFailure();}
 
     const conditions = generalPairs(mailBlank(skill.condition_skill) ? "" : skill.condition_skill);
 
     if (conditions.size && ![...conditions].some(([id, value]) => (points.get(id) ?? 0) >= value))
-      generalFailure();
+      {generalFailure();}
   }
 
   return cityInteger(num(row, "talentpoint"));
@@ -41,16 +41,16 @@ export function activateGeneralTalent(rules: Rules, row: Row, id: number, full: 
   const points = generalPairs(text(row, "talent")),
     rule = rules.power.newGeneralSkills?.get(String(id));
 
-  if (!rule) generalFailure();
+  if (!rule) {generalFailure();}
 
   const remaining = validateGeneralTalents(rules, row, points),
     previous = points.get(id) ?? 0;
 
-  if (rule.learn_lv && num(row, "level") < cityInteger(rule.learn_lv, 1)) generalFailure();
+  if (rule.learn_lv && num(row, "level") < cityInteger(rule.learn_lv, 1)) {generalFailure();}
 
   const addition = full ? Math.min(remaining, cityInteger(rule.max_lv, 1) - previous) : 1;
 
-  if (addition <= 0 || addition > remaining) generalFailure();
+  if (addition <= 0 || addition > remaining) {generalFailure();}
 
   points.set(id, previous + addition);
   const next = { ...row, talent: generalContent(points), talentpoint: remaining - addition };

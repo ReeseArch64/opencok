@@ -45,7 +45,7 @@ export class HeroRankPublicationService {
           type >= 3 &&
           !text(row.event, "serverGroup").split("|").includes(String(this.rules.kingdomId))
         )
-          continue;
+          {continue;}
 
         const lookup = heroRankingLookup(
             row.event,
@@ -57,11 +57,11 @@ export class HeroRankPublicationService {
           ),
           level = cityInteger(row.score.level, 0, 4095);
 
-        if (typeof lookup === "number") continue;
+        if (typeof lookup === "number") {continue;}
 
         const rankKey = lookup.keys[level];
 
-        if (!rankKey) throw new Error("Invalid hero rank publication band");
+        if (!rankKey) {throw new Error("Invalid hero rank publication band");}
 
         scores.push({
           rankKey,
@@ -77,7 +77,7 @@ export class HeroRankPublicationService {
         });
       }
 
-      if (scores.length) await this.publish(await this.projection.write(scores, at));
+      if (scores.length) {await this.publish(await this.projection.write(scores, at));}
 
       const last = rows.at(-1);
       this.cursor =
@@ -85,7 +85,7 @@ export class HeroRankPublicationService {
           ? { actId: text(last.event, "uuid"), member: text(last.score, "uid") }
           : undefined;
 
-      if (!this.cursor) break;
+      if (!this.cursor) {break;}
     }
   }
 }

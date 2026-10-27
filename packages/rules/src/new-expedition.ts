@@ -24,7 +24,7 @@ export function expeditionSchedule(manifest: ExpeditionManifest): ExpeditionPhas
     manifest.stages.length < 1 ||
     manifest.stages.length > 9
   )
-    expeditionFailure();
+    {expeditionFailure();}
 
   let startTime = manifest.startTime;
   const seen = new Set<number>();
@@ -32,12 +32,12 @@ export function expeditionSchedule(manifest: ExpeditionManifest): ExpeditionPhas
   return manifest.stages.map(({ stage, durationMs }) => {
     cityInteger(stage, 0, 8);
 
-    if (seen.has(stage) || durationMs <= 0n || durationMs > 31536000000n) expeditionFailure();
+    if (seen.has(stage) || durationMs <= 0n || durationMs > 31536000000n) {expeditionFailure();}
 
     seen.add(stage);
     const phase = { stage, startTime, endTime: startTime + durationMs };
 
-    if (phase.endTime > 9223372036854775807n) expeditionFailure();
+    if (phase.endTime > 9223372036854775807n) {expeditionFailure();}
 
     startTime = phase.endTime;
 
@@ -46,7 +46,7 @@ export function expeditionSchedule(manifest: ExpeditionManifest): ExpeditionPhas
 }
 
 export function expeditionPhase(period: Row | undefined, now: bigint): ExpeditionPhase | undefined {
-  if (!period || now < long(period, "startTime") || now >= long(period, "endTime")) return;
+  if (!period || now < long(period, "startTime") || now >= long(period, "endTime")) {return;}
 
   let raw: unknown;
 
@@ -56,7 +56,7 @@ export function expeditionPhase(period: Row | undefined, now: bigint): Expeditio
     expeditionFailure();
   }
 
-  if (!Array.isArray(raw) || raw.length < 1 || raw.length > 9) expeditionFailure();
+  if (!Array.isArray(raw) || raw.length < 1 || raw.length > 9) {expeditionFailure();}
 
   let previous = long(period, "startTime");
   const seen = new Set<number>();
@@ -71,21 +71,21 @@ export function expeditionPhase(period: Row | undefined, now: bigint): Expeditio
       !/^\d{1,19}$/.test(item.startTime) ||
       !/^\d{1,19}$/.test(item.endTime)
     )
-      expeditionFailure();
+      {expeditionFailure();}
 
     const stage = cityInteger(item.stage, 0, 8),
       startTime = BigInt(item.startTime),
       endTime = BigInt(item.endTime);
 
-    if (seen.has(stage) || startTime !== previous || endTime <= startTime) expeditionFailure();
+    if (seen.has(stage) || startTime !== previous || endTime <= startTime) {expeditionFailure();}
 
     seen.add(stage);
     previous = endTime;
 
-    if (now >= startTime && now < endTime) result = { stage, startTime, endTime };
+    if (now >= startTime && now < endTime) {result = { stage, startTime, endTime };}
   }
 
-  if (previous !== long(period, "endTime")) expeditionFailure();
+  if (previous !== long(period, "endTime")) {expeditionFailure();}
 
   return result;
 }
@@ -107,24 +107,24 @@ export function expeditionScore(
   for (const id of (definition?.score ?? "").split(";").filter(Boolean)) {
     const row = rules.advanced.expeditionScores?.get(id);
 
-    if (!row) expeditionFailure();
+    if (!row) {expeditionFailure();}
 
     if (Number(row.type) !== action || !(row.value ?? "").split(";").map(Number).includes(param))
-      continue;
+      {continue;}
 
     let bonus = 0;
 
     for (const value of (row.effect ?? "").split(";").filter(Boolean))
-      bonus = Math.fround(bonus + effect(cityInteger(value, 1)));
+      {bonus = Math.fround(bonus + effect(cityInteger(value, 1)));}
 
     const delta = Number(row.points) * count * Math.fround(1 + Math.fround(bonus / 100));
 
-    if (!Number.isFinite(delta)) expeditionFailure();
+    if (!Number.isFinite(delta)) {expeditionFailure();}
 
     total += delta;
   }
 
-  if (!Number.isFinite(total) || total < 0) expeditionFailure();
+  if (!Number.isFinite(total) || total < 0) {expeditionFailure();}
 
   return total;
 }

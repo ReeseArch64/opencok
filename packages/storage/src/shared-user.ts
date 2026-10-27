@@ -52,7 +52,7 @@ function validOwner(owner: string, layout: SharedUserLayout) {
     !owner.isWellFormed() ||
     (layout !== "hash" && layout !== "keys")
   )
-    throw new DependencyError("shared user cache");
+    {throw new DependencyError("shared user cache");}
 }
 
 function cacheKey(owner: string, layout: SharedUserLayout) {
@@ -80,7 +80,7 @@ export async function publishSharedUser(
     !update.body.isWellFormed() ||
     Buffer.byteLength(update.body) > 65535
   )
-    throw new DependencyError("shared user cache");
+    {throw new DependencyError("shared user cache");}
 
   try {
     const result = await command(
@@ -98,7 +98,7 @@ export async function publishSharedUser(
       layout,
     );
 
-    if (result !== 0 && result !== 1) throw new Error();
+    if (result !== 0 && result !== 1) {throw new Error();}
   } catch {
     throw new DependencyError("shared user cache");
   }
@@ -117,10 +117,10 @@ export async function loadSharedUser(
         ? await command("HGET", cacheKey(owner, layout), owner)
         : await command("GET", cacheKey(owner, layout));
 
-    if (result === null) return null;
+    if (result === null) {return null;}
 
     if (typeof result !== "string" || !result.isWellFormed() || Buffer.byteLength(result) > 65535)
-      throw new Error();
+      {throw new Error();}
 
     return result;
   } catch {

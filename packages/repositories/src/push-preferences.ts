@@ -27,7 +27,7 @@ export async function setPushPreference(
       (value) => !Number.isInteger(value) || value < -2147483648 || value > 2147483647,
     )
   )
-    throw new DependencyError("push preference input");
+    {throw new DependencyError("push preference input");}
 
   await db.transaction(
     async (tx) => {
@@ -50,19 +50,19 @@ export async function setPushPreference(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > BigInt(now)
       )
-        throw new DependencyError("push preference owner");
+        {throw new DependencyError("push preference owner");}
 
       const key = and(eq(parse_info.uid, uid), eq(parse_info.type, preference.type));
       const [existing] = await tx.select({ uid: parse_info.uid }).from(parse_info).where(key);
 
       if (existing) {
-        if (existing.uid !== uid) throw new DependencyError("push preference selection");
+        if (existing.uid !== uid) {throw new DependencyError("push preference selection");}
 
         await tx
           .update(parse_info)
           .set({ status: preference.status, audio: preference.audio })
           .where(key);
-      } else await tx.insert(parse_info).values({ uid, ...preference });
+      } else {await tx.insert(parse_info).values({ uid, ...preference });}
     },
     { isolationLevel: "read committed", accessMode: "read write" },
   );

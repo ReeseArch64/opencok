@@ -28,7 +28,7 @@ export class SeasonalExchangeDomain extends CityCommandDomain {
     this.types = [];
 
     this.prepare = async (context, command, params) => {
-      if (int(params, "type") !== 5) seasonalExchangeFailure();
+      if (int(params, "type") !== 5) {seasonalExchangeFailure();}
 
       const config = context.rules.items.get("chrisms"),
         state = context.state.seasonalExchange,
@@ -45,7 +45,7 @@ export class SeasonalExchangeDomain extends CityCommandDomain {
         context.now < long(period, "startTime") ||
         context.now >= long(period, "endTime")
       )
-        seasonalExchangeFailure();
+        {seasonalExchangeFailure();}
 
       cityInteger(config.k12, 1);
       const interval = cityAmount(config.k1) * 1000n;
@@ -72,9 +72,9 @@ export class SeasonalExchangeDomain extends CityCommandDomain {
         command === "activity.exchange.info" &&
         (!row || (config.k12 === "1" && context.now - long(row, "updateTime") >= interval))
       )
-        refresh();
+        {refresh();}
 
-      if (!row) seasonalExchangeFailure();
+      if (!row) {seasonalExchangeFailure();}
 
       const view = () =>
         seasonalExchangeView(
@@ -105,11 +105,11 @@ export class SeasonalExchangeDomain extends CityCommandDomain {
         );
 
       if (command === "activity.exchange.info")
-        return { response: encode({ activity: sfs.object(view()) }), event: null };
+        {return { response: encode({ activity: sfs.object(view()) }), event: null };}
 
       const level = cityInteger(int(params, "level"), 1, 5);
 
-      if (level !== num(row, "level") + 1 || !context.economy.quantity) seasonalExchangeFailure();
+      if (level !== num(row, "level") + 1 || !context.economy.quantity) {seasonalExchangeFailure();}
 
       const reward = seasonalExchangeRewards(text(row, "rewards"))[level - 1]!;
       context.economy.item("209174", -reward.count);

@@ -6,9 +6,9 @@ export async function containsReservedNickname(
   patterns: readonly string[],
 ): Promise<boolean> {
   if (typeof name !== "string" || name.length > 65535 || patterns.length > 10000)
-    throw new Error("Invalid reserved nickname input");
+    {throw new Error("Invalid reserved nickname input");}
 
-  if (!patterns.length) return false;
+  if (!patterns.length) {return false;}
 
   const text = reservedNicknameText(name);
   const expressions: ({ pattern: string; flags: string } | { invalid: true })[] = [];
@@ -25,7 +25,7 @@ export async function containsReservedNickname(
 
     bytes += JSON.stringify(expression).length;
 
-    if (bytes > 4 * 1024 * 1024) throw new Error("Reserved nickname patterns exceed bound");
+    if (bytes > 4 * 1024 * 1024) {throw new Error("Reserved nickname patterns exceed bound");}
 
     expressions.push(expression);
   }
@@ -47,8 +47,8 @@ export async function containsReservedNickname(
       clearTimeout(timer);
       void worker.terminate();
 
-      if (typeof value === "boolean") resolve(value);
-      else reject(new Error("Reserved nickname matching failed"));
+      if (typeof value === "boolean") {resolve(value);}
+      else {reject(new Error("Reserved nickname matching failed"));}
     });
     worker.once("error", () => {
       clearTimeout(timer);

@@ -53,7 +53,7 @@ test("fragment snapshots reject invalid repetition proofs, duplicate tiers and m
     [{ ...offer, multiple: 0 }],
     [{ ...offer, id: ["209699"] }],
   ])
-    expect(() => readFragmentExchangeOffers(Buffer.from(JSON.stringify(value)))).toThrow();
+    {expect(() => readFragmentExchangeOffers(Buffer.from(JSON.stringify(value)))).toThrow();}
   expect(() => readFragmentExchangeOffers(Buffer.from([255]))).toThrow();
   expect(() => readFragmentExchangeOffers(Buffer.alloc(65536))).toThrow();
 });

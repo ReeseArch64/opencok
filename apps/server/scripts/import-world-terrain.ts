@@ -27,7 +27,7 @@ try {
       !value ||
       options.has(key)
     )
-      throw new Error("Invalid terrain operator option");
+      {throw new Error("Invalid terrain operator option");}
     options.set(key, value);
   }
   const pageSize = options.has("--page-size") ? Number(options.get("--page-size")) : 1000;
@@ -48,7 +48,7 @@ try {
     !process.env.DATABASE_URL ||
     !process.env.GAME_ZOOKEEPER
   )
-    throw new Error("Explicit terrain operator configuration required");
+    {throw new Error("Explicit terrain operator configuration required");}
   const kingdomId = Number(realmRaw),
     size = Number(sizeRaw),
     connectionString = postgresUrl.parse(process.env.DATABASE_URL);
@@ -59,9 +59,9 @@ try {
     size > 4000 ||
     !Number.isInteger(size)
   )
-    throw new Error("Invalid terrain dimensions");
+    {throw new Error("Invalid terrain dimensions");}
   const file = Bun.file(path);
-  if (file.size < 1 || file.size > 128 * 1024 * 1024) throw new Error("Invalid terrain file size");
+  if (file.size < 1 || file.size > 128 * 1024 * 1024) {throw new Error("Invalid terrain file size");}
   stage = "terrain";
   const terrain = parseWorldTerrain(new Uint8Array(await file.arrayBuffer()));
   stage = "catalogs";
@@ -69,7 +69,7 @@ try {
     settings = worldTerrainRules(rules),
     birth = worldBirthRules(rules);
   if (terrain.size !== size || settings.size !== size)
-    throw new Error("Authored terrain and configured dimensions differ");
+    {throw new Error("Authored terrain and configured dimensions differ");}
   stage = "ownership";
   coordination = new Coordination({
     kingdomId,

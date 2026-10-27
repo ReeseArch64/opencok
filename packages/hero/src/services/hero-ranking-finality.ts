@@ -36,7 +36,7 @@ export class HeroRankingFinalityService {
     for (const closure of candidates.closures) {
       const period = await this.registry.get(text(closure, "periodId"));
 
-      if (!period) throw new Error("Missing shared hero ranking closure period");
+      if (!period) {throw new Error("Missing shared hero ranking closure period");}
 
       periods.set(period.id, period);
     }
@@ -54,14 +54,14 @@ export class HeroRankingFinalityService {
     }
 
     for (const period of await this.registry.pending(this.rules.kingdomId))
-      periods.set(period.id, period);
+      {periods.set(period.id, period);}
 
-    if (periods.size > 24) throw new Error("Hero finality refresh bound exceeded");
+    if (periods.size > 24) {throw new Error("Hero finality refresh bound exceeded");}
 
     for (const period of periods.values()) {
       const closure = await this.realm.seal(period, at);
 
-      if (!closure) continue;
+      if (!closure) {continue;}
 
       if (num(closure, "phase") === 0) {
         const rows = await this.realm.page(closure);
@@ -89,7 +89,7 @@ export class HeroRankingFinalityService {
           closure.cursor = cursor;
         }
 
-        if (long(closure, "processed") !== long(closure, "scoreCount")) continue;
+        if (long(closure, "processed") !== long(closure, "scoreCount")) {continue;}
 
         if (!(await this.registry.complete(period, closure, at))) {
           await this.realm.reset(closure);
@@ -102,7 +102,7 @@ export class HeroRankingFinalityService {
       await this.registry.finalize(period, at);
       const result = await this.registry.result(period.id);
 
-      if (result) await this.realm.finished(period.id, result.kingdomRank);
+      if (result) {await this.realm.finished(period.id, result.kingdomRank);}
     }
   }
 }
