@@ -5,6 +5,7 @@ import { GameplayCatalog } from "@opencok/enums/gameplay-catalog";
 import { CatalogKind } from "@opencok/enums/catalog-kind";
 import type { CatalogValue, CatalogCodec } from "../src/catalog-model.ts";
 import { convertCatalog, type SourceElement } from "./catalog-conversion.ts";
+import { namedHeroRecord } from "./named-hero-records.ts";
 
 export interface CatalogSource {
   readonly id: string;
@@ -150,16 +151,25 @@ export async function writeCatalogModules(sources: AsyncIterable<CatalogSource>)
         const parts: string[] = [];
         for (let offset = 0; offset < definition.records.length; offset += 750) {
           const part = module + ".records" + parts.length + ".ts";
+          const records = definition.records.slice(offset, offset + 750);
+          const named = records.map((record) => namedHeroRecord(module!, record));
+          const declarations = [
+            ...new Set(named.flatMap((entry) => (entry ? [entry.declaration] : []))),
+          ];
           await writeFile(
             join(directory, part),
             "import type { " +
               recordName +
               ' } from "' +
               recordModule +
-              '";\nexport const records: readonly ' +
+              '";\n' +
+              declarations.join("\n") +
+              "\nexport const records: readonly " +
               recordName +
               "[] = " +
-              render(definition.records.slice(offset, offset + 750)) +
+              "[" +
+              records.map((record, index) => named[index]?.expression ?? render(record)).join(",") +
+              "]" +
               ";\n",
           );
           generated.add(part);

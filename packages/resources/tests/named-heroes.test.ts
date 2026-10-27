@@ -1,6 +1,10 @@
 import { expect, test } from "bun:test";
 import { Mulan } from "@opencok/hero/domain/mulan";
-import { MulanDefinitionMapper } from "@opencok/hero/mappings/mulan-definition";
+import { HeroDefinitionMapper } from "@opencok/hero/mappings/hero-definition";
+import { heroCatalogBindings } from "@opencok/constants/hero-catalog-bindings";
+import { HeroItem } from "@opencok/enums/hero-item";
+import { HeroTalentTree } from "@opencok/enums/hero-talent-tree";
+import { namedHeroRecord } from "../scripts/named-hero-records.ts";
 import { catalog } from "../src/catalogs/data/general_base.ts";
 import { catalogCodecs } from "../src/catalog-codecs.ts";
 import { legacyRecord } from "../src/catalog-compatibility.ts";
@@ -16,26 +20,117 @@ test("the loaded Mulan definition preserves the pre-refactor compatibility recor
 test("named hero configuration drives the compatibility boundary", () => {
   const hero = new Mulan();
   const configured = Object.assign(new Mulan(), {
-    recruitment: { fragmentsRequired: 2500 },
-    progression: { initialLevel: 5, maximumLevel: 90, talentPointDivisor: 5 },
+    recruitment: { ...hero.recruitment, cost: { item: HeroItem.MulanFragment, quantity: 2500 } },
+    progression: { ...hero.progression, initialLevel: 5, maximumLevel: 90, talentPointDivisor: 5 },
   });
-  const definition = new MulanDefinitionMapper().toDefinition(configured);
+  const definition = new HeroDefinitionMapper(heroCatalogBindings).toDefinition(configured);
   expect(definition.needPieces).toEqual([213293, 2500]);
   expect(definition.baseLevel).toBe(5);
   expect(definition.levelMax).toBe(90);
   expect(definition.talentPointDivisor).toBe(5);
-  expect(hero.recruitment.fragmentsRequired).toBe(3000);
+  expect(hero.recruitment.cost.quantity).toBe(3000);
   expect(hero.progression.maximumLevel).toBe(99);
 });
 
 test("invalid named hero configuration fails before catalog publication", () => {
-  const mapper = new MulanDefinitionMapper();
-  for (const fragmentsRequired of [0, -1, 1.5, NaN, Infinity]) {
-    const hero = Object.assign(new Mulan(), { recruitment: { fragmentsRequired } });
+  const mapper = new HeroDefinitionMapper(heroCatalogBindings);
+  for (const fragmentsRequired of [-1, 1.5, NaN, Infinity]) {
+    const hero = Object.assign(new Mulan(), {
+      recruitment: {
+        ...new Mulan().recruitment,
+        cost: { item: HeroItem.MulanFragment, quantity: fragmentsRequired },
+      },
+    });
     expect(() => mapper.toDefinition(hero)).toThrow("Invalid hero definition: Hua Mulan");
   }
   const hero = Object.assign(new Mulan(), {
-    progression: { initialLevel: 100, maximumLevel: 99, talentPointDivisor: 10 },
+    progression: {
+      ...new Mulan().progression,
+      initialLevel: 100,
+      maximumLevel: 99,
+      talentPointDivisor: 10,
+    },
   });
-  expect(() => mapper.toDefinition(hero)).toThrow("Initial level exceeds maximum: Hua Mulan");
+  expect(() => mapper.toDefinition(hero)).toThrow("Invalid hero definition: Hua Mulan");
+});
+
+test("stars, talent trees, assignments and refinement are authored in the domain", () => {
+  const original = new Mulan();
+  const hero = Object.assign(new Mulan(), {
+    stars: {
+      ...original.stars,
+      upgrades: original.stars.upgrades.map((step) => ({
+        ...step,
+        cost: { ...step.cost, quantity: 123 },
+      })),
+    },
+    talentTrees: [HeroTalentTree.MulanSpear, HeroTalentTree.MulanVanguard],
+    assignments: { ...original.assignments, canLoot: false, canBattle: false },
+    refinement: {
+      ...original.refinement,
+      valueRollCostPerAttribute: { item: HeroItem.MulanFragment, quantity: 42 },
+      slots: original.refinement.slots.map((slot) => ({
+        ...slot,
+        requiredLevel: 20,
+        unlockCost: { item: HeroItem.HeroBadge, quantity: 7 },
+      })),
+      typeRollPrices: original.refinement.typeRollPrices.map((price) => ({ ...price, gold: 250 })),
+    },
+  });
+  const mapped = new HeroDefinitionMapper(heroCatalogBindings).toDefinition(hero);
+  expect(mapped.starGoods).toEqual(Array.from({ length: 4 }, () => [213293, 123]));
+  expect(mapped.generalAb).toEqual([53571202, 41020011]);
+  expect(mapped.loot).toBe(0);
+  expect(mapped.battle).toBe(0);
+  expect(mapped.refineCard).toBe(42);
+  expect(mapped.unlockLevel).toEqual([
+    [1, 20],
+    [2, 20],
+    [3, 20],
+    [4, 20],
+    [5, 20],
+  ]);
+  expect(mapped.unlockGoodsNum).toEqual([
+    [1, 7],
+    [2, 7],
+    [3, 7],
+    [4, 7],
+    [5, 7],
+  ]);
+  expect(mapped.refineEffect).toEqual([
+    [1, 250],
+    [2, 250],
+    [3, 250],
+    [4, 250],
+    [5, 250],
+  ]);
+});
+
+test("invalid ordering and unrepresentable item costs fail instead of losing domain data", () => {
+  const original = new Mulan();
+  const mapper = new HeroDefinitionMapper(heroCatalogBindings);
+  const unsorted = Object.assign(new Mulan(), {
+    stars: { ...original.stars, upgrades: [...original.stars.upgrades].reverse() },
+  });
+  expect(() => mapper.toDefinition(unsorted)).toThrow("Invalid hero definition");
+  const differentItem = Object.assign(new Mulan(), {
+    refinement: {
+      ...original.refinement,
+      valueRollCostPerAttribute: { item: HeroItem.HeroBadge, quantity: 20 },
+    },
+  });
+  expect(() => mapper.toDefinition(differentItem)).toThrow("consume recruitment fragments");
+  const missingSlot = Object.assign(new Mulan(), {
+    refinement: { ...original.refinement, slots: [] },
+  });
+  expect(() => mapper.toDefinition(missingSlot)).toThrow("Invalid hero definition");
+});
+
+test("catalog imports retain named Mulan authorship and leave unrelated rows unchanged", () => {
+  expect(namedHeroRecord("general_base", { id: 53571, levelMax: 48 })).toEqual({
+    declaration: 'import { mulan } from "../../heroes/mulan.ts";',
+    expression: "mulan",
+  });
+  expect(namedHeroRecord("general_base", { id: 53572 })).toBeUndefined();
+  expect(namedHeroRecord("general_skill", { id: 53571 })).toBeUndefined();
 });

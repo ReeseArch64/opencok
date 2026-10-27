@@ -1,29 +1,18 @@
-export abstract class Hero {
+import type { HeroDefinition } from "../contracts/hero-definition.ts";
+import { validateHeroDefinition } from "../validations/hero-definition.ts";
+
+export abstract class Hero implements HeroDefinition {
+  public abstract readonly identity: HeroDefinition["identity"];
   public abstract readonly name: string;
-  public abstract readonly recruitment: {
-    readonly fragmentsRequired: number;
-  };
-  public abstract readonly progression: {
-    readonly initialLevel: number;
-    readonly maximumLevel: number;
-    readonly talentPointDivisor: number;
-  };
+  public abstract readonly gender: HeroDefinition["gender"];
+  public abstract readonly recruitment: HeroDefinition["recruitment"];
+  public abstract readonly progression: HeroDefinition["progression"];
+  public abstract readonly stars: HeroDefinition["stars"];
+  public abstract readonly talentTrees: HeroDefinition["talentTrees"];
+  public abstract readonly assignments: HeroDefinition["assignments"];
+  public abstract readonly refinement: HeroDefinition["refinement"];
 
   public validate(): void {
-    const { initialLevel, maximumLevel, talentPointDivisor } = this.progression;
-    const values = [
-      initialLevel,
-      maximumLevel,
-      talentPointDivisor,
-      this.recruitment.fragmentsRequired,
-    ];
-
-    if (values.some((value) => !Number.isSafeInteger(value) || value < 1)) {
-      throw new Error(`Invalid hero definition: ${this.name}`);
-    }
-
-    if (initialLevel > maximumLevel) {
-      throw new Error(`Initial level exceeds maximum: ${this.name}`);
-    }
+    validateHeroDefinition(this);
   }
 }

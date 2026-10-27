@@ -1,5 +1,4 @@
-import { Mulan } from "@opencok/hero/domain/mulan";
-import { MulanDefinitionMapper } from "@opencok/hero/mappings/mulan-definition";
+import { mulan } from "../../heroes/mulan.ts";
 import type { GeneralBaseDefinition } from "@opencok/hero/resources/catalogs/types/general_base";
 
 export const records: readonly GeneralBaseDefinition[] = [
@@ -5225,7 +5224,7 @@ export const records: readonly GeneralBaseDefinition[] = [
     ],
     "goodsId": 211453,
   },
-  new MulanDefinitionMapper().toDefinition(new Mulan()),
+  mulan,
   {
     "id": 53572,
     "newAccMaxLv": 100,

@@ -104,83 +104,121 @@ No wire, database, account, inventory or queue migration is introduced. Roll bac
 the complete application artifact to restore prior behavior. Native mobile client
 validation remains separate from server compatibility checks.
 
-## Named hero migration proposal
+## Named hero definitions and migration proposal
 
-Status: initial Mulan authoring slice implemented; broader domain migration proposed.
-No new dependency or technology decision is required.
+Mulan's base definition is authored in `packages/hero/src/domain/mulan.ts` as
+`Mulan extends Hero`. Recruitment, progression, stars, assignments, talent tree
+references and refinement use named properties, booleans, semantic enums and
+item costs. This module contains no native resource IDs or delimited strings.
+`Hero` delegates shared configuration invariants to the domain validation module.
+An archetype is separate from a player's owned hero and its persistent state.
 
-The XML-to-TypeScript conversion removed a runtime input format, but did not finish
-redesigning the domain. `GeneralBaseDefinition` still carries source-shaped fields,
-`catalog-compatibility.ts` converts typed values back to string records, and
-`hero/rules/general-progression.ts` parses those records. A developer should be
-able to locate Hua Mulan by name and edit her progression without knowing that
-her native general ID is 53571. Numeric IDs remain necessary for saved ownership,
-client assets and protocol references; they should identify boundary bindings,
-not provide the vocabulary for authoring mechanics.
+`HeroDefinitionMapper` is shared projection code, with constructor-injected
+`HeroCatalogBindings`. It contains no Mulan configuration, hero IDs, item IDs,
+skill IDs or translation IDs. The maintained catalog composes Mulan and the mapper
+in `src/heroes/mulan.ts`. `constants/hero-catalog-bindings` owns the numeric
+identities; `enums/hero-*` provides the vocabulary used by domain code. Only direct
+workspace dependencies were added; no external library is required.
 
-### Implemented first slice
+The current catalog adapter still feeds existing string-consuming server rules.
+It is not a network serializer, and a catalog field is not automatically a wire
+requirement. Network Mappers and persistence adapters remain separate boundaries.
+This change preserves existing behavior while replacing the entire Mulan base
+record's authoring model. Skill effect formulas and individual talent nodes still
+live in their existing catalogs and have not yet been migrated to named objects.
 
-`packages/hero/src/domain/mulan.ts` now defines `Mulan extends Hero`. It owns the
-readable name, recruitment fragment quantity, initial level, maximum level and
-talent point divisor. `Hero` validates these shared configuration invariants.
-The real `general_base` catalog instantiates this definition through
-`MulanDefinitionMapper`, which preserves the existing native IDs, field order,
-related catalog references and remaining configuration. It does not create a
-second Mulan entry or change player state. Edit these migrated properties in
-`Mulan`, rather than the numeric records array.
+### Field meanings and evidence
 
-The mapper is a transitional binding, not the final domain model: star costs,
-refinement settings, talent tree identifiers and other fields still use the
-existing catalog representation there. The named definition represents a hero
-archetype; it does not represent an individual player's owned hero. Existing
-services still own recruitment transactions and other use cases.
+Read-only inspection used the extracted Android `v12.06.0` client's
+`assets/local/database.local.xml`, `assets/local/text_en.ini`, and
+`assets/lua_static/game/hero/NewUI_v2/HeroXLView.lua`, together with the maintained
+Mulan patch `data/android/patches/033-hua-mulan/content.json` and its resource
+builder. The stock extracted hero at this ID predates the Mulan replacement;
+use the patch's identity and skill/tree names, not the stock appearance or level
+limit. No client code or assets are copied into maintained source or required at
+runtime.
 
-The compatibility regression uses a digest captured from Mulan's complete
-pre-refactor flat record, including field order. Intentional balance changes
-require reviewing that contract and updating its expected digest. The migration
-also compared all 109 `general_base` records against the preceding catalog.
-This is server-side evidence, not native client acceptance.
+The current server's general progression, talents, refinement and skill services
+establish the meaning of server-only fields. Read-only legacy inspection of
+`CsmodModule` establishes that `new_acc_max_lv` belongs to automated account hero
+grants; `AbstractGetGeneral` establishes the initial quality assignment. This is
+historical evidence, not authorization to restore automatic hero grants.
 
-### Proposed next slices and acceptance
+| Existing catalog field                 | Authored meaning                                                                                                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`, `name`                           | Hero identity and localized name binding: Hua Mulan → general 53571, text 169493.                                                                                  |
+| `newAccMaxLv`                          | Historical automated-grant level limit, kept separate from playable maximum level. No maintained startup path consumes it to grant heroes.                         |
+| `isUnlock`                             | Whether recruitment is available.                                                                                                                                  |
+| `type`                                 | Server level-table column selector: 0 selects `exp1`/`point1`, 1 selects `exp`/`point`. It is **not** the client's visual hero category. Kept as binding metadata. |
+| `gender`                               | Female, mapped to the native gender code.                                                                                                                          |
+| `baseLevel`, `baseQuality`             | Initial level and initial quality rank. Quality rank is not the client's rarity ribbon.                                                                            |
+| `baseStar`, `starMaxLevel`             | Initial and maximum star count.                                                                                                                                    |
+| `baseSkill`, `baseSkill2`–`baseSkill5` | Initial skill and skills unlocked at each subsequent star.                                                                                                         |
+| `breachGoods`                          | Ordered breakthrough-stage item costs. These costs do not themselves enable a level gate.                                                                          |
+| `starGoods`                            | Item costs for each star upgrade.                                                                                                                                  |
+| `needPieces`, `piecesId`               | Recruitment item and quantity, and the fragment identity reused by refinement.                                                                                     |
+| `levelMax`, `talentPointDivisor`       | Playable maximum level and divisor applied to the selected cumulative talent-point schedule.                                                                       |
+| `talent`                               | Compatibility group linking talent nodes to this hero; 72 is a group identifier, not a talent budget.                                                              |
+| `generalAb`                            | Ordered references to Mulan's Vanguard, Offensive and Spear trees.                                                                                                 |
+| `loot`, `lootLevel`                    | Loot participation and minimum hero level.                                                                                                                         |
+| `garrison`, `battle`, `lordExp`        | Garrison, battle and use of lord-experience items are permitted.                                                                                                   |
+| `refineCard`                           | Hero fragments charged per non-maximized attribute for a value roll, before free/batch adjustments.                                                                |
+| `refineEffect`                         | Gold price for changing attribute types, indexed by the number of unlocked attributes being rerolled.                                                              |
+| `refineEffectLock`                     | Additional gold price indexed by the number of locked attributes.                                                                                                  |
+| `refineNum`                            | Per-slot refinement item quantity. Preserve zero as a quantity; existing activation also requires a positive entry.                                                |
+| `unlockLevel`, `unlockStar`            | Hero level and star prerequisites for each refinement slot.                                                                                                        |
+| `unlockGoodsNum`, `goodsId`            | Per-slot unlock item quantity and its item identity: Hero Badge.                                                                                                   |
 
-1. Complete Mulan's domain configuration: named talent trees, skill definitions,
-   fragment references, star progression and refinement policies. Confirm names
-   and meanings from authorized resource/localization evidence before assigning
-   them. Keep unresolved codes explicitly in compatibility bindings. Accept when
-   each migrated field has one authoring source and its old projection is proven
-   equivalent, including declaration order and duplicate handling.
-2. Introduce a hero registry with semantic keys and explicit native-ID lookup at
-   boundaries. Version the bindings by actual resource provenance rather than
-   assuming every client release shares IDs. Accept when Mulan can be resolved
-   by name in domain code, unknown IDs are rejected explicitly, and each migrated
-   binding resolves unambiguously without altering legacy entries.
-3. Migrate one vertical use case at a time, starting with recruitment and level
-   progression. Inject typed definitions into Services and pure domain rules;
-   preserve database contracts and wire Mappers. Remove the corresponding
-   `String(id)`, `split`, and numeric parsing only after both paths agree. Accept
-   when fragment charges, unlock checks, talent points, level gates and retry
-   behavior match existing tests and persisted ownership is preserved.
-4. Expand hero coverage through small dependent changes. Use concrete subclasses
-   for named authored archetypes and specialized behavior; keep shared lifecycle
-   and invariants in `Hero`, and balance tables as typed data. Do not duplicate
-   recruitment, combat or persistence workflows in every subclass. Accept when
-   each migrated hero has an identifiable authoring module and verified binding.
-5. Apply the same separation to items, units, buildings and other catalogs based
-   on actual use cases. A row in an event or level table does not automatically
-   need a class. Accept each slice with typed consumers, readable identities and
-   compatibility coverage rather than merely renamed source fields.
-6. Retire compatibility projections per migrated consumer. Remove a legacy
-   catalog path only when references and compatibility tests establish that it
-   has no remaining consumers. Native release acceptance remains separate.
+The patched skills resolve to Mulan's Formation, Infantry Basic Attack, Damage
+by Infantry, Striking Distance of Infantry, and Infantry Basic Puncture. Their
+native identifiers are recorded once in the bindings. The fragment is Hua Mulan
+Fragment (213293); the client item record maps Hero Badge (211453) to localized
+text 169805. Domain code uses `HeroItem.MulanFragment` and `HeroItem.HeroBadge`.
+Quantities such as 3000 fragments or level 99 remain numbers because they express
+balance, not opaque identities.
 
-Imports are recovery tools, not the authoring source of named definitions. The
-current general importer still overwrites `general_base.records0.ts`, including
-its Mulan integration. Before reimporting, preserve and reapply the named entry;
-its regression test must pass afterward. A later importer change should generate
-only explicitly unmigrated entries and preserve named registrations. Do not add
-ignored Java/XML originals as runtime dependencies or regenerate away maintained
-mechanics.
+### Compatibility and validation
 
-Roll back this first slice by reverting its application code together. It has no
-database migration, balance adjustment or client artifact change. Later slices
-must retain this property or document their own state migration and recovery.
+The projection preserves Mulan's complete pre-refactor flat record and field
+order, checked against its independently captured SHA-256 digest. Tests also
+change domain costs, stars, trees, assignments and refinement and verify their
+projection; they reject invalid ordering and item combinations that the old
+catalog cannot represent. The entire 109-record general base catalog was compared
+before and after the initial migration. Existing server progression and refinement
+tests remain the behavior checks. This is not device/emulator acceptance.
+
+The import writer recognizes Mulan's native base-record identity and emits a
+reference to the maintained named definition, preserving its source order and
+avoiding duplicate authoring. Other records retain the ordinary import path.
+Reimporting still overwrites unmigrated skill and talent catalogs; do not use it
+to discard maintained balance changes. Original inputs remain read-only.
+
+### Remaining migration proposal
+
+1. Model skill effects and individual talent nodes with named effects, requirements
+   and progression, backed by the patched client resources and existing rule
+   consumers. Keep one authoring source per mechanic. Test client references,
+   node order, effect units, branching and point costs before replacing each
+   numeric catalog definition.
+2. Give Services and pure rules typed archetypes and typed level schedules through
+   constructor injection. Migrate recruitment, leveling, stars and refinement in
+   separate vertical changes. Replace string parsing in the consumer, then remove
+   its compatibility projection. Preserve fragment charges, unlock checks,
+   transactions, retries and owned hero state.
+3. Add a semantic hero registry and native-ID lookup at the input/persistence
+   boundaries. Confirm resource bindings per client release instead of assuming
+   shared IDs or deriving meaning from an ID's digits. Reject unknown bindings
+   rather than choosing a similarly named hero or skill.
+4. Expand named definitions to other heroes, items and units with evidence for
+   each identity. Shared workflows belong in base classes and Services; concrete
+   archetypes own configuration and specialized behavior. Level/event table rows
+   can remain structured data rather than becoming empty subclasses.
+5. Remove obsolete server representations once all consumers have migrated. Only
+   verified client contracts and persistence compatibility constrain the final
+   boundary; XML keys, import column names and Java storage conveniences do not
+   define the future domain model.
+
+This change has no database migration, balance adjustment or client artifact
+change. Roll back the application commit as a unit. Later state migrations need
+explicit deployment and recovery plans. The implemented slice is the complete
+Mulan base definition, not a completed redesign of all hero rule consumers.

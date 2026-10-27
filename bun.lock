@@ -245,6 +245,9 @@
     },
     "packages/constants": {
       "name": "@opencok/constants",
+      "dependencies": {
+        "@opencok/enums": "workspace:*",
+      },
       "devDependencies": {
         "@opencok/config": "workspace:*",
         "@types/bun": "catalog:",
@@ -429,6 +432,7 @@
         "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/drizzle": "workspace:*",
+        "@opencok/enums": "workspace:*",
         "@opencok/errors": "workspace:*",
         "@opencok/mappings": "workspace:*",
         "@opencok/messages": "workspace:*",
@@ -625,6 +629,7 @@
     "packages/resources": {
       "name": "@opencok/resources",
       "dependencies": {
+        "@opencok/constants": "workspace:*",
         "@opencok/contracts": "workspace:*",
         "@opencok/enums": "workspace:*",
         "@opencok/hero": "workspace:*",

@@ -115,10 +115,11 @@ Hero and general implementations live in `packages/hero/src`, with `contracts`,
 `rules`, `services`, `mappings`, `validations`, `repositories`, `storage` and
 `resources` directories preserving those responsibilities inside the domain.
 Named hero archetypes begin in `hero/src/domain`: `Mulan extends Hero` owns
-recruitment and progression configuration, and `MulanDefinitionMapper` binds it
-to the existing general catalog. Other general fields remain transitional
-compatibility configuration in that mapper. See the
-[named hero migration proposal](../packages/resources/README.md#named-hero-migration-proposal)
+recruitment, progression, stars, assignments, talent tree references and refinement
+configuration. The generic `HeroDefinitionMapper` projects it into the existing
+general catalog using injected numeric bindings from `constants`. Native IDs stay
+in those bindings; domain definitions use semantic enums from `enums`. See the
+[named hero migration proposal](../packages/resources/README.md#named-hero-definitions-and-migration-proposal)
 for the implemented boundary and proposed typed-consumer migration.
 Other packages import these modules through `@opencok/hero/<responsibility>/*`.
 Constants, enums and Controllers remain in their existing packages; database schema
