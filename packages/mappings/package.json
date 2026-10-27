@@ -107,7 +107,8 @@
     "./world-utility": "./src/world-utility.ts",
     "./city-defense": "./src/city-defense.ts",
     "./treasure-map": "./src/treasure-map.ts",
-    "./activity-reward": "./src/activity-reward.ts"
+    "./activity-reward": "./src/activity-reward.ts",
+    "./activity-operators": "./src/activity-operators.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

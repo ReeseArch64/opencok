@@ -85,6 +85,10 @@ export interface GameStore extends AuthenticationStore {
   activityDirectory?(
     uid: string,
   ): Promise<import("./activity-directory").ActivityDirectorySnapshot>;
+  activityOperators?(
+    uid: string,
+    now: number,
+  ): Promise<import("./activity-operators").ActivityOperatorsSnapshot>;
   heroEvents?(
     uid: string,
     kingdomId: number,

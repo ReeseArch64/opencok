@@ -190,7 +190,9 @@
     "./responses/world-march-runtime": "./src/responses/world-march-runtime.ts",
     "./military-rank-awards": "./src/military-rank-awards.ts",
     "./activity-reward": "./src/activity-reward.ts",
-    "./responses/activity-reward": "./src/responses/activity-reward.ts"
+    "./responses/activity-reward": "./src/responses/activity-reward.ts",
+    "./activity-operators": "./src/activity-operators.ts",
+    "./responses/activity-operators": "./src/responses/activity-operators.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",
