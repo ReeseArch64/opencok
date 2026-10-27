@@ -32,9 +32,10 @@ This index bootstraps the ADR practice without introducing an extra technology d
 - [ADR-0005: Adopt Redis for cache and ephemeral coordination](0005-adopt-redis-for-cache.md) — accepted
 - [ADR-0006: Adopt Redis Insight for development inspection](0006-adopt-redis-insight-for-development.md) — accepted
 - [ADR-0007: Adopt Oxlint for JavaScript and TypeScript linting](0007-adopt-oxlint-for-linting.md) — accepted
-- [ADR-0008: Adopt Oxfmt for repository formatting](0008-adopt-oxfmt-for-formatting.md) — accepted
+- [ADR-0008: Adopt Oxfmt for repository formatting](0008-adopt-oxfmt-for-formatting.md) — superseded by ADR-0014
 - [ADR-0009: Adopt Bun for development tooling and execution](0009-adopt-bun-for-development.md) — accepted
 - [ADR-0010: Adopt Node.js for production service execution](0010-adopt-nodejs-for-production.md) — deprecated (production mandate suspended)
 - [ADR-0011: Adopt TypeScript for application and shared package code](0011-adopt-typescript-for-application-code.md) — accepted
 - [ADR-0012: Adopt Effect for API and realm service composition](0012-adopt-effect-for-service-composition.md) — proposed
 - [ADR-0013: Adopt Maple for local operational observability](0013-adopt-maple-for-local-operational-observability.md) — proposed
+- [ADR-0014: Adopt dprint for TypeScript formatting](0014-adopt-dprint-for-typescript-formatting.md) — accepted
