@@ -385,6 +385,8 @@ services:
     stop_grace_period: 30s
     networks: [opencok-internal-network, opencok-external-network]
     environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://maple:4318
+      MAPLE_LOCAL_INGEST_KEY: ${MAPLE_LOCAL_INGEST_KEY}
       NODE_ENV: development
       DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL for API, server and Chat}
       GLOBAL_DATABASE_NAME: opencok_global
@@ -412,7 +414,37 @@ services:
     container_name: opencok-gateway
     restart: unless-stopped
     profiles: [all, dev, prod]
-    command: [--configFile=/etc/traefik/traefik.yml]
+    command:
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.forwardedheaders.insecure=false
+      - --entrypoints.web.http.aliasheadersstrategy=delete
+      - --entrypoints.game.address=:9933
+      - --entrypoints.health.address=:8082
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --providers.file.watch=true
+      - --ping.entrypoint=health
+      - --api.dashboard=false
+      - --api.insecure=false
+      - --log.level=WARN
+      - --accesslog.format=json
+      - --accesslog.fields.defaultmode=drop
+      - --accesslog.fields.names.StartUTC=keep
+      - --accesslog.fields.names.RequestMethod=keep
+      - --accesslog.fields.names.RouterName=keep
+      - --accesslog.fields.names.OriginStatus=keep
+      - --accesslog.fields.names.DownstreamStatus=keep
+      - --accesslog.fields.names.Duration=keep
+      - --accesslog.fields.headers.defaultmode=drop
+      - --accesslog.fields.queryparameters.defaultmode=drop
+      - --experimental.otlplogs=true
+      - --accesslog.otlp.servicename=gateway
+      - --accesslog.otlp.http.endpoint=http://maple:4318/v1/logs
+      - --accesslog.otlp.http.headers.Authorization=Bearer ${MAPLE_LOCAL_INGEST_KEY}
+      - --metrics.otlp.servicename=gateway
+      - --metrics.otlp.pushinterval=1s
+      - --metrics.otlp.addrouterslabels=true
+      - --metrics.otlp.http.endpoint=http://maple:4318/v1/metrics
+      - --metrics.otlp.http.headers.Authorization=Bearer ${MAPLE_LOCAL_INGEST_KEY}
     stop_grace_period: 15s
     read_only: true
     cap_drop: [ALL]
@@ -423,6 +455,7 @@ services:
     mem_limit: 256m
     cpus: "0.50"
     environment:
+      OTEL_RESOURCE_ATTRIBUTES: service.namespace=opencok,deployment.environment.name=${NODE_ENV:-development}
       CDN_URL: ${CDN_URL:?Set CDN_URL for gateway asset storage}
     depends_on:
       api:
@@ -433,10 +466,10 @@ services:
       - 80:80
       - 9933:9933
     volumes:
-      - ./infra/gateway/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./infra/gateway/dynamic.yml:/etc/traefik/dynamic.yml:ro
     healthcheck:
-      test: [CMD, traefik, healthcheck, --configFile=/etc/traefik/traefik.yml]
+      test:
+        [CMD, traefik, healthcheck, --ping.entrypoint=health, --entrypoints.health.address=:8082]
       interval: 10s
       timeout: 3s
       start_period: 5s

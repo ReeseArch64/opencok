@@ -265,11 +265,14 @@ compatibility and cannot silently rewrite in-flight calculations.
 
 ## 12. Observability, Evelog and search
 
-Current server/API services use Evlog through [shared logging](../packages/core/README.md#operational-logging)
+Current server/API/Chat services use Evlog through [shared logging](../packages/core/README.md#operational-logging)
 and export filtered logs, traces, controlled exceptions and duration/process metrics to
 Maple Local in Compose. [ADR-0013](../docs/decisions/0013-adopt-maple-for-local-operational-observability.md)
 records the authorized implementation and suspends Grafana, Loki, Prometheus, Axiom and
-Sentry for these signals while Maple passes verification. Production capacity remains open.
+Sentry for these signals while Maple passes verification. The gateway exports filtered
+access logs and HTTP metrics through native Traefik OTLP exporters under `gateway`;
+native ingress tracing stays disabled to exclude request URLs and client addresses.
+Maple is not a startup dependency. Production capacity remains open.
 Operational events cover composed service/adapter calls, HTTP/TCP, PostgreSQL statements,
 workers, generated media/frames and confirmed transaction effects. Bodies, SQL, credentials,
 player identities and raw exception messages/stacks are excluded. Maple is an operational

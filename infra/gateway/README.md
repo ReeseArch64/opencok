@@ -1,7 +1,8 @@
 # TypeScript stack gateway
 
 Traefik routes HTTP discovery to `api:8080` and SFS/TCP to `server:9933`.
-Configuration lives in [traefik.yml](traefik.yml) and [dynamic.yml](dynamic.yml).
+Static configuration lives in the gateway command in
+[docker-compose.yml](../../docker-compose.yml); routes live in [dynamic.yml](dynamic.yml).
 No Docker socket or administration dashboard is exposed.
 
 | Public route                                                                                             | Methods         | Destination                           |
@@ -46,6 +47,17 @@ UTC time, method, router, statuses and duration. The API returns a request ID an
 logs status/duration without payloads. Client Authorization headers are not stripped
 by an obsolete media compatibility middleware. Forwarded headers are not trusted
 from arbitrary sources.
+
+Gateway access logs and OTLP HTTP metrics are exported directly to Maple as `gateway`,
+using the shared `MAPLE_LOCAL_INGEST_KEY`. CLI configuration supplies authenticated
+export headers without mixing static file and environment configuration methods.
+The access-log field allowlist applies to console and exported records alike.
+Metrics include entry point, router and service labels, with a one-second export
+interval. Native gateway tracing remains disabled because its default span attributes
+include request URLs and client addresses outside the operational data allowlist.
+Traefik process diagnostics remain on the local console; exported access-log statuses
+and latency metrics cover ingress failures. Maple is not a startup dependency.
+The native OTLP access-log exporter uses Traefik's `experimental.otlpLogs` option.
 
 Historical Nginx, Apache-upload and avatar configs have been removed from this
 stage instead of serving as misleading deployment alternatives.

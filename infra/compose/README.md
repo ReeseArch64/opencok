@@ -314,32 +314,36 @@ Maple or pgAdmin container alone does not establish readiness.
 Start the services after rebuilding the applications:
 
 ```sh
-docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait maple server api
+docker compose -f docker-compose.yml -f docker-compose.dev.yml --profile dev up --build -d --wait maple server api chat gateway
 ```
 
 Compose's PostgreSQL setup applies migration `0044_mutation_trace_context.sql` before
 server/API start. This adds nullable outbox trace context without resetting existing
-state. Rebuild server/API when updating this integration. Maple is not a gameplay
+state. Rebuild server/API/Chat when updating this integration. Maple is not a gameplay
 readiness dependency: a telemetry outage does not prevent application startup.
 
 Open `http://127.0.0.1:4318`. Set independently generated
 `MAPLE_LOCAL_ACCESS_TOKEN` and `MAPLE_LOCAL_INGEST_KEY` values in the ignored root `.env`
-before starting the services; Compose supplies no default credentials. Maple, server
-and API must use the same ingest key. After changing credentials, recreate Maple,
-server and API together. Generate each
+before starting the services; Compose supplies no default credentials. Maple, server,
+API, Chat and gateway must use the same ingest key. After changing credentials,
+recreate all five services together. Generate each
 value with `openssl rand -hex 32`; keep them out of source and command output captured
 for reports. The dashboard token can read/query telemetry; the ingest key only writes.
 Maple's port 4318 is published on all host interfaces. Restrict access with host
 network controls when the development machine is reachable by other devices.
 
-Both services send OTLP to `http://maple:4318`. For applications run outside Compose,
+Server, API and Chat send OTLP to `http://maple:4318`. Chat initializes its exporter
+before opening application resources and flushes after closing them on shutdown or
+startup failure. The gateway sends filtered access logs and HTTP metrics through
+Traefik's native OTLP exporters; see the [gateway guide](../gateway/README.md).
+For applications run outside Compose,
 set `OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318` and the same ingest key.
 The telemetry export interval is fixed at 1000 ms in code.
 `OTEL_SLOW_OPERATION_MS` defaults to 1000 and accepts 100–60000 ms; configure it
 on the applications when changing the slow-operation threshold. Leaving the endpoint
 unset keeps JSON logs without network export.
 
-In the dashboard, select `server` or `api`, filter by operation/outcome/level and open
+In the dashboard, select `server`, `api`, `chat` or `gateway`, filter by operation/outcome/level and open
 a log's trace to inspect its child spans. Use request/connection/job IDs or the opaque
 mutation reference for a specific operation. Inspect Errors for controlled exception
 groups and Metrics for `opencok.operation.duration`, `opencok.operations.active`,
@@ -378,7 +382,8 @@ Verification commands use synthetic inputs and disposable infrastructure:
 bun run --cwd packages/core test:maple
 ```
 
-This checks every required signal, trace/log correlation, private-field filtering,
+This checks application signals for server/API/Chat, gateway access logs and HTTP
+metrics, trace/log correlation, private-field filtering,
 query authentication and clean-restart persistence against the real Maple image.
 Production capacity and representative load remain separate admission work.
 

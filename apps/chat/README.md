@@ -63,6 +63,18 @@ and receipts prevent replay resurrection. Maintenance is bounded, and MongoDB ou
 preserve PostgreSQL bodies for archive fallback. See the complete
 [topic-24 workflow, deployment and retention guide](../../docs/social-chat-migration.md).
 
+## Operational telemetry
+
+Compose supplies `OTEL_EXPORTER_OTLP_ENDPOINT=http://maple:4318` and the shared
+`MAPLE_LOCAL_INGEST_KEY`. Chat uses the same validated telemetry settings and Evlog
+exporter as server/API, under service name `chat`. HTTP/WebSocket operational logs,
+HTTP latency and process metrics, and controlled error spans are exported without
+message bodies, player identities or credentials. Existing shared database
+instrumentation contributes dependency spans. The exporter starts before application
+resources and flushes after resource cleanup, including startup failure. Maple
+availability does not gate Chat readiness. Without an OTLP endpoint, console logging
+continues. See the [local Maple guide](../../infra/compose/README.md#observability).
+
 ## Validation and limits
 
 Run `bun run --cwd apps/chat check-types`, `bun run --cwd apps/chat test` and
