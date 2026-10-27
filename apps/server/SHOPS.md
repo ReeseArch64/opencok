@@ -22,12 +22,20 @@ Shop eligibility checks sale state, catalog/version, realm, country, civilizatio
 player/castle levels, registration age and absolute sale windows. Listings exclude
 sold-out offers. Purchases recheck eligibility and counters while holding the
 account and offer locks. A client cannot set a price, currency, reward or limit.
+The version gate uses the saved profile's `appVersion`; profiles without a saved
+version retain the maintained client-version fallback. An old saved version cannot
+use that fallback to bypass an offer's minimum version.
 
 Normal gold spending uses free gold, special paid gold and paid gold in that
 order. DMM accounts use the corresponding DMM pools. Optional item costs consume
 valid value-zero stacks. Expired items cannot pay for a purchase or trade. Debit
 and grant legs remain in the ledger even if an exchange has no net item change.
 Item grants use the inventory subsystem's stacking and expiration rules.
+An item is expired when `vanishTime <= now`, except for the permanent zero value.
+The same exclusive deadline applies to spending and selecting a reusable grant
+stack, so delivery cannot revive an expired stack. An offer without a positive
+configured currency or item cost is unavailable, matching the source purchase
+guard. Equipment identities and missing item catalogs cannot become item costs.
 
 Daily boundaries and calendar timestamps use UTC, matching maintained realm
 tests. Weekly offers use the catalog's comma-separated Calendar weekdays (Sunday
@@ -92,6 +100,76 @@ ledger continuity. The two-realm TCP/SFS scenario checks catalog discovery,
 purchase, correlation replay, exhausted limits and subsequent inventory use.
 `apps/server/scripts/mutate-shops.ts` checks that critical protection removals
 cause validation failures. These synthetic tests do not validate APK rendering.
+
+The recovery suite compares complete synthetic profile, resource, inventory,
+purchase, realm-stock, NPC-offer, receipt, ledger and outbox snapshots after each
+rejection or injected persistence failure. Both shop and NPC failures at ledger,
+outbox and receipt insertion roll back the entire operation. NPC tests also cover
+insufficient items, exact expiry deadlines, unsupported equipment, distinct racing
+operations, lost replies, restored offers, durable replay after PostgreSQL restart
+and stale-owner rejection for both new commands and saved replies.
+
+The actual TCP/SFS scenario exercises all three catalog commands in two realms.
+It then replays explicit purchase and exchange operation IDs after server restart
+and authenticated reconnect, with different `_cok_` correlation values and without
+restoring the original shop offer. The saved result replays through the native
+response envelope without consulting current pricing or repeating delivery.
+
+## Issue 324 acceptance
+
+This matrix covers the scope and explicit exclusions of
+[issue 324](https://github.com/ReeseArch64/opencok/issues/324). Completion of that
+scope does not certify every legacy shop family or device build.
+
+| Criterion                                                                                  | Maintained implementation                                                                                    | Verification                                                                                                                        |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Versioned catalog, eligibility, tier prices and counters                                   | `rules/shops`, `mappings/shops`, `ShopService` and maintained `shop_new` catalog                             | `test/shops.test.ts`, `integration/shop-trade-recovery.test.ts` and the three native catalog commands in `integration/core.test.ts` |
+| Atomic purchase, player/cycle/day limits and realm stock                                   | `createShopRepository` composes the fenced mutation and inventory executors with the locked `shop_stock` row | `integration/shops.test.ts` and mixed-cost, complete-state rollback checks in `integration/shop-trade-recovery.test.ts`             |
+| Persisted NPC offers, exchange, cancel and UTC day renewal                                 | `TradeService` and `createTradeExecutor`                                                                     | `integration/shops.test.ts` and offer restoration, renewal, race and rollback checks in `integration/shop-trade-recovery.test.ts`   |
+| Duplicates, concurrent buyers, insufficient balances, reply loss, restart and stale owners | Durable `command_receipt`, `economy_posting` and `mutation_outbox` under realm fencing                       | Disposable PostgreSQL shop/NPC suites plus purchase/exchange replay after actual TCP/SFS reconnect in `integration/core.test.ts`    |
+| Explicit specialized dependencies and unsupported families                                 | Pre-debit eligibility and item-delivery guards; dependency matrix below                                      | Unit denial matrix, unchanged PostgreSQL snapshots and unsupported NPC delivery tests                                               |
+| Small dependent PRs and migration/recovery instructions                                    | Original persistence, service and runtime changes followed by eligibility/recovery completion                | Kingdom migration `0014_shop_stock`, deployment instructions above and issue-linked PR stack                                        |
+
+Reproduce the targeted checks from the repository root:
+
+```sh
+bun --no-env-file test apps/server/test/shops.test.ts apps/server/test/inventory.test.ts
+bun --no-env-file test apps/server/integration/shops.test.ts apps/server/integration/shop-trade-recovery.test.ts
+bun --no-env-file test apps/server/integration/core.test.ts apps/server/integration/campaign-producers.test.ts apps/server/integration/continued-cost.test.ts
+bun --no-env-file apps/server/scripts/mutate-shops.ts
+bun run lint
+bun run format:check
+bun run --cwd apps/server check-types
+bun run --cwd packages/rules check-types
+bun run --cwd packages/services check-types
+```
+
+## Specialized dependency boundaries
+
+| Native price or delivery family                                                   | Authoritative dependency required before exposure                             | Current behavior                                                                             |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Price 1, gold                                                                     | Saved ordinary or DMM gold pools                                              | Atomic debit and normal inventory delivery                                                   |
+| `value_item`, ordinary goods                                                      | Owned, unexpired value-zero inventory stacks and configured positive quantity | Atomic item debit, optionally combined with gold                                             |
+| Price 2, alliance contribution                                                    | Alliance membership and contribution accounting                               | Hidden/rejected before debit                                                                 |
+| Price 3, kingdom contribution                                                     | Kingdom contribution accounting and its lifecycle                             | Hidden/rejected before debit                                                                 |
+| Price 4, military rank honor                                                      | Military feature/rank eligibility and honor accounting                        | Hidden/rejected before debit                                                                 |
+| Price 5, SVIP points                                                              | Owned SVIP shop level, points and experience progression                      | Hidden/rejected before debit                                                                 |
+| Price 6, neutral score                                                            | Neutral score authority and lifecycle                                         | Hidden/rejected before debit                                                                 |
+| Price 7, civilization score                                                       | Civilization authority and verified spending effects                          | Hidden/rejected before debit                                                                 |
+| Price 8, crystal gold                                                             | Crystal-gold authority, distinct from ordinary gold and crystals              | Hidden/rejected before debit                                                                 |
+| Price 9, CSMOD balance                                                            | CSMOD balance and fulfillment authority                                       | Hidden/rejected before debit                                                                 |
+| Status `type2=1` and equipment delivery/costs                                     | Status/equipment ownership, storage, effects and native response composition  | Never substituted with an ordinary item stack; shop and NPC requests fail before consumption |
+| Prestige/military/SVIP conditions, shop experience and group discounts            | Saved eligibility and domain effects, including discount-item consumption     | Conditioned offers hidden/rejected; client discount requests rejected                        |
+| Weekly schedules combined with cycle renewal                                      | Audited combined scheduling and renewal policy                                | Unsupported before debit                                                                     |
+| NPC princess tasks and unrelated event progression                                | The owning task/event trigger and atomic integration                          | No fabricated task completion; inventory changes remain durable                              |
+| `exchange.*`, `csmodstore.*`, dedicated alliance/military and promotion exchanges | Their separate payment, currency, stock and event lifecycles                  | Outside the ordinary shop/NPC command surface                                                |
+
+Existing confirmed ordinary shop purchases already feed the maintained campaign
+and continued-cost domains. `integration/campaign-producers.test.ts` and
+`integration/continued-cost.test.ts` verify those integrations, their receipts and
+rollback. Durable outbox delivery alone is not evidence of an unimplemented
+specialized effect. No new dependency, schema migration, environment setting or
+mobile resource patch is needed for the eligibility and recovery completion.
 
 Specialized alliance/kingdom contribution, military honor, SVIP, neutral and
 civilization scores, crystal-gold/CSMOD balances, status/equipment delivery,
