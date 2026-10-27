@@ -89,6 +89,14 @@ function endTime(
         end = opened + BigInt(days) * 86400000n;
       return end > now ? end : undefined;
     }
+    case 24:
+      return localEventControlOpen(rules, "69026", context) ? 0n : undefined;
+    case 26: {
+      if (!openingValid || !localEventControlOpen(rules, "69027", context)) return;
+      const end =
+        opened + BigInt(cityInteger(rules.configuration.payControl!.get("69027")!.k6)) * 86400000n;
+      return end > now ? end : undefined;
+    }
     case 27: {
       if (!feature(rules, "target_quest", context)) return;
       const config = rules.items.get("target_quest");
