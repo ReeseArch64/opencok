@@ -14959,3 +14959,69 @@ select "rankKey", "member", "kingdomId", "actId", "eventId", "type", "level", "e
 update "opencok_global"."hero_rank_score" set "rankKey" = $1, "member" = $2, "kingdomId" = $3, "actId" = $4, "eventId" = $5, "type" = $6, "level" = $7, "endTime" = $8, "score" = $9, "metadata" = $10, "ownerEpoch" = $11, "sequence" = $12, "observedAt" = $13 where "opencok_global"."hero_rank_score"."rankKey" = $14
 delete from "opencok_global"."hero_rank_score" where "opencok_global"."hero_rank_score"."rankKey" = $1"
 `;
+
+exports[`opencok_global.hero_rank_period: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["id","varchar(32)",true,null,null,null]
+column ["type","integer",true,null,null,null]
+column ["eventId","varchar(200)",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["group","varchar(255)",true,null,null,null]
+column ["expectedRealms","varchar(2048)",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["state","integer",true,"0",null,null]
+column ["finalizedAt","bigint",true,"0",null,null]
+column ["kingdomRank","varchar(255)",false,null,null,null]
+primary ["hero_rank_period_PRIMARY",["id"]]
+index ["hero_rank_period_pending",false,["state","endTime"]]
+check ["hero_rank_period_bounds","\\"type\\" BETWEEN 1 AND 4 AND \\"endTime\\" > 0 AND \\"createdAt\\" >= \\"endTime\\" AND \\"state\\" IN (0,1) AND ((\\"state\\" = 0 AND \\"finalizedAt\\" = 0) OR (\\"state\\" = 1 AND \\"finalizedAt\\" >= \\"endTime\\"))"]
+insert into "opencok_global"."hero_rank_period" ("id", "type", "eventId", "endTime", "group", "expectedRealms", "createdAt", "state", "finalizedAt", "kingdomRank") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+select "id", "type", "eventId", "endTime", "group", "expectedRealms", "createdAt", "state", "finalizedAt", "kingdomRank" from "opencok_global"."hero_rank_period" where "opencok_global"."hero_rank_period"."id" = $1
+update "opencok_global"."hero_rank_period" set "id" = $1, "type" = $2, "eventId" = $3, "endTime" = $4, "group" = $5, "expectedRealms" = $6, "createdAt" = $7, "state" = $8, "finalizedAt" = $9, "kingdomRank" = $10 where "opencok_global"."hero_rank_period"."id" = $11
+delete from "opencok_global"."hero_rank_period" where "opencok_global"."hero_rank_period"."id" = $1"
+`;
+
+exports[`opencok_global.hero_rank_watermark: schema and CRUD SQL 1`] = `
+"schema opencok_global
+column ["periodId","varchar(32)",true,null,null,null]
+column ["kingdomId","integer",true,null,null,null]
+column ["actId","varchar(40)",false,null,null,null]
+column ["state","integer",true,"0",null,null]
+column ["digest","varchar(32)",true,null,null,null]
+column ["scoreCount","bigint",true,"0",null,null]
+column ["eligible","integer",true,null,null,null]
+column ["completedAt","bigint",true,"0",null,null]
+column ["total","bigint",true,"0",null,null]
+primary ["hero_rank_watermark_PRIMARY",["periodId","kingdomId"]]
+index ["hero_rank_watermark_source",false,["kingdomId","actId","state"]]
+check ["hero_rank_watermark_bounds","\\"kingdomId\\" > 0 AND \\"state\\" IN (0,1) AND \\"scoreCount\\" >= 0 AND \\"scoreCount\\" <= 1000000 AND \\"eligible\\" IN (0,1) AND \\"completedAt\\" >= 0 AND (\\"actId\\" IS NOT NULL OR (\\"eligible\\" = 0 AND \\"scoreCount\\" = 0 AND \\"total\\" = 0))"]
+insert into "opencok_global"."hero_rank_watermark" ("periodId", "kingdomId", "actId", "state", "digest", "scoreCount", "eligible", "completedAt", "total") values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+select "periodId", "kingdomId", "actId", "state", "digest", "scoreCount", "eligible", "completedAt", "total" from "opencok_global"."hero_rank_watermark" where "opencok_global"."hero_rank_watermark"."periodId" = $1
+update "opencok_global"."hero_rank_watermark" set "periodId" = $1, "kingdomId" = $2, "actId" = $3, "state" = $4, "digest" = $5, "scoreCount" = $6, "eligible" = $7, "completedAt" = $8, "total" = $9 where "opencok_global"."hero_rank_watermark"."periodId" = $10
+delete from "opencok_global"."hero_rank_watermark" where "opencok_global"."hero_rank_watermark"."periodId" = $1"
+`;
+
+exports[`opencok_kingdom.hero_rank_closure: schema and CRUD SQL 1`] = `
+"schema opencok_kingdom
+column ["periodId","varchar(32)",true,null,null,null]
+column ["actId","varchar(40)",false,null,null,null]
+column ["type","integer",true,null,null,null]
+column ["endTime","bigint",true,null,null,null]
+column ["group","varchar(255)",true,null,null,null]
+column ["eventId","varchar(200)",true,null,null,null]
+column ["eligible","integer",true,null,null,null]
+column ["phase","integer",true,"0",null,null]
+column ["cursor","varchar(40)",true,"''",null,null]
+column ["processed","bigint",true,"0",null,null]
+column ["scoreCount","bigint",true,null,null,null]
+column ["digest","varchar(32)",true,null,null,null]
+column ["createdAt","bigint",true,null,null,null]
+column ["kingdomRank","varchar(255)",false,null,null,null]
+primary ["hero_rank_closure_PRIMARY",["periodId"]]
+index ["hero_rank_closure_pending",false,["phase","endTime"]]
+check ["hero_rank_closure_bounds","\\"type\\" BETWEEN 1 AND 4 AND \\"endTime\\" > 0 AND \\"createdAt\\" >= \\"endTime\\" AND \\"eligible\\" IN (0,1) AND \\"phase\\" BETWEEN 0 AND 3 AND \\"processed\\" >= 0 AND \\"processed\\" <= \\"scoreCount\\" AND \\"scoreCount\\" <= 1000000 AND (\\"actId\\" IS NOT NULL OR (\\"eligible\\" = 0 AND \\"scoreCount\\" = 0))"]
+insert into "opencok_kingdom"."hero_rank_closure" ("periodId", "actId", "type", "endTime", "group", "eventId", "eligible", "phase", "cursor", "processed", "scoreCount", "digest", "createdAt", "kingdomRank") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+select "periodId", "actId", "type", "endTime", "group", "eventId", "eligible", "phase", "cursor", "processed", "scoreCount", "digest", "createdAt", "kingdomRank" from "opencok_kingdom"."hero_rank_closure" where "opencok_kingdom"."hero_rank_closure"."periodId" = $1
+update "opencok_kingdom"."hero_rank_closure" set "periodId" = $1, "actId" = $2, "type" = $3, "endTime" = $4, "group" = $5, "eventId" = $6, "eligible" = $7, "phase" = $8, "cursor" = $9, "processed" = $10, "scoreCount" = $11, "digest" = $12, "createdAt" = $13, "kingdomRank" = $14 where "opencok_kingdom"."hero_rank_closure"."periodId" = $15
+delete from "opencok_kingdom"."hero_rank_closure" where "opencok_kingdom"."hero_rank_closure"."periodId" = $1"
+`;

@@ -1229,3 +1229,54 @@ matched group ordering, board limits and a 257-member page boundary. Native TCP 
 SIGKILL recovery pass with the publisher composed into the realm. Final ranking
 prizes, kingdom result settlement and expedition coordination remain subsequent
 runtime work. Native device execution remains unverified.
+
+## Coordinated hero ranking finality
+
+Hero ranking closes after a minimum five-minute grace and explicit confirmation
+from every configured realm in the native ranking group. Each realm first takes
+an exclusive authority barrier, waits for executable overdue queues and march
+transitions, then marks its event closed and stores a score count/fingerprint in
+one owned transaction. In-flight mutations complete before that fingerprint is
+read. Banned, missing or visiting characters cannot execute those transitions;
+their pending state remains intact and a later authorization change cannot reopen
+the closed hero stage or add retroactive hero points.
+
+A realm with no corresponding event confirms its own absence under the same
+barrier. The coordinator does not infer an offline realm's absence. Unmatched
+kingdom events close without an invented opponent or new prize entitlement and
+retain their imported score rows. Calendar admission samples its clock after
+acquiring the owned calendar transaction, so a delayed refresh cannot create a
+historical stage after absence was confirmed.
+
+Sealed scores upload in pages of 64 with a durable cursor. The shared registry
+checks the complete count and fingerprint before accepting a realm's confirmation;
+a mismatch resets that upload for retry. Once accepted, projection updates preserve
+its immutable score facts while allowing current authority/cache versions to advance.
+This also protects final standings against a delayed snapshot captured before
+closure. Shared finalization uses the persisted realm cohort and rejects a caller
+that attempts to shorten it. An unavailable realm keeps the group pending.
+
+Kingdom ordering uses the exact sum of personal kingdom scores; alliance kingdom
+scores do not replace that total. Ties preserve the admitted opponent order. The
+coupled alliance result waits for the personal kingdom result, and both persisted
+event rows and their main activity retain the same final country order. No extra
+kingdom victory effect is created: the corresponding reference reward hook has no
+economic implementation. Ranking prize mail is the next owned delivery stage.
+
+Global migration `0014_hero_ranking_finality` adds `hero_rank_period` and
+`hero_rank_watermark`; kingdom migration `0032_hero_ranking_finality` adds
+`hero_rank_closure`. The inventory becomes 825 tables and 6,716 fields: 140 global
+and 685 kingdom tables. The source index supports sealed-publication guards.
+Apply both roles' migrations before this binary. Back up closure cursors, event
+markers, owned score rows, shared projection ownership, fingerprints and group
+results together. Retain all sealed state during binary rollback; clearing a
+marker or cursor independently is not a valid reward-recovery strategy. No new
+dependency or environment variable is required.
+
+Synthetic PostgreSQL cases cover grace/cohort waiting, actual overdue training,
+in-flight mutations with the production transaction fence, absence and banned
+actors, checksum mismatch/retry, immutable facts across authority replacement,
+local/shared rollback, coupled country totals, unmatched stages and bounded tails.
+Native TCP and SIGKILL recovery retain ordinary gameplay with the coordinator
+composed into the realm. Final ranking mail remains a separate stage; native device
+execution remains unverified.

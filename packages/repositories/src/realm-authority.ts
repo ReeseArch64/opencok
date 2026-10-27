@@ -62,6 +62,7 @@ export async function acquireRealmAuthority(
 export async function fenceRealmTransaction(
   tx: RealmTransaction,
   authority: RealmAuthority,
+  mode: "share" | "update" = "share",
 ): Promise<void> {
   authority.assertReady();
   const rows = await tx
@@ -75,7 +76,7 @@ export async function fenceRealmTransaction(
       ),
     )
     .limit(1)
-    .for("share");
+    .for(mode);
   if (rows.length !== 1) throw new DependencyError("realm authority");
   authority.assertReady();
 }

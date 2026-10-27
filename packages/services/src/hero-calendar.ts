@@ -8,7 +8,6 @@ export class HeroCalendarService {
     readonly now = Date.now,
   ) {}
   refresh() {
-    const at = BigInt(this.now());
-    return this.store.reconcile((state) => heroCalendarPlan(state, this.rules, at));
+    return this.store.reconcile((state) => heroCalendarPlan(state, this.rules, BigInt(this.now())));
   }
 }

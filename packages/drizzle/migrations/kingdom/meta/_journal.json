@@ -225,6 +225,13 @@
       "when": 1793030152424,
       "tag": "0031_olympic_settlement",
       "breakpoints": false
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793038495362,
+      "tag": "0032_hero_ranking_finality",
+      "breakpoints": false
     }
   ]
 }
