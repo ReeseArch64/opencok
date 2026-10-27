@@ -77,7 +77,7 @@ test("real TCP scout quotation, inspection, intel mail and return preserve troop
       }),
     ]);
     const rules = await loadRules(),
-      size = 1200,
+      size = 1201,
       anchors = [1 + 181 + 361 * size, 1 + 201 + 361 * size],
       authority = await acquireRealmAuthority(realm.db, 1, () => true),
       creator = new CharacterProvisioningService(

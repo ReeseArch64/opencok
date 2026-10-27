@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { userprofile } from "@opencok/drizzle/schema/opencok_kingdom/userprofile";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
 import { user_building } from "@opencok/drizzle/schema/opencok_kingdom/user_building";
@@ -19,7 +19,7 @@ async function fixture() {
   const size = 1201;
   const h = await cityHarness(
     [createCivilizationCastleDomain(size), createTotemDomain(size)],
-    false,
+    true,
     undefined,
     size,
   );
@@ -29,6 +29,7 @@ async function fixture() {
     h.rules.advanced.totems!.set("20015001", {
       ...h.rules.advanced.totems!.get("20015001")!,
       cover_area: "2",
+      take_effect_time: "1",
     });
     h.rules.goods.set("211685", { ...h.rules.goods.get("211685")!, permanent_props: "0" });
     const city = 1 + 20 + 20 * size;
@@ -186,6 +187,11 @@ test("native civilization and totem placement preserve pending marches and saved
     expect(
       (await h.db.db.select().from(user_item).where(eq(user_item.uuid, "totem-item")))[0]!.count,
     ).toBe(0);
+    h.clock.now += 60000;
+    await h.command("totem.tick", {});
+    const cleared = await h.db.db.select().from(worldpoint).where(inArray(worldpoint.id, h.cells));
+    expect(cleared).toHaveLength(4);
+    expect(cleared.every((point) => point.pointType === 0 && !point.ownerId)).toBe(true);
   } finally {
     await h.close();
   }
