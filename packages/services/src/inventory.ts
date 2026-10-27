@@ -167,7 +167,7 @@ export class InventoryPlanner {
     this.items = state.items.map((item) => ({ ...item }));
   }
   valid(item: InventoryItem) {
-    return item.vanishTime === 0n || item.vanishTime >= BigInt(this.now);
+    return item.vanishTime === 0n || item.vanishTime > BigInt(this.now);
   }
   own(uuid: string) {
     const item = this.items.find((item) => item.uuid === uuid);

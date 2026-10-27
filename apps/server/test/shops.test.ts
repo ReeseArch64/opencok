@@ -10,6 +10,7 @@ import {
 import { shopOffer } from "@opencok/mappings/shops";
 import type { ShopState, ShopPlan } from "@opencok/contracts/shops";
 import { ShopService } from "@opencok/services/shops";
+import { planInventoryGrants } from "@opencok/services/inventory";
 import { sfs, fields } from "@opencok/messages/sfs";
 
 const rules = new Rules(new Map(), new Map(), new Map());
@@ -170,4 +171,83 @@ test("shop service splits gold pools and preserves both item debit and grant pos
   await expect(
     service.command("buyer", "shoppingMall.buy", { id: sfs.string("offer"), num: sfs.int(1) }),
   ).rejects.toThrow();
+});
+
+test("shop version eligibility uses the saved client version", () => {
+  const current = state();
+  const versioned = { ...offer, version: "9.27.0" };
+  current.inventory.profile = { ...current.inventory.profile, appVersion: "6.12.20" };
+  expect(shopAvailable(versioned, current, rules)).toBe(false);
+  current.inventory.profile = { ...current.inventory.profile, appVersion: "9.27.0" };
+  expect(shopAvailable(versioned, current, rules)).toBe(true);
+  expect(shopAvailable({ ...versioned, version: "12.06.0" }, current, rules)).toBe(false);
+});
+
+test("unsupported shop currencies, effects and equipment cannot appear as ordinary inventory offers", () => {
+  const local = new Rules(new Map(), new Map(), new Map());
+  local.goods.set("200300", { id: "200300" });
+  local.goods.set("200301", { id: "200301", para1: "equipment" });
+  local.goods.set("1000000", { id: "1000000" });
+  local.power.equipment = new Map([["equipment", { id: "equipment" }]]);
+  const current = state();
+  for (const type of [2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+    expect(() => shopAvailable({ ...offer, value1_type: String(type) }, current, local)).toThrow();
+    expect(() =>
+      shopAvailable({ ...offer, value2_type: String(type), value2: "1" }, current, local),
+    ).toThrow();
+  }
+  const unsupported: Rule[] = [
+    { type2: "1" },
+    { sale_type: "13" },
+    { sale_type: "14" },
+    { sale_type: "19" },
+    { military_rank: "1" },
+    { svip_shop_level: "1" },
+    { prestige_level: "1" },
+    { exp: "1" },
+    { discount: "1" },
+    { item_id: "200301" },
+    { value_item: "200301", value_item_num: "1" },
+    { value_item: "1000000", value_item_num: "1" },
+    { value_item: "missing", value_item_num: "1" },
+    { value_item: "200300", value_item_num: "0" },
+    { value1: "0" },
+  ];
+  for (const change of unsupported)
+    expect(shopAvailable({ ...offer, ...change }, current, local)).toBe(false);
+  expect(
+    shopAvailable(
+      { ...offer, value1: "0", value_item: "200300", value_item_num: "1" },
+      current,
+      local,
+    ),
+  ).toBe(true);
+});
+
+test("shop and trade grants cannot spend or revive a stack at its expiry deadline", () => {
+  const current = state();
+  current.inventory.items = [
+    { uuid: "expired", itemId: "200300", count: 4, value: 0, vanishTime: BigInt(current.now) },
+  ];
+  expect(() =>
+    planInventoryGrants(current.inventory, rules, [], current.now, [
+      { itemId: "200300", count: 1 },
+    ]),
+  ).toThrow();
+  const plan = planInventoryGrants(
+    current.inventory,
+    rules,
+    [{ itemId: "200300", count: 1 }],
+    current.now,
+  );
+  expect(plan.items).toHaveLength(1);
+  expect(plan.items[0]!.uuid).not.toBe("expired");
+  expect(plan.items[0]!.count).toBe(1);
+  current.inventory.items = [
+    { ...current.inventory.items[0]!, vanishTime: BigInt(current.now + 1) },
+  ];
+  expect(
+    planInventoryGrants(current.inventory, rules, [], current.now, [{ itemId: "200300", count: 1 }])
+      .items[0]!.count,
+  ).toBe(3);
 });

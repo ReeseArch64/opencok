@@ -39,7 +39,7 @@ import { Cache } from "@opencok/storage/session";
 import { Coordination } from "@opencok/storage/coordination";
 import { Database } from "@opencok/repositories/game";
 import type { Config } from "../src/config.ts";
-import { fields, sfs, str, Type, type Value } from "@opencok/messages/sfs";
+import { fields, sfs, str, Type, type Value, type Fields } from "@opencok/messages/sfs";
 import { FOREVER } from "@opencok/mappings/city";
 import { Client } from "./client.ts";
 import { dataConfigItems } from "../test/fixtures/data-config.ts";
@@ -63,6 +63,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
   const containers: string[] = [];
   const servers: Awaited<ReturnType<typeof startServer>>[] = [];
   const clients: Client[] = [];
+  const shopReplays = new Map<number, { request: Fields; reply: Fields }>();
+  const tradeReplays = new Map<number, { request: Fields; reply: Fields }>();
   let chat: ReturnType<typeof createChatApp> | undefined;
   let chatRepository: ReturnType<typeof createChatRepository> | undefined;
   const adapters: Database[] = [];
@@ -322,7 +324,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         item_id: "200001",
         sale_type: "10",
         value1_type: "1",
-        value1: "0",
+        value1: "1",
         buy_times: "1",
       });
       runtimeRules.trades.set("wire-trade", {
@@ -527,12 +529,21 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       );
       expect((await client.command("build.info")).building?.type).toBe(Type.Array);
       expect((await client.command("mall.info")).shoppingMall?.type).toBe(Type.Array);
+      for (const [command, params] of [
+        ["mall.info.type", { type: sfs.string("10") }],
+        ["mall.data", { mallId: sfs.string("10") }],
+      ] as const) {
+        const offers = (await client.command(command, params)).shoppingMall!.value as Value[];
+        expect(offers.some((offer) => fields(offer).id?.value === "wire-shop")).toBe(true);
+      }
       const shopPurchase = {
         id: sfs.string("wire-shop"),
         num: sfs.int(1),
         _cok_: sfs.string("shop-wire"),
+        operationId: sfs.string(randomUUID()),
       };
       const bought = await client.command("shoppingMall.buy", shopPurchase);
+      shopReplays.set(id, { request: shopPurchase, reply: bought });
       expect(fields(bought.goods).count).toEqual(sfs.int(8));
       expect(fields((await client.command("shoppingMall.buy", shopPurchase)).goods).count).toEqual(
         sfs.int(8),
@@ -542,18 +553,24 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
           await client.command("shoppingMall.buy", {
             ...shopPurchase,
             _cok_: sfs.string("shop-other"),
+            operationId: sfs.string(randomUUID()),
           })
         ).errorCode,
       ).toBeDefined();
       expect(
         (await client.command("trade.info", { _cok_: sfs.string("trade-offer") })).trade,
       ).toEqual(sfs.string("200001;1|200001;1"));
-      const traded = await client.command("trade.exchange", { _cok_: sfs.string("trade-swap") });
+      const tradeRequest = {
+        _cok_: sfs.string("trade-swap"),
+        operationId: sfs.string(randomUUID()),
+      };
+      const traded = await client.command("trade.exchange", tradeRequest);
+      tradeReplays.set(id, { request: tradeRequest, reply: traded });
       expect(fields(traded.addItem).count).toEqual(sfs.int(8));
       expect(fields(traded.tradeCaravan).times).toEqual(sfs.int(1));
-      expect(
-        (await client.command("trade.exchange", { _cok_: sfs.string("trade-swap") })).operationId,
-      ).toEqual(traded.operationId);
+      expect((await client.command("trade.exchange", tradeRequest)).operationId).toEqual(
+        traded.operationId,
+      );
       const claimedMail = await client.command("mail.reward", {
         uid: sfs.string("synthetic-mail-reward"),
         _cok_: sfs.string("mail-claim"),
@@ -648,7 +665,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(after.queues).toHaveLength(before.queues.length + 1);
       expect(after).toEqual({
         ...before,
-        profile: { ...before.profile, lastOnlineTime: onlineAt },
+        profile: { ...before.profile, gold: 9007199254740992n, lastOnlineTime: onlineAt },
         lord: {
           ...before.lord,
           dailyTaskFlushTime: dailyFlush,
@@ -765,7 +782,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         return rows.rows[0]?.pendingEffects === 0;
       });
       const saved = await adapter.getProfileById(`synthetic-player-${id}`);
-      expect(saved).toMatchObject({ name: `Renamed ${id}`, gold: 9007199254740893n });
+      expect(saved).toMatchObject({ name: `Renamed ${id}`, gold: 9007199254740892n });
       const replacement = new Client(server.port, id);
       clients.push(replacement);
       await replacement.handshake();
@@ -776,7 +793,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       );
       const replacedInit = fields(fields((await replacement.next()).p).p);
       expect(fields(replacedInit.user).name?.value).toBe(`Renamed ${id}`);
-      expect(fields(replacedInit.user).gold?.value).toBe(9007199254740893n);
+      expect(fields(replacedInit.user).gold?.value).toBe(9007199254740892n);
 
       expect((await replacement.command("cmd.ping")).serverNowTime?.type).toBe(Type.Long);
       const paidAt = BigInt(Date.now()),
@@ -861,7 +878,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       const paidInit = fields(fields((await paidLogin.next()).p).p);
       expect(fields(paidInit.repayinfo).payPoint).toEqual(sfs.long(1700));
       expect(paidInit.newSerCumRechargeTotal).toEqual(sfs.long(1700));
-      expect(fields(paidInit.user).gold).toEqual(sfs.long(9007199254740893n));
+      expect(fields(paidInit.user).gold).toEqual(sfs.long(9007199254740892n));
       configureGoldEggs(runtimeRules);
       runtimeRules.power.activityPanels!.set("57175", {
         ...runtimeRules.power.activityPanels!.get("57175")!,
@@ -909,11 +926,11 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       });
       expect(fields(legacyOpened.eggAct).eggCd?.type).toBe(Type.Long);
       const legacyClear = await paidLogin.command("egg.act.cd", {});
-      expect(legacyClear.gold).toEqual(sfs.long(9007199254740892n));
+      expect(legacyClear.gold).toEqual(sfs.long(9007199254740891n));
       const legacyReward = await paidLogin.command("egg.act.reward", {});
       expect(fields(legacyReward.eggAct).exp).toEqual(sfs.int(3));
       expect(legacyReward.reward?.type).toBe(Type.Array);
-      expect((await adapter.getProfileById(paidOwner))!.gold).toBe(9007199254740893n);
+      expect((await adapter.getProfileById(paidOwner))!.gold).toBe(9007199254740892n);
       expect((await paidLogin.command("egg.activity.init", {})).errorCode).toEqual(
         sfs.string("102192"),
       );
@@ -973,6 +990,19 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       ).rows[0].showEquip,
     ).toBe(1);
     expect(fields((await reconnected.command("build.info")).resource).wood?.value).toBe(10005n);
+    for (const [command, saved] of [
+      ["shoppingMall.buy", shopReplays.get(1)!],
+      ["trade.exchange", tradeReplays.get(1)!],
+    ] as const) {
+      const replayed = await reconnected.command(command, {
+        ...saved.request,
+        _cok_: sfs.string("after-restart"),
+      });
+      expect(replayed.operationId).toEqual(saved.reply.operationId);
+      expect(replayed._cok_).toEqual(sfs.string("after-restart"));
+      if (command === "shoppingMall.buy") expect(replayed.goods).toEqual(saved.reply.goods);
+      else expect(replayed.addItem).toEqual(saved.reply.addItem);
+    }
     await pg.docker(["pause", redis]);
     await eventually(
       async () => (await fetch(`http://127.0.0.1:${restarted.healthPort}/readyz`)).status === 503,

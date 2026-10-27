@@ -80,6 +80,7 @@ export class ShopService {
                 },
               ]
             : [];
+        if (!gold && !costs.length) throw new GameError(errors.unsupported);
         const plan = planInventoryGrants(
           original,
           this.rules,
