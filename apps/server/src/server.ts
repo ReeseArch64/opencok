@@ -8,6 +8,7 @@ import { createMergeCampaignStore, mergeCampaignActor } from "@opencok/repositor
 import { mergeEffectBoard } from "@opencok/mappings/merge-campaign";
 import { publishMergeEffectBoard } from "@opencok/services/merge-campaign";
 import { serverFeature } from "@opencok/rules/power-context";
+import { createTreasureMapDomain } from "@opencok/services/treasure-map";
 import { cityDefenseDomain } from "@opencok/services/city-defense";
 import { createWorldUtilityStore } from "@opencok/repositories/world-utility";
 import { createWorldResourceRefreshExecutor } from "@opencok/repositories/world-resource-refresh";
@@ -644,6 +645,7 @@ export const RealmDependenciesLive = Layer.effect(
         dragonTalentsDomain,
         createWorldMarchDomain(config.mapSize),
         cityDefenseDomain,
+        createTreasureMapDomain(config.mapSize),
         createCivilizationCastleDomain(config.mapSize),
         createTotemDomain(config.mapSize),
         minstrelDomain,

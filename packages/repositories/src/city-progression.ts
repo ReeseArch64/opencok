@@ -1,5 +1,6 @@
 import { redPacketReader, writeRedPackets } from "./red-packets";
 import { readHotItems, writeHotItems } from "./hot-item";
+import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { readMonsterExchanges, writeMonsterExchanges } from "./monster-exchange";
 import { readFragmentExchanges, writeFragmentExchanges } from "./fragment-exchange";
 import { readCampaignProfile } from "./campaign-notice";
@@ -94,6 +95,20 @@ export function createCityProgressionStore(
   let alliance = "";
   let cosmeticTarget: Awaited<ReturnType<typeof readCosmeticTarget>>;
   return {
+    async treasurePoints(ids) {
+      if (
+        ids.length > 4096 ||
+        ids.some((id) => !Number.isInteger(id) || id < 1 || id > mapSize * mapSize)
+      )
+        throw new Error("Invalid treasure target query");
+      if (!ids.length) return [];
+      return tx
+        .select()
+        .from(worldpoint)
+        .where(and(eq(worldpoint.worldId, 0), inArray(worldpoint.id, [...ids])))
+        .orderBy(asc(worldpoint.id))
+        .for("update");
+    },
     async getState(command, ranking, request) {
       const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
       const [resource] = await tx.select().from(user_resource).where(eq(user_resource.uid, owner));
@@ -273,6 +288,7 @@ export function createCityProgressionStore(
           : {}),
         worldMutation:
           command?.startsWith("world.") ||
+          command?.startsWith("treasuremap.") ||
           command === "buy.citydef" ||
           command === "totem" ||
           command === "civilizationCastle"

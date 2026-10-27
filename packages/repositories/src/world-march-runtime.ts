@@ -1,3 +1,4 @@
+import { readTreasureMaps, writeTreasureMaps } from "./treasure-map";
 import { t_worldboss } from "@opencok/drizzle/schema/opencok_kingdom/t_worldboss";
 import { and, asc, eq, inArray, lte, sql, or, isNull } from "drizzle-orm";
 import { totem_activation } from "@opencok/drizzle/schema/opencok_kingdom/totem_activation";
@@ -111,13 +112,22 @@ export async function readWorldMutationState(
       : undefined;
   if (cityBosses && cityBosses.length > 1024)
     throw new Error("City fire source aggregate exceeds bound");
-  return { world, points, marches, checkpoints, randomDestination, cityBosses };
+  return {
+    world,
+    points,
+    marches,
+    checkpoints,
+    randomDestination,
+    cityBosses,
+    treasures: await readTreasureMaps(tx, owner),
+  };
 }
 export async function writeWorldMutation(
   tx: MutationTransaction,
   owner: string,
   write: WorldMutationWrite,
 ) {
+  await writeTreasureMaps(tx, owner, write);
   if (write.world) {
     if (write.world.uid !== owner) throw new Error("Foreign world write");
     await tx

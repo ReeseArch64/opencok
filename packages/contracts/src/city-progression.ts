@@ -221,6 +221,7 @@ export interface CityProgressionWrite {
 }
 
 export interface CityProgressionStore {
+  treasurePoints?(ids: readonly number[]): Promise<readonly Row[]>;
   getState(
     command?: string,
     ranking?: GeneralRankingWeights,

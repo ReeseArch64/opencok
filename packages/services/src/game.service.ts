@@ -1,5 +1,6 @@
 import { activityDirectory } from "@opencok/mappings/activity-directory";
 import { activityDirectoryEntries } from "@opencok/rules/activity-directory";
+import { treasureMapCommands } from "./treasure-map";
 import { cityDefenseCommands } from "./city-defense";
 import { worldUtility } from "./world-utility";
 import { rewardPreviewArray } from "@opencok/mappings/rewards";
@@ -297,6 +298,7 @@ export class GameService {
     const hearts = await this.services.cityProgression?.(uid, "heart.init", {});
     const gifts = await this.services.cityProgression?.(uid, "gift.init", {});
     const worldRecovery = await this.services.cityProgression?.(uid, "world.tick", {});
+    const treasureMaps = await this.services.cityProgression?.(uid, "treasuremap.init", {});
     await this.services.reconcileAlliance?.(uid);
     await this.services.reconcileTimed?.(uid);
     const effects = await this.services.cityProgression?.(uid, "effects.init", {});
@@ -339,6 +341,7 @@ export class GameService {
       ...regionalRecall?.body,
       ...hearts?.body,
       ...gifts?.body,
+      ...treasureMaps?.body,
       ...equipment?.body,
       ...generals?.body,
       ...dragons?.body,
@@ -472,8 +475,16 @@ export class GameService {
     await this.services.reconcileAlliance?.(uid);
     let body: Fields;
     let pushes: Result["pushes"] = [];
-    if (worldMutationCommands.includes(command) || cityDefenseCommands.includes(command)) {
-      if (command === "world.tick" || !this.services.cityProgression)
+    if (
+      worldMutationCommands.includes(command) ||
+      cityDefenseCommands.includes(command) ||
+      treasureMapCommands.includes(command)
+    ) {
+      if (
+        command === "world.tick" ||
+        command === "treasuremap.init" ||
+        !this.services.cityProgression
+      )
         throw new GameError(errors.unsupported);
       const result = await this.services.cityProgression(uid, command, params);
       if (Object.keys(result.body).length === 0) result.body.success = sfs.bool(true);
