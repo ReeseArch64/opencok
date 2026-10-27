@@ -90,5 +90,14 @@ and ZooKeeper: an active owner refused admission without changing its epoch,
 bounded partial progress resumed to completion, process exit released ownership
 and connections, a new owner admitted the completed map, and size mismatch
 preserved all cells.
-The authorized full XML was parsed and checked locally without publishing its
-content; full authored-map database ingestion and device execution were not run.
+The authorized full XML was imported through the real CLI into disposable
+PostgreSQL with a disposable ZooKeeper owner. It committed 1,442,401 cells in
+1,443 pages of at most 1000 cells in 181.347 seconds. Sampled peak CLI RSS was
+786,916 KiB; the disposable database occupied 412,407,475 bytes. The completed
+1201 guard admitted the map and rejected 1200. IDs covered 1 through 1,442,401,
+all birth areas were populated, the 26 static reservation cells remained present,
+and exactly one birth phase existed. Source file size and modification time were
+unchanged. Temporary databases, containers and synthetic fixtures were removed;
+no authored content was exported or committed. These figures describe this local
+validation run rather than a production throughput guarantee. Device execution
+remains unverified.
