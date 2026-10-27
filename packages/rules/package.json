@@ -183,7 +183,8 @@
     "./world-resource-new": "./src/world-resource-new.ts",
     "./world-monsters": "./src/world-monsters.ts",
     "./gold-eggs": "./src/gold-eggs.ts",
-    "./egg-activity": "./src/egg-activity.ts"
+    "./egg-activity": "./src/egg-activity.ts",
+    "./world-scout": "./src/world-scout.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
