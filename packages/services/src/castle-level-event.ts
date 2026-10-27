@@ -1,3 +1,4 @@
+import { javaHashMapOrder } from "@opencok/rules/java-hash-map-order";
 import { randomInt, randomUUID } from "node:crypto";
 import { num, type Row } from "@opencok/contracts/rows";
 import { encode, sfs, str, int, Type, type Fields } from "@opencok/messages/sfs";
@@ -83,7 +84,7 @@ export const castleLevelEventDomain: CityDomain = {
       };
       const table = rules.map((rule) => {
         const fields: Fields = Object.fromEntries(
-          Object.entries(rule).map(([key, value]) => [key, sfs.string(value)]),
+          javaHashMapOrder(Object.keys(rule)).map((key) => [key, sfs.string(rule[key]!)]),
         );
         fields.lv_reward_arr = preview(rule.lv_reward!, true);
         fields.Shared_reward_arr = preview(
