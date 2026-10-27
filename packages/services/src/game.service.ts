@@ -568,6 +568,11 @@ export class GameService {
       case "dragontower":
       case "minstrel":
       case "alchemist":
+      case "euro.cup.info":
+      case "euro.cup.bet.info":
+      case "euro.cup.record":
+      case "euro.cup.bet":
+      case "euro.cup.reward":
       case "groupbuys.info":
       case "special.ui.state":
       case "continuedcost.hideking":

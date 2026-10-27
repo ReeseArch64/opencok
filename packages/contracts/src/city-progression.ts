@@ -80,6 +80,7 @@ export interface DragonProgressionWrite {
   deletedSkills?: readonly string[];
 }
 export interface CityProgressionState {
+  cupBetting?: import("./cup-betting").CupBettingState;
   groupBuy?: import("./groupbuy").GroupBuyState;
   continuedCost?: import("./continued-cost").ContinuedCostReader;
   trouble?: import("./trouble").TroubleState;
@@ -136,6 +137,7 @@ export interface CityProgressionState {
 }
 
 export interface CityProgressionWrite {
+  cupBetting?: import("./cup-betting").CupBettingWrite;
   groupBuy?: import("./groupbuy").GroupBuyWrite;
   specialEventPurchase?: Row;
   continuedCostHide?: number;

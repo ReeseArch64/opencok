@@ -149,7 +149,9 @@
     "./special-event": "./src/special-event.ts",
     "./responses/special-event": "./src/responses/special-event.ts",
     "./groupbuy": "./src/groupbuy.ts",
-    "./responses/groupbuy": "./src/responses/groupbuy.ts"
+    "./responses/groupbuy": "./src/responses/groupbuy.ts",
+    "./cup-betting": "./src/cup-betting.ts",
+    "./responses/cup-betting": "./src/responses/cup-betting.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

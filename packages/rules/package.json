@@ -142,7 +142,8 @@
     "./trouble": "./src/trouble.ts",
     "./continued-cost": "./src/continued-cost.ts",
     "./special-event": "./src/special-event.ts",
-    "./groupbuy": "./src/groupbuy.ts"
+    "./groupbuy": "./src/groupbuy.ts",
+    "./cup-betting": "./src/cup-betting.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",
