@@ -35,15 +35,15 @@ function fixture(initial = new Map<string, Buffer | null>()) {
         async query(query: { text: string }, params: unknown[] = []) {
           const text = query.text;
           queries.push({ text, params });
-          if (text.startsWith("begin")) return { rows: [] };
+          if (text.startsWith("begin")) {return { rows: [] };}
           if (text === "rollback") {
             changes.clear();
             release?.();
             return { rows: [] };
           }
           if (text === "commit") {
-            if (failure === "commit") throw new Error("Synthetic commit failure");
-            for (const [uid, description] of changes) saved.set(uid, description);
+            if (failure === "commit") {throw new Error("Synthetic commit failure");}
+            for (const [uid, description] of changes) {saved.set(uid, description);}
             release?.();
             return { rows: [] };
           }
@@ -56,7 +56,7 @@ function fixture(initial = new Map<string, Buffer | null>()) {
               release = done;
             });
             await previous;
-            if (failure === "owner") throw new Error("Synthetic owner read failure");
+            if (failure === "owner") {throw new Error("Synthetic owner read failure");}
             return {
               rows: fresh
                 ? [
@@ -73,7 +73,7 @@ function fixture(initial = new Map<string, Buffer | null>()) {
           }
           if (text.startsWith('select "uid"')) {
             calls.push("existing");
-            if (failure === "read") throw new Error("Synthetic description read failure");
+            if (failure === "read") {throw new Error("Synthetic description read failure");}
             const pattern = new RegExp(params[0] as string, "u");
             return {
               rows: [...saved.keys()].filter((uid) => pattern.test(uid)).map((uid) => [uid]),
@@ -85,9 +85,9 @@ function fixture(initial = new Map<string, Buffer | null>()) {
             expect(text).toBe(
               'insert into "opencok_kingdom"."celebrity" ("uid", "description") values ($1, $2) returning "uid"',
             );
-            if (failure === "insert") throw new Error("Synthetic insert failure");
+            if (failure === "insert") {throw new Error("Synthetic insert failure");}
             const [uid, description] = params as [string, Buffer | null];
-            if (saved.has(uid)) throw new Error("Synthetic duplicate row");
+            if (saved.has(uid)) {throw new Error("Synthetic duplicate row");}
             changes.set(uid, description);
             return { rows: failure === "result" ? [] : [[uid]] };
           }
@@ -95,7 +95,7 @@ function fixture(initial = new Map<string, Buffer | null>()) {
           expect(text).toBe(
             'update "opencok_kingdom"."celebrity" set "description" = $1 where "opencok_kingdom"."celebrity"."uid" = $2 returning "uid"',
           );
-          if (failure === "update") throw new Error("Synthetic update failure");
+          if (failure === "update") {throw new Error("Synthetic update failure");}
           const [description, uid] = params as [Buffer | null, string];
           changes.set(uid, description);
           return { rows: failure === "result" ? [] : [[uid]] };

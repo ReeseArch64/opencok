@@ -15,7 +15,7 @@ export async function readBattleRankingState(
   now: number,
 ): Promise<BattleRankingState> {
   if (!uid || uid.length > 40 || !Number.isSafeInteger(now))
-    throw new Error("Invalid battle ranking owner");
+    {throw new Error("Invalid battle ranking owner");}
 
   const realmType =
     realm > 999999
@@ -45,7 +45,7 @@ export async function readBattleRankingState(
       )[0];
 
       if (!profile)
-        return { profile, realmType, openedAt: 0n, observerTeam: undefined, tickets: [] };
+        {return { profile, realmType, openedAt: 0n, observerTeam: undefined, tickets: [] };}
 
       const openedAt =
         (
@@ -69,7 +69,7 @@ export async function readBattleRankingState(
         .orderBy(asc(ob_record.allianceIds))
         .limit(32768);
 
-      if (records.length > 32767) throw new Error("Invalid observer tickets");
+      if (records.length > 32767) {throw new Error("Invalid observer tickets");}
 
       return {
         profile,

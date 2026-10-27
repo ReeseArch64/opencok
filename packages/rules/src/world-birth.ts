@@ -8,23 +8,23 @@ export function worldBirthRules(rules: Rules): WorldBirthRules {
       const id = 43000 + index,
         raw = rules.world.residential?.get(String(id))?.area_id;
 
-      if (!raw) worldMutationFailure();
+      if (!raw) {worldMutationFailure();}
 
       const areas = raw.split("|").map((value) => cityInteger(value, 1));
 
-      if (areas.length > 16 || new Set(areas).size !== areas.length) worldMutationFailure();
+      if (areas.length > 16 || new Set(areas).size !== areas.length) {worldMutationFailure();}
 
       return { id, areas };
     }),
     limits: number[] = [],
     row = rules.items.get("worldmap_num");
 
-  if (!row) worldMutationFailure();
+  if (!row) {worldMutationFailure();}
 
   for (let index = 1; index <= 1024 && row[`k${index}`] !== undefined; index++)
-    limits.push(cityInteger(row[`k${index}`], 1));
+    {limits.push(cityInteger(row[`k${index}`], 1));}
 
-  if (!limits.length || limits.length >= 1024) worldMutationFailure();
+  if (!limits.length || limits.length >= 1024) {worldMutationFailure();}
 
   return { priorities, limits, side: cityInteger(rules.items.get("worldmap_city")?.k1, 1, 256) };
 }
@@ -43,7 +43,7 @@ export function initialWorldBirth(rules: WorldBirthRules, epoch: bigint): WorldB
 }
 
 export function parseWorldBirth(raw: string): WorldBirthState {
-  if (typeof raw !== "string" || Buffer.byteLength(raw) > 262144) worldMutationFailure();
+  if (typeof raw !== "string" || Buffer.byteLength(raw) > 262144) {worldMutationFailure();}
 
   const state = JSON.parse(raw) as WorldBirthState;
 
@@ -59,10 +59,10 @@ export function parseWorldBirth(raw: string): WorldBirthState {
     Array.isArray(state.counts) ||
     Object.keys(state.counts).length > 16384
   )
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   if (![state.version, state.priority, state.round, state.limit].every(Number.isInteger))
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   cityInteger(state.version, 1, 2147483646);
   cityInteger(state.priority, 43000, 43097);
@@ -70,11 +70,11 @@ export function parseWorldBirth(raw: string): WorldBirthState {
   cityInteger(state.limit, 1);
 
   for (const [area, count] of Object.entries(state.counts)) {
-    if (!/^(0|[1-9][0-9]{0,9})$/.test(area)) worldMutationFailure();
+    if (!/^(0|[1-9][0-9]{0,9})$/.test(area)) {worldMutationFailure();}
 
     cityInteger(area);
 
-    if (!Number.isInteger(count)) worldMutationFailure();
+    if (!Number.isInteger(count)) {worldMutationFailure();}
 
     cityInteger(count);
   }
@@ -102,7 +102,7 @@ export function advanceWorldBirth(state: WorldBirthState, rules: WorldBirthRules
     if (limit === undefined && state.phase === 0) {
       state.phase = 1;
       state.limit = 2147483647;
-    } else if (limit !== undefined) state.limit = limit;
+    } else if (limit !== undefined) {state.limit = limit;}
   }
 }
 
@@ -120,7 +120,7 @@ export function countWorldBirth(state: WorldBirthState, rules: WorldBirthRules, 
       .find((row) => row.id === state.priority)!
       .areas.every((id) => state.counts[id] === undefined || state.counts[id]! >= state.limit)
   )
-    advanceWorldBirth(state, rules);
+    {advanceWorldBirth(state, rules);}
 }
 
 export function worldBirthArea(point: number, size: number, side: number) {
@@ -143,7 +143,7 @@ export function worldBirthCandidates(areas: readonly number[], size: number, sid
       fromY = ((area - 1) % columns) * side;
 
     for (let y = Math.max(1, fromY); y < Math.min(size, fromY + side); y++)
-      for (let x = Math.max(1, fromX); x < Math.min(size, fromX + side); x++) {
+      {for (let x = Math.max(1, fromX); x < Math.min(size, fromX + side); x++) {
         const point = 1 + x + y * size;
 
         if (
@@ -151,11 +151,11 @@ export function worldBirthCandidates(areas: readonly number[], size: number, sid
             admitted.has(worldBirthArea(id, size, side)),
           )
         )
-          points.push(point);
-      }
+          {points.push(point);}
+      }}
   }
 
-  if (points.length > 1048576) worldMutationFailure();
+  if (points.length > 1048576) {worldMutationFailure();}
 
   return points;
 }

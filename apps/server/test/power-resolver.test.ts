@@ -123,7 +123,7 @@ test("general equipment consumes current owner equipment modifiers without feedi
 for (const effect of [
   37, 78, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 487, 895, 2196,
 ] as const)
-  test(`effect ${effect} combines every ordinary-realm source and the global equipment multiplier`, () => {
+  {test(`effect ${effect} combines every ordinary-realm source and the global equipment multiplier`, () => {
     const { state, rules, abilities, world, resolve } = fixture(effect);
     for (const id of [
       "dragon_new",
@@ -133,7 +133,7 @@ for (const effect of [
       "miracle_buff",
       "luckyday_server",
     ])
-      rules.features.set(id, { id, version: "12.06.0", online: "1" });
+      {rules.features.set(id, { id, version: "12.06.0", online: "1" });}
     state.profile = { allianceId: "alliance", civilizationType: 1, pf: "synthetic" };
     rules.items.set("effect", { id: "effect", k1: `${effect};2` });
     state.sciences = [{ itemId: 1000, level: 1 }];
@@ -177,7 +177,7 @@ for (const effect of [
     state.equipment = [{ itemId: 9001, on: 1 }];
     rules.power.equipment!.set("9001", { id: "9001", para1: `${effect}`, num1: "41" });
     world.set(effect, 43);
-    if (effect !== 218) world.set(218, 100);
+    if (effect !== 218) {world.set(218, 100);}
     state.heroes = [{ heroid: 7001, level: 1 }];
     rules.power.heroes!.set("7001", { id: "7001", para1: `${effect};47` });
     rules.power.activityEvents!.set("9005005", {
@@ -235,7 +235,7 @@ for (const effect of [
     expect(resolve(null)).toBe(effect === 218 ? 626 : 667);
     expect(() => resolve()).toThrow();
     expect(state).toEqual(before);
-  });
+  });}
 
 test("equipment reconstruction uses earlier worn items and excludes research loaded after equipment", () => {
   const { state, rules, resolve } = fixture();
@@ -277,7 +277,7 @@ test("base effects are added after other effects and dragon contributions retain
   rules.items.clear();
   rules.power.vip!.get("1")!.effect = "487;-100000000";
   for (const id of ["dragon_new", "dragon_levelup"])
-    rules.features.set(id, { id, version: "12.06.0", online: "1" });
+    {rules.features.set(id, { id, version: "12.06.0", online: "1" });}
   state.dragons = [{ itemId: 6001, dragonState: 3, useFlag: 1, lv: 1 }];
   state.dragonSkills = [{ ownerId: 6001, index1: 1, skillId: "8002", level: 1 }];
   rules.power.dragonSkills!.set("8002", {

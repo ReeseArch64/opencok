@@ -49,7 +49,7 @@ test("the signed mailbox request carries only the durable operation identity", (
     { ...update, operationId: "not-an-operation" },
     { ...update, name: "Forged Name" },
   ])
-    expect(() => decodeChatMailbox(JSON.stringify(value))).toThrow();
+    {expect(() => decodeChatMailbox(JSON.stringify(value))).toThrow();}
 });
 
 async function exchange(options: {

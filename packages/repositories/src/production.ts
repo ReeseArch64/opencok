@@ -49,7 +49,7 @@ export function createProductionExecutor(
             .limit(257)
             .for("update");
 
-          if (rows.length > 256) throw new Error("Production aggregate exceeds bound");
+          if (rows.length > 256) {throw new Error("Production aggregate exceeds bound");}
 
           const accounts = rows.map((row) => ({ ...row, rates: decodeProductionRates(row.rates) }));
           const result = await plan({
@@ -75,14 +75,14 @@ export function createProductionExecutor(
             result.accounts.length > 256 ||
             new Set(result.accounts.map((row) => row.buildingId)).size !== result.accounts.length
           )
-            throw new Error("Invalid production write set");
+            {throw new Error("Invalid production write set");}
 
           for (const account of result.accounts) {
             if (
               account.ownerId !== command.owner ||
               !inventory.buildings.some((row) => row.uuid === account.buildingId)
             )
-              throw new Error("Invalid production owner");
+              {throw new Error("Invalid production owner");}
 
             const previous = accounts.find((row) => row.buildingId === account.buildingId);
 
@@ -90,7 +90,7 @@ export function createProductionExecutor(
               previous &&
               (previous.asset !== account.asset || account.settledAt < previous.settledAt)
             )
-              throw new Error("Production checkpoint conflict");
+              {throw new Error("Production checkpoint conflict");}
 
             settleProduction(account, account.settledAt);
             const value = { ...account, rates: encodeProductionRates(account.rates) };
@@ -102,7 +102,7 @@ export function createProductionExecutor(
 
           for (const building of result.buildings) {
             if (!inventory.buildings.some((row) => row.uuid === building.uuid))
-              throw new Error("Unknown production building");
+              {throw new Error("Unknown production building");}
 
             await tx
               .update(user_building)
@@ -136,7 +136,7 @@ export async function changeProductionInTransaction<T>(
   }>,
 ): Promise<T> {
   if (initial.length > 256 || new Set(initial.map((row) => row.buildingId)).size !== initial.length)
-    throw new Error("Invalid production rate change set");
+    {throw new Error("Invalid production rate change set");}
 
   const saved = await tx
     .select()
@@ -146,7 +146,7 @@ export async function changeProductionInTransaction<T>(
     .limit(257)
     .for("update");
 
-  if (saved.length > 256) throw new Error("Production aggregate exceeds bound");
+  if (saved.length > 256) {throw new Error("Production aggregate exceeds bound");}
 
   const buildings = await tx
     .select({ id: user_building.uuid })
@@ -154,11 +154,11 @@ export async function changeProductionInTransaction<T>(
     .where(eq(user_building.uid, owner));
   const accounts = initial.map((account) => {
     if (account.ownerId !== owner || !buildings.some((row) => row.id === account.buildingId))
-      throw new Error("Invalid production rate change owner");
+      {throw new Error("Invalid production rate change owner");}
 
     const previous = saved.find((row) => row.buildingId === account.buildingId);
 
-    if (previous && previous.asset !== account.asset) throw new Error("Production asset changed");
+    if (previous && previous.asset !== account.asset) {throw new Error("Production asset changed");}
 
     return settleProduction(
       previous ? { ...previous, rates: decodeProductionRates(previous.rates) } : account,

@@ -16,7 +16,7 @@ try {
     requireEnv("DATABASE_ROLE") !== "kingdom" ||
     !["inspect", "adopt"].includes(action ?? "")
   )
-    throw new Error("Invalid birth operator arguments");
+    {throw new Error("Invalid birth operator arguments");}
   const kingdomId = Number(realm);
   database = createDatabase("kingdom", {
     connectionString: requireEnv("DATABASE_URL"),
@@ -30,9 +30,9 @@ try {
     .from(realm_authority)
     .limit(2);
   if (owners.some((owner) => owner.id !== kingdomId))
-    throw new Error("Foreign realm operator database");
+    {throw new Error("Foreign realm operator database");}
   if (action === "inspect") {
-    if (args.length) throw new Error("Invalid birth inspection arguments");
+    if (args.length) {throw new Error("Invalid birth inspection arguments");}
     const [saved] = await database.db
       .select()
       .from(trigger_var)
@@ -64,7 +64,7 @@ try {
       !/^[1-9][0-9]*$/.test(round) ||
       !/^[012]$/.test(phase)
     )
-      throw new Error("Invalid birth adoption arguments");
+      {throw new Error("Invalid birth adoption arguments");}
     const rules = worldBirthRules(await loadRules(undefined, kingdomId)),
       authority = await acquireRealmAuthority(database.db, kingdomId, () => true);
     const result = await createWorldBirthAdopter(

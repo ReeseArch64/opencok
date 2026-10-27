@@ -68,7 +68,7 @@ async function fixture() {
     });
   }
   for (const point of [3, 8, 1440000])
-    await h.db.db.insert(worldpoint).values({
+    {await h.db.db.insert(worldpoint).values({
       id: point,
       worldId: 0,
       x: (point - 1) % 1200,
@@ -79,7 +79,7 @@ async function fixture() {
       pointType: 0,
       resLevel: 0,
       resInitValue: 0,
-    });
+    });}
   const command = (action: string, params: Fields = {}, owner = "owner") =>
     h.command(
       "totem",

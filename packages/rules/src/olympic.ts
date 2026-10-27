@@ -8,7 +8,7 @@ export function olympicPeriod(rules: Rules) {
     start = eventTimestamp(panel?.start),
     end = eventTimestamp(panel?.end);
 
-  if (!panel || start === undefined || end === undefined || start >= end) return;
+  if (!panel || start === undefined || end === undefined || start >= end) {return;}
 
   return { start, end, enabled: panel.function_on === "1" };
 }
@@ -16,7 +16,7 @@ export function olympicPeriod(rules: Rules) {
 export function olympicDefinitions(rules: Rules): Row[] {
   const rows = [...(rules.advanced.olympicBets?.values() ?? [])];
 
-  if (rows.length > 256) throw new Error("Olympic question bound exceeded");
+  if (rows.length > 256) {throw new Error("Olympic question bound exceeded");}
 
   return rows.map((rule) => {
     const startBetTime = eventTimestamp(rule.start),
@@ -31,11 +31,11 @@ export function olympicDefinitions(rules: Rules): Row[] {
       startBetTime >= startTime ||
       (rule.result?.length ?? 0) > 10
     )
-      throw new Error("Invalid Olympic question");
+      {throw new Error("Invalid Olympic question");}
 
     const type = cityInteger(rule.type, 0, 5);
 
-    if (type === 4) throw new Error("Unsupported Olympic resource");
+    if (type === 4) {throw new Error("Unsupported Olympic resource");}
 
     const tax = Number(rule.earn_ratio ?? 10);
 
@@ -61,12 +61,12 @@ export function olympicPayout(amount: number, question: Row) {
     pool = cityAmount(question.rewardPool),
     tax = BigInt(cityInteger(question.tax, 0, 50));
 
-  if (!winners || stake > winners) throw new Error("Invalid Olympic winning pool");
+  if (!winners || stake > winners) {throw new Error("Invalid Olympic winning pool");}
 
   let profit = (stake * pool * (100n - tax)) / (winners * 100n) + 1n;
 
   if (pool === 0n && profit > BigInt(cityInteger(question.rewardLimit)))
-    profit = BigInt(cityInteger(question.rewardLimit));
+    {profit = BigInt(cityInteger(question.rewardLimit));}
 
   const total = stake + profit;
 
@@ -127,12 +127,12 @@ export async function reconcileOlympicQuestions(
       now < long(row, "startTime") ||
       !text(definition, "result")
     )
-      continue;
+      {continue;}
 
     const winners = cityAmount(await winningStake(id, text(definition, "result"))),
       total = cityAmount(row.betNum);
 
-    if (winners > total) throw new Error("Invalid Olympic pool totals");
+    if (winners > total) {throw new Error("Invalid Olympic pool totals");}
 
     row.result = text(definition, "result");
     row.ended = 1;

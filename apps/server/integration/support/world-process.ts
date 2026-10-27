@@ -33,23 +33,23 @@ export async function startWorldProcess(config: ServerConfig) {
       stdout: "ignore",
       stderr: "ignore",
       ipc(message: unknown) {
-        if (!isRecord(message)) return;
+        if (!isRecord(message)) {return;}
         if (
           message.type === "ready" &&
           typeof message.port === "number" &&
           typeof message.healthPort === "number"
         )
-          accept({ port: message.port, healthPort: message.healthPort });
-        if (message.type === "failed") reject(new Error("Synthetic world process startup failed"));
+          {accept({ port: message.port, healthPort: message.healthPort });}
+        if (message.type === "failed") {reject(new Error("Synthetic world process startup failed"));}
       },
     },
   );
   const crash = async () => {
-    if (child.exitCode === null) child.kill("SIGKILL");
+    if (child.exitCode === null) {child.kill("SIGKILL");}
     await child.exited;
   };
   const close = async () => {
-    if (child.exitCode !== null) return;
+    if (child.exitCode !== null) {return;}
     child.kill("SIGTERM");
     try {
       await bounded(child.exited, 5000);

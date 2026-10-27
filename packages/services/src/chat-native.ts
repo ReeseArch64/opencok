@@ -23,9 +23,9 @@ export class ChatNativeService {
 
   room(state: PlayerState, type: number) {
     if (type === 2 && state.allianceId && state.membershipAllianceId === state.allianceId)
-      return `alliance_${state.originalServerId}_${state.allianceId}`;
+      {return `alliance_${state.originalServerId}_${state.allianceId}`;}
 
-    if (type === 0) return `country_${state.serverId}`;
+    if (type === 0) {return `country_${state.serverId}`;}
 
     throw new ChatCommandError("invalid_room");
   }
@@ -39,14 +39,14 @@ export class ChatNativeService {
     const state = await this.repository.getPlayerStateById(owner);
 
     if (!state || state.banned || (state.banUntil ?? 0) > this.now())
-      throw new ChatCommandError("unauthorized");
+      {throw new ChatCommandError("unauthorized");}
 
     if (
       command === "chat.translate" ||
       command === "chat.translate.improve" ||
       command === "chat.mi.bind.account"
     )
-      throw new ChatCommandError("provider_unavailable");
+      {throw new ChatCommandError("provider_unavailable");}
 
     if (command === "chat.logout") {
       await this.repository.sessions.revoke?.(owner);
@@ -60,7 +60,7 @@ export class ChatNativeService {
       const post = params.post ?? 0;
 
       if (![0, 2].includes(Number(post)) || typeof params.msg !== "string")
-        throw new ChatCommandError("invalid_message");
+        {throw new ChatCommandError("invalid_message");}
 
       const roomId =
         Number(post) === 2
@@ -69,10 +69,10 @@ export class ChatNativeService {
             ? `original_${state.originalServerId}`
             : this.room(state, 0);
 
-      if (!(await authorize(owner, roomId))) throw new ChatCommandError("invalid_room");
+      if (!(await authorize(owner, roomId))) {throw new ChatCommandError("invalid_room");}
 
       if (this.repository.access && !(await this.repository.access.canSend(owner)))
-        throw new ChatCommandError("chat_muted");
+        {throw new ChatCommandError("chat_muted");}
 
       const saved = await this.repository.messages.create({
         roomId,
@@ -112,13 +112,13 @@ export class ChatNativeService {
         }
       }
 
-      if (!Array.isArray(rooms) || rooms.length > 16) throw new ChatCommandError("invalid_room");
+      if (!Array.isArray(rooms) || rooms.length > 16) {throw new ChatCommandError("invalid_room");}
 
       const results = [];
 
       for (const room of rooms) {
         if (!room || typeof room !== "object" || Array.isArray(room))
-          throw new ChatCommandError("invalid_room");
+          {throw new ChatCommandError("invalid_room");}
 
         results.push(
           await this.history(owner, state, room as Record<string, unknown>, true, frame),
@@ -129,17 +129,17 @@ export class ChatNativeService {
     }
 
     if (command !== "chat.get" && command !== "chat.get.by.seq")
-      throw new ChatCommandError("unsupported_command");
+      {throw new ChatCommandError("unsupported_command");}
 
-    if (command === "chat.get.by.seq") return this.history(owner, state, params, false, frame);
+    if (command === "chat.get.by.seq") {return this.history(owner, state, params, false, frame);}
 
     const type = Number(params.type ?? 0);
 
-    if (type === 1) return this.direct(owner, state, params);
+    if (type === 1) {return this.direct(owner, state, params);}
 
     const roomId = this.room(state, type);
 
-    if (!(await authorize(owner, roomId))) throw new ChatCommandError("invalid_room");
+    if (!(await authorize(owner, roomId))) {throw new ChatCommandError("invalid_room");}
 
     const rows = await this.repository.messages.getAllByRange(
       roomId,
@@ -149,18 +149,18 @@ export class ChatNativeService {
     const visible = [];
 
     for (const row of rows)
-      if (!this.repository.access || (await this.repository.access.canRead(owner, row)))
-        visible.push(await frame(row));
+      {if (!this.repository.access || (await this.repository.access.canRead(owner, row)))
+        {visible.push(await frame(row));}}
 
     return { msg: visible };
   }
 
   integer(value: unknown, fallback: number) {
-    if (value === undefined || value === "") return fallback;
+    if (value === undefined || value === "") {return fallback;}
 
     const number = Number(value);
 
-    if (!Number.isSafeInteger(number) || number < 0) throw new ChatCommandError("invalid_cursor");
+    if (!Number.isSafeInteger(number) || number < 0) {throw new ChatCommandError("invalid_cursor");}
 
     return number;
   }
@@ -169,14 +169,14 @@ export class ChatNativeService {
     const peer = params.id ?? "";
 
     if (typeof peer !== "string" || !this.repository.mailbox)
-      throw new ChatCommandError("invalid_target");
+      {throw new ChatCommandError("invalid_target");}
 
     const rows = await this.repository.mailbox.list(owner, state.serverId, peer, 3, 100);
     const messages = [];
 
     for (const row of rows) {
       if (this.repository.access && !(await this.repository.access.canReceive(owner, row.peer)))
-        continue;
+        {continue;}
 
       const senderUid = row.sender ?? row.peer;
       const sender = await this.repository.getPlayerStateById(senderUid);
@@ -203,22 +203,22 @@ export class ChatNativeService {
     const type = Number(params.type ?? 3);
 
     if (!Number.isInteger(type) || type < 0 || type === 4)
-      throw new ChatCommandError("invalid_room");
+      {throw new ChatCommandError("invalid_room");}
 
     if (type === 2)
-      return {
+      {return {
         id: params.id ?? "",
         type,
         firstSeqId: "-1",
         lastSeqId: "-1",
         ...(await this.direct(owner, state, params)),
-      };
+      };}
 
     let roomId: string;
 
-    if (type === 0 || type === 1) roomId = this.room(state, type === 1 ? 2 : 0);
+    if (type === 0 || type === 1) {roomId = this.room(state, type === 1 ? 2 : 0);}
     else {
-      if (typeof params.id !== "string") throw new ChatCommandError("invalid_room");
+      if (typeof params.id !== "string") {throw new ChatCommandError("invalid_room");}
 
       roomId = params.id.startsWith("private_") ? params.id : `private_${params.id}`;
     }
@@ -230,9 +230,9 @@ export class ChatNativeService {
         ? !room
         : !(await createRoomAuthorizer(this.repository.getPlayerStateById)(owner, roomId))
     )
-      throw new ChatCommandError("invalid_room");
+      {throw new ChatCommandError("invalid_room");}
 
-    if (!this.repository.messages.page) throw new ChatCommandError("unavailable");
+    if (!this.repository.messages.page) {throw new ChatCommandError("unavailable");}
 
     const end = latest ? 0 : this.integer(params.end, 0);
     const rows = (
@@ -250,11 +250,11 @@ export class ChatNativeService {
     const sequences: number[] = [];
 
     for (const row of rows) {
-      if (this.repository.access && !(await this.repository.access.canRead(owner, row))) continue;
+      if (this.repository.access && !(await this.repository.access.canRead(owner, row))) {continue;}
 
       sequences.push(row.sequenceId);
 
-      if (row.sequenceId < start) continue;
+      if (row.sequenceId < start) {continue;}
 
       visible.push(
         room

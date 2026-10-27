@@ -79,7 +79,7 @@ test("arena virtual army setup persists owned preferences without reserving real
       sfs.object({ armyId: sfs.string("107000"), count: sfs.int(100) }),
     ]);
     for (const raw of ["107000;200001", "107000;1|107000;1", "999999;10", "107000;-1"])
-      await expect(h.command("arena.army", { armies: sfs.string(raw) })).rejects.toThrow();
+      {await expect(h.command("arena.army", { armies: sfs.string(raw) })).rejects.toThrow();}
     expect((await h.db.db.select().from(user_arena_army))[0]!.free).toBe(100);
     await expect(h.command("arena.apply")).rejects.toThrow();
     expect((await h.db.db.select().from(arena_registration))[0]!.state).toBe(0);

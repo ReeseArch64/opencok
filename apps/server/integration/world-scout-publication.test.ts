@@ -24,7 +24,7 @@ test("scout outbox publishes actor intel and defender notice through persisted s
     const reader = createWorldScoutMailReader(h.db.db, 1),
       sent: { owner: string; body: Fields }[] = [];
     for (const event of events)
-      await publishWorldScoutMail(
+      {await publishWorldScoutMail(
         event.payload,
         event.ownerUid,
         reader,
@@ -32,7 +32,7 @@ test("scout outbox publishes actor intel and defender notice through persisted s
           expect(command).toBe("push.mail");
           sent.push({ owner, body });
         },
-      );
+      );}
     expect(sent.map((row) => row.owner).sort()).toEqual(["other", "owner"]);
     expect(sent.find((row) => row.owner === "other")!.body.fromUid!.value).toBe("owner");
     expect(sent.find((row) => row.owner === "owner")!.body.type!.value).toBe(8);

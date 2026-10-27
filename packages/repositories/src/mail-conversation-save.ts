@@ -36,7 +36,7 @@ export function saveMailConversation(
         query.fromUser.includes("\0") ||
         !query.fromUser.isWellFormed()))
   )
-    throw new Error("Invalid conversation save query");
+    {throw new Error("Invalid conversation save query");}
 
   return db.transaction(
     async (tx) => {
@@ -62,7 +62,7 @@ export function saveMailConversation(
         (profile.banTime ?? 0n) > BigInt(query.now) ||
         query.scope === "none"
       )
-        return { profile };
+        {return { profile };}
 
       await tx
         .update(mail)

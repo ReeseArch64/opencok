@@ -10,9 +10,9 @@ test("bundled rules load for both realms and isolate mutable indexes", async () 
   expect(second.kingdomId).toBe(2);
   expect(first.buildings.size).toBeGreaterThan(0);
   const key = [...first.buildings.keys()][0];
-  if (!key) throw new Error("Missing bundled building ID");
+  if (!key) {throw new Error("Missing bundled building ID");}
   const original = second.buildings.get(key);
-  if (!original) throw new Error("Missing building definition");
+  if (!original) {throw new Error("Missing building definition");}
   first.buildings.set(key, {
     ...original,
     constructionSeconds: (original.constructionSeconds ?? 0) + 1,

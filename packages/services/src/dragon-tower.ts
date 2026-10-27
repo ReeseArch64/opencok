@@ -37,10 +37,10 @@ import type { CityDomain } from "./city-domain.ts";
 import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function units(params: Fields) {
-  if (params.armys?.type !== Type.Array) towerFailure();
+  if (params.armys?.type !== Type.Array) {towerFailure();}
 
   if (!(params.armys.value as Value[]).length || (params.armys.value as Value[]).length > 128)
-    towerFailure();
+    {towerFailure();}
 
   return (params.armys.value as Value[]).map((value) => {
     const row = fields(value);
@@ -60,14 +60,14 @@ function finishHeal(row: Row) {
   let total = 0;
 
   for (const [id, count] of healing) {
-    if (count > (dead.get(id) ?? 0)) towerFailure();
+    if (count > (dead.get(id) ?? 0)) {towerFailure();}
 
     alive.set(id, cityInteger((alive.get(id) ?? 0) + count));
     dead.set(id, (dead.get(id) ?? 0) - count);
     total += count;
   }
 
-  if (total > num(row, "armyrevivenum")) towerFailure();
+  if (total > num(row, "armyrevivenum")) {towerFailure();}
 
   row.armyrevivenum = num(row, "armyrevivenum") - total;
   row.armyrevive = "";
@@ -89,9 +89,9 @@ function reset(row: Row, now: bigint, weekly: boolean, manual: boolean) {
     resettimes: manual ? num(row, "resettimes") + 1 : 0,
   });
 
-  if (!manual) Object.assign(row, { dailyresettime: now, weeklyrevive: 0, sharetimes: 0 });
+  if (!manual) {Object.assign(row, { dailyresettime: now, weeklyrevive: 0, sharetimes: 0 });}
 
-  if (weekly) Object.assign(row, { weeklymaxlayer: 0, weeklyresettime: now });
+  if (weekly) {Object.assign(row, { weeklymaxlayer: 0, weeklyresettime: now });}
 }
 
 function validateSelection(context: CityProgressionContext, row: Row, params: Fields) {
@@ -106,7 +106,7 @@ function validateSelection(context: CityProgressionContext, row: Row, params: Fi
       num(general, "state") !== 1 ||
       context.rules.power.newGeneralBases?.get(raw)?.battle !== "1"
     )
-      towerFailure();
+      {towerFailure();}
 
     row.generalid = id;
   }
@@ -121,7 +121,7 @@ function validateSelection(context: CityProgressionContext, row: Row, params: Fi
         num(dragon, "dragonState") !== 3 ||
         dragonJson(dragon.travelData, emptyDragonTravel).travelState === 1)
     )
-      towerFailure();
+      {towerFailure();}
 
     row.dragon = uuid;
   }
@@ -132,14 +132,14 @@ function healDuration(
   row: Row,
   selection: ReadonlyMap<string, number>,
 ) {
-  if (!dragonFeature(context.rules, "dragon_tower_heal", context.now)) return 0n;
+  if (!dragonFeature(context.rules, "dragon_tower_heal", context.now)) {return 0n;}
 
   let seconds = 0;
 
   for (const [id, count] of selection) {
     const rule = context.rules.arms.get(id);
 
-    if (!rule) towerFailure();
+    if (!rule) {towerFailure();}
 
     const base =
       count * cityInteger(rule.time) * Math.fround(cityInteger(rule.heal_time) / 1000) -
@@ -171,7 +171,7 @@ function healDuration(
   const duration =
     Math.trunc(Math.fround(Math.fround(Math.fround(seconds) * factor) * multiplier)) * 1000;
 
-  if (!Number.isSafeInteger(duration) || duration < 0) towerFailure();
+  if (!Number.isSafeInteger(duration) || duration < 0) {towerFailure();}
 
   return BigInt(duration);
 }
@@ -188,7 +188,7 @@ export class DragonTowerDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.dragonTower;
 
-    if (!state) towerFailure();
+    if (!state) {towerFailure();}
 
     const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000),
       building = context.state.buildings.find((row) => num(row, "itemId") === 432000),
@@ -202,16 +202,16 @@ export class DragonTowerDomain extends CityCommandDomain {
     );
 
     if (command === "dragontower.init" && (!open || !building))
-      return { response: encode({ dragontowerplay: sfs.bool(false) }), event: null };
+      {return { response: encode({ dragontowerplay: sfs.bool(false) }), event: null };}
 
-    if (!open || !building) towerFailure();
+    if (!open || !building) {towerFailure();}
 
     const action = command === "dragontower" ? str(params, "M__REQUEST_ID__H") : "entertower";
 
-    if (["battle", "quickbattle"].includes(action)) towerFailure();
+    if (["battle", "quickbattle"].includes(action)) {towerFailure();}
 
     if (action === "ranking")
-      return {
+      {return {
         response: encode({
           weeklyranking: sfs.array(
             towerRankingView(
@@ -231,16 +231,16 @@ export class DragonTowerDomain extends CityCommandDomain {
           ),
         }),
         event: null,
-      };
+      };}
 
     if (action === "maxlayer")
-      return {
+      {return {
         response: encode({ historymaxlayer: sfs.int(towerIndex(state.historyMax)) }),
         event: null,
-      };
+      };}
 
     if (action === "reportsimple")
-      return {
+      {return {
         response: encode({
           reportlist: sfs.array(
             (state.reports ?? []).map((row) =>
@@ -258,13 +258,13 @@ export class DragonTowerDomain extends CityCommandDomain {
           ),
         }),
         event: null,
-      };
+      };}
 
     if (action === "report") {
       const report = state.reports?.[0],
         raw = text(report ?? {}, "report");
 
-      if (raw.length > 65535) towerFailure();
+      if (raw.length > 65535) {towerFailure();}
 
       return {
         response: encode(
@@ -276,7 +276,7 @@ export class DragonTowerDomain extends CityCommandDomain {
       };
     }
 
-    if (action === "reporttemp") return { response: encode({}), event: null };
+    if (action === "reporttemp") {return { response: encode({}), event: null };}
 
     const row: Row = state.user
       ? { ...state.user }
@@ -350,12 +350,12 @@ export class DragonTowerDomain extends CityCommandDomain {
     });
     const pushes: { command: string; body: Uint8Array }[] = [];
     const completeResponse = (body: Fields) => {
-      if (resetOccurred) pushes.push({ command: "push.dragontower.reset", body: encode(view()) });
+      if (resetOccurred) {pushes.push({ command: "push.dragontower.reset", body: encode(view()) });}
       else if (healed)
-        pushes.push({
+        {pushes.push({
           command: "push.dragontower.army",
           body: encode(towerArmyView(row, context.state.armies)),
-        });
+        });}
 
       return {
         response: encode(body),
@@ -376,16 +376,16 @@ export class DragonTowerDomain extends CityCommandDomain {
     };
 
     if (command === "dragontower.init")
-      return completeResponse({ dragontowerplay: sfs.bool(num(row, "weeklymaxlayer") <= 0) });
+      {return completeResponse({ dragontowerplay: sfs.bool(num(row, "weeklymaxlayer") <= 0) });}
 
-    if (resetOccurred) return completeResponse({});
+    if (resetOccurred) {return completeResponse({});}
 
     if (action === "entertower" || command === "dragontower.tick")
-      return completeResponse(command === "dragontower.tick" ? {} : view());
+      {return completeResponse(command === "dragontower.tick" ? {} : view());}
 
     if (action === "reset") {
       if (num(row, "currentlayer") === 84501 || num(row, "resettimes") >= cityInteger(config.k5))
-        towerFailure();
+        {towerFailure();}
 
       reset(row, context.now, false, true);
       buffs = [];
@@ -412,9 +412,9 @@ export class DragonTowerDomain extends CityCommandDomain {
           Number(rule.type) !== (action === "addarmy" ? 2 : 3) ||
           (rule.time !== "-1" && num(buff, "remainlayers") < num(row, "currentlayer"))
         )
-          towerFailure();
+          {towerFailure();}
 
-        if (action === "addarmy") cap = cityInteger(rule.army, 1);
+        if (action === "addarmy") {cap = cityInteger(rule.army, 1);}
 
         buffs = buffs.filter((item) => item !== buff);
         write.buffs = buffs;
@@ -428,7 +428,7 @@ export class DragonTowerDomain extends CityCommandDomain {
         Object.assign(row, { deadarmy: "", armyrevive: "", armyrevivecd: 0n, armyrevivenum: 0 });
       } else {
         for (const [id, count] of selection)
-          current.set(id, cityInteger((current.get(id) ?? 0) + count));
+          {current.set(id, cityInteger((current.get(id) ?? 0) + count));}
 
         saveUnits(row, "army", current);
       }
@@ -437,7 +437,7 @@ export class DragonTowerDomain extends CityCommandDomain {
     }
 
     if (action === "healarmy") {
-      if (long(row, "armyrevivecd") > context.now) towerFailure();
+      if (long(row, "armyrevivecd") > context.now) {towerFailure();}
 
       const dead = towerArmy(row.deadarmy),
         selected = new Map<string, number>();
@@ -446,13 +446,13 @@ export class DragonTowerDomain extends CityCommandDomain {
       for (const unit of units(params)) {
         const id = String(unit.id);
 
-        if (selected.has(id) || unit.num > (dead.get(id) ?? 0)) towerFailure();
+        if (selected.has(id) || unit.num > (dead.get(id) ?? 0)) {towerFailure();}
 
         selected.set(id, unit.num);
         total += unit.num;
       }
 
-      if (!total || total > num(row, "armyrevivenum")) towerFailure();
+      if (!total || total > num(row, "armyrevivenum")) {towerFailure();}
 
       const duration = healDuration(context, row, selected);
       saveUnits(row, "armyrevive", selected);
@@ -470,7 +470,7 @@ export class DragonTowerDomain extends CityCommandDomain {
 
         finishHeal(row);
         healed = true;
-      } else row.armyrevivecd = context.now + duration;
+      } else {row.armyrevivecd = context.now + duration;}
 
       return completeResponse({ ...view(false), ...(buy ? { buyresult: sfs.object(buy) } : {}) });
     }
@@ -494,11 +494,11 @@ export class DragonTowerDomain extends CityCommandDomain {
         } else {
           const owned = context.economy.ownedItem?.(str(params, "item"));
 
-          if (!owned) towerFailure();
+          if (!owned) {towerFailure();}
 
           const rule = context.rules.goods.get(owned.itemId);
 
-          if (rule?.type !== "2") towerFailure();
+          if (rule?.type !== "2") {towerFailure();}
 
           let count = cityInteger(int(params, "count"), 1),
             seconds = Number(remaining / 1000n);
@@ -508,7 +508,7 @@ export class DragonTowerDomain extends CityCommandDomain {
             count = Math.min(count, Math.ceil(seconds / value));
             seconds = Math.max(0, seconds - count * value);
           } else {
-            if (value > 100) towerFailure();
+            if (value > 100) {towerFailure();}
 
             count = 1;
             seconds = Math.trunc(seconds * (1 - value / 100));
@@ -538,7 +538,7 @@ export class DragonTowerDomain extends CityCommandDomain {
       const alive = towerArmy(row.army);
 
       for (const [id, count] of towerArmy(row.deadarmy))
-        alive.set(id, cityInteger((alive.get(id) ?? 0) + count));
+        {alive.set(id, cityInteger((alive.get(id) ?? 0) + count));}
 
       saveUnits(row, "army", alive);
       Object.assign(row, {
@@ -571,7 +571,7 @@ export class DragonTowerDomain extends CityCommandDomain {
         !rule ||
         num(row, "score") < Number(rule.score)
       )
-        towerFailure();
+        {towerFailure();}
 
       context.economy.gold(-cityAmount(rule.gold ?? "0"));
       row.score = num(row, "score") - cityInteger(rule.score);
@@ -581,7 +581,7 @@ export class DragonTowerDomain extends CityCommandDomain {
       );
       const duration = Number(rule.time);
 
-      if (!Number.isInteger(duration) || duration < -1 || duration > 1024) towerFailure();
+      if (!Number.isInteger(duration) || duration < -1 || duration > 1024) {towerFailure();}
 
       buffs.push({
         uid: context.owner,
@@ -604,7 +604,7 @@ export class DragonTowerDomain extends CityCommandDomain {
     }
 
     if (action === "nextlayer") {
-      if (num(layer, "layerstate") !== 3 || towerIndex(num(layer, "layer")) > limit) towerFailure();
+      if (num(layer, "layerstate") !== 3 || towerIndex(num(layer, "layer")) > limit) {towerFailure();}
 
       const next = num(layer, "layer") + 1;
 
@@ -664,7 +664,7 @@ export async function publishDragonTowerMutation(
     const push = fields(entry),
       name = str(push, "command");
 
-    if (!["push.dragontower.army", "push.dragontower.reset"].includes(name)) towerFailure();
+    if (!["push.dragontower.army", "push.dragontower.reset"].includes(name)) {towerFailure();}
 
     await publish(owner, name, fields(push.body));
   }

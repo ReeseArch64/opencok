@@ -21,13 +21,13 @@ function integer(value: unknown): number {
     value < -2147483648 ||
     value > 2147483647
   )
-    return invalid();
+    {return invalid();}
 
   return value;
 }
 
 function long(value: unknown): bigint {
-  if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) return invalid();
+  if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) {return invalid();}
 
   return value;
 }
@@ -39,7 +39,7 @@ function text(value: unknown, limit: number): string {
     !value.isWellFormed() ||
     value.includes("\0")
   )
-    return invalid();
+    {return invalid();}
 
   return value;
 }
@@ -49,7 +49,7 @@ function nullableText(value: unknown, limit: number): string | null {
 }
 
 function owned(row: Row | undefined, uid: string): Row | undefined {
-  if (row !== undefined && row.uid !== uid) return invalid();
+  if (row !== undefined && row.uid !== uid) {return invalid();}
 
   return row;
 }
@@ -60,11 +60,11 @@ export function worldPointDetailQuery(
   local: number,
   now: number,
 ): WorldPointDetailQuery {
-  if (integer(local) < 1 || !Number.isSafeInteger(now) || now < 0) return invalid();
+  if (integer(local) < 1 || !Number.isSafeInteger(now) || now < 0) {return invalid();}
 
   const kingdomId = server === undefined || server === -1 ? local : integer(server);
 
-  if (kingdomId < 1) return invalid();
+  if (kingdomId < 1) {return invalid();}
 
   return { point: integer(point), kingdomId, now };
 }
@@ -80,19 +80,19 @@ export function worldPointOwnerBase(
   owner: WorldPointOwnerSnapshot,
   remote: boolean,
 ): WorldPointOwnerDetail {
-  if (typeof remote !== "boolean") return invalid();
+  if (typeof remote !== "boolean") {return invalid();}
 
   const type = integer(point.pointType);
 
-  if (!remote && type === 15) return {};
+  if (!remote && type === 15) {return {};}
 
   const uid = nullableText(point.ownerId, 255);
 
-  if (mailBlank(uid)) return {};
+  if (mailBlank(uid)) {return {};}
 
   const result: WorldPointOwnerDetail = { uid: uid! };
 
-  if (!remote && type === 6) return result;
+  if (!remote && type === 6) {return result;}
 
   const profile = owned(owner.profile, uid!);
   let registered = profile ? long(profile.regTime) : 0n;
@@ -103,7 +103,7 @@ export function worldPointOwnerBase(
     if (registration) {
       const migrated = long(registration.time);
 
-      if (migrated > registered) registered = migrated;
+      if (migrated > registered) {registered = migrated;}
     }
   }
 
@@ -117,7 +117,7 @@ export function worldPointOwnerBase(
   if (city && profile) {
     const statistics = owned(owner.statistics, uid!);
 
-    if (!statistics) return invalid();
+    if (!statistics) {return invalid();}
 
     result.power = long(statistics.power ?? 0n);
     result.killArmy = long(statistics.armyKill ?? 0n);
@@ -129,11 +129,11 @@ export function worldPointOwnerBase(
     if (!mailBlank(allianceId)) {
       const alliance = owned(owner.alliance, allianceId!);
 
-      if (alliance?.abbr != null) result.afn = text(alliance.abbr, 10);
+      if (alliance?.abbr != null) {result.afn = text(alliance.abbr, 10);}
 
       const member = owned(owner.member, uid!);
       result.rank = integer(member?.rank ?? 0);
-    } else if (type === 3) result.rank = 0;
+    } else if (type === 3) {result.rank = 0;}
 
     result.vl = 0;
   }
@@ -153,7 +153,7 @@ export function worldCityDetail(
   const duel = long(lastBeDuelTime ?? 0n);
 
   if (!Number.isFinite(slowDownEffect) || Math.fround(slowDownEffect) !== slowDownEffect)
-    return invalid();
+    {return invalid();}
 
   let factor: bigint;
 

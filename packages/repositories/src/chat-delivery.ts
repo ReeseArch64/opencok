@@ -16,7 +16,7 @@ export function createChatDeliveryStore(
 
   return {
     async acquire(instance, token) {
-      if (!/^[a-zA-Z0-9_-]{1,100}$/.test(instance)) throw new TypeError("Invalid chat instance");
+      if (!/^[a-zA-Z0-9_-]{1,100}$/.test(instance)) {throw new TypeError("Invalid chat instance");}
 
       await db.transaction(async (tx) => {
         await tx.execute(
@@ -25,7 +25,7 @@ export function createChatDeliveryStore(
         const [old] = await tx.select().from(chat_consumer).where(eq(chat_consumer.id, instance));
 
         if (old && old.token !== token && old.leaseUntil > now())
-          throw new Error("Chat instance already active");
+          {throw new Error("Chat instance already active");}
 
         await tx
           .insert(chat_consumer)
@@ -44,7 +44,7 @@ export function createChatDeliveryStore(
     },
     async poll(instance, token, limit = 100) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 100)
-        throw new TypeError("Invalid delivery limit");
+        {throw new TypeError("Invalid delivery limit");}
 
       const [previous] = await db
         .select()
@@ -62,7 +62,7 @@ export function createChatDeliveryStore(
         )
         .returning();
 
-      if (!consumer) throw new Error("Chat distribution lease lost");
+      if (!consumer) {throw new Error("Chat distribution lease lost");}
 
       const [oldest] = await db
         .select({ sequence: chat_event.sequence })
@@ -147,7 +147,7 @@ export function createChatDeliveryStore(
       };
     },
     async acknowledge(instance, token, sequence) {
-      if (!/^\d+$/.test(sequence)) throw new TypeError("Invalid delivery cursor");
+      if (!/^\d+$/.test(sequence)) {throw new TypeError("Invalid delivery cursor");}
 
       const rows = await db
         .update(chat_consumer)
@@ -162,7 +162,7 @@ export function createChatDeliveryStore(
         )
         .returning({ id: chat_consumer.id });
 
-      if (!rows.length) throw new Error("Chat distribution lease lost");
+      if (!rows.length) {throw new Error("Chat distribution lease lost");}
     },
     async release(instance, token) {
       await db

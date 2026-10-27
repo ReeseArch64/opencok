@@ -18,15 +18,15 @@ export function configureOperators(rules: Rules) {
     ["13", { id: "13", Type: "26", call_activity: "0" }],
   ]);
   for (const key of ["target_quest", "recall_quest", "alliance_groupbuys", "continued_cost"])
-    rules.features.set(key, { id: key, version: "1.0.0", online: "all", test: "all" });
+    {rules.features.set(key, { id: key, version: "1.0.0", online: "all", test: "all" });}
   for (const id of ["69023", "69024"])
-    rules.configuration.payControl!.set(id, {
+    {rules.configuration.payControl!.set(id, {
       ...rules.configuration.payControl!.get(id)!,
       k1: "1.0.0",
       k2: "all",
       k5: "1",
       k6: "4",
-    });
+    });}
   rules.advanced.castleLevels!.set("9011501", {
     ...rules.advanced.castleLevels!.get("9011501")!,
     activity_Type: "1;4|2;7",
@@ -52,7 +52,7 @@ export function configureOperators(rules: Rules) {
     ["combat", "38"],
     ["combat-custom", "31"],
   ])
-    rules.power.activityPanels!.set(id!, {
+    {rules.power.activityPanels!.set(id!, {
       ...rules.power.activityPanels!.get(id!)!,
       id: id!,
       type: type!,
@@ -60,7 +60,7 @@ export function configureOperators(rules: Rules) {
       start: "2024-01-01-00-00",
       end: "2024-01-02-00-00",
       ...(id === "combat-custom" ? { battle_type: "1" } : {}),
-    });
+    });}
 }
 export function operatorSnapshot(): ActivityOperatorsSnapshot {
   const now = BigInt(operatorsNow);

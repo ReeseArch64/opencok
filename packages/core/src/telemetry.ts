@@ -57,7 +57,7 @@ export class Telemetry {
     const exporter = { headers, timeoutMillis: 2000 };
     let lastFailure = 0;
     const failed = () => {
-      if (Date.now() - lastFailure < 5000) return;
+      if (Date.now() - lastFailure < 5000) {return;}
 
       lastFailure = Date.now();
       report("telemetry_export_failed");
@@ -141,10 +141,10 @@ export class Telemetry {
       context: context.active(),
     });
     const dimensions: Attributes = { event: String(record.event ?? "event"), level };
-    if (typeof record.operation === "string") dimensions.operation = record.operation;
+    if (typeof record.operation === "string") {dimensions.operation = record.operation;}
     if (record.event === "command_completed" && typeof record.command === "string")
-      dimensions.operation = `command.${record.command}`;
-    if (typeof record.outcome === "string") dimensions.outcome = record.outcome;
+      {dimensions.operation = `command.${record.command}`;}
+    if (typeof record.outcome === "string") {dimensions.outcome = record.outcome;}
     this.events.add(1, dimensions);
     if (
       typeof record.durationMs === "number" &&
@@ -157,9 +157,9 @@ export class Telemetry {
         "resource_failed",
       ].includes(String(record.event))
     )
-      this.durations.record(record.durationMs, dimensions);
+      {this.durations.record(record.durationMs, dimensions);}
     if (record.outcome === "failure")
-      trace.getActiveSpan()?.setStatus({ code: SpanStatusCode.ERROR });
+      {trace.getActiveSpan()?.setStatus({ code: SpanStatusCode.ERROR });}
     if (level === "error") {
       const span = trace.getActiveSpan();
       span?.setStatus({ code: SpanStatusCode.ERROR });
@@ -194,14 +194,14 @@ export class Telemetry {
     try {
       const results = await Promise.allSettled([this.traces.shutdown(), this.logs.shutdown()]);
       await this.meters.shutdown();
-      if (results.some((result) => result.status === "rejected")) this.reportFailure();
+      if (results.some((result) => result.status === "rejected")) {this.reportFailure();}
     } finally {
       this.manager.disable();
       context.disable();
       trace.disable();
       metrics.disable();
       diag.disable();
-      if (telemetry === this) telemetry = undefined;
+      if (telemetry === this) {telemetry = undefined;}
     }
   }
 }
@@ -211,8 +211,8 @@ export function configureTelemetry(
   options: TelemetryOptions,
   report: (event: string) => void,
 ) {
-  if (!options.endpoint) return undefined;
-  if (telemetry) throw new Error("Telemetry is already initialized");
+  if (!options.endpoint) {return undefined;}
+  if (telemetry) {throw new Error("Telemetry is already initialized");}
 
   telemetry = new Telemetry(service, options, report);
 

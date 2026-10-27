@@ -25,32 +25,32 @@ export function heroInsideRanking(rows: readonly Row[]): Fields {
         const result: Fields = {};
 
         for (const key of ["uid", "name", "pic"])
-          if (row[key] != null) result[key] = sfs.string(String(row[key]));
+          {if (row[key] != null) {result[key] = sfs.string(String(row[key]));}}
 
         for (const key of ["picVer", "picfraId"])
-          result[key] = sfs.int(Number(javaDecimal(String(row[key] ?? 0), 32)));
+          {result[key] = sfs.int(Number(javaDecimal(String(row[key] ?? 0), 32)));}
 
         const power = javaDecimal(String(row.power ?? 0), 64);
 
-        if (power > 0n) result.power = sfs.long(power);
+        if (power > 0n) {result.power = sfs.long(power);}
 
         for (const key of ["abbr", "lang"])
-          if (row[key] != null) result[key] = sfs.string(String(row[key]));
+          {if (row[key] != null) {result[key] = sfs.string(String(row[key]));}}
 
         if (Number(row.mainBuildingLevel) > 0)
-          result.mainBuildingLevel = sfs.int(Number(row.mainBuildingLevel));
+          {result.mainBuildingLevel = sfs.int(Number(row.mainBuildingLevel));}
 
-        if (row.allianceId != null) result.allianceId = sfs.string(String(row.allianceId));
+        if (row.allianceId != null) {result.allianceId = sfs.string(String(row.allianceId));}
 
         for (const key of ["gmFlag", "crossFightSrcServerId", "vipLevel", "svipLevel"])
-          result[key] = sfs.int(
+          {result[key] = sfs.int(
             Number(javaDecimal(String(row[key] ?? (key === "crossFightSrcServerId" ? -1 : 0)), 32)),
-          );
+          );}
 
         for (const key of ["vipEndTime", "offLineTime"]) {
           const value = javaDecimal(String(row[key] ?? 0), 64);
 
-          if (value > 0n) result[key] = sfs.long(value);
+          if (value > 0n) {result[key] = sfs.long(value);}
         }
 
         result.rank = sfs.int(index + 1);
@@ -73,15 +73,15 @@ export function heroHistory(
       const fields: Fields = {};
 
       for (const key of ["uid", "allianceId", "rewardId"])
-        if (member[key] != null) fields[key] = sfs.string(String(member[key]));
+        {if (member[key] != null) {fields[key] = sfs.string(String(member[key]));}}
 
       fields.rank = sfs.int(Number(member.rank));
 
       for (const key of ["name", "server", "pic", "picVer", "picfraId", "abbr", "icon"])
-        if (member[key] != null)
-          fields[key] = ["server", "picVer", "picfraId"].includes(key)
+        {if (member[key] != null)
+          {fields[key] = ["server", "picVer", "picfraId"].includes(key)
             ? sfs.int(Number(member[key]))
-            : sfs.string(String(member[key]));
+            : sfs.string(String(member[key]));}}
 
       return sfs.object(fields);
     });
@@ -89,7 +89,7 @@ export function heroHistory(
       const fields: Fields = { id: sfs.int(Number(realm.id)), rank: sfs.int(Number(realm.rank)) };
 
       for (const key of ["name", "banner"])
-        if (realm[key] != null) fields[key] = sfs.string(String(realm[key]));
+        {if (realm[key] != null) {fields[key] = sfs.string(String(realm[key]));}}
 
       return sfs.object(fields);
     });

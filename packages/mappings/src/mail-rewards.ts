@@ -15,8 +15,8 @@ export function combineMailRewards(responses: readonly Buffer[], ids: readonly s
 
     for (const [key, value] of Object.entries(result)) {
       if (key === "goods") {
-        for (const item of value.value as Value[]) goods.set(str(fields(item), "uuid"), item);
-      } else body[key] = value;
+        for (const item of value.value as Value[]) {goods.set(str(fields(item), "uuid"), item);}
+      } else {body[key] = value;}
     }
 
     for (const value of envelope.pushes!.value as Value[]) {
@@ -24,25 +24,25 @@ export function combineMailRewards(responses: readonly Buffer[], ids: readonly s
         payload = fields(push.body);
 
       if (str(push, "command") === "push.useritem")
-        for (const item of payload.useritemlist!.value as Value[])
-          items.set(str(fields(item), "uuid"), item);
-      else if (str(push, "command") === "push.city.refresh") resource = payload;
-      else extra.push({ command: str(push, "command"), body: payload });
+        {for (const item of payload.useritemlist!.value as Value[])
+          {items.set(str(fields(item), "uuid"), item);}}
+      else if (str(push, "command") === "push.city.refresh") {resource = payload;}
+      else {extra.push({ command: str(push, "command"), body: payload });}
     }
   }
 
-  if (goods.size) body.goods = sfs.array([...goods.values()]);
+  if (goods.size) {body.goods = sfs.array([...goods.values()]);}
 
   body.successUids = sfs.string(ids.join(","));
   const pushes: { command: string; body: Fields }[] = [];
 
   if (items.size)
-    pushes.push({
+    {pushes.push({
       command: "push.useritem",
       body: { useritemlist: sfs.array([...items.values()]) },
-    });
+    });}
 
-  if (resource) pushes.push({ command: "push.city.refresh", body: resource });
+  if (resource) {pushes.push({ command: "push.city.refresh", body: resource });}
 
   return inventoryResponse(body, [...pushes, ...extra]);
 }

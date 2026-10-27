@@ -36,7 +36,7 @@ function fixture() {
   };
 }
 function bits(value: number) {
-  if (Number.isNaN(value)) return 2143289344;
+  if (Number.isNaN(value)) {return 2143289344;}
   const bytes = new DataView(new ArrayBuffer(4));
   bytes.setFloat32(0, value);
   return bytes.getInt32(0);
@@ -68,7 +68,7 @@ test("general equipment modifiers, extra properties and suit addition match 1000
       { itemId: 2, extraProperty: `78,${input[3]}` },
     );
     f.modifiers.set(214, javaFloat(input[4]));
-    for (const id of [207, 209]) f.modifiers.set(id, javaFloat(input[5]));
+    for (const id of [207, 209]) {f.modifiers.set(id, javaFloat(input[5]));}
     f.modifiers.set(218, javaFloat(input[6]));
     f.rules.power.equipmentSets!.set("s", { suit_para1: "78", suit_num1: input[7]! });
     expect(bits(f.resolve().get(78)!)).toBe(vector.bits);
@@ -87,7 +87,7 @@ test("color and site modifiers are reread for extras and modifier 218 resolves o
   ).toBe(13);
   const siteEffects = [207, 209, 208, 210, 211, 212, 213];
   for (let color = 0; color <= 5; color++)
-    for (let site = 0; site <= 6; site++) {
+    {for (let site = 0; site <= 6; site++) {
       f.calls.length = 0;
       Object.assign(f.rules.power.equipment!.get("1")!, {
         color: String(color),
@@ -99,7 +99,7 @@ test("color and site modifiers are reread for extras and modifier 218 resolves o
       f.resolve();
       const one = color >= 2 ? [212 + color, siteEffects[site]!] : [siteEffects[site]!];
       expect(f.calls).toEqual([...one, ...one, 218, 218]);
-    }
+    }}
   const calls: number[] = [];
   f.rules.power.equipment!.set("1", { para1: "78|91", num1: "1" });
   const result = newGeneralEquipmentEffects(7, f.equipment, f.rules, (id) => {
@@ -159,7 +159,7 @@ test("ordinary parameter groups stop at the first blank and at 99 while canonica
   });
   expect(f.resolve().get(78)).toBe(2);
   const rule: Record<string, string> = { para100: "bad", num100: "bad" };
-  for (let i = 1; i < 100; i++) Object.assign(rule, { [`para${i}`]: "78", [`num${i}`]: "1" });
+  for (let i = 1; i < 100; i++) {Object.assign(rule, { [`para${i}`]: "78", [`num${i}`]: "1" });}
   f.rules.power.equipment!.set("1", rule);
   expect(f.resolve().get(78)).toBe(99);
   f.rules.power.equipment!.set("1", { site: "6" });

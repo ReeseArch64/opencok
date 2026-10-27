@@ -116,7 +116,7 @@ test("sessions correlate successful commands and every repeated failure without 
           hotOperations.push(str(params, "operationId"));
           return { body: {}, pushes: [] };
         }
-        if (command !== "cmd.ping") throw new Error("private-database-password");
+        if (command !== "cmd.ping") {throw new Error("private-database-password");}
         return { body: {}, pushes: [] };
       },
     },
@@ -154,7 +154,7 @@ test("sessions correlate successful commands and every repeated failure without 
       extension("private-unknown-command", {}),
     ];
     socket.emit("data", Buffer.concat(packets.map(frame)));
-    while (state.inFlight.size) await Promise.all(state.inFlight);
+    while (state.inFlight.size) {await Promise.all(state.inFlight);}
     const completed = records.filter((record) => record.event === "command_completed");
     expect(completed.map((record) => record.outcome)).toEqual([
       ...Array(7).fill("success"),
@@ -183,7 +183,7 @@ test("sessions correlate successful commands and every repeated failure without 
     expect(JSON.stringify(records)).not.toContain(signature);
   } finally {
     socket.destroy();
-    while (state.inFlight.size) await Promise.all(state.inFlight);
+    while (state.inFlight.size) {await Promise.all(state.inFlight);}
     spies.forEach((spy) => spy.mockRestore());
   }
 });

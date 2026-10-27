@@ -16,7 +16,7 @@ import { territorySoldierCapacity } from "./world-territory-capacity.ts";
 const territoryTypes = [14, 18, 20, 21, 23, 46, 47];
 
 function int(value: unknown): number {
-  if (value == null) return 0;
+  if (value == null) {return 0;}
 
   if (
     typeof value !== "number" ||
@@ -24,22 +24,22 @@ function int(value: unknown): number {
     value < -2147483648 ||
     value > 2147483647
   )
-    throw new Error("Invalid specialized world integer");
+    {throw new Error("Invalid specialized world integer");}
 
   return value;
 }
 
 function long(value: unknown, sentinel = false): bigint {
-  if (value == null) return 0n;
+  if (value == null) {return 0n;}
 
   if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value)
-    throw new Error("Invalid specialized world time");
+    {throw new Error("Invalid specialized world time");}
 
   return sentinel && value === 9223372036854775807n ? 0n : value;
 }
 
 function text(value: unknown): string {
-  if (value == null) return "";
+  if (value == null) {return "";}
 
   if (
     typeof value !== "string" ||
@@ -47,7 +47,7 @@ function text(value: unknown): string {
     !value.isWellFormed() ||
     value.includes("\0")
   )
-    throw new Error("Invalid specialized world text");
+    {throw new Error("Invalid specialized world text");}
 
   return value;
 }
@@ -65,14 +65,14 @@ function realState(point: Row, row: Row, marches: readonly Row[], rules: Rules):
   const active = row.active === 1;
   const stat = int(row.stat);
 
-  if (stat < 0 || stat > 10) throw new Error("Unknown territory state");
+  if (stat < 0 || stat > 10) {throw new Error("Unknown territory state");}
 
   let value = 0;
 
-  if (stat === 0 || stat === 1) value = stat === 1 && occupied ? 0 : 1;
-  else if (stat === 2) value = occupied ? (active ? 5 : 0) : active ? 4 : 1;
-  else if (stat === 3) value = occupied ? 2 : 3;
-  else if (stat === 10) value = occupied && marches.length ? 0 : 1;
+  if (stat === 0 || stat === 1) {value = stat === 1 && occupied ? 0 : 1;}
+  else if (stat === 2) {value = occupied ? (active ? 5 : 0) : active ? 4 : 1;}
+  else if (stat === 3) {value = occupied ? 2 : 3;}
+  else if (stat === 10) {value = occupied && marches.length ? 0 : 1;}
   else if (stat === 4) {
     value = occupied ? 6 : 1;
 
@@ -99,7 +99,7 @@ function realState(point: Row, row: Row, marches: readonly Row[], rules: Rules):
     }
   }
 
-  if ([21, 23].includes(int(row.type))) value = value === 4 ? 1 : value === 5 ? 0 : value;
+  if ([21, 23].includes(int(row.type))) {value = value === 4 ? 1 : value === 5 ? 0 : value;}
 
   return value;
 }
@@ -107,7 +107,7 @@ function realState(point: Row, row: Row, marches: readonly Row[], rules: Rules):
 function bossFields(state: WorldSpecialDetailSnapshot, observer: string): Fields {
   const row = state.boss;
 
-  if (!row || row.status === 0 || row.status === 3) return {};
+  if (!row || row.status === 0 || row.status === 3) {return {};}
 
   const ranks = [...state.ranks].sort((a, b) => (int(b.score) - int(a.score)) | 0);
   const index = ranks.findIndex((rank) => rank.uid === observer);
@@ -117,7 +117,7 @@ function bossFields(state: WorldSpecialDetailSnapshot, observer: string): Fields
       (index >= 0 && index < 999 && ranks[index]!.reward === 1));
   const data: Fields = {};
 
-  for (const key of ["point", "level", "maxhp", "hp"]) data[key] = sfs.int(int(row[key]));
+  for (const key of ["point", "level", "maxhp", "hp"]) {data[key] = sfs.int(int(row[key]));}
 
   data.id = sfs.int(int(row.bossid));
   data.type = { type: Type.Byte, value: int(row.type) };
@@ -142,27 +142,27 @@ export async function specialWorldFields(
   const point = snapshot.point!;
   const type = int(point.pointType);
 
-  if (!territoryTypes.includes(type) && (snapshot.remote || ![49, 50].includes(type))) return {};
+  if (!territoryTypes.includes(type) && (snapshot.remote || ![49, 50].includes(type))) {return {};}
 
   const state = snapshot.special;
 
-  if (!state) throw new Error("Missing specialized world snapshot");
+  if (!state) {throw new Error("Missing specialized world snapshot");}
 
   if ([49, 50].includes(type))
-    return mailBlank(text(point.ownerId)) && mailBlank(text(point.ownerName))
+    {return mailBlank(text(point.ownerId)) && mailBlank(text(point.ownerName))
       ? bossFields(state, observer)
-      : {};
+      : {};}
 
   const output: Fields = {};
 
-  if (type === 46 && !snapshot.remote) output.flag = sfs.string(text(state.observerBanner));
+  if (type === 46 && !snapshot.remote) {output.flag = sfs.string(text(state.observerBanner));}
 
   const row = state.territory;
 
-  if (!row) return output;
+  if (!row) {return output;}
 
   if (row.pointId !== point.id || row.atWorldId !== point.worldId || row.type !== type)
-    throw new Error("Foreign territory projection");
+    {throw new Error("Foreign territory projection");}
 
   const body: Fields = {
     uid: sfs.string(text(row.uid)),
@@ -171,31 +171,31 @@ export async function specialWorldFields(
   };
 
   for (const key of ["pointId", "type", "resType"])
-    if (row[key] != null) body[key] = sfs.int(int(row[key]));
+    {if (row[key] != null) {body[key] = sfs.int(int(row[key]));}}
 
   for (const key of ["allianceAbbr", "name", "pic"])
-    if (!mailBlank(text(row[key]))) body[key] = sfs.string(text(row[key]));
+    {if (!mailBlank(text(row[key]))) {body[key] = sfs.string(text(row[key]));}}
 
-  if (row.flag != null) body.flag = sfs.string(text(row.flag));
+  if (row.flag != null) {body.flag = sfs.string(text(row.flag));}
 
   body.level = sfs.int(int(row.level) <= 0 ? 1 : (int(row.level) + 1) | 0);
   const speed = row.buildingSpd ?? 0;
 
   if (typeof speed !== "number" || !Number.isFinite(speed))
-    throw new Error("Invalid territory building speed");
+    {throw new Error("Invalid territory building speed");}
 
   body.buildingSpd = sfs.double(speed);
   body.active = sfs.int(int(row.active));
 
   for (const key of ["activateTime", "updateTime", "startTime"])
-    body[key] = sfs.long(long(row[key], true));
+    {body[key] = sfs.long(long(row[key], true));}
 
   body.lastUpdateTime = sfs.long(long(row.lastUpdateTime));
   body.curDef = sfs.int(int(row.curDef));
   body.maxDef = sfs.int(int(row.maxDef));
   body.count = sfs.int(int(row.num));
 
-  if (type === 46) body.banner = sfs.string(text(state.banner));
+  if (type === 46) {body.banner = sfs.string(text(state.banner));}
 
   const occupied = !mailBlank(text(point.ownerId));
 
@@ -208,7 +208,7 @@ export async function specialWorldFields(
       let visible = true;
 
       for (const [key, value] of Object.entries(raw)) {
-        if (value.type !== Type.Int) throw new Error("Invalid turret casualty count");
+        if (value.type !== Type.Int) {throw new Error("Invalid turret casualty count");}
 
         if (key !== "deadPower") {
           if ((value.value as number) <= 0) {
@@ -221,20 +221,20 @@ export async function specialWorldFields(
       }
 
       if (visible)
-        kills.push(
+        {kills.push(
           sfs.object({
             uid: sfs.string(entry.uid),
             name: sfs.string(text(entry.profile?.name)),
             ...picture(entry.profile),
             dead: sfs.object(dead),
           }),
-        );
+        );}
     }
 
     body.kill = sfs.array(kills);
   } else if (occupied) {
     if (state.ownerProfile && state.ownerProfile.uid !== point.ownerId)
-      throw new Error("Foreign territory owner profile");
+      {throw new Error("Foreign territory owner profile");}
 
     const allianceId = state.ownerProfile?.allianceId ?? point.allianceId;
     const owner: Fields = {
@@ -243,12 +243,12 @@ export async function specialWorldFields(
       allianceId: sfs.string(text(allianceId)),
     };
 
-    if (state.ownerProfile) Object.assign(owner, picture(state.ownerProfile));
+    if (state.ownerProfile) {Object.assign(owner, picture(state.ownerProfile));}
 
     if (state.ownerAlliance && !mailBlank(text(state.ownerAlliance.abbr)))
-      owner.abbr = sfs.string(text(state.ownerAlliance.abbr));
+      {owner.abbr = sfs.string(text(state.ownerAlliance.abbr));}
 
-    if (state.team) owner.team = sfs.bool(true);
+    if (state.team) {owner.team = sfs.bool(true);}
 
     body.owner = sfs.object(owner);
   }
@@ -264,10 +264,10 @@ export async function specialWorldFields(
   }
 
   if (type === 23)
-    body.resourceList = sfs.array(
+    {body.resourceList = sfs.array(
       state.resources.map(({ row: resource, profile }) => {
         if (resource.uid !== profile.uid || resource.allianceId !== row.allianceId)
-          throw new Error("Foreign warehouse resource");
+          {throw new Error("Foreign warehouse resource");}
 
         const item: Fields = {
           uid: sfs.string(text(resource.uid)),
@@ -277,14 +277,14 @@ export async function specialWorldFields(
         };
 
         for (const key of ["wood", "stone", "iron", "food"])
-          item[key] = sfs.long(long(resource[key]) < 0n ? 0n : long(resource[key]));
+          {item[key] = sfs.long(long(resource[key]) < 0n ? 0n : long(resource[key]));}
 
         item.silver = sfs.long(long(resource.silver));
         item.lastUpdateTime = sfs.long(long(resource.lastUpdateTime));
 
         return sfs.object(item);
       }),
-    );
+    );}
 
   output.territory = sfs.object(body);
   let soldiers = 0,
@@ -292,28 +292,28 @@ export async function specialWorldFields(
 
   for (const march of state.marches) {
     if (march.targetId !== point.id || march.worldId !== point.worldId || march.state !== 1)
-      throw new Error("Foreign territory defense");
+      {throw new Error("Foreign territory defense");}
 
     if (!snapshot.remote && march.ownerUid === observer)
-      output.marchUuid = sfs.string(text(march.uuid));
+      {output.marchUuid = sfs.string(text(march.uuid));}
 
     if (occupied && [14, 20, 21, 46, 47].includes(type)) {
       if (type !== 21 && !mailBlank(text(point.ownerMarchUUid)))
-        output.ownerMarchUuid = sfs.string(text(point.ownerMarchUUid));
+        {output.ownerMarchUuid = sfs.string(text(point.ownerMarchUUid));}
 
-      if (!Buffer.isBuffer(march.armyInfo)) throw new Error("Missing territory defense army");
+      if (!Buffer.isBuffer(march.armyInfo)) {throw new Error("Missing territory defense army");}
 
       const army = decodeWorldResourceArmy(march.armyInfo);
 
       if (!army || army.owner !== march.ownerUid || !army.soldiers)
-        throw new Error("Foreign territory defense army");
+        {throw new Error("Foreign territory defense army");}
 
       for (const soldier of army.soldiers)
-        soldiers = (soldiers + ((soldier.total - soldier.dead) | 0)) | 0;
+        {soldiers = (soldiers + ((soldier.total - soldier.dead) | 0)) | 0;}
 
       if (march.ownerUid === point.ownerId) {
         if (!state.ownerEffects || state.ownerEffects.effects.profile.uid !== point.ownerId)
-          throw new Error("Missing territory owner capacity");
+          {throw new Error("Missing territory owner capacity");}
 
         capacity = await territorySoldierCapacity(
           state.ownerEffects,
@@ -332,14 +332,14 @@ export async function specialWorldFields(
   }
 
   if (!snapshot.remote && [14, 46, 47].includes(type))
-    Object.assign(output, {
+    {Object.assign(output, {
       speed: body.buildingSpd,
       maxDef: body.maxDef,
       curDef: body.curDef,
       stat: body.stat,
       updateTime: body.updateTime,
       startTime: body.startTime,
-    });
+    });}
 
   return output;
 }

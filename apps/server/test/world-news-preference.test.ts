@@ -23,7 +23,7 @@ function database(
   const client = {
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
-      if (query.text.startsWith("begin")) pending = structuredClone(saved);
+      if (query.text.startsWith("begin")) {pending = structuredClone(saved);}
       else if (query.text.includes('from "opencok_kingdom"."userprofile"')) {
         expect(params[0]).toBe(owner);
         expect(query.text).toContain("for update");
@@ -31,23 +31,23 @@ function database(
           rows: profile ? [[profile.uid, profile.serverId, profile.banFlag, profile.banTime]] : [],
         };
       } else if (query.text.startsWith('insert into "opencok_kingdom"."parse_info"')) {
-        if (options.failure === "insert") throw new Error("insert unavailable");
+        if (options.failure === "insert") {throw new Error("insert unavailable");}
         const [uid, type, status, audio] = params;
         expect(uid).toBe(owner);
         if (pending!.has(Number(type)))
-          throw Object.assign(new Error("duplicate preference"), { code: "23505" });
+          {throw Object.assign(new Error("duplicate preference"), { code: "23505" });}
         pending!.set(Number(type), {
           type: Number(type),
           status: Number(status),
           audio: Number(audio),
         });
       } else if (query.text === "commit") {
-        if (options.failure === "commit") throw new Error("commit failed");
+        if (options.failure === "commit") {throw new Error("commit failed");}
         saved = pending!;
         pending = undefined;
-        if (options.failure === "lost-commit") throw new Error("commit acknowledgment lost");
-      } else if (query.text === "rollback") pending = undefined;
-      else throw new Error("Unexpected SQL operation");
+        if (options.failure === "lost-commit") {throw new Error("commit acknowledgment lost");}
+      } else if (query.text === "rollback") {pending = undefined;}
+      else {throw new Error("Unexpected SQL operation");}
       return { rows: [] };
     },
   };
@@ -98,11 +98,11 @@ test("missing, moved, mismatched and banned owners cannot initialize preferences
 test("preference initialization rejects invalid identity, realm and clock before any SQL", async () => {
   const { db, queries } = database();
   for (const uid of ["", "x".repeat(41)])
-    await expect(initializeWorldNewsPreference(db, uid, 2, now)).rejects.toThrow();
+    {await expect(initializeWorldNewsPreference(db, uid, 2, now)).rejects.toThrow();}
   for (const clock of [-1, NaN, Infinity, 0.5])
-    await expect(initializeWorldNewsPreference(db, owner, 2, clock)).rejects.toThrow();
+    {await expect(initializeWorldNewsPreference(db, owner, 2, clock)).rejects.toThrow();}
   for (const kingdom of [0, 1.5, NaN])
-    await expect(initializeWorldNewsPreference(db, owner, kingdom, now)).rejects.toThrow();
+    {await expect(initializeWorldNewsPreference(db, owner, kingdom, now)).rejects.toThrow();}
   expect(queries).toEqual([]);
 });
 

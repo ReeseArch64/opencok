@@ -30,7 +30,7 @@ export async function loadFriendshipMine(
     kingdomId < 1 ||
     kingdomId > 2147483647
   )
-    throw new DependencyError("reconnect owner");
+    {throw new DependencyError("reconnect owner");}
 
   const binding = await readFriendshipBinding(global, kingdomId, uid);
 
@@ -46,7 +46,7 @@ export async function loadFriendshipMine(
       )[0];
 
       if (!profile || profile.uid !== uid || profile.serverId !== kingdomId)
-        throw new DependencyError("reconnect owner");
+        {throw new DependencyError("reconnect owner");}
 
       return readFriendshipMine(tx, uid, binding, initial);
     },
@@ -67,12 +67,12 @@ export async function readFriendshipBinding(
   const account = accounts.length === 1 ? accounts[0] : undefined;
 
   if (account && (!/^[+-]?\d+$/.test(account.server) || Number(account.server) !== kingdomId))
-    throw new DependencyError("reconnect realm");
+    {throw new DependencyError("reconnect realm");}
 
   const binding = account?.binding;
 
   if (binding && binding.trim() && binding.length > 40)
-    throw new DependencyError("reconnect binding");
+    {throw new DependencyError("reconnect binding");}
 
   return binding ?? null;
 }
@@ -83,7 +83,7 @@ export async function readFriendshipMine(
   binding: string | null,
   initial: () => FriendshipMine,
 ): Promise<Row> {
-  if (!binding?.trim()) return { ...initial() };
+  if (!binding?.trim()) {return { ...initial() };}
 
   const read = () =>
     tx
@@ -94,7 +94,7 @@ export async function readFriendshipMine(
       .for("share");
   const existing = (await read())[0];
 
-  if (existing) return existing;
+  if (existing) {return existing;}
 
   const seed = initial();
   const inserted = (
@@ -115,11 +115,11 @@ export async function readFriendshipMine(
       .returning(mineFields)
   )[0];
 
-  if (inserted) return inserted;
+  if (inserted) {return inserted;}
 
   const winner = (await read())[0];
 
-  if (!winner) throw new DependencyError("reconnect mine");
+  if (!winner) {throw new DependencyError("reconnect mine");}
 
   return winner;
 }

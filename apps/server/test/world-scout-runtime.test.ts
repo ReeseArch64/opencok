@@ -113,7 +113,7 @@ test("scout troop quota uses the owned school, real effects, float percentages a
 });
 test("scout expedition capacity requires an admitted live fighting phase and actual Source controls", () => {
   for (const id of ["17_wk", "tech_newEffect"])
-    rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });
+    {rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });}
   rules.features.set("wk_switch_new", {
     id: "wk_switch_new",
     online: "close",

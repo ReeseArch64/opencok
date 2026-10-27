@@ -88,7 +88,7 @@ test("operator reads project exact saved player clocks and registration country 
       mutation_outbox,
       economy_posting,
     ])
-      expect(await h.db.db.select().from(table)).toHaveLength(0);
+      {expect(await h.db.db.select().from(table)).toHaveLength(0);}
     await h.db.db.insert(activity_group_buys).values({
       id: "synthetic-oversized",
       curRound: 1,

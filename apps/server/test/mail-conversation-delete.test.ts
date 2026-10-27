@@ -82,9 +82,9 @@ test("chat-dependent reads become available only with configured durable deliver
 test("oversized or malformed conversation selections reject before mutation", async () => {
   const { game, deleted } = app();
   for (const users of ["x".repeat(41), "x\0", Array(1001).fill("a").join(","), "\ud800"])
-    await expect(
+    {await expect(
       game.execute("self", "chatMail.delete.batch", { users: sfs.string(users) }),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   await expect(
     game.execute("self", "chatMail.delete.batch", { users: sfs.int(1) }),
   ).rejects.toThrow();

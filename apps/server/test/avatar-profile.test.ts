@@ -37,7 +37,7 @@ class MemoryCache extends Cache {
   }
   override async command(command: string, ...args: string[]): Promise<unknown> {
     this.calls.push({ command, args });
-    if (command === "MGET") return args.map((key) => this.values.get(key) ?? null);
+    if (command === "MGET") {return args.map((key) => this.values.get(key) ?? null);}
     expect(command).toBe("EVAL");
     expect(args[0]).toBe(playerUpdateScript);
     expect(args[1]).toBe("1");
@@ -45,8 +45,8 @@ class MemoryCache extends Cache {
     const row = oracle.cases.find(
       (row) => row.before === (this.values.get(key) ?? null) && row.incoming === args[3],
     );
-    if (!row) throw new Error("Missing synthetic Lua oracle case");
-    if (row.writes) this.values.set(key, row.after!);
+    if (!row) {throw new Error("Missing synthetic Lua oracle case");}
+    if (row.writes) {this.values.set(key, row.after!);}
     return row.result;
   }
 }
@@ -66,18 +66,18 @@ function fixture() {
         working = structuredClone(state);
         return { rows: [] };
       }
-      if (text === "rollback") return { rows: [] };
+      if (text === "rollback") {return { rows: [] };}
       if (text === "commit") {
-        if (failure === "commit") throw new Error("Synthetic commit failure");
+        if (failure === "commit") {throw new Error("Synthetic commit failure");}
         state = working;
-        if (failure === "lost") throw new Error("Synthetic lost commit reply");
+        if (failure === "lost") {throw new Error("Synthetic lost commit reply");}
         return { rows: [] };
       }
       const table = text.includes('"userprofile"') ? "profile" : "completion";
       if (failure === `${text.split(" ")[0]}:${table}`)
-        throw new Error("Synthetic database failure");
+        {throw new Error("Synthetic database failure");}
       if (text.startsWith("select")) {
-        if (table === "profile") return { rows: working.profile ? [working.profile] : [] };
+        if (table === "profile") {return { rows: working.profile ? [working.profile] : [] };}
         const e = working.entry;
         return {
           rows: e
@@ -99,7 +99,7 @@ function fixture() {
       expect(text.startsWith("update")).toBe(true);
       expect(table).toBe("completion");
       expect(params.slice(1)).toEqual(["1001", 5, working.entry!.pendingEffects]);
-      if (failure === "cas") return { rows: [] };
+      if (failure === "cas") {return { rows: [] };}
       working.entry!.pendingEffects = Number(params[0]);
       return { rows: [["1001"]] };
     },
@@ -174,14 +174,14 @@ test("invalid cache inputs and replies reject without silently replacing malform
     return 1;
   };
   for (const uid of ["", "x".repeat(256), "bad\0uid", "\ud800"])
-    await expect(publishPlayerUpdate(command, 1, uid, "1")).rejects.toThrow();
+    {await expect(publishPlayerUpdate(command, 1, uid, "1")).rejects.toThrow();}
   for (const value of ["", "01", "-1", "9223372036854775808", "1.0"])
-    await expect(publishPlayerUpdate(command, 1, "1001", value)).rejects.toThrow();
+    {await expect(publishPlayerUpdate(command, 1, "1001", value)).rejects.toThrow();}
   for (const realm of [0, -1, 1.5, 2147483648])
-    await expect(publishPlayerUpdate(command, realm, "1001", "1")).rejects.toThrow();
+    {await expect(publishPlayerUpdate(command, realm, "1001", "1")).rejects.toThrow();}
   expect(calls).toBe(0);
   for (const result of [-1, 2, "1", null, undefined])
-    await expect(publishPlayerUpdate(async () => result, 1, "1001", "1")).rejects.toThrow();
+    {await expect(publishPlayerUpdate(async () => result, 1, "1001", "1")).rejects.toThrow();}
   const bad = new MemoryCache();
   bad.values.set("opencok:kingdom:1:player-update:1001", "1e3");
   await expect(bad.publishPlayerUpdateTime("1001", "1792756800")).rejects.toThrow();
@@ -219,7 +219,7 @@ test("profile intent uses committed metadata and exact seconds, rejecting foreig
     { committedAt: -1n },
     { effects: "invalid" },
   ])
-    expect(() => avatarProfileUpdate({ ...completion(), ...patch }, 1)).toThrow();
+    {expect(() => avatarProfileUpdate({ ...completion(), ...patch }, 1)).toThrow();}
   for (const profile of [
     null,
     [],
@@ -227,9 +227,9 @@ test("profile intent uses committed metadata and exact seconds, rejecting foreig
     { userName: null, platform: "test", updatedAt: "1792756800" },
     { userName: "Synthetic", platform: "\ud800", updatedAt: "1792756800" },
   ])
-    expect(() =>
+    {expect(() =>
       avatarProfileUpdate({ ...completion(), effects: JSON.stringify({ version: 1, profile }) }, 1),
-    ).toThrow();
+    ).toThrow();}
 });
 
 test("owned publication and acknowledgment clear only bit two while preserving immutable history", async () => {
@@ -350,8 +350,8 @@ test("foreign owners, invalid projections and absent work never invoke the publi
   }
   const invalid = fixture();
   for (const timeout of [0, 99, 30001, NaN])
-    expect(() =>
+    {expect(() =>
       publishAvatarProfile(invalid.db, 1, "1001", 5, avatarProfileUpdate, async () => {}, timeout),
-    ).toThrow();
+    ).toThrow();}
   expect(invalid.queries).toEqual([]);
 });

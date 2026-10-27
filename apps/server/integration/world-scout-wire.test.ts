@@ -35,7 +35,7 @@ import { startServer } from "../src/server";
 async function eventually(check: () => Promise<boolean>, milliseconds = 15000) {
   const end = Date.now() + milliseconds;
   do {
-    if (await check()) return;
+    if (await check()) {return;}
     await Bun.sleep(50);
   } while (Date.now() < end);
   throw new Error("Synthetic scout transition timed out");
@@ -314,12 +314,12 @@ test("real TCP scout quotation, inspection, intel mail and return preserve troop
       ),
     );
   } finally {
-    for (const client of clients) client.close();
+    for (const client of clients) {client.close();}
     await runtime?.close();
     await global?.close();
     await realm?.close();
     await redis.stop();
-    if (zkCreated) await pg.docker(["rm", "--force", "--volumes", zk]);
+    if (zkCreated) {await pg.docker(["rm", "--force", "--volumes", zk]);}
     await pg.stop();
   }
 }, 180000);

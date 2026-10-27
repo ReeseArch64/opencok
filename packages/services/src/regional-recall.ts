@@ -36,7 +36,7 @@ export class RegionalRecallDomain extends CityCommandDomain {
     const empty = () => ({ response: encode({}), event: null });
     const state = context.state.regionalRecall;
 
-    if (!state) regionalRecallFailure();
+    if (!state) {regionalRecallFailure();}
 
     if (
       !serverFeature(context.rules, "recall", {
@@ -45,11 +45,11 @@ export class RegionalRecallDomain extends CityCommandDomain {
         now: Number(context.now),
       })
     )
-      return empty();
+      {return empty();}
 
     const rule = regionalRecallRule(context.rules, state.country);
 
-    if (!rule) return empty();
+    if (!rule) {return empty();}
 
     let record: Row | undefined = state.record ? { ...state.record } : undefined;
 
@@ -60,7 +60,7 @@ export class RegionalRecallDomain extends CityCommandDomain {
           ladder = regionalRecallBand(rule, level);
 
         if (ladder < 0 || !regionalRecallEligible(rule, context.state.profile, level, context.now))
-          return empty();
+          {return empty();}
 
         record = {
           uid: context.owner,
@@ -100,7 +100,7 @@ export class RegionalRecallDomain extends CityCommandDomain {
             randomInt,
           );
 
-          for (const id of plan.deleted) deleted.add(id);
+          for (const id of plan.deleted) {deleted.add(id);}
 
           statuses = [
             ...statuses.filter(
@@ -123,7 +123,7 @@ export class RegionalRecallDomain extends CityCommandDomain {
               `${template?.message ?? ""}|${text(context.state.profile, "name")}|${text(context.state.profile, "name")}`,
             );
 
-          if (!template || !contents) regionalRecallFailure();
+          if (!template || !contents) {regionalRecallFailure();}
 
           context.write.regionalRecall.mail = state.members.map((owner) => ({
             uid: randomUUID().replaceAll("-", "") + "00",
@@ -141,7 +141,7 @@ export class RegionalRecallDomain extends CityCommandDomain {
         }
       }
 
-      if (context.now > long(record, "endtime")) return empty();
+      if (context.now > long(record, "endtime")) {return empty();}
 
       return {
         response: encode(
@@ -154,13 +154,13 @@ export class RegionalRecallDomain extends CityCommandDomain {
       };
     }
 
-    if (!record || record.uid !== context.owner) return empty();
+    if (!record || record.uid !== context.owner) {return empty();}
 
     const rewards = regionalRecallRewards(rule, num(record, "ladder")),
       claimed = cityInteger(record.receivedaynum, 0, rewards.length);
 
     if (command === "region.recall.open.ui")
-      return {
+      {return {
         response: encode(
           regionalRecallView(
             rule.id!,
@@ -182,12 +182,12 @@ export class RegionalRecallDomain extends CityCommandDomain {
           ),
         ),
         event: null,
-      };
+      };}
 
     const previous = long(record, "receivetime");
 
     if (previous / 86400000n === context.now / 86400000n || claimed >= rewards.length)
-      return empty();
+      {return empty();}
 
     const reward: Value = sfs.array(
       grantNativeProgressionReward(context, pinProgressionReward(context, rewards[claimed]!)),

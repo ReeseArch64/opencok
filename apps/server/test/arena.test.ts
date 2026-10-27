@@ -15,7 +15,7 @@ test("arena selections retain virtual roster deltas and enforce canonical identi
     { armyId: "107100", count: 10 },
   ]);
   for (const value of ["107000;200001", "107000;1|107000;2", "0107000;1", "107000,10", "107000;-1"])
-    expect(() => arenaArmySelection(rules, value, [])).toThrow();
+    {expect(() => arenaArmySelection(rules, value, [])).toThrow();}
   expect(arenaRankDelta(30, 100, true)).toBe(0);
   expect(arenaRankDelta(100, 100, true)).toBe(10);
   expect(arenaRankDelta(100, 100, false)).toBe(5);
@@ -45,9 +45,9 @@ test("native arena requests retain correlation while match and result messages r
     "arena.enter",
     "arena.leave",
   ])
-    expect((await game.execute("owner", command, { _cok_: sfs.long(7n) })).body._cok_).toEqual(
+    {expect((await game.execute("owner", command, { _cok_: sfs.long(7n) })).body._cok_).toEqual(
       sfs.long(7n),
-    );
+    );}
   await expect(game.execute("owner", "arena.matched", {})).rejects.toThrow();
   await expect(game.execute("owner", "arena.finished", {})).rejects.toThrow();
   expect(calls).toHaveLength(6);

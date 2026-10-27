@@ -82,9 +82,9 @@ test("trouble native commands retain long correlation and reject forged arrival 
       cityProgression: async () => ({ body: {}, pushes: [] }),
     });
   for (const command of ["get.trouble.list", "trouble.speed"])
-    expect(
+    {expect(
       (await game.execute("owner", command, { _cok_: sfs.long(9007199254740993n) })).body._cok_,
-    ).toEqual(sfs.long(9007199254740993n));
+    ).toEqual(sfs.long(9007199254740993n));}
   await expect(
     game.execute("owner", "trouble.deliver", {
       item: sfs.string("210097"),

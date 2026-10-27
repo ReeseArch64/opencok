@@ -9,7 +9,7 @@ import {
 import vectors from "./fixtures/new-general-skill-vectors.json";
 
 function bits(value: number) {
-  if (Number.isNaN(value)) return 2143289344;
+  if (Number.isNaN(value)) {return 2143289344;}
   const data = new DataView(new ArrayBuffer(4));
   data.setFloat32(0, value);
   return data.getInt32(0);
@@ -61,7 +61,7 @@ test("Float parsing rejects malformed, non-Java and oversized numeric text", () 
     "1\n2",
     "0".repeat(65536),
   ])
-    expect(() => javaFloat(raw)).toThrow();
+    {expect(() => javaFloat(raw)).toThrow();}
 });
 
 test("integer HashMap traversal matches 80 Java 8 collision, tree split, resize and duplicate vectors", () => {
@@ -72,7 +72,7 @@ test("integer HashMap traversal matches 80 Java 8 collision, tree split, resize 
     expect(javaIntHashMapOrder(first)).toEqual(vector.second);
   }
   for (const value of [NaN, Infinity, 0.5, 2147483648, -2147483649])
-    expect(() => javaIntHashMapOrder([value])).toThrow();
+    {expect(() => javaIntHashMapOrder([value])).toThrow();}
   expect(() => javaIntHashMapOrder(Array.from({ length: 4097 }, (_, i) => i))).toThrow();
 });
 
@@ -177,8 +177,8 @@ test("restored levels accept Java digits, keep final duplicates and skip malform
   expect([...f.resolve().talents]).toEqual([[78, 3]]);
   for (const raw of ["10;", "10; 2", "10;2147483648", "bad;1", "10;2;"]) {
     f.state.talent = raw;
-    if (raw === "10;2;") expect(f.resolve().talents.size).toBe(0);
-    else expect(() => f.resolve()).toThrow();
+    if (raw === "10;2;") {expect(f.resolve().talents.size).toBe(0);}
+    else {expect(() => f.resolve()).toThrow();}
   }
 });
 
@@ -210,7 +210,7 @@ test("missing required skill catalogs and bounded restored state reject without 
     { talent: " ".repeat(5001) },
     { baseSkill: " ".repeat(257) },
   ])
-    expect(() => newGeneralSkillEffects({ ...f.state, ...patch }, f.rules)).toThrow();
+    {expect(() => newGeneralSkillEffects({ ...f.state, ...patch }, f.rules)).toThrow();}
   f.rules.power.newGeneralBases!.set("1", { base_skill: Array(4097).fill("10").join(";") });
   expect(() => f.resolve()).toThrow();
 });

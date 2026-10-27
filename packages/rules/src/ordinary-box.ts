@@ -9,17 +9,17 @@ export function boxFailure(): never {
 }
 
 export function boxWords(raw: string): number[] {
-  if (raw.length > 1600) boxFailure();
+  if (raw.length > 1600) {boxFailure();}
 
-  if (raw === "{}") raw = "";
+  if (raw === "{}") {raw = "";}
 
   const parts = raw.split(",").filter(Boolean);
 
-  if (parts.length > 128) boxFailure();
+  if (parts.length > 128) {boxFailure();}
 
   const words = Array<number>(128).fill(0);
 
-  for (const [i, part] of parts.entries()) words[i] = Number(javaDecimal(part, 32));
+  for (const [i, part] of parts.entries()) {words[i] = Number(javaDecimal(part, 32));}
 
   return words;
 }
@@ -34,7 +34,7 @@ export function boxWord(
   cityInteger(offset, 1, 31);
   cityInteger(bits, 1, 31);
 
-  if (offset + bits > 32) boxFailure();
+  if (offset + bits > 32) {boxFailure();}
 
   return (words[index]! >>> (32 - offset - bits)) & (2 ** bits - 1);
 }
@@ -65,7 +65,7 @@ export function setBoxCounter(words: number[], slot: number, value: number) {
 }
 
 function choose(weights: readonly number[], random: (maximum: number) => number): number {
-  if (!weights.length || weights.length > 128) boxFailure();
+  if (!weights.length || weights.length > 128) {boxFailure();}
 
   const total = cityInteger(
       weights.reduce((sum, weight) => sum + cityInteger(weight), 0),
@@ -77,7 +77,7 @@ function choose(weights: readonly number[], random: (maximum: number) => number)
   for (const [i, weight] of weights.entries()) {
     sum += weight;
 
-    if (draw < sum) return i;
+    if (draw < sum) {return i;}
   }
 
   return boxFailure();
@@ -105,12 +105,12 @@ export function boxSelection(
     weights =
       (lucky ? rule.rate_luckyday : rule.rate)?.split("|").map((value) => cityInteger(value)) ?? [];
 
-  if (rewards.length !== weights.length || special.length !== weights.length) boxFailure();
+  if (rewards.length !== weights.length || special.length !== weights.length) {boxFailure();}
 
   const index = choose(weights, random),
     id = rewards[index]!;
 
-  if (!rules.advanced.payRewards?.has(id)) boxFailure();
+  if (!rules.advanced.payRewards?.has(id)) {boxFailure();}
 
   return { id: cityInteger(id, 1), special: cityInteger(special[index], 0, 1) };
 }

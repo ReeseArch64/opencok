@@ -17,7 +17,7 @@ test("calendar parsing matches 2971 independent Java 8 numeric, rollover, cutove
   ][]) {
     expect(javaCalendarDate(value, fields, offset)?.toString() ?? "error", value).toBe(expected);
     if (fields === 5)
-      expect(ruleTime(value, offset)).toBe(expected === "error" ? 0n : BigInt(expected));
+      {expect(ruleTime(value, offset)).toBe(expected === "error" ? 0n : BigInt(expected));}
   }
 });
 
@@ -50,7 +50,7 @@ test("calendar parsing consumes a prefix with the requested fields and retains s
   expect(javaCalendarDate("2147483648-1-1-0-0")).toBe(6017484157321406464n);
   expect(javaCalendarDate("9223372036854775808-1-1-0-0")).toBe(-6019000092841406464n);
   for (const value of ["", "bad", "2026-3-1", "+2026-3-1-0-0", "\n2026-3-1-0-0"])
-    expect(ruleTime(value)).toBe(0n);
+    {expect(ruleTime(value)).toBe(0n);}
 });
 
 test("calendar bounds reject unsupported inputs without mistaking parse failure for an out-of-range JS date", () => {
@@ -58,9 +58,9 @@ test("calendar bounds reject unsupported inputs without mistaking parse failure 
   expect(javaCalendarDate(value.padEnd(65535, "x"))).toBe(BigInt(context.now));
   expect(() => javaCalendarDate(value.padEnd(65536, "x"))).toThrow();
   for (const offset of [-841, 841, 0.5, NaN, Infinity])
-    expect(() => javaCalendarDate(value, 5, offset)).toThrow();
+    {expect(() => javaCalendarDate(value, 5, offset)).toThrow();}
   for (const input of [null, undefined, 0, {}])
-    expect(() => javaCalendarDate(input as string)).toThrow();
+    {expect(() => javaCalendarDate(input as string)).toThrow();}
   expect(() => javaCalendarDate(value, 5, 0, 9223372036854775808n)).toThrow();
 });
 
@@ -83,7 +83,7 @@ test("function-on and server-only windows normalize dates and retain sequential 
     expect(query(context.now + 1)).toBe(false);
   }
   rule.start = "bad";
-  for (const query of queries) expect(query(context.now)).toBe(true);
+  for (const query of queries) {expect(query(context.now)).toBe(true);}
   rule.end = "bad";
   for (const query of queries) {
     expect(query(context.now)).toBe(false);
@@ -96,7 +96,7 @@ test("function-on and server-only windows normalize dates and retain sequential 
       throw new Error("Unused end date");
     },
   });
-  for (const query of queries) expect(query(context.now)).toBe(false);
+  for (const query of queries) {expect(query(context.now)).toBe(false);}
   rule.start = "9223372036854775808-1-1-0-0";
-  for (const query of queries) expect(() => query(context.now)).toThrow("Unused end date");
+  for (const query of queries) {expect(() => query(context.now)).toThrow("Unused end date");}
 });

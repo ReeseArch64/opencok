@@ -15,13 +15,13 @@ import type { CityDomain } from "./city-domain.ts";
 import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function gain(context: CityProgressionContext, row: Row, count: number) {
-  if (count < 0 || !Number.isSafeInteger(count)) castleFailure();
+  if (count < 0 || !Number.isSafeInteger(count)) {castleFailure();}
 
   const item = context.rules.items.get("civilization_fortress")?.k1;
 
-  if (!item || !context.rules.goods.has(item)) castleFailure();
+  if (!item || !context.rules.goods.has(item)) {castleFailure();}
 
-  if (count) context.economy.item(item, count);
+  if (count) {context.economy.item(item, count);}
 
   row.resourceNum = Number(row.resourceNum ?? 0) - count;
 }
@@ -47,12 +47,12 @@ export class CivilizationCastleDomain extends CityCommandDomain {
           now: Number(context.now),
         })
       )
-        castleFailure();
+        {castleFailure();}
 
       const action = str(params, "M__REQUEST_ID__H");
       const world = context.state.worldMutation;
 
-      if (!world) castleFailure();
+      if (!world) {castleFailure();}
 
       let row = settleCastle(
         context.rules,
@@ -62,12 +62,12 @@ export class CivilizationCastleDomain extends CityCommandDomain {
       const oldPoint = num(row, "pointId");
       const occupied = world.points.find((entry) => num(entry, "id") === oldPoint);
 
-      if (occupied && text(occupied, "ownerMarchUUid")) castleFailure();
+      if (occupied && text(occupied, "ownerMarchUUid")) {castleFailure();}
 
       if (action === "info") {
         const target = context.state.civilizationCastleTarget;
 
-        if (!target) context.write.civilizationCastle = row;
+        if (!target) {context.write.civilizationCastle = row;}
 
         const view = target ? settleCastle(context.rules, target.castle, context.now) : row;
 
@@ -94,7 +94,7 @@ export class CivilizationCastleDomain extends CityCommandDomain {
             text(point, "ownerId") !== context.owner ||
             ![68, 69].includes(num(point, "pointType"))
           )
-            castleFailure();
+            {castleFailure();}
 
           pointWrites.push({
             ...point,
@@ -111,7 +111,7 @@ export class CivilizationCastleDomain extends CityCommandDomain {
       const place = (point: number) => {
         const ids = worldFootprint(point, size);
 
-        if (ids.length !== 4) castleFailure();
+        if (ids.length !== 4) {castleFailure();}
 
         for (const id of ids) {
           const entry = world.points.find((value) => num(value, "id") === id);
@@ -127,7 +127,7 @@ export class CivilizationCastleDomain extends CityCommandDomain {
             num(entry, "grid2Type") !== 0 ||
             num(entry, "resInitValue") !== 0
           )
-            castleFailure();
+            {castleFailure();}
 
           pointWrites.push({
             ...entry,
@@ -144,12 +144,12 @@ export class CivilizationCastleDomain extends CityCommandDomain {
       };
 
       if (action === "place") {
-        if (num(row, "status") !== 0) castleFailure();
+        if (num(row, "status") !== 0) {castleFailure();}
 
         const building = context.state.buildings.find((entry) => String(entry.itemId) === "443000");
         const level = num(building ?? {}, "level");
 
-        if (!level) castleFailure();
+        if (!level) {castleFailure();}
 
         const costRule = castleRule(context.rules, num(row, "level") || 1);
         place(int(params, "pointId"));
@@ -160,7 +160,7 @@ export class CivilizationCastleDomain extends CityCommandDomain {
         const score = cityAmount(costRule.integral ?? 0);
 
         if (!context.economy.civilizationScore || context.balance("civilizationSorce") < score)
-          castleFailure();
+          {castleFailure();}
 
         context.economy.civilizationScore(-score);
         const rule = castleRule(context.rules, level);
@@ -185,7 +185,7 @@ export class CivilizationCastleDomain extends CityCommandDomain {
           Number(row.resourceNum ?? 0) < 1 ||
           context.now - long(row, "lastSettleTime") < cooldown
         )
-          castleFailure();
+          {castleFailure();}
 
         const requested = int(params, "gainCount", -1);
         const count =
@@ -197,23 +197,23 @@ export class CivilizationCastleDomain extends CityCommandDomain {
         body.gainCount = sfs.int(count);
         body.lastSettleTime = sfs.long(context.now);
       } else if (action === "remove") {
-        if (!num(row, "status")) castleFailure();
+        if (!num(row, "status")) {castleFailure();}
 
         gain(context, row, Math.floor(Number(row.resourceNum ?? 0)));
         erase();
         row = { ...row, status: 0, pointId: 0, def: 0, resourceNum: 0 };
       } else if (action === "move") {
-        if (!num(row, "status")) castleFailure();
+        if (!num(row, "status")) {castleFailure();}
 
         place(int(params, "pointId"));
         erase();
         const item = context.rules.items.get("civilization_fortress")?.k4;
 
-        if (!item) castleFailure();
+        if (!item) {castleFailure();}
 
         context.spendItem(item, 1);
       } else if (action === "speedUp") {
-        if (num(row, "status") !== 1) castleFailure();
+        if (num(row, "status") !== 1) {castleFailure();}
 
         let remaining = long(row, "buildTime") - context.now;
         const gold = int(params, "isGold") === 1;
@@ -226,7 +226,7 @@ export class CivilizationCastleDomain extends CityCommandDomain {
           const item = context.economy.ownedItem?.(str(params, "itemUuid"));
           const rule = item ? context.rules.goods.get(item.itemId) : undefined;
 
-          if (!item || rule?.type !== "2") castleFailure();
+          if (!item || rule?.type !== "2") {castleFailure();}
 
           let count = cityInteger(int(params, "itemCount", 1), 1);
           const speed = cityInteger(rule.para3, 1);
@@ -241,10 +241,10 @@ export class CivilizationCastleDomain extends CityCommandDomain {
                 ? remaining - BigInt(speed * count) * 1000n
                 : 0n;
           } else if (rule.para2 === "2" && speed <= 100 && count === 1)
-            remaining = (remaining * BigInt(100 - speed)) / 100n;
-          else castleFailure();
+            {remaining = (remaining * BigInt(100 - speed)) / 100n;}
+          else {castleFailure();}
 
-          if (item.count < count) castleFailure();
+          if (item.count < count) {castleFailure();}
 
           context.economy.item(item.itemId, -count);
           body.itemId = sfs.string(item.itemId);
@@ -255,11 +255,11 @@ export class CivilizationCastleDomain extends CityCommandDomain {
         row = settleCastle(context.rules, row, context.now);
         body.isGold = sfs.int(gold ? 1 : 0);
         body.buildTime = sfs.long(long(row, "buildTime"));
-      } else castleFailure();
+      } else {castleFailure();}
 
       context.write.civilizationCastle = row;
 
-      if (pointWrites.length) context.write.worldMutation = { points: pointWrites };
+      if (pointWrites.length) {context.write.worldMutation = { points: pointWrites };}
 
       return {
         response: encode(body),

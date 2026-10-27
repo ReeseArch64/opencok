@@ -33,8 +33,8 @@ test("cup native queries retain LONG correlation and reject the internal settlem
     "euro.cup.record",
     "euro.cup.reward",
   ])
-    expect(
+    {expect(
       (await game.execute("owner", command, { _cok_: sfs.long(9007199254740993n) })).body._cok_,
-    ).toEqual(sfs.long(9007199254740993n));
+    ).toEqual(sfs.long(9007199254740993n));}
   await expect(game.execute("owner", "euro.cup.settle", {})).rejects.toThrow();
 });

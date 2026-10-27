@@ -6,10 +6,10 @@ import { HttpError } from "@opencok/errors/http";
 
 export function firebaseIdentity(projectId: string): IdentityVerifier & { close(): Promise<void> } {
   if (!/^[a-z][a-z0-9-]{4,61}[a-z0-9]$/.test(projectId))
-    throw new Error("Invalid Firebase project");
+    {throw new Error("Invalid Firebase project");}
 
   if (process.env.FIREBASE_AUTH_EMULATOR_HOST)
-    throw new Error("Firebase emulator authentication is not allowed in this runtime");
+    {throw new Error("Firebase emulator authentication is not allowed in this runtime");}
 
   const app = initializeApp(
     { projectId, credential: applicationDefault() },
@@ -19,7 +19,7 @@ export function firebaseIdentity(projectId: string): IdentityVerifier & { close(
   return {
     async verify(token) {
       if (!token || token.length > 16384)
-        throw new HttpError(401, "Identity authentication required");
+        {throw new HttpError(401, "Identity authentication required");}
 
       try {
         const verified = await getAuth(app).verifyIdToken(token, true);

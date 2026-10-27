@@ -39,9 +39,9 @@ export abstract class PollingWorker {
     }
 
     if (!this.stopped)
-      this.cancel = this.after(() => {
+      {this.cancel = this.after(() => {
         this.cancel = undefined;
         this.active = this.run();
-      }, 5000);
+      }, 5000);}
   }
 }

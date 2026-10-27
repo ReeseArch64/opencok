@@ -40,9 +40,9 @@ test("native special-event reads retain long correlation and no client can confi
       ._cok_,
   ).toEqual(sfs.long(9007199254740993n));
   for (const command of ["special.paid", "special.reserve", "special.confirm"])
-    await expect(
+    {await expect(
       game.execute("owner", command, { eventId: sfs.string("forged") }),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   expect(specialEventOperation("order")).toBe(specialEventOperation("order"));
   expect(specialEventOperation("order")).not.toBe(specialEventOperation("other"));
   expect(

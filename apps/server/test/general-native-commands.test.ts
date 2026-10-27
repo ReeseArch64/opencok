@@ -80,5 +80,5 @@ test("canonical requests and direct purchase stay intact while spoofed and unkno
     kingdomId: 1,
   });
   for (const command of ["newgeneral.admin", "newgeneral.activatetalent.extra", "constructor.info"])
-    await expect(game.execute("owner", command, {})).rejects.toThrow();
+    {await expect(game.execute("owner", command, {})).rejects.toThrow();}
 });

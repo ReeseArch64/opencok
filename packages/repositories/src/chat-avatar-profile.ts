@@ -10,7 +10,7 @@ import type { AvatarProfileUpdate } from "@opencok/contracts/files";
 import type { Database } from "./game.ts";
 
 function project(row: typeof chat_avatar_profile.$inferSelect): AvatarProfileUpdate {
-  if (row.revision < 0n) throw new Error("Invalid stored avatar revision");
+  if (row.revision < 0n) {throw new Error("Invalid stored avatar revision");}
 
   const value = {
     owner: row.owner_uid,
@@ -24,7 +24,7 @@ function project(row: typeof chat_avatar_profile.$inferSelect): AvatarProfileUpd
     ...(row.revision > 0n ? { revision: row.revision } : {}),
   };
 
-  if (!validAvatarProfile(value)) throw new Error("Invalid stored chat avatar profile");
+  if (!validAvatarProfile(value)) {throw new Error("Invalid stored chat avatar profile");}
 
   return value;
 }
@@ -36,7 +36,7 @@ export function createChatAvatarProfileStore(
     async publish(input) {
       const update = Object.freeze({ ...input });
 
-      if (!validAvatarProfile(update)) throw new Error("Invalid chat avatar profile");
+      if (!validAvatarProfile(update)) {throw new Error("Invalid chat avatar profile");}
 
       return db.transaction(
         async (tx) => {
@@ -52,7 +52,7 @@ export function createChatAvatarProfileStore(
             account.uid !== update.owner ||
             account.server !== String(update.kingdomId)
           )
-            throw new Error("Chat avatar profile owner unavailable");
+            {throw new Error("Chat avatar profile owner unavailable");}
 
           const [identity] = await tx
             .select({
@@ -64,7 +64,7 @@ export function createChatAvatarProfileStore(
             .limit(1);
 
           if (!identity || typeof identity.renamed !== "boolean")
-            throw new Error("Chat nickname authority unavailable");
+            {throw new Error("Chat nickname authority unavailable");}
 
           let userName = update.userName;
 
@@ -76,7 +76,7 @@ export function createChatAvatarProfileStore(
               identity.name.includes("\0") ||
               !identity.name.isWellFormed()
             )
-              throw new Error("Chat nickname authority unavailable");
+              {throw new Error("Chat nickname authority unavailable");}
 
             userName = identity.name;
           }
@@ -96,13 +96,13 @@ export function createChatAvatarProfileStore(
             const current = project(row);
 
             if (current.owner !== update.owner || current.kingdomId !== update.kingdomId)
-              throw new Error("Invalid stored chat avatar profile");
+              {throw new Error("Invalid stored chat avatar profile");}
 
             const revised = (current.revision ?? 0n) > 0n || (update.revision ?? 0n) > 0n;
             const previous = revised ? (current.revision ?? 0n) : BigInt(current.sequence);
             const incoming = revised ? (update.revision ?? 0n) : BigInt(update.sequence);
 
-            if (previous > incoming) return "superseded";
+            if (previous > incoming) {return "superseded";}
 
             if (previous === incoming) {
               if (
@@ -111,9 +111,9 @@ export function createChatAvatarProfileStore(
                 (!identity.renamed && current.userName !== update.userName) ||
                 current.platform !== update.platform
               )
-                throw new Error("Conflicting chat avatar profile");
+                {throw new Error("Conflicting chat avatar profile");}
 
-              if (current.userName === userName) return "unchanged";
+              if (current.userName === userName) {return "unchanged";}
             }
           }
 
@@ -139,7 +139,7 @@ export function createChatAvatarProfileStore(
                 .returning({ owner: chat_avatar_profile.owner_uid });
 
           if (changed.length !== 1 || changed[0]!.owner !== update.owner)
-            throw new Error("Chat avatar profile write failed");
+            {throw new Error("Chat avatar profile write failed");}
 
           return "applied";
         },
@@ -154,7 +154,7 @@ export function createChatAvatarProfileStore(
         kingdomId < 1 ||
         kingdomId > 2147483647
       )
-        throw new Error("Invalid chat avatar profile query");
+        {throw new Error("Invalid chat avatar profile query");}
 
       const [row] = await db
         .select({ profile: chat_avatar_profile })
@@ -174,12 +174,12 @@ export function createChatAvatarProfileStore(
         )
         .limit(1);
 
-      if (!row) return null;
+      if (!row) {return null;}
 
       const value = project(row.profile);
 
       if (value.owner !== owner || value.kingdomId !== kingdomId)
-        throw new Error("Invalid stored chat avatar profile");
+        {throw new Error("Invalid stored chat avatar profile");}
 
       return value;
     },

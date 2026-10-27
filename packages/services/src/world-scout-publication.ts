@@ -19,31 +19,31 @@ const parameter = (contents: string, message: string) =>
   Array.from(contents.slice(message.length + 1)).length <= 255;
 
 function template(row: Row, author: string, recipient: string, type: number, contents: string) {
-  if (text(row, "fromUser") || num(row, "itemIdFlag") !== 1) invalid();
+  if (text(row, "fromUser") || num(row, "itemIdFlag") !== 1) {invalid();}
 
   const title = text(row, "title"),
     sender = text(row, "fromName");
 
   if (type === 2) {
-    if (sender !== "105522") invalid();
+    if (sender !== "105522") {invalid();}
 
     if (recipient === author) {
-      if (title !== "114102" || contents !== "114005") invalid();
-    } else if (title !== "105523" || !parameter(contents, "105554")) invalid();
+      if (title !== "114102" || contents !== "114005") {invalid();}
+    } else if (title !== "105523" || !parameter(contents, "105554")) {invalid();}
 
     return;
   }
 
   if (recipient === author) {
-    if (title === "114163" && sender === "105519" && parameter(contents, "114164")) return;
+    if (title === "114163" && sender === "105519" && parameter(contents, "114164")) {return;}
 
     if (
       title === "114102" &&
       sender === "105522" &&
       (parameter(contents, "114162") || parameter(contents, "164142"))
     )
-      return;
-  } else if (title === "105523" && sender === "105522" && parameter(contents, "105554")) return;
+      {return;}
+  } else if (title === "105523" && sender === "105522" && parameter(contents, "105554")) {return;}
 
   invalid();
 }
@@ -55,13 +55,13 @@ export async function publishWorldScoutMail(
   publish: (recipient: string, command: string, body: Fields) => Promise<unknown>,
 ) {
   if (!identifier(author) || !(payload instanceof Uint8Array) || payload.byteLength > 65536)
-    invalid();
+    {invalid();}
 
   const body = decode(Buffer.from(payload)),
     recipient = str(body, "owner"),
     uid = str(fields(body.mail), "uid");
 
-  if (!identifier(recipient) || !/^[a-f0-9]{32}00$/.test(uid)) invalid();
+  if (!identifier(recipient) || !/^[a-f0-9]{32}00$/.test(uid)) {invalid();}
 
   const saved = await reader(recipient, uid);
 
@@ -71,11 +71,11 @@ export async function publishWorldScoutMail(
     saved.kingdomId > 2147483647 ||
     saved.realm !== saved.kingdomId
   )
-    invalid();
+    {invalid();}
 
   const row = saved.mail;
 
-  if (!row) return;
+  if (!row) {return;}
 
   const type = num(row, "type"),
     flag = num(row, "itemIdFlag"),
@@ -96,14 +96,14 @@ export async function publishWorldScoutMail(
     !(row.contents instanceof Uint8Array) ||
     row.contents.byteLength > 65535
   )
-    invalid();
+    {invalid();}
 
   if (type === 8) {
-    if (recipient !== author || sender || flag !== 0) invalid();
+    if (recipient !== author || sender || flag !== 0) {invalid();}
   } else {
     const contents = new TextDecoder("utf-8", { fatal: true }).decode(row.contents);
 
-    if (type === 2 || flag === 1) template(row, author, recipient, type, contents);
+    if (type === 2 || flag === 1) {template(row, author, recipient, type, contents);}
     else {
       const notice = contents.match(/^([\s\S]*)\|(1|2|3)\|([1-9][0-9]{0,9})$/);
 
@@ -115,7 +115,7 @@ export async function publishWorldScoutMail(
         Number(notice[3]) > 2147483647 ||
         text(row, "title") !== notice[2]
       )
-        invalid();
+        {invalid();}
     }
   }
 

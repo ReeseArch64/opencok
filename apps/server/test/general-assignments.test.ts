@@ -12,7 +12,7 @@ test("march assignment excludes occupied heroes and return restores eligibility"
     marching = generalMarch(rules, row);
   expect(marching.state).toBe(3);
   expect(() => generalMarch(rules, marching)).toThrow();
-  for (const state of [2, 4, 5, 6]) expect(() => generalMarch(rules, { ...row, state })).toThrow();
+  for (const state of [2, 4, 5, 6]) {expect(() => generalMarch(rules, { ...row, state })).toThrow();}
   expect(generalMarchReturn(marching).state).toBe(1);
   expect(() => generalMarchReturn(row)).toThrow();
 });

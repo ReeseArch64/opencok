@@ -22,19 +22,19 @@ export async function readSevenDayCycle(tx: MutationTransaction, owner: string) 
     .for("update");
 
   if (draws.length > 3 || draws.some((row) => ![0, 1, 2].includes(row.type)))
-    throw new Error("Invalid owned cycle draws");
+    {throw new Error("Invalid owned cycle draws");}
 
   const history: Row[] = [];
 
   for (const page of [0, 1, 2])
-    history.push(
+    {history.push(
       ...(await tx
         .select()
         .from(luck_draw_history)
         .where(eq(luck_draw_history.type, page))
         .orderBy(desc(luck_draw_history.time))
         .limit(30)),
-    );
+    );}
 
   return { cycle, draws, history };
 }
@@ -47,7 +47,7 @@ export async function writeSevenDayCycle(
   if (write.cycle) {
     const row = write.cycle;
 
-    if (row.uid !== owner) throw new Error("Invalid cycle owner");
+    if (row.uid !== owner) {throw new Error("Invalid cycle owner");}
 
     const value = {
       uid: owner,
@@ -58,7 +58,7 @@ export async function writeSevenDayCycle(
           return names.map((name) => {
             const key = cycleField(name, page);
 
-            if (name === "receive_reward") cycleClaims(text(row, key));
+            if (name === "receive_reward") {cycleClaims(text(row, key));}
 
             const value =
               name === "stage"
@@ -70,7 +70,7 @@ export async function writeSevenDayCycle(
                     : long(row, key);
 
             if (typeof value === "bigint" && (value < -1n || value > 9223372036854775807n))
-              throw new Error("Invalid cycle timestamp");
+              {throw new Error("Invalid cycle timestamp");}
 
             return [key, value];
           });
@@ -86,7 +86,7 @@ export async function writeSevenDayCycle(
   if (write.draw) {
     const row = write.draw;
 
-    if (row.uid !== owner) throw new Error("Invalid cycle draw owner");
+    if (row.uid !== owner) {throw new Error("Invalid cycle draw owner");}
 
     cycleBuffs(text(row, "reward"));
     const value = {
@@ -99,7 +99,7 @@ export async function writeSevenDayCycle(
     };
 
     if ([value.upTime, value.randTime].some((at) => at < 0n || at > 9223372036854775807n))
-      throw new Error("Invalid cycle draw timestamp");
+      {throw new Error("Invalid cycle draw timestamp");}
 
     await tx
       .insert(user_luck_draw)
@@ -115,7 +115,7 @@ export async function writeSevenDayCycle(
       text(row, "roleName").length > 40 ||
       text(row, "allianceName").length > 40
     )
-      throw new Error("Invalid cycle history owner");
+      {throw new Error("Invalid cycle history owner");}
 
     await tx.insert(luck_draw_history).values({
       gameUid: owner,

@@ -62,17 +62,17 @@ export function createEconomyMutationExecutor(
         .where(eq(user_resource.uid, command.owner))
         .for("update");
 
-      if (!profile || !resource) throw new Error("Missing economic account");
+      if (!profile || !resource) {throw new Error("Missing economic account");}
 
       const balances = {} as Record<EconomyAsset, bigint>;
 
-      for (const asset of profileAssets) balances[`profile.${asset}`] = profile[asset] ?? 0n;
+      for (const asset of profileAssets) {balances[`profile.${asset}`] = profile[asset] ?? 0n;}
 
-      for (const asset of resourceAssets) balances[`resource.${asset}`] = resource[asset] ?? 0n;
+      for (const asset of resourceAssets) {balances[`resource.${asset}`] = resource[asset] ?? 0n;}
 
       const result = await plan(Object.freeze(balances));
 
-      if (result.changes.length > 256) throw new Error("Economic posting limit exceeded");
+      if (result.changes.length > 256) {throw new Error("Economic posting limit exceeded");}
 
       const postings: EconomyPosting[] = [];
       const profileUpdate: Partial<typeof userprofile.$inferInsert> = {};
@@ -85,7 +85,7 @@ export function createEconomyMutationExecutor(
           seen.has(change.asset) ||
           typeof change.delta !== "bigint"
         )
-          throw new Error("Invalid economic asset");
+          {throw new Error("Invalid economic asset");}
 
         seen.add(change.asset);
         const before = balances[change.asset];
@@ -101,18 +101,18 @@ export function createEconomyMutationExecutor(
         const field = change.asset.split(".")[1]!;
 
         if (change.asset.startsWith("profile."))
-          Object.assign(profileUpdate, { [field]: posting.after });
-        else Object.assign(resourceUpdate, { [field]: posting.after });
+          {Object.assign(profileUpdate, { [field]: posting.after });}
+        else {Object.assign(resourceUpdate, { [field]: posting.after });}
       }
 
       if (Object.keys(profileUpdate).length)
-        await tx.update(userprofile).set(profileUpdate).where(eq(userprofile.uid, command.owner));
+        {await tx.update(userprofile).set(profileUpdate).where(eq(userprofile.uid, command.owner));}
 
       if (Object.keys(resourceUpdate).length)
-        await tx
+        {await tx
           .update(user_resource)
           .set(resourceUpdate)
-          .where(eq(user_resource.uid, command.owner));
+          .where(eq(user_resource.uid, command.owner));}
 
       return { response: result.response, postings, events: result.events };
     });

@@ -67,19 +67,19 @@ function remove(context: CityProgressionContext, office: Row) {
   });
   const general = ownedGeneral(context, num(office, "id"));
 
-  if (num(general, "state") === 6) writeGeneral(context, { ...general, state: 1 });
+  if (num(general, "state") === 6) {writeGeneral(context, { ...general, state: 1 });}
 }
 
 export function refreshGeneralOffices(context: CityProgressionContext) {
-  if (!offices(context).some((row) => num(row, "position") > 0)) return;
+  if (!offices(context).some((row) => num(row, "position") > 0)) {return;}
 
   for (const office of offices(context)) {
-    if (num(office, "position") === 0) continue;
+    if (num(office, "position") === 0) {continue;}
 
     const general = ownedGeneral(context, num(office, "id")),
       rule = context.rules.power.newGeneralOffices?.get(text(office, "officeId"));
 
-    if (!rule || num(general, "state") !== 6) generalFailure();
+    if (!rule || num(general, "state") !== 6) {generalFailure();}
 
     let unlocked = true;
 
@@ -101,7 +101,7 @@ export function refreshGeneralOffices(context: CityProgressionContext) {
 
     const accrued = generalOfficeExperience(office, rule, context.now);
 
-    if (!accrued.amount) continue;
+    if (!accrued.amount) {continue;}
 
     const base = generalBase(context.rules, num(general, "id")),
       gates = generalList(base.breach_level),
@@ -111,7 +111,7 @@ export function refreshGeneralOffices(context: CityProgressionContext) {
       num(general, "level") < cityInteger(base.max_level, 1) &&
       !(gates.includes(num(general, "level")) && !done.has(num(general, "level")))
     )
-      writeGeneral(context, generalExperience(context.rules, general, accrued.amount).row);
+      {writeGeneral(context, generalExperience(context.rules, general, accrued.amount).row);}
 
     writeOffice(context, { ...office, lastRefreshExpTime: accrued.at });
   }
@@ -125,7 +125,7 @@ export function generalOfficeCommand(context: CityProgressionContext, params: Fi
       now: Number(context.now),
     })
   )
-    generalFailure();
+    {generalFailure();}
 
   const action = str(params, "M__REQUEST_ID__H");
   refreshGeneralOffices(context);
@@ -136,19 +136,19 @@ export function generalOfficeCommand(context: CityProgressionContext, params: Fi
       name = str(params, "positionName"),
       position = ["master", "adjutant", "executive"].indexOf(name) + 1;
 
-    if (!position) generalFailure();
+    if (!position) {generalFailure();}
 
     generalOfficeUnlocked(context.rules, officeId, position, officeContext(context));
     const general = ownedGeneral(context, id);
 
-    if (![1, 6].includes(num(general, "state"))) generalFailure();
+    if (![1, 6].includes(num(general, "state"))) {generalFailure();}
 
     for (const office of offices(context))
-      if (
+      {if (
         num(office, "position") > 0 &&
         (office.id === id || (office.officeId === officeId && office.position === position))
       )
-        remove(context, office);
+        {remove(context, office);}}
 
     writeGeneral(context, { ...general, state: 6, buildingUuid: "" });
     writeOffice(context, {
@@ -163,15 +163,15 @@ export function generalOfficeCommand(context: CityProgressionContext, params: Fi
     const id = cityInteger(str(params, "heroId"), 1),
       office = offices(context).find((row) => row.id === id && num(row, "position") > 0);
 
-    if (!office) generalFailure();
+    if (!office) {generalFailure();}
 
     remove(context, office);
-  } else if (!["info", "refreshExp"].includes(action)) generalFailure();
+  } else if (!["info", "refreshExp"].includes(action)) {generalFailure();}
 
   const groups = new Map<string, Fields>();
 
   for (const office of offices(context)) {
-    if (!num(office, "position")) continue;
+    if (!num(office, "position")) {continue;}
 
     const id = text(office, "officeId"),
       fields = groups.get(id) ?? { id: sfs.string(id) };
@@ -199,7 +199,7 @@ function idleAssignedBuilding(context: CityProgressionContext, building: Row) {
     queueType !== undefined &&
     context.state.queues.some((row) => row.type === queueType && text(row, "itemId") !== "")
   )
-    generalFailure();
+    {generalFailure();}
 }
 
 export function assignGeneral(
@@ -213,22 +213,22 @@ export function assignGeneral(
     const next = generalGarrison(context.rules, row, building, context.now);
 
     for (const previous of generalRoster(context).generals)
-      if (
+      {if (
         previous.id !== row.id &&
         num(previous, "state") === 2 &&
         previous.buildingUuid === building.uuid
       ) {
         idleAssignedBuilding(context, building);
         writeGeneral(context, { ...previous, state: 1, buildingUuid: "" });
-      }
+      }}
 
     writeGeneral(context, next);
   } else if (action === "canclegarrison") {
-    if (num(row, "state") !== 2) generalFailure();
+    if (num(row, "state") !== 2) {generalFailure();}
 
     idleAssignedBuilding(context, context.ownBuilding(text(row, "buildingUuid")));
     writeGeneral(context, { ...row, state: 1, buildingUuid: "" });
-  } else generalFailure();
+  } else {generalFailure();}
 }
 
 export function refreshGeneralUnlocks(context: CityProgressionContext) {
@@ -240,7 +240,7 @@ export function refreshGeneralUnlocks(context: CityProgressionContext) {
   ];
   const house = buildings.find((row) => row.itemId === 433000 && num(row, "level") > 0);
 
-  if (!house) return;
+  if (!house) {return;}
 
   const roster = generalRoster(context),
     ids = new Set(
@@ -262,7 +262,7 @@ export function refreshGeneralUnlocks(context: CityProgressionContext) {
   for (const config of context.rules.general.unlocks?.values() ?? []) {
     const id = cityInteger(config.hero_id, 1);
 
-    if (ids.has(id) || ids.size >= capacity) continue;
+    if (ids.has(id) || ids.size >= capacity) {continue;}
 
     const conditions = generalPairs(config.type);
 
@@ -275,7 +275,7 @@ export function refreshGeneralUnlocks(context: CityProgressionContext) {
         ),
       )
     )
-      continue;
+      {continue;}
 
     recruitGeneral(context, id, false);
     ids.add(id);

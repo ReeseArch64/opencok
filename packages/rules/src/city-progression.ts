@@ -29,22 +29,22 @@ export const progressionEffectIds = [
 export type ProgressionEffectId = (typeof progressionEffectIds)[number];
 
 export function cityInteger(value: unknown, minimum = 0, maximum = 2147483647): number {
-  if (!/^[0-9]+$/.test(String(value))) throw new GameError(errors.invalid, "city_progression");
+  if (!/^[0-9]+$/.test(String(value))) {throw new GameError(errors.invalid, "city_progression");}
 
   const result = Number(value);
 
   if (!Number.isSafeInteger(result) || result < minimum || result > maximum)
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   return result;
 }
 
 export function cityAmount(value: unknown): bigint {
-  if (!/^[0-9]+$/.test(String(value))) throw new GameError(errors.invalid, "city_progression");
+  if (!/^[0-9]+$/.test(String(value))) {throw new GameError(errors.invalid, "city_progression");}
 
   const result = BigInt(String(value));
 
-  if (result > 9223372036854775807n) throw new GameError(errors.invalid, "city_progression");
+  if (result > 9223372036854775807n) {throw new GameError(errors.invalid, "city_progression");}
 
   return result;
 }
@@ -52,16 +52,16 @@ export function cityAmount(value: unknown): bigint {
 export function reducedCityCost(value: bigint, ...reductions: number[]): bigint {
   let result = Number(value);
 
-  if (!Number.isSafeInteger(result)) throw new GameError(errors.invalid, "city_progression");
+  if (!Number.isSafeInteger(result)) {throw new GameError(errors.invalid, "city_progression");}
 
   for (const reduction of reductions) {
-    if (!Number.isFinite(reduction)) throw new GameError(errors.invalid, "city_progression");
+    if (!Number.isFinite(reduction)) {throw new GameError(errors.invalid, "city_progression");}
 
     result *= Math.max(0, 1 - reduction / 100);
   }
 
   if (!Number.isSafeInteger(Math.trunc(result)))
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   return BigInt(Math.trunc(result));
 }
@@ -73,14 +73,14 @@ export function cityDuration(seconds: number, speed: number, reductionSeconds = 
     speed <= -100 ||
     reductionSeconds < 0
   )
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   const millis = Math.max(
     3000,
     Math.trunc((seconds * 1000) / (1 + speed / 100) - reductionSeconds * 1000),
   );
 
-  if (!Number.isSafeInteger(millis)) throw new GameError(errors.invalid, "city_progression");
+  if (!Number.isSafeInteger(millis)) {throw new GameError(errors.invalid, "city_progression");}
 
   return BigInt(millis);
 }
@@ -99,7 +99,7 @@ export function cityPrestige(
     prestigeValue: long(row, "prestigeValue"),
   }));
 
-  if (civilization) return newGeneralPrestigeLevel(civilization, prestiges, rules);
+  if (civilization) {return newGeneralPrestigeLevel(civilization, prestiges, rules);}
 
   return Math.max(
     0,
@@ -112,16 +112,16 @@ export function checkCityBuildingRequirements(
   rule: BuildingState,
   rules: Rules,
 ) {
-  if (rule.limit === 1) throw new GameError(errors.buildingLimited, "city_progression");
+  if (rule.limit === 1) {throw new GameError(errors.buildingLimited, "city_progression");}
 
   for (const requirement of rule.requiredBuildings ?? [])
-    if (
+    {if (
       !state.buildings.some(
         (row) =>
           num(row, "itemId") === requirement.buildingId && cityLevel(row) >= requirement.level,
       )
     )
-      throw new GameError(errors.resource, "city_progression");
+      {throw new GameError(errors.resource, "city_progression");}}
 
   for (const requirement of rule.requiredStarBuildings ?? []) {
     const base = Math.trunc(requirement.levelId / 100) * 100,
@@ -131,14 +131,14 @@ export function checkCityBuildingRequirements(
       state.buildings.filter((row) => num(row, "itemId") === base && num(row, "star") >= star)
         .length < requirement.quantity
     )
-      throw new GameError(errors.resource, "city_progression");
+      {throw new GameError(errors.resource, "city_progression");}
   }
 
   if (
     (rule.civilizationLevel ?? 0) >
     (num(state.profile, "civilizationType") === 0 ? 0 : cityPrestige(state, rules))
   )
-    throw new GameError(errors.prestige, "city_progression");
+    {throw new GameError(errors.prestige, "city_progression");}
 }
 
 export function checkCityPosition(
@@ -151,11 +151,11 @@ export function checkCityPosition(
   const rule = [...rules.positions.values()].find((row) => Number(row.position) === pos);
 
   if (!rule || !(rule.building?.split(";") ?? []).includes(itemId))
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   const opened = text(state.profile, "openedPos").split(/[;|,]/).includes(String(pos));
 
-  if (rule.unlock !== "1" && !opened) throw new GameError(errors.locked, "city_progression");
+  if (rule.unlock !== "1" && !opened) {throw new GameError(errors.locked, "city_progression");}
 }
 
 export function cityQueueType(itemId: number): number | undefined {
@@ -180,16 +180,16 @@ export function citySpeedGold(rules: Rules, durationMs: bigint, troops = false):
   const seconds = Number(durationMs / 1000n);
 
   if (!Number.isSafeInteger(seconds) || seconds < 0)
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
-  if (!seconds) return 0n;
+  if (!seconds) {return 0n;}
 
   const rule = rules.items.get("cd_gold"),
     unit = Number(troops ? rule?.k5 : rule?.k1),
     power = Number(troops ? rule?.k6 : rule?.k2);
 
   if (!(unit > 0) || !Number.isFinite(power))
-    throw new GameError(errors.unsupported, "city_progression");
+    {throw new GameError(errors.unsupported, "city_progression");}
 
   return BigInt(
     cityInteger(
@@ -204,10 +204,10 @@ export function citySpeedGold(rules: Rules, durationMs: bigint, troops = false):
 }
 
 export function cityResourceGold(rules: Rules, asset: CityAsset, amount: bigint): bigint {
-  if (!amount) return 0n;
+  if (!amount) {return 0n;}
 
   if (amount < 0n || amount > BigInt(Number.MAX_SAFE_INTEGER))
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   const limits = rules.items.get("resource_cost"),
     first = rules.items.get("resource_num1"),
@@ -215,18 +215,18 @@ export function cityResourceGold(rules: Rules, asset: CityAsset, amount: bigint)
     scale = rules.items.get("resource_num3");
 
   if (!limits || !first || !second || !scale)
-    throw new GameError(errors.unsupported, "city_progression");
+    {throw new GameError(errors.unsupported, "city_progression");}
 
   if (asset === "silver")
-    return BigInt(
+    {return BigInt(
       cityInteger(
         Math.ceil(Math.fround(Math.fround(Number(amount)) * Math.fround(Number(scale.k5)))),
       ),
-    );
+    );}
 
   let tier = 0;
 
-  while (tier < 4 && amount > cityAmount(limits[`k${tier + 1}`])) tier++;
+  while (tier < 4 && amount > cityAmount(limits[`k${tier + 1}`])) {tier++;}
 
   const source = tier === 4 ? second : first,
     offset = tier === 4 ? 1 : tier * 3 + 1;
@@ -238,7 +238,7 @@ export function cityResourceGold(rules: Rules, asset: CityAsset, amount: bigint)
   );
 
   if (![a, b, c, multiplier].every(Number.isFinite) || multiplier <= 0)
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   return BigInt(
     cityInteger(
@@ -251,10 +251,10 @@ export function cityResourceGold(rules: Rules, asset: CityAsset, amount: bigint)
 }
 
 export function progressionActivityData(value: unknown): ProgressionActivityData | undefined {
-  if (value === undefined || value === null) return undefined;
+  if (value === undefined || value === null) {return undefined;}
 
   if (typeof value !== "object" || Array.isArray(value))
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   const data = value as ProgressionActivityData;
 
@@ -275,7 +275,7 @@ export function progressionActivityData(value: unknown): ProgressionActivityData
     !data.items ||
     JSON.stringify(data).length > 65536
   )
-    throw new GameError(errors.invalid, "city_progression");
+    {throw new GameError(errors.invalid, "city_progression");}
 
   if (data.target) {
     cityInteger(data.target.level, 0, 30);
@@ -285,19 +285,19 @@ export function progressionActivityData(value: unknown): ProgressionActivityData
 
   for (const [asset, cost] of Object.entries(data.costs)) {
     if (![...cityAssets, "woodbind", "stonebind", "ironbind", "foodbind"].includes(asset))
-      throw new GameError(errors.invalid, "city_progression");
+      {throw new GameError(errors.invalid, "city_progression");}
 
     cityAmount(cost);
   }
 
   for (const [itemId, count] of Object.entries(data.items)) {
-    if (!/^\d+$/.test(itemId)) throw new GameError(errors.invalid, "city_progression");
+    if (!/^\d+$/.test(itemId)) {throw new GameError(errors.invalid, "city_progression");}
 
     cityInteger(count, 1);
   }
 
   for (const [id, count] of Object.entries(data.units ?? {})) {
-    if (!/^\d+$/.test(id)) throw new GameError(errors.invalid, "city_progression");
+    if (!/^\d+$/.test(id)) {throw new GameError(errors.invalid, "city_progression");}
 
     cityInteger(count, 1);
   }
@@ -306,32 +306,32 @@ export function progressionActivityData(value: unknown): ProgressionActivityData
 }
 
 export function cityUnlockCount(state: CityProgressionState, rules: Rules, type: number): bigint {
-  if (type === 0) return 0n;
+  if (type === 0) {return 0n;}
 
-  if (type === 1) return BigInt(state.tasks.filter((row) => num(row, "state") === 2).length);
+  if (type === 1) {return BigInt(state.tasks.filter((row) => num(row, "state") === 2).length);}
 
   if (type === 2)
-    return state.achievements
+    {return state.achievements
       .filter(
         (row) =>
           rules.profile.achievements?.findLast((rule) => rule.id === text(row, "id"))?.aim === "9",
       )
-      .reduce((max, row) => (long(row, "num") > max ? long(row, "num") : max), 0n);
+      .reduce((max, row) => (long(row, "num") > max ? long(row, "num") : max), 0n);}
 
-  if (type === 3) return BigInt(num(state.profile, "level"));
+  if (type === 3) {return BigInt(num(state.profile, "level"));}
 
   if (type === 4)
-    return state.sciences.reduce(
+    {return state.sciences.reduce(
       (sum, row) =>
         sum +
         cityAmount(
           rules.power.sciences?.get(String(num(row, "itemId") + num(row, "level")))?.power ?? 0,
         ),
       0n,
-    );
+    );}
 
   if (type === 5)
-    return BigInt(
+    {return BigInt(
       state.equipment.filter((row) => {
         const rule = rules.power.equipment?.get(text(row, "itemId"));
 
@@ -339,10 +339,10 @@ export function cityUnlockCount(state: CityProgressionState, rules: Rules, type:
           rule !== undefined && cityInteger(rule.color ?? 0) >= 5 && Object.hasOwn(rule, "suit_id")
         );
       }).length,
-    );
+    );}
 
   if (type === 6)
-    return state.armies.reduce(
+    {return state.armies.reduce(
       (sum, row) =>
         sum +
         ["free", "defence", "march", "pve"].reduce(
@@ -350,20 +350,20 @@ export function cityUnlockCount(state: CityProgressionState, rules: Rules, type:
           0n,
         ),
       0n,
-    );
+    );}
 
-  if (type === 7) return long(state.statistics, "attacksWin");
+  if (type === 7) {return long(state.statistics, "attacksWin");}
 
-  if (type === 8) return long(state.statistics, "armyCure");
+  if (type === 8) {return long(state.statistics, "armyCure");}
 
-  if (type === 9) return long(state.statistics, "armyKill");
+  if (type === 9) {return long(state.statistics, "armyKill");}
 
-  if (type === 10) return long(state.glory, "expeditionVictoryTimes");
+  if (type === 10) {return long(state.glory, "expeditionVictoryTimes");}
 
   if (type >= 400000)
-    return BigInt(
+    {return BigInt(
       Math.max(0, ...state.buildings.filter((row) => num(row, "itemId") === type).map(cityLevel)),
-    );
+    );}
 
   throw new GameError(errors.invalid, "city_progression");
 }

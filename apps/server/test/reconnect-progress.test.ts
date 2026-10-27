@@ -42,9 +42,9 @@ function database(overrides: Record<string, Record<string, unknown>[]> = {}, fai
         failed = true;
         throw Object.assign(new Error("Synthetic transaction failure"), { code: failBegin });
       }
-      if (query.text.startsWith("update")) return { rows: [["owner"]] };
+      if (query.text.startsWith("update")) {return { rows: [["owner"]] };}
       const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
-      if (!table) return { rows: [] };
+      if (!table) {return { rows: [] };}
       const selected = query.text
         .slice(7, query.text.indexOf(" from "))
         .split(", ")
@@ -74,9 +74,9 @@ test("reconnect progress locks the authenticated owner and resource checkpoint b
   expect(reads[0]!.text).not.toMatch(/email|password|deviceId|loginIp|lastIp/i);
   expect(reads[0]!.text).toContain("deviceUuid");
   for (const table of ["user_army", "user_task", "queue", "user_weakness_building", "user_skill"])
-    expect(
+    {expect(
       reads.find((query) => query.text.includes(`from "opencok_kingdom"."${table}"`))!.params,
-    ).toContain("owner");
+    ).toContain("owner");}
   expect(queries.at(-1)!.text).toBe("commit");
 });
 

@@ -26,11 +26,11 @@ function fixture() {
   let occupied = false;
   let lockResult: unknown = undefined;
   const unlock = (id: number) => {
-    for (const [key, owner] of locks) if (owner === id) locks.delete(key);
+    for (const [key, owner] of locks) {if (owner === id) {locks.delete(key);}}
   };
   class Pool {
     async connect() {
-      if (failure === "connect") throw new Error("Synthetic pool failure");
+      if (failure === "connect") {throw new Error("Synthetic pool failure");}
       const id = sequence++;
       let marker = false;
       return {
@@ -47,20 +47,20 @@ function fixture() {
           if (text.startsWith("begin")) {
             expect(text).toBe("begin isolation level read committed read write");
             if (failure === "begin")
-              throw Object.assign(new Error("Synthetic begin failure"), { code: "08006" });
+              {throw Object.assign(new Error("Synthetic begin failure"), { code: "08006" });}
             return { rows: [] };
           }
           if (text === "rollback") {
-            if (failure === "rollback") throw new Error("Synthetic rollback failure");
+            if (failure === "rollback") {throw new Error("Synthetic rollback failure");}
             marker = false;
             unlock(id);
             return { rows: [] };
           }
           if (text === "commit") {
-            if (failure === "commit") throw new Error("Synthetic commit failure");
-            if (marker) markers.push(id);
+            if (failure === "commit") {throw new Error("Synthetic commit failure");}
+            if (marker) {markers.push(id);}
             unlock(id);
-            if (failure === "lost") throw new Error("Synthetic lost commit acknowledgement");
+            if (failure === "lost") {throw new Error("Synthetic lost commit acknowledgement");}
             return { rows: [] };
           }
           if (text.includes("pg_try_advisory_xact_lock")) {
@@ -71,26 +71,26 @@ function fixture() {
               params[0] as string,
             );
             if (failure === "lock")
-              throw Object.assign(new Error("Synthetic lock failure"), { code: "57014" });
-            if (lockResult !== undefined) return { rows: lockResult };
+              {throw Object.assign(new Error("Synthetic lock failure"), { code: "57014" });}
+            if (lockResult !== undefined) {return { rows: lockResult };}
             const key = params[0] as string;
             const acquired = !locks.has(key) || locks.get(key) === id;
-            if (acquired) locks.set(key, id);
+            if (acquired) {locks.set(key, id);}
             return { rows: [{ acquired }] };
           }
           expect([...locks.values()]).toContain(id);
           if (text.includes('from "opencok_global"."usermapping"')) {
             if (failure === "mapping")
-              throw Object.assign(new Error("Synthetic mapping failure"), { code: "42P01" });
+              {throw Object.assign(new Error("Synthetic mapping failure"), { code: "42P01" });}
             return { rows: mapped ? [["self", "name", "alpha"]] : [] };
           }
           if (text.includes('from "opencok_global"."account_new"')) {
             if (failure === "account")
-              throw Object.assign(new Error("Synthetic account failure"), { code: "42P01" });
+              {throw Object.assign(new Error("Synthetic account failure"), { code: "42P01" });}
             return { rows: occupied ? [["self"]] : [] };
           }
           if (text === "select 1 as marker") {
-            if (failure === "operation") throw new Error("Synthetic operation failure");
+            if (failure === "operation") {throw new Error("Synthetic operation failure");}
             marker = true;
             return { rows: [{ marker: 1 }] };
           }

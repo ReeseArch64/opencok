@@ -14,7 +14,7 @@ export class RealmSocialController {
 
   readonly handle: AsyncHttpHandler = async (request, response) => {
     const reply = (status: number, data: unknown) => {
-      if (response.writableEnded) return;
+      if (response.writableEnded) {return;}
 
       response.writeHead(status, {
         "content-type": "application/json",
@@ -99,8 +99,8 @@ export class RealmSocialController {
       );
       reply(200, encode(chatSocialResponse(result)).toString("base64"));
     } catch (error) {
-      if (error instanceof ChatCommandError) reply(200, { error: error.code });
-      else reply(503, {});
+      if (error instanceof ChatCommandError) {reply(200, { error: error.code });}
+      else {reply(503, {});}
     } finally {
       clearTimeout(timer);
     }

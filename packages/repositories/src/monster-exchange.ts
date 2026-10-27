@@ -17,7 +17,7 @@ export async function readMonsterExchanges(tx: MutationTransaction, owner: strin
     .limit(65)
     .for("update");
 
-  if (rows.length > 64) throw new Error("Token exchange aggregate exceeds bound");
+  if (rows.length > 64) {throw new Error("Token exchange aggregate exceeds bound");}
 
   return rows;
 }
@@ -28,7 +28,7 @@ export async function writeMonsterExchanges(
   rows: readonly Row[],
 ) {
   if (rows.length > 64 || new Set(rows.map((row) => row.actId)).size !== rows.length)
-    throw new Error("Invalid token exchange writes");
+    {throw new Error("Invalid token exchange writes");}
 
   for (const row of rows) {
     const id = cityInteger(row.actId, 1),
@@ -36,13 +36,13 @@ export async function writeMonsterExchanges(
       claims = text(row, "receiveLevels"),
       tag = text(row, "reserve_2");
 
-    if (row.uid !== owner) throw new Error("Foreign token exchange write");
+    if (row.uid !== owner) {throw new Error("Foreign token exchange write");}
 
     if (id === 6) {
       if (!/^monster-adopted:v1:\d{1,10}$/.test(tag))
-        throw new Error("Invalid legacy token exchange adoption");
+        {throw new Error("Invalid legacy token exchange adoption");}
     } else {
-      if (num(row, "reserve_1") !== 6) throw new Error("Foreign token exchange slot");
+      if (num(row, "reserve_1") !== 6) {throw new Error("Foreign token exchange slot");}
 
       readMonsterExchangeHeader(tag);
     }

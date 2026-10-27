@@ -33,7 +33,7 @@ export function createWorldScoutStore(
             (profile.banTime ?? 0n) > BigInt(now) ||
             world.worldId !== 0
           )
-            return undefined;
+            {return undefined;}
 
           const ids = [
             ...new Set([
@@ -50,7 +50,7 @@ export function createWorldScoutStore(
           const target = points.find((row) => row.id === point),
             owner = await readWorldResourceOwner(tx, observer);
 
-          if (!target || !owner) return undefined;
+          if (!target || !owner) {return undefined;}
 
           if (target.ownerId) {
             const [targetProfile] = await tx
@@ -58,7 +58,7 @@ export function createWorldScoutStore(
               .from(userprofile)
               .where(eq(userprofile.uid, target.ownerId));
 
-            if (targetProfile && targetProfile.serverId !== kingdomId) return undefined;
+            if (targetProfile && targetProfile.serverId !== kingdomId) {return undefined;}
           }
 
           const buildings = await tx
@@ -79,7 +79,7 @@ export function createWorldScoutStore(
               : [];
 
           if (buildings.length > 4096 || targetCastles.length > 1)
-            throw new Error("Invalid scout quotation aggregate");
+            {throw new Error("Invalid scout quotation aggregate");}
 
           return {
             profile,

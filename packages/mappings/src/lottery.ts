@@ -17,7 +17,7 @@ export function lotteryInfo(row: Row, display?: string): Fields {
   };
 
   if (num(row, "type") === 2) {
-    if (display) body.lotteryInfo = sfs.string(display);
+    if (display) {body.lotteryInfo = sfs.string(display);}
 
     if (num(row, "step") > 0) {
       const slots = text(row, "lotteryInfo2").split("|");

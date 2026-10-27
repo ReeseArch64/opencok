@@ -44,7 +44,7 @@ export function createTradeExecutor(
             result.trade.num > 2147483647 ||
             ![0, 1].includes(result.trade.superValue)
           )
-            throw new Error("Invalid trade state");
+            {throw new Error("Invalid trade state");}
 
           await tx
             .insert(npc_trade)

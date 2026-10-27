@@ -65,7 +65,7 @@ export async function checkPowerStore(db: Database["kingdom"]["db"]) {
     server_info,
     cross_throne_reward_record,
   ])
-    await db.select().from(table).limit(0);
+    {await db.select().from(table).limit(0);}
 }
 
 export function getPowerByPlayerId(
@@ -124,7 +124,7 @@ export function getPowerByPlayerId(
         throneRewards: [],
       };
 
-      if (!profile) return empty;
+      if (!profile) {return empty;}
 
       const effects = await readPlayerEffects(tx, profile);
       const statistics = (
@@ -211,7 +211,7 @@ export function getPowerByPlayerId(
 }
 
 function bound<T extends { limit(value: number): unknown }>(query: T, bounded: boolean): T {
-  if (bounded) query.limit(4097);
+  if (bounded) {query.limit(4097);}
 
   return query;
 }
@@ -223,7 +223,7 @@ export async function readPlayerEffects(
 ): Promise<PlayerEffectSnapshot> {
   const uid = profile.uid;
 
-  if (typeof uid !== "string" || !uid) throw new Error("Invalid effect owner");
+  if (typeof uid !== "string" || !uid) {throw new Error("Invalid effect owner");}
 
   const generals = await bound(
     tx
@@ -483,7 +483,7 @@ export async function readPlayerEffects(
       throneRewards,
     ].some((rows) => rows.length > 4096)
   )
-    throw new Error("Too many player effect records");
+    {throw new Error("Too many player effect records");}
 
   return {
     profile,

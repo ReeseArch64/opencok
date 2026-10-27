@@ -48,10 +48,10 @@ test("static throne, native trebuchet footprints and victory tower are reserved 
       [0, -1],
       [-1, -1],
     ])
-      expect(point(x! + dx!, y! + dy!)).toMatchObject({
+      {expect(point(x! + dx!, y! + dy!)).toMatchObject({
         pointType: 13,
         pointItem: String(point(x!, y!).id),
-      });
+      });}
     expect(point(x! + 1, y!).pointType).toBe(0);
   }
   expect(point(604, 600)).toMatchObject({ pointType: 48, resLevel: 1, resInitValue: 0 });

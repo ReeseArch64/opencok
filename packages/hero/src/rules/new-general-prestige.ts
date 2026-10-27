@@ -17,12 +17,12 @@ export function newGeneralPrestigeLevel(
   prestiges: readonly NewGeneralPrestige[],
   rules: Rules,
 ): number {
-  if (prestiges.length > 4096) throw new Error("Too many saved prestige records");
+  if (prestiges.length > 4096) {throw new Error("Too many saved prestige records");}
 
   const type = generalSavedInteger(civilizationType);
   const selected = prestiges.find((row) => generalSavedInteger(row.civilizationType) === type);
 
-  if (!selected) return 0;
+  if (!selected) {return 0;}
 
   const value = generalSavedLong(selected.prestigeValue);
   const levels = rules.power.prestigeLevelRecords ?? rules.power.prestigeLevels?.values() ?? [];
@@ -34,7 +34,7 @@ export function newGeneralPrestigeLevel(
       (points.length === 1 && (points[0]! <= 0n ? value < points[0]! : value >= points[0]!)) ||
       (points.length === 2 && value >= points[0]! && value < points[1]!)
     )
-      return generalInteger(rule.reputation_level);
+      {return generalInteger(rule.reputation_level);}
   }
 
   return 0;

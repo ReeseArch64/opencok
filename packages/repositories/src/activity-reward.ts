@@ -12,9 +12,9 @@ import type { MutationTransaction } from "./mutation";
 export function activityRewardReader(tx: MutationTransaction, owner: string): ActivityRewardReader {
   return {
     async alliance(id) {
-      if (!id) return {};
+      if (!id) {return {};}
 
-      if (id.length > 40) throw new Error("Invalid activity reward alliance");
+      if (id.length > 40) {throw new Error("Invalid activity reward alliance");}
 
       const [record] = await tx.select().from(alliance).where(eq(alliance.uid, id)).for("update");
       const [member] = await tx
@@ -27,7 +27,7 @@ export function activityRewardReader(tx: MutationTransaction, owner: string): Ac
     },
     async owned(actId) {
       if (!actId || actId.length > 40 || actId.includes("\0"))
-        throw new Error("Invalid activity reward identity");
+        {throw new Error("Invalid activity reward identity");}
 
       const [entitlement] = await tx
         .select()
@@ -35,7 +35,7 @@ export function activityRewardReader(tx: MutationTransaction, owner: string): Ac
         .where(and(eq(user_activity.uid, owner), eq(user_activity.actId, actId)))
         .for("update");
 
-      if (!entitlement) return undefined;
+      if (!entitlement) {return undefined;}
 
       const [announcement] = await tx
         .select()
@@ -65,10 +65,10 @@ export async function writeActivityReward(
     )
     .returning({ actId: user_activity.actId });
 
-  if (updated.length !== 1) throw new Error("Activity reward entitlement changed");
+  if (updated.length !== 1) {throw new Error("Activity reward entitlement changed");}
 
   if (!Number.isInteger(write.kingdomId) || write.kingdomId <= 0)
-    throw new Error("Invalid activity reward realm");
+    {throw new Error("Invalid activity reward realm");}
 
   const postings: EconomyPosting[] = [];
 
@@ -84,14 +84,14 @@ export async function writeActivityReward(
       )
       .for("update");
 
-    if (!before) throw new Error("Missing activity reward membership");
+    if (!before) {throw new Error("Missing activity reward membership");}
 
     for (const key of ["point", "accPoint"] as const) {
       const previous = before[key] ?? 0,
         next = write.member[key];
 
       if (!Number.isInteger(next) || previous < 0 || next < previous || next > 2147483647)
-        throw new Error("Invalid activity reward contribution");
+        {throw new Error("Invalid activity reward contribution");}
 
       postings.push({
         account: owner,
@@ -113,7 +113,7 @@ export async function writeActivityReward(
       )
       .returning({ uid: alliance_member.uid });
 
-    if (updated.length !== 1) throw new Error("Activity reward membership changed");
+    if (updated.length !== 1) {throw new Error("Activity reward membership changed");}
   }
 
   if (write.alliance) {
@@ -130,7 +130,7 @@ export async function writeActivityReward(
       write.alliance.points < before.points ||
       write.alliance.points > 9223372036854775807n
     )
-      throw new Error("Invalid activity reward alliance points");
+      {throw new Error("Invalid activity reward alliance points");}
 
     postings.push({
       account: write.alliance.id,
@@ -146,11 +146,11 @@ export async function writeActivityReward(
       .where(eq(alliance.uid, write.alliance.id))
       .returning({ uid: alliance.uid });
 
-    if (updated.length !== 1) throw new Error("Activity reward alliance changed");
+    if (updated.length !== 1) {throw new Error("Activity reward alliance changed");}
   }
 
   if (postings.length)
-    await tx.insert(economy_posting).values(
+    {await tx.insert(economy_posting).values(
       postings.map((posting, entry) => ({
         kingdomId: write.kingdomId,
         ownerUid: owner,
@@ -163,5 +163,5 @@ export async function writeActivityReward(
         delta: posting.after - posting.before,
         reason: posting.reason,
       })),
-    );
+    );}
 }

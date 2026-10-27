@@ -40,7 +40,7 @@ export async function writeCostRankAward(
     .for("update");
 
   if (!row || row.createdAt > now || id !== costRankAwardId(row.periodId, owner))
-    throw new Error("Invalid owned consumption award acknowledgement");
+    {throw new Error("Invalid owned consumption award acknowledgement");}
 
   await tx.update(awards).set({ deliveredAt: now, nextAttemptAt: 0n }).where(eq(awards.id, id));
 }
@@ -95,7 +95,7 @@ export function createCostRankAwardStore(
           !uid ||
           uid.length > 40
         )
-          throw new Error("Stale consumption reward cursor");
+          {throw new Error("Stale consumption reward cursor");}
 
         if (kingdom === authority.kingdomId && create) {
           const [profile] = await tx
@@ -121,7 +121,7 @@ export function createCostRankAwardStore(
                 previous.ownerUid !== uid ||
                 previous.rank !== rank
               )
-                throw new Error("Foreign consumption award identity");
+                {throw new Error("Foreign consumption award identity");}
             } else {
               const payload = JSON.stringify(create());
               costRankMail(payload);
@@ -163,7 +163,7 @@ export function createCostRankAwardStore(
           now < current.finalizedAt ||
           long(closure, "finalizedAt") !== current.finalizedAt
         )
-          throw new Error("Incomplete consumption ranking awards");
+          {throw new Error("Incomplete consumption ranking awards");}
 
         await tx
           .update(closures)

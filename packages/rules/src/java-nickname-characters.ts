@@ -737,7 +737,7 @@ const properties = [
 ] as const;
 
 export function javaNicknameCharacter(codePoint: number): number {
-  if (!Number.isInteger(codePoint) || codePoint < 0 || codePoint > 0x10ffff) return 0;
+  if (!Number.isInteger(codePoint) || codePoint < 0 || codePoint > 0x10ffff) {return 0;}
 
   let first = 0,
     last = properties.length - 1;
@@ -746,9 +746,9 @@ export function javaNicknameCharacter(codePoint: number): number {
     const middle = (first + last) >>> 1;
     const [start, end, property] = properties[middle]!;
 
-    if (codePoint < start) last = middle - 1;
-    else if (codePoint > end) first = middle + 1;
-    else return property;
+    if (codePoint < start) {last = middle - 1;}
+    else if (codePoint > end) {first = middle + 1;}
+    else {return property;}
   }
 
   return 0;

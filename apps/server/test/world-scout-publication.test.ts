@@ -73,9 +73,9 @@ test("scout publication rejects wrong owner, foreign realm, unrelated mail, loot
     row({ contents: Buffer.from("not a scout notice") }),
     row({ type: 8, fromUser: null }),
   ])
-    await expect(
+    {await expect(
       publishWorldScoutMail(payload(), "owner", read(invalid), publish),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   await expect(
     publishWorldScoutMail(payload(), "owner", read(row(), 2), publish),
   ).rejects.toThrow();

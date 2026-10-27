@@ -26,9 +26,9 @@ export function comebackDeviceId(profile: Row) {
 }
 
 export function decodeComebackSession(raw: string | undefined): ComebackSession | undefined {
-  if (raw === undefined) return;
+  if (raw === undefined) {return;}
 
-  if (Buffer.byteLength(raw) > 2048) comebackFailure();
+  if (Buffer.byteLength(raw) > 2048) {comebackFailure();}
 
   const row = JSON.parse(raw) as Record<string, unknown>;
 
@@ -41,7 +41,7 @@ export function decodeComebackSession(raw: string | undefined): ComebackSession 
     !row.sessionId.isWellFormed() ||
     row.sessionId.includes("\0")
   )
-    comebackFailure();
+    {comebackFailure();}
 
   const time = (key: string) => {
     const value = row[key];
@@ -51,7 +51,7 @@ export function decodeComebackSession(raw: string | undefined): ComebackSession 
       !/^\d{1,19}$/.test(value) ||
       BigInt(value) > 9223372036854775807n
     )
-      comebackFailure();
+      {comebackFailure();}
 
     return BigInt(value);
   };
@@ -69,7 +69,7 @@ export function decodeComebackSession(raw: string | undefined): ComebackSession 
     state.observedAt < state.openedAt ||
     (state.closedAt > 0n && (state.closedAt < state.openedAt || state.closedAt > state.observedAt))
   )
-    comebackFailure();
+    {comebackFailure();}
 
   return state;
 }
@@ -118,17 +118,17 @@ export function comebackConfigOpen(config: Rule, now: bigint) {
 export function comebackChannels(config: Rule) {
   const rows = (config.activity_Type ?? "").split("|");
 
-  if (rows.length > 3) comebackFailure();
+  if (rows.length > 3) {comebackFailure();}
 
   const channels = rows.map((row) => {
     const parts = row.split(";");
 
-    if (parts.length !== 2) comebackFailure();
+    if (parts.length !== 2) {comebackFailure();}
 
     return { type: cityInteger(parts[0], 1, 3), days: cityInteger(parts[1], 1, 365) };
   });
 
-  if (new Set(channels.map((channel) => channel.type)).size !== channels.length) comebackFailure();
+  if (new Set(channels.map((channel) => channel.type)).size !== channels.length) {comebackFailure();}
 
   return channels;
 }
@@ -144,7 +144,7 @@ export function comebackDaily(config: Rule) {
     days.join(";").length > 30 ||
     rewards.some((id) => !/^\d{1,12}$/.test(id))
   )
-    comebackFailure();
+    {comebackFailure();}
 
   return days.map((day, index) => ({ day, reward: rewards[index]! }));
 }
@@ -160,7 +160,7 @@ export function comebackPayNodes(config: Rule) {
     nodes.join(";").length > 100 ||
     rewards.some((id) => !/^\d{1,12}$/.test(id))
   )
-    comebackFailure();
+    {comebackFailure();}
 
   return nodes.map((pay, index) => ({ pay, reward: rewards[index]! }));
 }
@@ -168,11 +168,11 @@ export function comebackPayNodes(config: Rule) {
 export function comebackClaims(raw: unknown, maximum = 100) {
   const value = String(raw ?? "");
 
-  if (value.length > maximum || (value && !/^\d+(?:;\d+)*$/.test(value))) comebackFailure();
+  if (value.length > maximum || (value && !/^\d+(?:;\d+)*$/.test(value))) {comebackFailure();}
 
   const values = value ? value.split(";").map((entry) => cityInteger(entry, 1)) : [];
 
-  if (new Set(values).size !== values.length) comebackFailure();
+  if (new Set(values).size !== values.length) {comebackFailure();}
 
   return values;
 }
@@ -182,11 +182,11 @@ function matches(raw: string | undefined, value: string) {
 }
 
 function band(raw: string | undefined, value: number) {
-  if (raw === "0") return true;
+  if (raw === "0") {return true;}
 
   const parts = (raw ?? "").split(";").map((part) => cityInteger(part));
 
-  if (parts.length !== 2 || parts[0]! > parts[1]!) comebackFailure();
+  if (parts.length !== 2 || parts[0]! > parts[1]!) {comebackFailure();}
 
   return value >= parts[0]! && value <= parts[1]!;
 }
@@ -214,13 +214,13 @@ function canReward(
   if (config.pay_lv !== "0") {
     const selected = (config.pay_lv ?? "").split("|").map((raw) => cityInteger(raw, 1, 8));
 
-    if (!selected.length || selected.length > 8) comebackFailure();
+    if (!selected.length || selected.length > 8) {comebackFailure();}
 
     if (
       totalCharge < levels[selected[0]! - 1]![0]! ||
       totalCharge > levels[selected.at(-1)! - 1]![1]!
     )
-      return false;
+      {return false;}
   }
 
   return (
@@ -237,7 +237,7 @@ function canReward(
 }
 
 export function comebackRecord(state: ComebackState): Row | undefined {
-  if (state.records.length > 64) comebackFailure();
+  if (state.records.length > 64) {comebackFailure();}
 
   return [...state.records].sort((a, b) =>
     long(a, "backTime") === long(b, "backTime")
@@ -255,7 +255,7 @@ export function comebackEnrollment(
   castle: number,
   now: bigint,
 ) {
-  if (!comebackEnabled(rules, now) || num(profile, "crossFightSrcServerId") > 0) return;
+  if (!comebackEnabled(rules, now) || num(profile, "crossFightSrcServerId") > 0) {return;}
 
   const existing = comebackRecord(state),
     session = state.session;
@@ -263,21 +263,21 @@ export function comebackEnrollment(
   if (existing) {
     const current = rules.advanced.comebacks?.get(text(existing, "configId"));
 
-    if (!current || comebackConfigOpen(current, now)) return;
+    if (!current || comebackConfigOpen(current, now)) {return;}
   }
 
-  if (!session || session.closedAt > 0n || session.openedAt > now) return;
+  if (!session || session.closedAt > 0n || session.openedAt > now) {return;}
 
   const configs = [...(rules.advanced.comebacks?.values() ?? [])].filter(
     (rule) => rule.StartTime !== "0",
   );
 
-  if (configs.length > 256) comebackFailure();
+  if (configs.length > 256) {comebackFailure();}
 
   configs.sort((a, b) => cityInteger(b.weight) - cityInteger(a.weight));
 
   for (const config of configs) {
-    if (!comebackConfigOpen(config, now)) continue;
+    if (!comebackConfigOpen(config, now)) {continue;}
 
     const forced = num(profile, "backFlag_mc") > 0 ? 3 : num(profile, "backFlag_op") > 0 ? 4 : 0;
     const inherited =
@@ -293,12 +293,12 @@ export function comebackEnrollment(
     const at = session.openedAt;
     const lost = previous > 0n && previous <= at ? Number((at - previous) / day) : 0;
 
-    if (existing && lost < cityInteger(config.lost_condition)) continue;
+    if (existing && lost < cityInteger(config.lost_condition)) {continue;}
 
     let type = forced;
 
     if (!type) {
-      if (previous <= 0n || previous > at) continue;
+      if (previous <= 0n || previous > at) {continue;}
 
       const interval = config.target_SetupTime ?? "";
 
@@ -307,10 +307,10 @@ export function comebackEnrollment(
         const start = eventTimestamp(bounds[0]),
           end = eventTimestamp(bounds[1]);
 
-        if (bounds.length !== 2 || start === undefined || end === undefined) comebackFailure();
+        if (bounds.length !== 2 || start === undefined || end === undefined) {comebackFailure();}
 
-        if (previous < start || previous > end) continue;
-      } else if (lost < cityInteger(interval === "0" ? 30 : interval, 1, 36500)) continue;
+        if (previous < start || previous > end) {continue;}
+      } else if (lost < cityInteger(interval === "0" ? 30 : interval, 1, 36500)) {continue;}
 
       type = returning ? 2 : 1;
     }
@@ -320,7 +320,7 @@ export function comebackEnrollment(
         ? Number((at - session.previousOnlineAt) / day)
         : 0;
 
-    if (!canReward(config, profile, castle, state.totalCharge, type, ownLost, rules)) continue;
+    if (!canReward(config, profile, castle, state.totalCharge, type, ownLost, rules)) {continue;}
 
     comebackChannels(config);
 
@@ -331,7 +331,7 @@ export function comebackEnrollment(
 export function comebackActiveChannels(config: Rule, record: Row, now: bigint) {
   const back = long(record, "backTime");
 
-  if (back <= 0n || back > now) return [];
+  if (back <= 0n || back > now) {return [];}
 
   const days = Number(now / day - back / day) + 1;
 

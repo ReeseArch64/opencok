@@ -38,7 +38,7 @@ function projectAvatarProfile(
     typeof entry.effects !== "string" ||
     new TextEncoder().encode(entry.effects).length > 65535
   )
-    return invalid();
+    {return invalid();}
 
   let snapshot;
 
@@ -65,7 +65,7 @@ function projectAvatarProfile(
         !value.isWellFormed(),
     )
   )
-    return invalid();
+    {return invalid();}
 
   return {
     owner: entry.ownerUid,

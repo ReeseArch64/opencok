@@ -109,13 +109,13 @@ test("timed activities and building production commit once across concurrency, r
     expect(boostRates.at(-1)!.perHour).toBe(baselineRates[0]!.perHour);
 
     const domain: ActivityDomain = async (tx, action, _activity, _now, economy) => {
-      if (action === "start") economy.gold(-100n);
-      if (action === "cancel") economy.gold(50n);
+      if (action === "start") {economy.gold(-100n);}
+      if (action === "cancel") {economy.gold(50n);}
       if (action === "finish")
-        await tx
+        {await tx
           .update(userprofile)
           .set({ exp: sql`${userprofile.exp}+1` })
-          .where(eq(userprofile.uid, "owner"));
+          .where(eq(userprofile.uid, "owner"));}
       return encode({});
     };
     const domains = new Map([[0, domain]]);

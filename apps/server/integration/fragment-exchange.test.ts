@@ -44,9 +44,9 @@ async function fixture() {
     offers: async () => readFragmentExchangeOffers((await saved()).reward!),
     fund: async (count = 40) => {
       for (const itemId of ["209699", "209700", "209701", "209702", "209703", "209704"])
-        await h.db.db
+        {await h.db.db
           .insert(user_item)
-          .values({ uuid: `fragment-${itemId}`, ownerId: "owner", itemId, count, value: 0 });
+          .values({ uuid: `fragment-${itemId}`, ownerId: "owner", itemId, count, value: 0 });}
     },
     counter: async (key: string) =>
       (await h.db.db.select().from(trigger_var).where(eq(trigger_var.uid, "owner"))).find(
@@ -106,7 +106,7 @@ test("a real fragment exchange consumes its saved recipe, grants the pinned resu
       h.rules.advanced.campaignVariables!.get("S$long_3th_anniversary_dragon_exchange_count_max")!
         .initialValue,
     );
-    for (let index = 0; index < maximum + 1; index++) await h.reward();
+    for (let index = 0; index < maximum + 1; index++) {await h.reward();}
     expect(await h.counter("long_3th_anniversary_dragon_exchange_count")).toBe(String(maximum));
     const initial = Number(
       h.rules.advanced.campaignVariables!.get("P$long_3th_anniversary_dragon_exchange_count")!

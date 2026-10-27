@@ -24,12 +24,12 @@ export class ApiRouter {
     const rawPath = new URL(request.url).pathname;
 
     if (rawPath === characterPath)
-      return provisioning
+      {return provisioning
         ? provisioning(request)
         : Response.json(
             { state: "unavailable" },
             { status: 503, headers: { "Cache-Control": "no-store" } },
-          );
+          );}
 
     if (
       files &&
@@ -37,7 +37,7 @@ export class ApiRouter {
         IMAGE_PATH.test(rawPath) ||
         /^\/_internal\/avatars\/[0-9]{1,20}\/[1-9][0-9]{0,5}(\/url)?$/.test(rawPath))
     )
-      return files(request);
+      {return files(request);}
 
     const path = new URL(request.url).pathname.replace(/\/{2,}/g, "/");
 
@@ -59,7 +59,7 @@ export class ApiRouter {
     }
 
     if (["/healthz", "/_health.php"].includes(path) && ["GET", "HEAD"].includes(request.method))
-      return this.text("ok\n");
+      {return this.text("ok\n");}
 
     if (path === "/readyz" && ["GET", "HEAD"].includes(request.method)) {
       await accounts.health();
@@ -69,7 +69,7 @@ export class ApiRouter {
     }
 
     if (this.discoveryPaths.has(path) && this.methods.has(request.method))
-      return this.legacy(await this.discovery.run(await requestParameters(request)));
+      {return this.legacy(await this.discovery.run(await requestParameters(request)));}
 
     if (
       path === "/gameservice/api/query_userinfo_by_name.php" &&

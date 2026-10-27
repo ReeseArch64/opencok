@@ -8,14 +8,14 @@ export function validatePosting(posting: EconomyPosting): bigint {
     [posting.asset, 64],
     [posting.reason, 128],
   ] as const)
-    if (
+    {if (
       typeof value !== "string" ||
       !value.trim() ||
       value.length > limit ||
       !value.isWellFormed() ||
       value.includes("\0")
     )
-      throw new Error("Invalid ledger identity");
+      {throw new Error("Invalid ledger identity");}}
 
   if (
     typeof posting.before !== "bigint" ||
@@ -25,7 +25,7 @@ export function validatePosting(posting: EconomyPosting): bigint {
     posting.before > maximum ||
     posting.after > maximum
   )
-    throw new Error("Invalid ledger balance");
+    {throw new Error("Invalid ledger balance");}
 
   return posting.after - posting.before;
 }

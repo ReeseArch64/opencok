@@ -28,7 +28,7 @@ export function cosmeticOwnership(
       now: Number(context.now),
     })
   )
-    return;
+    {return;}
 
   const dirty = context.write.cosmeticTarget?.avatars ?? [];
   const avatars = [
@@ -60,11 +60,11 @@ export function cosmeticOwnership(
   }
 
   if (owned)
-    for (const state of states)
-      state.endTime =
+    {for (const state of states)
+      {state.endTime =
         long(owned, "expirationTime") === -1n
           ? 9223372036854775807n
-          : long(owned, "expirationTime");
+          : long(owned, "expirationTime");}}
 
   return counter ? undefined : [...dirty.filter((row) => row.avatarId !== owned!.avatarId), owned!];
 }
@@ -72,11 +72,11 @@ export function cosmeticOwnership(
 export function cosmeticTargetStates(context: CityProgressionContext) {
   const target = context.state.cosmeticTarget;
 
-  if (!target) throw new Error("Missing cosmetic target");
+  if (!target) {throw new Error("Missing cosmetic target");}
 
   const write = context.write.cosmeticTarget;
 
-  if (!write) return target.states;
+  if (!write) {return target.states;}
 
   return [
     ...target.states.filter(
@@ -94,7 +94,7 @@ export function cosmeticInteractionParticipants(owner: string, command: string, 
     int(params, "type", -1) !== 45 ||
     !str(params, "uid", "").trim()
   )
-    return;
+    {return;}
 
   return [...new Set([owner, playerItemGiftRecipient(str(params, "uid"))])];
 }
@@ -105,7 +105,7 @@ export function cosmeticInteractionEvent(
 ): Uint8Array | null {
   const changed = context.write.cosmeticChanges;
 
-  if (!changed?.length) return null;
+  if (!changed?.length) {return null;}
 
   const target = context.state.cosmeticTarget;
 
@@ -115,7 +115,7 @@ export function cosmeticInteractionEvent(
     changed.length > 64 ||
     changed.some((row) => row.uid !== target.uid)
   )
-    throw new Error("Invalid cosmetic interaction changes");
+    {throw new Error("Invalid cosmetic interaction changes");}
 
   const states =
     target.uid === context.owner
@@ -125,11 +125,11 @@ export function cosmeticInteractionEvent(
   const updates = changed.map((change) => {
     const row = states.find((row) => row.stateId === change.id);
 
-    if (!row) throw new Error("Missing changed cosmetic status");
+    if (!row) {throw new Error("Missing changed cosmetic status");}
 
     const type = num(row, "type2");
 
-    if (![100, 105, 200].includes(type)) throw new Error("Unsupported cosmetic status kind");
+    if (![100, 105, 200].includes(type)) {throw new Error("Unsupported cosmetic status kind");}
 
     kinds.add(type);
     const body: Fields = {
@@ -183,7 +183,7 @@ export async function publishCosmeticInteractionMutation(
     event.kinds.value.length > 3 ||
     point < 0
   )
-    throw new Error("Invalid cosmetic interaction event");
+    {throw new Error("Invalid cosmetic interaction event");}
 
   for (const status of event.statuses.value) {
     const update = fields(status),
@@ -191,10 +191,10 @@ export async function publishCosmeticInteractionMutation(
       body = fields(update.body),
       id = int(body, "statusId");
 
-    if (![100, 105, 200].includes(kind)) throw new Error("Invalid cosmetic private status kind");
+    if (![100, 105, 200].includes(kind)) {throw new Error("Invalid cosmetic private status kind");}
 
     if (id <= 0 || body.endTime?.type !== Type.Long || body.effectState?.type !== Type.Object)
-      throw new Error("Invalid cosmetic status notification");
+      {throw new Error("Invalid cosmetic status notification");}
 
     if (body.status) {
       if (
@@ -202,7 +202,7 @@ export async function publishCosmeticInteractionMutation(
         !Array.isArray(body.status.value) ||
         body.status.value.length > 128
       )
-        throw new Error("Invalid cosmetic status effects");
+        {throw new Error("Invalid cosmetic status effects");}
 
       for (const effect of body.status.value) {
         const value = fields(effect);
@@ -213,17 +213,17 @@ export async function publishCosmeticInteractionMutation(
           value.stateId?.type !== Type.Int ||
           int(value, "stateId") !== id
         )
-          throw new Error("Invalid cosmetic status effect");
+          {throw new Error("Invalid cosmetic status effect");}
       }
     }
 
     await publish(uid, "status.push", body);
 
     if (kind === 100)
-      await publish(uid, "push.server.action", { type: sfs.int(9), params: sfs.object(body) });
+      {await publish(uid, "push.server.action", { type: sfs.int(9), params: sfs.object(body) });}
   }
 
-  if (!point) return;
+  if (!point) {return;}
 
   const projection = fields(event.projection),
     recipients = new Set([owner, uid, ...(await interested([point], owner, uid))]);
@@ -233,7 +233,7 @@ export async function publishCosmeticInteractionMutation(
     let data: CityCosmeticResponse = {};
 
     if (type === 100) {
-      if (projection.sid) data = { sid: int(projection, "sid"), set: int(projection, "set") };
+      if (projection.sid) {data = { sid: int(projection, "sid"), set: int(projection, "set") };}
     } else if (type === 105) {
       if (projection.bubble) {
         const value = fields(projection.bubble);
@@ -250,7 +250,7 @@ export async function publishCosmeticInteractionMutation(
           },
         };
       }
-    } else throw new Error("Invalid cosmetic notification kind");
+    } else {throw new Error("Invalid cosmetic notification kind");}
 
     const body = cityCosmeticUpdate(data, uid, point),
       command =
@@ -260,6 +260,6 @@ export async function publishCosmeticInteractionMutation(
             ? "push.bubble.status"
             : "push.overlap.status";
 
-    for (const recipient of recipients) if (recipient) await publish(recipient, command, body);
+    for (const recipient of recipients) {if (recipient) {await publish(recipient, command, body);}}
   }
 }

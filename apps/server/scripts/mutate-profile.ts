@@ -30,7 +30,7 @@ async function run(source: string) {
       },
     ],
   });
-  if (!result.success) throw new Error("Profile mutation bundle failed");
+  if (!result.success) {throw new Error("Profile mutation bundle failed");}
   const child = Bun.spawn(
     [process.execPath, "--no-env-file", "test", "nickname-mutation-command.test.js"],
     {
@@ -49,12 +49,12 @@ async function run(source: string) {
 }
 try {
   const original = await readFile(authFile, "utf8");
-  if (await run(original)) throw new Error("Profile mutation baseline failed");
+  if (await run(original)) {throw new Error("Profile mutation baseline failed");}
   for (const [name, from, to] of mutations) {
     if (original.split(from).length !== 2)
-      throw new Error(`Profile mutation target changed: ${name}`);
+      {throw new Error(`Profile mutation target changed: ${name}`);}
     if ((await run(original.replace(from, to))) === 0)
-      throw new Error(`Critical profile mutation survived: ${name}`);
+      {throw new Error(`Critical profile mutation survived: ${name}`);}
     console.log(`Killed: ${name}`);
   }
   console.log(`${mutations.length} critical profile mutations killed`);

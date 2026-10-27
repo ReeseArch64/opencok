@@ -6,7 +6,7 @@ export class ChatRoomAuthorizer {
   public constructor(private readonly getPlayerStateById: PlayerStateLoader) {}
 
   public readonly authorize: RoomAuthorizer = async (uid, claimedRoomId) => {
-    if (typeof uid !== "string" || !uid || typeof claimedRoomId !== "string") return null;
+    if (typeof uid !== "string" || !uid || typeof claimedRoomId !== "string") {return null;}
 
     const state = await this.getPlayerStateById(uid);
 

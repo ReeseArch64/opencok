@@ -25,20 +25,20 @@ function parseArgs(argv) {
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
     const next = () => {
-      if (i + 1 >= argv.length) die(`Missing value for ${a}`);
+      if (i + 1 >= argv.length) {die(`Missing value for ${a}`);}
       return argv[++i];
     };
 
-    if (a === "--repo-root") out.repoRoot = next();
-    else if (a === "--dir") out.dir = next();
-    else if (a === "--force-index") out.forceIndex = true;
-    else if (a === "--index-file") out.indexFile = next();
-    else if (a === "--first-title") out.firstTitle = next();
-    else if (a === "--first-status") out.firstStatus = next();
-    else if (a === "--deciders") out.deciders = next();
-    else if (a === "--technical-story") out.technicalStory = next();
-    else if (a === "--strategy") out.strategy = next();
-    else if (a === "--json") out.json = true;
+    if (a === "--repo-root") {out.repoRoot = next();}
+    else if (a === "--dir") {out.dir = next();}
+    else if (a === "--force-index") {out.forceIndex = true;}
+    else if (a === "--index-file") {out.indexFile = next();}
+    else if (a === "--first-title") {out.firstTitle = next();}
+    else if (a === "--first-status") {out.firstStatus = next();}
+    else if (a === "--deciders") {out.deciders = next();}
+    else if (a === "--technical-story") {out.technicalStory = next();}
+    else if (a === "--strategy") {out.strategy = next();}
+    else if (a === "--json") {out.json = true;}
     else if (a === "--help" || a === "-h") {
       process.stdout.write(
         [
@@ -63,19 +63,19 @@ function parseArgs(argv) {
   }
 
   if (!["auto", "number", "slug"].includes(out.strategy))
-    die(`Invalid --strategy: ${out.strategy}`);
+    {die(`Invalid --strategy: ${out.strategy}`);}
   return out;
 }
 
 function loadReadmeTemplate() {
   const skillRoot = path.resolve(__dirname, "..");
   const templatePath = path.join(skillRoot, "assets", "templates", "adr-readme.md");
-  if (!fs.existsSync(templatePath)) die(`README template not found: ${templatePath}`);
+  if (!fs.existsSync(templatePath)) {die(`README template not found: ${templatePath}`);}
   return fs.readFileSync(templatePath, "utf8");
 }
 
 function writeIndex(indexFile, adrDirName, { force }) {
-  if (fs.existsSync(indexFile) && !force) return;
+  if (fs.existsSync(indexFile) && !force) {return;}
   const content = loadReadmeTemplate().replaceAll("{ADR_DIR}", adrDirName);
   fs.mkdirSync(path.dirname(indexFile), { recursive: true });
   fs.writeFileSync(indexFile, `${content.trimEnd()}\n`, "utf8");
@@ -153,9 +153,9 @@ Conventions:
 }
 
 function updateIndexFile(indexFile, { relLink, title, status, date }) {
-  if (!fs.existsSync(indexFile)) return;
+  if (!fs.existsSync(indexFile)) {return;}
   let content = fs.readFileSync(indexFile, "utf8");
-  if (content.includes(relLink)) return;
+  if (content.includes(relLink)) {return;}
 
   const entryLine = `- [${title}](${relLink}) (${status}, ${date})`;
 
@@ -165,7 +165,7 @@ function updateIndexFile(indexFile, { relLink, title, status, date }) {
 
   if (headingIdx !== -1) {
     let insertAt = headingIdx + 1;
-    while (insertAt < lines.length && lines[insertAt].trim() === "") insertAt++;
+    while (insertAt < lines.length && lines[insertAt].trim() === "") {insertAt++;}
     lines.splice(insertAt, 0, entryLine);
   } else {
     lines.push(entryLine);
@@ -178,7 +178,7 @@ function main() {
   const args = parseArgs(process.argv);
 
   const repoRoot = path.resolve(process.cwd(), args.repoRoot);
-  if (!fs.existsSync(repoRoot)) die(`Repo root does not exist: ${repoRoot}`);
+  if (!fs.existsSync(repoRoot)) {die(`Repo root does not exist: ${repoRoot}`);}
 
   const adrDir = path.resolve(repoRoot, args.dir);
   fs.mkdirSync(adrDir, { recursive: true });

@@ -41,7 +41,7 @@ export function createExpeditionCalendarStore(
             !plan.create ||
             long(plan.create, "startTime") < latest.endTime
           )
-            throw new Error("Invalid expedition calendar replacement");
+            {throw new Error("Invalid expedition calendar replacement");}
 
           await tx
             .update(expedition_calendar)

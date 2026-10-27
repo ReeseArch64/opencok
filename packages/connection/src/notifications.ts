@@ -11,7 +11,7 @@ export function createRealmNotifications() {
       recipients.set(owner, recipient);
 
       return () => {
-        if (recipients.get(owner) === recipient) recipients.delete(owner);
+        if (recipients.get(owner) === recipient) {recipients.delete(owner);}
       };
     },
     async publish(
@@ -22,7 +22,7 @@ export function createRealmNotifications() {
     ): Promise<boolean> {
       const recipient = recipients.get(owner);
 
-      if (!recipient || signal?.aborted) return false;
+      if (!recipient || signal?.aborted) {return false;}
 
       try {
         const delivered = await recipient(command, body, signal);

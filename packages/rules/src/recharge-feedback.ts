@@ -13,7 +13,7 @@ export function feedbackWindow(rules: Rules, context: RuleContext) {
     start = eventTimestamp(rule?.k5),
     end = eventTimestamp(rule?.k6);
 
-  if (!rule || start === undefined || end === undefined || end < start) return undefined;
+  if (!rule || start === undefined || end === undefined || end < start) {return undefined;}
 
   return {
     start,
@@ -30,15 +30,15 @@ export function feedbackPrice(rules: Rules, productId: string): number | undefin
   const prices = new Set<number>();
 
   for (const row of rules.advanced.castleExchanges?.values() ?? []) {
-    if (row.product_id !== productId) continue;
+    if (row.product_id !== productId) {continue;}
 
     const match = row.dollar?.match(/^(\d+)(?:\.(\d{1,2}))?$/);
 
-    if (!match) return undefined;
+    if (!match) {return undefined;}
 
     const cents = Number(match[1]) * 100 + Number((match[2] ?? "").padEnd(2, "0"));
 
-    if (!Number.isSafeInteger(cents) || cents <= 0 || cents > 2147483647) return undefined;
+    if (!Number.isSafeInteger(cents) || cents <= 0 || cents > 2147483647) {return undefined;}
 
     prices.add(cents);
   }

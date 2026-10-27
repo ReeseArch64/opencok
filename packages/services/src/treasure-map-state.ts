@@ -6,9 +6,9 @@ export function treasureMapRoster(context: CityProgressionContext) {
     (context.state.worldMutation?.treasures ?? []).map((row) => [text(row, "uuid"), row]),
   );
 
-  for (const row of context.write.worldMutation?.treasures ?? []) rows.set(text(row, "uuid"), row);
+  for (const row of context.write.worldMutation?.treasures ?? []) {rows.set(text(row, "uuid"), row);}
 
-  for (const id of context.write.worldMutation?.deletedTreasures ?? []) rows.delete(id);
+  for (const id of context.write.worldMutation?.deletedTreasures ?? []) {rows.delete(id);}
 
   return [...rows.values()];
 }

@@ -10,7 +10,7 @@ export function activityDirectory(entries: readonly ActivityDirectoryEntryRespon
         const fields: Fields = { t: sfs.int(entry.t) };
 
         for (const key of ["opt", "st", "et"] as const)
-          if (entry[key] !== undefined) fields[key] = sfs.int(entry[key]);
+          {if (entry[key] !== undefined) {fields[key] = sfs.int(entry[key]);}}
 
         return sfs.object(fields);
       }),

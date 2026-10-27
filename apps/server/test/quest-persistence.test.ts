@@ -63,7 +63,7 @@ test("nine unchanged initialization stages avoid 9252 redundant quest writes", a
     },
   };
   for (let stage = 0; stage < 9; stage++)
-    await writeQuests(tx, "owner", structuredClone(write), before);
+    {await writeQuests(tx, "owner", structuredClone(write), before);}
   expect(calls).toHaveLength(0);
   const changed = structuredClone(write);
   changed.tasks[0]!.state = 1;

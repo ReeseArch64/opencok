@@ -173,7 +173,7 @@ test("power requests reject missing, banned and mismatched snapshot owners", asy
 test("command failure preserves state and never substitutes missing catalogs or unresolved dragon effects", async () => {
   const { game, rules, state } = fixture();
   for (const id of ["dragon_new", "dragon_levelup", "dragon_science"])
-    rules.features.set(id, { id, version: "99.0.0", online: "1" });
+    {rules.features.set(id, { id, version: "99.0.0", online: "1" });}
   state.dragons = [{ itemId: 6001, dragonState: 3, lv: 2 }];
   await expect(
     game.execute("synthetic", "get.power.info", { dragonAttackPercent: sfs.int(0) }),
@@ -205,7 +205,7 @@ test("storage failures propagate without returning a partial power result", asyn
 function enableDragon(input: ReturnType<typeof fixture>) {
   const { state, rules } = input;
   for (const id of ["dragon_new", "dragon_levelup", "dragon_science"])
-    rules.features.set(id, { id, version: "99.0.0", online: "1" });
+    {rules.features.set(id, { id, version: "99.0.0", online: "1" });}
   state.dragons = [{ itemId: 6001, dragonState: 3, lv: 2, useFlag: 0 }];
   rules.items.set("dragon_new", { id: "dragon_new", k10: "10", k11: "2", k12: "3" });
   rules.power.dragonBases = new Map([["6001", { id: "6001", initFight: "120" }]]);

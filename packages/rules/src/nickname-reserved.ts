@@ -11,7 +11,7 @@ export function reservedNicknameText(name: string): string {
 
 export function reservedNicknamePattern(source: string): { pattern: string; flags: string } {
   if (typeof source !== "string" || source.length > 4096 || !source.isWellFormed())
-    throw new Error("Invalid reserved nickname pattern");
+    {throw new Error("Invalid reserved nickname pattern");}
 
   let flags = "u";
   let insensitive = false;
@@ -42,7 +42,7 @@ export function reservedNicknamePattern(source: string): { pattern: string; flag
     if (unit === "\\") {
       const next = input[++index];
 
-      if (!next) throw new Error("Invalid reserved nickname escape");
+      if (!next) {throw new Error("Invalid reserved nickname escape");}
 
       if (next === "Q" && !quoted) {
         quoted = true;
@@ -60,20 +60,20 @@ export function reservedNicknamePattern(source: string): { pattern: string; flag
         continue;
       }
 
-      if (next === "b" && !characterClass) result += boundary;
-      else if (next === "B" && !characterClass) result += `(?!${boundary})`;
-      else if (next === "A") result += "(?<![\\s\\S])";
-      else if (next === "z") result += "(?![\\s\\S])";
+      if (next === "b" && !characterClass) {result += boundary;}
+      else if (next === "B" && !characterClass) {result += `(?!${boundary})`;}
+      else if (next === "A") {result += "(?<![\\s\\S])";}
+      else if (next === "z") {result += "(?![\\s\\S])";}
       else if (next === "s")
-        result += characterClass ? " \\t\\n\\x0B\\f\\r" : "[ \\t\\n\\x0B\\f\\r]";
-      else if (next === "S" && !characterClass) result += "[^ \\t\\n\\x0B\\f\\r]";
-      else if ("dDwWtnrf\\.[]{}()*+?^$|-/".includes(next)) result += `\\${next}`;
+        {result += characterClass ? " \\t\\n\\x0B\\f\\r" : "[ \\t\\n\\x0B\\f\\r]";}
+      else if (next === "S" && !characterClass) {result += "[^ \\t\\n\\x0B\\f\\r]";}
+      else if ("dDwWtnrf\\.[]{}()*+?^$|-/".includes(next)) {result += `\\${next}`;}
       else if (next === "u" || next === "x") {
         const width = next === "u" ? 4 : 2;
         const hex = input.slice(index + 1, index + 1 + width);
 
         if (!new RegExp(`^[0-9a-fA-F]{${width}}$`).test(hex))
-          throw new Error("Invalid reserved nickname escape");
+          {throw new Error("Invalid reserved nickname escape");}
 
         const lowered = literal(String.fromCharCode(Number.parseInt(hex, 16)))
           .charCodeAt(0)
@@ -81,7 +81,7 @@ export function reservedNicknamePattern(source: string): { pattern: string; flag
           .padStart(width, "0");
         result += `\\${next}${lowered}`;
         index += width;
-      } else throw new Error("Unsupported reserved nickname escape");
+      } else {throw new Error("Unsupported reserved nickname escape");}
 
       continue;
     }
@@ -92,10 +92,10 @@ export function reservedNicknamePattern(source: string): { pattern: string; flag
     }
 
     if (unit === "[") {
-      if (characterClass) throw new Error("Unsupported reserved nickname class");
+      if (characterClass) {throw new Error("Unsupported reserved nickname class");}
 
       characterClass = true;
-    } else if (unit === "]") characterClass = false;
+    } else if (unit === "]") {characterClass = false;}
 
     if (
       input.startsWith("&&", index) ||
@@ -103,20 +103,20 @@ export function reservedNicknamePattern(source: string): { pattern: string; flag
       (input.startsWith("(?", index) &&
         !["(?:", "(?=", "(?!", "(?<=", "(?<!"].some((prefix) => input.startsWith(prefix, index)))
     )
-      throw new Error("Unsupported reserved nickname construct");
+      {throw new Error("Unsupported reserved nickname construct");}
 
     if (unit === "^" && !characterClass && flags.includes("m"))
-      result += "(?=[\\s\\S])(?:(?<![\\s\\S])|(?<=[\\n\\u0085\\u2028\\u2029])|(?<=\\r)(?!\\n))";
+      {result += "(?=[\\s\\S])(?:(?<![\\s\\S])|(?<=[\\n\\u0085\\u2028\\u2029])|(?<=\\r)(?!\\n))";}
     else if (unit === "$" && !characterClass && flags.includes("m"))
-      result += "(?=(?:\\r\\n|(?<!\\r)\\n|[\\r\\u0085\\u2028\\u2029])|(?![\\s\\S]))";
+      {result += "(?=(?:\\r\\n|(?<!\\r)\\n|[\\r\\u0085\\u2028\\u2029])|(?![\\s\\S]))";}
     else if (unit === "." && !characterClass && !flags.includes("s"))
-      result += "[^\\n\\r\\u0085\\u2028\\u2029]";
+      {result += "[^\\n\\r\\u0085\\u2028\\u2029]";}
     else if (unit === "$" && !characterClass && !flags.includes("m"))
-      result += "(?=(?:\\r\\n|[\\n\\r\\u0085\\u2028\\u2029])?(?![\\s\\S]))";
-    else result += literal(unit);
+      {result += "(?=(?:\\r\\n|[\\n\\r\\u0085\\u2028\\u2029])?(?![\\s\\S]))";}
+    else {result += literal(unit);}
   }
 
-  if (result.length > 1000000) throw new Error("Reserved nickname pattern exceeds bound");
+  if (result.length > 1000000) {throw new Error("Reserved nickname pattern exceeds bound");}
 
   new RegExp(result, flags);
 

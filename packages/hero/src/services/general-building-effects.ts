@@ -30,7 +30,7 @@ export function restoredResourceBuilding(
   for (const row of bounded(snapshot.buildings)) {
     const uuid = text(row.uuid, 40);
 
-    if (uuid === null) throw new Error("Missing saved building UUID");
+    if (uuid === null) {throw new Error("Missing saved building UUID");}
 
     keys.push(uuid);
     selected.set(uuid, { itemId: integer(row.itemId), level: row.level, star: row.star });

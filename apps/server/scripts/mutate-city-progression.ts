@@ -22,15 +22,15 @@ async function run(changed?: string, source?: string) {
         name: "city-mutation",
         setup(build) {
           if (changed)
-            build.onLoad({ filter: new RegExp(`${changed}/src/city-progression\\.ts$`) }, () => ({
+            {build.onLoad({ filter: new RegExp(`${changed}/src/city-progression\\.ts$`) }, () => ({
               contents: source!,
               loader: "ts",
-            }));
+            }));}
         },
       },
     ],
   });
-  if (!result.success) throw new Error("City mutation bundle failed");
+  if (!result.success) {throw new Error("City mutation bundle failed");}
   const child = Bun.spawn([process.execPath, "--no-env-file", "test", "city-progression.test.js"], {
     cwd: directory,
     stdin: "ignore",
@@ -45,15 +45,15 @@ async function run(changed?: string, source?: string) {
   return code;
 }
 try {
-  if (await run()) throw new Error("City mutation baseline failed");
+  if (await run()) {throw new Error("City mutation baseline failed");}
   for (const [name, module, from, to] of mutations) {
     const source = await readFile(
       new URL(`../../../packages/${module}/src/city-progression.ts`, import.meta.url),
       "utf8",
     );
-    if (source.split(from).length !== 2) throw new Error(`City mutation target changed: ${name}`);
+    if (source.split(from).length !== 2) {throw new Error(`City mutation target changed: ${name}`);}
     if ((await run(module, source.replace(from, to))) === 0)
-      throw new Error(`Critical city mutation survived: ${name}`);
+      {throw new Error(`Critical city mutation survived: ${name}`);}
     console.log(`Killed: ${name}`);
   }
 } finally {

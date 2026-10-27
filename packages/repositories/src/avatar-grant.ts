@@ -28,7 +28,7 @@ export function readAvatarGrant(
     !Number.isSafeInteger(now) ||
     now < 0
   )
-    throw new Error("Invalid avatar grant query");
+    {throw new Error("Invalid avatar grant query");}
 
   return db.transaction(
     async (tx) => {
@@ -54,7 +54,7 @@ export function readAvatarGrant(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > BigInt(now)
       )
-        return { profile };
+        {return { profile };}
 
       const sequence = avatarSequence(profile.picVer);
       let active = true;
@@ -64,7 +64,7 @@ export function readAvatarGrant(
       try {
         const grant = await inspect(profile, {
           async castleLevel() {
-            if (!active || castleRead) throw new Error("Invalid avatar castle read");
+            if (!active || castleRead) {throw new Error("Invalid avatar castle read");}
 
             castleRead = true;
             const rows = await tx
@@ -74,12 +74,12 @@ export function readAvatarGrant(
               .limit(2);
 
             if (rows.length > 1 || rows.some((row) => row.uid !== owner))
-              throw new Error("Invalid avatar castle state");
+              {throw new Error("Invalid avatar castle state");}
 
             return rows[0]?.level ?? 0;
           },
           async uploadRecord() {
-            if (!active || recordRead) throw new Error("Invalid avatar record read");
+            if (!active || recordRead) {throw new Error("Invalid avatar record read");}
 
             recordRead = true;
             const rows = await tx
@@ -92,7 +92,7 @@ export function readAvatarGrant(
               .where(eq(pic_upload_record.uid, owner))
               .limit(1);
 
-            if (rows[0] && rows[0].uid !== owner) throw new Error("Invalid avatar record owner");
+            if (rows[0] && rows[0].uid !== owner) {throw new Error("Invalid avatar record owner");}
 
             return rows[0];
           },
@@ -105,7 +105,7 @@ export function readAvatarGrant(
           )
           .limit(1);
 
-        if (completed.length) throw new Error("Avatar sequence already committed");
+        if (completed.length) {throw new Error("Avatar sequence already committed");}
 
         return { profile, grant };
       } finally {

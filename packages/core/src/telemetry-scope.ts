@@ -7,7 +7,7 @@ export function telemetryScope(service: string, options: TelemetryOptions) {
     Effect.sync(() => initializeTelemetry(service, options)),
     (active, exit) =>
       Effect.promise(async () => {
-        if (!active) return;
+        if (!active) {return;}
         const failed = Exit.isFailure(exit) && !Cause.hasInterruptsOnly(exit.cause);
         logEvent(
           failed ? "service_failed" : "stopped",

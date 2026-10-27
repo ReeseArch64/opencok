@@ -27,10 +27,10 @@ export async function acquireRealmAuthority(
     kingdomId > 2147483647 ||
     !Number.isSafeInteger(now)
   )
-    throw new DependencyError("realm authority");
+    {throw new DependencyError("realm authority");}
 
   const assertReady = () => {
-    if (!ready()) throw new DependencyError("realm authority");
+    if (!ready()) {throw new DependencyError("realm authority");}
   };
   assertReady();
   const instance = randomUUID();
@@ -54,7 +54,7 @@ export async function acquireRealmAuthority(
       })
       .returning({ epoch: realm_authority.ownerEpoch });
 
-    if (rows.length !== 1 || rows[0]!.epoch <= 0n) throw new DependencyError("realm authority");
+    if (rows.length !== 1 || rows[0]!.epoch <= 0n) {throw new DependencyError("realm authority");}
 
     assertReady();
 
@@ -84,7 +84,7 @@ export async function fenceRealmTransaction(
     .limit(1)
     .for(mode);
 
-  if (rows.length !== 1) throw new DependencyError("realm authority");
+  if (rows.length !== 1) {throw new DependencyError("realm authority");}
 
   authority.assertReady();
 }
@@ -92,11 +92,11 @@ export async function fenceRealmTransaction(
 const guarded = new WeakSet<object>();
 
 export function fenceRealmDatabase(db: RealmDatabase, authority: RealmAuthority): void {
-  if (guarded.has(db)) throw new DependencyError("realm authority already installed");
+  if (guarded.has(db)) {throw new DependencyError("realm authority already installed");}
 
   const transaction = db.transaction.bind(db);
   db.transaction = (apply, config) => {
-    if (config?.accessMode === "read only") return transaction(apply, config);
+    if (config?.accessMode === "read only") {return transaction(apply, config);}
 
     return transaction(async (tx) => {
       await fenceRealmTransaction(tx, authority);
@@ -108,11 +108,11 @@ export function fenceRealmDatabase(db: RealmDatabase, authority: RealmAuthority)
   };
 
   for (const method of ["insert", "update", "delete"] as const)
-    Object.defineProperty(db, method, {
+    {Object.defineProperty(db, method, {
       value: () => {
         throw new DependencyError("realm write requires transaction");
       },
-    });
+    });}
 
   guarded.add(db);
 }

@@ -31,7 +31,7 @@ export function readMailUpdates(
     BigInt.asIntN(64, query.after) !== query.after ||
     typeof inspect !== "function"
   )
-    throw new DependencyError("mail updates input");
+    {throw new DependencyError("mail updates input");}
 
   return db.transaction(
     async (tx) => {
@@ -54,7 +54,7 @@ export function readMailUpdates(
         (profile.banTime ?? 0n) > BigInt(query.now) ||
         (profile.banFlag ?? 0) !== 0
       )
-        return { profile };
+        {return { profile };}
 
       const rows = await tx
         .select({
@@ -71,7 +71,7 @@ export function readMailUpdates(
         .orderBy(asc(mail_update.mailUid))
         .limit(10001);
 
-      if (rows.length > 10000) throw new DependencyError("mail updates limit");
+      if (rows.length > 10000) {throw new DependencyError("mail updates limit");}
 
       await inspect(
         rows.map((row) => ({
@@ -90,7 +90,7 @@ export function readMailUpdates(
       const foreign = rows.filter((row) => row.owner !== null && row.owner !== uid);
 
       for (let offset = 0; offset < foreign.length; offset += 500)
-        await tx
+        {await tx
           .delete(mail_update)
           .where(
             and(
@@ -106,7 +106,7 @@ export function readMailUpdates(
                   ),
               ),
             ),
-          );
+          );}
 
       await tx
         .delete(mail_update)

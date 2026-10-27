@@ -20,11 +20,11 @@ function database(
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
       if (query.text.includes("count(*)")) {
-        if (options.fail === "count") throw new Error("Synthetic rank count failure");
+        if (options.fail === "count") {throw new Error("Synthetic rank count failure");}
         return { rows: options.emptyCount ? [] : [["9007199254740993"]] };
       }
       if (query.text.includes("left join")) {
-        if (options.fail === "candidates") throw new Error("Synthetic ranking candidate failure");
+        if (options.fail === "candidates") {throw new Error("Synthetic ranking candidate failure");}
         const values =
           kind === "level" ? ["other", 20, 5] : ["other", "9007199254740993", "2147483648"];
         return {
@@ -34,7 +34,7 @@ function database(
         };
       }
       if (query.text.includes('from "opencok_kingdom"."userprofile"')) {
-        if (options.fail === "profile") throw new Error("Synthetic requester failure");
+        if (options.fail === "profile") {throw new Error("Synthetic requester failure");}
         return {
           rows: options.missing ? [] : [["self", 10, 1, options.banned ? String(now + 1) : "0", 0]],
         };
@@ -70,12 +70,12 @@ test("player boards use scoped read-only snapshots and stable explicit secondary
       alliancename: "Alliance",
       abbr: "A",
     });
-    if (kind === "level") expect(snapshot.candidates[0]).toMatchObject({ level: 20, exp: 5 });
+    if (kind === "level") {expect(snapshot.candidates[0]).toMatchObject({ level: 20, exp: 5 });}
     else
-      expect(snapshot.candidates[0]).toMatchObject({
+      {expect(snapshot.candidates[0]).toMatchObject({
         power: 9007199254740993n,
         armyKill: 2147483648n,
-      });
+      });}
     expect(queries).toHaveLength(5);
     expect(queries[0]?.text).toBe("begin isolation level repeatable read read only");
     expect(queries.at(-1)?.text).toBe("commit");
@@ -83,9 +83,9 @@ test("player boards use scoped read-only snapshots and stable explicit secondary
     const board = queries[2]!;
     expect(board.text).toContain('left join "opencok_kingdom"."alliance"');
     for (const statement of queries)
-      expect(statement.text).not.toMatch(
+      {expect(statement.text).not.toMatch(
         /\b(insert|update|delete)\b|select \*|deviceId|email|passmd5|"gold"/,
-      );
+      );}
     if (kind === "level") {
       expect(board.params).toEqual([0, 9]);
       expect(board.text).toContain(
@@ -145,8 +145,8 @@ test("missing or banned requesters skip board reads and provider failures roll b
   }
   const untouched = database("power");
   for (const uid of ["", " ", "x".repeat(41)])
-    expect(() => readPlayerRanking(untouched.db, uid, query("power"))).toThrow();
+    {expect(() => readPlayerRanking(untouched.db, uid, query("power"))).toThrow();}
   for (const limit of [0, -1, 0.5, 32768])
-    expect(() => readPlayerRanking(untouched.db, "self", { ...query("power"), limit })).toThrow();
+    {expect(() => readPlayerRanking(untouched.db, "self", { ...query("power"), limit })).toThrow();}
   expect(untouched.queries).toHaveLength(0);
 });

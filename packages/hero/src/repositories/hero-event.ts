@@ -26,7 +26,7 @@ export async function readHeroEvents(
       (id) => id !== undefined && (!id || id.length > 255),
     )
   )
-    throw new Error("Invalid hero event selection");
+    {throw new Error("Invalid hero event selection");}
 
   return db.transaction(
     async (tx) => {
@@ -53,7 +53,7 @@ export async function readHeroEvents(
           lastMergeMillis: 0n,
         };
 
-      if (!profile) return empty;
+      if (!profile) {return empty;}
 
       const [lord] = await tx
           .select()
@@ -87,7 +87,7 @@ export async function readHeroEvents(
           )
           .limit(1);
 
-        if (!event) return empty;
+        if (!event) {return empty;}
 
         activityId = event.activity;
       }
@@ -109,9 +109,9 @@ export async function readHeroEvents(
         activities.length > 256 ||
         new Set(activities.map((row) => row.activityId)).size !== activities.length
       )
-        throw new Error("Ambiguous hero activity");
+        {throw new Error("Ambiguous hero activity");}
 
-      if (!activities.length || selection.panels) return { ...empty, activities };
+      if (!activities.length || selection.panels) {return { ...empty, activities };}
 
       const events = await tx
         .select()
@@ -129,7 +129,7 @@ export async function readHeroEvents(
         .orderBy(asc(hero_event.readyTime), asc(hero_event.uuid))
         .limit(257);
 
-      if (events.length > 256) throw new Error("Hero event bound exceeded");
+      if (events.length > 256) {throw new Error("Hero event bound exceeded");}
 
       const scores = events.length
         ? await tx
@@ -150,7 +150,7 @@ export async function readHeroEvents(
             .limit(513)
         : [];
 
-      if (scores.length > 512) throw new Error("Hero owned score bound exceeded");
+      if (scores.length > 512) {throw new Error("Hero owned score bound exceeded");}
 
       const [castle] = await tx
         .select({ level: user_building.level })

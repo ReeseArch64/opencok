@@ -56,7 +56,7 @@ function fixture() {
     worldPowerEffects: async (realm) => {
       realms.push(realm!);
       state.reads++;
-      if (state.failAt === state.reads) throw new Error("Synthetic owner modifier failure");
+      if (state.failAt === state.reads) {throw new Error("Synthetic owner modifier failure");}
       return new Map([["78", JSON.stringify({ value: String(state.reads * 10) })]]);
     },
   };
@@ -147,11 +147,11 @@ test("troops without a load field skip counts, saved effects and owner dependenc
   f.rules.arms.set("troop", {});
   const soldier = f.army.soldiers![0]!;
   for (const key of ["owner", "total", "dead", "loadEffect"])
-    Object.defineProperty(soldier, key, {
+    {Object.defineProperty(soldier, key, {
       get() {
         throw new Error("Unused troop field");
       },
-    });
+    });}
   Object.defineProperty(f.owner, "effects", {
     get() {
       throw new Error("Unused owner");

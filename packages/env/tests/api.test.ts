@@ -45,7 +45,7 @@ test("public chat discovery uses an optional HTTP origin without private URL com
     "https://cok.chat",
     "https://other.cok.chat",
   ])
-    expect(() => parseApiEnvironment({ CHAT_URL: value })).toThrow("CHAT_URL");
+    {expect(() => parseApiEnvironment({ CHAT_URL: value })).toThrow("CHAT_URL");}
 });
 
 test("API media requires five S3 settings and supports an optional internal storage origin", () => {
@@ -63,7 +63,7 @@ test("API media requires five S3 settings and supports an optional internal stor
     "http://minio:9000",
   );
   for (const field of Object.keys(media))
-    expect(() => parseApiEnvironment({ ...media, [field]: undefined })).toThrow();
+    {expect(() => parseApiEnvironment({ ...media, [field]: undefined })).toThrow();}
   expect(
     parseApiEnvironment(Object.fromEntries(Object.keys(media).map((key) => [key, ""]))).S3_BUCKET,
   ).toBeUndefined();
@@ -73,11 +73,11 @@ test("API media requires five S3 settings and supports an optional internal stor
     "http://s3.example/path",
     "http://s3.example/?key=x",
   ])
-    expect(() => parseApiEnvironment({ ...media, S3_PUBLIC_ENDPOINT: endpoint })).toThrow(
+    {expect(() => parseApiEnvironment({ ...media, S3_PUBLIC_ENDPOINT: endpoint })).toThrow(
       "S3_PUBLIC_ENDPOINT",
-    );
+    );}
   for (const endpoint of ["file:///private", "http://u:p@minio:9000", "http://minio/path"])
-    expect(() => parseApiEnvironment({ ...media, S3_ENDPOINT: endpoint })).toThrow("S3_ENDPOINT");
+    {expect(() => parseApiEnvironment({ ...media, S3_ENDPOINT: endpoint })).toThrow("S3_ENDPOINT");}
 });
 
 test("creation requires complete trusted realm configuration without exposing secrets", () => {
@@ -100,12 +100,12 @@ test("creation requires complete trusted realm configuration without exposing se
     "http://realm/_internal/characters?q=1",
     "file:///tmp/characters",
   ])
-    expect(() =>
+    {expect(() =>
       parseApiEnvironment({
         ...configured,
         API_PROVISIONING_REALMS: JSON.stringify([{ id: 1, url }]),
       }),
-    ).toThrow();
+    ).toThrow();}
   expect(() =>
     parseApiEnvironment({ ...configured, API_PROVISIONING_REALMS: "invalid" }),
   ).toThrow();

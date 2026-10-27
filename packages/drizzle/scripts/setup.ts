@@ -33,7 +33,7 @@ export async function setupDatabases(
           await client.query(`CREATE DATABASE "${target.database}"`);
         } catch (error) {
           if (!(error && typeof error === "object" && "code" in error && error.code === "42P04"))
-            throw error;
+            {throw error;}
         }
       }
       const pool = new Pool({

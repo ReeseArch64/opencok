@@ -54,7 +54,7 @@ test("shop tiers price the requested batch at its final daily tier and reject ov
   expect(shopPrice(offer, 0, 2).gold).toBe(40);
   expect(shopPrice(offer, 3, 1).gold).toBe(30);
   for (const count of [0, -1, 1.5, NaN, 2147483648])
-    expect(() => shopPrice(offer, 0, count)).toThrow();
+    {expect(() => shopPrice(offer, 0, count)).toThrow();}
   expect(() => shopPrice({ ...offer, value1: "2147483647" }, 0, 2)).toThrow();
   expect(() => shopPrice({ ...offer, value1_type: "4" }, 0, 1)).toThrow();
   expect(() => shopPrice({ ...offer, value1: "-1" }, 0, 1)).toThrow();
@@ -91,7 +91,7 @@ test("weekly offers use the selected UTC weekday and publish its daily window", 
   expect(view.beginTime).toEqual(sfs.long(BigInt(monday)));
   expect(view.endTime).toEqual(sfs.long(BigInt(monday + 3 * 3600000)));
   for (const begin_time of ["0", "8", "1,,2", "1;2"])
-    expect(() => shopWindow({ ...weekly, begin_time }, monday)).toThrow();
+    {expect(() => shopWindow({ ...weekly, begin_time }, monday)).toThrow();}
   expect(() => shopWindow({ ...weekly, buy_times_refresh: "2" }, monday)).toThrow();
 });
 
@@ -110,7 +110,7 @@ test("shop eligibility enforces catalog, country, castle, version and schedule g
     { register: "25" },
   ];
   for (const change of denied)
-    expect(shopAvailable({ ...offer, ...change }, current, rules)).toBe(false);
+    {expect(shopAvailable({ ...offer, ...change }, current, rules)).toBe(false);}
   const scheduled = { ...offer, begin_time: "202601010000", sale_life: "1" };
   const { begin, end } = shopWindow(scheduled);
   expect(shopAvailable(scheduled, { ...current, now: begin - 1 }, rules)).toBe(false);
@@ -214,7 +214,7 @@ test("unsupported shop currencies, effects and equipment cannot appear as ordina
     { value1: "0" },
   ];
   for (const change of unsupported)
-    expect(shopAvailable({ ...offer, ...change }, current, local)).toBe(false);
+    {expect(shopAvailable({ ...offer, ...change }, current, local)).toBe(false);}
   expect(
     shopAvailable(
       { ...offer, value1: "0", value_item: "200300", value_item_num: "1" },

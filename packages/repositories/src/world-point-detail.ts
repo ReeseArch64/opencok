@@ -79,7 +79,7 @@ async function readBarbarian(db: Reader, point: Row) {
       (row.lastArmyMapByteArray !== null &&
         (!Buffer.isBuffer(row.lastArmyMapByteArray) || row.lastArmyMapByteArray.length > 65535)))
   )
-    throw new Error("Invalid barbarian state");
+    {throw new Error("Invalid barbarian state");}
 
   return { row };
 }
@@ -114,7 +114,7 @@ const resourceMarchColumns = {
 async function readResourceMarch(db: Reader, point: Row) {
   const id = point.ownerMarchUUid;
 
-  if (!validText(id, 40) || !id) throw new Error("Invalid resource march pointer");
+  if (!validText(id, 40) || !id) {throw new Error("Invalid resource march pointer");}
 
   const march = single(
     await db
@@ -138,7 +138,7 @@ async function readResourceMarch(db: Reader, point: Row) {
         (typeof march.collectSpd !== "number" ||
           (Number.isFinite(march.collectSpd) && !Number.isFinite(Math.fround(march.collectSpd)))))
     )
-      throw new Error("Invalid resource march state");
+      {throw new Error("Invalid resource march state");}
 
     for (const field of [
       "arrivalTime",
@@ -150,7 +150,7 @@ async function readResourceMarch(db: Reader, point: Row) {
       const value = march[field];
 
       if (value !== null && (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value))
-        throw new Error("Invalid resource march time");
+        {throw new Error("Invalid resource march time");}
     }
   }
 
@@ -179,19 +179,19 @@ async function readExploration(
     rows.some((row) => row.ownerUid !== observer || !validText(row.uuid, 40) || !row.uuid) ||
     new Set(rows.map((row) => row.uuid)).size !== rows.length
   )
-    throw new Error("Invalid exploration marches");
+    {throw new Error("Invalid exploration marches");}
 
   const id = select(
     Object.freeze({ ...point }),
     Object.freeze(rows.map((row) => Object.freeze({ ...row }))),
   );
 
-  if (id === undefined) return { march: undefined };
+  if (id === undefined) {return { march: undefined };}
 
   const selected = rows.find((row) => row.uuid === id);
 
   if (!selected || selected.targetId !== point.id || selected.state !== 1)
-    throw new Error("Invalid exploration selection");
+    {throw new Error("Invalid exploration selection");}
 
   const report = single(
     await db
@@ -212,7 +212,7 @@ async function readExploration(
     (report.exploreReport !== null &&
       (!Buffer.isBuffer(report.exploreReport) || report.exploreReport.length > 65535))
   )
-    throw new Error("Invalid exploration report");
+    {throw new Error("Invalid exploration report");}
 
   return { march: { ...selected, exploreReport: report.exploreReport } };
 }
@@ -241,7 +241,7 @@ async function readNeutralResource(db: Reader, point: Row) {
       march.state !== 1 ||
       !integer(march.worldId))
   )
-    throw new Error("Invalid neutral resource march");
+    {throw new Error("Invalid neutral resource march");}
 
   return { march };
 }
@@ -265,7 +265,7 @@ function validText(value: unknown, limit: number): value is string {
 }
 
 function blank(value: string | null | undefined): boolean {
-  if (value == null) return true;
+  if (value == null) {return true;}
 
   return Array.from(value).every((character) => {
     const code = character.charCodeAt(0);
@@ -288,7 +288,7 @@ function authorized(
   kingdomId: number,
   now: number,
 ): boolean {
-  if (profile?.uid !== observer || profile.serverId !== kingdomId) return false;
+  if (profile?.uid !== observer || profile.serverId !== kingdomId) {return false;}
 
   const flag = profile.banFlag ?? 0;
   const until = profile.banTime ?? 0n;
@@ -302,7 +302,7 @@ function authorized(
 }
 
 function single<T>(rows: T[]): T | undefined {
-  if (rows.length > 1) throw new Error("Ambiguous world detail row");
+  if (rows.length > 1) {throw new Error("Ambiguous world detail row");}
 
   return rows[0];
 }
@@ -313,13 +313,13 @@ async function ownerRows(
   remote: boolean,
   cityExtras: boolean,
 ): Promise<WorldPointOwnerSnapshot> {
-  if (!remote && (point.pointType === 6 || point.pointType === 15)) return {};
+  if (!remote && (point.pointType === 6 || point.pointType === 15)) {return {};}
 
   const uid = point.ownerId;
 
-  if (uid == null || (typeof uid === "string" && blank(uid))) return {};
+  if (uid == null || (typeof uid === "string" && blank(uid))) {return {};}
 
-  if (!validText(uid, 255)) throw new Error("Invalid point owner");
+  if (!validText(uid, 255)) {throw new Error("Invalid point owner");}
 
   const result: WorldPointOwnerSnapshot = {};
   result.profile = single(
@@ -344,7 +344,7 @@ async function ownerRows(
       .limit(2),
   );
 
-  if (result.profile && result.profile.uid !== uid) throw new Error("Foreign point owner");
+  if (result.profile && result.profile.uid !== uid) {throw new Error("Foreign point owner");}
 
   const city = point.pointType === 1 || point.pointType === 2;
 
@@ -359,7 +359,7 @@ async function ownerRows(
     );
 
     if (result.registration && result.registration.uid !== uid)
-      throw new Error("Foreign owner registration");
+      {throw new Error("Foreign owner registration");}
 
     if (city) {
       result.statistics = single(
@@ -371,7 +371,7 @@ async function ownerRows(
       );
 
       if (result.statistics && result.statistics.uid !== uid)
-        throw new Error("Foreign owner statistics");
+        {throw new Error("Foreign owner statistics");}
     }
   }
 
@@ -379,7 +379,7 @@ async function ownerRows(
     const allianceId = point.allianceId;
 
     if (allianceId != null && !(typeof allianceId === "string" && blank(allianceId))) {
-      if (!validText(allianceId, 40)) throw new Error("Invalid point alliance");
+      if (!validText(allianceId, 40)) {throw new Error("Invalid point alliance");}
 
       result.alliance = single(
         await db
@@ -390,7 +390,7 @@ async function ownerRows(
       );
 
       if (result.alliance && result.alliance.uid !== allianceId)
-        throw new Error("Foreign point alliance");
+        {throw new Error("Foreign point alliance");}
 
       result.member = single(
         await db
@@ -400,7 +400,7 @@ async function ownerRows(
           .limit(2),
       );
 
-      if (result.member && result.member.uid !== uid) throw new Error("Foreign owner membership");
+      if (result.member && result.member.uid !== uid) {throw new Error("Foreign owner membership");}
     }
   }
 
@@ -427,10 +427,10 @@ async function readPoint(
       .limit(2),
   );
 
-  if (!point) return {};
+  if (!point) {return {};}
 
   if (point.id !== id || point.worldId !== worldId || !integer(point.pointType))
-    throw new Error("Invalid world point");
+    {throw new Error("Invalid world point");}
 
   const owner = await ownerRows(db, point, remote, cityExtras);
   const resource =
@@ -470,7 +470,7 @@ async function readPoint(
     (resourceGroup.length > 4096 ||
       new Set(resourceGroup.map((row) => row.uuid)).size !== resourceGroup.length)
   )
-    throw new Error("Invalid shared resource marches");
+    {throw new Error("Invalid shared resource marches");}
 
   const resourceOwner =
     resourceEffects && resource?.march
@@ -492,7 +492,7 @@ export function createWorldPointDetailStore(
   kingdomId: number,
 ): WorldPointDetailStore {
   if (!integer(kingdomId) || kingdomId < 1 || !databases.kingdoms.has(kingdomId))
-    throw new Error("Invalid world detail realm");
+    {throw new Error("Invalid world detail realm");}
 
   return {
     async read(observer, input, selectExploration, turret) {
@@ -509,7 +509,7 @@ export function createWorldPointDetailStore(
         (query.cityExtras !== undefined && typeof query.cityExtras !== "boolean") ||
         (query.resourceEffects !== undefined && typeof query.resourceEffects !== "boolean")
       )
-        throw new Error("Invalid world detail query");
+        {throw new Error("Invalid world detail query");}
 
       const remote = query.kingdomId !== kingdomId;
 
@@ -525,7 +525,7 @@ export function createWorldPointDetailStore(
           const snapshot = { profile, kingdomId: query.kingdomId, remote };
 
           if (!authorized(profile, observer, kingdomId, query.now) || query.point <= 0)
-            return snapshot;
+            {return snapshot;}
 
           const world = single(
             await tx
@@ -536,11 +536,11 @@ export function createWorldPointDetailStore(
           );
 
           if (!world || world.uid !== observer || !integer(world.worldId))
-            throw new Error("Missing observer world");
+            {throw new Error("Missing observer world");}
 
           const result = { ...snapshot, world };
 
-          if (remote) return result;
+          if (remote) {return result;}
 
           const detail = await readPoint(
             tx,
@@ -584,10 +584,10 @@ export function createWorldPointDetailStore(
           query.point <= 0 ||
           !remote
         )
-          return local;
+          {return local;}
 
         if (!databases.kingdoms.has(query.kingdomId))
-          throw new Error("Unconfigured world detail realm");
+          {throw new Error("Unconfigured world detail realm");}
 
         const detail = await databases.getKingdom(query.kingdomId).db.transaction(async (tx) => {
           const result = await readPoint(tx, query.point, 0, true, false, query.resourceEffects);
@@ -614,7 +614,7 @@ export function createWorldPointDetailStore(
 }
 
 async function readCity(db: Reader, observer: string, profile: Row, kingdomId: number) {
-  if (profile.serverId !== kingdomId) throw new Error("Invalid city realm");
+  if (profile.serverId !== kingdomId) {throw new Error("Invalid city realm");}
 
   const observerStatistics = single(
     await db
@@ -625,7 +625,7 @@ async function readCity(db: Reader, observer: string, profile: Row, kingdomId: n
   );
 
   if (!observerStatistics || observerStatistics.uid !== observer)
-    throw new Error("Foreign observer statistics");
+    {throw new Error("Foreign observer statistics");}
 
   const mixed = single(
     await db
@@ -635,7 +635,7 @@ async function readCity(db: Reader, observer: string, profile: Row, kingdomId: n
       .limit(2),
   );
 
-  if (!mixed || mixed.uid !== profile.uid) throw new Error("Foreign city duel state");
+  if (!mixed || mixed.uid !== profile.uid) {throw new Error("Foreign city duel state");}
 
   const effects = await readPlayerEffects(db, profile, true);
 

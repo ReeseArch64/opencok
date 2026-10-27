@@ -14,13 +14,13 @@ test("nickname boundary properties match every Unicode code point in Java 8", ()
   for (let codePoint = 0; codePoint <= 0x10ffff; codePoint++) {
     const property = javaNicknameCharacter(codePoint);
     properties[codePoint] = property === 1 ? 119 : property === 2 ? 109 : 46;
-    if (property === 1) word++;
-    if (property === 2) marks++;
+    if (property === 1) {word++;}
+    if (property === 2) {marks++;}
   }
   expect(createHash("sha256").update(properties).digest("hex")).toBe(vectors.propertiesSha256);
   expect([word, marks]).toEqual([107270, 1280]);
   for (const codePoint of [-1, 0.5, NaN, Infinity, 0x110000])
-    expect(javaNicknameCharacter(codePoint)).toBe(0);
+    {expect(javaNicknameCharacter(codePoint)).toBe(0);}
 });
 
 test("nickname matching follows 4071 independently generated Java 8 regex outcomes", () => {
@@ -28,14 +28,14 @@ test("nickname matching follows 4071 independently generated Java 8 regex outcom
   const failures: unknown[] = [];
   for (const [entry, name, expected] of vectors.cases as [string, string, boolean][]) {
     const actual = containsNicknameBadWords(text(name), [text(entry)]);
-    if (actual !== expected) failures.push({ entry, name, actual, expected });
+    if (actual !== expected) {failures.push({ entry, name, actual, expected });}
   }
   expect(failures).toEqual([]);
 });
 
 test("ASCII words use Unicode Java boundaries and ASCII-only case folding", () => {
   for (const name of ["abc", "ABC", " abc ", "abc-", "!AbC!", "\u0301abc"])
-    expect(containsNicknameBadWords(name, ["abc"]), name).toBe(true);
+    {expect(containsNicknameBadWords(name, ["abc"]), name).toBe(true);}
   for (const name of [
     "xabc",
     "abc2",
@@ -47,7 +47,7 @@ test("ASCII words use Unicode Java boundaries and ASCII-only case folding", () =
     "abc\u0301",
     "𐐀abc",
   ])
-    expect(containsNicknameBadWords(name, ["abc"]), name).toBe(false);
+    {expect(containsNicknameBadWords(name, ["abc"]), name).toBe(false);}
   expect(containsNicknameBadWords("K", ["k"])).toBe(false);
   expect(containsNicknameBadWords("K", ["k"])).toBe(true);
   expect(containsNicknameBadWords("_\u0301abc", ["abc"])).toBe(true);
@@ -58,11 +58,11 @@ test("non-word entries retain case and permit only Java ASCII whitespace between
   expect(containsNicknameBadWords("中 文", ["中文"])).toBe(true);
   expect(containsNicknameBadWords("中\t\n\v\f\r 文", ["中文"])).toBe(true);
   for (const gap of ["\u00a0", "\u2000", "\u3000"])
-    expect(containsNicknameBadWords(`中${gap}文`, ["中文"])).toBe(false);
+    {expect(containsNicknameBadWords(`中${gap}文`, ["中文"])).toBe(false);}
   expect(containsNicknameBadWords("A !", ["A!"])).toBe(true);
   expect(containsNicknameBadWords("a!", ["A!"])).toBe(false);
   for (const punctuation of ["+", ".", "{", "}", "*", "[", "]", "(", ")", "\\", "?"])
-    expect(containsNicknameBadWords(`a ${punctuation} b`, [`a${punctuation}b`])).toBe(true);
+    {expect(containsNicknameBadWords(`a ${punctuation} b`, [`a${punctuation}b`])).toBe(true);}
 });
 
 test("unescaped anchors and alternatives keep their generated-pattern semantics", () => {
@@ -71,7 +71,7 @@ test("unescaped anchors and alternatives keep their generated-pattern semantics"
   expect(containsNicknameBadWords(" x a", ["^a"])).toBe(false);
   expect(containsNicknameBadWords(" a", ["^a"])).toBe(true);
   for (const suffix of ["", "\n", "\r", "\r\n", "\u0085", "\u2028", "\u2029"])
-    expect(containsNicknameBadWords(`a${suffix}`, ["a$"])).toBe(true);
+    {expect(containsNicknameBadWords(`a${suffix}`, ["a$"])).toBe(true);}
   expect(containsNicknameBadWords("ab", ["a$"])).toBe(false);
   expect(containsNicknameBadWords("a$", ["a$"])).toBe(false);
 });

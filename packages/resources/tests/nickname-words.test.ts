@@ -41,7 +41,7 @@ test("reloads append entries and remove only the first space and v from the comb
 test("failed reads unlock and preserve the previous list including an initially empty list", async () => {
   let failure = true;
   const filter = new NicknameWordFilter(async () => {
-    if (failure) throw new Error("Synthetic read failure");
+    if (failure) {throw new Error("Synthetic read failure");}
     return ["blocked"];
   });
   await filter.reload();

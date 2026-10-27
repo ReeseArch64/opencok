@@ -33,8 +33,8 @@ export async function startChatProcess(index: number, databaseUrl: string) {
       stdout: "ignore",
       stderr: "ignore",
       ipc: (message: unknown) => {
-        if (!isRecord(message)) return;
-        if (message.type === "ready" && typeof message.port === "number") ready(message.port);
+        if (!isRecord(message)) {return;}
+        if (message.type === "ready" && typeof message.port === "number") {ready(message.port);}
         if (message.type === "polled" && typeof message.id === "string") {
           pending.get(message.id)?.();
           pending.delete(message.id);
@@ -43,7 +43,7 @@ export async function startChatProcess(index: number, databaseUrl: string) {
     },
   );
   async function close() {
-    if (child.exitCode !== null) return;
+    if (child.exitCode !== null) {return;}
     child.kill("SIGTERM");
     try {
       await bounded(child.exited);

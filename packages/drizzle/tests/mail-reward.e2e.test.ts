@@ -27,7 +27,7 @@ test("mail migration preserves ordinary text and supports lossless NUL strings w
     await mkdir(join(folder, "meta"));
     await writeFile(join(folder, "meta/_journal.json"), JSON.stringify(journal));
     for (const entry of journal.entries)
-      await copyFile(new URL(`${entry.tag}.sql`, history), join(folder, `${entry.tag}.sql`));
+      {await copyFile(new URL(`${entry.tag}.sql`, history), join(folder, `${entry.tag}.sql`));}
     await migrate(database.db, { migrationsFolder: folder });
     const ordinary = "\\x0041 ordinary 城 🏰";
     await database.pool.query(

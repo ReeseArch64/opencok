@@ -30,7 +30,7 @@ export function createExpeditionTreasuryExecutor(
         .from(userprofile)
         .where(eq(userprofile.uid, command.owner));
 
-      if (!profile) throw new Error("Missing treasury operator");
+      if (!profile) {throw new Error("Missing treasury operator");}
 
       const params = decode(Buffer.from(command.request)),
         uid = str(params, "uid", "");
@@ -39,7 +39,7 @@ export function createExpeditionTreasuryExecutor(
         : [];
 
       if (uid && (!command.participants?.includes(uid) || target?.serverId !== authority.kingdomId))
-        throw new Error("Unowned treasury recipient");
+        {throw new Error("Unowned treasury recipient");}
 
       const kings = await tx
         .select()
@@ -54,7 +54,7 @@ export function createExpeditionTreasuryExecutor(
         .limit(2)
         .for("share");
 
-      if (kings.length > 1) throw new Error("Ambiguous current king");
+      if (kings.length > 1) {throw new Error("Ambiguous current king");}
 
       const [treasury] = await tx
         .select()
@@ -88,23 +88,23 @@ export function createExpeditionTreasuryExecutor(
           !target ||
           !result.received
         )
-          throw new Error("Incomplete treasury transfer");
+          {throw new Error("Incomplete treasury transfer");}
 
         for (const asset of treasuryAssets) {
           const before = long(treasury, asset),
             after = result.balances[asset];
 
           if (after < 0n || after > before || before - after !== long(result.record, asset))
-            throw new Error("Invalid treasury debit");
+            {throw new Error("Invalid treasury debit");}
 
           if (before !== after)
-            postings.push({
+            {postings.push({
               account,
               asset: `resource.${asset}`,
               before,
               after,
               reason: command.command,
-            });
+            });}
         }
 
         await tx
@@ -118,7 +118,7 @@ export function createExpeditionTreasuryExecutor(
           record.toUid !== uid ||
           long(record, "sendTime") !== captured
         )
-          throw new Error("Invalid treasury history");
+          {throw new Error("Invalid treasury history");}
 
         await tx.insert(king_allot_tax_record).values({
           uuid: text(record, "uuid"),
@@ -133,11 +133,11 @@ export function createExpeditionTreasuryExecutor(
           stone: long(record, "stone"),
         });
         await insertSystemMail(tx, result.mail, uid, result.mail.uid.slice(0, 32), captured);
-      } else if (result.mail || result.record) throw new Error("Unfunded treasury award");
+      } else if (result.mail || result.record) {throw new Error("Unfunded treasury award");}
 
       if (result.received) {
         if (!target || result.received.uid !== uid || !command.participants?.includes(uid))
-          throw new Error("Foreign treasury counter");
+          {throw new Error("Foreign treasury counter");}
 
         const value = {
           uid,
@@ -150,7 +150,7 @@ export function createExpeditionTreasuryExecutor(
           value.lastClearTime < 0n ||
           value.lastClearTime > captured
         )
-          throw new Error("Invalid treasury counter");
+          {throw new Error("Invalid treasury counter");}
 
         await tx
           .insert(user_expedition_info)

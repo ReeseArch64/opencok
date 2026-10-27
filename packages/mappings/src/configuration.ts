@@ -33,7 +33,7 @@ export interface DataConfigContext {
 }
 
 function requiredRecord(rule: Rule | undefined): Rule {
-  if (!rule) throw new GameError(errors.unsupported, "config_record");
+  if (!rule) {throw new GameError(errors.unsupported, "config_record");}
 
   return rule;
 }
@@ -41,7 +41,7 @@ function requiredRecord(rule: Rule | undefined): Rule {
 function requiredString(rule: Rule | undefined, key: string): string {
   const value = requiredRecord(rule)[key];
 
-  if (typeof value !== "string") throw new GameError(errors.unsupported, "config_string");
+  if (typeof value !== "string") {throw new GameError(errors.unsupported, "config_string");}
 
   return value;
 }
@@ -66,7 +66,7 @@ function strings(rule: Rule | undefined, projection?: Record<string, string>): F
   const result: Fields = {};
 
   if (rule)
-    for (const [target, source] of Object.entries(
+    {for (const [target, source] of Object.entries(
       projection ??
         Object.fromEntries(
           Object.keys(rule)
@@ -74,8 +74,8 @@ function strings(rule: Rule | undefined, projection?: Record<string, string>): F
             .map((key) => [key, key]),
         ),
     )) {
-      if (rule[source] !== undefined) result[target] = sfs.string(rule[source]);
-    }
+      if (rule[source] !== undefined) {result[target] = sfs.string(rule[source]);}
+    }}
 
   return result;
 }
@@ -83,7 +83,7 @@ function strings(rule: Rule | undefined, projection?: Record<string, string>): F
 function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fields {
   const items = rules.configuration.dataConfig ?? rules.items;
 
-  if (!items.size) throw new GameError(errors.unsupported);
+  if (!items.size) {throw new GameError(errors.unsupported);}
 
   const result: Fields = {};
   const version = context.version ?? MOBILE_CLIENT_VERSION;
@@ -100,13 +100,13 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
     result[target] = sfs.object(strings(requiredRecord(rule), projection));
   };
 
-  for (const key of objectKeys) object(key, items.get(key));
+  for (const key of objectKeys) {object(key, items.get(key));}
 
   for (const [target, source] of [
     ["hero", "hero_soul"],
     ["hero_yutao", "hero"],
   ])
-    object(target!, items.get(source!));
+    {object(target!, items.get(source!));}
 
   for (const [target, source] of [
     ["followFB", "FB_follow"],
@@ -114,7 +114,7 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
   ] as const) {
     const rule = items.get(source);
 
-    if (rule && Object.keys(rule).length) object(target, rule);
+    if (rule && Object.keys(rule).length) {object(target, rule);}
   }
 
   object("w_thedoor", rules.features.get("w_thedoor") ?? {});
@@ -130,7 +130,7 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
   object("facebook_gift", items.get("facebook_gift"), { k7: "k7" });
   const ranking = requiredRecord(items.get("ranking"));
 
-  if (ranking.k3 !== undefined) object("ranking", ranking, { k3: "k3" });
+  if (ranking.k3 !== undefined) {object("ranking", ranking, { k3: "k3" });}
 
   for (const [target, id, key] of [
     ["freeSpdT", "resources_basics", "k8"],
@@ -165,34 +165,34 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
   const loading = items.get("loading_show_type");
 
   if (loading && Object.keys(loading).length)
-    result.loading_show_type = sfs.string(requiredString(loading, "k1"));
+    {result.loading_show_type = sfs.string(requiredString(loading, "k1"));}
 
   const questLevel = items.get("alliance_quest")?.k10;
 
-  if (questLevel !== undefined) result.alliance_quest_init_level = sfs.int(integer(questLevel));
+  if (questLevel !== undefined) {result.alliance_quest_init_level = sfs.int(integer(questLevel));}
 
   if (context.profileLevel !== undefined && available("stamina_limit")) {
     const stamina = rules.role(context.profileLevel).stamina;
 
-    if (stamina === undefined) throw new GameError(errors.unsupported, "stamina_rule");
+    if (stamina === undefined) {throw new GameError(errors.unsupported, "stamina_rule");}
 
     result.monster_count = sfs.int(integer(stamina));
   }
 
   const bossMembers = requiredString(items.get("monster"), "k11").split(";").filter(Boolean)[1];
 
-  if (bossMembers === undefined) throw new GameError(errors.unsupported, "boss_members_rule");
+  if (bossMembers === undefined) {throw new GameError(errors.unsupported, "boss_members_rule");}
 
   result.boss_max_member = sfs.string(bossMembers);
   result.cross_open = sfs.bool(!!context.crossOpen && versionAtLeast(version, "1.0.59"));
   const scout = items.get("scoutmark_on");
 
-  if (scout && enabled(scout.k1)) result.scoutmark_on = sfs.string(requiredString(scout, "k2"));
+  if (scout && enabled(scout.k1)) {result.scoutmark_on = sfs.string(requiredString(scout, "k2"));}
 
   const terms = requiredRecord(items.get("serviceterms_on"));
 
   if (requiredString(terms, "k1") === "1" && enabled(terms.k3))
-    result.serviceTerms_on = sfs.string(requiredString(terms, "k2"));
+    {result.serviceTerms_on = sfs.string(requiredString(terms, "k2"));}
 
   const questSwitch = requiredRecord(items.get("function_on8"));
   const quests = enabled(questSwitch.k2);
@@ -240,14 +240,14 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
 
   const activityFields = strings(requiredRecord(items.get("activityconfig2")));
 
-  if (version === "1.1.10") activityFields.k12 = sfs.string("0");
+  if (version === "1.1.10") {activityFields.k12 = sfs.string("0");}
 
   result.activityconfig2 = sfs.object(activityFields);
   const icon = requiredRecord(items.get("icon"));
   const iconFields = strings(icon);
 
   for (const key of ["k4", "k5"]) {
-    if (icon[key] === undefined) continue;
+    if (icon[key] === undefined) {continue;}
 
     const date = javaCalendarDate(icon[key], 3) ?? 0n;
     iconFields[key] = sfs.string(String(date));
@@ -280,7 +280,7 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
     Object.fromEntries(
       generalSales.map((rule) => {
         if (typeof rule.id !== "string" || rule.id.length > 255 || typeof rule.limit !== "string")
-          throw new GameError(errors.unsupported, "general_sale_rule");
+          {throw new GameError(errors.unsupported, "general_sale_rule");}
 
         return [rule.id, sfs.string(rule.limit)];
       }),
@@ -304,7 +304,7 @@ function serializeDataConfig(rules: Rules, context: DataConfigContext = {}): Fie
     skillFields[`k${tab}`] = sfs.string(
       javaListSort(skills, (a, b) => (a.id === b.id ? 0 : (a.tabIndex - b.tabIndex) | 0))
         .map((skill, index) => {
-          if (skill.tabIndex === -1) return "";
+          if (skill.tabIndex === -1) {return "";}
 
           const selector = context.testServer ? skill.test : skill.online;
           const enabled = selector !== undefined && featureRealmEnabled(selector, rules.kingdomId);

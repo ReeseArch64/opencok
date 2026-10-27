@@ -12,7 +12,7 @@ const context: RuleContext = { now, kingdomId: 2, version: "12.06.0" };
 function rules() {
   const catalog = new Rules(new Map(), new Map(), new Map());
   for (const id of ["dragon_new", "dragon_levelup", "dragon_science"])
-    catalog.features.set(id, { id, version: "99.0.0", online: "2", test: "9" });
+    {catalog.features.set(id, { id, version: "99.0.0", online: "2", test: "9" });}
   return catalog;
 }
 
@@ -60,7 +60,7 @@ test("title contract JSON retains signed deadlines, absent defaults and duplicat
     { contract_unlock_title: null },
     { contract_unlock_title: Buffer.alloc(0) },
   ];
-  for (const knight of missing) expect(titleContractExpiries(knight)).toEqual(new Map());
+  for (const knight of missing) {expect(titleContractExpiries(knight)).toEqual(new Map());}
   const bytes = Buffer.from(
     '{"8001":9007199254740993,"8002":-9223372036854775808,"8003":9223372036854775807}',
   );
@@ -91,9 +91,9 @@ test("title contracts reject invalid shapes and types instead of silently expiri
     '{"8001":-9223372036854775809}',
     '{"__proto__":123}',
   ])
-    expect(() => titleContractExpiries({ contract_unlock_title: Buffer.from(json) })).toThrow(
+    {expect(() => titleContractExpiries({ contract_unlock_title: Buffer.from(json) })).toThrow(
       "102192",
-    );
+    );}
   expect(() => titleContractExpiries({ contract_unlock_title: "{}" })).toThrow("102192");
 });
 

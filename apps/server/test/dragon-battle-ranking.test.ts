@@ -41,9 +41,9 @@ function fixture() {
   const cache = new Cache({ redisUrl: "unused", timeoutMs: 1, kingdomId: 2 });
   cache.command = async (...args) => {
     commands.push(args);
-    if (!responses.length) throw new Error("Unexpected cache call");
+    if (!responses.length) {throw new Error("Unexpected cache call");}
     const value = responses.shift();
-    if (value instanceof Error) throw value;
+    if (value instanceof Error) {throw value;}
     return value;
   };
   const services: GameServices = {
@@ -86,7 +86,7 @@ test("Dragon Battle ranges retain Java splitting, digit parsing, caps and signed
     { start: 2147483647, end: -2147483648 },
   ]);
   for (const value of ["0", "|1", "0|", "0| 1", "2147483648|1", "0|1;;1|1"])
-    expect(() => dragonRankingRanges(value)).toThrow();
+    {expect(() => dragonRankingRanges(value)).toThrow();}
 });
 
 test("Dragon Battle preserves requested order, duplicates, self append and public SFS fields", async () => {
@@ -166,9 +166,9 @@ test("Dragon Battle rank/percentage arithmetic keeps signed boundaries and exact
 test("Dragon Battle empty inputs and reached read failures retain their distinct envelopes", async () => {
   const f = fixture();
   for (const input of ["", "0|1;".repeat(35)])
-    expect((await f.run({ index_limit: sfs.string(input) })).body).toEqual({
+    {expect((await f.run({ index_limit: sfs.string(input) })).body).toEqual({
       success: sfs.bool(true),
-    });
+    });}
   expect(f.commands).toEqual([]);
   f.responses.push(new Error("Synthetic list outage"), new Error("Synthetic rank outage"));
   expect((await f.run()).body.rank).toEqual(sfs.array());
@@ -181,7 +181,7 @@ test("Dragon Battle empty inputs and reached read failures retain their distinct
 test("Dragon Battle rejects invalid input and unauthorized owners before reading the board", async () => {
   const f = fixture();
   for (const params of [{ index_limit: sfs.int(1) }, { index_limit: sfs.string("0|invalid") }])
-    await expect(f.run(params)).rejects.toThrow();
+    {await expect(f.run(params)).rejects.toThrow();}
   const profiles: (Row | undefined)[] = [
     undefined,
     { uid: "other", serverId: 2 },

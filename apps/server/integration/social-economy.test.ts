@@ -25,9 +25,9 @@ test("postbox and notices charge once, preserve recipients, cap rewards and reda
     const settings = h.rules.configuration.payControl!.get("69017")!;
     Object.assign(settings, { k1: "1970-01-01", k2: "2099-01-01", k7: "100", k8: "1", k10: "1" });
     for (const owner of ["owner", "other"])
-      await h.db.db
+      {await h.db.db
         .insert(user_item)
-        .values({ uuid: `post-${owner}`, ownerId: owner, itemId: "209932", count: 5, value: 0 });
+        .values({ uuid: `post-${owner}`, ownerId: owner, itemId: "209932", count: 5, value: 0 });}
     await h.db.db
       .insert(user_item)
       .values({ uuid: "notice-owner", ownerId: "owner", itemId: "200011", count: 1, value: 0 });

@@ -33,28 +33,28 @@ export function generalAbility(
   effect: (id: number) => number,
 ): { row: Row; body?: Fields } {
   if (action === "activatetalent")
-    return {
+    {return {
       row: activateGeneralTalent(
         context.rules,
         row,
         cityInteger(int(params, "talentid"), 1),
         cityInteger(int(params, "full", 0), 0, 1),
       ),
-    };
+    };}
 
   if (action === "resettalent") {
-    if (!generalPairs(text(row, "talent")).size) generalFailure();
+    if (!generalPairs(text(row, "talent")).size) {generalFailure();}
 
     const uuid = str(params, "goods", "");
 
     if (uuid) {
       const item = context.economy.ownedItem?.(uuid);
 
-      if (item?.itemId !== "200040") generalFailure();
+      if (item?.itemId !== "200040") {generalFailure();}
 
       context.spendItem(item.itemId, 1);
     } else
-      context.economy.gold(-BigInt(cityInteger(context.rules.items.get("ability_cost")?.k3, 1)));
+      {context.economy.gold(-BigInt(cityInteger(context.rules.items.get("ability_cost")?.k3, 1)));}
 
     return {
       row: {
@@ -70,14 +70,14 @@ export function generalAbility(
     };
   }
 
-  if (action === "skilluse") return useSkill(context, row, params, effect);
+  if (action === "skilluse") {return useSkill(context, row, params, effect);}
 
   if (
     !["activaterefine", "refinevalue", "refinerollback", "refinelock", "refinetype"].includes(
       action,
     )
   )
-    generalFailure();
+    {generalFailure();}
 
   if (
     !generalFeatureAvailable(context.rules, "general_random_effect", {
@@ -86,9 +86,9 @@ export function generalAbility(
       now: Number(context.now),
     })
   )
-    generalFailure();
+    {generalFailure();}
 
-  if ([3, 4, 5].includes(num(row, "state"))) generalFailure();
+  if ([3, 4, 5].includes(num(row, "state"))) {generalFailure();}
 
   let next: Row = row;
 
@@ -96,7 +96,7 @@ export function generalAbility(
     const result = activateGeneralRefinement(context.rules, row, randomInt);
 
     if (result.cost > 0) {
-      if (!result.item) generalFailure();
+      if (!result.item) {generalFailure();}
 
       context.spendItem(result.item, result.cost);
     }
@@ -113,7 +113,7 @@ export function generalAbility(
         now: Number(context.now),
       })
     )
-      generalFailure();
+      {generalFailure();}
 
     if (
       batch &&
@@ -124,7 +124,7 @@ export function generalAbility(
           long(state, "endTime") > context.now,
       )
     )
-      generalFailure();
+      {generalFailure();}
 
     const result = refineGeneralValues(context.rules, row, batch, randomInt),
       mixed = context.state.quests?.mixed ?? {};
@@ -140,21 +140,21 @@ export function generalAbility(
       : cityInteger(cityInteger(base.refine_card, 1) * result.count * (batch ? 10 : 1));
 
     if (cost) {
-      if (!base.pieces_id) generalFailure();
+      if (!base.pieces_id) {generalFailure();}
 
       context.spendItem(base.pieces_id, cost);
     } else
-      (context.write.generalRoster ??= {}).refinementPeriod = {
+      {(context.write.generalRoster ??= {}).refinementPeriod = {
         count: count + 1,
         time: context.now,
-      };
+      };}
 
     next = { ...result.row, refinecard: cityInteger(num(row, "refinecard") + cost) };
     refreshQuests(context, { main: 63, daily: 46, count: batch ? 10 : 1, key: String(row.id) });
   } else if (action === "refinerollback") {
     const values = generalProperties(text(row, "oldrefineproperty"));
 
-    if (!values.size) generalFailure();
+    if (!values.size) {generalFailure();}
 
     next = { ...row, refineproperty: generalPropertiesContent(values), oldrefineproperty: "" };
   } else if (action === "refinelock") {
@@ -163,10 +163,10 @@ export function generalAbility(
       locked = new Set(generalList(text(row, "lockproperty")));
 
     if (!generalProperties(text(row, "refineproperty")).has(index) || locked.has(index) === !!lock)
-      generalFailure();
+      {generalFailure();}
 
-    if (lock) locked.add(index);
-    else locked.delete(index);
+    if (lock) {locked.add(index);}
+    else {locked.delete(index);}
 
     next = { ...row, lockproperty: [...locked].join(";") };
   } else {
@@ -187,7 +187,7 @@ function useSkill(
   params: Fields,
   effect: (id: number) => number,
 ) {
-  if ([4, 5].includes(num(row, "state"))) generalFailure();
+  if ([4, 5].includes(num(row, "state"))) {generalFailure();}
 
   const id = str(params, "skillId"),
     rule = context.rules.power.newGeneralSkills?.get(id),
@@ -200,15 +200,15 @@ function useSkill(
       ? !learned.has(Number(id))
       : !generalBaseSkills(context.rules, row).includes(Number(id)))
   )
-    generalFailure();
+    {generalFailure();}
 
-  if (generalList(rule.replace).some((id) => learned.has(id))) generalFailure();
+  if (generalList(rule.replace).some((id) => learned.has(id))) {generalFailure();}
 
   const prior = context.state.generalRoster?.skills.find(
     (skill) => skill.newGeneralId === row.id && skill.skillId === id,
   );
 
-  if (prior && (num(prior, "stat") === 1 || long(prior, "endTime") > context.now)) generalFailure();
+  if (prior && (num(prior, "stat") === 1 || long(prior, "endTime") > context.now)) {generalFailure();}
 
   const cooldown = Math.max(
     0,
@@ -219,7 +219,7 @@ function useSkill(
     ),
   );
 
-  if (!Number.isSafeInteger(cooldown) || cooldown > 315360000000) generalFailure();
+  if (!Number.isSafeInteger(cooldown) || cooldown > 315360000000) {generalFailure();}
 
   const type = Number(rule.type),
     count = () =>
@@ -236,7 +236,7 @@ function useSkill(
     const statusId = cityInteger(rule.para1, 1),
       status = context.rules.power.statuses?.get(String(statusId));
 
-    if (!status || !status.time || (status.overlap ?? "0") !== "0") generalFailure();
+    if (!status || !status.time || (status.overlap ?? "0") !== "0") {generalFailure();}
 
     actTime += BigInt(cityInteger(status.time, 1)) * 1000n;
     const write = (context.write.generalRoster ??= {});
@@ -270,7 +270,7 @@ function useSkill(
         .sort((a, b) => num(b, "level") + num(b, "star") - num(a, "level") - num(a, "star"));
       const building = choices[0];
 
-      if (!building) generalFailure();
+      if (!building) {generalFailure();}
 
       const unlocked = [...context.rules.arms.values()]
         .filter(
@@ -282,7 +282,7 @@ function useSkill(
       armyId = unlocked[0]?.id;
     }
 
-    if (!armyId || !context.rules.arms.has(armyId)) generalFailure();
+    if (!armyId || !context.rules.arms.has(armyId)) {generalFailure();}
 
     const amount = count(),
       previous = context.state.armies.find((army) => army.armyId === armyId) ?? {
@@ -307,16 +307,16 @@ function useSkill(
         .map((entry) => entry.split(";"))
         .find(([type]) => Number(type) === resource);
 
-    if (selected?.type !== Type.Array || !definition || definition.length !== 3) generalFailure();
+    if (selected?.type !== Type.Array || !definition || definition.length !== 3) {generalFailure();}
 
     const points = selected.value as Value[];
 
     if (!points.length || points.length > 16 || points.some((point) => point.type !== Type.Int))
-      generalFailure();
+      {generalFailure();}
 
     const ids = points.map((point) => cityInteger(point.value, 0, 2147483647));
 
-    if (new Set(ids).size !== ids.length) generalFailure();
+    if (new Set(ids).size !== ids.length) {generalFailure();}
 
     (context.write.generalRoster ??= {}).worldResources = ids.map((pointId) => ({
       pointId,
@@ -324,7 +324,7 @@ function useSkill(
       level: cityInteger(definition[1], 1, 100),
       amount: cityInteger(definition[2], 1),
     }));
-  } else if (type === 17) grantRewards(context, rule.para1);
+  } else if (type === 17) {grantRewards(context, rule.para1);}
   else if (type === 18 || type === 21) {
     const queueType = type === 18 ? 11 : 6,
       queue = context.state.queues.find(
@@ -335,7 +335,7 @@ function useSkill(
           long(queue, "updateTime") > context.now,
       );
 
-    if (!queue) generalFailure();
+    if (!queue) {generalFailure();}
 
     const milliseconds = BigInt(cityInteger(rule.para1, 1)) * 1000n,
       due = long(queue, "updateTime") - milliseconds;
@@ -350,7 +350,7 @@ function useSkill(
       }),
     };
   } else if (type === 19) {
-    if (!rule.para1) generalFailure();
+    if (!rule.para1) {generalFailure();}
 
     const plan = temporaryEffect(
       context.state.effects.states,
@@ -366,7 +366,7 @@ function useSkill(
   } else if (type === 20) {
     actTime += BigInt(cityInteger(rule.duration, 1)) * 1000n;
     stat = 3;
-  } else generalFailure();
+  } else {generalFailure();}
 
   const skill = {
     uid: context.owner,

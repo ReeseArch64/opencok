@@ -26,7 +26,7 @@ export function fragmentExchangeRecipes(rows: Iterable<Rule>): readonly Fragment
       rewards.some((id) => !/^\d{1,12}$/.test(id)) ||
       rewards.length !== weights.length
     )
-      campaignFailure();
+      {campaignFailure();}
 
     return {
       type,
@@ -45,7 +45,7 @@ export function fragmentExchangeRecipes(rows: Iterable<Rule>): readonly Fragment
     new Set(recipes.map((rule) => `${rule.type}:${rule.same}`)).size !== recipes.length ||
     new Set(recipes.map((rule) => rule.pool.join(";"))).size !== 1
   )
-    campaignFailure();
+    {campaignFailure();}
 
   return recipes;
 }
@@ -59,7 +59,7 @@ function weighted(weights: readonly number[], random: (maximum: number) => numbe
   let bound = 0;
   const index = weights.findIndex((weight) => draw < (bound += weight));
 
-  if (index < 0) campaignFailure();
+  if (index < 0) {campaignFailure();}
 
   return index;
 }
@@ -73,7 +73,7 @@ export function selectFragmentExchangeOffers(
     .filter((type) => onlyType === undefined || type === onlyType)
     .sort((a, b) => b - a);
 
-  if (!types.length || types.length > 64) campaignFailure();
+  if (!types.length || types.length > 64) {campaignFailure();}
 
   return types.map((type) => {
     const choices = recipes.filter((rule) => rule.type === type).sort((a, b) => a.same - b.same),
@@ -110,13 +110,13 @@ export function selectFragmentExchangeOffers(
 }
 
 export function readFragmentExchangeOffers(bytes: Uint8Array): readonly FragmentExchangeOffer[] {
-  if (!bytes.length || bytes.length > 65535) campaignFailure();
+  if (!bytes.length || bytes.length > 65535) {campaignFailure();}
 
   const raw: unknown = JSON.parse(
     javaMailTrim(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
   );
 
-  if (!Array.isArray(raw) || !raw.length || raw.length > 64) campaignFailure();
+  if (!Array.isArray(raw) || !raw.length || raw.length > 64) {campaignFailure();}
 
   const offers: FragmentExchangeOffer[] = raw.map((value) => {
     if (
@@ -128,18 +128,18 @@ export function readFragmentExchangeOffers(bytes: Uint8Array): readonly Fragment
       typeof value.reward !== "string" ||
       !/^\d{1,12}$/.test(value.reward)
     )
-      campaignFailure();
+      {campaignFailure();}
 
     const type = cityInteger(value.type, 1, 64),
       same = cityInteger(value.same, 1, type),
       counts = new Map<string, number>();
 
-    for (const id of value.id as string[]) counts.set(id, (counts.get(id) ?? 0) + 1);
+    for (const id of value.id as string[]) {counts.set(id, (counts.get(id) ?? 0) + 1);}
 
     const maximum = Math.max(...counts.values());
 
     if (value.id.length !== type || maximum !== same || counts.size !== type - same + 1)
-      campaignFailure();
+      {campaignFailure();}
 
     return {
       id: value.id,
@@ -150,7 +150,7 @@ export function readFragmentExchangeOffers(bytes: Uint8Array): readonly Fragment
     };
   });
 
-  if (new Set(offers.map((offer) => offer.type)).size !== offers.length) campaignFailure();
+  if (new Set(offers.map((offer) => offer.type)).size !== offers.length) {campaignFailure();}
 
   return offers;
 }

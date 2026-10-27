@@ -60,14 +60,14 @@ async function read(db: Reader, query: WorldSearchQuery): Promise<Row[]> {
     .offset(query.offset);
 
   if (rows.length > 8 || new Set(rows.map((row) => row.uid)).size !== rows.length)
-    throw new DependencyError("world search results");
+    {throw new DependencyError("world search results");}
 
   return rows;
 }
 
 export function createWorldSearchStore(databases: Databases, kingdomId: number): WorldSearchStore {
   if (!realm(kingdomId) || !databases.kingdoms.has(kingdomId))
-    throw new Error("Invalid world search realm");
+    {throw new Error("Invalid world search realm");}
 
   const options = { isolationLevel: "repeatable read", accessMode: "read only" } as const;
 
@@ -88,7 +88,7 @@ export function createWorldSearchStore(databases: Databases, kingdomId: number):
         !Number.isSafeInteger(query.now) ||
         query.now < 0
       )
-        throw new Error("Invalid world search query");
+        {throw new Error("Invalid world search query");}
 
       try {
         const snapshot = await databases.getKingdom(kingdomId).db.transaction(async (tx) => {
@@ -110,12 +110,12 @@ export function createWorldSearchStore(databases: Databases, kingdomId: number):
           return { profile, kingdomId: query.kingdomId, rows };
         }, options);
 
-        if (!authorized(snapshot.profile, owner, kingdomId, query.now)) return snapshot;
+        if (!authorized(snapshot.profile, owner, kingdomId, query.now)) {return snapshot;}
 
-        if (query.kingdomId === kingdomId) return snapshot;
+        if (query.kingdomId === kingdomId) {return snapshot;}
 
         if (!databases.kingdoms.has(query.kingdomId))
-          throw new DependencyError("world search realm");
+          {throw new DependencyError("world search realm");}
 
         const rows = await databases
           .getKingdom(query.kingdomId)

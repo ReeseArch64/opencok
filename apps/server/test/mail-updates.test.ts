@@ -38,14 +38,14 @@ function fixture() {
     query: async (query: { text: string }, params: unknown[] = []) => {
       const text = query.text;
       queries.push({ text, params });
-      if (text.startsWith("begin")) before = structuredClone(markers);
-      if (text === "rollback") markers = before;
+      if (text.startsWith("begin")) {before = structuredClone(markers);}
+      if (text === "rollback") {markers = before;}
       if (text.includes('from "opencok_kingdom"."userprofile"')) {
         expect(text).toEndWith("for update");
         return { rows: savedProfile ? [savedProfile] : [] };
       }
       if (text.startsWith("select") && text.includes('"mail_update"')) {
-        if (failure === "select") throw new Error("synthetic marker read failure");
+        if (failure === "select") {throw new Error("synthetic marker read failure");}
         expect(text).toContain("left join");
         expect(text).toContain('"mail_update"."toUser" = $1');
         expect(text).toContain('"mail_update"."updateTime" >= $2');
@@ -70,7 +70,7 @@ function fixture() {
         };
       }
       if (text.startsWith("delete")) {
-        if (failure === "delete") throw new Error("synthetic marker cleanup failure");
+        if (failure === "delete") {throw new Error("synthetic marker cleanup failure");}
         expect(text).toStartWith('delete from "opencok_kingdom"."mail_update"');
         const owner = params[0];
         if (text.includes(" < ")) {
@@ -82,15 +82,15 @@ function fixture() {
         } else {
           expect(params.length).toBeLessThanOrEqual(1001);
           markers = markers.filter((row) => {
-            if (row.owner !== owner) return true;
+            if (row.owner !== owner) {return true;}
             for (let index = 1; index < params.length; index += 2)
-              if (row.uid === params[index] && row.time === BigInt(params[index + 1] as string))
-                return false;
+              {if (row.uid === params[index] && row.time === BigInt(params[index + 1] as string))
+                {return false;}}
             return true;
           });
         }
       }
-      if (text === "commit" && failure === "commit") throw new Error("synthetic commit failure");
+      if (text === "commit" && failure === "commit") {throw new Error("synthetic commit failure");}
       return { rows: [] };
     },
   };
@@ -117,7 +117,7 @@ test("mail cursor preserves Java signed Long parsing and uses zero on reached pa
     ["9223372036854775807", 9223372036854775807n],
     ["-9223372036854775808", -9223372036854775808n],
   ] as const)
-    expect(mailUpdateCursor(raw)).toBe(expected);
+    {expect(mailUpdateCursor(raw)).toBe(expected);}
   for (const raw of [
     null,
     "",
@@ -128,7 +128,7 @@ test("mail cursor preserves Java signed Long parsing and uses zero on reached pa
     "9223372036854775808",
     "-9223372036854775809",
   ])
-    expect(mailUpdateCursor(raw)).toBe(0n);
+    {expect(mailUpdateCursor(raw)).toBe(0n);}
 });
 
 test("mail update JSON preserves long precision and never includes absent or foreign flags", () => {
@@ -165,7 +165,7 @@ test("mail updates switch to the original chunk envelope at exactly 32767 UTF-16
     }
     expect(raw()).toHaveLength(length);
     const body = mailUpdatesProjection(rows);
-    if (length < 32767) expect(body).toEqual({ data: sfs.string(raw()) });
+    if (length < 32767) {expect(body).toEqual({ data: sfs.string(raw()) });}
     else {
       expect(body.data).toEqual(sfs.string(""));
       const chunks = body.updatemailArr!.value as { value: string }[];
@@ -237,7 +237,7 @@ test("mail marker reads reject unauthorized owners and roll back cleanup after r
     app.fail(stage);
     await expect(
       readMailUpdates(app.db, 1, "self", { after: 0n, now }, async () => {
-        if (stage === "inspect") throw new Error("synthetic projection failure");
+        if (stage === "inspect") {throw new Error("synthetic projection failure");}
       }),
     ).rejects.toThrow();
     expect(app.markers()).toEqual(before);
@@ -318,7 +318,7 @@ test("authenticated mail update command preserves optional time correlation and 
     expect(reply.pushes).toEqual([]);
   }
   for (const time of [sfs.int(1), sfs.long(1), sfs.array()])
-    await expect(game.execute("self", "chat.get.update.mails", { time })).rejects.toThrow();
+    {await expect(game.execute("self", "chat.get.update.mails", { time })).rejects.toThrow();}
   db.mailUpdates = undefined;
   await expect(
     game.execute("self", "chat.get.update.mails", { time: sfs.string("0") }),

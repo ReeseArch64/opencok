@@ -63,10 +63,10 @@ function match(value: string, pattern: string): boolean {
   let expression = "^";
   for (let i = 0; i < pattern.length; i++) {
     const char = pattern[i]!;
-    if (char === "%") expression += ".*";
-    else if (char === "_") expression += ".";
-    else if (char === "\\") expression += "\\u{" + pattern[++i]!.codePointAt(0)!.toString(16) + "}";
-    else expression += "\\u{" + char.codePointAt(0)!.toString(16) + "}";
+    if (char === "%") {expression += ".*";}
+    else if (char === "_") {expression += ".";}
+    else if (char === "\\") {expression += "\\u{" + pattern[++i]!.codePointAt(0)!.toString(16) + "}";}
+    else {expression += "\\u{" + char.codePointAt(0)!.toString(16) + "}";}
   }
   return new RegExp(expression + "$", "isu").test(value);
 }
@@ -93,16 +93,16 @@ function fixture(cross = true) {
         expect(text).toBe("begin isolation level repeatable read read only");
         return { rows: [] };
       }
-      if (text === "rollback") return { rows: [] };
+      if (text === "rollback") {return { rows: [] };}
       if (text === "commit") {
-        if (state.failure === `commit${realm}`) throw new Error("Synthetic private commit details");
+        if (state.failure === `commit${realm}`) {throw new Error("Synthetic private commit details");}
         return { rows: [] };
       }
-      if (!text.startsWith("select ")) throw new Error("Unexpected mutation");
-      if (params.length === 1 && params[0] === 0) return { rows: [] };
+      if (!text.startsWith("select ")) {throw new Error("Unexpected mutation");}
+      if (params.length === 1 && params[0] === 0) {return { rows: [] };}
       if (realm === 0) {
         if (text.includes('from "opencok_global"."usermapping"')) {
-          if (state.failure === "mapping") throw new Error("Synthetic private mapping details");
+          if (state.failure === "mapping") {throw new Error("Synthetic private mapping details");}
           const rows = state.rawMappings
             ? state.mappings
             : state.mappings
@@ -111,7 +111,7 @@ function fixture(cross = true) {
                 .slice(0, Number(params[2]));
           return { rows: rows.map((row) => [row.uid]) };
         }
-        if (state.failure === "account") throw new Error("Synthetic private account details");
+        if (state.failure === "account") {throw new Error("Synthetic private account details");}
         const allowed = params.slice(0, -2),
           own = params.at(-2),
           minimum = Number(params.at(-1));
@@ -125,12 +125,12 @@ function fixture(cross = true) {
         return { rows: rows.map((row) => [row.uid, row.server]) };
       }
       if (realm === 1 && !text.includes("join")) {
-        if (state.failure === "profile") throw new Error("Synthetic private observer details");
+        if (state.failure === "profile") {throw new Error("Synthetic private observer details");}
         state.onProfile?.();
         return { rows: state.profile ? [state.profile] : [] };
       }
       if (realm === 1) {
-        if (state.failure === "local") throw new Error("Synthetic private local details");
+        if (state.failure === "local") {throw new Error("Synthetic private local details");}
         const rows = state.rawLocal
           ? state.local
           : state.local
@@ -144,7 +144,7 @@ function fixture(cross = true) {
               .slice(0, Number(params[3]));
         return { rows };
       }
-      if (state.failure === "remote") throw new Error("Synthetic private remote details");
+      if (state.failure === "remote") {throw new Error("Synthetic private remote details");}
       const ids = params.slice(1, -1);
       const rows = state.rawRemote
         ? state.remote
@@ -163,7 +163,7 @@ function fixture(cross = true) {
     global: { db: drizzle(client(0) as unknown as NodePgClient, { schema: global }) },
     getKingdom: (id: number) => {
       const db = realmDatabases.get(id);
-      if (!db) throw new Error("Synthetic route absent");
+      if (!db) {throw new Error("Synthetic route absent");}
       return db;
     },
   } as unknown as Parameters<typeof createPlayerSearchStore>[0];
@@ -308,7 +308,7 @@ test("mapping window is limited before account eligibility and is never refilled
 
 test("missing remote profiles become ordered placeholders and low/absent castles remain excluded", async () => {
   const f = fixture();
-  for (const id of ["missing", "low", "zero", "normal"]) f.add(id);
+  for (const id of ["missing", "low", "zero", "normal"]) {f.add(id);}
   f.state.remote = f.state.remote.filter((row) => row[0] !== "missing");
   f.state.remote.find((row) => row[0] === "low")![13] = 4;
   f.state.remote.find((row) => row[0] === "zero")![13] = null;
@@ -327,7 +327,7 @@ test("missing remote profiles become ordered placeholders and low/absent castles
 test("remote profile batches share one read-only realm snapshot and never exceed 500 identities", async () => {
   const f = fixture();
   f.rules.items.set("lookfor", { k1: "5", k2: "1000" });
-  for (let i = 0; i < 501; i++) f.add(String(i).padStart(4, "0"));
+  for (let i = 0; i < 501; i++) {f.add(String(i).padStart(4, "0"));}
   const result = await f.search();
   expect(result.body.total).toEqual(sfs.long(501));
   const reads = f.queries.filter((q) => q.realm === 2 && q.text.startsWith("select"));
@@ -368,10 +368,10 @@ test("unknown, malformed or inconsistent directory routes fail without local/emp
     const f = fixture();
     f.add("R");
     f.state.rawRemote = true;
-    if (mode === "foreign") f.state.remote = [remoteRow("foreign")];
-    if (mode === "realm") f.state.remote[0]![10] = 1;
+    if (mode === "foreign") {f.state.remote = [remoteRow("foreign")];}
+    if (mode === "realm") {f.state.remote[0]![10] = 1;}
     if (mode === "duplicate" || mode === "excess")
-      f.state.remote.push(remoteRow(mode === "duplicate" ? "R" : "other"));
+      {f.state.remote.push(remoteRow(mode === "duplicate" ? "R" : "other"));}
     await expect(f.search()).rejects.toThrow("player search unavailable");
     expect(f.queries.at(-1)!.text).toBe("rollback");
   }
@@ -533,7 +533,7 @@ test("shared public profile derives VIP in catalog order without repairs or unre
     { allianceId: 1 },
     { abbr: 2 },
   ] as Row[])
-    expect(() => sharedSearchProfile(data, ruleSet(), now)).toThrow();
+    {expect(() => sharedSearchProfile(data, ruleSet(), now)).toThrow();}
   const bad = ruleSet();
   bad.power.vip!.set("bad", { id: "bad", point: "0" });
   expect(() => sharedSearchProfile({ vipEndTime: BigInt(now + 1) }, bad, now)).toThrow();

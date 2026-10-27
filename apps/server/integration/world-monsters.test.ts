@@ -120,7 +120,7 @@ test("four-cell boss props use native lower-right ranges and reject a claimed ra
     ).toEqual(sfs.int(16));
     expect(await h.count()).toBe(1);
     expect(await h.point(16)).toMatchObject({ pointType: 15, monsterCurrHP: 0, flushFlag: 1 });
-    for (const id of [11, 12, 15]) expect((await h.point(id)).pointType).toBe(17);
+    for (const id of [11, 12, 15]) {expect((await h.point(id)).pointType).toBe(17);}
     expect(await h.point(11)).toMatchObject({
       monsterCurrHP: 77,
       flushTime: 123n,

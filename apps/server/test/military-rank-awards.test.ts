@@ -53,7 +53,7 @@ test("military awards retain float32 addition, clamp and the database's numeric 
   expect(militaryRankAdd(2, -5)).toBe(0);
   expect(militaryRankCents(13.34)).toBe(1334n);
   for (const value of [NaN, Infinity, -1, 1000000000])
-    expect(() => militaryRankAdd(value, 1)).toThrow();
+    {expect(() => militaryRankAdd(value, 1)).toThrow();}
   expect(() => militaryRankAdd(999999936, 128)).toThrow();
   expect(() => militaryRankAdd(1, NaN)).toThrow();
 });
@@ -118,11 +118,11 @@ test("missing zero future and expired authoritative clocks preserve awards while
   for (const marker of [undefined, 0n, 101n]) {
     const { context } = fixture(marker);
     if (marker === undefined)
-      context.state.militaryAward = {
+      {context.state.militaryAward = {
         async load() {
           return { row: undefined, clockMarker: undefined };
         },
-      };
+      };}
     await expect(
       applyMilitaryRankAward(context, { kind: "military", amount: 1, entitlementId: "gift" }),
     ).rejects.toThrow();

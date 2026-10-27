@@ -34,7 +34,7 @@ export function mailConversationReadQuery(
 ): MailConversationReadQuery {
   const mod = input.mod === undefined ? 0 : input.mod;
 
-  if (!int(mod) || !Number.isSafeInteger(now) || now < 0) return invalid();
+  if (!int(mod) || !Number.isSafeInteger(now) || now < 0) {return invalid();}
 
   const effects: MailConversationReadEffect[] = [];
 
@@ -48,10 +48,10 @@ export function mailConversationReadQuery(
         fromUser.includes("\0") ||
         !fromUser.isWellFormed())
     )
-      return invalid();
+      {return invalid();}
 
     if (mod !== 1 && input.driftingBottle !== undefined && !int(input.driftingBottle))
-      return invalid();
+      {return invalid();}
 
     const bottle = mod !== 1 && input.driftingBottle === 1;
     effects.push({
@@ -66,23 +66,23 @@ export function mailConversationReadQuery(
       types: mod === 1 ? ["2"] : bottle ? ["3"] : ["1", "20"],
     });
   } else if (input.type !== undefined) {
-    if (!int(input.type)) return invalid();
+    if (!int(input.type)) {return invalid();}
 
     effects.push({ kind: "mail", types: [mailServerType(input.type)], unreadOnly: true });
   }
 
   if (input.types !== undefined) {
     if (typeof input.types !== "string" || new TextEncoder().encode(input.types).length > 65535)
-      return invalid();
+      {return invalid();}
 
     const tokens = input.types.split(",").filter(Boolean);
 
-    if (tokens.length > 1000) return invalid();
+    if (tokens.length > 1000) {return invalid();}
 
     for (const token of tokens)
-      effects.push({ kind: "mail", types: [mailServerType(decimal(token))], unreadOnly: true });
+      {effects.push({ kind: "mail", types: [mailServerType(decimal(token))], unreadOnly: true });}
 
-    if (input.types === "0,1,20") effects.push({ kind: "chat", others: "", types: ["1", "20"] });
+    if (input.types === "0,1,20") {effects.push({ kind: "chat", others: "", types: ["1", "20"] });}
   }
 
   return { now, effects };

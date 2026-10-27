@@ -67,7 +67,7 @@ test("explicit destination realm routes emperor reads without changing the local
     ["GET", "opencok:kingdom:1:emperor-version"],
   ]);
   for (const kingdomId of [0, -1, NaN, 1.5])
-    await expect(cache.emperorVersion(kingdomId)).rejects.toThrow();
+    {await expect(cache.emperorVersion(kingdomId)).rejects.toThrow();}
   expect(cache.calls).toHaveLength(2);
 });
 

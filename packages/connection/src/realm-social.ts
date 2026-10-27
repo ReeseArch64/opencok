@@ -25,7 +25,7 @@ export function createRealmSocialExecutor(options: {
     !Number.isInteger(options.realm) ||
     options.realm < 1
   )
-    throw new TypeError("Invalid social configuration");
+    {throw new TypeError("Invalid social configuration");}
 
   return async (owner, command, params) => {
     const operationId = params.operationId
@@ -51,7 +51,7 @@ export function createRealmSocialExecutor(options: {
       }).toString("base64"),
     });
 
-    if (Buffer.byteLength(body) > 24_576) throw new TypeError("Social request too large");
+    if (Buffer.byteLength(body) > 24_576) {throw new TypeError("Social request too large");}
 
     const timestamp = String(Date.now());
     const response = await fetchChatJson(
@@ -76,13 +76,13 @@ export function createRealmSocialExecutor(options: {
       isRecord(response.data) &&
       typeof response.data.error === "string"
     )
-      throw new GameError(
+      {throw new GameError(
         response.data.error === "provider_unavailable" ? errors.unsupported : errors.invalid,
         "social_rule",
-      );
+      );}
 
     if (!isRecord(response) || response.code !== 1 || typeof response.data !== "string")
-      throw new Error("Social service unavailable");
+      {throw new Error("Social service unavailable");}
 
     return decode(Buffer.from(response.data, "base64"));
   };

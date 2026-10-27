@@ -52,7 +52,7 @@ export function ownedGeneral(context: CityProgressionContext, id: number) {
     context.write.generalRoster?.generals?.find((row) => row.id === id) ??
     generalRoster(context).generals.find((row) => row.id === id);
 
-  if (!row) throw new GameError(errors.missing, "city_progression");
+  if (!row) {throw new GameError(errors.missing, "city_progression");}
 
   generalBase(context.rules, id);
 
@@ -130,29 +130,29 @@ export function generalEffects(context: CityProgressionContext, row: Row) {
   );
 
   for (const status of context.write.generalRoster?.statuses ?? [])
-    if (status.newGeneralId === row.id) statuses.set(num(status, "stateId"), status);
+    {if (status.newGeneralId === row.id) {statuses.set(num(status, "stateId"), status);}}
 
   for (const deleted of context.write.generalRoster?.deletedStatuses ?? [])
-    if (deleted.generalId === row.id) statuses.delete(deleted.stateId);
+    {if (deleted.generalId === row.id) {statuses.delete(deleted.stateId);}}
 
   for (const status of context.write.generalRoster?.statuses ?? [])
-    if (status.newGeneralId === row.id) statuses.set(num(status, "stateId"), status);
+    {if (status.newGeneralId === row.id) {statuses.set(num(status, "stateId"), status);}}
 
   for (const status of statuses.values()) {
-    if (long(status, "startTime") > context.now || long(status, "endTime") < context.now) continue;
+    if (long(status, "startTime") > context.now || long(status, "endTime") < context.now) {continue;}
 
     for (const entry of (context.rules.power.statuses?.get(text(status, "stateId"))?.effect ?? "")
       .split("|")
       .filter(Boolean)) {
       const [id, value] = entry.split(";").map(Number);
 
-      if (!Number.isInteger(id) || !Number.isFinite(value)) generalFailure();
+      if (!Number.isInteger(id) || !Number.isFinite(value)) {generalFailure();}
 
       append(id!, value!, long(status, "startTime"), long(status, "endTime"));
     }
   }
 
-  for (const values of permanent) for (const [id, value] of values) append(id, value);
+  for (const values of permanent) {for (const [id, value] of values) {append(id, value);}}
 
   if (
     generalFeatureAvailable(context.rules, "general_random_effect", {
@@ -162,10 +162,10 @@ export function generalEffects(context: CityProgressionContext, row: Row) {
     })
   ) {
     for (const property of generalProperties(text(row, "refineproperty")).values())
-      for (const id of (generalPropertyRule(context.rules, property.id).effect ?? "")
+      {for (const id of (generalPropertyRule(context.rules, property.id).effect ?? "")
         .split(";")
         .filter(Boolean))
-        append(cityInteger(id, 1), property.value);
+        {append(cityInteger(id, 1), property.value);}}
   }
 
   return buff;
@@ -195,13 +195,13 @@ export function generalView(context: CityProgressionContext, row: Row) {
     );
 
     if (!saved)
-      skills.push({
+      {skills.push({
         newGeneralId: num(row, "id"),
         skillId: String(id),
         actTime: 0n,
         endTime: 9223372036854775807n,
         stat: 0,
-      });
+      });}
     else if (long(saved, "endTime") <= context.now) {
       saved.stat = 0;
       saved.endTime = 9223372036854775807n;
@@ -230,7 +230,7 @@ export function recruitGeneral(context: CityProgressionContext, id: number, frag
     (row) => row.itemId === 433000 && num(row, "level") > 0,
   );
 
-  if (!building) throw new GameError(errors.locked, "city_progression");
+  if (!building) {throw new GameError(errors.locked, "city_progression");}
 
   const pending = context.write.generalRoster?.generals ?? [],
     ids = new Set([...roster.generals, ...pending].map((row) => num(row, "id")));
@@ -245,7 +245,7 @@ export function recruitGeneral(context: CityProgressionContext, id: number, frag
     256,
   );
 
-  if (ids.has(id) || ids.size >= capacity) generalFailure();
+  if (ids.has(id) || ids.size >= capacity) {generalFailure();}
 
   if (base.faction && base.faction !== "0") {
     const faction = cityInteger(base.faction, 1),
@@ -262,15 +262,15 @@ export function recruitGeneral(context: CityProgressionContext, id: number, frag
       faction !== num(context.state.profile, "civilizationType") ||
       prestige < cityInteger(base.reputation_level)
     )
-      generalFailure();
+      {generalFailure();}
   }
 
   if (fragments && (!base.faction || base.faction === "0")) {
     const costs = generalPairs(base.need_pieces);
 
-    if (costs.size !== 1) generalFailure();
+    if (costs.size !== 1) {generalFailure();}
 
-    for (const [item, count] of costs) context.spendItem(String(item), count);
+    for (const [item, count] of costs) {context.spendItem(String(item), count);}
   }
 
   const row = generalRecruit(context.rules, id, context.owner, context.now);
@@ -293,12 +293,12 @@ async function prepare(context: CityProgressionContext, command: string, params:
     (command === "newgeneral" && !feature("general")) ||
     (command === "newgeneral.buy" && !feature("general_sale"))
   )
-    generalFailure();
+    {generalFailure();}
 
   recoverGenerals(context, command === "general.init");
 
   if (command === "general.init" && !feature("general"))
-    return { response: encode({ data: sfs.object({}) }), responseKind: "nested" as const };
+    {return { response: encode({ data: sfs.object({}) }), responseKind: "nested" as const };}
 
   if (command === "general.init") {
     refreshGeneralUnlocks(context);
@@ -337,7 +337,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
     const base = generalBase(context.rules, id),
       sale = context.rules.configuration.generalSales?.get(base.sale_id ?? "");
 
-    if (!sale) generalFailure();
+    if (!sale) {generalFailure();}
 
     const previous = generalRoster(context).purchases.find((row) => row.generalId === id) ?? {
         uid: context.owner,
@@ -346,11 +346,11 @@ async function prepare(context: CityProgressionContext, command: string, params:
       key = `countType${type}`,
       purchased = cityInteger(num(previous, key) + count);
 
-    if (sale.limit === "1" && purchased > cityInteger(sale[`sale_num${type}`])) generalFailure();
+    if (sale.limit === "1" && purchased > cityInteger(sale[`sale_num${type}`])) {generalFailure();}
 
     const pieces = [...generalPairs(base.need_pieces).keys()];
 
-    if (pieces.length !== 1) generalFailure();
+    if (pieces.length !== 1) {generalFailure();}
 
     const cost = BigInt(cityInteger(sale[`sale_price${type}`], 1)) * BigInt(count);
     context.economy.gold(-cost);
@@ -388,7 +388,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
           item = context.economy.ownedItem?.(uuid),
           rule = item && context.rules.goods.get(item.itemId);
 
-        if (!item || rule?.type !== "3" || rule.para1 !== "109") generalFailure();
+        if (!item || rule?.type !== "3" || rule.para1 !== "109") {generalFailure();}
 
         const base = generalBase(context.rules, id);
 
@@ -398,7 +398,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
             rule.para3 !== "all" &&
             !rule.para3.split(";").includes(String(id)))
         )
-          generalFailure();
+          {generalFailure();}
 
         const result = generalExperience(
           context.rules,
@@ -429,7 +429,7 @@ async function prepare(context: CityProgressionContext, command: string, params:
                 );
 
         for (const [item, count] of result.costs)
-          if (count > 0) context.spendItem(String(item), count);
+          {if (count > 0) {context.spendItem(String(item), count);}}
 
         writeGeneral(context, result.row);
         body = {
@@ -437,9 +437,9 @@ async function prepare(context: CityProgressionContext, command: string, params:
           buff: sfs.array(generalEffects(context, result.row).map(sfs.object)),
         };
 
-        if (action === "breach") body.breach = sfs.string(text(result.row, "breach"));
+        if (action === "breach") {body.breach = sfs.string(text(result.row, "breach"));}
 
-        if (action === "star") body.star = sfs.int(num(result.row, "star"));
+        if (action === "star") {body.star = sfs.int(num(result.row, "star"));}
 
         if (action === "baseskillup") {
           body.id = sfs.int(int(params, "baseskillid"));
@@ -470,10 +470,10 @@ async function prepare(context: CityProgressionContext, command: string, params:
     ["heroOffice", "robgeneral"].includes(command) &&
     context.write.generalRoster?.generals?.length
   )
-    pushes.push({
+    {pushes.push({
       command: "push.general.info",
       body: encode(generalChanges(context, context.write.generalRoster.generals)),
-    });
+    });}
 
   return {
     response: encode({ data: sfs.object(body) }),

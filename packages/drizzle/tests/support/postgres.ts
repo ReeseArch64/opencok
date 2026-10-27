@@ -24,9 +24,9 @@ export class DisposablePostgres {
       child.exited,
     ]);
     if (code)
-      throw new Error(
+      {throw new Error(
         `Disposable PostgreSQL ${args[0]} failed (exit ${code}): ${errors.replaceAll(String(this.options.password), "[redacted]").trim()}`,
-      );
+      );}
     return output;
   }
   async connect(database = "postgres") {

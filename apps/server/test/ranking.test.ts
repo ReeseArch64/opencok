@@ -54,7 +54,7 @@ test("ranking options preserve the configured top limit and exact GM hiding swit
   catalog.configuration.serverConfig!.get("power_limit")!.rankingHideGm = "01";
   expect(playerRankingQuery("power", catalog, now).hideGm).toBe(false);
   for (const limit of ["0", "-1", "1.5", "32768", " 2", "1e2", ""])
-    expect(() => playerRankingQuery("power", rules(limit), now)).toThrow("102192");
+    {expect(() => playerRankingQuery("power", rules(limit), now)).toThrow("102192");}
   expect(() => playerRankingQuery("power", catalog, NaN)).toThrow();
 });
 
@@ -181,10 +181,10 @@ test("unrepresentable ranking snapshots fail instead of returning truncated or r
       snapshot([row("self", { banTime: 9007199254740992 })]),
       snapshot(Array.from({ length: 7 }, (_, i) => row(String(i)))),
     ])
-      expect(() => selectPlayerRanking("self", query, state)).toThrow("102192");
+      {expect(() => selectPlayerRanking("self", query, state)).toThrow("102192");}
   }
   for (const power of [9007199254740992, "9223372036854775808", "1.5"])
-    expect(() =>
+    {expect(() =>
       playerRanking("power", { rows: [row("self", { power })], selfRanking: 1 }),
-    ).toThrow("102192");
+    ).toThrow("102192");}
 });

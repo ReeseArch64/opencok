@@ -29,19 +29,19 @@ export class ShopService {
             : str(params, "type", "");
 
       if (category !== undefined) {
-        if (!category.trim()) return { body: {}, pushes: [] };
+        if (!category.trim()) {return { body: {}, pushes: [] };}
 
         if (
           !/^[+-]?\d+$/.test(category) ||
           !Number.isSafeInteger(Number(category)) ||
           Math.abs(Number(category)) > 2147483647
         )
-          throw new GameError(errors.invalid);
+          {throw new GameError(errors.invalid);}
 
         category = String(Number(category));
 
         if (![...this.rules.shops.values()].some((rule) => rule.sale_type === category))
-          return { body: {}, pushes: [] };
+          {return { body: {}, pushes: [] };}
       }
 
       return this.repository.read(owner, async (state) => ({
@@ -50,16 +50,16 @@ export class ShopService {
       }));
     }
 
-    if (command !== "shoppingMall.buy") throw new GameError(errors.unsupported);
+    if (command !== "shoppingMall.buy") {throw new GameError(errors.unsupported);}
 
     const id = str(params, "id");
 
     if (!id || id.length > 40 || id.includes("\0") || !id.isWellFormed())
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const count = inventoryCount(int(params, "num"));
 
-    if (str(params, "discountItem", "")) throw new GameError(errors.unsupported);
+    if (str(params, "discountItem", "")) {throw new GameError(errors.unsupported);}
 
     const operation = params.operationId;
 
@@ -71,7 +71,7 @@ export class ShopService {
           operation.value,
         ))
     )
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const requestId = operation ? (operation.value as string).toLowerCase() : randomUUID();
     const request = encode({ id: sfs.string(id), num: sfs.int(count) });
@@ -82,7 +82,7 @@ export class ShopService {
         const rule = this.rules.shops.get(id);
 
         if (!rule || !shopAvailable(rule, state, this.rules))
-          throw new GameError(errors.unsupported);
+          {throw new GameError(errors.unsupported);}
 
         const counters = shopLimit(rule, state, count);
         const { gold } = shopPrice(rule, counters.daily, count);
@@ -97,7 +97,7 @@ export class ShopService {
               ]
             : [];
 
-        if (!gold && !costs.length) throw new GameError(errors.unsupported);
+        if (!gold && !costs.length) {throw new GameError(errors.unsupported);}
 
         const plan = planInventoryGrants(
           original,
@@ -117,7 +117,7 @@ export class ShopService {
         for (const key of pools) {
           const before = long(original.profile, key);
 
-          if (before < 0n) throw new GameError(errors.invalid);
+          if (before < 0n) {throw new GameError(errors.invalid);}
 
           const debit = before < remaining ? before : remaining;
 
@@ -134,19 +134,19 @@ export class ShopService {
           }
         }
 
-        if (remaining) throw new GameError(errors.gold);
+        if (remaining) {throw new GameError(errors.gold);}
 
         const balance = pools.reduce(
           (sum, key) => sum + (profile[key] ?? long(original.profile, key)),
           0n,
         );
 
-        if (balance > 9223372036854775807n) throw new GameError(errors.invalid);
+        if (balance > 9223372036854775807n) {throw new GameError(errors.invalid);}
 
         const items = plan.items;
         const delivered = plan.items.find((item) => item.itemId === rule.item_id);
 
-        if (!delivered) throw new Error("Missing shop delivery");
+        if (!delivered) {throw new Error("Missing shop delivery");}
 
         const body: Fields = {
           gold: sfs.long(balance),
@@ -173,7 +173,7 @@ export class ShopService {
           shopLimit(rule, nextState, 1);
           body.shoppingMallItems = sfs.object(shopOffer(rule, nextState));
         } catch (error) {
-          if (!(error instanceof GameError)) throw error;
+          if (!(error instanceof GameError)) {throw error;}
 
           body.shoppingMallItems = sfs.object({});
         }
@@ -219,15 +219,15 @@ export class ShopService {
     for (const rule of [...this.rules.shops.values()].sort(
       (a, b) => Number(a.display ?? 0) - Number(b.display ?? 0),
     )) {
-      if (category !== undefined && rule.sale_type !== category) continue;
+      if (category !== undefined && rule.sale_type !== category) {continue;}
 
       try {
-        if (!shopAvailable(rule, state, this.rules)) continue;
+        if (!shopAvailable(rule, state, this.rules)) {continue;}
 
         shopLimit(rule, state, 1);
         entries.push(sfs.object(shopOffer(rule, state)));
       } catch (error) {
-        if (!(error instanceof GameError)) throw error;
+        if (!(error instanceof GameError)) {throw error;}
       }
     }
 

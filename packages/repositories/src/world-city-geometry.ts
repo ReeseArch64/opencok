@@ -90,7 +90,7 @@ export async function normalizeWorldCityGeometry(
     const rows = owned.filter((row) => [main, ...ranges].includes(row.pointType)),
       geometry = resolveWorldCityGeometry(anchor, size, owner, evidence, main, ranges);
 
-    if (!geometry || !apply || geometry.orientation === "native") return geometry;
+    if (!geometry || !apply || geometry.orientation === "native") {return geometry;}
 
     if (
       !profile ||
@@ -99,7 +99,7 @@ export async function normalizeWorldCityGeometry(
       (residence && profile.point !== null && profile.point !== 0 && profile.point !== anchor) ||
       rows.some((row) => row.ownerMarchUUid || row.resInitValue !== 0 || row.resCostValue !== 0)
     )
-      return geometry;
+      {return geometry;}
 
     const references = await tx
       .select({ uid: world_march.uuid })
@@ -117,7 +117,7 @@ export async function normalizeWorldCityGeometry(
       .limit(1)
       .for("update");
 
-    if (references.length) return geometry;
+    if (references.length) {return geometry;}
 
     const pending = await tx
       .select({ payload: mutation_outbox.payload })
@@ -131,16 +131,16 @@ export async function normalizeWorldCityGeometry(
       )
       .limit(257);
 
-    if (pending.length > 256) return geometry;
+    if (pending.length > 256) {return geometry;}
 
     for (const event of pending) {
       try {
         const data = decode(event.payload),
           arrivals = data.troubles;
 
-        if (!arrivals) continue;
+        if (!arrivals) {continue;}
 
-        if (arrivals.type !== Type.Array || !Array.isArray(arrivals.value)) return geometry;
+        if (arrivals.type !== Type.Array || !Array.isArray(arrivals.value)) {return geometry;}
 
         if (
           arrivals.value.some((value) => {
@@ -149,7 +149,7 @@ export async function normalizeWorldCityGeometry(
             return str(row, "target") === owner && geometry.points.includes(int(row, "point"));
           })
         )
-          return geometry;
+          {return geometry;}
       } catch {
         return geometry;
       }
@@ -163,7 +163,7 @@ export async function normalizeWorldCityGeometry(
           (record) => !marches.some((march) => text(march, "uuid") === text(record, "id")),
         )
       )
-        return geometry;
+        {return geometry;}
 
       for (const march of marches) {
         const record = checkpoints.find((row) => text(row, "id") === text(march, "uuid"));
@@ -178,7 +178,7 @@ export async function normalizeWorldCityGeometry(
             (num(march, "type") === 0 && num(march, "targetType") === 2)
           )
         )
-          return geometry;
+          {return geometry;}
 
         try {
           const data = decode(Buffer.from(record.payload as Buffer)),
@@ -201,10 +201,10 @@ export async function normalizeWorldCityGeometry(
               str(data, "purpose") !== "trouble" &&
               str(data, "purpose") !== "treasure")
           )
-            return geometry;
+            {return geometry;}
 
           if (num(march, "targetType") === 2 && str(data, "purpose", "") !== "treasure")
-            return geometry;
+            {return geometry;}
 
           const expectedPurpose =
             num(march, "type") === 13
@@ -218,7 +218,7 @@ export async function normalizeWorldCityGeometry(
             num(march, "state") !==
               ["outbound", "gathering", "returning"].indexOf(str(data, "phase"))
           )
-            return geometry;
+            {return geometry;}
 
           changes.push({ id: text(march, "uuid"), data });
         } catch {
@@ -244,10 +244,10 @@ export async function normalizeWorldCityGeometry(
       .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, geometry.anchor)));
 
     for (const row of rows.filter((row) => row.id !== geometry.anchor))
-      await tx
+      {await tx
         .update(worldpoint)
         .set({ pointType: ranges[0], ...(residence ? { pointItem: String(geometry.anchor) } : {}) })
-        .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, row.id)));
+        .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, row.id)));}
 
     if (residence) {
       await tx
@@ -282,7 +282,7 @@ export async function normalizeWorldCityGeometry(
         .set({ pointId: geometry.anchor })
         .where(eq(civilization_castle.uid, owner));
 
-      if (castle) castle.pointId = geometry.anchor;
+      if (castle) {castle.pointId = geometry.anchor;}
     }
 
     return {

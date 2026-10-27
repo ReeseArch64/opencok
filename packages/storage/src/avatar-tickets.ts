@@ -17,29 +17,29 @@ export function createAvatarTickets(
         sequence < 1 ||
         sequence > 999999
       )
-        throw new Error("Invalid avatar ticket input");
+        {throw new Error("Invalid avatar ticket input");}
 
       const seconds = purpose === "upload" ? 120 : 30;
       const token = `v2.${randomBytes(32).toString("hex")}`;
       const expires = now() + seconds * 1000;
 
-      if (!Number.isSafeInteger(expires) || expires < 0) throw new Error("Invalid avatar clock");
+      if (!Number.isSafeInteger(expires) || expires < 0) {throw new Error("Invalid avatar clock");}
 
       const value = JSON.stringify({ owner, seq: String(sequence), purpose, expires });
 
       if ((await command("SET", key(token), value, "EX", String(seconds), "NX")) !== "OK")
-        throw new Error("Avatar authorization unavailable");
+        {throw new Error("Avatar authorization unavailable");}
 
       return token;
     },
     async verify(token, purpose) {
       if (!/^v2\.[a-f0-9]{64}$/.test(token))
-        throw new HttpError(401, "Invalid avatar authorization");
+        {throw new HttpError(401, "Invalid avatar authorization");}
 
       const raw = await command("GET", key(token));
 
       if (typeof raw !== "string" || raw.length > 512)
-        throw new HttpError(401, "Invalid avatar authorization");
+        {throw new HttpError(401, "Invalid avatar authorization");}
 
       let value;
 
@@ -61,7 +61,7 @@ export function createAvatarTickets(
         value.expires <= now() ||
         value.expires > now() + (purpose === "upload" ? 120000 : 30000)
       )
-        throw new HttpError(401, "Invalid avatar authorization");
+        {throw new HttpError(401, "Invalid avatar authorization");}
 
       return { owner: value.owner, seq: value.seq };
     },

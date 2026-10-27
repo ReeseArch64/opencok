@@ -10,7 +10,7 @@ export function readReconnectBase(
   db: Database["kingdom"]["db"],
   uid: string,
 ): Promise<ReconnectBaseState> {
-  if (!uid.trim() || uid.length > 40) throw new Error("Invalid reconnect identity");
+  if (!uid.trim() || uid.length > 40) {throw new Error("Invalid reconnect identity");}
 
   return db.transaction(
     async (tx) => {
@@ -33,7 +33,7 @@ export function readReconnectBase(
           .limit(1)
       )[0];
 
-      if (!profile) return { profile: undefined, armies: [], generals: [], skills: [] };
+      if (!profile) {return { profile: undefined, armies: [], generals: [], skills: [] };}
 
       const armies = await tx
         .select({
@@ -49,7 +49,7 @@ export function readReconnectBase(
         .orderBy(asc(user_army.armyId))
         .limit(32768);
 
-      if (armies.length > 32767) throw new Error("Reconnect armies exceed wire limit");
+      if (armies.length > 32767) {throw new Error("Reconnect armies exceed wire limit");}
 
       const generals = await tx
         .select({
@@ -65,7 +65,7 @@ export function readReconnectBase(
         .orderBy(asc(user_general.uuid))
         .limit(32768);
 
-      if (generals.length > 32767) throw new Error("Reconnect generals exceed wire limit");
+      if (generals.length > 32767) {throw new Error("Reconnect generals exceed wire limit");}
 
       const skills = generals.length
         ? await tx
@@ -86,7 +86,7 @@ export function readReconnectBase(
             .limit(32768)
         : [];
 
-      if (skills.length > 32767) throw new Error("Reconnect skills exceed wire limit");
+      if (skills.length > 32767) {throw new Error("Reconnect skills exceed wire limit");}
 
       return { profile, armies, generals, skills };
     },

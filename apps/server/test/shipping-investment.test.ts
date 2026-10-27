@@ -28,7 +28,7 @@ test("native shipping investment commands retain correlation", async () => {
     { cityProgression: async () => ({ body: {}, pushes: [] }) },
   );
   for (const command of ["shipping.trade.invest.ui", "shipping.trade.invest.reward"])
-    expect(
+    {expect(
       (await game.execute("owner", command, { _cok_: sfs.long(9007199254740993n) })).body._cok_,
-    ).toEqual(sfs.long(9007199254740993n));
+    ).toEqual(sfs.long(9007199254740993n));}
 });

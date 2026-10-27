@@ -14,7 +14,7 @@ export function arenaArmySelection(
 ) {
   const values = raw.split("|");
 
-  if (!raw || values.length > 128) arenaFailure();
+  if (!raw || values.length > 128) {arenaFailure();}
 
   const seen = new Set<string>(),
     selected = new Map(current.map((row) => [row.armyId, row.count]));
@@ -22,16 +22,16 @@ export function arenaArmySelection(
   for (const value of values) {
     const pair = value.split(";");
 
-    if (pair.length !== 2 || seen.has(pair[0]!)) arenaFailure();
+    if (pair.length !== 2 || seen.has(pair[0]!)) {arenaFailure();}
 
     const id = String(cityInteger(pair[0], 1)),
       count = cityInteger(pair[1]);
 
-    if (pair[0] !== id || seen.has(id)) arenaFailure();
+    if (pair[0] !== id || seen.has(id)) {arenaFailure();}
 
     const rule = rules.arms.get(id);
 
-    if (!rule || !["1", "2", "3", "4"].includes(rule.arm ?? "")) arenaFailure();
+    if (!rule || !["1", "2", "3", "4"].includes(rule.arm ?? "")) {arenaFailure();}
 
     selected.set(id, count);
     seen.add(id);
@@ -40,7 +40,7 @@ export function arenaArmySelection(
   const total = [...selected.values()].reduce((a, b) => a + b, 0);
 
   if (!Number.isSafeInteger(total) || total > cityInteger(rules.items.get("fight_arena")?.k9, 1))
-    arenaFailure();
+    {arenaFailure();}
 
   return [...selected]
     .sort(([a], [b]) => a.localeCompare(b))
@@ -51,7 +51,7 @@ export function arenaRankDelta(playerScore: number, teamTotal: number, won: bool
   cityInteger(playerScore);
   cityInteger(teamTotal);
 
-  if (playerScore > teamTotal) arenaFailure();
+  if (playerScore > teamTotal) {arenaFailure();}
 
   const fraction =
     teamTotal > 0 ? Math.fround(Math.fround(playerScore) / Math.fround(teamTotal)) : 0;

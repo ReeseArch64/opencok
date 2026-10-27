@@ -20,7 +20,7 @@ function fixture(mappings: Mapping[] = [], accounts: Account[] = []) {
           'select "gameUid", "mappingType", "mappingValue" from "opencok_global"."usermapping" where ("opencok_global"."usermapping"."mappingType" collate "C" ~ $1 and "opencok_global"."usermapping"."mappingValue" collate "C" ~ $2)',
         );
         expect(params).toHaveLength(2);
-        if (failure?.stage === "mapping") throw failure.error;
+        if (failure?.stage === "mapping") {throw failure.error;}
         const type = new RegExp(params[0] as string, "u");
         const value = new RegExp(params[1] as string, "u");
         return {
@@ -35,7 +35,7 @@ function fixture(mappings: Mapping[] = [], accounts: Account[] = []) {
         );
         expect(params).toHaveLength(2);
         expect(params[1]).toBe(-1);
-        if (failure?.stage === "account") throw failure.error;
+        if (failure?.stage === "account") {throw failure.error;}
         const uid = new RegExp(params[0] as string, "u");
         return {
           rows: accounts
@@ -63,17 +63,17 @@ test("nickname SQL candidate patterns contain every BMP character that can parti
   const patterns = names.map((name) => new RegExp(mysqlUtf8UnicodeCandidates([name]), "u"));
   const keys = names.map(mysqlUtf8UnicodeKey);
   for (let code = 1; code <= 65535; code++) {
-    if (code >= 0xd800 && code <= 0xdfff) continue;
+    if (code >= 0xd800 && code <= 0xdfff) {continue;}
     const character = String.fromCharCode(code);
     const key = mysqlUtf8UnicodeKey(character);
     for (let index = 0; index < names.length; index++) {
       let offset = keys[index]!.indexOf(key);
-      while (offset >= 0 && offset % 4 !== 0) offset = keys[index]!.indexOf(key, offset + 1);
-      if (!key || offset >= 0) expect(patterns[index]!.test(character)).toBe(true);
+      while (offset >= 0 && offset % 4 !== 0) {offset = keys[index]!.indexOf(key, offset + 1);}
+      if (!key || offset >= 0) {expect(patterns[index]!.test(character)).toBe(true);}
     }
   }
   for (let index = 0; index < names.length; index++)
-    expect(patterns[index]!.test(names[index]!)).toBe(true);
+    {expect(patterns[index]!.test(names[index]!)).toBe(true);}
   expect(patterns[0]!.test("😀")).toBe(false);
   expect(patterns[0]!.test("\0")).toBe(false);
   expect(patterns[0]!.test("eman")).toBe(true);
@@ -113,7 +113,7 @@ test("global nickname lookup requires an existing non-deleted non-null active ac
     expect(instance.queries).toHaveLength(2);
   }
   for (const active of [0, 1, -2, 2147483647])
-    expect(await fixture(mappings, [{ uid: "self", active }]).occupied("alpha")).toBe(true);
+    {expect(await fixture(mappings, [{ uid: "self", active }]).occupied("alpha")).toBe(true);}
 });
 
 test("global nickname lookup checks all mapped IDs and applies exact comparison after account prefiltering", async () => {
@@ -138,17 +138,17 @@ test("global nickname lookup checks all mapped IDs and applies exact comparison 
 
 test("nickname availability preserves reached SQL-error empty-result behavior at either query", async () => {
   for (const stage of ["mapping", "account"] as const)
-    for (const code of ["42P01", "57014", "08006", "XX000"]) {
+    {for (const code of ["42P01", "57014", "08006", "XX000"]) {
       const instance = fixture([{ uid: "self", type: "name", value: "alpha" }]);
       instance.fail(stage, Object.assign(new Error("Synthetic SQL failure"), { code }));
       expect(await instance.occupied("alpha")).toBe(false);
       expect(instance.queries).toHaveLength(stage === "mapping" ? 1 : 2);
-    }
+    }}
 });
 
 test("nickname availability does not turn network malformed-data or programming failures into free names", async () => {
   for (const stage of ["mapping", "account"] as const)
-    for (const error of [
+    {for (const error of [
       new Error("Synthetic failure"),
       Object.assign(new Error("Synthetic transport failure"), { code: "ECONNRESET" }),
       { code: "42p01" },
@@ -157,7 +157,7 @@ test("nickname availability does not turn network malformed-data or programming 
       const instance = fixture([{ uid: "self", type: "name", value: "alpha" }]);
       instance.fail(stage, error);
       await expect(instance.occupied("alpha")).rejects.toThrow("nickname availability");
-    }
+    }}
   const instance = fixture([{ uid: "\ud800", type: "name", value: "alpha" }]);
   await expect(instance.occupied("alpha")).rejects.toThrow("nickname availability");
   expect(instance.queries).toHaveLength(1);

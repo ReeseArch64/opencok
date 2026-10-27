@@ -63,7 +63,7 @@ export class InventoryService {
         "item.compose.suitequipment.store",
       ].includes(command)
     )
-      throw new GameError(errors.unsupported);
+      {throw new GameError(errors.unsupported);}
 
     for (const key of ["num", "count", "pernum", "batch", "id"]) {
       const value = params[key];
@@ -76,7 +76,7 @@ export class InventoryService {
           value.value < 0 ||
           value.value > 2147483647)
       )
-        throw new GameError(errors.invalid);
+        {throw new GameError(errors.invalid);}
     }
 
     for (const key of ["itemId", "uuid", "targetId"]) {
@@ -89,7 +89,7 @@ export class InventoryService {
           value.value.length > 255 ||
           !value.value.isWellFormed())
       )
-        throw new GameError(errors.invalid);
+        {throw new GameError(errors.invalid);}
     }
 
     const operation = params.operationId;
@@ -102,12 +102,12 @@ export class InventoryService {
           operation.value,
         ))
     )
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const request: Fields = {};
 
     for (const key of Object.keys(params).sort())
-      if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) request[key] = params[key]!;
+      {if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) {request[key] = params[key]!;}}
 
     const requestId = operation ? (operation.value as string).toLowerCase() : randomUUID();
     const bytes = encode(request);
@@ -134,7 +134,7 @@ export class InventoryService {
     inventoryCount(count);
 
     if (!Number.isInteger(value) || value < 0 || value > 2147483647)
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     const request = encode({
       itemId: sfs.string(itemId),
@@ -181,7 +181,7 @@ export class InventoryPlanner {
     readonly effects: InventoryEffects,
     readonly now: number,
   ) {
-    if (!Number.isSafeInteger(now) || now < 0) throw new Error("Invalid inventory clock");
+    if (!Number.isSafeInteger(now) || now < 0) {throw new Error("Invalid inventory clock");}
 
     this.items = state.items.map((item) => ({ ...item }));
   }
@@ -193,7 +193,7 @@ export class InventoryPlanner {
   own(uuid: string) {
     const item = this.items.find((item) => item.uuid === uuid);
 
-    if (!item || !this.valid(item)) throw new GameError("E100166");
+    if (!item || !this.valid(item)) {throw new GameError("E100166");}
 
     return item;
   }
@@ -218,7 +218,7 @@ export class InventoryPlanner {
     item.count = next;
 
     if (rule.time_type === "1" && rule.vanishTime)
-      item.vanishTime = BigInt(this.now) + BigInt(inventoryInteger(rule.vanishTime)) * 60000n;
+      {item.vanishTime = BigInt(this.now) + BigInt(inventoryInteger(rule.vanishTime)) * 60000n;}
 
     this.changed.set(item.uuid, item);
 
@@ -228,7 +228,7 @@ export class InventoryPlanner {
   take(item: InventoryItem, count: number) {
     inventoryCount(count);
 
-    if (!this.valid(item) || item.count < count) throw new GameError("E100165");
+    if (!this.valid(item) || item.count < count) {throw new GameError("E100165");}
 
     this.post(
       `item.${item.uuid}`,
@@ -244,13 +244,13 @@ export class InventoryPlanner {
     inventoryCount(count);
 
     for (const item of this.items) {
-      if (item.itemId !== id || item.value !== 0 || !this.valid(item) || item.count <= 0) continue;
+      if (item.itemId !== id || item.value !== 0 || !this.valid(item) || item.count <= 0) {continue;}
 
       const take = Math.min(count, item.count);
       this.take(item, take);
       count -= take;
 
-      if (!count) return;
+      if (!count) {return;}
     }
 
     throw new GameError("E100165");
@@ -269,7 +269,7 @@ export class InventoryPlanner {
   total() {
     const total = this.pools().reduce((sum, key) => sum + this.balance(key), 0n);
 
-    if (total < 0n || total > 9223372036854775807n) throw new GameError(errors.invalid);
+    if (total < 0n || total > 9223372036854775807n) {throw new GameError(errors.invalid);}
 
     return total;
   }
@@ -281,7 +281,7 @@ export class InventoryPlanner {
       params.hasCDTime &&
       (params.hasCDTime.type !== Type.Bool || typeof params.hasCDTime.value !== "boolean")
     )
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
     if (
       params.hasCDTime?.value === true ||
@@ -292,11 +292,11 @@ export class InventoryPlanner {
           now: this.now,
         }))
     )
-      throw new GameError(errors.unsupported);
+      {throw new GameError(errors.unsupported);}
 
     const batch = int(params, "batch", 0);
 
-    if (batch < 0) throw new GameError(errors.invalid);
+    if (batch < 0) {throw new GameError(errors.invalid);}
 
     if (
       batch > 0 &&
@@ -307,18 +307,18 @@ export class InventoryPlanner {
         now: this.now,
       })
     )
-      throw new GameError(errors.unsupported);
+      {throw new GameError(errors.unsupported);}
 
     const { count, price } = inventoryPrice(rule, requested, batch > 0);
 
-    if (this.total() < BigInt(price)) throw new GameError(errors.gold);
+    if (this.total() < BigInt(price)) {throw new GameError(errors.gold);}
 
     let remaining = BigInt(price);
 
     for (const key of this.pools()) {
       const balance = this.balance(key);
 
-      if (balance < 0n) throw new GameError(errors.invalid);
+      if (balance < 0n) {throw new GameError(errors.invalid);}
 
       const cost = balance < remaining ? balance : remaining;
 
@@ -343,27 +343,27 @@ export class InventoryPlanner {
     inventoryCount(count);
     const rule = inventoryGoods(this.rules, item.itemId);
 
-    if (count > 1 && !rule.useall) throw new GameError(errors.invalid);
+    if (count > 1 && !rule.useall) {throw new GameError(errors.invalid);}
 
     if (
       rule.civilizations &&
       rule.civilizations !== "0" &&
       !rule.civilizations.split(";").includes(String(num(this.state.profile, "civilizationType")))
     )
-      throw new GameError("E100166");
+      {throw new GameError("E100166");}
 
     if (rule.cd_time) {
       const cooldown = BigInt(inventoryInteger(rule.cd_time)) * 60000n;
       const last = this.state.cooldowns.get(item.itemId);
 
-      if (last !== undefined && BigInt(this.now) < last + cooldown) throw new GameError("111160");
+      if (last !== undefined && BigInt(this.now) < last + cooldown) {throw new GameError("111160");}
 
       this.cooldowns.set(item.itemId, BigInt(this.now));
     }
 
     let effectRule = rule;
 
-    if (rule.type === "13") effectRule = inventoryGoods(this.rules, rule.para4 ?? "");
+    if (rule.type === "13") {effectRule = inventoryGoods(this.rules, rule.para4 ?? "");}
 
     const effect: Fields = {};
 
@@ -380,12 +380,12 @@ export class InventoryPlanner {
         await this.state.useEffect(effectRule.id!, count, activityEconomy(this)),
       );
     } else if (effectRule.type === "3") {
-      if (text(this.state.profile, "pf") === "cn1") throw new GameError(errors.unsupported);
+      if (text(this.state.profile, "pf") === "cn1") {throw new GameError(errors.unsupported);}
 
       const id = inventoryInteger(effectRule.para1);
 
       if (![100, 101, 102, 103, 104, 158, 159, 160].includes(id))
-        throw new GameError(errors.unsupported);
+        {throw new GameError(errors.unsupported);}
 
       const base = inventoryInteger(effectRule.para2);
       inventoryCount(base * count);
@@ -410,7 +410,7 @@ export class InventoryPlanner {
         count;
 
       if (!Number.isInteger(amount) || amount < 0 || amount > 2147483647)
-        throw new GameError(errors.invalid);
+        {throw new GameError(errors.invalid);}
 
       if (id === 100) {
         const key = this.pools()[0]!;
@@ -435,13 +435,13 @@ export class InventoryPlanner {
           );
           const castle = this.state.buildings.find((row) => String(row.itemId) === "400000");
 
-          if (!castle || num(castle, "level") < required) throw new GameError(errors.unsupported);
+          if (!castle || num(castle, "level") < required) {throw new GameError(errors.unsupported);}
         }
 
         const bound = id >= 158 ? key : `${key}bind`;
 
         if (id >= 158 && long(this.state.resource, bound) + BigInt(amount) > 2147483647n)
-          throw new GameError(errors.invalid);
+          {throw new GameError(errors.invalid);}
 
         this.post(
           `resource.${bound}`,
@@ -455,7 +455,7 @@ export class InventoryPlanner {
           body: resource({ ...this.state.resource, ...this.resources }),
         });
       }
-    } else if (effectRule.type !== "21") throw new GameError(errors.unsupported);
+    } else if (effectRule.type !== "21") {throw new GameError(errors.unsupported);}
 
     this.take(item, count);
     await this.state.recordAction?.("use", item.itemId, count, activityEconomy(this));
@@ -467,7 +467,7 @@ export class InventoryPlanner {
     if (command === "item.buy" || command === "item.buyUse") {
       const purchase = this.buy(str(params, "itemId"), inventoryCount(int(params, "num")), params);
 
-      if (command === "item.buy") return purchase.body;
+      if (command === "item.buy") {return purchase.body;}
 
       const useRet = await this.use(purchase.item, purchase.count);
 
@@ -475,22 +475,22 @@ export class InventoryPlanner {
     }
 
     if (command === "item.use")
-      return this.use(this.own(str(params, "uuid")), inventoryCount(int(params, "num")));
+      {return this.use(this.own(str(params, "uuid")), inventoryCount(int(params, "num")));}
 
     if (command === "item.compose2") {
       const id = String(inventoryCount(int(params, "id"))),
         count = inventoryCount(int(params, "count"), 9999);
       const rule = this.rules.materials.get(id);
 
-      if (!rule) throw new GameError(errors.unsupported);
+      if (!rule) {throw new GameError(errors.unsupported);}
 
       const costs = inventoryPairs(rule.material),
         targets = inventoryPairs(rule.target);
 
       for (const id of targets.keys())
-        if (inventoryGoods(this.rules, id).type === "37") throw new GameError(errors.unsupported);
+        {if (inventoryGoods(this.rules, id).type === "37") {throw new GameError(errors.unsupported);}}
 
-      for (const [id, amount] of costs) this.spendItems(id, inventoryCount(amount * count));
+      for (const [id, amount] of costs) {this.spendItems(id, inventoryCount(amount * count));}
 
       const rewards = new Map<string, number>();
 
@@ -499,7 +499,7 @@ export class InventoryPlanner {
         rewards.set(id, (rewards.get(id) ?? 0) + 1);
       }
 
-      for (const [id, amount] of rewards) this.add(id, amount);
+      for (const [id, amount] of rewards) {this.add(id, amount);}
 
       await this.state.recordAction?.("compose", id, count, activityEconomy(this));
 
@@ -511,7 +511,7 @@ export class InventoryPlanner {
     const id = source?.itemId ?? str(params, "itemId");
     const rule = inventoryGoods(this.rules, id);
 
-    if (suite && rule.type !== "43") throw new GameError(errors.invalid);
+    if (suite && rule.type !== "43") {throw new GameError(errors.invalid);}
 
     const multiple = inventoryCount(int(params, suite ? "num" : "pernum", suite ? 0 : 1));
     const { costs, rewards } = inventoryRecipe(rule, id, str(params, "targetId", ""), multiple);
@@ -519,12 +519,12 @@ export class InventoryPlanner {
     for (const id of rewards.keys()) {
       const target = inventoryGoods(this.rules, id);
 
-      if (target.type === "37") throw new GameError(errors.unsupported);
+      if (target.type === "37") {throw new GameError(errors.unsupported);}
     }
 
     for (const [cost, amount] of costs) {
-      if (source && cost === source.itemId) this.take(source, amount);
-      else this.spendItems(cost, amount);
+      if (source && cost === source.itemId) {this.take(source, amount);}
+      else {this.spendItems(cost, amount);}
     }
 
     const item = this.add(inventoryWeighted(rewards), multiple);
@@ -535,10 +535,10 @@ export class InventoryPlanner {
 
   result(body: Fields): InventoryPlan {
     if (this.changed.size)
-      this.pushes.push({
+      {this.pushes.push({
         command: "push.useritem",
         body: inventoryChanges([...this.changed.values()], this.rules),
-      });
+      });}
 
     return {
       confirmedSpending: confirmedContinuedCost(this.state, this.rules, this.now, this.items),
@@ -575,9 +575,9 @@ export function planInventoryGrants(
     now,
   );
 
-  for (const cost of costs) planner.spendItems(cost.itemId, inventoryCount(cost.count));
+  for (const cost of costs) {planner.spendItems(cost.itemId, inventoryCount(cost.count));}
 
-  for (const grant of grants) planner.add(grant.itemId, grant.count);
+  for (const grant of grants) {planner.add(grant.itemId, grant.count);}
 
   return planner.result({});
 }

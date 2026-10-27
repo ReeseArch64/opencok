@@ -33,14 +33,14 @@ import type { CityProgressionContext } from "./city-progression-context.ts";
 const nextDay = (now: bigint) => (now / 86400000n + 1n) * 86400000n;
 
 function position(params: Fields, maximum: number) {
-  if (params.pos?.type !== Type.Int) goldEggsFailure();
+  if (params.pos?.type !== Type.Int) {goldEggsFailure();}
 
   return cityInteger(int(params, "pos"), 0, maximum - 1);
 }
 
 function cost(context: CityProgressionContext, amount: number) {
   if (context.balance("gold") < BigInt(amount))
-    throw new GameError(errors.gold, "city_progression");
+    {throw new GameError(errors.gold, "city_progression");}
 
   context.economy.gold(-BigInt(amount));
 }
@@ -63,16 +63,16 @@ function steps(
 ) {
   const rows = [...(context.rules.advanced.goldenEggSteps?.values() ?? [])];
 
-  if (!rows.length || rows.length > 256) goldEggsFailure();
+  if (!rows.length || rows.length > 256) {goldEggsFailure();}
 
   const pick = random(rows.length);
 
-  if (!Number.isInteger(pick) || pick < 0 || pick >= rows.length) goldEggsFailure();
+  if (!Number.isInteger(pick) || pick < 0 || pick >= rows.length) {goldEggsFailure();}
 
   const step = rows[pick]!.step ?? "",
     order = step.split(";").map((raw) => cityInteger(raw, 0, length - 1));
 
-  if (order.length !== length || new Set(order).size !== length) goldEggsFailure();
+  if (order.length !== length || new Set(order).size !== length) {goldEggsFailure();}
 
   return { step, order };
 }
@@ -126,9 +126,9 @@ export class GoldEggsDomain extends CityCommandDomain {
         !goldEggsEnabled(context.rules, context.now) ||
         num(context.state.profile, "crossFightSrcServerId") > 0
       )
-        throw new GameError(errors.unsupported, "city_progression");
+        {throw new GameError(errors.unsupported, "city_progression");}
 
-      if (!reader || !period) goldEggsFailure();
+      if (!reader || !period) {goldEggsFailure();}
 
       if (command === "goldeggs.award.deliver") {
         if (
@@ -136,24 +136,24 @@ export class GoldEggsDomain extends CityCommandDomain {
           params.end?.type !== Type.Long ||
           params.global?.type !== Type.Bool
         )
-          goldEggsFailure();
+          {goldEggsFailure();}
 
         const value = { start: cityAmount(params.start.value), end: cityAmount(params.end.value) },
           global = params.global.value === true;
 
         if (str(params, "operationId") !== goldEggsAwardOperation(context.owner, value, global))
-          goldEggsFailure();
+          {goldEggsFailure();}
 
         const award = await reader.award(value, global);
 
-        if (!award) goldEggsFailure();
+        if (!award) {goldEggsFailure();}
 
         const template = context.rules.mail.get(award.template),
           contents = javaMailBytes(
             template?.message ? `${template.message}|${award.rank}` : undefined,
           );
 
-        if (!template || !contents) goldEggsFailure();
+        if (!template || !contents) {goldEggsFailure();}
 
         const quests = (context.write.quests ??= {});
         quests.mail = [
@@ -178,7 +178,7 @@ export class GoldEggsDomain extends CityCommandDomain {
         ];
         const message: AvatarSystemMail = quests.mail.at(-1)!;
 
-        if (!context.economy.event) goldEggsFailure();
+        if (!context.economy.event) {goldEggsFailure();}
 
         context.economy.event({
           id: "gold-eggs-mail",
@@ -229,11 +229,11 @@ export class GoldEggsDomain extends CityCommandDomain {
       const calendar = goldEggsCalendar(context.rules, context.now),
         config = context.rules.items.get("golden_egg");
 
-      if (!calendar?.admitted || !config) goldEggsFailure();
+      if (!calendar?.admitted || !config) {goldEggsFailure();}
 
       const saved = await reader.prepare(calendar);
 
-      if (!saved && command !== "goldeggs.info") goldEggsFailure();
+      if (!saved && command !== "goldeggs.info") {goldEggsFailure();}
 
       const row: Row = saved
         ? { ...saved }
@@ -254,10 +254,10 @@ export class GoldEggsDomain extends CityCommandDomain {
       goldEggsRecord(row, context.owner, context.now);
       let cells = goldEggsCells(row.statelist, context.rules);
 
-      if (!cells.length && command === "goldeggs.info") cells = goldEggsDisk(context.rules, random);
+      if (!cells.length && command === "goldeggs.info") {cells = goldEggsDisk(context.rules, random);}
 
       if (!cells.length && ["goldeggs.smashing", "goldeggs.smashingall"].includes(command))
-        goldEggsFailure();
+        {goldEggsFailure();}
 
       let body: Fields;
 
@@ -280,7 +280,7 @@ export class GoldEggsDomain extends CityCommandDomain {
           claimed = goldEggsClaims(row.score_reward, context.rules),
           reward = rewards[pos]!;
 
-        if (claimed.includes(pos) || long(row, "score") < reward.score) goldEggsFailure();
+        if (claimed.includes(pos) || long(row, "score") < reward.score) {goldEggsFailure();}
 
         row.score_reward = [...claimed, pos].join(";");
         body = { reward: sfs.array(grant(context, [reward.reward], 1, random)), pos: sfs.int(pos) };
@@ -290,7 +290,7 @@ export class GoldEggsDomain extends CityCommandDomain {
         if (amount) {
           cost(context, amount);
           row.flushcount = cityInteger(num(row, "flushcount") + 1);
-        } else row.flushfreetimes = cityInteger(num(row, "flushfreetimes") - 1);
+        } else {row.flushfreetimes = cityInteger(num(row, "flushfreetimes") - 1);}
 
         cells = goldEggsDisk(context.rules, random);
         row.flushtime = context.now;
@@ -304,10 +304,10 @@ export class GoldEggsDomain extends CityCommandDomain {
         const pos = position(params, cells.length),
           cell = cells[pos]!;
 
-        if (cell.smashed) goldEggsFailure();
+        if (cell.smashed) {goldEggsFailure();}
 
-        if (num(row, "freetimes") > 0) row.freetimes = cityInteger(num(row, "freetimes") - 1);
-        else cost(context, cityInteger(config.k3, 1));
+        if (num(row, "freetimes") > 0) {row.freetimes = cityInteger(num(row, "freetimes") - 1);}
+        else {cost(context, cityInteger(config.k3, 1));}
 
         const egg = context.rules.advanced.goldenEggs!.get(cell.id)!;
         body = {};
@@ -340,7 +340,7 @@ export class GoldEggsDomain extends CityCommandDomain {
           allscore: sfs.long(long(row, "score")),
         });
       } else {
-        if (cells.some((cell) => cell.smashed)) throw new GameError("175408", "city_progression");
+        if (cells.some((cell) => cell.smashed)) {throw new GameError("175408", "city_progression");}
 
         cost(context, cityInteger(config.k10, 1));
         const { step, order } = steps(context, cells.length, random),
@@ -354,9 +354,9 @@ export class GoldEggsDomain extends CityCommandDomain {
           if (egg.reward) {
             const multiple = cityInteger(row.multiple, 1, 10000);
 
-            if (ids.length + multiple > 4096) goldEggsFailure();
+            if (ids.length + multiple > 4096) {goldEggsFailure();}
 
-            for (let i = 0; i < multiple; i++) ids.push(egg.reward);
+            for (let i = 0; i < multiple; i++) {ids.push(egg.reward);}
 
             row.multiple = 1;
           }

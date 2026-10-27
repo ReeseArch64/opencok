@@ -31,7 +31,7 @@ export async function worldScoutQuotation(
 ): Promise<Fields> {
   const id = int(params, "point");
 
-  if (id < 1 || id > size * size || !Number.isSafeInteger(now) || now < 0) invalid();
+  if (id < 1 || id > size * size || !Number.isSafeInteger(now) || now < 0) {invalid();}
 
   const snapshot = await store.read(observer, id, kingdomId, now);
 
@@ -44,7 +44,7 @@ export async function worldScoutQuotation(
     num(snapshot.profile, "banFlag") !== 0 ||
     long(snapshot.profile, "banTime") > BigInt(now)
   )
-    invalid();
+    {invalid();}
 
   const point = snapshot.point,
     kind = num(point, "pointType"),
@@ -54,11 +54,11 @@ export async function worldScoutQuotation(
       long(point, "flushTime") > BigInt(now) &&
       barbarianCurrentHP(point, snapshot.barbarian, rules, BigInt(now)) > 0;
 
-  if (point.ownerId == null && ![14, 23, 46, 47].includes(kind) && !barbarian) invalid();
+  if (point.ownerId == null && ![14, 23, 46, 47].includes(kind) && !barbarian) {invalid();}
 
   const context = resourceOwnerRuleContext(snapshot.owner, { kingdomId, now });
 
-  if (!services.worldPowerEffects) invalid();
+  if (!services.worldPowerEffects) {invalid();}
 
   const world = worldPowerEffects(
       decodeWorldPowerEffects(await services.worldPowerEffects(kingdomId)),
@@ -79,7 +79,7 @@ export async function worldScoutQuotation(
   const source = num(snapshot.world, "pointId"),
     origin = resolveWorldCityGeometry(source, size, observer, snapshot.points)?.points;
 
-  if (!origin) invalid();
+  if (!origin) {invalid();}
 
   let destination: readonly number[] | undefined;
 
@@ -93,14 +93,14 @@ export async function worldScoutQuotation(
       kind === 68 ? [69] : [8, 2],
     )?.points;
 
-    if (!destination) invalid();
-  } else if ([6, 12, 18, 21, 15, 49, 66].includes(kind)) destination = worldFootprint(id, size);
+    if (!destination) {invalid();}
+  } else if ([6, 12, 18, 21, 15, 49, 66].includes(kind)) {destination = worldFootprint(id, size);}
 
   if (size > 600 && id === 1 + 600 + 600 * size)
-    destination = Array.from(
+    {destination = Array.from(
       { length: 9 },
       (_, index) => id + ((index % 3) - 1) + (Math.floor(index / 3) - 1) * size,
-    );
+    );}
 
   const route = ordinaryMarchRoute(
     rules,

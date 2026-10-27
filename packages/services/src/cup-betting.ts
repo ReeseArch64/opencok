@@ -38,7 +38,7 @@ export class CupScheduleService {
 }
 
 export function cupSettlementOperation(owner: string, ids: readonly string[]) {
-  if (!ids.length || ids.length > 4096 || new Set(ids).size !== ids.length) invalid();
+  if (!ids.length || ids.length > 4096 || new Set(ids).size !== ids.length) {invalid();}
 
   return `cup:settle:${createHash("sha256")
     .update(JSON.stringify([owner, [...ids].sort()]))
@@ -60,16 +60,16 @@ export class CupBettingDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.cupBetting;
 
-    if (!state) invalid();
+    if (!state) {invalid();}
 
     const empty = () => ({ response: encode({}), event: null }),
       calendar = cupCalendar(context.rules),
       mail = command === "euro.cup.settle";
 
     if (!mail && (!calendar || context.now < calendar.start || context.now > calendar.end))
-      return empty();
+      {return empty();}
 
-    if (mail && (!calendar || context.now <= calendar.end)) invalid();
+    if (mail && (!calendar || context.now <= calendar.end)) {invalid();}
 
     const matches = reconcileCupMatches(state.matches, cupMatches(context.rules), context.now),
       byId = new Map(matches.map((row) => [text(row, "id"), row])),
@@ -86,7 +86,7 @@ export class CupBettingDomain extends CityCommandDomain {
     };
 
     if (command === "euro.cup.info")
-      return {
+      {return {
         response: encode({
           matchList: sfs.array(
             matches
@@ -97,7 +97,7 @@ export class CupBettingDomain extends CityCommandDomain {
           ),
         }),
         event: null,
-      };
+      };}
 
     if (command === "euro.cup.bet.info" || command === "euro.cup.record") {
       const matchId = command === "euro.cup.bet.info" ? str(params, "matchId") : undefined;
@@ -141,16 +141,16 @@ export class CupBettingDomain extends CityCommandDomain {
         owned.reduce((sum, row) => sum + BigInt(num(row, "betNum")), 0n) + BigInt(amount) >
           limits.cap
       )
-        invalid();
+        {invalid();}
 
       const sides = text(match, "vs").split("|"),
         index = sides.findIndex((value) => value.toLowerCase() === side.toLowerCase());
 
-      if (index < 0) invalid();
+      if (index < 0) {invalid();}
 
       const odds = Math.fround(num(match, index === 0 ? "oddsA" : "oddsB"));
 
-      if (!Number.isFinite(odds) || odds <= 0) invalid();
+      if (!Number.isFinite(odds) || odds <= 0) {invalid();}
 
       context.spend({ [assets[type]!]: BigInt(amount) }, false);
       const bet: Row = {
@@ -198,7 +198,7 @@ export class CupBettingDomain extends CityCommandDomain {
           pending.map((row) => text(row, "uuid")),
         )
     )
-      invalid();
+      {invalid();}
 
     for (const bet of pending) {
       if (text(bet, "winner") === text(bet, "betSide")) {
@@ -216,14 +216,14 @@ export class CupBettingDomain extends CityCommandDomain {
 
     if (mail) {
       for (const bet of pending) {
-        if (text(bet, "winner") !== text(bet, "betSide")) continue;
+        if (text(bet, "winner") !== text(bet, "betSide")) {continue;}
 
         const type = cityInteger(bet.resourceType, 0, 3),
           value = cupPayout(cityInteger(bet.betNum, 1), num(bet, "odds")),
           template = context.rules.mail.get("11763"),
           contents = javaMailBytes(template?.message);
 
-        if (!template || !contents) invalid();
+        if (!template || !contents) {invalid();}
 
         const quests = (context.write.quests ??= {});
         quests.mail = [
@@ -247,7 +247,7 @@ export class CupBettingDomain extends CityCommandDomain {
       return empty();
     }
 
-    for (const [type, value] of totals) context.economy.resource(`${assets[type]!}bind`, value);
+    for (const [type, value] of totals) {context.economy.resource(`${assets[type]!}bind`, value);}
 
     const rewards = [];
 

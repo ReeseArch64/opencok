@@ -45,12 +45,12 @@ export class ExpeditionScorePublicationService {
           ? { periodId: last.periodId, stage: last.stage, member: last.member }
           : undefined;
 
-      if (!this.cursor) break;
+      if (!this.cursor) {break;}
     }
 
     const clock = await this.source.clock();
 
-    if (clock && latest) await this.publish(clock, latest, observedAt);
+    if (clock && latest) {await this.publish(clock, latest, observedAt);}
   }
 }
 
@@ -69,7 +69,7 @@ export class ExpeditionLiveViewService {
       body.startTime?.value !== view.startTime ||
       body.endTime?.value !== view.endTime
     )
-      return body;
+      {return body;}
 
     const fallback = { ...body, rank: sfs.int(-1) };
     let totals;
@@ -80,11 +80,11 @@ export class ExpeditionLiveViewService {
       return fallback;
     }
 
-    if (!totals) return fallback;
+    if (!totals) {return fallback;}
 
     const kingdoms = body.kingdominfolist?.value;
 
-    if (!Array.isArray(kingdoms)) throw new Error("Missing native expedition kingdoms");
+    if (!Array.isArray(kingdoms)) {throw new Error("Missing native expedition kingdoms");}
 
     return {
       ...body,
@@ -99,13 +99,13 @@ export class ExpeditionLiveViewService {
             !value.value ||
             typeof value.value !== "object"
           )
-            throw new Error("Invalid native expedition kingdom");
+            {throw new Error("Invalid native expedition kingdom");}
 
           const fields = value.value as Fields,
             id = int(fields, "serverid");
 
           if (id !== view.kingdomId && id !== view.opponent)
-            throw new Error("Foreign native expedition kingdom");
+            {throw new Error("Foreign native expedition kingdom");}
 
           return sfs.object({
             ...fields,

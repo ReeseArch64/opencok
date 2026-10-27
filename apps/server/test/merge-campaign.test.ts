@@ -68,7 +68,7 @@ test("merge board wire types, gating and bounded state reject corrupt authority"
     '{"version":1,"effects":[],"notified":[310,310]}',
     '{"version":1,"effects":[{"id":310,"sourceMergeAt":1,"start":2,"end":600003,"value":100}],"notified":[]}',
   ])
-    expect(() => decodeMergeEffects(raw)).toThrow();
+    {expect(() => decodeMergeEffects(raw)).toThrow();}
   const rules = await loadRules();
   rules.features.set("server_buff", { version: "1.0.0", online: "close", test: "close" });
   expect(

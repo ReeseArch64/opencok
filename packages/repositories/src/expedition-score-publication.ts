@@ -112,7 +112,7 @@ export function createExpeditionScoreProjection(
       authority.assertReady();
       cityAmount(now);
 
-      if (rows.length > 256) throw new Error("Expedition score publication bound exceeded");
+      if (rows.length > 256) {throw new Error("Expedition score publication bound exceeded");}
 
       for (const row of rows) {
         cityInteger(row.stage, 0, 8);
@@ -131,7 +131,7 @@ export function createExpeditionScoreProjection(
           row.score < 0 ||
           (row.metadata !== null && Buffer.byteLength(row.metadata) > 8192)
         )
-          throw new Error("Invalid owned expedition publication");
+          {throw new Error("Invalid owned expedition publication");}
       }
 
       return db.transaction(async (tx) => {
@@ -193,7 +193,7 @@ export function createExpeditionScoreProjection(
           : [];
         accepted = accepted.flatMap((row) => {
           if (!seals.some((seal) => seal.periodId === row.periodId && seal.stage === row.stage))
-            return [row];
+            {return [row];}
 
           const frozen = refresh.find(
             (saved) =>
@@ -231,7 +231,7 @@ export function createExpeditionScoreProjection(
             .returning({ member: expedition_score.member });
 
           if (written.length !== accepted.length)
-            throw new Error("Foreign or stale expedition score member");
+            {throw new Error("Foreign or stale expedition score member");}
         }
 
         authority.assertReady();
@@ -268,7 +268,7 @@ export function createExpeditionLiveSource(
           (profile.banFlag ?? 0) !== 0 ||
           (profile.banTime ?? 0n) > now
         )
-          throw new GameError(errors.invalid);
+          {throw new GameError(errors.invalid);}
 
         const [period] = await tx
             .select()
@@ -277,7 +277,7 @@ export function createExpeditionLiveSource(
             .limit(1),
           phase = expeditionPhase(period, now);
 
-        if (!period || !phase) return;
+        if (!period || !phase) {return;}
 
         return {
           periodId: period.periodId,
@@ -315,7 +315,7 @@ export function createExpeditionLiveSource(
             own.opponent !== other.kingdomId ||
             other.opponent !== own.kingdomId
           )
-            return;
+            {return;}
 
           const result = await tx.execute<{
             rank: number;
@@ -328,7 +328,7 @@ export function createExpeditionLiveSource(
           const row = result.rows[0];
 
           if (!row || Object.values(row).some((value) => !Number.isFinite(value)))
-            throw new Error("Invalid shared expedition totals");
+            {throw new Error("Invalid shared expedition totals");}
 
           return row;
         },

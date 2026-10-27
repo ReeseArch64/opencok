@@ -23,20 +23,20 @@ export function dragonDefinition(rules: Rules, row: Row) {
     (rule) => Number(rule.base_id) === num(row, "itemId") && Number(rule.level) === num(row, "lv"),
   );
 
-  if (!base || levels.length !== 1) dragonFailure();
+  if (!base || levels.length !== 1) {dragonFailure();}
 
   return { base, level: levels[0]! };
 }
 
 export function dragonJson<T extends object>(raw: unknown, empty: T): T {
   if (raw === null || raw === undefined || raw === "" || raw === "null")
-    return structuredClone(empty);
+    {return structuredClone(empty);}
 
-  if (typeof raw !== "string" || raw.length > 4000) dragonFailure();
+  if (typeof raw !== "string" || raw.length > 4000) {dragonFailure();}
 
   const parsed: unknown = JSON.parse(raw);
 
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) dragonFailure();
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {dragonFailure();}
 
   return { ...empty, ...parsed };
 }
@@ -45,9 +45,9 @@ export function dragonFriendly(row: Row, amount: number, maximum: number, now: b
   const previous = num(row, "friendly");
   row.friendly = cityInteger(Math.max(0, Math.min(maximum, previous + amount)));
 
-  if (previous === 0 && amount > 0) row.friendShipDecreaseTime = now;
+  if (previous === 0 && amount > 0) {row.friendShipDecreaseTime = now;}
 
-  if (row.friendly === 0) row.friendShipDecreaseTime = 0n;
+  if (row.friendly === 0) {row.friendShipDecreaseTime = 0n;}
 }
 
 export function dragonDecay(
@@ -57,7 +57,7 @@ export function dragonDecay(
   now: bigint,
   effect: (id: number) => number,
 ) {
-  if (num(row, "dragonState") !== 3) return;
+  if (num(row, "dragonState") !== 3) {return;}
 
   if (num(row, "initFriendShipFlag") === 0) {
     row.friendly = cityInteger(level.friendship);
@@ -82,12 +82,12 @@ export function dragonDecay(
       Math.fround(1 - Math.max(Math.fround(effect(485) / 100), 0)),
   );
 
-  if (!Number.isSafeInteger(seconds) || seconds <= 0) return;
+  if (!Number.isSafeInteger(seconds) || seconds <= 0) {return;}
 
   const interval = BigInt(seconds) * 1000n,
     elapsed = now - long(row, "friendShipDecreaseTime");
 
-  if (elapsed < 0n) dragonFailure();
+  if (elapsed < 0n) {dragonFailure();}
 
   const decrease = elapsed / interval;
 
@@ -98,7 +98,7 @@ export function dragonDecay(
 }
 
 export function dragonPower(row: Row, rules: Rules, attackPercent = 0) {
-  if (num(row, "dragonState") !== 3) return 0n;
+  if (num(row, "dragonState") !== 3) {return 0n;}
 
   const { base, level } = dragonDefinition(rules, row),
     global = rules.items.get("dragon_new");
@@ -114,7 +114,7 @@ export function dragonPower(row: Row, rules: Rules, attackPercent = 0) {
       Math.fround(Number(global?.k12)) +
     Number(base.initFight);
 
-  if (!Number.isFinite(power) || power < 0 || power > Number.MAX_SAFE_INTEGER) dragonFailure();
+  if (!Number.isFinite(power) || power < 0 || power > Number.MAX_SAFE_INTEGER) {dragonFailure();}
 
   return BigInt(Math.trunc(power));
 }

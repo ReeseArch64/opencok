@@ -46,7 +46,7 @@ function serializeBuilding(row: Row, rules: Rules, next = false, now = Date.now(
   out.unlock_value = sfs.string(unlock.values);
 
   for (const key of ["wood", "stone", "iron", "food", "silver"] as const)
-    out[key] = sfs.long(rules.cost(rule, key));
+    {out[key] = sfs.long(rules.cost(rule, key));}
 
   out.time = sfs.int(rule.constructionSeconds ?? 0);
   out.exp = sfs.int(rule.experience ?? 0);
@@ -55,7 +55,7 @@ function serializeBuilding(row: Row, rules: Rules, next = false, now = Date.now(
   out.ban_luckyday = sfs.int(0);
   out.destroy_time = sfs.int(rule.demolitionSeconds ?? 0);
 
-  if (rule.power !== undefined) out.power = sfs.int(rule.power);
+  if (rule.power !== undefined) {out.power = sfs.int(rule.power);}
 
   if (rule.unlockPayment !== undefined) {
     out.unlock_costType = sfs.int(rule.unlockPayment.paymentId);
@@ -64,14 +64,14 @@ function serializeBuilding(row: Row, rules: Rules, next = false, now = Date.now(
 
   const item = buildingItemCosts(rule);
 
-  if (item !== undefined) out.item = sfs.string(item);
+  if (item !== undefined) {out.item = sfs.string(item);}
 
   const parameters = buildingDisplayParameters(rule);
 
   for (let index = 0; index < 5; index++) {
     const parameter = parameters[index];
 
-    if (parameter !== undefined) out["para" + (index + 1)] = sfs.string(parameter);
+    if (parameter !== undefined) {out["para" + (index + 1)] = sfs.string(parameter);}
   }
 
   const nextRule = rules.nextBuilding(itemId, level, rule.starLevel, rule.starProgress, now);
@@ -79,13 +79,13 @@ function serializeBuilding(row: Row, rules: Rules, next = false, now = Date.now(
     .slice(0, 5)
     .filter((value) => value !== undefined);
 
-  if (paras.length) out.nextLevelParas = sfs.string(paras.join(","));
+  if (paras.length) {out.nextLevelParas = sfs.string(paras.join(","));}
 
-  if (long(row, "refreshTime")) out.refreshTime = sfs.long(long(row, "refreshTime"));
+  if (long(row, "refreshTime")) {out.refreshTime = sfs.long(long(row, "refreshTime"));}
 
   if (long(row, "effectTime")) {
-    if (text(row, "itemId") === "417000") out.cdTime = sfs.long(long(row, "effectTime") / 1000n);
-    else out.effectTime = sfs.long(long(row, "effectTime"));
+    if (text(row, "itemId") === "417000") {out.cdTime = sfs.long(long(row, "effectTime") / 1000n);}
+    else {out.effectTime = sfs.long(long(row, "effectTime"));}
   }
 
   return out;
@@ -104,7 +104,7 @@ function serializeQueue(row: Row, item: Fields = {}, helped = true): Fields {
     totalTime: sfs.long(long(row, "totalTime") || long(row, "updateTime") - long(row, "startTime")),
   };
 
-  if (helped) result.isHelped = sfs.int(num(row, "isHelped"));
+  if (helped) {result.isHelped = sfs.int(num(row, "isHelped"));}
 
   return result;
 }
@@ -127,7 +127,7 @@ function serializeResource(row: Row): Fields {
     "granite",
     "limestone",
   ])
-    result[key] = sfs.int(Math.max(0, num(row, key)));
+    {result[key] = sfs.int(Math.max(0, num(row, key)));}
 
   result.dragonFood = sfs.int(num(row, "dragon_food"));
   result.dragonGold = sfs.int(num(row, "dragon_gold"));
@@ -165,7 +165,7 @@ function serializeUser(
   };
 
   for (const key of ["uid", "name", "allianceId", "openedPos", "pic", "guideStep"])
-    result[key] = sfs.string(text(profile, key));
+    {result[key] = sfs.string(text(profile, key));}
 
   for (const key of [
     "level",
@@ -176,7 +176,7 @@ function serializeUser(
     "gmFlag",
     "crossFightSrcServerId",
   ])
-    result[key] = sfs.int(num(profile, key));
+    {result[key] = sfs.int(num(profile, key));}
 
   for (const key of [
     "paidGold",
@@ -191,7 +191,7 @@ function serializeUser(
     "neutralScore",
     "csmodBalance",
   ])
-    result[key] = sfs.long(long(profile, key));
+    {result[key] = sfs.long(long(profile, key));}
 
   return result;
 }

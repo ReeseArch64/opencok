@@ -18,14 +18,14 @@ import { mailBlank } from "@opencok/rules/mail";
 import { javaIntHashMapOrder } from "@opencok/rules/java-hash-map-order";
 
 function serializereconnectMarchDragon(row: Row | undefined, rules: Rules): Fields {
-  if (!row) return { uuid: sfs.string(""), itemId: sfs.string(""), friendShip: sfs.int(0) };
+  if (!row) {return { uuid: sfs.string(""), itemId: sfs.string(""), friendShip: sfs.int(0) };}
 
   const rule = [...(rules.power.dragonLevels?.values() ?? [])].find(
     (rule) =>
       integer(rule.base_id) === integer(row.itemId) && integer(rule.level) === integer(row.lv),
   );
 
-  if (!rule) throw new Error("Missing march dragon rule");
+  if (!rule) {throw new Error("Missing march dragon rule");}
 
   const result: Fields = {
     userId: sfs.string(string(row.uid)),
@@ -35,15 +35,15 @@ function serializereconnectMarchDragon(row: Row | undefined, rules: Rules): Fiel
   };
 
   if (row.nickName !== null && row.nickName !== undefined)
-    result.nickName = sfs.string(string(row.nickName));
+    {result.nickName = sfs.string(string(row.nickName));}
 
   return result;
 }
 
 function serializeReconnectMarchArmy(army: SavedMarchArmy | null, rules: Rules): Value[] {
-  if (army === null) return [];
+  if (army === null) {return [];}
 
-  if (army.soldiers === null) throw new Error("Missing saved march soldiers");
+  if (army.soldiers === null) {throw new Error("Missing saved march soldiers");}
 
   const groups = new Map<
     number,
@@ -57,7 +57,7 @@ function serializeReconnectMarchArmy(army: SavedMarchArmy | null, rules: Rules):
     if (type === null) {
       const arm = integer(rule?.arm);
 
-      if (arm < 1 || arm > 8) throw new Error("Invalid march troop family");
+      if (arm < 1 || arm > 8) {throw new Error("Invalid march troop family");}
 
       type = Math.floor((arm - 1) / 2);
     }
@@ -101,7 +101,7 @@ function serializereconnectMarchBase(
   const type = integer(row.type);
   const state = integer(row.state);
 
-  if (state < 0 || state > 2) throw new Error("Invalid march state");
+  if (state < 0 || state > 2) {throw new Error("Invalid march state");}
 
   const fields: Fields = {
     uuid: sfs.string(string(row.uuid)),
@@ -132,13 +132,13 @@ function serializereconnectMarchBase(
   }
 
   if (!mailBlank(row.plunderRes as string | null) || !mailBlank(row.retrieveRes as string | null))
-    fields.plunderRes = sfs.string(string(row.plunderRes));
+    {fields.plunderRes = sfs.string(string(row.plunderRes));}
 
   let start = 0n;
   let end = long(row.arrivalTime);
 
-  if (state === 0) start = long(row.marchStartTime);
-  else if (state === 1) end = 0n;
+  if (state === 0) {start = long(row.marchStartTime);}
+  else if (state === 1) {end = 0n;}
   else {
     const returning = long(row.returnStartTime);
     const arrival = long(row.marchArrivalTime);
@@ -154,7 +154,7 @@ function serializereconnectMarchBase(
       context.siege ||
       !(remaining > 0 || [1, 3, 9, 10, 12, 13, 17].includes(type) || context.resourceBattle)
     )
-      end = 0n;
+      {end = 0n;}
   }
 
   fields.st = sfs.long(start);
@@ -162,7 +162,7 @@ function serializereconnectMarchBase(
   fields.mt = sfs.int(integer(row.marchTime));
 
   if (!context.siege && !mailBlank(row.blackLandMarchTime as string | null))
-    fields.mt2 = sfs.array(decodeLegacyJsonArray(string(row.blackLandMarchTime)));
+    {fields.mt2 = sfs.array(decodeLegacyJsonArray(string(row.blackLandMarchTime)));}
 
   fields.army = sfs.array(reconnectMarchArmy(army, rules));
 
@@ -171,7 +171,7 @@ function serializereconnectMarchBase(
     fields.monsterLevel = sfs.int(integer(row.monsterLevel));
   }
 
-  if (context.resourceBattle) fields.occupyEndTime = sfs.long(long(row.occupyResourceEndTime));
+  if (context.resourceBattle) {fields.occupyEndTime = sfs.long(long(row.occupyResourceEndTime));}
 
   if (
     type === 0 &&
@@ -209,7 +209,7 @@ function serializereconnectMarches(
   for (const view of views) {
     const id = string(view.row.uuid);
 
-    if (index.has(id)) throw new Error("Duplicate reconnect march");
+    if (index.has(id)) {throw new Error("Duplicate reconnect march");}
 
     index.set(id, view);
   }
@@ -217,24 +217,24 @@ function serializereconnectMarches(
   const project = (view: ReconnectMarchView, visiting: Set<string>): Fields => {
     const id = string(view.row.uuid);
 
-    if (visiting.has(id) || visiting.size > 1) throw new Error("Cyclic reconnect team");
+    if (visiting.has(id) || visiting.size > 1) {throw new Error("Cyclic reconnect team");}
 
     visiting.add(id);
     let result = { ...view.base };
     const dragons: Fields[] = view.hasDragon && view.petDragon ? [view.petDragon] : [];
     const generals: Fields[] = view.general ? [view.general] : [];
 
-    if (view.petDragon) result.petDragon = sfs.object(view.petDragon);
+    if (view.petDragon) {result.petDragon = sfs.object(view.petDragon);}
 
     const team = view.team;
 
     if (team) {
       if (new Set(team.members).size !== team.members.length || team.members.includes(team.leader))
-        throw new Error("Duplicate reconnect team members");
+        {throw new Error("Duplicate reconnect team members");}
 
       const leader = index.get(team.leader);
 
-      if (!leader) throw new Error("Missing reconnect team leader");
+      if (!leader) {throw new Error("Missing reconnect team leader");}
 
       const members = team.members.map((id) => {
         const member = index.get(id);
@@ -244,25 +244,25 @@ function serializereconnectMarches(
           member.row.teamId !== view.row.teamId ||
           member.row.worldId !== view.row.worldId
         )
-          throw new Error("Inconsistent reconnect team member");
+          {throw new Error("Inconsistent reconnect team member");}
 
         return member;
       });
 
       if (leader.row.teamId !== view.row.teamId || leader.row.worldId !== view.row.worldId)
-        throw new Error("Inconsistent reconnect team leader");
+        {throw new Error("Inconsistent reconnect team leader");}
 
       result.team = sfs.string(team.leader);
       const type = integer(view.row.type);
       const state = integer(view.row.state);
 
       if ([5, 16, 19].includes(type) && state !== 2 && now >= long(view.row.marchArrivalTime)) {
-        if (id !== team.leader) result = { ...project(leader, visiting), uuid: sfs.string(id) };
+        if (id !== team.leader) {result = { ...project(leader, visiting), uuid: sfs.string(id) };}
       } else if ([4, 15, 18].includes(type)) {
         const totals = new Map<number, { total: number; dead: number }>();
 
         for (const march of [leader, ...members]) {
-          if (march.base.army?.type !== Type.Array) throw new Error("Invalid reconnect team army");
+          if (march.base.army?.type !== Type.Array) {throw new Error("Invalid reconnect team army");}
 
           for (const entry of march.base.army.value as Value[]) {
             const army = objectFields(entry);
@@ -284,9 +284,9 @@ function serializereconnectMarches(
           ),
         );
 
-        if (state === 2) result.leaderArmy = view.base.army!;
+        if (state === 2) {result.leaderArmy = view.base.army!;}
 
-        if (now < long(view.row.marchStartTime)) result.sType = sfs.int(1);
+        if (now < long(view.row.marchStartTime)) {result.sType = sfs.int(1);}
       }
 
       result.tct = sfs.long(long(team.createdAt));
@@ -299,12 +299,12 @@ function serializereconnectMarches(
           if (member.hasDragon && member.dragon) {
             const uuid = member.dragon.uuid?.value;
 
-            if (typeof uuid !== "string") throw new Error("Invalid march dragon identity");
+            if (typeof uuid !== "string") {throw new Error("Invalid march dragon identity");}
 
-            if (!dragons.some((dragon) => dragon.uuid?.value === uuid)) dragons.push(member.dragon);
+            if (!dragons.some((dragon) => dragon.uuid?.value === uuid)) {dragons.push(member.dragon);}
           }
 
-          if (member.general) generals.push(member.general);
+          if (member.general) {generals.push(member.general);}
         }
       }
     }
@@ -317,7 +317,7 @@ function serializereconnectMarches(
   };
   const own = views.filter((view) => view.row.ownerUid === owner);
 
-  if (own.length > 32767) throw new Error("Oversized reconnect marches");
+  if (own.length > 32767) {throw new Error("Oversized reconnect marches");}
 
   return {
     worldMarch: sfs.array(

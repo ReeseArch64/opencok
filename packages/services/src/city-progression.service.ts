@@ -41,8 +41,8 @@ export class CityProgressionService<T> {
     this.contexts = new CityProgressionContextFactory(store, rules, effects);
 
     for (const domain of this.domainList)
-      for (const type of domain.types) {
-        if (this.domains.has(type)) throw new Error("Duplicate city activity domain");
+      {for (const type of domain.types) {
+        if (this.domains.has(type)) {throw new Error("Duplicate city activity domain");}
 
         this.domains.set(type, async (tx, action, activity, now, economy) => {
           const { repository, plan } = await this.contexts.create(
@@ -52,21 +52,21 @@ export class CityProgressionService<T> {
             economy,
           );
 
-          if (action === TimedActivityAction.Finish) plan.completing = activity;
+          if (action === TimedActivityAction.Finish) {plan.completing = activity;}
 
           const body = await domain.apply(plan, action, activity);
           refreshCampaignGrants(plan);
 
           if (action === TimedActivityAction.Finish && activity.type === 0)
-            refreshGeneralUnlocks(plan);
+            {refreshGeneralUnlocks(plan);}
 
           if (action === TimedActivityAction.Finish)
-            refreshQuests(plan, {
+            {refreshQuests(plan, {
               legacy: activity.type === 0 ? 3 : activity.type === 6 ? 12 : undefined,
               daily: activity.type === 0 ? 26 : activity.type === 6 ? 27 : undefined,
               main: activity.type === 0 ? 31 : undefined,
               count: 1,
-            });
+            });}
 
           if (
             action === TimedActivityAction.Finish &&
@@ -80,7 +80,7 @@ export class CityProgressionService<T> {
                   : plan.write.armies;
             const quantity = (rows ?? []).reduce((sum, row) => {
               if (activity.type === 3)
-                return (
+                {return (
                   sum +
                   Math.max(
                     0,
@@ -89,7 +89,7 @@ export class CityProgressionService<T> {
                       "heal",
                     ) - num(row, "heal"),
                   )
-                );
+                );}
 
               const prior = (activity.type === 2 ? plan.state.forts : plan.state.armies).find(
                 (prior) => prior.armyId === row.armyId,
@@ -111,7 +111,7 @@ export class CityProgressionService<T> {
 
           return encode(body);
         });
-      }
+      }}
   }
 
   public readonly accelerate = async (
@@ -123,7 +123,7 @@ export class CityProgressionService<T> {
   ) => {
     const domain = this.domainList.find((domain) => domain.types.includes(activity.type));
 
-    if (!domain?.accelerate) throw new GameError(errors.unsupported, "city_progression");
+    if (!domain?.accelerate) {throw new GameError(errors.unsupported, "city_progression");}
 
     const { repository, plan } = await this.contexts.create(tx, activity.ownerId, now, economy);
     await domain.accelerate(plan, activity, remaining);
@@ -140,7 +140,7 @@ export class CityProgressionService<T> {
   ) => {
     const domain = this.domainList.find((domain) => domain.types.includes(activity.type));
 
-    if (!domain?.next) return undefined;
+    if (!domain?.next) {return undefined;}
 
     const { repository, plan } = await this.contexts.create(tx, activity.ownerId, now, economy);
     const result = await domain.next(plan, activity);
@@ -163,7 +163,7 @@ export class CityProgressionService<T> {
       (candidate) => candidate.handles?.(command) ?? candidate.commands.includes(command),
     );
 
-    if (!domain) throw new GameError(errors.unsupported, "city_progression");
+    if (!domain) {throw new GameError(errors.unsupported, "city_progression");}
 
     const { repository, plan } = await this.contexts.create(
       tx,
@@ -176,7 +176,7 @@ export class CityProgressionService<T> {
     const result = await domain.prepare(plan, command, decode(Buffer.from(params)));
     refreshCampaignGrants(plan);
 
-    if (!domain.commands.includes("task.reward.get")) refreshQuests(plan);
+    if (!domain.commands.includes("task.reward.get")) {refreshQuests(plan);}
 
     await flushExpeditionScores(plan);
     await flushHeroScore(plan);

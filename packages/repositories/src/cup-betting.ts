@@ -26,7 +26,7 @@ export async function readCupBetting(tx: MutationTransaction, owner: string) {
     .limit(4097)
     .for("update");
 
-  if (matches.length > 1024 || bets.length > 4096) throw new Error("Cup aggregate exceeds bound");
+  if (matches.length > 1024 || bets.length > 4096) {throw new Error("Cup aggregate exceeds bound");}
 
   return { matches, bets };
 }
@@ -37,7 +37,7 @@ export async function writeCupBetting(
   write: CupBettingWrite,
 ) {
   if ((write.matches?.length ?? 0) > 1024 || (write.bets?.length ?? 0) > 4096)
-    throw new Error("Cup write exceeds bound");
+    {throw new Error("Cup write exceeds bound");}
 
   for (const row of write.matches ?? []) {
     const id = text(row, "id"),
@@ -56,7 +56,7 @@ export async function writeCupBetting(
       ![oddsA, oddsB].every((value) => !Number.isNaN(value) && value > 0) ||
       (winner && !vs.split("|").includes(winner))
     )
-      throw new Error("Invalid cup match write");
+      {throw new Error("Invalid cup match write");}
 
     const value = {
       id,
@@ -89,7 +89,7 @@ export async function writeCupBetting(
       Number.isNaN(num(row, "odds")) ||
       num(row, "odds") <= 0
     )
-      throw new Error("Invalid cup bet owner");
+      {throw new Error("Invalid cup bet owner");}
 
     const value = {
       uuid: text(row, "uuid"),
@@ -109,10 +109,10 @@ export async function writeCupBetting(
       .from(user_bet)
       .where(eq(user_bet.uuid, value.uuid));
 
-    if (saved && saved.uid !== owner) throw new Error("Foreign cup bet");
+    if (saved && saved.uid !== owner) {throw new Error("Foreign cup bet");}
 
     if (value.odds === Infinity && saved?.odds !== Infinity)
-      throw new Error("Invalid new cup odds");
+      {throw new Error("Invalid new cup odds");}
 
     await tx
       .insert(user_bet)
@@ -141,7 +141,7 @@ export async function pendingCupSettlements(db: Database["kingdom"]["db"], after
     .orderBy(asc(user_bet.uid))
     .limit(64);
 
-  if (rows.some((row) => row.ids.length > 4096)) throw new Error("Cup settlement exceeds bound");
+  if (rows.some((row) => row.ids.length > 4096)) {throw new Error("Cup settlement exceeds bound");}
 
   return rows;
 }

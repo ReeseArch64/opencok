@@ -19,7 +19,7 @@ test("every maintained numeric campaign declaration is available by its exact sc
     planner = new CampaignPlanner(context);
   expect(rules.advanced.campaignVariables?.size).toBe(384);
   for (const [key, variable] of rules.advanced.campaignVariables!)
-    expect(planner.value(key)).toBe(BigInt(variable.initialValue ?? 0));
+    {expect(planner.value(key)).toBe(BigInt(variable.initialValue ?? 0));}
   expect(planner.value("$kingwar_testitem_sent_2")).toBe(0n);
   expect(planner.value("I$long_sss")).toBe(100n);
   planner.write("I$long_sss", 999n);

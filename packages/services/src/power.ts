@@ -9,34 +9,34 @@ import { powerFeatureContext } from "@opencok/rules/power-context";
 
 export function decodeWorldPowerEffects(records: ReadonlyMap<string, string>): WorldPowerEffect[] {
   try {
-    if (records.size > 4096) throw new Error();
+    if (records.size > 4096) {throw new Error();}
 
     const effects: WorldPowerEffect[] = [];
     let bytes = 0;
 
     for (const [key, raw] of records) {
       if (!/^(?:0|[1-9]\d{0,9})$/.test(key) || Number(key) > 2147483647 || typeof raw !== "string")
-        throw new Error();
+        {throw new Error();}
 
       bytes += Buffer.byteLength(raw);
 
-      if (bytes > 1048576) throw new Error();
+      if (bytes > 1048576) {throw new Error();}
 
       const record = decodeStoredJson(Buffer.from(raw));
 
-      if (record === null || typeof record !== "object" || Array.isArray(record)) throw new Error();
+      if (record === null || typeof record !== "object" || Array.isArray(record)) {throw new Error();}
 
-      if (!Object.hasOwn(record, "value")) continue;
+      if (!Object.hasOwn(record, "value")) {continue;}
 
       const { value, endTime } = record as Record<string, unknown>;
 
-      if (typeof value !== "string") throw new Error();
+      if (typeof value !== "string") {throw new Error();}
 
       if (
         Object.hasOwn(record, "endTime") &&
         (typeof endTime !== "bigint" || BigInt.asIntN(64, endTime) !== endTime)
       )
-        throw new Error();
+        {throw new Error();}
 
       effects.push({ id: Number(key), value, endTime: endTime as bigint | undefined });
     }
@@ -51,14 +51,14 @@ export function titleContractExpiries(knight: Row | undefined): ReadonlyMap<stri
   const data = knight?.contract_unlock_title;
 
   if (data === undefined || data === null || (Buffer.isBuffer(data) && !data.length))
-    return new Map();
+    {return new Map();}
 
   try {
-    if (!Buffer.isBuffer(data)) throw new Error();
+    if (!Buffer.isBuffer(data)) {throw new Error();}
 
     const object = decodeStoredJson(data);
 
-    if (object === null || typeof object !== "object" || Array.isArray(object)) throw new Error();
+    if (object === null || typeof object !== "object" || Array.isArray(object)) {throw new Error();}
 
     const result = new Map<string, bigint>();
 
@@ -69,7 +69,7 @@ export function titleContractExpiries(knight: Row | undefined): ReadonlyMap<stri
         typeof value !== "bigint" ||
         BigInt.asIntN(64, value) !== value
       )
-        throw new Error();
+        {throw new Error();}
 
       result.set(key, value);
     }

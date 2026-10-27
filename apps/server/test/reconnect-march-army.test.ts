@@ -54,7 +54,7 @@ test("older march snapshots retain nullable companion fields and reject incompat
   changed[offset] = 88;
   expect(() => decodeWorldMarchArmy(changed)).toThrow();
   for (let length = 0; length < bytes.length; length++)
-    expect(() => decodeWorldMarchArmy(bytes.subarray(0, length))).toThrow();
+    {expect(() => decodeWorldMarchArmy(bytes.subarray(0, length))).toThrow();}
 });
 
 test("native serialized soldier star levels remain factual fields of the march snapshot", () => {

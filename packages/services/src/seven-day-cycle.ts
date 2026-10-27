@@ -23,7 +23,7 @@ import type { CityDomain } from "./city-domain.ts";
 import type { CityProgressionContext } from "./city-progression-context.ts";
 
 export function sevenDayPurchaseOperationId(owner: string, eventId: string): string {
-  if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) cycleFailure();
+  if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) {cycleFailure();}
 
   return `sevenday:${createHash("sha256").update(`${owner}\0${eventId}`).digest("hex")}`;
 }
@@ -31,7 +31,7 @@ export function sevenDayPurchaseOperationId(owner: string, eventId: string): str
 function decimal(rule: Rule, key: string): number {
   const value = Number(rule[key]);
 
-  if (!rule[key]?.trim() || !Number.isFinite(value)) cycleFailure();
+  if (!rule[key]?.trim() || !Number.isFinite(value)) {cycleFailure();}
 
   return value;
 }
@@ -77,7 +77,7 @@ export class SevenDayCycleDomain extends CityCommandDomain {
     this.prepare = async (context, command, params) => {
       const state = context.state.sevenDayCycle;
 
-      if (!state) cycleFailure();
+      if (!state) {cycleFailure();}
 
       const empty = () => ({ response: encode({}), event: null });
       const ruleContext = {
@@ -89,7 +89,7 @@ export class SevenDayCycleDomain extends CityCommandDomain {
       if (command === "sevenday.look.reward") {
         const rule = context.rules.advanced.exchangeCycles?.get(str(params, "id"));
 
-        if (!rule) cycleFailure();
+        if (!rule) {cycleFailure();}
 
         return {
           response: encode({
@@ -104,9 +104,9 @@ export class SevenDayCycleDomain extends CityCommandDomain {
       const row = state.cycle ? { ...state.cycle } : fresh(context),
         write = (context.write.sevenDayCycle ??= {});
 
-      if (!state.cycle) write.cycle = row;
+      if (!state.cycle) {write.cycle = row;}
 
-      if (command === "sevenday.init") return empty();
+      if (command === "sevenday.init") {return empty();}
 
       const page = cityInteger(int(params, "page"), 0, 2),
         stageKey = cycleField("stage", page),
@@ -147,26 +147,26 @@ export class SevenDayCycleDomain extends CityCommandDomain {
           str(params, "operationId") !== sevenDayPurchaseOperationId(context.owner, eventId) ||
           !(await gateway.accept({ owner: context.owner, eventId, exchangeId }))
         )
-          cycleFailure();
+          {cycleFailure();}
 
         const offer = offers.find(
           (offer) =>
             offer.exchangeid === exchangeId && cityInteger(offer.stage, 1, 7) === stage + 1,
         );
 
-        if (!offer || waited || last > context.now) cycleFailure();
+        if (!offer || waited || last > context.now) {cycleFailure();}
 
         const next = stage === 6 ? 0 : stage + 1;
         row[stageKey] = next;
 
-        if (next === 0) row[claimsKey] = "";
+        if (next === 0) {row[claimsKey] = "";}
 
         row[waitKey] = context.now;
         const totalKey = cycleField("totalstage", page);
         row[totalKey] = cityInteger(num(row, totalKey) + 1);
         const seconds = cityInteger(offer.time ?? 0);
 
-        if (seconds > 0) row[cdKey] = (today + 1n) * 86400000n + BigInt(seconds) * 1000n;
+        if (seconds > 0) {row[cdKey] = (today + 1n) * 86400000n + BigInt(seconds) * 1000n;}
 
         write.cycle = row;
 
@@ -195,7 +195,7 @@ export class SevenDayCycleDomain extends CityCommandDomain {
           offers.map((offer) => {
             const exchange = context.rules.advanced.castleExchanges?.get(offer.exchangeid!);
 
-            if (!exchange) cycleFailure();
+            if (!exchange) {cycleFailure();}
 
             return sfs.object({
               id: sfs.int(cityInteger(offer.id, 1)),
@@ -215,7 +215,7 @@ export class SevenDayCycleDomain extends CityCommandDomain {
         );
 
         if (drawOpen) {
-          if (!state.draws.some((item) => num(item, "type") === page)) write.draw = draw;
+          if (!state.draws.some((item) => num(item, "type") === page)) {write.draw = draw;}
 
           const buffs = cycleBuffs(text(draw, "reward"));
           body.drawcount = sfs.int(cityInteger(draw.count));
@@ -271,9 +271,9 @@ export class SevenDayCycleDomain extends CityCommandDomain {
           !rule.reward ||
           rule.reward === "0"
         )
-          cycleFailure();
+          {cycleFailure();}
 
-        if (claimed.includes(id) || stage < cityInteger(rule.stage, 1, 7)) return empty();
+        if (claimed.includes(id) || stage < cityInteger(rule.stage, 1, 7)) {return empty();}
 
         const next = [...claimed, id].join(";") + ";";
         cycleClaims(next);
@@ -287,23 +287,23 @@ export class SevenDayCycleDomain extends CityCommandDomain {
         return { response: encode({ reward: sfs.array(reward) }), event: null };
       }
 
-      if (!drawOpen) return empty();
+      if (!drawOpen) {return empty();}
 
-      if (cityInteger(draw.count) < 1) cycleFailure();
+      if (cityInteger(draw.count) < 1) {cycleFailure();}
 
       const choice = cycleDrawChoice(context.rules, page, random),
         body: Fields = { id: sfs.string(choice.id!) };
 
       if (choice.reward?.trim() && choice.reward !== "0")
-        body.reward = sfs.array(
+        {body.reward = sfs.array(
           grantNativeProgressionReward(context, pinProgressionReward(context, choice.reward)),
-        );
+        );}
 
       if (choice.buff?.trim()) {
         const buff = applyProgressionStatus(context, choice.buff),
           end = buff.endTime;
 
-        if (!end) cycleFailure();
+        if (!end) {cycleFailure();}
 
         body.buff = sfs.object(buff);
         context.economy.push?.("status.push", encode(buff));
@@ -311,7 +311,7 @@ export class SevenDayCycleDomain extends CityCommandDomain {
         buffs.set(choice.buff, BigInt(String(end.value)));
         const raw = [...buffs].map(([id, at]) => `${id}:${at}`).join("|");
 
-        if (raw.length >= 500) cycleFailure();
+        if (raw.length >= 500) {cycleFailure();}
 
         draw.reward = raw;
       }
@@ -321,7 +321,7 @@ export class SevenDayCycleDomain extends CityCommandDomain {
       write.draw = draw;
 
       if (["3", "4"].includes(choice.color ?? ""))
-        write.history = {
+        {write.history = {
           gameUid: context.owner,
           roleName: text(context.state.profile, "name"),
           allianceId: text(context.state.profile, "allianceId"),
@@ -329,7 +329,7 @@ export class SevenDayCycleDomain extends CityCommandDomain {
           type: page,
           itemId: choice.id!,
           time: context.now,
-        };
+        };}
 
       body.drawcount = sfs.int(draw.count);
 

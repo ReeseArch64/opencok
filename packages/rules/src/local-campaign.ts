@@ -7,11 +7,11 @@ export function campaignFailure(): never {
 }
 
 export function campaignNumber(value: unknown): bigint {
-  if (!/^-?\d{1,19}$/.test(String(value))) campaignFailure();
+  if (!/^-?\d{1,19}$/.test(String(value))) {campaignFailure();}
 
   const result = BigInt(String(value));
 
-  if (result < -9223372036854775808n || result > 9223372036854775807n) campaignFailure();
+  if (result < -9223372036854775808n || result > 9223372036854775807n) {campaignFailure();}
 
   return result;
 }
@@ -38,7 +38,7 @@ export function campaignCompare(left: bigint, operator: string, right: bigint) {
 }
 
 export function campaignMath(left: bigint, operator: string, right: bigint) {
-  if ((operator === "/" || operator === "%") && right === 0n) campaignFailure();
+  if ((operator === "/" || operator === "%") && right === 0n) {campaignFailure();}
 
   switch (operator) {
     case "+":
@@ -59,7 +59,7 @@ export function campaignMath(left: bigint, operator: string, right: bigint) {
 export function campaignTimestamp(raw: string | undefined) {
   const match = raw?.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
 
-  if (!match || Number(match[4]) > 59) return undefined;
+  if (!match || Number(match[4]) > 59) {return undefined;}
 
   const at = eventTimestamp(`${match[1]}-${match[2]}-${match[3]}`);
 
@@ -67,23 +67,23 @@ export function campaignTimestamp(raw: string | undefined) {
 }
 
 export function campaignRefresh(at: bigint, now: bigint, type: number, interval: number) {
-  if (type === 0) return false;
+  if (type === 0) {return false;}
 
   if (type === 1 || type === 2)
-    return now - at >= BigInt(interval) * (type === 1 ? 60000n : 3600000n);
+    {return now - at >= BigInt(interval) * (type === 1 ? 60000n : 3600000n);}
 
-  if (type === 3) return now / 86400000n - at / 86400000n >= BigInt(interval);
+  if (type === 3) {return now / 86400000n - at / 86400000n >= BigInt(interval);}
 
   if (type === 4)
-    return (now / 86400000n + 3n) / 7n - (at / 86400000n + 3n) / 7n >= BigInt(interval);
+    {return (now / 86400000n + 3n) / 7n - (at / 86400000n + 3n) / 7n >= BigInt(interval);}
 
   const a = new Date(Number(at)),
     b = new Date(Number(now));
 
   if (type === 5)
-    return a.getUTCFullYear() !== b.getUTCFullYear() || a.getUTCMonth() !== b.getUTCMonth();
+    {return a.getUTCFullYear() !== b.getUTCFullYear() || a.getUTCMonth() !== b.getUTCMonth();}
 
-  if (type === 6) return a.getUTCFullYear() !== b.getUTCFullYear();
+  if (type === 6) {return a.getUTCFullYear() !== b.getUTCFullYear();}
 
   return campaignFailure();
 }
@@ -93,7 +93,7 @@ export function campaignEventMatches(
   parameters: string | undefined,
   selector: string,
 ) {
-  if (code !== 62) return !parameters || parameters === selector;
+  if (code !== 62) {return !parameters || parameters === selector;}
 
   const expected = (parameters ?? "").split(";"),
     actual = selector.split(";");

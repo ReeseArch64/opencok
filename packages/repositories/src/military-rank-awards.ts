@@ -60,7 +60,7 @@ export async function writeMilitaryRankAward(
     write.periodEnd <= now ||
     write.periodEnd <= write.clockMarker
   )
-    throw new Error("Invalid military award write");
+    {throw new Error("Invalid military award write");}
 
   const requestId = militaryRankEntitlement(write.entitlementId),
     snapshot = await militaryRankAwardReader(tx, owner).load(),
@@ -75,14 +75,14 @@ export async function writeMilitaryRankAward(
     Boolean(snapshot.row) !== Boolean(write.before) ||
     (snapshot.row && write.before && !militaryRankSame(snapshot.row, write.before))
   )
-    throw new Error("Stale military award snapshot");
+    {throw new Error("Stale military award snapshot");}
 
   const before = snapshot.row ?? militaryRankDefault(owner);
   let after = before;
 
-  for (const award of write.awards) after = militaryRankGrant(after, award, write.honorCap);
+  for (const award of write.awards) {after = militaryRankGrant(after, award, write.honorCap);}
 
-  if (!militaryRankSame(after, write.after)) throw new Error("Inconsistent military award facts");
+  if (!militaryRankSame(after, write.after)) {throw new Error("Inconsistent military award facts");}
 
   const value = {
     uid: owner,
@@ -112,7 +112,7 @@ export async function writeMilitaryRankAward(
         ...(honor ? { honor: value.honor, maxHonorWeekly: value.maxHonorWeekly } : {}),
       })
       .where(eq(user_military_rank.uid, owner));
-  } else await tx.insert(user_military_rank).values(value);
+  } else {await tx.insert(user_military_rank).values(value);}
 
   await tx.insert(economy_posting).values(
     ["militaryScore", "honor", "maxHonorWeekly"].map((asset, entry) => ({

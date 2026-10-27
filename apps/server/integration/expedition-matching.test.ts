@@ -86,11 +86,11 @@ async function fixture() {
       service,
       service2,
       close: async () => {
-        for (const close of closers.toReversed()) await close();
+        for (const close of closers.toReversed()) {await close();}
       },
     };
   } catch (error) {
-    for (const close of closers.toReversed()) await close();
+    for (const close of closers.toReversed()) {await close();}
     throw error;
   }
 }

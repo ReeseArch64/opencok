@@ -34,7 +34,7 @@ export class FriendshipMineService {
 
   async command(owner: string, command: string, params: Fields, internal = false) {
     if (["mine.friend", "mine.help"].includes(command)) {
-      if (!this.remote) throw new GameError(errors.unsupported);
+      if (!this.remote) {throw new GameError(errors.unsupported);}
 
       const body = await this.remote(owner, command, params);
 
@@ -75,13 +75,13 @@ export class FriendshipMineService {
     }
 
     if (!friendshipMineCommands.includes(command) && !(command === "mine.receive.help" && internal))
-      throw new GameError(errors.unsupported);
+      {throw new GameError(errors.unsupported);}
 
     const operationId = params.operationId ? str(params, "operationId") : randomUUID();
     const request: Fields = {};
 
     for (const key of Object.keys(params).sort())
-      if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) request[key] = params[key]!;
+      {if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) {request[key] = params[key]!;}}
 
     const response = await this.execute(
       { owner, requestId: operationId, command, request: encode(request) },
@@ -96,7 +96,7 @@ export class FriendshipMineService {
         let body: Fields = {};
 
         if (command === "mine.help.info")
-          body.result = sfs.array(
+          {body.result = sfs.array(
             helpers.toReversed().map((helper) =>
               sfs.object({
                 gUid: sfs.string(helper.gUid),
@@ -104,10 +104,10 @@ export class FriendshipMineService {
                 time: sfs.long(helper.time),
               }),
             ),
-          );
+          );}
         else if (command === "mine.callHelp") {
           if (view.mineTime > BigInt(now) || view.call)
-            throw new GameError(errors.invalid, "social_rule");
+            {throw new GameError(errors.invalid, "social_rule");}
 
           mine.call = 1;
         } else if (command === "mine.receive.help") {
@@ -126,11 +126,11 @@ export class FriendshipMineService {
             mine.miner = view.miner + 1;
             helpers.push({ gUid: helper, name: str(params, "name"), time: now });
 
-            if (helpers.length > 50) helpers.shift();
+            if (helpers.length > 50) {helpers.shift();}
           }
         } else if (command === "mine.dig") {
           if (view.mineTime > BigInt(now) || view.miner < view.maxMiners)
-            throw new GameError(errors.invalid, "social_rule");
+            {throw new GameError(errors.invalid, "social_rule");}
 
           const draw = (raw: string | undefined) =>
             inventoryWeighted(
@@ -146,7 +146,7 @@ export class FriendshipMineService {
           if (rule.rate_item && rule.item) {
             const choices = rule.item.split("|")[Number(draw(rule.rate_item))]?.split(";");
 
-            if (!choices?.length) throw new GameError(errors.invalid);
+            if (!choices?.length) {throw new GameError(errors.invalid);}
 
             const pair = choices[randomInt(choices.length)]!.split("_");
             const count = cityInteger(pair[1]);
@@ -157,7 +157,7 @@ export class FriendshipMineService {
           if (rule.gold && rule.rate_gold) {
             const multiple = [1, 2, 5, 10][Number(draw(rule.rate_gold))];
 
-            if (!multiple) throw new GameError(errors.invalid);
+            if (!multiple) {throw new GameError(errors.invalid);}
 
             const gold = BigInt(rule.gold) * BigInt(multiple);
             economy.gold(gold);
@@ -168,7 +168,7 @@ export class FriendshipMineService {
             });
           }
 
-          if (goods) body.goods = sfs.object(goods);
+          if (goods) {body.goods = sfs.object(goods);}
 
           mine.miner = 0;
           mine.call = 0;
@@ -185,17 +185,17 @@ export class FriendshipMineService {
           }
         }
 
-        if (command !== "mine.help.info") await store.save(mine, helpers);
+        if (command !== "mine.help.info") {await store.save(mine, helpers);}
 
         if (command === "mine.callHelp" || command === "mine.dig") {
           const result = friendshipMineView(mine, this.rules);
           const mineFields = fields(reconnectMine(result).mine);
 
-          if (command === "mine.dig") body.userMine = sfs.object(mineFields);
-          else body = mineFields;
+          if (command === "mine.dig") {body.userMine = sfs.object(mineFields);}
+          else {body = mineFields;}
         }
 
-        if (long(mine, "mineTime") < 0n) throw new GameError(errors.invalid);
+        if (long(mine, "mineTime") < 0n) {throw new GameError(errors.invalid);}
 
         const result = planner.result(body);
 
@@ -206,7 +206,7 @@ export class FriendshipMineService {
             recipients.length > 100 ||
             recipients.some((uid) => !/^[a-zA-Z0-9_-]{1,40}$/.test(uid))
           )
-            throw new GameError(errors.invalid);
+            {throw new GameError(errors.invalid);}
 
           return {
             ...result,

@@ -38,7 +38,7 @@ export function createHeroCalendarStore(
             .for("update");
 
         if (activities.length > 4096 || events.length > 4096)
-          throw new Error("Hero calendar persisted bound exceeded");
+          {throw new Error("Hero calendar persisted bound exceeded");}
 
         const [lord] = await tx
             .select()
@@ -71,7 +71,7 @@ export function createHeroCalendarStore(
         const plan = build({ activities, events, blocked });
 
         if (plan.activities.length > 64 || plan.events.length > 64)
-          throw new Error("Hero calendar write bound exceeded");
+          {throw new Error("Hero calendar write bound exceeded");}
 
         for (const row of plan.activities) {
           const value = {
@@ -94,7 +94,7 @@ export function createHeroCalendarStore(
             value.endTime <= value.startTime ||
             value.roundTime <= 0n
           )
-            throw new Error("Invalid hero calendar write");
+            {throw new Error("Invalid hero calendar write");}
 
           await tx
             .insert(hero_activity)

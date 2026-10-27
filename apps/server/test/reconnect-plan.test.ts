@@ -149,7 +149,7 @@ test("starvation projects final armies, accounts for weakness and deaths, and cr
   ];
   rules.arms.set("100001", { upkeep: "86400000", new_arms: "1", arm: "1" });
   for (const key of ["p6_all", "p6_security_resources", "p6_weak"])
-    rules.features.set(key, { version: "1.0.0", online: "all" });
+    {rules.features.set(key, { version: "1.0.0", online: "all" });}
   rules.items.set("week_info", { k1: "1", k2: "500" });
   rules.buildings.set(
     Number("439001"),

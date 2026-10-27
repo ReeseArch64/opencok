@@ -41,7 +41,7 @@ export function createExpeditionPhaseStore(
             .limit(1);
         const at = BigInt(now());
 
-        if (prior && at < prior.updatedAt) return prior;
+        if (prior && at < prior.updatedAt) {return prior;}
 
         const plan = resolve({ manifest, admission }, at);
         const value = {
@@ -61,12 +61,12 @@ export function createExpeditionPhaseStore(
           prior.endTime === value.endTime &&
           prior.opponent === value.opponent
         )
-          return prior;
+          {return prior;}
 
         const revision = (prior?.revision ?? 0n) + 1n;
 
         if (revision > 9223372036854775807n || !value.periodId || value.periodId.length > 40)
-          throw new Error("Invalid expedition clock revision");
+          {throw new Error("Invalid expedition clock revision");}
 
         const [saved] = await tx
           .insert(expedition_clock)
@@ -107,7 +107,7 @@ export function createExpeditionActivityReader(
   return {
     async read(owner) {
       if (!owner || owner.length > 40 || !owner.isWellFormed() || owner.includes("\0"))
-        throw new GameError(errors.invalid);
+        {throw new GameError(errors.invalid);}
 
       return db.transaction(async (tx) => {
         await tx.execute(sql`set local lock_timeout='1s'`);
@@ -126,7 +126,7 @@ export function createExpeditionActivityReader(
           (profile.banFlag ?? 0) !== 0 ||
           (profile.banTime ?? 0n) > at
         )
-          throw new GameError(errors.invalid);
+          {throw new GameError(errors.invalid);}
 
         return {
           profile,

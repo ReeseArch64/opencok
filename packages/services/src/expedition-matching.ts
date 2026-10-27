@@ -31,13 +31,13 @@ export class ExpeditionMatchingService {
   private async run() {
     const period = await this.calendar.refresh();
 
-    if (!period) return;
+    if (!period) {return;}
 
-    if (!text(period, "expectedRealms").split("|").includes(String(this.rules.kingdomId))) return;
+    if (!text(period, "expectedRealms").split("|").includes(String(this.rules.kingdomId))) {return;}
 
     const window = expeditionCalendarPhases(period).find((row) => row.stage === 1);
 
-    if (!window || BigInt(this.now()) < window.startTime) return;
+    if (!window || BigInt(this.now()) < window.startTime) {return;}
 
     let config: ExpeditionMatchConfiguration | undefined;
 
@@ -50,11 +50,11 @@ export class ExpeditionMatchingService {
     const admission = await this.realm.admit(period, !!config);
 
     if (admission && long(admission, "appliedAt") === 0n)
-      await this.registry.register(period, admission, config, BigInt(this.now()));
+      {await this.registry.register(period, admission, config, BigInt(this.now()));}
 
     await this.registry.finalize(period, config, BigInt(this.now()));
     const result = await this.registry.result(period, this.rules.kingdomId);
 
-    if (result) await this.realm.apply(period, result);
+    if (result) {await this.realm.apply(period, result);}
   }
 }

@@ -25,13 +25,13 @@ export async function inspectWorldMarch(
   now: number,
   services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage">,
 ): Promise<Fields> {
-  if (int(params, "msFlag", 0) !== 0 || !Number.isSafeInteger(now) || now < 0) unavailable();
+  if (int(params, "msFlag", 0) !== 0 || !Number.isSafeInteger(now) || now < 0) {unavailable();}
 
   const owner = str(params, "uid", observer),
     id = str(params, "uuid"),
     state = await store.read(observer, owner, id, kingdomId, now);
 
-  if (!state) unavailable();
+  if (!state) {unavailable();}
 
   const { march, point } = state,
     type = num(march, "type"),
@@ -46,7 +46,7 @@ export async function inspectWorldMarch(
       (type === 13 && targetType === 1)
     )
   )
-    unavailable();
+    {unavailable();}
 
   const army = march.armyInfo ? decodeWorldMarchArmy(march.armyInfo as Buffer) : null;
 
@@ -56,7 +56,7 @@ export async function inspectWorldMarch(
     !army.soldiers ||
     army.soldiers.some((unit) => unit.owner !== owner)
   )
-    unavailable();
+    {unavailable();}
 
   const raw = await readResourceRawArmyLoad(
       army,
@@ -82,16 +82,16 @@ export async function inspectWorldMarch(
     ),
     speed = Math.fround(Number(march.collectSpd ?? 0));
 
-  if (!Number.isFinite(speed) || speed < 0) unavailable();
+  if (!Number.isFinite(speed) || speed < 0) {unavailable();}
 
   let end = long(march, "arrivalTime");
 
   if (phase === 1 && [3, 37].includes(targetType)) {
-    if (speed <= 0) unavailable();
+    if (speed <= 0) {unavailable();}
 
     const duration = Math.ceil(Math.fround(Math.fround(Math.fround(maximum) / speed) * 1000));
 
-    if (!Number.isSafeInteger(duration)) unavailable();
+    if (!Number.isSafeInteger(duration)) {unavailable();}
 
     end += BigInt(duration);
   }
@@ -106,7 +106,7 @@ export async function inspectWorldMarch(
     (savedDragon && savedDragon.owner !== owner) ||
     (army.general && army.general.owner !== owner)
   )
-    unavailable();
+    {unavailable();}
 
   const petDragon = dragon ? reconnectMarchDragon(dragon, rules) : undefined,
     general = army.general

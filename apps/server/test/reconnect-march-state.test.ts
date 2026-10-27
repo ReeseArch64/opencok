@@ -49,7 +49,7 @@ function database(own: Row[], team: Row[] = [], overrides: Record<string, Row[]>
       query: async (query: { text: string }, params: unknown[] = []) => {
         queries.push({ text: query.text, params });
         const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
-        if (!table) return { rows: [] };
+        if (!table) {return { rows: [] };}
         const selected = query.text
           .slice(7, query.text.indexOf(" from "))
           .split(", ")
@@ -105,7 +105,7 @@ test("foreign owners, foreign team worlds, dependencies and oversized rows rejec
     database([march()], [], { userprofile: [{ uid: "foreign", serverId: 2 }] }),
     database(Array.from({ length: 32768 }, (_, id) => march({ uuid: String(id) }))),
   ])
-    await expect(readReconnectMarches(fixture.db, owner)).rejects.toThrow();
+    {await expect(readReconnectMarches(fixture.db, owner)).rejects.toThrow();}
 });
 
 test("march projection restores realm origin, alliance, officer and appearance without exposing another owner's march", () => {

@@ -36,7 +36,7 @@ async function fixture() {
   try {
     h.clock.now = 172800000;
     for (const id of ["dragon_new", "dragon_levelup", "dragon_travel", "science_race_switch"])
-      h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });
+      {h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });}
     await h.db.db.insert(user_pet_dragon).values({
       uuid: "owned-dragon",
       uid: "owner",

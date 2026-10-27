@@ -67,7 +67,7 @@ test("Hua Mulan has 60 talents and spends the level 99 budget without inventing 
   expect(() => activateGeneralTalent(rules, { ...row, id: 53572 }, 53571100, 0)).toThrow();
   let learned = row;
   for (const node of nodes) {
-    if (Number(learned.talentpoint) === 0) break;
+    if (Number(learned.talentpoint) === 0) {break;}
     learned = activateGeneralTalent(rules, learned, Number(node.id), 1);
   }
   expect(learned.talentpoint).toBe(0);

@@ -41,24 +41,24 @@ export function vipMutation(
     const key = duration <= 259200000n ? "k1" : duration < 2592000000n ? "k2" : "k3";
     const conversion = Number(rules.items.get("vip2sviptime")?.[key] ?? 24);
 
-    if (!Number.isFinite(conversion) || conversion <= 0) invalid();
+    if (!Number.isFinite(conversion) || conversion <= 0) {invalid();}
 
-    if (superVip && effect === 70) duration = BigInt(Math.ceil(Number(duration) / conversion));
+    if (superVip && effect === 70) {duration = BigInt(Math.ceil(Number(duration) / conversion));}
 
-    if (!superVip && effect === 250) duration = BigInt(Math.ceil(Number(duration) * conversion));
+    if (!superVip && effect === 250) {duration = BigInt(Math.ceil(Number(duration) * conversion));}
 
     row.vipEndTime = cityAmount(
       (long(row, "vipEndTime") > now ? long(row, "vipEndTime") : now) + duration,
     );
   } else {
     if (superVip)
-      row.sPoint = cityInteger(
+      {row.sPoint = cityInteger(
         num(row, "sPoint") + (effect === 249 ? value : Math.ceil(value / ratio)),
-      );
-    else row.score = cityInteger(num(row, "score") + (effect === 249 ? value * ratio : value));
+      );}
+    else {row.score = cityInteger(num(row, "score") + (effect === 249 ? value * ratio : value));}
 
     for (const rule of rules.power.vip?.values() ?? [])
-      if (num(row, "score") >= Number(rule.point)) row.level = Number(rule.id) - 7000;
+      {if (num(row, "score") >= Number(rule.point)) {row.level = Number(rule.id) - 7000;}}
 
     const threshold = cityInteger(rules.power.superVip?.get("7010")?.point ?? 2147483647);
 
@@ -70,13 +70,13 @@ export function vipMutation(
     }
 
     for (const rule of rules.power.superVip?.values() ?? [])
-      if (num(row, "sPoint") >= Number(rule.spoint ?? 0) && num(row, "score") >= threshold)
-        row.sLevel = Number(rule.id) - 7009;
+      {if (num(row, "sPoint") >= Number(rule.spoint ?? 0) && num(row, "score") >= threshold)
+        {row.sLevel = Number(rule.id) - 7009;}}
 
     if (num(row, "level") !== levelBefore || num(row, "sLevel") !== superBefore)
-      row.vipEndTime = cityAmount(
+      {row.vipEndTime = cityAmount(
         (long(row, "vipEndTime") > now ? long(row, "vipEndTime") : now) + 86400000n,
-      );
+      );}
   }
 
   return row;
@@ -93,9 +93,9 @@ export function temporaryEffect(
 ) {
   const rule = rules.power.statuses?.get(id);
 
-  if (!rule) invalid();
+  if (!rule) {invalid();}
 
-  if (rule!.rate && random(1000) >= cityInteger(rule!.rate)) return { states: [], deleted: [] };
+  if (rule!.rate && random(1000) >= cityInteger(rule!.rate)) {return { states: [], deleted: [] };}
 
   const group = rule!.group ?? "",
     family = group.slice(0, -2);
@@ -110,10 +110,10 @@ export function temporaryEffect(
   const oldRule = prior ? rules.power.statuses?.get(String(prior.stateId)) : undefined;
   const overlap = rule!.overlap;
 
-  if (prior && overlap === "5" && String(prior.stateId) !== id) invalid();
+  if (prior && overlap === "5" && String(prior.stateId) !== id) {invalid();}
 
   if (prior && Number(group) % 100 < Number(oldRule?.group ?? 0) % 100 && overlap === "0")
-    invalid();
+    {invalid();}
 
   const sameSubgroup =
     rule!.subgroup !== undefined || oldRule?.subgroup !== undefined
@@ -146,7 +146,7 @@ export function temporaryEffect(
     overlap !== oldRule?.overlap &&
     (long(prior, "endTime") === 9223372036854775807n || long(prior, "endTime") > now + duration)
   )
-    return {
+    {return {
       states: [
         {
           ...prior,
@@ -156,7 +156,7 @@ export function temporaryEffect(
         },
       ],
       deleted: [],
-    };
+    };}
 
   let end =
     rule!.time === undefined
@@ -164,7 +164,7 @@ export function temporaryEffect(
       : (extend ? long(prior!, "endTime") : now) + duration;
 
   if (rule!.autoend)
-    end = (now / 86400000n) * 86400000n + BigInt(cityInteger(rule!.autoend)) * 86400000n;
+    {end = (now / 86400000n) * 86400000n + BigInt(cityInteger(rule!.autoend)) * 86400000n;}
 
   cityAmount(end);
   const state: Row = {

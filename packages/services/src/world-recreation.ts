@@ -31,16 +31,16 @@ export class WorldRecreationDomain extends CityCommandDomain {
     this.prepare = async (context, _command, params) => {
       const state = context.state.worldMutation;
 
-      if (!state || num(state.world, "pointId") !== 0) worldMutationFailure();
+      if (!state || num(state.world, "pointId") !== 0) {worldMutationFailure();}
 
-      if (!context.birthPoint) worldMutationFailure();
+      if (!context.birthPoint) {worldMutationFailure();}
 
       const placement = await context.birthPoint(worldBirthRules(context.rules)),
         target = cityInteger(placement.point, 1, size * size),
         footprint = worldFootprint(target, size),
         castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
 
-      if (!castle) worldMutationFailure();
+      if (!castle) {worldMutationFailure();}
 
       const rows = footprint.map((id) => placement.points.find((row) => num(row, "id") === id));
 
@@ -57,7 +57,7 @@ export class WorldRecreationDomain extends CityCommandDomain {
             long(row, "reserve") !== 0n,
         )
       )
-        worldMutationFailure();
+        {worldMutationFailure();}
 
       const maximum = cityDefenseMaximum(context),
         shield = context.state.effects.states

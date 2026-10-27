@@ -29,7 +29,7 @@ export function normalRechargeOperation(owner: string, orderId: string, platform
     platform.length > 20 ||
     [owner, orderId, platform].some((value) => !value.isWellFormed() || value.includes("\0"))
   )
-    normalRechargeFailure();
+    {normalRechargeFailure();}
 
   return `recharge:${createHash("sha256").update(`${owner}\0${platform}\0${orderId}`).digest("hex")}`;
 }
@@ -77,12 +77,12 @@ export class NormalRechargeDomain extends CityCommandDomain {
     this.prepare = async (context, command, params) => {
       const state = context.state.normalRecharge;
 
-      if (!state) normalRechargeFailure();
+      if (!state) {normalRechargeFailure();}
 
       const empty = () => ({ response: encode({}), event: null });
 
       if (num(context.state.profile, "crossFightSrcServerId") > 0)
-        return command === "normal.recharge.init" ? empty() : normalRechargeFailure();
+        {return command === "normal.recharge.init" ? empty() : normalRechargeFailure();}
 
       const server = { ...state.server };
       const begin = normalRechargeMergeStart(context.rules, server, context.now);
@@ -95,7 +95,7 @@ export class NormalRechargeDomain extends CityCommandDomain {
       if (command === "normal.recharge.init") {
         const period = normalRechargePeriod(context.rules, server, context.now, true);
 
-        if (!period) return empty();
+        if (!period) {return empty();}
 
         const total = state.totals.find((row) => num(row, "type") === period.type),
           at = long(total ?? {}, "updateTime");
@@ -120,7 +120,7 @@ export class NormalRechargeDomain extends CityCommandDomain {
         platform = str(params, "platform"),
         operation = normalRechargeOperation(context.owner, orderId, platform);
 
-      if (!gateway || str(params, "operationId") !== operation) normalRechargeFailure();
+      if (!gateway || str(params, "operationId") !== operation) {normalRechargeFailure();}
 
       const { proof, gold, payment } = await deliveredPayment(
         gateway,
@@ -136,7 +136,7 @@ export class NormalRechargeDomain extends CityCommandDomain {
         previous = await state.processed(key);
 
       if (previous) {
-        if (previous !== digest) normalRechargeFailure();
+        if (previous !== digest) {normalRechargeFailure();}
 
         return empty();
       }
@@ -147,7 +147,7 @@ export class NormalRechargeDomain extends CityCommandDomain {
         receipt: { key, fingerprint: digest },
       };
 
-      if (!period) return empty();
+      if (!period) {return empty();}
 
       let increment = gold;
 
@@ -160,36 +160,36 @@ export class NormalRechargeDomain extends CityCommandDomain {
           proof.methodParam > 6 ||
           proof.methodParam === 5
         )
-          return empty();
+          {return empty();}
 
         increment = normalRechargeNode(String(payment.spend), 2);
       }
 
-      if (increment <= 0n) return empty();
+      if (increment <= 0n) {return empty();}
 
       const old = state.totals.find((row) => num(row, "type") === period.type),
         at = long(old ?? {}, "updateTime");
       const same = at >= period.start && at < period.end;
 
-      if (at > proof.occurredAt && !same) return empty();
+      if (at > proof.occurredAt && !same) {return empty();}
 
       const total = cityAmount((same ? cityAmount(old?.gold ?? 0) : 0n) + increment);
       let level = same ? cityInteger(old?.getLv ?? 0, 0, 128) : 0;
       const thresholds = normalRechargeThresholds(context.rules, period.type);
 
-      if (level > thresholds.length) normalRechargeFailure();
+      if (level > thresholds.length) {normalRechargeFailure();}
 
       for (const threshold of thresholds) {
         const target = cityInteger(threshold.level, 1);
 
-        if (target <= level || total < normalRechargeNode(threshold.Node, period.type)) continue;
+        if (target <= level || total < normalRechargeNode(threshold.Node, period.type)) {continue;}
 
         const template = context.rules.mail.get(
             period.type === 4 ? "12014" : period.type === 2 ? "11522" : "12000",
           ),
           contents = javaMailBytes(template?.message);
 
-        if (!template || !contents) normalRechargeFailure();
+        if (!template || !contents) {normalRechargeFailure();}
 
         const quests = (context.write.quests ??= {});
         quests.mail = [
@@ -215,12 +215,12 @@ export class NormalRechargeDomain extends CityCommandDomain {
         level = target;
 
         if (period.type === 1 || period.type === 3)
-          new CampaignPlanner(
+          {new CampaignPlanner(
             Object.assign(Object.create(context) as CityProgressionContext, {
               now: proof.occurredAt,
             }),
             { pay_total_level: level },
-          ).event(70, String(level));
+          ).event(70, String(level));}
       }
 
       context.write.normalRecharge = {

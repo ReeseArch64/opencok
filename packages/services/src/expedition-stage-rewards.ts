@@ -62,7 +62,7 @@ export class ExpeditionStageRewardService {
         members.map((row) => text(row, "uid")),
       );
 
-      if (!shared) continue;
+      if (!shared) {continue;}
 
       const history = closure.history
         ? text(closure, "history")
@@ -96,20 +96,20 @@ export class ExpeditionStageRewardService {
               !("totals" in ranking) ||
               !Array.isArray(ranking.totals)
             )
-              throw new Error("Missing final expedition totals");
+              {throw new Error("Missing final expedition totals");}
 
             const total = ranking.totals.find(
               (row) => row.serverId === this.rules.kingdomId,
             )?.score;
 
             if (typeof total !== "number" || !Number.isFinite(total) || total < 0)
-              throw new Error("Invalid final expedition total");
+              {throw new Error("Invalid final expedition total");}
 
             const won = num(closure, "winner") === this.rules.kingdomId,
               parameters = [String(stage), expeditionScoreText(total)],
               threshold = this.rules.items.get("17_wk")?.k2 ?? "";
 
-            if (won) parameters.push(threshold);
+            if (won) {parameters.push(threshold);}
 
             const top = shared.top;
 
@@ -122,7 +122,7 @@ export class ExpeditionStageRewardService {
                 "name" in metadata &&
                 typeof metadata.name === "string"
               )
-                parameters.push(metadata.name, expeditionScoreText(num(top, "score")));
+                {parameters.push(metadata.name, expeditionScoreText(num(top, "score")));}
             }
 
             plans.push({
@@ -139,14 +139,14 @@ export class ExpeditionStageRewardService {
                     : undefined,
                 );
 
-              if (!template || !contents) throw new Error("Missing expedition award mail template");
+              if (!template || !contents) {throw new Error("Missing expedition award mail template");}
 
               const reward =
                 plan.reward === "0"
                   ? null
                   : pinProgressionReward({ rules: this.rules, now: at }, plan.reward);
 
-              if (reward !== null) mailRewardEntries(reward);
+              if (reward !== null) {mailRewardEntries(reward);}
 
               return {
                 id: expeditionAwardId(periodId, stage, uid, plan.kind),
@@ -166,7 +166,7 @@ export class ExpeditionStageRewardService {
         closure.awardCursor = text(member, "uid");
         work += count;
 
-        if (work >= 64) break;
+        if (work >= 64) {break;}
       }
     }
   }
@@ -191,7 +191,7 @@ export class ExpeditionStageRewardService {
       }
     }
 
-    if (failed) throw failure;
+    if (failed) {throw failure;}
   }
 }
 
@@ -209,7 +209,7 @@ function payload(value: string): ExpeditionAwardPayload {
     parsed.claims.length > 128 ||
     parsed.claims.some((id) => !Number.isSafeInteger(id) || id < 1)
   )
-    throw new Error("Invalid expedition award payload");
+    {throw new Error("Invalid expedition award payload");}
 
   const ids = new Set<string>();
 
@@ -226,7 +226,7 @@ function payload(value: string): ExpeditionAwardPayload {
       Buffer.from(mail.contents, "base64").toString("base64") !== mail.contents ||
       (mail.reward !== null && typeof mail.reward !== "string")
     )
-      throw new Error("Invalid expedition award mail");
+      {throw new Error("Invalid expedition award mail");}
 
     ids.add(mail.id);
   }
@@ -243,7 +243,7 @@ export class ExpeditionStageRewardDomain extends CityCommandDomain {
     const id = str(params, "awardId");
 
     if (!/^[a-f0-9]{32}$/.test(id) || str(params, "operationId") !== expeditionAwardOperation(id))
-      throw new Error("Invalid expedition delivery operation");
+      {throw new Error("Invalid expedition delivery operation");}
 
     const award = await context.state.expeditionAward?.load(id);
 
@@ -253,19 +253,19 @@ export class ExpeditionStageRewardDomain extends CityCommandDomain {
       long(award, "createdAt") > context.now ||
       id !== expeditionAwardId(text(award, "periodId"), num(award, "stage"), context.owner)
     )
-      throw new Error("Missing owned expedition entitlement");
+      {throw new Error("Missing owned expedition entitlement");}
 
-    if (long(award, "deliveredAt") > 0n) return { response: encode({}), event: null };
+    if (long(award, "deliveredAt") > 0n) {return { response: encode({}), event: null };}
 
     const saved = payload(text(award, "payload"));
 
-    if (!context.economy.event) throw new Error("Expedition mail publication unavailable");
+    if (!context.economy.event) {throw new Error("Expedition mail publication unavailable");}
 
     const quests = (context.write.quests ??= {}),
       full = context.rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;
 
     for (const draft of saved.mails) {
-      if (draft.reward !== null) mailRewardEntries(draft.reward);
+      if (draft.reward !== null) {mailRewardEntries(draft.reward);}
 
       const mail: AvatarSystemMail = {
         uid: draft.id + "00",
@@ -313,7 +313,7 @@ export class ExpeditionHistoryService {
   async read(owner: string) {
     const at = BigInt(this.now());
 
-    if (!expeditionOpen(this.rules, at)) throw new Error("Expedition history is unavailable");
+    if (!expeditionOpen(this.rules, at)) {throw new Error("Expedition history is unavailable");}
 
     const rows = await this.source.owned(owner, at),
       ids = [

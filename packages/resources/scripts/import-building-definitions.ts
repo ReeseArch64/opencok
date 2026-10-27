@@ -4,7 +4,7 @@ import { importBuildingDefinition } from "../src/buildings/import.ts";
 import { parseRules } from "../src/xml-fixtures.ts";
 
 const path = process.argv[2];
-if (!path) throw new Error("Supply an authorized building.xml source");
+if (!path) {throw new Error("Supply an authorized building.xml source");}
 const source = await Bun.file(path).text();
 const records = parseRules(source, "building");
 const groups = new Map<number, unknown[]>();
@@ -15,21 +15,21 @@ for (const [id, record] of records) {
   groups.set(definition.buildingId, group);
 }
 const render = (value: unknown): string => {
-  if (typeof value === "bigint") return String(value) + "n";
+  if (typeof value === "bigint") {return String(value) + "n";}
   if (typeof value === "number") {
-    if (!Number.isFinite(value)) throw new Error("Invalid numeric building definition");
+    if (!Number.isFinite(value)) {throw new Error("Invalid numeric building definition");}
     return String(value);
   }
-  if (Array.isArray(value)) return "[\n" + value.map(render).join(",\n") + "\n]";
+  if (Array.isArray(value)) {return "[\n" + value.map(render).join(",\n") + "\n]";}
   if (value && typeof value === "object")
-    return (
+    {return (
       "{\n" +
       Object.entries(value)
         .filter(([, item]) => item !== undefined)
         .map(([key, item]) => key + ": " + render(item))
         .join(",\n") +
       "\n}"
-    );
+    );}
   return JSON.stringify(value);
 };
 const directory = new URL("../src/buildings/", import.meta.url);

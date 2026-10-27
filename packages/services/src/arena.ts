@@ -39,7 +39,7 @@ export class ArenaDomain extends CityCommandDomain {
     this.prepare = async (context, command, params) => {
       const saved = context.state.arena;
 
-      if (!saved) arenaFailure();
+      if (!saved) {arenaFailure();}
 
       const castle = context.state.buildings.reduce(
         (level, row) =>
@@ -65,26 +65,26 @@ export class ArenaDomain extends CityCommandDomain {
       };
 
       if (!saved.registration && num(row, "state") > 0)
-        row.applicationId = createHash("sha256")
+        {row.applicationId = createHash("sha256")
           .update(
             [context.owner, String(row.time), String(row.worldId), String(row.version)].join(":"),
           )
           .digest("hex")
-          .slice(0, 32);
+          .slice(0, 32);}
 
       const armies = saved.armies.map((row) => ({ ...row }));
       const write: ArenaWrite = (context.write.arena = { registration: row });
       const notification = () =>
         encode({ owner: sfs.string(context.owner), info: sfs.object(arenaInfo(row)) });
 
-      if (command === "arena.info") return { response: encode(arenaInfo(row)), event: null };
+      if (command === "arena.info") {return { response: encode(arenaInfo(row)), event: null };}
 
       if (command === "show.arena.army")
-        return { response: encode(arenaArmy(armies)), event: null };
+        {return { response: encode(arenaArmy(armies)), event: null };}
 
       if (command === "arena.army") {
         if (!saved.world || num(saved.world, "worldId") !== 0 || num(row, "state") === 3)
-          arenaFailure();
+          {arenaFailure();}
 
         const selection = arenaArmySelection(
           context.rules,
@@ -100,7 +100,7 @@ export class ArenaDomain extends CityCommandDomain {
         return { response: encode({}), event: null };
       }
 
-      if (!gateway?.validated()) arenaFailure();
+      if (!gateway?.validated()) {arenaFailure();}
 
       if (command === "arena.apply") {
         if (
@@ -114,7 +114,7 @@ export class ArenaDomain extends CityCommandDomain {
           num(saved.world, "worldId") !== 0 ||
           num(row, "state") !== 0
         )
-          arenaFailure();
+          {arenaFailure();}
 
         row.state = 1;
         row.time = context.now;
@@ -133,7 +133,7 @@ export class ArenaDomain extends CityCommandDomain {
 
       const applicationId = str(params, "applicationId", text(row, "applicationId"));
 
-      if (!applicationId || applicationId !== text(row, "applicationId")) arenaFailure();
+      if (!applicationId || applicationId !== text(row, "applicationId")) {arenaFailure();}
 
       if (command === "arena.matched") {
         const worldId = cityInteger(int(params, "worldId"), 1),
@@ -146,9 +146,9 @@ export class ArenaDomain extends CityCommandDomain {
           num(row, "version") === version &&
           num(row, "fightServerId") === fightServerId
         )
-          return { response: encode(arenaInfo(row)), event: null };
+          {return { response: encode(arenaInfo(row)), event: null };}
 
-        if (num(row, "state") !== 1) arenaFailure();
+        if (num(row, "state") !== 1) {arenaFailure();}
 
         Object.assign(row, { worldId, fightServerId, version, state: 2 });
 
@@ -162,7 +162,7 @@ export class ArenaDomain extends CityCommandDomain {
           num(saved.world, "worldId") !== 0 ||
           !armies.some((unit) => num(unit, "free") > 0)
         )
-          arenaFailure();
+          {arenaFailure();}
 
         const result = await gateway.enter({
           owner: context.owner,
@@ -181,7 +181,7 @@ export class ArenaDomain extends CityCommandDomain {
           !Object.keys(result.serverInfo).length ||
           Object.values(result.serverInfo).some((value) => typeof value !== "string")
         )
-          arenaFailure();
+          {arenaFailure();}
 
         row.state = 3;
 
@@ -204,7 +204,7 @@ export class ArenaDomain extends CityCommandDomain {
           !saved.world ||
           num(saved.world, "worldId") !== num(row, "worldId")
         )
-          arenaFailure();
+          {arenaFailure();}
 
         await gateway.leave({
           owner: context.owner,
@@ -224,7 +224,7 @@ export class ArenaDomain extends CityCommandDomain {
           int(params, "version") !== num(row, "version") ||
           params.won?.type !== Type.Bool
         )
-          arenaFailure();
+          {arenaFailure();}
 
         const result: ArenaResult = {
           owner: context.owner,
@@ -242,7 +242,7 @@ export class ArenaDomain extends CityCommandDomain {
           result.resultId.length > 128 ||
           !(await gateway.acceptResult(result))
         )
-          arenaFailure();
+          {arenaFailure();}
 
         row.rankScore = cityInteger(
           num(row, "rankScore") + arenaRankDelta(result.playerScore, result.teamTotal, result.won),
@@ -284,7 +284,7 @@ export async function publishArenaMutation(
     owner = str(body, "owner");
 
   if (command === "arena.apply") {
-    if (!gateway?.validated()) arenaFailure();
+    if (!gateway?.validated()) {arenaFailure();}
 
     const application: ArenaApplication = {
       owner,
@@ -297,7 +297,7 @@ export async function publishArenaMutation(
     return;
   }
 
-  if (body.info?.type !== Type.Object) arenaFailure();
+  if (body.info?.type !== Type.Object) {arenaFailure();}
 
   await publish(owner, "push.arena.state", body.info.value as Fields);
 }

@@ -16,11 +16,11 @@ export function createWorldScoutMailReader(
   kingdomId: number,
 ): WorldScoutMailReader {
   if (!Number.isInteger(kingdomId) || kingdomId < 1 || kingdomId > 2147483647)
-    throw new Error("Invalid scout publication realm");
+    {throw new Error("Invalid scout publication realm");}
 
   return async (recipient, mailUid) => {
     if (!identifier(recipient) || !/^[a-f0-9]{32}00$/.test(mailUid))
-      throw new Error("Invalid scout publication query");
+      {throw new Error("Invalid scout publication query");}
 
     const [saved] = await db
       .select({ mail, realm: userprofile.serverId })
@@ -30,10 +30,10 @@ export function createWorldScoutMailReader(
       .limit(1);
 
     if (!saved || saved.realm !== kingdomId)
-      throw new Error("Scout publication recipient is not resident");
+      {throw new Error("Scout publication recipient is not resident");}
 
     if (saved.mail && (saved.mail.uid !== mailUid || saved.mail.toUser !== recipient))
-      throw new Error("Scout publication recipient does not own mail");
+      {throw new Error("Scout publication recipient does not own mail");}
 
     return { kingdomId, realm: saved.realm, mail: saved.mail ?? undefined };
   };

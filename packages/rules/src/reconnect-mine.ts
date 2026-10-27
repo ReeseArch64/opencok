@@ -9,13 +9,13 @@ function invalid(): never {
 }
 
 function signed(value: unknown, bits: 32 | 64): bigint {
-  if (typeof value === "number" && !Number.isSafeInteger(value)) return invalid();
+  if (typeof value === "number" && !Number.isSafeInteger(value)) {return invalid();}
 
-  if (!/^[+-]?\d+$/.test(String(value))) return invalid();
+  if (!/^[+-]?\d+$/.test(String(value))) {return invalid();}
 
   const result = BigInt(String(value));
 
-  if (BigInt.asIntN(bits, result) !== result) return invalid();
+  if (BigInt.asIntN(bits, result) !== result) {return invalid();}
 
   return result;
 }
@@ -23,7 +23,7 @@ function signed(value: unknown, bits: 32 | 64): bigint {
 export function initialFriendshipMine(rules: Rules): FriendshipMine {
   const rule = [...(rules.reconnect.treasures?.values() ?? [])].find((item) => item.lv === "1");
 
-  if (!rule) return invalid();
+  if (!rule) {return invalid();}
 
   const mine: FriendshipMine = {
     itemId: Number(signed(rule.id, 32)),
@@ -45,7 +45,7 @@ export function friendshipMineView(row: Row, rules: Rules): FriendshipMineView {
   const ruleId = String(Number(BigInt.asIntN(32, BigInt(itemId) + BigInt(level) - 1n)));
   const rule = rules.reconnect.treasures?.get(ruleId);
 
-  if (!rule) return invalid();
+  if (!rule) {return invalid();}
 
   return {
     itemId,

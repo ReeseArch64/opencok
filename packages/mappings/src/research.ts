@@ -12,7 +12,7 @@ export function research(row: Row, rules: Rules, deadline = 0n): Fields {
     level = num(row, "level"),
     rule = rules.power.sciences?.get(String(cityInteger(itemId, 1) + cityInteger(level, 0, 99)));
 
-  if (!rule) throw new GameError(errors.unsupported, "city_progression");
+  if (!rule) {throw new GameError(errors.unsupported, "city_progression");}
 
   const result: Fields = {
     level: sfs.int(level),
@@ -32,7 +32,7 @@ export function research(row: Row, rules: Rules, deadline = 0n): Fields {
     "science_point",
     "vip",
   ])
-    if (rule[key] !== undefined) result[key] = sfs.string(rule[key]);
+    {if (rule[key] !== undefined) {result[key] = sfs.string(rule[key]);}}
 
   result.nextPara2 = sfs.string(
     rules.power.sciences?.get(String(Number(itemId) + level + 1))?.para2 ?? "",
@@ -42,17 +42,17 @@ export function research(row: Row, rules: Rules, deadline = 0n): Fields {
 }
 
 export function researchData(rows: readonly Row[], queues: readonly Row[], rules: Rules) {
-  if (rows.length > 4096 || queues.length > 256) throw new Error("Research snapshot exceeds bound");
+  if (rows.length > 4096 || queues.length > 256) {throw new Error("Research snapshot exceeds bound");}
 
   const records = new Map(rows.map((row) => [text(row, "itemId"), row]));
 
-  if (records.size !== rows.length) throw new Error("Duplicate saved research");
+  if (records.size !== rows.length) {throw new Error("Duplicate saved research");}
 
   for (const rule of rules.power.sciences?.values() ?? [])
-    if (rule.science_lv === "0" && !records.has(rule.id!))
-      records.set(rule.id!, { itemId: rule.id!, level: 0 });
+    {if (rule.science_lv === "0" && !records.has(rule.id!))
+      {records.set(rule.id!, { itemId: rule.id!, level: 0 });}}
 
-  if (records.size > 4096) throw new Error("Research catalog exceeds bound");
+  if (records.size > 4096) {throw new Error("Research catalog exceeds bound");}
 
   return sfs.array(
     [...records.values()]
@@ -62,7 +62,7 @@ export function researchData(rows: readonly Row[], queues: readonly Row[], rules
           (queue) => num(queue, "type") === 6 && queue.itemId === row.itemId,
         );
 
-        if (pending.length > 1) throw new Error("Duplicate pending research");
+        if (pending.length > 1) {throw new Error("Duplicate pending research");}
 
         return sfs.object(
           research(row, rules, pending.length ? long(pending[0]!, "updateTime") : 0n),

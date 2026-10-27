@@ -192,9 +192,9 @@ test("march direction and long deadlines match outgoing, occupied and early retu
   ).toEqual(sfs.long(0n));
   const empty = { ...army, soldiers: [] };
   for (const type of [1, 3, 9, 10, 12, 13, 17])
-    expect(reconnectMarchBase({ ...row, state: 2, type }, empty, rules, context).et).toEqual(
+    {expect(reconnectMarchBase({ ...row, state: 2, type }, empty, rules, context).et).toEqual(
       sfs.long(300n),
-    );
+    );}
   expect(row.arrivalTime).toBe(300n);
   expect(() => reconnectMarchBase({ ...row, state: 3 }, army, rules, context)).toThrow();
 });

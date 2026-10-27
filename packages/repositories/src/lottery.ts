@@ -17,7 +17,7 @@ export async function readLottery(tx: MutationTransaction, owner: string) {
     .orderBy(asc(user_lottery.lotteryId))
     .limit(1025);
 
-  if (history.length > 1024) throw new Error("Lottery history bound exceeded");
+  if (history.length > 1024) {throw new Error("Lottery history bound exceeded");}
 
   return { record, history };
 }
@@ -34,11 +34,11 @@ export async function writeLottery(
     ![1, 2].includes(num(row, "type")) ||
     ![0, 1].includes(num(row, "superMode"))
   )
-    throw new Error("Foreign lottery record");
+    {throw new Error("Foreign lottery record");}
 
   for (const key of ["step", "times1", "times2", "multiple", "times3", "times4", "boxTimes"])
-    if (!Number.isInteger(num(row, key)) || num(row, key) < 0 || num(row, key) > 2147483647)
-      throw new Error("Invalid lottery counter");
+    {if (!Number.isInteger(num(row, key)) || num(row, key) < 0 || num(row, key) > 2147483647)
+      {throw new Error("Invalid lottery counter");}}
 
   for (const [key, limit] of [
     ["result", 100],
@@ -46,7 +46,7 @@ export async function writeLottery(
     ["lotteryInfo1", 200],
     ["lotteryInfo2", 100],
   ] as const)
-    if (text(row, key).length > limit) throw new Error("Invalid lottery projection");
+    {if (text(row, key).length > limit) {throw new Error("Invalid lottery projection");}}
 
   const value = {
     uid: owner,
@@ -71,7 +71,7 @@ export async function writeLottery(
     .onConflictDoUpdate({ target: lottery_record.uid, set: value });
 
   for (const entry of write.history ?? []) {
-    if (entry.uid !== owner) throw new Error("Foreign lottery history");
+    if (entry.uid !== owner) {throw new Error("Foreign lottery history");}
 
     const next = {
       uid: owner,

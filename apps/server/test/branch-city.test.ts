@@ -9,7 +9,7 @@ import type { GameStore } from "@opencok/contracts/game";
 function setup(level: number, state: number | null = null) {
   const rules = new Rules(new Map(), new Map(), new Map());
   for (const id of ["subcity", "hero_building"])
-    rules.features.set(id, { id, online: "all", version: "1.0.0", pf: "all" });
+    {rules.features.set(id, { id, online: "all", version: "1.0.0", pf: "all" });}
   rules.items.set("subcity_reward", { k4: "20", k5: "15" });
   const h = cityFixture(rules);
   h.state.branchCity = state === null ? null : { openstate: state };
@@ -115,5 +115,5 @@ test("login and reconnect publish saved branch state at the init root", async ()
     }),
   });
   for (let attempt = 0; attempt < 2; attempt++)
-    expect((await game.initialize("owner")).body.branchcityopen).toEqual(sfs.int(1));
+    {expect((await game.initialize("owner")).body.branchcityopen).toEqual(sfs.int(1));}
 });

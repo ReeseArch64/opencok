@@ -86,7 +86,7 @@ export function createSessionHandler(
     let pending = 0;
     let chain = Promise.resolve();
     const send = (packet: Fields) => {
-      if (socket.destroyed) return;
+      if (socket.destroyed) {return;}
 
       const bytes = frame(packet);
 
@@ -110,7 +110,7 @@ export function createSessionHandler(
         return;
       }
 
-      if (packet.c?.type !== Type.Byte || packet.a?.type !== Type.Short) throw new ProtocolError();
+      if (packet.c?.type !== Type.Byte || packet.a?.type !== Type.Short) {throw new ProtocolError();}
 
       const controller = packet.c.value;
       const action = packet.a.value;
@@ -118,7 +118,7 @@ export function createSessionHandler(
 
       if (controller === 0 && action === 0) {
         if (handshake || str(body, "api").length > 64 || str(body, "cl", "").length > 512)
-          throw new ProtocolError();
+          {throw new ProtocolError();}
 
         handshake = true;
         report("handshake_completed", { outcome: "success" });
@@ -133,10 +133,10 @@ export function createSessionHandler(
         return;
       }
 
-      if (!handshake) throw new ProtocolError();
+      if (!handshake) {throw new ProtocolError();}
 
       if (controller === 0 && action === 1) {
-        if (uid) throw new ProtocolError();
+        if (uid) {throw new ProtocolError();}
 
         const started = performance.now();
         let claimed: string | undefined;
@@ -154,7 +154,7 @@ export function createSessionHandler(
             await cache.release(claimed, previous.token);
           }
 
-          if (!(await cache.claim(claimed, token))) throw new LoginError();
+          if (!(await cache.claim(claimed, token))) {throw new LoginError();}
 
           sessions.set(claimed, { socket, token });
           stage = "initialization";
@@ -164,7 +164,7 @@ export function createSessionHandler(
           const initial = initializedState.body;
 
           if (socket.destroyed || !ready() || sessions.get(claimed)?.socket !== socket) {
-            if (sessions.get(claimed)?.socket === socket) sessions.delete(claimed);
+            if (sessions.get(claimed)?.socket === socket) {sessions.delete(claimed);}
 
             await dependencies.profileSessions?.close(claimed, connectionId, Date.now());
             await cache.release(claimed, token);
@@ -185,14 +185,14 @@ export function createSessionHandler(
             }),
           );
 
-          if (details._cok_) initial._cok_ = details._cok_;
+          if (details._cok_) {initial._cok_ = details._cok_;}
 
           send(extension("init", initial));
 
-          for (const push of initializedState.pushes) send(extension(push.command, push.body));
+          for (const push of initializedState.pushes) {send(extension(push.command, push.body));}
 
           if (!socket.destroyed)
-            unsubscribe = dependencies.notifications?.subscribe(
+            {unsubscribe = dependencies.notifications?.subscribe(
               uid,
               async (command, body, signal) => {
                 if (
@@ -202,7 +202,7 @@ export function createSessionHandler(
                   sessions.get(claimed!)?.socket !== socket ||
                   !(await cache.refresh(claimed!, token))
                 )
-                  return false;
+                  {return false;}
 
                 if (
                   signal?.aborted ||
@@ -210,13 +210,13 @@ export function createSessionHandler(
                   !ready() ||
                   sessions.get(claimed!)?.socket !== socket
                 )
-                  return false;
+                  {return false;}
 
                 send(extension(command, body));
 
                 return !socket.destroyed;
               },
-            );
+            );}
 
           report("login_accepted", {
             initialization: "partial",
@@ -253,7 +253,7 @@ export function createSessionHandler(
                 report("session_cleanup_failed", { reason: "profile_session" }, "error"),
               );
 
-            if (sessions.get(claimed)?.socket === socket) sessions.delete(claimed);
+            if (sessions.get(claimed)?.socket === socket) {sessions.delete(claimed);}
 
             await cache
               .release(claimed, token)
@@ -272,7 +272,7 @@ export function createSessionHandler(
         return;
       }
 
-      if (!uid) throw new ProtocolError();
+      if (!uid) {throw new ProtocolError();}
 
       if (!(await cache.refresh(uid, token))) {
         closeReason = "session_expired";
@@ -295,12 +295,12 @@ export function createSessionHandler(
         return;
       }
 
-      if (controller !== 1 || action !== 13) throw new ProtocolError();
+      if (controller !== 1 || action !== 13) {throw new ProtocolError();}
 
       const command = str(body, "c");
       const params = fields(body.p);
 
-      if (command.length > 128) throw new ProtocolError();
+      if (command.length > 128) {throw new ProtocolError();}
 
       metrics.commands++;
       const started = performance.now();
@@ -317,24 +317,24 @@ export function createSessionHandler(
       try {
         if (command === "cmd.finishinit") {
           if (!initialized)
-            report("client_init_acknowledged", {
+            {report("client_init_acknowledged", {
               initialization: "partial",
               outcome: "success",
               durationMs: Math.round(performance.now() - started),
-            });
+            });}
 
           initialized = true;
           const result: Fields = {};
 
-          if (params._cok_) result._cok_ = params._cok_;
+          if (params._cok_) {result._cok_ = params._cok_;}
 
-          if (params.cmdBaseTime) result.cmdBaseTime = params.cmdBaseTime;
+          if (params.cmdBaseTime) {result.cmdBaseTime = params.cmdBaseTime;}
 
           send(extension(command, result));
         } else if (command === "world.get") {
           const result = await world.get(uid, params);
 
-          if (params._cok_) result._cok_ = params._cok_;
+          if (params._cok_) {result._cok_ = params._cok_;}
 
           send(extension(command, result));
         } else {
@@ -368,7 +368,7 @@ export function createSessionHandler(
                   params._cok_.value.length <= 128)
               )
             )
-              throw new ProtocolError();
+              {throw new ProtocolError();}
 
             const identity = createHash("sha256")
               .update(connectionId)
@@ -382,7 +382,7 @@ export function createSessionHandler(
 
           const result = await game.execute(uid, command, params);
 
-          for (const push of result.pushes) send(extension(push.command, push.body));
+          for (const push of result.pushes) {send(extension(push.command, push.body));}
 
           send(extension(command, result.body));
         }
@@ -400,9 +400,9 @@ export function createSessionHandler(
           errorCode: sfs.string(error instanceof GameError ? error.code : "E100179"),
         };
 
-        if (params._cok_) result._cok_ = params._cok_;
+        if (params._cok_) {result._cok_ = params._cok_;}
 
-        if (params.cmdBaseTime) result.cmdBaseTime = params.cmdBaseTime;
+        if (params.cmdBaseTime) {result.cmdBaseTime = params.cmdBaseTime;}
 
         send(extension(command, result));
       } finally {
@@ -421,17 +421,17 @@ export function createSessionHandler(
     socket.on("data", (data) => {
       try {
         for (const packet of reader.feed(Buffer.isBuffer(data) ? data : Buffer.from(data))) {
-          if (++pending > MAX_PENDING_PACKETS) throw new ProtocolError();
+          if (++pending > MAX_PENDING_PACKETS) {throw new ProtocolError();}
 
           const operationId = randomUUID();
           chain = chain
             .then(async () => {
               try {
                 if (!socket.destroyed)
-                  await withLogContext(
+                  {await withLogContext(
                     { connectionId, operationId, kingdom: config.kingdomId, component: "tcp" },
                     () => observeServerOperation("tcp.packet", () => handle(packet)),
-                  );
+                  );}
               } finally {
                 pending--;
               }
@@ -448,12 +448,12 @@ export function createSessionHandler(
             });
         }
 
-        if (pending >= PAUSE_PENDING_PACKETS) socket.pause();
+        if (pending >= PAUSE_PENDING_PACKETS) {socket.pause();}
 
         const task = chain.finally(() => {
           inFlight.delete(task);
 
-          if (!socket.destroyed && pending < PAUSE_PENDING_PACKETS) socket.resume();
+          if (!socket.destroyed && pending < PAUSE_PENDING_PACKETS) {socket.resume();}
         });
         inFlight.add(task);
       } catch {
@@ -496,7 +496,7 @@ export function createSessionHandler(
           })
           .catch(() => report("session_cleanup_failed", { reason: "cache_release" }, "error"))
           .finally(() => {
-            if (sessions.get(closingUid)?.socket === socket) sessions.delete(closingUid);
+            if (sessions.get(closingUid)?.socket === socket) {sessions.delete(closingUid);}
 
             inFlight.delete(cleanup);
           });

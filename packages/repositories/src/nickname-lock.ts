@@ -23,7 +23,7 @@ export async function withAvailableNickname<T>(
   operation: (tx: NicknameGlobalTransaction) => Promise<T>,
 ): Promise<T> {
   return withNicknameLock(db, name, async (tx) => {
-    if (await readNicknameOccupation(tx, name)) throw new GameError(errors.nicknameOccupied);
+    if (await readNicknameOccupation(tx, name)) {throw new GameError(errors.nicknameOccupied);}
 
     return operation(tx);
   });
@@ -44,7 +44,7 @@ export async function withNicknameLock<T>(
       name.includes("\0") ||
       nicknameTrim(name) !== name
     )
-      throw new Error("Invalid nickname lock input");
+      {throw new Error("Invalid nickname lock input");}
 
     key = createHash("sha256")
       .update("opencok:nickname-change:uca400:")
@@ -71,9 +71,9 @@ export async function withNicknameLock<T>(
     );
 
     if (result.rows.length !== 1 || typeof result.rows[0]?.acquired !== "boolean")
-      throw new DependencyError("nickname lock result");
+      {throw new DependencyError("nickname lock result");}
 
-    if (!result.rows[0].acquired) throw new GameError(errors.nicknameOccupied);
+    if (!result.rows[0].acquired) {throw new GameError(errors.nicknameOccupied);}
 
     const value = await operation(tx);
     await tx.execute(sql`commit`);
@@ -82,12 +82,12 @@ export async function withNicknameLock<T>(
     return value;
   } catch (error) {
     if (rollback)
-      try {
+      {try {
         await rollback();
         ended = true;
-      } catch {}
+      } catch {}}
 
-    if (ended && error instanceof GameError) throw error;
+    if (ended && error instanceof GameError) {throw error;}
 
     throw new DependencyError("nickname change transaction");
   } finally {

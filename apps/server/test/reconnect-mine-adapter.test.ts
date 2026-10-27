@@ -25,13 +25,13 @@ function database(
   const queries: { database: string; text: string; params: unknown[] }[] = [];
   const mines = new Map<string, unknown[]>();
   const binding = options.binding === undefined ? "synthetic-binding" : options.binding;
-  if (options.existing) mines.set(`synthetic:${binding}`, saved);
+  if (options.existing) {mines.set(`synthetic:${binding}`, saved);}
   let uncertainCommit = options.uncertainCommit;
   const global = drizzle(
     {
       query: async (query: { text: string }, params: unknown[] = []) => {
         queries.push({ database: "global", text: query.text, params });
-        if (options.fail === "account") throw new Error("Synthetic account failure");
+        if (options.fail === "account") {throw new Error("Synthetic account failure");}
         return {
           rows: Array.from({ length: options.accounts ?? 1 }, () => [
             binding,
@@ -51,23 +51,23 @@ function database(
           throw new Error("Synthetic uncertain commit result");
         }
         if (query.text.includes('from "opencok_kingdom"."userprofile"')) {
-          if (options.fail === "profile") throw new Error("Synthetic profile failure");
+          if (options.fail === "profile") {throw new Error("Synthetic profile failure");}
           return { rows: options.ownerMissing ? [] : [[params[0], options.ownerRealm ?? 2]] };
         }
         if (query.text.startsWith('insert into "opencok_kingdom"."user_mine"')) {
-          if (options.fail === "insert") throw new Error("Synthetic insert failure");
+          if (options.fail === "insert") {throw new Error("Synthetic insert failure");}
           const key = `${params[0]}:${params[1]}`;
           if (options.conflict) {
-            if (!options.lostConflict) mines.set(key, saved);
+            if (!options.lostConflict) {mines.set(key, saved);}
             return { rows: [] };
           }
-          if (mines.has(key)) return { rows: [] };
+          if (mines.has(key)) {return { rows: [] };}
           const row = [params[2], params[3], params[5], params[6], params[7], params[4]];
           mines.set(key, row);
           return { rows: [row] };
         }
         if (query.text.includes('from "opencok_kingdom"."user_mine"')) {
-          if (options.fail === "mine") throw new Error("Synthetic mine failure");
+          if (options.fail === "mine") {throw new Error("Synthetic mine failure");}
           const row = mines.get(`${params[0]}:${params[1]}`);
           return { rows: row ? [row] : [] };
         }
@@ -109,9 +109,9 @@ test("bound mine reads preserve saved progress and select only the requested own
   );
   expect(db.queries.at(-1)?.text).toBe("commit");
   for (const query of db.queries)
-    expect(query.text).not.toMatch(
+    {expect(query.text).not.toMatch(
       /\b(insert|update|delete)\b|select \*|deviceId|emailAccount|passmd5|helpInfo/,
-    );
+    );}
 });
 
 test("unbound or absent account records use ephemeral defaults without reading or writing saved mines", async () => {
@@ -173,13 +173,13 @@ test("retry after a simulated lost commit response recovers the persisted mine t
 test("invalid identity, realm, binding, missing owners and provider failures never initialize another player's mine", async () => {
   const untouched = database();
   for (const uid of ["", " ", "x".repeat(41)])
-    await expect(
+    {await expect(
       loadFriendshipMine(untouched.global, untouched.kingdom, 2, uid, () => seed),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   for (const kingdomId of [0, -1, 1.5, 2147483648])
-    await expect(
+    {await expect(
       loadFriendshipMine(untouched.global, untouched.kingdom, kingdomId, "synthetic", () => seed),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   expect(untouched.queries).toHaveLength(0);
   for (const options of [
     { server: "3" },
@@ -197,7 +197,7 @@ test("invalid identity, realm, binding, missing owners and provider failures nev
     expect(db.mines.size).toBe(0);
     expect(db.queries.some((query) => query.text === "commit")).toBe(false);
     if (db.queries.some((query) => query.text.startsWith("begin")))
-      expect(db.queries.at(-1)?.text).toBe("rollback");
+      {expect(db.queries.at(-1)?.text).toBe("rollback");}
   }
   const invalidDefault = database();
   await expect(

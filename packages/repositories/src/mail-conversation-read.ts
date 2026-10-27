@@ -31,12 +31,12 @@ export function markMailConversationRead(
     !Array.isArray(query.effects) ||
     query.effects.length > 1002
   )
-    throw new Error("Invalid conversation read query");
+    {throw new Error("Invalid conversation read query");}
 
   const requestedAt = BigInt(query.now);
   const effects = query.effects.map((effect) => {
     if (!effect || !Array.isArray(effect.types))
-      throw new Error("Invalid conversation read effect");
+      {throw new Error("Invalid conversation read effect");}
 
     if (effect.kind === "chat") {
       if (
@@ -46,7 +46,7 @@ export function markMailConversationRead(
           (type: unknown) => typeof type !== "string" || !["1", "2", "3", "20"].includes(type),
         )
       )
-        throw new Error("Invalid conversation chat intent");
+        {throw new Error("Invalid conversation chat intent");}
 
       return { ...effect, types: [...effect.types] };
     }
@@ -56,16 +56,16 @@ export function markMailConversationRead(
       typeof effect.unreadOnly !== "boolean" ||
       !effect.types.every(integer)
     )
-      throw new Error("Invalid conversation mail assignment");
+      {throw new Error("Invalid conversation mail assignment");}
 
     if (effect.fromUser === undefined) {
       if (!effect.unreadOnly || effect.types.length !== 1)
-        throw new Error("Invalid conversation type assignment");
+        {throw new Error("Invalid conversation type assignment");}
     } else if (
       (effect.fromUser !== null && !identifier(effect.fromUser)) ||
       !(effect.unreadOnly ? ["20,21,22", "23,24"] : ["43,44"]).includes(effect.types.join(","))
     )
-      throw new Error("Invalid conversation sender assignment");
+      {throw new Error("Invalid conversation sender assignment");}
 
     return { ...effect, types: [...effect.types] };
   });
@@ -75,7 +75,7 @@ export function markMailConversationRead(
       : [],
   );
 
-  if (chat.length > 2) throw new Error("Conversation chat intent capacity exceeded");
+  if (chat.length > 2) {throw new Error("Conversation chat intent capacity exceeded");}
 
   const assignments = effects.filter((effect) => effect.kind === "mail");
 
@@ -102,7 +102,7 @@ export function markMailConversationRead(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > requestedAt
       )
-        return { profile };
+        {return { profile };}
 
       if (chat.length) {
         const counts = await tx
@@ -111,10 +111,10 @@ export function markMailConversationRead(
           .where(eq(mail_chat_read_intent.ownerUid, owner));
 
         if (counts.length !== 1 || !/^(0|[1-9]\d*)$/.test(counts[0]!.count))
-          throw new Error("Invalid conversation chat backlog");
+          {throw new Error("Invalid conversation chat backlog");}
 
         if (BigInt(counts[0]!.count) + BigInt(chat.length) > 1000n)
-          throw new Error("Conversation chat backlog capacity exceeded");
+          {throw new Error("Conversation chat backlog capacity exceeded");}
       }
 
       if (assignments.length) {

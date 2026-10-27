@@ -45,15 +45,15 @@ async function run(path?: string, source?: string) {
             loader: "ts",
           }));
           if (path)
-            build.onLoad({ filter: new RegExp(path.replaceAll(".", "\\.") + "$") }, () => ({
+            {build.onLoad({ filter: new RegExp(path.replaceAll(".", "\\.") + "$") }, () => ({
               contents: source!,
               loader: "ts",
-            }));
+            }));}
         },
       },
     ],
   });
-  if (!result.success) throw new Error("Inventory mutation bundle failed");
+  if (!result.success) {throw new Error("Inventory mutation bundle failed");}
   const child = Bun.spawn([process.execPath, "--no-env-file", "test", "inventory.test.js"], {
     cwd: directory,
     stdout: "pipe",
@@ -68,12 +68,12 @@ async function run(path?: string, source?: string) {
   return code;
 }
 try {
-  if (await run()) throw new Error("Inventory mutation baseline failed");
+  if (await run()) {throw new Error("Inventory mutation baseline failed");}
   for (const [name, path, from, to] of mutations) {
     const source = await readFile(new URL(path, root), "utf8");
-    if (source.split(from).length !== 2) throw new Error(`Mutation target changed: ${name}`);
+    if (source.split(from).length !== 2) {throw new Error(`Mutation target changed: ${name}`);}
     if ((await run(path, source.replace(from, to))) === 0)
-      throw new Error(`Critical mutation survived: ${name}`);
+      {throw new Error(`Critical mutation survived: ${name}`);}
     console.log(`Killed: ${name}`);
   }
 } finally {

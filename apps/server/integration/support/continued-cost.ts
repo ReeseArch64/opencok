@@ -32,7 +32,7 @@ const spender: CityDomain = {
 };
 function configure(rules: Rules) {
   for (const key of ["continued_cost", "new_rank_cost"])
-    rules.features.set(key, { id: key, online: "all", test: "all", version: "1.0.0" });
+    {rules.features.set(key, { id: key, online: "all", test: "all", version: "1.0.0" });}
   rules.items.set("continued_cost", { ...rules.items.get("continued_cost")!, k1: "1", k2: "1" });
   rules.power.activityPanels!.set("57159", {
     ...rules.power.activityPanels!.get("57159")!,
@@ -132,11 +132,11 @@ export async function costRankingFixture(extra: readonly CityDomain[] = []) {
       spend2,
       plan: costRankingPlan(h.rules, [1, 2])!,
       close: async () => {
-        for (const close of closers.toReversed()) await close();
+        for (const close of closers.toReversed()) {await close();}
       },
     };
   } catch (error) {
-    for (const close of closers.toReversed()) await close();
+    for (const close of closers.toReversed()) {await close();}
     throw error;
   }
 }

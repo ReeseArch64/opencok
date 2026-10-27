@@ -103,9 +103,9 @@ async function seed(id = 1, rows = taskRows()) {
     lastTime: 0n,
   });
   if (rows.length)
-    await realm(id)
+    {await realm(id)
       .db.insert(user_alliance_task)
-      .values(rows.map((row) => ({ uid, itemId: `metadata-${row.id}`, ...row })));
+      .values(rows.map((row) => ({ uid, itemId: `metadata-${row.id}`, ...row })));}
   return uid;
 }
 async function changed(uid: string, id = 1, catalogs = rules()) {
@@ -139,7 +139,7 @@ function loseCommit() {
   Object.defineProperty(pool, "connect", {
     configurable: true,
     value: (...args: unknown[]) => {
-      if (args.length) return Reflect.apply(original, pool, args);
+      if (args.length) {return Reflect.apply(original, pool, args);}
       return connect().then((client) => {
         let touched = false;
         return {
@@ -151,12 +151,12 @@ function loseCommit() {
                   : first && typeof first === "object" && "text" in first
                     ? first.text
                     : undefined;
-            if (typeof text === "string" && text.startsWith("begin")) touched = false;
+            if (typeof text === "string" && text.startsWith("begin")) {touched = false;}
             if (
               typeof text === "string" &&
               text.startsWith('update "opencok_kingdom"."nickname_change"')
             )
-              touched = true;
+              {touched = true;}
             const result = await Reflect.apply(client.query, client, input);
             if (armed && touched && text === "commit") {
               armed = false;
@@ -182,13 +182,13 @@ beforeAll(async () => {
       topology.globalDatabase,
       ...topology.kingdoms.map((entry) => entry.database),
     ])
-      await admin.query(`CREATE DATABASE "${name}"`);
+      {await admin.query(`CREATE DATABASE "${name}"`);}
   } finally {
     await admin.end();
   }
   databases = createDatabases(pg.options, topology);
   await migrateDatabase(databases.global.pool, "global");
-  for (const entry of topology.kingdoms) await migrateDatabase(realm(entry.id).pool, "kingdom");
+  for (const entry of topology.kingdoms) {await migrateDatabase(realm(entry.id).pool, "kingdom");}
 }, 120_000);
 afterAll(async () => {
   try {

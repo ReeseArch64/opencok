@@ -12,29 +12,29 @@ function invalid(): never {
 }
 
 function integer(value: unknown): number {
-  if (!/^[+-]?\d+$/.test(String(value))) return invalid();
+  if (!/^[+-]?\d+$/.test(String(value))) {return invalid();}
 
   const number = Number(value);
 
-  if (!Number.isInteger(number) || number < -2147483648 || number > 2147483647) return invalid();
+  if (!Number.isInteger(number) || number < -2147483648 || number > 2147483647) {return invalid();}
 
   return number;
 }
 
 function deadline(value: unknown): bigint {
-  if (typeof value === "number" && !Number.isSafeInteger(value)) return invalid();
+  if (typeof value === "number" && !Number.isSafeInteger(value)) {return invalid();}
 
-  if (!/^[+-]?\d+$/.test(String(value))) return invalid();
+  if (!/^[+-]?\d+$/.test(String(value))) {return invalid();}
 
   const number = BigInt(String(value));
 
-  if (BigInt.asIntN(64, number) !== number) return invalid();
+  if (BigInt.asIntN(64, number) !== number) {return invalid();}
 
   return number;
 }
 
 export function publicProfileSocial(state: PublicProfileState, kingdomId: number) {
-  if (integer(kingdomId) <= 0) return invalid();
+  if (integer(kingdomId) <= 0) {return invalid();}
 
   const flowerVal = state.flowers
     ? Number(
@@ -53,7 +53,7 @@ export function publicProfileSocial(state: PublicProfileState, kingdomId: number
     if (!ready) {
       const ordinal = integer(positionId) % 100;
 
-      if (ordinal >= 0 && ordinal <= 16) officer = String(216000 + ordinal);
+      if (ordinal >= 0 && ordinal <= 16) {officer = String(216000 + ordinal);}
     }
   }
 
@@ -67,7 +67,7 @@ export function publicAllianceProgress(state: PublicAllianceState, rules: Rules)
   const nextlevel = currentlevel === undefined ? undefined : (currentlevel + 1n) * 1000n;
   const member = deadline(state.totals.member);
 
-  if (member <= 0n) return invalid();
+  if (member <= 0n) {return invalid();}
 
   let fightpower: bigint | undefined;
 
@@ -75,11 +75,11 @@ export function publicAllianceProgress(state: PublicAllianceState, rules: Rules)
     const raw = state.totals.fightpower;
 
     if ((typeof raw === "number" && !Number.isSafeInteger(raw)) || !/^[+-]?\d+$/.test(String(raw)))
-      return invalid();
+      {return invalid();}
 
     fightpower = BigInt(String(raw));
 
-    if (!Number.isFinite(Number(fightpower))) return invalid();
+    if (!Number.isFinite(Number(fightpower))) {return invalid();}
   }
 
   const expansion = state.withEffects
@@ -101,13 +101,13 @@ export function publicProfileProgress(
   context: RuleContext,
   profileKingdomId = context.kingdomId,
 ) {
-  if (!state.profile || !Number.isSafeInteger(context.now)) return invalid();
+  if (!state.profile || !Number.isSafeInteger(context.now)) {return invalid();}
 
-  if (context.kingdomId !== rules.kingdomId || context.kingdomId <= 0) return invalid();
+  if (context.kingdomId !== rules.kingdomId || context.kingdomId <= 0) {return invalid();}
 
   integer(context.kingdomId);
 
-  if (integer(profileKingdomId) <= 0) return invalid();
+  if (integer(profileKingdomId) <= 0) {return invalid();}
 
   const level = integer(state.profile.level ?? 0);
   const roleId = String(Number(BigInt.asIntN(32, 100100n + BigInt(level))));
@@ -116,15 +116,15 @@ export function publicProfileProgress(
   const vipEndTime = deadline(state.vip?.vipEndTime ?? 0);
 
   if (state.vip && vipEndTime > BigInt(context.now)) {
-    if (!rules.power.vip?.size) return invalid();
+    if (!rules.power.vip?.size) {return invalid();}
 
     const score = integer(state.vip.score ?? 0);
     let selected: string | undefined;
 
     for (const rule of rules.power.vip.values())
-      if (integer(rule.point) <= score) selected = rule.id;
+      {if (integer(rule.point) <= score) {selected = rule.id;}}
 
-    if (selected !== undefined) vip = (integer(selected) % 100) + 1;
+    if (selected !== undefined) {vip = (integer(selected) % 100) + 1;}
   }
 
   const count = state.completedAchievements;
@@ -133,13 +133,13 @@ export function publicProfileProgress(
   if (
     ![count, total].every((value) => Number.isInteger(value) && value >= 0 && value <= 2147483647)
   )
-    return invalid();
+    {return invalid();}
 
   const achieveNum = total === 0 ? 1 : Math.fround(Math.fround(count) / Math.fround(total));
   const rank = integer(state.military?.militaryRank ?? 0);
   const armedLevel = rank > 0 ? integer(rules.profile.militaryRanks?.get(String(rank))?.level) : 1;
 
-  if (state.taverns.length > 1) return invalid();
+  if (state.taverns.length > 1) {return invalid();}
 
   const market = integer(state.taverns[0]?.level ?? 0) === 0 ? 0 : 1;
 

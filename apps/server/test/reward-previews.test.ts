@@ -31,7 +31,7 @@ function project(reward: Rule, draws: number[] = []) {
   const result = previewRewards("synthetic", rules(reward), context, (bound) => {
     bounds.push(bound);
     const draw = draws.shift();
-    if (draw === undefined) throw new Error("Missing synthetic draw");
+    if (draw === undefined) {throw new Error("Missing synthetic draw");}
     return draw;
   });
   return { result, bounds };
@@ -243,16 +243,16 @@ test("malformed rules and random providers fail without exposing stored reward c
     { item: "200100", num: "1", rate: "2147483647;1", circle: "1" },
     { item: "bad", num: "1", rate: "100", circle: "1" },
   ] as Rule[])
-    expect(() => previewRewards("synthetic", rules(reward), context, () => 0)).toThrow("102192");
+    {expect(() => previewRewards("synthetic", rules(reward), context, () => 0)).toThrow("102192");}
   for (const value of [-1, 100, 0.5, NaN, Infinity])
-    expect(() =>
+    {expect(() =>
       previewRewards(
         "synthetic",
         rules({ item: "200100", num: "1", rate: "100", circle: "1" }),
         context,
         () => value,
       ),
-    ).toThrow("102192");
+    ).toThrow("102192");}
   expect(() =>
     previewRewards("synthetic", rules({}), { ...context, kingdomId: 1 }, noRandom),
   ).toThrow();

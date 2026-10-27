@@ -14,7 +14,7 @@ test("investment installments use bounded binary claim flags and completed UTC d
   expect(() => investmentDays(0n, 1n)).toThrow();
   expect(investmentFlags("1;0;1")).toEqual(["1", "0", "1"]);
   for (const raw of ["", "false;true", "0;2", "0;", Array(65).fill("0").join(";")])
-    expect(() => investmentFlags(raw)).toThrow();
+    {expect(() => investmentFlags(raw)).toThrow();}
   expect(investmentSchedule({ time: "2", interest: "20;30" })).toEqual([20, 30]);
   expect(() => investmentSchedule({ time: "3", interest: "20;30" })).toThrow();
   expect(localActivityConditions("1;10|2;20|3;2|4;4|5;3", 15, 3, 4)).toBe(true);
@@ -32,8 +32,8 @@ test("native investment commands preserve correlation and login recovery cannot 
     { cityProgression: async () => ({ body: {}, pushes: [] }) },
   );
   for (const command of ["invest.add", "invest.open.ui", "invest.receive"])
-    expect(
+    {expect(
       (await game.execute("owner", command, { _cok_: sfs.long(9007199254740993n) })).body._cok_,
-    ).toEqual(sfs.long(9007199254740993n));
+    ).toEqual(sfs.long(9007199254740993n));}
   await expect(game.execute("owner", "invest.init", {})).rejects.toThrow();
 });

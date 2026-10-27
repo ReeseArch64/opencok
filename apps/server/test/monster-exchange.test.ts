@@ -15,7 +15,7 @@ test("seven complete token panels retain their native reward quantities, colors,
   const rules = await loadRules(),
     configs = [];
   for (const panel of rules.power.activityPanels!.values()) {
-    if (panel.exchange !== "1") continue;
+    if (panel.exchange !== "1") {continue;}
     try {
       configs.push(monsterExchangeConfig(panel));
     } catch {}
@@ -42,7 +42,7 @@ test("seven complete token panels retain their native reward quantities, colors,
       .map((config) => config.id),
   ).toEqual(["57171", "57180"]);
   for (const id of ["57096", "57150", "57201"])
-    expect(() => monsterExchangeConfig(rules.power.activityPanels!.get(id)!)).toThrow();
+    {expect(() => monsterExchangeConfig(rules.power.activityPanels!.get(id)!)).toThrow();}
 });
 test("weighted token offers preserve every configured boundary and reject invalid random draws", async () => {
   const rules = await loadRules(),
@@ -66,9 +66,9 @@ test("token offer and claim parsers preserve legacy optional color and ordered c
   ]);
   expect(monsterExchangeClaims("3,1,5", 5)).toEqual([3, 1, 5]);
   for (const raw of ["1,1", "0", "6", "1,", "-1"])
-    expect(() => monsterExchangeClaims(raw, 5)).toThrow();
+    {expect(() => monsterExchangeClaims(raw, 5)).toThrow();}
   for (const raw of ["", "247012;0", "x;1", "247012;1;0;1"])
-    expect(() => readMonsterExchangeOffers(raw)).toThrow();
+    {expect(() => readMonsterExchangeOffers(raw)).toThrow();}
   expect(() => readMonsterExchangeHeader("monster-exchange:v1:211658:0")).toThrow();
 });
 test("token clock alignment skips long outages directly and retains the native ten-second manual refresh grace", () => {

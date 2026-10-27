@@ -16,7 +16,7 @@ export class ChatHistoryRoomController extends ChatHistoryController {
     const { roomId, start, end } = params;
 
     if (!isSafeInteger(start) || start < 0 || !isSafeInteger(end) || end <= start)
-      throw new ChatCommandError("invalid_time");
+      {throw new ChatCommandError("invalid_time");}
 
     const room = await this.requireRoom(context, roomId);
     const raw = await this.options.messages.getAllByRange(room.roomId, start, end);

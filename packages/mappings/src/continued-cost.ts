@@ -28,7 +28,7 @@ export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpe
   const body = decode(Buffer.from(payload)),
     entries = body.tiers;
   const amount = (key: string) => {
-    if (body[key]?.type !== Type.Long) throw new Error("Invalid continued-cost long field");
+    if (body[key]?.type !== Type.Long) {throw new Error("Invalid continued-cost long field");}
 
     return cityAmount(body[key]!.value);
   };
@@ -39,12 +39,12 @@ export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpe
     !entries.value.length ||
     entries.value.length > 128
   )
-    throw new Error("Invalid continued-cost tiers");
+    {throw new Error("Invalid continued-cost tiers");}
 
   const tiers = entries.value.map((value) => {
     const tier = fields(value);
 
-    if (tier.point?.type !== Type.Long) throw new Error("Invalid continued-cost threshold");
+    if (tier.point?.type !== Type.Long) {throw new Error("Invalid continued-cost threshold");}
 
     return {
       level: cityInteger(int(tier, "level"), 1),
@@ -62,7 +62,7 @@ export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpe
         (index > 0 && tier.point < tiers[index - 1]!.point),
     )
   )
-    throw new Error("Invalid continued-cost tier order");
+    {throw new Error("Invalid continued-cost tier order");}
 
   const result = {
     owner: str(body, "owner"),
@@ -85,7 +85,7 @@ export function readContinuedCostSpending(payload: Uint8Array): ContinuedCostSpe
     result.amount <= 0n ||
     (result.type === 1 && result.paid + result.free !== result.amount)
   )
-    throw new Error("Invalid continued-cost evidence");
+    {throw new Error("Invalid continued-cost evidence");}
 
   return result;
 }

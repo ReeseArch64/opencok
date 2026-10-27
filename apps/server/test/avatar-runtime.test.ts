@@ -50,7 +50,7 @@ function fixture(mode = "1", chatEnabled = true) {
       const text = query.text;
       queries.push({ text, params });
       if (text.includes("insert into opencok_kingdom.avatar_publication"))
-        return { rows: [{ revision: "1" }] };
+        {return { rows: [{ revision: "1" }] };}
       if (text.startsWith("begin")) {
         expect(transaction).toBe(false);
         working = structuredClone(state);
@@ -63,7 +63,7 @@ function fixture(mode = "1", chatEnabled = true) {
       }
       if (text === "commit") {
         transaction = false;
-        if (failure === "commit") throw new Error("Synthetic failure");
+        if (failure === "commit") {throw new Error("Synthetic failure");}
         state = working;
         if (failure === "lost-completion" && state.completions.length) {
           failure = "";
@@ -73,7 +73,7 @@ function fixture(mode = "1", chatEnabled = true) {
       }
       const source = transaction ? working : state;
       if (text.startsWith("select")) {
-        if (params.length === 1 && params[0] === 0) return { rows: [] };
+        if (params.length === 1 && params[0] === 0) {return { rows: [] };}
         if (text.includes("inner join")) {
           expect(text).toContain('"pendingEffects" > $1');
           expect(params[0]).toBe(0);
@@ -97,18 +97,18 @@ function fixture(mode = "1", chatEnabled = true) {
           };
         }
         if (text.includes('"userprofile"'))
-          return {
+          {return {
             rows: source.profile
               ? [text.includes('"banTime"') ? source.profile : source.profile.slice(0, 2)]
               : [],
-          };
-        if (text.includes('"user_building"')) return { rows: [["1001", 10]] };
+          };}
+        if (text.includes('"user_building"')) {return { rows: [["1001", 10]] };}
         if (text.includes('"pic_upload_record"'))
-          return {
+          {return {
             rows: source.record ? [[source.record[0], source.record[2], source.record[5]]] : [],
-          };
+          };}
         if (text.includes('"pendingEffects" >'))
-          return { rows: source.completions.filter((r) => Number(r[6]) > 0).map((r) => [r[1]]) };
+          {return { rows: source.completions.filter((r) => Number(r[6]) > 0).map((r) => [r[1]]) };}
         const rows = source.completions.filter((r) => r[0] === params[0] && r[1] === params[1]);
         return { rows: text.includes('"effects"') ? rows : rows.map((r) => r.slice(0, 3)) };
       }
@@ -125,16 +125,16 @@ function fixture(mode = "1", chatEnabled = true) {
       }
       expect(text.startsWith("insert")).toBe(true);
       if (text.includes('"avatar_completion"'))
-        source.completions.push(
+        {source.completions.push(
           params.length >= 8 ? params.slice(0, 8) : [...params.slice(0, 7), "0"],
-        );
-      else if (text.includes('"pic_upload_record"')) source.record = params.slice(0, 7);
-      else if (text.includes('"mail_group"')) source.groups.push(params);
-      else if (text.includes('"mail_contents"')) source.extra.push(params);
+        );}
+      else if (text.includes('"pic_upload_record"')) {source.record = params.slice(0, 7);}
+      else if (text.includes('"mail_group"')) {source.groups.push(params);}
+      else if (text.includes('"mail_contents"')) {source.extra.push(params);}
       else if (text.includes('"mail"')) {
-        if (failure === "mail") throw new Error("private mail failure");
+        if (failure === "mail") {throw new Error("private mail failure");}
         source.mail.push(params);
-      } else throw new Error("Unexpected write");
+      } else {throw new Error("Unexpected write");}
       return { rows: [] };
     },
   };
@@ -182,7 +182,7 @@ function fixture(mode = "1", chatEnabled = true) {
     cache: {
       publishPlayerUpdateTime: async (owner, time) => {
         expect(owner).toBe("1001");
-        if (failure === "cache") throw new Error("private cache failure");
+        if (failure === "cache") {throw new Error("private cache failure");}
         markers.push(time);
       },
     },
@@ -190,7 +190,7 @@ function fixture(mode = "1", chatEnabled = true) {
     report: (effect) => reports.push(effect),
     now: () => now,
     fetch: async (_, options) => {
-      if (failure === "chat") throw new Error("private chat failure");
+      if (failure === "chat") {throw new Error("private chat failure");}
       let status = 0,
         body = "";
       await receiver(
@@ -404,7 +404,7 @@ test("readiness only inspects maintained tables and the pending selector rejects
     { owner: "1001", sequence: 0 },
     { owner: "1001", sequence: 1000000 },
   ])
-    await expect(nextAvatarDelivery(f.db, 1, cursor)).rejects.toThrow();
+    {await expect(nextAvatarDelivery(f.db, 1, cursor)).rejects.toThrow();}
   await expect(nextAvatarDelivery(f.db, 0)).rejects.toThrow();
   expect(f.queries).toHaveLength(4);
 });

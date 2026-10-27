@@ -23,7 +23,7 @@ export async function captureCostFact(
   const value = readContinuedCostSpending(event.payload);
 
   if (value.owner !== event.ownerUid || value.at > now || event.eventId !== "continued-cost")
-    throw new Error("Foreign or premature confirmed consumption fact");
+    {throw new Error("Foreign or premature confirmed consumption fact");}
 
   const postings =
     witnessedPostings ??
@@ -51,7 +51,7 @@ export async function captureCostFact(
     period.endTime !== value.end ||
     period.type !== value.type
   )
-    throw new Error("Conflicting confirmed consumption period");
+    {throw new Error("Conflicting confirmed consumption period");}
 
   const inserted = await tx
     .insert(facts)
@@ -71,10 +71,10 @@ export async function captureCostFact(
     .onConflictDoNothing()
     .returning({ id: facts.eventId });
 
-  if (inserted.length !== 1) throw new Error("Consumption fact ingestion race");
+  if (inserted.length !== 1) {throw new Error("Consumption fact ingestion race");}
 
   if (period.state === 0)
-    await tx
+    {await tx
       .insert(scores)
       .values({
         periodId: id,
@@ -92,5 +92,5 @@ export async function captureCostFact(
           free: sql`${scores.free}+excluded.free`,
           lastAt: sql`greatest(${scores.lastAt},excluded."lastAt")`,
         },
-      });
+      });}
 }

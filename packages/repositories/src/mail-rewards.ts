@@ -65,9 +65,9 @@ export function createMailRewardExecutor(
       ids.some((id) => !id || id.length > 40 || id.includes("\0") || !id.isWellFormed()) ||
       (!batch && (ids.length !== 1 || labels.length))
     )
-      throw new GameError(errors.invalid);
+      {throw new GameError(errors.invalid);}
 
-    if (!(await allowed())) throw new GameError(errors.unsupported);
+    if (!(await allowed())) {throw new GameError(errors.unsupported);}
 
     return execute(command, async (tx) => {
       const owner = command.owner;
@@ -86,7 +86,7 @@ export function createMailRewardExecutor(
         )[0];
 
         if (receipt && receipt.command !== "mail.reward.claim")
-          throw new Error("Mail claim identity conflict");
+          {throw new Error("Mail claim identity conflict");}
 
         return receipt;
       };
@@ -94,7 +94,7 @@ export function createMailRewardExecutor(
       if (!batch) {
         const existing = await readClaim(ids[0]!);
 
-        if (existing) return { response: existing.response };
+        if (existing) {return { response: existing.response };}
       }
 
       const filters = [...(ids.length ? [inArray(mail.uid, ids)] : []), ...labels.map(category)];
@@ -118,22 +118,22 @@ export function createMailRewardExecutor(
         entries.length > 64 ||
         entries.reduce((size, entry) => size + Buffer.byteLength(entry.rewardId ?? ""), 0) > 262144
       )
-        throw new GameError(errors.invalid);
+        {throw new GameError(errors.invalid);}
 
-      if (!batch && !entries.length) throw new GameError(errors.missing);
+      if (!batch && !entries.length) {throw new GameError(errors.missing);}
 
       const responses: Buffer[] = [],
         claimed: string[] = [];
 
       for (const entry of entries) {
         if (entry.rewardStatus !== 0 || (await readClaim(entry.uid))) {
-          if (!batch) throw new GameError("E100147");
+          if (!batch) {throw new GameError("E100147");}
 
           continue;
         }
 
         if (!entry.rewardId?.trim()) {
-          if (!batch) throw new GameError(errors.invalid);
+          if (!batch) {throw new GameError(errors.invalid);}
 
           continue;
         }
@@ -144,7 +144,7 @@ export function createMailRewardExecutor(
             !entry.fromUser ||
             !versionAtLeast(MOBILE_CLIENT_VERSION, entry.fromUser))
         ) {
-          if (!batch) throw new GameError(errors.unsupported);
+          if (!batch) {throw new GameError(errors.unsupported);}
 
           continue;
         }
@@ -202,7 +202,7 @@ export async function mailRewardRealmAllowed(
   db: Database["databases"]["global"]["db"],
   kingdomId: number,
 ): Promise<boolean> {
-  if (kingdomId > 999999) return true;
+  if (kingdomId > 999999) {return true;}
 
   const [realm] = await db
     .select({ type: server_info.type })

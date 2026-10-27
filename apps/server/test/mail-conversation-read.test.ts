@@ -25,7 +25,7 @@ test("conversation read plans preserve sender and moderator precedence and order
     ],
   });
   for (const mod of [undefined, 0, 2, -1, -2147483648, 2147483647])
-    for (const driftingBottle of [undefined, 0, 1, -1, 2]) {
+    {for (const driftingBottle of [undefined, 0, 1, -1, 2]) {
       const bottle = driftingBottle === 1;
       expect(query({ fromUser: "sender", mod, driftingBottle, type: 7 }).effects).toEqual([
         {
@@ -36,7 +36,7 @@ test("conversation read plans preserve sender and moderator precedence and order
         },
         { kind: "chat", others: "sender", types: bottle ? ["3"] : ["1", "20"] },
       ]);
-    }
+    }}
 });
 
 test("null, empty, blank and comma-containing senders retain distinct mailbox and chat values", () => {
@@ -100,12 +100,12 @@ test("comma-list decimal parsing matches 410 frozen synthetic Java 8 vectors wit
   ]);
   expect(oracle.vectors).toHaveLength(410);
   for (const { input, value } of oracle.vectors) {
-    if (input === "") expect(query({ types: input }).effects).toEqual([]);
-    else if (value === null) expect(() => query({ types: input }), JSON.stringify(input)).toThrow();
+    if (input === "") {expect(query({ types: input }).effects).toEqual([]);}
+    else if (value === null) {expect(() => query({ types: input }), JSON.stringify(input)).toThrow();}
     else
-      expect(query({ types: input }).effects, JSON.stringify(input)).toEqual([
+      {expect(query({ types: input }).effects, JSON.stringify(input)).toEqual([
         mail(mappings.get(value) ?? value),
-      ]);
+      ]);}
   }
   for (const types of [
     "1, 2",
@@ -119,7 +119,7 @@ test("comma-list decimal parsing matches 410 frozen synthetic Java 8 vectors wit
     "--1",
     "+-1",
   ])
-    expect(() => query({ fromUser: "sender", types })).toThrow();
+    {expect(() => query({ fromUser: "sender", types })).toThrow();}
 });
 
 test("operation-plan bounds reject unsafe consumed fields without constraining ignored selectors", () => {
@@ -133,10 +133,10 @@ test("operation-plan bounds reject unsafe consumed fields without constraining i
     expect(() => query({ driftingBottle: value })).not.toThrow();
   }
   for (const fromUser of ["x".repeat(41), "\0", "\ud800", "😀".repeat(21)])
-    expect(() => query({ fromUser })).toThrow();
+    {expect(() => query({ fromUser })).toThrow();}
   expect(query({ fromUser: "😀".repeat(20) }).effects).toHaveLength(2);
   for (const clock of [-1, 0.5, NaN, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => mailConversationReadQuery({}, clock)).toThrow();
+    {expect(() => mailConversationReadQuery({}, clock)).toThrow();}
   expect(mailConversationReadQuery({}, 0)).toEqual({ now: 0, effects: [] });
   expect(query({ types: ",".repeat(65535) }).effects).toEqual([]);
   expect(() => query({ types: ",".repeat(65536) })).toThrow();
@@ -199,10 +199,10 @@ test("wire parsing rejects invalid consumed widths and fabricated value shapes b
     { fromUser: sfs.string("sender"), types: sfs.string("0,1,20,broken") },
   ];
   for (const value of [NaN, Infinity, 0.5, -2147483649, 2147483648, undefined as never])
-    invalid.push(
+    {invalid.push(
       { mod: sfs.int(value) },
       { type: sfs.int(value) },
       { fromUser: sfs.string("sender"), driftingBottle: sfs.int(value) },
-    );
-  for (const params of invalid) expect(() => mailConversationReadRequest(params, now)).toThrow();
+    );}
+  for (const params of invalid) {expect(() => mailConversationReadRequest(params, now)).toThrow();}
 });

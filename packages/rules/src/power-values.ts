@@ -6,11 +6,11 @@ export function invalidEffect(): never {
 }
 
 export function effectInteger(raw: unknown): number {
-  if (!/^[+-]?\d+$/.test(String(raw))) return invalidEffect();
+  if (!/^[+-]?\d+$/.test(String(raw))) {return invalidEffect();}
 
   const value = Number(raw);
 
-  if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647) return invalidEffect();
+  if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647) {return invalidEffect();}
 
   return value;
 }
@@ -21,11 +21,11 @@ export function effectLong(raw: unknown): bigint {
     (typeof raw === "number" && !Number.isSafeInteger(raw)) ||
     !/^[+-]?\d+$/.test(String(raw))
   )
-    return invalidEffect();
+    {return invalidEffect();}
 
   const value = BigInt(raw);
 
-  if (BigInt.asIntN(64, value) !== value) return invalidEffect();
+  if (BigInt.asIntN(64, value) !== value) {return invalidEffect();}
 
   return value;
 }
@@ -35,11 +35,11 @@ export function effectDouble(raw: unknown): number {
     (typeof raw !== "number" && typeof raw !== "string") ||
     !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(String(raw).trim())
   )
-    return invalidEffect();
+    {return invalidEffect();}
 
   const value = Number(raw);
 
-  if (!Number.isFinite(value)) return invalidEffect();
+  if (!Number.isFinite(value)) {return invalidEffect();}
 
   return value;
 }
@@ -47,7 +47,7 @@ export function effectDouble(raw: unknown): number {
 export function effectFloat(raw: unknown): number {
   const value = Math.fround(effectDouble(raw));
 
-  if (!Number.isFinite(value)) return invalidEffect();
+  if (!Number.isFinite(value)) {return invalidEffect();}
 
   return value;
 }

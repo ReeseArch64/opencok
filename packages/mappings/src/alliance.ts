@@ -26,12 +26,12 @@ export function allianceMailData(contents: Buffer): Record<string, string | numb
   const value: unknown = JSON.parse(raw);
 
   if (!value || typeof value !== "object" || Array.isArray(value))
-    throw new Error("Invalid alliance mail");
+    {throw new Error("Invalid alliance mail");}
 
   const result: Record<string, string | number> = {};
 
   for (const [key, entry] of Object.entries(value))
-    if (typeof entry === "string" || typeof entry === "number") result[key] = entry;
+    {if (typeof entry === "string" || typeof entry === "number") {result[key] = entry;}}
 
   return result;
 }

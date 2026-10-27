@@ -19,7 +19,7 @@ async function resourceHarness(type = 0, size = 4) {
   h.rules.items.set("worldmap_city", { ...map, k4: "1", k6: String(size), k7: "25" });
   const groups = new Map<string, Record<string, string>[]>();
   for (let group = 0; group < 4; group++)
-    groups.set(
+    {groups.set(
       group ? `resources${group}` : "resources",
       Array.from({ length: size }, (_, index) => ({
         id: String(index + 1),
@@ -29,11 +29,11 @@ async function resourceHarness(type = 0, size = 4) {
         res_level: "1",
         hours: "0",
       })),
-    );
+    );}
   h.rules.world.resources = groups;
   for (let y = 0; y < size; y++)
-    for (let x = 0; x < size; x++)
-      await h.db.db.insert(worldpoint).values({
+    {for (let x = 0; x < size; x++)
+      {await h.db.db.insert(worldpoint).values({
         id: 1 + x + y * size,
         worldId: 0,
         x,
@@ -45,7 +45,7 @@ async function resourceHarness(type = 0, size = 4) {
         ownerId: x === 1 && y === 1 ? "owner" : "",
         resLevel: 0,
         resInitValue: 0,
-      });
+      });}}
   const executor = createWorldResourceRefreshExecutor(h.db.db, h.authority, size);
   const run = (at: bigint, effects = new Map<number, number>(), random = () => 0) =>
     executor.execute(at, (store) => refreshWorldResources(store, h.rules, size, effects, random));
@@ -103,7 +103,7 @@ test("normal world resources initialize once, retain occupied nodes, expire into
     ).toBe(1000000n);
     const pushes: string[] = [];
     for (const event of await h.db.db.select().from(mutation_outbox))
-      await publishWorldMutation(
+      {await publishWorldMutation(
         event.payload,
         event.eventType,
         1,
@@ -112,7 +112,7 @@ test("normal world resources initialize once, retain occupied nodes, expire into
           expect(owner).toBe("owner");
           pushes.push(command);
         },
-      );
+      );}
     expect(pushes.length).toBeGreaterThan(0);
     expect(pushes.every((command) => command === "push.world.point")).toBe(true);
     await acquireRealmAuthority(h.db.db, 1, () => true);
@@ -259,10 +259,10 @@ test("black-land resource supply uses native geometry, hysteresis, weighted band
           flushTime: 0n,
         })
         .where(eq(worldpoint.id, id));
-    for (const row of initial.slice(0, 4)) await erase(row.id);
+    for (const row of initial.slice(0, 4)) {await erase(row.id);}
     await run(now + 1n);
     expect(await resources()).toHaveLength(27);
-    for (const row of initial.slice(4, 10)) await erase(row.id);
+    for (const row of initial.slice(4, 10)) {await erase(row.id);}
     await run(now + 2n);
     expect(await resources()).toHaveLength(31);
     const occupied = (await resources())[0]!;

@@ -15,7 +15,7 @@ function firstStatusEffect(source: string): [number, number] | undefined {
   for (const segment of source.split("|").filter(Boolean)) {
     const parts = segment.split(";").filter(Boolean);
 
-    if (parts.length === 2) values.set(integer(parts[0]), double(parts[1]));
+    if (parts.length === 2) {values.set(integer(parts[0]), double(parts[1]));}
   }
 
   const first = hashOrder(values.keys())[0];
@@ -31,7 +31,7 @@ export function territoryTreeEffects(
   const effects = new Map<number, number>();
   const alliance = text(profile, "allianceId");
 
-  if (!alliance.trim()) return effects;
+  if (!alliance.trim()) {return effects;}
 
   const eligible = trees.filter(
     (row) =>
@@ -40,15 +40,15 @@ export function territoryTreeEffects(
       integer(row.pointId ?? 0) > 0,
   );
 
-  if (eligible.length > 1) return invalid();
+  if (eligible.length > 1) {return invalid();}
 
   const tree = eligible[0];
 
-  if (!tree || ![1, 3].includes(integer(tree.stat ?? 0))) return effects;
+  if (!tree || ![1, 3].includes(integer(tree.stat ?? 0))) {return effects;}
 
   const defaultSkin = rules.items.get("life_treeavatar")?.k2;
 
-  if (!defaultSkin?.trim()) return invalid();
+  if (!defaultSkin?.trim()) {return invalid();}
 
   const skin = text(tree, "activeSkin").trim() ? text(tree, "activeSkin") : defaultSkin;
   let statuses: Iterable<string>;
@@ -58,27 +58,27 @@ export function territoryTreeEffects(
     const id = level === 1 ? "69015" : level === 2 ? "69016" : "69014";
     const control = rules.configuration.payControl?.get(id);
 
-    if (!control) return invalid();
+    if (!control) {return invalid();}
 
     statuses = hashOrder(Object.keys(control)).map((key) => control[key]!);
   } else {
-    if (!rules.power.treeSkins?.size) return invalid();
+    if (!rules.power.treeSkins?.size) {return invalid();}
 
     statuses = rules.power.treeSkins.get(skin)?.buff?.split(";").filter(Boolean) ?? [];
   }
 
   const ids = hashOrder(statuses);
 
-  if (ids.length && !rules.power.statuses?.size) return invalid();
+  if (ids.length && !rules.power.statuses?.size) {return invalid();}
 
   for (const id of ids) {
     const source = rules.power.statuses?.get(id)?.effect;
 
-    if (!source?.trim()) continue;
+    if (!source?.trim()) {continue;}
 
     const first = firstStatusEffect(source);
 
-    if (!first) return invalid();
+    if (!first) {return invalid();}
 
     const [effect, value] = first;
     effects.set(effect, Math.max(-2147483648, Math.min(2147483647, Math.floor(value))));

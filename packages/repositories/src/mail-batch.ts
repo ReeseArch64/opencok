@@ -41,7 +41,7 @@ export function readMailBatch(
         !query.fromUser.isWellFormed()
       : query.fromUser !== null)
   )
-    throw new Error("Invalid mail batch query");
+    {throw new Error("Invalid mail batch query");}
 
   return readOwnedMailWindow(
     databases,

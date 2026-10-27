@@ -58,7 +58,7 @@ const marchColumns = {
 type Reader = Pick<Database["kingdom"]["db"], "select">;
 
 const bounded = <T>(rows: T[]): T[] => {
-  if (rows.length > 32767) throw new Error("Oversized reconnect march state");
+  if (rows.length > 32767) {throw new Error("Oversized reconnect march state");}
 
   return rows;
 };
@@ -71,7 +71,7 @@ const identities = (rows: readonly Row[], key: string) => [
 
 export async function readReconnectMarches(db: Reader, uid: string): Promise<ReconnectMarchState> {
   if (!uid || uid.length > 40 || uid.includes("\0") || !uid.isWellFormed())
-    throw new Error("Invalid reconnect march owner");
+    {throw new Error("Invalid reconnect march owner");}
 
   const rows = await withTreasureMarchTimes(
     db,
@@ -98,9 +98,9 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
     territories: [],
   };
 
-  if (!rows.length) return result;
+  if (!rows.length) {return result;}
 
-  if (rows.some((row) => row.ownerUid !== uid)) throw new Error("Foreign reconnect march");
+  if (rows.some((row) => row.ownerUid !== uid)) {throw new Error("Foreign reconnect march");}
 
   const teams: (Row & { family: number })[] = [];
   const seen = new Set(rows.map((row) => row.uuid));
@@ -115,7 +115,7 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
       "teamId",
     );
 
-    if (!ids.length) continue;
+    if (!ids.length) {continue;}
 
     const selected = bounded(
       await db
@@ -135,7 +135,7 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
       new Set(selected.map((row) => row.id)).size !== selected.length ||
       selected.some((row) => !ids.includes(row.id))
     )
-      throw new Error("Invalid reconnect teams");
+      {throw new Error("Invalid reconnect teams");}
 
     teams.push(...selected.map((row) => ({ ...row, family })));
     const members = bounded(
@@ -159,7 +159,7 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
       const team = selected.find((team) => team.id === row.teamId);
 
       if (!team || team.worldId !== row.worldId || ![family, family + 1].includes(row.type))
-        throw new Error("Foreign reconnect team member");
+        {throw new Error("Foreign reconnect team member");}
 
       if (!seen.has(row.uuid)) {
         seen.add(row.uuid);
@@ -238,14 +238,14 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
   const alliances = identities(rows, "allianceId");
 
   if (alliances.length)
-    result.alliances = bounded(
+    {result.alliances = bounded(
       await db
         .select({ uid: alliance.uid, abbr: alliance.abbr })
         .from(alliance)
         .where(inArray(alliance.uid, alliances))
         .orderBy(asc(alliance.uid))
         .limit(32768),
-    );
+    );}
 
   const worlds = [...new Set(rows.map((row) => row.worldId))];
   const points: Row[] = [];
@@ -284,7 +284,7 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
       .map((row) => row.targetId);
 
     if (territoryTargets.length)
-      territories.push(
+      {territories.push(
         ...bounded(
           await db
             .select({
@@ -301,14 +301,14 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
             )
             .limit(32768),
         ),
-      );
+      );}
 
     const miracleTargets = rows
       .filter((row) => row.worldId === world && row.targetType === 54)
       .map((row) => row.targetId);
 
     if (miracleTargets.length)
-      miracles.push(
+      {miracles.push(
         ...bounded(
           await db
             .select({
@@ -327,7 +327,7 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
             )
             .limit(32768),
         ),
-      );
+      );}
   }
 
   result.points = bounded(points);
@@ -342,8 +342,8 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
     [result.skills, owners, "uid"],
     [result.alliances, alliances, "uid"],
   ] as const)
-    if (records.some((row) => !allowed.includes(String(row[field]))))
-      throw new Error("Foreign reconnect march dependency");
+    {if (records.some((row) => !allowed.includes(String(row[field]))))
+      {throw new Error("Foreign reconnect march dependency");}}
 
   for (const [records, keys] of [
     [result.profiles, ["uid"]],
@@ -358,7 +358,7 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
   ] as const) {
     const keysSeen = new Set(records.map((row) => keys.map((key) => String(row[key])).join("\0")));
 
-    if (keysSeen.size !== records.length) throw new Error("Duplicate reconnect march dependency");
+    if (keysSeen.size !== records.length) {throw new Error("Duplicate reconnect march dependency");}
   }
 
   for (const [records, worldKey, pointKey] of [
@@ -366,13 +366,13 @@ export async function readReconnectMarches(db: Reader, uid: string): Promise<Rec
     [result.miracles, "worldid", "point"],
     [result.territories, "atWorldId", "pointId"],
   ] as const)
-    if (
+    {if (
       records.some(
         (point) =>
           !rows.some((row) => row.worldId === point[worldKey] && row.targetId === point[pointKey]),
       )
     )
-      throw new Error("Foreign reconnect destination");
+      {throw new Error("Foreign reconnect destination");}}
 
   return result;
 }

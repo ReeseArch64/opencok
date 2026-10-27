@@ -53,18 +53,18 @@ function fixture() {
       const text = statement.text;
       queries.push({ text, params });
       if (text.includes("insert into opencok_kingdom.avatar_publication"))
-        return { rows: [{ revision: "1" }] };
+        {return { rows: [{ revision: "1" }] };}
       if (text.startsWith("begin")) {
         working = structuredClone(state);
         committed = false;
         return { rows: [] };
       }
-      if (text === "rollback") return { rows: [] };
+      if (text === "rollback") {return { rows: [] };}
       if (text === "commit") {
-        if (failure === "commit") throw new Error("Synthetic commit failure");
+        if (failure === "commit") {throw new Error("Synthetic commit failure");}
         state = working;
         committed = true;
-        if (failure === "lost") throw new Error("Synthetic lost response");
+        if (failure === "lost") {throw new Error("Synthetic lost response");}
         return { rows: [] };
       }
       const source = text.includes('"avatar_completion"')
@@ -76,16 +76,16 @@ function fixture() {
             : "profile";
       const operation = `${text.split(" ")[0]}:${source}`;
       calls.push(operation);
-      if (failure === operation) throw new Error("Synthetic database failure");
+      if (failure === operation) {throw new Error("Synthetic database failure");}
       if (text.startsWith("select")) {
-        if (source === "profile") return { rows: working.profile ? [working.profile] : [] };
-        if (source === "castle") return { rows: castles };
+        if (source === "profile") {return { rows: working.profile ? [working.profile] : [] };}
+        if (source === "castle") {return { rows: castles };}
         if (source === "record")
-          return {
+          {return {
             rows: working.record ? [[working.record[0], working.record[2], working.record[5]]] : [],
-          };
+          };}
         if (text.includes('"pendingEffects" >'))
-          return { rows: Array.from({ length: backlog }, () => [1]) };
+          {return { rows: Array.from({ length: backlog }, () => [1]) };}
         return {
           rows: working.completions.filter((row) => row[0] === params[0] && row[1] === params[1]),
         };
@@ -99,14 +99,14 @@ function fixture() {
         }
       }
       if (operation === "update:profile") {
-        if (failure === "cas") return { rows: [] };
+        if (failure === "cas") {return { rows: [] };}
         expect(params).toEqual([params[0], "1001", 1, working.profile![4]]);
         working.profile![4] = params[0];
         return { rows: [["1001"]] };
       }
       if (operation === "insert:completion") {
         if (working.completions.some((row) => row[0] === params[0] && row[1] === params[1]))
-          throw new Error("Synthetic duplicate receipt");
+          {throw new Error("Synthetic duplicate receipt");}
         working.completions.push(params.slice(0, 7));
       }
       return { rows: [] };
@@ -126,7 +126,7 @@ function fixture() {
       calls.push("find");
       expect(owner).toBe("1001");
       expect(Number.isInteger(sequence)).toBe(true);
-      if (failure === "find") throw new Error("Synthetic files failure");
+      if (failure === "find") {throw new Error("Synthetic files failure");}
       return candidate;
     },
   };
@@ -403,12 +403,12 @@ test("query, plan and escaped-reader boundaries reject malformed data before wri
     `5:${hash.toUpperCase()}`,
     `5:${hash}\n`,
   ])
-    expect(() => avatarFinishQuery(raw, now)).toThrow();
+    {expect(() => avatarFinishQuery(raw, now)).toThrow();}
   for (const time of [-1, NaN, 1.5, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => avatarFinishQuery(`5:${hash}`, time)).toThrow();
+    {expect(() => avatarFinishQuery(`5:${hash}`, time)).toThrow();}
   const f = fixture();
   for (const owner of ["", "other", "1".repeat(21)])
-    expect(() =>
+    {expect(() =>
       commitAvatarFinish(
         f.db,
         1,
@@ -419,7 +419,7 @@ test("query, plan and escaped-reader boundaries reject malformed data before wri
           throw new Error();
         },
       ),
-    ).toThrow();
+    ).toThrow();}
   expect(f.queries).toEqual([]);
   let readers: AvatarGrantReaders | undefined;
   const query = avatarFinishQuery(`5:${hash}`, now);

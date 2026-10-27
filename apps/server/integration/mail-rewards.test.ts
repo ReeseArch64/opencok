@@ -191,7 +191,7 @@ test("mail claims commit once across overlap, new request IDs, lost replies, rol
       ["label-system", 2],
       ["label-fight", 7],
     ] as const)
-      await send(id, "gold,0,1", type);
+      {await send(id, "gold,0,1", type);}
     const notice = await batch("label-notice", { types: sfs.string("1,1") });
     expect(notice.body.successUids).toEqual(sfs.string("label-notice"));
     expect((await state("label-system")).rewardStatus).toBe(0);
@@ -233,7 +233,7 @@ test("mail claims commit once across overlap, new request IDs, lost replies, rol
       ["granite", 10],
       ["limestone", 11],
     ] as const)
-      expect(resourceKinds.body[key]).toEqual(sfs.long(value));
+      {expect(resourceKinds.body[key]).toEqual(sfs.long(value));}
     expect(resourceKinds.body.stone_bind).toEqual(sfs.long(0));
     await first.db
       .update(userprofile)
@@ -283,7 +283,7 @@ test("mail claims commit once across overlap, new request IDs, lost replies, rol
         ),
     ).toHaveLength(0);
   } finally {
-    for (const database of databases) await database.close();
+    for (const database of databases) {await database.close();}
     await pg.stop();
   }
 }, 120000);

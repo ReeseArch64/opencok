@@ -17,7 +17,7 @@ function fixture() {
   ]);
   rules.power.generalSkills = new Map([["5001", { type: "0", para1: "133", base: "3", add: "2" }]]);
   for (const key of ["tech_newEffect", "17_wk"])
-    rules.features.set(key, { version: "99.0.0", online: "2" });
+    {rules.features.set(key, { version: "99.0.0", online: "2" });}
   const snapshot: WorldResourceOwnerSnapshot = {
     effects: {
       profile: {
@@ -88,7 +88,7 @@ function fixture() {
   const services: Pick<GameServices, "worldPowerEffects" | "emperorVersion" | "expeditionStage"> = {
     expeditionStage: async () => {
       state.expeditionReads++;
-      if (state.failExpedition) throw new Error("Synthetic expedition failure");
+      if (state.failExpedition) {throw new Error("Synthetic expedition failure");}
       return state.expeditionStage;
     },
     worldPowerEffects: async (realm) => {
@@ -272,9 +272,9 @@ test("owner skill decoding is bounded and fails before realm metadata reads; ord
 test("invalid execution realm or time rejects before any dependency or effect callback", async () => {
   const f = fixture();
   for (const kingdomId of [0, -1, 1.5, NaN, 2147483648])
-    await expect(f.resolve({ kingdomId })).rejects.toThrow();
+    {await expect(f.resolve({ kingdomId })).rejects.toThrow();}
   for (const now of [NaN, Infinity, 0.5, 9007199254740992])
-    await expect(f.resolve({ now })).rejects.toThrow();
+    {await expect(f.resolve({ now })).rejects.toThrow();}
   expect(f.calls).toEqual([]);
   expect(f.state.ticks).toBe(0);
   expect(f.state.expeditionReads).toBe(0);

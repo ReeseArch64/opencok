@@ -26,7 +26,7 @@ export abstract class SignedChatRequest {
       typeof signature !== "string" ||
       !/^[a-f0-9]{64}$/.test(signature)
     )
-      return false;
+      {return false;}
 
     return timingSafeEqual(
       Buffer.from(signature, "hex"),

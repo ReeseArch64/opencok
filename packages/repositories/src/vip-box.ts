@@ -16,7 +16,7 @@ export async function readVipBox(tx: MutationTransaction, owner: string) {
     .limit(129)
     .for("update");
 
-  if (records.length > 128) throw new Error("Too many owned VIP wheels");
+  if (records.length > 128) {throw new Error("Too many owned VIP wheels");}
 
   const history = await tx
     .select()
@@ -32,7 +32,7 @@ export async function writeVipBox(tx: MutationTransaction, owner: string, write:
   const row = write.record;
 
   if (row.uid !== owner || text(row, "itemidlist").length > 255)
-    throw new Error("Invalid VIP wheel owner");
+    {throw new Error("Invalid VIP wheel owner");}
 
   const indices = vipBoxIndices(text(row, "itemidlist"), 64),
     value = {
@@ -48,7 +48,7 @@ export async function writeVipBox(tx: MutationTransaction, owner: string, write:
     };
 
   if (indices.length !== value.stepNum || value.stepNum > 0 !== (value.free === 1))
-    throw new Error("Invalid VIP wheel progress");
+    {throw new Error("Invalid VIP wheel progress");}
 
   await tx
     .insert(vip_box_turntable)
@@ -65,7 +65,7 @@ export async function writeVipBox(tx: MutationTransaction, owner: string, write:
       text(history, "name").length > 40 ||
       text(history, "itemId").length > 40
     )
-      throw new Error("Invalid VIP wheel history");
+      {throw new Error("Invalid VIP wheel history");}
 
     await tx.execute(
       sql`select pg_advisory_xact_lock(hashtextextended('opencok:vip-box:history', 0))`,

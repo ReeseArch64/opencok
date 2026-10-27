@@ -23,9 +23,9 @@ export async function nicknameAccountUid(
       .where(sql`${account_new.gameUid} collate "C" ~ ${mysqlUtf8UnicodeCandidates([owner])}`);
     const matches = candidates.filter((row) => mysqlUtf8UnicodeKey(row.uid) === key);
 
-    if (!matches.length) throw new GameError("E100123");
+    if (!matches.length) {throw new GameError("E100123");}
 
-    if (matches.length !== 1) throw new DependencyError("ambiguous nickname account");
+    if (matches.length !== 1) {throw new DependencyError("ambiguous nickname account");}
 
     const uid = matches[0]!.uid;
     const rows = await tx
@@ -34,10 +34,10 @@ export async function nicknameAccountUid(
       .where(eq(account_new.gameUid, uid))
       .for("update");
 
-    if (!rows.length) throw new GameError("E100123");
+    if (!rows.length) {throw new GameError("E100123");}
 
     if (rows.length !== 1 || rows[0]!.uid !== uid)
-      throw new DependencyError("nickname account selection");
+      {throw new DependencyError("nickname account selection");}
 
     return uid;
   } catch (error) {
@@ -50,7 +50,7 @@ export async function nicknameAccountUid(
       typeof cause.code === "string" &&
       /^[0-9A-Z]{5}$/.test(cause.code)
     )
-      throw new GameError("E100123");
+      {throw new GameError("E100123");}
 
     throw error;
   }
@@ -71,7 +71,7 @@ export async function writeNicknameGlobal(
       .returning({ uid: account_new.gameUid });
 
     if (updated.length !== 1 || updated[0]!.uid !== uid)
-      throw new Error("Nickname account update failed");
+      {throw new Error("Nickname account update failed");}
 
     const ownerKey = mysqlUtf8UnicodeKey(owner);
     const candidates = await tx
@@ -89,7 +89,7 @@ export async function writeNicknameGlobal(
     );
 
     for (let offset = 0; offset < owned.length; offset += 500)
-      await tx
+      {await tx
         .delete(usermapping)
         .where(
           or(
@@ -99,7 +99,7 @@ export async function writeNicknameGlobal(
                 and(eq(usermapping.gameUid, row.uid), eq(usermapping.mappingType, row.type)),
               ),
           ),
-        );
+        );}
 
     const inserted = await tx
       .insert(usermapping)
@@ -116,7 +116,7 @@ export async function writeNicknameGlobal(
       inserted[0]!.type !== "name" ||
       inserted[0]!.value !== name
     )
-      throw new Error("Nickname mapping insert failed");
+      {throw new Error("Nickname mapping insert failed");}
   } catch {
     throw new GameError("E100179");
   }
@@ -136,7 +136,7 @@ export async function commitNicknameGlobal<T>(
       owner.includes("\0") ||
       typeof prepare !== "function"
     )
-      throw new Error("Invalid nickname owner");
+      {throw new Error("Invalid nickname owner");}
 
     mysqlUtf8UnicodeKey(owner);
   } catch {

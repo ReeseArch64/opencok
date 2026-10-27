@@ -64,10 +64,10 @@ test("fresh general Integer ConcurrentHashMap traversal matches 116 independent 
     f.snapshot.generals = keys.map((key, index) => general(key, { star: index }));
     const restored = f.restore();
     expect(restored.map((entry) => entry.id)).toEqual(order);
-    for (const entry of restored) expect(entry.star).toBe(keys.lastIndexOf(entry.id));
+    for (const entry of restored) {expect(entry.star).toBe(keys.lastIndexOf(entry.id));}
   }
   for (const key of [NaN, Infinity, 0.5, 2147483648, -2147483649])
-    expect(() => legacyIntegerOrder([key])).toThrow();
+    {expect(() => legacyIntegerOrder([key])).toThrow();}
   expect(() => legacyIntegerOrder(Array(4097).fill(1))).toThrow();
 });
 

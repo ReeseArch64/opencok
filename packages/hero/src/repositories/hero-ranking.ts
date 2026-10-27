@@ -30,7 +30,7 @@ export async function readHeroRanking(
     activityId.length > 100 ||
     !Number.isSafeInteger(now)
   )
-    throw new Error("Invalid hero ranking query");
+    {throw new Error("Invalid hero ranking query");}
 
   return db.transaction(
     async (tx) => {
@@ -48,7 +48,7 @@ export async function readHeroRanking(
           .limit(1)
       )[0];
 
-      if (!profile) return { profile, events: [] };
+      if (!profile) {return { profile, events: [] };}
 
       const activities = await tx
         .select({ uuid: hero_activity.uuid })
@@ -62,11 +62,11 @@ export async function readHeroRanking(
         )
         .limit(2);
 
-      if (activities.length > 1) throw new Error("Ambiguous active hero activity");
+      if (activities.length > 1) {throw new Error("Ambiguous active hero activity");}
 
       const activity = activities[0];
 
-      if (!activity) return { profile, events: [] };
+      if (!activity) {return { profile, events: [] };}
 
       const events = await tx
         .select({
@@ -83,7 +83,7 @@ export async function readHeroRanking(
         .limit(257);
 
       if (events.length > 256 || events.some((event) => event.activityId !== activity.uuid))
-        throw new Error("Invalid hero event snapshot");
+        {throw new Error("Invalid hero event snapshot");}
 
       return { profile, events };
     },
@@ -98,7 +98,7 @@ export async function readHeroInsideRanking(
   now: number,
 ): Promise<HeroInsideRankingSnapshot> {
   if (!uid || uid.length > 40 || !eventId || eventId.length > 100 || !Number.isSafeInteger(now))
-    throw new Error("Invalid hero inside ranking query");
+    {throw new Error("Invalid hero inside ranking query");}
 
   return db.transaction(
     async (tx) => {
@@ -116,7 +116,7 @@ export async function readHeroInsideRanking(
           .limit(1)
       )[0];
 
-      if (!profile?.allianceId) return { profile, rows: [] };
+      if (!profile?.allianceId) {return { profile, rows: [] };}
 
       const event = (
         await tx
@@ -134,7 +134,7 @@ export async function readHeroInsideRanking(
           .limit(1)
       )[0];
 
-      if (!event || ![2, 4].includes(Number(event.type))) return { profile, rows: [] };
+      if (!event || ![2, 4].includes(Number(event.type))) {return { profile, rows: [] };}
 
       const rows = await tx
         .select({
@@ -172,7 +172,7 @@ export async function readHeroInsideRanking(
         .limit(32768);
 
       if (rows.length > 32767 || new Set(rows.map((row) => row.uid)).size !== rows.length)
-        throw new Error("Invalid hero inside ranking snapshot");
+        {throw new Error("Invalid hero inside ranking snapshot");}
 
       return { profile, rows };
     },
@@ -194,7 +194,7 @@ export async function readHeroHistory(
     type > 4 ||
     !Number.isSafeInteger(now)
   )
-    throw new Error("Invalid hero history query");
+    {throw new Error("Invalid hero history query");}
 
   return db.transaction(
     async (tx) => {
@@ -213,7 +213,7 @@ export async function readHeroHistory(
       )[0];
       const empty = { profile, active: undefined, events: [], castleLevel: 0, alliancePower: 0n };
 
-      if (!profile || type === 0) return empty;
+      if (!profile || type === 0) {return empty;}
 
       const active = (
         await tx
@@ -232,7 +232,7 @@ export async function readHeroHistory(
           .limit(1)
       )[0];
 
-      if (!active) return empty;
+      if (!active) {return empty;}
 
       const castle = await tx
         .select({ level: user_building.level })
@@ -240,7 +240,7 @@ export async function readHeroHistory(
         .where(and(eq(user_building.uid, uid), eq(user_building.itemId, 400000)))
         .limit(2);
 
-      if (castle.length > 1) throw new Error("Ambiguous main building");
+      if (castle.length > 1) {throw new Error("Ambiguous main building");}
 
       const power = profile.allianceId
         ? (
@@ -288,7 +288,7 @@ export async function readHeroHistoryPresentation(
     alliances.some((id) => !id || id.length > 255) ||
     realms.some((id) => !Number.isInteger(id))
   )
-    throw new Error("Invalid hero presentation query");
+    {throw new Error("Invalid hero presentation query");}
 
   return db.transaction(
     async (tx) => ({

@@ -10,7 +10,7 @@ export function regionalRecallFailure(): never {
 }
 
 export function regionalRecallRule(rules: Rules, country: string) {
-  if (!country) return;
+  if (!country) {return;}
 
   return [...(rules.advanced.regionalRecalls?.values() ?? [])].find((rule) => rule.k10 === country);
 }
@@ -29,7 +29,7 @@ export function regionalRecallEligible(rule: Rule, profile: Row, level: number, 
     end = eventTimestamp(rule.k4);
 
   if (registered === undefined || start === undefined || end === undefined || end < start)
-    regionalRecallFailure();
+    {regionalRecallFailure();}
 
   return (
     level >= cityInteger(rule.k11) &&
@@ -44,7 +44,7 @@ export function regionalRecallEligible(rule: Rule, profile: Row, level: number, 
 export function regionalRecallRewards(rule: Rule, ladder: number) {
   const rewards = rule.k7?.split("|")[cityInteger(ladder)]?.split(";");
 
-  if (!rewards?.length || rewards.length > 32 || rewards.some((id) => !id)) regionalRecallFailure();
+  if (!rewards?.length || rewards.length > 32 || rewards.some((id) => !id)) {regionalRecallFailure();}
 
   return rewards;
 }

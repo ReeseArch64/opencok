@@ -72,14 +72,14 @@ test("stored JSON separates malformed content from bounded or unresolved decodin
     "{a:1",
     "{a 1}",
   ])
-    expect(() => decodeLegacyJsonObject(input)).toThrow(LegacyJsonError);
+    {expect(() => decodeLegacyJsonObject(input)).toThrow(LegacyJsonError);}
   for (const input of [
     '{"a":' + "[".repeat(34) + "0" + "]".repeat(34) + "}",
     '{"' + "k".repeat(256) + '":0}',
     "{[]:0}",
     " ".repeat(4 * 1024 * 1024 + 1),
   ])
-    expect(() => decodeLegacyJsonObject(input)).toThrow(ProtocolError);
+    {expect(() => decodeLegacyJsonObject(input)).toThrow(ProtocolError);}
 });
 
 test("mail content projection covers every type and preserves raw text, timestamp and content chunks", () => {
@@ -91,8 +91,8 @@ test("mail content projection covers every type and preserves raw text, timestam
     expect(body.u).toEqual(sfs.string("message"));
     expect(body.contentStr).toEqual(sfs.string(""));
     expect(body.contentsArr).toEqual(sfs.array([sfs.string(content)]));
-    if (structured.has(type)) expect(body.count).toEqual(sfs.long(9007199254740993n));
-    else expect(body.contents).toEqual(sfs.string("hello\nworld"));
+    if (structured.has(type)) {expect(body.count).toEqual(sfs.long(9007199254740993n));}
+    else {expect(body.contents).toEqual(sfs.string("hello\nworld"));}
     expect(decode(encode(body))).toEqual(body);
   }
   const content = "x".repeat(10001);
@@ -178,9 +178,9 @@ test("content queries preserve pipe splitting and whitespace IDs while bounding 
     Array(1001).fill("x").join("|"),
     "|".repeat(65536),
   ])
-    expect(() => mailContentsQuery(value, 0)).toThrow();
+    {expect(() => mailContentsQuery(value, 0)).toThrow();}
   for (const now of [-1, NaN, 1.5, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => mailContentsQuery("id", now)).toThrow();
+    {expect(() => mailContentsQuery("id", now)).toThrow();}
 });
 
 test("permissive comment syntax, duplicate JSON strings and split UTF-16 boundaries preserve legacy presentation", () => {
@@ -193,7 +193,7 @@ test("permissive comment syntax, duplicate JSON strings and split UTF-16 boundar
   });
   const chunks = result([entry(2, "x".repeat(4999) + "😀" + "z")])[0]!.contentsArr;
   expect(chunks).toEqual(sfs.array([sfs.string("x".repeat(4999) + "?"), sfs.string("?z")]));
-  for (const raw of ["{1.0:1}"]) expect(() => decodeLegacyJsonObject(raw)).toThrow(ProtocolError);
+  for (const raw of ["{1.0:1}"]) {expect(() => decodeLegacyJsonObject(raw)).toThrow(ProtocolError);}
 });
 
 test("mail detail rejects transport-envelope depth overflow before returning a removal plan", () => {

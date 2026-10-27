@@ -49,7 +49,7 @@ function weighted(pool: readonly Rule[], random: (maximum: number) => number): R
   for (const rule of pool) {
     sum += cityInteger(rule.rate);
 
-    if (draw < sum) return rule;
+    if (draw < sum) {return rule;}
   }
 
   return targetFailure();
@@ -63,14 +63,14 @@ export function selectTargetTasks(
 ): readonly Rule[] {
   const all = [...(rules.advanced.targetTasks?.values() ?? [])];
 
-  if (all.length > 4096) targetFailure();
+  if (all.length > 4096) {targetFailure();}
 
   const eligible = all.filter((rule) => {
-    if (!targetTaskTypes.has(cityInteger(rule.type, 1, 29))) return false;
+    if (!targetTaskTypes.has(cityInteger(rule.type, 1, 29))) {return false;}
 
     const bounds = (rule.accept ?? "").split(";").map((value) => cityInteger(value));
 
-    if (bounds.length !== 2 || bounds[0]! > bounds[1]!) targetFailure();
+    if (bounds.length !== 2 || bounds[0]! > bounds[1]!) {targetFailure();}
 
     return bounds[0]! <= castle && castle <= bounds[1]!;
   });
@@ -79,16 +79,16 @@ export function selectTargetTasks(
   if (config.k6 === "1") {
     const groups = (config.k7 ?? "").split("|");
 
-    if (!groups.length || groups.length > 5) targetFailure();
+    if (!groups.length || groups.length > 5) {targetFailure();}
 
     for (const group of groups) {
       const choices = group.split(";").filter(Boolean);
 
-      if (!choices.length || choices.length > 128) targetFailure();
+      if (!choices.length || choices.length > 128) {targetFailure();}
 
       const pair = choices[cityInteger(random(choices.length), 0, choices.length - 1)]!.split("-");
 
-      if (pair.length !== 2) targetFailure();
+      if (pair.length !== 2) {targetFailure();}
 
       const rule = eligible.find(
         (rule) =>
@@ -97,15 +97,15 @@ export function selectTargetTasks(
           !selected.some((prior) => prior.id === rule.id),
       );
 
-      if (!rule) targetFailure();
+      if (!rule) {targetFailure();}
 
       selected.push(rule);
     }
   } else
-    for (let i = 0; i < cityInteger(config.k3, 1, 5); i++) {
+    {for (let i = 0; i < cityInteger(config.k3, 1, 5); i++) {
       const pool = eligible.filter((rule) => !selected.some((prior) => prior.id === rule.id));
       selected.push(weighted(pool, random));
-    }
+    }}
 
   return selected;
 }
@@ -113,9 +113,9 @@ export function selectTargetTasks(
 export function targetQuantity(rule: Rule, random: (maximum: number) => number): number {
   const values = (rule.num ?? "").split(";").map((value) => cityInteger(value, 1));
 
-  if (values.length === 1) return values[0]!;
+  if (values.length === 1) {return values[0]!;}
 
-  if (values.length !== 2) targetFailure();
+  if (values.length !== 2) {targetFailure();}
 
   const minimum = Math.min(...values),
     maximum = Math.max(...values);

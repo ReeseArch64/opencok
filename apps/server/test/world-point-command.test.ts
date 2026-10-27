@@ -85,47 +85,47 @@ function fixture() {
     query: async (query: { text: string }, params: unknown[] = []) => {
       const text = query.text;
       queries.push({ text, params });
-      if (text === state.fail) throw new Error("Synthetic private failure");
+      if (text === state.fail) {throw new Error("Synthetic private failure");}
       if (text.startsWith("begin")) {
         expect(text).toBe("begin isolation level repeatable read read only");
         return { rows: [] };
       }
-      if (text === "commit" || text === "rollback") return { rows: [] };
+      if (text === "commit" || text === "rollback") {return { rows: [] };}
       expect(text).toStartWith("select ");
       expect(text).not.toMatch(/for update|for share|monsterInfo/);
       const table = /from "opencok_kingdom"\."([^"]+)"/.exec(text)![1]!;
       const resource =
         table === "world_march" && (text.includes('"armyInfo"') || text.includes('"collectSpd"'));
-      if (!resource) expect(text).not.toMatch(/armyInfo|plunderRes/);
+      if (!resource) {expect(text).not.toMatch(/armyInfo|plunderRes/);}
       const report = table === "world_march" && text.includes('"exploreReport"');
       const neutral =
         !resource && table === "world_march" && text.includes('"occupyResourceEndTime"');
       const key = table + (resource ? ":resource" : report ? ":report" : neutral ? ":neutral" : "");
-      if (key === state.fail) throw new Error("Synthetic private failure");
+      if (key === state.fail) {throw new Error("Synthetic private failure");}
       let rows: Row[] = [];
       if (table === "userprofile")
-        rows = [params[0] === "observer" ? state.observer : state.target].filter(Boolean) as Row[];
-      else if (table === "user_world") rows = state.world ? [state.world] : [];
+        {rows = [params[0] === "observer" ? state.observer : state.target].filter(Boolean) as Row[];}
+      else if (table === "user_world") {rows = state.world ? [state.world] : [];}
       else if (table === "worldpoint")
-        rows =
+        {rows =
           state.point && state.point.id === params[0] && state.point.worldId === params[1]
             ? [state.point]
-            : [];
+            : [];}
       else if (table === "playerinfo")
-        rows = [
+        {rows = [
           {
             uid: params[0] as string,
             power: params[0] === "observer" ? state.observerPower : state.targetPower,
             armyKill: 3n,
           },
-        ];
+        ];}
       else if (table === "user_mixed_info") {
         expect(params).toEqual(["target", 2]);
         expect(text).not.toMatch(/clientRecord|activitypopup|friend|session/);
         rows = state.mixed ? [state.mixed] : [];
-      } else if (table === "stat_reg") rows = [{ uid: "target", type: 2, time: 200n }];
-      else if (table === "alliance") rows = [{ uid: "A", abbr: "SYN", bannerStyle: "UN" }];
-      else if (table === "alliance_member") rows = [{ uid: "target", rank: 4 }];
+      } else if (table === "stat_reg") {rows = [{ uid: "target", type: 2, time: 200n }];}
+      else if (table === "alliance") {rows = [{ uid: "A", abbr: "SYN", bannerStyle: "UN" }];}
+      else if (table === "alliance_member") {rows = [{ uid: "target", rank: 4 }];}
       else if (table === "world_barbarion") {
         expect(params).toEqual([701, 2]);
         expect(text).not.toMatch(/lastAwardArmyMapByteArray|currentHP|worldId|ownerId/);
@@ -208,7 +208,7 @@ function fixture() {
         );
         expect(text).toContain(" limit $");
         rows = state.effects.get(table) ?? [];
-      } else throw new Error("Unexpected synthetic query");
+      } else {throw new Error("Unexpected synthetic query");}
       rows = state.overrides.get(key) ?? rows;
       const columns = text
         .slice(7, text.indexOf(" from "))
@@ -221,7 +221,7 @@ function fixture() {
   const databases = {
     kingdoms: new Map([[1, { db }]]),
     getKingdom: (id: number) => {
-      if (id !== 1) throw new Error("Unconfigured realm");
+      if (id !== 1) {throw new Error("Unconfigured realm");}
       return { db };
     },
   } as unknown as Parameters<typeof createWorldPointDetailStore>[0];
@@ -418,7 +418,7 @@ test("command validates integer parameters, local realm routing and observer sta
   const f = fixture();
   await expect(f.game.execute("observer", "world.get.detail", {})).rejects.toThrow("E000000");
   for (const serverId of [-1, 1])
-    expect((await f.execute({ serverId: sfs.int(serverId) })).body.point).toEqual(sfs.int(701));
+    {expect((await f.execute({ serverId: sfs.int(serverId) })).body.point).toEqual(sfs.int(701));}
   for (const patch of [{ serverId: 2 }, { banFlag: 1 }, { banTime: BigInt(now + 1) }] as Row[]) {
     const f = fixture();
     Object.assign(f.state.observer!, patch);
@@ -593,7 +593,7 @@ test("neutral selected-march dependencies reject missing or malformed durations 
     const f = fixture();
     f.state.point = samplePoint({ pointType: 60 });
     f.rules.world.neutralResources = new Map();
-    if (record) f.rules.world.neutralResources.set("monster", record as Record<string, string>);
+    if (record) {f.rules.world.neutralResources.set("monster", record as Record<string, string>);}
     await expect(f.execute()).rejects.toThrow("102192");
   }
   const f = fixture();
@@ -693,7 +693,7 @@ test("city extras obey exact feature flag and city type and do not read unused d
     const f = fixture();
     f.state.point = samplePoint({ pointType: type });
     f.rules.items.set("lost_battle", { k3: flag! });
-    if (!target) f.state.target = undefined;
+    if (!target) {f.state.target = undefined;}
     const result = await f.execute();
     expect(result.body.slowDown).toBeUndefined();
     expect(result.body.targetPower).toBeUndefined();

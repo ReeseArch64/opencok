@@ -89,11 +89,11 @@ export class AllianceScienceContext {
   }
 
   complete(): Fields {
-    if (!this.c.allianceId) return {};
+    if (!this.c.allianceId) {return {};}
 
     const queue = this.c.state.research.find((row) => row.allianceId === this.c.allianceId);
 
-    if (!queue || long(queue, "startTime") + long(queue, "needTime") > this.c.now) return {};
+    if (!queue || long(queue, "startTime") + long(queue, "needTime") > this.c.now) {return {};}
 
     const id = num(queue, "scienceId"),
       row = this.row(id),
@@ -104,7 +104,7 @@ export class AllianceScienceContext {
       if (!data || (Buffer.isBuffer(data) && data.length === 0)) {
         const target = allianceScienceRule(this.c.rules, id, num(row, "level") + 1);
 
-        if (long(row, "researchstarttime") !== long(queue, "startTime")) allianceFailure();
+        if (long(row, "researchstarttime") !== long(queue, "startTime")) {allianceFailure();}
 
         saved = {
           version: 1,
@@ -112,13 +112,13 @@ export class AllianceScienceContext {
           to: num(row, "level") + 1,
           power: cityInteger(target.power),
         };
-      } else saved = JSON.parse(Buffer.isBuffer(data) ? data.toString("utf8") : "");
+      } else {saved = JSON.parse(Buffer.isBuffer(data) ? data.toString("utf8") : "");}
     } catch {
       allianceFailure();
     }
 
     if (saved.version !== 1 || saved.from !== num(row, "level") || saved.to !== saved.from + 1)
-      allianceFailure();
+      {allianceFailure();}
 
     allianceScienceRule(this.c.rules, id, saved.to);
     const next = {
@@ -130,7 +130,7 @@ export class AllianceScienceContext {
     this.c.write.deletedResearch = [this.c.allianceId];
     this.c.productionAt = this.c.now;
 
-    for (const member of this.c.list()) this.c.productionOwners.add(text(member, "uid"));
+    for (const member of this.c.list()) {this.c.productionOwners.add(text(member, "uid"));}
 
     this.c.ledger.pushes.push({ command: "push.al.science", body: this.snapshot(next) });
 
@@ -232,7 +232,7 @@ export class AllianceScienceContext {
         next[counter] = 0;
         next[prefix + "Available"] =
           available < cityInteger(config?.[index === 1 ? "k1" : "k2"], 0, 1000) ? 1 : 0;
-      } else next[counter] = notUsed;
+      } else {next[counter] = notUsed;}
     }
 
     return next;
@@ -247,7 +247,7 @@ export class AllianceScienceContext {
     if (command === "al.science.donate.cd") {
       const remaining = long(member, "donateCDTime") - c.now;
 
-      if (remaining <= 0n) allianceFailure();
+      if (remaining <= 0n) {allianceFailure();}
 
       const cost = Math.max(1, Math.floor(Number(remaining) / 1000 / cityInteger(config?.k4, 1)));
       economy.gold(-BigInt(cost));
@@ -269,13 +269,13 @@ export class AllianceScienceContext {
       }
 
       if (!Array.isArray(selected) || selected.some((id) => typeof id !== "string"))
-        allianceFailure();
+        {allianceFailure();}
 
       selected = selected.filter((value) => value !== String(id));
 
-      if (cityInteger(int(params, "isuse"), 0, 1)) selected.push(String(id));
+      if (cityInteger(int(params, "isuse"), 0, 1)) {selected.push(String(id));}
 
-      if (JSON.stringify(selected).length > 255) allianceFailure();
+      if (JSON.stringify(selected).length > 255) {allianceFailure();}
 
       c.setAlliance({ ...c.alliance(), targetScience: JSON.stringify(selected) });
 
@@ -286,13 +286,13 @@ export class AllianceScienceContext {
       row = this.row(id),
       rule = allianceScienceRule(c.rules, id, num(row, "level"));
 
-    if (num(row, "level") >= cityInteger(rule.max_lv, 1)) allianceFailure();
+    if (num(row, "level") >= cityInteger(rule.max_lv, 1)) {allianceFailure();}
 
     if (command === "al.science.fresh") {
       const previous = c.state.donations.find((row) => num(row, "scienceid") === id),
         next = previous ?? this.offers(id);
 
-      if (!previous) c.write.donations = [next];
+      if (!previous) {c.write.donations = [next];}
 
       return this.options(next);
     }
@@ -305,7 +305,7 @@ export class AllianceScienceContext {
         num(row, "donatefinish") !== 1 ||
         num(row, "donateprogress") < allianceScienceStage(rule, num(row, "donateprogress")).total
       )
-        allianceFailure();
+        {allianceFailure();}
 
       const target = allianceScienceRule(c.rules, id, num(row, "level") + 1),
         duration = BigInt(
@@ -315,7 +315,7 @@ export class AllianceScienceContext {
           ),
         );
 
-      for (const member of c.list()) c.productionOwners.add(text(member, "uid"));
+      for (const member of c.list()) {c.productionOwners.add(text(member, "uid"));}
 
       c.write.sciences = [{ ...row, researchstarttime: c.now }];
       c.write.research = [
@@ -342,7 +342,7 @@ export class AllianceScienceContext {
       };
     }
 
-    if (command !== "al.science.donate") allianceFailure();
+    if (command !== "al.science.donate") {allianceFailure();}
 
     const cd = long(member, "donateCDTime"),
       available = cd <= c.now ? 1 : Number(member.donateAvailable ?? 1),
@@ -359,22 +359,22 @@ export class AllianceScienceContext {
         (queue) => queue.allianceId === c.allianceId && num(queue, "scienceId") === id,
       )
     )
-      allianceFailure();
+      {allianceFailure();}
 
     const option = cityInteger(int(params, "option"), 0, 2),
       prefix = ["low", "mid", "high"][option]!,
       offer = c.state.donations.find((row) => num(row, "scienceid") === id);
 
-    if (!offer || (option > 0 && num(offer, prefix + "Available") !== 1)) allianceFailure();
+    if (!offer || (option > 0 && num(offer, prefix + "Available") !== 1)) {allianceFailure();}
 
     const resource = text(offer, prefix + "res"),
       quantity = cityInteger(num(offer, prefix + "num"), 1),
       contribution = cityInteger(num(offer, prefix + "contribute"), 1),
       progress = cityInteger(num(offer, option === 2 ? "higprogress" : prefix + "progress"), 1);
 
-    if (!(assets as readonly string[]).includes(resource)) allianceFailure();
+    if (!(assets as readonly string[]).includes(resource)) {allianceFailure();}
 
-    if (resource === "gold") economy.gold(-BigInt(quantity));
+    if (resource === "gold") {economy.gold(-BigInt(quantity));}
     else {
       const asset = resource as Exclude<(typeof assets)[number], "gold">,
         bound = asset + "bind",
@@ -383,9 +383,9 @@ export class AllianceScienceContext {
           : 0n,
         take = boundBalance < BigInt(quantity) ? boundBalance : BigInt(quantity);
 
-      if (take) economy.resource(bound as "woodbind", -take);
+      if (take) {economy.resource(bound as "woodbind", -take);}
 
-      if (BigInt(quantity) > take) economy.resource(asset, -(BigInt(quantity) - take));
+      if (BigInt(quantity) > take) {economy.resource(asset, -(BigInt(quantity) - take));}
     }
 
     const total = allianceScienceStage(rule, num(row, "donateprogress")).total,

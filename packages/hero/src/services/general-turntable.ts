@@ -28,7 +28,7 @@ export function generalTurntable(
       now: Number(context.now),
     })
   )
-    generalFailure();
+    {generalFailure();}
 
   const action = str(params, "M__REQUEST_ID__H"),
     last = long(context.state.quests?.mixed ?? {}, "generalFree"),
@@ -40,7 +40,7 @@ export function generalTurntable(
     for (const payload of context.state.generalRoster?.drawHistory ?? []) {
       const data = decode(Buffer.from(payload));
 
-      if (data.notices?.type !== Type.Array) continue;
+      if (data.notices?.type !== Type.Array) {continue;}
 
       for (const value of data.notices.value as Value[]) {
         const notice = fields(value);
@@ -52,10 +52,10 @@ export function generalTurntable(
           }),
         );
 
-        if (history.length >= 50) break;
+        if (history.length >= 50) {break;}
       }
 
-      if (history.length >= 50) break;
+      if (history.length >= 50) {break;}
     }
 
     return {
@@ -64,14 +64,14 @@ export function generalTurntable(
     };
   }
 
-  if (action !== "openwheel") generalFailure();
+  if (action !== "openwheel") {generalFailure();}
 
   const id = str(params, "id"),
     count = cityInteger(int(params, "num"), 1, 1000),
     rule = context.rules.general.wheels?.get(id);
   const castle = context.state.buildings.find((row) => row.itemId === 400000);
 
-  if (!rule || num(castle ?? {}, "level") < cityInteger(rule.minlevel, 1)) generalFailure();
+  if (!rule || num(castle ?? {}, "level") < cityInteger(rule.minlevel, 1)) {generalFailure();}
 
   const items = (rule.item ?? "").split(";"),
     counts = (rule.item_num ?? "").split(";").map((value) => cityInteger(value, 1)),
@@ -83,7 +83,7 @@ export function generalTurntable(
     items.length !== counts.length ||
     items.some((id) => !context.rules.goods.has(id))
   )
-    generalFailure();
+    {generalFailure();}
 
   context.economy.gold(
     -BigInt(cityInteger(rule.gold, 1)) * BigInt(Math.max(0, count - (free ? 1 : 0))),
@@ -105,13 +105,13 @@ export function generalTurntable(
     );
 
     if ((rule.notice_item ?? "").split(";").includes(String(index + 1)))
-      notices.push(
+      {notices.push(
         sfs.object({
           name: sfs.string(String(context.state.profile.name ?? "")),
           itemid: sfs.string(item),
           itemnum: sfs.string(String(quantity)),
         }),
-      );
+      );}
   }
 
   (context.write.generalRoster ??= {}).turntableAt = context.now;

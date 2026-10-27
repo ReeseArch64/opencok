@@ -60,7 +60,7 @@ function forge(context: CityProgressionContext) {
     (row) => num(row, "itemId") === 429000 && num(row, "level") > 0,
   );
 
-  if (!row) throw new GameError(errors.troopBuilding, "city_progression");
+  if (!row) {throw new GameError(errors.troopBuilding, "city_progression");}
 
   context.idleBuilding(row);
 
@@ -75,20 +75,20 @@ function forge(context: CityProgressionContext) {
 function own(context: CityProgressionContext, id: string) {
   const row = context.state.equipment.find((row) => row.uuid === id);
 
-  if (!row) throw new GameError(errors.missing, "city_progression");
+  if (!row) {throw new GameError(errors.missing, "city_progression");}
 
   return row;
 }
 
 function idle(row: Row) {
-  if (num(row, "on") !== 0 || num(row, "generalid") !== 0) invalid();
+  if (num(row, "on") !== 0 || num(row, "generalid") !== 0) {invalid();}
 }
 
 export function newEquipment(context: CityProgressionContext, id: string): Row {
   equipmentRule(context.rules, id);
 
   if (context.state.equipment.length + (context.write.equipment?.length ?? 0) >= 1000)
-    throw new GameError(errors.full, "city_progression");
+    {throw new GameError(errors.full, "city_progression");}
 
   return {
     uid: context.owner,
@@ -112,11 +112,11 @@ function material(context: CityProgressionContext, command: string, params: Fiel
     create = command === "material.create";
 
   if (rule?.type !== "7" || color < 0 || color > 5 || (create ? color === 5 : color === 0))
-    invalid();
+    {invalid();}
 
   const target = String(Number(id) + (create ? 1 : -1));
 
-  if (!context.rules.goods.has(target)) invalid();
+  if (!context.rules.goods.has(target)) {invalid();}
 
   const ratio = cityInteger(context.rules.items.get("equip")?.k6, 1);
   context.spendItem(id, cityInteger(create ? count * ratio : count));
@@ -156,13 +156,13 @@ async function prepare(
     if (son) {
       idle(son);
 
-      if (!base.cotyledons?.split(";").includes(text(son, "itemId"))) invalid();
+      if (!base.cotyledons?.split(";").includes(text(son, "itemId"))) {invalid();}
     }
 
     suitColor = son && num(son, "itemId") % 10 === 5 ? 5 : 4;
 
     if (stoneId !== "0") {
-      if (suitColor === 5) invalid();
+      if (suitColor === 5) {invalid();}
 
       const owned = context.economy.ownedItem?.(stoneId),
         good = owned ? context.rules.goods.get(owned.itemId) : undefined;
@@ -174,11 +174,11 @@ async function prepare(
         Number(base.level) < minimum! ||
         Number(base.level) > maximum!
       )
-        invalid();
+        {invalid();}
 
       context.spendItem(owned!.itemId, 1);
 
-      if (randomInt(100) <= cityInteger(good!.para4, 0, 100)) suitColor = 5;
+      if (randomInt(100) <= cityInteger(good!.para4, 0, 100)) {suitColor = 5;}
     }
 
     params = { ...params, itemId: sfs.string(`${prefix}4`), uuid: sfs.string(sonId) };
@@ -186,7 +186,7 @@ async function prepare(
   }
 
   if (command === "equipment.init")
-    body = {
+    {body = {
       equip: sfs.array(
         context.state.equipment
           .filter((row) => num(row, "on") !== 2)
@@ -207,17 +207,17 @@ async function prepare(
       materialBackup: sfs.int(
         Math.max(1, num(context.state.quests?.mixed ?? {}, "materialBackup")),
       ),
-    };
+    };}
   else if (command === "material.create" && params.equips) {
     const ids = str(params, "equips").split(","),
       count = cityInteger(context.rules.items.get("equip")?.k6, 1);
 
-    if (ids.length !== count || new Set(ids).size !== count) invalid();
+    if (ids.length !== count || new Set(ids).size !== count) {invalid();}
 
     const rows = ids.map((id) => own(context, id)),
       first = equipmentRule(context.rules, text(rows[0]!, "itemId"));
 
-    if (Number(first.color) >= 5) invalid();
+    if (Number(first.color) >= 5) {invalid();}
 
     for (const row of rows) {
       idle(row);
@@ -228,7 +228,7 @@ async function prepare(
         rule.level !== first.level ||
         (rule.suit_id ?? "") !== (first.suit_id ?? "")
       )
-        invalid();
+        {invalid();}
     }
 
     context.write.deletedEquipment = ids;
@@ -236,17 +236,17 @@ async function prepare(
     context.write.equipment = [row];
     body.equipAdd = sfs.array([sfs.object(equipment(row))]);
     refreshQuests(context, { daily: 36, legacy: 14, count: 1 });
-  } else if (command.startsWith("material.")) body = material(context, command, params);
+  } else if (command.startsWith("material.")) {body = material(context, command, params);}
   else if (command === "equipment.buy") {
     const good = context.rules.goods.get(str(params, "itemId")),
       count = cityInteger(int(params, "count"), 1, 128);
 
-    if (!good?.para1 || !context.rules.power.equipment?.has(good.para1)) invalid();
+    if (!good?.para1 || !context.rules.power.equipment?.has(good.para1)) {invalid();}
 
     context.economy.gold(-BigInt(cityInteger(good!.price, 1)) * BigInt(count));
     const rows = Array.from({ length: count }, () => newEquipment(context, good!.para1!));
 
-    if (context.state.equipment.length + rows.length > 1000) invalid();
+    if (context.state.equipment.length + rows.length > 1000) {invalid();}
 
     context.write.equipment = rows;
     body = {
@@ -258,7 +258,7 @@ async function prepare(
       id = str(params, "itemId"),
       rule = equipmentRule(context.rules, id);
 
-    if (rule.no_forge === "1" || rule.site === "6") invalid();
+    if (rule.no_forge === "1" || rule.site === "6") {invalid();}
 
     const modern = params.rate !== undefined,
       multiple = modern ? cityInteger(int(params, "rate"), 1, 99999) : 1;
@@ -268,18 +268,18 @@ async function prepare(
         )
       : undefined;
 
-    if (modern && !rate) invalid();
+    if (modern && !rate) {invalid();}
 
     const payment = int(params, "gold", 0);
 
-    if (![0, 1].includes(payment)) invalid();
+    if (![0, 1].includes(payment)) {invalid();}
 
     const input = params.tools;
 
-    if (input && input.type !== Type.Array) invalid();
+    if (input && input.type !== Type.Array) {invalid();}
 
     const tools = ((input?.value ?? []) as Value[]).map((value) => {
-      if (value.type !== Type.Int) invalid();
+      if (value.type !== Type.Int) {invalid();}
 
       return cityInteger(value.value);
     });
@@ -312,12 +312,12 @@ async function prepare(
           : Number(before.level) < Number(rule.son_equipment) ||
             Number(before.level) > Number(rule.level)
       )
-        invalid();
+        {invalid();}
 
       context.write.deletedEquipment = [text(son, "uuid")];
     }
 
-    for (const [itemId, count] of selected.costs) context.spendItem(itemId, count);
+    for (const [itemId, count] of selected.costs) {context.spendItem(itemId, count);}
 
     const reduction =
       context.effect(203) +
@@ -345,7 +345,7 @@ async function prepare(
     if (stone) {
       const goods = context.rules.goods.get(stone);
 
-      if (goods?.type !== "43" || color < 4) invalid();
+      if (goods?.type !== "43" || color < 4) {invalid();}
 
       context.spendItem(stone, multiple);
     }
@@ -354,7 +354,7 @@ async function prepare(
       let count = 0;
 
       for (let index = 1; index <= 3; index++)
-        if (randomInt(10000) < Number(rate?.[`ran_${index}`] ?? 0)) count++;
+        {if (randomInt(10000) < Number(rate?.[`ran_${index}`] ?? 0)) {count++;}}
 
       row.extraProperty = Array.from(
         { length: Math.min(cityInteger(result.ran_num ?? 0), count) },
@@ -386,7 +386,7 @@ async function prepare(
           .some((pair) => pair.startsWith("2201;")) && long(state, "endTime") > context.now,
     );
 
-    if (quality.length) context.write.deletedStates = quality.map((state) => num(state, "stateId"));
+    if (quality.length) {context.write.deletedStates = quality.map((state) => num(state, "stateId"));}
 
     return {
       type: 11,
@@ -406,10 +406,10 @@ async function prepare(
   } else if (command === "set.suit.decompose.effect") {
     const selection = str(params, "suits").split(";");
 
-    if (selection.length !== 3) invalid();
+    if (selection.length !== 3) {invalid();}
 
     for (const [index, id] of selection.entries())
-      if (id !== "0") {
+      {if (id !== "0") {
         const row = context.state.suitDecompositions?.find((row) => row.suitid === id);
 
         if (
@@ -420,8 +420,8 @@ async function prepare(
           ).length <
             (index + 1) * 2
         )
-          invalid();
-      }
+          {invalid();}
+      }}
 
     context.write.equipmentSelection = selection.join(";");
     body.decomposeSuitEffect = sfs.string(selection.join(";"));
@@ -437,7 +437,7 @@ async function prepare(
       ids.length > 6 ||
       new Set(ids).size !== ids.length
     )
-      invalid();
+      {invalid();}
 
     const prior = context.state.suitDecompositions?.find((row) => row.suitid === id),
       value: Row = { owner: context.owner, suitid: id };
@@ -456,11 +456,11 @@ async function prepare(
         rule.site === "6" ||
         consumed.some((id) => id !== "0" && equipmentRule(context.rules, id).site === rule.site)
       )
-        invalid();
+        {invalid();}
 
       const slot = consumed.indexOf("0");
 
-      if (slot < 0) invalid();
+      if (slot < 0) {invalid();}
 
       consumed[slot] = text(row, "itemId");
     }
@@ -476,14 +476,14 @@ async function prepare(
       rule = equipmentRule(context.rules, text(row, "itemId"));
 
     if (command === "equip.putOn" || command === "equip.takeOff") {
-      if (num(row, "on") === 2) invalid();
+      if (num(row, "on") === 2) {invalid();}
 
       const assigned = context.state.newGenerals.generals.find(
         (general) => num(general, "id") === num(row, "generalid"),
       );
 
       if (num(row, "generalid") > 0 && (!assigned || ![1, 2, 6].includes(num(assigned, "state"))))
-        invalid();
+        {invalid();}
 
       const put = command === "equip.putOn",
         generalId = cityInteger(str(params, "generalid", "0")),
@@ -492,7 +492,7 @@ async function prepare(
             ? context.state.newGenerals.generals.find((row) => num(row, "id") === generalId)
             : undefined;
 
-      if (generalId > 0 && (!general || ![1, 2, 6].includes(num(general, "state")))) invalid();
+      if (generalId > 0 && (!general || ![1, 2, 6].includes(num(general, "state")))) {invalid();}
 
       if (
         put &&
@@ -500,14 +500,14 @@ async function prepare(
           (generalId > 0 ? num(general!, "level") : num(context.state.profile, "level")) ||
           (rule.exclusive_hero === "1" && generalId === 0))
       )
-        invalid();
+        {invalid();}
 
       if (
         put &&
         ((generalId === 0 && num(row, "on") === 1) ||
           (generalId > 0 && num(row, "generalid") === generalId))
       )
-        invalid();
+        {invalid();}
 
       const old = context.state.equipment.filter(
         (other) =>
@@ -521,7 +521,7 @@ async function prepare(
       ];
 
       if (!put) {
-        if (generalId === 0 ? num(row, "on") !== 1 : num(row, "generalid") !== generalId) invalid();
+        if (generalId === 0 ? num(row, "on") !== 1 : num(row, "generalid") !== generalId) {invalid();}
 
         changed.splice(0, old.length);
       }
@@ -542,11 +542,11 @@ async function prepare(
       forge(context);
       idle(row);
 
-      if (rule.no_decompose === "1") invalid();
+      if (rule.no_decompose === "1") {invalid();}
 
       const items = dismantleEquipment(rule, randomInt);
 
-      for (const [id, count] of items) context.economy.item(id, count);
+      for (const [id, count] of items) {context.economy.item(id, count);}
 
       context.write.deletedEquipment = [text(row, "uuid")];
       body = {
@@ -556,7 +556,7 @@ async function prepare(
         itemId: sfs.string(text(row, "itemId")),
       };
     } else if (command === "equipment.strength") {
-      if (num(row, "on") === 2 || rule.isStrengthen !== "1") invalid();
+      if (num(row, "on") === 2 || rule.isStrengthen !== "1") {invalid();}
 
       const level = cityInteger(num(row, "strengthLevel"), 0, 9);
       context.spend({ silver: cityAmount(rule.Strengthen_iron?.split("|")[level]) }, false);
@@ -569,7 +569,7 @@ async function prepare(
       const rate = cityInteger(rule.Strengthen_rate?.split("|")[level], 0, 100),
         success = rate === 100 || randomInt(101) <= rate;
 
-      if (success) context.write.equipment = [{ ...row, strengthLevel: level + 1 }];
+      if (success) {context.write.equipment = [{ ...row, strengthLevel: level + 1 }];}
 
       body = {
         strengthLevel: sfs.int(level + (success ? 1 : 0)),
@@ -578,7 +578,7 @@ async function prepare(
     } else if (command === "equip.reforge") {
       idle(row);
 
-      if (!text(row, "extraProperty") || !rule.reforgeRandomID) invalid();
+      if (!text(row, "extraProperty") || !rule.reforgeRandomID) {invalid();}
 
       const config = context.rules.items.get("equipment_combine"),
         count = num(row, "reforgeCount"),
@@ -587,7 +587,7 @@ async function prepare(
       context.spend(equipmentCosts(rule.reforgeCost, 0, multiplier), false);
 
       for (const [id, cost] of equipmentPairs(rule.reforgeItem))
-        context.spendItem(id, Math.ceil(cost * multiplier));
+        {context.spendItem(id, Math.ceil(cost * multiplier));}
 
       const library =
         config?.k9
@@ -609,7 +609,7 @@ async function prepare(
       const value = { ...row, extraProperty: extra, reforgeCount: count + 1 };
       context.write.equipment = [value];
       body = equipment(value);
-    } else invalid();
+    } else {invalid();}
   }
 
   return { response: encode(body), event: null };
@@ -623,12 +623,12 @@ async function apply(
   const row = own(context, activity.itemId),
     data = progressionActivityData(activity.data);
 
-  if (num(row, "on") !== 2 || (data && data.kind !== "equipment")) invalid();
+  if (num(row, "on") !== 2 || (data && data.kind !== "equipment")) {invalid();}
 
-  if (action === TimedActivityAction.Start) invalid();
+  if (action === TimedActivityAction.Start) {invalid();}
 
   if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule)
-    return equipment(row);
+    {return equipment(row);}
 
   if (action === TimedActivityAction.Cancel) {
     context.write.deletedEquipment = [text(row, "uuid")];

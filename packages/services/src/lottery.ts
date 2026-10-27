@@ -48,7 +48,7 @@ const castleLevel = (context: CityProgressionContext) =>
 function config(context: CityProgressionContext, id: string): Rule {
   const rule = context.rules.items.get(id);
 
-  if (!rule) lotteryFailure();
+  if (!rule) {lotteryFailure();}
 
   return rule;
 }
@@ -63,13 +63,13 @@ function single(context: CityProgressionContext, id: string) {
   const raw = pinProgressionReward(context, id),
     rewards = progressionRewardPreview(raw);
 
-  if (rewards.length !== 1) lotteryFailure();
+  if (rewards.length !== 1) {lotteryFailure();}
 
   const reward = rewards[0]!;
 
-  if (reward.kind === "item") return `${reward.id}:${reward.count}`;
+  if (reward.kind === "item") {return `${reward.id}:${reward.count}`;}
 
-  if (reward.kind === "count") return `${reward.type}:${reward.value}`;
+  if (reward.kind === "count") {return `${reward.type}:${reward.value}`;}
 
   return lotteryFailure();
 }
@@ -88,9 +88,9 @@ function outerGrid(context: CityProgressionContext, mode: string) {
   return Array.from({ length: 9 }, (_, index) => {
     const [reward] = String(rule[`k${index + 1}`] ?? "").split("|");
 
-    if (reward === "0") return `${resources[randomInt(resources.length)]}:0`;
+    if (reward === "0") {return `${resources[randomInt(resources.length)]}:0`;}
 
-    if (reward === "100") return "100:1";
+    if (reward === "100") {return "100:1";}
 
     return single(context, reward ?? "");
   }).join("|");
@@ -99,7 +99,7 @@ function outerGrid(context: CityProgressionContext, mode: string) {
 function display(row: Row) {
   const values = text(row, "lotteryInfo2").split("|");
 
-  if (values.length !== 9) lotteryFailure();
+  if (values.length !== 9) {lotteryFailure();}
 
   for (let i = 0; i < values.length; i++) {
     const j = i + randomInt(values.length - i);
@@ -124,7 +124,7 @@ function pay(
   if (deficit) {
     const amount = Number(deficit) * Number(factor);
 
-    if (!useGold || !Number.isFinite(amount) || amount <= 0) lotteryFailure();
+    if (!useGold || !Number.isFinite(amount) || amount <= 0) {lotteryFailure();}
 
     context.economy.gold(
       -BigInt(
@@ -136,7 +136,7 @@ function pay(
     );
   }
 
-  if (spend) context.economy.resource(asset, -spend);
+  if (spend) {context.economy.resource(asset, -spend);}
 }
 
 function grant(context: CityProgressionContext, raw: string): Value[] {
@@ -162,7 +162,7 @@ function chest(context: CityProgressionContext, row: Row): string {
   const first = config(context, "lottery_cost").k10?.split(";").filter(Boolean);
   let strategy: string;
 
-  if (num(row, "times1") === 0 && first?.length) strategy = first[randomInt(first.length)]!;
+  if (num(row, "times1") === 0 && first?.length) {strategy = first[randomInt(first.length)]!;}
   else {
     const choices = [1, 2, 3]
       .map((index) => config(context, "strategy_mode")[`k${index}`]?.split("|"))
@@ -203,7 +203,7 @@ function chest(context: CityProgressionContext, row: Row): string {
       )
     ];
 
-  if (!selected?.id) lotteryFailure();
+  if (!selected?.id) {lotteryFailure();}
 
   const used = new Set<number>(),
     slots: string[] = [];
@@ -215,13 +215,13 @@ function chest(context: CityProgressionContext, row: Row): string {
       .find((group) => group.includes(i));
     const remaining = group?.filter((index) => !used.has(index));
 
-    if (!remaining?.length) lotteryFailure();
+    if (!remaining?.length) {lotteryFailure();}
 
     const position = remaining[randomInt(remaining.length)]!;
     used.add(position);
     const id = selected[`site${position}`];
 
-    if (!id) lotteryFailure();
+    if (!id) {lotteryFailure();}
 
     slots.push(Number(id) >= 200 && Number(id) <= 205 ? `${id}:1` : single(context, id));
   }
@@ -245,7 +245,7 @@ function chest(context: CityProgressionContext, row: Row): string {
 function outer(context: CityProgressionContext, row: Row, superMode: boolean) {
   const first = num(row, "times1") === 0;
 
-  if (superMode && num(row, "times1") < 5) lotteryFailure();
+  if (superMode && num(row, "times1") < 5) {lotteryFailure();}
 
   const rule = config(context, superMode ? "super_lottery" : "normal_lottery"),
     costRule = config(context, "lottery_cost");
@@ -269,7 +269,7 @@ function outer(context: CityProgressionContext, row: Row, superMode: boolean) {
       >
     )[type];
 
-    if (!base) lotteryFailure();
+    if (!base) {lotteryFailure();}
 
     const spread = cityInteger(costRule.k8),
       value = lotteryResourceAmount(
@@ -282,9 +282,9 @@ function outer(context: CityProgressionContext, row: Row, superMode: boolean) {
     const reward = innerGrant(context, String(type), value);
     result = { ...result, ...(reward.value as Fields) };
   } else if (id !== "100")
-    result.items = sfs.array(
+    {result.items = sfs.array(
       grantNativeProgressionReward(context, pinProgressionReward(context, id)),
-    );
+    );}
 
   return { id, result };
 }
@@ -303,9 +303,9 @@ export class LotteryDomain extends CityCommandDomain {
 
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     if (command === "lottery.init" && !context.rules.advanced.lotteries?.size)
-      return { response: encode({}), event: null };
+      {return { response: encode({}), event: null };}
 
-    if (!context.state.lottery || !context.rules.advanced.lotteries?.size) lotteryFailure();
+    if (!context.state.lottery || !context.rules.advanced.lotteries?.size) {lotteryFailure();}
 
     const row: Row = {
       uid: context.owner,
@@ -328,10 +328,10 @@ export class LotteryDomain extends CityCommandDomain {
     context.write.lottery = { record: row };
 
     if (!text(row, "lotteryInfo1"))
-      row.lotteryInfo1 = `${outerGrid(context, "normal_lottery")};${outerGrid(context, "super_lottery")}`;
+      {row.lotteryInfo1 = `${outerGrid(context, "normal_lottery")};${outerGrid(context, "super_lottery")}`;}
 
     if (command === "lottery.init") {
-      if (num(row, "step") >= 9) row.type = 1;
+      if (num(row, "step") >= 9) {row.type = 1;}
 
       return {
         response: encode({
@@ -358,7 +358,7 @@ export class LotteryDomain extends CityCommandDomain {
       const price = newDay ? 0 : cityInteger(superMode ? cost.k2 : cost.k1);
       const deficit = BigInt(price) - context.balance("chip");
 
-      if (deficit <= 0n) lotteryFailure();
+      if (deficit <= 0n) {lotteryFailure();}
 
       pay(context, "chip", price, true, cost2.k10);
       context.economy.resource("chip", BigInt(price));
@@ -367,7 +367,7 @@ export class LotteryDomain extends CityCommandDomain {
         chip: sfs.int(number32(context.balance("chip"))),
       };
     } else if (command === "lottery.b.use") {
-      if (num(row, "type") === 2 || num(row, "boxTimes") < 1) lotteryFailure();
+      if (num(row, "type") === 2 || num(row, "boxTimes") < 1) {lotteryFailure();}
 
       body.lottery = sfs.string(chest(context, row));
       row.boxTimes = num(row, "boxTimes") - 1;
@@ -377,13 +377,13 @@ export class LotteryDomain extends CityCommandDomain {
       row.updateTime = context.now;
       body.boxTimes = sfs.int(num(row, "boxTimes"));
     } else if (command === "lottery.batch") {
-      if (num(row, "type") === 2) lotteryFailure();
+      if (num(row, "type") === 2) {lotteryFailure();}
 
       const count = 10;
       pay(context, "chip", cityInteger(cost.k1) * (newDay ? count - 1 : count), false, cost2.k10);
       row.times3 = newDay ? count : num(row, "times3") + count;
 
-      if (newDay) row.times4 = 0;
+      if (newDay) {row.times4 = 0;}
 
       const results: Value[] = [];
 
@@ -416,19 +416,19 @@ export class LotteryDomain extends CityCommandDomain {
     } else if (command === "lottery.start") {
       const type = str(params, "type");
 
-      if (type !== "1" && type !== "2") lotteryFailure();
+      if (type !== "1" && type !== "2") {lotteryFailure();}
 
       const times = cityInteger(str(params, "times"));
 
       if (times !== num(row, type === "1" ? "times1" : "times2"))
-        return {
+        {return {
           response: encode({
             [type === "1" ? "times1" : "times2"]: sfs.int(
               num(row, type === "1" ? "times1" : "times2"),
             ),
           }),
           event: null,
-        };
+        };}
 
       if (type === "1") {
         pay(
@@ -440,7 +440,7 @@ export class LotteryDomain extends CityCommandDomain {
         );
         row.times3 = newDay ? 1 : num(row, "times3") + 1;
 
-        if (newDay) row.times4 = 0;
+        if (newDay) {row.times4 = 0;}
 
         const reward = outer(context, row, superMode);
         row.type = 1;
@@ -448,7 +448,7 @@ export class LotteryDomain extends CityCommandDomain {
         row.lotteryId = "";
         row.lotteryInfo2 = "";
 
-        if (reward.id === "100") body.lottery = sfs.string(chest(context, row));
+        if (reward.id === "100") {body.lottery = sfs.string(chest(context, row));}
 
         row.times1 = num(row, "times1") + 1;
         row.step = 0;
@@ -457,13 +457,13 @@ export class LotteryDomain extends CityCommandDomain {
         row.updateTime = context.now;
         body.rewards = sfs.object(reward.result);
       } else {
-        if (num(row, "type") !== 2 || num(row, "step") >= 9) lotteryFailure();
+        if (num(row, "type") !== 2 || num(row, "step") >= 9) {lotteryFailure();}
 
         const position = cityInteger(str(params, "position"), 0, 8),
           step = num(row, "step") + 1;
         const previous = num(row, "step") === 0 ? [] : text(row, "result").split("|");
 
-        if (previous.some((entry) => entry.split(":")[1] === String(position))) lotteryFailure();
+        if (previous.some((entry) => entry.split(":")[1] === String(position))) {lotteryFailure();}
 
         const slots = lotterySlots(text(row, "lotteryInfo2")),
           reward = slots[step - 1]!;
@@ -510,7 +510,7 @@ export class LotteryDomain extends CityCommandDomain {
       body.updatetime = sfs.long(long(row, "updateTime"));
       context.recordHero(9, type === "1" ? "1" : String(num(row, "step") + 1));
       refreshQuests(context, { legacy: 9, daily: 34, main: 38, count: 1 });
-    } else lotteryFailure();
+    } else {lotteryFailure();}
 
     return { response: encode(body) };
   };

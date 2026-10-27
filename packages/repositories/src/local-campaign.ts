@@ -23,7 +23,7 @@ export async function readCampaignVariables(
     .orderBy(asc(trigger_var.type), asc(trigger_var.key))
     .limit(2049);
 
-  if (rows.length > 2048) throw new Error("Campaign variable bound exceeded");
+  if (rows.length > 2048) {throw new Error("Campaign variable bound exceeded");}
 
   return rows;
 }
@@ -46,7 +46,7 @@ export async function writeCampaignVariables(
       BigInt(text(row, "value")) < -9223372036854775808n ||
       BigInt(text(row, "value")) > 9223372036854775807n
     )
-      throw new Error("Invalid campaign variable write");
+      {throw new Error("Invalid campaign variable write");}
 
     const value = {
       type: 1,

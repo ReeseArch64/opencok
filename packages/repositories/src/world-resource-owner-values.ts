@@ -33,7 +33,7 @@ export function rows(
     values.some((row) => row.uid !== uid || !valid(row)) ||
     new Set(values.map(key)).size !== values.length
   )
-    throw new Error("Invalid resource owner records");
+    {throw new Error("Invalid resource owner records");}
 }
 
 export function nullableText(value: unknown, limit: number): boolean {

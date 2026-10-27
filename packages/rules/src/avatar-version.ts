@@ -12,7 +12,7 @@ export function legacyAvatarVersion(version: unknown): number {
     version < -2147483648 ||
     version > 2147483647
   )
-    throw new GameError(errors.invalid, "avatar_rule");
+    {throw new GameError(errors.invalid, "avatar_rule");}
 
   return version >= 1000000 ? (version % 1000000) + 1 : version > 0 ? version + 1 : 1;
 }
@@ -27,7 +27,7 @@ export function avatarVersionPlan(
   interval: bigint | null,
   mailTemplate: Rule | undefined,
 ): AvatarVersionPlan {
-  if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid, "avatar_rule");
+  if (!Number.isSafeInteger(now) || now < 0) {throw new GameError(errors.invalid, "avatar_rule");}
 
   const sequence = legacyAvatarVersion(profile.picVer);
 
@@ -40,7 +40,7 @@ export function avatarVersionPlan(
         !value.isWellFormed(),
     )
   )
-    throw new GameError(errors.invalid, "avatar_rule");
+    {throw new GameError(errors.invalid, "avatar_rule");}
 
   const mail =
     moderated && mailTemplate && Object.keys(mailTemplate).length ? { ...mailTemplate } : null;
@@ -55,7 +55,7 @@ export function avatarVersionPlan(
   });
 
   if (Buffer.byteLength(effects) > 65535 || (moderated && interval === null))
-    throw new GameError(errors.unsupported, "avatar_rule");
+    {throw new GameError(errors.unsupported, "avatar_rule");}
 
   return {
     picVer: sequence + (moderated ? 0 : 2000000),
@@ -89,17 +89,17 @@ function snapshot(entry: AvatarVersionIntent) {
     typeof entry.effects !== "string" ||
     Buffer.byteLength(entry.effects) > 65535
   )
-    throw new Error("Invalid avatar version intent");
+    {throw new Error("Invalid avatar version intent");}
 
   const value = JSON.parse(entry.effects);
 
-  if (value?.version !== 1) throw new Error("Invalid avatar version effects");
+  if (value?.version !== 1) {throw new Error("Invalid avatar version effects");}
 
   return value;
 }
 
 export function avatarVersionMail(entry: AvatarVersionIntent): AvatarSystemMail {
-  if (!(entry.pendingEffects & 1)) throw new Error("Avatar version mail not pending");
+  if (!(entry.pendingEffects & 1)) {throw new Error("Avatar version mail not pending");}
 
   const value = snapshot(entry);
 
@@ -123,7 +123,7 @@ export function avatarVersionProfile(
     ...(entry.revision ? { revision: entry.revision } : {}),
   };
 
-  if (!validAvatarProfile(result)) throw new Error("Invalid avatar version profile");
+  if (!validAvatarProfile(result)) {throw new Error("Invalid avatar version profile");}
 
   return result;
 }

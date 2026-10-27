@@ -10,14 +10,14 @@ export function playerItemGiftTarget(rules: Rules, itemId: string): string {
   const rule = rules.goods.get(itemId),
     target = rule?.para1;
 
-  if (rule?.type !== "25" || !target || !rules.goods.has(target)) playerItemGiftFailure();
+  if (rule?.type !== "25" || !target || !rules.goods.has(target)) {playerItemGiftFailure();}
 
   return target;
 }
 
 export function playerItemGiftRecipient(uid: string): string {
   if (!uid.trim() || uid.length > 40 || !uid.isWellFormed() || uid.includes("\0"))
-    playerItemGiftFailure();
+    {playerItemGiftFailure();}
 
   return uid;
 }

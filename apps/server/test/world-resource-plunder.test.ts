@@ -75,13 +75,13 @@ test("root arrays reuse 28 frozen structure outcomes including holes, functions 
   let count = 0;
   for (const [source, expected] of structures) {
     const match = /^\{a:(\[.*\])\}$/s.exec(source!);
-    if (!match) continue;
+    if (!match) {continue;}
     count++;
-    if (expected === "Error") expect(() => decodeLegacyJsonArray(match[1]!)).toThrow();
+    if (expected === "Error") {expect(() => decodeLegacyJsonArray(match[1]!)).toThrow();}
     else
-      expect(describe(sfs.array(decodeLegacyJsonArray(match[1]!)))).toBe(
+      {expect(describe(sfs.array(decodeLegacyJsonArray(match[1]!)))).toBe(
         expected!.slice("O[YQ===".length, -1),
-      );
+      );}
   }
   expect(count).toBe(28);
 });
@@ -97,7 +97,7 @@ test("root arrays retain permissive delimiters, comments, trailing text and nest
     sfs.string('"[1]"'),
   ]);
   for (const source of ["null", "{}", "", "  ", "[", "[,]"])
-    expect(() => decodeLegacyJsonArray(source)).toThrow();
+    {expect(() => decodeLegacyJsonArray(source)).toThrow();}
 });
 
 test("plunder subtracts only one object with an Int value and preserves absent values", () => {
@@ -112,7 +112,7 @@ test("plunder subtracts only one object with an Int value and preserves absent v
     ["[{v:0x10}]", 16],
     ["[{v:+7}]", 7],
   ] as const)
-    expect(restoredResourcePlunder(source, 3)).toEqual([{ value }]);
+    {expect(restoredResourcePlunder(source, 3)).toEqual([{ value }]);}
   for (const source of [
     '[{v:"7"}]',
     "[{v:7.0}]",
@@ -124,16 +124,16 @@ test("plunder subtracts only one object with an Int value and preserves absent v
     "[null]",
     "[[]]",
   ])
-    expect(() => restoredResourcePlunder(source, 3)).toThrow();
+    {expect(() => restoredResourcePlunder(source, 3)).toThrow();}
 });
 
 test("multiple plunder entries and territory resource types skip value casts but still validate serialized arrays", () => {
   expect(restoredResourcePlunder("[1,null,{v:true}]", 3)).toEqual([{}, {}, {}]);
   for (const type of [18, 19]) {
     for (const source of ["[1]", "[null]", "[{v:2147483648}]", "[{v:7.0}]", '[{v:"seven"}]'])
-      expect(restoredResourcePlunder(source, type)).toEqual([{}]);
+      {expect(restoredResourcePlunder(source, type)).toEqual([{}]);}
     for (const source of ["null", "[function(){}]", "[1,,2]"])
-      expect(() => restoredResourcePlunder(source, type)).toThrow();
+      {expect(() => restoredResourcePlunder(source, type)).toThrow();}
   }
   expect(() => restoredResourcePlunder("[1,function(){}]", 3)).toThrow();
 });
@@ -144,7 +144,7 @@ test("stored array and plunder bounds reject oversized input, excessive depth an
   expect(() => decodeLegacyJsonArray("[".repeat(34) + "0" + "]".repeat(34))).toThrow();
   expect(() => restoredResourcePlunder("[" + " ".repeat(2047) + "]", 3)).toThrow();
   for (const pointType of [NaN, Infinity, 1.5, 2147483648])
-    expect(() => restoredResourcePlunder(null, pointType)).toThrow();
+    {expect(() => restoredResourcePlunder(null, pointType)).toThrow();}
 });
 
 test("collection restoration defaults nullable primitives and keeps exact Long fields and Float32 speed", () => {
@@ -179,21 +179,21 @@ test("collection restoration defaults nullable primitives and keeps exact Long f
   });
   expect(row).toEqual(before);
   for (const rate of [-0, NaN, Infinity, -Infinity])
-    expect(resourceSavedCollection({ collectSpd: rate }).collectSpd).toBe(rate);
+    {expect(resourceSavedCollection({ collectSpd: rate }).collectSpd).toBe(rate);}
 });
 
 test("collection restoration rejects integer narrowing overflow and mistyped or out-of-range saved primitives", () => {
   for (const value of [-2147483649n, 2147483648n, 9223372036854775807n, 1, "1"])
-    expect(() => resourceSavedCollection({ collectedBeforeSpd: value })).toThrow("102192");
+    {expect(() => resourceSavedCollection({ collectedBeforeSpd: value })).toThrow("102192");}
   for (const value of [-2147483648n, 0n, 2147483647n])
-    expect(resourceSavedCollection({ collectedBeforeSpd: value }).collectedBeforeSpd).toBe(
+    {expect(resourceSavedCollection({ collectedBeforeSpd: value }).collectedBeforeSpd).toBe(
       Number(value),
-    );
+    );}
   for (const key of ["marchArrivalTime", "changeCollectSpdTime", "occupyResourceEndTime"])
-    for (const value of [1, "1", 9223372036854775808n, -9223372036854775809n])
-      expect(() => resourceSavedCollection({ [key]: value })).toThrow("102192");
+    {for (const value of [1, "1", 9223372036854775808n, -9223372036854775809n])
+      {expect(() => resourceSavedCollection({ [key]: value })).toThrow("102192");}}
   for (const value of ["1", 1n, Number.MAX_VALUE])
-    expect(() => resourceSavedCollection({ collectSpd: value })).toThrow("102192");
+    {expect(() => resourceSavedCollection({ collectSpd: value })).toThrow("102192");}
 });
 
 test("plunder and saved collection fields compose with resource arithmetic and exact local wire types", () => {

@@ -30,7 +30,7 @@ export function markMailRead(
       (id) => typeof id !== "string" || id.length > 40 || id.includes("\0") || !id.isWellFormed(),
     )
   )
-    throw new Error("Invalid mail read query");
+    {throw new Error("Invalid mail read query");}
 
   return db.transaction(
     async (tx) => {
@@ -56,7 +56,7 @@ export function markMailRead(
         (profile.banTime ?? 0n) > BigInt(query.now) ||
         !query.ids.length
       )
-        return { profile };
+        {return { profile };}
 
       const changed = await tx
         .update(mail)
@@ -71,7 +71,7 @@ export function markMailRead(
         .returning({ uid: mail.uid, type: mail.type, createTime: mail.createTime });
 
       if (changed.length)
-        await tx
+        {await tx
           .insert(mail_update)
           .values(
             changed.map((row) => ({
@@ -83,12 +83,12 @@ export function markMailRead(
           .onConflictDoUpdate({
             target: [mail_update.toUser, mail_update.mailUid],
             set: { updateTime: sql`greatest(${mail_update.updateTime}, excluded."updateTime")` },
-          });
+          });}
 
       const gifts = query.batch ? [] : changed.filter((row) => row.type === 28);
 
       if (gifts.length)
-        await tx
+        {await tx
           .insert(mail_gift_opening)
           .values(
             gifts.map((row) => ({
@@ -98,7 +98,7 @@ export function markMailRead(
               openedAt: BigInt(query.now),
             })),
           )
-          .onConflictDoNothing({ target: [mail_gift_opening.mailUid, mail_gift_opening.sendTime] });
+          .onConflictDoNothing({ target: [mail_gift_opening.mailUid, mail_gift_opening.sendTime] });}
 
       return { profile };
     },

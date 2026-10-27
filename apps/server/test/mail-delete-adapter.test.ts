@@ -93,13 +93,13 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
       const text = statement.text;
       queries.push({ text, params });
       if (text.startsWith("begin"))
-        before = {
+        {before = {
           rows: [...rows],
           extra: [...extra],
           markers: new Map(markers),
           groups: new Map(groups),
           invites: [...invites],
-        };
+        };}
       if (text === "rollback" && before) {
         rows = before.rows;
         extra = before.extra;
@@ -108,7 +108,7 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
         invites = before.invites;
       }
       const fail = (stage: string) => {
-        if (options.fail === stage) throw new Error(`Synthetic ${stage} failure`);
+        if (options.fail === stage) {throw new Error(`Synthetic ${stage} failure`);}
       };
       if (text.includes('from "opencok_kingdom"."userprofile"')) {
         fail("profile");
@@ -183,7 +183,7 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
       if (text.startsWith('update "opencok_kingdom"."mail_group"')) {
         fail("group-update");
         const key = `${params[1]}:${params[2]}:${params[3]}`;
-        if (groups.has(key)) groups.set(key, BigInt(params[0] as bigint));
+        if (groups.has(key)) {groups.set(key, BigInt(params[0] as bigint));}
       }
       if (text.startsWith('delete from "opencok_kingdom"."alliance_invite_move"')) {
         fail("invite");
@@ -191,7 +191,7 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
           (entry) => entry.invitee !== params[0] || !params.slice(1).includes(entry.inviter),
         );
       }
-      if (text === "commit") fail("commit");
+      if (text === "commit") {fail("commit");}
       return { rows: [] };
     },
   };
@@ -246,7 +246,7 @@ test("deletion refreshes latest sender timestamps exactly and removes exhausted 
   );
   expect(state().groups.get("self:100:alice")).toBe(9007199254740993n);
   expect(state().groups.get("self:500:mod")).toBe(10n);
-  for (const group of [200, 300, 400]) expect(state().groups.has(`self:${group}:`)).toBe(false);
+  for (const group of [200, 300, 400]) {expect(state().groups.has(`self:${group}:`)).toBe(false);}
   const reads = queries.filter(
     (entry) =>
       entry.text.startsWith("select") && entry.text.includes('from "opencok_kingdom"."mail"'),
@@ -254,7 +254,7 @@ test("deletion refreshes latest sender timestamps exactly and removes exhausted 
   expect(reads.map((entry) => entry.params)).toContainEqual(["self", 20, 21, 22, "alice", 1]);
   expect(reads.map((entry) => entry.params)).toContainEqual(["self", 23, 24, "mod", 1]);
   for (const read of reads)
-    expect(read.text).toContain('order by "opencok_kingdom"."mail"."createTime" desc limit');
+    {expect(read.text).toContain('order by "opencok_kingdom"."mail"."createTime" desc limit');}
   await deleteMail(db, 1, "self", mailDeleteQuery("old,mod-text", now), plan);
   expect(state().groups.has("self:100:alice")).toBe(false);
   expect(state().groups.has("self:500:mod")).toBe(false);
@@ -341,9 +341,9 @@ test("deletion bounds metadata and direct inputs without leaving partial state",
   const { db, queries, state } = database();
   const query = mailDeleteQuery("system", now);
   for (const owner of ["", " ", "\0", "\ud800", "x".repeat(41)])
-    expect(() => deleteMail(db, 1, owner, query, plan)).toThrow();
+    {expect(() => deleteMail(db, 1, owner, query, plan)).toThrow();}
   for (const realm of [0, 1.5, 2147483648])
-    expect(() => deleteMail(db, realm, "self", query, plan)).toThrow();
+    {expect(() => deleteMail(db, realm, "self", query, plan)).toThrow();}
   for (const patch of [
     { now: -1 },
     { now: NaN },
@@ -352,11 +352,11 @@ test("deletion bounds metadata and direct inputs without leaving partial state",
     { ids: ["\0"] },
     { ids: ["\ud800"] },
   ])
-    expect(() => deleteMail(db, 1, "self", { ...query, ...patch }, plan)).toThrow();
+    {expect(() => deleteMail(db, 1, "self", { ...query, ...patch }, plan)).toThrow();}
   expect(queries).toEqual([]);
   const ids = Array.from({ length: 130 }, (_, i) => `large-${i}`);
   for (const uid of ids)
-    state().rows.push(row(uid, { type: 26, contents: Buffer.alloc(65535, 32) }));
+    {state().rows.push(row(uid, { type: 26, contents: Buffer.alloc(65535, 32) }));}
   const count = state().rows.length;
   await expect(
     deleteMail(db, 1, "self", mailDeleteQuery(ids.join(","), now), plan),

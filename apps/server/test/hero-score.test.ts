@@ -24,5 +24,5 @@ test("hero scoring uses the configured action and parameter pairs and signed pow
 test("every maintained hero event resolves its scoring rules without needing private runtime catalogs", async () => {
   const rules = await loadRules();
   for (const rule of rules.ranking.heroEvents!.values())
-    expect(heroScoreDelta(rules, { eventId: rule.id! }, [])).toBe(0n);
+    {expect(heroScoreDelta(rules, { eventId: rule.id! }, [])).toBe(0n);}
 });

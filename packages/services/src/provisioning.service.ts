@@ -22,18 +22,18 @@ export class ProvisioningService {
   async create(token: string, input: CreateCharacterDto): Promise<CharacterResponse> {
     const selected = createCharacterSchema.safeParse(input);
 
-    if (!selected.success) throw new HttpError(400, "Invalid character input");
+    if (!selected.success) {throw new HttpError(400, "Invalid character input");}
 
     const realm = this.realms.get(selected.data.kingdomId);
 
-    if (!realm) throw new HttpError(400, "Realm unavailable");
+    if (!realm) {throw new HttpError(400, "Realm unavailable");}
 
     const identity = await this.identities.verify(token);
     const reserved = await this.store.reserve(identity, selected.data);
     const reservation = reservationSchema.parse(reserved.reservation);
 
     if (reserved.ready)
-      return { gameUid: reservation.gameUid, kingdomId: reservation.kingdomId, state: "ready" };
+      {return { gameUid: reservation.gameUid, kingdomId: reservation.kingdomId, state: "ready" };}
 
     let receipt;
 

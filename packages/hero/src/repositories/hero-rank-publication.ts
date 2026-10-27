@@ -85,7 +85,7 @@ export function createHeroRankProjection(
         rows.length > 64 ||
         new Set(rows.map((row) => `${row.rankKey}:${row.member}`)).size !== rows.length
       )
-        throw new Error("Invalid hero rank publication batch");
+        {throw new Error("Invalid hero rank publication batch");}
 
       for (const row of rows) {
         if (
@@ -105,7 +105,7 @@ export function createHeroRankProjection(
           row.score > 2147483647 ||
           (row.metadata !== null && Buffer.byteLength(row.metadata) > 8192)
         )
-          throw new Error("Invalid owned hero rank score");
+          {throw new Error("Invalid owned hero rank score");}
 
         cityInteger(row.type, 1, 4);
         cityInteger(row.level, 0, 4095);
@@ -127,7 +127,7 @@ export function createHeroRankProjection(
           (owner.ownerEpoch > authority.epoch ||
             (owner.ownerEpoch === authority.epoch && owner.instanceId !== authority.instance))
         )
-          throw new Error("Stale global hero rank owner");
+          {throw new Error("Stale global hero rank owner");}
 
         if (!owner) {
           [owner] = await tx
@@ -147,7 +147,7 @@ export function createHeroRankProjection(
             .returning();
         }
 
-        if (!owner) throw new Error("Missing global hero rank owner");
+        if (!owner) {throw new Error("Missing global hero rank owner");}
 
         const [version] = await tx
           .update(hero_rank_owner)
@@ -155,7 +155,7 @@ export function createHeroRankProjection(
           .where(eq(hero_rank_owner.kingdomId, authority.kingdomId))
           .returning();
 
-        if (!version) throw new Error("Missing hero rank publication version");
+        if (!version) {throw new Error("Missing hero rank publication version");}
 
         const seals = await tx
           .select({ actId: hero_rank_watermark.actId })
@@ -190,7 +190,7 @@ export function createHeroRankProjection(
           : [];
 
         if (existing.some((row) => row.kingdomId !== authority.kingdomId))
-          throw new Error("Foreign sealed hero ranking member");
+          {throw new Error("Foreign sealed hero ranking member");}
 
         const preserved = existing.map((row) => ({
           ...row,
@@ -210,7 +210,7 @@ export function createHeroRankProjection(
             observedAt,
           }));
 
-        if (!values.length) return [];
+        if (!values.length) {return [];}
 
         const result = await tx
           .insert(hero_rank_score)
@@ -233,7 +233,7 @@ export function createHeroRankProjection(
           })
           .returning();
 
-        if (result.length !== values.length) throw new Error("Foreign hero rank member ownership");
+        if (result.length !== values.length) {throw new Error("Foreign hero rank member ownership");}
 
         authority.assertReady();
 

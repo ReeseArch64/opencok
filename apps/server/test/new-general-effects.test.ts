@@ -12,7 +12,7 @@ const context = { kingdomId: 1, version: "12.6.0", now: 1000 };
 function fixture() {
   const rules = new Rules(new Map(), new Map(), new Map());
   for (const name of ["general_official", "general_random_effect"])
-    rules.features.set(name, { version: "1.0.0", online: "all" });
+    {rules.features.set(name, { version: "1.0.0", online: "all" });}
   rules.items.set("general_official", { k1: "1", k2: "0.5" });
   rules.power.newGeneralBases = new Map([
     ["1", { base_skill: "10" }],
@@ -79,7 +79,7 @@ function fixture() {
 }
 
 function bits(value: number) {
-  if (Number.isNaN(value)) return 2143289344;
+  if (Number.isNaN(value)) {return 2143289344;}
   const bytes = new DataView(new ArrayBuffer(4));
   bytes.setFloat32(0, value);
   return bytes.getInt32(0);
@@ -151,10 +151,10 @@ test("fresh saved-level and operation-time restoration fails before filtering in
 test("non-refinement failures discard prior generals and preserve the outer zero-on-exception boundary", () => {
   for (const fail of ["status", "skill", "equipment", "office"]) {
     const f = fixture();
-    if (fail === "status") f.rules.power.statuses!.get("2")!.effect = "78;bad";
-    if (fail === "skill") f.rules.power.newGeneralSkills!.get("20")!.base = "bad";
-    if (fail === "equipment") f.equipped.pop();
-    if (fail === "office") f.rules.items.get("general_official")!.k2 = "bad";
+    if (fail === "status") {f.rules.power.statuses!.get("2")!.effect = "78;bad";}
+    if (fail === "skill") {f.rules.power.newGeneralSkills!.get("20")!.base = "bad";}
+    if (fail === "equipment") {f.equipped.pop();}
+    if (fail === "office") {f.rules.items.get("general_official")!.k2 = "bad";}
     expect(f.resolve()).toBe(0);
     expect(f.calls.slice(0, 2)).toEqual(["clock", "equip:1:78"]);
   }

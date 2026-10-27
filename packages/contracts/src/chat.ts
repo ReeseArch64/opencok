@@ -198,7 +198,7 @@ export function isChatSessionTicket(value: unknown, now: number): value is ChatS
     typeof value.session !== "string" ||
     !/^[A-Za-z0-9_-]{43}$/.test(value.session)
   )
-    return false;
+    {return false;}
 
   const token = Buffer.from(value.session, "base64url");
 

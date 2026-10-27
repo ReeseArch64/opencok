@@ -36,7 +36,7 @@ function matches(name: string, pattern: string): boolean {
     let char = chars[i]!;
     if (char === "\\") {
       char = chars[++i]!;
-      if (char === undefined) throw new Error("Invalid synthetic pattern");
+      if (char === undefined) {throw new Error("Invalid synthetic pattern");}
     } else if (char === "%") {
       expression += "[\\s\\S]*";
       continue;
@@ -66,27 +66,27 @@ function fixture() {
           queries.push({ realm, text, params });
           if (text.startsWith("begin")) {
             expect(text).toBe("begin isolation level repeatable read read only");
-            if (state.fail === "begin") throw new Error("Synthetic begin failure");
+            if (state.fail === "begin") {throw new Error("Synthetic begin failure");}
             return { rows: [] };
           }
-          if (text === "rollback") return { rows: [] };
+          if (text === "rollback") {return { rows: [] };}
           if (text === "commit") {
-            if (state.fail === "commit") throw new Error("Synthetic commit failure");
+            if (state.fail === "commit") {throw new Error("Synthetic commit failure");}
             return { rows: [] };
           }
           expect(text).toStartWith("select ");
-          if (params.length === 1 && params[0] === 0) return { rows: [] };
+          if (params.length === 1 && params[0] === 0) {return { rows: [] };}
           if (!text.includes("left join")) {
             expect(realm).toBe(1);
             expect(params).toEqual(["self", 1]);
             expect(text).not.toContain("for update");
             expect(text).not.toContain("for share");
-            if (state.fail === "profile") throw new Error("Synthetic profile failure");
+            if (state.fail === "profile") {throw new Error("Synthetic profile failure");}
             state.onProfile?.();
             return { rows: state.profile ? [state.profile] : [] };
           }
           if (state.fail === "search" || (state.fail === "remote" && realm === 2))
-            throw new Error("Synthetic private database failure");
+            {throw new Error("Synthetic private database failure");}
           expect(text).toContain('left join "opencok_kingdom"."playerinfo"');
           expect(text).toContain('left join "opencok_kingdom"."alliance"');
           expect(text).toContain('"playerinfo"."uid" = "opencok_kingdom"."userprofile"."uid"');
@@ -99,8 +99,8 @@ function fixture() {
           expect(text).not.toContain('"serverId"');
           expect(params.slice(0, 2)).toEqual([9223372036854775807n, 9223372036854775806n]);
           expect(params[3]).toBe(8);
-          if (params.length === 5) expect(text).toEndWith("offset $5");
-          if (state.raw) return { rows: state.raw };
+          if (params.length === 5) {expect(text).toEndWith("offset $5");}
+          if (state.raw) {return { rows: state.raw };}
           const offset = Number(params[4] ?? 0);
           const rows = (realm === 1 ? state.local : state.remote)
             .filter(
@@ -134,7 +134,7 @@ function fixture() {
     kingdoms: databases,
     getKingdom: (id: number) => {
       const database = databases.get(id);
-      if (!database) throw new Error("Synthetic unconfigured realm");
+      if (!database) {throw new Error("Synthetic unconfigured realm");}
       return database;
     },
   } as unknown as Databases;
@@ -328,7 +328,7 @@ test("page normalization preserves positive Java wrapping and rejects negative w
     2147483648,
     -2147483649,
   ])
-    expect(() => worldSearchOffset(page)).toThrow();
+    {expect(() => worldSearchOffset(page)).toThrow();}
 });
 
 test("malformed parameters fail before repository access without silently coercing values", async () => {
@@ -398,7 +398,7 @@ test("projection allows only public fields and rejects invalid, duplicate or exc
     { abbr: "x".repeat(11) },
     { abbr: null },
   ] as Row[])
-    expect(() => worldSearch([{ ...valid, ...patch }])).toThrow();
+    {expect(() => worldSearch([{ ...valid, ...patch }])).toThrow();}
   expect(() => worldSearch([valid, valid])).toThrow();
   expect(() =>
     worldSearch(Array.from({ length: 9 }, (_, i) => ({ ...valid, uid: String(i) }))),
@@ -444,13 +444,13 @@ test("repository captures input before awaiting and validates direct caller boun
     { now: -1 },
     { now: NaN },
   ])
-    await expect(
+    {await expect(
       invalid.store.search("self", { name: "", offset: 0, kingdomId: 1, now, ...patch }),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   for (const owner of ["", "\0", "\ud800", "x".repeat(256)])
-    await expect(
+    {await expect(
       invalid.store.search(owner, { name: "", offset: 0, kingdomId: 1, now }),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   expect(invalid.queries).toEqual([]);
   expect(() => createWorldSearchStore(invalid.topology, 0)).toThrow();
   expect(() => createWorldSearchStore(invalid.topology, 3)).toThrow();
@@ -471,13 +471,13 @@ test("command revalidates injected adapter identity and realm and bounds the cor
     { profile: { uid: "self", serverId: 2 }, kingdomId: 1, rows: [] },
     { profile: { uid: "self", serverId: 1 }, kingdomId: 2, rows: [] },
   ])
-    await expect(
+    {await expect(
       make({ worldSearch: { search: async () => snapshot } }).execute(
         "self",
         "world.search.user",
         {},
       ),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   const f = fixture();
   const overhead = encode(
     extension("world.search.user", {

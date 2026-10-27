@@ -17,7 +17,7 @@ export function createChatNoticeCostReader(
     const [receipt] = await db.select().from(command_receipt).where(key).limit(1);
 
     if (!receipt || !["chat.notice", "chat.original.notice"].includes(receipt.command))
-      throw new Error("Notice cost receipt unavailable");
+      {throw new Error("Notice cost receipt unavailable");}
 
     const postings = await db
       .select({

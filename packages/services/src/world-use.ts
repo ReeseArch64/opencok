@@ -47,7 +47,7 @@ export class WorldUseDomain extends CityCommandDomain {
         const world = context.state.worldMutation?.world,
           reader = context.state.worldMonsters;
 
-        if (!world || !reader || num(world, "worldId") !== 0) worldMutationFailure();
+        if (!world || !reader || num(world, "worldId") !== 0) {worldMutationFailure();}
 
         return {
           response: encode({ id: sfs.int(await reader.nearestBoss(num(world, "pointId"))) }),
@@ -65,7 +65,7 @@ export class WorldUseDomain extends CityCommandDomain {
           num(world, "worldId") !== 0 ||
           num(context.state.profile, "serverId") !== context.rules.kingdomId
         )
-          worldMutationFailure();
+          {worldMutationFailure();}
 
         if (
           !ruleAvailable(context.rules.features.get("barbarion_switch"), {
@@ -74,7 +74,7 @@ export class WorldUseDomain extends CityCommandDomain {
             now: Number(context.now),
           })
         )
-          throw new GameError(errors.unsupported, "world_state");
+          {throw new GameError(errors.unsupported, "world_state");}
 
         const radius = cityInteger(context.rules.items.get("world_barbarion")?.k5, 1, 32),
           minimum =
@@ -99,14 +99,14 @@ export class WorldUseDomain extends CityCommandDomain {
           );
 
         if (living.length)
-          return {
+          {return {
             response: encode({ pointId: sfs.int(num(living[random(living.length)]!, "id")) }),
             event: null,
-          };
+          };}
 
         const chosen = chooseWorldMonsterCells(nearby.filter(worldItemFree), true, size, random);
 
-        if (!chosen.length) return { response: encode({ pointId: sfs.int(-1) }), event: null };
+        if (!chosen.length) {return { response: encode({ pointId: sfs.int(-1) }), event: null };}
 
         const actor = worldBarbarianActor(context.rules, "4800000"),
           points = chosen.map((point, index) => ({
@@ -141,7 +141,7 @@ export class WorldUseDomain extends CityCommandDomain {
           num(world, "worldId") !== 0 ||
           num(context.state.profile, "serverId") !== context.rules.kingdomId
         )
-          worldMutationFailure();
+          {worldMutationFailure();}
 
         const config = context.rules.items.get("world_barbarion"),
           radius = cityInteger(config?.k5, 1, 32),
@@ -155,16 +155,16 @@ export class WorldUseDomain extends CityCommandDomain {
         const targetConfig = worldMonsterConfiguration(context.rules, target);
 
         if (reusable.length)
-          return {
+          {return {
             response: encode({
               pointId: sfs.int(num(reusable[random(reusable.length)]!, "id")),
             }),
             event: null,
-          };
+          };}
 
         const free = nearby.filter(worldItemFree);
 
-        if (!free.length) return { response: encode({ pointId: sfs.int(-1) }), event: null };
+        if (!free.length) {return { response: encode({ pointId: sfs.int(-1) }), event: null };}
 
         const selected = free[random(free.length)]!,
           primary = {
@@ -181,16 +181,16 @@ export class WorldUseDomain extends CityCommandDomain {
           chosen = chooseWorldMonsterCells(refill, targetConfig.four, size, random);
 
         if (chosen.length)
-          for (const row of spawnWorldMonsterCells(
+          {for (const row of spawnWorldMonsterCells(
             context.rules,
             chosen,
             target,
             context.now,
             86400,
           )) {
-            if (num(row, "id") === num(primary, "id")) points[0] = row;
-            else points.push(row);
-          }
+            if (num(row, "id") === num(primary, "id")) {points[0] = row;}
+            else {points.push(row);}
+          }}
 
         (context.write.worldMutation ??= {}).points = points;
 
@@ -212,7 +212,7 @@ export class WorldUseDomain extends CityCommandDomain {
           item = context.economy.ownedItem?.(uuid);
 
         if (!state || !reader || !item || item.count < 1 || !context.economy.consumeItem)
-          worldMutationFailure();
+          {worldMutationFailure();}
 
         const rule = context.rules.goods.get(item.itemId),
           source = state.points.find((point) => num(point, "id") === id);
@@ -224,12 +224,12 @@ export class WorldUseDomain extends CityCommandDomain {
           (rule.type2 ?? "").length ||
           !rule.para1
         )
-          worldMutationFailure();
+          {worldMutationFailure();}
 
         const config = worldMonsterConfiguration(context.rules, rule.para1),
           points = worldMonsterProp(context.rules, state.points, id, rule.para1, size, context.now);
 
-        if (await reader.claimed(points.map((point) => num(point, "id")))) worldMutationFailure();
+        if (await reader.claimed(points.map((point) => num(point, "id")))) {worldMutationFailure();}
 
         const main = points[0]!,
           maximum = worldMonsterMaximum(num(main, "pointType"), rule.para1, context.rules),
@@ -265,13 +265,13 @@ export class WorldUseDomain extends CityCommandDomain {
         uuid = str(params, "itemUUid"),
         item = context.economy.ownedItem?.(uuid);
 
-      if (!state || !item || item.count < 1 || !context.economy.consumeItem) worldMutationFailure();
+      if (!state || !item || item.count < 1 || !context.economy.consumeItem) {worldMutationFailure();}
 
       const row = state.points.find((row) => num(row, "id") === id),
         rule = context.rules.goods.get(item.itemId);
 
       if (!row || !worldItemFree(row) || !["11", "12"].includes(rule?.type ?? ""))
-        worldMutationFailure();
+        {worldMutationFailure();}
 
       const target = worldItemTarget(rule!, random);
 
@@ -282,7 +282,7 @@ export class WorldUseDomain extends CityCommandDomain {
           !context.state.worldMonsters ||
           (await context.state.worldMonsters.claimed(points.map((point) => num(point, "id"))))
         )
-          worldMutationFailure();
+          {worldMutationFailure();}
 
         const response = worldItemUsed({ pointId: id, itemid: item.itemId });
         context.economy.consumeItem(uuid, 1);
@@ -300,7 +300,7 @@ export class WorldUseDomain extends CityCommandDomain {
       }
 
       if (!context.state.worldMonsters || (await context.state.worldMonsters.claimed([id])))
-        worldMutationFailure();
+        {worldMutationFailure();}
 
       const resource = worldItemResource(context.rules, target),
         point = {

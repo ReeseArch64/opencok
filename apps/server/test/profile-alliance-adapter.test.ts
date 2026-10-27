@@ -30,32 +30,32 @@ function database(
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
       const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
-      if (table && table === options.failure) throw new Error("Synthetic alliance failure");
+      if (table && table === options.failure) {throw new Error("Synthetic alliance failure");}
       if (table === "userprofile")
-        return { rows: [["synthetic", "Public", 5, 123, null, 2, 3, 0, allianceId, 2]] };
-      if (table === "user_achievement") return { rows: [["0"]] };
+        {return { rows: [["synthetic", "Public", 5, 123, null, 2, 3, 0, allianceId, 2]] };}
+      if (table === "user_achievement") {return { rows: [["0"]] };}
       if (table === "alliance")
-        return {
+        {return {
           rows: options.missing
             ? []
             : [Object.keys(getTableColumns(alliance)).map((key) => record[key] ?? null)],
-        };
+        };}
       if (table === "alliance_member") {
         if (query.text.includes('inner join "opencok_kingdom"."userprofile"'))
-          return {
+          {return {
             rows: Array.from({ length: options.leaders ?? 1 }, (_, index) => [
               `leader-${index}`,
               "Leader",
             ]),
-          };
+          };}
         return { rows: [[options.members ?? "2", "9007199254740993"]] };
       }
       if (table === "alliance_science")
-        return { rows: Array.from({ length: options.overflow ? 32768 : 1 }, () => [1000, 1]) };
+        {return { rows: Array.from({ length: options.overflow ? 32768 : 1 }, () => [1000, 1]) };}
       if (table === "alliance_vedio")
-        return {
+        {return {
           rows: [[allianceId, "synthetic-video", "synthetic-thumbnail", 720, 1280, 1234, 10, 1]],
-        };
+        };}
       return { rows: [] };
     },
   };

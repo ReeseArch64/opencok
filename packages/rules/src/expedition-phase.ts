@@ -14,11 +14,11 @@ export function expeditionPhaseView(
   const active = expeditionPhase(state.manifest, now);
 
   if (active)
-    return {
+    {return {
       periodId: text(state.manifest!, "periodId"),
       ...active,
       opponent: num(state.manifest!, "matchServerId"),
-    };
+    };}
 
   const phases = expeditionCalendarPhases(period),
     global = phases.find((row) => now >= row.startTime && now < row.endTime),
@@ -38,10 +38,10 @@ export function expeditionPhaseOperation(revision: bigint) {
 }
 
 export function expeditionPanelDefinitions(rules: Rules, now: bigint, lastMergeMillis: bigint) {
-  if (!expeditionOpen(rules, now)) return [];
+  if (!expeditionOpen(rules, now)) {return [];}
 
   return [...(rules.power.activityPanels?.values() ?? [])].flatMap((rule) => {
-    if (rule.type !== "37" || rule.function_on === "0") return [];
+    if (rule.type !== "37" || rule.function_on === "0") {return [];}
 
     const merge =
       lastMergeMillis > 0n &&
@@ -56,7 +56,7 @@ export function expeditionPanelDefinitions(rules: Rules, now: bigint, lastMergeM
       const start = eventTimestamp(rule.start),
         end = eventTimestamp(rule.end);
 
-      if (start !== undefined && end !== undefined && (now <= start || now >= end)) return [];
+      if (start !== undefined && end !== undefined && (now <= start || now >= end)) {return [];}
     }
 
     return [{ rule, merge }];

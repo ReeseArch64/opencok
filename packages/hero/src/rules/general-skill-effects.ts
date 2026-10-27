@@ -20,16 +20,16 @@ export function generalSkillEffects(
     for (const skill of skills) {
       const rule = rules.power.generalSkills?.get(skill.id);
 
-      if (!rule) return invalid();
+      if (!rule) {return invalid();}
 
-      if (rule.type !== "0") continue;
+      if (rule.type !== "0") {continue;}
 
       const ids = rule.para1?.split("|").filter(Boolean) ?? [];
       const bases = rule.base?.split("|").filter(Boolean) ?? [];
       const increments = rule.add?.split("|").filter(Boolean) ?? [];
 
       if (!ids.length || bases.length < ids.length || increments.length < ids.length)
-        return invalid();
+        {return invalid();}
 
       const points = Number(BigInt.asIntN(32, BigInt(integer(skill.points)) - 1n));
       const skillEffects = new Map<number, number>();
@@ -40,10 +40,10 @@ export function generalSkillEffects(
       }
 
       for (const [id, value] of skillEffects)
-        general.set(id, float((general.get(id) ?? 0) + value));
+        {general.set(id, float((general.get(id) ?? 0) + value));}
     }
 
-    for (const [id, value] of general) effects.set(id, float((effects.get(id) ?? 0) + value));
+    for (const [id, value] of general) {effects.set(id, float((effects.get(id) ?? 0) + value));}
   }
 
   return effects;

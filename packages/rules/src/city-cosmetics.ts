@@ -19,11 +19,11 @@ export function cityCosmeticProjection(
       ),
       row = special ?? group[0];
 
-    if (!row) return;
+    if (!row) {return;}
 
     let end = long(row, "endTime");
 
-    if (end === 9223372036854775807n) end = now > 2147000000000n ? now + 86400000n : 2147000000000n;
+    if (end === 9223372036854775807n) {end = now > 2147000000000n ? now + 86400000n : 2147000000000n;}
 
     return {
       sid: cityInteger(row.stateId, 1),

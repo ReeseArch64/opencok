@@ -30,19 +30,19 @@ export class GoldEggsRuntime {
     const captured = this.now();
 
     if (!Number.isSafeInteger(captured) || captured < 0)
-      throw new Error("Invalid gold eggs runtime clock");
+      {throw new Error("Invalid gold eggs runtime clock");}
 
-    if (captured < this.nextAt || !goldEggsEnabled(this.rules, BigInt(captured))) return;
+    if (captured < this.nextAt || !goldEggsEnabled(this.rules, BigInt(captured))) {return;}
 
     const at = BigInt(captured);
     await this.store.advance(goldEggsCalendar(this.rules, at), at);
 
     for (const period of await this.store.periods()) {
-      if (!period.admitted || !period.global || at <= period.end) continue;
+      if (!period.admitted || !period.global || at <= period.end) {continue;}
 
       const rows = await this.ranks.final(period);
 
-      if (rows !== undefined) await this.store.finalizeGlobal(period, rows, at);
+      if (rows !== undefined) {await this.store.finalizeGlobal(period, rows, at);}
     }
 
     for (const award of await this.store.pending()) {

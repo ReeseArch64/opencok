@@ -20,7 +20,7 @@ test("S3 conditional writes, metadata integrity and restart persistence use isol
       new Response(child.stderr).text(),
       child.exited,
     ]);
-    if (status) throw new Error(`Disposable MinIO ${args[0]} failed`);
+    if (status) {throw new Error(`Disposable MinIO ${args[0]} failed`);}
     return output.trim();
   }
   async function client() {
@@ -38,7 +38,7 @@ test("S3 conditional writes, metadata integrity and restart persistence use isol
       }
       await Bun.sleep(100);
     }
-    if (!ready) throw new Error("Disposable MinIO readiness timeout");
+    if (!ready) {throw new Error("Disposable MinIO readiness timeout");}
     const result = s3Client({
       endpoint,
       region: "us-east-1",
@@ -143,7 +143,7 @@ test("S3 conditional writes, metadata integrity and restart persistence use isol
     );
     await expect(store.find(owner, sequence)).rejects.toThrow("Avatar integrity mismatch");
   } finally {
-    for (const item of clients) item.destroy();
-    if (created) await docker(["rm", "--force", "--volumes", name]);
+    for (const item of clients) {item.destroy();}
+    if (created) {await docker(["rm", "--force", "--volumes", name]);}
   }
 }, 120000);

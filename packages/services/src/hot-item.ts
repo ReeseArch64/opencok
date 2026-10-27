@@ -28,7 +28,7 @@ import type { CityDomain } from "./city-domain.ts";
 import type { CityProgressionContext } from "./city-progression-context.ts";
 
 function best(owner: string, pool: readonly Row[]): Row {
-  if (!pool.length) hotItemFailure();
+  if (!pool.length) {hotItemFailure();}
 
   let selected = pool[0]!,
     color = 0;
@@ -62,7 +62,7 @@ function snapshot(
 ): HotItemFilter {
   const state = context.state.hotItem;
 
-  if (!state) hotItemFailure();
+  if (!state) {hotItemFailure();}
 
   return {
     now: context.now,
@@ -96,13 +96,13 @@ function generate(
       : (context.rules.items.get("store")?.k9 ?? "").split("|").map((part) => {
           const pair = part.split(";");
 
-          if (pair.length !== 2) hotItemFailure();
+          if (pair.length !== 2) {hotItemFailure();}
 
           return [cityInteger(pair[0], 1, 127), cityInteger(pair[1], 1, 64)];
         });
 
   if (groups.length > 16 || new Set(groups.map(([kind]) => kind)).size !== groups.length)
-    hotItemFailure();
+    {hotItemFailure();}
 
   const offers: Row[] = [];
 
@@ -120,20 +120,20 @@ function generate(
     for (const rule of choices) {
       const key = version === 2 ? (rule.item ?? "").split(";")[0]! : (rule.item ?? "");
 
-      if (seen.has(key)) continue;
+      if (seen.has(key)) {continue;}
 
       seen.add(key);
       selected.push(hotOfferRow(context.owner, rule, context.now, kind));
     }
 
     if (selected.length < maximum!)
-      for (const rule of hotFallback(context.rules, version, kind!, maximum! - selected.length))
-        selected.push(hotOfferRow(context.owner, rule, context.now, kind));
+      {for (const rule of hotFallback(context.rules, version, kind!, maximum! - selected.length))
+        {selected.push(hotOfferRow(context.owner, rule, context.now, kind));}}
 
     offers.push(...selected);
   }
 
-  if (!offers.length || offers.length > 64) hotItemFailure();
+  if (!offers.length || offers.length > 64) {hotItemFailure();}
 
   return { offers, best: best(context.owner, pool) };
 }
@@ -141,16 +141,16 @@ function generate(
 function resource(context: CityProgressionContext, id: number, delta: bigint) {
   const asset = hotResourceAssets[id];
 
-  if (!asset) hotItemFailure();
+  if (!asset) {hotItemFailure();}
 
-  if (asset === "gold") context.economy.gold(delta);
+  if (asset === "gold") {context.economy.gold(delta);}
   else if (asset === "crystal") {
-    if (!context.economy.crystal) hotItemFailure();
+    if (!context.economy.crystal) {hotItemFailure();}
 
     context.economy.crystal(delta);
   } else if (delta < 0n && ["wood", "stone", "iron", "food", "silver"].includes(asset))
-    context.spend({ [asset]: -delta }, false);
-  else context.economy.resource(asset, delta);
+    {context.spend({ [asset]: -delta }, false);}
+  else {context.economy.resource(asset, delta);}
 }
 
 export class HotItemDomain extends CityCommandDomain {
@@ -175,14 +175,14 @@ export class HotItemDomain extends CityCommandDomain {
     this.prepare = async (context, command, params) => {
       const state = context.state.hotItem;
 
-      if (!state) hotItemFailure();
+      if (!state) {hotItemFailure();}
 
       const version = hotItemVersion(context.rules, context.now);
       const expected = command.includes("v3") || command.endsWith("V3") ? 3 : 2;
 
-      if (command !== "hot.item.v2.get" && expected !== version) hotItemFailure();
+      if (command !== "hot.item.v2.get" && expected !== version) {hotItemFailure();}
 
-      if (version === 2 && context.rules.items.get("store")?.k7 !== "0") hotItemFailure();
+      if (version === 2 && context.rules.items.get("store")?.k7 !== "0") {hotItemFailure();}
 
       const sameDay =
         !!state.refresh && long(state.refresh, "todayTime") / 86400000n === context.now / 86400000n;
@@ -203,7 +203,7 @@ export class HotItemDomain extends CityCommandDomain {
       const manual = command === "hot.item.refresh" || command === "hot.item.refreshV3";
       const buy = command.endsWith(".buy");
 
-      if (buy && !valid) hotItemFailure();
+      if (buy && !valid) {hotItemFailure();}
 
       let offers = rows,
         featured = version === 2 ? state.bestV2 : state.bestV3;
@@ -212,12 +212,12 @@ export class HotItemDomain extends CityCommandDomain {
       if (manual || !valid || !featured) {
         const cost = manual ? hotRefreshCost(context.rules, count) : 0;
 
-        if (cost) context.economy.gold(-BigInt(cost));
+        if (cost) {context.economy.gold(-BigInt(cost));}
 
         const generated = generate(context, version, count, purchases, manual, random);
         offers = generated.offers;
 
-        if (!manual || !featured) featured = generated.best;
+        if (!manual || !featured) {featured = generated.best;}
 
         if (manual) {
           nextCount = cityInteger(count + 1);
@@ -225,7 +225,7 @@ export class HotItemDomain extends CityCommandDomain {
         }
       }
 
-      if (!featured) hotItemFailure();
+      if (!featured) {hotItemFailure();}
 
       const write = {
         version,
@@ -247,29 +247,29 @@ export class HotItemDomain extends CityCommandDomain {
           (row) => text(row, "goodsId") === `${id};${pack}` && num(row, "price") === price,
         );
 
-        if (!row) hotItemFailure();
+        if (!row) {hotItemFailure();}
 
         const offer = hotItemOffer(row);
 
-        if (priceType !== offer.priceType || units > offer.num) hotItemFailure();
+        if (priceType !== offer.priceType || units > offer.num) {hotItemFailure();}
 
         if (
           params.refreshTime &&
           (params.refreshTime.type !== Type.Long || params.refreshTime.value !== offer.refreshTime)
         )
-          hotItemFailure();
+          {hotItemFailure();}
 
-        if (priceType < 19) resource(context, priceType, -BigInt(price));
-        else context.spendItem(String(priceType), price);
+        if (priceType < 19) {resource(context, priceType, -BigInt(price));}
+        else {context.spendItem(String(priceType), price);}
 
         body = {};
         const type = hotItemType(id);
 
-        if (type === 0) resource(context, Number(id), BigInt(pack));
+        if (type === 0) {resource(context, Number(id), BigInt(pack));}
         else if (type === 2) {
           const granted: Row[] = [];
 
-          if (pack > 1000) hotItemFailure();
+          if (pack > 1000) {hotItemFailure();}
 
           for (let index = 0; index < pack; index++) {
             context.write.equipment = [
@@ -281,7 +281,7 @@ export class HotItemDomain extends CityCommandDomain {
 
           body.equip = sfs.array(granted.map((row) => sfs.object(equipment(row))));
         } else {
-          if (!context.rules.goods.has(id)) hotItemFailure();
+          if (!context.rules.goods.has(id)) {hotItemFailure();}
 
           context.economy.item(id, pack);
           body.item = sfs.object(
@@ -317,10 +317,10 @@ export class HotItemDomain extends CityCommandDomain {
 
         const history = purchases.find((row) => text(row, "goodsId") === offer.goodsId);
 
-        if (history) history.buyCount = cityInteger(num(history, "buyCount") + 1);
-        else purchases.push({ uid: context.owner, goodsId: offer.goodsId, buyCount: 1 });
+        if (history) {history.buyCount = cityInteger(num(history, "buyCount") + 1);}
+        else {purchases.push({ uid: context.owner, goodsId: offer.goodsId, buyCount: 1 });}
 
-        if (purchases.length > 2048) hotItemFailure();
+        if (purchases.length > 2048) {hotItemFailure();}
 
         Object.assign(body, {
           remainGold: sfs.long(context.balance("gold")),
@@ -339,14 +339,14 @@ export class HotItemDomain extends CityCommandDomain {
           goldCost: sfs.int(hotRefreshCost(context.rules, nextCount)),
         };
 
-        if (manual) body.remainGold = sfs.long(context.balance("gold"));
+        if (manual) {body.remainGold = sfs.long(context.balance("gold"));}
         else {
           body.bestItem = sfs.object(hotBestItemView(featured));
 
           if (version === 3) {
             const end = eventTimestamp(context.rules.items.get("store")?.k11);
 
-            if (end === undefined) hotItemFailure();
+            if (end === undefined) {hotItemFailure();}
 
             body.endTime = sfs.long(end);
           }
@@ -372,11 +372,11 @@ export function createHotBusinessMan(rules: import("@opencok/rules/game").Rules,
 
   return {
     current() {
-      if (!rules.items.has("store")) return;
+      if (!rules.items.has("store")) {return;}
 
       const captured = clock();
 
-      if (!Number.isSafeInteger(captured) || captured <= 0) hotItemFailure();
+      if (!Number.isSafeInteger(captured) || captured <= 0) {hotItemFailure();}
 
       const now = BigInt(captured);
 
@@ -384,7 +384,7 @@ export function createHotBusinessMan(rules: import("@opencok/rules/game").Rules,
         saved = hotBusinessMan(rules, now);
         deadline = now < saved.start ? saved.start : saved.end;
 
-        if (deadline <= now) hotItemFailure();
+        if (deadline <= now) {hotItemFailure();}
       }
 
       const body = {

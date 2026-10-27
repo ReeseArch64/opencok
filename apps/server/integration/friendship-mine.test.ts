@@ -88,7 +88,7 @@ test("friendship mines conserve helpers and rewards across retries and generatio
     await command("mine.callHelp");
     expect((await help("helper-c", "0")).body.result?.value).toBe(0);
     for (const actor of ["helper-a", "helper-b", "helper-c"])
-      expect((await help(actor, String(mine.mineTime))).body.result?.value).toBe(1);
+      {expect((await help(actor, String(mine.mineTime))).body.result?.value).toBe(1);}
     const next = await command("mine.dig");
     expect(fields(next.body.userMine).level?.value).toBe(2);
     expect(fields(next.body.userMine).exp?.value).toBe(1);

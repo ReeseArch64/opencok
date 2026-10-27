@@ -262,11 +262,11 @@ async function fixture() {
       cache2,
       live,
       close: async () => {
-        for (const close of closers.toReversed()) await close();
+        for (const close of closers.toReversed()) {await close();}
       },
     };
   } catch (error) {
-    for (const close of closers.toReversed()) await close();
+    for (const close of closers.toReversed()) {await close();}
     throw error;
   }
 }

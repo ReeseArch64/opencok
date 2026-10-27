@@ -34,7 +34,7 @@ export function featureAnnouncementEnabled(
 ): boolean {
   const key = rule.id;
 
-  if (typeof key !== "string") throw new GameError(errors.unsupported, "config_string");
+  if (typeof key !== "string") {throw new GameError(errors.unsupported, "config_string");}
 
   switch (key) {
     case "worldboss":
@@ -61,7 +61,7 @@ export function featureAnnouncementEnabled(
     case "role_on": {
       const feature = key === "payelex" ? "cn_bind" : "role_on";
 
-      if (!ruleAvailable(rules.features.get(feature), context)) return false;
+      if (!ruleAvailable(rules.features.get(feature), context)) {return false;}
 
       const binding = rules.items.get(key === "payelex" ? "cn_bind" : "role_info");
 
@@ -93,11 +93,11 @@ export function accountVerificationRequired(
   context: RuleContext,
   count: string | null,
 ): boolean {
-  if (!accountVerificationEnabled(rules, context) || count === null) return false;
+  if (!accountVerificationEnabled(rules, context) || count === null) {return false;}
 
   const limit = rules.items.get("function_on7")?.k7;
 
-  if (limit === undefined) return false;
+  if (limit === undefined) {return false;}
 
   try {
     return javaDecimal(count, 32) >= javaDecimal(limit, 32);

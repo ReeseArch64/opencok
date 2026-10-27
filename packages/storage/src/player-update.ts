@@ -37,7 +37,7 @@ export async function publishPlayerUpdate(
     !/^(0|[1-9][0-9]{0,18})$/.test(updatedAt) ||
     BigInt(updatedAt) > 9223372036854775807n
   )
-    throw new DependencyError("redis");
+    {throw new DependencyError("redis");}
 
   try {
     const result = await command(
@@ -48,7 +48,7 @@ export async function publishPlayerUpdate(
       updatedAt,
     );
 
-    if (result !== 0 && result !== 1) throw new Error();
+    if (result !== 0 && result !== 1) {throw new Error();}
   } catch {
     throw new DependencyError("redis");
   }

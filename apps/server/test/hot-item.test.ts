@@ -62,7 +62,7 @@ test("native hot-item mapping preserves source scalar types, goods/equipment/res
     { ...item, priceType: 9 },
     { ...item, type: 128 },
   ])
-    expect(() => hotItemOffer(row)).toThrow();
+    {expect(() => hotItemOffer(row)).toThrow();}
 });
 test("declared refresh tiers retain free quotas and strict V3 dates and feature/version gates", async () => {
   const rules = await loadRules();

@@ -65,7 +65,7 @@ test("repeated castles retain entries and the final self ordinal across the full
     [castle("self", "s", { banTime: null })],
     [castle("self", "s", { banTime: "9223372036854775808" })],
   ])
-    expect(() => selectPlayerRanking("self", query(), snapshot(candidates))).toThrow("102192");
+    {expect(() => selectPlayerRanking("self", query(), snapshot(candidates))).toThrow("102192");}
 });
 
 test("castle wire preserves cached columns and types without exposing internal building identity", () => {

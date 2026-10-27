@@ -12,7 +12,7 @@ return 1`;
 function javaSplit(value: string, separator: string): string[] {
   const parts = value.split(separator);
 
-  while (parts.length && parts.at(-1) === "") parts.pop();
+  while (parts.length && parts.at(-1) === "") {parts.pop();}
 
   return parts;
 }
@@ -45,7 +45,7 @@ export async function selectSystemMailPage(
     BigInt.asIntN(64, time) !== time ||
     typeof inspect !== "function"
   )
-    throw new DependencyError("mail pagination");
+    {throw new DependencyError("mail pagination");}
 
   const ids = [...input];
   const key = `opencok:kingdom:${kingdomId}:chat-user-info:${owner}`;
@@ -61,7 +61,7 @@ export async function selectSystemMailPage(
           value !== null && (typeof value !== "string" || Buffer.byteLength(value) > 1024 * 1024),
       )
     )
-      throw new DependencyError("mail pagination");
+      {throw new DependencyError("mail pagination");}
 
     const previous = values.map((value) => value ?? "") as [string, string];
     let nextSent = previous[0];
@@ -77,11 +77,11 @@ export async function selectSystemMailPage(
           !/^[+-]?\d+$/.test(parts[0]!) ||
           BigInt.asIntN(64, BigInt(parts[0]!)) !== BigInt(parts[0]!)
         )
-          throw new DependencyError("mail pagination");
+          {throw new DependencyError("mail pagination");}
 
         if (BigInt(parts[0]!) === time)
-          for (const id of javaSplit(parts[1]!, ","))
-            if (
+          {for (const id of javaSplit(parts[1]!, ","))
+            {if (
               [...id].some((character) => {
                 const code = character.charCodeAt(0);
 
@@ -96,25 +96,25 @@ export async function selectSystemMailPage(
                 );
               })
             )
-              sent.add(id);
+              {sent.add(id);}}}
       }
 
       indices = [];
 
       for (const [index, id] of ids.entries()) {
-        if (sent.has(id)) continue;
+        if (sent.has(id)) {continue;}
 
         indices.push(index);
         sent.add(id);
 
-        if (indices.length >= count) break;
+        if (indices.length >= count) {break;}
       }
 
       more = indices.length >= count;
 
-      if (sent.size && time !== 0n) nextSent = `${time}:${[...sent].join(",")},`;
+      if (sent.size && time !== 0n) {nextSent = `${time}:${[...sent].join(",")},`;}
 
-      if (Buffer.byteLength(nextSent) > 1024 * 1024) throw new DependencyError("mail pagination");
+      if (Buffer.byteLength(nextSent) > 1024 * 1024) {throw new DependencyError("mail pagination");}
     }
 
     let counter = 0;
@@ -123,7 +123,7 @@ export async function selectSystemMailPage(
     if (parts[0] === String(time) && parts[1] && /^[+-]?\d+$/.test(parts[1])) {
       const value = BigInt(parts[1]);
 
-      if (BigInt.asIntN(32, value) === value) counter = Number(value);
+      if (BigInt.asIntN(32, value) === value) {counter = Number(value);}
     }
 
     const nextCounter = `${time}:${(counter + 1) | 0}`;
@@ -141,9 +141,9 @@ export async function selectSystemMailPage(
       nextCounter,
     );
 
-    if (result === 1) return;
+    if (result === 1) {return;}
 
-    if (result !== 0) throw new DependencyError("mail pagination");
+    if (result !== 0) {throw new DependencyError("mail pagination");}
   }
 
   throw new DependencyError("mail pagination contention");

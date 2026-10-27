@@ -19,7 +19,7 @@ function database(
   const client = {
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
-      if (query.text.startsWith("begin")) transaction = true;
+      if (query.text.startsWith("begin")) {transaction = true;}
       const stage =
         query.text === "commit"
           ? "commit"
@@ -37,9 +37,9 @@ function database(
           options.sqlState ? { code: options.sqlState } : {},
         );
       }
-      if (query.text === "rollback") aborted = false;
-      if (aborted) throw new Error("Transaction still aborted");
-      if (query.text === "commit" || query.text === "rollback") transaction = false;
+      if (query.text === "rollback") {aborted = false;}
+      if (aborted) {throw new Error("Transaction still aborted");}
+      if (query.text === "commit" || query.text === "rollback") {transaction = false;}
       if (query.text.includes('from "opencok_kingdom"."userprofile"')) {
         const values: Record<string, unknown> = {
           uid: "synthetic-player",
@@ -51,7 +51,7 @@ function database(
         };
       }
       if (query.text.includes('from "opencok_kingdom"."switches"'))
-        return { rows: options.emptySwitches ? [] : [["synthetic-switch", 1, "12.6.0"]] };
+        {return { rows: options.emptySwitches ? [] : [["synthetic-switch", 1, "12.6.0"]] };}
       if (query.text.includes('from "opencok_kingdom"."parse_info"')) {
         return { rows: [[3, 0, 1]] };
       }
@@ -130,7 +130,7 @@ test("invalid Redis transport responses and bounded keys fail before configurati
   }
   cache.calls.length = 0;
   for (const device of ["a".repeat(256)])
-    await expect(cache.deviceChangeCount(device)).rejects.toThrow();
+    {await expect(cache.deviceChangeCount(device)).rejects.toThrow();}
   expect(cache.calls).toEqual([]);
 });
 
@@ -153,7 +153,7 @@ test("empty switches remain successful while required snapshot failures cannot b
     const { db, queries } = database({ failure });
     await expect(getConfigurationByPlayerId(db, "synthetic-player")).rejects.toThrow();
     expect(queries.at(-1)?.text).toBe("rollback");
-    if (failure !== "commit") expect(queries.some(({ text }) => text === "commit")).toBe(false);
+    if (failure !== "commit") {expect(queries.some(({ text }) => text === "commit")).toBe(false);}
     expect(queries.some(({ text }) => text.includes('from "opencok_kingdom"."switches"'))).toBe(
       false,
     );
@@ -162,7 +162,7 @@ test("empty switches remain successful while required snapshot failures cannot b
 
 test("counter keys preserve empty, literal null and whitespace device suffixes", async () => {
   const cache = new CounterCache(1);
-  for (const device of ["", "null", " "]) expect(await cache.deviceChangeCount(device)).toBeNull();
+  for (const device of ["", "null", " "]) {expect(await cache.deviceChangeCount(device)).toBeNull();}
   expect(cache.calls).toEqual([
     ["GET", "opencok:global:device-account-change:"],
     ["GET", "opencok:global:device-account-change:null"],

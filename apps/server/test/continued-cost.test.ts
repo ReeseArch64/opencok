@@ -82,9 +82,9 @@ test("native continued-cost endpoints retain long correlation and cannot submit 
     "continuedcost.hideking",
     "continuedcost.global.reward",
   ])
-    expect(
+    {expect(
       (await game.execute("owner", command, { _cok_: sfs.long(9007199254740993n) })).body._cok_,
-    ).toEqual(sfs.long(9007199254740993n));
+    ).toEqual(sfs.long(9007199254740993n));}
   await expect(
     game.execute("owner", "continuedcost.apply", { amount: sfs.long(999999n) }),
   ).rejects.toThrow();

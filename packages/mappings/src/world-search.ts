@@ -7,7 +7,7 @@ import { errors } from "@opencok/constants/game";
 import { sfs, type Fields } from "@opencok/messages/sfs";
 
 function serializeWorldSearch(rows: readonly Row[]): Fields {
-  if (rows.length > 8) throw new GameError(errors.invalid);
+  if (rows.length > 8) {throw new GameError(errors.invalid);}
 
   const ids = new Set<string>();
 
@@ -24,7 +24,7 @@ function serializeWorldSearch(rows: readonly Row[]): Fields {
         ] as const) {
           const field = row[key];
 
-          if (key === "pic" && field == null) continue;
+          if (key === "pic" && field == null) {continue;}
 
           if (
             typeof field !== "string" ||
@@ -32,14 +32,14 @@ function serializeWorldSearch(rows: readonly Row[]): Fields {
             !field.isWellFormed() ||
             field.includes("\0")
           )
-            throw new GameError(errors.invalid);
+            {throw new GameError(errors.invalid);}
 
           value[key] = sfs.string(field);
         }
 
         const uid = row.uid as string;
 
-        if (!uid || ids.has(uid)) throw new GameError(errors.invalid);
+        if (!uid || ids.has(uid)) {throw new GameError(errors.invalid);}
 
         ids.add(uid);
 
@@ -50,14 +50,14 @@ function serializeWorldSearch(rows: readonly Row[]): Fields {
             row.picVer < -2147483648 ||
             row.picVer > 2147483647
           )
-            throw new GameError(errors.invalid);
+            {throw new GameError(errors.invalid);}
 
           value.picVer = sfs.int(row.picVer);
         }
 
         if (row.power != null) {
           if (typeof row.power !== "bigint" || BigInt.asIntN(64, row.power) !== row.power)
-            throw new GameError(errors.invalid);
+            {throw new GameError(errors.invalid);}
 
           value.power = sfs.long(row.power);
         }

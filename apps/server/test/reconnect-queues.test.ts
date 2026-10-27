@@ -27,21 +27,21 @@ test("reconnect projects every queue family without completing elapsed activitie
   expect(values).toHaveLength(42);
   for (const [type, value] of values.entries()) {
     const item = fields(value.itemObj);
-    if (type === 0) expect(item).toEqual({});
+    if (type === 0) {expect(item).toEqual({});}
     else if ([1, 8, 9, 10, 17].includes(type))
-      expect(item).toEqual({
+      {expect(item).toEqual({
         itemId: sfs.string("owned-target"),
         allId: sfs.string("owned-target"),
-      });
+      });}
     else if (type === 11)
-      expect(item).toEqual({ itemId: sfs.string("12345"), cost: sfs.string("wood;7") });
+      {expect(item).toEqual({ itemId: sfs.string("12345"), cost: sfs.string("wood;7") });}
     else if (type === 12)
-      expect(item).toEqual({
+      {expect(item).toEqual({
         itemId: sfs.string("owned-target"),
         para: sfs.int(0),
         allId: sfs.string("owned-target"),
-      });
-    else expect(item).toEqual({ itemId: sfs.string("owned-target") });
+      });}
+    else {expect(item).toEqual({ itemId: sfs.string("owned-target") });}
     expect(value.updateTime).toEqual(sfs.long(3n));
     expect(value.totalTime).toEqual(sfs.long(2n));
     expect(value.isHelped).toEqual(sfs.int(1));
@@ -86,8 +86,8 @@ test("training and prop queues preserve Java tokenization and selection failures
 test("reconnect queue state rejects duplicates and unrepresentable persisted integers", () => {
   expect(() => project([{ uuid: "q" }, { uuid: "q" }])).toThrow();
   for (const key of ["qid", "type", "isHelped"])
-    expect(() => project([{ uuid: "q", [key]: 2147483648 }])).toThrow();
+    {expect(() => project([{ uuid: "q", [key]: 2147483648 }])).toThrow();}
   for (const key of ["startTime", "endTime", "updateTime", "totalTime"])
-    expect(() => project([{ uuid: "q", [key]: 9223372036854775808n }])).toThrow();
+    {expect(() => project([{ uuid: "q", [key]: 9223372036854775808n }])).toThrow();}
   expect(() => project(Array.from({ length: 32768 }, (_, i) => ({ uuid: String(i) })))).toThrow();
 });

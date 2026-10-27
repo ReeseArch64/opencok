@@ -25,7 +25,7 @@ export async function occupiedResourceFields(
 ): Promise<Fields> {
   const point = state.point!;
 
-  if (point.pointType !== 3 && point.pointType !== 37) return {};
+  if (point.pointType !== 3 && point.pointType !== 37) {return {};}
 
   const remaining = resourceRemaining(point.resInitValue as number, point.resCostValue as number);
   const group = state.resourceGroup?.map((row) => {
@@ -35,7 +35,7 @@ export async function occupiedResourceFields(
       row.state !== 1 ||
       typeof row.uuid !== "string"
     )
-      throw new Error("Foreign shared collection march");
+      {throw new Error("Foreign shared collection march");}
 
     return { ...resourceSavedCollection(row), armyLoad: 0, uuid: row.uuid };
   });
@@ -45,7 +45,7 @@ export async function occupiedResourceFields(
     !mailBlank(point.ownerId as string | null) &&
     !mailBlank(point.ownerMarchUUid as string | null)
   ) {
-    if (!state.resource) throw new Error("Missing resource snapshot");
+    if (!state.resource) {throw new Error("Missing resource snapshot");}
 
     const row = state.resource.march;
 
@@ -57,7 +57,7 @@ export async function occupiedResourceFields(
         row.worldId !== point.worldId ||
         !Buffer.isBuffer(row.armyInfo)
       )
-        throw new Error("Foreign resource march");
+        {throw new Error("Foreign resource march");}
 
       const army = decodeWorldResourceArmy(row.armyInfo);
       const rawArmyLoad = await readResourceRawArmyLoad(
@@ -100,7 +100,7 @@ export async function occupiedResourceFields(
   }
 
   if (point.pointType === 37 && !state.remote) {
-    if (!group) throw new Error("Missing shared resource snapshot");
+    if (!group) {throw new Error("Missing shared resource snapshot");}
 
     Object.assign(
       body,

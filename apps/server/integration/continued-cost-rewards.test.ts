@@ -212,7 +212,7 @@ test("stored consumption prizes drain during shared admission failure, preserve 
     await h.db.db
       .insert(user_building)
       .values(ids.map((uid) => ({ uuid: `castle-${uid}`, uid, itemId: 400000, pos: 0, level: 1 })));
-    for (const uid of ids) await h.command("synthetic.spend", { gold: sfs.long(10n) }, uid);
+    for (const uid of ids) {await h.command("synthetic.spend", { gold: sfs.long(10n) }, uid);}
     await h.seal();
     await h
       .rewards(async () => {
@@ -224,7 +224,7 @@ test("stored consumption prizes drain during shared admission failure, preserve 
     expect((await h.db.db.select().from(closures))[0]?.awardCursor).toBe(64);
     expect((await h.db.db.select().from(closures))[0]?.awardedAt).toBe(0n);
     const rewards = new Map(h.rules.reconnect.rewards);
-    for (const id of ["236039", "236040", "236042"]) h.rules.reconnect.rewards!.delete(id);
+    for (const id of ["236039", "236040", "236042"]) {h.rules.reconnect.rewards!.delete(id);}
     h.clock.now += 60000;
     await expect(
       h
@@ -243,7 +243,7 @@ test("stored consumption prizes drain during shared admission failure, preserve 
           saved.some((old) => old.id === row.id && old.payload === row.payload),
       ),
     ).toBe(true);
-    for (const [id, row] of rewards) h.rules.reconnect.rewards!.set(id, row);
+    for (const [id, row] of rewards) {h.rules.reconnect.rewards!.set(id, row);}
     await h.rewards().refresh();
     expect(await h.db.db.select().from(awards)).toHaveLength(65);
     expect(await h.db.db.select().from(mail)).toHaveLength(65);

@@ -27,7 +27,7 @@ export async function loadHeroRankingPosition(
         ) || key.length > 400,
     )
   )
-    throw new DependencyError("hero ranking input");
+    {throw new DependencyError("hero ranking input");}
 
   const result = await command(
     "EVAL",
@@ -42,7 +42,7 @@ export async function loadHeroRankingPosition(
     !/^\d+$/.test(String(result)) ||
     Number(result) > 5001
   )
-    throw new DependencyError("hero ranking result");
+    {throw new DependencyError("hero ranking result");}
 
   return Number(result);
 }
@@ -61,9 +61,9 @@ export async function loadHeroHistoryPublication(
         ) || key.length > 400,
     )
   )
-    throw new DependencyError("hero history input");
+    {throw new DependencyError("hero history input");}
 
-  if (!keys.length) return [];
+  if (!keys.length) {return [];}
 
   const result = await command(
     "EVAL",
@@ -85,12 +85,12 @@ return result`,
   );
 
   if (!Array.isArray(result) || result.length !== keys.length)
-    throw new DependencyError("hero history result");
+    {throw new DependencyError("hero history result");}
 
   let bytes = 0;
 
   return result.map((value) => {
-    if (!Array.isArray(value) || value.length !== 2) throw new DependencyError("hero history row");
+    if (!Array.isArray(value) || value.length !== 2) {throw new DependencyError("hero history row");}
 
     const [members, alliances] = value;
 
@@ -102,15 +102,15 @@ return result`,
       !Array.isArray(alliances) ||
       alliances.length !== (alliance ? members.length : 0)
     )
-      throw new DependencyError("hero history members");
+      {throw new DependencyError("hero history members");}
 
     for (const raw of alliances) {
       if (raw !== null && typeof raw !== "string")
-        throw new DependencyError("hero history metadata");
+        {throw new DependencyError("hero history metadata");}
 
       bytes += typeof raw === "string" ? new TextEncoder().encode(raw).length : 0;
 
-      if (bytes > 1048576) throw new DependencyError("hero history size");
+      if (bytes > 1048576) {throw new DependencyError("hero history size");}
     }
 
     return { members, alliances };
@@ -122,7 +122,7 @@ export async function publishHeroRanking(
   kingdomId: number,
   rows: readonly import("@opencok/hero/contracts/hero-rank-publication").HeroRankVersionedScore[],
 ): Promise<void> {
-  if (!rows.length) return;
+  if (!rows.length) {return;}
 
   if (
     rows.length > 64 ||
@@ -151,7 +151,7 @@ export async function publishHeroRanking(
         (row.metadata !== null && Buffer.byteLength(row.metadata) > 8192),
     )
   )
-    throw new DependencyError("hero rank publication input");
+    {throw new DependencyError("hero rank publication input");}
 
   const result = await command(
     "EVAL",
@@ -207,5 +207,5 @@ return 1`,
     ),
   );
 
-  if (Number(result) !== 1) throw new DependencyError("hero rank publication result");
+  if (Number(result) !== 1) {throw new DependencyError("hero rank publication result");}
 }

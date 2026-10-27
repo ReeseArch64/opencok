@@ -29,7 +29,7 @@ export function eggActivityOpen(rules: Rules, now: bigint) {
 export function eggActivityId(value: unknown) {
   const id = String(value ?? "");
 
-  if (!/^\d{1,10}$/.test(id)) eggActivityFailure();
+  if (!/^\d{1,10}$/.test(id)) {eggActivityFailure();}
 
   return id;
 }
@@ -38,7 +38,7 @@ export function eggActivityRule(rules: Rules, id: string): Rule {
   eggActivityId(id);
   const row = rules.advanced.eggs?.get(id);
 
-  if (!row) eggActivityFailure();
+  if (!row) {eggActivityFailure();}
 
   return row;
 }
@@ -54,7 +54,7 @@ export function eggActivityDraw(rules: Rules, random: (maximum: number) => numbe
     ids.length !== weights.length ||
     new Set(ids).size !== ids.length
   )
-    eggActivityFailure();
+    {eggActivityFailure();}
 
   return goldEggsDraw(
     ids.map((id, index) => {
@@ -69,22 +69,22 @@ export function eggActivityDraw(rules: Rules, random: (maximum: number) => numbe
 export function eggActivityGoods(raw: unknown) {
   const value = String(raw ?? "");
 
-  if (value.length > 200 || (value && !/^\d+(?:\|\d+)*$/.test(value))) eggActivityFailure();
+  if (value.length > 200 || (value && !/^\d+(?:\|\d+)*$/.test(value))) {eggActivityFailure();}
 
   const ids = value ? value.split("|") : [];
 
-  if (new Set(ids).size !== ids.length) eggActivityFailure();
+  if (new Set(ids).size !== ids.length) {eggActivityFailure();}
 
   return ids;
 }
 
 export function eggActivityRecord(row: Row, owner: string) {
-  if (row.uid !== owner) eggActivityFailure();
+  if (row.uid !== owner) {eggActivityFailure();}
 
   eggActivityId(row.curEgg);
   const cd = cityAmount(row.eggCd);
 
-  if (cd <= 0n) eggActivityFailure();
+  if (cd <= 0n) {eggActivityFailure();}
 
   cityInteger(row.exp ?? 0);
   cityInteger(row.curExpStage ?? 0);
@@ -93,7 +93,7 @@ export function eggActivityRecord(row: Row, owner: string) {
 }
 
 export function eggActivityCollection(row: Row, owner: string) {
-  if (row.uid !== owner) eggActivityFailure();
+  if (row.uid !== owner) {eggActivityFailure();}
 
   eggActivityId(row.eggId);
   eggActivityGoods(row.goods);
@@ -107,7 +107,7 @@ export function eggActivityThresholds(rules: Rules) {
     exp = (config?.k4 ?? "").split(";"),
     rewards = (config?.k5 ?? "").split(";");
 
-  if (!exp.length || exp.length > 64 || exp.length !== rewards.length) eggActivityFailure();
+  if (!exp.length || exp.length > 64 || exp.length !== rewards.length) {eggActivityFailure();}
 
   return exp.map((value, index) => ({
     exp: cityInteger(value, 1),
@@ -120,11 +120,11 @@ export function eggActivityClearCost(row: Row, rules: Rules, now: bigint) {
     rate = Number(rules.configuration.payControl?.get("69007")?.k7);
 
   if (cd === eggActivityIdle || cd <= now || !Number.isFinite(rate) || rate <= 0)
-    eggActivityFailure();
+    {eggActivityFailure();}
 
   const seconds = Number((cd - now) / 1000n);
 
-  if (!Number.isSafeInteger(seconds)) eggActivityFailure();
+  if (!Number.isSafeInteger(seconds)) {eggActivityFailure();}
 
   return cityInteger(Math.ceil(seconds / rate));
 }
@@ -134,7 +134,7 @@ export function eggActivityMissing(row: Row, rule: Rule) {
     required = `${rule.dark ?? ""};${rule.question_mark ?? ""}`.split(";").filter(Boolean);
 
   if (!required.length || required.length > 32 || required.some((id) => !/^\d+$/.test(id)))
-    eggActivityFailure();
+    {eggActivityFailure();}
 
   return !existing.length || required.some((id) => !existing.includes(id));
 }

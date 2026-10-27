@@ -19,7 +19,7 @@ test("talent ownership, prerequisite alternatives, maxima, and point budgets", (
     { id: "90002", skill_group: "987", max_lv: "1", condition_skill: "90001;2" },
     { id: "90003", skill_group: "988", max_lv: "1" },
   ] as Rule[])
-    rules.power.newGeneralSkills!.set(rule.id!, rule);
+    {rules.power.newGeneralSkills!.set(rule.id!, rule);}
   const row = generalRecruit(rules, 53500, "owner", 1n);
   expect(() => activateGeneralTalent(rules, row, 90002, 0)).toThrow();
   expect(() => activateGeneralTalent(rules, row, 90003, 0)).toThrow();
@@ -45,5 +45,5 @@ test("refinement proposals preserve applied effects until confirmation and seria
   expect(result.row.oldrefineproperty).not.toBe("");
   expect(generalRefinement(result.row, rules).canbackrefinepropertylist).toBeDefined();
   for (const raw of ["1;1_0_0|1;1_1_1", "1;1_-2_0", "1;1_NaN_0", "6;1_1_1"])
-    expect(() => generalProperties(raw)).toThrow();
+    {expect(() => generalProperties(raw)).toThrow();}
 });

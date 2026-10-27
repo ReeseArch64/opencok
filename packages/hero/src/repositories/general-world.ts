@@ -8,13 +8,13 @@ export async function writeGeneralWorldResources(
   resources: NonNullable<GeneralWrite["worldResources"]>,
   now: bigint,
 ) {
-  if (!resources.length) return;
+  if (!resources.length) {return;}
 
   if (
     resources.length > 16 ||
     new Set(resources.map((row) => row.pointId)).size !== resources.length
   )
-    throw new Error("Invalid general resource targets");
+    {throw new Error("Invalid general resource targets");}
 
   const points = await tx
     .select()
@@ -31,7 +31,7 @@ export async function writeGeneralWorldResources(
     .orderBy(asc(worldpoint.id))
     .for("update");
 
-  if (points.length !== resources.length) throw new Error("Missing general resource target");
+  if (points.length !== resources.length) {throw new Error("Missing general resource target");}
 
   for (const resource of resources) {
     const point = points.find((row) => row.id === resource.pointId)!;
@@ -49,7 +49,7 @@ export async function writeGeneralWorldResources(
       resource.amount < 1 ||
       resource.amount > 2147483647
     )
-      throw new Error("Occupied general resource target");
+      {throw new Error("Occupied general resource target");}
 
     await tx
       .update(worldpoint)

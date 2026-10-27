@@ -25,7 +25,7 @@ export function continuedCostPeriod(
     }) ||
     num(profile, "crossFightSrcServerId") > 0
   )
-    return;
+    {return;}
 
   const start = eventTimestamp(panel?.start),
     end = eventTimestamp(panel?.end),
@@ -40,7 +40,7 @@ export function continuedCostPeriod(
     BigInt(now) >= end ||
     num(castle ?? {}, "level") < cityInteger(config.k1 ?? 0)
   )
-    return;
+    {return;}
 
   const type = cityInteger(config.k2, 1, 6),
     tiers = [...(rules.advanced.continuedCosts?.values() ?? [])]
@@ -63,7 +63,7 @@ export function continuedCostPeriod(
         (i > 0 && tier.point < tiers[i - 1]!.point),
     )
   )
-    throw new Error("Invalid continued-cost reward tiers");
+    {throw new Error("Invalid continued-cost reward tiers");}
 
   return { start, end, type, face: config.k3 ?? "", tiers };
 }
@@ -95,18 +95,18 @@ export function continuedCostAmount(
   for (const entry of postings) {
     const spent = entry.before - entry.after;
 
-    if (spent <= 0n) continue;
+    if (spent <= 0n) {continue;}
 
     if (type === 1 && gold.has(entry.asset)) {
       amount += spent;
 
-      if (["profile.gold", "profile.dmmGold"].includes(entry.asset)) free += spent;
-      else paid += spent;
+      if (["profile.gold", "profile.dmmGold"].includes(entry.asset)) {free += spent;}
+      else {paid += spent;}
     } else if (type === 2 && entry.asset.startsWith("item.")) {
       const item = items.find((item) => `item.${item.uuid}` === entry.asset);
 
-      if (item && rules.goods.get(item.itemId)?.type === "2") amount += spent;
-    } else if (assets[type]?.includes(entry.asset)) amount += spent;
+      if (item && rules.goods.get(item.itemId)?.type === "2") {amount += spent;}
+    } else if (assets[type]?.includes(entry.asset)) {amount += spent;}
   }
 
   return { amount: cityAmount(amount), paid: cityAmount(paid), free: cityAmount(free) };
@@ -116,14 +116,14 @@ export function continuedCostClaims(raw: unknown) {
   const text = String(raw ?? "");
 
   if (text.length > 40 || (text && !/^(?:,\d+)+$/.test(text)))
-    throw new Error("Invalid continued-cost claim flags");
+    {throw new Error("Invalid continued-cost claim flags");}
 
   const values = text
     .split(",")
     .filter(Boolean)
     .map((value) => cityInteger(value, 1));
 
-  if (new Set(values).size !== values.length) throw new Error("Duplicate continued-cost claims");
+  if (new Set(values).size !== values.length) {throw new Error("Duplicate continued-cost claims");}
 
   return new Set(values);
 }

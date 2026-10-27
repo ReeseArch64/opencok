@@ -23,7 +23,7 @@ export function deliverAvatarMail(
     sequence < 1 ||
     sequence > 999999
   )
-    throw new Error("Invalid avatar mail query");
+    {throw new Error("Invalid avatar mail query");}
 
   return db.transaction(
     async (tx) => {
@@ -36,7 +36,7 @@ export function deliverAvatarMail(
           .for("update")
       )[0];
 
-      if (!profile || profile.uid !== owner || profile.serverId !== kingdomId) return { profile };
+      if (!profile || profile.uid !== owner || profile.serverId !== kingdomId) {return { profile };}
 
       const key = and(
         eq(avatar_completion.ownerUid, owner),
@@ -46,7 +46,7 @@ export function deliverAvatarMail(
         await tx.select().from(avatar_completion).where(key).limit(1).for("update")
       )[0];
 
-      if (!entry) return { profile };
+      if (!entry) {return { profile };}
 
       if (
         entry.ownerUid !== owner ||
@@ -56,9 +56,9 @@ export function deliverAvatarMail(
         entry.pendingEffects < 0 ||
         entry.pendingEffects > 7
       )
-        throw new Error("Invalid avatar mail state");
+        {throw new Error("Invalid avatar mail state");}
 
-      if (!(entry.pendingEffects & 1)) return { profile };
+      if (!(entry.pendingEffects & 1)) {return { profile };}
 
       const stem = createHash("sha256")
         .update(`avatar-mail\n${owner}\n${sequence}\n${entry.hash}`)
@@ -78,7 +78,7 @@ export function deliverAvatarMail(
         .returning({ ownerUid: avatar_completion.ownerUid });
 
       if (updated.length !== 1 || updated[0]!.ownerUid !== owner)
-        throw new Error("Avatar mail acknowledgment failed");
+        {throw new Error("Avatar mail acknowledgment failed");}
 
       return { profile, mail: message };
     },

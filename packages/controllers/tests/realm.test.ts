@@ -77,7 +77,7 @@ test("command Controller preserves response identity, typed correlation, pushes 
     async execute(uid, command, fields) {
       expect(uid).toBe("owner");
       expect(fields).toBe(params);
-      if (command === "fail") throw failure;
+      if (command === "fail") {throw failure;}
       return result;
     },
   });

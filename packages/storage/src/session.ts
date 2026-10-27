@@ -45,7 +45,7 @@ export class Cache {
       epoch <= 0n ||
       epoch > 9223372036854775807n
     )
-      throw new DependencyError("redis session owner");
+      {throw new DependencyError("redis session owner");}
 
     this.sessionOwner = epoch;
   }
@@ -78,7 +78,7 @@ export class Cache {
             typeof result === "object" &&
             !Array.isArray(result)
           )
-            return Object.entries(result).flat();
+            {return Object.entries(result).flat();}
 
           return result;
         })(),
@@ -226,13 +226,13 @@ export class Cache {
   }
 
   async deviceChangeCount(deviceId: string): Promise<string | null> {
-    if (deviceId.length > 255) throw new DependencyError("redis");
+    if (deviceId.length > 255) {throw new DependencyError("redis");}
 
     const value = await this.command("GET", `opencok:global:device-account-change:${deviceId}`);
 
-    if (value === null) return null;
+    if (value === null) {return null;}
 
-    if (typeof value !== "string" || value.length > 65535) throw new DependencyError("redis");
+    if (typeof value !== "string" || value.length > 65535) {throw new DependencyError("redis");}
 
     return value;
   }
@@ -243,7 +243,7 @@ export class Cache {
         (kind) => key === `forbidden_words_${kind}`,
       )
     )
-      throw new DependencyError("nickname forbidden list");
+      {throw new DependencyError("nickname forbidden list");}
 
     let entries: unknown;
 
@@ -254,17 +254,17 @@ export class Cache {
     }
 
     if (!Array.isArray(entries) || entries.length > 65536)
-      throw new DependencyError("nickname forbidden list");
+      {throw new DependencyError("nickname forbidden list");}
 
     let bytes = 0;
 
     for (const entry of entries) {
       if (typeof entry !== "string" || Buffer.byteLength(entry) > 65535)
-        throw new DependencyError("nickname forbidden list");
+        {throw new DependencyError("nickname forbidden list");}
 
       bytes += Buffer.byteLength(entry);
 
-      if (bytes > 16 * 1024 * 1024) throw new DependencyError("nickname forbidden list");
+      if (bytes > 16 * 1024 * 1024) {throw new DependencyError("nickname forbidden list");}
     }
 
     return [...entries];
@@ -299,7 +299,7 @@ export class Cache {
 
   async lastSystemMail(uid: string): Promise<string | null> {
     if (!uid || uid.length > 40 || uid.includes("\0") || !uid.isWellFormed())
-      throw new DependencyError("mail cursor");
+      {throw new DependencyError("mail cursor");}
 
     const value = await this.command(
       "HGET",
@@ -307,7 +307,7 @@ export class Cache {
       "chat_last_mail_id",
     );
 
-    if (value === null) return null;
+    if (value === null) {return null;}
 
     if (
       typeof value !== "string" ||
@@ -315,7 +315,7 @@ export class Cache {
       value.includes("\0") ||
       !value.isWellFormed()
     )
-      throw new DependencyError("mail cursor");
+      {throw new DependencyError("mail cursor");}
 
     return value;
   }
@@ -324,7 +324,7 @@ export class Cache {
     update: SharedUserUpdate,
     layout: SharedUserLayout = "hash",
   ): Promise<void> {
-    if (update.kingdomId !== this.config.kingdomId) throw new DependencyError("shared user cache");
+    if (update.kingdomId !== this.config.kingdomId) {throw new DependencyError("shared user cache");}
 
     return publishSharedUser((command, ...args) => this.command(command, ...args), update, layout);
   }
@@ -340,28 +340,28 @@ export class Cache {
       uids.length > 50 ||
       uids.some((uid) => !uid || uid.length > 255)
     )
-      throw new DependencyError("redis");
+      {throw new DependencyError("redis");}
 
-    if (!uids.length) return new Map();
+    if (!uids.length) {return new Map();}
 
     const values = await this.command(
       "MGET",
       ...uids.map((uid) => `opencok:kingdom:${kingdomId}:player-update:${uid}`),
     );
 
-    if (!Array.isArray(values) || values.length !== uids.length) throw new DependencyError("redis");
+    if (!Array.isArray(values) || values.length !== uids.length) {throw new DependencyError("redis");}
 
     const updates = new Map<string, string>();
 
     for (const [index, value] of values.entries()) {
-      if (value === null || (typeof value === "string" && !value.trim())) continue;
+      if (value === null || (typeof value === "string" && !value.trim())) {continue;}
 
       if (
         typeof value !== "string" ||
         !/^\d{1,19}$/.test(value) ||
         BigInt(value) > 9223372036854775807n
       )
-        throw new DependencyError("redis");
+        {throw new DependencyError("redis");}
 
       updates.set(uids[index]!, value);
     }
@@ -370,20 +370,20 @@ export class Cache {
   }
 
   async emperorVersion(kingdomId = this.config.kingdomId): Promise<number | null | undefined> {
-    if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
+    if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) {throw new DependencyError("redis");}
 
     const value = await this.command("GET", `opencok:kingdom:${kingdomId}:emperor-version`);
 
-    if (value === null) return undefined;
+    if (value === null) {return undefined;}
 
-    if (value === "none") return null;
+    if (value === "none") {return null;}
 
     if (typeof value !== "string" || !/^(?:0|-?[1-9]\d{0,9})$/.test(value))
-      throw new DependencyError("redis");
+      {throw new DependencyError("redis");}
 
     const version = Number(value);
 
-    if (version < -2147483648 || version > 2147483647) throw new DependencyError("redis");
+    if (version < -2147483648 || version > 2147483647) {throw new DependencyError("redis");}
 
     return version;
   }
@@ -397,7 +397,7 @@ export class Cache {
       kingdomId < 1 ||
       !/^[a-zA-Z0-9_-]{1,40}$/.test(territory)
     )
-      throw new DependencyError("redis");
+      {throw new DependencyError("redis");}
 
     const values = await this.command(
       "HGETALL",
@@ -405,7 +405,7 @@ export class Cache {
     );
 
     if (!Array.isArray(values) || values.length > 2000 || values.length % 2 !== 0)
-      throw new DependencyError("redis");
+      {throw new DependencyError("redis");}
 
     const result = new Map<string, string>();
     let bytes = 0;
@@ -420,11 +420,11 @@ export class Cache {
         typeof content !== "string" ||
         result.has(uid)
       )
-        throw new DependencyError("redis");
+        {throw new DependencyError("redis");}
 
       bytes += Buffer.byteLength(content);
 
-      if (bytes > 4 * 1024 * 1024) throw new DependencyError("redis");
+      if (bytes > 4 * 1024 * 1024) {throw new DependencyError("redis");}
 
       result.set(uid, content);
     }
@@ -447,12 +447,12 @@ export class Cache {
   }
 
   async worldEffects(kingdomId = this.config.kingdomId): Promise<ReadonlyMap<string, string>> {
-    if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) throw new DependencyError("redis");
+    if (!Number.isSafeInteger(kingdomId) || kingdomId < 1) {throw new DependencyError("redis");}
 
     const values = await this.command("HGETALL", `opencok:kingdom:${kingdomId}:world-effects`);
 
     if (!Array.isArray(values) || values.length > 8192 || values.length % 2 !== 0)
-      throw new DependencyError("redis");
+      {throw new DependencyError("redis");}
 
     const effects = new Map<string, string>();
     let bytes = 0;
@@ -468,12 +468,12 @@ export class Cache {
         typeof value !== "string" ||
         effects.has(key)
       )
-        throw new DependencyError("redis");
+        {throw new DependencyError("redis");}
 
       const size = Buffer.byteLength(value);
       bytes += size;
 
-      if (size > 65535 || bytes > 1048576) throw new DependencyError("redis");
+      if (size > 65535 || bytes > 1048576) {throw new DependencyError("redis");}
 
       effects.set(key, value);
     }

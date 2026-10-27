@@ -9,7 +9,7 @@ test("description filtering matches independently generated Java 8 replacement o
   const failures: unknown[] = [];
   for (const [entry, name, expected] of vectors.cases) {
     const actual = filterNicknameBadWords(text(name!), [text(entry!)]);
-    if (actual !== text(expected!)) failures.push({ entry, name, expected, actual });
+    if (actual !== text(expected!)) {failures.push({ entry, name, expected, actual });}
   }
   expect(failures).toEqual([]);
 });

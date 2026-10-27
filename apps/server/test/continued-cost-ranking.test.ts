@@ -12,7 +12,7 @@ import { sfs } from "@opencok/messages/sfs";
 test("consumption period identities, realm census and prize bands retain exact pinned windows", async () => {
   const rules = await loadRules();
   for (const key of ["continued_cost", "new_rank_cost"])
-    rules.features.set(key, { online: "1;2", test: "close", version: "1.0.0" });
+    {rules.features.set(key, { online: "1;2", test: "close", version: "1.0.0" });}
   const plan = costRankingPlan(rules, [3, 2, 1, 1])!;
   expect(plan.expectedRealms).toEqual([1, 2]);
   expect(plan.id).toBe(costRankingPeriodId(plan.startTime, plan.endTime, plan.type));

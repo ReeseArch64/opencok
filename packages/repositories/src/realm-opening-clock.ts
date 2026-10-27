@@ -9,7 +9,7 @@ export async function initializeRealmOpeningClock(
   authority: RealmAuthority,
   now = Date.now(),
 ) {
-  if (!Number.isSafeInteger(now) || now <= 0) throw new Error("Invalid realm opening clock");
+  if (!Number.isSafeInteger(now) || now <= 0) {throw new Error("Invalid realm opening clock");}
 
   return db.transaction(async (tx) => {
     await fenceRealmTransaction(tx, authority);
@@ -19,11 +19,11 @@ export async function initializeRealmOpeningClock(
       .from(server_info)
       .where(eq(server_info.uid, "server"));
 
-    if (existing) return existing.activityTime;
+    if (existing) {return existing.activityTime;}
 
     const [profile] = await tx.select({ uid: userprofile.uid }).from(userprofile).limit(1);
 
-    if (profile) return null;
+    if (profile) {return null;}
 
     const [created] = await tx
       .insert(server_info)

@@ -13,7 +13,7 @@ import type { CityProgressionContext } from "@opencok/services/city-progression-
 export function general(context: CityProgressionContext, id: string) {
   const row = context.state.effects.generals.find((row) => row.uuid === id);
 
-  if (!row) throw new GameError(errors.missing, "city_progression");
+  if (!row) {throw new GameError(errors.missing, "city_progression");}
 
   return row;
 }
@@ -43,13 +43,13 @@ export function prepareLegacyGeneral(
     const tree: TalentTree = { id: root };
 
     for (const [id, value] of Object.entries(input)) {
-      if (id === "id") continue;
+      if (id === "id") {continue;}
 
-      if (value.type !== Type.Int) invalid();
+      if (value.type !== Type.Int) {invalid();}
 
       const points = cityInteger(value.value);
 
-      if (points > 0) tree[id] = points;
+      if (points > 0) {tree[id] = points;}
     }
 
     const old = trees.find((tree) => tree.id === root);
@@ -60,7 +60,7 @@ export function prepareLegacyGeneral(
         ([id, value]) => id !== "id" && typeof value === "number" && Number(tree[id] ?? 0) < value,
       )
     )
-      invalid();
+      {invalid();}
 
     trees = [...trees.filter((tree) => tree.id !== root), tree];
     body = {
@@ -74,13 +74,13 @@ export function prepareLegacyGeneral(
           ?.id ?? "200390";
       context.spendItem(id, 1);
     } else
-      context.economy.gold(-BigInt(cityInteger(context.rules.items.get("ability_cost")?.k3, 1)));
+      {context.economy.gold(-BigInt(cityInteger(context.rules.items.get("ability_cost")?.k3, 1)));}
 
     trees = trees.filter((tree) => tree.ids !== undefined);
     body = { gold: sfs.long(context.balance("gold")), pointRemain: sfs.int(maximum) };
   } else if (command === "skill.switch") {
     if (page === currentPage)
-      return { response: encode({ gold: sfs.long(context.balance("gold")) }) };
+      {return { response: encode({ gold: sfs.long(context.balance("gold")) }) };}
 
     const control = context.rules.configuration.payControl?.get("69009");
 
@@ -88,7 +88,7 @@ export function prepareLegacyGeneral(
       !stored ||
       num(context.state.effects.vip ?? {}, "sLevel") < Number(control?.k2 ?? 2147483647)
     )
-      invalid();
+      {invalid();}
 
     validateTalentTrees(trees, context.rules, maximum);
     context.economy.gold(-BigInt(cityInteger(control?.k1, 1)));
@@ -109,14 +109,14 @@ export function prepareLegacyGeneral(
       rule = context.rules.power.generalSkills?.get(id),
       subcommand = command === "skill" ? str(params, "M__REQUEST_ID__H") : command.slice(6);
 
-    if (!rule || !trees.some((tree) => Number(tree[id] ?? 0) > 0) || rule.type === "0") invalid();
+    if (!rule || !trees.some((tree) => Number(tree[id] ?? 0) > 0) || rule.type === "0") {invalid();}
 
     const skill = context.state.skills.find((row) => row.skillId === id);
 
-    if (!["use", "del"].includes(subcommand)) invalid();
+    if (!["use", "del"].includes(subcommand)) {invalid();}
 
     if (subcommand === "del") {
-      if (!skill) invalid();
+      if (!skill) {invalid();}
 
       context.write.deletedStates = [Number(rule!.para1)];
       context.write.skills = [{ ...skill!, actTime: context.now }];
@@ -126,7 +126,7 @@ export function prepareLegacyGeneral(
         long(skill, "endTime") < 9223372036854775807n &&
         long(skill, "endTime") > context.now
       )
-        invalid();
+        {invalid();}
 
       if (id === "610700") {
         const hours = cityInteger(rule!.para1, 1);
@@ -148,29 +148,29 @@ export function prepareLegacyGeneral(
             resourceId > 3 ||
             base === undefined
           )
-            continue;
+            {continue;}
 
           const asset = (["wood", "stone", "iron", "food"] as const)[resourceId]!;
           const amount = cityAmount(
             Math.trunc(base * hours * Math.max(0, 1 + context.effect(50 + resourceId) / 100)),
           );
 
-          if (amount > 0n) context.economy.resource(asset, amount);
+          if (amount > 0n) {context.economy.resource(asset, amount);}
         }
 
         body.resource = sfs.object(context.resource());
       } else {
         if (!context.rules.power.statuses?.has(rule!.para1 ?? ""))
-          throw new GameError(errors.unsupported, "city_progression");
+          {throw new GameError(errors.unsupported, "city_progression");}
 
         body = applyStatus(context, rule!.para1!);
       }
 
       if (rule!.duration)
-        context.write.states = context.write.states?.map((state) => ({
+        {context.write.states = context.write.states?.map((state) => ({
           ...state,
           endTime: context.now + BigInt(cityInteger(rule!.duration)) * 1000n,
-        }));
+        }));}
 
       const end = context.write.states?.[0]?.endTime ?? context.now;
       context.write.skills = [
@@ -196,23 +196,23 @@ export function prepareLegacyGeneral(
     const cooldown = context.write.skills?.[0];
 
     if (cooldown)
-      body = {
+      {body = {
         ...activeSkill(cooldown),
         ...body,
         ...(context.write.states?.length ? { itemEffectObj: sfs.object(body) } : {}),
-      };
+      };}
 
     return { response: encode(body) };
   }
 
   if (page === currentPage)
-    context.write.generals = [
+    {context.write.generals = [
       { ...row, abilityIndex: page, ability: Buffer.from(JSON.stringify(trees)) },
-    ];
+    ];}
   else
-    context.write.abilityPages = [
+    {context.write.abilityPages = [
       { uid: context.owner, page, ability: Buffer.from(JSON.stringify(trees)) },
-    ];
+    ];}
 
   return { response: encode(body), event: null };
 }

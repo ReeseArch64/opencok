@@ -45,12 +45,12 @@ export function createCampaignAudience(
         now < 0n ||
         (allianceId !== undefined && (!allianceId || allianceId.length > 40))
       )
-        throw new Error("Invalid campaign audience page");
+        {throw new Error("Invalid campaign audience page");}
 
       return db.transaction(async (tx) => {
         await fenceRealmTransaction(tx, authority);
 
-        if (!owners.length) return [];
+        if (!owners.length) {return [];}
 
         const rows = await tx
           .select({ uid: userprofile.uid })

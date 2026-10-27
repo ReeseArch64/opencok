@@ -24,7 +24,7 @@ function database(
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
       const fail = (phase: string) => {
-        if (options.fail === phase) throw new Error(`Synthetic ${phase} failure`);
+        if (options.fail === phase) {throw new Error(`Synthetic ${phase} failure`);}
       };
       if (query.text.startsWith("select (count(*) + 1)::text")) {
         fail("count");
@@ -132,10 +132,10 @@ test("alliance snapshots preserve member-only fallback, science power and distin
       `sum("opencok_kingdom"."playerinfo"."${kind === "power" ? "power" : "armyKill"}")`,
     );
     if (kind === "power")
-      expect(board.text).toContain(
+      {expect(board.text).toContain(
         'coalesce(sum("opencok_kingdom"."alliance_science"."power"), 0)',
-      );
-    else expect(board.text).not.toContain('"alliance_science"');
+      );}
+    else {expect(board.text).not.toContain('"alliance_science"');}
     const fallback = queries[3]!;
     expect(fallback.params).toEqual(["own-alliance"]);
     expect(fallback.text).toContain('"member_score" > (select');
@@ -145,9 +145,9 @@ test("alliance snapshots preserve member-only fallback, science power and distin
     expect(queries[4]?.params).toEqual(["0", "1", 32768]);
     expect(queries[5]?.params).toEqual(["0", "1", 2]);
     for (const statement of queries)
-      expect(statement.text).not.toMatch(
+      {expect(statement.text).not.toMatch(
         /\b(insert|update|delete)\b|select \*|email|passmd5|"gold"|"wood"/,
-      );
+      );}
   }
 });
 
@@ -184,10 +184,10 @@ test("missing or banned owners skip reads and query failures or oversized scienc
   }
   const untouched = database();
   for (const uid of ["", " ", "x".repeat(41)])
-    expect(() => readAllianceRanking(untouched.db, uid, query("power"))).toThrow();
+    {expect(() => readAllianceRanking(untouched.db, uid, query("power"))).toThrow();}
   for (const limit of [0, -1, 1.5, 32768])
-    expect(() =>
+    {expect(() =>
       readAllianceRanking(untouched.db, "owner", { ...query("power"), limit }),
-    ).toThrow();
+    ).toThrow();}
   expect(untouched.queries).toHaveLength(0);
 });

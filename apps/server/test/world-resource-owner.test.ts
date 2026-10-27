@@ -123,34 +123,34 @@ function fixture() {
             expect(text).toBe("begin isolation level repeatable read read only");
             return { rows: [] };
           }
-          if (text === "commit" || text === "rollback") return { rows: [] };
+          if (text === "commit" || text === "rollback") {return { rows: [] };}
           expect(text).toStartWith("select ");
           expect(text).not.toMatch(
             /for update|for share|password|email|referrer|"ip"|skillInfo|oldrefineproperty|lockproperty|costUnlockTimes/,
           );
-          if (params.length === 1 && params[0] === 0) return { rows: [] };
+          if (params.length === 1 && params[0] === 0) {return { rows: [] };}
           const table = /from "opencok_kingdom"\."([^"]+)"/.exec(text)![1]!;
           const detailProfile = table === "userprofile" && text.includes('"crossFightSrcServerId"');
           const generalGear = table === "user_equip" && text.includes('"generalid" >');
           const key = `${realm}:${table}${detailProfile ? ":effects" : generalGear ? ":general" : ""}`;
-          if (state.fail === key) throw new Error("Synthetic private driver detail");
+          if (state.fail === key) {throw new Error("Synthetic private driver detail");}
           let rows = state.records.get(`${realm}:${table}`) ?? [];
           if (table === "userprofile") {
             if (params[0] === "observer") {
               state.onObserver?.();
               rows = [state.observer];
-            } else rows = state.owners.get(realm) ? [state.owners.get(realm)!] : [];
-          } else if (table === "user_world") rows = [{ uid: "observer", worldId: 9 }];
-          else if (table === "worldpoint") rows = [state.points.get(realm)!];
+            } else {rows = state.owners.get(realm) ? [state.owners.get(realm)!] : [];}
+          } else if (table === "user_world") {rows = [{ uid: "observer", worldId: 9 }];}
+          else if (table === "worldpoint") {rows = [state.points.get(realm)!];}
           else if (table === "world_march")
-            rows = state.marches.get(realm) ? [state.marches.get(realm)!] : [];
+            {rows = state.marches.get(realm) ? [state.marches.get(realm)!] : [];}
           else if (table === "user_equip")
-            rows = rows.filter((row) =>
+            {rows = rows.filter((row) =>
               generalGear ? (row.generalid as number) > 0 : row.on === 1,
-            );
+            );}
           if (table !== "userprofile" && rows[0]?.uid !== undefined)
-            rows = rows.filter((row) => row.uid === params[0]);
-          if (state.overrides.has(key)) rows = state.overrides.get(key)!;
+            {rows = rows.filter((row) => row.uid === params[0]);}
+          if (state.overrides.has(key)) {rows = state.overrides.get(key)!;}
           const columns = text
             .slice(7, text.indexOf(" from "))
             .split(", ")
@@ -238,7 +238,7 @@ test("remote owner reads use the destination transaction after local authorizati
     "hero_office",
     "user_equip",
   ])
-    expect(reads(f, table).every((query) => query.realm === 2)).toBe(true);
+    {expect(reads(f, table).every((query) => query.realm === 2)).toBe(true);}
   const localCommit = f.queries.findIndex((query) => query.realm === 1 && query.text === "commit");
   expect(localCommit).toBeGreaterThan(0);
   expect(f.queries.findIndex((query) => query.text.includes('"new_general"'))).toBeGreaterThan(
@@ -253,12 +253,12 @@ test("owner-effect reads are explicit and skip absent marches, profiles, unsuppo
   expect(reads(disabled, "new_general")).toHaveLength(0);
   for (const kind of ["march", "profile", "type", "owner", "pointer", "authorization"]) {
     const f = fixture();
-    if (kind === "march") f.state.marches.set(1, undefined);
-    if (kind === "profile") f.state.owners.set(1, undefined);
-    if (kind === "type") f.state.points.get(1)!.pointType = 0;
-    if (kind === "owner") f.state.points.get(1)!.ownerId = "\u2000";
-    if (kind === "pointer") f.state.points.get(1)!.ownerMarchUUid = null;
-    if (kind === "authorization") f.state.observer.banFlag = 1;
+    if (kind === "march") {f.state.marches.set(1, undefined);}
+    if (kind === "profile") {f.state.owners.set(1, undefined);}
+    if (kind === "type") {f.state.points.get(1)!.pointType = 0;}
+    if (kind === "owner") {f.state.points.get(1)!.ownerId = "\u2000";}
+    if (kind === "pointer") {f.state.points.get(1)!.ownerMarchUUid = null;}
+    if (kind === "authorization") {f.state.observer.banFlag = 1;}
     expect((await f.read()).resource?.owner).toBeUndefined();
     expect(reads(f, "new_general")).toHaveLength(0);
     expect(reads(f, "user_general")).toHaveLength(0);

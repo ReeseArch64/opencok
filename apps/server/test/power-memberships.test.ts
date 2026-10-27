@@ -67,7 +67,7 @@ test("VIP activation has an exclusive deadline and retains millisecond precision
   expect(vipEffects(undefined, rules, now).size).toBe(0);
   expect(vipEffects({ ...vip, vipEndTime: 9007199254740993n }, rules, now).get(487)).toBe(15);
   for (const vipEndTime of [9007199254740992, 9223372036854775808n, "private-invalid", null])
-    expect(() => vipEffects({ ...vip, vipEndTime }, rules, now)).toThrow("102192");
+    {expect(() => vipEffects({ ...vip, vipEndTime }, rules, now)).toThrow("102192");}
 });
 
 test("VIP score thresholds, absent tiers and float increments do not alter stored progression", () => {

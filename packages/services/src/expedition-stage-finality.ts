@@ -26,13 +26,13 @@ export class ExpeditionStageFinalityService {
     const now = BigInt(this.now());
 
     for (const period of await this.realm.candidates(now)) {
-      if (!this.validatedStages.has(period.stage)) continue;
+      if (!this.validatedStages.has(period.stage)) {continue;}
 
-      if (!(await this.registry.verify(period))) continue;
+      if (!(await this.registry.verify(period))) {continue;}
 
       const closure = await this.realm.seal(period, now);
 
-      if (!closure) continue;
+      if (!closure) {continue;}
 
       await this.registry.begin(period, closure, now);
 
@@ -48,7 +48,7 @@ export class ExpeditionStageFinalityService {
           closure.processed = processed;
         }
 
-        if (long(closure, "processed") !== long(closure, "scoreCount")) continue;
+        if (long(closure, "processed") !== long(closure, "scoreCount")) {continue;}
 
         if (!(await this.registry.complete(period, closure, now))) {
           await this.realm.reset(closure);
@@ -61,7 +61,7 @@ export class ExpeditionStageFinalityService {
       const winner = await this.registry.finalize(period, now);
 
       if (winner !== undefined)
-        await this.realm.finished({ ...closure, periodId: text(closure, "periodId") }, winner, now);
+        {await this.realm.finished({ ...closure, periodId: text(closure, "periodId") }, winner, now);}
     }
   }
 }

@@ -51,12 +51,12 @@ beforeAll(async () => {
   pools.push(await postgres.connect("remote"));
   for (const [index, pool] of pools.entries()) {
     for (const migration of ["0000_initial.sql", "0001_opencok_namespaces.sql"])
-      await pool.query(
+      {await pool.query(
         await readFile(
           new URL(`../../../packages/drizzle/migrations/kingdom/${migration}`, import.meta.url),
           "utf8",
         ),
-      );
+      );}
     await pool.query(
       `insert into opencok_kingdom.userprofile (uid,name,level,exp,country,"serverId","allianceId") values ('self','Self',1,0,'US',$1,'A'),('member','Member',1,0,'US',$1,'A')`,
       [index + 1],
@@ -79,10 +79,10 @@ beforeAll(async () => {
         [700 + type, world, type],
       );
       if ([14, 18, 20, 21, 23, 46, 47].includes(type))
-        await pool.query(
+        {await pool.query(
           `insert into opencok_kingdom.alliance_territory (uid,"pointId","atWorldId",type,"allianceId","allianceName",active,stat,"curDef","maxDef","buildingSpd","updateTime") values ($1,$2,$3,$4,'A','Alliance',1,3,20,100,0.25,9007199254740993)`,
           [`t${type}`, 700 + type, world, type],
-        );
+        );}
     }
     await pool.query(
       `insert into opencok_kingdom.user_territory_resource (uid,"allianceId",wood,food) values ('member','A',-10,9007199254740993),('orphan','A',100,100),('foreign','B',200,200)`,
@@ -96,7 +96,7 @@ beforeAll(async () => {
     kingdoms,
     getKingdom: (id: number) => {
       const db = kingdoms.get(id);
-      if (!db) throw new Error("Unconfigured realm");
+      if (!db) {throw new Error("Unconfigured realm");}
       return db;
     },
   } as unknown as typeof databases;
@@ -111,7 +111,7 @@ beforeAll(async () => {
   await cache.command("HSET", "opencok:kingdom:2:turret:t21", "remote", '{"troop":9}');
 }, 120000);
 afterAll(async () => {
-  for (const pool of pools) await pool.end();
+  for (const pool of pools) {await pool.end();}
   await postgres.stop();
   await redis.stop();
 });

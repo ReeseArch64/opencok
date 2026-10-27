@@ -16,7 +16,7 @@ export async function readAnniversaryStatistics(tx: MutationTransaction, owner: 
     .where(eq(anniversary_userinfo.uid, owner));
   const alliances = await tx.select().from(anniversary_allianceinfo).limit(2);
 
-  if (alliances.length > 1) throw new Error("Ambiguous anniversary alliance statistics");
+  if (alliances.length > 1) {throw new Error("Ambiguous anniversary alliance statistics");}
 
   const [attack] = await tx.select().from(atk_time).where(eq(atk_time.uid, owner));
   const [defend] = await tx.select().from(def_time).where(eq(def_time.uid, owner));
@@ -32,7 +32,7 @@ export async function readAnniversaryStatistics(tx: MutationTransaction, owner: 
       .orderBy(asc(logrecord.uid))
       .limit(2);
 
-    if (attacks.length > 1) throw new Error("Ambiguous anniversary attack history");
+    if (attacks.length > 1) {throw new Error("Ambiguous anniversary attack history");}
 
     if (attacks[0]) {
       const targets = await tx
@@ -42,15 +42,15 @@ export async function readAnniversaryStatistics(tx: MutationTransaction, owner: 
         .orderBy(asc(logrecord.uid))
         .limit(2);
 
-      if (targets.length > 1) throw new Error("Ambiguous anniversary target history");
+      if (targets.length > 1) {throw new Error("Ambiguous anniversary target history");}
 
       if (targets[0]?.uid)
-        name = (
+        {name = (
           await tx
             .select({ name: userprofile.name })
             .from(userprofile)
             .where(eq(userprofile.uid, targets[0].uid))
-        )[0]?.name;
+        )[0]?.name;}
     }
   }
 

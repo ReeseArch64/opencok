@@ -78,7 +78,7 @@ test("maintenance recovers from storage failure and tolerates an unavailable arc
   const service = new ChatMaintenanceService({
     repository: {
       health: async () => {
-        if (unavailable) throw new Error("synthetic storage failure");
+        if (unavailable) {throw new Error("synthetic storage failure");}
       },
       deleteExpired: async () => ({ messages: 0, sessions: 0 }),
       archivePending: async () => {

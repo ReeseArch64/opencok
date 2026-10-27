@@ -15,7 +15,7 @@ export function worldResourceDuration(rules: Rules, level: number, dead = false)
   const hours = Number(rules.items.get(dead ? "resources_death" : "resources_life")?.[`k${level}`]);
   const duration = Math.trunc(hours * 3600000);
 
-  if (!Number.isSafeInteger(duration) || duration <= 0) worldMutationFailure();
+  if (!Number.isSafeInteger(duration) || duration <= 0) {worldMutationFailure();}
 
   return BigInt(duration);
 }
@@ -53,13 +53,13 @@ export function worldResourceChoice(
           Math.ceil(Math.abs(num(point, "y") - center) / bandWidth),
         );
 
-  if (band === 0 && !blackLand) return undefined;
+  if (band === 0 && !blackLand) {return undefined;}
 
   const choices = group.filter(
     (rule) => Number(rule.area_level) === band && BigInt(cityInteger(rule.hours)) * 3600000n <= age,
   );
 
-  if (!choices.length) return undefined;
+  if (!choices.length) {return undefined;}
 
   const goldRatio = goldBonus ? Math.fround(Number(rules.items.get("17_wk")?.k11 ?? 0) / 100) : 0;
   const selected =
@@ -76,12 +76,12 @@ export function worldResourceChoice(
       )
     ];
 
-  if (!selected) worldMutationFailure();
+  if (!selected) {worldMutationFailure();}
 
   const type = cityInteger(selected.res_type, 0, 6),
     level = cityInteger(selected.res_level, 1, 10);
 
-  if (type === 6) return { type, level, amount: 0 };
+  if (type === 6) {return { type, level, amount: 0 };}
 
   const key = [
     "world_wood",

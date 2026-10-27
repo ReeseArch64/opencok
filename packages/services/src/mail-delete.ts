@@ -20,7 +20,7 @@ function invitationJson(value: Value): string {
       return String(value.value);
     case Type.Double:
       if (typeof value.value !== "number" || !Number.isFinite(value.value))
-        throw new ProtocolError();
+        {throw new ProtocolError();}
 
       return Object.is(value.value, -0) ? "-0.0" : String(value.value);
     case Type.String:
@@ -43,12 +43,12 @@ export function planMailBatchInvitations(
   const updates: MailBatchInvitationUpdate[] = [];
 
   for (const entry of entries) {
-    if (entry.type !== 26) continue;
+    if (entry.type !== 26) {continue;}
 
     const inline = storedMailText(entry.contents);
 
     if (inline.toLowerCase() === "extra" && entry.extra === null)
-      throw new Error("Missing persisted invitation contents");
+      {throw new Error("Missing persisted invitation contents");}
 
     let body;
 
@@ -57,12 +57,12 @@ export function planMailBatchInvitations(
         inline.toLowerCase() === "extra" ? storedMailText(entry.extra) : inline,
       );
     } catch (error) {
-      if (error instanceof LegacyJsonError) continue;
+      if (error instanceof LegacyJsonError) {continue;}
 
       throw error;
     }
 
-    if (body.inviterUid?.type !== Type.String || body.inviteeUid?.type !== Type.String) continue;
+    if (body.inviterUid?.type !== Type.String || body.inviteeUid?.type !== Type.String) {continue;}
 
     const inviter = str(body, "inviterUid");
 
@@ -72,12 +72,12 @@ export function planMailBatchInvitations(
       inviter.includes("\0") ||
       !inviter.isWellFormed()
     )
-      continue;
+      {continue;}
 
     body.deal = sfs.int(1);
     const bytes = javaMailBytes(invitationJson(sfs.object(body)));
 
-    if (!bytes || bytes.byteLength > 65535) throw new ProtocolError();
+    if (!bytes || bytes.byteLength > 65535) {throw new ProtocolError();}
 
     updates.push({ uid: entry.uid, inviter, contents: Buffer.from(bytes) });
   }
@@ -92,7 +92,7 @@ export function planMailDeletion(
   const inviters = new Set<string>();
 
   for (const entry of entries) {
-    if (entry.type !== 26 || !entry.contents) continue;
+    if (entry.type !== 26 || !entry.contents) {continue;}
 
     try {
       const inline = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(
@@ -101,18 +101,18 @@ export function planMailDeletion(
       let start = 0;
       let end = inline.length;
 
-      while (start < end && inline.charCodeAt(start) <= 32) start++;
+      while (start < end && inline.charCodeAt(start) <= 32) {start++;}
 
-      while (end > start && inline.charCodeAt(end - 1) <= 32) end--;
+      while (end > start && inline.charCodeAt(end - 1) <= 32) {end--;}
 
       const data =
         inline.slice(start, end).toLowerCase() === "extra" ? entry.extra : entry.contents;
 
-      if (!data) continue;
+      if (!data) {continue;}
 
       const contents = decodeStoredJson(data);
 
-      if (!contents || typeof contents !== "object" || Array.isArray(contents)) continue;
+      if (!contents || typeof contents !== "object" || Array.isArray(contents)) {continue;}
 
       const { inviterUid, inviteeUid } = contents as Record<string, unknown>;
 
@@ -124,7 +124,7 @@ export function planMailDeletion(
         inviterUid.includes("\0") ||
         !inviterUid.isWellFormed()
       )
-        continue;
+        {continue;}
 
       inviters.add(inviterUid);
     } catch {}

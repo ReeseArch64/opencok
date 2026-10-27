@@ -44,9 +44,9 @@ test("native cycle commands preserve long correlation while paid producers remai
     "sevenday.reward",
     "sevenday.lucky.draw",
   ])
-    expect(
+    {expect(
       (await game.execute("owner", command, { _cok_: sfs.long(9007199254740993n) })).body._cok_,
-    ).toEqual(sfs.long(9007199254740993n));
+    ).toEqual(sfs.long(9007199254740993n));}
   await expect(game.execute("owner", "sevenday.purchase", {})).rejects.toThrow();
   await expect(game.execute("owner", "sevenday.init", {})).rejects.toThrow();
 });

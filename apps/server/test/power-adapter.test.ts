@@ -26,7 +26,7 @@ function database(
       queries.push({ text: query.text, params });
       const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
       if (table === "userprofile")
-        return {
+        {return {
           rows: options.missing
             ? []
             : [
@@ -42,27 +42,27 @@ function database(
                   2,
                 ],
               ],
-        };
-      if (table === "user_army") return { rows: [["107001", 1, 2, 3, 4]] };
-      if (table === "user_general") return { rows: [["1001", 5, Buffer.from('[{"600001":2}]')]] };
-      if (table === "user_equip") return { rows: [[1001, 1, "487,3", 4]] };
-      if (table === "user_wall") return { rows: [["108001", 5]] };
-      if (table === "user_state") return { rows: [[510001, "0", "9007199254740993", 487, 25]] };
-      if (table === "user_vip") return { rows: [[250, "9007199254740993", 2]] };
-      if (table === "user_civilization_prestige") return { rows: [[2, "9007199254740993"]] };
-      if (table === "user_military_rank") return { rows: [["1001|1002"]] };
-      if (table === "user_miracle_buff_active") return { rows: [[4]] };
-      if (table === "kingdom_position") return { rows: options.office ? [["216002", 2]] : [] };
+        };}
+      if (table === "user_army") {return { rows: [["107001", 1, 2, 3, 4]] };}
+      if (table === "user_general") {return { rows: [["1001", 5, Buffer.from('[{"600001":2}]')]] };}
+      if (table === "user_equip") {return { rows: [[1001, 1, "487,3", 4]] };}
+      if (table === "user_wall") {return { rows: [["108001", 5]] };}
+      if (table === "user_state") {return { rows: [[510001, "0", "9007199254740993", 487, 25]] };}
+      if (table === "user_vip") {return { rows: [[250, "9007199254740993", 2]] };}
+      if (table === "user_civilization_prestige") {return { rows: [[2, "9007199254740993"]] };}
+      if (table === "user_military_rank") {return { rows: [["1001|1002"]] };}
+      if (table === "user_miracle_buff_active") {return { rows: [[4]] };}
+      if (table === "kingdom_position") {return { rows: options.office ? [["216002", 2]] : [] };}
       if (table === "activity") {
-        if (options.fightFailure) throw new Error("Synthetic fight read failure");
+        if (options.fightFailure) {throw new Error("Synthetic fight read failure");}
         return { rows: [[0, "1792756790000", "1792756800000", "9007199254740993"]] };
       }
       if (table === "alliance_territory") {
-        if (options.treeFailure) throw new Error("Synthetic tree read failure");
+        if (options.treeFailure) {throw new Error("Synthetic tree read failure");}
         return { rows: [[options.allianceId, 10, 42, 3, 2, "synthetic-skin"]] };
       }
       if (table === "alliance_science") {
-        if (options.allianceFailure) throw new Error("Synthetic alliance read failure");
+        if (options.allianceFailure) {throw new Error("Synthetic alliance read failure");}
         return {
           rows: [
             [1000, 2],
@@ -70,29 +70,29 @@ function database(
           ],
         };
       }
-      if (table === "user_civilization_science") return { rows: [[2000, 3]] };
-      if (table === "foreigen_sciences") return { rows: [[3000, 2]] };
-      if (table === "cross_throne_reward_record") return { rows: [[7, 1001]] };
+      if (table === "user_civilization_science") {return { rows: [[2000, 3]] };}
+      if (table === "foreigen_sciences") {return { rows: [[3000, 2]] };}
+      if (table === "cross_throne_reward_record") {return { rows: [[7, 1001]] };}
       if (table === "lucky_day")
-        return { rows: options.lucky ? [[1, "9007199254740993", "8001", 1]] : [] };
+        {return { rows: options.lucky ? [[1, "9007199254740993", "8001", 1]] : [] };}
       if (table === "server_info") {
-        if (options.serverFailure) throw new Error("Synthetic realm metadata failure");
+        if (options.serverFailure) {throw new Error("Synthetic realm metadata failure");}
         return { rows: [["9007199254740995"]] };
       }
-      if (table === "t_hero") return { rows: [[7001, 5, 20]] };
-      if (table === "user_pet_dragon") return { rows: [[6001, 3, 5, 1]] };
+      if (table === "t_hero") {return { rows: [[7001, 5, 20]] };}
+      if (table === "user_pet_dragon") {return { rows: [[6001, 3, 5, 1]] };}
       if (table === "dragon_talent_skill")
-        return {
+        {return {
           rows: [
             ["synthetic", 6001, "talent", 0n, 9007199254740993n, 9007199254740995n, 1, 2, 3, 4],
           ],
-        };
-      if (table === "user_pet_dragon_skill") return { rows: [[6001, 1, "8001", 3, 2]] };
+        };}
+      if (table === "user_pet_dragon_skill") {return { rows: [[6001, 1, "8001", 3, 2]] };}
       if (table === "user_knight_title")
-        return { rows: [[8001, 8002, Buffer.from(`{"8002":${now + 1}}`)]] };
-      if (table === "user_item") return { rows: [["talisman", 1, "9007199254740993"]] };
+        {return { rows: [[8001, 8002, Buffer.from(`{"8002":${now + 1}}`)]] };}
+      if (table === "user_item") {return { rows: [["talisman", 1, "9007199254740993"]] };}
       if (table === "pic_upload_record") {
-        if (options.failure) throw new Error("Synthetic upload read failure");
+        if (options.failure) {throw new Error("Synthetic upload read failure");}
         return { rows: [["9007199254740993", "9007199254740995", 4]] };
       }
       return { rows: [] };
@@ -356,7 +356,7 @@ test("power readiness checks each required table without reading records or writ
     "server_info",
     "cross_throne_reward_record",
   ])
-    expect(tables).toContain(table);
+    {expect(tables).toContain(table);}
   for (const query of queries) {
     expect(query.text.startsWith("select ")).toBe(true);
     expect(query.text).toContain(" limit $1");

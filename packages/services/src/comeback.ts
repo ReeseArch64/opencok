@@ -31,7 +31,7 @@ import type { CityProgressionContext } from "./city-progression-context.ts";
 function rewards(context: CityProgressionContext, id: string) {
   const rule = context.rules.advanced.payRewards?.get(id);
 
-  if (!rule) comebackFailure();
+  if (!rule) {comebackFailure();}
 
   const result = previewRewards(
     id,
@@ -41,7 +41,7 @@ function rewards(context: CityProgressionContext, id: string) {
     rule,
   );
 
-  if (result.length > 64) comebackFailure();
+  if (result.length > 64) {comebackFailure();}
 
   return result;
 }
@@ -49,7 +49,7 @@ function rewards(context: CityProgressionContext, id: string) {
 function enroll(context: CityProgressionContext) {
   const state = context.state.comeback;
 
-  if (!state) comebackFailure();
+  if (!state) {comebackFailure();}
 
   const castle = context.state.buildings.find((row) => num(row, "itemId") === 400000);
   const selected = comebackEnrollment(
@@ -60,11 +60,11 @@ function enroll(context: CityProgressionContext) {
     context.now,
   );
 
-  if (!selected) return comebackRecord(state);
+  if (!selected) {return comebackRecord(state);}
 
   const { config, type } = selected;
 
-  if (state.records.some((row) => row.configId === config.id)) comebackFailure();
+  if (state.records.some((row) => row.configId === config.id)) {comebackFailure();}
 
   const record: Row = {
     uid: context.owner,
@@ -83,7 +83,7 @@ function enroll(context: CityProgressionContext) {
     const template = context.rules.mail.get(config.mail),
       contents = javaMailBytes(template?.message);
 
-    if (!template || !contents) comebackFailure();
+    if (!template || !contents) {comebackFailure();}
 
     context.write.comeback.mail = {
       uid:
@@ -121,15 +121,15 @@ function activities(
     const endTime = channel.end / 1000n;
 
     if (channel.type === 1)
-      return {
+      {return {
         type: 1,
         endTime,
         claimed: num(record, "backReward") > 0,
         ...(config.reward_back !== "0" ? { rewards: rewards(context, config.reward_back!) } : {}),
-      };
+      };}
 
     if (channel.type === 2)
-      return {
+      {return {
         type: 2,
         endTime,
         daily: comebackDaily(config).map((row) => ({
@@ -137,7 +137,7 @@ function activities(
           state: day < row.day ? 0 : daily.has(row.day) ? 2 : 1,
           rewards: rewards(context, row.reward),
         })),
-      };
+      };}
 
     return {
       type: 3,
@@ -164,14 +164,14 @@ export class ComebackDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.comeback;
 
-    if (!state) comebackFailure();
+    if (!state) {comebackFailure();}
 
     const active =
       comebackEnabled(context.rules, context.now) &&
       num(context.state.profile, "crossFightSrcServerId") <= 0;
 
     if (!active) {
-      if (command === "comeback.reward") comebackFailure();
+      if (command === "comeback.reward") {comebackFailure();}
 
       return {
         response: encode(command === "comeback.info" ? comebackInfoView([]) : {}),
@@ -190,7 +190,7 @@ export class ComebackDomain extends CityCommandDomain {
       long(current, "backTime") <= 0n ||
       long(current, "backTime") > context.now
     ) {
-      if (command === "comeback.reward") comebackFailure();
+      if (command === "comeback.reward") {comebackFailure();}
 
       return {
         response: encode(command === "comeback.info" ? comebackInfoView([]) : {}),
@@ -211,7 +211,7 @@ export class ComebackDomain extends CityCommandDomain {
       const rows = activities(context, current, config);
 
       if (rows.length)
-        context.write.comeback = { ...context.write.comeback, viewedAt: context.now };
+        {context.write.comeback = { ...context.write.comeback, viewedAt: context.now };}
 
       return { response: encode(comebackInfoView(rows)), event: null };
     }
@@ -221,14 +221,14 @@ export class ComebackDomain extends CityCommandDomain {
     const channel = comebackChannels(config).find((channel) => channel.type === type);
 
     if (!channel || context.now > long(current, "backTime") + BigInt(channel.days) * 86400000n)
-      comebackFailure();
+      {comebackFailure();}
 
     const record = { ...current };
     let id: string;
 
     if (type === 1) {
       if (num(record, "backReward") > 0 || !config.reward_back || config.reward_back === "0")
-        comebackFailure();
+        {comebackFailure();}
 
       record.backReward = 1;
       id = config.reward_back;
@@ -242,7 +242,7 @@ export class ComebackDomain extends CityCommandDomain {
         claimed.includes(day) ||
         context.now / 86400000n - long(record, "backTime") / 86400000n + 1n < BigInt(day)
       )
-        comebackFailure();
+        {comebackFailure();}
 
       record.dailyReward = [...claimed, day].join(";");
       id = selected.reward;
@@ -256,7 +256,7 @@ export class ComebackDomain extends CityCommandDomain {
         claimed.includes(pay) ||
         long(context.state.profile, "payTotal") - long(record, "payTotal") < BigInt(pay)
       )
-        comebackFailure();
+        {comebackFailure();}
 
       record.payReward = [...claimed, pay].join(";");
       id = selected.reward;

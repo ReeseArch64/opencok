@@ -17,7 +17,7 @@ function invalid(): never {
 }
 
 function splitWhole(value: string, separator: string): string[] {
-  if (!value) return [];
+  if (!value) {return [];}
 
   return value
     .split(separator)
@@ -31,7 +31,7 @@ function integer(value: unknown): number {
     value < -2147483648 ||
     value > 2147483647
   )
-    return invalid();
+    {return invalid();}
 
   return value;
 }
@@ -41,11 +41,11 @@ function intCast(value: number): number {
 }
 
 function longCast(value: number): bigint {
-  if (Number.isNaN(value)) return 0n;
+  if (Number.isNaN(value)) {return 0n;}
 
-  if (value >= 9223372036854775808) return 9223372036854775807n;
+  if (value >= 9223372036854775808) {return 9223372036854775807n;}
 
-  if (value <= -9223372036854775808) return -9223372036854775808n;
+  if (value <= -9223372036854775808) {return -9223372036854775808n;}
 
   return BigInt(Math.trunc(value));
 }
@@ -55,13 +55,13 @@ export function barbarianArmyPlan(
   rules: Rules,
   now: number,
 ): ArmyPlan | undefined {
-  if (!row) return undefined;
+  if (!row) {return undefined;}
 
-  if (!Number.isSafeInteger(now) || now < 0 || typeof row.configId !== "string") return invalid();
+  if (!Number.isSafeInteger(now) || now < 0 || typeof row.configId !== "string") {return invalid();}
 
   const last = row.lastBeAttackedTime ?? 0n;
 
-  if (typeof last !== "bigint" || BigInt.asIntN(64, last) !== last) return invalid();
+  if (typeof last !== "bigint" || BigInt.asIntN(64, last) !== last) {return invalid();}
 
   const rule = rules.world.barbarians?.get(row.configId);
   let seconds: number;
@@ -75,18 +75,18 @@ export function barbarianArmyPlan(
   const rate = Math.min(1, Number(BigInt.asIntN(64, BigInt(now) - last)) / 1000 / seconds / 100);
   const formation = rule?.army === undefined ? undefined : rules.world.armies?.get(rule.army);
 
-  if (!formation) return invalid();
+  if (!formation) {return invalid();}
 
   const army = new Map<string, number>();
   const raw = formation.arm;
 
   if (!mailBlank(raw)) {
-    if (typeof raw !== "string" || raw.length > 65535) return invalid();
+    if (typeof raw !== "string" || raw.length > 65535) {return invalid();}
 
     for (const entry of splitWhole(raw, "|")) {
       const parts = splitWhole(entry, ";");
 
-      if (parts.length !== 2) continue;
+      if (parts.length !== 2) {continue;}
 
       try {
         army.set(parts[0]!, Number(javaDecimal(parts[1], 32)));
@@ -94,7 +94,7 @@ export function barbarianArmyPlan(
         return invalid();
       }
 
-      if (army.size > 4096) return invalid();
+      if (army.size > 4096) {return invalid();}
     }
   }
 
@@ -108,9 +108,9 @@ export function barbarianPower(
   remaining: ReadonlyMap<string | null, number | null> | null,
   rules: Rules,
 ): bigint {
-  if (!plan || !plan.army.size) return 0n;
+  if (!plan || !plan.army.size) {return 0n;}
 
-  if (!remaining) return invalid();
+  if (!remaining) {return invalid();}
 
   const recovered = new Map<string, number>();
 

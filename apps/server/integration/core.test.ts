@@ -48,7 +48,7 @@ import { loadRules } from "@opencok/resources/rules";
 async function eventually(check: () => Promise<boolean>, timeout = 15000) {
   const end = Date.now() + timeout;
   while (Date.now() < end) {
-    if (await check().catch(() => false)) return;
+    if (await check().catch(() => false)) {return;}
     await Bun.sleep(100);
   }
   throw new Error("Synthetic dependency readiness timed out");
@@ -88,7 +88,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     const admin = await pg.start();
     try {
       for (const name of [topology.globalDatabase, ...topology.kingdoms.map((k) => k.database)])
-        await admin.query(`CREATE DATABASE "${name}"`);
+        {await admin.query(`CREATE DATABASE "${name}"`);}
     } finally {
       await admin.end();
     }
@@ -98,10 +98,10 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         .pathname,
     });
     for (const kingdom of databases.kingdoms.values())
-      await migrate(kingdom.db, {
+      {await migrate(kingdom.db, {
         migrationsFolder: new URL("../../../packages/drizzle/migrations/kingdom", import.meta.url)
           .pathname,
-      });
+      });}
     for (const id of [1, 2]) {
       const db = databases.getKingdom(id).db;
       const uid = `synthetic-player-${id}`;
@@ -221,7 +221,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         '<ItemSpec id="200001" type="21" useall="1" para1="50"/><ItemSpec id="200002" para1="60"/><ItemSpec id="200021" type="17" price="100"/>',
     };
     for (const [name, records] of Object.entries(xml))
-      await Bun.write(join(resources, `${name}.xml`), `<database>${records}</database>`);
+      {await Bun.write(join(resources, `${name}.xml`), `<database>${records}</database>`);}
     for (const [name, image, port] of [
       [redis, "redis:6.2.24-bookworm", 6379],
       [zk, "zookeeper:3.4.14", 2181],
@@ -306,7 +306,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       (runtimeRules.power.newGeneralSkills ??= new Map()).set("53900", { id: "53900", type: "0" });
       runtimeRules.advanced.campaignRules = campaignRulesCatalog.rules;
       for (const [itemId, rule] of exchangeCatalog.goods)
-        if (!runtimeRules.goods.has(itemId)) runtimeRules.goods.set(itemId, rule);
+        {if (!runtimeRules.goods.has(itemId)) {runtimeRules.goods.set(itemId, rule);}}
       runtimeRules.reconnect.rewards = exchangeCatalog.reconnect.rewards;
       const tokenPanel = { ...exchangeCatalog.power.activityPanels!.get("57209")! };
       delete tokenPanel.start;
@@ -460,10 +460,10 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         expect(history._cok_).toEqual(sfs.long(9007199254740993n));
         expect(history.ranklist).toEqual(sfs.array([]));
       } finally {
-        if (expeditionFeature) runtimeRules.features.set("17_wk", expeditionFeature);
-        else runtimeRules.features.delete("17_wk");
-        if (expeditionSwitch) runtimeRules.features.set("wk_switch_new", expeditionSwitch);
-        else runtimeRules.features.delete("wk_switch_new");
+        if (expeditionFeature) {runtimeRules.features.set("17_wk", expeditionFeature);}
+        else {runtimeRules.features.delete("17_wk");}
+        if (expeditionSwitch) {runtimeRules.features.set("wk_switch_new", expeditionSwitch);}
+        else {runtimeRules.features.delete("wk_switch_new");}
       }
 
       for (const [command, params] of [
@@ -483,7 +483,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         expect(olympicInfo._cok_).toEqual(sfs.long(9007199254740993n));
       }
       for (const command of ["Olympic.result", "Olympic.settle"])
-        expect((await client.command(command, {})).errorCode?.value).toBe("102192");
+        {expect((await client.command(command, {})).errorCode?.value).toBe("102192");}
       const comebackInfo = await client.command("comeback.info", { _cok_: sfs.string("comeback") });
       expect(comebackInfo.count).toEqual(sfs.int(0));
       expect(comebackInfo._cok_).toEqual(sfs.string("comeback"));
@@ -507,7 +507,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         "groupbuys.close",
         "groupbuys.settle",
       ])
-        expect((await client.command(command, {})).errorCode?.value).toBe("102192");
+        {expect((await client.command(command, {})).errorCode?.value).toBe("102192");}
       const specialInfo = await client.command("special.ui.state", {
         _cok_: sfs.long(9007199254740993n),
       });
@@ -636,7 +636,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       ).toBe(6);
 
       for (const command of ["build.create", "build.upgrade"])
-        expect((await client.command(command)).errorCode?.value).toBe("E000000");
+        {expect((await client.command(command)).errorCode?.value).toBe("E000000");}
       expect((await client.command("combat.attack")).errorCode?.value).toBe("102192");
       const map = await client.command("world.get", {
         x: sfs.int(10),
@@ -652,7 +652,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       expect(points.map((p: { o?: string }) => p.o)).toContain(`Synthetic ${id}`);
       const after = await adapter.getCityByPlayerId(`synthetic-player-${id}`, Date.now());
       const checkpoint = after.resource?.lastUpdateTime;
-      if (typeof checkpoint !== "bigint") throw new Error("Missing reconnect checkpoint");
+      if (typeof checkpoint !== "bigint") {throw new Error("Missing reconnect checkpoint");}
       expect(checkpoint).toBeGreaterThan(BigInt(String(before.resource?.lastUpdateTime ?? 0)));
       const dailyFlush = BigInt(String(after.lord?.dailyTaskFlushTime ?? 0)),
         allianceFlush = BigInt(String(after.lord?.newDailyTaskFlushTime ?? 0));
@@ -702,7 +702,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         previousCostTiers = runtimeRules.advanced.continuedCosts;
       try {
         for (const key of ["continued_cost", "new_rank_cost"])
-          runtimeRules.features.set(key, { online: "all", test: "all", version: "1.0.0" });
+          {runtimeRules.features.set(key, { online: "all", test: "all", version: "1.0.0" });}
         runtimeRules.items.set("continued_cost", {
           id: "continued_cost",
           k1: "1",
@@ -763,11 +763,11 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
           ["continued_cost", previousCostFeature],
           ["new_rank_cost", previousRankFeature],
         ] as const) {
-          if (previous) runtimeRules.features.set(key, previous);
-          else runtimeRules.features.delete(key);
+          if (previous) {runtimeRules.features.set(key, previous);}
+          else {runtimeRules.features.delete(key);}
         }
-        if (previousCostItem) runtimeRules.items.set("continued_cost", previousCostItem);
-        else runtimeRules.items.delete("continued_cost");
+        if (previousCostItem) {runtimeRules.items.set("continued_cost", previousCostItem);}
+        else {runtimeRules.items.delete("continued_cost");}
         runtimeRules.power.activityPanels = previousCostPanels;
         runtimeRules.advanced.continuedCosts = previousCostTiers;
       }
@@ -802,7 +802,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         paidOrder = `synthetic-paid-${id}`;
       const payControl = (runtimeRules.configuration.payControl ??= new Map());
       for (const key of ["69022", "69023", "69025"])
-        payControl.set(key, {
+        {payControl.set(key, {
           id: key,
           k1: "1.0.0",
           k2: "all",
@@ -811,7 +811,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
           k6: `${paidYear + 1}-01-01-00-00`,
           k7: `${paidYear}-01-01-00-00`,
           k8: `${paidYear + 1}-01-01-00-00`,
-        });
+        });}
       const catalog = (runtimeRules.advanced.castleExchanges ??= new Map());
       catalog.set("synthetic-delivery", {
         id: "synthetic-delivery",
@@ -821,7 +821,7 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       });
       runtimeRules.reconnect.rewards!.set("990000001", { id: "990000001", gold: "7" });
       for (const template of ["12000", "11809"])
-        runtimeRules.mail.set(template, exchangeCatalog.mail.get(template)!);
+        {runtimeRules.mail.set(template, exchangeCatalog.mail.get(template)!);}
       runtimeRules.advanced.normalRechargeThresholds = new Map([
         ["normal", { id: "normal", type: "1", Node: "500", level: "1", Gift: "990000001" }],
       ]);
@@ -912,12 +912,12 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
         k7: "999999",
       });
       for (const [key, rule] of runtimeRules.advanced.eggs!)
-        runtimeRules.advanced.eggs!.set(key, { ...rule, time: "30" });
+        {runtimeRules.advanced.eggs!.set(key, { ...rule, time: "30" });}
       for (const key of ["990011", "990015"])
-        runtimeRules.reconnect.rewards!.set(key, {
+        {runtimeRules.reconnect.rewards!.set(key, {
           ...runtimeRules.reconnect.rewards!.get(key)!,
           gold: "1",
-        });
+        });}
       const legacyEgg = await paidLogin.command("egg.act.info", {});
       expect(legacyEgg.opened).toEqual(sfs.bool(true));
       expect(fields(legacyEgg.eggAct).eggCd).toEqual(sfs.long(-1));
@@ -1000,8 +1000,8 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
       });
       expect(replayed.operationId).toEqual(saved.reply.operationId);
       expect(replayed._cok_).toEqual(sfs.string("after-restart"));
-      if (command === "shoppingMall.buy") expect(replayed.goods).toEqual(saved.reply.goods);
-      else expect(replayed.addItem).toEqual(saved.reply.addItem);
+      if (command === "shoppingMall.buy") {expect(replayed.goods).toEqual(saved.reply.goods);}
+      else {expect(replayed.addItem).toEqual(saved.reply.addItem);}
     }
     await pg.docker(["pause", redis]);
     await eventually(
@@ -1032,10 +1032,10 @@ test("PostgreSQL SFS login, city and map preserve state and isolate both realms"
     clients.forEach((client) => client.close());
     await Promise.allSettled(servers.map((server) => server.close()));
     await Promise.allSettled(adapters.map((adapter) => adapter.close()));
-    if (chat) await new Promise<void>((resolve) => chat!.server.close(() => resolve()));
+    if (chat) {await new Promise<void>((resolve) => chat!.server.close(() => resolve()));}
     await chatRepository?.close();
     await databases?.close();
-    for (const name of containers) await pg.docker(["rm", "--force", "--volumes", name]);
+    for (const name of containers) {await pg.docker(["rm", "--force", "--volumes", name]);}
     await pg.stop();
     await rm(resources, { recursive: true, force: true });
   }

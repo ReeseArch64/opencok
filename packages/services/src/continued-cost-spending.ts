@@ -13,17 +13,17 @@ export function confirmedContinuedCost(
 ) {
   const period = continuedCostPeriod(rules, state.profile, state.buildings, now);
 
-  if (!period) return undefined;
+  if (!period) {return undefined;}
 
   const owner = text(state.profile, "uid");
 
   return (postings: readonly EconomyPosting[]): MutationEvent | undefined => {
     if (postings.some((entry) => entry.account !== owner))
-      throw new Error("Foreign continued-cost posting");
+      {throw new Error("Foreign continued-cost posting");}
 
     const spent = continuedCostAmount(period.type, postings, items, rules);
 
-    if (!spent.amount) return undefined;
+    if (!spent.amount) {return undefined;}
 
     return {
       id: "continued-cost",
@@ -42,11 +42,11 @@ export function confirmedNicknameCost(rules: Rules) {
   ) => {
     const period = continuedCostPeriod(rules, profile, buildings, now);
 
-    if (!period) return;
+    if (!period) {return;}
 
     const amount = continuedCostAmount(period.type, postings, [], rules);
 
-    if (!amount.amount) return;
+    if (!amount.amount) {return;}
 
     return {
       id: "continued-cost",

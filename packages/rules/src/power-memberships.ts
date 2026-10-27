@@ -9,7 +9,7 @@ import {
 } from "./power-values.ts";
 
 function pairs(source: string | undefined): [number, number][] {
-  if (source === undefined) return invalid();
+  if (source === undefined) {return invalid();}
 
   return source
     .split("|")
@@ -28,24 +28,24 @@ export function vipEffects(
 ): ReadonlyMap<number, number> {
   const effects = new Map<number, number>();
 
-  if (!vip) return effects;
+  if (!vip) {return effects;}
 
-  if (!Number.isSafeInteger(now)) return invalid();
+  if (!Number.isSafeInteger(now)) {return invalid();}
 
   const end = long(vip.vipEndTime);
 
-  if (end <= BigInt(now)) return effects;
+  if (end <= BigInt(now)) {return effects;}
 
-  if (!rules.power.vip?.size) return invalid();
+  if (!rules.power.vip?.size) {return invalid();}
 
   const score = integer(vip.score);
   let selected: Rule | undefined;
 
   for (const rule of rules.power.vip.values()) {
-    if (integer(rule.point) <= score) selected = rule;
+    if (integer(rule.point) <= score) {selected = rule;}
   }
 
-  if (selected) for (const [id, value] of pairs(selected.effect)) effects.set(id, value);
+  if (selected) {for (const [id, value] of pairs(selected.effect)) {effects.set(id, value);}}
 
   const level = integer(vip.sLevel);
 
@@ -53,10 +53,10 @@ export function vipEffects(
     const id = String(Number(BigInt.asIntN(32, 7009n + BigInt(level))));
     const rule = rules.power.superVip?.get(id);
 
-    if (!rule) return invalid();
+    if (!rule) {return invalid();}
 
     for (const [effect, value] of pairs(rule.effect))
-      effects.set(effect, float((effects.get(effect) ?? 0) + value));
+      {effects.set(effect, float((effects.get(effect) ?? 0) + value));}
   }
 
   return effects;
@@ -74,7 +74,7 @@ export function allianceScienceEffects(
     );
     const rule = rules.power.allianceSciences?.get(id);
 
-    if (!rule || rule.para1 === undefined) return invalid();
+    if (!rule || rule.para1 === undefined) {return invalid();}
 
     const value = float(rule.para2);
 

@@ -28,7 +28,7 @@ function info(context: CityProgressionContext, planner: CampaignPlanner): Annive
       const week = cityInteger(rule.id),
         n = week % 100;
 
-      if (context.now < end!) current = week;
+      if (context.now < end!) {current = week;}
 
       return {
         week_id: week,
@@ -78,7 +78,7 @@ export class AnniversaryDomain extends CityCommandDomain {
 
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     if (command === "1year.info") {
-      if (!context.state.anniversaryStatistics) campaignFailure();
+      if (!context.state.anniversaryStatistics) {campaignFailure();}
 
       return {
         response: encode(
@@ -96,14 +96,14 @@ export class AnniversaryDomain extends CityCommandDomain {
       const type = cityInteger(int(params, "type"));
       const target = str(params, "uid", "");
 
-      if (type === 45 && !target.trim()) return { response: encode({}), event: null };
+      if (type === 45 && !target.trim()) {return { response: encode({}), event: null };}
 
       if (
         type === 45 &&
         (context.state.cosmeticTarget?.uid !== target ||
           context.state.cosmeticTarget.realm !== context.rules.kingdomId)
       )
-        campaignFailure();
+        {campaignFailure();}
 
       new CampaignPlanner(context, {
         uid: type === 45 ? target : context.owner,
@@ -164,17 +164,17 @@ export class AnniversaryDomain extends CityCommandDomain {
       !context.rules.advanced.anniversaryWeeks?.size ||
       !context.rules.advanced.campaignVariables?.size
     )
-      campaignFailure();
+      {campaignFailure();}
 
     if (command === "third.anniversary")
-      return { response: encode(anniversaryView(info(context, planner))), event: null };
+      {return { response: encode(anniversaryView(info(context, planner))), event: null };}
 
     const index = cityInteger(int(params, "boxIdx"), 1) - 1;
     const current = weeks(context).filter(
       (row) => context.now >= row.start! && context.now < row.end!,
     );
 
-    if (current.length !== 1) campaignFailure();
+    if (current.length !== 1) {campaignFailure();}
 
     const week = current[0]!.rule,
       n = cityInteger(week.id) % 100;
@@ -187,14 +187,14 @@ export class AnniversaryDomain extends CityCommandDomain {
       planner.value(flag) !== 0n ||
       planner.value(`P$long_3th_week${n}_score_count`) < BigInt(cityInteger(reward[0], 1))
     )
-      campaignFailure();
+      {campaignFailure();}
 
     new CampaignPlanner(context, {
       take_or_preview_reward: 1,
       key_rewardId: cityInteger(reward[1], 1),
     }).event(58, `1;${reward[1]}`);
 
-    if (new CampaignPlanner(context).value(flag) !== 1n) campaignFailure();
+    if (new CampaignPlanner(context).value(flag) !== 1n) {campaignFailure();}
 
     return { response: encode({ success: sfs.string("1") }) };
   };

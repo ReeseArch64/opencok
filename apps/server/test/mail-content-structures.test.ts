@@ -70,7 +70,7 @@ test("array holes and functions only invalidate values retained after legacy exc
     "{class:function(){}}",
     '{kept: "function(){}"}',
   ])
-    expect(() => decodeLegacyJsonObject(input)).toThrow(LegacyJsonError);
+    {expect(() => decodeLegacyJsonObject(input)).toThrow(LegacyJsonError);}
   expect(decodeLegacyJsonObject('{kept:"function(){}"}')).toEqual({
     kept: sfs.string('"function(){}"'),
   });

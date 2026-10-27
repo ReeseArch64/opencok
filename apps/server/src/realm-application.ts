@@ -10,7 +10,7 @@ export class RealmApplication {
 
   public constructor(config: Config, rules?: Rules) {
     if (rules && rules.kingdomId !== config.kingdomId)
-      throw new Error("Rules do not belong to the configured realm");
+      {throw new Error("Rules do not belong to the configured realm");}
 
     this.runtime = ManagedRuntime.make(
       RealmApplicationLive.pipe(

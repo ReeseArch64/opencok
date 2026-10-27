@@ -80,7 +80,7 @@ test("positive cached load is used only when the owner is not resident and skips
     ),
   ).toBe(80);
   for (const cachedLoad of [0, -1, -2147483648])
-    expect(resourceRawArmyLoad(army({ cachedLoad }), catalog)).toBe(80);
+    {expect(resourceRawArmyLoad(army({ cachedLoad }), catalog)).toBe(80);}
   expect(resourceRawArmyLoad(army({ effects: effects({ worldLoad: 100 }) }), catalog)).toBe(160);
   expect(() => resourceRawArmyLoad(army({ residentOwner: true }), catalog)).toThrow("102192");
 });
@@ -186,12 +186,12 @@ test("raw army restoration bounds input widths and troop counts without coercion
   for (const value of [NaN, Infinity, 0.5, 2147483648, -2147483649]) {
     expect(() => resourceRawArmyLoad(army({ cachedLoad: value }), catalog)).toThrow();
     for (const key of ["total", "dead", "loadEffect"])
-      expect(() =>
+      {expect(() =>
         resourceRawArmyLoad(
           army({ soldiers: [{ armsId: "troop", total: 1, dead: 0, loadEffect: 0, [key]: value }] }),
           catalog,
         ),
-      ).toThrow();
+      ).toThrow();}
   }
   expect(() =>
     resourceRawArmyLoad(army({ residentOwner: 1 as unknown as boolean }), catalog),
@@ -200,12 +200,12 @@ test("raw army restoration bounds input widths and troop counts without coercion
     resourceRawArmyLoad(army({ effects: effects({ worldLoad: 0.1 }) }), catalog),
   ).toThrow();
   for (const armsId of ["a".repeat(256), "\0", "\ud800"])
-    expect(() =>
+    {expect(() =>
       resourceRawArmyLoad(
         army({ soldiers: [{ armsId, total: 1, dead: 0, loadEffect: 0 }] }),
         catalog,
       ),
-    ).toThrow();
+    ).toThrow();}
   const soldiers = Array.from({ length: 4096 }, () => ({
     armsId: "troop",
     total: 1,

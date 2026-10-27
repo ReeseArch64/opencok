@@ -18,17 +18,17 @@ function modelText(value: string): string {
   let start = 0;
   let end = value.length;
 
-  while (start < end && value.charCodeAt(start) <= 32) start++;
+  while (start < end && value.charCodeAt(start) <= 32) {start++;}
 
-  while (end > start && value.charCodeAt(end - 1) <= 32) end--;
+  while (end > start && value.charCodeAt(end - 1) <= 32) {end--;}
 
   return value.slice(start, end);
 }
 
 function integer(value: unknown): bigint {
-  if (typeof value === "number" && !Number.isSafeInteger(value)) return invalid();
+  if (typeof value === "number" && !Number.isSafeInteger(value)) {return invalid();}
 
-  if (!/^[+-]?\d+$/.test(String(value))) return invalid();
+  if (!/^[+-]?\d+$/.test(String(value))) {return invalid();}
 
   return BigInt(String(value));
 }
@@ -36,7 +36,7 @@ function integer(value: unknown): bigint {
 function int(value: unknown): Value {
   const number = integer(value);
 
-  if (BigInt.asIntN(32, number) !== number) return invalid();
+  if (BigInt.asIntN(32, number) !== number) {return invalid();}
 
   return sfs.int(Number(number));
 }
@@ -44,7 +44,7 @@ function int(value: unknown): Value {
 function count(value: unknown): Value {
   const number = integer(value);
 
-  if (BigInt.asIntN(64, number) !== number) return invalid();
+  if (BigInt.asIntN(64, number) !== number) {return invalid();}
 
   return BigInt.asIntN(32, number) === number ? sfs.int(Number(number)) : sfs.long(number);
 }
@@ -52,7 +52,7 @@ function count(value: unknown): Value {
 function aggregate(value: unknown): Value {
   const number = Number(integer(value));
 
-  if (!Number.isFinite(number)) return invalid();
+  if (!Number.isFinite(number)) {return invalid();}
 
   return Math.abs(number) < 10000000 ? sfs.int(number) : sfs.double(number);
 }
@@ -74,17 +74,17 @@ function serializeAllianceRanking(
         };
 
         if (alliance.leader !== null && alliance.leader !== undefined)
-          row.leader = sfs.string(text(alliance, "leader"));
+          {row.leader = sfs.string(text(alliance, "leader"));}
 
-        if (text(alliance, "icon").trim()) row.icon = sfs.string(modelText(text(alliance, "icon")));
+        if (text(alliance, "icon").trim()) {row.icon = sfs.string(modelText(text(alliance, "icon")));}
 
         const metric = kind === "power" ? "fightpower" : "armyKill";
 
         if (alliance[metric] !== null && alliance[metric] !== undefined)
-          row[metric] = aggregate(alliance[metric]);
+          {row[metric] = aggregate(alliance[metric]);}
 
         if (video) {
-          if (video.allianceId !== alliance.uid) return invalid();
+          if (video.allianceId !== alliance.uid) {return invalid();}
 
           row.allianceVideo = sfs.object(allianceVideo(video));
         }
@@ -94,7 +94,7 @@ function serializeAllianceRanking(
     ),
   };
 
-  if (ranking.selfRanking !== 0) fields.selfRanking = int(ranking.selfRanking);
+  if (ranking.selfRanking !== 0) {fields.selfRanking = int(ranking.selfRanking);}
 
   return fields;
 }

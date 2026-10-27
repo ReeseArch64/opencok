@@ -35,13 +35,13 @@ function json(value: unknown) {
 }
 
 function object(raw: string | undefined, maximum = 262144): Row | undefined {
-  if (raw === undefined) return;
+  if (raw === undefined) {return;}
 
-  if (Buffer.byteLength(raw) > maximum) throw new Error("Gold eggs snapshot bound exceeded");
+  if (Buffer.byteLength(raw) > maximum) {throw new Error("Gold eggs snapshot bound exceeded");}
 
   const row = JSON.parse(raw) as Row;
 
-  if (!row || row.version !== 1) throw new Error("Invalid gold eggs snapshot version");
+  if (!row || row.version !== 1) {throw new Error("Invalid gold eggs snapshot version");}
 
   return row;
 }
@@ -56,10 +56,10 @@ function period(row: Row): GoldEggsPeriod {
 function calendar(raw: string | undefined, realm: number): GoldEggsCalendar | undefined {
   const row = object(raw, 32768);
 
-  if (!row) return;
+  if (!row) {return;}
 
   const limits = (value: unknown) => {
-    if (!Array.isArray(value) || value.length > 150) throw new Error("Invalid gold eggs prizes");
+    if (!Array.isArray(value) || value.length > 150) {throw new Error("Invalid gold eggs prizes");}
 
     return goldEggsPrizes(
       value
@@ -76,7 +76,7 @@ function calendar(raw: string | undefined, realm: number): GoldEggsCalendar | un
     typeof row.admitted !== "boolean" ||
     typeof row.global !== "boolean"
   )
-    throw new Error("Foreign gold eggs calendar");
+    {throw new Error("Foreign gold eggs calendar");}
 
   return {
     ...period(row),
@@ -99,7 +99,7 @@ function board(
 ): GoldEggsBoard | undefined {
   const row = object(raw);
 
-  if (!row) return;
+  if (!row) {return;}
 
   const saved = period(row);
 
@@ -108,7 +108,7 @@ function board(
     !Array.isArray(row.rows) ||
     row.rows.length > 150
   )
-    throw new Error("Invalid gold eggs frozen board");
+    {throw new Error("Invalid gold eggs frozen board");}
 
   const rows: GoldEggsStanding[] = row.rows.map((input: Row) => {
     const uid = text(input, "uid"),
@@ -116,7 +116,7 @@ function board(
       pic = text(input, "pic");
 
     if (!uid || uid.length > 40 || name.length > 255 || pic.length > 255)
-      throw new Error("Invalid gold eggs standing identity");
+      {throw new Error("Invalid gold eggs standing identity");}
 
     const value = {
       uid,
@@ -130,7 +130,7 @@ function board(
     };
 
     if (value.createdAt < saved.start || value.createdAt > saved.end)
-      throw new Error("Foreign gold eggs standing period");
+      {throw new Error("Foreign gold eggs standing period");}
 
     return value;
   });
@@ -139,11 +139,11 @@ function board(
     (realm !== undefined && rows.some((row) => row.kingdomId !== realm)) ||
     new Set(rows.map((row) => `${row.kingdomId}:${row.uid}`)).size !== rows.length
   )
-    throw new Error("Duplicate gold eggs standing");
+    {throw new Error("Duplicate gold eggs standing");}
 
   const finalizedAt = cityAmount(row.finalizedAt);
 
-  if (finalizedAt <= saved.end) throw new Error("Premature gold eggs finalization");
+  if (finalizedAt <= saved.end) {throw new Error("Premature gold eggs finalization");}
 
   return { ...saved, finalizedAt, rows };
 }
@@ -176,7 +176,7 @@ async function save(
   now: bigint,
 ) {
   if (name.length > 200 || Buffer.byteLength(value) > 262144)
-    throw new Error("Gold eggs persistence bound exceeded");
+    {throw new Error("Gold eggs persistence bound exceeded");}
 
   await tx
     .insert(trigger_var)
@@ -243,7 +243,7 @@ async function freezeLocal(
   now: bigint,
 ) {
   if (now <= value.end || (await read(tx, 2, String(realm), key("local", value))) !== undefined)
-    return false;
+    {return false;}
 
   const rows = value.admitted
     ? await readGoldEggsRows(tx, realm, value, now, value.localLimit)
@@ -261,7 +261,7 @@ async function freezeLocal(
 }
 
 async function admit(tx: MutationTransaction, realm: number, value: GoldEggsCalendar, now: bigint) {
-  if (value.kingdomId !== realm || now < value.start) return false;
+  if (value.kingdomId !== realm || now < value.start) {return false;}
 
   const old = await header(tx, realm, value);
 
@@ -294,11 +294,11 @@ export function goldEggsReader(
       if (owned) {
         const previous = await header(tx, realm, period(owned));
 
-        if (previous) await freezeLocal(tx, realm, previous, now);
+        if (previous) {await freezeLocal(tx, realm, previous, now);}
       }
 
       if ((await read(tx, 2, String(realm), key("local", value))) !== undefined)
-        throw new Error("Gold eggs period already finalized");
+        {throw new Error("Gold eggs period already finalized");}
 
       const [record] = await tx
         .select()
@@ -321,20 +321,20 @@ export function goldEggsReader(
           )
           .limit(2);
 
-        if (matches.length > 1) throw new Error("Ambiguous imported gold eggs period");
+        if (matches.length > 1) {throw new Error("Ambiguous imported gold eggs period");}
 
-        if (matches[0]) await freezeLocal(tx, realm, calendar(matches[0].value, realm)!, now);
+        if (matches[0]) {await freezeLocal(tx, realm, calendar(matches[0].value, realm)!, now);}
       }
 
       await admit(tx, realm, value, now);
 
-      if (!record) return;
+      if (!record) {return;}
 
-      if (record.createtime > now) throw new Error("Future gold eggs actor clock");
+      if (record.createtime > now) {throw new Error("Future gold eggs actor clock");}
 
-      if (owned && goldEggsPeriodId(period(owned)) !== goldEggsPeriodId(value)) return;
+      if (owned && goldEggsPeriodId(period(owned)) !== goldEggsPeriodId(value)) {return;}
 
-      if (record.createtime < value.start || record.createtime > value.end) return;
+      if (record.createtime < value.start || record.createtime > value.end) {return;}
 
       return record;
     },
@@ -355,7 +355,7 @@ export function goldEggsReader(
         (global && !admitted.global) ||
         (await read(tx, 1, owner, key(`award.${mode}`, value), 128)) !== undefined
       )
-        return;
+        {return;}
 
       const frozen = board(
         await read(tx, 2, String(realm), key(mode, value)),
@@ -363,14 +363,14 @@ export function goldEggsReader(
         global ? undefined : realm,
       );
 
-      if (!frozen || frozen.finalizedAt > now) return;
+      if (!frozen || frozen.finalizedAt > now) {return;}
 
       const rank = frozen.rows.findIndex((row) => row.uid === owner && row.kingdomId === realm) + 1;
       const prize = (global ? admitted.globalPrizes : admitted.localPrizes).find(
         (prize) => rank >= prize.first && rank <= prize.last,
       );
 
-      if (!rank || !prize) return;
+      if (!rank || !prize) {return;}
 
       return {
         rank,
@@ -396,7 +396,7 @@ export async function writeGoldEggs(
       text(row, "statelist").length > 1024 ||
       text(row, "score_reward").length > 512
     )
-      throw new Error("Invalid owned gold eggs write");
+      {throw new Error("Invalid owned gold eggs write");}
 
     const value = {
       uid: owner,
@@ -420,7 +420,7 @@ export async function writeGoldEggs(
       value.everydaytime > now ||
       value.flushtime > now
     )
-      throw new Error("Foreign gold eggs period write");
+      {throw new Error("Foreign gold eggs period write");}
 
     await tx
       .insert(gold_eggs)
@@ -430,14 +430,14 @@ export async function writeGoldEggs(
   }
 
   if (write.award)
-    await save(
+    {await save(
       tx,
       1,
       owner,
       key(`award.${write.award.global ? "global" : "local"}`, write.award.period),
       "1",
       now,
-    );
+    );}
 }
 
 async function page(tx: MutationTransaction, realm: number, cursor?: string) {
@@ -467,7 +467,7 @@ export function createGoldEggsRuntimeStore(
     pendingCursor: string | undefined,
     periodCursor: string | undefined;
   const receipt = async (tx: MutationTransaction, changes: readonly string[], now: bigint) => {
-    if (!changes.length) return;
+    if (!changes.length) {return;}
 
     const requestId = `gold-eggs-runtime:${createHash("sha256").update(changes.join("|")).digest("hex")}`;
     await appendMutationRecords(
@@ -495,21 +495,21 @@ export function createGoldEggsRuntimeStore(
           .where(eq(trigger_timmer.timmer_name, "runtime.goldEggs"));
 
         if (timer && timer.last_exec_millis > now)
-          throw new Error("Reversed gold eggs runtime clock");
+          {throw new Error("Reversed gold eggs runtime clock");}
 
-        if (timer && now - timer.last_exec_millis < 3600000n) return;
+        if (timer && now - timer.last_exec_millis < 3600000n) {return;}
 
         const changed: string[] = [];
 
         if (value && (await admit(tx, authority.kingdomId, value, now)))
-          changed.push(`admit:${goldEggsPeriodId(value)}`);
+          {changed.push(`admit:${goldEggsPeriodId(value)}`);}
 
         const rows = await page(tx, authority.kingdomId, advanceCursor);
         advanceCursor = rows.length === 8 ? rows.at(-1)!.key : undefined;
 
         for (const row of rows)
-          if (await freezeLocal(tx, authority.kingdomId, row.value, now))
-            changed.push(`local:${goldEggsPeriodId(row.value)}`);
+          {if (await freezeLocal(tx, authority.kingdomId, row.value, now))
+            {changed.push(`local:${goldEggsPeriodId(row.value)}`);}}
 
         await tx
           .insert(trigger_timmer)
@@ -552,12 +552,12 @@ export function createGoldEggsRuntimeStore(
           now < local.finalizedAt + 3600000n ||
           (await read(tx, 2, String(authority.kingdomId), key("global", value))) !== undefined
         )
-          return;
+          {return;}
 
         const sorted = goldEggsSort(rows, saved.globalLimit);
 
         for (const row of sorted.filter((row) => row.kingdomId === authority.kingdomId))
-          if (
+          {if (
             !local.rows.some(
               (owned) =>
                 owned.uid === row.uid &&
@@ -565,7 +565,7 @@ export function createGoldEggsRuntimeStore(
                 owned.createdAt === row.createdAt,
             )
           )
-            throw new Error("Unverified owned global gold eggs score");
+            {throw new Error("Unverified owned global gold eggs score");}}
 
         board(json({ ...value, finalizedAt: now, rows: sorted }), value);
         await save(
@@ -587,8 +587,8 @@ export function createGoldEggsRuntimeStore(
         const result: { owner: string; period: GoldEggsPeriod; global: boolean }[] = [];
 
         for (const { value } of headers)
-          for (const global of [false, true]) {
-            if (!value.admitted || (global && !value.global)) continue;
+          {for (const global of [false, true]) {
+            if (!value.admitted || (global && !value.global)) {continue;}
 
             const mode = global ? "global" : "local",
               frozen = board(
@@ -597,7 +597,7 @@ export function createGoldEggsRuntimeStore(
                 global ? undefined : authority.kingdomId,
               );
 
-            if (!frozen) continue;
+            if (!frozen) {continue;}
 
             const eligible = frozen.rows.filter(
               (row, index) =>
@@ -607,7 +607,7 @@ export function createGoldEggsRuntimeStore(
                 ),
             );
 
-            if (!eligible.length) continue;
+            if (!eligible.length) {continue;}
 
             const done = await tx
               .select({ uid: trigger_var.uid })
@@ -625,15 +625,15 @@ export function createGoldEggsRuntimeStore(
             const finished = new Set(done.map((row) => row.uid));
 
             for (const row of eligible)
-              if (!finished.has(row.uid))
-                result.push({
+              {if (!finished.has(row.uid))
+                {result.push({
                   owner: row.uid,
                   period: { start: value.start, end: value.end },
                   global,
-                });
-          }
+                });}}
+          }}
 
-        if (!result.length) return [];
+        if (!result.length) {return [];}
 
         const selected = [...result.slice(awardOffset), ...result.slice(0, awardOffset)].slice(
           0,
@@ -656,7 +656,7 @@ export function createGoldEggsRanks(
     realms.length > 2 ||
     new Set(realms.map((row) => row.kingdomId)).size !== realms.length
   )
-    throw new Error("Invalid gold eggs ranking realms");
+    {throw new Error("Invalid gold eggs ranking realms");}
 
   const collect = async (value: GoldEggsPeriod, final: boolean) => {
     const rows: GoldEggsStanding[] = [];
@@ -667,9 +667,9 @@ export function createGoldEggsRanks(
         async (tx) => {
           const meta = await header(tx, realm.kingdomId, value);
 
-          if (!meta) return final && eligible ? undefined : [];
+          if (!meta) {return final && eligible ? undefined : [];}
 
-          if (!meta.global) return [];
+          if (!meta.global) {return [];}
 
           const frozen = board(
             await read(tx, 2, String(realm.kingdomId), key("local", value)),
@@ -678,9 +678,9 @@ export function createGoldEggsRanks(
           );
 
           if (final)
-            return frozen && frozen.finalizedAt + 3600000n <= BigInt(now())
+            {return frozen && frozen.finalizedAt + 3600000n <= BigInt(now())
               ? frozen.rows
-              : undefined;
+              : undefined;}
 
           return (
             frozen?.rows ??
@@ -692,7 +692,7 @@ export function createGoldEggsRanks(
         { isolationLevel: "repeatable read", accessMode: "read only" },
       );
 
-      if (selected === undefined) return;
+      if (selected === undefined) {return;}
 
       rows.push(...selected);
     }

@@ -65,21 +65,21 @@ test("conversation saving preserves every client type mapping and raw flag extre
     [-1, -1],
     [2147483647, 2147483647],
   ] as const)
-    expect(mailConversationSaveQuery({ mod: 0, type: input, flag: -2147483648 }, now)).toEqual({
+    {expect(mailConversationSaveQuery({ mod: 0, type: input, flag: -2147483648 }, now)).toEqual({
       scope: "type",
       type,
       flag: -2147483648,
       now,
-    });
+    });}
   for (const flag of [-2147483648, -1, 0, 1, 2, 2147483647])
-    for (const mod of [-1, 0, 1, 2])
-      expect(mailConversationSaveQuery({ fromUser: "sender", mod, flag, type: NaN }, now)).toEqual({
+    {for (const mod of [-1, 0, 1, 2])
+      {expect(mailConversationSaveQuery({ fromUser: "sender", mod, flag, type: NaN }, now)).toEqual({
         scope: "sender",
         fromUser: "sender",
         moderation: mod === 1,
         flag,
         now,
-      });
+      });}}
   expect(mailConversationSaveQuery({ mod: 0, flag: NaN }, now)).toEqual({ scope: "none", now });
   for (const input of [
     { mod: NaN },
@@ -90,9 +90,9 @@ test("conversation saving preserves every client type mapping and raw flag extre
     { mod: 0, fromUser: "\ud800", flag: 1 },
     { mod: 0, fromUser: "x".repeat(41), flag: 1 },
   ])
-    expect(() => mailConversationSaveQuery(input, now)).toThrow();
+    {expect(() => mailConversationSaveQuery(input, now)).toThrow();}
   for (const time of [-1, NaN, 1.5, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => mailConversationSaveQuery({ mod: 0 }, time)).toThrow();
+    {expect(() => mailConversationSaveQuery({ mod: 0 }, time)).toThrow();}
 });
 
 test("chatMail.save honors selector precedence, consumed wire fields and correlated empty-result acknowledgment", async () => {

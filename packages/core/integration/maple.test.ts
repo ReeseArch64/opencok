@@ -20,7 +20,7 @@ test("the pinned Maple container stores application signals and gateway access l
       new Response(child.stderr).text(),
       child.exited,
     ]);
-    if (code) throw new Error("Disposable Maple command failed");
+    if (code) {throw new Error("Disposable Maple command failed");}
     return output;
   }
   const compose = (args: string[]) =>
@@ -66,7 +66,7 @@ test("the pinned Maple container stores application signals and gateway access l
       ready = await fetch(`${endpoint}/health`, { signal: AbortSignal.timeout(2000) })
         .then((response) => response.ok)
         .catch(() => false);
-      if (ready) break;
+      if (ready) {break;}
       await Bun.sleep(100);
     }
     expect(ready).toBe(true);
@@ -141,7 +141,7 @@ test("the pinned Maple container stores application signals and gateway access l
         "SELECT count() AS count FROM metrics_histogram WHERE ServiceName = 'gateway'",
       );
       gatewayReady = Number(logs[0].count) > 0 && Number(metrics[0].count) > 0;
-      if (gatewayReady) break;
+      if (gatewayReady) {break;}
       await Bun.sleep(250);
     }
     expect(gatewayReady).toBe(true);
@@ -157,7 +157,7 @@ test("the pinned Maple container stores application signals and gateway access l
     while (Date.now() < deadline) {
       try {
         retained = Number((await query("SELECT count() AS count FROM traces"))[0].count) > 0;
-        if (retained) break;
+        if (retained) {break;}
       } catch {}
       await Bun.sleep(500);
     }

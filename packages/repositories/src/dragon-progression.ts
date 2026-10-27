@@ -41,7 +41,7 @@ export async function readDragonProgression(tx: MutationTransaction, owner: stri
     .limit(1);
 
   if (dragons.length > 128 || skills.length > 4096 || marches.length > 256)
-    throw new Error("Dragon aggregate exceeds bound");
+    {throw new Error("Dragon aggregate exceeds bound");}
 
   const talents = await tx
     .select()
@@ -49,7 +49,7 @@ export async function readDragonProgression(tx: MutationTransaction, owner: stri
     .where(eq(dragon_talent_skill.uid, owner))
     .limit(1025);
 
-  if (talents.length > 1024) throw new Error("Dragon talent aggregate exceeds bound");
+  if (talents.length > 1024) {throw new Error("Dragon talent aggregate exceeds bound");}
 
   return { dragons, skills, marches, talents, switchedAt: switched?.time ?? 0n };
 }
@@ -60,7 +60,7 @@ export async function writeDragonProgression(
   write: DragonProgressionWrite,
 ) {
   for (const row of write.talents ?? []) {
-    if (row.uid !== owner) throw new Error("Foreign dragon talent");
+    if (row.uid !== owner) {throw new Error("Foreign dragon talent");}
 
     const value = {
       uid: owner,
@@ -88,7 +88,7 @@ export async function writeDragonProgression(
   }
 
   for (const row of write.dragons ?? []) {
-    if (row.uid !== owner) throw new Error("Foreign dragon write");
+    if (row.uid !== owner) {throw new Error("Foreign dragon write");}
 
     const value = {
       uuid: text(row, "uuid"),
@@ -116,7 +116,7 @@ export async function writeDragonProgression(
       .from(user_pet_dragon)
       .where(eq(user_pet_dragon.uuid, value.uuid));
 
-    if (existing && existing.uid !== owner) throw new Error("Foreign dragon identity");
+    if (existing && existing.uid !== owner) {throw new Error("Foreign dragon identity");}
 
     await tx
       .insert(user_pet_dragon)
@@ -125,7 +125,7 @@ export async function writeDragonProgression(
   }
 
   for (const row of write.skills ?? []) {
-    if (row.uid !== owner) throw new Error("Foreign dragon skill write");
+    if (row.uid !== owner) {throw new Error("Foreign dragon skill write");}
 
     const value = {
       uuid: text(row, "uuid"),
@@ -143,7 +143,7 @@ export async function writeDragonProgression(
       .from(user_pet_dragon_skill)
       .where(eq(user_pet_dragon_skill.uuid, value.uuid));
 
-    if (existing && existing.uid !== owner) throw new Error("Foreign dragon skill identity");
+    if (existing && existing.uid !== owner) {throw new Error("Foreign dragon skill identity");}
 
     await tx
       .insert(user_pet_dragon_skill)
@@ -152,12 +152,12 @@ export async function writeDragonProgression(
   }
 
   if (write.deletedSkills?.length)
-    await tx
+    {await tx
       .delete(user_pet_dragon_skill)
       .where(
         and(
           eq(user_pet_dragon_skill.uid, owner),
           inArray(user_pet_dragon_skill.uuid, [...write.deletedSkills]),
         ),
-      );
+      );}
 }

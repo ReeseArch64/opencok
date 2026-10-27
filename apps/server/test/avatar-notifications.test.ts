@@ -85,7 +85,7 @@ function fixture() {
     return socket;
   };
   const drain = async () => {
-    while (state.inFlight.size) await Promise.allSettled(state.inFlight);
+    while (state.inFlight.size) {await Promise.allSettled(state.inFlight);}
   };
   const login = async (socket: MemoryConnection) => {
     socket.emit("data", frame(envelope(0, 0, { api: sfs.string("1.7.1") })));

@@ -9,7 +9,7 @@ function serializeAvatarMailPush(mail: AvatarSystemMail, fullFields: boolean): F
   const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
   let contents = javaMailTrim(text.decode(mail.extra ?? mail.contents));
 
-  if (mail.extra === null && contents.toLowerCase() === "extra") contents = "";
+  if (mail.extra === null && contents.toLowerCase() === "extra") {contents = "";}
 
   const fields: Fields = {
     title: sfs.string(mail.title),
@@ -29,7 +29,7 @@ function serializeAvatarMailPush(mail: AvatarSystemMail, fullFields: boolean): F
   }
 
   if (fullFields)
-    Object.assign(fields, {
+    {Object.assign(fields, {
       rewardStatus: sfs.int(mail.rewardStatus),
       status: sfs.int(0),
       contentsLocal: sfs.string(contents.replaceAll("\\n", "\n")),
@@ -38,7 +38,7 @@ function serializeAvatarMailPush(mail: AvatarSystemMail, fullFields: boolean): F
       reply: sfs.int(mail.reply),
       translationId: sfs.string(""),
       fromUser: sfs.string(""),
-    });
+    });}
 
   return fields;
 }

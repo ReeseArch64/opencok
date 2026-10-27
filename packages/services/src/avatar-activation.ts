@@ -33,7 +33,7 @@ export class AvatarActivationDomain extends CityCommandDomain {
         now: Number(context.now),
       })
     )
-      campaignFailure();
+      {campaignFailure();}
 
     const owned =
       target.avatars.find((row) => row.avatarId === id) ??
@@ -47,18 +47,18 @@ export class AvatarActivationDomain extends CityCommandDomain {
       !owned ||
       (long(owned, "expirationTime") !== -1n && long(owned, "expirationTime") <= context.now)
     )
-      campaignFailure();
+      {campaignFailure();}
 
     new CampaignPlanner(context).event(59, id);
     const before = context.write.states ?? context.state.effects.states,
       plan = temporaryEffect(before, context.rules, context.owner, id, context.now, 1, randomInt),
       state = plan.states[0];
 
-    if (!state) return { response: encode({}), event: null };
+    if (!state) {return { response: encode({}), event: null };}
 
     if (!["3", "4"].includes(rule.overlap ?? "") && long(owned, "expirationTime") !== -1n)
-      state.endTime = long(owned, "expirationTime");
-    else if (rule.type === "3") state.endTime = 9223372036854775807n;
+      {state.endTime = long(owned, "expirationTime");}
+    else if (rule.type === "3") {state.endTime = 9223372036854775807n;}
 
     context.write.states = [
       ...before.filter(

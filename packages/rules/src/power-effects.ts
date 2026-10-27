@@ -8,16 +8,16 @@ import { effectInteger as integer } from "./power-values.ts";
 import { civilizationResearchEffect, towerResearchEffect } from "./power-research.ts";
 
 function effectValues(source: string | undefined, requested: number): number[] {
-  if (!source?.trim()) return [];
+  if (!source?.trim()) {return [];}
 
   const out: number[] = [];
 
   for (const segment of source.split("|").filter(Boolean)) {
     const parts = segment.split(";").filter(Boolean);
 
-    if (parts.length < 2) throw new GameError(errors.unsupported, "power_effect");
+    if (parts.length < 2) {throw new GameError(errors.unsupported, "power_effect");}
 
-    if (integer(parts[0]) === requested) out.push(integer(parts[1]));
+    if (integer(parts[0]) === requested) {out.push(integer(parts[1]));}
   }
 
   return out;
@@ -32,27 +32,27 @@ export function storedPowerEffects(
   let initialAndScience = 0;
 
   for (const value of effectValues(rules.items.get("effect")?.k1, effect))
-    initialAndScience = Math.fround(initialAndScience + Math.fround(value));
+    {initialAndScience = Math.fround(initialAndScience + Math.fround(value));}
 
   for (const row of state.sciences) {
-    if (integer(row.level) <= 0) continue;
+    if (integer(row.level) <= 0) {continue;}
 
     const id = String(
       Number(BigInt.asIntN(32, BigInt(integer(row.itemId)) + BigInt(integer(row.level)))),
     );
     const rule = rules.power.sciences?.get(id);
 
-    if (!rule) throw new GameError(errors.unsupported, "power_effect");
+    if (!rule) {throw new GameError(errors.unsupported, "power_effect");}
 
     const ids = rule.para1;
 
-    if (!ids?.trim() || ids === "army" || ids === "trap" || ids === "up") continue;
+    if (!ids?.trim() || ids === "army" || ids === "trap" || ids === "up") {continue;}
 
     for (const id of ids.split("|").filter(Boolean))
-      if (integer(id) === effect)
-        initialAndScience = Math.fround(
+      {if (integer(id) === effect)
+        {initialAndScience = Math.fround(
           initialAndScience + Math.fround(integer(rule.para2 ?? "0")),
-        );
+        );}}
   }
 
   initialAndScience = towerResearchEffect(
@@ -78,23 +78,23 @@ export function storedPowerEffects(
   let status = 0n;
 
   for (const row of state.states) {
-    if (long(row, "startTime") > BigInt(now) || long(row, "endTime") <= BigInt(now)) continue;
+    if (long(row, "startTime") > BigInt(now) || long(row, "endTime") <= BigInt(now)) {continue;}
 
     const rule = rules.power.statuses?.get(text(row, "stateId"));
 
-    if (!rule) throw new GameError(errors.unsupported, "power_effect");
+    if (!rule) {throw new GameError(errors.unsupported, "power_effect");}
 
-    if (!rule.effect?.trim()) continue;
+    if (!rule.effect?.trim()) {continue;}
 
     if (rule.random?.trim() && rule.random !== "0") {
-      if (integer(row.ranEffId ?? -1) === effect) status += BigInt(integer(row.ranEffValue));
+      if (integer(row.ranEffId ?? -1) === effect) {status += BigInt(integer(row.ranEffValue));}
     } else {
       for (const value of effectValues(rule.effect, effect))
-        status += BigInt(
+        {status += BigInt(
           integer(row.stateId) === 510152 && integer(row.ranEffValue ?? 0) > 0
             ? integer(row.ranEffValue)
             : value,
-        );
+        );}
     }
   }
 

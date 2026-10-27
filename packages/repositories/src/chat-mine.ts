@@ -26,12 +26,12 @@ export function createChatMineCommands(
     params: Record<string, unknown>,
     operationId: string,
   ): Promise<Record<string, unknown>> => {
-    if (!databases.kingdoms.has(realm)) throw new ChatCommandError("invalid_realm");
+    if (!databases.kingdoms.has(realm)) {throw new ChatCommandError("invalid_realm");}
 
     const now = BigInt(clock().getTime());
 
     if (command === "mine.inbox.poll") {
-      if (owner !== `realm-${realm}`) throw new ChatCommandError("unauthorized");
+      if (owner !== `realm-${realm}`) {throw new ChatCommandError("unauthorized");}
 
       const rows = await db
         .select()
@@ -59,10 +59,10 @@ export function createChatMineCommands(
     const actor = await repository.getPlayerStateById(owner);
 
     if (!actor || actor.banned || actor.serverId !== realm || (actor.banUntil ?? 0) > Number(now))
-      throw new ChatCommandError("unauthorized");
+      {throw new ChatCommandError("unauthorized");}
 
     if (command === "mine.inbox.ack") {
-      if (typeof params.id !== "string") throw new ChatCommandError("invalid_request");
+      if (typeof params.id !== "string") {throw new ChatCommandError("invalid_request");}
 
       await db
         .update(chat_owner_command)
@@ -78,7 +78,7 @@ export function createChatMineCommands(
       return {};
     }
 
-    if (!actor.facebookId) throw new ChatCommandError("facebook_binding_required");
+    if (!actor.facebookId) {throw new ChatCommandError("facebook_binding_required");}
 
     if (command === "mine.call.publish") {
       const kingdom = databases.kingdoms.get(realm)!;
@@ -96,33 +96,33 @@ export function createChatMineCommands(
         )
         .limit(1);
 
-      if (!source) throw new ChatCommandError("invalid_request");
+      if (!source) {throw new ChatCommandError("invalid_request");}
 
-      if (source.createdAt + 86_400_000n <= now || !source.payload.length) return { expired: true };
+      if (source.createdAt + 86_400_000n <= now || !source.payload.length) {return { expired: true };}
 
       const data = decode(source.payload);
 
-      if (str(data, "binding") !== actor.facebookId) return { superseded: true };
+      if (str(data, "binding") !== actor.facebookId) {return { superseded: true };}
 
       const values = data.recipients?.value;
 
       if (!Array.isArray(values) || values.length > 100)
-        throw new ChatCommandError("invalid_request");
+        {throw new ChatCommandError("invalid_request");}
 
       const ids = (values as Value[]).map((value) => str({ uid: value }, "uid"));
 
       if (ids.some((uid) => !/^[a-zA-Z0-9_-]{1,40}$/.test(uid)))
-        throw new ChatCommandError("invalid_request");
+        {throw new ChatCommandError("invalid_request");}
 
       const recipients: string[] = [];
 
       for (const uid of ids)
-        if (
+        {if (
           uid !== owner &&
           (await repository.getPlayerStateById(uid)) &&
           (await repository.access?.canReceive(uid, owner))
         )
-          recipients.push(uid);
+          {recipients.push(uid);}}
 
       const rawKey = `mine-call-${operationId}`,
         key = rawKey.length <= 128 ? rawKey : createHash("sha256").update(rawKey).digest("hex"),
@@ -136,13 +136,13 @@ export function createChatMineCommands(
           .where(and(eq(chat_operation.owner, owner), eq(chat_operation.operationId, key)));
 
         if (old) {
-          if (old.hash !== hash) throw new ChatCommandError("conflicting_request");
+          if (old.hash !== hash) {throw new ChatCommandError("conflicting_request");}
 
           return { unchanged: true };
         }
 
         for (const uid of recipients)
-          await tx.insert(chat_event).values({
+          {await tx.insert(chat_event).values({
             id: randomUUID(),
             kind: "social",
             owner,
@@ -153,7 +153,7 @@ export function createChatMineCommands(
             },
             createdAt: source.createdAt,
             expiresAt: source.createdAt + 86_400_000n,
-          });
+          });}
 
         await tx.insert(chat_operation).values({
           owner,
@@ -174,9 +174,9 @@ export function createChatMineCommands(
         params.ids.length > 100 ||
         params.ids.some((id) => typeof id !== "string" || !/^[a-zA-Z0-9_-]{1,40}$/.test(id))
       )
-        throw new ChatCommandError("invalid_request");
+        {throw new ChatCommandError("invalid_request");}
 
-      if (!params.ids.length) return { friendList: [], friends: [] };
+      if (!params.ids.length) {return { friendList: [], friends: [] };}
 
       const accounts = await db
         .select({
@@ -195,11 +195,11 @@ export function createChatMineCommands(
           !account.facebook ||
           !(await repository.access?.canReceive(owner, account.uid))
         )
-          continue;
+          {continue;}
 
         const kingdom = databases.kingdoms.get(Number(account.realm));
 
-        if (!kingdom) continue;
+        if (!kingdom) {continue;}
 
         const [mine] = await kingdom.db
           .select()
@@ -220,7 +220,7 @@ export function createChatMineCommands(
                 !value || typeof value.gUid !== "string" || !Number.isSafeInteger(value.time),
             )
           )
-            throw new ChatCommandError("invalid_mine");
+            {throw new ChatCommandError("invalid_mine");}
 
           friends.push({
             helped: helpers.some(
@@ -248,7 +248,7 @@ export function createChatMineCommands(
       params.gUid === owner ||
       !/^[a-zA-Z0-9_-]{1,40}$/.test(params.gUid)
     )
-      throw new ChatCommandError("invalid_request");
+      {throw new ChatCommandError("invalid_request");}
 
     const target = await repository.getPlayerStateById(params.gUid);
 
@@ -257,7 +257,7 @@ export function createChatMineCommands(
       params.server !== target.serverId ||
       !(await repository.access?.canReceive(owner, params.gUid))
     )
-      throw new ChatCommandError("invalid_target");
+      {throw new ChatCommandError("invalid_target");}
 
     const kingdom = databases.kingdoms.get(target.serverId)!;
     const [mine] = await kingdom.db
@@ -266,7 +266,7 @@ export function createChatMineCommands(
       .where(and(eq(user_mine.uid, params.gUid), eq(user_mine.fId, target.facebookId)))
       .limit(1);
 
-    if (!mine || !mine.call || (mine.mineTime ?? 0n) > now) return { result: 0 };
+    if (!mine || !mine.call || (mine.mineTime ?? 0n) > now) {return { result: 0 };}
 
     const [inserted] = await db
       .insert(chat_owner_command)
@@ -296,7 +296,7 @@ export function createChatMineCommands(
       )[0];
 
     if (!saved || saved.owner !== params.gUid || saved.realm !== target.serverId)
-      throw new ChatCommandError("conflicting_request");
+      {throw new ChatCommandError("conflicting_request");}
 
     return { result: 1, pending: saved.processedAt === null, id: saved.id };
   };

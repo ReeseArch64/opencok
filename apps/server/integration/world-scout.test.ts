@@ -32,8 +32,8 @@ async function harness() {
       ["owner", 1202],
       ["other", 1212],
     ] as const)
-      for (const id of worldFootprint(anchor, 1200))
-        await h.db.db.insert(worldpoint).values({
+      {for (const id of worldFootprint(anchor, 1200))
+        {await h.db.db.insert(worldpoint).values({
           id,
           worldId: 0,
           x: (id - 1) % 1200,
@@ -47,7 +47,7 @@ async function harness() {
           resLevel: 99,
           resInitValue: 0,
           shieldTime: 999999999n,
-        });
+        });}}
     let effects = new Map<string, string>();
     const game = new GameService(
       {} as GameStore,

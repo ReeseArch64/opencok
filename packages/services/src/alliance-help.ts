@@ -29,7 +29,7 @@ function generation(row: Row): HelpGeneration {
     new Set(value.helpers).size !== value.helpers.length ||
     value.helpers.some((id) => typeof id !== "string" || !id || id.length > 40)
   )
-    allianceFailure();
+    {allianceFailure();}
 
   return value;
 }
@@ -48,7 +48,7 @@ export class AllianceHelpContext {
         ? help.helpers.toString("utf8").replace(/[\s\0]+$/g, "")
         : "";
 
-      if (raw.startsWith("{") || raw.length > 65535) allianceFailure();
+      if (raw.startsWith("{") || raw.length > 65535) {allianceFailure();}
 
       const previous = this.c.state.activities.find(
         (row) =>
@@ -60,7 +60,7 @@ export class AllianceHelpContext {
         long(help, "startTime") < long(previous, "startedAt") ||
         long(help, "startTime") >= long(previous, "dueAt")
       )
-        allianceFailure();
+        {allianceFailure();}
 
       const helpers = raw.split(",").filter(Boolean);
 
@@ -69,7 +69,7 @@ export class AllianceHelpContext {
         new Set(helpers).size !== helpers.length ||
         helpers.length !== num(help, "nowcount")
       )
-        allianceFailure();
+        {allianceFailure();}
 
       saved = { version: 1, activityId: text(previous, "id"), helpers };
       legacy = true;
@@ -88,7 +88,7 @@ export class AllianceHelpContext {
       num(help, "isvalid") !== 1 ||
       help.allianceId !== this.c.allianceId
     )
-      allianceFailure();
+      {allianceFailure();}
 
     this.c.member(text(help, "senderId"));
 
@@ -127,7 +127,7 @@ export class AllianceHelpContext {
   }
 
   available() {
-    if (this.c.state.helps.length > 4096) allianceFailure();
+    if (this.c.state.helps.length > 4096) {allianceFailure();}
 
     return this.c.state.helps.filter((row) => {
       try {
@@ -151,7 +151,7 @@ export class AllianceHelpContext {
       saved.helpers.includes(this.c.owner) ||
       num(row, "nowcount") >= num(row, "maxcount")
     )
-      allianceFailure();
+      {allianceFailure();}
 
     const queue = this.c.state.queues.find(
       (queue) => queue.uuid === activity.queueId && queue.ownerId === activity.ownerId,
@@ -162,7 +162,7 @@ export class AllianceHelpContext {
       long(queue, "updateTime") !==
         long(this.c.state.activities.find((row) => row.id === activity.id) ?? {}, "dueAt")
     )
-      allianceFailure();
+      {allianceFailure();}
 
     const before = long(activity, "dueAt"),
       reduction = BigInt(cityInteger(num(row, "reduceSec"), 1)),
@@ -209,24 +209,24 @@ export class AllianceHelpContext {
     this.c.right("help");
 
     if (command === "al.showhelp")
-      return { helps: sfs.array(this.available().map((row) => sfs.object(this.snapshot(row)))) };
+      {return { helps: sfs.array(this.available().map((row) => sfs.object(this.snapshot(row)))) };}
 
     if (command === "al.helpall")
-      return {
+      {return {
         helps: sfs.array(
           this.available()
             .filter((row) => row.senderId !== this.c.owner)
             .slice(0, 128)
             .map((row) => sfs.object(this.help(row))),
         ),
-      };
+      };}
 
     if (command === "al.renderhelp") {
-      if (params.uid && str(params, "uid") !== this.c.owner) allianceFailure();
+      if (params.uid && str(params, "uid") !== this.c.owner) {allianceFailure();}
 
       const help = this.c.state.helps.find((row) => row.helpId === str(params, "helpId"));
 
-      if (!help) allianceFailure();
+      if (!help) {allianceFailure();}
 
       return this.help(help);
     }
@@ -248,13 +248,13 @@ export class AllianceHelpContext {
       long(queue, "updateTime") !== long(activity, "dueAt") ||
       int(params, "qType") !== num(activity, "type")
     )
-      allianceFailure();
+      {allianceFailure();}
 
     const embassy = this.c.state.cities.find(
       (row) => row.uid === this.c.owner && num(row, "itemId") === 402000 && num(row, "level") > 0,
     );
 
-    if (!embassy) allianceFailure();
+    if (!embassy) {allianceFailure();}
 
     const building =
       num(activity, "type") === 0
@@ -264,7 +264,7 @@ export class AllianceHelpContext {
         : undefined;
     const itemId = building ? text(building, "itemId") : text(activity, "itemId");
 
-    if (params.itemId && str(params, "itemId") !== itemId) allianceFailure();
+    if (params.itemId && str(params, "itemId") !== itemId) {allianceFailure();}
 
     const count = cityInteger(
         cityBuildingParameter(embassy, this.c.rules, 0) + (await this.c.effect(161)),

@@ -20,7 +20,7 @@ function invalid(): never {
 }
 
 export function rechargeActivityOperationId(owner: string, eventId: string) {
-  if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) invalid();
+  if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) {invalid();}
 
   return `sercum:${createHash("sha256").update(`${owner}\0${eventId}`).digest("hex")}`;
 }
@@ -41,7 +41,7 @@ export class RechargeActivityDomain extends CityCommandDomain {
     this.prepare = async (context, command, params) => {
       const state = context.state.rechargeActivity;
 
-      if (!state) invalid();
+      if (!state) {invalid();}
 
       const empty = () => ({ response: encode({}), event: null });
       const ruleContext = {
@@ -54,7 +54,7 @@ export class RechargeActivityDomain extends CityCommandDomain {
       const claimed = new Set(state.claims.map((row) => text(row, "id"))),
         rules = [...(context.rules.advanced.rechargeThresholds?.values() ?? [])];
 
-      if (rules.length > 1024) invalid();
+      if (rules.length > 1024) {invalid();}
 
       if (command === "new.sercum.paid") {
         const eventId = str(params, "eventId");
@@ -63,7 +63,7 @@ export class RechargeActivityDomain extends CityCommandDomain {
           !gateway ||
           str(params, "operationId") !== rechargeActivityOperationId(context.owner, eventId)
         )
-          invalid();
+          {invalid();}
 
         const receipt = await gateway.accepted({ owner: context.owner, eventId });
 
@@ -76,14 +76,14 @@ export class RechargeActivityDomain extends CityCommandDomain {
           receipt.rechargeGold < 0n ||
           !Number.isSafeInteger(Number(receipt.occurredAt))
         )
-          invalid();
+          {invalid();}
 
         const eventWindow = rechargeActivityWindow(context.rules, state.openedAt, {
           ...ruleContext,
           now: Number(receipt.occurredAt),
         });
 
-        if (!eventWindow?.active || receipt.rechargeGold === 0n) return empty();
+        if (!eventWindow?.active || receipt.rechargeGold === 0n) {return empty();}
 
         context.write.rechargeActivity = { total: cityAmount(total + receipt.rechargeGold) };
 
@@ -91,7 +91,7 @@ export class RechargeActivityDomain extends CityCommandDomain {
       }
 
       if (command === "new.sercum.ui") {
-        if (!window?.active) return empty();
+        if (!window?.active) {return empty();}
 
         return {
           response: encode({
@@ -118,10 +118,10 @@ export class RechargeActivityDomain extends CityCommandDomain {
       }
 
       if (command === "new.sercum.init") {
-        if (!window) return empty();
+        if (!window) {return empty();}
 
         if (window.active)
-          return {
+          {return {
             response: encode(
               rechargeActivityLogin({
                 ...(window.end > context.now
@@ -133,7 +133,7 @@ export class RechargeActivityDomain extends CityCommandDomain {
               }),
             ),
             event: null,
-          };
+          };}
 
         const pending = rules.filter(
           (rule) => !claimed.has(rule.id!) && total >= cityAmount(rule.pay_node),
@@ -143,7 +143,7 @@ export class RechargeActivityDomain extends CityCommandDomain {
           const template = context.rules.mail.get("11790"),
             contents = javaMailBytes(template?.message);
 
-          if (!template || !contents) invalid();
+          if (!template || !contents) {invalid();}
 
           const quests = (context.write.quests ??= {});
           quests.mail = [
@@ -165,7 +165,7 @@ export class RechargeActivityDomain extends CityCommandDomain {
         }
 
         if (pending.length)
-          context.write.rechargeActivity = { claims: pending.map((rule) => rule.id!) };
+          {context.write.rechargeActivity = { claims: pending.map((rule) => rule.id!) };}
 
         return empty();
       }
@@ -173,7 +173,7 @@ export class RechargeActivityDomain extends CityCommandDomain {
       const id = str(params, "id"),
         rule = context.rules.advanced.rechargeThresholds?.get(id);
 
-      if (!rule || claimed.has(id) || total < cityAmount(rule.pay_node)) invalid();
+      if (!rule || claimed.has(id) || total < cityAmount(rule.pay_node)) {invalid();}
 
       const reward = grantNativeProgressionReward(
         context,

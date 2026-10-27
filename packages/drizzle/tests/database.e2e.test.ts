@@ -67,7 +67,7 @@ afterAll(async () => {
 
 for (const { id, namespace, table, config, spec } of catalog) {
   for (const kingdomId of scopes(spec.role))
-    test(`${caseId(id, kingdomId)}: catalog, CRUD, defaults, constraints and rollback`, async () => {
+    {test(`${caseId(id, kingdomId)}: catalog, CRUD, defaults, constraints and rollback`, async () => {
       const { db, pool } = client(kingdomId);
       const columns = (
         await pool.query(
@@ -101,8 +101,8 @@ for (const { id, namespace, table, config, spec } of catalog) {
       expect(await read()).toEqual([]);
       const required: Row = {};
       for (const column of spec.columns)
-        if (column.notNull && !column.identity && column.default === null)
-          required[property(column.name)] = original[property(column.name)];
+        {if (column.notNull && !column.identity && column.default === null)
+          {required[property(column.name)] = original[property(column.name)];}}
       const before = await now(pool);
       await db.insert(table).values(required);
       const defaults = await read();
@@ -111,49 +111,49 @@ for (const { id, namespace, table, config, spec } of catalog) {
         after = await now(pool);
       for (const column of spec.columns) {
         if (property(column.name) in required)
-          expect(actual[property(column.name)]).toEqual(required[property(column.name)]);
+          {expect(actual[property(column.name)]).toEqual(required[property(column.name)]);}
         else if (column.identity || column.default?.includes("nextval("))
-          expect(BigInt(actual[property(column.name)] as bigint | string | number)).toBeGreaterThan(
+          {expect(BigInt(actual[property(column.name)] as bigint | string | number)).toBeGreaterThan(
             0n,
-          );
+          );}
         else if (column.default?.startsWith("to_char("))
-          assert.ok(
+          {assert.ok(
             String(actual[property(column.name)]) >= before &&
               String(actual[property(column.name)]) <= after,
-          );
-        else expect(actual[property(column.name)]).toEqual(literalDefault(column));
+          );}
+        else {expect(actual[property(column.name)]).toEqual(literalDefault(column));}
       }
       await db.delete(table);
       await db.insert(table).values(original);
       const nullable = { ...original };
       for (const column of spec.columns)
-        if (!column.notNull) nullable[property(column.name)] = null;
+        {if (!column.notNull) {nullable[property(column.name)] = null;}}
       await db.update(table).set(nullable);
       expect(await read()).toEqual([nullable]);
       await db.update(table).set(original);
       for (const column of spec.columns) {
         if (column.notNull)
-          await rejectsCode(db.update(table).set({ [property(column.name)]: null }), "23502");
+          {await rejectsCode(db.update(table).set({ [property(column.name)]: null }), "23502");}
         if (column.calendar)
-          await rejectsCode(
+          {await rejectsCode(
             db.update(table).set({ [property(column.name)]: "invalid-date" }),
             "23514",
-          );
+          );}
       }
       for (const index of spec.indexes.filter((index) => index.kind !== "index")) {
         const duplicate = { ...changed };
         for (const column of index.columns)
-          duplicate[property(column.name)] = original[property(column.name)];
-        if (id === "opencok_kingdom.avatar_completion") duplicate.picVer = original.picVer;
+          {duplicate[property(column.name)] = original[property(column.name)];}
+        if (id === "opencok_kingdom.avatar_completion") {duplicate.picVer = original.picVer;}
         await rejectsCode(db.insert(table).values(duplicate), "23505");
       }
       for (const key of spec.foreignKeys)
-        await rejectsCode(
+        {await rejectsCode(
           db
             .update(table)
             .set(Object.fromEntries(key.columns.map((column) => [property(column), 999n]))),
           "23503",
-        );
+        );}
       const abort = new Error("synthetic rollback");
       await expect(
         db.transaction(async (tx) => {
@@ -175,7 +175,7 @@ for (const { id, namespace, table, config, spec } of catalog) {
       }
       expect(await read()).toEqual([original]);
       completed.add(caseId(id, kingdomId));
-    }, 15_000);
+    }, 15_000);}
 }
 
 test("default setup is repeatable, preserves records and keeps both kingdom databases isolated", async () => {
@@ -320,11 +320,11 @@ test("the global database and both kingdoms preserve every field across restart"
   await server.restart();
   databases = createDatabases(server.options);
   for (const { id, table, spec } of catalog)
-    for (const kingdomId of scopes(spec.role)) {
+    {for (const kingdomId of scopes(spec.role)) {
       assert.deepEqual(
         await client(kingdomId).db.select().from(table),
         [sampleRow(spec)],
         `${caseId(id, kingdomId)} persistence`,
       );
-    }
+    }}
 }, 120_000);

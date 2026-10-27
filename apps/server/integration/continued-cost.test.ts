@@ -26,10 +26,10 @@ const spender: CityDomain = {
   commands: ["synthetic.spend"],
   types: [],
   async prepare(context, _command, params) {
-    if (params.gold) context.economy.gold(-BigInt(params.gold.value as bigint));
-    if (params.wood) context.economy.resource("wood", -BigInt(params.wood.value as bigint));
+    if (params.gold) {context.economy.gold(-BigInt(params.gold.value as bigint));}
+    if (params.wood) {context.economy.resource("wood", -BigInt(params.wood.value as bigint));}
     if (params.item)
-      context.economy.consumeItem!(String(params.item.value), Number(params.count!.value));
+      {context.economy.consumeItem!(String(params.item.value), Number(params.count!.value));}
     return { response: new Uint8Array([0x12, 0, 0]), event: null };
   },
   async apply() {
@@ -87,7 +87,7 @@ async function fixture() {
     service = h.service,
   ) => {
     const fact = readContinuedCostSpending(event.payload);
-    if (fact.owner !== owner) throw new Error("Foreign spending fact");
+    if (fact.owner !== owner) {throw new Error("Foreign spending fact");}
     return service.domainCommand(owner, "continuedcost.apply", {
       ...decode(event.payload),
       operationId: sfs.string(continuedCostOperation(owner, event.requestId, event.id)),
@@ -104,7 +104,7 @@ async function fixture() {
         0,
         owner,
       );
-      if (!delivered) break;
+      if (!delivered) {break;}
     }
   };
   const spend = (amount: bigint, operationId = randomUUID()) =>

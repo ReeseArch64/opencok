@@ -72,7 +72,7 @@ async function fixture() {
       (await h.db.db.select().from(user_resource).where(eq(user_resource.uid, owner)))[0]!;
     const settle = async (owner = "owner") => {
       const pending = (await pendingCupSettlements(h.db.db)).find((row) => row.owner === owner);
-      if (!pending) throw new Error("Missing pending synthetic bets");
+      if (!pending) {throw new Error("Missing pending synthetic bets");}
       return h.command(
         "euro.cup.settle",
         { operationId: sfs.string(cupSettlementOperation(owner, pending.ids)) },
@@ -122,7 +122,7 @@ test("cup bets atomically consume bound resources, freeze float odds and retain 
 test("cup admission rejects invalid stakes, mixed resources, limits and late bets without modifying inventory or pools", async () => {
   const h = await fixture();
   try {
-    for (const amount of [0, -1, 201]) await expect(h.bet(amount)).rejects.toThrow();
+    for (const amount of [0, -1, 201]) {await expect(h.bet(amount)).rejects.toThrow();}
     await expect(h.bet(10, "unknown")).rejects.toThrow();
     expect(await h.db.db.select().from(user_bet)).toHaveLength(0);
     await h.bet(70);

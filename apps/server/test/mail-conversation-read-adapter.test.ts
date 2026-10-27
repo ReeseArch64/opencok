@@ -46,15 +46,15 @@ function database(
     query: async (statement: { text: string }, params: unknown[] = []) => {
       const text = statement.text;
       queries.push({ text, params });
-      if (text.startsWith("begin")) before = structuredClone({ rows, intents });
-      if (text === "rollback") ({ rows, intents } = before);
+      if (text.startsWith("begin")) {before = structuredClone({ rows, intents });}
+      if (text === "rollback") {({ rows, intents } = before);}
       if (text.includes('from "opencok_kingdom"."userprofile"')) {
         options.beforeProfile?.();
-        if (options.fail === "profile") throw new Error("Synthetic profile failure");
+        if (options.fail === "profile") {throw new Error("Synthetic profile failure");}
         return { rows: options.profile === null ? [] : [options.profile ?? ["self", 1, "0", 0]] };
       }
       if (text.includes('from "opencok_kingdom"."mail_chat_read_intent"')) {
-        if (options.fail === "count") throw new Error("Synthetic count failure");
+        if (options.fail === "count") {throw new Error("Synthetic count failure");}
         expect(text).toBe(
           'select count(*)::text from "opencok_kingdom"."mail_chat_read_intent" where "opencok_kingdom"."mail_chat_read_intent"."ownerUid" = $1',
         );
@@ -68,7 +68,7 @@ function database(
         };
       }
       if (text.startsWith('update "opencok_kingdom"."mail"')) {
-        if (options.fail === "update") throw new Error("Synthetic update failure");
+        if (options.fail === "update") {throw new Error("Synthetic update failure");}
         const parameter = (reference: string) => params[Number(reference.slice(1)) - 1];
         const owner = text.match(/"mail"\."toUser" = (\$\d+)/)![1]!;
         const alternatives = text
@@ -86,7 +86,7 @@ function database(
           });
         expect(text).not.toMatch(/coalesce|is null|returning|limit|rewardStatus|saveFlag/);
         for (const row of rows)
-          if (
+          {if (
             row.owner === parameter(owner) &&
             alternatives.some(
               (selection) =>
@@ -96,7 +96,7 @@ function database(
                 (selection.status === undefined || row.status === selection.status),
             )
           )
-            row.status = params[0] as number;
+            {row.status = params[0] as number;}}
       }
       if (text.startsWith('insert into "opencok_kingdom"."mail_chat_read_intent"')) {
         expect(text).not.toMatch(/on conflict|returning/);
@@ -123,10 +123,10 @@ function database(
             requestedAt: BigInt(requestedAt as string),
           });
         }
-        if (options.fail === "insert") throw new Error("Synthetic insert failure");
+        if (options.fail === "insert") {throw new Error("Synthetic insert failure");}
       }
       if (text === "commit" && options.fail === "commit")
-        throw new Error("Synthetic commit failure");
+        {throw new Error("Synthetic commit failure");}
       return { rows: [] };
     },
   };
@@ -410,11 +410,11 @@ test("invalid plans reject before database work even when called directly", () =
   const fixture = database();
   const query = plan({ fromUser: "sender" });
   for (const owner of ["", " ", "\0", "\ud800", "x".repeat(41)])
-    expect(() => markMailConversationRead(fixture.db, 1, owner, query)).toThrow();
+    {expect(() => markMailConversationRead(fixture.db, 1, owner, query)).toThrow();}
   for (const realm of [0, 1.5, 2147483648])
-    expect(() => markMailConversationRead(fixture.db, realm, "self", query)).toThrow();
+    {expect(() => markMailConversationRead(fixture.db, realm, "self", query)).toThrow();}
   for (const time of [-1, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => run(fixture, { ...query, now: time })).toThrow();
+    {expect(() => run(fixture, { ...query, now: time })).toThrow();}
   for (const effects of [
     null,
     [null],
@@ -433,6 +433,6 @@ test("invalid plans reject before database work even when called directly", () =
     [{ kind: "chat", types: ["2"], others: "x".repeat(41) }],
     Array.from({ length: 3 }, () => query.effects[1]),
   ])
-    expect(() => run(fixture, { now, effects } as MailConversationReadQuery)).toThrow();
+    {expect(() => run(fixture, { now, effects } as MailConversationReadQuery)).toThrow();}
   expect(fixture.queries).toEqual([]);
 });

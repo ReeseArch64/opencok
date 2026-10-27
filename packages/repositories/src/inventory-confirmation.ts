@@ -37,7 +37,7 @@ export function mergeInventoryConfirmation(
           ]);
 
       if (event.id !== "continued-cost" || signature(left) !== signature(right))
-        throw new Error("Conflicting chained consumption evidence");
+        {throw new Error("Conflicting chained consumption evidence");}
 
       events.set(event.id, {
         ...event,

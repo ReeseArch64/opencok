@@ -26,7 +26,7 @@ export async function readResourceNewGenerals(
   uid: string,
   moved: boolean,
 ): Promise<WorldResourceOwnerSnapshot["newGenerals"]> {
-  if (!text(uid, 255) || !uid) throw new Error("Invalid general owner");
+  if (!text(uid, 255) || !uid) {throw new Error("Invalid general owner");}
 
   const generals = await db
     .select(generalColumns)

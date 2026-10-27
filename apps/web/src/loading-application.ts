@@ -14,18 +14,18 @@ export class LoadingApplication {
     view.onVisibilityChange(() => {
       clearTimeout(this.timer);
 
-      if (!view.isHidden()) void this.ping();
+      if (!view.isHidden()) {void this.ping();}
     });
   }
 
   public async start(): Promise<void> {
-    if (!(await this.view.loadAssets(this.assets))) return;
+    if (!(await this.view.loadAssets(this.assets))) {return;}
 
     await this.ping();
   }
 
   private async ping(): Promise<void> {
-    if (this.busy) return;
+    if (this.busy) {return;}
 
     this.busy = true;
     clearTimeout(this.timer);
@@ -39,7 +39,7 @@ export class LoadingApplication {
       this.busy = false;
       this.view.completeCheck();
 
-      if (!this.view.isHidden()) this.timer = setTimeout(() => void this.ping(), 5_000);
+      if (!this.view.isHidden()) {this.timer = setTimeout(() => void this.ping(), 5_000);}
     }
   }
 }

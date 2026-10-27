@@ -35,7 +35,7 @@ export function createChatAvatarProfilePublisher(options: {
     options.timeoutMs < 100 ||
     options.timeoutMs > 30000
   )
-    throw new Error("Invalid chat avatar profile configuration");
+    {throw new Error("Invalid chat avatar profile configuration");}
 
   const endpoint = url.toString();
   const { signingSecret, timeoutMs, now = Date.now, fetch: request = fetch } = options;
@@ -49,7 +49,7 @@ export function createChatAvatarProfilePublisher(options: {
       const time = now();
 
       if (!Number.isSafeInteger(time) || time < 0 || Buffer.byteLength(body) > 4096)
-        throw new Error();
+        {throw new Error();}
 
       const timestamp = String(time);
       const value = await fetchChatJson(
@@ -78,7 +78,7 @@ export function createChatAvatarProfilePublisher(options: {
         value.data.sequence !== update.sequence ||
         !["applied", "unchanged", "superseded"].includes(String(value.data.result))
       )
-        throw new Error();
+        {throw new Error();}
     } catch {
       throw new Error("Chat avatar profile unavailable");
     }

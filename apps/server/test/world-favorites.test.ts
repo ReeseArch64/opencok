@@ -67,16 +67,16 @@ function fixture() {
       }
       if (text === "commit") {
         active = false;
-        if (failure === "commit") throw new Error("Synthetic commit failure");
+        if (failure === "commit") {throw new Error("Synthetic commit failure");}
         state = working;
-        if (failure === "lost") throw new Error("Synthetic lost commit reply");
+        if (failure === "lost") {throw new Error("Synthetic lost commit reply");}
         return { rows: [] };
       }
       if (text.startsWith("select")) {
-        if (params[0] === 0) return { rows: [] };
+        if (params[0] === 0) {return { rows: [] };}
         if (text.includes('"userprofile"')) {
           expect(params).toEqual(["self", 1]);
-          if (failure === "profile") throw new Error("Synthetic profile failure");
+          if (failure === "profile") {throw new Error("Synthetic profile failure");}
           return { rows: working.profile ? [working.profile] : [] };
         }
         expect(text).toContain('"createTime" desc nulls last');
@@ -105,13 +105,13 @@ function fixture() {
         expect(text).toContain('on conflict ("uid","point","server") do update set');
         const row = params.slice(0, 8);
         expect(params.slice(8)).toEqual(row);
-        if (failure === "insert") throw new Error("Synthetic insert failure");
-        if (failure === "empty") return { rows: [] };
+        if (failure === "insert") {throw new Error("Synthetic insert failure");}
+        if (failure === "empty") {return { rows: [] };}
         const index = working.rows.findIndex(
           (existing) => existing[0] === row[0] && existing[1] === row[1] && existing[6] === row[6],
         );
-        if (index < 0) working.rows.push(row);
-        else working.rows[index] = row;
+        if (index < 0) {working.rows.push(row);}
+        else {working.rows[index] = row;}
         return { rows: [["self"]] };
       }
       expect(text).toStartWith('delete from "opencok_kingdom"."world_favorite"');
@@ -121,7 +121,7 @@ function fixture() {
         (failure === "second-delete" &&
           queries.filter((q) => q.text.startsWith("delete")).length === 2)
       )
-        throw new Error("Synthetic delete failure");
+        {throw new Error("Synthetic delete failure");}
       const pairs = new Set(
         Array.from(
           { length: (params.length - 1) / 2 },
@@ -137,8 +137,8 @@ function fixture() {
   const globalClient = {
     query: async (query: { text: string }, params: unknown[] = []) => {
       globalQueries.push({ text: query.text, params });
-      if (params[0] === 0) return { rows: [] };
-      if (failure === "global") throw new Error("Synthetic global failure");
+      if (params[0] === 0) {return { rows: [] };}
+      if (failure === "global") {throw new Error("Synthetic global failure");}
       return { rows: types.filter((row) => params.includes(row[0])) };
     },
   };
@@ -191,16 +191,16 @@ test("favorite name validation matches all BMP primitive Java cases and document
     expect(favoriteName("X" + String.fromCharCode(code) + "Y"), code.toString(16)).toBe(expected);
   }
   for (const row of oracle.cases)
-    expect(favoriteName(row.name)).toBe(
+    {expect(favoriteName(row.name)).toBe(
       row.legacy && row.name.length <= 255 && row.name.isWellFormed() && !row.name.includes("\0"),
-    );
-  for (const value of [null, undefined, 1, {}]) expect(favoriteName(value)).toBe(false);
+    );}
+  for (const value of [null, undefined, 1, {}]) {expect(favoriteName(value)).toBe(false);}
 });
 
 test("server catalog upper bounds and every legacy type branch preserve signed boundary behavior", () => {
   const rules = ruleSet();
   expect(favoriteServer(undefined, 4, rules)).toBe(4);
-  for (const id of [-2147483648, -1, 0, 1, 2, 3]) expect(favoriteServer(id, 1, rules)).toBe(id);
+  for (const id of [-2147483648, -1, 0, 1, 2, 3]) {expect(favoriteServer(id, 1, rules)).toBe(id);}
   expect(() => favoriteServer(4, 1, rules)).toThrow();
   rules.profile.servers!.set("unicode", { id: "+１２", test: "TRUE" });
   expect(favoriteServer(12, 1, rules)).toBe(12);
@@ -214,12 +214,12 @@ test("server catalog upper bounds and every legacy type branch preserve signed b
     0, 1, 2, 3, 2, 3, 1, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15, 0, 1, 0, 0, 21, 21, 0, 0, 0,
   ];
   for (const server of [-1, 1, 999999])
-    for (let type = 0; type < expected.length; type++)
-      expect(favoriteServerType(server, type)).toBe(expected[type]!);
+    {for (let type = 0; type < expected.length; type++)
+      {expect(favoriteServerType(server, type)).toBe(expected[type]!);}}
   for (let type = 0; type < expected.length; type++)
-    expect(favoriteServerType(1000000, type)).toBe(
+    {expect(favoriteServerType(1000000, type)).toBe(
       [1, 4, 5, 6, 8, 10, 12, 14, 16, 18].includes(type) ? 1 : 0,
-    );
+    );}
   expect(favoriteServerType(1, undefined)).toBe(0);
   expect(favoriteServerType(1, 999)).toBe(0);
 });
@@ -296,8 +296,8 @@ test("listing preserves server/time ordering, null omission, exact longs and glo
 test("paired deletion preserves cross-pairs and owners, echoes duplicates, and succeeds for empty/repeated selections", async () => {
   const f = fixture();
   for (const owner of ["self", "other"])
-    for (const point of [1, 2])
-      for (const server of [1, 2]) f.state.rows.push([owner, point, 0, -1, -1, "", server, 0n]);
+    {for (const point of [1, 2])
+      {for (const server of [1, 2]) {f.state.rows.push([owner, point, 0, -1, -1, "", server, 0n]);}}}
   const result = await f.remove([1, 2, 1], [1, 2, 1]);
   expect(result.body).toEqual({
     state: sfs.int(1),
@@ -321,8 +321,8 @@ test("replacement and deletion failures roll back atomically and uncertain commi
     const before = structuredClone(f.state.rows);
     f.fail(failure);
     await expect(f.add({ name: sfs.string("Changed") })).rejects.toThrow();
-    if (failure !== "lost") expect(f.state.rows).toEqual(before);
-    else expect(f.state.rows[0]![5]).toBe("Changed");
+    if (failure !== "lost") {expect(f.state.rows).toEqual(before);}
+    else {expect(f.state.rows[0]![5]).toBe("Changed");}
     f.fail("");
     await f.add({ name: sfs.string("Changed") });
     expect(f.state.rows).toHaveLength(1);
@@ -339,7 +339,7 @@ test("replacement and deletion failures roll back atomically and uncertain commi
   }
   const bulk = fixture();
   for (let point = 0; point < 501; point++)
-    bulk.state.rows.push(["self", point, 0, -1, -1, "", 1, 0n]);
+    {bulk.state.rows.push(["self", point, 0, -1, -1, "", 1, 0n]);}
   bulk.fail("second-delete");
   expect(
     (
@@ -396,7 +396,7 @@ test("malformed requests and unauthorized profiles cannot access or mutate favor
 
 test("listing rejects unrepresentable output instead of truncating and validates projection ownership", async () => {
   const f = fixture();
-  for (let i = 0; i < 4000; i++) f.state.rows.push(["self", i, 0, -1, -1, "x".repeat(255), 1, 0n]);
+  for (let i = 0; i < 4000; i++) {f.state.rows.push(["self", i, 0, -1, -1, "x".repeat(255), 1, 0n]);}
   await expect(f.list()).rejects.toThrow();
   expect(f.state.rows).toHaveLength(4000);
   const oversized = fixture();
@@ -423,12 +423,12 @@ test("listing rejects unrepresentable output instead of truncating and validates
     { point: 1.5 },
     { name: "\ud800" },
   ] as Row[])
-    expect(() =>
+    {expect(() =>
       worldFavorites(
         { profile: undefined, rows: [{ uid: "self", ...patch }], serverTypes: new Map() },
         "self",
       ),
-    ).toThrow();
+    ).toThrow();}
 });
 
 test("readiness and repository validation use existing tables without connecting or changing schema", async () => {
@@ -437,7 +437,7 @@ test("readiness and repository validation use existing tables without connecting
   expect(f.queries[0]!.params).toEqual([0]);
   expect(f.globalQueries[0]!.params).toEqual([0]);
   for (const owner of ["", "x\0", "\ud800", "x".repeat(256)])
-    await expect(f.store.list(owner, now)).rejects.toThrow();
+    {await expect(f.store.list(owner, now)).rejects.toThrow();}
   await expect(f.store.remove("self", [{ point: 1, server: Infinity }], now)).rejects.toThrow();
   await expect(
     f.store.add("self", {
@@ -459,16 +459,16 @@ test("global metadata failure or invalid duplicate rows cannot produce a fabrica
     const f = fixture();
     await f.add();
     const before = structuredClone(f.state.rows);
-    if (failure === "global") f.fail("global");
+    if (failure === "global") {f.fail("global");}
     else
-      f.setTypes(
+      {f.setTypes(
         failure === "duplicate"
           ? [
               [1, 0],
               [1, 2],
             ]
           : [[1, NaN]],
-      );
+      );}
     await expect(f.list()).rejects.toThrow();
     expect(f.state.rows).toEqual(before);
   }

@@ -18,13 +18,13 @@ function integer(value: unknown): number {
     value < -2147483648 ||
     value > 2147483647
   )
-    return invalid();
+    {return invalid();}
 
   return value;
 }
 
 function long(value: unknown): bigint {
-  if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) return invalid();
+  if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) {return invalid();}
 
   return value;
 }
@@ -33,7 +33,7 @@ function strings(row: Row, result: Fields, keys: readonly string[]) {
   for (const key of keys) {
     const value = row[key];
 
-    if (value == null) continue;
+    if (value == null) {continue;}
 
     if (
       typeof value !== "string" ||
@@ -41,7 +41,7 @@ function strings(row: Row, result: Fields, keys: readonly string[]) {
       value.includes("\0") ||
       new TextEncoder().encode(value).length > 32767
     )
-      return invalid();
+      {return invalid();}
 
     result[key] = sfs.string(value);
   }
@@ -52,7 +52,7 @@ function serializePlayerSearchEntry(entry: PlayerSearchEntry): Fields {
   const kingdomId = integer(entry.kingdomId);
 
   if (kingdomId < 1 || typeof remote !== "boolean" || typeof data.uid !== "string" || !data.uid)
-    return invalid();
+    {return invalid();}
 
   const result: Fields = { serverId: sfs.int(kingdomId) };
   strings(data, result, ["uid", "name", "lang", "pic", "abbr"]);
@@ -61,9 +61,9 @@ function serializePlayerSearchEntry(entry: PlayerSearchEntry): Fields {
     strings(data, result, ["alliancename"]);
 
     for (const key of ["picVer", "level"])
-      if (data[key] != null) result[key] = sfs.int(integer(data[key]));
+      {if (data[key] != null) {result[key] = sfs.int(integer(data[key]));}}
 
-    if (data.power != null) result.power = sfs.long(long(data.power));
+    if (data.power != null) {result.power = sfs.long(long(data.power));}
 
     return result;
   }
@@ -71,14 +71,14 @@ function serializePlayerSearchEntry(entry: PlayerSearchEntry): Fields {
   strings(data, result, ["allianceId"]);
 
   for (const key of ["picVer", "picfraId", "gmFlag", "vipLevel", "svipLevel", "rank"])
-    result[key] = sfs.int(integer(data[key] ?? 0));
+    {result[key] = sfs.int(integer(data[key] ?? 0));}
 
   result.crossFightSrcServerId = sfs.int(integer(data.crossFightSrcServerId ?? -1));
 
   for (const key of ["power", "vipEndTime", "offLineTime"]) {
     const value = long(data[key] ?? 0n);
 
-    if (value > 0n) result[key] = sfs.long(value);
+    if (value > 0n) {result[key] = sfs.long(value);}
   }
 
   const level = integer(data.mainBuildingLevel ?? 0);
@@ -97,7 +97,7 @@ function serializePlayerSearch(result: PlayerSearchResult): Fields {
     long(result.total) < BigInt(result.entries.length) ||
     long(result.maximum) < 0n
   )
-    return invalid();
+    {return invalid();}
 
   const body: Fields = {
     list: sfs.array(result.entries.map((entry) => sfs.object(playerSearchEntry(entry)))),
@@ -107,7 +107,7 @@ function serializePlayerSearch(result: PlayerSearchResult): Fields {
   };
   strings({ key: result.key }, body, ["key"]);
 
-  if (!body.key) return invalid();
+  if (!body.key) {return invalid();}
 
   return body;
 }

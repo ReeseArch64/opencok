@@ -35,7 +35,7 @@ export function pinProgressionReward(
   id: string,
   catalog = context.rules.reconnect.rewards,
 ) {
-  if (!catalog?.has(id)) throw new GameError(errors.unsupported, "city_progression");
+  if (!catalog?.has(id)) {throw new GameError(errors.unsupported, "city_progression");}
 
   return previewRewards(
     id,
@@ -46,9 +46,9 @@ export function pinProgressionReward(
   )
     .map((row) => {
       if (row.kind === "item")
-        return `${row.type === 7 ? "goods" : "equip"},${row.id},${row.count}`;
+        {return `${row.type === 7 ? "goods" : "equip"},${row.id},${row.count}`;}
 
-      if (row.kind === "count" && assets[row.type]) return `${assets[row.type]},0,${row.value}`;
+      if (row.kind === "count" && assets[row.type]) {return `${assets[row.type]},0,${row.value}`;}
 
       throw new GameError(errors.unsupported, "city_progression");
     })
@@ -58,16 +58,16 @@ export function pinProgressionReward(
 export function progressionRewardPreview(raw: string): RewardPreview[] {
   return mailRewardEntries(raw).map((row) => {
     if (row.category === "goods" || row.category === "equip")
-      return {
+      {return {
         kind: "item",
         type: row.category === "goods" ? 7 : 14,
         id: row.itemId,
         count: row.count,
-      };
+      };}
 
     const type = assets.indexOf(row.category as (typeof assets)[number]);
 
-    if (type < 0) throw new GameError(errors.unsupported, "city_progression");
+    if (type < 0) {throw new GameError(errors.unsupported, "city_progression");}
 
     return { kind: "count", type, value: row.count };
   });
@@ -78,7 +78,7 @@ export function grantPinnedProgressionReward(context: CityProgressionContext, ra
 
   for (const row of rows) {
     if (row.kind === "item") {
-      if (row.type === 7) context.economy.item(row.id, row.count);
+      if (row.type === 7) {context.economy.item(row.id, row.count);}
       else {
         const equipment = [...(context.write.equipment ?? [])];
 
@@ -90,10 +90,10 @@ export function grantPinnedProgressionReward(context: CityProgressionContext, ra
         context.write.equipment = equipment;
       }
     } else if (row.kind === "count") {
-      if (row.type === 5) context.economy.gold(BigInt(row.value));
-      else if (row.type === 6) context.experience(row.value);
+      if (row.type === 5) {context.economy.gold(BigInt(row.value));}
+      else if (row.type === 6) {context.experience(row.value);}
       else
-        context.economy.resource(
+        {context.economy.resource(
           assets[row.type] as
             | "wood"
             | "stone"
@@ -105,7 +105,7 @@ export function grantPinnedProgressionReward(context: CityProgressionContext, ra
             | "dragon_food"
             | "dragon_gold",
           BigInt(row.value),
-        );
+        );}
     }
   }
 
@@ -130,7 +130,7 @@ export function grantNativeProgressionReward(
     grantPinnedProgressionReward(context, encoded);
 
     if (reward.kind === "item")
-      return sfs.object({
+      {return sfs.object({
         type: sfs.int(reward.type),
         value:
           reward.type === 7
@@ -148,9 +148,9 @@ export function grantNativeProgressionReward(
                   .slice(before)
                   .map((row) => sfs.object(equipmentView(row))),
               ),
-      });
+      });}
 
-    if (reward.kind !== "count") throw new GameError(errors.unsupported, "city_progression");
+    if (reward.kind !== "count") {throw new GameError(errors.unsupported, "city_progression");}
 
     const asset = assets[reward.type];
     const total =

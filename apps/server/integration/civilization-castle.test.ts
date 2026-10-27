@@ -35,8 +35,8 @@ test("civilization castles fence placement, recover elapsed production and settl
       .insert(user_building)
       .values({ uid: "owner", uuid: "civilization-building", itemId: 443000, level: 1, pos: 22 });
     for (const base of [10, 20])
-      for (const id of [base, base + 1, base + 1200, base + 1201])
-        await h.db.db.insert(worldpoint).values({
+      {for (const id of [base, base + 1, base + 1200, base + 1201])
+        {await h.db.db.insert(worldpoint).values({
           id,
           worldId: 0,
           x: (id - 1) % 1200,
@@ -47,7 +47,7 @@ test("civilization castles fence placement, recover elapsed production and settl
           pointType: 0,
           resLevel: 0,
           resInitValue: 0,
-        });
+        });}}
     const command = (action: string, params: Fields = {}) =>
       h.command("civilizationCastle", {
         M__REQUEST_ID__H: sfs.string(action),
@@ -123,8 +123,8 @@ test("castle speed and move costs roll back on invalid or occupied map tiles", a
       .insert(user_building)
       .values({ uid: "owner", uuid: "civilization-building", itemId: 443000, level: 1, pos: 22 });
     for (const base of [10, 20])
-      for (const id of [base, base + 1, base + 1200, base + 1201])
-        await h.db.db.insert(worldpoint).values({
+      {for (const id of [base, base + 1, base + 1200, base + 1201])
+        {await h.db.db.insert(worldpoint).values({
           id,
           worldId: 0,
           x: (id - 1) % 1200,
@@ -135,7 +135,7 @@ test("castle speed and move costs roll back on invalid or occupied map tiles", a
           pointType: 0,
           resLevel: 0,
           resInitValue: 0,
-        });
+        });}}
     const command = (action: string, params: Fields = {}) =>
       h.command("civilizationCastle", {
         M__REQUEST_ID__H: sfs.string(action),

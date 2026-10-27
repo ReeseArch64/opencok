@@ -78,9 +78,9 @@ test("native expedition query and claim requests retain correlation without expo
     "distribution.record.show",
     "tax.record.show",
   ])
-    expect((await game.execute("owner", command, { _cok_: sfs.long(7n) })).body._cok_).toEqual(
+    {expect((await game.execute("owner", command, { _cok_: sfs.long(7n) })).body._cok_).toEqual(
       sfs.long(7n),
-    );
+    );}
   await expect(
     game.execute("owner", "expedition.score", { score: sfs.int(1000000) }),
   ).rejects.toThrow();

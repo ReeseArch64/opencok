@@ -90,7 +90,7 @@ test("resource props debit the selected owned stack once and publish the native 
     for (const event of (await h.db.db.select().from(mutation_outbox)).filter(
       (row) => row.eventType === "world.use",
     ))
-      await publishWorldMutation(
+      {await publishWorldMutation(
         event.payload,
         event.eventType,
         1,
@@ -103,7 +103,7 @@ test("resource props debit the selected owned stack once and publish the native 
             expect(body.itemid!.type).toBe(Type.String);
           }
         },
-      );
+      );}
     expect(pushes).toEqual(["other"]);
     await h.use("spare", 2);
     expect((await h.db.db.select().from(worldpoint).where(eq(worldpoint.id, 2)))[0]!.gridType).toBe(
@@ -198,10 +198,10 @@ test("missing and future realm opening clocks permit bounded prop expiry without
     for (const [index, opening] of [undefined, 0n, 1000000000000n].entries()) {
       h.clock.now = 1000000 + index * 200000000;
       if (opening !== undefined)
-        await h.db.db
+        {await h.db.db
           .insert(server_info)
           .values({ uid: "server", activityTime: opening })
-          .onConflictDoUpdate({ target: server_info.uid, set: { activityTime: opening } });
+          .onConflictDoUpdate({ target: server_info.uid, set: { activityTime: opening } });}
       await h.use("spare", 1);
       await h.use("spare", 2);
       await h.db.db

@@ -9,11 +9,11 @@ import type {
 } from "./catalog-model.ts";
 
 function legacyValue(value: CatalogValue, codec: CatalogFieldCodec, depth = 0): string {
-  if (!Array.isArray(value)) return String(value);
+  if (!Array.isArray(value)) {return String(value);}
 
   const separator = codec.separators?.[depth];
 
-  if (separator === undefined) throw new Error("Missing legacy catalog sequence codec");
+  if (separator === undefined) {throw new Error("Missing legacy catalog sequence codec");}
 
   return value.map((item) => legacyValue(item, codec, depth + 1)).join(separator);
 }
@@ -27,7 +27,7 @@ export function legacyRecord(record: object, codec: CatalogCodec): Rule {
     Object.entries(record).map(([field, value]) => {
       const metadata = fields.get(field);
 
-      if (!metadata) throw new Error("Unmapped legacy catalog field: " + field);
+      if (!metadata) {throw new Error("Unmapped legacy catalog field: " + field);}
 
       return [metadata.key, legacyValue(value as CatalogValue, metadata.descriptor)];
     }),
@@ -39,7 +39,7 @@ export function legacyCatalogRecords(
   codec: CatalogCodec,
   name: string,
 ): Rule[] {
-  if (catalog.kind !== CatalogKind.Table) throw new Error("Catalog is not a gameplay table");
+  if (catalog.kind !== CatalogKind.Table) {throw new Error("Catalog is not a gameplay table");}
 
   const records =
     name === "vip"
@@ -63,7 +63,7 @@ export function legacyDeclaredCatalog(
   const records = declarations.map((record) => legacyRecord(record, codec));
 
   for (const section of top) {
-    if (section.id === undefined) throw new Error("Missing catalog section ID");
+    if (section.id === undefined) {throw new Error("Missing catalog section ID");}
 
     groups.set(
       String(section.id),
@@ -81,7 +81,7 @@ export function legacyDeclaredCatalog(
 }
 
 export function indexRules(records: Rule[], name: string): Map<string, Rule> {
-  if (!records.length) throw new Error("Missing gameplay resource records");
+  if (!records.length) {throw new Error("Missing gameplay resource records");}
 
   const map = new Map<string, Rule>();
   const replaceDuplicates = [
@@ -109,15 +109,15 @@ export function indexRules(records: Rule[], name: string): Map<string, Rule> {
   for (const record of records) {
     const item = record;
 
-    if (!item.id?.trim()) continue;
+    if (!item.id?.trim()) {continue;}
 
     if (!replaceDuplicates && map.has(item.id))
-      throw new Error(`Invalid gameplay resource ID: ${name}`);
+      {throw new Error(`Invalid gameplay resource ID: ${name}`);}
 
     map.set(item.id, item);
   }
 
-  if (!map.size && name !== "goods") throw new Error(`Invalid gameplay resource ID: ${name}`);
+  if (!map.size && name !== "goods") {throw new Error(`Invalid gameplay resource ID: ${name}`);}
 
   return map;
 }

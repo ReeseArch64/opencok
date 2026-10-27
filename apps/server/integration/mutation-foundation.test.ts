@@ -21,7 +21,7 @@ function loseCommit(pool: ReturnType<typeof createDatabase<"kingdom">>["pool"], 
   Object.defineProperty(pool, "connect", {
     configurable: true,
     value: (...connectArgs: unknown[]) => {
-      if (connectArgs.length) return Reflect.apply(originalConnect, pool, connectArgs);
+      if (connectArgs.length) {return Reflect.apply(originalConnect, pool, connectArgs);}
       return connect().then((client) => {
         let touched = false;
         return {
@@ -33,8 +33,8 @@ function loseCommit(pool: ReturnType<typeof createDatabase<"kingdom">>["pool"], 
                 : first && typeof first === "object" && "text" in first
                   ? first.text
                   : undefined;
-            if (typeof text === "string" && text.startsWith("begin")) touched = false;
-            if (typeof text === "string" && text.trimStart().startsWith(statement)) touched = true;
+            if (typeof text === "string" && text.startsWith("begin")) {touched = false;}
+            if (typeof text === "string" && text.trimStart().startsWith(statement)) {touched = true;}
             const result = await Reflect.apply(client.query, client, args);
             if (armed && touched && text === "commit") {
               armed = false;
@@ -135,7 +135,7 @@ test("persistent mutation receipts, ledger and epoch fencing survive concurrency
       Array.from({ length: 8 }, () => execute(command("duplicate"), purchase)),
     );
     expect(applications).toBe(1);
-    for (const reply of replies) expect(reply).toEqual(Buffer.from([0, 128, 255]));
+    for (const reply of replies) {expect(reply).toEqual(Buffer.from([0, 128, 255]));}
     expect(await first.db.select().from(command_receipt)).toHaveLength(1);
     const postings = await first.db.select().from(economy_posting).orderBy(economy_posting.entry);
     expect(postings.map((p) => [p.before, p.delta, p.after])).toEqual([
@@ -150,12 +150,12 @@ test("persistent mutation receipts, ledger and epoch fencing survive concurrency
     );
     expect(applications).toBe(1);
     for (const delta of [-9007199254740993n, 9223372036854775807n])
-      await expect(
+      {await expect(
         execute(command(`invalid-${delta}`), async () => ({
           changes: [{ asset: "profile.gold", delta, reason: "invalid" }],
           response: Buffer.alloc(0),
         })),
-      ).rejects.toThrow("balance");
+      ).rejects.toThrow("balance");}
     const generic = createMutationExecutor(first.db, owner);
     await expect(
       generic(command("rollback"), async (tx) => {
@@ -303,7 +303,7 @@ test("persistent mutation receipts, ledger and epoch fencing survive concurrency
     } finally {
       loss.restore();
     }
-    for (const database of databases.splice(0)) await database.close();
+    for (const database of databases.splice(0)) {await database.close();}
     await pg.restart();
     const restarted = open("mutation_one");
     const restartOwner = await acquireRealmAuthority(restarted.db, 1, () => true);

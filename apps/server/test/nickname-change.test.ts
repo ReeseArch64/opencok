@@ -88,27 +88,27 @@ test("rename validation retains reserved-name bad-word and control precedence ov
     ).rejects.toMatchObject({ code: "105251" });
   }
   for (const code of [0, 8, 9, 13, 31, 127, 128, 159])
-    await expect(
+    {await expect(
       validateNicknameChange(String.fromCharCode(code), filters().providers),
-    ).rejects.toMatchObject({ code: "105251" });
+    ).rejects.toMatchObject({ code: "105251" });}
   expect(await validateNicknameChange("a\nb", filters().providers)).toBe("a b");
 });
 
 test("rename validation emits distinct blank parenthesis weighted-length and character errors", async () => {
   for (const name of ["", "  ", "\n\\n", "\u2000", "a", "ab", "a".repeat(17), "a{"])
-    await expect(validateNicknameChange(name, filters().providers)).rejects.toMatchObject({
+    {await expect(validateNicknameChange(name, filters().providers)).rejects.toMatchObject({
       code: "E000000",
-    });
+    });}
   for (const name of ["(a", " (alpha)", "(" + "a".repeat(20)])
-    await expect(validateNicknameChange(name, filters().providers)).rejects.toMatchObject({
+    {await expect(validateNicknameChange(name, filters().providers)).rejects.toMatchObject({
       code: "113995",
-    });
+    });}
   for (const name of ["ab/", "ab\\", "a{b", "ab}", 'a"b', "abc😀", "abc☃"])
-    await expect(validateNicknameChange(name, filters().providers)).rejects.toMatchObject({
+    {await expect(validateNicknameChange(name, filters().providers)).rejects.toMatchObject({
       code: "105229",
-    });
+    });}
   for (const name of ["a{b}", "中文", "ééé", "a b c d e f g h", "a".repeat(16)])
-    expect(await validateNicknameChange(` ${name} `, filters().providers)).toBe(name);
+    {expect(await validateNicknameChange(` ${name} `, filters().providers)).toBe(name);}
 });
 
 test("rename validation preserves reached provider failures and rejects malformed pure inputs", async () => {
@@ -139,9 +139,9 @@ test("rename item cost consumes exactly one and preserves configuration-before-i
     errorCode(() => nicknameItemDebit(count, "20"), "E100165");
   }
   for (const type of [undefined, null, "", " 0", "1.0", "2147483648"])
-    expect(() => nicknameItemDebit(0, type)).toThrow("Invalid decimal integer");
+    {expect(() => nicknameItemDebit(0, type)).toThrow("Invalid decimal integer");}
   for (const count of [NaN, 0.5, 2147483648, -2147483649])
-    expect(() => nicknameItemDebit(count, "0")).toThrow("Invalid nickname item count");
+    {expect(() => nicknameItemDebit(count, "0")).toThrow("Invalid nickname item count");}
 });
 
 test("rename gold debit spends free then special then paid balances with the DMM response exception", () => {
@@ -165,9 +165,9 @@ test("rename gold debit spends free then special then paid balances with the DMM
 
 test("rename gold debit agrees with allocation conservation across small synthetic balance combinations", () => {
   for (let free = 0; free <= 6; free++)
-    for (let special = 0; special <= 6; special++)
-      for (let paid = 0; paid <= 6; paid++)
-        for (let price = 0; price <= free + special + paid; price++) {
+    {for (let special = 0; special <= 6; special++)
+      {for (let paid = 0; paid <= 6; paid++)
+        {for (let price = 0; price <= free + special + paid; price++) {
           const state = {
             ...initial,
             gold: BigInt(free),
@@ -185,7 +185,7 @@ test("rename gold debit agrees with allocation conservation across small synthet
             paidGold: BigInt(paid - usedPaid),
           });
           expect(result.gold).toBe(BigInt(free + special + paid - price));
-        }
+        }}}}
 });
 
 test("rename gold debit distinguishes insufficient funds from malformed or negative prices and totals", () => {
@@ -193,7 +193,7 @@ test("rename gold debit distinguishes insufficient funds from malformed or negat
   errorCode(() => nicknameGoldDebit(initial, "dmm", "101"), "E100001");
   expect(() => nicknameGoldDebit(initial, null, "-1")).toThrow("Negative nickname gold cost");
   for (const value of [undefined, null, "", " 1", "1 ", "1.0", "2147483648", "-2147483649"])
-    expect(() => nicknameGoldDebit(initial, null, value)).toThrow("Invalid decimal integer");
+    {expect(() => nicknameGoldDebit(initial, null, value)).toThrow("Invalid decimal integer");}
   expect(() => nicknameGoldDebit({ ...initial, gold: -100n }, null, "0")).toThrow(
     "Negative total gold",
   );
@@ -276,7 +276,7 @@ test("rename refund reads the reduction ratio only for exact CN1 after parsing t
   expect(nicknameGoldRefund(initial, "cn1", "3", ratio).delta).toBe(1n);
   expect(calls).toBe(1);
   for (const platform of [null, "cn2", "CN1", "dmm"])
-    expect(nicknameGoldRefund(initial, platform, "3", unusedRatio).delta).toBe(3n);
+    {expect(nicknameGoldRefund(initial, platform, "3", unusedRatio).delta).toBe(3n);}
   expect(() => nicknameGoldRefund(initial, "cn1", "bad", ratio)).toThrow("Invalid decimal integer");
   expect(calls).toBe(1);
   expect(() => nicknameGoldRefund(initial, "cn1", "1", unusedRatio)).toThrow(

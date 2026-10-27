@@ -29,12 +29,12 @@ export function createWorldResourceRefreshExecutor(
         const now = at ?? BigInt(captureTime());
 
         if (now < 0n || now > BigInt(Number.MAX_SAFE_INTEGER))
-          throw new Error("Invalid resource clock");
+          {throw new Error("Invalid resource clock");}
 
         const [info] = await tx.select().from(server_info).where(eq(server_info.uid, "server"));
         const ready = Boolean(info?.activityTime && info.activityTime <= now);
 
-        if (!ready && now < nextExpiry) return;
+        if (!ready && now < nextExpiry) {return;}
 
         const [clock] = await tx
           .select()
@@ -52,7 +52,7 @@ export function createWorldResourceRefreshExecutor(
             const candidates: { id: number; flushTime: bigint | null }[] = [];
 
             for (let type = 0; type < 6; type++)
-              candidates.push(
+              {candidates.push(
                 ...(await tx
                   .select({ id: worldpoint.id, flushTime: worldpoint.flushTime })
                   .from(worldpoint)
@@ -66,7 +66,7 @@ export function createWorldResourceRefreshExecutor(
                   )
                   .orderBy(asc(worldpoint.flushTime))
                   .limit(64)),
-              );
+              );}
 
             const selected = candidates
               .sort((a, b) =>
@@ -279,7 +279,7 @@ export function createWorldResourceRefreshExecutor(
         return ready ? undefined : expiredCount === 64 ? now : now + 1800000n;
       });
 
-      if (next !== undefined) nextExpiry = next;
+      if (next !== undefined) {nextExpiry = next;}
     },
   };
 }

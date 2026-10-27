@@ -22,7 +22,7 @@ export async function readThroneRanking(
             .limit(1)
         )[0];
 
-      if (!period) return { period: undefined, rows: [] };
+      if (!period) {return { period: undefined, rows: [] };}
 
       if (
         !Number.isInteger(period.index) ||
@@ -31,7 +31,7 @@ export async function readThroneRanking(
         typeof period.info !== "string" ||
         period.info.length > 8192
       )
-        throw new Error("Invalid throne period");
+        {throw new Error("Invalid throne period");}
 
       const rows = await tx
         .select({
@@ -54,7 +54,7 @@ export async function readThroneRanking(
         .orderBy(desc(user_cross_throne.totalKills), asc(user_cross_throne.id))
         .limit(32768);
 
-      if (rows.length > 32767) throw new Error("Oversized throne ranking");
+      if (rows.length > 32767) {throw new Error("Oversized throne ranking");}
 
       return { period: { index: period.index, info: period.info }, rows };
     },

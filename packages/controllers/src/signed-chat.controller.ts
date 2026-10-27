@@ -25,7 +25,7 @@ export abstract class SignedChatController<T extends object, Result> {
       this.timeoutMs < 100 ||
       this.timeoutMs > 30000
     )
-      throw new Error(configurationError);
+      {throw new Error(configurationError);}
   }
 
   protected abstract readonly operation: string;
@@ -77,18 +77,18 @@ export abstract class SignedChatController<T extends object, Result> {
       let size = 0;
 
       for await (const chunk of request) {
-        if (expired) throw new Error();
+        if (expired) {throw new Error();}
 
         const bytes = Buffer.from(chunk);
         size += bytes.length;
 
         if (size > 4096)
-          return { status: HttpStatus.PayloadTooLarge, category: "bad_request" } as const;
+          {return { status: HttpStatus.PayloadTooLarge, category: "bad_request" } as const;}
 
         chunks.push(bytes);
       }
 
-      if (expired) throw new Error();
+      if (expired) {throw new Error();}
 
       let body: string;
 
@@ -101,7 +101,7 @@ export abstract class SignedChatController<T extends object, Result> {
       }
 
       if (!this.verify(body, request, this.now()))
-        return { status: HttpStatus.Forbidden, category: "unauthorized" } as const;
+        {return { status: HttpStatus.Forbidden, category: "unauthorized" } as const;}
 
       let update: T;
 
@@ -127,8 +127,8 @@ export abstract class SignedChatController<T extends object, Result> {
         }),
       ]);
 
-      if (result.status === HttpStatus.Ok) reply(HttpStatus.Ok, result.data);
-      else fail(result.status, result.category);
+      if (result.status === HttpStatus.Ok) {reply(HttpStatus.Ok, result.data);}
+      else {fail(result.status, result.category);}
     } catch {
       fail(HttpStatus.ServiceUnavailable, "storage_unavailable");
     } finally {

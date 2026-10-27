@@ -20,7 +20,7 @@ export async function enqueueMailChat(
   now: number,
   effects: readonly MailChatEffect[],
 ) {
-  if (!effects.length) return;
+  if (!effects.length) {return;}
 
   if (
     effects.length > 1000 ||
@@ -34,7 +34,7 @@ export async function enqueueMailChat(
         !["1,20", "2", "3", "1,2,20"].includes(effect.types.join(",")),
     )
   )
-    throw new Error("Invalid mail chat effect");
+    {throw new Error("Invalid mail chat effect");}
 
   const [count] = await tx
     .select({ count: sql<string>`count(*)::text` })
@@ -42,7 +42,7 @@ export async function enqueueMailChat(
     .where(eq(mail_chat_read_intent.ownerUid, owner));
 
   if (!count || !/^\d+$/.test(count.count) || BigInt(count.count) + BigInt(effects.length) > 1000n)
-    throw new Error("Mail chat backlog exceeded");
+    {throw new Error("Mail chat backlog exceeded");}
 
   const commandId = randomUUID();
   await tx.insert(mail_chat_read_intent).values(
@@ -71,7 +71,7 @@ export async function relayMailChat(
     timeoutMs < 100 ||
     timeoutMs > 30000
   )
-    throw new Error("Invalid mailbox relay");
+    {throw new Error("Invalid mailbox relay");}
 
   return db.transaction(
     async (tx) => {
@@ -87,7 +87,7 @@ export async function relayMailChat(
         .for("update", { skipLocked: true });
       const entry = pending[0];
 
-      if (!entry) return 0;
+      if (!entry) {return 0;}
 
       const update: ChatMailboxUpdate = {
         owner: entry.ownerUid,

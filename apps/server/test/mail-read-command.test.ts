@@ -108,9 +108,9 @@ test("read query rules retain single IDs and bounded batch semantics and reject 
   expect(mailReadQuery(false, "a,b", now)).toEqual({ batch: false, ids: ["a,b"], now });
   expect(mailReadQuery(true, ",a,, a ,a,", now).ids).toEqual(["a", " a "]);
   for (const ids of ["\0", "\ud800", "x".repeat(41), ",".repeat(65536)])
-    expect(() => mailReadQuery(true, ids, now)).toThrow();
+    {expect(() => mailReadQuery(true, ids, now)).toThrow();}
   for (const time of [NaN, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => mailReadQuery(false, "a", time)).toThrow();
+    {expect(() => mailReadQuery(false, "a", time)).toThrow();}
   expect(() => mailReadQuery(1 as never, "a", now)).toThrow();
 });
 

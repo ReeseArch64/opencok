@@ -122,11 +122,11 @@ async function fixture(types = [1]) {
           [1, 2],
         )!,
       close: async () => {
-        for (const close of closers.toReversed()) await close();
+        for (const close of closers.toReversed()) {await close();}
       },
     };
   } catch (error) {
-    for (const close of closers.toReversed()) await close();
+    for (const close of closers.toReversed()) {await close();}
     throw error;
   }
 }

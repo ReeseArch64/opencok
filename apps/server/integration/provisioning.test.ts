@@ -304,9 +304,9 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
       }),
     );
     for (const value of distinct)
-      expect(
+      {expect(
         await realm.db.select().from(worldpoint).where(eq(worldpoint.ownerId, value.gameUid)),
-      ).toHaveLength(4);
+      ).toHaveLength(4);}
     await global.close();
     await realm.close();
     await pg.restart();
@@ -473,7 +473,7 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
   } finally {
     client?.close();
     await runtime?.close();
-    for (const name of containers) await pg.docker(["rm", "-f", name]).catch(() => undefined);
+    for (const name of containers) {await pg.docker(["rm", "-f", name]).catch(() => undefined);}
     await Promise.allSettled([global?.close(), realm?.close(), otherRealm?.close()]);
     await pg.stop();
   }

@@ -52,7 +52,7 @@ test("contribution uses k4, removes bans after the single window and keeps candi
     }),
   ).toThrow("102192");
   for (const k4 of ["", "0", "-1", "1.5", " 2", "32768"])
-    expect(() => playerRankingQuery("contribution", rules(k4), now)).toThrow("102192");
+    {expect(() => playerRankingQuery("contribution", rules(k4), now)).toThrow("102192");}
 });
 
 test("empty visible contribution lists use myRanking=-1 regardless of the stored self or fallback position", () => {

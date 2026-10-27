@@ -16,7 +16,7 @@ export interface NewGeneralSkillState {
 }
 
 function addSkill(result: Map<number, number>, skill: Rule | undefined, level: () => number) {
-  if (integer(skill?.type) !== 0) return;
+  if (integer(skill?.type) !== 0) {return;}
 
   const ids = split(skill?.para1, ";");
   const bases = split(skill?.base, ";").map(javaFloat);
@@ -39,7 +39,7 @@ export function newGeneralSkillEffects(state: NewGeneralSkillState, rules: Rules
     state.star < -2147483648 ||
     state.star > 2147483647
   )
-    throw new Error("Invalid new-general skill state");
+    {throw new Error("Invalid new-general skill state");}
 
   const talents = generalMap(state.talent, integer, 5000);
   const saved = generalMap(state.baseSkill, integer, 256);
@@ -57,9 +57,9 @@ export function newGeneralSkillEffects(state: NewGeneralSkillState, rules: Rules
     if (!mailBlank(extra)) {
       const next = split(extra, ";");
 
-      if (ids.length) ids.push(...next);
+      if (ids.length) {ids.push(...next);}
 
-      if (ids.length > 4096) throw new Error("Too many new-general skills");
+      if (ids.length > 4096) {throw new Error("Too many new-general skills");}
     }
   }
 
@@ -69,13 +69,13 @@ export function newGeneralSkillEffects(state: NewGeneralSkillState, rules: Rules
     const skill = rules.power.newGeneralSkills?.get(id);
 
     if (mailBlank(skill?.condition_type))
-      addSkill(skills, skill, () => saved.get(integer(id)) ?? 1);
+      {addSkill(skills, skill, () => saved.get(integer(id)) ?? 1);}
   }
 
   const talentEffects = new Map<number, number>();
 
   for (const id of javaIntHashMapOrder(talents.keys()))
-    addSkill(talentEffects, rules.power.newGeneralSkills?.get(String(id)), () => talents.get(id)!);
+    {addSkill(talentEffects, rules.power.newGeneralSkills?.get(String(id)), () => talents.get(id)!);}
 
   return {
     skills: new Map(javaIntHashMapOrder(skills.keys()).map((id) => [id, skills.get(id)!])),

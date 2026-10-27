@@ -11,14 +11,14 @@ test("response contracts are validated independently", () => {
   const dto: MailDeletedResponse = { delete: 3 };
   expect(mailDeletedSchema.parse(dto)).toEqual(dto);
   for (const data of [{ delete: 3, owner: "private" }, { delete: "3" }, {}])
-    expect(() => mailDeletedSchema.parse(data)).toThrow(z.ZodError);
+    {expect(() => mailDeletedSchema.parse(data)).toThrow(z.ZodError);}
 });
 
 test("plain response schemas enforce signed integer widths without coercion", () => {
   for (const value of [-2147483648, 2147483647])
-    expect(mailDeletedSchema.parse({ delete: value }).delete).toBe(value);
+    {expect(mailDeletedSchema.parse({ delete: value }).delete).toBe(value);}
   for (const value of [-2147483649, 2147483648, 1.5, NaN, Infinity, "1", null])
-    expect(() => mailDeletedSchema.parse({ delete: value })).toThrow(z.ZodError);
+    {expect(() => mailDeletedSchema.parse({ delete: value })).toThrow(z.ZodError);}
   const dto: WorldResourceOwnerResponse = {
     q: 1,
     spd: 1.5,
@@ -30,7 +30,7 @@ test("plain response schemas enforce signed integer widths without coercion", ()
   };
   expect(worldResourceOwnerSchema.parse(dto).occupyEndTime).toBe(9223372036854775807n);
   for (const sdt of [-9223372036854775809n, 9223372036854775808n, 1, "1"])
-    expect(() => worldResourceOwnerSchema.parse({ ...dto, sdt })).toThrow(z.ZodError);
+    {expect(() => worldResourceOwnerSchema.parse({ ...dto, sdt })).toThrow(z.ZodError);}
 });
 
 test("plain search schemas validate nested entries, optional fields and duplicate identities", () => {
@@ -39,7 +39,7 @@ test("plain search schemas validate nested entries, optional fields and duplicat
   expect(() => worldSearchSchema.parse({ list: [{ ...entry, pic: 1 }] })).toThrow(z.ZodError);
   expect(() => worldSearchSchema.parse({ list: [entry, entry] })).toThrow(z.ZodError);
   for (const uid of ["", "x".repeat(256), "bad\0id", "\ud800"])
-    expect(() => worldSearchSchema.parse({ list: [{ ...entry, uid }] })).toThrow(z.ZodError);
+    {expect(() => worldSearchSchema.parse({ list: [{ ...entry, uid }] })).toThrow(z.ZodError);}
 });
 
 test("dynamic response validation preserves literal prototype keys and rejects invalid nested values", () => {
@@ -57,7 +57,7 @@ test("dynamic response validation preserves literal prototype keys and rejects i
 
 test("response validation retains legacy floating values and bounds UTF-8 text and collections", () => {
   for (const value of [NaN, Infinity, -Infinity, -0])
-    expect(responseValueSchema.safeParse(value).success).toBe(true);
+    {expect(responseValueSchema.safeParse(value).success).toBe(true);}
   expect(responseValueSchema.safeParse("é".repeat(16384)).success).toBe(false);
   expect(responseValueSchema.safeParse(Array.from({ length: 32768 }, () => null)).success).toBe(
     false,

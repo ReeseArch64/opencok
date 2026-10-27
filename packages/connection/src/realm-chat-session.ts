@@ -35,7 +35,7 @@ export function createRealmChatSessionIssuer(options: {
     options.timeoutMs < 100 ||
     options.timeoutMs > 30000
   )
-    throw new Error("Invalid chat session configuration");
+    {throw new Error("Invalid chat session configuration");}
 
   const endpoint = url.toString();
   const signingSecret = options.signingSecret;
@@ -57,7 +57,7 @@ export function createRealmChatSessionIssuer(options: {
           (value) => typeof value !== "string" || !value.isWellFormed(),
         )
       )
-        throw new Error();
+        {throw new Error();}
 
       const form = new URLSearchParams({
         appid: "100001",
@@ -74,7 +74,7 @@ export function createRealmChatSessionIssuer(options: {
       );
       const body = form.toString();
 
-      if (Buffer.byteLength(body) > 16384) throw new Error();
+      if (Buffer.byteLength(body) > 16384) {throw new Error();}
 
       const value = await fetchChatJson(
         endpoint,
@@ -88,7 +88,7 @@ export function createRealmChatSessionIssuer(options: {
       );
 
       if (!isRecord(value) || value.code !== 1 || !isChatSessionTicket(value.data, now()))
-        throw new Error();
+        {throw new Error();}
 
       return { session: value.data.session, expire: value.data.expire };
     } catch {

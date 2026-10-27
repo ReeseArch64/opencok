@@ -41,9 +41,9 @@ export function expeditionInfo(state: ExpeditionState, profile: Row, realmName: 
   ];
 
   if (period && phase && phase.stage !== 0 && num(period, "matchServerId") > 0)
-    kingdoms.push(
+    {kingdoms.push(
       sfs.object({ serverid: sfs.int(num(period, "matchServerId")), score: sfs.string("0") }),
-    );
+    );}
 
   const rewardlist = expeditionRewardList(row);
 
@@ -117,17 +117,17 @@ export function expeditionPanels(
       };
 
       for (const key of ["activityid", "exchange", "res_andmd5", "res_iosmd5"])
-        if (rule[key] !== undefined) result[key] = sfs.string(rule[key]!);
+        {if (rule[key] !== undefined) {result[key] = sfs.string(rule[key]!);}}
 
       if (rule.rewardid !== undefined)
-        result.reward = rewardPreviewArray(
+        {result.reward = rewardPreviewArray(
           previewRewards(
             rule.rewardid,
             rules,
             { kingdomId: rules.kingdomId, version: "12.06.0", now: Number(now) },
             randomInt,
           ),
-        );
+        );}
 
       result.popup = sfs.string(
         now >= (state.phase?.startTime ?? 0n) &&
@@ -137,7 +137,7 @@ export function expeditionPanels(
       );
 
       for (const key of ["androidmd5", "iosmd5"])
-        if (rule[key] !== undefined) result[key] = sfs.string(rule[key]!);
+        {if (rule[key] !== undefined) {result[key] = sfs.string(rule[key]!);}}
 
       return validateFields(expeditionPanelSchema, result);
     },

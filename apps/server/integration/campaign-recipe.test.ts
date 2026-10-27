@@ -37,7 +37,7 @@ test("native campaign recipes consume the four maintained ingredients once and c
     const replies = await Promise.all(Array.from({ length: 4 }, () => h.exchange(request)));
     expect(replies.every((reply) => reply.body.type?.value === 44)).toBe(true);
     for (const item of ["212025", "212026", "212027", "212028"])
-      expect(await h.quantity(item)).toBe(1);
+      {expect(await h.quantity(item)).toBe(1);}
     expect(await h.quantity("212078")).toBe(1);
     expect(await h.variable("long_3th_avviversary_paint_abcd_count")).toBe("1");
     expect(await h.variable("long_3th_week1_score_count")).toBe("550");
@@ -90,7 +90,7 @@ test("recipe receipt failure restores ingredients, rewards, campaign counters an
     );
     await expect(h.exchange()).rejects.toThrow();
     for (const item of ["212025", "212026", "212027", "212028"])
-      expect(await h.quantity(item)).toBe(2);
+      {expect(await h.quantity(item)).toBe(2);}
     expect(await h.quantity("212078")).toBe(0);
     expect(await h.variable("long_3th_avviversary_paint_abcd_count")).toBeUndefined();
     await h.db.db.execute(

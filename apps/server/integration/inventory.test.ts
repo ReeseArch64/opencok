@@ -74,7 +74,7 @@ test("inventory transactions preserve quantities, receipts, effects and fencing 
       { id: "991007", type: "21", time_type: "1", vanishTime: "1" },
       { id: "991008", type: "21", price: "10", sales: "2;15|5;30", useall: "1" },
     ] as Rule[])
-      rules.goods.set(rule.id!, rule);
+      {rules.goods.set(rule.id!, rule);}
     rules.materials.set("991100", {
       id: "991100",
       material: "991004;1|991005;1",
@@ -185,9 +185,9 @@ test("inventory transactions preserve quantities, receipts, effects and fencing 
       service.grant("inventory-owner", randomUUID(), "991004", 2147483647),
     ).rejects.toThrow();
     for (const count of [0, -1, 1.5, 2147483648])
-      await expect(
+      {await expect(
         command("item.buy", { itemId: sfs.string("991001"), num: sfs.int(count) }),
-      ).rejects.toThrow();
+      ).rejects.toThrow();}
     const sale = await command("item.buy", { itemId: sfs.string("991008"), num: sfs.int(2) });
     expect(sale.body.costGold).toEqual(sfs.int(15));
     expect(fields(sale.body.item).count).toEqual(sfs.int(2));
@@ -311,7 +311,7 @@ test("inventory transactions preserve quantities, receipts, effects and fencing 
     await acquireRealmAuthority(second.db, 1, () => true);
     await expect(restarted.grant("inventory-owner", randomUUID(), "991001", 1)).rejects.toThrow();
   } finally {
-    for (const database of databases) await database.close();
+    for (const database of databases) {await database.close();}
     await pg.stop();
   }
 }, 120000);

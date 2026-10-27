@@ -52,7 +52,7 @@ async function fixture(types = [1, 2]) {
     await h.db.db.insert(alliance_member).values({ uid: owner, allianceId: "guild", rank: 1 });
   }
   for (const type of types)
-    await h.db.db.insert(hero_event).values({
+    {await h.db.db.insert(hero_event).values({
       uuid: `event-${type}`,
       eventId: "synthetic",
       activityId: "main",
@@ -62,7 +62,7 @@ async function fixture(types = [1, 2]) {
       startTime: 1n,
       endTime: 2000000n,
       rewardStatus: 0,
-    });
+    });}
   return h;
 }
 async function deliver(h: Awaited<ReturnType<typeof fixture>>) {

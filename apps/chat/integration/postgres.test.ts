@@ -15,7 +15,7 @@ test("PostgreSQL preserves concurrent receipts, expiration, realm routing and re
     const admin = await pg.start();
     try {
       for (const name of ["opencok_global", "opencok_kingdom_1", "opencok_kingdom_2"])
-        await admin.query(`CREATE DATABASE "${name}"`);
+        {await admin.query(`CREATE DATABASE "${name}"`);}
     } finally {
       await admin.end();
     }
@@ -25,10 +25,10 @@ test("PostgreSQL preserves concurrent receipts, expiration, realm routing and re
         .pathname,
     });
     for (const kingdom of databases.kingdoms.values())
-      await migrate(kingdom.db, {
+      {await migrate(kingdom.db, {
         migrationsFolder: new URL("../../../packages/drizzle/migrations/kingdom", import.meta.url)
           .pathname,
-      });
+      });}
     for (const id of [1, 2]) {
       await databases.global.db.insert(account_new).values({
         gameUid: `player-${id}`,
@@ -76,7 +76,7 @@ test("PostgreSQL preserves concurrent receipts, expiration, realm routing and re
     expect(results[0]!.sequenceId).toBe(results[1]!.sequenceId);
     await expect(store.messages.create({ ...input, body: "changed" })).rejects.toThrow("conflict");
     for (const body of ["\0", "\ud800", "x".repeat(501), ""])
-      await expect(store.messages.create({ ...input, body })).rejects.toThrow();
+      {await expect(store.messages.create({ ...input, body })).rejects.toThrow();}
     expect(await store.messages.getAll("country_1")).toHaveLength(0);
     await store.close();
     store = undefined;

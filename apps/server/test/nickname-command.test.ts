@@ -23,14 +23,14 @@ function fixture(services?: GameServices) {
     },
     async nicknameOccupied(name: string) {
       calls.push(`occupied:${name}`);
-      if (failure === "occupied") throw new Error("Synthetic availability failure");
+      if (failure === "occupied") {throw new Error("Synthetic availability failure");}
       return occupied;
     },
   };
   const providers = services ?? {
     nicknameBadWords: (name: string) => {
       calls.push(`filter:${name}`);
-      if (failure === "filter") throw new Error("Synthetic filter failure");
+      if (failure === "filter") {throw new Error("Synthetic filter failure");}
       return blocked;
     },
   };

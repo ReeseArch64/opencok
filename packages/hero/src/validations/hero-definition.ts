@@ -5,11 +5,11 @@ export function validateHeroDefinition(hero: HeroDefinition): void {
     throw new Error(`Invalid hero definition: ${hero.name}`);
   };
   const integer = (value: number, minimum = 0, maximum = Number.MAX_SAFE_INTEGER) => {
-    if (!Number.isSafeInteger(value) || value < minimum || value > maximum) invalid();
+    if (!Number.isSafeInteger(value) || value < minimum || value > maximum) {invalid();}
   };
   const cost = (value: HeroItemCost) => integer(value.quantity);
   const sequence = (values: readonly number[], first: number) => {
-    if (values.some((value, index) => value !== first + index)) invalid();
+    if (values.some((value, index) => value !== first + index)) {invalid();}
   };
   const { recruitment, progression, stars, refinement } = hero;
   integer(recruitment.initialQuality, 1);
@@ -25,23 +25,23 @@ export function validateHeroDefinition(hero: HeroDefinition): void {
     2,
   );
 
-  if (stars.upgrades.length !== 4 || !stars.initialSkills.length) invalid();
+  if (stars.upgrades.length !== 4 || !stars.initialSkills.length) {invalid();}
 
-  for (const step of stars.upgrades) cost(step.cost);
+  for (const step of stars.upgrades) {cost(step.cost);}
 
   sequence(
     progression.breakthroughs.map((step) => step.stage),
     1,
   );
 
-  for (const step of progression.breakthroughs) cost(step.cost);
+  for (const step of progression.breakthroughs) {cost(step.cost);}
 
-  if (new Set(hero.talentTrees).size !== hero.talentTrees.length) invalid();
+  if (new Set(hero.talentTrees).size !== hero.talentTrees.length) {invalid();}
 
   integer(hero.assignments.minimumLootLevel, 1, progression.maximumLevel);
   cost(refinement.valueRollCostPerAttribute);
 
-  if (!refinement.slots.length || refinement.slots.length > 5) invalid();
+  if (!refinement.slots.length || refinement.slots.length > 5) {invalid();}
 
   sequence(
     refinement.slots.map((slot) => slot.position),
@@ -49,9 +49,9 @@ export function validateHeroDefinition(hero: HeroDefinition): void {
   );
 
   for (const slot of refinement.slots) {
-    if (slot.requiredLevel !== undefined) integer(slot.requiredLevel, 1, progression.maximumLevel);
-    if (slot.requiredStars !== undefined) integer(slot.requiredStars, 1);
-    if (slot.unlockCost) cost(slot.unlockCost);
+    if (slot.requiredLevel !== undefined) {integer(slot.requiredLevel, 1, progression.maximumLevel);}
+    if (slot.requiredStars !== undefined) {integer(slot.requiredStars, 1);}
+    if (slot.unlockCost) {cost(slot.unlockCost);}
     integer(slot.refinementItemQuantity);
   }
 
@@ -68,8 +68,8 @@ export function validateHeroDefinition(hero: HeroDefinition): void {
     refinement.typeRollPrices.length !== refinement.slots.length ||
     refinement.lockedAttributePrices.length !== refinement.slots.length - 1
   )
-    invalid();
+    {invalid();}
 
   for (const price of [...refinement.typeRollPrices, ...refinement.lockedAttributePrices])
-    integer(price.gold);
+    {integer(price.gold);}
 }

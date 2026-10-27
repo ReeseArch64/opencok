@@ -7,9 +7,9 @@ function fixture(responses: unknown[], kingdomId = 2) {
   const cache = new Cache({ redisUrl: "unused", timeoutMs: 1, kingdomId });
   cache.command = async (command, ...args) => {
     calls.push({ command, args });
-    if (!responses.length) throw new Error("Unexpected dependency call");
+    if (!responses.length) {throw new Error("Unexpected dependency call");}
     const response = responses.shift();
-    if (response instanceof Error) throw response;
+    if (response instanceof Error) {throw response;}
     return response;
   };
   return { cache, calls };

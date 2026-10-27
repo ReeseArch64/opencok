@@ -29,7 +29,7 @@ const workshopCommands = ["create.tool", "queue.tool", "rm.tool", "tool.queue.bu
 function workshopQueue(context: CityProgressionContext) {
   const row = context.state.queues.find((row) => num(row, "type") === 12 && num(row, "qid") === 1);
 
-  if (!row) throw new GameError(errors.queue, "city_progression");
+  if (!row) {throw new GameError(errors.queue, "city_progression");}
 
   return row;
 }
@@ -38,7 +38,7 @@ function workshopDuration(context: CityProgressionContext, id: string) {
   const good = context.rules.goods.get(id),
     parts = good?.make?.split("|");
 
-  if (!parts || good?.type !== "7") invalid();
+  if (!parts || good?.type !== "7") {invalid();}
 
   return cityDuration(
     cityInteger(parts![1]),
@@ -62,11 +62,11 @@ async function prepareWorkshop(
       max = Math.max(1, num(context.state.quests?.mixed ?? {}, "materialBackup")),
       index = int(params, "index", 0);
 
-    if (index < 0) invalid();
+    if (index < 0) {invalid();}
 
-    if (items.length && index > 0 && index < items.length) items[index] = id;
+    if (items.length && index > 0 && index < items.length) {items[index] = id;}
     else {
-      if (items.length >= max) throw new GameError(errors.full, "city_progression");
+      if (items.length >= max) {throw new GameError(errors.full, "city_progression");}
 
       items.push(id);
     }
@@ -74,14 +74,14 @@ async function prepareWorkshop(
     const queueItemId = items.join(";") + ";";
 
     if (long(row, "updateTime") === idleDeadline)
-      return {
+      {return {
         type: 12,
         itemId: id,
         queueItemId,
         durationMs,
         data: context.data("material"),
         response: encode({ itemId: sfs.string(id) }),
-      };
+      };}
 
     context.write.queueUpdates = [{ ...row, itemId: queueItemId }];
     body = queueView({ ...row, itemId: queueItemId }, {}, false);
@@ -100,13 +100,13 @@ async function prepareWorkshop(
       next >
         6 + Number(context.rules.power.superVip?.get(String(7009 + superLevel))?.queue_num ?? 0)
     )
-      invalid();
+      {invalid();}
 
     const rule = context.rules.role(next > 6 ? 50 + superLevel : prior),
       [type, amount] = rule.queue_unlock?.split("|") ?? [];
 
-    if (type === "5") context.economy.gold(-cityAmount(amount));
-    else context.spend(equipmentCosts(`${type};${amount}`), false);
+    if (type === "5") {context.economy.gold(-cityAmount(amount));}
+    else {context.spend(equipmentCosts(`${type};${amount}`), false);}
 
     context.write.materialBackup = next;
     body = {
@@ -114,7 +114,7 @@ async function prepareWorkshop(
       gold: sfs.long(context.balance("gold")),
       resource: sfs.object(context.resource()),
     };
-  } else body = queueView(row, {}, false);
+  } else {body = queueView(row, {}, false);}
 
   return { response: encode(body), event: null };
 }
@@ -128,14 +128,14 @@ async function applyWorkshop(
     items = text(row, "itemId").split(";").filter(Boolean),
     id = items[0];
 
-  if (!id || !activity.itemId.split(";").includes(id)) invalid();
+  if (!id || !activity.itemId.split(";").includes(id)) {invalid();}
 
-  if (action === TimedActivityAction.Start) invalid();
+  if (action === TimedActivityAction.Start) {invalid();}
 
   if (action === TimedActivityAction.Restore && num(row, "para") > 0) {
     const completed = cityInteger(num(row, "para"), 0, items.length - 1);
 
-    for (const prior of items.splice(0, completed)) context.economy.item(prior, 1);
+    for (const prior of items.splice(0, completed)) {context.economy.item(prior, 1);}
 
     context.write.queueUpdates = [{ ...row, itemId: items.join(";") + ";", para: 0 }];
 
@@ -143,7 +143,7 @@ async function applyWorkshop(
   }
 
   if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule)
-    return { itemId: sfs.string(id!) };
+    {return { itemId: sfs.string(id!) };}
 
   if (action === TimedActivityAction.Cancel) {
     context.write.queueUpdates = [{ ...row, itemId: "", para: 0 }];
@@ -169,7 +169,7 @@ async function nextWorkshop(context: CityProgressionContext, activity: TimedActi
   const row = workshopQueue(context),
     id = text(row, "itemId").split(";").filter(Boolean)[0];
 
-  if (!id) return undefined;
+  if (!id) {return undefined;}
 
   return {
     type: 12,
@@ -192,12 +192,12 @@ async function accelerateWorkshop(
   const used =
     long(mixed, "materialCdTime") / 86400000n === today ? num(mixed, "materialCdNum") : 0;
 
-  if (used >= cityInteger(context.rules.items.get("equip")?.k12)) invalid();
+  if (used >= cityInteger(context.rules.items.get("equip")?.k12)) {invalid();}
 
   const id = activity.itemId.split(";")[0]!,
     make = context.rules.goods.get(id)?.make?.split("|");
 
-  if (!make) invalid();
+  if (!make) {invalid();}
 
   const seconds = Number(remaining / 1000n),
     cost = Math.floor(

@@ -79,7 +79,7 @@ export function observeOperation<T>(
         throw error;
       }
     });
-  if (!telemetry) return execute();
+  if (!telemetry) {return execute();}
 
   const attributes = Object.fromEntries(
     Object.entries(fields).filter(
@@ -98,7 +98,7 @@ export function observeOperation<T>(
   return telemetry.tracer.startActiveSpan(operation, { kind, attributes }, (span) => {
     try {
       const value = execute();
-      if (value instanceof Promise) return value.finally(() => span.end()) as T;
+      if (value instanceof Promise) {return value.finally(() => span.end()) as T;}
       span.end();
       return value;
     } catch (error) {
@@ -111,18 +111,18 @@ export function observeOperation<T>(
 const instrumented = new WeakSet<object>();
 
 export function observeAdapter<T>(target: T, component: string): T {
-  if (Effect.isEffect(target)) return target;
+  if (Effect.isEffect(target)) {return target;}
   if (typeof target === "function") {
     return function (this: unknown, ...args: unknown[]) {
       return observeOperation(component, () => Reflect.apply(target, this, args));
     } as T;
   }
-  if (target && typeof target === "object") return observeMethods(target, component);
+  if (target && typeof target === "object") {return observeMethods(target, component);}
   return target;
 }
 
 export function observeMethods<T extends object>(target: T, component: string): T {
-  if (instrumented.has(target)) return target;
+  if (instrumented.has(target)) {return target;}
   instrumented.add(target);
   const names = new Set<string>();
   for (
@@ -131,10 +131,10 @@ export function observeMethods<T extends object>(target: T, component: string): 
     prototype = Object.getPrototypeOf(prototype)
   ) {
     for (const name of Object.getOwnPropertyNames(prototype)) {
-      if (name === "constructor" || names.has(name)) continue;
+      if (name === "constructor" || names.has(name)) {continue;}
       names.add(name);
       const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
-      if (typeof descriptor?.value !== "function") continue;
+      if (typeof descriptor?.value !== "function") {continue;}
       const method = descriptor.value;
       Object.defineProperty(target, name, {
         configurable: true,

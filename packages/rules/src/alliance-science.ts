@@ -10,7 +10,7 @@ export function allianceScienceRule(rules: Rules, id: number, level = 0): Rule {
     rule = rules.power.allianceSciences?.get(String(id + level));
 
   if (!base || base.science_lv !== "0" || !rule || cityInteger(rule.science_lv) !== level)
-    allianceFailure();
+    {allianceFailure();}
 
   return rule;
 }
@@ -21,7 +21,7 @@ export function allianceScienceStage(rule: Rule, progress: number) {
     stage = 0;
 
   for (; stage < thresholds.length - 1 && current >= thresholds[stage]!; stage++)
-    current -= thresholds[stage]!;
+    {current -= thresholds[stage]!;}
 
   return {
     stage,

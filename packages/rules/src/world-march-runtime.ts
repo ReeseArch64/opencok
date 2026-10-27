@@ -12,9 +12,9 @@ export function worldFootprint(point: number, size: number, four = true): number
   const x = (point - 1) % size,
     y = Math.floor((point - 1) / size);
 
-  if (!four) return [point];
+  if (!four) {return [point];}
 
-  if (x === 0 || y === 0) worldMutationFailure();
+  if (x === 0 || y === 0) {worldMutationFailure();}
 
   return [point - 1, point - size, point - size - 1, point];
 }
@@ -49,7 +49,7 @@ export function ordinaryMarchRoute(
     !Number.isFinite(effect) ||
     !Number.isFinite(blackEffect)
   )
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   const coordinateY = (id: number) =>
     javaCoordinates ? Math.trunc((id - 1) / size) : Math.floor((id - 1) / size);
@@ -58,7 +58,7 @@ export function ordinaryMarchRoute(
     toPoint = target;
 
   for (const from of sourceFootprint ?? worldFootprint(source, size, sourceFour))
-    for (const to of targetFootprint ?? worldFootprint(target, size, targetFour)) {
+    {for (const to of targetFootprint ?? worldFootprint(target, size, targetFour)) {
       const current = Math.hypot(
         ((from - 1) % size) - ((to - 1) % size),
         coordinateY(from) - coordinateY(to),
@@ -69,7 +69,7 @@ export function ordinaryMarchRoute(
         fromPoint = from;
         toPoint = to;
       }
-    }
+    }}
 
   const from = [(fromPoint - 1) % size, coordinateY(fromPoint)] as const,
     to = [(toPoint - 1) % size, coordinateY(toPoint)] as const,
@@ -81,7 +81,7 @@ export function ordinaryMarchRoute(
   const hits: [number, number][] = [];
 
   if (delta !== 0)
-    for (let offset = 0; offset !== delta; offset += step) {
+    {for (let offset = 0; offset !== delta; offset += step) {
       const position: [number, number] = [...from];
       position[axis] += offset;
       position[other] = Math.trunc(
@@ -91,14 +91,14 @@ export function ordinaryMarchRoute(
         ),
       );
 
-      if (Math.max(Math.abs(position[0] - center), Math.abs(position[1] - center)) !== 26) continue;
+      if (Math.max(Math.abs(position[0] - center), Math.abs(position[1] - center)) !== 26) {continue;}
 
-      if (!hits.length) hits.push(position);
+      if (!hits.length) {hits.push(position);}
       else if (Math.hypot(position[0] - hits[0]![0], position[1] - hits[0]![1]) > 1) {
         hits.push(position);
         break;
       }
-    }
+    }}
 
   const knots = [from, ...hits, to],
     segments: MarchRouteSegment[] = [];
@@ -108,7 +108,7 @@ export function ordinaryMarchRoute(
       end = knots[index]!,
       length = Math.hypot(end[0] - start[0], end[1] - start[1]);
 
-    if (length === 0) continue;
+    if (length === 0) {continue;}
 
     const black =
       Math.abs((start[0] + end[0]) / 2 - center) <= 26 &&
@@ -160,7 +160,7 @@ export function resourceGatherRate(
       Math.fround(Math.max(Math.fround(100 + effect), 20) / 100),
   );
 
-  if (!Number.isFinite(value) || value <= 0) worldMutationFailure();
+  if (!Number.isFinite(value) || value <= 0) {worldMutationFailure();}
 
   return value;
 }
@@ -173,7 +173,7 @@ export function accelerateMarchSegments(
 ) {
   cityInteger(percent, 1, 100);
 
-  if (segments.length > 3 || now < 0n) worldMutationFailure();
+  if (segments.length > 3 || now < 0n) {worldMutationFailure();}
 
   const fraction = Math.fround(1 - Math.fround(percent / 100));
   let cursor = start,
@@ -199,7 +199,7 @@ export function accelerateMarchSegments(
     return { ...segment, mt: time };
   });
 
-  if (!active) worldMutationFailure();
+  if (!active) {worldMutationFailure();}
 
   return { segments: result, remaining };
 }

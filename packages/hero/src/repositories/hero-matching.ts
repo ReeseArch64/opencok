@@ -41,7 +41,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
         value.registeredAt < value.startTime ||
         value.registeredAt >= value.endTime
       )
-        throw new Error("Invalid hero realm registration");
+        {throw new Error("Invalid hero realm registration");}
 
       await db.transaction(async (tx) => {
         await lock(tx, value.periodId);
@@ -52,7 +52,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           .for("update");
 
         if (!period) {
-          if (value.registeredAt + 240000n >= value.endTime) return;
+          if (value.registeredAt + 240000n >= value.endTime) {return;}
 
           [period] = await tx
             .insert(hero_match_period)
@@ -77,7 +77,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           period.definition !== value.definition ||
           value.registeredAt < period.createdAt
         )
-          throw new Error("Conflicting hero matching period");
+          {throw new Error("Conflicting hero matching period");}
 
         const [existing] = await tx
           .select()
@@ -90,7 +90,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           )
           .limit(1);
 
-        if (existing || period.matchedAt > 0n || value.registeredAt >= period.admissionEnd) return;
+        if (existing || period.matchedAt > 0n || value.registeredAt >= period.admissionEnd) {return;}
 
         const [count] = await tx
           .select({ total: sql<string>`count(*)::text` })
@@ -98,7 +98,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           .where(eq(hero_match_realm.periodId, value.periodId));
 
         if (Number(count?.total ?? 0) >= 4096)
-          throw new Error("Hero matching registry bound exceeded");
+          {throw new Error("Hero matching registry bound exceeded");}
 
         await tx.insert(hero_match_realm).values({
           periodId: value.periodId,
@@ -122,7 +122,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           .for("update");
 
         if (!period || period.matchedAt > 0n || now < period.admissionEnd || now >= period.endTime)
-          return;
+          {return;}
 
         const realms = await tx
           .select()
@@ -131,7 +131,7 @@ export function createHeroMatchingRegistry(db: Global): HeroMatchingRegistry {
           .limit(4097);
         const groups = heroMatchGroups(realms, period.groupSize, period.matchSize);
 
-        if (!groups.length) return;
+        if (!groups.length) {return;}
 
         await tx.execute(
           sql`update opencok_global.hero_match_realm r set "serverGroup"=v."serverGroup", "matchedAt"=${now} from jsonb_to_recordset(${JSON.stringify(groups)}::jsonb) as v("kingdomId" integer,"serverGroup" text) where r."periodId"=${periodId} and r."kingdomId"=v."kingdomId"`,
@@ -186,9 +186,9 @@ export function createHeroMatchingRealmStore(
             .orderBy(asc(hero_activity.startTime), asc(hero_activity.uuid))
             .limit(2);
 
-        if (periods.length > 1) throw new Error("Hero matching local period bound exceeded");
+        if (periods.length > 1) {throw new Error("Hero matching local period bound exceeded");}
 
-        if (!periods.length) return [];
+        if (!periods.length) {return [];}
 
         const [power] = await tx
           .select({
@@ -216,7 +216,7 @@ export function createHeroMatchingRealmStore(
           .where(eq(hero_activity.uuid, id))
           .for("update");
 
-        if (!period || period.finish !== 0 || (period.endTime ?? 0n) <= BigInt(now())) return;
+        if (!period || period.finish !== 0 || (period.endTime ?? 0n) <= BigInt(now())) {return;}
 
         const members = result.serverGroup.split("|").map((raw) => cityInteger(raw, 1));
 
@@ -232,7 +232,7 @@ export function createHeroMatchingRealmStore(
           result.matchedAt >= (period.endTime ?? 0n) ||
           (period.serverGroup && period.serverGroup !== result.serverGroup)
         )
-          throw new Error("Invalid owned hero match result");
+          {throw new Error("Invalid owned hero match result");}
 
         await tx
           .update(hero_activity)

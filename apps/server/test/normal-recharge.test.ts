@@ -29,7 +29,7 @@ test("normal recharge periods require authoritative admission and merge facts, h
   const rules = await fixture(),
     server = { payTotalTime: 1n };
   for (const payTotalTime of [0n, now + 1n])
-    expect(normalRechargePeriod(rules, { payTotalTime }, now)).toBeUndefined();
+    {expect(normalRechargePeriod(rules, { payTotalTime }, now)).toBeUndefined();}
   expect(normalRechargePeriod(rules, server, now)?.type).toBe(1);
   expect(normalRechargePeriod(rules, server, now + 3n * day)?.type).toBe(1);
   expect(normalRechargePeriod(rules, server, now + 3n * day + 1n)).toBeUndefined();
@@ -94,7 +94,7 @@ test("normal operators use saved realm facts and the trusted paid producer remai
     "new.sercum.paid",
     "feedback.paid",
   ])
-    await expect(game.execute("owner", command, { _cok_: sfs.string("opaque") })).rejects.toThrow(
+    {await expect(game.execute("owner", command, { _cok_: sfs.string("opaque") })).rejects.toThrow(
       "102192",
-    );
+    );}
 });

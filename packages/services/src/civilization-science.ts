@@ -30,7 +30,7 @@ function complete(context: CityProgressionContext, base: number, expected?: numb
     level = num(row, "level");
 
   if (expected !== undefined && expected !== level + 1)
-    throw new GameError(errors.queue, "city_progression");
+    {throw new GameError(errors.queue, "city_progression");}
 
   const before = civilizationScience(context.rules, base, level),
     after = civilizationScience(context.rules, base, level + 1);
@@ -77,13 +77,13 @@ export class CivilizationScienceDomain extends CityCommandDomain {
             bases.flatMap((base) => {
               const level = num(current(context, base), "level");
 
-              if (!context.rules.power.civilizationSciences?.has(String(base + level))) return [];
+              if (!context.rules.power.civilizationSciences?.has(String(base + level))) {return [];}
 
               const pending = context.state.queues.filter(
                 (row) => num(row, "type") === 19 && row.itemId === String(base),
               );
 
-              if (pending.length > 1) throw new GameError(errors.queue, "city_progression");
+              if (pending.length > 1) {throw new GameError(errors.queue, "city_progression");}
 
               return [
                 sfs.object(
@@ -108,7 +108,7 @@ export class CivilizationScienceDomain extends CityCommandDomain {
         now: Number(context.now),
       })
     )
-      throw new GameError(errors.unsupported, "city_progression");
+      {throw new GameError(errors.unsupported, "city_progression");}
 
     const base = cityInteger(str(params, "itemId"), 1),
       row = current(context, base),
@@ -117,7 +117,7 @@ export class CivilizationScienceDomain extends CityCommandDomain {
     const next = civilizationScience(context.rules, base, level + 1);
 
     if (context.state.queues.some((q) => num(q, "type") === 19 && q.itemId === String(base)))
-      throw new GameError(errors.occupied, "city_progression");
+      {throw new GameError(errors.occupied, "city_progression");}
 
     civilizationScienceRequirements(context.state, context.rules, rule);
     const payment = cityInteger(int(params, "gold", 0), 0, 1),
@@ -132,7 +132,7 @@ export class CivilizationScienceDomain extends CityCommandDomain {
     for (const pair of rule.science_point?.split("|").filter(Boolean) ?? []) {
       const [id, count, ...extra] = pair.split(";");
 
-      if (!id || extra.length) throw new GameError(errors.invalid, "city_progression");
+      if (!id || extra.length) {throw new GameError(errors.invalid, "city_progression");}
 
       context.spendItem(id, cityInteger(count));
     }
@@ -187,7 +187,7 @@ export class CivilizationScienceDomain extends CityCommandDomain {
       (data && data.kind !== "civilization") ||
       action === TimedActivityAction.Start
     )
-      throw new GameError(errors.queue, "city_progression");
+      {throw new GameError(errors.queue, "city_progression");}
 
     civilizationScience(context.rules, base, num(row, "level") + 1);
 
@@ -198,7 +198,7 @@ export class CivilizationScienceDomain extends CityCommandDomain {
     }
 
     if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule)
-      return civilizationScienceView(context.rules, base, num(row, "level"), activity.dueAt);
+      {return civilizationScienceView(context.rules, base, num(row, "level"), activity.dueAt);}
 
     return complete(context, base, data?.target?.level);
   };

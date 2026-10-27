@@ -31,17 +31,17 @@ export class TroubleDomain extends CityCommandDomain {
   public readonly types: CityDomain["types"] = [];
 
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
-    if (!context.state.trouble) worldMutationFailure();
+    if (!context.state.trouble) {worldMutationFailure();}
 
     if (command === "get.trouble.list")
-      return { response: encode(troubleHistory(context.state.trouble.history)), event: null };
+      {return { response: encode(troubleHistory(context.state.trouble.history)), event: null };}
 
     if (command === "trouble.speed") {
       const state = context.state.effects.states.find((row) =>
         ["3", "4"].includes(context.rules.power.statuses?.get(String(row.stateId))?.overlap ?? ""),
       );
 
-      if (!state) worldMutationFailure();
+      if (!state) {worldMutationFailure();}
 
       context.economy.gold(-troubleRemovalGold(context.rules, long(state, "endTime"), context.now));
       const id = num(state, "stateId");
@@ -71,7 +71,7 @@ export class TroubleDomain extends CityCommandDomain {
       username = str(params, "username"),
       at = params.at?.type === Type.Long ? BigInt(params.at.value as bigint) : -1n;
 
-    if (username.length > 255 || at < 0n || at > context.now) worldMutationFailure();
+    if (username.length > 255 || at < 0n || at > context.now) {worldMutationFailure();}
 
     const rule = troubleItem(context.rules, item),
       result = temporaryEffect(
@@ -85,7 +85,7 @@ export class TroubleDomain extends CityCommandDomain {
       ),
       state = result.states[0];
 
-    if (!state) worldMutationFailure();
+    if (!state) {worldMutationFailure();}
 
     context.write.states = result.states;
     context.write.deletedStates = result.deleted;
@@ -124,17 +124,17 @@ export async function deliverWorldTroubles(
   const data = decode(payload),
     rows = data.troubles;
 
-  if (!rows) return;
+  if (!rows) {return;}
 
   if (rows.type !== Type.Array || !Array.isArray(rows.value) || rows.value.length > 256)
-    throw new Error("Invalid trouble arrivals");
+    {throw new Error("Invalid trouble arrivals");}
 
   for (const value of rows.value) {
     const row = fields(value),
       target = playerItemGiftRecipient(str(row, "target")),
       id = str(row, "march");
 
-    if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error("Invalid trouble march identity");
+    if (!/^[a-f0-9-]{36}$/.test(id)) {throw new Error("Invalid trouble march identity");}
 
     await deliver(target, { ...row, operationId: sfs.string(`trouble:${id}`) });
   }
@@ -157,15 +157,15 @@ export async function publishTroubleMutation(
     body = fields(data.body);
 
   if (point < 0 || !["trouble.deliver", "trouble.speed"].includes(command))
-    throw new Error("Invalid trouble notification");
+    {throw new Error("Invalid trouble notification");}
 
   const recipients = new Set([uid, ...(point ? await interested([point], owner, uid) : [])]);
 
   for (const recipient of recipients)
-    if (recipient)
-      await publish(
+    {if (recipient)
+      {await publish(
         recipient,
         command === "trouble.deliver" ? "push.trouble.avatar" : "push.city.status",
         body,
-      );
+      );}}
 }

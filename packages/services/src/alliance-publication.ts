@@ -30,19 +30,19 @@ export async function publishAllianceMutation(
         (profile) => profile.uid === str(row, "uid") && !text(profile, "allianceId"),
       )
     )
-      await publish(str(row, "uid"), "push.al.leave", { allianceId: sfs.string(id) });
+      {await publish(str(row, "uid"), "push.al.leave", { allianceId: sfs.string(id) });}
   }
 
-  if (!snapshot.record) return;
+  if (!snapshot.record) {return;}
 
   if (command === "activity.accept.reward") {
     const actor = str(data, "actor");
 
     for (const member of snapshot.members)
-      if (text(member, "uid") !== actor)
-        await publish(text(member, "uid"), "al.point.push", {
+      {if (text(member, "uid") !== actor)
+        {await publish(text(member, "uid"), "al.point.push", {
           alliancePoint: sfs.long(long(snapshot.record, "alliancepoint")),
-        });
+        });}}
 
     return;
   }
@@ -123,7 +123,7 @@ export async function publishAllianceMutation(
         (entry) => str(entry.value, "uid") === member.uid && str(entry.value, "allianceId") === id,
       )
     )
-      await publish(text(member, "uid"), "push.al.join", {
+      {await publish(text(member, "uid"), "push.al.join", {
         alliance: sfs.object({
           ...info,
           allianceScience: sfs.array(
@@ -142,18 +142,18 @@ export async function publishAllianceMutation(
               ),
           ),
         }),
-      });
+      });}
 
     if (command.startsWith("al.leader."))
-      await publish(text(member, "uid"), "push.al.leader.trans", { alliance: sfs.object(info) });
+      {await publish(text(member, "uid"), "push.al.leader.trans", { alliance: sfs.object(info) });}
 
     if (command === "al.callhelp" || command === "al.renderhelp" || command === "al.helpall")
-      for (const help of snapshot.helps) {
+      {for (const help of snapshot.helps) {
         const active = snapshot.queues.find(
           (queue) => queue.uuid === help.content && queue.ownerId === help.senderId,
         );
 
-        if (!active) continue;
+        if (!active) {continue;}
 
         await publish(
           text(member, "uid"),
@@ -174,13 +174,13 @@ export async function publishAllianceMutation(
             isvalid: sfs.int(num(help, "isvalid")),
           },
         );
-      }
+      }}
 
     if (command.startsWith("al.science.") || command === "alliance.tick")
-      for (const science of snapshot.sciences)
-        await publish(text(member, "uid"), "push.al.science", {
+      {for (const science of snapshot.sciences)
+        {await publish(text(member, "uid"), "push.al.science", {
           ...scienceFields(science),
           alliancepoint: sfs.long(long(record, "alliancepoint")),
-        });
+        });}}
   }
 }

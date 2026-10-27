@@ -13,7 +13,7 @@ import type { RechargeFeedbackGateway } from "@opencok/contracts/recharge-feedba
 import type { CityDomain } from "./city-domain.ts";
 
 export function rechargeFeedbackOperationId(owner: string, eventId: string): string {
-  if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) feedbackFailure();
+  if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) {feedbackFailure();}
 
   return `feedback:${createHash("sha256").update(`${owner}\0${eventId}`).digest("hex")}`;
 }
@@ -34,7 +34,7 @@ export class RechargeFeedbackDomain extends CityCommandDomain {
     this.prepare = async (context, command, params) => {
       const reader = context.state.rechargeFeedback;
 
-      if (!reader) feedbackFailure();
+      if (!reader) {feedbackFailure();}
 
       const ruleContext = {
           kingdomId: context.rules.kingdomId,
@@ -45,10 +45,10 @@ export class RechargeFeedbackDomain extends CityCommandDomain {
       const empty = () => ({ response: encode({}), event: null });
       const rules = [...(context.rules.advanced.rechargeFeedback?.values() ?? [])];
 
-      if (rules.length > 1024) feedbackFailure();
+      if (rules.length > 1024) {feedbackFailure();}
 
       if (command === "pay.recharge.ui.state") {
-        if (!window?.active) return empty();
+        if (!window?.active) {return empty();}
 
         const prices = rules.map((rule) => feedbackPrice(context.rules, rule.product_id ?? "")),
           counts = await reader.counts(
@@ -83,11 +83,11 @@ export class RechargeFeedbackDomain extends CityCommandDomain {
         !gateway ||
         str(params, "operationId") !== rechargeFeedbackOperationId(context.owner, eventId)
       )
-        feedbackFailure();
+        {feedbackFailure();}
 
       const proof = await gateway.accepted({ owner: context.owner, eventId });
 
-      if (!proof) feedbackFailure();
+      if (!proof) {feedbackFailure();}
 
       const payment = await reader.payment(proof.orderId, proof.platform),
         price = feedbackPrice(context.rules, proof.productId);
@@ -101,16 +101,16 @@ export class RechargeFeedbackDomain extends CityCommandDomain {
         !Number.isSafeInteger(Number(payment.time)) ||
         (price !== undefined && Math.round(payment.spend * 100) !== price)
       )
-        feedbackFailure();
+        {feedbackFailure();}
 
-      if (price === undefined) return empty();
+      if (price === undefined) {return empty();}
 
       const paidWindow = feedbackWindow(context.rules, {
         ...ruleContext,
         now: Number(payment.time),
       });
 
-      if (!paidWindow?.active) return empty();
+      if (!paidWindow?.active) {return empty();}
 
       const counts = await reader.counts(paidWindow.start, paidWindow.end, [price]),
         claimed = new Set(
@@ -127,7 +127,7 @@ export class RechargeFeedbackDomain extends CityCommandDomain {
         const template = context.rules.mail.get("11809"),
           contents = javaMailBytes(template?.message);
 
-        if (!template || !contents) feedbackFailure();
+        if (!template || !contents) {feedbackFailure();}
 
         const quests = (context.write.quests ??= {});
         quests.mail = [
@@ -149,11 +149,11 @@ export class RechargeFeedbackDomain extends CityCommandDomain {
       }
 
       if (eligible.length)
-        context.write.rechargeFeedback = eligible.map((rule) => ({
+        {context.write.rechargeFeedback = eligible.map((rule) => ({
           id: rule.id!,
           startTime: paidWindow.start,
           endTime: paidWindow.end,
-        }));
+        }));}
 
       return empty();
     };

@@ -69,7 +69,7 @@ test("seasonal exchange pins five offers, enforces sequential levels and refresh
     expect(await h.gold()).toBe(baseline + 7n);
     await expect(h.command("activity.exchange.reward", { level: sfs.int(1) })).rejects.toThrow();
     for (const level of [2, 3, 4, 5])
-      await h.command("activity.exchange.reward", { level: sfs.int(level) });
+      {await h.command("activity.exchange.reward", { level: sfs.int(level) });}
     expect(await h.count()).toBe(5);
     expect(await h.gold()).toBe(baseline + 35n);
     expect((await h.saved()).level).toBe(0);

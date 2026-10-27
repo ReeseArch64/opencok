@@ -27,10 +27,10 @@ export class AllianceHeartDomain extends CityCommandDomain {
     this.prepare = async (context, command, params) => {
       const state = context.state.allianceHeart;
 
-      if (!state) allianceHeartFailure();
+      if (!state) {allianceHeartFailure();}
 
       if (command === "heart.init") {
-        if (!state.pending.length) return { response: encode(allianceHeartLogin()), event: null };
+        if (!state.pending.length) {return { response: encode(allianceHeartLogin()), event: null };}
 
         const first = state.pending[0]!,
           duration = num(first, "duration"),
@@ -43,7 +43,7 @@ export class AllianceHeartDomain extends CityCommandDomain {
           effect.length > 2 ||
           state.pending.some((row) => row.uid !== context.owner)
         )
-          allianceHeartFailure();
+          {allianceHeartFailure();}
 
         const until = context.now + BigInt(duration) * 1000n,
           names = state.pending.map((row) => text(row, "senderName"));
@@ -73,13 +73,13 @@ export class AllianceHeartDomain extends CityCommandDomain {
         alliance = state.members.find((row) => row.uid === context.owner)?.allianceId;
 
       if (!alliance || state.members.find((row) => row.uid === recipient)?.allianceId !== alliance)
-        throw new GameError("152027");
+        {throw new GameError("152027");}
 
       if (
         state.recipient?.uid !== recipient ||
         num(state.recipient, "serverId") !== context.rules.kingdomId
       )
-        allianceHeartFailure();
+        {allianceHeartFailure();}
 
       const itemId = str(params, "itemId"),
         uuid = str(params, "uuid"),
@@ -87,33 +87,33 @@ export class AllianceHeartDomain extends CityCommandDomain {
         rule = allianceHeartRule(context.rules, itemId);
 
       if (!item || item.itemId !== itemId || item.count < 1 || !context.economy.consumeItem)
-        allianceHeartFailure();
+        {allianceHeartFailure();}
 
       const city = (uid: string) => {
           const world = state.worlds.find((row) => row.uid === uid);
 
-          if (!world || num(world, "pointId") === 0) return;
+          if (!world || num(world, "pointId") === 0) {return;}
 
-          if (num(world, "worldId") !== 0) allianceHeartFailure();
+          if (num(world, "worldId") !== 0) {allianceHeartFailure();}
 
           const point = state.points.find(
             (row) => row.id === world.pointId && row.ownerId === uid && num(row, "pointType") === 1,
           );
 
-          if (!point) allianceHeartFailure();
+          if (!point) {allianceHeartFailure();}
 
           return num(point, "id");
         },
         own = city(context.owner),
         target = city(recipient);
 
-      if (!own) allianceHeartFailure();
+      if (!own) {allianceHeartFailure();}
 
       const until = context.now + BigInt(rule.duration) * 1000n,
         points = [{ id: own, uid: context.owner, until, effect: rule.effect }];
 
       if (target && target !== own)
-        points.push({ id: target, uid: recipient, until, effect: rule.effect });
+        {points.push({ id: target, uid: recipient, until, effect: rule.effect });}
 
       context.economy.consumeItem(uuid, 1);
       const online = connected(recipient);
@@ -184,7 +184,7 @@ export async function publishAllianceHeartMutation(
     !Array.isArray(event.points.value) ||
     event.points.value.length > 2
   )
-    allianceHeartFailure();
+    {allianceHeartFailure();}
 
   const points = event.points.value.map((value) => fields(value));
   const notification = recipient ? fields(event.notification) : undefined;
@@ -203,13 +203,13 @@ export async function publishAllianceHeartMutation(
       typeof until.value !== "bigint" ||
       until.value <= 0n
     )
-      allianceHeartFailure();
+      {allianceHeartFailure();}
 
     const body = allianceHeartNotification(id, effect, until.value);
 
     for (const observer of new Set(await interested([id], owner, ""))) {
       if (observer && !(notification && observer === recipient && uid === recipient))
-        await publish(observer, "push.heart.having", body);
+        {await publish(observer, "push.heart.having", body);}
     }
   }
 
@@ -219,7 +219,7 @@ export async function publishAllianceHeartMutation(
       until = BigInt(str(notification, "time"));
 
     if (!Number.isInteger(point) || point <= 0 || str(notification, "receiveuid") !== recipient)
-      allianceHeartFailure();
+      {allianceHeartFailure();}
 
     await publish(
       recipient,

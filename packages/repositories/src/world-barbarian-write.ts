@@ -12,7 +12,7 @@ export async function writeWorldBarbarianActors(
 ) {
   const actor = write.barbarianActors;
 
-  if (!actor) return;
+  if (!actor) {return;}
 
   const ids = [...actor.points],
     points = write.points ?? [];
@@ -33,7 +33,7 @@ export async function writeWorldBarbarianActors(
     actor.currentHP < 0 ||
     actor.currentHP > 2147483647
   )
-    throw new Error("Invalid barbarian actor plan");
+    {throw new Error("Invalid barbarian actor plan");}
 
   const saved = await tx
     .select()
@@ -52,7 +52,7 @@ export async function writeWorldBarbarianActors(
         row.ownerMarchUUid,
     )
   )
-    throw new Error("Barbarian footprint changed");
+    {throw new Error("Barbarian footprint changed");}
 
   const [claimed] = await tx
     .select({ id: worldpoint.id })
@@ -66,7 +66,7 @@ export async function writeWorldBarbarianActors(
     )
     .limit(1);
 
-  if (claimed) throw new Error("Barbarian footprint claimed");
+  if (claimed) {throw new Error("Barbarian footprint claimed");}
 
   const army = encodeJavaIntMap(actor.army),
     awards = encodeJavaIntMap(actor.awards);
@@ -82,5 +82,5 @@ export async function writeWorldBarbarianActors(
   );
 
   if (points.some((point) => long(point, "flushTime") <= 0n))
-    throw new Error("Invalid barbarian lifetime");
+    {throw new Error("Invalid barbarian lifetime");}
 }

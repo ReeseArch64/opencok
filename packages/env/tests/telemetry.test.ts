@@ -24,5 +24,5 @@ test("telemetry is optional and its timing and authenticated endpoint settings a
     { MAPLE_LOCAL_INGEST_KEY: "short" },
     { OTEL_SLOW_OPERATION_MS: "-1" },
   ])
-    expect(telemetrySchema.safeParse(input).success).toBe(false);
+    {expect(telemetrySchema.safeParse(input).success).toBe(false);}
 });

@@ -12,9 +12,9 @@ test("legacy defense replacement, dismissal, and tavern picks preserve ownership
       ["a", "240000", 1],
       ["b", "240001", 0],
     ] as const)
-      await h.db.db
+      {await h.db.db
         .insert(user_general)
-        .values({ uuid, uid: "owner", generalId: id, level: 1, status, abilityIndex: 1 });
+        .values({ uuid, uid: "owner", generalId: id, level: 1, status, abilityIndex: 1 });}
     await h.command("general.def.ch", { src: sfs.string("b"), dst: sfs.string("a") });
     expect(
       (await h.db.db.select().from(user_general).where(eq(user_general.uuid, "a")))[0]?.status,

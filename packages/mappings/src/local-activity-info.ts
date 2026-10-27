@@ -29,7 +29,7 @@ export function catalogRewardView(
   }
 
   for (const key of ["wood", "food", "iron", "stone", "gold", "prestige"] as const)
-    if (rule[key] !== undefined) raw[key] = sfs.string(rule[key]);
+    {if (rule[key] !== undefined) {raw[key] = sfs.string(rule[key]);}}
 
   return validateFields(catalogRewardSchema, {
     award: rewardPreviewArray(rewards),

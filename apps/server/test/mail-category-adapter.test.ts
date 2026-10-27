@@ -69,10 +69,10 @@ function fixture(
       const text = statement.text;
       calls.push({ text, params });
       const fail = (name: string) => {
-        if (name === options.fail) throw new Error("Synthetic " + name + " failure");
+        if (name === options.fail) {throw new Error("Synthetic " + name + " failure");}
       };
-      if (text.startsWith("begin")) before = rows.map((row) => ({ ...row }));
-      if (text === "rollback") rows = before;
+      if (text.startsWith("begin")) {before = rows.map((row) => ({ ...row }));}
+      if (text === "rollback") {rows = before;}
       if (text.includes('from "opencok_kingdom"."translationv2"')) {
         const contents = Buffer.from("traduzido");
         return {
@@ -80,7 +80,7 @@ function fixture(
         };
       }
       if (text.includes('from "opencok_kingdom"."userprofile"') && text.includes('"name"'))
-        return { rows: [["sender", 1, "Current", "portrait", 2, "pt", "TAG"]] };
+        {return { rows: [["sender", 1, "Current", "portrait", 2, "pt", "TAG"]] };}
       if (text.includes('from "opencok_kingdom"."userprofile"')) {
         fail("profile");
         return { rows: options.profile === null ? [] : [options.profile ?? ["self", 1, "0", 0]] };
@@ -142,7 +142,7 @@ function fixture(
         const [owner, ...ids] = params;
         rows = rows.filter((row) => row.toUser !== owner || !ids.includes(row.uid));
       }
-      if (text === "commit") fail("commit");
+      if (text === "commit") {fail("commit");}
       return { rows: [] };
     },
   };
@@ -254,7 +254,7 @@ test("category capacities reject before body fetch and malformed cleanup rolls b
     ).rejects.toThrow();
     expect(f.rows()).toEqual(before);
     expect(f.calls.at(-1)!.text).toBe("rollback");
-    if ("size" in options) expect(f.calls).toHaveLength(4);
+    if ("size" in options) {expect(f.calls).toHaveLength(4);}
   }
   const rewards = fixture();
   rewards.rows().find((row) => row.uid === "newest")!.rewardId = "x".repeat(4 * 1024 * 1024 + 1);
@@ -264,7 +264,7 @@ test("category capacities reject before body fetch and malformed cleanup rolls b
   expect(rewards.calls).toHaveLength(4);
   const large = fixture();
   for (let i = 0; i < 1001; i++)
-    large.rows().push({ ...mailListEntry({ uid: `large-${i}` }), extraOwner: "self" });
+    {large.rows().push({ ...mailListEntry({ uid: `large-${i}` }), extraOwner: "self" });}
   await expect(
     readMailCategory(large.databases, 1, "self", query(1, 0, 2147483647), async () => []),
   ).rejects.toThrow("capacity");
@@ -294,8 +294,8 @@ test("extra ownership is enforced and absent payloads do not become malformed-ma
   for (const missing of [false, true]) {
     const f = fixture();
     const good = f.rows().find((row) => row.uid === "good")!;
-    if (missing) good.extra = null;
-    else good.extraOwner = "foreign";
+    if (missing) {good.extra = null;}
+    else {good.extraOwner = "foreign";}
     await expect(
       readMailCategory(f.databases, 1, "self", query(), inspect(query())),
     ).rejects.toThrow("Missing persisted mail contents");
@@ -351,16 +351,16 @@ test("game command reaches category SQL through the production repository adapte
 test("direct category callers cannot bypass numeric or identity bounds", () => {
   const f = fixture();
   for (const owner of ["", " ", "x".repeat(41), "\0", "\ud800"])
-    expect(() => readMailCategory(f.databases, 1, owner, query(), inspect(query()))).toThrow();
+    {expect(() => readMailCategory(f.databases, 1, owner, query(), inspect(query()))).toThrow();}
   for (const realm of [0, 1.5, 2147483648])
-    expect(() => readMailCategory(f.databases, realm, "self", query(), inspect(query()))).toThrow();
+    {expect(() => readMailCategory(f.databases, realm, "self", query(), inspect(query()))).toThrow();}
   for (const q of [
     { ...query(), now: -1 },
     { ...query(), category: 0.5 },
     { ...query(), offset: 2147483648 },
     { ...query(), begin: NaN },
   ])
-    expect(() => readMailCategory(f.databases, 1, "self", q, inspect(q))).toThrow();
+    {expect(() => readMailCategory(f.databases, 1, "self", q, inspect(q))).toThrow();}
   expect(f.calls).toEqual([]);
 });
 

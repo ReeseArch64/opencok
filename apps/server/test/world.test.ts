@@ -51,7 +51,7 @@ test("v12 point sections contain JSON objects below the signed-short UTF limit",
 
 test("map sections reject malformed or non-object points", () => {
   for (const point of ["null", "[]", "1", '"point"', "{"])
-    expect(() => pointSections([point])).toThrow();
+    {expect(() => pointSections([point])).toThrow();}
 });
 
 test("native fixed reservations and stored monster points remain visible without combat outcomes", () => {

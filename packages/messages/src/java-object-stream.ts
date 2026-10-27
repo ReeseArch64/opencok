@@ -31,7 +31,7 @@ export type JavaValue =
   | { kind: "block"; bytes: Buffer };
 
 export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
-  if (!Buffer.isBuffer(bytes) || bytes.length > 65535) throw new ProtocolError();
+  if (!Buffer.isBuffer(bytes) || bytes.length > 65535) {throw new ProtocolError();}
 
   let offset = 0;
   let budget = 32768;
@@ -40,7 +40,7 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
     throw new ProtocolError();
   };
   const take = (size: number): Buffer => {
-    if (!Number.isSafeInteger(size) || size < 0 || offset + size > bytes.length) return invalid();
+    if (!Number.isSafeInteger(size) || size < 0 || offset + size > bytes.length) {return invalid();}
 
     const value = bytes.subarray(offset, offset + size);
     offset += size;
@@ -49,14 +49,14 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
   };
   const byte = () => take(1)[0]!;
   const add = (value: JavaClass | JavaValue) => {
-    if (handles.length >= 16384) invalid();
+    if (handles.length >= 16384) {invalid();}
 
     handles.push(value);
   };
   const reference = (): JavaClass | JavaValue => {
     const index = take(4).readUInt32BE() - 0x7e0000;
 
-    if (index < 0 || index >= handles.length) return invalid();
+    if (index < 0 || index >= handles.length) {return invalid();}
 
     return handles[index]!;
   };
@@ -67,42 +67,42 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
     for (let i = 0; i < encoded.length;) {
       const first = encoded[i++]!;
 
-      if (first > 0 && first < 128) value += String.fromCharCode(first);
+      if (first > 0 && first < 128) {value += String.fromCharCode(first);}
       else if (first >= 0xc0 && first <= 0xef) {
         const second = encoded[i++];
 
-        if (second === undefined || (second & 0xc0) !== 0x80) return invalid();
+        if (second === undefined || (second & 0xc0) !== 0x80) {return invalid();}
 
         let code: number;
 
         if (first < 0xe0) {
           code = ((first & 31) << 6) | (second & 63);
 
-          if (code !== 0 && code < 128) return invalid();
+          if (code !== 0 && code < 128) {return invalid();}
         } else {
           const third = encoded[i++];
 
-          if (third === undefined || (third & 0xc0) !== 0x80) return invalid();
+          if (third === undefined || (third & 0xc0) !== 0x80) {return invalid();}
 
           code = ((first & 15) << 12) | ((second & 63) << 6) | (third & 63);
 
-          if (code < 2048) return invalid();
+          if (code < 2048) {return invalid();}
         }
 
         value += String.fromCharCode(code);
-      } else return invalid();
+      } else {return invalid();}
     }
 
     return value;
   };
   const guard = (depth: number) => {
-    if (depth > 32 || --budget < 0) invalid();
+    if (depth > 32 || --budget < 0) {invalid();}
   };
   const annotation = (depth: number): JavaValue[] => {
     const values: JavaValue[] = [];
 
     while (bytes[offset] !== 0x78) {
-      if (values.length >= 8192) invalid();
+      if (values.length >= 8192) {invalid();}
 
       values.push(content(depth + 1, true));
     }
@@ -115,22 +115,22 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
     guard(depth);
     const token = byte();
 
-    if (token === 0x70) return null;
+    if (token === 0x70) {return null;}
 
     if (token === 0x71) {
       const value = reference();
 
       if (!value || typeof value !== "object" || value.kind !== "class" || !value.complete)
-        return invalid();
+        {return invalid();}
 
       return value;
     }
 
-    if (token !== 0x72) return invalid();
+    if (token !== 0x72) {return invalid();}
 
     const name = utf();
 
-    if (!name || name.length > 1024) return invalid();
+    if (!name || name.length > 1024) {return invalid();}
 
     const uid = take(8).readBigInt64BE();
     const result: JavaClass = {
@@ -145,11 +145,11 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
     add(result);
     result.flags = byte();
 
-    if (![2, 3, 18].includes(result.flags)) return invalid();
+    if (![2, 3, 18].includes(result.flags)) {return invalid();}
 
     const count = take(2).readUInt16BE();
 
-    if (count > 256 || (result.flags === 18 && (count !== 0 || uid !== 0n))) return invalid();
+    if (count > 256 || (result.flags === 18 && (count !== 0 || uid !== 0n))) {return invalid();}
 
     const names = new Set<string>();
 
@@ -157,7 +157,7 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
       const type = String.fromCharCode(byte());
       const fieldName = utf();
 
-      if (!"BCDFIJSZL[".includes(type) || !fieldName || names.has(fieldName)) return invalid();
+      if (!"BCDFIJSZL[".includes(type) || !fieldName || names.has(fieldName)) {return invalid();}
 
       names.add(fieldName);
       const field: Field = { name: fieldName, type };
@@ -165,7 +165,7 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
       if (type === "L" || type === "[") {
         const signature = content(depth + 1);
 
-        if (typeof signature !== "string" || signature[0] !== type) return invalid();
+        if (typeof signature !== "string" || signature[0] !== type) {return invalid();}
 
         field.signature = signature;
       }
@@ -198,7 +198,7 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
       case "Z": {
         const value = byte();
 
-        if (value > 1) return invalid();
+        if (value > 1) {return invalid();}
 
         return value === 1;
       }
@@ -210,12 +210,12 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
     guard(depth);
     const token = byte();
 
-    if (token === 0x70) return null;
+    if (token === 0x70) {return null;}
 
     if (token === 0x71) {
       const value = reference();
 
-      if (value && typeof value === "object" && value.kind === "class") return invalid();
+      if (value && typeof value === "object" && value.kind === "class") {return invalid();}
 
       return value as JavaValue;
     }
@@ -234,11 +234,11 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
       return { kind: "block", bytes: Buffer.from(take(size)) };
     }
 
-    if (![0x73, 0x75, 0x76, 0x7e].includes(token)) return invalid();
+    if (![0x73, 0x75, 0x76, 0x7e].includes(token)) {return invalid();}
 
     const type = descriptor(depth + 1);
 
-    if (!type) return invalid();
+    if (!type) {return invalid();}
 
     if (token === 0x76) {
       const value: JavaValue = { kind: "class-value", descriptor: type };
@@ -248,13 +248,13 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
     }
 
     if (token === 0x7e) {
-      if (type.flags !== 18) return invalid();
+      if (type.flags !== 18) {return invalid();}
 
       const value: JavaValue = { kind: "enum", descriptor: type, name: "" };
       add(value);
       const name = content(depth + 1);
 
-      if (typeof name !== "string") return invalid();
+      if (typeof name !== "string") {return invalid();}
 
       value.name = name;
 
@@ -263,13 +263,13 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
 
     if (token === 0x75) {
       if (!type.name.startsWith("[") || type.flags !== 2 || type.fields.length || type.parent)
-        return invalid();
+        {return invalid();}
 
       const value: JavaValue = { kind: "array", descriptor: type, values: [] };
       add(value);
       const length = take(4).readInt32BE();
 
-      if (length < 0 || length > (type.name === "[B" ? 65535 : 4096)) return invalid();
+      if (length < 0 || length > (type.name === "[B" ? 65535 : 4096)) {return invalid();}
 
       const element = type.name[1]!;
 
@@ -282,14 +282,14 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
       return value;
     }
 
-    if (type.flags === 18 || type.name.startsWith("[")) return invalid();
+    if (type.flags === 18 || type.name.startsWith("[")) {return invalid();}
 
     const value: JavaObject = { kind: "object", descriptor: type, slots: new Map() };
     add(value);
     const chain: JavaClass[] = [];
 
     for (let current: JavaClass | null = type; current; current = current.parent) {
-      if (chain.length >= 32 || chain.includes(current) || current.flags === 18) return invalid();
+      if (chain.length >= 32 || chain.includes(current) || current.flags === 18) {return invalid();}
 
       chain.push(current);
     }
@@ -298,10 +298,10 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
       const fields = new Map<string, JavaValue>();
 
       for (const field of current.fields)
-        fields.set(
+        {fields.set(
           field.name,
           field.type === "L" || field.type === "[" ? content(depth + 1) : primitive(field.type),
-        );
+        );}
 
       value.slots.set(current, { fields, custom: current.flags === 3 ? annotation(depth) : [] });
     }
@@ -309,11 +309,11 @@ export function decodeJavaObjectStream(bytes: Buffer): JavaValue {
     return value;
   };
 
-  if (!take(4).equals(Buffer.from("aced0005", "hex"))) return invalid();
+  if (!take(4).equals(Buffer.from("aced0005", "hex"))) {return invalid();}
 
   const result = content(0);
 
-  if (offset !== bytes.length) return invalid();
+  if (offset !== bytes.length) {return invalid();}
 
   return result;
 }

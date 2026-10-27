@@ -17,7 +17,7 @@ test("decoded object traversal matches frozen Java 8 concurrent-map resize and c
     const entries = legacyJsonEntries(object);
     expect(entries.map(([key]) => key)).toEqual(order.map((index) => wireText(keys[index]!)));
     for (let index = 0; index < entries.length; index++)
-      expect(entries[index]![1]).toEqual(sfs.array([sfs.int(order[index]!)]));
+      {expect(entries[index]![1]).toEqual(sfs.array([sfs.int(order[index]!)]));}
   }
 });
 
@@ -40,7 +40,7 @@ test("combat helper maps use concurrent-map order on both sides and keep each as
       order.map((index) => wireText(keys[index]!)),
     );
     for (let index = 0; index < attackers.length; index++)
-      expect(fields(attackers[index]).armyInfo).toEqual(sfs.array([sfs.int(order[index]!)]));
+      {expect(fields(attackers[index]).armyInfo).toEqual(sfs.array([sfs.int(order[index]!)]));}
     const defenders = report.defHelpReport!.value as Value[];
     expect(defenders.map((value) => fields(value).name!.value)).toEqual(
       legacyJsonEntries(decodeLegacyJsonObject(objectText([...keys].reverse()))).map(

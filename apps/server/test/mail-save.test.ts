@@ -20,11 +20,11 @@ test("mail saving preserves single identifiers and batch split semantics while n
     now,
   });
   for (const flag of [-2147483648, -1, 0, 2, 2147483647])
-    expect(mailSaveQuery("batch", "a", flag, now).flag).toBe(0);
+    {expect(mailSaveQuery("batch", "a", flag, now).flag).toBe(0);}
   for (const value of ["", ",,,,", " \t\n", "\u2003"])
-    expect(mailSaveQuery("batch", value, 1, now).ids).toEqual([]);
+    {expect(mailSaveQuery("batch", value, 1, now).ids).toEqual([]);}
   for (const value of ["\u00a0", "\u2007", "\u202f", " a "])
-    expect(mailSaveQuery("batch", value, 1, now).ids).toEqual([value]);
+    {expect(mailSaveQuery("batch", value, 1, now).ids).toEqual([value]);}
   expect(
     mailSaveQuery("batch", Array.from({ length: 1000 }, (_, i) => `mail-${i}`).join(","), 1, now)
       .ids,
@@ -39,11 +39,11 @@ test("mail saving rejects malformed IDs, unbounded batches and invalid numeric i
     Array.from({ length: 1001 }, () => "a").join(","),
     ",".repeat(65536),
   ])
-    expect(() => mailSaveQuery("batch", value, 1, now)).toThrow();
+    {expect(() => mailSaveQuery("batch", value, 1, now)).toThrow();}
   for (const flag of [NaN, 1.5, Infinity, 2147483648, -2147483649])
-    expect(() => mailSaveQuery("save", "a", flag, now)).toThrow();
+    {expect(() => mailSaveQuery("save", "a", flag, now)).toThrow();}
   for (const time of [-1, NaN, 1.5, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => mailSaveQuery("save", "a", 1, time)).toThrow();
+    {expect(() => mailSaveQuery("save", "a", 1, time)).toThrow();}
   expect(() => mailSaveQuery("unknown" as never, "a", 1, now)).toThrow();
   expect(mailSave("save")).toEqual({ save: sfs.string("success") });
   expect(mailSave("cancel")).toEqual({ cancel: sfs.string("success") });

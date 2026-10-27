@@ -29,7 +29,7 @@ import { startWorldProcess } from "./support/world-process";
 async function until(check: () => Promise<boolean>, milliseconds = 15000) {
   const end = Date.now() + milliseconds;
   do {
-    if (await check()) return;
+    if (await check()) {return;}
     await Bun.sleep(100);
   } while (Date.now() < end);
   throw new Error("Synthetic world transition timed out");
@@ -404,11 +404,11 @@ test("a killed realm recovers the same march and publishes native transitions on
         .where(and(eq(worldpoint.worldId, 0), eq(worldpoint.id, 10))),
     ).toMatchObject([{ resCostValue: 5, ownerMarchUUid: "" }]);
   } finally {
-    for (const client of clients) client.close();
+    for (const client of clients) {client.close();}
     await runtime?.close();
     await global?.close();
     await realm?.close();
-    for (const name of containers) await pg.docker(["stop", name]);
+    for (const name of containers) {await pg.docker(["stop", name]);}
     await pg.stop();
   }
 }, 180000);

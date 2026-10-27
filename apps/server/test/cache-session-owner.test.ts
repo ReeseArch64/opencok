@@ -37,7 +37,7 @@ test("owned Redis sessions share one epoch key across claim, refresh and token-c
 });
 test("a session cache cannot change its bound realm epoch or accept an invalid epoch", () => {
   for (const epoch of [0n, -1n, 9223372036854775808n])
-    expect(() => new SessionCache(config).bindRealmOwner(epoch)).toThrow();
+    {expect(() => new SessionCache(config).bindRealmOwner(epoch)).toThrow();}
   const cache = new SessionCache(config);
   cache.bindRealmOwner(1n);
   expect(() => cache.bindRealmOwner(1n)).toThrow();

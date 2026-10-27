@@ -14,7 +14,7 @@ const denominator = 3600000n * productionScale;
 
 export function activityInstant(value: bigint) {
   if (typeof value !== "bigint" || value < 0n || value >= idleDeadline)
-    throw new Error("Invalid activity instant");
+    {throw new Error("Invalid activity instant");}
 
   return value;
 }
@@ -22,7 +22,7 @@ export function activityInstant(value: bigint) {
 export function activityState(dueAt: bigint, now: bigint): "idle" | "running" | "due" {
   activityInstant(now);
 
-  if (dueAt === idleDeadline) return "idle";
+  if (dueAt === idleDeadline) {return "idle";}
 
   activityInstant(dueAt);
 
@@ -44,19 +44,19 @@ export function transitionActivity(
     !Number.isSafeInteger(activity.version) ||
     activity.version >= 2147483647
   )
-    throw new Error("Activity version conflict");
+    {throw new Error("Activity version conflict");}
 
-  if (now < activity.startedAt) throw new Error("Activity clock moved backwards");
+  if (now < activity.startedAt) {throw new Error("Activity clock moved backwards");}
 
   const due = activityState(activity.dueAt, now) === "due";
 
-  if (action === "cancel" && due) throw new Error("Due activity cannot be cancelled");
+  if (action === "cancel" && due) {throw new Error("Due activity cannot be cancelled");}
 
-  if (action === "finish" && !due) throw new Error("Activity is not due");
+  if (action === "finish" && !due) {throw new Error("Activity is not due");}
 
   if (action === "reschedule") {
     if (dueAt === undefined || activityInstant(dueAt) > activity.dueAt || dueAt < now)
-      throw new Error("Invalid activity acceleration");
+      {throw new Error("Invalid activity acceleration");}
 
     return { ...activity, dueAt, version: activity.version + 1 };
   }
@@ -80,7 +80,7 @@ export function validateProductionRate(rate: ProductionRate) {
     rate.capacity < 0n ||
     rate.capacity > idleDeadline
   )
-    throw new Error("Invalid production rate");
+    {throw new Error("Invalid production rate");}
 }
 
 export function settleProduction(account: ProductionAccount, now: bigint): ProductionAccount {
@@ -95,28 +95,28 @@ export function settleProduction(account: ProductionAccount, now: bigint): Produ
     account.rates.length < 1 ||
     account.rates.length > 256
   )
-    throw new Error("Invalid production checkpoint");
+    {throw new Error("Invalid production checkpoint");}
 
   let previous = -1n;
 
   for (const rate of account.rates) {
     validateProductionRate(rate);
 
-    if (rate.at <= previous) throw new Error("Unordered production rates");
+    if (rate.at <= previous) {throw new Error("Unordered production rates");}
 
     previous = rate.at;
   }
 
-  if (account.rates[0]!.at > account.settledAt) throw new Error("Missing production rate history");
+  if (account.rates[0]!.at > account.settledAt) {throw new Error("Missing production rate history");}
 
-  if (now <= account.settledAt) return { ...account };
+  if (now <= account.settledAt) {return { ...account };}
 
   let amount = account.amount,
     remainder = account.remainder,
     cursor = account.settledAt;
   let index = 0;
 
-  while (index + 1 < account.rates.length && account.rates[index + 1]!.at <= cursor) index++;
+  while (index + 1 < account.rates.length && account.rates[index + 1]!.at <= cursor) {index++;}
 
   while (cursor < now) {
     const rate = account.rates[index]!;
@@ -136,7 +136,7 @@ export function settleProduction(account: ProductionAccount, now: bigint): Produ
 
     cursor = end;
 
-    if (next !== undefined && next <= end) index++;
+    if (next !== undefined && next <= end) {index++;}
   }
 
   const rates = account.rates.slice(Math.min(index, account.rates.length - 1));
@@ -150,7 +150,7 @@ export function changeProductionRate(
   rates: readonly ProductionRate[],
 ): ProductionAccount {
   if (at < account.settledAt || rates[0]?.at !== at)
-    throw new Error("Retroactive production change");
+    {throw new Error("Retroactive production change");}
 
   const settled = settleProduction(account, at);
 

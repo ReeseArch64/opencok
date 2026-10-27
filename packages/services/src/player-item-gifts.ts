@@ -18,7 +18,7 @@ export class PlayerItemGiftDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.playerItemGifts;
 
-    if (!state) playerItemGiftFailure();
+    if (!state) {playerItemGiftFailure();}
 
     if (command === "item.send") {
       const recipient = playerItemGiftRecipient(str(params, "uid")),
@@ -26,7 +26,7 @@ export class PlayerItemGiftDomain extends CityCommandDomain {
       playerItemGiftTarget(context.rules, itemId);
 
       if (state.recipient?.uid !== recipient || state.recipient.realm !== context.rules.kingdomId)
-        playerItemGiftFailure();
+        {playerItemGiftFailure();}
 
       context.economy.item(itemId, -1);
       context.write.playerItemGifts = { send: { uid: recipient, itemId, createdAt: context.now } };
@@ -34,7 +34,7 @@ export class PlayerItemGiftDomain extends CityCommandDomain {
       return { response: encode(playerItemGiftView()), event: null };
     }
 
-    if (!state.pending.length) return { response: encode({}), event: null };
+    if (!state.pending.length) {return { response: encode({}), event: null };}
 
     const ids: number[] = [],
       names: string[] = [],
@@ -43,7 +43,7 @@ export class PlayerItemGiftDomain extends CityCommandDomain {
 
     for (const gift of state.pending) {
       if (gift.uid !== context.owner || num(gift, "itemNum") < 0 || !Number.isInteger(gift.id))
-        playerItemGiftFailure();
+        {playerItemGiftFailure();}
 
       const itemId = text(gift, "itemId"),
         target = playerItemGiftTarget(context.rules, itemId);
@@ -57,7 +57,7 @@ export class PlayerItemGiftDomain extends CityCommandDomain {
     context.write.playerItemGifts = { delivered: ids };
     const itemStates = [...items].map((id) => context.economy.itemState?.(id));
 
-    if (itemStates.some((item) => !item)) playerItemGiftFailure();
+    if (itemStates.some((item) => !item)) {playerItemGiftFailure();}
 
     const pushes = [
       {
@@ -109,7 +109,7 @@ export async function publishPlayerItemGiftMutation(
     event.pushes.value.length < 2 ||
     event.pushes.value.length > 65
   )
-    playerItemGiftFailure();
+    {playerItemGiftFailure();}
 
   for (const value of event.pushes.value) {
     const push = fields(value),
@@ -122,11 +122,11 @@ export async function publishPlayerItemGiftMutation(
         !Array.isArray(body.useritemlist.value) ||
         body.useritemlist.value.length > 64
       )
-        playerItemGiftFailure();
+        {playerItemGiftFailure();}
     } else if (command === "push.item.having") {
       if (body.name?.type !== Type.String || body.itemId?.type !== Type.String)
-        playerItemGiftFailure();
-    } else playerItemGiftFailure();
+        {playerItemGiftFailure();}
+    } else {playerItemGiftFailure();}
 
     encode(body);
     await publish(owner, command, body);

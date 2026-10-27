@@ -47,7 +47,7 @@ test("social transactions survive restart, revoke access and archive verified bo
     const admin = await pg.start();
     try {
       for (const name of ["opencok_global", "opencok_kingdom_1", "opencok_kingdom_2"])
-        await admin.query(`CREATE DATABASE "${name}"`);
+        {await admin.query(`CREATE DATABASE "${name}"`);}
     } finally {
       await admin.end();
     }
@@ -57,10 +57,10 @@ test("social transactions survive restart, revoke access and archive verified bo
         .pathname,
     });
     for (const kingdom of databases.kingdoms.values())
-      await migrate(kingdom.db, {
+      {await migrate(kingdom.db, {
         migrationsFolder: new URL("../../../packages/drizzle/migrations/kingdom", import.meta.url)
           .pathname,
-      });
+      });}
     for (const [uid, realm, gm] of [
       ["alice", 1, 0],
       ["bob", 2, 0],
@@ -228,7 +228,7 @@ test("social transactions survive restart, revoke access and archive verified bo
         await first.archivePending!();
         break;
       } catch (error) {
-        if (attempt >= 4) throw error;
+        if (attempt >= 4) {throw error;}
         await Bun.sleep(100);
       }
     }
@@ -323,6 +323,6 @@ test("social transactions survive restart, revoke access and archive verified bo
     await archive?.close();
     await databases?.close();
     await pg.stop();
-    if (mongoStarted) await pg.docker(["rm", "--force", mongo]);
+    if (mongoStarted) {await pg.docker(["rm", "--force", mongo]);}
   }
 }, 120_000);

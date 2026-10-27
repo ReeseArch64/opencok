@@ -10,7 +10,7 @@ export function playerItemGiftView(): Fields {
 }
 
 export function playerItemGiftLogin(names: readonly string[], items: readonly string[]): Fields {
-  if (names.length !== items.length) throw new Error("Mismatched received gift names and items");
+  if (names.length !== items.length) {throw new Error("Mismatched received gift names and items");}
 
   return validateFields(playerItemGiftLoginSchema, {
     item_allname: { type: Type.StringArray, value: [...names] },

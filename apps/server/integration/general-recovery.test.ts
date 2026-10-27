@@ -14,7 +14,7 @@ test("prison operations require the current captor and revival recovers persiste
   const h = await cityHarness([generalsDomain]);
   try {
     for (const id of ["hero_rob", "hero_revival"])
-      h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });
+      {h.rules.features.set(id, { id, online: "all", test: "all", version: "1.0.0" });}
     const row = {
       ...generalRecruit(h.rules, 53500, "other", BigInt(h.clock.now)),
       state: 4,
@@ -114,7 +114,7 @@ test("resource creation locks eligible empty points and rolls back the full skil
         ) as typeof new_general.$inferInsert,
       );
     for (const id of [1, 2])
-      await h.db.db.insert(worldpoint).values({
+      {await h.db.db.insert(worldpoint).values({
         id,
         worldId: 0,
         x: id,
@@ -126,7 +126,7 @@ test("resource creation locks eligible empty points and rolls back the full skil
         resLevel: 0,
         resInitValue: 0,
         ownerId: id === 1 ? "" : "other",
-      });
+      });}
     const request = {
       M__REQUEST_ID__H: sfs.string("skilluse"),
       id: sfs.int(53500),

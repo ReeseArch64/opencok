@@ -9,7 +9,7 @@ import type { Database } from "./game.ts";
 
 export async function checkAvatarCompletionStore(db: Database["kingdom"]["db"]): Promise<void> {
   for (const table of [avatar_completion, mail, mail_contents, mail_group])
-    await db.select().from(table).limit(0);
+    {await db.select().from(table).limit(0);}
 }
 
 export async function nextAvatarDelivery(
@@ -28,7 +28,7 @@ export async function nextAvatarDelivery(
         cursor.sequence < 1 ||
         cursor.sequence > 999999))
   )
-    throw new Error("Invalid avatar delivery cursor");
+    {throw new Error("Invalid avatar delivery cursor");}
 
   const [entry] = await db
     .select({ owner: avatar_completion.ownerUid, sequence: avatar_completion.sequence })
@@ -59,7 +59,7 @@ export async function nextAvatarDelivery(
       entry.sequence < 1 ||
       entry.sequence > 999999)
   )
-    throw new Error("Invalid avatar delivery key");
+    {throw new Error("Invalid avatar delivery key");}
 
   return entry;
 }

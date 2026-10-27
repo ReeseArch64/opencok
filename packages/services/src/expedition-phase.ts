@@ -20,7 +20,7 @@ export class ExpeditionPhaseService {
   async refresh() {
     const period = await this.calendar.refresh();
 
-    if (!period) return;
+    if (!period) {return;}
 
     return this.store.reconcile(period, (state, now) => expeditionPhaseView(period, state, now));
   }
@@ -60,9 +60,9 @@ export class ExpeditionPhaseDomain extends CityCommandDomain {
       BigInt(raw) !== long(clock, "revision") ||
       str(params, "operationId") !== expeditionPhaseOperation(BigInt(raw))
     )
-      throw new Error("Invalid owned expedition notification revision");
+      {throw new Error("Invalid owned expedition notification revision");}
 
-    if (!context.economy.event) throw new Error("Expedition phase publication unavailable");
+    if (!context.economy.event) {throw new Error("Expedition phase publication unavailable");}
 
     const panels = expeditionPanels(
       {
@@ -106,14 +106,14 @@ export async function publishExpeditionPhaseNotification(
 ) {
   const data = decode(Buffer.from(payload));
 
-  if (str(data, "owner") !== owner) throw new Error("Foreign expedition activity notification");
+  if (str(data, "owner") !== owner) {throw new Error("Foreign expedition activity notification");}
 
-  if (revision === undefined || str(data, "revision") !== String(revision)) return false;
+  if (revision === undefined || str(data, "revision") !== String(revision)) {return false;}
 
   const body = fields(data.body);
 
   if (body.activity?.type !== Type.Array)
-    throw new Error("Malformed expedition activity notification");
+    {throw new Error("Malformed expedition activity notification");}
 
   await publish(owner, "push.activity.update", body);
 

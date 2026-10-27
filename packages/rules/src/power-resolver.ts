@@ -133,7 +133,7 @@ export function playerGameEffect(
       2807,
     ].includes(effect)
   )
-    return invalid();
+    {return invalid();}
 
   const vip = vipEffects(state.vip, rules, context.now);
   const general = generalSkillEffects(abilities, rules);
@@ -175,9 +175,9 @@ export function playerGameEffect(
     let equipped = equipment.get(id) ?? 0;
 
     if (id !== 218)
-      equipped = float(
+      {equipped = float(
         equipped * float(1 + float(resolve(218, equipment, loadingEquipment) / 100)),
-      );
+      );}
 
     let other = float((vip.get(id) ?? 0) + float(base.status));
 
@@ -190,7 +190,7 @@ export function playerGameEffect(
       world.get(id),
       hero.get(id),
     ])
-      other = float(other + float(value ?? 0));
+      {other = float(other + float(value ?? 0));}
 
     other = float(other + float(loadingEquipment ? 0 : (lucky.get(id) ?? 0)));
     other = float(other + (dragon.get(id) ?? 0));
@@ -215,7 +215,7 @@ export function playerGameEffect(
   const selection = state.profile.decomposeSuitEffect ?? state.profile.decomposesuiteffect;
 
   if (selection !== undefined && selection !== null && typeof selection !== "string")
-    return invalid();
+    {return invalid();}
 
   const complete = equipmentSetEffects(state.equipment, selection, rules, context, equipment);
 

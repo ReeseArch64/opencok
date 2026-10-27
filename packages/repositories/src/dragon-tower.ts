@@ -40,7 +40,7 @@ export async function readDragonTower(
     .limit(129)
     .for("update");
 
-  if (layers.length > 1024 || buffs.length > 128) towerFailure();
+  if (layers.length > 1024 || buffs.length > 128) {towerFailure();}
 
   const [server] = await tx
     .select({ at: server_info.activityTime })
@@ -133,7 +133,7 @@ export async function writeDragonTower(
   if (write.user) {
     const row = write.user;
 
-    if (row.uid !== owner) towerFailure();
+    if (row.uid !== owner) {towerFailure();}
 
     const value = {
       uid: owner,
@@ -161,7 +161,7 @@ export async function writeDragonTower(
   }
 
   for (const row of write.layers ?? []) {
-    if (row.uid !== owner) towerFailure();
+    if (row.uid !== owner) {towerFailure();}
 
     const value = {
       uid: owner,
@@ -189,7 +189,7 @@ export async function writeDragonTower(
     await tx.delete(dragon_tower_buff).where(eq(dragon_tower_buff.uid, owner));
 
     for (const row of write.buffs) {
-      if (row.uid !== owner) towerFailure();
+      if (row.uid !== owner) {towerFailure();}
 
       await tx.insert(dragon_tower_buff).values({
         uid: owner,

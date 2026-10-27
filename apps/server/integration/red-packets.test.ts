@@ -586,7 +586,7 @@ test("claim quotas cap maintained personal counters while each distinct funded p
     await h.paid(await h.purchase());
     await h.paid(await h.purchase());
     for (const packet of await h.packets())
-      expect(int((await h.claim(packet.uid)).body, "add")).toBeGreaterThan(0);
+      {expect(int((await h.claim(packet.uid)).body, "add")).toBeGreaterThan(0);}
     expect(await h.counter("long_3th_anniversary_redpacket_get_money_count")).toBe(String(maximum));
     expect(await h.db.db.select().from(red_packets_records)).toHaveLength(2);
   } finally {

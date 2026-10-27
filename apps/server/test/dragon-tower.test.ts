@@ -24,7 +24,7 @@ test("tower catalogs retain weighted monster choices, bounded virtual armies and
     "null",
     "broken",
   ])
-    expect(() => towerArmy(value)).toThrow();
+    {expect(() => towerArmy(value)).toThrow();}
   expect(towerOpen(new Rules(new Map(), new Map(), new Map()), {}, 0, 0n, 1000n)).toBe(false);
   expect(towerIndex(0)).toBe(0);
   expect(towerIndex(84501)).toBe(1);

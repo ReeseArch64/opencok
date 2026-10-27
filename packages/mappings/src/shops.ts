@@ -34,7 +34,7 @@ export function shopOffer(rule: Rule, state: ShopState): Fields {
     "discount",
     "prestige_level",
   ])
-    if (rule[key]) result[key] = sfs.string(rule[key]);
+    {if (rule[key]) {result[key] = sfs.string(rule[key]);}}
 
   const { begin, end } = shopWindow(rule, state.now);
   result.todayBuy = sfs.int(counters.daily);
@@ -51,7 +51,7 @@ export function shopOffer(rule: Rule, state: ShopState): Fields {
       const price = prices[Math.min(index, prices.length - 1)]!;
       result[key] = sfs.string(price);
 
-      if (key === "value1" && price !== "0") result.price = sfs.string(price);
+      if (key === "value1" && price !== "0") {result.price = sfs.string(price);}
     }
 
     result.buy_times_daily = sfs.string(String(tiers[index]));

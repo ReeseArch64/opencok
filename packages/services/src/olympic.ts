@@ -44,7 +44,7 @@ export class OlympicScheduleService {
 }
 
 export function olympicSettlementOperation(owner: string, ids: readonly string[]) {
-  if (!ids.length || ids.length > 64 || new Set(ids).size !== ids.length) invalid();
+  if (!ids.length || ids.length > 64 || new Set(ids).size !== ids.length) {invalid();}
 
   return `olympic:${createHash("sha256")
     .update(JSON.stringify([owner, [...ids].sort()]))
@@ -65,7 +65,7 @@ export class OlympicDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.olympic;
 
-    if (!state) invalid();
+    if (!state) {invalid();}
 
     const period = olympicPeriod(context.rules),
       active = !!period?.enabled && context.now >= period.start && context.now <= period.end,
@@ -73,7 +73,7 @@ export class OlympicDomain extends CityCommandDomain {
       configuration = new Map(definitions.map((row) => [text(row, "id"), row])),
       mail = command === "Olympic.settle";
 
-    if (mail && (!period || context.now <= period.end)) invalid();
+    if (mail && (!period || context.now <= period.end)) {invalid();}
 
     const questions = await reconcileOlympicQuestions(
         state.questions,
@@ -86,7 +86,7 @@ export class OlympicDomain extends CityCommandDomain {
       bets = state.bets.map((row) => {
         const question = byId.get(text(row, "questionId"));
 
-        if (!question || num(question, "ended") !== 1 || num(row, "ended") === 1) return row;
+        if (!question || num(question, "ended") !== 1 || num(row, "ended") === 1) {return row;}
 
         const winner = text(question, "result") === text(row, "betCountry"),
           reward =
@@ -106,7 +106,7 @@ export class OlympicDomain extends CityCommandDomain {
         : context.balance(assets[type]!) + context.balance(`${assets[type]!}bind`);
 
     if (command === "Olympic.question.info")
-      return {
+      {return {
         response: encode({
           matchList: sfs.array(
             questions
@@ -127,10 +127,10 @@ export class OlympicDomain extends CityCommandDomain {
           ),
         }),
         event: null,
-      };
+      };}
 
     if (command === "Olympic.bet.info")
-      return {
+      {return {
         response: encode({
           betList: sfs.array(
             bets.map((row) => {
@@ -150,7 +150,7 @@ export class OlympicDomain extends CityCommandDomain {
           ),
         }),
         event: null,
-      };
+      };}
 
     if (command === "Olympic.bet") {
       const id = str(params, "questionId"),
@@ -175,10 +175,10 @@ export class OlympicDomain extends CityCommandDomain {
         context.now <= long(question, "startBetTime") ||
         context.now >= long(question, "startTime")
       )
-        invalid();
+        {invalid();}
 
-      if (type === 5) context.economy.gold(-BigInt(count));
-      else context.spend({ [assets[type]!]: BigInt(count) }, false);
+      if (type === 5) {context.economy.gold(-BigInt(count));}
+      else {context.spend({ [assets[type]!]: BigInt(count) }, false);}
 
       question.betNum = long(question, "betNum") + BigInt(count);
       context.write.olympic.bets = [
@@ -213,14 +213,14 @@ export class OlympicDomain extends CityCommandDomain {
           pending.map((row) => text(row, "uuid")),
         )
     )
-      invalid();
+      {invalid();}
 
     for (const bet of pending) {
       if (text(bet, "result") === text(bet, "betCountry")) {
         const type = cityInteger(bet.resourceType, 0, 5),
           value = BigInt(cityInteger(bet.reward));
 
-        if (type === 4) invalid();
+        if (type === 4) {invalid();}
 
         totals.set(type, (totals.get(type) ?? 0n) + value);
 
@@ -228,7 +228,7 @@ export class OlympicDomain extends CityCommandDomain {
           const template = context.rules.mail.get("11811"),
             contents = javaMailBytes(template?.message);
 
-          if (!template || !contents) invalid();
+          if (!template || !contents) {invalid();}
 
           const quests = (context.write.quests ??= {});
           quests.mail = [
@@ -257,13 +257,13 @@ export class OlympicDomain extends CityCommandDomain {
       (row) => pending.includes(row) || !state.bets.includes(row),
     );
 
-    if (mail) return { response: encode({}), event: null };
+    if (mail) {return { response: encode({}), event: null };}
 
     const rewards = [];
 
     for (const [type, value] of [...totals].toSorted((a, b) => a[0] - b[0])) {
-      if (type === 5) context.economy.gold(value);
-      else context.economy.resource(`${assets[type]!}bind`, value);
+      if (type === 5) {context.economy.gold(value);}
+      else {context.economy.resource(`${assets[type]!}bind`, value);}
 
       let remaining = value;
 

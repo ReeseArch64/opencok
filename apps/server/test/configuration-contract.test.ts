@@ -111,7 +111,7 @@ test("complete configuration wire contract survives XML loading, realm compositi
         expect(decoded._cok_).toEqual(sfs.string("contract"));
         expect(decoded.cmdBaseTime).toEqual(sfs.string("42"));
         expect(response.pushes).toEqual([]);
-        if (previous) expect(encoded).toEqual(previous);
+        if (previous) {expect(encoded).toEqual(previous);}
         previous = encoded;
         const expired = await new Game(store, rules, settings, () => now + 1).execute(
           "synthetic",
@@ -129,7 +129,7 @@ test("complete configuration wire contract survives XML loading, realm compositi
           "serviceTerms_on",
         ];
         for (const id of ["FB_follow", "lordtips_time", "loading_show_type", "scoutmark_on"])
-          rules.configuration.dataConfig!.delete(id);
+          {rules.configuration.dataConfig!.delete(id);}
         delete rules.configuration.dataConfig!.get("ranking")!.k3;
         delete rules.configuration.dataConfig!.get("alliance_quest")!.k10;
         rules.configuration.dataConfig!.get("serviceterms_on")!.k1 = "0";

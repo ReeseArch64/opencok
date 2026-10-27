@@ -108,7 +108,7 @@ test("API discovery returns the maintained chat configuration and server lists t
 
 test("disabled discovery and excluded routes or methods never reach chat", async () => {
   for (const path of chatDiscoveryPaths)
-    expect((await appFor().fetch(new Request(`http://api.invalid${path}`))).status).toBe(404);
+    {expect((await appFor().fetch(new Request(`http://api.invalid${path}`))).status).toBe(404);}
   const upstream = exchange();
   const app = appFor(provider(upstream.fetch));
   for (const path of [
@@ -119,12 +119,12 @@ test("disabled discovery and excluded routes or methods never reach chat", async
     "/chat/server/links/",
     "/api/v1global_config/extra",
   ])
-    expect((await app.fetch(new Request(`http://api.invalid${path}`))).status).toBe(404);
+    {expect((await app.fetch(new Request(`http://api.invalid${path}`))).status).toBe(404);}
   for (const method of ["POST", "PUT", "DELETE", "HEAD", "OPTIONS"])
-    for (const path of chatDiscoveryPaths)
-      expect((await app.fetch(new Request(`http://api.invalid${path}`, { method }))).status).toBe(
+    {for (const path of chatDiscoveryPaths)
+      {expect((await app.fetch(new Request(`http://api.invalid${path}`, { method }))).status).toBe(
         404,
-      );
+      );}}
   expect(upstream.calls).toEqual([]);
   const discovery = provider(upstream.fetch);
   for (const path of [
@@ -133,9 +133,9 @@ test("disabled discovery and excluded routes or methods never reach chat", async
     "/api/v1global_config?secret=x",
     "//other.invalid/chat/server/all",
   ])
-    await expect(discovery(path as ChatDiscoveryPath)).rejects.toThrow(
+    {await expect(discovery(path as ChatDiscoveryPath)).rejects.toThrow(
       "Chat discovery unavailable",
-    );
+    );}
   expect(upstream.calls).toEqual([]);
 });
 
@@ -182,7 +182,7 @@ test("caller credentials and upstream private headers never cross the public dis
     ]);
     expect(await response.json()).toEqual(list);
     for (const header of ["set-cookie", "x-private", "location"])
-      expect(response.headers.get(header)).toBeNull();
+      {expect(response.headers.get(header)).toBeNull();}
     expect(response.headers.get("x-request-id")).not.toBe("private-correlation");
     expect(JSON.stringify(logs)).not.toContain("private-");
     expect(JSON.stringify(logs)).not.toContain(origin);
@@ -283,11 +283,11 @@ test("public metadata is bounded during stream consumption and the full request 
   ).rejects.toThrow("Chat discovery unavailable");
   expect(cancelled).toBe(1);
   for (const length of ["16385", "invalid"])
-    await expect(
+    {await expect(
       provider(async () => Response.json(list, { headers: { "content-length": length } }))(
         "/chat/server/all",
       ),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   let signal: AbortSignal | null | undefined;
   await expect(
     provider(async (_url, options) => {
@@ -342,11 +342,11 @@ test("origin and dependency configuration reach the API without starting a serve
     "https://cok.chat",
     "https://other.cok.chat",
   ])
-    expect(() => createChatDiscovery({ origin: value, timeoutMs: 1000 })).toThrow(
+    {expect(() => createChatDiscovery({ origin: value, timeoutMs: 1000 })).toThrow(
       "Invalid chat discovery configuration",
-    );
+    );}
   for (const timeoutMs of [0, 99, 30001, NaN, 100.5])
-    expect(() => createChatDiscovery({ origin, timeoutMs })).toThrow();
+    {expect(() => createChatDiscovery({ origin, timeoutMs })).toThrow();}
 });
 
 test("gateway allowlisting exposes only the three public GET metadata paths and keeps existing destinations", async () => {

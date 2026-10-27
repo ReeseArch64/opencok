@@ -239,7 +239,7 @@ test("legacy general rewards retain source ownership, count, defense slots and l
             ? `exp,0,${threshold}|general,${general.id},4|power,0,23`
             : `general,${general.id},4|exp,0,1|power,0,23`;
       if (order === "no-level-up")
-        await h.db.db.update(userprofile).set({ level: 5 }).where(eq(userprofile.uid, "owner"));
+        {await h.db.db.update(userprofile).set({ level: 5 }).where(eq(userprofile.uid, "owner"));}
       await h.db.db
         .update(server_push)
         .set({ reward: Buffer.from(javaMailBytes(raw)!) })

@@ -20,7 +20,7 @@ import type { CityProgressionContext } from "./city-progression-context.ts";
 function mail(context: CityProgressionContext, rule: Rule, key: string) {
   const id = rule[key];
 
-  if (!id?.trim()) return;
+  if (!id?.trim()) {return;}
 
   const template = context.rules.mail.get(id);
   const contents = javaMailBytes(
@@ -28,7 +28,7 @@ function mail(context: CityProgressionContext, rule: Rule, key: string) {
       `${template.message}${key === "start_mail" ? `|${rule.gold}|${rule.time}` : ""}`,
   );
 
-  if (!template || !contents) investmentFailure();
+  if (!template || !contents) {investmentFailure();}
 
   const quests = (context.write.quests ??= {});
   quests.mail = [
@@ -62,7 +62,7 @@ export class DailyInvestmentDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.dailyInvestment;
 
-    if (!state) investmentFailure();
+    if (!state) {investmentFailure();}
 
     const empty = () => ({ response: encode({}), event: null });
 
@@ -73,7 +73,7 @@ export class DailyInvestmentDomain extends CityCommandDomain {
         now: Number(context.now),
       })
     ) {
-      if (["invest.add", "invest.receive"].includes(command)) investmentFailure();
+      if (["invest.add", "invest.receive"].includes(command)) {investmentFailure();}
 
       return empty();
     }
@@ -85,8 +85,8 @@ export class DailyInvestmentDomain extends CityCommandDomain {
       let vip = 0;
 
       for (const item of context.rules.power.vip?.values() ?? [])
-        if (cityInteger(item.point) <= num(context.state.effects.vip ?? {}, "score"))
-          vip = (cityInteger(item.id) % 100) + 1;
+        {if (cityInteger(item.point) <= num(context.state.effects.vip ?? {}, "score"))
+          {vip = (cityInteger(item.id) % 100) + 1;}}
 
       return (
         context.now >= state.serverOpenTime &&
@@ -102,7 +102,7 @@ export class DailyInvestmentDomain extends CityCommandDomain {
     if (command === "invest.open.ui") {
       const plans = [...(context.rules.advanced.dailyInvestments?.values() ?? [])];
 
-      if (plans.length > 1024) investmentFailure();
+      if (plans.length > 1024) {investmentFailure();}
 
       return {
         response: encode({
@@ -129,17 +129,17 @@ export class DailyInvestmentDomain extends CityCommandDomain {
     }
 
     if (command === "invest.add") {
-      if (row && num(row, "endactive") === 0) investmentFailure();
+      if (row && num(row, "endactive") === 0) {investmentFailure();}
 
       const id = str(params, "id"),
         rule = context.rules.advanced.dailyInvestments?.get(id);
 
-      if (!rule || !eligible(rule) || rule.on_sale !== "1") investmentFailure();
+      if (!rule || !eligible(rule) || rule.on_sale !== "1") {investmentFailure();}
 
       const schedule = investmentSchedule(rule),
         cost = cityAmount(rule.gold);
 
-      if (context.balance("gold") < cost) investmentFailure();
+      if (context.balance("gold") < cost) {investmentFailure();}
 
       context.economy.gold(-cost);
       row = {
@@ -167,20 +167,20 @@ export class DailyInvestmentDomain extends CityCommandDomain {
     }
 
     if (!row || num(row, "endactive") !== 0) {
-      if (command === "invest.init") return empty();
+      if (command === "invest.init") {return empty();}
 
       investmentFailure();
     }
 
     const rule = context.rules.advanced.dailyInvestments?.get(text(row, "tableid"));
 
-    if (!rule) investmentFailure();
+    if (!rule) {investmentFailure();}
 
     const schedule = investmentSchedule(rule),
       flags = investmentFlags(text(row, "isreceive")),
       days = investmentDays(context.now, long(row, "beginTime"));
 
-    if (schedule.length !== flags.length) investmentFailure();
+    if (schedule.length !== flags.length) {investmentFailure();}
 
     if (command === "invest.init") {
       if (
@@ -197,7 +197,7 @@ export class DailyInvestmentDomain extends CityCommandDomain {
 
     const position = cityInteger(int(params, "pos"), 0, flags.length - 1);
 
-    if (position > days || flags[position] !== "0") investmentFailure();
+    if (position > days || flags[position] !== "0") {investmentFailure();}
 
     const gold = schedule[position]!;
     context.economy.gold(BigInt(gold));

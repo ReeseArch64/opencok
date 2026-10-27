@@ -42,7 +42,7 @@ function open(context: CityProgressionContext) {
 function saved(context: CityProgressionContext) {
   const state = context.state.targetTask;
 
-  if (!state) targetFailure();
+  if (!state) {targetFailure();}
 
   return {
     ...state,
@@ -56,10 +56,10 @@ function repeatedReward(context: CityProgressionContext, id: string, times: numb
   const rows = new Map<string, number>();
 
   for (let i = 0; i < times; i++)
-    for (const row of mailRewardEntries(pinProgressionReward(context, id))) {
+    {for (const row of mailRewardEntries(pinProgressionReward(context, id))) {
       const key = `${row.category},${row.itemId}`;
       rows.set(key, cityInteger((rows.get(key) ?? 0) + row.count));
-    }
+    }}
 
   return [...rows].map(([key, count]) => `${key},${count}`).join("|");
 }
@@ -72,13 +72,13 @@ function recover(context: CityProgressionContext, random: (maximum: number) => n
     let sent = false;
 
     for (const row of state.tasks) {
-      if (num(row, "state") <= 0) continue;
+      if (num(row, "state") <= 0) {continue;}
 
       const rule = context.rules.advanced.targetTasks?.get(text(row, "id")),
         template = context.rules.mail.get("11835"),
         contents = javaMailBytes(template?.message);
 
-      if (!rule || !template || !contents) targetFailure();
+      if (!rule || !template || !contents) {targetFailure();}
 
       const reward = repeatedReward(
         context,
@@ -111,7 +111,7 @@ function recover(context: CityProgressionContext, random: (maximum: number) => n
 
   const config = context.rules.items.get("target_quest");
 
-  if (!config) targetFailure();
+  if (!config) {targetFailure();}
 
   const window = targetSchedule(config, context.now, state.openedAt);
 
@@ -162,7 +162,7 @@ export function recordTargetTask(
 ): void {
   recordRecallTask(context, type, amount, condition, at);
 
-  if (!context.state.targetTask || !open(context) || amount <= 0) return;
+  if (!context.state.targetTask || !open(context) || amount <= 0) {return;}
 
   const state = saved(context),
     notes = state.notes;
@@ -174,7 +174,7 @@ export function recordTargetTask(
     at >= long(notes, "endTime") ||
     long(notes, "beginTime") <= 0n
   )
-    return;
+    {return;}
 
   const day = cityInteger((at - long(notes, "beginTime")) / 86400000n),
     count = cityInteger(
@@ -199,34 +199,34 @@ export function recordTargetTask(
         ? !rule.extend_type?.split(";").includes(condition)
         : rule.extend_type !== condition)
     )
-      return row;
+      {return row;}
 
     row.num = cityInteger(Math.min(2147483647, num(row, "num") + count));
 
-    if (num(row, "num") >= num(row, "target_num")) row.state = 1;
+    if (num(row, "num") >= num(row, "target_num")) {row.state = 1;}
 
     changed = true;
 
     return row;
   });
 
-  if (changed) context.write.targetTask = { ...context.write.targetTask, tasks };
+  if (changed) {context.write.targetTask = { ...context.write.targetTask, tasks };}
 }
 
 function grant(context: CityProgressionContext, mode: number): Fields {
   const state = saved(context),
     notes = state.notes ? { ...state.notes } : undefined;
 
-  if (!notes || num(notes, "receive_mode") !== 0) targetFailure();
+  if (!notes || num(notes, "receive_mode") !== 0) {targetFailure();}
 
   const completed = state.tasks.filter((row) => num(row, "state") > 0);
 
-  if (!completed.length) targetFailure();
+  if (!completed.length) {targetFailure();}
 
   const rewards: Value[] = completed.map((row) => {
     const rule = context.rules.advanced.targetTasks?.get(text(row, "id"));
 
-    if (!rule) targetFailure();
+    if (!rule) {targetFailure();}
 
     const reward = repeatedReward(
       context,
@@ -246,7 +246,7 @@ function grant(context: CityProgressionContext, mode: number): Fields {
 }
 
 export function targetTaskPurchaseOperationId(owner: string, eventId: string): string {
-  if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) targetFailure();
+  if (!/^[A-Za-z0-9:._-]{1,128}$/.test(eventId)) {targetFailure();}
 
   return `targetpaid:${createHash("sha256").update(`${owner}\0${eventId}`).digest("hex")}`;
 }
@@ -277,7 +277,7 @@ export class TargetTaskDomain extends CityCommandDomain {
       const empty = () => ({ response: encode({}), event: null });
 
       if (!open(context)) {
-        if (command === "target.init") return empty();
+        if (command === "target.init") {return empty();}
 
         targetFailure();
       }
@@ -291,7 +291,7 @@ export class TargetTaskDomain extends CityCommandDomain {
           !gateway ||
           str(params, "operationId") !== targetTaskPurchaseOperationId(context.owner, eventId)
         )
-          targetFailure();
+          {targetFailure();}
 
         proof = (await gateway.accepted({ owner: context.owner, eventId })) ?? undefined;
 
@@ -301,13 +301,13 @@ export class TargetTaskDomain extends CityCommandDomain {
           proof.occurredAt < 0n ||
           proof.occurredAt > context.now
         )
-          targetFailure();
+          {targetFailure();}
       }
 
       const state = recover(context, random),
         notes = state.notes;
 
-      if (command === "target.init") return empty();
+      if (command === "target.init") {return empty();}
 
       const begin = notes ? long(notes, "beginTime") : 0n,
         day =
@@ -322,7 +322,7 @@ export class TargetTaskDomain extends CityCommandDomain {
           .map((row) => {
             const rule = context.rules.advanced.targetTasks?.get(text(row, "id"));
 
-            if (!rule) targetFailure();
+            if (!rule) {targetFailure();}
 
             return {
               reward: rewardPreviewArray(
@@ -361,16 +361,16 @@ export class TargetTaskDomain extends CityCommandDomain {
       }
 
       if (command === "target.paid") {
-        if (proof!.exchangeId !== state.config.k5) targetFailure();
+        if (proof!.exchangeId !== state.config.k5) {targetFailure();}
 
-        if (!notes) return empty();
+        if (!notes) {return empty();}
 
         if (
           num(notes, "receive_mode") > 0 ||
           proof!.occurredAt < begin ||
           proof!.occurredAt >= long(notes, "endTime")
         )
-          return empty();
+          {return empty();}
 
         const body = grant(context, 2);
 
@@ -381,7 +381,7 @@ export class TargetTaskDomain extends CityCommandDomain {
       }
 
       if (command === "target.task.receive")
-        return { response: encode(grant(context, 1)), event: null };
+        {return { response: encode(grant(context, 1)), event: null };}
 
       if (
         !notes ||
@@ -389,7 +389,7 @@ export class TargetTaskDomain extends CityCommandDomain {
         context.now < begin ||
         context.now >= long(notes, "endTime")
       )
-        targetFailure();
+        {targetFailure();}
 
       const action = cityInteger(int(params, "type"), 1, 2),
         index = cityInteger(int(params, "index"), 0, 4),
@@ -397,7 +397,7 @@ export class TargetTaskDomain extends CityCommandDomain {
         count = cityInteger(int(params, "num"), 1),
         row = state.tasks.find((row) => num(row, "type_level") === index);
 
-      if (!row) targetFailure();
+      if (!row) {targetFailure();}
 
       const next = { ...row };
 
@@ -410,11 +410,11 @@ export class TargetTaskDomain extends CityCommandDomain {
           num(row, "state") !== 1 ||
           num(row, "rewardDouble") >= cityInteger(parts[1], 0, 999)
         )
-          targetFailure();
+          {targetFailure();}
 
         next.rewardDouble = cityInteger(num(row, "rewardDouble") + 1, 0, 999);
       } else {
-        if (itemId !== state.config.k9 || num(row, "state") !== 0) targetFailure();
+        if (itemId !== state.config.k9 || num(row, "state") !== 0) {targetFailure();}
 
         next.state = 1;
       }
@@ -462,7 +462,7 @@ export async function publishTargetTaskMutation(
     body.receive_mode?.type !== Type.Bool ||
     body.receive_mode.value !== true
   )
-    targetFailure();
+    {targetFailure();}
 
   encode(body);
   await publish(owner, "push.target.task", body);

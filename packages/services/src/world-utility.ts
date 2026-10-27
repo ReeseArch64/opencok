@@ -15,13 +15,13 @@ export async function worldUtility(
   size: number,
   now: number,
 ): Promise<Fields> {
-  if (!Number.isSafeInteger(now) || now < 0) throw new GameError(errors.invalid);
+  if (!Number.isSafeInteger(now) || now < 0) {throw new GameError(errors.invalid);}
 
   const point = command === "point.nearest.find" ? int(params, "point") : undefined;
 
-  if (point !== undefined && point > size * size) throw new GameError(errors.invalid);
+  if (point !== undefined && point > size * size) {throw new GameError(errors.invalid);}
 
-  if (int(params, "serverId", kingdom) !== kingdom) throw new GameError(errors.unsupported);
+  if (int(params, "serverId", kingdom) !== kingdom) {throw new GameError(errors.unsupported);}
 
   const state = await store.read(owner, point, command === "world.al.leader.pt");
 
@@ -32,12 +32,12 @@ export async function worldUtility(
     num(state.profile, "banFlag") !== 0 ||
     long(state.profile, "banTime") > BigInt(now)
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
-  if (num(state.world, "worldId") !== 0) throw new GameError(errors.unsupported);
+  if (num(state.world, "worldId") !== 0) {throw new GameError(errors.unsupported);}
 
   if (command === "point.nearest.find")
-    return worldNearestPoint({ point: nearestWorldFootprint(state.points, point!, size) });
+    {return worldNearestPoint({ point: nearestWorldFootprint(state.points, point!, size) });}
 
   if (command === "world.leave") {
     await store.leave(owner);
@@ -45,7 +45,7 @@ export async function worldUtility(
     return {};
   }
 
-  if (command !== "world.al.leader.pt") throw new GameError(errors.invalid);
+  if (command !== "world.al.leader.pt") {throw new GameError(errors.invalid);}
 
   const alliance = text(state.profile, "allianceId");
 
@@ -53,7 +53,7 @@ export async function worldUtility(
     state.members.some((row) => text(row, "allianceId") !== alliance) ||
     state.members.filter((row) => num(row, "rank") === 5).length > 1
   )
-    throw new GameError(errors.invalid);
+    {throw new GameError(errors.invalid);}
 
   return allianceWorldPoints(state, owner);
 }

@@ -29,7 +29,7 @@ async function generate(
   const owned = context.economy.quantity?.(item) ?? 0;
 
   if (!colour || owned <= 0 || !context.treasurePoints || !context.state.worldMutation)
-    worldMutationFailure();
+    {worldMutationFailure();}
 
   const count = Math.min(
     128,
@@ -39,13 +39,13 @@ async function generate(
       ).length,
   );
 
-  if (count <= 0) return {};
+  if (count <= 0) {return {};}
 
   const rules = treasureMapRules(context.rules, num(context.state.profile, "level"), colour);
   const hint = rules[0]!,
     origin = num(context.state.worldMutation.world, "pointId");
 
-  if (origin <= 0 || origin > size * size) worldMutationFailure();
+  if (origin <= 0 || origin > size * size) {worldMutationFailure();}
 
   const candidates = treasureMapCandidates(
     origin,
@@ -54,7 +54,7 @@ async function generate(
     cityInteger(hint.rangmax),
   );
 
-  if (!candidates.length) worldMutationFailure();
+  if (!candidates.length) {worldMutationFailure();}
 
   const planned = Array.from({ length: count }, () => ({
     rule: rules[
@@ -70,18 +70,18 @@ async function generate(
     const selected = [...new Set(ids)].filter((id) => !points.has(id));
 
     for (let offset = 0; offset < selected.length; offset += 4096)
-      for (const point of await context.treasurePoints!(selected.slice(offset, offset + 4096)))
-        points.set(num(point, "id"), point);
+      {for (const point of await context.treasurePoints!(selected.slice(offset, offset + 4096)))
+        {points.set(num(point, "id"), point);}}
   };
   await read(planned.map((row) => row.point));
   const fallback = new Map<number, readonly number[]>();
 
   for (const row of planned)
-    if (!treasureMapFree(points.get(row.point)))
-      fallback.set(
+    {if (!treasureMapFree(points.get(row.point)))
+      {fallback.set(
         row.point,
         treasureMapFallback(row.point, size, cityInteger(context.rules.items.get("heritage")?.k1)),
-      );
+      );}}
 
   await read([...fallback.values()].flat());
   const created = planned.map(({ rule, point }) => {
@@ -89,9 +89,9 @@ async function generate(
       ? point
       : fallback.get(point)?.find((id) => treasureMapFree(points.get(id)));
 
-    if (!target) worldMutationFailure();
+    if (!target) {worldMutationFailure();}
 
-    if (!context.rules.reconnect.rewards?.has(rule.reward ?? "")) worldMutationFailure();
+    if (!context.rules.reconnect.rewards?.has(rule.reward ?? "")) {worldMutationFailure();}
 
     const row = {
       uuid: randomUUID().replaceAll("-", ""),
@@ -135,7 +135,7 @@ export class TreasureMapDomain extends CityCommandDomain {
     this.types = [];
 
     this.prepare = async (context, command, params) => {
-      if (!context.state.worldMutation) worldMutationFailure();
+      if (!context.state.worldMutation) {worldMutationFailure();}
 
       if (command === "treasuremap.init") {
         const rows = treasureMapRoster(context).filter((row) => num(row, "state") === 0);
@@ -151,10 +151,10 @@ export class TreasureMapDomain extends CityCommandDomain {
       }
 
       if (command === "treasuremap.get")
-        return {
+        {return {
           response: encode(await generate(context, size, str(params, "itemid"))),
           event: null,
-        };
+        };}
 
       if (command === "treasuremap.spd") {
         const gold = speedTreasureMarch(context, str(params, "marchid"));
@@ -165,12 +165,12 @@ export class TreasureMapDomain extends CityCommandDomain {
         };
       }
 
-      if (command !== "treasuremap.destroy") worldMutationFailure();
+      if (command !== "treasuremap.destroy") {worldMutationFailure();}
 
       const id = str(params, "treasureuuid"),
         row = treasureMapRoster(context).find((row) => row.uuid === id && num(row, "state") === 0);
 
-      if (!row) worldMutationFailure();
+      if (!row) {worldMutationFailure();}
 
       const item = treasureMapItem(num(row, "colour")),
         before = context.economy.itemState?.(item);

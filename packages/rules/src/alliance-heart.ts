@@ -10,7 +10,7 @@ export function allianceHeartFailure(): never {
 export function allianceHeartRule(rules: Rules, itemId: string) {
   const item = rules.goods.get(itemId);
 
-  if (item?.type !== "20" || !item.para1 || item.para1.length > 2) allianceHeartFailure();
+  if (item?.type !== "20" || !item.para1 || item.para1.length > 2) {allianceHeartFailure();}
 
   return { effect: item.para1, duration: cityInteger(item.para2, 1) };
 }

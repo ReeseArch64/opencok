@@ -71,7 +71,7 @@ export function createAvatarRuntime(options: {
               true,
             );
 
-            if (recovered.picVer === undefined) throw error;
+            if (recovered.picVer === undefined) {throw error;}
 
             return recovered;
           } catch {
@@ -137,7 +137,7 @@ export function createAvatarRuntime(options: {
             true,
           );
 
-          if (!recovered.intent) throw error;
+          if (!recovered.intent) {throw error;}
 
           return recovered;
         } catch {

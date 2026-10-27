@@ -17,7 +17,7 @@ async function limitedBody(
   stream: ReadableStream<Uint8Array> | null,
   maximum: number,
 ): Promise<string> {
-  if (!stream) throw new HttpError(400, "Missing body");
+  if (!stream) {throw new HttpError(400, "Missing body");}
 
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
@@ -27,7 +27,7 @@ async function limitedBody(
     for (;;) {
       const next = await reader.read();
 
-      if (next.done) break;
+      if (next.done) {break;}
 
       size += next.value.length;
 
@@ -58,27 +58,27 @@ function failure(error: unknown) {
 
 export function provisioningHandler(controller: Pick<ProvisioningController, "create">) {
   return async (request: Request): Promise<Response> => {
-    if (request.method !== "POST") return new Response(null, { status: 405 });
+    if (request.method !== "POST") {return new Response(null, { status: 405 });}
 
     try {
       const auth = /^Bearer ([^\s]+)$/.exec(request.headers.get("Authorization") ?? "");
 
       if (!auth || auth[1]!.length > 16384)
-        throw new HttpError(401, "Identity authentication required");
+        {throw new HttpError(401, "Identity authentication required");}
 
       let parsed: unknown;
 
       try {
         parsed = JSON.parse(await limitedBody(request.body, 4096));
       } catch (error) {
-        if (error instanceof HttpError) throw error;
+        if (error instanceof HttpError) {throw error;}
 
         throw new HttpError(400, "Invalid body");
       }
 
       const input = createCharacterSchema.safeParse(parsed);
 
-      if (!input.success) throw new HttpError(400, "Invalid character input");
+      if (!input.success) {throw new HttpError(400, "Invalid character input");}
 
       const response = await controller.create(auth[1]!, input.data);
 
@@ -99,7 +99,7 @@ export function characterProvisioningHandler(
 ) {
   return async (request: Request): Promise<Response> => {
     if (request.method !== "POST" || new URL(request.url).pathname !== provisionPath)
-      return new Response(null, { status: 404 });
+      {return new Response(null, { status: 404 });}
 
     try {
       const body = await limitedBody(request.body, 8192);
@@ -113,7 +113,7 @@ export function characterProvisioningHandler(
           now(),
         )
       )
-        throw new HttpError(401, "Invalid provisioning authorization");
+        {throw new HttpError(401, "Invalid provisioning authorization");}
 
       let parsed: unknown;
 
@@ -125,7 +125,7 @@ export function characterProvisioningHandler(
 
       const input = reservationSchema.safeParse(parsed);
 
-      if (!input.success) throw new HttpError(400, "Invalid reservation");
+      if (!input.success) {throw new HttpError(400, "Invalid reservation");}
 
       const result = await controller.create(input.data);
       const output = JSON.stringify(provisionReceiptSchema.parse(result));
@@ -163,7 +163,7 @@ export function realmProvisioner(
     target.hash ||
     !secret
   )
-    throw new Error("Invalid provisioning endpoint");
+    {throw new Error("Invalid provisioning endpoint");}
 
   return {
     async create(reservation) {
@@ -204,7 +204,7 @@ export function realmProvisioner(
           true,
         )
       )
-        throw new HttpError(503, "Invalid realm receipt");
+        {throw new HttpError(503, "Invalid realm receipt");}
 
       return provisionReceiptSchema.parse(JSON.parse(output));
     },

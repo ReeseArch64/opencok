@@ -8,7 +8,7 @@ export async function readActivityDirectory(
   db: Database["kingdom"]["db"],
   owner: string,
 ): Promise<ActivityDirectorySnapshot> {
-  if (!owner || owner.length > 40) throw new Error("Invalid activity directory owner");
+  if (!owner || owner.length > 40) {throw new Error("Invalid activity directory owner");}
 
   return db.transaction(
     async (tx) => {
@@ -23,7 +23,7 @@ export async function readActivityDirectory(
         .where(eq(userprofile.uid, owner))
         .limit(1);
 
-      if (!profile) return { activities: [] };
+      if (!profile) {return { activities: [] };}
 
       const activities = await tx
         .select()
@@ -32,7 +32,7 @@ export async function readActivityDirectory(
         .orderBy(asc(activity.id))
         .limit(4097);
 
-      if (activities.length > 4096) throw new Error("Activity directory bound exceeded");
+      if (activities.length > 4096) {throw new Error("Activity directory bound exceeded");}
 
       return { profile, activities };
     },

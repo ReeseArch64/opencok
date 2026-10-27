@@ -28,7 +28,7 @@ function fixture() {
   const cache = new Cache({ redisUrl: "unused", timeoutMs: 1, kingdomId: 2 });
   cache.command = async (...args) => {
     commands.push(args);
-    if (response instanceof Error) throw response;
+    if (response instanceof Error) {throw response;}
     return response;
   };
   const store = {
@@ -113,7 +113,7 @@ test("global celebrity realm gates run before selector decoding and unsupported 
 test("global celebrity rankings reject invalid selectors, owners, missing providers and reached failures", async () => {
   const f = fixture();
   for (const params of [{} as Fields, { rankType: sfs.string("1") }, { rankType: sfs.short(1) }])
-    await expect(f.run(params)).rejects.toThrow();
+    {await expect(f.run(params)).rejects.toThrow();}
   const profiles: (Row | undefined)[] = [
     undefined,
     { uid: "other", serverId: 2 },
@@ -168,7 +168,7 @@ test("global ranking metadata distinguishes SQLSTATE fallback from malformed row
   let failure: Error | undefined;
   const client = {
     async query() {
-      if (failure) throw failure;
+      if (failure) {throw failure;}
       return { rows };
     },
   };

@@ -45,7 +45,7 @@ function publishAvatarEffect(
     timeoutMs < 100 ||
     timeoutMs > 30000
   )
-    throw new Error("Invalid avatar profile query");
+    {throw new Error("Invalid avatar profile query");}
 
   return db.transaction(
     async (tx) => {
@@ -59,7 +59,7 @@ function publishAvatarEffect(
       )[0];
 
       if (!profile || profile.uid !== owner || profile.serverId !== kingdomId)
-        return { profile, published: false };
+        {return { profile, published: false };}
 
       const key = and(
         eq(avatar_completion.ownerUid, owner),
@@ -69,7 +69,7 @@ function publishAvatarEffect(
         await tx.select().from(avatar_completion).where(key).limit(1).for("update")
       )[0];
 
-      if (!entry) return { profile, published: false };
+      if (!entry) {return { profile, published: false };}
 
       if (
         entry.ownerUid !== owner ||
@@ -78,9 +78,9 @@ function publishAvatarEffect(
         entry.pendingEffects < 0 ||
         entry.pendingEffects > 7
       )
-        throw new Error("Invalid avatar profile state");
+        {throw new Error("Invalid avatar profile state");}
 
-      if (!(entry.pendingEffects & bit)) return { profile, published: false };
+      if (!(entry.pendingEffects & bit)) {return { profile, published: false };}
 
       const update = Object.freeze({ ...project(Object.freeze({ ...entry }), kingdomId) });
 
@@ -107,7 +107,7 @@ function publishAvatarEffect(
             !value.isWellFormed(),
         )
       )
-        throw new Error("Invalid avatar profile projection");
+        {throw new Error("Invalid avatar profile projection");}
 
       const controller = new AbortController();
       let timer: ReturnType<typeof setTimeout> | undefined;
@@ -136,7 +136,7 @@ function publishAvatarEffect(
         .returning({ ownerUid: avatar_completion.ownerUid });
 
       if (changed.length !== 1 || changed[0]!.ownerUid !== owner)
-        throw new Error("Avatar profile acknowledgment failed");
+        {throw new Error("Avatar profile acknowledgment failed");}
 
       return { profile, published: true };
     },

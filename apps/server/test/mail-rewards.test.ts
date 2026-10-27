@@ -22,7 +22,7 @@ test("attachment parsing preserves quantities and rejects malformed, negative, f
     "gold,0,NaN",
     "gold,0,1\u0000",
   ])
-    expect(() => mailRewardEntries(raw)).toThrow();
+    {expect(() => mailRewardEntries(raw)).toThrow();}
   expect(() => mailRewardEntries(Array.from({ length: 65 }, () => "gold,0,1").join("|"))).toThrow();
 });
 
@@ -38,7 +38,7 @@ test("mail selections deduplicate overlap and preserve the legacy label fallback
     batch: false,
   });
   for (const types of ["x", "1.5", "2147483648", "-2147483649", "1\0"])
-    expect(() => mailRewardSelection(undefined, "", types, true)).toThrow();
+    {expect(() => mailRewardSelection(undefined, "", types, true)).toThrow();}
   expect(() => mailRewardSelection("", "", "", false)).toThrow();
   expect(() => mailRewardSelection("x".repeat(41), "", "", false)).toThrow();
   expect(() =>

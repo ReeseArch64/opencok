@@ -33,7 +33,7 @@ export function createShopRepository(
         async (tx) => {
           const [profile] = await tx.select().from(userprofile).where(eq(userprofile.uid, owner));
 
-          if (!profile) throw new Error("Missing shop account");
+          if (!profile) {throw new Error("Missing shop account");}
 
           const buildings = await tx
             .select()
@@ -60,7 +60,7 @@ export function createShopRepository(
       );
     },
     execute(input, offer, plan) {
-      if (!offer || offer.length > 40) throw new Error("Invalid shop offer");
+      if (!offer || offer.length > 40) {throw new Error("Invalid shop offer");}
 
       return execute(input, async (tx) => {
         await tx.insert(shop_stock).values({ id: offer }).onConflictDoNothing();
@@ -93,7 +93,7 @@ export function createShopRepository(
                 purchase.count <= 0 ||
                 purchase.count > 2147483647
               )
-                throw new Error("Invalid shop purchase");
+                {throw new Error("Invalid shop purchase");}
 
               const values = {
                 buyDaily: purchase.daily,

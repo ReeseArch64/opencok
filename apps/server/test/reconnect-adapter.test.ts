@@ -19,9 +19,9 @@ function database(
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
       const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
-      if (table === options.fail && table) throw new Error("Synthetic reconnect read failure");
+      if (table === options.fail && table) {throw new Error("Synthetic reconnect read failure");}
       if (table === "userprofile")
-        return {
+        {return {
           rows: options.missing
             ? []
             : [
@@ -38,9 +38,9 @@ function database(
                   "17",
                 ],
               ],
-        };
+        };}
       if (table === "user_army")
-        return {
+        {return {
           rows: Array.from({ length: options.armies ?? 2 }, (_, i) => [
             `army-${i}`,
             i + 1,
@@ -49,9 +49,9 @@ function database(
             i,
             "9007199254740997",
           ]),
-        };
+        };}
       if (table === "user_general")
-        return {
+        {return {
           rows: Array.from({ length: options.generals ?? 1 }, (_, i) => [
             `general-${i}`,
             "1001",
@@ -60,9 +60,9 @@ function database(
             Buffer.from('[{"ids":"50001|50002"}]'),
             2,
           ]),
-        };
+        };}
       if (table === "user_skill")
-        return {
+        {return {
           rows: Array.from({ length: options.skills ?? 1 }, (_, i) => [
             `skill-${i}`,
             "synthetic",
@@ -74,7 +74,7 @@ function database(
             3,
             4,
           ]),
-        };
+        };}
       return { rows: [] };
     },
   };
@@ -175,7 +175,7 @@ test("missing reconnect owners skip dependent reads and invalid identities never
   });
   expect(queries).toHaveLength(3);
   expect(queries.at(-1)?.text).toBe("commit");
-  for (const uid of ["", " ", "a".repeat(41)]) expect(() => readReconnectBase(db, uid)).toThrow();
+  for (const uid of ["", " ", "a".repeat(41)]) {expect(() => readReconnectBase(db, uid)).toThrow();}
   expect(queries).toHaveLength(3);
 });
 

@@ -13,7 +13,7 @@ export function createChatNicknameStore(
     async refresh(input) {
       const update = Object.freeze({ ...input });
 
-      if (!validChatNickname(update)) throw new Error("Invalid chat nickname operation");
+      if (!validChatNickname(update)) {throw new Error("Invalid chat nickname operation");}
 
       return db.transaction(
         async (tx) => {
@@ -41,7 +41,7 @@ export function createChatNicknameStore(
             account.name.includes("\0") ||
             !account.name.isWellFormed()
           )
-            throw new Error("Chat nickname authority unavailable");
+            {throw new Error("Chat nickname authority unavailable");}
 
           const key = and(
             eq(chat_avatar_profile.owner_uid, update.owner),
@@ -54,7 +54,7 @@ export function createChatNicknameStore(
             .limit(1)
             .for("update");
 
-          if (!profile || profile.name === account.name) return "unchanged";
+          if (!profile || profile.name === account.name) {return "unchanged";}
 
           const changed = await tx
             .update(chat_avatar_profile)
@@ -63,7 +63,7 @@ export function createChatNicknameStore(
             .returning({ owner: chat_avatar_profile.owner_uid });
 
           if (changed.length !== 1 || changed[0]!.owner !== update.owner)
-            throw new Error("Chat nickname write failed");
+            {throw new Error("Chat nickname write failed");}
 
           return "applied";
         },

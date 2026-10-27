@@ -12,13 +12,13 @@ export function shippingInvestmentAward(rule: Rule, random: (maximum: number) =>
   const ranges = (rule.Range ?? "").split("|").map((value) => {
     const pair = value.split(";").map((value) => cityInteger(value));
 
-    if (pair.length !== 2 || pair[0] === pair[1]) shippingInvestmentFailure();
+    if (pair.length !== 2 || pair[0] === pair[1]) {shippingInvestmentFailure();}
 
     return [Math.min(...pair), Math.max(...pair)] as const;
   });
 
   if (!weights.length || weights.length > 128 || weights.length !== ranges.length)
-    shippingInvestmentFailure();
+    {shippingInvestmentFailure();}
 
   const total = cityInteger(
       weights.reduce((sum, value) => sum + value, 0),
@@ -30,7 +30,7 @@ export function shippingInvestmentAward(rule: Rule, random: (maximum: number) =>
   for (const [index, weight] of weights.entries()) {
     sum += weight;
 
-    if (draw >= sum) continue;
+    if (draw >= sum) {continue;}
 
     const [minimum, maximum] = ranges[index]!,
       span = maximum - minimum;

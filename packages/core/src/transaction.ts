@@ -7,8 +7,8 @@ const pending = new AsyncLocalStorage<{ event: string; fields: Fields }[]>();
 
 export function afterCommit(event: string, fields: Fields) {
   const events = pending.getStore();
-  if (events) events.push({ event, fields });
-  else logEvent(event, fields);
+  if (events) {events.push({ event, fields });}
+  else {logEvent(event, fields);}
 }
 
 export function observeTransaction<T>(operation: string, run: () => Promise<T>): Promise<T> {
@@ -18,7 +18,7 @@ export function observeTransaction<T>(operation: string, run: () => Promise<T>):
     pending.run(events, async () => {
       try {
         const result = await run();
-        if (parent) parent.push(...events);
+        if (parent) {parent.push(...events);}
         else {
           logEvent("transaction_committed", {
             operation,
@@ -26,11 +26,11 @@ export function observeTransaction<T>(operation: string, run: () => Promise<T>):
             outcome: "success",
           });
           for (const event of events)
-            logEvent(event.event, {
+            {logEvent(event.event, {
               ...event.fields,
               commitState: "committed",
               outcome: "success",
-            });
+            });}
         }
         return result;
       } catch (error) {

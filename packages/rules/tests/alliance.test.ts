@@ -23,7 +23,7 @@ test("alliance creation respects castle thresholds and rank capabilities", () =>
 test("editable permissions cannot grant gameplay capabilities or accept duplicate entries", () => {
   expect(changeAlliancePermissions({ rank: 5 }, "", "0_1:0;2_2:1")["0_1"]).toBe(0);
   for (const input of ["invite:1", "0_1:2", "0_1:1;0_1:0", "__proto__:1"])
-    expect(() => changeAlliancePermissions({ rank: 5 }, "", input)).toThrow();
+    {expect(() => changeAlliancePermissions({ rank: 5 }, "", input)).toThrow();}
   expect(() => changeAlliancePermissions({ rank: 4 }, "", "0_1:0")).toThrow();
 });
 test("membership capacity and restrictions use authoritative population and power", () => {

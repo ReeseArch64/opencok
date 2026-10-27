@@ -1,7 +1,7 @@
 import { num, text, type Row } from "@opencok/contracts/rows";
 
 export function nearestWorldFootprint(points: readonly Row[], target: number, size: number) {
-  if (target <= 0) return 0;
+  if (target <= 0) {return 0;}
 
   const free = new Set(
     points
@@ -20,18 +20,18 @@ export function nearestWorldFootprint(points: readonly Row[], target: number, si
     targetY = Math.floor((target - 1) / size);
 
   for (let ring = 1; ring < 8; ring++)
-    for (let x = targetX - ring; x <= targetX + ring; x++)
-      for (let y = targetY - ring; y <= targetY + ring; y++) {
+    {for (let x = targetX - ring; x <= targetX + ring; x++)
+      {for (let y = targetY - ring; y <= targetY + ring; y++) {
         if (x > targetX - ring && x < targetX + ring && y > targetY - ring && y < targetY + ring)
-          continue;
+          {continue;}
 
-        if (x <= 0 || y <= 0 || x >= size || y >= size) continue;
+        if (x <= 0 || y <= 0 || x >= size || y >= size) {continue;}
 
         const point = 1 + x + y * size;
 
         if ([point, point - 1, point - size, point - size - 1].every((id) => free.has(id)))
-          return point;
-      }
+          {return point;}
+      }}}
 
   return 0;
 }

@@ -20,17 +20,17 @@ export function battleRankingOpen(
     Number(javaDecimal(rules.items.get("wa_info")?.k1 ?? "", 32)) +
     (playoff ? Number(javaDecimal(rules.items.get("wap_info")?.k1 ?? "", 32)) * 7 : 0);
 
-  if (BigInt(now) - snapshot.openedAt < BigInt(days) * 86400000n) return false;
+  if (BigInt(now) - snapshot.openedAt < BigInt(days) * 86400000n) {return false;}
 
   if (playoff)
-    return (
+    {return (
       serverFeature(rules, "wap_switch", {
         kingdomId: realm,
         now,
         version,
         testServer: [1, 4, 5, 6, 8, 10, 12, 14].includes(snapshot.realmType),
       }) && versionAtLeast(version, rules.features.get("wap_switch")?.version ?? "")
-    );
+    );}
 
   const gate = rules.items.get("wa_switch");
 
@@ -55,7 +55,7 @@ export function playoffPairs(
   }
 
   if (groups.size !== 8 || [...groups.values()].some((group) => group.length > 8))
-    throw new Error("Incomplete playoff groups");
+    {throw new Error("Incomplete playoff groups");}
 
   const champions = [...groups]
     .sort(([a], [b]) => a - b)
@@ -64,7 +64,7 @@ export function playoffPairs(
         team.results.slice(0, 3).every((result) => result === 1),
       );
 
-      if (winners.length !== 1) throw new Error("Ambiguous playoff champion");
+      if (winners.length !== 1) {throw new Error("Ambiguous playoff champion");}
 
       return winners[0]!;
     })
@@ -73,12 +73,12 @@ export function playoffPairs(
   const pairs: PlayoffTeam[][] = [];
 
   for (const team of champions) {
-    if (!pending.delete(team.teamId)) continue;
+    if (!pending.delete(team.teamId)) {continue;}
 
     const enemyId = team.curEnemyId ?? team.enemyIds[turns - 1] ?? "";
     const enemy = pending.get(enemyId);
 
-    if (!enemy) throw new Error("Incomplete playoff pairing");
+    if (!enemy) {throw new Error("Incomplete playoff pairing");}
 
     pending.delete(enemyId);
     pairs.push([team, enemy]);
@@ -86,7 +86,7 @@ export function playoffPairs(
 
   const own = pairs.findIndex((pair) => pair.some((team) => team.teamId === allianceId));
 
-  if (own > 0) pairs.unshift(...pairs.splice(own, 1));
+  if (own > 0) {pairs.unshift(...pairs.splice(own, 1));}
 
   return pairs.flat();
 }
@@ -96,10 +96,10 @@ export function playoffTimes(
   self: PlayoffTeam | undefined,
   now: number,
 ): { endTime?: bigint; battleState?: number } {
-  if (!self || publication.state <= 0) return {};
+  if (!self || publication.state <= 0) {return {};}
 
   if (![4, 5].includes(publication.state))
-    return { endTime: BigInt.asIntN(64, publication.start + publication.duration) / 1000n };
+    {return { endTime: BigInt.asIntN(64, publication.start + publication.duration) / 1000n };}
 
   const hour = new Date(now).getUTCHours();
   const startHour = self.index * 2;
@@ -109,23 +109,23 @@ export function playoffTimes(
       : publication.start;
 
   if (hour < startHour)
-    return {
+    {return {
       battleState: 0,
       endTime: BigInt.asIntN(64, start + BigInt(startHour) * 3600000n) / 1000n,
-    };
+    };}
 
   if (hour < startHour + 2)
-    return {
+    {return {
       battleState: 1,
       endTime: BigInt.asIntN(64, start + BigInt(startHour + 2) * 3600000n) / 1000n,
-    };
+    };}
 
   return { battleState: 2, endTime: 0n };
 }
 
 export function playoffBattleStart(now: number, weekday: number, index: number): bigint {
   if (!Number.isSafeInteger(now) || !Number.isInteger(weekday) || weekday < 1 || weekday > 7)
-    throw new Error("Invalid playoff calendar");
+    {throw new Error("Invalid playoff calendar");}
 
   const date = new Date(now);
   const currentDay = date.getUTCDay() || 7;

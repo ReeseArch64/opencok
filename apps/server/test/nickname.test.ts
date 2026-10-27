@@ -13,7 +13,7 @@ const text = (hex: string) => Buffer.from(hex, "hex").swap16().toString("utf16le
 
 test("GBK widths match the Java 8 checksum for every UTF-16 code unit", () => {
   const widths: number[] = [];
-  for (let unit = 0; unit <= 65535; unit++) widths.push(javaGbkLength(String.fromCharCode(unit)));
+  for (let unit = 0; unit <= 65535; unit++) {widths.push(javaGbkLength(String.fromCharCode(unit)));}
   expect(createHash("sha256").update(widths.join("")).digest("hex")).toBe(vectors.gbkWidthsSha256);
   expect(widths.filter((width) => width === 2)).toHaveLength(23940);
 });
@@ -123,7 +123,7 @@ test("invalid syntax or weighted length skips providers while a filter match ski
     "😀ab",
     "abc\nxyz",
   ])
-    expect((await checkNickname(name, 0, providers)).exist).toBe(-1);
+    {expect((await checkNickname(name, 0, providers)).exist).toBe(-1);}
   expect(calls).toEqual([]);
   expect(await checkNickname("abc", 0, providers)).toEqual({
     occupied: 0,
@@ -197,10 +197,10 @@ test("text bounds and malformed check types fail without consulting providers", 
   const providers = { containsBadWords: never, occupied: never };
   for (const value of [undefined, null, 12, "a".repeat(65536)]) {
     for (const fn of [nicknameTrim, nicknameLength, nicknameCharactersAllowed, javaGbkLength])
-      expect(() => fn(value as string)).toThrow();
+      {expect(() => fn(value as string)).toThrow();}
     await expect(checkNickname(value as string, 0, providers)).rejects.toThrow();
   }
   for (const type of [NaN, Infinity, 0.5, 2147483648, -2147483649])
-    await expect(checkNickname("abc", type, providers)).rejects.toThrow();
+    {await expect(checkNickname("abc", type, providers)).rejects.toThrow();}
   expect(nicknameLength("a".repeat(65535))).toBe(65535);
 });

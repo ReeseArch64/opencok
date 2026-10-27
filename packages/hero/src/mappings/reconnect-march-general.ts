@@ -31,7 +31,7 @@ function serializereconnectMarchGeneral(
     return integer(row.stat) === 3 && now <= long(row.actTime);
   });
 
-  if (active.length) result.skillList = { type: Type.StringArray, value: active };
+  if (active.length) {result.skillList = { type: Type.StringArray, value: active };}
 
   return result;
 }

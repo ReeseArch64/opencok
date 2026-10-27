@@ -41,26 +41,26 @@ export function goldEggsPeriod(rules: Rules): GoldEggsPeriod | undefined {
     start = eventTimestamp(panel?.start),
     end = eventTimestamp(panel?.end);
 
-  if (start === undefined || end === undefined || end <= start) return;
+  if (start === undefined || end === undefined || end <= start) {return;}
 
   return { start, end };
 }
 
 export function goldEggsPeriodId(period: GoldEggsPeriod) {
   if (period.start <= 0n || period.end <= period.start || period.end > 9223372036854775807n)
-    goldEggsFailure();
+    {goldEggsFailure();}
 
   return createHash("sha256").update(`${period.start}:${period.end}`).digest("hex");
 }
 
 export function goldEggsPrizes(raw: string | undefined): GoldEggsPrize[] {
-  if (!raw || raw.length > 4096) goldEggsFailure();
+  if (!raw || raw.length > 4096) {goldEggsFailure();}
 
   const rows = raw.split("|").map((part) => {
     const [range, reward, ...rest] = part.split(";"),
       limits = range?.split("-") ?? [];
 
-    if (rest.length || !reward || !/^\d+$/.test(reward) || limits.length > 2) goldEggsFailure();
+    if (rest.length || !reward || !/^\d+$/.test(reward) || limits.length > 2) {goldEggsFailure();}
 
     const first = cityInteger(limits[0], 1, 150),
       last = cityInteger(limits[1] ?? limits[0], first, 150);
@@ -72,7 +72,7 @@ export function goldEggsPrizes(raw: string | undefined): GoldEggsPrize[] {
     rows.length > 150 ||
     rows.some((row, index) => index > 0 && row.first <= rows[index - 1]!.last)
   )
-    goldEggsFailure();
+    {goldEggsFailure();}
 
   return rows;
 }
@@ -81,7 +81,7 @@ export function goldEggsCalendar(rules: Rules, now: bigint): GoldEggsCalendar | 
   const period = goldEggsPeriod(rules),
     prizes = rules.items.get("golden_rank");
 
-  if (!period || !prizes || !goldEggsEnabled(rules, now)) return;
+  if (!period || !prizes || !goldEggsEnabled(rules, now)) {return;}
 
   return {
     ...period,
@@ -100,7 +100,7 @@ export function goldEggsCalendar(rules: Rules, now: bigint): GoldEggsCalendar | 
 export function goldEggsCells(raw: unknown, rules: Rules): GoldEggsCell[] {
   const value = String(raw ?? "");
 
-  if (value.length > 1024) goldEggsFailure();
+  if (value.length > 1024) {goldEggsFailure();}
 
   const cells = value
     ? value.split("|").map((part) => {
@@ -113,7 +113,7 @@ export function goldEggsCells(raw: unknown, rules: Rules): GoldEggsCell[] {
           !["0", "1"].includes(state ?? "") ||
           cityInteger(type) !== cityInteger(rule.type)
         )
-          goldEggsFailure();
+          {goldEggsFailure();}
 
         return { id: id!, type: cityInteger(type), smashed: state === "1" };
       })
@@ -123,17 +123,17 @@ export function goldEggsCells(raw: unknown, rules: Rules): GoldEggsCell[] {
     cells.length > 64 ||
     (cells.length && cells.length !== cityInteger(rules.items.get("golden_egg")?.k5, 1, 64))
   )
-    goldEggsFailure();
+    {goldEggsFailure();}
 
   return cells;
 }
 
 export function goldEggsCellText(cells: readonly GoldEggsCell[]) {
-  if (cells.length > 64) goldEggsFailure();
+  if (cells.length > 64) {goldEggsFailure();}
 
   const value = cells.map((cell) => `${cell.id};${cell.type};${cell.smashed ? 1 : 0}`).join("|");
 
-  if (value.length > 1024) goldEggsFailure();
+  if (value.length > 1024) {goldEggsFailure();}
 
   return value;
 }
@@ -147,18 +147,18 @@ export function goldEggsDraw(
     entries.length > 256 ||
     entries.some((row) => !Number.isSafeInteger(row.weight) || row.weight < 0)
   )
-    goldEggsFailure();
+    {goldEggsFailure();}
 
   const total = entries.reduce((sum, row) => sum + row.weight, 0);
 
-  if (total <= 0 || total > 2147483647) goldEggsFailure();
+  if (total <= 0 || total > 2147483647) {goldEggsFailure();}
 
   let selected = random(total);
 
-  if (!Number.isInteger(selected) || selected < 0 || selected >= total) goldEggsFailure();
+  if (!Number.isInteger(selected) || selected < 0 || selected >= total) {goldEggsFailure();}
 
   for (const row of entries) {
-    if (selected < row.weight) return row.value;
+    if (selected < row.weight) {return row.value;}
 
     selected -= row.weight;
   }
@@ -170,7 +170,7 @@ export function goldEggsDisk(rules: Rules, random: (maximum: number) => number) 
   const config = rules.items.get("golden_egg"),
     pool = rules.advanced.goldenEggs;
 
-  if (!config || !pool || pool.size > 256) goldEggsFailure();
+  if (!config || !pool || pool.size > 256) {goldEggsFailure();}
 
   const entries = javaHashMapOrder([...pool.keys()]).map((id) => ({
       value: id,
@@ -180,7 +180,7 @@ export function goldEggsDisk(rules: Rules, random: (maximum: number) => number) 
     fallback = (config.k9 ?? "").split(";");
 
   if (!fallback.length || fallback.length > 64 || fallback.some((id) => !pool.has(id)))
-    goldEggsFailure();
+    {goldEggsFailure();}
 
   const seen = new Map<string, number>();
 
@@ -195,11 +195,11 @@ export function goldEggsDisk(rules: Rules, random: (maximum: number) => number) 
       if (used >= maximum) {
         const pick = random(fallback.length);
 
-        if (!Number.isInteger(pick) || pick < 0 || pick >= fallback.length) goldEggsFailure();
+        if (!Number.isInteger(pick) || pick < 0 || pick >= fallback.length) {goldEggsFailure();}
 
         id = fallback[pick]!;
         rule = pool.get(id)!;
-      } else seen.set(id, used + 1);
+      } else {seen.set(id, used + 1);}
     }
 
     return { id, type: cityInteger(rule.type, 0, 127), smashed: false };
@@ -214,7 +214,7 @@ export function goldEggsMultiplier(
   const rows = (rule.status ?? "").split("|").map((part) => {
     const [value, weight, ...rest] = part.split(";");
 
-    if (!value || rest.length) goldEggsFailure();
+    if (!value || rest.length) {goldEggsFailure();}
 
     return { value: String(cityInteger(value, 1, 10000)), weight: cityInteger(weight) };
   });
@@ -226,11 +226,11 @@ export function goldEggsClaims(raw: unknown, rules: Rules) {
   const value = String(raw ?? ""),
     length = goldEggsScoreRewards(rules).length;
 
-  if (value.length > 512 || (value && !/^\d+(?:;\d+)*$/.test(value))) goldEggsFailure();
+  if (value.length > 512 || (value && !/^\d+(?:;\d+)*$/.test(value))) {goldEggsFailure();}
 
   const rows = value ? value.split(";").map((value) => cityInteger(value, 0, length - 1)) : [];
 
-  if (new Set(rows).size !== rows.length) goldEggsFailure();
+  if (new Set(rows).size !== rows.length) {goldEggsFailure();}
 
   return rows;
 }
@@ -239,7 +239,7 @@ export function goldEggsScoreRewards(rules: Rules) {
   const rows = (rules.items.get("golden_egg")?.k7 ?? "").split("|").map((part) => {
     const [score, reward, ...rest] = part.split(";");
 
-    if (rest.length || !reward || !/^\d+$/.test(reward)) goldEggsFailure();
+    if (rest.length || !reward || !/^\d+$/.test(reward)) {goldEggsFailure();}
 
     return { score: BigInt(cityInteger(score, 1)), reward };
   });
@@ -249,25 +249,25 @@ export function goldEggsScoreRewards(rules: Rules) {
     rows.length > 64 ||
     rows.some((row, index) => index > 0 && row.score <= rows[index - 1]!.score)
   )
-    goldEggsFailure();
+    {goldEggsFailure();}
 
   return rows;
 }
 
 export function goldEggsFlushCost(row: Row, rules: Rules) {
-  if (num(row, "flushfreetimes") > 0) return 0;
+  if (num(row, "flushfreetimes") > 0) {return 0;}
 
   const costs = (rules.items.get("golden_egg")?.k6 ?? "")
     .split(";")
     .map((raw) => cityInteger(raw, 1));
 
-  if (!costs.length || costs.length > 128) goldEggsFailure();
+  if (!costs.length || costs.length > 128) {goldEggsFailure();}
 
   return costs[Math.min(cityInteger(row.flushcount ?? 0), costs.length - 1)]!;
 }
 
 export function goldEggsSort(rows: readonly GoldEggsStanding[], maximum = 150) {
-  if (rows.length > 300 || maximum < 1 || maximum > 150) goldEggsFailure();
+  if (rows.length > 300 || maximum < 1 || maximum > 150) {goldEggsFailure();}
 
   return [...rows]
     .sort((a, b) =>
@@ -291,11 +291,11 @@ export function goldEggsRecord(row: Row, owner: string, now: bigint) {
     long(row, "createtime") > now ||
     long(row, "everydaytime") > now
   )
-    goldEggsFailure();
+    {goldEggsFailure();}
 
-  for (const key of ["freetimes", "flushfreetimes", "flushcount"]) cityInteger(row[key] ?? 0);
+  for (const key of ["freetimes", "flushfreetimes", "flushcount"]) {cityInteger(row[key] ?? 0);}
 
   cityInteger(row.multiple ?? 1, 1, 10000);
 
-  if (long(row, "score") < 0n) goldEggsFailure();
+  if (long(row, "score") < 0n) {goldEggsFailure();}
 }

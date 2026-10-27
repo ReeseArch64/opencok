@@ -31,7 +31,7 @@ export async function installExpeditionPeriod(
   await fenceRealmTransaction(tx, authority);
 
   if (manifest.serverId !== authority.kingdomId || !(await authorize(manifest)))
-    expeditionFailure();
+    {expeditionFailure();}
 
   const phases = expeditionSchedule(manifest);
   await tx.execute(sql`SELECT pg_advisory_xact_lock(60718, ${manifest.serverId})`);
@@ -79,11 +79,11 @@ export async function installExpeditionPeriod(
       existing.startTime !== value.startTime ||
       existing.endTime !== value.endTime
     )
-      expeditionFailure();
+      {expeditionFailure();}
   };
 
   if (prior)
-    await archive(
+    {await archive(
       {
         periodId: prior.periodId,
         serverId: prior.serverId,
@@ -93,16 +93,16 @@ export async function installExpeditionPeriod(
         endTime: prior.endTime,
       },
       0n,
-    );
+    );}
 
   if (prior?.periodId === manifest.periodId) {
     if (prior.schedule !== schedule || prior.matchServerId !== manifest.matchServerId)
-      expeditionFailure();
+      {expeditionFailure();}
 
     return;
   }
 
-  if (prior && manifest.startTime < prior.endTime) expeditionFailure();
+  if (prior && manifest.startTime < prior.endTime) {expeditionFailure();}
 
   const value = {
     serverId: manifest.serverId,
@@ -160,7 +160,7 @@ export async function readExpedition(
       .limit(2)
       .for("share");
 
-    if (archives.length > 1) throw new Error("Ambiguous owned expedition manifest time");
+    if (archives.length > 1) {throw new Error("Ambiguous owned expedition manifest time");}
 
     const archive = archives[0];
 
@@ -206,7 +206,7 @@ export async function readExpedition(
         )
         .limit(10);
 
-  if (progress.length > 9) expeditionFailure();
+  if (progress.length > 9) {expeditionFailure();}
 
   let allianceScore = 0,
     kingdomScore = 0,
@@ -249,7 +249,7 @@ export async function readExpedition(
     state.lastMergeMillis = long(server ?? {}, "lastMergeMillis");
   }
 
-  if (projectionOnly) state.projectionOnly = true;
+  if (projectionOnly) {state.projectionOnly = true;}
 
   if (period && phase) {
     const [closure] = await tx
@@ -263,7 +263,7 @@ export async function readExpedition(
       )
       .limit(1);
 
-    if (closure) state.closed = true;
+    if (closure) {state.closed = true;}
   }
 
   if (["expedition.show", "distribution.record.show", "tax.record.show"].includes(command ?? "")) {
@@ -275,28 +275,28 @@ export async function readExpedition(
     );
 
     if (command === "expedition.show")
-      state.records = await tx
+      {state.records = await tx
         .select()
         .from(expedition_record)
         .orderBy(desc(expedition_record.time), asc(expedition_record.uuid))
         .offset(offset)
-        .limit(50);
+        .limit(50);}
 
     if (command === "tax.record.show")
-      state.taxRecords = await tx
+      {state.taxRecords = await tx
         .select()
         .from(king_tax_record)
         .orderBy(desc(king_tax_record.taxTime), asc(king_tax_record.uuid))
         .offset(offset)
-        .limit(50);
+        .limit(50);}
 
     if (command === "distribution.record.show")
-      state.distributions = await tx
+      {state.distributions = await tx
         .select()
         .from(king_allot_tax_record)
         .orderBy(desc(king_allot_tax_record.sendTime), asc(king_allot_tax_record.uuid))
         .offset(offset)
-        .limit(50);
+        .limit(50);}
   }
 
   return state;
@@ -309,7 +309,7 @@ export async function writeExpedition(
 ) {
   for (const row of rows) {
     if (row.uid !== owner || !Number.isFinite(num(row, "score")) || num(row, "score") < 0)
-      expeditionFailure();
+      {expeditionFailure();}
 
     const value = {
       uid: owner,

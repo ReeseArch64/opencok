@@ -23,20 +23,20 @@ function failure(): never {
 async function owned(context: CityProgressionContext, period: ContinuedCostPeriod) {
   const record = await context.state.continuedCost?.load(period.type, period.start);
 
-  if (!record) return;
+  if (!record) {return;}
 
   if (
     long(record, "periodStart") === period.start ||
     (long(record, "updateTime") > period.start && long(record, "updateTime") < period.end)
   )
-    return { ...record, periodStart: period.start };
+    {return { ...record, periodStart: period.start };}
 }
 
 function claimMail(context: CityProgressionContext, reward: string) {
   const template = context.rules.mail.get("12174"),
     contents = javaMailBytes(template?.message);
 
-  if (!template || !contents) failure();
+  if (!template || !contents) {failure();}
 
   const quests = (context.write.quests ??= {});
   quests.mail = [
@@ -69,7 +69,7 @@ export class ContinuedCostDomain extends CityCommandDomain {
   public readonly types: CityDomain["types"] = [];
 
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
-    if (!context.state.continuedCost) failure();
+    if (!context.state.continuedCost) {failure();}
 
     if (command === "continuedcost.hideking" || command === "continuedcost.global.reward") {
       if (
@@ -79,14 +79,14 @@ export class ContinuedCostDomain extends CityCommandDomain {
           now: Number(context.now),
         })
       )
-        return { response: encode({}), event: null };
+        {return { response: encode({}), event: null };}
 
       if (command === "continuedcost.hideking") {
-        if (!context.state.quests?.mixed.uid) return { response: encode({}), event: null };
+        if (!context.state.quests?.mixed.uid) {return { response: encode({}), event: null };}
 
         const current = num(context.state.quests?.mixed ?? {}, "costHide");
 
-        if (![0, 1].includes(current)) failure();
+        if (![0, 1].includes(current)) {failure();}
 
         context.write.continuedCostHide = current === 0 ? 1 : 0;
 
@@ -100,9 +100,9 @@ export class ContinuedCostDomain extends CityCommandDomain {
         .split("|")
         .filter(Boolean);
 
-      if (!bands.length) return { response: encode({}), event: null };
+      if (!bands.length) {return { response: encode({}), event: null };}
 
-      if (bands.length > 128) failure();
+      if (bands.length > 128) {failure();}
 
       return {
         response: encode({
@@ -113,7 +113,7 @@ export class ContinuedCostDomain extends CityCommandDomain {
                 max = cityInteger(upper, min);
 
               if (extra.length || !reward || !context.rules.reconnect.rewards?.has(reward))
-                failure();
+                {failure();}
 
               return sfs.object({
                 min: sfs.int(min),
@@ -150,9 +150,9 @@ export class ContinuedCostDomain extends CityCommandDomain {
           Number(context.now),
         );
 
-    if (!period) return { response: encode({}), event: null };
+    if (!period) {return { response: encode({}), event: null };}
 
-    if (evidence && (evidence.owner !== context.owner || evidence.at > context.now)) failure();
+    if (evidence && (evidence.owner !== context.owner || evidence.at > context.now)) {failure();}
 
     let row: Row | undefined = await owned(context, period);
 
@@ -189,7 +189,7 @@ export class ContinuedCostDomain extends CityCommandDomain {
       };
     }
 
-    if (!evidence && !row) failure();
+    if (!evidence && !row) {failure();}
 
     const claimed = continuedCostClaims(row?.getLv),
       logs: number[] = [];
@@ -216,11 +216,11 @@ export class ContinuedCostDomain extends CityCommandDomain {
         period.tiers.filter((tier) => tier.point <= long(row!, "total")).at(-1)?.level ?? 0;
 
       for (const tier of period.tiers)
-        if (tier.level > num(row, "lv") && tier.level <= level && !claimed.has(tier.level)) {
+        {if (tier.level > num(row, "lv") && tier.level <= level && !claimed.has(tier.level)) {
           claimMail(context, tier.reward);
           claimed.add(tier.level);
           logs.push(tier.level);
-        }
+        }}
 
       row.lv = Math.max(num(row, "lv"), level);
       row.getLv = [...claimed].map((value) => `,${value}`).join("");
@@ -234,7 +234,7 @@ export class ContinuedCostDomain extends CityCommandDomain {
       tier = period.tiers.find((tier) => tier.level === level);
 
     if (!tier || num(row, "lv") < level || claimed.has(level))
-      throw new GameError(errors.rewardClaimed, "city_progression");
+      {throw new GameError(errors.rewardClaimed, "city_progression");}
 
     const granted = grantNativeProgressionReward(
       context,

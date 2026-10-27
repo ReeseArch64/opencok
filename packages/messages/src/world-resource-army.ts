@@ -22,7 +22,7 @@ function invalid(): never {
 }
 
 function object(value: JavaValue): JavaObject {
-  if (!value || typeof value !== "object" || value.kind !== "object") return invalid();
+  if (!value || typeof value !== "object" || value.kind !== "object") {return invalid();}
 
   return value;
 }
@@ -32,7 +32,7 @@ function checked(value: JavaValue, name: string, uid: bigint, flags: number): Ja
   const type = result.descriptor;
 
   if (type.name !== name || type.uid !== uid || type.flags !== flags || type.parent)
-    return invalid();
+    {return invalid();}
 
   return result;
 }
@@ -40,41 +40,41 @@ function checked(value: JavaValue, name: string, uid: bigint, flags: number): Ja
 function field(value: JavaObject, name: string, type: string): JavaValue {
   const declaration = value.descriptor.fields.find((entry) => entry.name === name);
 
-  if (!declaration) return type === "I" ? 0 : null;
+  if (!declaration) {return type === "I" ? 0 : null;}
 
-  if ((declaration.signature ?? declaration.type) !== type) return invalid();
+  if ((declaration.signature ?? declaration.type) !== type) {return invalid();}
 
   return value.slots.get(value.descriptor)!.fields.get(name)!;
 }
 
 function text(value: JavaValue): string | null {
-  if (value !== null && typeof value !== "string") return invalid();
+  if (value !== null && typeof value !== "string") {return invalid();}
 
   return value;
 }
 
 function list(value: JavaValue): JavaValue[] | null {
-  if (value === null) return null;
+  if (value === null) {return null;}
 
   const source = object(value);
   const type = source.descriptor;
   const arrayList = type.name === "java.util.ArrayList";
   const linkedList = type.name === "java.util.LinkedList";
 
-  if (!arrayList && !linkedList) return invalid();
+  if (!arrayList && !linkedList) {return invalid();}
 
   checked(source, type.name, arrayList ? 8683452581122892189n : 876323262645176354n, 3);
   const slot = source.slots.get(type)!;
   const header = slot.custom[0];
 
   if (!header || typeof header !== "object" || header.kind !== "block" || header.bytes.length !== 4)
-    return invalid();
+    {return invalid();}
 
   const count = header.bytes.readInt32BE();
 
-  if (count < 0 || count > 4096 || slot.custom.length !== count + 1) return invalid();
+  if (count < 0 || count > 4096 || slot.custom.length !== count + 1) {return invalid();}
 
-  if (arrayList && field(source, "size", "I") !== count) return invalid();
+  if (arrayList && field(source, "size", "I") !== count) {return invalid();}
 
   return slot.custom.slice(1);
 }
@@ -93,7 +93,7 @@ export function decodeWorldResourceArmy(data: Buffer): SavedResourceArmy | null 
 
   const decoded = decodeJavaObjectStream(data);
 
-  if (decoded === null) return null;
+  if (decoded === null) {return null;}
 
   const root = checked(decoded, armyName, 1740992047662150684n, 2);
 
@@ -128,11 +128,11 @@ export interface SavedMarchArmy extends Omit<SavedResourceArmy, "soldiers"> {
 }
 
 export function decodeWorldMarchArmy(data: Buffer): SavedMarchArmy | null {
-  if (isMaintainedMarchArmy(data)) return readMaintainedMarchArmy(data);
+  if (isMaintainedMarchArmy(data)) {return readMaintainedMarchArmy(data);}
 
   const decoded = decodeJavaObjectStream(data);
 
-  if (decoded === null) return null;
+  if (decoded === null) {return null;}
 
   const root = checked(decoded, armyName, 1740992047662150684n, 2);
   const army = resourceArmy(root);
@@ -167,11 +167,11 @@ export function decodeWorldMarchArmy(data: Buffer): SavedMarchArmy | null {
             type.kind !== "enum" ||
             type.descriptor.name !== `${armyName}$BasicArmType`
           )
-            return invalid();
+            {return invalid();}
 
           basicArm = ["INFANTRY", "CAVALRY", "BOW", "CAR"].indexOf(type.name);
 
-          if (basicArm < 0) return invalid();
+          if (basicArm < 0) {return invalid();}
         }
 
         return {
@@ -214,7 +214,7 @@ export function isMaintainedMarchArmy(data: Buffer) {
 }
 
 function readMaintainedMarchArmy(data: Buffer): SavedMarchArmy {
-  if (!Buffer.isBuffer(data) || data.length > 65535) return invalid();
+  if (!Buffer.isBuffer(data) || data.length > 65535) {return invalid();}
 
   const army = JSON.parse(
     new TextDecoder("utf-8", { fatal: true }).decode(data.subarray(maintainedMarchPrefix.length)),
@@ -235,10 +235,10 @@ function readMaintainedMarchArmy(data: Buffer): SavedMarchArmy {
     !Array.isArray(army.dragons) ||
     army.dragons.length > 8
   )
-    return invalid();
+    {return invalid();}
 
   for (const soldier of army.soldiers)
-    if (
+    {if (
       soldier.owner !== army.owner ||
       typeof soldier.armsId !== "string" ||
       !/^\d{1,12}$/.test(soldier.armsId) ||
@@ -249,10 +249,10 @@ function readMaintainedMarchArmy(data: Buffer): SavedMarchArmy {
       (soldier.level !== undefined && !integer(soldier.level, 0)) ||
       !(soldier.basicArm === null || integer(soldier.basicArm, 0))
     )
-      return invalid();
+      {return invalid();}}
 
   for (const dragon of army.dragons)
-    if (
+    {if (
       dragon.owner !== army.owner ||
       typeof dragon.uuid !== "string" ||
       !dragon.uuid ||
@@ -260,7 +260,7 @@ function readMaintainedMarchArmy(data: Buffer): SavedMarchArmy {
       !integer(dragon.itemId, 1) ||
       !integer(dragon.level, 1)
     )
-      return invalid();
+      {return invalid();}}
 
   if (
     army.general !== null &&
@@ -268,7 +268,7 @@ function readMaintainedMarchArmy(data: Buffer): SavedMarchArmy {
       !integer(army.general.id, 1) ||
       !integer(army.general.level, 1))
   )
-    return invalid();
+    {return invalid();}
 
   return army;
 }
@@ -283,11 +283,11 @@ export function encodeWorldMarchArmy(army: SavedMarchArmy): Buffer {
 export function decodeWorldMarchSpeedEffects(
   data: Buffer,
 ): ReadonlyMap<string, number> | undefined {
-  if (isMaintainedMarchArmy(data)) return undefined;
+  if (isMaintainedMarchArmy(data)) {return undefined;}
 
   const decoded = decodeJavaObjectStream(data);
 
-  if (decoded === null) return undefined;
+  if (decoded === null) {return undefined;}
 
   const root = checked(decoded, armyName, 1740992047662150684n, 2);
   const soldiers = list(field(root, "soldierList", "Ljava/util/List;"));
@@ -297,7 +297,7 @@ export function decodeWorldMarchSpeedEffects(
     const soldier = checked(value, `${armyName}$Soldier`, -1404739455579587157n, 2);
     const id = text(field(soldier, "armsId", "Ljava/lang/String;"));
 
-    if (!id) invalid();
+    if (!id) {invalid();}
 
     const effect = field(soldier, "marchSpdEffectVal", "I") as number;
     result.set(id, Math.min(result.get(id) ?? effect, effect));

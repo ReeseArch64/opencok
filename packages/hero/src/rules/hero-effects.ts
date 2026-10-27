@@ -24,7 +24,7 @@ export function selectHeroes(heroes: readonly Row[]): readonly Row[] {
       level > integer(previous.row.level ?? 0) ||
       (level === integer(previous.row.level ?? 0) && exp >= integer(previous.row.exp ?? 0))
     )
-      selected.set(family, { row, index });
+      {selected.set(family, { row, index });}
   }
 
   const indices = new Set([...selected.values()].map((entry) => entry.index));
@@ -40,7 +40,7 @@ export function heroEffects(
   const effects = new Map<number, number>();
   const event = rules.power.activityEvents?.get("9005005");
 
-  if (!Number.isSafeInteger(context.now)) return effects;
+  if (!Number.isSafeInteger(context.now)) {return effects;}
 
   let start = 0n;
   let end = 0n;
@@ -60,12 +60,12 @@ export function heroEffects(
 
   const now = BigInt(context.now);
 
-  if (now < start || now > end) return effects;
+  if (now < start || now > end) {return effects;}
 
   for (const hero of selectHeroes(heroes)) {
     const rule = rules.power.heroes?.get(text(hero, "heroid"));
 
-    if (!rule) return invalid();
+    if (!rule) {return invalid();}
 
     const contribution = new Map<number, number>();
 
@@ -77,7 +77,7 @@ export function heroEffects(
       }
     }
 
-    for (const [id, value] of contribution) effects.set(id, float((effects.get(id) ?? 0) + value));
+    for (const [id, value] of contribution) {effects.set(id, float((effects.get(id) ?? 0) + value));}
   }
 
   return effects;

@@ -15,7 +15,7 @@ export async function readPrayer(tx: MutationTransaction, owner: string) {
 export async function writePrayer(tx: MutationTransaction, owner: string, write: PrayerWrite) {
   const row = write.record;
 
-  if (row.uid !== owner) throw new Error("Foreign prayer state");
+  if (row.uid !== owner) {throw new Error("Foreign prayer state");}
 
   const counters: Record<string, number> = {};
 
@@ -28,10 +28,10 @@ export async function writePrayer(tx: MutationTransaction, owner: string, write:
     ...prayerFields,
     ...prayerFields.map((field) => `gold${field}`),
   ])
-    counters[key] = cityInteger(row[key] ?? 0);
+    {counters[key] = cityInteger(row[key] ?? 0);}
 
   if (counters.isFirstFree! > 1 || counters.isFirstPay! > 1)
-    throw new Error("Invalid prayer first-use flags");
+    {throw new Error("Invalid prayer first-use flags");}
 
   const value = { uid: owner, ...counters, lastPrayTime: cityAmount(row.lastPrayTime) };
   await tx
@@ -43,7 +43,7 @@ export async function writePrayer(tx: MutationTransaction, owner: string, write:
     const entry = write.history;
 
     if (!prayerFields.includes(entry.resource as (typeof prayerFields)[number]))
-      throw new Error("Invalid prayer history resource");
+      {throw new Error("Invalid prayer history resource");}
 
     await tx.insert(pray_record).values({
       uid: owner,

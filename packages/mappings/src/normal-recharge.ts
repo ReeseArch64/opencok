@@ -9,7 +9,7 @@ export function normalRechargeView(
   face: string,
   rewards: readonly { point: number; rewards: readonly RewardPreview[]; important?: string }[],
 ) {
-  if (rewards.length > 128) throw new Error("Recharge projection bound exceeded");
+  if (rewards.length > 128) {throw new Error("Recharge projection bound exceeded");}
 
   return {
     repayinfo: sfs.object({

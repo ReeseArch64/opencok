@@ -53,7 +53,7 @@ function repository() {
 
 afterEach(() => {
   for (const directory of directories.splice(0))
-    rmSync(directory, { recursive: true, force: true });
+    {rmSync(directory, { recursive: true, force: true });}
 });
 
 test("first branch push checks every branch commit without replaying inherited history", () => {

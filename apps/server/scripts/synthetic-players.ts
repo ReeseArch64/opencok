@@ -93,9 +93,9 @@ export async function seedSyntheticPlayers(
   now: number,
 ) {
   if (!Number.isInteger(count) || count < 1 || count > 300 || !Number.isSafeInteger(now) || now < 0)
-    throw new Error("Invalid synthetic seed parameters");
+    {throw new Error("Invalid synthetic seed parameters");}
   const realm = rules.kingdomId;
-  if (realm !== 1) throw new Error("Synthetic seed supports only the local first kingdom");
+  if (realm !== 1) {throw new Error("Synthetic seed supports only the local first kingdom");}
   const uids = Array.from({ length: count }, (_, i) => `simseed-${realm}-${pad(i + 1)}`);
   const names = uids.map(
     (_, i) =>
@@ -105,17 +105,17 @@ export async function seedSyntheticPlayers(
   const ids = Array.from({ length: groups }, (_, i) => `simseed-${realm}-alliance-${pad(i + 1)}`);
   const allianceDisplayNames = ids.map((_, i) => `${allianceNames[i]} ${realm}`);
   const allianceTags = ids.map((_, i) => `S${realm}${pad(i + 1)}`);
-  if (troops.some((id) => !rules.arms.has(id))) throw new Error("Missing troop catalog");
+  if (troops.some((id) => !rules.arms.has(id))) {throw new Error("Missing troop catalog");}
   const scienceBases = [...(rules.power.sciences?.values() ?? [])]
     .filter((rule) => rule.science_lv === "0" && /^\d+$/.test(rule.id ?? ""))
     .slice(0, 6);
   const itemIds = ["200001", "200002", "200021", "200031", "200390"].filter((id) =>
     rules.goods.has(id),
   );
-  if (scienceBases.length < 6 || itemIds.length < 3) throw new Error("Missing progression catalog");
+  if (scienceBases.length < 6 || itemIds.length < 3) {throw new Error("Missing progression catalog");}
   const position = [...rules.positions.values()].find((row) => row.building === "433000");
   if (!position || !rules.power.newGeneralBases?.has("53500"))
-    throw new Error("Missing hero catalog");
+    {throw new Error("Missing hero catalog");}
   return db.transaction(async (tx) => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`opencok-simseed-${realm}`}))`);
     if (
@@ -146,7 +146,7 @@ export async function seedSyntheticPlayers(
           .where(inArray(alliance.abbr, allianceTags))
       ).length
     )
-      throw new Error("Synthetic identities or names already exist; no changes were made");
+      {throw new Error("Synthetic identities or names already exist; no changes were made");}
     const points = await tx.execute<{ id: number }>(sql`
       SELECT p.id FROM opencok_kingdom.worldpoint p
       JOIN opencok_kingdom.worldpoint e ON e.id = p.id + 1 AND e."worldId" = 0 AND e.x = p.x + 1 AND e.y = p.y
@@ -162,7 +162,7 @@ export async function seedSyntheticPlayers(
       AND coalesce(p.reserve, 0) = 0 AND coalesce(e.reserve, 0) = 0 AND coalesce(s.reserve, 0) = 0 AND coalesce(c.reserve, 0) = 0
       ORDER BY ((p.x * 37 + p.y * 71) % 1201), p.id LIMIT ${count} FOR UPDATE OF p,e,s,c SKIP LOCKED
     `);
-    if (points.rows.length !== count) throw new Error("Not enough safe empty city locations");
+    if (points.rows.length !== count) {throw new Error("Not enough safe empty city locations");}
     for (let group = 0; group < groups; group++) {
       const size = Math.min(25, count - group * 25);
       await tx.insert(alliance).values({
@@ -215,7 +215,7 @@ export async function seedSyntheticPlayers(
         return { ...building, level: target, refreshTime: BigInt(now) };
       });
       if (buildings.some((building) => Number(building.pos) === Number(position.position)))
-        throw new Error("Hero building position occupied");
+        {throw new Error("Hero building position occupied");}
       rules.building("433000", 1);
       buildings.push({
         uuid: randomUUID(),
@@ -247,7 +247,7 @@ export async function seedSyntheticPlayers(
       const sciences = scienceBases.map((rule, index) => {
         const itemId = rule.id!;
         let level = 1 + ((i + index) % 5);
-        while (level > 0 && !rules.power.sciences?.has(String(Number(itemId) + level))) level--;
+        while (level > 0 && !rules.power.sciences?.has(String(Number(itemId) + level))) {level--;}
         return { uid, itemId, level, cd: 9223372036854775807n };
       });
       const items = itemIds.map((itemId, index) => ({
@@ -331,9 +331,9 @@ export async function seedSyntheticPlayers(
       await tx.insert(user_lord).values(seed.lord as typeof user_lord.$inferInsert);
       await tx.insert(user_vip).values(seed.vip as typeof user_vip.$inferInsert);
       if (seed.tasks.length)
-        await tx.insert(user_task).values(seed.tasks as (typeof user_task.$inferInsert)[]);
+        {await tx.insert(user_task).values(seed.tasks as (typeof user_task.$inferInsert)[]);}
       if (generals.length)
-        await tx.insert(user_general).values(generals as (typeof user_general.$inferInsert)[]);
+        {await tx.insert(user_general).values(generals as (typeof user_general.$inferInsert)[]);}
       await tx
         .insert(new_general)
         .values(
@@ -409,10 +409,10 @@ if (import.meta.main) {
       apply !== "--apply" ||
       extra !== undefined
     )
-      throw new Error("Usage: synthetic-players.ts 1 <1-300> --apply");
+      {throw new Error("Usage: synthetic-players.ts 1 <1-300> --apply");}
     const url = new URL(requireEnv("DATABASE_URL"));
     if (process.env.NODE_ENV !== "development" || url.hostname !== "postgres")
-      throw new Error("Synthetic seeding is limited to the local development stack");
+      {throw new Error("Synthetic seeding is limited to the local development stack");}
     url.pathname = "/opencok_kingdom_1";
     database = createDatabase("kingdom", { connectionString: url.toString(), max: 1 });
     const rules = await loadRules(undefined, 1);

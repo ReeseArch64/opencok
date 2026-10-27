@@ -57,18 +57,18 @@ function fixture() {
         query: async (query: { text: string }, params: unknown[] = []) => {
           const text = query.text;
           queries.push({ client, text, params });
-          if (text.startsWith("begin")) return { rows: [] };
+          if (text.startsWith("begin")) {return { rows: [] };}
           if (text === "rollback") {
             working = undefined;
             release();
             return { rows: [] };
           }
           if (text === "commit") {
-            if (failure === "commit") throw new Error("Synthetic commit failure");
+            if (failure === "commit") {throw new Error("Synthetic commit failure");}
             saved = working!;
             working = undefined;
             release();
-            if (failure === "lost") throw new Error("Synthetic lost acknowledgment");
+            if (failure === "lost") {throw new Error("Synthetic lost acknowledgment");}
             return { rows: [] };
           }
           if (text.includes('from "opencok_kingdom"."userprofile"')) {
@@ -81,7 +81,7 @@ function fixture() {
             });
             await previous;
             working = structuredClone(saved);
-            if (failure === "owner") throw new Error("Synthetic owner failure");
+            if (failure === "owner") {throw new Error("Synthetic owner failure");}
             const current = overrideOwner ? lockedProfile : profile;
             return {
               rows: current
@@ -89,7 +89,7 @@ function fixture() {
                 : [],
             };
           }
-          if (!working) throw new Error("Query without owner lock");
+          if (!working) {throw new Error("Query without owner lock");}
           if (
             text.startsWith("select") &&
             text.includes('from "opencok_kingdom"."user_mixed_info"')
@@ -99,7 +99,7 @@ function fixture() {
             expect(params).toEqual(["self", 1]);
             const field = /^select "uid", "([^"]+)"/.exec(text)?.[1];
             expect(commands.some(([, , column]) => column === field)).toBe(true);
-            if (failure === "mixed") throw new Error("Synthetic mixed failure");
+            if (failure === "mixed") {throw new Error("Synthetic mixed failure");}
             const row = working.get("self");
             return { rows: row ? [[row.uid, row[field!]]] : [] };
           }
@@ -111,7 +111,7 @@ function fixture() {
             expect(commands.some(([, , column]) => column === field)).toBe(true);
             expect(params[1]).toBe("self");
             expect(params).toHaveLength(2);
-            if (failure === "update") throw new Error("Synthetic update failure");
+            if (failure === "update") {throw new Error("Synthetic update failure");}
             working.get("self")![field!] =
               field === "showBanner" ? BigInt(params[0] as string) : (params[0] as number);
             return { rows: [], rowCount: 1 };
@@ -158,8 +158,8 @@ function fixture() {
     row: () => structuredClone(saved.get("self")),
     other: () => structuredClone(saved.get("other")),
     setRow: (row: Row | undefined) => {
-      if (row) saved.set("self", row);
-      else saved.delete("self");
+      if (row) {saved.set("self", row);}
+      else {saved.delete("self");}
     },
     profile: (row: Row | undefined) => {
       profile = row;
@@ -215,7 +215,7 @@ test("unchanged profile values skip writes while speed flags write on every acce
     const instance = fixture();
     const value = Number(instance.row()![column]);
     for (let index = 0; index < 2; index++)
-      await instance.game.execute("self", command, { [key]: sfs.int(value) });
+      {await instance.game.execute("self", command, { [key]: sfs.int(value) });}
     expect(
       instance.queries.filter(({ text }) => text.startsWith("update")),
       command,
@@ -258,8 +258,8 @@ test("missing mixed state suppresses lazy optional parsing but required preferen
     const request = instance.game.execute("self", command, {
       [key]: optional ? sfs.string("malformed but unused") : sfs.int(1),
     });
-    if (optional) expect(await request).toEqual({ body: { success: sfs.bool(true) }, pushes: [] });
-    else await expect(request).rejects.toThrow();
+    if (optional) {expect(await request).toEqual({ body: { success: sfs.bool(true) }, pushes: [] });}
+    else {await expect(request).rejects.toThrow();}
     expect(instance.row()).toBeUndefined();
     expect(instance.queries.some(({ text }) => /^(insert|update|delete)/.test(text))).toBe(false);
   }
@@ -269,15 +269,15 @@ test("out-of-domain scroll integers acknowledge without mixed reads while 0 and 
   const instance = fixture();
   instance.fail("mixed");
   for (const setting of [-2147483648, -1, 2, 2147483647])
-    expect(
+    {expect(
       await instance.game.execute("self", "equip.scroll", { setting: sfs.int(setting) }),
-    ).toEqual({ body: { success: sfs.bool(true) }, pushes: [] });
+    ).toEqual({ body: { success: sfs.bool(true) }, pushes: [] });}
   expect(instance.queries).toEqual([]);
   instance.fail("");
   for (const setting of [0, 1])
-    expect(
+    {expect(
       (await instance.game.execute("self", "equip.scroll", { setting: sfs.int(setting) })).body,
-    ).toEqual({ scrollEquip: sfs.bool(setting === 1) });
+    ).toEqual({ scrollEquip: sfs.bool(setting === 1) });}
 });
 
 test("malformed present flag values reject when consumed and never modify saved state", async () => {
@@ -295,14 +295,14 @@ test("malformed present flag values reject when consumed and never modify saved 
       sfs.int(2147483648),
       sfs.int(-2147483649),
     ])
-      await expect(instance.game.execute("self", command, { [key]: value })).rejects.toThrow();
+      {await expect(instance.game.execute("self", command, { [key]: value })).rejects.toThrow();}
     if (command !== "banner.set" && command !== "speed.cd.open")
-      await expect(instance.game.execute("self", command, {})).rejects.toThrow();
+      {await expect(instance.game.execute("self", command, {})).rejects.toThrow();}
     expect(instance.row()).toEqual(before);
     expect(instance.queries.some(({ text }) => text.startsWith("update"))).toBe(false);
     if (command === "banner.set" || command === "speed.cd.open")
-      expect(instance.queries.at(-1)?.text).toBe("rollback");
-    else expect(instance.queries).toEqual([]);
+      {expect(instance.queries.at(-1)?.text).toBe("rollback");}
+    else {expect(instance.queries).toEqual([]);}
   }
 });
 
@@ -377,21 +377,21 @@ test("invalid repository selectors and identity bounds reject before queries or 
     return 1;
   };
   for (const uid of ["", "x".repeat(41), "a\0b", "\ud800"])
-    await expect(
+    {await expect(
       updateProfilePreference(instance.db, uid, 2, "showEquip", now, value),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   for (const field of ["uid", "taskStage", "__proto__"])
-    await expect(
+    {await expect(
       updateProfilePreference(instance.db, "self", 2, field as ProfilePreferenceField, now, value),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   for (const instant of [-1, NaN, Infinity, 0.5])
-    await expect(
+    {await expect(
       updateProfilePreference(instance.db, "self", 2, "showEquip", instant, value),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   for (const realm of [0, -1, NaN, 0.5])
-    await expect(
+    {await expect(
       updateProfilePreference(instance.db, "self", realm, "showEquip", now, value),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   expect(instance.queries).toEqual([]);
   expect(reads).toBe(0);
 });

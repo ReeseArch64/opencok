@@ -19,12 +19,12 @@ export function prayerParameter(rules: Rules, altar: Row, index: number) {
     ),
     parameter = definition.clientParameters?.[index];
 
-  if (!parameter) return "0";
+  if (!parameter) {return "0";}
 
   let value = parameter.value;
 
   for (const step of parameter.steps ?? [])
-    if (step.progress <= num(altar, "progress")) value = step.value;
+    {if (step.progress <= num(altar, "progress")) {value = step.value;}}
 
   return value;
 }
@@ -45,7 +45,7 @@ export function prayerConfiguration(rules: Rules, altar: Row) {
     weights.reduce((sum, weight) => sum + weight, 0) <= 0 ||
     !control
   )
-    prayerFailure();
+    {prayerFailure();}
 
   return {
     base: {
@@ -66,7 +66,7 @@ export function prayerConfiguration(rules: Rules, altar: Row) {
 }
 
 export function prayerInteger(value: number) {
-  if (!Number.isFinite(value) || value < 0) prayerFailure();
+  if (!Number.isFinite(value) || value < 0) {prayerFailure();}
 
   return Math.min(2147483647, Math.trunc(value));
 }
@@ -88,7 +88,7 @@ export function resetPrayer(
   if (!previous || long(row, "lastPrayTime") / 86400000n !== now / 86400000n) {
     Object.assign(row, base, { prayCount: 0, itemPrayCount: 0, lastPrayTime: now });
 
-    for (const key of prayerFields) row[`gold${key}`] = 0;
+    for (const key of prayerFields) {row[`gold${key}`] = 0;}
   }
 
   return row;
@@ -102,16 +102,16 @@ export function prayerHit(
   const maximum = first ? 3 : weights.reduce((sum, value) => sum + value, 0),
     roll = random(maximum);
 
-  if (!Number.isInteger(roll) || roll < 0 || roll >= maximum) prayerFailure();
+  if (!Number.isInteger(roll) || roll < 0 || roll >= maximum) {prayerFailure();}
 
-  if (first) return [2, 5, 10][roll]!;
+  if (first) {return [2, 5, 10][roll]!;}
 
   let cumulative = 0;
 
   for (const [index, weight] of weights.entries()) {
     cumulative += weight;
 
-    if (roll < cumulative) return [1, 2, 5, 10][index]!;
+    if (roll < cumulative) {return [1, 2, 5, 10][index]!;}
   }
 
   return prayerFailure();

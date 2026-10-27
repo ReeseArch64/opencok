@@ -26,19 +26,19 @@ function addParameter(result: Parameters, name: string, value: string): void {
   const bracket = name.indexOf("[");
   const key = (bracket < 0 ? name : name.slice(0, bracket)).replace(/[ .]/g, "_");
 
-  if (key) result[key] = bracket < 0 ? value : "Array";
+  if (key) {result[key] = bracket < 0 ? value : "Array";}
 }
 
 export async function requestParameters(request: Request): Promise<Parameters> {
   const result: Parameters = Object.create(null);
 
-  for (const [name, value] of new URL(request.url).searchParams) addParameter(result, name, value);
+  for (const [name, value] of new URL(request.url).searchParams) {addParameter(result, name, value);}
 
   if (request.method === "POST") {
     const limit = 65536;
 
     if (Number(request.headers.get("content-length")) > limit)
-      throw new HttpError(413, "Request too large");
+      {throw new HttpError(413, "Request too large");}
 
     const reader = request.body?.getReader();
     const chunks: Uint8Array[] = [];
@@ -48,7 +48,7 @@ export async function requestParameters(request: Request): Promise<Parameters> {
       while (reader) {
         const { done, value } = await reader.read();
 
-        if (done) break;
+        if (done) {break;}
 
         size += value.length;
 
@@ -69,10 +69,10 @@ export async function requestParameters(request: Request): Promise<Parameters> {
 
     if (contentType.startsWith("application/x-www-form-urlencoded")) {
       for (const [name, value] of new URLSearchParams(await request.text()))
-        addParameter(result, name, value);
+        {addParameter(result, name, value);}
     } else if (contentType.startsWith("multipart/form-data")) {
       for (const [name, value] of await request.formData()) {
-        if (typeof value === "string") addParameter(result, name, value);
+        if (typeof value === "string") {addParameter(result, name, value);}
       }
     }
   }

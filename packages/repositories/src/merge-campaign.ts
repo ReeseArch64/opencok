@@ -27,7 +27,7 @@ export function createMergeCampaignStore(
   const timers = mergeTimers(rules);
 
   if (new Set(timers.map((timer) => timer.name)).size !== timers.length)
-    throw new Error("Duplicate merge campaign timer");
+    {throw new Error("Duplicate merge campaign timer");}
 
   const where = and(
     eq(trigger_var.type, 2),
@@ -62,13 +62,13 @@ export function createMergeCampaignStore(
         const now = at ?? Date.now();
 
         if (!Number.isSafeInteger(now) || now <= 0 || now > Number.MAX_SAFE_INTEGER - 600000)
-          throw new Error("Invalid merge campaign clock");
+          {throw new Error("Invalid merge campaign clock");}
 
         const { snapshot, mergeAt } = await read(tx);
         const before = JSON.stringify(snapshot);
 
         for (const timer of timers) {
-          if (!mergeTimerEligible(timer, mergeAt, now)) continue;
+          if (!mergeTimerEligible(timer, mergeAt, now)) {continue;}
 
           const [saved] = await tx
             .select()
@@ -77,12 +77,12 @@ export function createMergeCampaignStore(
             .for("update");
 
           if (saved && saved.last_exec_millis < 0n)
-            throw new Error("Invalid merge campaign timer clock");
+            {throw new Error("Invalid merge campaign timer clock");}
 
-          if (saved && BigInt(now) - saved.last_exec_millis < BigInt(timer.interval)) continue;
+          if (saved && BigInt(now) - saved.last_exec_millis < BigInt(timer.interval)) {continue;}
 
           if (saved && (saved.count < 0 || saved.count >= 2147483647))
-            throw new Error("Invalid merge campaign timer count");
+            {throw new Error("Invalid merge campaign timer count");}
 
           for (const effect of timer.effects) {
             snapshot.effects = snapshot.effects.filter((existing) => existing.id !== effect.id);
@@ -112,7 +112,7 @@ export function createMergeCampaignStore(
         snapshot.notified = currentMergeEffects(snapshot, mergeAt, now).map((effect) => effect.id);
         const value = JSON.stringify(snapshot);
 
-        if (before === value) return false;
+        if (before === value) {return false;}
 
         decodeMergeEffects(value);
         await tx

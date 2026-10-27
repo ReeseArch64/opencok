@@ -34,7 +34,7 @@ export async function updateProfilePreference(
     kingdomId < 1 ||
     !Object.hasOwn(columns, field)
   )
-    throw new DependencyError("profile preference input");
+    {throw new DependencyError("profile preference input");}
 
   return db.transaction(
     async (tx) => {
@@ -57,7 +57,7 @@ export async function updateProfilePreference(
         (profile.banFlag ?? 0) !== 0 ||
         (profile.banTime ?? 0n) > BigInt(now)
       )
-        throw new DependencyError("profile preference owner");
+        {throw new DependencyError("profile preference owner");}
 
       const [mixed] = await tx
         .select({ uid: user_mixed_info.uid, value: columns[field] })
@@ -67,17 +67,17 @@ export async function updateProfilePreference(
         .for("update");
 
       if (!mixed) {
-        if (field === "clientSaveFlag" || field === "showBanner") return undefined;
+        if (field === "clientSaveFlag" || field === "showBanner") {return undefined;}
 
         throw new DependencyError("profile preference missing");
       }
 
-      if (mixed.uid !== uid) throw new DependencyError("profile preference selection");
+      if (mixed.uid !== uid) {throw new DependencyError("profile preference selection");}
 
       const current = Number(mixed.value ?? 0);
 
       if (!Number.isInteger(current) || current < -2147483648 || current > 2147483647)
-        throw new DependencyError("profile preference stored value");
+        {throw new DependencyError("profile preference stored value");}
 
       const value = readValue();
 
@@ -87,13 +87,13 @@ export async function updateProfilePreference(
         value > 2147483647 ||
         (field === "scrollEquip" && value !== 0 && value !== 1)
       )
-        throw new DependencyError("profile preference value");
+        {throw new DependencyError("profile preference value");}
 
       if (field === "clientSaveFlag" || current !== value)
-        await tx
+        {await tx
           .update(user_mixed_info)
           .set({ [field]: field === "showBanner" ? BigInt(value) : value })
-          .where(eq(user_mixed_info.uid, uid));
+          .where(eq(user_mixed_info.uid, uid));}
 
       return value;
     },

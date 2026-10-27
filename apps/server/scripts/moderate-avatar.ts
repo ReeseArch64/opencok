@@ -18,7 +18,7 @@ try {
     !operationId ||
     requireEnv("DATABASE_ROLE") !== "kingdom"
   )
-    throw new Error("Invalid operator arguments");
+    {throw new Error("Invalid operator arguments");}
   const kingdomId = Number(realm);
   database = createDatabase("kingdom", {
     connectionString: requireEnv("DATABASE_URL"),

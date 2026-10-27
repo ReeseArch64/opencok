@@ -7,7 +7,7 @@ const integer = (value: unknown) => Number(javaDecimal(String(value ?? 0), 32));
 
 const long = (value: unknown) => {
   if (typeof value === "number" && !Number.isSafeInteger(value))
-    throw new Error("Invalid resource integer");
+    {throw new Error("Invalid resource integer");}
 
   return javaDecimal(String(value ?? 0), 64);
 };
@@ -19,11 +19,11 @@ const positive = (value: bigint) => (value > 0n ? value : 0n);
 const float = Math.fround;
 
 function floatLong(value: number): bigint {
-  if (Number.isNaN(value)) return 0n;
+  if (Number.isNaN(value)) {return 0n;}
 
-  if (value >= 9223372036854775808) return 9223372036854775807n;
+  if (value >= 9223372036854775808) {return 9223372036854775807n;}
 
-  if (value <= -9223372036854775808) return -9223372036854775808n;
+  if (value <= -9223372036854775808) {return -9223372036854775808n;}
 
   return BigInt(Math.trunc(value));
 }
@@ -47,7 +47,7 @@ export function reconnectFoodRates(
 
   for (const row of armies) {
     if (typeof row.armyId !== "string" || indexed.has(row.armyId))
-      throw new Error("Invalid upkeep army");
+      {throw new Error("Invalid upkeep army");}
 
     indexed.set(row.armyId, row);
   }
@@ -60,7 +60,7 @@ export function reconnectFoodRates(
   for (const id of javaHashMapOrder(indexed.keys())) {
     const rule = rules.arms.get(id);
 
-    if (!rule || rule.upkeep === undefined) continue;
+    if (!rule || rule.upkeep === undefined) {continue;}
 
     const row = indexed.get(id)!;
     const quantity = ["free", "pve", "defence", "march"].reduce(
@@ -70,7 +70,7 @@ export function reconnectFoodRates(
     let cost = (integer(rule.upkeep) / 86400 / 1000) * quantity;
     const type = integer(rule.new_arms);
 
-    if (type === 0) ordinary = float(ordinary + cost * (1 - ordinaryEffect / 100));
+    if (type === 0) {ordinary = float(ordinary + cost * (1 - ordinaryEffect / 100));}
     else {
       if (type === 1) {
         const arm = integer(rule.arm);
@@ -80,8 +80,8 @@ export function reconnectFoodRates(
           Math.max(0.01, float(1 - float(float(reduction) / 100)));
       }
 
-      if (effects.consumeBound) bound = float(bound + cost);
-      else ordinary = float(ordinary + cost);
+      if (effects.consumeBound) {bound = float(bound + cost);}
+      else {ordinary = float(ordinary + cost);}
     }
   }
 
@@ -125,7 +125,7 @@ export function settleReconnectFood(
       ? Math.max(0, regular)
       : Number(BigInt.asIntN(32, positive(combined)));
 
-    if (BigInt(consumable) < ordinary) ordinary = BigInt(consumable);
+    if (BigInt(consumable) < ordinary) {ordinary = BigInt(consumable);}
   }
 
   ordinary = positive(ordinary);
@@ -137,7 +137,7 @@ export function settleReconnectFood(
     food = wrap(food + delta);
 
     if (food < 0n) {
-      if (!options.separateBound) foodbind = positive(wrap(foodbind + food));
+      if (!options.separateBound) {foodbind = positive(wrap(foodbind + food));}
 
       food = 0n;
     }
@@ -147,7 +147,7 @@ export function settleReconnectFood(
   const total = wrap(food + foodbind);
 
   if (bound > 0n || total === 0n) {
-    if (total === 0n) starvingMillis = elapsed;
+    if (total === 0n) {starvingMillis = elapsed;}
     else if (bound > total) {
       starvingMillis = floatLong(float(float(Number(wrap(bound - total))) / float(rates.bound)));
       bound = total;

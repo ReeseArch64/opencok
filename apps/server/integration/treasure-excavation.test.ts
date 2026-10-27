@@ -65,7 +65,7 @@ async function excavationHarness() {
     ["treasure-one", 10],
     ["treasure-two", 20],
   ] as const)
-    await h.db.db.insert(treasure_map).values({
+    {await h.db.db.insert(treasure_map).values({
       uuid,
       treasureId: "1001",
       currentOwner: "owner",
@@ -77,7 +77,7 @@ async function excavationHarness() {
       startTime: 0n,
       finishTime: 0n,
       state: 0,
-    });
+    });}
   const start = (target = 10) =>
     h.command("world.march", {
       point: sfs.int(target),
@@ -152,15 +152,15 @@ test("owned excavation consumes a map at arrival, pins reward mail, restores tim
     for (const event of (await h.db.db.select().from(mutation_outbox)).filter((row) =>
       row.eventType.startsWith("world."),
     ))
-      await publishWorldMutation(
+      {await publishWorldMutation(
         event.payload,
         event.eventType,
         1,
         async () => ["owner"],
         async (_owner, command, body) => {
-          if (command === "push.world.march.win") win.push(body);
+          if (command === "push.world.march.win") {win.push(body);}
         },
-      );
+      );}
     expect(win).toHaveLength(1);
     expect(Object.keys(win[0]!)).toEqual(["uuid", "o", "treasureMap"]);
     expect(win[0]!.fight).toBeUndefined();
@@ -188,21 +188,21 @@ test("owned excavation consumes a map at arrival, pins reward mail, restores tim
       Array.from({ length: 3 }, () => claims.command("owner", "mail.reward", claim)),
     );
     for (const entry of entries)
-      if (entry.category === "goods")
-        expect(
+      {if (entry.category === "goods")
+        {expect(
           (await h.db.db.select().from(user_item).where(eq(user_item.itemId, entry.itemId)))[0]!
             .count,
-        ).toBe(entry.count);
+        ).toBe(entry.count);}}
     await claims.command("owner", "mail.reward", {
       ...claim,
       operationId: sfs.string(randomUUID()),
     });
     for (const entry of entries)
-      if (entry.category === "goods")
-        expect(
+      {if (entry.category === "goods")
+        {expect(
           (await h.db.db.select().from(user_item).where(eq(user_item.itemId, entry.itemId)))[0]!
             .count,
-        ).toBe(entry.count);
+        ).toBe(entry.count);}}
   } finally {
     await h.close();
   }

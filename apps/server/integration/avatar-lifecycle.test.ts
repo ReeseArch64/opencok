@@ -38,7 +38,7 @@ import { loadRules } from "@opencok/resources/rules";
 async function eventually(check: () => Promise<boolean>, timeout = 15000) {
   const end = Date.now() + timeout;
   while (Date.now() < end) {
-    if (await check().catch(() => false)) return;
+    if (await check().catch(() => false)) {return;}
     await Bun.sleep(100);
   }
   throw new Error("Synthetic dependency readiness timed out");
@@ -79,7 +79,7 @@ test("avatar TCP lifecycle uploads through API and S3, survives restart, moderat
     const admin = await pg.start();
     try {
       for (const name of [topology.globalDatabase, ...topology.kingdoms.map((k) => k.database)])
-        await admin.query(`CREATE DATABASE "${name}"`);
+        {await admin.query(`CREATE DATABASE "${name}"`);}
     } finally {
       await admin.end();
     }
@@ -89,10 +89,10 @@ test("avatar TCP lifecycle uploads through API and S3, survives restart, moderat
         .pathname,
     });
     for (const kingdom of databases.kingdoms.values())
-      await migrate(kingdom.db, {
+      {await migrate(kingdom.db, {
         migrationsFolder: new URL("../../../packages/drizzle/migrations/kingdom", import.meta.url)
           .pathname,
-      });
+      });}
     for (const id of [1, 2]) {
       const db = databases.getKingdom(id).db;
       const uid = String(1000 + id);
@@ -188,7 +188,7 @@ test("avatar TCP lifecycle uploads through API and S3, survives restart, moderat
         '<ItemSpec id="200001" para1="50"/><ItemSpec id="200002" para1="60"/><ItemSpec id="200021" type="17" price="100"/>',
     };
     for (const [name, records] of Object.entries(xml))
-      await Bun.write(join(resources, `${name}.xml`), `<database>${records}</database>`);
+      {await Bun.write(join(resources, `${name}.xml`), `<database>${records}</database>`);}
     for (const [name, image, port] of [
       [redis, "redis:6.2.24-bookworm", 6379],
       [zk, "zookeeper:3.4.14", 2181],
@@ -434,12 +434,12 @@ test("avatar TCP lifecycle uploads through API and S3, survives restart, moderat
     clients.forEach((client) => client.close());
     await Promise.allSettled(servers.map((server) => server.close()));
     await Promise.allSettled(adapters.map((adapter) => adapter.close()));
-    if (chat) await new Promise<void>((resolve) => chat!.server.close(() => resolve()));
+    if (chat) {await new Promise<void>((resolve) => chat!.server.close(() => resolve()));}
     await chatRepository?.close();
     await filesServer?.stop(true);
     await media.close();
     await databases?.close();
-    for (const name of containers) await pg.docker(["rm", "--force", "--volumes", name]);
+    for (const name of containers) {await pg.docker(["rm", "--force", "--volumes", name]);}
     await pg.stop();
     await rm(resources, { recursive: true, force: true });
   }

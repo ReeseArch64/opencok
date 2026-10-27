@@ -133,13 +133,13 @@ test("group buys reserve a shared round point limit before payment and bind ever
     expect(attempts.filter((result) => result.status === "fulfilled")).toHaveLength(2);
     expect((await h.command("groupbuys.info", {})).body.totalBuy).toEqual(sfs.int(0));
     for (const [i, result] of attempts.entries())
-      if (result.status === "fulfilled") {
+      {if (result.status === "fulfilled") {
         await expect(h.pay(events[i]!)).rejects.toThrow();
         h.prove(events[i]!, "owner", "759048");
         await h.pay(events[i]!);
         await h.pay(events[i]!);
         await expect(h.pay(events[i]!, "other")).rejects.toThrow();
-      }
+      }}
     const [row] = await h.db.db.select().from(alliance_group_buys);
     expect(row).toMatchObject({ uid: "owner", point: 10, reward: 0, round: 1 });
     expect(await h.db.db.select().from(mail)).toHaveLength(2);

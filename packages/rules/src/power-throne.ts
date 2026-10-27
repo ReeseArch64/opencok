@@ -13,19 +13,19 @@ export function personalThroneEffect(
   effect: number,
   initial: number,
 ): number {
-  if (!rewards.length || emperorVersion === null) return initial;
+  if (!rewards.length || emperorVersion === null) {return initial;}
 
-  if (emperorVersion === undefined || rewards.length > 4096) return invalid();
+  if (emperorVersion === undefined || rewards.length > 4096) {return invalid();}
 
   const version = integer(emperorVersion);
   let total = initial;
 
   for (const reward of rewards) {
-    if (integer(reward.version) !== version) continue;
+    if (integer(reward.version) !== version) {continue;}
 
     const rule = rules.power.monarchTitles?.get(String(integer(reward.rewardId)));
 
-    if (rule?.effect === undefined || rule.num === undefined) return invalid();
+    if (rule?.effect === undefined || rule.num === undefined) {return invalid();}
 
     const ids = rule.effect.split("|").filter(Boolean);
     const values = rule.num.split("|").filter(Boolean);
@@ -34,7 +34,7 @@ export function personalThroneEffect(
       const id = integer(ids[index]);
       const value = float(values[index]);
 
-      if (id === effect) total = Math.fround(total + value);
+      if (id === effect) {total = Math.fround(total + value);}
     }
   }
 

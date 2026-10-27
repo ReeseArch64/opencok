@@ -78,8 +78,8 @@ test("category windows retain early break, signed-int addition and unknown-categ
     [0, 2147483647, 2147483647],
   ];
   for (let category = 1; category <= 8; category++)
-    for (const [begin, offset, expected] of vectors)
-      expect(mailCategoryWindow(query(category, begin!, offset!))).toBe(expected);
+    {for (const [begin, offset, expected] of vectors)
+      {expect(mailCategoryWindow(query(category, begin!, offset!))).toBe(expected);}}
   for (const category of [-2147483648, -1, 0, 9, 2147483647]) {
     expect(mailCategoryWindow(query(category))).toBeUndefined();
     expect(mailCategoryProjection("self", query(category), [], presentation())).toEqual({
@@ -96,7 +96,7 @@ test("category windows retain early break, signed-int addition and unknown-categ
     expect(() => query(1, 0, invalid)).toThrow();
   }
   for (const time of [-1, 0.5, NaN, Number.MAX_SAFE_INTEGER + 1])
-    expect(() => mailCategoryQuery(1, 0, 1, time)).toThrow();
+    {expect(() => mailCategoryQuery(1, 0, 1, time)).toThrow();}
 });
 
 test("category membership retains overlapping types, notice exceptions and filtering after the mailbox window", () => {
@@ -163,16 +163,16 @@ test("sender enrichment and stored-to-client types use their distinct legacy all
     [22, 1],
   ]);
   for (let type = 0; type < 50; type++)
-    expect(mailClientType(type)).toBe(mappings.get(type) ?? type);
+    {expect(mailClientType(type)).toBe(mappings.get(type) ?? type);}
   for (const value of [
     null,
     undefined,
     "",
     "\t\n\r\u001c \u1680\u180e\u2000\u200a\u2028\u2029\u205f\u3000",
   ])
-    expect(mailBlank(value)).toBe(true);
+    {expect(mailBlank(value)).toBe(true);}
   for (const value of ["\0", "\u00a0", "\u2007", "\u202f", " name "])
-    expect(mailBlank(value)).toBe(false);
+    {expect(mailBlank(value)).toBe(false);}
 });
 
 test("ordinary list envelopes preserve exact field widths, reward descriptors, flags and nested content", () => {
@@ -205,7 +205,7 @@ test("ordinary list envelopes preserve exact field widths, reward descriptors, f
       ["like", 4],
       ["donate", 8],
     ] as const)
-      expect(item[name]).toEqual(sfs.int((bits & mask) === mask ? 1 : 0));
+      {expect(item[name]).toEqual(sfs.int((bits & mask) === mask ? 1 : 0));}
   }
   const stored =
     '{createTime:12,u:"original",contentStr:"keep",contentsArr:["keep"],n:9223372036854775807}';
@@ -238,8 +238,8 @@ test("version notices and null database flags retain their legacy defaults", () 
     )[0]!;
     expect(result.version).toEqual(sfs.string(fromUser ?? "1.0.59"));
     for (const key of ["title", "fromName", "oldName", "rewardId"])
-      expect(result[key]).toEqual(sfs.string(""));
-    for (const key of ["status", "itemIdFlag", "save"]) expect(result[key]).toEqual(sfs.int(0));
+      {expect(result[key]).toEqual(sfs.string(""));}
+    for (const key of ["status", "itemIdFlag", "save"]) {expect(result[key]).toEqual(sfs.int(0));}
   }
   expect(messages(project(2, [entry(15)]).body)[0]!.version).toBeUndefined();
 });
@@ -272,7 +272,7 @@ test("chat categories carry content, recipient update metadata and sender identi
     [4, [20, 21, 22, 37, 38, 45, 46]],
     [7, [23, 24, 39, 40]],
   ] as const)
-    for (const type of types) {
+    {for (const type of types) {
       const result = messages(project(category, [entry(type)]).body)[0]!;
       expect(result).toEqual({
         contents: sfs.string("hello\nworld"),
@@ -285,7 +285,7 @@ test("chat categories carry content, recipient update metadata and sender identi
         fromUser: sfs.string("sender"),
         status: sfs.int(0),
       });
-    }
+    }}
   expect(messages(project(4, [entry(22, { fromUser: null })]).body)[0]!.fromUser).toBeUndefined();
   expect(messages(project(8, [entry(44)]).body)[0]!.detail).toEqual(
     sfs.object({ contents: sfs.string("hello\nworld") }),
@@ -325,7 +325,7 @@ test("chat translation preserves original text and observes type, language and f
   expect(malformed.translationId).toEqual(sfs.string("broken"));
   expect(malformed.translationMsg).toBeUndefined();
   for (const message of [entry(21, { translationId: "pt|id" }), entry(22, { translationId: " " })])
-    expect(messages(project(4, [message], context).body)[0]!.translationMsg).toBeUndefined();
+    {expect(messages(project(4, [message], context).body)[0]!.translationMsg).toBeUndefined();}
 });
 
 test("translation requests retain legacy language aliases, case distinctions and split behavior", () => {
@@ -355,13 +355,13 @@ test("translation requests retain legacy language aliases, case distinctions and
     "": "en",
   };
   for (const [lang, expected] of Object.entries(aliases))
-    expect(mailTranslationRequest("|pt||id|ignored|", lang)).toEqual({
+    {expect(mailTranslationRequest("|pt||id|ignored|", lang)).toEqual({
       id: "id",
       fromLang: "pt",
       toLang: expected,
-    });
+    });}
   for (const id of [null, "", " ", "pt", "pt|||", "| |id", "pt|\u2000"])
-    expect(mailTranslationRequest(id, "en")).toBeUndefined();
+    {expect(mailTranslationRequest(id, "en")).toBeUndefined();}
   expect(mailTranslationRequest("pt|id", null)).toBeUndefined();
   expect(mailTranslationRequest("pt| id ", "en")).toEqual({
     id: " id ",
@@ -377,7 +377,7 @@ test("combat previews distinguish win, loss and draw and fail independently from
     ["", 2],
     ["\u2000", 2],
   ] as const)
-    for (const npc of [false, true]) {
+    {for (const npc of [false, true]) {
       const content = JSON.stringify({
         warPoint: "point",
         atkUser: { name: "attacker" },
@@ -396,7 +396,7 @@ test("combat previews distinguish win, loss and draw and fail independently from
         }),
       );
       expect(fields(result.detail).defGen).toEqual(sfs.array([sfs.object()]));
-    }
+    }}
   const missingWinner = '{warPoint:"p",atkUser:{name:"a"},defUser:{name:"d"}}';
   expect(
     fields(
@@ -429,7 +429,7 @@ test("malformed list content is omitted only after owned selection while capacit
   expect(structuredClone([bad, good])).toEqual(before);
   expect(project(1, [bad]).invalidIds).toEqual([]);
   for (const contents of ["{[]:1}", " ".repeat(4 * 1024 * 1024 + 1) + "{}"])
-    expect(() => project(3, [bad, { ...good, contents: Buffer.from(contents) }])).toThrow();
+    {expect(() => project(3, [bad, { ...good, contents: Buffer.from(contents) }])).toThrow();}
   expect(() => project(3, [bad, { ...good, toUser: "other" }])).toThrow();
   expect(() => project(3, [good, good])).toThrow();
   expect(() =>

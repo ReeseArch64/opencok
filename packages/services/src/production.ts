@@ -28,18 +28,18 @@ export class ProductionService {
 
   async command(owner: string, command: string, params: Fields) {
     if (!["build.collect", "building.addOutPut", "production.settle"].includes(command))
-      throw new Error("Unsupported production command");
+      {throw new Error("Unsupported production command");}
 
     const supplied = str(params, "operationId", "") || randomUUID();
 
     if (command !== "production.settle" && !/^[A-Za-z0-9:._-]{1,128}$/.test(supplied))
-      throw new Error("Stable operationId required for production mutation");
+      {throw new Error("Stable operationId required for production mutation");}
 
     const requestId = supplied || randomUUID();
     const request: Fields = {};
 
     for (const key of Object.keys(params).sort())
-      if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) request[key] = params[key]!;
+      {if (!["operationId", "_cok_", "cmdBaseTime"].includes(key)) {request[key] = params[key]!;}}
 
     const response = await this.execute(
       { owner, requestId, command, request: encode(request) },
@@ -51,7 +51,7 @@ export class ProductionService {
             : state.buildings.filter((row) => row.uuid === str(params, "uuid"));
 
         if (command !== "production.settle" && selected.length !== 1)
-          throw new Error("Production building not found");
+          {throw new Error("Production building not found");}
 
         const accounts: ProductionAccount[] = [],
           buildings: Row[] = [];
@@ -61,7 +61,7 @@ export class ProductionService {
           const kind = this.asset(building);
 
           if (kind === undefined || num(building, "level") < 1)
-            throw new Error("Invalid production building");
+            {throw new Error("Invalid production building");}
 
           const asset = assets[kind]!;
           const previous = state.accounts.find((row) => row.buildingId === building.uuid);
@@ -87,7 +87,7 @@ export class ProductionService {
             const before = ledger.resources[asset] ?? long(state.resource, asset),
               after = before + account.amount;
 
-            if (after > 9223372036854775807n) throw new Error("Production balance overflow");
+            if (after > 9223372036854775807n) {throw new Error("Production balance overflow");}
 
             ledger.resources[asset] = after;
             ledger.post(`resource.${asset}`, before, after, "production.collect");
@@ -100,7 +100,7 @@ export class ProductionService {
             body = resource({ ...state.resource, ...ledger.resources });
           } else if (command === "building.addOutPut") {
             if (long(building, "effectTime") > state.now)
-              throw new Error("Production boost already active");
+              {throw new Error("Production boost already active");}
 
             const useItem = !!str(params, "goods", "").trim();
             let seconds: number;
@@ -126,14 +126,14 @@ export class ProductionService {
               );
               const price = Number(definition.clientParameters?.[2]?.value);
 
-              if (!Number.isSafeInteger(price) || price < 0) throw new Error("Missing boost price");
+              if (!Number.isSafeInteger(price) || price < 0) {throw new Error("Missing boost price");}
 
               debit(ledger, BigInt(price), "production.boost");
               seconds = Number(this.rules.items.get("building_base")?.k6);
             }
 
             if (!Number.isSafeInteger(seconds) || seconds <= 0)
-              throw new Error("Invalid production boost duration");
+              {throw new Error("Invalid production boost duration");}
 
             const effectTime = activityInstant(state.now + BigInt(seconds) * 1000n);
             const changed = {
@@ -151,12 +151,12 @@ export class ProductionService {
           }
 
           if (collected > 0n)
-            await state.recordAction?.(
+            {await state.recordAction?.(
               "harvest",
               String(kind),
               Number(collected > 2147483647n ? 2147483647n : collected),
               activityEconomy(ledger),
-            );
+            );}
 
           accounts.push(account);
         }
@@ -183,7 +183,7 @@ export class ProductionService {
   }
 
   asset(building: Row): number | undefined {
-    if (num(building, "level") < 1) return undefined;
+    if (num(building, "level") < 1) {return undefined;}
 
     const type = this.rules.building(
       text(building, "itemId"),

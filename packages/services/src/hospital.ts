@@ -82,7 +82,7 @@ function complete(
     power += unitPower(troopDefinition(context.rules, armyId), count);
   }
 
-  if (!healed) throw new GameError(errors.queue, "city_progression");
+  if (!healed) {throw new GameError(errors.queue, "city_progression");}
 
   context.write.armies = armies;
   context.write.hospital = hospital;
@@ -111,7 +111,7 @@ async function prepare(
     const row = context.state.hospital.find((hospital) => hospital.armyId === armyId);
     const [dead] = transferTroops(num(row ?? {}, "dead"), 0, count);
 
-    if (row) context.write.hospital = [{ ...row, dead }];
+    if (row) {context.write.hospital = [{ ...row, dead }];}
 
     return {
       response: encode({
@@ -124,7 +124,7 @@ async function prepare(
   const selection = healingSelection(params, Type.Int),
     count = [...selection.values()].reduce((sum, quantity) => sum + quantity, 0);
 
-  if (count > hospitalCapacity(context)) throw new GameError(errors.invalid, "city_progression");
+  if (count > hospitalCapacity(context)) {throw new GameError(errors.invalid, "city_progression");}
 
   if (
     !context.state.buildings.some(
@@ -134,18 +134,18 @@ async function prepare(
         num(building, "opType") === 0,
     )
   )
-    throw new GameError(errors.troopBuilding, "city_progression");
+    {throw new GameError(errors.troopBuilding, "city_progression");}
 
   if (
     !direct &&
     (context.state.hospital.some((row) => num(row, "heal") > 0) ||
       context.state.queues.some((queue) => num(queue, "type") === 3 && text(queue, "itemId")))
   )
-    throw new GameError(errors.occupied, "city_progression");
+    {throw new GameError(errors.occupied, "city_progression");}
 
   const payment = int(params, "isBuyRes", 0);
 
-  if (![0, 1].includes(payment)) throw new GameError(errors.invalid, "city_progression");
+  if (![0, 1].includes(payment)) {throw new GameError(errors.invalid, "city_progression");}
 
   const costs: Partial<Record<CityAsset, bigint>> = {},
     hospital: Row[] = [];
@@ -156,7 +156,7 @@ async function prepare(
   for (const [armyId, quantity] of selection) {
     const row = context.state.hospital.find((wounded) => wounded.armyId === armyId);
 
-    if (!row) throw new GameError(errors.missing, "city_progression");
+    if (!row) {throw new GameError(errors.missing, "city_progression");}
 
     const [dead, heal] = transferTroops(num(row, "dead"), direct ? 0 : num(row, "heal"), quantity);
     reserveTroops(context.state, armyId, quantity);
@@ -191,7 +191,7 @@ async function prepare(
   );
   context.spend(costs, direct || payment === 1);
 
-  if (itemCount) context.spendItem("211508", cityInteger(itemCount));
+  if (itemCount) {context.spendItem("211508", cityInteger(itemCount));}
 
   if (direct) {
     context.accelerate(durationMs);
@@ -244,9 +244,9 @@ async function apply(
         Object.keys(data.units ?? {}).length !== rows.length ||
         rows.some((row) => data.units?.[text(row, "armyId")] !== num(row, "heal"))))
   )
-    throw new GameError(errors.queue, "city_progression");
+    {throw new GameError(errors.queue, "city_progression");}
 
-  if (action === TimedActivityAction.Start) throw new GameError(errors.invalid, "city_progression");
+  if (action === TimedActivityAction.Start) {throw new GameError(errors.invalid, "city_progression");}
 
   if (action === TimedActivityAction.Restore || action === TimedActivityAction.Reschedule) {
     context.write.hospital = rows.map((row) => ({ ...row, finishTime: activity.dueAt }));

@@ -55,8 +55,8 @@ async function measure(batched: boolean) {
   const start = performance.now();
 
   for (let stage = 0; stage < stages; stage++) {
-    if (batched) await writeQuests(tx, "synthetic", { tasks, story }, before);
-    else for (const row of [...tasks, ...story]) await execute([row]);
+    if (batched) {await writeQuests(tx, "synthetic", { tasks, story }, before);}
+    else {for (const row of [...tasks, ...story]) {await execute([row]);}}
   }
 
   return {

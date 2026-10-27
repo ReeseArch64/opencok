@@ -44,7 +44,7 @@ export function createAvatarVersion(options: {
   return {
     async update(owner, now) {
       if (!/^[0-9]{1,20}$/.test(owner) || !Number.isSafeInteger(now) || now < 0)
-        throw new GameError(errors.invalid, "avatar_rule");
+        {throw new GameError(errors.invalid, "avatar_rule");}
 
       const operationId = randomBytes(16).toString("hex");
       const template = rules.mail.get("10111");
@@ -59,7 +59,7 @@ export function createAvatarVersion(options: {
           interval = avatarFinishInterval(rules);
           const record = await readers.uploadRecord();
 
-          if (record && record.uid !== owner) throw new GameError(errors.invalid, "avatar_rule");
+          if (record && record.uid !== owner) {throw new GameError(errors.invalid, "avatar_rule");}
 
           checkAvatarRecord(rules, record, now);
         }
@@ -77,7 +77,7 @@ export function createAvatarVersion(options: {
             result.profile.serverId !== kingdomId ||
             result.mail.owner !== owner
           )
-            throw new Error("Invalid avatar version mail recipient");
+            {throw new Error("Invalid avatar version mail recipient");}
 
           try {
             const full = rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;

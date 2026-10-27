@@ -21,26 +21,26 @@ function invalid(): never {
 }
 
 function integer(value: number): number {
-  if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647) return invalid();
+  if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647) {return invalid();}
 
   return value;
 }
 
 function long(value: bigint): bigint {
-  if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) return invalid();
+  if (typeof value !== "bigint" || BigInt.asIntN(64, value) !== value) {return invalid();}
 
   return value;
 }
 
 function speed(value: number): number {
   if (typeof value !== "number" || !Number.isFinite(value) || !Number.isFinite(Math.fround(value)))
-    return invalid();
+    {return invalid();}
 
   return Math.fround(value);
 }
 
 function narrow(value: number): number {
-  if (Number.isNaN(value)) return 0;
+  if (Number.isNaN(value)) {return 0;}
 
   return Math.max(-2147483648, Math.min(2147483647, Math.trunc(value))) || 0;
 }
@@ -50,13 +50,13 @@ export function resourceLongFloat(value: bigint): number {
   const magnitude = value < 0n ? -value : value;
   const shift = magnitude.toString(2).length - 24;
 
-  if (shift <= 0) return Number(value);
+  if (shift <= 0) {return Number(value);}
 
   let leading = magnitude >> BigInt(shift);
   const tail = magnitude - (leading << BigInt(shift));
   const half = 1n << BigInt(shift - 1);
 
-  if (tail > half || (tail === half && (leading & 1n) !== 0n)) leading++;
+  if (tail > half || (tail === half && (leading & 1n) !== 0n)) {leading++;}
 
   return (value < 0n ? -1 : 1) * Number(leading) * 2 ** shift;
 }
@@ -69,11 +69,11 @@ export function resourceSavedCollection(row: Row): WorldResourceSavedCollection 
   const rate = row.collectSpd ?? 0;
 
   if (typeof rate !== "number" || (Number.isFinite(rate) && !Number.isFinite(Math.fround(rate))))
-    return invalid();
+    {return invalid();}
 
   const collected = long((row.collectedBeforeSpd ?? 0n) as bigint);
 
-  if (collected < -2147483648n || collected > 2147483647n) return invalid();
+  if (collected < -2147483648n || collected > 2147483647n) {return invalid();}
 
   return {
     collectSpd: Math.fround(rate),
@@ -94,13 +94,13 @@ export function resourceSoldierLoadBase(
     !soldier.armsId.isWellFormed() ||
     soldier.armsId.includes("\0")
   )
-    return invalid();
+    {return invalid();}
 
   const arms = rules.arms.get(soldier.armsId);
 
-  if (!arms) return invalid();
+  if (!arms) {return invalid();}
 
-  if (!Object.hasOwn(arms, "load")) return undefined;
+  if (!Object.hasOwn(arms, "load")) {return undefined;}
 
   let load: number;
 
@@ -120,7 +120,7 @@ export function resourceModifiedTroopLoad(
 ): number {
   integer(base);
   const float = (value: number): number => {
-    if (typeof value !== "number" || !Object.is(Math.fround(value), value)) return invalid();
+    if (typeof value !== "number" || !Object.is(Math.fround(value), value)) {return invalid();}
 
     return value;
   };
@@ -144,22 +144,22 @@ export function resourceModifiedTroopLoad(
 export function resourceRawArmyLoad(army: WorldResourceArmy, rules: Rules): number {
   const cached = integer(army.cachedLoad);
 
-  if (typeof army.residentOwner !== "boolean") return invalid();
+  if (typeof army.residentOwner !== "boolean") {return invalid();}
 
-  if (!army.residentOwner && cached > 0) return cached;
+  if (!army.residentOwner && cached > 0) {return cached;}
 
-  if (!Array.isArray(army.soldiers) || army.soldiers.length > 4096) return invalid();
+  if (!Array.isArray(army.soldiers) || army.soldiers.length > 4096) {return invalid();}
 
   let result = 0;
 
   for (const soldier of army.soldiers) {
     const base = resourceSoldierLoadBase(soldier, rules);
 
-    if (base === undefined) continue;
+    if (base === undefined) {continue;}
 
     const effects = army.effects;
 
-    if (!effects && army.residentOwner) return invalid();
+    if (!effects && army.residentOwner) {return invalid();}
 
     result = (result + resourceModifiedTroopLoad(base, soldier.loadEffect, effects)) | 0;
   }
@@ -176,9 +176,9 @@ export function resourceArmyLoad(input: WorldResourceLoad, rules: Rules): number
     item !== null &&
     (typeof item !== "string" || item.length > 255 || !item.isWellFormed() || item.includes("\0"))
   )
-    return invalid();
+    {return invalid();}
 
-  if (input.plunder.length > 32767) return invalid();
+  if (input.plunder.length > 32767) {return invalid();}
 
   if (item !== null && !mailBlank(item) && item !== "null") {
     let numeric = true;
@@ -199,7 +199,7 @@ export function resourceArmyLoad(input: WorldResourceLoad, rules: Rules): number
         if (resource >= 0 && resource <= 5) {
           const weight = javaDecimal(rules.items.get("resources_weight")?.[`k${resource + 1}`], 32);
 
-          if (weight === 0n) return invalid();
+          if (weight === 0n) {return invalid();}
 
           load = Number(BigInt.asIntN(32, BigInt(load) / weight));
         }
@@ -228,13 +228,13 @@ export function resourceCollected(
   const elapsed = BigInt.asIntN(64, long(now) - long(march.marchArrivalTime));
   const seconds = Math.fround(resourceLongFloat(elapsed) / Math.fround(1000));
 
-  if (seconds < 0) return 0;
+  if (seconds < 0) {return 0;}
 
   const collected = narrow(Math.fround(rate * seconds));
 
-  if (pointType === 18) return Math.min(collected, march.armyLoad);
+  if (pointType === 18) {return Math.min(collected, march.armyLoad);}
 
-  if (pointType === 37) return collected;
+  if (pointType === 37) {return collected;}
 
   const result = Math.min(remaining, Math.min(collected, march.armyLoad));
 
@@ -274,9 +274,9 @@ export function resourceGroupDetail(
 ): WorldResourceGroupDetail | undefined {
   integer(remaining);
 
-  if (marches.length > 32767) return invalid();
+  if (marches.length > 32767) {return invalid();}
 
-  if (!marches.length) return undefined;
+  if (!marches.length) {return undefined;}
 
   let totalSpeed = Math.fround(0),
     collected = 0;
@@ -298,7 +298,7 @@ export function neutralResourceStart(
   march: Row | undefined,
   rules: Rules,
 ): bigint | undefined {
-  if (point.pointType !== 60 || point.pointItem == null) return undefined;
+  if (point.pointType !== 60 || point.pointItem == null) {return undefined;}
 
   if (
     typeof point.pointItem !== "string" ||
@@ -306,13 +306,13 @@ export function neutralResourceStart(
     !point.pointItem.isWellFormed() ||
     point.pointItem.includes("\0")
   )
-    return invalid();
+    {return invalid();}
 
-  if (mailBlank(point.pointItem) || !march) return undefined;
+  if (mailBlank(point.pointItem) || !march) {return undefined;}
 
   integer(point.id as number);
 
-  if (march.targetId !== point.id || march.state !== 1) return invalid();
+  if (march.targetId !== point.id || march.state !== 1) {return invalid();}
 
   const end = long((march.occupyResourceEndTime ?? 0n) as bigint);
   let seconds: bigint;
@@ -334,18 +334,18 @@ export function restoredSharedCollectionTime(
   now: bigint,
   included: boolean,
 ): bigint {
-  if (!included) return 0n;
+  if (!included) {return 0n;}
 
   const group = resourceGroupDetail(remaining, marches, () => now);
 
-  if (!group) return 0n;
+  if (!group) {return 0n;}
 
   const castLong = (value: number): bigint => {
-    if (Number.isNaN(value)) return 0n;
+    if (Number.isNaN(value)) {return 0n;}
 
-    if (value >= Number(9223372036854775807n)) return 9223372036854775807n;
+    if (value >= Number(9223372036854775807n)) {return 9223372036854775807n;}
 
-    if (value <= Number(-9223372036854775808n)) return -9223372036854775808n;
+    if (value <= Number(-9223372036854775808n)) {return -9223372036854775808n;}
 
     return BigInt(Math.trunc(value));
   };

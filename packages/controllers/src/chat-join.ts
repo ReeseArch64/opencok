@@ -14,7 +14,7 @@ export class ChatJoinController extends ChatCommandController {
 
   public async execute({ uid, params, connection }: CommandContext) {
     if (!Array.isArray(params.rooms) || params.rooms.length > 16)
-      throw new ChatCommandError("invalid_room");
+      {throw new ChatCommandError("invalid_room");}
 
     const accepted: Room[] = [];
 
@@ -23,18 +23,18 @@ export class ChatJoinController extends ChatCommandController {
         throw new ChatCommandError("invalid_room");
       }
 
-      if (!Object.values(ChatRoomGroup).some((group) => group === item.group)) continue;
+      if (!Object.values(ChatRoomGroup).some((group) => group === item.group)) {continue;}
 
       const room = await this.authorizeRoom(uid, item.id);
 
-      if (!room || room.group !== item.group) throw new ChatCommandError("invalid_room");
+      if (!room || room.group !== item.group) {throw new ChatCommandError("invalid_room");}
 
       accepted.push(room);
     }
 
-    if (accepted.length === 0) throw new ChatCommandError("invalid_room");
+    if (accepted.length === 0) {throw new ChatCommandError("invalid_room");}
 
-    for (const room of accepted) connection.joinedRooms.add(room.roomId);
+    for (const room of accepted) {connection.joinedRooms.add(room.roomId);}
 
     return {
       status: true,

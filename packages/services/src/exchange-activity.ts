@@ -28,7 +28,7 @@ export class ExchangeActivityDomain extends CityCommandDomain {
         const ids = str(params, "ids").split("|").filter(Boolean),
           exchange: Value[] = [];
 
-        if (ids.length > 64) campaignFailure();
+        if (ids.length > 64) {campaignFailure();}
 
         for (const id of new Set(ids)) {
           cityInteger(id, 1);
@@ -36,7 +36,7 @@ export class ExchangeActivityDomain extends CityCommandDomain {
             context.rules.power.activityPanels?.get(id)?.exchange === "1" ? tokens : fragments;
           const result = await domain.prepare(context, command, { ...params, ids: sfs.string(id) });
 
-          if (result.event !== null) throw new Error("Unexpected exchange projection event");
+          if (result.event !== null) {throw new Error("Unexpected exchange projection event");}
 
           exchange.push(...(decode(Buffer.from(result.response)).exchange!.value as Value[]));
         }

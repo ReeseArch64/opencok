@@ -111,7 +111,7 @@ export function mergeInventoryResponses(primary: Uint8Array, secondary: Uint8Arr
     !Array.isArray(left.pushes.value) ||
     !Array.isArray(right.pushes.value)
   )
-    throw new Error("Invalid chained inventory response");
+    {throw new Error("Invalid chained inventory response");}
 
   return inventoryResponse(
     fields(left.body),

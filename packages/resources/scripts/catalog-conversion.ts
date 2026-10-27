@@ -44,7 +44,7 @@ export function scalar(value: string): CatalogScalar {
   if (/^-?(0|[1-9]\d*)$/.test(value)) {
     const integer = BigInt(value);
     if (String(integer) === value)
-      return Number.isSafeInteger(Number(integer)) ? Number(integer) : integer;
+      {return Number.isSafeInteger(Number(integer)) ? Number(integer) : integer;}
   }
   const decimal = Number(value);
   return Number.isFinite(decimal) && String(decimal) === value ? decimal : value;
@@ -63,7 +63,7 @@ const amounts = new Set([
   "price_crystal",
 ]);
 function amount(value: CatalogValue): CatalogValue {
-  if (Array.isArray(value)) return value.map(amount);
+  if (Array.isArray(value)) {return value.map(amount);}
   return typeof value === "number" && Number.isSafeInteger(value) ? BigInt(value) : value;
 }
 
@@ -74,7 +74,7 @@ function numericSequence(value: string): boolean {
 }
 
 function decode(value: string, separators: readonly string[]): CatalogValue {
-  if (!separators.length) return scalar(value);
+  if (!separators.length) {return scalar(value);}
   return value.split(separators[0]!).map((part) => decode(part, separators.slice(1)));
 }
 
@@ -112,10 +112,10 @@ function table(
         const record = { ...attributes(node) };
         const tag = Object.keys(node).find((key) => key !== ":@")!;
         if (children(node, tag).some((child) => !Object.hasOwn(child, "#text")))
-          throw new Error("Nested table record requires a domain model");
+          {throw new Error("Nested table record requires a domain model");}
         const content = text(children(node, tag));
         if (content.trim()) {
-          if (record.content !== undefined) throw new Error("Ambiguous table content");
+          if (record.content !== undefined) {throw new Error("Ambiguous table content");}
           record.content = content;
         }
         raw.push(record);
@@ -143,7 +143,7 @@ function table(
     for (const [key, value] of Object.entries(record)) {
       const descriptor = codec[key]!;
       if (Object.hasOwn(result, descriptor.field))
-        throw new Error("Colliding catalog fields: " + key);
+        {throw new Error("Colliding catalog fields: " + key);}
       const decoded =
         descriptor.separators && numericSequence(value)
           ? decode(value, descriptor.separators)
@@ -308,9 +308,9 @@ export function convertCatalog(
   name: string,
 ): { definition: CatalogDefinition; codec: CatalogCodec } {
   const map = tagged(ordered, "map")[0];
-  if (map) return { definition: tileMap(map), codec: {} };
+  if (map) {return { definition: tileMap(map), codec: {} };}
   const root = tagged(ordered, "database")[0];
-  if (!root) throw new Error("Missing catalog root");
+  if (!root) {throw new Error("Missing catalog root");}
   const database = children(root, "database");
   if (["event", "trigger", "trigger-activity", "trigger-exchange", "trigger-var"].includes(name)) {
     const version = tagged(database, "version")[0];

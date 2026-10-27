@@ -38,7 +38,7 @@ export function createAvatarCompletion(options: {
               const plan = await inspect(profile, readers);
 
               if (plan.pendingEffects & 1)
-                avatarSystemMail(
+                {avatarSystemMail(
                   {
                     ownerUid: uid,
                     sequence: query.sequence,
@@ -47,7 +47,7 @@ export function createAvatarCompletion(options: {
                     ...plan,
                   },
                   "0".repeat(32),
-                );
+                );}
 
               return plan;
             }),
@@ -69,7 +69,7 @@ export function createAvatarCompletion(options: {
             result.profile.serverId !== kingdomId ||
             result.mail.owner !== owner
           )
-            throw new Error("Invalid avatar mail recipient");
+            {throw new Error("Invalid avatar mail recipient");}
 
           try {
             const full = rules.items.get("chat_switch")?.k3?.split("|").includes("1") ?? false;

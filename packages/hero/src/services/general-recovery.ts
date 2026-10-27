@@ -26,17 +26,17 @@ export function recoverGenerals(context: CityProgressionContext, reconnect: bool
   const marching = new Set<number>();
 
   if (reconnect)
-    for (const march of generalRoster(context).marches ?? []) {
-      if (!Buffer.isBuffer(march.armyInfo)) continue;
+    {for (const march of generalRoster(context).marches ?? []) {
+      if (!Buffer.isBuffer(march.armyInfo)) {continue;}
 
       const general = decodeWorldMarchArmy(march.armyInfo)?.general;
 
       if (general) {
-        if (general.owner !== context.owner) generalFailure();
+        if (general.owner !== context.owner) {generalFailure();}
 
         marching.add(general.id);
       }
-    }
+    }}
 
   for (const row of generalRoster(context).generals) {
     if (
@@ -44,14 +44,14 @@ export function recoverGenerals(context: CityProgressionContext, reconnect: bool
       ((long(row, "relivetime") > 0n && long(row, "relivetime") <= context.now) ||
         (long(row, "gethomttime") > 0n && long(row, "gethomttime") <= context.now))
     )
-      writeGeneral(context, releasedGeneral(row));
+      {writeGeneral(context, releasedGeneral(row));}
     else if (
       reconnect &&
       ((num(row, "state") === 3 && !marching.has(num(row, "id"))) ||
         (num(row, "state") === 2 &&
           !context.state.buildings.some((building) => building.uuid === row.buildingUuid)))
     )
-      writeGeneral(context, releasedGeneral(row));
+      {writeGeneral(context, releasedGeneral(row));}
   }
 }
 
@@ -79,11 +79,11 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
       now: Number(context.now),
     })
   )
-    generalFailure();
+    {generalFailure();}
 
   const action = str(params, "M__REQUEST_ID__H");
 
-  if (num(context.state.profile, "crossFightSrcServerId") > 0) generalFailure();
+  if (num(context.state.profile, "crossFightSrcServerId") > 0) {generalFailure();}
 
   const prisoners = generalRoster(context).prisoners ?? [],
     expired = (row: Row) =>
@@ -94,10 +94,10 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
     const stale = prisoners.filter(expired);
 
     if (stale.length)
-      (context.write.generalRoster ??= {}).prisoners = stale.map((row) => ({
+      {(context.write.generalRoster ??= {}).prisoners = stale.map((row) => ({
         ...releasedGeneral(row),
         actor: context.owner,
-      }));
+      }));}
 
     return {
       prisonlist: sfs.array(
@@ -121,11 +121,11 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
           now: Number(context.now),
         })
       )
-        generalFailure();
+        {generalFailure();}
 
       const item = context.rules.items.get("hero_revival")?.k1;
 
-      if (!item) generalFailure();
+      if (!item) {generalFailure();}
 
       context.spendItem(item, 1);
       next = releasedGeneral(row);
@@ -142,7 +142,7 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
         !grave ||
         !item
       )
-        generalFailure();
+        {generalFailure();}
 
       context.spendItem(item, 1);
       const duration = cityInteger(
@@ -163,7 +163,7 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
       };
     }
 
-    if (next !== row) writeGeneral(context, next);
+    if (next !== row) {writeGeneral(context, next);}
 
     return generalChanges(context, [next]);
   }
@@ -180,13 +180,13 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
     num(row, "state") !== 4 ||
     uid === context.owner
   )
-    generalFailure();
+    {generalFailure();}
 
   let next: Row;
 
-  if (action === "free") next = releasedGeneral(row);
+  if (action === "free") {next = releasedGeneral(row);}
   else if (action === "kill") {
-    if (long(row, "killtime") > context.now) generalFailure();
+    if (long(row, "killtime") > context.now) {generalFailure();}
 
     const duration = cityInteger(
       context.rules.building(
@@ -209,11 +209,11 @@ export function generalPrison(context: CityProgressionContext, params: Fields): 
       times = generalMap(text(row, "optime"), (value) => BigInt(value), 200),
       duration = generalPairs(context.rules.items.get("hero_rob")?.k12).get(type);
 
-    if (!duration || (times.get(type) ?? 0n) > context.now) generalFailure();
+    if (!duration || (times.get(type) ?? 0n) > context.now) {generalFailure();}
 
     times.set(type, context.now + BigInt(duration) * 1000n);
     next = { ...row, optime: [...times].map(([type, at]) => `${type};${at}`).join("|") };
-  } else generalFailure();
+  } else {generalFailure();}
 
   (context.write.generalRoster ??= {}).prisoners = [{ ...next, actor: context.owner }];
 

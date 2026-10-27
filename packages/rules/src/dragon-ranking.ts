@@ -6,19 +6,19 @@ import { javaDecimal } from "./java-integer.ts";
 function split(value: string, separator: string): string[] {
   const pieces = value.split(separator);
 
-  while (pieces.at(-1) === "") pieces.pop();
+  while (pieces.at(-1) === "") {pieces.pop();}
 
   return pieces;
 }
 
 export function dragonRankingRanges(value: string): DragonRankingRange[] | undefined {
-  if (typeof value !== "string") throw new GameError(errors.invalid);
+  if (typeof value !== "string") {throw new GameError(errors.invalid);}
 
-  if (value === "") return undefined;
+  if (value === "") {return undefined;}
 
   const pieces = split(value, ";");
 
-  if (pieces.length >= 35) return undefined;
+  if (pieces.length >= 35) {return undefined;}
 
   return pieces.map((piece) => {
     const fields = split(piece, "|");

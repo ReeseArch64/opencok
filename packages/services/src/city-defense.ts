@@ -11,7 +11,7 @@ import type { CityProgressionContext } from "./city-progression-context.ts";
 export function cityDefenseMaximum(context: CityProgressionContext) {
   const wall = context.state.buildings.find((building) => num(building, "itemId") === 419000);
 
-  if (!wall) worldMutationFailure();
+  if (!wall) {worldMutationFailure();}
 
   const definition = context.rules.building(
     "419000",
@@ -35,7 +35,7 @@ export class CityDefenseDomain extends CityCommandDomain {
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
     const state = context.state.worldMutation;
 
-    if (!state) worldMutationFailure();
+    if (!state) {worldMutationFailure();}
 
     const point = state.points.find((row) => num(row, "id") === num(state.world, "pointId"));
 
@@ -45,7 +45,7 @@ export class CityDefenseDomain extends CityCommandDomain {
       text(point, "ownerId") !== context.owner ||
       num(point, "worldId") !== 0
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
 
     if (
       command === "world.user.rcd" &&
@@ -55,21 +55,21 @@ export class CityDefenseDomain extends CityCommandDomain {
       num(point, "y") >= 574 &&
       num(point, "y") <= 626
     )
-      return { response: encode({ recover: sfs.string("isBlackLand") }), event: null };
+      {return { response: encode({ recover: sfs.string("isBlackLand") }), event: null };}
 
     const burning = long(point, "fireTime") !== 0n;
 
-    if (command === "buy.citydef" && !burning) worldMutationFailure();
+    if (command === "buy.citydef" && !burning) {worldMutationFailure();}
 
     const rule = context.rules.items.get("world_fire1");
 
-    if (!rule) worldMutationFailure();
+    if (!rule) {worldMutationFailure();}
 
     if (
       command === "world.user.rcd" &&
       context.now - long(state.world, "lastCityDefTime") < BigInt(cityInteger(rule.k2)) * 60000n
     )
-      worldMutationFailure();
+      {worldMutationFailure();}
 
     const row = settleCityFire(
       point,
@@ -81,7 +81,7 @@ export class CityDefenseDomain extends CityCommandDomain {
     if (command === "buy.citydef") {
       const cost = cityAmount(rule.k4);
 
-      if (cost > 2147483647n) worldMutationFailure();
+      if (cost > 2147483647n) {worldMutationFailure();}
 
       context.economy.gold(-cost);
       row.startOccupyTime = 0n;
@@ -101,7 +101,7 @@ export class CityDefenseDomain extends CityCommandDomain {
         lastCityDefTime: context.now,
         cityDefValue: num(row, "cityDefValue"),
       });
-    } else worldMutationFailure();
+    } else {worldMutationFailure();}
 
     (context.write.worldMutation ??= {}).points = [row];
 

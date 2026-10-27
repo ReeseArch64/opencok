@@ -18,7 +18,7 @@ type Row = typeof chat_message.$inferSelect;
 export function chatMessage(row: Row): ChatMessage {
   const sequenceId = Number(row.sequence_id);
 
-  if (!Number.isSafeInteger(sequenceId)) throw new Error("Chat sequence exceeds wire precision");
+  if (!Number.isSafeInteger(sequenceId)) {throw new Error("Chat sequence exceeds wire precision");}
 
   return {
     sequenceId,
@@ -53,12 +53,12 @@ export function createChatMessageStore(
       [...input.body].length > 500 ||
       !Number.isFinite(input.now.getTime())
     )
-      throw new TypeError("Invalid chat message");
+      {throw new TypeError("Invalid chat message");}
   }
   async function hydrate(rows: Row[]): Promise<ChatMessage[]> {
     for (const row of rows)
-      if (!Number.isSafeInteger(Number(row.sequence_id)))
-        throw new Error("Chat sequence exceeds wire precision");
+      {if (!Number.isSafeInteger(Number(row.sequence_id)))
+        {throw new Error("Chat sequence exceeds wire precision");}}
 
     const output: ChatMessage[] = [];
     const missing = rows
@@ -72,9 +72,9 @@ export function createChatMessageStore(
     );
 
     for (const row of rows) {
-      if (row.deleted_at || row.expires_at <= current()) continue;
+      if (row.deleted_at || row.expires_at <= current()) {continue;}
 
-      if (row.body !== null) output.push(chatMessage(row));
+      if (row.body !== null) {output.push(chatMessage(row));}
       else if (archive) {
         const copy = archive.getMany
           ? copies.get(Number(row.sequence_id))
@@ -92,12 +92,12 @@ export function createChatMessageStore(
           copy.expiresAt === milliseconds(row.expires_at) &&
           copy.expiresAt > clock().getTime()
         )
-          output.push(copy);
-        else throw new Error("Chat archive copy unavailable");
-      } else throw new Error("Chat archive unavailable");
+          {output.push(copy);}
+        else {throw new Error("Chat archive copy unavailable");}
+      } else {throw new Error("Chat archive unavailable");}
     }
 
-    if (!output.length) return output;
+    if (!output.length) {return output;}
 
     const valid = await db
       .select({ id: chat_message.sequence_id })
@@ -121,7 +121,7 @@ export function createChatMessageStore(
     async create(input) {
       validate(input);
 
-      if (!(await canSend(input.senderUid))) throw new TypeError("Chat sender muted");
+      if (!(await canSend(input.senderUid))) {throw new TypeError("Chat sender muted");}
 
       return db.transaction(async (tx) => {
         await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('chat:append',0))`);
@@ -140,10 +140,10 @@ export function createChatMessageStore(
 
         if (existing) {
           if (existing.expires_at <= current() || existing.deleted_at)
-            throw new TypeError("Chat message expired");
+            {throw new TypeError("Chat message expired");}
 
           if ((existing.body_hash ?? hash(existing.body ?? "")) !== digest)
-            throw new TypeError("Chat receipt content conflict");
+            {throw new TypeError("Chat receipt content conflict");}
 
           return { ...chatMessage(existing), inserted: false };
         }
@@ -166,7 +166,7 @@ export function createChatMessageStore(
           })
           .returning();
 
-        if (!saved) throw new Error("Chat insert failed");
+        if (!saved) {throw new Error("Chat insert failed");}
 
         await tx.insert(chat_event).values({
           id: randomUUID(),
@@ -182,7 +182,7 @@ export function createChatMessageStore(
       });
     },
     async getAll(roomId, afterMs = 0) {
-      if (!Number.isSafeInteger(afterMs) || afterMs < 0) throw new TypeError("Invalid time");
+      if (!Number.isSafeInteger(afterMs) || afterMs < 0) {throw new TypeError("Invalid time");}
 
       return hydrate(
         (
@@ -210,7 +210,7 @@ export function createChatMessageStore(
         !Number.isSafeInteger(endMs) ||
         endMs <= startMs
       )
-        throw new TypeError("Invalid time");
+        {throw new TypeError("Invalid time");}
 
       return hydrate(
         (
@@ -242,7 +242,7 @@ export function createChatMessageStore(
         query.limit < 1 ||
         query.limit > 100
       )
-        throw new TypeError("Invalid cursor");
+        {throw new TypeError("Invalid cursor");}
 
       const rows = await db
         .select()
@@ -269,7 +269,7 @@ export function createChatMessageStore(
     },
     async remove(sequenceId) {
       if (!Number.isSafeInteger(sequenceId) || sequenceId < 0)
-        throw new TypeError("Invalid message");
+        {throw new TypeError("Invalid message");}
 
       await db.transaction(async (tx) => {
         await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('chat:append',0))`);
@@ -282,7 +282,7 @@ export function createChatMessageStore(
           .returning();
 
         if (removed)
-          await tx.insert(chat_event).values({
+          {await tx.insert(chat_event).values({
             id: randomUUID(),
             kind: "delete",
             room: removed.room_key,
@@ -293,7 +293,7 @@ export function createChatMessageStore(
             },
             createdAt: BigInt(clock().getTime()),
             expiresAt: BigInt(clock().getTime() + 86_400_000),
-          });
+          });}
       });
       await archive?.remove(sequenceId);
     },
@@ -311,7 +311,7 @@ export function createChatMessageStore(
         .limit(500);
 
       for (const row of expired)
-        await db
+        {await db
           .update(chat_message)
           .set({ body: null, body_hash: row.body_hash ?? hash(row.body!), deleted_at: now })
           .where(
@@ -319,7 +319,7 @@ export function createChatMessageStore(
               eq(chat_message.sequence_id, row.sequence_id),
               eq(chat_message.version, row.version),
             ),
-          );
+          );}
 
       if (!archive) {
         const due = await db
@@ -334,7 +334,7 @@ export function createChatMessageStore(
           )
           .limit(100);
 
-        if (due.length) throw new Error("Chat archive unavailable");
+        if (due.length) {throw new Error("Chat archive unavailable");}
 
         return 0;
       }
@@ -372,7 +372,7 @@ export function createChatMessageStore(
           hash(verified.body) !== copy.hash ||
           verified.expiresAt !== copy.expiresAt
         )
-          throw new Error("Archive verification failed");
+          {throw new Error("Archive verification failed");}
 
         await db
           .update(chat_message)

@@ -13,12 +13,12 @@ export class ChatSocialService {
     const parsed = chatSocialParams.safeParse(params);
 
     if (!parsed.success || typeof key !== "string" || !/^[a-zA-Z0-9_:-]{1,128}$/.test(key))
-      throw new ChatCommandError("invalid_request");
+      {throw new ChatCommandError("invalid_request");}
 
     const value = parsed.data;
     const sequence = Number(value.seqId ?? value.seqid ?? 0);
 
-    if (!Number.isSafeInteger(sequence)) throw new ChatCommandError("invalid_cursor");
+    if (!Number.isSafeInteger(sequence)) {throw new ChatCommandError("invalid_cursor");}
 
     const operation = {
       owner,

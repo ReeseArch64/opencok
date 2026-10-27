@@ -19,7 +19,7 @@ export function campaignNoticeBody(notice: CampaignNoticeResponse): Fields {
     notice.para.length > 8 ||
     notice.para.some((value) => typeof value !== "string" || Buffer.byteLength(value) > 4096)
   )
-    throw new Error("Invalid native campaign notice");
+    {throw new Error("Invalid native campaign notice");}
 
   return {
     msgId: sfs.string(notice.msgId),
@@ -38,7 +38,7 @@ export function campaignNoticeFrame(notice: CampaignNotice) {
     notice.allianceId.length > 40 ||
     (notice.scope === 1 && !notice.allianceId)
   )
-    throw new Error("Invalid campaign notice envelope");
+    {throw new Error("Invalid campaign notice envelope");}
 
   return encode({
     at: sfs.long(notice.at),
@@ -70,7 +70,7 @@ export function readCampaignNotice(payload: Uint8Array, owner: string): Campaign
     parameters.length > 8 ||
     parameters.some((value: Value) => value.type !== Type.String || typeof value.value !== "string")
   )
-    throw new Error("Invalid owned campaign notice");
+    {throw new Error("Invalid owned campaign notice");}
 
   const message = {
     msgId: str(body, "msgId"),

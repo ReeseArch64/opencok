@@ -5,13 +5,13 @@ import { eventTimestamp } from "./local-events";
 import type { Rules, Rule } from "./game";
 
 export function closedActivityPanels(profile: Row, rules: Rules, now: bigint): readonly string[] {
-  if (num(profile, "crossFightSrcServerId") > 0) return [];
+  if (num(profile, "crossFightSrcServerId") > 0) {return [];}
 
   return [...(rules.power.activityPanels?.values() ?? [])]
     .filter((rule) => {
-      if (rule.function_on === "0" || rule.close !== "1") return false;
+      if (rule.function_on === "0" || rule.close !== "1") {return false;}
 
-      if (rule.start === undefined && rule.end === undefined) return true;
+      if (rule.start === undefined && rule.end === undefined) {return true;}
 
       const start = eventTimestamp(rule.start),
         end = eventTimestamp(rule.end);
@@ -24,7 +24,7 @@ export function closedActivityPanels(profile: Row, rules: Rules, now: bigint): r
 export function catalogReward(rules: Rules, id: string): Rule {
   const rule = rules.reconnect.rewards?.get(id);
 
-  if (!rule || !id || id.length > 40) throw new GameError(errors.invalid, "reward_preview");
+  if (!rule || !id || id.length > 40) {throw new GameError(errors.invalid, "reward_preview");}
 
   return rule;
 }

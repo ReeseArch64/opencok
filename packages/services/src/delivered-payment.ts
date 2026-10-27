@@ -13,7 +13,7 @@ export async function deliveredPayment(
   now: bigint,
   read: (orderId: string, platform: string) => Promise<Row | undefined>,
 ) {
-  if (!gateway) normalRechargeFailure();
+  if (!gateway) {normalRechargeFailure();}
 
   const proof = await gateway.delivered({ owner, kingdomId: rules.kingdomId, orderId, platform }),
     catalog = rules.advanced.castleExchanges?.get(proof?.exchangeId ?? ""),
@@ -42,13 +42,13 @@ export async function deliveredPayment(
     long(payment, "time") !== proof.occurredAt ||
     Math.round(num(payment, "spend") * 100) !== proof.priceCents
   )
-    normalRechargeFailure();
+    {normalRechargeFailure();}
 
   const base = BigInt(cityInteger(catalog.gold_doller, 0));
   const gold = proof.rechargeGold ?? base;
 
   if (typeof gold !== "bigint" || gold < 0n || gold > base || gold > 2147483647n)
-    normalRechargeFailure();
+    {normalRechargeFailure();}
 
   return { proof, gold, payment };
 }

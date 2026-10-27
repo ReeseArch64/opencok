@@ -26,7 +26,7 @@ test("the complete client roster has concrete dragon classes and preserves every
   for (const dragon of dragonRoster) {
     dragon.validate();
 
-    if (!dragon.server) continue;
+    if (!dragon.server) {continue;}
 
     const nativeId = dragonCatalogBindings.dragons[dragon.identity];
     expect(namedDragonDefinition({ id: nativeId })).toEqual(mapper.toDefinition(dragon));

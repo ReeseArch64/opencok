@@ -74,7 +74,7 @@ export async function readProfileAlliance(
       .limit(1)
   )[0];
 
-  if (!record) throw new Error("Missing public profile alliance");
+  if (!record) {throw new Error("Missing public profile alliance");}
 
   const leaders = await tx
     .select({ uid: userprofile.uid, name: userprofile.name })
@@ -84,7 +84,7 @@ export async function readProfileAlliance(
     .orderBy(asc(alliance_member.uid))
     .limit(2);
 
-  if (leaders.length !== 1) throw new Error("Ambiguous public alliance leader");
+  if (leaders.length !== 1) {throw new Error("Ambiguous public alliance leader");}
 
   const totals = (
     await tx
@@ -94,7 +94,7 @@ export async function readProfileAlliance(
       .where(eq(alliance_member.allianceId, allianceId))
   )[0];
 
-  if (!totals || totals.member === "0") throw new Error("Missing public alliance member totals");
+  if (!totals || totals.member === "0") {throw new Error("Missing public alliance member totals");}
 
   const sciences = withEffects
     ? await tx
@@ -105,7 +105,7 @@ export async function readProfileAlliance(
         .limit(32768)
     : [];
 
-  if (sciences.length > 32767) throw new Error("Public alliance science collection exceeds limit");
+  if (sciences.length > 32767) {throw new Error("Public alliance science collection exceeds limit");}
 
   const video = (
     await tx

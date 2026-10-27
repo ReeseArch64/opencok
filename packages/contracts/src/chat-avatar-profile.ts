@@ -11,7 +11,7 @@ export interface ChatAvatarProfileStore {
 }
 
 export function validAvatarProfile(value: unknown): value is AvatarProfileUpdate {
-  if (!isRecord(value)) return false;
+  if (!isRecord(value)) {return false;}
 
   return (
     typeof value.owner === "string" &&
@@ -46,7 +46,7 @@ export function validAvatarProfile(value: unknown): value is AvatarProfileUpdate
 }
 
 export function encodeAvatarProfile(update: AvatarProfileUpdate): string {
-  if (!validAvatarProfile(update)) throw new Error("Invalid chat avatar profile");
+  if (!validAvatarProfile(update)) {throw new Error("Invalid chat avatar profile");}
 
   return JSON.stringify({
     owner: update.owner,
@@ -81,13 +81,13 @@ export function decodeAvatarProfile(body: string): AvatarProfileUpdate {
     typeof value.committedAt !== "string" ||
     !/^(0|[1-9][0-9]{0,15})$/.test(value.committedAt)
   )
-    throw new Error("Invalid chat avatar profile");
+    {throw new Error("Invalid chat avatar profile");}
 
   if (
     value.revision !== undefined &&
     (typeof value.revision !== "string" || !/^[1-9][0-9]{0,18}$/.test(value.revision))
   )
-    throw new Error("Invalid chat avatar revision");
+    {throw new Error("Invalid chat avatar revision");}
 
   const update = {
     ...value,
@@ -95,7 +95,7 @@ export function decodeAvatarProfile(body: string): AvatarProfileUpdate {
     ...(typeof value.revision === "string" ? { revision: BigInt(value.revision) } : {}),
   };
 
-  if (!validAvatarProfile(update)) throw new Error("Invalid chat avatar profile");
+  if (!validAvatarProfile(update)) {throw new Error("Invalid chat avatar profile");}
 
   return update;
 }

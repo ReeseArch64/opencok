@@ -20,12 +20,12 @@ function signed(value: unknown, bits: 8 | 32 | 64): bigint {
     (typeof value === "number" && !Number.isSafeInteger(value)) ||
     !/^[+-]?\d+$/.test(String(value))
   )
-    throw new GameError(errors.unsupported, "public_profile");
+    {throw new GameError(errors.unsupported, "public_profile");}
 
   const parsed = BigInt(String(value));
 
   if (BigInt.asIntN(bits, parsed) !== parsed)
-    throw new GameError(errors.unsupported, "public_profile");
+    {throw new GameError(errors.unsupported, "public_profile");}
 
   return parsed;
 }
@@ -38,7 +38,7 @@ function serializeAllianceVideo(row: Row): Fields {
     ["videoURL", "vedioURL"],
     ["thumbnailURL", "thumbnailURL"],
   ]) {
-    if (typeof row[column!] !== "string") throw new GameError(errors.unsupported, "public_profile");
+    if (typeof row[column!] !== "string") {throw new GameError(errors.unsupported, "public_profile");}
 
     fields[wire!] = sfs.string(text(row, column!));
   }
@@ -49,7 +49,7 @@ function serializeAllianceVideo(row: Row): Fields {
     ["videoSize", "vedioSize"],
     ["videoLength", "vedioLength"],
   ])
-    fields[wire!] = sfs.int(Number(signed(row[column!], 32)));
+    {fields[wire!] = sfs.int(Number(signed(row[column!], 32)));}
 
   fields.checksign = sfs.byte(Number(signed(row.checkSign, 8)));
 
@@ -66,43 +66,43 @@ function serializePublicAllianceInfo(
   const fields: Fields = {};
 
   for (const key of strings)
-    if (state.alliance[key] !== null && state.alliance[key] !== undefined)
-      fields[key] = sfs.string(text(state.alliance, key));
+    {if (state.alliance[key] !== null && state.alliance[key] !== undefined)
+      {fields[key] = sfs.string(text(state.alliance, key));}}
 
   for (const key of integers)
-    if (state.alliance[key] !== null && state.alliance[key] !== undefined)
-      fields[key] = sfs.int(Number(signed(state.alliance[key], 32)));
+    {if (state.alliance[key] !== null && state.alliance[key] !== undefined)
+      {fields[key] = sfs.int(Number(signed(state.alliance[key], 32)));}}
 
   for (const key of longs)
-    if (state.alliance[key] !== null && state.alliance[key] !== undefined)
-      fields[key] = sfs.long(signed(state.alliance[key], 64));
+    {if (state.alliance[key] !== null && state.alliance[key] !== undefined)
+      {fields[key] = sfs.long(signed(state.alliance[key], 64));}}
 
   for (const key of ["currentlevel", "nextlevel", "fightpower"] as const) {
     const value = progress[key];
 
     if (value !== undefined)
-      fields[key] = remote ? sfs.long(BigInt.asIntN(64, value)) : sfs.double(Number(value));
+      {fields[key] = remote ? sfs.long(BigInt.asIntN(64, value)) : sfs.double(Number(value));}
   }
 
   fields.member = sfs.long(progress.member);
 
-  if (progress.maxMember !== undefined) fields.maxMember = sfs.int(progress.maxMember);
+  if (progress.maxMember !== undefined) {fields.maxMember = sfs.int(progress.maxMember);}
 
   fields.learderUid = sfs.string(text(state.leader, "uid"));
 
   if (state.leader.name !== null && state.leader.name !== undefined)
-    fields.learderName = sfs.string(text(state.leader, "name"));
+    {fields.learderName = sfs.string(text(state.leader, "name"));}
 
   if (permissions !== undefined)
-    fields.permission = sfs.object(
+    {fields.permission = sfs.object(
       Object.fromEntries(
         [...permissions].map(([key, value]) => [key, sfs.int(Number(signed(value, 32)))]),
       ),
-    );
+    );}
 
   if (state.video) {
     if (text(state.video, "allianceId") !== text(state.alliance, "uid"))
-      throw new GameError(errors.unsupported, "public_profile");
+      {throw new GameError(errors.unsupported, "public_profile");}
 
     fields.allianceVideo = sfs.object(allianceVideo(state.video));
   }

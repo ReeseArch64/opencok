@@ -131,7 +131,7 @@ test("V2 pagination includes the timestamp bucket and first following message ev
 test("V2 cursor fallback accepts null, blank and zero and fails closed on cache failure", async () => {
   const f = fixture();
   for (const clientseq of [{ type: Type.Null, value: null }, sfs.string(" \t"), sfs.string("0")])
-    await f.run({ clientseq });
+    {await f.run({ clientseq });}
   expect(f.cursors()).toBe(3);
   expect(f.queries.every((query) => query.anchor === "cached")).toBe(true);
   f.services.lastSystemMail = async () => {
@@ -151,7 +151,7 @@ test("V2 rejects malformed input and unauthorized owners before mailbox access",
     { time: sfs.string("9223372036854775808") },
     { time: sfs.string("1 ") },
   ];
-  for (const params of invalid) await expect(f.run(params)).rejects.toThrow();
+  for (const params of invalid) {await expect(f.run(params)).rejects.toThrow();}
   const profiles: (Row | undefined)[] = [
     undefined,
     { uid: "foreign", serverId: 1 },
@@ -289,14 +289,14 @@ test("V1 cache detects contention, invalid metadata and poisoned selections with
   const cache = new Cache({ redisUrl: "redis://unused", timeoutMs: 100, kingdomId: 1 });
   let writes = 0;
   cache.command = async (name) => {
-    if (name === "HMGET") return [null, null];
+    if (name === "HMGET") {return [null, null];}
     writes++;
     return 0;
   };
   await expect(cache.systemMailPage("self", ["a"], 1, 1n, () => {})).rejects.toThrow("contention");
   expect(writes).toBe(5);
   for (const value of [["a:b"], ["a", "a"], ["\0"], ["a".repeat(41)]])
-    await expect(cache.systemMailPage("self", value, 1, 1n, () => {})).rejects.toThrow();
+    {await expect(cache.systemMailPage("self", value, 1, 1n, () => {})).rejects.toThrow();}
   expect(writes).toBe(5);
   cache.command = async () => [7, null];
   await expect(cache.systemMailPage("self", ["a"], 1, 1n, () => {})).rejects.toThrow();
@@ -305,7 +305,7 @@ test("V1 cache detects contention, invalid metadata and poisoned selections with
 test("native mixed polling composes social rooms with realm mail without losing wire types", async () => {
   const f = fixture();
   f.services.social = async (_owner, command, params): Promise<Fields> => {
-    if (command === "chat.shield.list") return { list: sfs.array([]) };
+    if (command === "chat.shield.list") {return { list: sfs.array([]) };}
     const room = JSON.parse(str(params, "params"))[0];
     return {
       rooms: sfs.array([

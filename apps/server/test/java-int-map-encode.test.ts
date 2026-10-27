@@ -20,7 +20,7 @@ test("Java integer map snapshots retain native descriptors, signed counters and 
 });
 test("Java integer map snapshot encoding rejects fractional or oversized unsupported actor state", () => {
   for (const value of [NaN, Infinity, 1.5, 2147483648, -2147483649])
-    expect(() => encodeJavaIntMap(new Map([["unit", value]]))).toThrow();
+    {expect(() => encodeJavaIntMap(new Map([["unit", value]]))).toThrow();}
   expect(() => encodeJavaIntMap(new Map([["x".repeat(65536), 1]]))).toThrow();
   expect(() =>
     encodeJavaIntMap(new Map(Array.from({ length: 4097 }, (_, i) => [String(i), i]))),

@@ -8,7 +8,7 @@ function parseDocument(xml: string, preserveOrder = false) {
     /<!DOCTYPE|<!ENTITY/i.test(xml) ||
     XMLValidator.validate(xml) !== true
   )
-    throw new Error("Invalid gameplay resource XML");
+    {throw new Error("Invalid gameplay resource XML");}
 
   return new XMLParser({
     preserveOrder,
@@ -25,28 +25,28 @@ function parseDocument(xml: string, preserveOrder = false) {
 export function parseRecords(source: string, name: string): Rule[] {
   const parsed = parseDocument(source);
 
-  if (!Object.hasOwn(parsed, "database")) throw new Error("Invalid gameplay resource root");
+  if (!Object.hasOwn(parsed, "database")) {throw new Error("Invalid gameplay resource root");}
 
   const records: unknown[] = [];
   const collect = (node: unknown) => {
-    if (!node || typeof node !== "object") return;
+    if (!node || typeof node !== "object") {return;}
 
     const group = node as { id?: string; ItemSpec?: unknown[]; Group?: unknown[] };
 
-    if (group.ItemSpec && (name !== "vip" || group.id === "vip")) records.push(...group.ItemSpec);
+    if (group.ItemSpec && (name !== "vip" || group.id === "vip")) {records.push(...group.ItemSpec);}
 
-    for (const child of group.Group ?? []) collect(child);
+    for (const child of group.Group ?? []) {collect(child);}
   };
   collect(parsed.database);
 
   for (const record of records)
-    if (
+    {if (
       !record ||
       typeof record !== "object" ||
       Array.isArray(record) ||
       Object.values(record).some((value) => typeof value !== "string")
     )
-      throw new Error("Invalid gameplay resource record");
+      {throw new Error("Invalid gameplay resource record");}}
 
   return records as Rule[];
 }
@@ -60,7 +60,7 @@ export function parseDeclaredCatalog(source: string): {
   const parsed = parseDocument(source, true) as Element[];
   const root = parsed.find((element) => Object.hasOwn(element, "database"));
 
-  if (!root || !Array.isArray(root.database)) throw new Error("Invalid gameplay resource root");
+  if (!root || !Array.isArray(root.database)) {throw new Error("Invalid gameplay resource root");}
 
   const elements = (nodes: Element[]) =>
     nodes.filter((node) =>
@@ -76,7 +76,7 @@ export function parseDeclaredCatalog(source: string): {
       const record = { ...node[":@"] };
 
       if (Object.values(record).some((value) => typeof value !== "string"))
-        throw new Error("Invalid gameplay resource record");
+        {throw new Error("Invalid gameplay resource record");}
 
       items.set(record.id ?? "null", record);
       declarations.push(record);
@@ -84,17 +84,17 @@ export function parseDeclaredCatalog(source: string): {
       return record;
     });
 
-  if (!groups.length) records(children);
+  if (!groups.length) {records(children);}
   else
-    for (const group of groups) {
+    {for (const group of groups) {
       const id = group[":@"]?.id;
 
       if (typeof id !== "string" || !Array.isArray(group.Group))
-        throw new Error("Invalid gameplay resource group");
+        {throw new Error("Invalid gameplay resource group");}
 
       const values = records(group.Group as Element[]);
       groupsById.set(id, values);
-    }
+    }}
 
   return { items, groups: groupsById, records: declarations };
 }
@@ -112,7 +112,7 @@ export function parseRules(xml: string, name: string): Map<string, Rule> {
       "function_star",
     ].includes(name)
   )
-    return parseDeclaredCatalog(xml).items;
+    {return parseDeclaredCatalog(xml).items;}
 
   return indexRules(parseRecords(xml, name), name);
 }

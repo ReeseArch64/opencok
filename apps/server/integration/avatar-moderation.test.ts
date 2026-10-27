@@ -22,7 +22,7 @@ function loseCommit(pool: ReturnType<typeof createDatabases>["global"]["pool"], 
   Object.defineProperty(pool, "connect", {
     configurable: true,
     value: (...connectArgs: unknown[]) => {
-      if (connectArgs.length) return Reflect.apply(originalConnect, pool, connectArgs);
+      if (connectArgs.length) {return Reflect.apply(originalConnect, pool, connectArgs);}
       return connect().then((client) => {
         let touched = false;
         return {
@@ -34,8 +34,8 @@ function loseCommit(pool: ReturnType<typeof createDatabases>["global"]["pool"], 
                 : first && typeof first === "object" && "text" in first
                   ? first.text
                   : undefined;
-            if (typeof text === "string" && text.startsWith("begin")) touched = false;
-            if (typeof text === "string" && text.trimStart().startsWith(statement)) touched = true;
+            if (typeof text === "string" && text.startsWith("begin")) {touched = false;}
+            if (typeof text === "string" && text.trimStart().startsWith(statement)) {touched = true;}
             const result = await Reflect.apply(client.query, client, args);
             if (armed && touched && text === "commit") {
               armed = false;
@@ -62,7 +62,7 @@ test("operator moderation is atomic, fenced, replayable and orders state changes
     const admin = await pg.start();
     try {
       for (const name of ["moderation_global", "moderation_realm"])
-        await admin.query(`create database "${name}"`);
+        {await admin.query(`create database "${name}"`);}
     } finally {
       await admin.end();
     }

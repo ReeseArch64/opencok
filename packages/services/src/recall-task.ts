@@ -27,7 +27,7 @@ function enabled(context: CityProgressionContext) {
 }
 
 function saved(context: CityProgressionContext) {
-  if (!context.state.recallTask) regionalRecallFailure();
+  if (!context.state.recallTask) {regionalRecallFailure();}
 
   return {
     ...context.state.recallTask,
@@ -43,7 +43,7 @@ export function recordRecallTask(
   condition = "1",
   at = context.now,
 ) {
-  if (!context.state.recallTask?.notes || !enabled(context) || amount <= 0) return;
+  if (!context.state.recallTask?.notes || !enabled(context) || amount <= 0) {return;}
 
   const state = saved(context),
     notes = state.notes!;
@@ -53,7 +53,7 @@ export function recordRecallTask(
     at < long(notes, "beginTime") ||
     at > long(notes, "endTime")
   )
-    return;
+    {return;}
 
   const count = cityInteger(
     typeof amount === "bigint"
@@ -76,18 +76,18 @@ export function recordRecallTask(
         ? !rule.extend_type?.split(";").includes(condition)
         : rule.extend_type !== condition)
     )
-      return row;
+      {return row;}
 
     row.num = Math.min(2147483647, num(row, "num") + count);
 
-    if (num(row, "num") >= num(row, "target_num")) row.state = 1;
+    if (num(row, "num") >= num(row, "target_num")) {row.state = 1;}
 
     changed = true;
 
     return row;
   });
 
-  if (changed) context.write.recallTask = { ...context.write.recallTask, tasks };
+  if (changed) {context.write.recallTask = { ...context.write.recallTask, tasks };}
 }
 
 export class RecallTaskDomain extends CityCommandDomain {
@@ -100,7 +100,7 @@ export class RecallTaskDomain extends CityCommandDomain {
   public readonly types: CityDomain["types"] = [];
 
   public readonly prepare: CityDomain["prepare"] = async (context, command, params) => {
-    if (!enabled(context)) return { response: encode({}), event: null };
+    if (!enabled(context)) {return { response: encode({}), event: null };}
 
     let state = saved(context);
     const rule = [...(context.rules.advanced.recallActivities?.values() ?? [])].find(
@@ -108,24 +108,24 @@ export class RecallTaskDomain extends CityCommandDomain {
     );
 
     if (command === "recall.task.init") {
-      if (!rule) return { response: encode({}), event: null };
+      if (!rule) {return { response: encode({}), event: null };}
 
       const start = eventTimestamp(rule.k3),
         end = eventTimestamp(rule.k4),
         castle = context.state.buildings.find((row) => num(row, "itemId") === 400000),
         level = num(castle ?? {}, "level");
 
-      if (start === undefined || end === undefined || end < start) regionalRecallFailure();
+      if (start === undefined || end === undefined || end < start) {regionalRecallFailure();}
 
       if (context.now <= start || context.now >= end || level < cityInteger(rule.k11))
-        return { response: encode({}), event: null };
+        {return { response: encode({}), event: null };}
 
       if (!state.notes) {
         const ladder = regionalRecallBand(rule, level + num(castle ?? {}, "star")),
           ids = rule.k7?.split("|")[ladder]?.split(";").filter(Boolean);
 
         if (!ids?.length || ids.length > 64 || new Set(ids).size !== ids.length)
-          regionalRecallFailure();
+          {regionalRecallFailure();}
 
         const notes: Row = {
           uid: context.owner,
@@ -144,7 +144,7 @@ export class RecallTaskDomain extends CityCommandDomain {
           const task = context.rules.advanced.recallTasks?.get(id),
             values = task?.num?.split(";").map((value) => cityInteger(value, 1));
 
-          if (!task || !values?.length || values.length > 2) regionalRecallFailure();
+          if (!task || !values?.length || values.length > 2) {regionalRecallFailure();}
 
           const target =
             values.length === 1
@@ -166,7 +166,7 @@ export class RecallTaskDomain extends CityCommandDomain {
         recordRecallTask(context, 26, 1);
 
         if (long(state.notes, "lastLoginTime") / 86400000n !== context.now / 86400000n)
-          recordRecallTask(context, 27, 1);
+          {recordRecallTask(context, 27, 1);}
 
         context.write.recallTask = {
           ...context.write.recallTask,
@@ -181,7 +181,7 @@ export class RecallTaskDomain extends CityCommandDomain {
       const rows = state.tasks.map((row) => {
         const task = context.rules.advanced.recallTasks?.get(text(row, "id"));
 
-        if (!task) regionalRecallFailure();
+        if (!task) {regionalRecallFailure();}
 
         return {
           reward: rewardPreviewArray(
@@ -212,11 +212,11 @@ export class RecallTaskDomain extends CityCommandDomain {
       original = state.tasks.find((row) => row.id === id);
 
     if (!original || num(original, "state") <= 0 || num(original, "receive") > 0 || !state.notes)
-      return { response: encode({}), event: null };
+      {return { response: encode({}), event: null };}
 
     const task = context.rules.advanced.recallTasks?.get(id);
 
-    if (!task) regionalRecallFailure();
+    if (!task) {regionalRecallFailure();}
 
     const body: Fields = {
       id: sfs.string(id),
@@ -260,9 +260,9 @@ export class RecallTaskDomain extends CityCommandDomain {
           applyProgressionStatus(context, milestone);
           body.status = sfs.string(milestone);
         } else
-          body.receive_reward = sfs.array(
+          {body.receive_reward = sfs.array(
             grantNativeProgressionReward(context, pinProgressionReward(context, milestone)),
-          );
+          );}
 
         context.write.recallTask.notes = {
           ...state.notes!,

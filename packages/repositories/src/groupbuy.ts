@@ -32,7 +32,7 @@ export async function readGroupBuy(tx: MutationTransaction, owner: string): Prom
         .limit(2)
         .for("update");
 
-      if (activities.length > 1) throw new Error("Ambiguous group-buy period");
+      if (activities.length > 1) {throw new Error("Ambiguous group-buy period");}
 
       let activity = activities[0];
 
@@ -49,11 +49,11 @@ export async function readGroupBuy(tx: MutationTransaction, owner: string): Prom
           .returning();
       }
 
-      if (!activity) throw new Error("Missing group-buy activity");
+      if (!activity) {throw new Error("Missing group-buy activity");}
 
       const rounds = groupBuyRounds(activity.roundInfo);
 
-      if (!rounds[round - 1]) throw new Error("Missing group-buy round");
+      if (!rounds[round - 1]) {throw new Error("Missing group-buy round");}
 
       const selection = and(
         eq(alliance_group_buys.id, activity.id),
@@ -95,7 +95,7 @@ export async function writeGroupBuy(tx: MutationTransaction, owner: string, writ
     id = text(activity, "id"),
     rounds = groupBuyRounds(activity.roundInfo);
 
-  if (!id || id.length > 40) throw new Error("Invalid group-buy identity");
+  if (!id || id.length > 40) {throw new Error("Invalid group-buy identity");}
 
   await tx
     .update(activity_group_buys)
@@ -105,7 +105,7 @@ export async function writeGroupBuy(tx: MutationTransaction, owner: string, writ
     })
     .where(eq(activity_group_buys.id, id));
 
-  if (!write.record) return;
+  if (!write.record) {return;}
 
   const row = write.record;
 
@@ -116,7 +116,7 @@ export async function writeGroupBuy(tx: MutationTransaction, owner: string, writ
     text(row, "allianceId").length > 40 ||
     text(row, "info").length > 1000
   )
-    throw new Error("Invalid group-buy owner");
+    {throw new Error("Invalid group-buy owner");}
 
   const value = {
     id,

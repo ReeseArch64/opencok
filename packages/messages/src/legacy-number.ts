@@ -7,10 +7,10 @@ const digitZeros = [
 ];
 
 function digit(code: number): number {
-  for (const zero of digitZeros) if (code >= zero && code <= zero + 9) return code - zero;
+  for (const zero of digitZeros) {if (code >= zero && code <= zero + 9) {return code - zero;}}
 
   for (const start of [0x41, 0x61, 0xff21, 0xff41])
-    if (code >= start && code <= start + 25) return code - start + 10;
+    {if (code >= start && code <= start + 25) {return code - start + 10;}}
 
   return -1;
 }
@@ -19,7 +19,7 @@ function integer(token: string, radix: number, bits: number): bigint | undefined
   const negative = token[0] === "-";
   const start = negative || token[0] === "+" ? 1 : 0;
 
-  if (start === token.length) return undefined;
+  if (start === token.length) {return undefined;}
 
   const limit = (1n << BigInt(bits - 1)) - (negative ? 0n : 1n);
   let value = 0n;
@@ -27,11 +27,11 @@ function integer(token: string, radix: number, bits: number): bigint | undefined
   for (let index = start; index < token.length; index++) {
     const number = digit(token.charCodeAt(index));
 
-    if (number < 0 || number >= radix) return undefined;
+    if (number < 0 || number >= radix) {return undefined;}
 
     value = value * BigInt(radix) + BigInt(number);
 
-    if (value > limit) return undefined;
+    if (value > limit) {return undefined;}
   }
 
   return negative ? -value : value;
@@ -46,33 +46,33 @@ export function legacyHexCodeUnit(token: string): number | undefined {
 function hexDouble(token: string): number | undefined {
   const match = /^([+-]?)0[xX]([\da-fA-F]*)(?:\.([\da-fA-F]*))?[pP]([+-]?\d+)[fFdD]?$/.exec(token);
 
-  if (!match || (!match[2] && !match[3])) return undefined;
+  if (!match || (!match[2] && !match[3])) {return undefined;}
 
   const digits = `${match[2]}${match[3] ?? ""}`;
   const mantissa = BigInt(`0x${digits}`);
   const sign = match[1] === "-" ? -1 : 1;
 
-  if (mantissa === 0n) return sign < 0 ? -0 : 0;
+  if (mantissa === 0n) {return sign < 0 ? -0 : 0;}
 
   const shift = Number(match[4]) - 4 * (match[3]?.length ?? 0);
   const exponent = mantissa.toString(2).length - 1 + shift;
 
-  if (exponent > 1023) return sign * Infinity;
+  if (exponent > 1023) {return sign * Infinity;}
 
-  if (exponent < -1075) return sign < 0 ? -0 : 0;
+  if (exponent < -1075) {return sign < 0 ? -0 : 0;}
 
   const quantum = Math.max(exponent - 52, -1074);
   const discarded = quantum - shift;
   let rounded: bigint;
 
-  if (discarded <= 0) rounded = mantissa << BigInt(-discarded);
+  if (discarded <= 0) {rounded = mantissa << BigInt(-discarded);}
   else {
     const count = BigInt(discarded);
     rounded = mantissa >> count;
     const remainder = mantissa - (rounded << count);
     const midpoint = 1n << (count - 1n);
 
-    if (remainder > midpoint || (remainder === midpoint && (rounded & 1n) === 1n)) rounded++;
+    if (remainder > midpoint || (remainder === midpoint && (rounded & 1n) === 1n)) {rounded++;}
   }
 
   return sign * Number(rounded) * 2 ** quantum;
@@ -85,24 +85,24 @@ export function legacyJsonNumber(token: string): Value | undefined {
         ? integer(token.slice(2), 16, 32)
         : integer(token, 8, 32);
 
-    if (initial !== undefined) return sfs.int(Number(initial));
+    if (initial !== undefined) {return sfs.int(Number(initial));}
   }
 
   const int = integer(token, 10, 32);
 
-  if (int !== undefined) return sfs.int(Number(int));
+  if (int !== undefined) {return sfs.int(Number(int));}
 
   const long = integer(token, 10, 64);
 
-  if (long !== undefined) return sfs.long(long);
+  if (long !== undefined) {return sfs.long(long);}
 
-  if (/^[+-]?(?:Infinity|NaN)$/.test(token)) return undefined;
+  if (/^[+-]?(?:Infinity|NaN)$/.test(token)) {return undefined;}
 
   const decimal = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?[dDfF]?$/.test(token)
     ? Number(token.replace(/[dDfF]$/, ""))
     : hexDouble(token);
 
-  if (decimal === undefined) return sfs.string(token);
+  if (decimal === undefined) {return sfs.string(token);}
 
   return Number.isFinite(decimal) ? sfs.double(decimal) : undefined;
 }

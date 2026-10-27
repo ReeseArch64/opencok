@@ -45,12 +45,12 @@ function database(
     query: async (query: { text: string }, params: unknown[] = []) => {
       queries.push({ text: query.text, params });
       const table = query.text.match(/from "opencok_kingdom"\."([^"]+)"/)?.[1];
-      if (!table) return { rows: [] };
-      if (table === options.fail) throw new Error("Synthetic profile read failure");
-      if (table === "userprofile" && options.missing) return { rows: [] };
-      if (table === "user_general" && options.noGenerals) return { rows: [] };
+      if (!table) {return { rows: [] };}
+      if (table === options.fail) {throw new Error("Synthetic profile read failure");}
+      if (table === "userprofile" && options.missing) {return { rows: [] };}
+      if (table === "user_general" && options.noGenerals) {return { rows: [] };}
       if (table === options.overflow)
-        return { rows: Array.from({ length: 32768 }, () => rows[table]![0]) };
+        {return { rows: Array.from({ length: 32768 }, () => rows[table]![0]) };}
       return { rows: rows[table] ?? [] };
     },
   };
@@ -158,7 +158,7 @@ test("missing profiles skip all dependent reads and invalid identities never rea
   expect(state.generals).toEqual([]);
   expect(state.completedAchievements).toBe(0);
   expect(queries).toHaveLength(3);
-  for (const uid of ["", " ", "a".repeat(41)]) expect(() => readPublicProfile(db, uid)).toThrow();
+  for (const uid of ["", " ", "a".repeat(41)]) {expect(() => readPublicProfile(db, uid)).toThrow();}
   expect(queries).toHaveLength(3);
 });
 

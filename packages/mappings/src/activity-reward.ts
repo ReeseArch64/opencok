@@ -12,7 +12,7 @@ export function activityRewardView(
   const fields: Fields = {};
 
   for (const [key, value] of Object.entries(amounts))
-    fields[key] =
+    {fields[key] =
       key === "military" ||
       key === "milhonor" ||
       key === "honor" ||
@@ -20,13 +20,13 @@ export function activityRewardView(
       key === "exp" ||
       key === "expDelta"
         ? sfs.int(Number(value))
-        : sfs.long(BigInt(value));
+        : sfs.long(BigInt(value));}
 
-  if (generals.length) fields.general = sfs.array(generals.map(sfs.object));
+  if (generals.length) {fields.general = sfs.array(generals.map(sfs.object));}
 
-  if (goods.length) fields.goods = sfs.array(goods.map(sfs.object));
+  if (goods.length) {fields.goods = sfs.array(goods.map(sfs.object));}
 
-  if (equip.length) fields.equip = sfs.array(equip.map(sfs.object));
+  if (equip.length) {fields.equip = sfs.array(equip.map(sfs.object));}
 
   return validateFields(activityRewardSchema, fields);
 }

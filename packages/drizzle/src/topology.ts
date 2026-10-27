@@ -34,17 +34,17 @@ export function validateTopology(topology: DatabaseTopology): DatabaseTopology {
   validateName(topology.globalDatabase);
 
   if (!Array.isArray(topology.kingdoms) || topology.kingdoms.length === 0)
-    throw new Error("Configure at least one kingdom");
+    {throw new Error("Configure at least one kingdom");}
 
   const ids = new Set<number>(),
     names = new Set([topology.globalDatabase]);
   const kingdoms = topology.kingdoms.map(({ id, database }) => {
     if (!Number.isSafeInteger(id) || id < 1 || ids.has(id))
-      throw new Error("Kingdom IDs must be unique positive safe integers");
+      {throw new Error("Kingdom IDs must be unique positive safe integers");}
 
     validateName(database);
 
-    if (names.has(database)) throw new Error("Each kingdom requires a distinct physical database");
+    if (names.has(database)) {throw new Error("Each kingdom requires a distinct physical database");}
 
     ids.add(id);
     names.add(database);
@@ -61,7 +61,7 @@ export function validateTopology(topology: DatabaseTopology): DatabaseTopology {
 export function databasePoolConfig(config: PoolConfig, database: string): PoolConfig {
   validateName(database);
 
-  if (!config.connectionString) return { ...config, database };
+  if (!config.connectionString) {return { ...config, database };}
 
   let url: URL;
 
@@ -72,7 +72,7 @@ export function databasePoolConfig(config: PoolConfig, database: string): PoolCo
   }
 
   if (url.protocol !== "postgres:" && url.protocol !== "postgresql:")
-    throw new Error("Invalid PostgreSQL connection URL");
+    {throw new Error("Invalid PostgreSQL connection URL");}
 
   url.pathname = `/${database}`;
   url.searchParams.delete("database");

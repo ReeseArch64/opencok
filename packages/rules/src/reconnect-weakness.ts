@@ -29,16 +29,16 @@ export function reconnectWeaknessPlan(
   capacity: number,
   rules: Rules,
 ): ReconnectWeaknessPlan {
-  if (elapsed < 0n || previous < 0n) throw new Error("Invalid starvation interval");
+  if (elapsed < 0n || previous < 0n) {throw new Error("Invalid starvation interval");}
 
   const rule = rules.items.get("week_info");
 
   if (!rule || rule.k1 === undefined || rule.k2 === undefined)
-    throw new Error("Missing weakness rule");
+    {throw new Error("Missing weakness rule");}
 
   const interval = (int(rule.k1) * 1000) | 0;
 
-  if (interval <= 0) throw new Error("Invalid weakness interval");
+  if (interval <= 0) {throw new Error("Invalid weakness interval");}
 
   const duration = javaDecimal(String(previous + elapsed), 64);
   const iterations = Number(BigInt.asIntN(32, duration / BigInt(interval)));
@@ -46,7 +46,7 @@ export function reconnectWeaknessPlan(
   const ratio = Math.fround(Math.fround(int(rule.k2)) / 1000);
   const indexed = new Map(armies.map((row) => [String(row.armyId), { ...row }]));
 
-  if (indexed.size !== armies.length) throw new Error("Duplicate weakness army");
+  if (indexed.size !== armies.length) {throw new Error("Duplicate weakness army");}
 
   const active = javaListSort(
     javaHashMapOrder(indexed.keys()).flatMap((id) => {
@@ -58,7 +58,7 @@ export function reconnectWeaknessPlan(
     (left, right) => {
       const difference = (count(left, ["free", "defence"]) - count(right, ["free", "defence"])) | 0;
 
-      if (difference !== 0) return difference;
+      if (difference !== 0) {return difference;}
 
       const a = String(left.armyId),
         b = String(right.armyId);
@@ -68,7 +68,7 @@ export function reconnectWeaknessPlan(
   );
   const beds = new Map(weakness.map((row) => [String(row.armyId), { ...row }]));
 
-  if (beds.size !== weakness.length) throw new Error("Duplicate weakness record");
+  if (beds.size !== weakness.length) {throw new Error("Duplicate weakness record");}
 
   let available =
     (int(capacity) - weakness.reduce((sum, row) => (sum + int(row.weakness)) | 0, 0)) | 0;
@@ -97,7 +97,7 @@ export function reconnectWeaknessPlan(
         inserted.push(id);
       }
 
-      if (count(army, ["free", "defence", "pve", "march"]) <= 0) continue;
+      if (count(army, ["free", "defence", "pve", "march"]) <= 0) {continue;}
 
       const remove = (amount: number) => {
         const free = int(army.free),
@@ -109,7 +109,7 @@ export function reconnectWeaknessPlan(
         );
         army.free = nonnegative(free - removedFree);
 
-        if (removedDefence > 0) army.defence = nonnegative(defence - removedDefence);
+        if (removedDefence > 0) {army.defence = nonnegative(defence - removedDefence);}
       };
       let required = int(bed.marchWeakness);
       let present = count(army, ["free", "defence"]);
@@ -119,7 +119,7 @@ export function reconnectWeaknessPlan(
         bed.marchWeakness = nonnegative(int(bed.marchWeakness) - required);
         remove(required);
         changed = true;
-      } else required = 0;
+      } else {required = 0;}
 
       present = count(army, ["free", "defence"]);
 
@@ -130,7 +130,7 @@ export function reconnectWeaknessPlan(
         );
         let loss = Math.min(2147483647, Math.ceil(living * ratio));
 
-        if (loss > 0) changed = true;
+        if (loss > 0) {changed = true;}
 
         if (loss > present) {
           bed.marchWeakness = nonnegative(int(bed.marchWeakness) + ((loss - present) | 0));
@@ -155,7 +155,7 @@ export function reconnectWeaknessPlan(
       }
     }
 
-    if (!changed) break;
+    if (!changed) {break;}
   }
 
   return {

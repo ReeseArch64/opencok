@@ -30,8 +30,8 @@ test("castle actions retain native correlation and recovery commands remain inte
     { cityProgression: async () => ({ body: {}, pushes: [] }) },
   );
   for (const command of ["castle.ui.state", "castle.level.reward", "castle.share.reward"])
-    expect(
+    {expect(
       (await game.execute("owner", command, { _cok_: sfs.long(9007199254740993n) })).body._cok_,
-    ).toEqual(sfs.long(9007199254740993n));
+    ).toEqual(sfs.long(9007199254740993n));}
   await expect(game.execute("owner", "castle.event.init", {})).rejects.toThrow();
 });

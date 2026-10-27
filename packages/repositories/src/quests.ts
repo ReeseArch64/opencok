@@ -64,16 +64,16 @@ export async function readQuests(
       )
       .returning();
 
-    if (flushed) guild = flushed;
+    if (flushed) {guild = flushed;}
     else
-      [guild] = await tx
+      {[guild] = await tx
         .select()
         .from(alliance)
-        .where(eq(alliance.uid, text(profile, "allianceId")));
+        .where(eq(alliance.uid, text(profile, "allianceId")));}
   }
 
   if (story.length > 4096 || daily.length > 256 || legacy.length > 1024)
-    throw new Error("Oversized quest aggregate");
+    {throw new Error("Oversized quest aggregate");}
 
   return {
     legacy,
@@ -94,17 +94,17 @@ export async function writeQuests(
   before?: Pick<CityProgressionState, "tasks" | "quests">,
 ) {
   for (const message of write.mail ?? [])
-    await insertSystemMail(
+    {await insertSystemMail(
       tx,
       message,
       owner,
       message.uid.slice(0, 32),
       message.createTime,
       message.itemIdFlag ?? 1,
-    );
+    );}
 
   for (const rows of [write.tasks, write.story, write.daily])
-    for (const row of rows ?? []) {
+    {for (const row of rows ?? []) {
       if (
         row.uid !== owner ||
         ![0, 1, 2].includes(num(row, "state")) ||
@@ -112,8 +112,8 @@ export async function writeQuests(
         num(row, "num") < 0 ||
         num(row, "num") > 2147483647
       )
-        throw new Error("Invalid quest write");
-    }
+        {throw new Error("Invalid quest write");}
+    }}
 
   write = {
     ...write,
@@ -124,12 +124,12 @@ export async function writeQuests(
   };
 
   if (write.fresh)
-    await tx
+    {await tx
       .insert(sign_in)
       .values({ uid: owner, ...write.fresh })
-      .onConflictDoUpdate({ target: sign_in.uid, set: write.fresh });
+      .onConflictDoUpdate({ target: sign_in.uid, set: write.fresh });}
 
-  if (write.resetLegacy) await tx.delete(user_daily_task).where(eq(user_daily_task.uid, owner));
+  if (write.resetLegacy) {await tx.delete(user_daily_task).where(eq(user_daily_task.uid, owner));}
 
   const legacy = (write.legacy ?? []).map((row) => ({
     uid: owner,
@@ -139,28 +139,28 @@ export async function writeQuests(
   }));
 
   for (let offset = 0; offset < legacy.length; offset += questBatchSize)
-    await tx
+    {await tx
       .insert(user_daily_task)
       .values(legacy.slice(offset, offset + questBatchSize))
       .onConflictDoUpdate({
         target: [user_daily_task.uid, user_daily_task.id],
         set: { num: sql`excluded.num`, times: sql`excluded.times` },
-      });
+      });}
 
   if (write.legacyPeriod !== undefined)
-    await tx
+    {await tx
       .insert(user_lord)
       .values({ uid: owner, dailyTaskFlushTime: write.legacyPeriod })
       .onConflictDoUpdate({
         target: user_lord.uid,
         set: { dailyTaskFlushTime: write.legacyPeriod },
-      });
+      });}
 
   if (write.dailyClaims !== undefined)
-    await tx
+    {await tx
       .insert(user_mixed_info)
       .values({ uid: owner, mdata: "", dailyTaskId: write.dailyClaims })
-      .onConflictDoUpdate({ target: user_mixed_info.uid, set: { dailyTaskId: write.dailyClaims } });
+      .onConflictDoUpdate({ target: user_mixed_info.uid, set: { dailyTaskId: write.dailyClaims } });}
 
   if (write.allianceBox) {
     const [profile] = await tx
@@ -177,7 +177,7 @@ export async function writeQuests(
       BigInt(guild.taskFlushTime ?? 0) / 86400000n !== write.allianceBox.period ||
       (guild.taskNum ?? 0) < write.allianceBox.threshold
     )
-      throw new Error("Stale alliance quest period");
+      {throw new Error("Stale alliance quest period");}
 
     const limits = new Map(
       (guild.taskLimit ?? "")
@@ -191,7 +191,7 @@ export async function writeQuests(
     );
     const count = limits.get(write.allianceBox.threshold) ?? 0;
 
-    if (count >= (guild.maxMember ?? 0)) throw new Error("Alliance quest box limit reached");
+    if (count >= (guild.maxMember ?? 0)) {throw new Error("Alliance quest box limit reached");}
 
     limits.set(write.allianceBox.threshold, count + 1);
     await tx
@@ -209,13 +209,13 @@ export async function writeQuests(
   }));
 
   for (let offset = 0; offset < tasks.length; offset += questBatchSize)
-    await tx
+    {await tx
       .insert(user_task)
       .values(tasks.slice(offset, offset + questBatchSize))
       .onConflictDoUpdate({
         target: [user_task.uid, user_task.id],
         set: { type: sql`excluded.type`, state: sql`excluded.state`, num: sql`excluded.num` },
-      });
+      });}
 
   const story = (write.story ?? []).map((row) => ({
     uid: owner,
@@ -226,16 +226,16 @@ export async function writeQuests(
   }));
 
   for (let offset = 0; offset < story.length; offset += questBatchSize)
-    await tx
+    {await tx
       .insert(user_story_task)
       .values(story.slice(offset, offset + questBatchSize))
       .onConflictDoUpdate({
         target: [user_story_task.uid, user_story_task.id],
         set: { type: sql`excluded.type`, state: sql`excluded.state`, num: sql`excluded.num` },
-      });
+      });}
 
   if (write.resetDaily)
-    await tx.delete(user_new_daily_task).where(eq(user_new_daily_task.uid, owner));
+    {await tx.delete(user_new_daily_task).where(eq(user_new_daily_task.uid, owner));}
 
   const daily = (write.daily ?? []).map((row) => ({
     uid: owner,
@@ -246,41 +246,41 @@ export async function writeQuests(
   }));
 
   for (let offset = 0; offset < daily.length; offset += questBatchSize)
-    await tx
+    {await tx
       .insert(user_new_daily_task)
       .values(daily.slice(offset, offset + questBatchSize))
       .onConflictDoUpdate({
         target: [user_new_daily_task.uid, user_new_daily_task.id, user_new_daily_task.type],
         set: { state: sql`excluded.state`, num: sql`excluded.num` },
-      });
+      });}
 
   if (write.lord)
-    await tx
+    {await tx
       .insert(user_lord)
       .values({ uid: owner, ...write.lord })
-      .onConflictDoUpdate({ target: user_lord.uid, set: write.lord });
+      .onConflictDoUpdate({ target: user_lord.uid, set: write.lord });}
 
   if (write.signIn)
-    await tx
+    {await tx
       .insert(user_14day_login)
       .values({ uid: owner, type: 1, ...write.signIn })
       .onConflictDoUpdate({
         target: [user_14day_login.uid, user_14day_login.type],
         set: write.signIn,
-      });
+      });}
 
   if (write.taskStage !== undefined)
-    await tx
+    {await tx
       .insert(user_mixed_info)
       .values({ uid: owner, mdata: "", taskStage: write.taskStage })
-      .onConflictDoUpdate({ target: user_mixed_info.uid, set: { taskStage: write.taskStage } });
+      .onConflictDoUpdate({ target: user_mixed_info.uid, set: { taskStage: write.taskStage } });}
 
   if (write.allianceTasks) {
     const rows = await tx.execute(
       sql`UPDATE opencok_kingdom.alliance SET "taskNum" = COALESCE("taskNum",0) + ${write.allianceTasks} WHERE uid = (SELECT "allianceId" FROM opencok_kingdom.userprofile WHERE uid = ${owner}) RETURNING uid`,
     );
 
-    if (rows.rowCount !== 1) throw new Error("Missing quest alliance");
+    if (rows.rowCount !== 1) {throw new Error("Missing quest alliance");}
   }
 }
 
@@ -289,7 +289,7 @@ export function changedQuestRows(
   before: readonly Row[] = [],
   daily = false,
 ): readonly Row[] | undefined {
-  if (!rows) return;
+  if (!rows) {return;}
 
   const key = (row: Row) => JSON.stringify([String(row.id), daily ? num(row, "type") : 0]);
   const previous = new Map(before.map((row) => [key(row), row]));

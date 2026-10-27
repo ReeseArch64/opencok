@@ -19,10 +19,10 @@ export async function expeditionScoreVersion(tx: GlobalTransaction, authority: R
     (owner.ownerEpoch > authority.epoch ||
       (owner.ownerEpoch === authority.epoch && owner.instanceId !== authority.instance))
   )
-    throw new Error("Stale global expedition publisher");
+    {throw new Error("Stale global expedition publisher");}
 
   if (!owner)
-    [owner] = await tx
+    {[owner] = await tx
       .insert(expedition_score_owner)
       .values({
         kingdomId: authority.kingdomId,
@@ -30,13 +30,13 @@ export async function expeditionScoreVersion(tx: GlobalTransaction, authority: R
         instanceId: authority.instance,
         sequence: 0n,
       })
-      .returning();
+      .returning();}
   else if (owner.ownerEpoch < authority.epoch)
-    [owner] = await tx
+    {[owner] = await tx
       .update(expedition_score_owner)
       .set({ ownerEpoch: authority.epoch, instanceId: authority.instance, sequence: 0n })
       .where(eq(expedition_score_owner.kingdomId, authority.kingdomId))
-      .returning();
+      .returning();}
 
   const [version] = await tx
     .update(expedition_score_owner)
@@ -44,7 +44,7 @@ export async function expeditionScoreVersion(tx: GlobalTransaction, authority: R
     .where(eq(expedition_score_owner.kingdomId, authority.kingdomId))
     .returning();
 
-  if (!version) throw new Error("Missing expedition publisher version");
+  if (!version) {throw new Error("Missing expedition publisher version");}
 
   return version;
 }

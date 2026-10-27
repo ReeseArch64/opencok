@@ -14,14 +14,14 @@ export function monsterExchangeConfig(row: Rule): MonsterExchangeConfig {
     interval = cityAmount(Math.trunc(Math.fround(Math.fround(Number(row.refresh)) * 1000))),
     costs = (row.refresh_cost ?? "").split(";").map((value) => cityInteger(value));
 
-  if (!/^\d{1,12}$/.test(token) || interval <= 10000n || costs.length > 64) campaignFailure();
+  if (!/^\d{1,12}$/.test(token) || interval <= 10000n || costs.length > 64) {campaignFailure();}
 
   const gears = Array.from({ length: levels }, (_, index) => {
     const choices = (row[`gear${index + 1}`] ?? "").split("|").map((entry) => {
       const parts = entry.split(";");
 
       if (parts.length < 3 || parts.length > 4 || !/^\d{1,12}$/.test(parts[0] ?? ""))
-        campaignFailure();
+        {campaignFailure();}
 
       return {
         reward: parts[0]!,
@@ -35,7 +35,7 @@ export function monsterExchangeConfig(row: Rule): MonsterExchangeConfig {
       1,
     );
 
-    if (choices.length > 128) campaignFailure();
+    if (choices.length > 128) {campaignFailure();}
 
     return choices;
   });
@@ -56,24 +56,24 @@ export function selectMonsterExchangeOffers(
     let boundary = 0;
     const choice = gear.find((choice) => draw < (boundary += choice.weight));
 
-    if (!choice) campaignFailure();
+    if (!choice) {campaignFailure();}
 
     return { reward: choice.reward, count: choice.count, color: choice.color };
   });
 }
 
 export function readMonsterExchangeOffers(raw: string): readonly MonsterExchangeOffer[] {
-  if (!raw || raw.length > 1000) campaignFailure();
+  if (!raw || raw.length > 1000) {campaignFailure();}
 
   const rows = raw.split("|");
 
-  if (rows.length > 16) campaignFailure();
+  if (rows.length > 16) {campaignFailure();}
 
   return rows.map((row) => {
     const parts = row.split(";");
 
     if (parts.length < 2 || parts.length > 3 || !/^\d{1,12}$/.test(parts[0] ?? ""))
-      campaignFailure();
+      {campaignFailure();}
 
     return {
       reward: parts[0]!,
@@ -91,17 +91,17 @@ export function monsterExchangeOffersText(offers: readonly MonsterExchangeOffer[
 }
 
 export function monsterExchangeClaims(raw: string, length: number): readonly number[] {
-  if (raw.length > 40 || (raw && !/^\d+(?:,\d+)*$/.test(raw))) campaignFailure();
+  if (raw.length > 40 || (raw && !/^\d+(?:,\d+)*$/.test(raw))) {campaignFailure();}
 
   const values = raw ? raw.split(",").map((value) => cityInteger(value, 1, length)) : [];
 
-  if (new Set(values).size !== values.length) campaignFailure();
+  if (new Set(values).size !== values.length) {campaignFailure();}
 
   return values;
 }
 
 export function monsterExchangeHeader(config: MonsterExchangeHeader) {
-  if (!/^\d{1,12}$/.test(config.token) || config.interval <= 10000n) campaignFailure();
+  if (!/^\d{1,12}$/.test(config.token) || config.interval <= 10000n) {campaignFailure();}
 
   cityAmount(config.interval);
 
@@ -111,7 +111,7 @@ export function monsterExchangeHeader(config: MonsterExchangeHeader) {
 export function readMonsterExchangeHeader(raw: string): MonsterExchangeHeader {
   const match = /^monster-exchange:v1:(\d{1,12}):(\d{1,19})$/.exec(raw);
 
-  if (!match) campaignFailure();
+  if (!match) {campaignFailure();}
 
   const value = { token: match[1]!, interval: cityAmount(match[2]) };
   monsterExchangeHeader(value);
@@ -129,7 +129,7 @@ export function monsterExchangeBoundary(
   cityAmount(now);
 
   if (interval <= grace || interval <= 10000n || now < checkpoint + interval - grace)
-    campaignFailure();
+    {campaignFailure();}
 
   const first = checkpoint + interval - grace;
 

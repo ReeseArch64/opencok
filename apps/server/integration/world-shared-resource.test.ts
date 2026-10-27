@@ -44,7 +44,7 @@ async function harness(slots = 2) {
         .values({ uid: owner, worldId: 0, pointId: anchor, color: 1, lastCityDefTime: 0n });
       await h.db.db.insert(user_army).values({ uid: owner, armyId: "107000", level: 1, free: 100 });
       for (const id of worldFootprint(anchor, 1200))
-        await h.db.db.insert(worldpoint).values({
+        {await h.db.db.insert(worldpoint).values({
           id,
           worldId: 0,
           x: (id - 1) % 1200,
@@ -57,10 +57,10 @@ async function harness(slots = 2) {
           ownerId: owner,
           resLevel: 1,
           resInitValue: 0,
-        });
+        });}
     }
     for (const id of worldFootprint(6005, 1200))
-      await h.db.db.insert(worldpoint).values({
+      {await h.db.db.insert(worldpoint).values({
         id,
         worldId: 0,
         x: (id - 1) % 1200,
@@ -74,7 +74,7 @@ async function harness(slots = 2) {
         resInitValue: 40,
         resCostValue: 0,
         flushTime: 99999999n,
-      });
+      });}
     const start = (owner = "owner") =>
         h.command(
           "world.march",

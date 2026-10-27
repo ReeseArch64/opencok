@@ -19,7 +19,7 @@ export class DisposableAvatarStorage {
       new Response(child.stderr).text(),
       child.exited,
     ]);
-    if (status) throw new Error("Disposable avatar storage failed");
+    if (status) {throw new Error("Disposable avatar storage failed");}
     return output.trim();
   }
   async start() {
@@ -59,7 +59,7 @@ export class DisposableAvatarStorage {
       }
       await Bun.sleep(100);
     }
-    if (!ready) throw new Error("Disposable avatar storage readiness timed out");
+    if (!ready) {throw new Error("Disposable avatar storage readiness timed out");}
     const client = s3Client({
       endpoint,
       region: "us-east-1",
@@ -75,7 +75,7 @@ export class DisposableAvatarStorage {
   }
   async close() {
     this.clients.forEach((c) => c.destroy());
-    if (this.created) await this.docker(["rm", "--force", "--volumes", this.name]);
+    if (this.created) {await this.docker(["rm", "--force", "--volumes", this.name]);}
   }
   image() {
     return sharp({ create: { width: 4, height: 4, channels: 3, background: "blue" } })

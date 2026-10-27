@@ -38,7 +38,7 @@ export function logContext() {
 
 export function updateLogContext(fields: Fields) {
   const active = context.getStore();
-  if (active) Object.assign(active, fields);
+  if (active) {Object.assign(active, fields);}
 }
 
 export function withLogContext<A>(fields: Fields, run: () => A): A {
@@ -61,14 +61,14 @@ export function logEvent(event: string, fields: Fields = {}, level: Level = "inf
   const record = logger.emit({
     _durationMs: typeof fields.durationMs === "number" ? fields.durationMs : undefined,
   });
-  if (record) telemetry?.emit(record);
+  if (record) {telemetry?.emit(record);}
 }
 
 export async function logHttpRequest(
   request: Request,
   fetch: (request: Request) => Promise<Response> | Response,
 ) {
-  if (logContext().requestId) return fetch(request);
+  if (logContext().requestId) {return fetch(request);}
 
   const requestId = `req_${randomUUID().replaceAll("-", "")}`;
   const started = performance.now();
@@ -125,18 +125,18 @@ export function httpOperation(path: string) {
     "/_internal/characters",
   ]);
 
-  if (known.has(path)) return path;
+  if (known.has(path)) {return path;}
 
   if (/^\/_internal\/avatars\/[0-9]{1,20}\/[1-9][0-9]{0,5}$/.test(path))
-    return "avatar.confirmation";
+    {return "avatar.confirmation";}
 
-  if (/^\/cok\/img\/[0-9]{1,6}\/[a-f0-9]{32}\.jpg$/.test(path)) return "avatar.download";
+  if (/^\/cok\/img\/[0-9]{1,6}\/[a-f0-9]{32}\.jpg$/.test(path)) {return "avatar.download";}
 
   return "unknown";
 }
 
 function classifiedErrorReason(error: unknown): string {
-  if (!(error instanceof Error)) return "unexpected_failure";
+  if (!(error instanceof Error)) {return "unexpected_failure";}
 
   const code = "code" in error ? error.code : undefined;
   const reasons: Record<string, string> = {
@@ -162,10 +162,10 @@ function classifiedErrorReason(error: unknown): string {
     "57P01": "database_shutdown",
   };
 
-  if (typeof code === "string" && Object.hasOwn(reasons, code)) return reasons[code]!;
-  if (typeof code === "string" && /^(?:E[0-9]{6}|[0-9]{6})$/.test(code)) return code;
+  if (typeof code === "string" && Object.hasOwn(reasons, code)) {return reasons[code]!;}
+  if (typeof code === "string" && /^(?:E[0-9]{6}|[0-9]{6})$/.test(code)) {return code;}
 
-  if (error.name === "TimeoutError" || error.name === "AbortError") return "dependency_timeout";
+  if (error.name === "TimeoutError" || error.name === "AbortError") {return "dependency_timeout";}
 
   return "unexpected_failure";
 }
@@ -177,7 +177,7 @@ export function errorReason(error: unknown): string {
     seen.add(error);
     const reason = classifiedErrorReason(error);
 
-    if (reason !== "unexpected_failure") return reason;
+    if (reason !== "unexpected_failure") {return reason;}
 
     error = error.cause;
   }

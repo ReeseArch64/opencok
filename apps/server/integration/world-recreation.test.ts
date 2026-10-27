@@ -119,15 +119,15 @@ test("lost resident cities recreate once for free with native footprints, curren
     for (const event of (await h.db.db.select().from(mutation_outbox)).filter(
       (row) => row.eventType === "world.user.rcr",
     ))
-      await publishWorldMutation(
+      {await publishWorldMutation(
         event.payload,
         event.eventType,
         1,
         async () => ["owner"],
         async (_uid, command) => {
-          if (command === "push.world.mv") moved.push(command);
+          if (command === "push.world.mv") {moved.push(command);}
         },
-      );
+      );}
     expect(moved).toEqual(["push.world.mv"]);
   } finally {
     await h.close();

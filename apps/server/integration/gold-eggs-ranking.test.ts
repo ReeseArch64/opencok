@@ -42,7 +42,7 @@ test("two realms settle admitted factual rankings into owned pinned mails once, 
     await command1("goldeggs.info");
     await command2("goldeggs.info");
     await command1("goldeggs.smashing", { pos: sfs.int(0) });
-    for (const pos of [0, 1, 2, 0]) await command2("goldeggs.smashing", { pos: sfs.int(pos) });
+    for (const pos of [0, 1, 2, 0]) {await command2("goldeggs.smashing", { pos: sfs.int(pos) });}
     const period = goldEggsCalendar(one.rules, BigInt(now()))!;
     await one.db.db
       .insert(gold_eggs)
@@ -106,7 +106,7 @@ test("two realms settle admitted factual rankings into owned pinned mails once, 
     one.clock.now += 3600000;
     expect((await ranks.final(period))!.map((row) => row.kingdomId)).toEqual([2, 1]);
     await Promise.all([runtime1.refresh(), runtime1.refresh(), runtime2.refresh()]);
-    for (const h of [one, two]) expect(await h.db.db.select().from(mail)).toHaveLength(2);
+    for (const h of [one, two]) {expect(await h.db.db.select().from(mail)).toHaveLength(2);}
     const restarted = new GoldEggsRuntime(
       createGoldEggsRuntimeStore(one.db.db, a),
       ranks,

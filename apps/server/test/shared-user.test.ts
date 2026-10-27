@@ -71,7 +71,7 @@ test("shared-user serialization preserves the complete public snapshot and exact
     rank: sfs.int(5),
   });
   for (const key of ["gold", "vipScore", "serverId", "level"])
-    expect(Object.hasOwn(JSON.parse(update.body), key)).toBe(false);
+    {expect(Object.hasOwn(JSON.parse(update.body), key)).toBe(false);}
 });
 
 test("sparse profiles retain source omission/default rules and only reach active VIP catalogs", () => {
@@ -158,15 +158,15 @@ test("invalid cache publications fail before I/O and stale or uncertain Redis re
     { ...update, kingdomId: 0 },
     { ...update, body: "x".repeat(65536) },
   ])
-    await expect(
+    {await expect(
       publishSharedUser(async () => {
         calls++;
         return 1;
       }, value),
-    ).rejects.toThrow();
+    ).rejects.toThrow();}
   expect(calls).toBe(0);
   for (const result of [2, -1, null, "1", true])
-    await expect(publishSharedUser(async () => result, update)).rejects.toThrow();
+    {await expect(publishSharedUser(async () => result, update)).rejects.toThrow();}
   await publishSharedUser(async () => 0, update);
   await expect(
     new Cache({ redisUrl: "unused", timeoutMs: 100, kingdomId: 2 }).publishSharedUserInfo(update),

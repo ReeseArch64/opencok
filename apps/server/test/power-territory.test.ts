@@ -53,7 +53,7 @@ test("territory power uses only the player's placed alliance tree and does not m
   expect(territoryTreeEffects(profile, trees, rules)).toEqual(new Map([[487, 12]]));
   expect(trees).toEqual(before);
   for (const allianceId of ["", " ", "other-missing"])
-    expect(territoryTreeEffects({ allianceId }, trees, rules).size).toBe(0);
+    {expect(territoryTreeEffects({ allianceId }, trees, rules).size).toBe(0);}
   expect(() => territoryTreeEffects(profile, [tree, { ...tree, pointId: 20 }], rules)).toThrow();
 });
 
@@ -61,9 +61,9 @@ test("only building and complete trees contribute, independently of feature anno
   const rules = fixture();
   expect(rules.features.size).toBe(0);
   for (let stat = 0; stat <= 10; stat++)
-    expect(territoryTreeEffects(profile, [{ ...tree, stat }], rules).get(487)).toBe(
+    {expect(territoryTreeEffects(profile, [{ ...tree, stat }], rules).get(487)).toBe(
       stat === 1 || stat === 3 ? 12 : undefined,
-    );
+    );}
   rules.items.clear();
   expect(territoryTreeEffects(profile, [{ ...tree, stat: 5 }], rules).size).toBe(0);
 });
@@ -77,13 +77,13 @@ test("default-skin stages floor double bonuses and saturate signed integer limit
     [3, 12],
     [-1, 12],
   ])
-    expect(territoryTreeEffects(profile, [{ ...tree, level: level! }], rules).get(487)).toBe(
+    {expect(territoryTreeEffects(profile, [{ ...tree, level: level! }], rules).get(487)).toBe(
       expected,
-    );
+    );}
   rules.power.statuses!.get("c")!.effect = "487;-2147483649.5";
   expect(territoryTreeEffects(profile, [{ ...tree, level: 2 }], rules).get(487)).toBe(-2147483648);
   for (const activeSkin of [null, "", " "])
-    expect(territoryTreeEffects(profile, [{ ...tree, activeSkin }], rules).get(487)).toBe(12);
+    {expect(territoryTreeEffects(profile, [{ ...tree, activeSkin }], rules).get(487)).toBe(12);}
 });
 
 test("default control values include their ID and missing or blank status effects are ignored", () => {

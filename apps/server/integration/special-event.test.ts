@@ -47,8 +47,8 @@ async function fixture() {
     });
     const buyer = createSpecialEventBuyer({
       getKingdom: (id) => {
-        if (id === 1) return h.db;
-        if (id === 2) return second;
+        if (id === 1) {return h.db;}
+        if (id === 2) {return second;}
         throw new Error("Unknown synthetic realm");
       },
     });
@@ -130,7 +130,7 @@ async function fixture() {
       },
     };
   } catch (error) {
-    for (const close of closers.toReversed()) await close();
+    for (const close of closers.toReversed()) {await close();}
     throw error;
   }
 }

@@ -20,7 +20,7 @@ function steps<T>(
   value: string | undefined,
   decode: (parts: string[]) => T,
 ): BuildingStep<T>[] | undefined {
-  if (value === undefined) return undefined;
+  if (value === undefined) {return undefined;}
 
   return value
     .split("|")
@@ -39,7 +39,7 @@ export function importBuildingDefinition(
   const id = record.id === undefined ? fallbackId : Number(record.id);
 
   if (id === undefined || !Number.isSafeInteger(id))
-    throw new Error("Invalid building definition ID");
+    {throw new Error("Invalid building definition ID");}
 
   const level = Number(record.level);
   const buildingId = Math.floor(id / 1000) * 1000;
@@ -62,13 +62,13 @@ export function importBuildingDefinition(
   const effect = (index: number, name: keyof BuildingEffects) => {
     const value = record["para" + (index + 1)];
 
-    if (value === undefined) return;
+    if (value === undefined) {return;}
 
     if (value.includes("|")) {
       const values = steps(value, (parts) => Number(parts[0]));
 
-      if (values) effectSteps[name] = values;
-    } else effects[name] = Number(value);
+      if (values) {effectSteps[name] = values;}
+    } else {effects[name] = Number(value);}
 
     parameters[index] = null;
   };
@@ -79,13 +79,13 @@ export function importBuildingDefinition(
     effect(1, "productionCapacity");
   }
 
-  if (buildingId === 404000) effect(3, "protectedFood");
+  if (buildingId === 404000) {effect(3, "protectedFood");}
 
-  if (buildingId === 427000) effect(0, "reinforcementCapacity");
+  if (buildingId === 427000) {effect(0, "reinforcementCapacity");}
 
-  if (buildingId === 407000) effect(0, "rallyCapacity");
+  if (buildingId === 407000) {effect(0, "rallyCapacity");}
 
-  if (buildingId === 441000) effect(0, "woundedKnightCapacity");
+  if (buildingId === 441000) {effect(0, "woundedKnightCapacity");}
 
   const item = (value: string) => {
     const [itemId, quantity] = value.split(";");

@@ -23,7 +23,7 @@ export class DiscoveryRedis {
         (async () => {
           await client.connect();
 
-          if ((await client.send("PING", [])) !== "PONG") throw new DependencyError("redis");
+          if ((await client.send("PING", [])) !== "PONG") {throw new DependencyError("redis");}
         })(),
         new Promise<never>((_, reject) => {
           timer = setTimeout(() => reject(new DependencyError("redis")), this.config.timeoutMs);

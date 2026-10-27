@@ -48,7 +48,7 @@ export function mailContentsQuery(value: string, now: number): MailContentsQuery
     !Number.isSafeInteger(now) ||
     now < 0
   )
-    return invalid();
+    {return invalid();}
 
   const ids = value.split("|").filter(Boolean);
 
@@ -57,7 +57,7 @@ export function mailContentsQuery(value: string, now: number): MailContentsQuery
     ids.length > 1000 ||
     ids.some((id) => id.length > 40 || id.includes("\0") || !id.isWellFormed())
   )
-    return invalid();
+    {return invalid();}
 
   return { ids: [...new Set(ids)], now };
 }
@@ -66,11 +66,11 @@ export function mailConversationSaveQuery(
   input: { mod: number; fromUser?: string; type?: number; flag?: number },
   now: number,
 ): MailConversationSaveQuery {
-  if (!int(input.mod) || !Number.isSafeInteger(now) || now < 0) return invalid();
+  if (!int(input.mod) || !Number.isSafeInteger(now) || now < 0) {return invalid();}
 
-  if (input.fromUser === undefined && input.type === undefined) return { scope: "none", now };
+  if (input.fromUser === undefined && input.type === undefined) {return { scope: "none", now };}
 
-  if (input.flag === undefined || !int(input.flag)) return invalid();
+  if (input.flag === undefined || !int(input.flag)) {return invalid();}
 
   if (input.fromUser !== undefined) {
     if (
@@ -79,7 +79,7 @@ export function mailConversationSaveQuery(
       input.fromUser.includes("\0") ||
       !input.fromUser.isWellFormed()
     )
-      return invalid();
+      {return invalid();}
 
     return {
       scope: "sender",
@@ -90,13 +90,13 @@ export function mailConversationSaveQuery(
     };
   }
 
-  if (input.type === undefined || !int(input.type)) return invalid();
+  if (input.type === undefined || !int(input.type)) {return invalid();}
 
   return { scope: "type", type: mailServerType(input.type), flag: input.flag, now };
 }
 
 export function mailServerType(type: number): number {
-  if (!int(type)) return invalid();
+  if (!int(type)) {return invalid();}
 
   const types = new Map([
     [0, 21],
@@ -111,7 +111,7 @@ export function mailServerType(type: number): number {
 }
 
 export function mailBlank(value: string | null | undefined): boolean {
-  if (value == null) return true;
+  if (value == null) {return true;}
 
   return Array.from(value).every((character) => {
     const code = character.charCodeAt(0);
@@ -141,9 +141,9 @@ export function mailBatchQuery(
     now < 0 ||
     (fromUser !== null && typeof fromUser !== "string")
   )
-    throw new GameError(errors.invalid, "mail");
+    {throw new GameError(errors.invalid, "mail");}
 
-  if (type === 10 || type === 1000) throw new GameError(errors.invalid, "mail");
+  if (type === 10 || type === 1000) {throw new GameError(errors.invalid, "mail");}
 
   const kinds = new Map<number, MailBatchKind>([
     [2, "notices"],
@@ -158,9 +158,9 @@ export function mailBatchQuery(
   ]);
   const kind = kinds.get(type) ?? "empty";
 
-  if (kind === "empty") return { kind, begin: 0, limit: 0, fromUser: null, now };
+  if (kind === "empty") {return { kind, begin: 0, limit: 0, fromUser: null, now };}
 
-  if (limit < 0) throw new GameError(errors.invalid, "mail");
+  if (limit < 0) {throw new GameError(errors.invalid, "mail");}
 
   const sender = kind === "personal" || kind === "moderation";
 
@@ -171,7 +171,7 @@ export function mailBatchQuery(
       fromUser!.includes("\0") ||
       !fromUser!.isWellFormed())
   )
-    throw new GameError(errors.invalid, "mail");
+    {throw new GameError(errors.invalid, "mail");}
 
   return { kind, begin: Math.max(0, begin), limit, fromUser: sender ? fromUser : null, now };
 }
@@ -187,7 +187,7 @@ export function mailCategoryQuery(
   now: number,
 ): MailCategoryQuery {
   if (![category, begin, offset].every(int) || !Number.isSafeInteger(now) || now < 0)
-    return invalid();
+    {return invalid();}
 
   return { category, begin, offset, now };
 }
@@ -195,7 +195,7 @@ export function mailCategoryQuery(
 export function mailCategoryWindow(query: MailCategoryQuery): number | undefined {
   mailCategoryQuery(query.category, query.begin, query.offset, query.now);
 
-  if (!categories[query.category - 1]) return undefined;
+  if (!categories[query.category - 1]) {return undefined;}
 
   return query.begin > 0 ? 0 : Math.max(0, (query.begin + query.offset) | 0);
 }
@@ -207,12 +207,12 @@ export function selectMailCategory<T extends Pick<MailListEntry, "type" | "title
   const limit = mailCategoryWindow(query);
 
   if (limit === undefined) {
-    if (window.length) return invalid();
+    if (window.length) {return invalid();}
 
     return [];
   }
 
-  if (window.length > limit || window.length > 1000) return invalid();
+  if (window.length > limit || window.length > 1000) {return invalid();}
 
   const types = categories[query.category - 1]!;
 
@@ -256,22 +256,22 @@ export function mailTranslationRequest(
   translationId: string | null,
   lang: string | null,
 ): { id: string; fromLang: string; toLang: string } | undefined {
-  if (lang === null || mailBlank(translationId)) return undefined;
+  if (lang === null || mailBlank(translationId)) {return undefined;}
 
   const [fromLang, id] = translationId!.split("|").filter(Boolean);
 
-  if (mailBlank(fromLang) || mailBlank(id)) return undefined;
+  if (mailBlank(fromLang) || mailBlank(id)) {return undefined;}
 
   const lower = lang.toLowerCase();
   let target = lang;
 
-  if (["cn", "zh-chs", "zh_cn", "zh-cn"].includes(lower)) target = "zh-Hans";
-  else if (["zh-cht", "tw", "zh_tw"].includes(lower)) target = "zh-Hant";
-  else if (["id", "in"].includes(lower)) target = "ms";
-  else if (lower === "jp") target = "ja";
-  else if (lang === "en_gb") target = "en";
-  else if (lang === "fr_fr") target = "fr";
-  else if (lang === "it_it") target = "it";
+  if (["cn", "zh-chs", "zh_cn", "zh-cn"].includes(lower)) {target = "zh-Hans";}
+  else if (["zh-cht", "tw", "zh_tw"].includes(lower)) {target = "zh-Hant";}
+  else if (["id", "in"].includes(lower)) {target = "ms";}
+  else if (lower === "jp") {target = "ja";}
+  else if (lang === "en_gb") {target = "en";}
+  else if (lang === "fr_fr") {target = "fr";}
+  else if (lang === "it_it") {target = "it";}
 
   const allowed = [
     "en",
@@ -292,7 +292,7 @@ export function mailTranslationRequest(
 }
 
 function mailIds(value: string, batch: boolean): string[] {
-  if (typeof value !== "string" || new TextEncoder().encode(value).length > 65535) return invalid();
+  if (typeof value !== "string" || new TextEncoder().encode(value).length > 65535) {return invalid();}
 
   const blank = mailBlank(value);
   const parts = batch ? (blank ? [] : value.split(",").filter(Boolean)) : [value];
@@ -301,21 +301,21 @@ function mailIds(value: string, batch: boolean): string[] {
     parts.length > 1000 ||
     parts.some((id) => id.length > 40 || id.includes("\0") || !id.isWellFormed())
   )
-    return invalid();
+    {return invalid();}
 
   return [...new Set(parts)];
 }
 
 export function mailReadQuery(batch: boolean, value: string, now: number): MailReadQuery {
-  if (typeof batch !== "boolean" || !Number.isSafeInteger(now) || now < 0) return invalid();
+  if (typeof batch !== "boolean" || !Number.isSafeInteger(now) || now < 0) {return invalid();}
 
   return { batch, ids: mailIds(value, batch), now };
 }
 
 export function mailDeleteQuery(value: string, now: number): MailDeleteQuery {
-  if (!Number.isSafeInteger(now) || now < 0) return invalid();
+  if (!Number.isSafeInteger(now) || now < 0) {return invalid();}
 
-  if (typeof value !== "string" || new TextEncoder().encode(value).length > 65535) return invalid();
+  if (typeof value !== "string" || new TextEncoder().encode(value).length > 65535) {return invalid();}
 
   const ids = value.split(",").filter(Boolean);
 
@@ -323,7 +323,7 @@ export function mailDeleteQuery(value: string, now: number): MailDeleteQuery {
     ids.length > 1000 ||
     ids.some((id) => id.length > 40 || id.includes("\0") || !id.isWellFormed())
   )
-    return invalid();
+    {return invalid();}
 
   return { ids: [...new Set(ids)], now };
 }
@@ -337,26 +337,26 @@ export function mailDeleteGroups(
     let group: MailDeleteGroup | undefined;
 
     if ([2, 11, 12, 17, 25, 26, 27, 28, 29, 33, 34].includes(entry.type))
-      group = { groupType: entry.type, groupIndex: entry.uid, types: [] };
+      {group = { groupType: entry.type, groupIndex: entry.uid, types: [] };}
     else if ([20, 21, 22].includes(entry.type) && entry.fromUser !== null)
-      group = {
+      {group = {
         groupType: 100,
         groupIndex: entry.fromUser,
         fromUser: entry.fromUser,
         types: [20, 21, 22],
-      };
+      };}
     else if ([23, 24, 39, 40].includes(entry.type) && entry.fromUser !== null)
-      group = {
+      {group = {
         groupType: 500,
         groupIndex: entry.fromUser,
         fromUser: entry.fromUser,
         types: [23, 24],
-      };
-    else if (entry.type === 5) group = { groupType: 200, groupIndex: "", types: [5] };
-    else if (entry.type === 10) group = { groupType: 400, groupIndex: "", types: [10] };
-    else if (entry.type === 18) group = { groupType: 300, groupIndex: "", types: [18] };
+      };}
+    else if (entry.type === 5) {group = { groupType: 200, groupIndex: "", types: [5] };}
+    else if (entry.type === 10) {group = { groupType: 400, groupIndex: "", types: [10] };}
+    else if (entry.type === 18) {group = { groupType: 300, groupIndex: "", types: [18] };}
 
-    if (group) groups.set(JSON.stringify([group.groupType, group.groupIndex]), group);
+    if (group) {groups.set(JSON.stringify([group.groupType, group.groupIndex]), group);}
   }
 
   return [...groups.values()];
@@ -374,7 +374,7 @@ export function mailSaveQuery(
     !Number.isSafeInteger(now) ||
     now < 0
   )
-    return invalid();
+    {return invalid();}
 
   return {
     mode,
@@ -385,7 +385,7 @@ export function mailSaveQuery(
 }
 
 export function mailStatusQuery(category: number | undefined, now: number): MailStatusQuery {
-  if ((category !== undefined && !int(category)) || !Number.isSafeInteger(now)) return invalid();
+  if ((category !== undefined && !int(category)) || !Number.isSafeInteger(now)) {return invalid();}
 
   return { category, now };
 }
@@ -395,9 +395,9 @@ export function calculateMailStatus(
   counts: readonly MailStatusCount[],
 ): MailStatusResult {
   if (query.category !== undefined && (query.category < 1 || query.category > 8))
-    return { mode: "unknown" };
+    {return { mode: "unknown" };}
 
-  if (counts.length > 32767) return invalid();
+  if (counts.length > 32767) {return invalid();}
 
   const totals = Array.from({ length: 8 }, () => ({ total: 0n, unread: 0n }));
   const selected = query.category === undefined ? undefined : categories[query.category - 1]!;
@@ -412,11 +412,11 @@ export function calculateMailStatus(
       group.count < 1n ||
       group.count > 9223372036854775807n
     )
-      return invalid();
+      {return invalid();}
 
     const key = `${group.type}:${group.status}:${group.allianceNotice}`;
 
-    if (seen.has(key)) return invalid();
+    if (seen.has(key)) {return invalid();}
 
     seen.add(key);
     const index = selected
@@ -427,27 +427,27 @@ export function calculateMailStatus(
         ? 4
         : combinedCategories.get(group.type);
 
-    if (index === undefined) continue;
+    if (index === undefined) {continue;}
 
     if (group.status !== 0 && group.status !== 1) {
-      if (!selected) return invalid();
+      if (!selected) {return invalid();}
 
       continue;
     }
 
     totals[index]!.total += group.count;
 
-    if (group.status === 0) totals[index]!.unread += group.count;
+    if (group.status === 0) {totals[index]!.unread += group.count;}
   }
 
   if (query.category === undefined)
-    return {
+    {return {
       mode: "all",
       categories: totals.map(({ total, unread }) => ({
         total: Number(BigInt.asIntN(32, total)),
         unread: Number(BigInt.asIntN(32, unread)),
       })),
-    };
+    };}
 
   const { total, unread } = totals[query.category - 1]!;
 

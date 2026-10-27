@@ -24,7 +24,7 @@ test("equipment crafting pins results, consumes once, completes, equips, and dis
       h.effects,
       () => h.clock.now,
     );
-    for (const id of ["201060", "201070"]) await inventory.grant("owner", randomUUID(), id, 2);
+    for (const id of ["201060", "201070"]) {await inventory.grant("owner", randomUUID(), id, 2);}
     const request = {
       itemId: sfs.string("1001010"),
       tools: sfs.array([sfs.int(201060), sfs.int(201070)]),

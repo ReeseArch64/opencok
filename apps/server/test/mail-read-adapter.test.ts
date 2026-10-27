@@ -31,22 +31,22 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
       const text = statement.text;
       queries.push({ text, params });
       if (text.startsWith("begin"))
-        before = {
+        {before = {
           entries: structuredClone(entries),
           markers: new Map(markers),
           openings: new Map(openings),
-        };
+        };}
       if (text === "rollback" && before) {
         entries = before.entries;
         markers = before.markers;
         openings = before.openings;
       }
       if (text.includes('from "opencok_kingdom"."userprofile"')) {
-        if (options.fail === "profile") throw new Error("Synthetic profile failure");
+        if (options.fail === "profile") {throw new Error("Synthetic profile failure");}
         return { rows: options.profile === null ? [] : [options.profile ?? ["self", 1, "0", 0]] };
       }
       if (text.startsWith('update "opencok_kingdom"."mail"')) {
-        if (options.fail === "mail") throw new Error("Synthetic mail failure");
+        if (options.fail === "mail") {throw new Error("Synthetic mail failure");}
         const [status, owner, ...ids] = params;
         const selected = entries.filter(
           (entry) =>
@@ -54,11 +54,11 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
             ids.includes(entry.uid) &&
             (!text.includes("coalesce") || (entry.status ?? 0) === 0),
         );
-        for (const entry of selected) entry.status = status as number;
+        for (const entry of selected) {entry.status = status as number;}
         return { rows: selected.map((entry) => [entry.uid, entry.type, String(entry.time)]) };
       }
       if (text.startsWith('insert into "opencok_kingdom"."mail_update"')) {
-        if (options.fail === "marker") throw new Error("Synthetic marker failure");
+        if (options.fail === "marker") {throw new Error("Synthetic marker failure");}
         for (let i = 0; i < params.length; i += 3) {
           const key = `${params[i]}:${params[i + 1]}`;
           const time = BigInt(params[i + 2] as string);
@@ -67,14 +67,14 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
         }
       }
       if (text.startsWith('insert into "opencok_kingdom"."mail_gift_opening"')) {
-        if (options.fail === "opening") throw new Error("Synthetic opening failure");
+        if (options.fail === "opening") {throw new Error("Synthetic opening failure");}
         for (let i = 0; i < params.length; i += 4) {
           const key = `${params[i]}:${params[i + 1]}`;
-          if (!openings.has(key)) openings.set(key, params.slice(i, i + 4));
+          if (!openings.has(key)) {openings.set(key, params.slice(i, i + 4));}
         }
       }
       if (text === "commit" && options.fail === "commit")
-        throw new Error("Synthetic commit failure");
+        {throw new Error("Synthetic commit failure");}
       return { rows: [] };
     },
   };
@@ -108,7 +108,7 @@ test("single read transitions only unread owned messages and atomically enqueues
   expect(queries[4]?.text).toContain('on conflict ("mailUid","sendTime") do nothing');
   expect(queries.at(-1)?.text).toBe("commit");
   for (const id of ["gift", "read", "odd", "foreign", "missing", ""])
-    await markMailRead(db, 1, "self", mailReadQuery(false, id, now + 1));
+    {await markMailRead(db, 1, "self", mailReadQuery(false, id, now + 1));}
   expect(state().openings.size).toBe(1);
   expect(state().markers.size).toBe(1);
   expect(state().entries.find((entry) => entry.uid === "odd")?.status).toBe(-1);
@@ -184,9 +184,9 @@ test("direct mutation callers cannot bypass ID, owner, realm or query bounds", (
   const { db, queries } = database();
   const query = mailReadQuery(false, "gift", now);
   for (const owner of ["", " ", "x".repeat(41), "\0", "\ud800"])
-    expect(() => markMailRead(db, 1, owner, query)).toThrow();
+    {expect(() => markMailRead(db, 1, owner, query)).toThrow();}
   for (const realm of [0, 1.5, 2147483648])
-    expect(() => markMailRead(db, realm, "self", query)).toThrow();
+    {expect(() => markMailRead(db, realm, "self", query)).toThrow();}
   for (const patch of [
     { now: -1 },
     { now: NaN },
@@ -197,6 +197,6 @@ test("direct mutation callers cannot bypass ID, owner, realm or query bounds", (
     { ids: ["\ud800"] },
     { ids: ["x".repeat(41)] },
   ])
-    expect(() => markMailRead(db, 1, "self", { ...query, ...patch } as typeof query)).toThrow();
+    {expect(() => markMailRead(db, 1, "self", { ...query, ...patch } as typeof query)).toThrow();}
   expect(queries).toEqual([]);
 });

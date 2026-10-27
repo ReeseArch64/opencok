@@ -45,7 +45,7 @@ export function createExpeditionStageRegistry(
       period.opponent === period.kingdomId ||
       now < period.endTime + 300000n
     )
-      throw new Error("Invalid expedition closure authority");
+      {throw new Error("Invalid expedition closure authority");}
 
     await tx.execute(sql`set local lock_timeout='1s'`);
     await tx.execute(sql`set local statement_timeout='3s'`);
@@ -63,7 +63,7 @@ export function createExpeditionStageRegistry(
       mark.scoreCount !== long(closure, "scoreCount") ||
       mark.total !== num(closure, "total")
     )
-      throw new Error("Conflicting expedition stage proof");
+      {throw new Error("Conflicting expedition stage proof");}
 
     return mark;
   };
@@ -80,7 +80,7 @@ export function createExpeditionStageRegistry(
             .where(eq(expedition_calendar.id, period.periodId))
             .limit(1);
 
-          if (!calendar) return false;
+          if (!calendar) {return false;}
 
           const phase = expeditionCalendarPhases(calendar).find(
             (item) => item.stage === period.stage,
@@ -91,7 +91,7 @@ export function createExpeditionStageRegistry(
             phase.endTime !== period.endTime ||
             calendar.endTime !== period.activityEnd
           )
-            throw new Error("Conflicting expedition finality schedule");
+            {throw new Error("Conflicting expedition finality schedule");}
 
           const cohort = await tx
             .select()
@@ -135,7 +135,7 @@ export function createExpeditionStageRegistry(
           phase.endTime !== period.endTime ||
           calendar.endTime !== period.activityEnd
         )
-          throw new Error("Unverified expedition stage schedule");
+          {throw new Error("Unverified expedition stage schedule");}
 
         const cohort = await tx
           .select()
@@ -157,7 +157,7 @@ export function createExpeditionStageRegistry(
           own.opponent !== other.kingdomId ||
           other.opponent !== own.kingdomId
         )
-          throw new Error("Unverified expedition finality cohort");
+          {throw new Error("Unverified expedition finality cohort");}
 
         const value = {
           periodId: period.periodId,
@@ -181,7 +181,7 @@ export function createExpeditionStageRegistry(
           saved.startTime !== value.startTime ||
           saved.endTime !== value.endTime
         )
-          throw new Error("Conflicting expedition finality period");
+          {throw new Error("Conflicting expedition finality period");}
 
         const [prior] = await tx.select().from(marks).where(markKey(period)).for("update");
 
@@ -191,7 +191,7 @@ export function createExpeditionStageRegistry(
           return;
         }
 
-        if (saved.state !== 0) throw new Error("Final expedition proof is immutable");
+        if (saved.state !== 0) {throw new Error("Final expedition proof is immutable");}
 
         await tx.insert(marks).values({
           periodId: period.periodId,
@@ -213,12 +213,12 @@ export function createExpeditionStageRegistry(
         const version = await lock(tx, period, now),
           mark = await pinned(tx, period, closure);
 
-        if (rows.length > 64) throw new Error("Expedition sealed upload bound exceeded");
+        if (rows.length > 64) {throw new Error("Expedition sealed upload bound exceeded");}
 
-        if (mark.state === 1) return;
+        if (mark.state === 1) {return;}
 
         for (const row of rows)
-          if (
+          {if (
             row.periodId !== period.periodId ||
             row.stage !== period.stage ||
             row.kingdomId !== authority.kingdomId ||
@@ -227,7 +227,7 @@ export function createExpeditionStageRegistry(
             !Number.isFinite(row.score) ||
             row.score < 0
           )
-            throw new Error("Invalid sealed expedition member");
+            {throw new Error("Invalid sealed expedition member");}}
 
         if (rows.length) {
           const written = await tx
@@ -254,7 +254,7 @@ export function createExpeditionStageRegistry(
             })
             .returning({ member: scores.member });
 
-          if (written.length !== rows.length) throw new Error("Foreign expedition sealed member");
+          if (written.length !== rows.length) {throw new Error("Foreign expedition sealed member");}
         }
 
         authority.assertReady();
@@ -265,7 +265,7 @@ export function createExpeditionStageRegistry(
         await lock(tx, period, now);
         const mark = await pinned(tx, period, closure);
 
-        if (mark.state === 1) return true;
+        if (mark.state === 1) {return true;}
 
         const result = await tx.execute<{ count: string; digest: string; total: number }>(
           sql`select count(*)::text as count,md5(coalesce(string_agg(length(member)::text||':'||member||':'||length("allianceId")::text||':'||"allianceId"||':'||encode(float8send(score),'hex'),'|' order by member collate "C"),'')) as digest,coalesce(sum(score order by member collate "C"),0)::float8 as total from ${scores} where "periodId"=${period.periodId} and stage=${period.stage} and "kingdomId"=${authority.kingdomId}`,
@@ -296,9 +296,9 @@ export function createExpeditionStageRegistry(
         );
         const [saved] = await tx.select().from(periods).where(periodKey(period)).for("update");
 
-        if (!saved) throw new Error("Missing expedition finality period");
+        if (!saved) {throw new Error("Missing expedition finality period");}
 
-        if (saved.state === 1) return saved.winner;
+        if (saved.state === 1) {return saved.winner;}
 
         const proofs = await tx
           .select()
@@ -322,7 +322,7 @@ export function createExpeditionStageRegistry(
           own.opponent !== other.kingdomId ||
           other.opponent !== own.kingdomId
         )
-          return;
+          {return;}
 
         const winner = own.total > other.total ? saved.leader : saved.opponent;
         const top = await tx

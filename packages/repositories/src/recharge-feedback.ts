@@ -14,9 +14,9 @@ export function rechargeFeedbackReader(
 ): RechargeFeedbackReader {
   return {
     async counts(start, end, prices) {
-      if (!prices.length) return new Map();
+      if (!prices.length) {return new Map();}
 
-      if (prices.length > 1024) throw new Error("Too many feedback price classes");
+      if (prices.length > 1024) {throw new Error("Too many feedback price classes");}
 
       const rows = await tx
         .select({ spend: paylog.spend, count: sql<string>`count(*)` })
@@ -54,13 +54,13 @@ export function rechargeFeedbackReader(
         )
         .limit(1025);
 
-      if (rows.length > 1024) throw new Error("Too many feedback claims");
+      if (rows.length > 1024) {throw new Error("Too many feedback claims");}
 
       return rows;
     },
     async payment(orderId, platform) {
       if (!orderId || orderId.length > 200 || !platform || platform.length > 20)
-        throw new Error("Invalid feedback order selection");
+        {throw new Error("Invalid feedback order selection");}
 
       return (
         await tx
@@ -78,11 +78,11 @@ export async function writeRechargeFeedback(
   claims: readonly RechargeFeedbackClaim[],
   now: bigint,
 ) {
-  if (claims.length > 1024) throw new Error("Too many feedback claim writes");
+  if (claims.length > 1024) {throw new Error("Too many feedback claim writes");}
 
   for (const claim of claims) {
     if (!claim.id || claim.id.length > 40 || claim.endTime < claim.startTime)
-      throw new Error("Invalid feedback claim");
+      {throw new Error("Invalid feedback claim");}
 
     await tx.insert(recharge_feedback_claim).values({
       uid: owner,

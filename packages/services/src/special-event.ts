@@ -27,12 +27,12 @@ export class SpecialEventPurchaseService {
       period = specialEventWindow(this.rules, { kingdomId: kingdom, version: "12.06.0", now: at }),
       product = specialEventProducts(this.rules).find((row) => row.id === exchangeId);
 
-    if (!period || !product || !this.buyer) throw new Error("Special event purchase unavailable");
+    if (!period || !product || !this.buyer) {throw new Error("Special event purchase unavailable");}
 
     const previous = await this.buyer.purchaseTime({ owner, kingdomId: kingdom, exchangeId });
 
     if (previous !== null && previous / 86400000n === BigInt(at) / 86400000n)
-      throw new Error("Special event daily limit reached");
+      {throw new Error("Special event daily limit reached");}
 
     return this.stock.reserve(
       {
@@ -51,7 +51,7 @@ export class SpecialEventPurchaseService {
     const reservation = await this.stock.find(eventId);
 
     if (!reservation || !this.gateway || num(reservation, "state") === 2)
-      throw new Error("Special event payment unavailable");
+      {throw new Error("Special event payment unavailable");}
 
     const proof = await this.gateway.accepted({
       eventId,
@@ -61,7 +61,7 @@ export class SpecialEventPurchaseService {
     });
 
     if (!proof || proof.at > BigInt(this.now()))
-      throw new Error("Unverified special event purchase");
+      {throw new Error("Unverified special event purchase");}
 
     return this.stock.confirm(eventId, proof.at);
   }
@@ -92,7 +92,7 @@ export class SpecialEventDomain extends CityCommandDomain {
           now: Number(context.now),
         });
 
-        if (!period) return { response: encode({}), event: null };
+        if (!period) {return { response: encode({}), event: null };}
 
         const products = specialEventProducts(context.rules, true),
           counts = await stock.counts(
@@ -117,7 +117,7 @@ export class SpecialEventDomain extends CityCommandDomain {
         num(proof, "kingdomId") !== context.rules.kingdomId ||
         long(proof, "purchaseTime") > context.now
       )
-        throw new Error("Unverified special event delivery");
+        {throw new Error("Unverified special event delivery");}
 
       context.write.specialEventPurchase = {
         uid: context.owner,

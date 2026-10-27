@@ -38,7 +38,7 @@ test("XML admission rejects entities, external tilesets, unsupported encodings a
     xml.replace('width="5"', 'width="4001"'),
     xml.replace('value="space"', 'value="space" value="stop"'),
   ])
-    expect(() => parse(invalid)).toThrow();
+    {expect(() => parse(invalid)).toThrow();}
   expect(() => parseWorldTerrain(new Uint8Array([0xff]))).toThrow();
   expect(() => parseWorldTerrain(new Uint8Array())).toThrow();
 });

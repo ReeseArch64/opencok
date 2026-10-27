@@ -23,22 +23,22 @@ export async function resolveMailPresentation(
   const requests = new Map<string, { id: string; fromLang: string; toLang: string }>();
 
   if (chat && enabled)
-    for (const entry of entries) {
-      if (entry.type !== 22 && entry.type !== 24) continue;
+    {for (const entry of entries) {
+      if (entry.type !== 22 && entry.type !== 24) {continue;}
 
       const sender = entry.fromUser === null ? undefined : senders.get(entry.fromUser);
       const request = mailTranslationRequest(entry.translationId, sender ? sender.lang : "");
 
-      if (request) requests.set(entry.uid, request);
-    }
+      if (request) {requests.set(entry.uid, request);}
+    }}
 
   const lookups = new Map<string, MailTranslationLookup>();
 
   for (const request of requests.values())
-    lookups.set(JSON.stringify([request.id, request.toLang]), {
+    {lookups.set(JSON.stringify([request.id, request.toLang]), {
       id: request.id,
       language: request.toLang,
-    });
+    });}
 
   const translated = lookups.size ? await readers.translations([...lookups.values()]) : [];
   const stored = new Map<string, string>();
@@ -46,7 +46,7 @@ export async function resolveMailPresentation(
   for (const row of translated) {
     const key = JSON.stringify([row.id, row.language]);
 
-    if (!lookups.has(key) || stored.has(key)) throw new GameError(errors.invalid);
+    if (!lookups.has(key) || stored.has(key)) {throw new GameError(errors.invalid);}
 
     stored.set(key, storedMailText(row.contents, false));
   }
@@ -57,7 +57,7 @@ export async function resolveMailPresentation(
     const translatedText = stored.get(JSON.stringify([request.id, request.toLang]));
 
     if (!mailBlank(translatedText))
-      translations.set(id, { originalLang: request.fromLang, translationMsg: translatedText! });
+      {translations.set(id, { originalLang: request.fromLang, translationMsg: translatedText! });}
   }
 
   const recipientUpdateTime = chat && entries.length ? await updateTime() : "";

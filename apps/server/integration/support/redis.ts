@@ -11,7 +11,7 @@ export class DisposableRedis {
       new Response(child.stderr).text(),
       child.exited,
     ]);
-    if (code) throw new Error(`Disposable Redis ${args[0]} failed (exit ${code})`);
+    if (code) {throw new Error(`Disposable Redis ${args[0]} failed (exit ${code})`);}
     return output.trim();
   }
   async start(): Promise<string> {
@@ -31,7 +31,7 @@ export class DisposableRedis {
     const cache = new Cache({ redisUrl: url, timeoutMs: 500, kingdomId: 1 });
     for (let attempt = 0; attempt < 50; attempt++) {
       try {
-        if ((await cache.command("PING")) === "PONG") return url;
+        if ((await cache.command("PING")) === "PONG") {return url;}
       } catch {}
       await Bun.sleep(100);
     }

@@ -46,17 +46,17 @@ function fixture() {
   const messages: MessageStore = {
     async create(input) {
       writes.push(input);
-      if (failure) throw failure;
+      if (failure) {throw failure;}
       return writeResult;
     },
     async getAll(...args) {
       reads.push(["recent", ...args]);
-      if (failure) throw failure;
+      if (failure) {throw failure;}
       return history;
     },
     async getAllByRange(...args) {
       reads.push(["range", ...args]);
-      if (failure) throw failure;
+      if (failure) {throw failure;}
       return history;
     },
   };
@@ -264,7 +264,7 @@ test("a failed peer push does not suppress later peers or turn a committed send 
   const owner = app.peer("owner", ["country_1"]);
   const broken = app.peer("broken", ["country_1"]);
   const healthy = app.peer("healthy", ["country_1"]);
-  for (const uid of ["broken", "healthy"]) app.states.set(uid, state());
+  for (const uid of ["broken", "healthy"]) {app.states.set(uid, state());}
   broken.context.sendFrame = () => {
     throw new Error("synthetic disconnected peer");
   };

@@ -18,7 +18,7 @@ import type { Database } from "./game";
 
 function validate(period: CostRankingPeriod) {
   if (period.id !== costRankingPeriodId(period.startTime, period.endTime, period.type))
-    throw new Error("Invalid consumption ranking identity");
+    {throw new Error("Invalid consumption ranking identity");}
 
   costRankingBands(period.rewards);
   const census = [...new Set(period.expectedRealms.map((id) => cityInteger(id, 1)))].toSorted(
@@ -30,7 +30,7 @@ function validate(period: CostRankingPeriod) {
     census.length > 128 ||
     census.join("|") !== period.expectedRealms.join("|")
   )
-    throw new Error("Invalid consumption ranking census");
+    {throw new Error("Invalid consumption ranking census");}
 }
 
 function read(row: typeof periods.$inferSelect): CostRankingPeriod {
@@ -66,7 +66,7 @@ export function createCostRankingRegistry(
       cityAmount(now);
 
       if (!period.expectedRealms.includes(authority.kingdomId))
-        throw new Error("Unconfigured consumption ranking realm");
+        {throw new Error("Unconfigured consumption ranking realm");}
 
       return db.transaction(async (tx) => {
         await tx.execute(sql`set local lock_timeout='1s'`);
@@ -85,7 +85,7 @@ export function createCostRankingRegistry(
           saved.rewards !== period.rewards ||
           saved.expectedRealms !== period.expectedRealms.join("|")
         )
-          throw new Error("Conflicting consumption ranking period");
+          {throw new Error("Conflicting consumption ranking period");}
 
         authority.assertReady();
 
@@ -95,7 +95,7 @@ export function createCostRankingRegistry(
     async get(id) {
       authority.assertReady();
 
-      if (!/^[a-f0-9]{32}$/.test(id)) throw new Error("Invalid consumption period lookup");
+      if (!/^[a-f0-9]{32}$/.test(id)) {throw new Error("Invalid consumption period lookup");}
 
       const [saved] = await db.select().from(periods).where(eq(periods.id, id)).limit(1);
 
@@ -110,7 +110,7 @@ export function createCostRankingRegistry(
           await tx.execute(sql`set local statement_timeout='3s'`);
           const [period] = await tx.select().from(periods).where(eq(periods.id, id)).limit(1);
 
-          if (!period) return;
+          if (!period) {return;}
 
           const definition = read(period),
             rows = await tx
@@ -149,7 +149,7 @@ export async function writeCostRankingSnapshot(
     rows.length > 100 ||
     new Set(rows.map((row) => row.uid)).size !== rows.length
   )
-    throw new Error("Invalid consumption ranking snapshot");
+    {throw new Error("Invalid consumption ranking snapshot");}
 
   for (const row of rows) {
     if (
@@ -162,7 +162,7 @@ export async function writeCostRankingSnapshot(
       row.lastAt >= period.endTime ||
       Buffer.byteLength(row.metadata) > 8192
     )
-      throw new Error("Invalid confirmed consumption score");
+      {throw new Error("Invalid confirmed consumption score");}
 
     costRankingEntry({ ...row, kingdomId: authority.kingdomId, type: period.type }, 1);
   }
@@ -182,10 +182,10 @@ export async function writeCostRankingSnapshot(
       (owner.ownerEpoch > authority.epoch ||
         (owner.ownerEpoch === authority.epoch && owner.instanceId !== authority.instance))
     )
-      throw new Error("Stale consumption ranking publisher");
+      {throw new Error("Stale consumption ranking publisher");}
 
     if (!owner)
-      [owner] = await tx
+      {[owner] = await tx
         .insert(owners)
         .values({
           kingdomId: authority.kingdomId,
@@ -193,13 +193,13 @@ export async function writeCostRankingSnapshot(
           instanceId: authority.instance,
           sequence: 0n,
         })
-        .returning();
+        .returning();}
     else if (owner.ownerEpoch < authority.epoch)
-      [owner] = await tx
+      {[owner] = await tx
         .update(owners)
         .set({ ownerEpoch: authority.epoch, instanceId: authority.instance, sequence: 0n })
         .where(eq(owners.kingdomId, authority.kingdomId))
-        .returning();
+        .returning();}
 
     const [version] = await tx
       .update(owners)
@@ -207,7 +207,7 @@ export async function writeCostRankingSnapshot(
       .where(eq(owners.kingdomId, authority.kingdomId))
       .returning();
 
-    if (!version) throw new Error("Missing consumption ranking owner");
+    if (!version) {throw new Error("Missing consumption ranking owner");}
 
     const [saved] = await tx.select().from(periods).where(eq(periods.id, period.id)).for("update");
 
@@ -216,7 +216,7 @@ export async function writeCostRankingSnapshot(
       saved.expectedRealms !== period.expectedRealms.join("|") ||
       saved.rewards !== period.rewards
     )
-      throw new Error("Unregistered consumption ranking snapshot");
+      {throw new Error("Unregistered consumption ranking snapshot");}
 
     const [mark] = await tx
       .select()
@@ -230,19 +230,19 @@ export async function writeCostRankingSnapshot(
         proof.digest !== costScoreDigest(rows) ||
         (mark && (mark.digest !== proof.digest || mark.scoreCount !== proof.scoreCount)))
     )
-      throw new Error("Conflicting consumption ranking proof");
+      {throw new Error("Conflicting consumption ranking proof");}
 
     if (proof && saved.state === 1 && !mark)
-      throw new Error("Missing finalized consumption ranking proof");
+      {throw new Error("Missing finalized consumption ranking proof");}
 
     const recordProof = async () => {
       if (proof && !mark)
-        await tx.insert(marks).values({
+        {await tx.insert(marks).values({
           periodId: period.id,
           kingdomId: authority.kingdomId,
           ...proof,
           completedAt: now,
-        });
+        });}
     };
     const existing = await tx
       .select()
@@ -260,7 +260,7 @@ export async function writeCostRankingSnapshot(
       }
 
       if (saved.state === 1)
-        throw new Error("Final consumption proof differs from its shared economic rows");
+        {throw new Error("Final consumption proof differs from its shared economic rows");}
     }
 
     const frozen = saved.state === 1 || (mark !== undefined && !proof);
@@ -298,7 +298,7 @@ export async function writeCostRankingSnapshot(
     }
 
     if (!frozen)
-      await tx.delete(scores).where(
+      {await tx.delete(scores).where(
         and(
           eq(scores.periodId, period.id),
           eq(scores.kingdomId, authority.kingdomId),
@@ -309,7 +309,7 @@ export async function writeCostRankingSnapshot(
               )
             : undefined,
         ),
-      );
+      );}
 
     if (accepted.length) {
       const changed = await tx
@@ -341,7 +341,7 @@ export async function writeCostRankingSnapshot(
         .returning({ uid: scores.uid });
 
       if (changed.length !== accepted.length)
-        throw new Error("Foreign or stale consumption ranking member");
+        {throw new Error("Foreign or stale consumption ranking member");}
     }
 
     await tx

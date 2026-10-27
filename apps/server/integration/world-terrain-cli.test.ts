@@ -54,7 +54,7 @@ test("real CLI refuses a live ZooKeeper owner without stealing its epoch and res
     expect((await h.run([], { size: 4 })).code).toBe(1);
     expect(await h.db.db.select().from(worldpoint)).toHaveLength(25);
   } finally {
-    if (owner.ready) owner.close();
+    if (owner.ready) {owner.close();}
     await h.close();
   }
 }, 180000);

@@ -25,25 +25,25 @@ function database(options: { profile?: unknown[] | null; fail?: string } = {}) {
     query: async (statement: { text: string }, params: unknown[] = []) => {
       const text = statement.text;
       queries.push({ text, params });
-      if (text.startsWith("begin")) before = rows.map((row) => ({ ...row }));
-      if (text === "rollback") rows = before;
+      if (text.startsWith("begin")) {before = rows.map((row) => ({ ...row }));}
+      if (text === "rollback") {rows = before;}
       if (text.includes('from "opencok_kingdom"."userprofile"')) {
-        if (options.fail === "profile") throw new Error("Synthetic profile failure");
+        if (options.fail === "profile") {throw new Error("Synthetic profile failure");}
         return { rows: options.profile === null ? [] : [options.profile ?? ["self", 1, "0", 0]] };
       }
       if (text.startsWith('update "opencok_kingdom"."mail"')) {
-        if (options.fail === "update") throw new Error("Synthetic update failure");
+        if (options.fail === "update") {throw new Error("Synthetic update failure");}
         const [flag, owner, selection, ...types] = params;
         const sender = text.includes('"mail"."fromUser" =');
         for (const row of rows)
-          if (
+          {if (
             row.owner === owner &&
             (sender ? row.from === selection && types.includes(row.type) : row.type === selection)
           )
-            row.saved = flag as number;
+            {row.saved = flag as number;}}
       }
       if (text === "commit" && options.fail === "commit")
-        throw new Error("Synthetic commit failure");
+        {throw new Error("Synthetic commit failure");}
       return { rows: [] };
     },
   };
@@ -91,7 +91,7 @@ test("type saving reaches every sender for the exact mapped type and preserves r
     mailConversationSaveQuery({ mod: 1, type: 14, flag: 2147483647 }, now),
   );
   for (const row of rows())
-    expect(row.saved).toBe(row.owner === "self" && row.type === 12 ? 2147483647 : null);
+    {expect(row.saved).toBe(row.owner === "self" && row.type === 12 ? 2147483647 : null);}
   expect(queries[2]?.params).toEqual([2147483647, "self", 12]);
   expect(queries[2]?.text).not.toContain("fromUser");
   await saveMailConversation(
@@ -174,9 +174,9 @@ test("direct conversation-save callers cannot bypass owner, realm or selector va
   const { db, queries } = database();
   const query = mailConversationSaveQuery({ mod: 0, fromUser: "sender", flag: 1 }, now);
   for (const owner of ["", " ", "\0", "\ud800", "x".repeat(41)])
-    expect(() => saveMailConversation(db, 1, owner, query)).toThrow();
+    {expect(() => saveMailConversation(db, 1, owner, query)).toThrow();}
   for (const realm of [0, 1.5, 2147483648])
-    expect(() => saveMailConversation(db, realm, "self", query)).toThrow();
+    {expect(() => saveMailConversation(db, realm, "self", query)).toThrow();}
   for (const patch of [
     { now: -1 },
     { now: NaN },
@@ -187,8 +187,8 @@ test("direct conversation-save callers cannot bypass owner, realm or selector va
     { fromUser: "x".repeat(41) },
     { moderation: 1 },
   ])
-    expect(() =>
+    {expect(() =>
       saveMailConversation(db, 1, "self", { ...query, ...patch } as typeof query),
-    ).toThrow();
+    ).toThrow();}
   expect(queries).toEqual([]);
 });

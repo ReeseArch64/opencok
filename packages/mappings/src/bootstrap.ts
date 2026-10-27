@@ -51,12 +51,12 @@ function serializeFeatureConfig(rules: Rules, context: FeatureContext): Fields {
   return {
     funcOn: sfs.array(
       [...(rules.configuration.featureRecords ?? rules.features.values())].map((rule) => {
-        if (typeof rule.id !== "string") throw new GameError(errors.unsupported, "config_string");
+        if (typeof rule.id !== "string") {throw new GameError(errors.unsupported, "config_string");}
 
         const enabled = featureAnnouncementEnabled(rule, rules, context);
 
         if (typeof rule.pf !== "string" || typeof rule.version !== "string")
-          throw new GameError(errors.unsupported, "config_string");
+          {throw new GameError(errors.unsupported, "config_string");}
 
         return sfs.object({
           funcKey: sfs.string(rule.id!),
@@ -99,14 +99,14 @@ function serializePushPreferences(rows: readonly Row[]) {
   );
 
   if (rows.length < PUSH_SETTING_COUNT)
-    for (let type = 0; type < PUSH_SETTING_COUNT; type++)
-      if (!present.has(type))
-        pushSettings.push(
+    {for (let type = 0; type < PUSH_SETTING_COUNT; type++)
+      {if (!present.has(type))
+        {pushSettings.push(
           sfs.object({
             type: sfs.int(type),
             status: sfs.int(type === WORLD_NEWS_PUSH_TYPE ? 0 : 1),
           }),
-        );
+        );}}}
 
   return sfs.array(pushSettings);
 }
@@ -157,11 +157,11 @@ function serializeArmySnapshot(row: Row, rules: Rules): Fields {
   const id = text(row, "armyId");
   const rule = rules.arms.get(id);
 
-  if (!rule) throw new GameError(errors.unsupported);
+  if (!rule) {throw new GameError(errors.unsupported);}
 
   const out: Fields = { id: sfs.string(id) };
 
-  for (const key of ["free", "march", "level"]) out[key] = sfs.int(num(row, key));
+  for (const key of ["free", "march", "level"]) {out[key] = sfs.int(num(row, key));}
 
   if (num(row, "train")) {
     out.train = sfs.int(num(row, "train"));
@@ -188,7 +188,7 @@ function serializeArmySnapshot(row: Row, rules: Rules): Fields {
     "mix_numtype",
     "unlock_civi_science",
   ])
-    if (rule[key] !== undefined) out[key] = sfs.int(Math.trunc(Number(rule[key])));
+    {if (rule[key] !== undefined) {out[key] = sfs.int(Math.trunc(Number(rule[key])));}}
 
   out.attack = sfs.int(
     Math.trunc(Math.fround(Number(rule.attack)) + num(row, "level") * Number(rule.attack_add)),
@@ -200,7 +200,7 @@ function serializeArmySnapshot(row: Row, rules: Rules): Fields {
   out.power = { type: Type.Float, value: Number(rule.power) };
   out.new_arms ??= sfs.int(0);
 
-  if (rule.science) out.science = sfs.string(rule.science);
+  if (rule.science) {out.science = sfs.string(rule.science);}
 
   return out;
 }
@@ -208,7 +208,7 @@ function serializeArmySnapshot(row: Row, rules: Rules): Fields {
 function serializeInventoryItem(row: Row, rules: Rules): Fields {
   const rule = rules.goods.get(text(row, "itemId").trim());
 
-  if (!rule) throw new GameError(errors.unsupported);
+  if (!rule) {throw new GameError(errors.unsupported);}
 
   const out: Fields = {
     uuid: sfs.string(text(row, "uuid")),
@@ -218,7 +218,7 @@ function serializeInventoryItem(row: Row, rules: Rules): Fields {
   };
 
   for (let i = 1; i < 10; i++)
-    if (rule[`para${i}`]) out[`para${i}`] = sfs.string(rule[`para${i}`]!);
+    {if (rule[`para${i}`]) {out[`para${i}`] = sfs.string(rule[`para${i}`]!);}}
 
   return out;
 }
