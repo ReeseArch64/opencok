@@ -96,6 +96,7 @@ export async function readWorldMutationState(
     castle?.pointId ?? 0,
     ...marches.flatMap((row) => [row.ownerId, row.targetId]),
     int(params, "point", 0),
+    command === "create.boss" ? int(params, "pointIndex", 0) : 0,
     command === "totem" ? 0 : int(params, "pointId", 0),
   ])
     if (point > 0) for (const id of worldCityCandidates(point, size)) ids.add(id);
