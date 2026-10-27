@@ -82,6 +82,7 @@ import { user_glory_info } from "@opencok/drizzle/schema/opencok_kingdom/user_gl
 import { building_production } from "@opencok/drizzle/schema/opencok_kingdom/building_production";
 import type {
   CityProgressionStore,
+  CityProgressionState,
   CityProgressionWrite,
 } from "@opencok/contracts/city-progression";
 import type { ActivityEconomy } from "@opencok/contracts/timed-activity";
@@ -107,6 +108,7 @@ export function createCityProgressionStore(
   authority?: RealmAuthority,
 ): CityProgressionStore {
   let alliance = "";
+  let questBefore: Pick<CityProgressionState, "tasks" | "quests"> | undefined;
   let cosmeticTarget: Awaited<ReturnType<typeof readCosmeticTarget>>;
 
   return {
@@ -231,6 +233,9 @@ export function createCityProgressionStore(
         command === "civilizationCastle"
           ? await readWorldMutationState(tx, owner, request, mapSize, command)
           : undefined;
+
+      const quests = await readQuests(tx, owner, profile, now);
+      questBefore = structuredClone({ tasks, quests });
 
       return {
         militaryAward:
@@ -398,7 +403,7 @@ export function createCityProgressionStore(
         generalRoster: await readGeneralRoster(tx, owner, command, ranking),
         abilityPages: await readAbilityPages(tx, owner),
         suitDecompositions: await readSuitDecompositions(tx, owner),
-        quests: await readQuests(tx, owner, profile, now),
+        quests,
         statistics: statistics ?? {},
         buildingExperience: buildingExperience ?? {},
         buildings,
@@ -593,7 +598,7 @@ export function createCityProgressionStore(
 
         await writeEquipment(tx, owner, write);
 
-        if (write.quests) await writeQuests(tx, owner, write.quests);
+        if (write.quests) await writeQuests(tx, owner, write.quests, questBefore);
 
         for (const row of write.buildings ?? []) {
           const value = {

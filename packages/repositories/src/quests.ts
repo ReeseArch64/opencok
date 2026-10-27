@@ -9,9 +9,15 @@ import { user_lord } from "@opencok/drizzle/schema/opencok_kingdom/user_lord";
 import { user_mixed_info } from "@opencok/drizzle/schema/opencok_kingdom/user_mixed_info";
 import { user_14day_login } from "@opencok/drizzle/schema/opencok_kingdom/user_14day_login";
 import { alliance } from "@opencok/drizzle/schema/opencok_kingdom/alliance";
-import type { QuestState, QuestWrite } from "@opencok/contracts/city-progression";
+import type {
+  CityProgressionState,
+  QuestState,
+  QuestWrite,
+} from "@opencok/contracts/city-progression";
 import { text, num, type Row } from "@opencok/contracts/rows";
 import type { MutationTransaction } from "./mutation";
+
+const questBatchSize = 256;
 
 export async function readQuests(
   tx: MutationTransaction,
@@ -81,7 +87,12 @@ export async function readQuests(
   };
 }
 
-export async function writeQuests(tx: MutationTransaction, owner: string, write: QuestWrite) {
+export async function writeQuests(
+  tx: MutationTransaction,
+  owner: string,
+  write: QuestWrite,
+  before?: Pick<CityProgressionState, "tasks" | "quests">,
+) {
   for (const message of write.mail ?? [])
     await insertSystemMail(
       tx,
@@ -104,6 +115,14 @@ export async function writeQuests(tx: MutationTransaction, owner: string, write:
         throw new Error("Invalid quest write");
     }
 
+  write = {
+    ...write,
+    tasks: changedQuestRows(write.tasks, before?.tasks),
+    story: changedQuestRows(write.story, before?.quests?.story),
+    daily: changedQuestRows(write.daily, write.resetDaily ? [] : before?.quests?.daily, true),
+    legacy: changedQuestRows(write.legacy, write.resetLegacy ? [] : before?.quests?.legacy),
+  };
+
   if (write.fresh)
     await tx
       .insert(sign_in)
@@ -112,18 +131,21 @@ export async function writeQuests(tx: MutationTransaction, owner: string, write:
 
   if (write.resetLegacy) await tx.delete(user_daily_task).where(eq(user_daily_task.uid, owner));
 
-  for (const row of write.legacy ?? []) {
-    const value = {
-      uid: owner,
-      id: text(row, "id"),
-      num: num(row, "num"),
-      times: num(row, "times"),
-    };
+  const legacy = (write.legacy ?? []).map((row) => ({
+    uid: owner,
+    id: text(row, "id"),
+    num: num(row, "num"),
+    times: num(row, "times"),
+  }));
+
+  for (let offset = 0; offset < legacy.length; offset += questBatchSize)
     await tx
       .insert(user_daily_task)
-      .values(value)
-      .onConflictDoUpdate({ target: [user_daily_task.uid, user_daily_task.id], set: value });
-  }
+      .values(legacy.slice(offset, offset + questBatchSize))
+      .onConflictDoUpdate({
+        target: [user_daily_task.uid, user_daily_task.id],
+        set: { num: sql`excluded.num`, times: sql`excluded.times` },
+      });
 
   if (write.legacyPeriod !== undefined)
     await tx
@@ -178,53 +200,59 @@ export async function writeQuests(tx: MutationTransaction, owner: string, write:
       .where(eq(alliance.uid, guild.uid));
   }
 
-  for (const row of write.tasks ?? []) {
-    const value = {
-      uid: owner,
-      id: text(row, "id"),
-      type: num(row, "type"),
-      state: num(row, "state"),
-      num: num(row, "num"),
-    };
+  const tasks = (write.tasks ?? []).map((row) => ({
+    uid: owner,
+    id: text(row, "id"),
+    type: num(row, "type"),
+    state: num(row, "state"),
+    num: num(row, "num"),
+  }));
+
+  for (let offset = 0; offset < tasks.length; offset += questBatchSize)
     await tx
       .insert(user_task)
-      .values(value)
-      .onConflictDoUpdate({ target: [user_task.uid, user_task.id], set: value });
-  }
+      .values(tasks.slice(offset, offset + questBatchSize))
+      .onConflictDoUpdate({
+        target: [user_task.uid, user_task.id],
+        set: { type: sql`excluded.type`, state: sql`excluded.state`, num: sql`excluded.num` },
+      });
 
-  for (const row of write.story ?? []) {
-    const value = {
-      uid: owner,
-      id: num(row, "id"),
-      type: num(row, "type"),
-      state: num(row, "state"),
-      num: num(row, "num"),
-    };
+  const story = (write.story ?? []).map((row) => ({
+    uid: owner,
+    id: num(row, "id"),
+    type: num(row, "type"),
+    state: num(row, "state"),
+    num: num(row, "num"),
+  }));
+
+  for (let offset = 0; offset < story.length; offset += questBatchSize)
     await tx
       .insert(user_story_task)
-      .values(value)
-      .onConflictDoUpdate({ target: [user_story_task.uid, user_story_task.id], set: value });
-  }
+      .values(story.slice(offset, offset + questBatchSize))
+      .onConflictDoUpdate({
+        target: [user_story_task.uid, user_story_task.id],
+        set: { type: sql`excluded.type`, state: sql`excluded.state`, num: sql`excluded.num` },
+      });
 
   if (write.resetDaily)
     await tx.delete(user_new_daily_task).where(eq(user_new_daily_task.uid, owner));
 
-  for (const row of write.daily ?? []) {
-    const value = {
-      uid: owner,
-      id: num(row, "id"),
-      type: num(row, "type"),
-      state: num(row, "state"),
-      num: num(row, "num"),
-    };
+  const daily = (write.daily ?? []).map((row) => ({
+    uid: owner,
+    id: num(row, "id"),
+    type: num(row, "type"),
+    state: num(row, "state"),
+    num: num(row, "num"),
+  }));
+
+  for (let offset = 0; offset < daily.length; offset += questBatchSize)
     await tx
       .insert(user_new_daily_task)
-      .values(value)
+      .values(daily.slice(offset, offset + questBatchSize))
       .onConflictDoUpdate({
         target: [user_new_daily_task.uid, user_new_daily_task.id, user_new_daily_task.type],
-        set: value,
+        set: { state: sql`excluded.state`, num: sql`excluded.num` },
       });
-  }
 
   if (write.lord)
     await tx
@@ -254,4 +282,27 @@ export async function writeQuests(tx: MutationTransaction, owner: string, write:
 
     if (rows.rowCount !== 1) throw new Error("Missing quest alliance");
   }
+}
+
+export function changedQuestRows(
+  rows: readonly Row[] | undefined,
+  before: readonly Row[] = [],
+  daily = false,
+): readonly Row[] | undefined {
+  if (!rows) return;
+
+  const key = (row: Row) => JSON.stringify([String(row.id), daily ? num(row, "type") : 0]);
+  const previous = new Map(before.map((row) => [key(row), row]));
+  const unique = new Map(rows.map((row) => [key(row), row]));
+
+  return [...unique.values()].filter((row) => {
+    const old = previous.get(key(row));
+
+    return (
+      !old ||
+      ["uid", "type", "state", "num", "times"].some((field) =>
+        field === "uid" ? old[field] !== row[field] : num(old, field) !== num(row, field),
+      )
+    );
+  });
 }

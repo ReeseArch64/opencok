@@ -304,44 +304,53 @@ export class GameService {
     return (await this.initialize(uid)).body;
   }
 
-  async initialize(uid: string, correlation: Fields = {}): Promise<Result> {
+  async initialize(uid: string, correlation: Fields = {}, signal?: AbortSignal): Promise<Result> {
+    signal?.throwIfAborted();
+
+    const cityProgression = async (owner: string, command: string, params: Fields) => {
+      signal?.throwIfAborted();
+
+      const result = await this.services.cityProgression?.(owner, command, params);
+      signal?.throwIfAborted();
+
+      return result;
+    };
     const businessMan = await this.services.hotItemBusinessMan?.();
-    const eggActivity = await this.services.cityProgression?.(uid, "egg.activity.init", {});
-    const normalRecharge = await this.services.cityProgression?.(uid, "normal.recharge.init", {});
-    const comeback = await this.services.cityProgression?.(uid, "comeback.init", {});
-    const prayer = await this.services.cityProgression?.(uid, "prayer.init", {});
-    const recallTasks = await this.services.cityProgression?.(uid, "recall.task.init", {});
-    const regionalRecall = await this.services.cityProgression?.(uid, "region.recall.init", {});
-    const hearts = await this.services.cityProgression?.(uid, "heart.init", {});
-    const gifts = await this.services.cityProgression?.(uid, "gift.init", {});
-    const worldRecovery = await this.services.cityProgression?.(uid, "world.tick", {});
-    const treasureMaps = await this.services.cityProgression?.(uid, "treasuremap.init", {});
+    const eggActivity = await cityProgression(uid, "egg.activity.init", {});
+    const normalRecharge = await cityProgression(uid, "normal.recharge.init", {});
+    const comeback = await cityProgression(uid, "comeback.init", {});
+    const prayer = await cityProgression(uid, "prayer.init", {});
+    const recallTasks = await cityProgression(uid, "recall.task.init", {});
+    const regionalRecall = await cityProgression(uid, "region.recall.init", {});
+    const hearts = await cityProgression(uid, "heart.init", {});
+    const gifts = await cityProgression(uid, "gift.init", {});
+    const worldRecovery = await cityProgression(uid, "world.tick", {});
+    const treasureMaps = await cityProgression(uid, "treasuremap.init", {});
+    signal?.throwIfAborted();
     await this.services.reconcileAlliance?.(uid);
+    signal?.throwIfAborted();
     await this.services.reconcileTimed?.(uid);
-    const effects = await this.services.cityProgression?.(uid, "effects.init", {});
-    const quest = await this.services.cityProgression?.(uid, "quest.init", {});
-    const equipment = await this.services.cityProgression?.(uid, "equipment.init", {});
-    const generals = await this.services.cityProgression?.(uid, "general.init", {});
-    const dragons = await this.services.cityProgression?.(uid, "dragon.init", {});
-    const civilization = await this.services.cityProgression?.(
-      uid,
-      "civilization.science.data.init",
-      {},
-    );
-    const dragonTower = await this.services.cityProgression?.(uid, "dragontower.init", {});
-    const vipBox = await this.services.cityProgression?.(uid, "vip.box.init", {});
-    const targets = await this.services.cityProgression?.(uid, "target.init", {});
-    const recharge = await this.services.cityProgression?.(uid, "new.sercum.init", {});
-    const boxes = await this.services.cityProgression?.(uid, "ordinary.box.init", {});
-    const cycle = await this.services.cityProgression?.(uid, "sevenday.init", {});
-    const branchCity = await this.services.cityProgression?.(uid, "branchcity.init", {});
-    const investment = await this.services.cityProgression?.(uid, "invest.init", {});
-    const castleLevel = await this.services.cityProgression?.(uid, "castle.event.init", {});
-    const luckyDay = await this.services.cityProgression?.(uid, "luckyday.init", {});
-    const campaign = await this.services.cityProgression?.(uid, "campaign.init", {});
-    const lottery = await this.services.cityProgression?.(uid, "lottery.init", {});
-    const totems = await this.services.cityProgression?.(uid, "totem.init", {});
+    const effects = await cityProgression(uid, "effects.init", {});
+    const quest = await cityProgression(uid, "quest.init", {});
+    const equipment = await cityProgression(uid, "equipment.init", {});
+    const generals = await cityProgression(uid, "general.init", {});
+    const dragons = await cityProgression(uid, "dragon.init", {});
+    const civilization = await cityProgression(uid, "civilization.science.data.init", {});
+    const dragonTower = await cityProgression(uid, "dragontower.init", {});
+    const vipBox = await cityProgression(uid, "vip.box.init", {});
+    const targets = await cityProgression(uid, "target.init", {});
+    const recharge = await cityProgression(uid, "new.sercum.init", {});
+    const boxes = await cityProgression(uid, "ordinary.box.init", {});
+    const cycle = await cityProgression(uid, "sevenday.init", {});
+    const branchCity = await cityProgression(uid, "branchcity.init", {});
+    const investment = await cityProgression(uid, "invest.init", {});
+    const castleLevel = await cityProgression(uid, "castle.event.init", {});
+    const luckyDay = await cityProgression(uid, "luckyday.init", {});
+    const campaign = await cityProgression(uid, "campaign.init", {});
+    const lottery = await cityProgression(uid, "lottery.init", {});
+    const totems = await cityProgression(uid, "totem.init", {});
     const alliance = await this.services.alliance?.(uid, "alliance.init", {});
+    signal?.throwIfAborted();
     const state = await this.state(uid);
     const world = state.world;
 
@@ -431,12 +440,15 @@ export class GameService {
         body: await this.services.worldEffectBoard(),
       });
 
+    signal?.throwIfAborted();
+
     if (!this.services.reconnect) return { body, pushes: initialPushes };
 
     const now = this.now();
     const context = { kingdomId: this.config.kingdomId, version: MOBILE_CLIENT_VERSION, now };
 
     return this.services.reconnect(uid, now, async (progress) => {
+      signal?.throwIfAborted();
       const planned = await planReconnectProgress(progress, this.rules, context, this.services, {
         specialServer: serverFeature(this.rules, "araf_mode", context),
         cn1: null,
@@ -482,6 +494,8 @@ export class GameService {
       if (correlation._cok_) planned.result.body._cok_ = correlation._cok_;
 
       validateReconnectResult(planned.result, "init");
+
+      signal?.throwIfAborted();
 
       return planned;
     });

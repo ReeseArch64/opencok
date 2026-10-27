@@ -1,6 +1,6 @@
 import type { PoolClient } from "pg";
 import { observeDependencyOperation } from "@opencok/core/operation";
-import { logEvent } from "@opencok/core/logging";
+import { errorReason, logEvent } from "@opencok/core/logging";
 import { afterCommit } from "@opencok/core/transaction";
 
 const commands = new Set([
@@ -44,22 +44,40 @@ export function observePostgresClient(
       () => {
         const result = Reflect.apply(query, this, args);
         if (!(result instanceof Promise)) return result;
-        return result.then((value: { rowCount?: number; rows?: unknown[] }) => {
-          logEvent("database_result", {
-            operation,
-            rowCount: value?.rowCount ?? undefined,
-            table,
-            outcome: "success",
-            commitState: "statement_completed",
-          });
-          if (["INSERT", "UPDATE", "DELETE"].includes(command))
-            afterCommit("database_rows_changed", {
+        return result.then(
+          (value: { rowCount?: number; rows?: unknown[] }) => {
+            logEvent("database_result", {
               operation,
+              rowCount: value?.rowCount ?? undefined,
               table,
-              rowCount: value?.rowCount ?? 0,
+              outcome: "success",
+              commitState: "statement_completed",
             });
-          return value;
-        });
+            if (["INSERT", "UPDATE", "DELETE"].includes(command))
+              afterCommit("database_rows_changed", {
+                operation,
+                table,
+                rowCount: value?.rowCount ?? 0,
+              });
+            return value;
+          },
+          (error: unknown) => {
+            const code = error instanceof Error && "code" in error ? error.code : undefined;
+            logEvent(
+              "database_failed",
+              {
+                operation,
+                table,
+                databaseRole: role,
+                reason: errorReason(error),
+                sqlState: typeof code === "string" && /^[0-9A-Z]{5}$/.test(code) ? code : undefined,
+                outcome: "failure",
+              },
+              "error",
+            );
+            throw error;
+          },
+        );
       },
       {
         component: "postgresql",

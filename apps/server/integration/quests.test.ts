@@ -101,3 +101,71 @@ test("daily rollover preserves unclaimed rewards in mail exactly once", async ()
     await h.close();
   }
 }, 60000);
+
+test("repeated initialization preserves quest row versions and failed batches roll back", async () => {
+  const h = await cityHarness([questsDomain]);
+  try {
+    const { sql } = await import("drizzle-orm");
+    const { writeQuests } = await import("@opencok/repositories/quests");
+    await h.db.db.transaction(async (tx) => {
+      await writeQuests(tx, "owner", {
+        tasks: Array.from({ length: 600 }, (_, id) => ({
+          uid: "owner",
+          id: `synthetic-${id}`,
+          type: 3,
+          state: id % 3,
+          num: id,
+        })),
+      });
+    });
+    await h.command("quest.init", {});
+    const snapshot = async () =>
+      (
+        await h.db.db.execute(
+          sql`SELECT id, xmin::text AS version, state, num FROM opencok_kingdom.user_task WHERE uid = 'owner' ORDER BY id`,
+        )
+      ).rows;
+    const before = await snapshot();
+    expect(before.length).toBeGreaterThan(256);
+    await h.command("quest.init", {});
+    expect(await snapshot()).toEqual(expect.arrayContaining(before));
+    const settled = await snapshot();
+    await expect(
+      h.db.db.transaction(async (tx) => {
+        await writeQuests(tx, "owner", {
+          tasks: [{ uid: "owner", id: "rollback-only", type: 3, state: 1, num: 1 }],
+          story: [{ uid: "owner", id: 2147483648, type: 1, state: 1, num: 1 }],
+        });
+      }),
+    ).rejects.toThrow();
+    expect(await snapshot()).toEqual(settled);
+  } finally {
+    await h.close();
+  }
+}, 60000);
+
+test("PostgreSQL statement timeout is classified through Drizzle and rolls back", async () => {
+  const h = await cityHarness([questsDomain]);
+  try {
+    const { sql } = await import("drizzle-orm");
+    const { errorReason } = await import("@opencok/core/logging");
+    let reason = "";
+    try {
+      await h.db.db.transaction(async (tx) => {
+        await tx
+          .insert(user_task)
+          .values({ uid: "owner", id: "timeout-only", type: 3, state: 1, num: 1 });
+        await tx.execute(sql`SET LOCAL statement_timeout = '25ms'`);
+        await tx.execute(sql`SELECT pg_sleep(0.2)`);
+      });
+    } catch (error) {
+      reason = errorReason(error);
+    }
+    expect(reason).toBe("database_query_cancelled");
+    expect(
+      await h.db.db.select().from(user_task).where(eq(user_task.id, "timeout-only")),
+    ).toHaveLength(0);
+  } finally {
+    await h.close();
+  }
+}, 60000);

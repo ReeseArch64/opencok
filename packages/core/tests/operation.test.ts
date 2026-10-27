@@ -91,3 +91,24 @@ test("effects are logged only after the outer commit and discarded on rollback",
     ),
   ).toBe(true);
 });
+
+test("database failures retain safe classifications through query wrappers and cyclic causes", () => {
+  const cause = Object.assign(new Error("private SQL and credentials"), { code: "57014" });
+  const wrapped = new Error("private query parameters", { cause });
+  expect(() =>
+    observeOperation("postgresql.kingdom.select", () => {
+      throw wrapped;
+    }),
+  ).toThrow();
+  expect(records.find((record) => record.event === "operation_failed")?.reason).toBe(
+    "database_query_cancelled",
+  );
+  expect(JSON.stringify(records)).not.toContain("private");
+  const cycle = new Error("private cycle");
+  cycle.cause = cycle;
+  expect(() =>
+    observeOperation("cyclic", () => {
+      throw cycle;
+    }),
+  ).toThrow();
+});
