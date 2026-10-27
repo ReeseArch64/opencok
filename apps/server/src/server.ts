@@ -1,6 +1,7 @@
 import { activityRewardDomain } from "@opencok/services/activity-reward";
 import { createComebackSessions } from "@opencok/repositories/comeback-session";
 import { comebackDomain, planComebackLogin } from "@opencok/services/comeback";
+import { branchCityDomain } from "@opencok/services/branch-city";
 import {
   createHotItemDomain,
   createHotBusinessMan,
@@ -653,6 +654,7 @@ export const RealmDependenciesLive = Layer.effect(
         createTotemDomain(config.mapSize),
         minstrelDomain,
         alchemistDomain,
+        branchCityDomain,
         dailyInvestmentDomain,
         createShippingInvestmentDomain(),
         createSevenDayCycleDomain(),
