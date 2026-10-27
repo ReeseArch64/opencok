@@ -79,8 +79,8 @@ async function harness() {
         throw new Error("Inspection entered owned mutation domain");
       },
     });
-    const query = (params: Fields = {}) =>
-      game.execute("owner", "world.get.march", {
+    const query = (params: Fields = {}, observer = "owner") =>
+      game.execute(observer, "world.get.march", {
         uid: sfs.string("other"),
         uuid: sfs.string("party"),
         ...params,
@@ -117,6 +117,15 @@ test("same-alliance native march inspection reads actual troop snapshots and loa
       star: sfs.int(2),
       count: sfs.int(10),
     });
+    const correlation = {
+      _cok_: sfs.string("own-inspection"),
+      cmdBaseTime: sfs.long(9007199254740993n),
+    };
+    const owned = await h.query(correlation, "other");
+    expect(owned.body._cok_).toEqual(correlation._cok_);
+    expect(owned.body.cmdBaseTime).toEqual(correlation.cmdBaseTime);
+    expect(owned.body.uid).toEqual(sfs.string("other"));
+    expect(owned.body.actionMax).toEqual(sfs.int(80));
     expect(await h.saved()).toEqual(before);
   } finally {
     await h.close();
