@@ -18,7 +18,7 @@ export const readConfig = Effect.gen(function* () {
         }
       : undefined,
     filesEnabled: !!settings.S3_BUCKET,
-    chatUrl: settings.API_CHAT_URL,
+    chatUrl: settings.CHAT_URL,
     kingdomId: settings.KINGDOM_ID,
     host: settings.API_HOST,
     port: settings.API_PORT,

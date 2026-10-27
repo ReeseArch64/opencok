@@ -68,12 +68,12 @@ containers, applies the real migrations, checks both realm lookups, concurrent w
 Unicode, exact expiry and persistence after restart. It does not touch local game data.
 
 Android tracks are untested. The TypeScript realm supports `chat.session.create`
-when `GAME_CHAT_SESSION_URL` targets this service's internal `/external/session` route and
+when `CHAT_URL` selects this service's HTTP origin and
 `CHAT_SIGNING_SECRET` matches. It binds issuance to the authenticated realm profile and
 returns the opaque token and second-based expiry. Units compose both sides with the token verifier; actual realm TCP, Chat HTTP/WebSocket,
 API metadata and disposable database acceptance now exercise the full server flow.
 Native-client behavior remains unverified. The shared API/gateway now exposes the three public metadata GET routes
-when `API_CHAT_URL` points to this service's HTTP origin. Chat remains the source of
+when `CHAT_URL` points to this service's HTTP origin. Chat remains the source of
 configuration and readiness; the proxy forwards no caller credentials or query strings.
 The advertised `CHAT_WEBSOCKET_URL` must be directly reachable because the shared gateway
 does not proxy `/chat/ws` or expose `/external/session`. See the

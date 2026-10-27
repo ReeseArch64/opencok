@@ -31,9 +31,9 @@ test("invalid API endpoints and private values report only variable names", () =
 });
 
 test("public chat discovery uses an optional HTTP origin without private URL components", () => {
-  expect(parseApiEnvironment({}).API_CHAT_URL).toBeUndefined();
-  expect(parseApiEnvironment({ API_CHAT_URL: "" }).API_CHAT_URL).toBeUndefined();
-  expect(parseApiEnvironment({ API_CHAT_URL: "https://chat.internal:8083/" }).API_CHAT_URL).toBe(
+  expect(parseApiEnvironment({}).CHAT_URL).toBeUndefined();
+  expect(parseApiEnvironment({ CHAT_URL: "" }).CHAT_URL).toBeUndefined();
+  expect(parseApiEnvironment({ CHAT_URL: "https://chat.internal:8083/" }).CHAT_URL).toBe(
     "https://chat.internal:8083/",
   );
   for (const value of [
@@ -46,7 +46,7 @@ test("public chat discovery uses an optional HTTP origin without private URL com
     "https://cok.chat",
     "https://other.cok.chat",
   ])
-    expect(() => parseApiEnvironment({ API_CHAT_URL: value })).toThrow("API_CHAT_URL");
+    expect(() => parseApiEnvironment({ CHAT_URL: value })).toThrow("CHAT_URL");
 });
 
 test("API media requires five S3 settings and supports an optional internal storage origin", () => {

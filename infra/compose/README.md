@@ -32,10 +32,12 @@ filter into `dist/data`. Rebuild images after source or resource changes.
 The root `.env` contains `NODE_ENV`, `DATABASE_ROLE`, `DATABASE_URL` and the private
 `GAME_LOGIN_SECRET` exception, plus `REDIS_URL=redis://redis:6379/0` for local
 containers. Chat defaults to `chat:8083`: the realm uses
-`/external/session` for sessions and `/_internal/nickname` for player renames,
-and the API proxies public metadata. `CHAT_SIGNING_SECRET`
+`/external/session` for sessions, `/_internal/nickname` for player renames and
+`/_internal/mailbox` for mailbox effects; the API proxies public metadata. `CHAT_SIGNING_SECRET`
 overrides the shared development signing value on both Chat and the realm. Optional
-`GAME_CHAT_SESSION_URL`, `GAME_NICKNAME_CHAT_URL` and `API_CHAT_URL` select another host. Set
+`CHAT_URL` selects the shared HTTP(S) origin for API and realm; paths are fixed in
+code. Setting it enables all three private realm integrations, including mailbox.
+Use a bare origin without credentials, path, query or fragment. Set
 `CHAT_WEBSOCKET_URL` when clients need a different address than
 `ws://192.168.1.104:8083/chat/ws`. Use `.env.example` as the reference and preserve
 existing values. No app-local env files are needed. The example database URL uses

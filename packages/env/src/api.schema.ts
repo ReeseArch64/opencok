@@ -2,7 +2,7 @@ import { filesSchema } from "./files";
 import { z } from "zod";
 import { blankToUndefined, validateEnvironment } from "./validation";
 
-import { port, timeout, redisUrl, realmSettings } from "./service.schema";
+import { port, timeout, redisUrl, realmSettings, chatUrl } from "./service.schema";
 
 const optionalPath = z.preprocess(blankToUndefined, z.string().optional());
 
@@ -54,29 +54,7 @@ export const apiSchema = z
         )
         .optional(),
     ),
-    API_CHAT_URL: z.preprocess(
-      blankToUndefined,
-      z
-        .url({ protocol: /^https?$/ })
-        .refine((value) => {
-          try {
-            const url = new URL(value);
-
-            return (
-              url.pathname === "/" &&
-              !url.username &&
-              !url.password &&
-              !url.search &&
-              !url.hash &&
-              url.hostname !== "cok.chat" &&
-              !url.hostname.endsWith(".cok.chat")
-            );
-          } catch {
-            return false;
-          }
-        })
-        .optional(),
-    ),
+    CHAT_URL: chatUrl,
     S3_ENDPOINT: filesSchema.shape.S3_ENDPOINT,
     S3_PUBLIC_ENDPOINT: z.preprocess(
       blankToUndefined,

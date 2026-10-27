@@ -30,43 +30,40 @@ test("mail translation defaults enabled and accepts explicit true or false only"
     );
 });
 
-test("realm chat session issuance is opt-in and requires a valid internal endpoint and shared secret", () => {
-  expect(parseServerEnvironment(base).GAME_CHAT_SESSION_URL).toBeUndefined();
+test("realm Chat integration requires an optional HTTP origin and shared signing secret", () => {
+  expect(parseServerEnvironment(base).CHAT_URL).toBeUndefined();
   expect(
-    parseServerEnvironment({ ...base, CHAT_SIGNING_SECRET: "synthetic" }).GAME_CHAT_SESSION_URL,
+    parseServerEnvironment({ ...base, CHAT_SIGNING_SECRET: "synthetic" }).CHAT_URL,
   ).toBeUndefined();
   expect(
-    parseServerEnvironment({ ...base, GAME_CHAT_SESSION_URL: "", CHAT_SIGNING_SECRET: "" })
-      .CHAT_SIGNING_SECRET,
+    parseServerEnvironment({ ...base, CHAT_URL: "", CHAT_SIGNING_SECRET: "" }).CHAT_URL,
   ).toBeUndefined();
-  const url = "https://chat.internal/external/session";
-  expect(
-    parseServerEnvironment({
-      ...base,
-      GAME_CHAT_SESSION_URL: url,
-      CHAT_SIGNING_SECRET: "synthetic",
-    }).GAME_CHAT_SESSION_URL,
-  ).toBe(url);
-  expect(() => parseServerEnvironment({ ...base, GAME_CHAT_SESSION_URL: url })).toThrow(
-    "CHAT_SIGNING_SECRET",
-  );
-  for (const value of [
+  for (const CHAT_URL of [
+    "http://chat.internal:8083",
+    "https://chat.internal:8083/",
+    "http://[::1]:8083",
+  ]) {
+    expect(
+      parseServerEnvironment({ ...base, CHAT_URL, CHAT_SIGNING_SECRET: "synthetic" }).CHAT_URL,
+    ).toBe(CHAT_URL);
+    expect(() => parseServerEnvironment({ ...base, CHAT_URL })).toThrow("CHAT_SIGNING_SECRET");
+  }
+  for (const CHAT_URL of [
     "invalid",
-    "ws://chat.internal/external/session",
-    "http://u:p@chat.internal/external/session",
-    "https://chat.internal/other",
-    "https://chat.internal/external/session?private=x",
-    "https://chat.internal/external/session#x",
-    "https://cok.chat/external/session",
-    "https://x.cok.chat/external/session",
-  ])
+    "ws://chat.internal",
+    "http://u:p@chat.internal",
+    "https://chat.internal/external/session",
+    "https://chat.internal/_internal/nickname",
+    "https://chat.internal/_internal/mailbox",
+    "https://chat.internal/?private=x",
+    "https://chat.internal/#x",
+    "https://cok.chat",
+    "https://x.cok.chat",
+  ]) {
     expect(() =>
-      parseServerEnvironment({
-        ...base,
-        GAME_CHAT_SESSION_URL: value,
-        CHAT_SIGNING_SECRET: "synthetic",
-      }),
-    ).toThrow("GAME_CHAT_SESSION_URL");
+      parseServerEnvironment({ ...base, CHAT_URL, CHAT_SIGNING_SECRET: "synthetic" }),
+    ).toThrow("CHAT_URL");
+  }
 });
 
 test("realm avatar integration needs only an explicit private API origin", () => {
@@ -121,58 +118,4 @@ test("realm startup no longer accepts an external XML resource path", () => {
   expect(parseServerEnvironment({ ...base, GAME_RESOURCES: "obsolete" })).not.toHaveProperty(
     "GAME_RESOURCES",
   );
-});
-
-test("mailbox delivery requires an exact maintained endpoint and matching signing configuration", () => {
-  const url = "http://chat.internal/_internal/mailbox";
-  expect(parseServerEnvironment(base).GAME_MAIL_CHAT_URL).toBeUndefined();
-  expect(
-    parseServerEnvironment({ ...base, GAME_MAIL_CHAT_URL: url, CHAT_SIGNING_SECRET: "synthetic" })
-      .GAME_MAIL_CHAT_URL,
-  ).toBe(url);
-  expect(() => parseServerEnvironment({ ...base, GAME_MAIL_CHAT_URL: url })).toThrow(
-    "CHAT_SIGNING_SECRET",
-  );
-  for (const value of [
-    url + "/",
-    url + "?x=1",
-    url + "#x",
-    "http://cok.chat/_internal/mailbox",
-    "http://user:pass@chat.internal/_internal/mailbox",
-    "ftp://chat.internal/_internal/mailbox",
-  ])
-    expect(() =>
-      parseServerEnvironment({
-        ...base,
-        GAME_MAIL_CHAT_URL: value,
-        CHAT_SIGNING_SECRET: "synthetic",
-      }),
-    ).toThrow("GAME_MAIL_CHAT_URL");
-});
-
-test("nickname delivery requires a private endpoint and signing secret", () => {
-  const url = "http://chat:8080/_internal/nickname";
-  expect(
-    parseServerEnvironment({
-      ...base,
-      GAME_NICKNAME_CHAT_URL: url,
-      CHAT_SIGNING_SECRET: "synthetic",
-    }).GAME_NICKNAME_CHAT_URL,
-  ).toBe(url);
-  expect(() => parseServerEnvironment({ ...base, GAME_NICKNAME_CHAT_URL: url })).toThrow(
-    "CHAT_SIGNING_SECRET",
-  );
-  for (const value of [
-    "http://cok.chat/_internal/nickname",
-    "http://chat:8080/_internal/mailbox",
-    "http://user:secret@chat/_internal/nickname",
-    "http://chat/_internal/nickname?other=1",
-  ])
-    expect(() =>
-      parseServerEnvironment({
-        ...base,
-        GAME_NICKNAME_CHAT_URL: value,
-        CHAT_SIGNING_SECRET: "synthetic",
-      }),
-    ).toThrow("GAME_NICKNAME_CHAT_URL");
 });

@@ -14,15 +14,21 @@ export const config = Effect.gen(function* () {
       ? { url: settings.GAME_AVATAR_CHAT_URL, signingSecret: settings.CHAT_SIGNING_SECRET! }
       : undefined,
     avatarFiles: settings.GAME_FILES_URL ? { origin: settings.GAME_FILES_URL } : undefined,
-    nicknameChat: settings.GAME_NICKNAME_CHAT_URL
-      ? { url: settings.GAME_NICKNAME_CHAT_URL, signingSecret: settings.CHAT_SIGNING_SECRET! }
-      : undefined,
-    mailChat: settings.GAME_MAIL_CHAT_URL
-      ? { url: settings.GAME_MAIL_CHAT_URL, signingSecret: settings.CHAT_SIGNING_SECRET! }
-      : undefined,
-    chatSession: settings.GAME_CHAT_SESSION_URL
+    nicknameChat: settings.CHAT_URL
       ? {
-          url: settings.GAME_CHAT_SESSION_URL,
+          url: new URL("/_internal/nickname", settings.CHAT_URL).href,
+          signingSecret: settings.CHAT_SIGNING_SECRET!,
+        }
+      : undefined,
+    mailChat: settings.CHAT_URL
+      ? {
+          url: new URL("/_internal/mailbox", settings.CHAT_URL).href,
+          signingSecret: settings.CHAT_SIGNING_SECRET!,
+        }
+      : undefined,
+    chatSession: settings.CHAT_URL
+      ? {
+          url: new URL("/external/session", settings.CHAT_URL).href,
           signingSecret: settings.CHAT_SIGNING_SECRET!,
         }
       : undefined,

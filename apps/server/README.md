@@ -137,7 +137,7 @@ requires the remaining service settings through its process environment.
 | `KINGDOM_ID`            | Realm ID, default `1`; selects SFS zone `COK1` or `COK2`.                                                                              |
 | `KINGDOM_DATABASE_NAME` | Defaults to `opencok_kingdom_<KINGDOM_ID>`.                                                                                            |
 | `GLOBAL_DATABASE_NAME`  | Defaults to `opencok_global`.                                                                                                          |
-| `GAME_CHAT_SESSION_URL` | Optional internal HTTP(S) endpoint ending in `/external/session`; unset disables chat session issuance.                                |
+| `CHAT_URL`              | Optional shared Chat HTTP(S) origin; enables session issuance, nickname delivery and mailbox effects.                                  |
 | `CHAT_SIGNING_SECRET`   | Required when the session URL is configured; must match the maintained chat service.                                                   |
 | `GAME_FILES_URL`        | Optional internal files-service HTTP(S) origin; unset disables avatar grants.                                                          |
 | `GAME_LOGIN_SECRET`     | Required private secret matching the legacy mobile login issuer.                                                                       |
@@ -1778,7 +1778,7 @@ IDs, expanded groups, invitation changes, markers and categories commit or roll 
 together; this strengthens the reference's multiple independent commits.
 
 Selected personal/moderator text, media or express messages with nonzero reward status
-now enqueue durable private-chat deletion when `GAME_MAIL_CHAT_URL` is configured.
+now enqueue durable private-chat deletion when `CHAT_URL` is configured.
 Missing configuration rejects mixed system/chat selections before writes. Reward-pending
 chat rows retain the source's primary-retention and auxiliary-removal rules.
 Sender-selected `chatMail.delete` and `chatMail.delete.batch` are implemented; see the
@@ -3266,11 +3266,13 @@ application version, language, alliance and phone device; all metadata is sent a
 A null phone device becomes empty. Other null metadata rejects, preserving the Java
 string-field behavior instead of inventing profile defaults.
 
-Configure `GAME_CHAT_SESSION_URL` with the internal `/external/session` URL reachable from
-the realm process and set `CHAT_SIGNING_SECRET` to the chat service's configured value.
-The development Compose realm forwards these optional settings; it does not provision a
-chat service. An absent URL keeps the command unsupported. URLs require HTTP(S), the exact
-route and no embedded credentials, query or fragment; legacy production chat hosts reject.
+Configure `CHAT_URL` with the Chat HTTP(S) origin reachable from the realm and API,
+and set `CHAT_SIGNING_SECRET` to the Chat service's configured value. The server
+appends `/external/session`, `/_internal/nickname` and `/_internal/mailbox` in code;
+setting this origin enables all three private integrations. The API uses the same
+origin for public metadata. Outside Compose, an absent URL disables these integrations.
+Development Compose defaults both services to `http://chat:8083`. Origins must have
+no path, embedded credentials, query or fragment; legacy production chat hosts reject.
 The game-facing WebSocket endpoint remains the chat service's `CHAT_WEBSOCKET_URL` setting.
 
 The connection adapter signs the legacy form with application ID `100001` and a TTL of
@@ -3294,7 +3296,7 @@ session handler and token verifier. They cover stored-hash identity, exact expir
 sessions on repeat, profile/realm isolation, signatures, bounded streams, timeouts and
 errors. No HTTP listener, WebSocket, database, client or ADB process is exercised. The
 shared API/gateway now exposes the chat service's public metadata through its existing
-GET paths when `API_CHAT_URL` is configured; see the
+GET paths when `CHAT_URL` is configured; see the
 [discovery contract](../api/README.md#public-chat-discovery). No new realm login field is
 invented. Private-conversation delivery remains separate work; issuing public-room
 sessions does not complete `chatMail.read`.
@@ -3306,7 +3308,7 @@ Its complete wire parser and ordered effect planner now have synthetic unit cove
 The repository persists owned mailbox assignments and chat intents atomically. Scalar
 `type`, ordinary `types` lists and empty requests need no chat configuration.
 Sender-selected requests and the exact raw `types = "0,1,20"` trigger require
-`GAME_MAIL_CHAT_URL`; without it they reject before writes. When configured, the
+`CHAT_URL`; without it they reject before writes. When configured, the
 maintained consumer and background relay complete private-conversation read effects.
 See [mailbox acceptance](MAILBOX.md) for cutoff semantics, replay and restart evidence.
 Public room history is not used as private-conversation state.

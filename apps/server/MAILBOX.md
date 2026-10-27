@@ -70,7 +70,7 @@ category counting remain in the same transaction.
 
 The kingdom outbox `mail_chat_read_intent` now contains read and delete actions.
 Admission is serialized by owner with at most 1,000 pending effects. Missing
-`GAME_MAIL_CHAT_URL` rejects chat-dependent mutations before any state changes;
+`CHAT_URL` rejects chat-dependent mutations before any state changes;
 mail-only operations remain available. When enabled, local changes and intent
 insertion commit atomically. The acknowledgment means durable acceptance; remote
 convergence follows through the background relay, including while the player is
@@ -123,8 +123,9 @@ starts a new pagination cycle.
    owner, realm, peer, category and original creation timestamps. Creating empty
    tables does not migrate old private messages. Resolve any cache-only mail bodies
    into owned persisted content. This implementation does not execute that import.
-5. Set `GAME_MAIL_CHAT_URL` to the maintained chat service's `/_internal/mailbox`
-   URL and set the matching `CHAT_SIGNING_SECRET`. Keep the endpoint on the private
+5. Set `CHAT_URL` to the maintained Chat HTTP(S) origin and set the matching
+   `CHAT_SIGNING_SECRET`. The server appends `/_internal/mailbox`; the same origin
+   enables session issuance and nickname delivery. Keep the endpoint on the private
    service network. Existing Redis configuration supports V1 bookkeeping.
 6. Deploy the realm, observe `mail_chat_relay_failed` and pending intent counts, and
    verify that backlog drains. Failures log realm/operation metadata, not bodies or

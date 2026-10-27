@@ -171,8 +171,8 @@ host/container settings.
 ## Optional services and integrations
 
 Chat runs separately. Configure its advertised WebSocket endpoint and trusted
-session-signing settings, `API_CHAT_URL` for public discovery and
-`GAME_CHAT_SESSION_URL` for the realm's private session endpoint. See the
+session-signing settings and a shared `CHAT_URL` HTTP origin for API discovery and
+the realm's private session, nickname and mailbox endpoints. See the
 [chat guide](apps/chat/README.md) and [API discovery guide](apps/api/README.md).
 
 Avatar media uses five S3 settings for its private bucket and SDK-presigned image

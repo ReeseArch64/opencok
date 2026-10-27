@@ -8,6 +8,8 @@ const source = Layer.succeed(EnvironmentSource, {
   DATABASE_URL: "postgresql://example:secret@localhost/global",
   KINGDOM_ID: "2",
   GAME_LOGIN_SECRET: "synthetic",
+  CHAT_URL: "https://chat.internal:8083/",
+  CHAT_SIGNING_SECRET: "synthetic-chat-secret",
 });
 
 test("API and realm read the same injected snapshot with independent service defaults", async () => {
@@ -20,6 +22,8 @@ test("API and realm read the same injected snapshot with independent service def
   expect(result[1].KINGDOM_ID).toBe(2);
   expect(result[0].GLOBAL_DATABASE_NAME).toBe(result[1].GLOBAL_DATABASE_NAME);
   expect(result[0].API_PORT).toBe(8082);
+  expect(result[0].CHAT_URL).toBe("https://chat.internal:8083/");
+  expect(result[1].CHAT_URL).toBe(result[0].CHAT_URL);
   for (const name of [
     "GAME_HOST",
     "GAME_PORT",

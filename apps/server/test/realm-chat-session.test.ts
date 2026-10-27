@@ -204,7 +204,7 @@ test("authenticated realm command issues a usable chat token through the maintai
   expect(sessions.size).toBe(2);
 });
 
-test("session configuration reaches the realm config and remains optional", async () => {
+test("one Chat origin configures private routes and remains optional", async () => {
   const base = {
     GAME_LOGIN_SECRET: "synthetic-login",
     GAME_RESOURCES: "synthetic-resources",
@@ -214,17 +214,36 @@ test("session configuration reaches the realm config and remains optional", asyn
     config.pipe(Effect.provideService(EnvironmentSource, base)),
   );
   expect(disabled.chatSession).toBeUndefined();
-  const enabled = await Effect.runPromise(
-    config.pipe(
-      Effect.provideService(EnvironmentSource, {
-        ...base,
-        GAME_CHAT_SESSION_URL: endpoint,
-        CHAT_SIGNING_SECRET: secret,
-      }),
-    ),
-  );
-  expect(enabled.chatSession).toEqual({ url: endpoint, signingSecret: secret });
-  expect(enabled.timeoutMs).toBe(5000);
+  expect(disabled.nicknameChat).toBeUndefined();
+  expect(disabled.mailChat).toBeUndefined();
+  for (const [CHAT_URL, origin] of [
+    ["http://chat.internal", "http://chat.internal"],
+    ["http://chat.internal/", "http://chat.internal"],
+    ["https://chat.internal:8083/", "https://chat.internal:8083"],
+  ] as const) {
+    const enabled = await Effect.runPromise(
+      config.pipe(
+        Effect.provideService(EnvironmentSource, {
+          ...base,
+          CHAT_URL,
+          CHAT_SIGNING_SECRET: secret,
+        }),
+      ),
+    );
+    expect(enabled.chatSession).toEqual({
+      url: `${origin}/external/session`,
+      signingSecret: secret,
+    });
+    expect(enabled.nicknameChat).toEqual({
+      url: `${origin}/_internal/nickname`,
+      signingSecret: secret,
+    });
+    expect(enabled.mailChat).toEqual({
+      url: `${origin}/_internal/mailbox`,
+      signingSecret: secret,
+    });
+    expect(enabled.timeoutMs).toBe(5000);
+  }
 });
 
 test("unconfigured, foreign, banned or malformed profile requests cannot reach session issuance", async () => {

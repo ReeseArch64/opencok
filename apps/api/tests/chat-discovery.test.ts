@@ -313,7 +313,7 @@ test("public metadata is bounded during stream consumption and the full request 
 test("origin and dependency configuration reach the API without starting a server", async () => {
   const values = {
     DATABASE_URL: "postgres://synthetic:synthetic@invalid.example/global",
-    API_CHAT_URL: origin,
+    CHAT_URL: origin,
   };
   const config = await Effect.runPromise(
     readConfig.pipe(Effect.provideService(EnvironmentSource, values)),

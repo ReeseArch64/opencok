@@ -279,9 +279,7 @@ services:
       REDIS_URL: ${REDIS_URL:?Set REDIS_URL for API and server}
       GAME_ZOOKEEPER: zookeeper:2181
       GAME_LOGIN_SECRET: ${GAME_LOGIN_SECRET}
-      GAME_MAIL_CHAT_URL: ${GAME_MAIL_CHAT_URL:-}
-      GAME_NICKNAME_CHAT_URL: ${GAME_NICKNAME_CHAT_URL:-http://chat:8083/_internal/nickname}
-      GAME_CHAT_SESSION_URL: ${GAME_CHAT_SESSION_URL:-http://chat:8083/external/session}
+      CHAT_URL: ${CHAT_URL:-http://chat:8083}
       CHAT_SIGNING_SECRET: ${CHAT_SIGNING_SECRET:-opencok-chat-development}
       GAME_MAP_SIZE: 1201
       DEPENDENCY_TIMEOUT_MS: 5000
@@ -323,7 +321,7 @@ services:
       GLOBAL_DATABASE_NAME: opencok_global
       KINGDOM_ID: 1
       API_SERVERS_FILE: ""
-      API_CHAT_URL: ${API_CHAT_URL:-http://chat:8083}
+      CHAT_URL: ${CHAT_URL:-http://chat:8083}
       API_HOST: 0.0.0.0
       API_PORT: 8080
       S3_ENDPOINT: http://minio:9000

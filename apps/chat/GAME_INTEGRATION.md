@@ -12,13 +12,13 @@ Apply the existing global and kingdom migrations before starting Chat. No new
 migration is introduced by this integration. Chat uses the configured global
 account directory to select each player's authoritative kingdom database.
 
-| Process         | Configuration                                                      | Purpose                                                        |
-| --------------- | ------------------------------------------------------------------ | -------------------------------------------------------------- |
-| Chat            | `DATABASE_URL`, `CHAT_KINGDOM_DATABASES`, `GLOBAL_DATABASE_NAME`   | Persistent sessions/messages and authoritative room membership |
-| Chat            | `CHAT_HOST`, `CHAT_PORT`, `CHAT_WEBSOCKET_URL`                     | Listener and client-reachable `ws(s)://host/chat/ws` endpoint  |
-| Chat and realms | `CHAT_SIGNING_SECRET`                                              | Matching backend session signing secret                        |
-| Realm           | `GAME_CHAT_SESSION_URL=http://chat.internal:8083/external/session` | Trusted internal session issuer                                |
-| API             | `API_CHAT_URL=http://chat.internal:8083`                           | Origin for the three public metadata routes                    |
+| Process         | Configuration                                                    | Purpose                                                          |
+| --------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Chat            | `DATABASE_URL`, `CHAT_KINGDOM_DATABASES`, `GLOBAL_DATABASE_NAME` | Persistent sessions/messages and authoritative room membership   |
+| Chat            | `CHAT_HOST`, `CHAT_PORT`, `CHAT_WEBSOCKET_URL`                   | Listener and client-reachable `ws(s)://host/chat/ws` endpoint    |
+| Chat and realms | `CHAT_SIGNING_SECRET`                                            | Matching backend session signing secret                          |
+| Realm           | `CHAT_URL=http://chat.internal:8083`                             | Origin for trusted internal session, nickname and mailbox routes |
+| API             | `CHAT_URL=http://chat.internal:8083`                             | Origin for the three public metadata routes                      |
 
 The local Compose stack starts one Chat instance and configures the realms and API
 to reach it over service DNS. It publishes port 8083 and accepts `CHAT_WEBSOCKET_URL`

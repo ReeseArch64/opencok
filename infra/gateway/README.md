@@ -14,7 +14,7 @@ No Docker socket or administration dashboard is exposed.
 
 The CDN routes `/cok/*` (excluding `/cok/img/*`) and `/100001/*` map to fixed
 MinIO bucket/host prefixes. The three chat metadata paths are forwarded to the API;
-`API_CHAT_URL` controls their upstream and an unset value preserves 404. The chat service
+`CHAT_URL` controls their upstream and an unset value preserves 404. The chat service
 supplies the public WebSocket endpoint; WebSocket traffic does not pass through this
 gateway. Other paths, including `/chat/ws`, `/external/session`, uploads, avatars and the
 PHP dispatcher, have no router and return 404. The discovery body limit is 64 KiB. Unknown methods

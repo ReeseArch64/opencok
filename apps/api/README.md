@@ -49,7 +49,7 @@ described in [Avatar media](#avatar-media):
 | `API_DEPENDENCY_TIMEOUT_MS` | Database/Redis timeout, default 3000 ms.                                                                                             |
 | `API_SERVERS_FILE`          | Optional JSON directory, relative to the workspace root; defaults to an in-memory directory derived from `KINGDOM_ID`.               |
 | `API_GAME_HOST`             | Optional advertised client-reachable TCP host. A bind wildcard is rejected.                                                          |
-| `API_CHAT_URL`              | Optional HTTP(S) origin of the maintained chat service; no path, embedded credentials, query or fragment.                            |
+| `CHAT_URL`                  | Optional HTTP(S) origin of the maintained chat service; no path, embedded credentials, query or fragment.                            |
 | `API_GAME_PORT`             | Optional advertised port override for a single-realm directory. Compose advertises gateway port `9933`.                              |
 
 Direct Bun execution requires separately reachable dependencies; the default
@@ -97,7 +97,7 @@ without the single-port `API_GAME_PORT` override.
 ## Public chat discovery
 
 [Issue #75](https://github.com/ReeseArch64/opencok/issues/75) connects the chat service's
-existing public metadata routes through the shared API and gateway. Set `API_CHAT_URL`
+existing public metadata routes through the shared API and gateway. Set `CHAT_URL`
 to the chat HTTP origin reachable from the API process, for example
 `http://chat.internal:8083`. The API fetches only `/api/v1global_config`,
 `/chat/server/links` and `/chat/server/all`; it never derives an upstream URL from
@@ -118,9 +118,9 @@ readiness and game-realm discovery remain independent of chat availability.
 responses are capped at 16 KiB; no chat metadata cache or automatic retry is introduced.
 The public WebSocket remains the chat service's configured `CHAT_WEBSOCKET_URL` and
 must be directly reachable by clients. The API does not relay WebSocket traffic or
-expose the session-signing secret. The realm's `GAME_CHAT_SESSION_URL` separately
-addresses the same service's internal `/external/session` endpoint. Development Compose
-starts Chat and defaults `API_CHAT_URL` to `http://chat:8083`. Override it when using
+expose the session-signing secret. The realm shares `CHAT_URL` and derives the same service's internal session,
+nickname and mailbox endpoints from fixed paths. Development Compose
+starts Chat and defaults `CHAT_URL` to `http://chat:8083`. Override it when using
 separately hosted chat reachable on the configured network. No database or migration
 changes are involved.
 
