@@ -1231,7 +1231,7 @@ export function createWorldMarchDomain(size: number): CityDomain {
             ? context.effect(401) + troubleDetectSpeed(context)
             : context.effect(60) + context.effect(97) + context.effect(2193),
           true,
-          trouble || shared,
+          trouble,
           context.effect(402),
           trouble,
           sourceFootprint,
