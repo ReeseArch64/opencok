@@ -285,6 +285,7 @@ export class GameService {
       "civilization.science.data.init",
       {},
     );
+    const totems = await this.services.cityProgression?.(uid, "totem.init", {});
     const alliance = await this.services.alliance?.(uid, "alliance.init", {});
     const state = await this.state(uid);
     const world = state.world;
@@ -299,6 +300,7 @@ export class GameService {
       ...equipment?.body,
       ...generals?.body,
       ...dragons?.body,
+      ...totems?.body,
       ...civilization?.body,
       ...alliance?.body,
       ...effects?.body,
@@ -490,6 +492,8 @@ export class GameService {
       case "fort.destroy":
       case "dragonskill":
       case "minstrel":
+      case "civilizationCastle":
+      case "totem":
       case "civilization.science.data.init":
       case "race.science.research":
       case "race.science.directly":

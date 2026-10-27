@@ -675,3 +675,5 @@ export { timed_activity } from "./opencok_kingdom/timed_activity";
 export { building_production } from "./opencok_kingdom/building_production";
 export { world_march_checkpoint } from "./opencok_kingdom/world_march_checkpoint";
 export { world_interest } from "./opencok_kingdom/world_interest";
+export { totem_activation } from "./opencok_kingdom/totem_activation";
+export { totem_delivery } from "./opencok_kingdom/totem_delivery";

@@ -165,3 +165,19 @@ item only after validating the entire destination footprint; removal credits the
 remaining whole crystals and frees the owned tiles. Map invalidations use the
 world interest relay. Garrison and robbery require their corresponding combat
 march engine; occupied legacy garrisons are rejected before changing their state.
+
+Totem placement persists a catalog snapshot, footprint, alliance, health and
+activation deadline. The native `totem` info, put and remove actions enforce
+owned inventory, placement limits, cooldowns and free tiles; permanent props are
+retained. Nearby allied totems shorten their persisted deadlines together.
+Recycling cancels the activation without resetting the placement cooldown.
+
+Expiry captures eligible cities under the map lock, clears the footprint and
+creates one durable delivery per recipient. Recipient mutations apply pending
+deliveries in deadline order under that player's lock. Each status change settles
+production at the saved activation instant before recalculating rates, including
+its eventual expiry. Delivery markers, status rows, notification events and mail
+commit together. A fenced recovery worker expires world activations independently
+of whether their owner can log in, then drains eligible recipient deliveries.
+Combat damage against totems still requires the corresponding validated battle
+engine; the placement workflow does not synthesize casualties or battle results.

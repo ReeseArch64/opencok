@@ -1,4 +1,6 @@
 import { and, asc, eq, inArray, lte, sql, or, isNull } from "drizzle-orm";
+import { totem_activation } from "@opencok/drizzle/schema/opencok_kingdom/totem_activation";
+import { totemFootprint, restoreTotemConfiguration } from "@opencok/rules/totem";
 import { civilization_castle } from "@opencok/drizzle/schema/opencok_kingdom/civilization_castle";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { user_world } from "@opencok/drizzle/schema/opencok_kingdom/user_world";
@@ -52,13 +54,34 @@ export async function readWorldMutationState(
       ? await tx.select().from(civilization_castle).where(eq(civilization_castle.uid, owner))
       : [];
   const ids = new Set<number>();
+  if (command === "totem") {
+    const active = await tx
+      .select({ point: totem_activation.pointId, payload: totem_activation.payload })
+      .from(totem_activation)
+      .where(eq(totem_activation.status, 0))
+      .limit(4097);
+    if (active.length > 4096) throw new Error("Totem map bound exceeded");
+    for (const entry of active)
+      for (const id of totemFootprint(
+        entry.point,
+        restoreTotemConfiguration(entry.payload).width,
+        size,
+      ))
+        ids.add(id);
+    const target = int(params, "pointId", 1),
+      x = (target - 1) % size,
+      y = Math.floor((target - 1) / size);
+    if (target > 0 && target <= size * size)
+      for (let dx = 0; dx < 4 && x + dx < size; dx++)
+        for (let dy = 0; dy < 4 && y + dy < size; dy++) ids.add(target + dx + dy * size);
+  }
   for (const point of [
     world.pointId,
     castle?.pointId ?? 0,
     randomDestination ?? 0,
     ...marches.flatMap((row) => [row.ownerId, row.targetId]),
     int(params, "point", 0),
-    int(params, "pointId", 0),
+    command === "totem" ? 0 : int(params, "pointId", 0),
   ])
     if (point > 0) for (const id of worldFootprint(point, size)) ids.add(id);
   const points = await tx
@@ -90,6 +113,7 @@ export async function writeWorldMutation(
       .update(worldpoint)
       .set({
         pointType: num(row, "pointType"),
+        monsterCurrHP: num(row, "monsterCurrHP"),
         pointItem: row.pointItem == null ? null : text(row, "pointItem"),
         ownerId: row.ownerId == null ? null : text(row, "ownerId"),
         ownerName: row.ownerName == null ? null : text(row, "ownerName"),

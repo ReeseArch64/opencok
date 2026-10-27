@@ -1,3 +1,5 @@
+import { createTotemEffectStore } from "@opencok/repositories/totem";
+import { settleTotemEffects } from "@opencok/services/totem";
 import { ProductionService } from "@opencok/services/production";
 import { createProductionExecutor } from "@opencok/repositories/production";
 import { randomUUID } from "node:crypto";
@@ -28,7 +30,7 @@ import { sfs, str, decode, type Fields } from "@opencok/messages/sfs";
 import { eq } from "drizzle-orm";
 import { DisposablePostgres } from "../../../../packages/drizzle/tests/support/postgres";
 
-export async function cityHarness(extra: readonly CityDomain[] = []) {
+export async function cityHarness(extra: readonly CityDomain[] = [], totems = false) {
   const pg = new DisposablePostgres();
   const admin = await pg.start();
   await admin.query('CREATE DATABASE "city"');
@@ -110,7 +112,7 @@ export async function cityHarness(extra: readonly CityDomain[] = []) {
           totalTime: 0n,
         });
     }
-    const preparation = {
+    const basePreparation = {
       async prepare(tx: Parameters<typeof readReconnectProgress>[0], owner: string, at: bigint) {
         const state = await readReconnectProgress(tx, owner, 1, at);
         const planned = await productionContext(state, rules, at, {
@@ -121,7 +123,7 @@ export async function cityHarness(extra: readonly CityDomain[] = []) {
         return planned.rates;
       },
     };
-    const boundary = createCityProductionBoundary(preparation, (row) => {
+    const baseBoundary = createCityProductionBoundary(basePreparation, (row) => {
       const rule = rules.building(
         text(row, "itemId"),
         num(row, "level"),
@@ -132,6 +134,28 @@ export async function cityHarness(extra: readonly CityDomain[] = []) {
         ? undefined
         : ["wood", "stone", "iron", "food"][rule.effects.productionResourceId ?? -1];
     });
+    const prepareTotems = async (
+      tx: Parameters<typeof readReconnectProgress>[0],
+      owner: string,
+      at: bigint,
+    ) => {
+      if (totems)
+        await settleTotemEffects(
+          createTotemEffectStore(tx, owner, at, 1200, 1, baseBoundary),
+          rules,
+          1200,
+        );
+    };
+    const boundary: typeof baseBoundary = async (tx, owner, at, change, deleted, economy) => {
+      await prepareTotems(tx, owner, at);
+      return baseBoundary(tx, owner, at, change, deleted, economy);
+    };
+    const preparation = {
+      async prepare(tx: Parameters<typeof readReconnectProgress>[0], owner: string, at: bigint) {
+        await prepareTotems(tx, owner, at);
+        return basePreparation.prepare(tx, owner, at);
+      },
+    };
     const handlers = createCityProgressionHandlers(
       (tx: Parameters<typeof readReconnectProgress>[0], owner, at) =>
         createCityProgressionStore(tx, owner, at, boundary),
