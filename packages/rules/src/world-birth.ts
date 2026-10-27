@@ -83,9 +83,12 @@ export function advanceWorldBirth(state: WorldBirthState, rules: WorldBirthRules
     } else if (limit !== undefined) state.limit = limit;
   }
 }
-export function countWorldBirth(state: WorldBirthState, rules: WorldBirthRules, area: number) {
+export function recordWorldBirth(state: WorldBirthState, area: number) {
   cityInteger(area);
   state.counts[area] = cityInteger((state.counts[area] ?? 0) + 1);
+}
+export function countWorldBirth(state: WorldBirthState, rules: WorldBirthRules, area: number) {
+  recordWorldBirth(state, area);
   if (
     state.phase !== 1 &&
     rules.priorities
@@ -93,4 +96,34 @@ export function countWorldBirth(state: WorldBirthState, rules: WorldBirthRules, 
       .areas.every((id) => state.counts[id] === undefined || state.counts[id]! >= state.limit)
   )
     advanceWorldBirth(state, rules);
+}
+
+export function worldBirthArea(point: number, size: number, side: number) {
+  cityInteger(point, 1, size * size);
+  return (
+    Math.floor(((point - 1) % size) / side) * Math.ceil(size / side) +
+    Math.floor(Math.floor((point - 1) / size) / side) +
+    1
+  );
+}
+export function worldBirthCandidates(areas: readonly number[], size: number, side: number) {
+  const columns = Math.ceil(size / side),
+    admitted = new Set(areas),
+    points: number[] = [];
+  for (const area of areas) {
+    const fromX = Math.floor((area - 1) / columns) * side,
+      fromY = ((area - 1) % columns) * side;
+    for (let y = Math.max(1, fromY); y < Math.min(size, fromY + side); y++)
+      for (let x = Math.max(1, fromX); x < Math.min(size, fromX + side); x++) {
+        const point = 1 + x + y * size;
+        if (
+          [point - 1, point - size, point - size - 1].every((id) =>
+            admitted.has(worldBirthArea(id, size, side)),
+          )
+        )
+          points.push(point);
+      }
+  }
+  if (points.length > 1048576) worldMutationFailure();
+  return points;
 }

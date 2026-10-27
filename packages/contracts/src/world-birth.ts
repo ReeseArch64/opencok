@@ -13,3 +13,18 @@ export interface WorldBirthState {
   limit: number;
   counts: Record<string, number>;
 }
+export interface WorldBirthPlacement {
+  readonly point: number;
+  readonly points: readonly import("./rows").Row[];
+}
+export interface WorldBirthAdoption {
+  readonly operator: string;
+  readonly reason: string;
+  readonly operationId: string;
+  readonly expectedVersion: number | null;
+  readonly priority: number;
+  readonly round: number;
+  readonly phase: 0 | 1 | 2;
+}
+
+export type WorldBirthMode = "birth" | "random";

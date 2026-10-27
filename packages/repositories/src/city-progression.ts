@@ -4,6 +4,8 @@ import { redPacketReader, writeRedPackets } from "./red-packets";
 import { readNormalRecharge, writeNormalRecharge } from "./normal-recharge";
 import { readComeback, writeComeback } from "./comeback";
 import { readHotItems, writeHotItems } from "./hot-item";
+import { allocateWorldBirth } from "./world-birth";
+import type { RealmAuthority } from "./realm-authority";
 import { worldpoint } from "@opencok/drizzle/schema/opencok_kingdom/worldpoint";
 import { readMonsterExchanges, writeMonsterExchanges } from "./monster-exchange";
 import { readFragmentExchanges, writeFragmentExchanges } from "./fragment-exchange";
@@ -95,10 +97,30 @@ export function createCityProgressionStore(
   now: bigint,
   boundary: ProgressionBoundary,
   mapSize = 1200,
+  authority?: RealmAuthority,
 ): CityProgressionStore {
   let alliance = "";
   let cosmeticTarget: Awaited<ReturnType<typeof readCosmeticTarget>>;
   return {
+    async birthPoint(rules, mode) {
+      if (!authority) throw new Error("Missing world birth authority");
+      if (mode !== "random") {
+        const [existing] = await tx
+          .select({ id: worldpoint.id })
+          .from(worldpoint)
+          .where(
+            and(
+              eq(worldpoint.worldId, 0),
+              eq(worldpoint.ownerId, owner),
+              eq(worldpoint.pointType, 1),
+            ),
+          )
+          .limit(1)
+          .for("update");
+        if (existing) throw new Error("Resident city already exists");
+      }
+      return allocateWorldBirth(tx, authority, mapSize, rules, now, mode);
+    },
     async treasurePoints(ids) {
       if (
         ids.length > 4096 ||

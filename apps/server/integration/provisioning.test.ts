@@ -1,3 +1,4 @@
+import { seedSyntheticWorldBirth } from "./support/world-birth";
 import { user_army } from "@opencok/drizzle/schema/opencok_kingdom/user_army";
 import { user_hospital } from "@opencok/drizzle/schema/opencok_kingdom/user_hospital";
 import { randomUUID } from "node:crypto";
@@ -67,6 +68,7 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
     const rules = await loadRules();
     let ready = true;
     const authority = await acquireRealmAuthority(realm.db, 1, () => ready);
+    await seedSyntheticWorldBirth(realm.db, authority, rules);
     const creator = createCharacterCreator(realm.db, authority, 10);
     const service = new CharacterProvisioningService(creator, rules);
     let store = createProvisioningStore(global.db);
@@ -181,9 +183,14 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
       .from(worldpoint)
       .where(eq(worldpoint.ownerId, reservation.gameUid));
     const nativeAnchor = nativeCity.find((point) => point.pointType === 1)!.id;
-    expect(nativeAnchor).toBe(12);
+    expect(nativeAnchor).toBeGreaterThan(10);
     expect(profile!.worldPoint).toBe(nativeAnchor);
-    expect(nativeCity.map((point) => point.id).sort((a, b) => a - b)).toEqual([1, 2, 11, 12]);
+    expect(nativeCity.map((point) => point.id).sort((a, b) => a - b)).toEqual([
+      nativeAnchor - 11,
+      nativeAnchor - 10,
+      nativeAnchor - 1,
+      nativeAnchor,
+    ]);
     expect(
       nativeCity
         .filter((point) => point.pointType === 8)
@@ -241,6 +248,7 @@ test("creation coordinates durable global reservations and atomic realm seeds ac
       })),
     );
     const otherAuthority = await acquireRealmAuthority(otherRealm.db, 2, () => true);
+    await seedSyntheticWorldBirth(otherRealm.db, otherAuthority, rules);
     const otherService = new CharacterProvisioningService(
       createCharacterCreator(otherRealm.db, otherAuthority, 10),
       await loadRules(undefined, 2),

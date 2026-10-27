@@ -230,6 +230,10 @@ export interface CityProgressionWrite {
 }
 
 export interface CityProgressionStore {
+  birthPoint?(
+    rules: import("./world-birth").WorldBirthRules,
+    mode?: import("./world-birth").WorldBirthMode,
+  ): Promise<import("./world-birth").WorldBirthPlacement>;
   treasurePoints?(ids: readonly number[]): Promise<readonly Row[]>;
   getState(
     command?: string,

@@ -1,3 +1,4 @@
+import { seedSyntheticWorldBirth } from "./support/world-birth";
 import { test, expect } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
@@ -53,6 +54,7 @@ async function worldHarness() {
       operationId,
     });
   const tick = () => h.command("world.tick", { operationId: sfs.string(randomUUID()) });
+  await seedSyntheticWorldBirth(h.db.db, h.authority, h.rules);
   return { ...h, start, tick };
 }
 
