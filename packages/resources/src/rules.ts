@@ -328,6 +328,7 @@ export async function loadRules(directory?: string, kingdomId = 1) {
     },
     { ranks: await optional(GameplayCatalog.Rank), gifts: await optional(GameplayCatalog.Gift) },
     {
+      luckyDays: await optional(GameplayCatalog.LuckyDay),
       expeditionStages: await optional(GameplayCatalog.NewWkReward),
       expeditionScores: await optional(GameplayCatalog.NewWkScore),
       expeditionRewards: await optional(GameplayCatalog.NewWkPersonReward),

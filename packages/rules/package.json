@@ -120,9 +120,10 @@
     "./world-march-runtime": "./src/world-march-runtime.ts",
     "./new-expedition": "./src/new-expedition.ts",
     "./dragon-tower": "./src/dragon-tower.ts",
+    "./local-activity-info": "./src/local-activity-info.ts",
     "./chat-retention": "./src/chat-retention.ts",
     "./chat-social": "./src/chat-social.ts",
-    "./local-activity-info": "./src/local-activity-info.ts"
+    "./lucky-day": "./src/lucky-day.ts"
   },
   "dependencies": {
     "@opencok/constants": "workspace:*",

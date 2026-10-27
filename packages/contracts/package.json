@@ -103,13 +103,14 @@
     "./expedition-treasury": "./src/expedition-treasury.ts",
     "./dragon-tower": "./src/dragon-tower.ts",
     "./responses/dragon-tower": "./src/responses/dragon-tower.ts",
+    "./responses/local-activity-info": "./src/responses/local-activity-info.ts",
     "./chat-delivery": "./src/chat-delivery.ts",
     "./chat-social": "./src/chat-social.ts",
     "./realm-social": "./src/realm-social.ts",
     "./postbox": "./src/postbox.ts",
     "./friendship-mine": "./src/friendship-mine.ts",
     "./responses/chat-social": "./src/responses/chat-social.ts",
-    "./responses/local-activity-info": "./src/responses/local-activity-info.ts"
+    "./responses/lucky-day": "./src/responses/lucky-day.ts"
   },
   "dependencies": {
     "@opencok/enums": "workspace:*",

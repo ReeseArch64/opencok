@@ -1,3 +1,4 @@
+import { createLuckyDayDomain } from "@opencok/services/lucky-day";
 import { dragonTowerDomain, publishDragonTowerMutation } from "@opencok/services/dragon-tower";
 import {
   ExpeditionTreasuryService,
@@ -429,6 +430,7 @@ export const RealmDependenciesLive = Layer.effect(
         createCivilizationCastleDomain(config.mapSize),
         createTotemDomain(config.mapSize),
         minstrelDomain,
+        createLuckyDayDomain(),
         lotteryDomain,
         expeditionDomain,
         anniversaryDomain,

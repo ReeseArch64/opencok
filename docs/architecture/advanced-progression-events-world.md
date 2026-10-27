@@ -330,3 +330,17 @@ migrations follow as `0018` through `0021`. Databases that applied only the
 published develop sequence can upgrade without editing their migration history.
 Earlier draft worktree migration numbers were not a deployed release sequence;
 disposable databases built from those drafts must be recreated before validation.
+
+Lucky-day polling persists the chosen effect, expiry, daily success count and
+unsuccessful-attempt count. A repeated operation replays its saved result, active
+bonuses cannot be rerolled, and failed attempts retain the configured cooldown and
+guarantee threshold. Native login projects the saved active bonus without making
+a new attempt. Platform, realm, version and normal or merged campaign windows
+share the existing effect resolver's gates. Historical dates remain unchanged.
+
+Activation writes the lucky-day row at the existing production boundary. The
+production schedule includes both the new rate and its saved expiry cut, so a
+later settlement cannot apply the bonus retrospectively or continue it after
+expiry. Lucky-day polling grants no items or gold; ordinary production settlement
+continues using its existing audited resource postings. Realm metadata must be
+present before the campaign can create an active effect.
